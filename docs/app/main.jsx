@@ -133,8 +133,15 @@ function MillibarTerminalApp() {
   const [bankroll, setBankroll] = React.useState(10000);
   const [stake, setStake] = React.useState(0.25);
   const [layers, setLayers] = React.useState({ satellite: true, track: true, cone: false, recon: false, ascat: false, models: false, particles: false });
+  const [narrow, setNarrow] = React.useState(typeof window !== "undefined" && window.innerWidth < 900);
+  React.useEffect(() => {
+    const onResize = () => setNarrow(window.innerWidth < 900);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   const dense = t.density === "compact";
   const tactical = t.theme !== "light";
+  const panelGrid = narrow ? "1fr" : "1.5fr 1fr 1fr";
 
   React.useEffect(() => {
     if (!playing || NF <= 0) return;
@@ -196,8 +203,8 @@ function MillibarTerminalApp() {
         {shellHeader}
         <main style={{ maxWidth: 1680, margin: "0 auto", padding: "16px 16px 48px" }}>
           <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, alignItems: "start" }}>
-            <window.MT_Observability />
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: 14, alignItems: "start" }}>
+            <window.MT_Observability narrow={narrow} />
             <div style={{ height: 300 }}><window.MT_Console stormId={null} frame={frame} /></div>
           </div>
         </main>
@@ -220,7 +227,7 @@ function MillibarTerminalApp() {
       <main style={{ maxWidth: 1680, margin: "0 auto", padding: "16px 16px 48px" }}>
         {/* command block */}
         <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: 16 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 320px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) 320px" }}>
             <div style={{ position: "relative", minHeight: 480, background: "var(--slate-950)" }}>
               <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
@@ -261,7 +268,7 @@ function MillibarTerminalApp() {
         </section>
 
         {/* panel grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr 1fr", gap: 14, alignItems: "start" }}>
+        <div style={{ display: "grid", gridTemplateColumns: panelGrid, gap: 14, alignItems: "start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
             <window.MT_Evidence stormId={storm} frame={frame} selection={sel} onSelect={(id) => setSel((s) => ({ ...s, evidence: id }))} dense={dense} />
             <window.MT_Markets frame={frame} selection={sel} onSelect={pickContract} dense={dense} />
@@ -274,7 +281,7 @@ function MillibarTerminalApp() {
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
             <window.MT_Ledger frame={frame} onSeek={(f) => { setPlaying(false); setFrame(f); }} dense={dense} />
-            <window.MT_Observability />
+            <window.MT_Observability narrow={narrow} />
           </div>
         </div>
 

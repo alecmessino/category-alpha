@@ -268,14 +268,14 @@ function MT_Ledger({ frame, onSeek, dense }) {
 }
 
 /* ---- Observability / Pipeline ---- */
-function MT_Observability() {
+function MT_Observability({ narrow }) {
   const CHIP = { PASS: "var(--pos)", EMPTY: "var(--text-2)", BLOCKED: "var(--special)", FAIL: "var(--neg)" };
   return (
     <P pad={false} title="Observability — Pipeline Status"
       footer={<PF source="verify_stack.py" latency="live" version="1.2.4" tier="A" />}>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 1, padding: 12, background: "var(--border-dim)" }}>
         {MT.pipeline.map((s, i) => (
-          <div key={s.stage} style={{ flex: "1 1 30%", minWidth: 120, background: "var(--surface-card)", padding: "8px 10px" }}>
+          <div key={s.stage} style={{ flex: narrow ? "1 1 100%" : "1 1 30%", minWidth: narrow ? 0 : 120, background: "var(--surface-card)", padding: "8px 10px" }}>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", letterSpacing: ".5px" }}>{i + 1}. {s.stage.toUpperCase()}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: CHIP[s.status] }} />
@@ -285,7 +285,7 @@ function MT_Observability() {
           </div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, padding: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: 8, padding: 12 }}>
         {MT.health.map((h) => <HR key={h.name} {...h} />)}
       </div>
     </P>
