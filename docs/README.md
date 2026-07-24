@@ -15,10 +15,22 @@ anything a feed can't supply is labelled **NO FEED / MODEL DEFERRED**, never inv
 | Active tropical cyclones (name, position, intensity, movement, advisory #) | NHC `CurrentStorms.json` | **live** |
 | Satellite imagery | NASA GIBS VIIRS/NOAA-20 (probed in-browser) | **live** |
 | Observed storm track | committed replay history (real past fixes) | **live** |
-| Prediction-market prices, volume | Kalshi (`KXHUR*`) → Polymarket fallback | **live** |
+| Prediction-market prices, volume | Kalshi (paginated) → Polymarket fallback | **live** — per-storm *and* seasonal count contracts |
 | Order-book depth | Kalshi order book | **live** (Kalshi contracts only; else NO FEED) |
+| Fair-value anchor for **seasonal** count contracts → edge, Q-Kelly | HURDAT2 (NOAA best-track archive) | **live climatology baseline** |
 | Forecast cone, recon, ASCAT, ensemble spaghetti | — | **NO FEED** (GIS/feeds not wired) |
-| Model probability anchor → edge, Q-Kelly allocation | — | **MODEL DEFERRED** (no public ensemble Cat-probability feed; fabricating one would break the honesty rule) |
+| Per-storm intensity probability (Cat 4+) | — | **MODEL DEFERRED** (no public ensemble Cat-probability feed; fabricating one would break the honesty rule) |
+
+### About the climatology anchor
+Seasonal contracts ("How many Atlantic hurricanes in 2026?") get a fair-value anchor computed from
+**HURDAT2**, NOAA/NHC's official Atlantic best-track archive: `P(season total > strike)` = the share of
+past seasons (1991→last complete year) that exceeded the strike. The file name is discovered from the
+NHC directory index so it doesn't rot each year.
+
+This is an **empirical baseline, not a skill forecast** — it knows nothing about ENSO, SSTs, or
+season-to-date progress, all of which the market price already reflects. The UI labels it as such and
+tells the reader to treat EDGE as a reference spread rather than alpha. If HURDAT2 is unreachable the
+anchor stays `null` and allocations revert to MODEL DEFERRED — never a fabricated probability.
 | SST anomaly | — | **NO FEED** (live SST is available but an anomaly needs a climatology baseline that isn't wired) |
 
 When no storm is active (e.g. a quiet Atlantic), the terminal shows the honest

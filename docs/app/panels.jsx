@@ -99,8 +99,8 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
   const hasModel = (MT._feeds && MT._feeds.models && MT._feeds.models.ok);
   const mktSrc = (MT._feeds && MT._feeds.markets && MT._feeds.markets.source) || "market";
   return (
-    <P pad={false} title="Edge Matrix — Q-Kelly Allocation" right={<BG tone={hasModel ? "live" : "neg"} dot>{hasModel ? "LIVE" : "MODEL DEFERRED"}</BG>}
-      footer={<PF source={mktSrc + " prices · model anchor " + (hasModel ? "live" : "not wired")} latency="live" version="—" tier={hasModel ? "B" : "C"} />}>
+    <P pad={false} title="Edge Matrix — Q-Kelly Allocation" right={<BG tone={hasModel ? "live" : "neg"} dot>{hasModel ? "CLIMATOLOGY ANCHOR" : "MODEL DEFERRED"}</BG>}
+      footer={<PF source={mktSrc + " prices × HURDAT2 climatology baseline"} latency="live" version="—" tier="C" />}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "10px 12px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: ".5px", textTransform: "uppercase", color: "var(--text-2)" }}>Bankroll</span>
         <input type="number" value={bankroll} min={100} step={500} onChange={(e) => setBankroll(+e.target.value || 0)}
@@ -171,7 +171,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
   const cell = { padding: pad, borderBottom: "1px solid var(--border-dim)", fontFamily: "var(--font-mono)", textAlign: "right" };
   return (
     <P pad={false} title={"Prediction Markets — " + (mktSource[0].toUpperCase() + mktSource.slice(1)) + " board"} right={<BG tone={rows.length ? "live" : "neg"} dot>{rows.length} MKTS</BG>}
-      footer={<PF source={mktSource + " · live prices"} latency="live" version="—" tier="C" />}>
+      footer={<PF source={mktSource + " · live prices · model = HURDAT2 climatology"} latency="live" version="—" tier="C" />}>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: dense ? 11 : 12 }}>
           <thead><tr>{th("Contract")}{th("Px", 1)}{th("Δ", 1)}{th("Model", 1)}{th("Edge", 1)}{th("Vol", 1)}{th("4h", 1)}</tr></thead>
@@ -182,11 +182,15 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
               <tr key={c.id} onClick={() => onSelect(c.id)} style={{ cursor: "pointer", background: on ? "color-mix(in srgb,var(--accent) 12%,transparent)" : "transparent" }}>
                 <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)" }}>
                   <div style={{ color: "var(--text-1)", fontWeight: 600, fontSize: dense ? 11 : 11.5 }}>{c.short}</div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)" }}>{c.id}{c.proxy ? " · proxy" : ""}</div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
+                    {c.horizon && <span style={{ color: c.horizon === "seasonal" ? "var(--special)" : "var(--accent)", fontWeight: 700, letterSpacing: ".4px" }}>{c.horizon === "seasonal" ? "SEASONAL" : "STORM"}</span>}
+                    <span>{c.id}</span>{c.proxy ? <span>· proxy</span> : null}
+                  </div>
                 </td>
                 <td style={{ ...cell, color: "var(--text-1)", fontWeight: 700 }}>{px != null ? Math.round(px * 100) + "¢" : "—"}</td>
                 <td style={{ ...cell, color: d >= 0 ? "var(--pos)" : "var(--neg)" }}>{d >= 0 ? "+" : ""}{d.toFixed(1)}</td>
-                <td style={{ ...cell, color: "var(--text-2)" }}>{model != null ? Math.round(model * 100) + "%" : "—"}</td>
+                <td style={{ ...cell, color: model != null ? "var(--special)" : "var(--text-2)" }}
+                    title={c.modelBasis ? "Climatology baseline — " + c.modelBasis : "No fair-value anchor for this contract"}>{model != null ? Math.round(model * 100) + "%" : "—"}</td>
                 <td style={{ ...cell, fontWeight: 800, ...eStyle }}>{edge == null ? "—" : (edge >= 0 ? "+" : "") + edge.toFixed(1)}</td>
                 <td style={{ ...cell, color: "var(--text-2)", fontSize: 10 }}>{fmtVol(c.volume)}</td>
                 <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{MT_spark(hist, 52, 15, edge > 0 ? "var(--pos)" : "var(--neg)")}</td>
@@ -195,8 +199,11 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
           })}</tbody>
         </table>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", padding: "6px 10px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", padding: "6px 10px", flexWrap: "wrap" }}>
         <span>Click a market → order book + allocation.</span><span>Σ vol {fmtVol(tvol)}</span>
+      </div>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", padding: "0 10px 8px", lineHeight: 1.5, opacity: .85 }}>
+        MODEL = empirical HURDAT2 season-count climatology, a <b style={{ color: "var(--warn)" }}>baseline</b> — it ignores ENSO, SSTs and season-to-date progress, which the market price already reflects. Treat EDGE as a reference spread, not alpha.
       </div>
     </P>
   );

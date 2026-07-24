@@ -38,6 +38,20 @@ async function getJSON(url, { timeout = 20000, headers = {} } = {}) {
   } finally { clearTimeout(to); }
 }
 
+async function getText(url, { timeout = 30000 } = {}) {
+  const t0 = Date.now();
+  const ctrl = new AbortController();
+  const to = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": UA, "Accept": "*/*" }, signal: ctrl.signal });
+    const latencyMs = Date.now() - t0;
+    if (!res.ok) return { ok: false, status: res.status, latencyMs, error: "HTTP " + res.status };
+    return { ok: true, status: res.status, latencyMs, text: await res.text() };
+  } catch (e) {
+    return { ok: false, status: null, latencyMs: Date.now() - t0, error: String(e && e.message || e) };
+  } finally { clearTimeout(to); }
+}
+
 function num(x) { const n = Number(x); return Number.isFinite(n) ? n : null; }
 function parseLat(s) { if (s == null) return null; const m = /(-?[\d.]+)\s*([NS])?/i.exec(String(s)); if (!m) return null; let v = Number(m[1]); if (/S/i.test(m[2] || "")) v = -v; return Number.isFinite(v) ? v : null; }
 function parseLon(s) { if (s == null) return null; const m = /(-?[\d.]+)\s*([EW])?/i.exec(String(s)); if (!m) return null; let v = Number(m[1]); if (/W/i.test(m[2] || "")) v = -v; return Number.isFinite(v) ? v : null; }
@@ -87,8 +101,88 @@ async function fetchStorms() {
   return { feed, storms };
 }
 
+/* ---------------- HURDAT2 climatology (fair-value baseline) ----------------
+ * HURDAT2 is NOAA/NHC's official Atlantic best-track archive (public domain). We
+ * derive an EMPIRICAL base rate for seasonal hurricane-count contracts:
+ *   P(season total > strike) = share of past seasons whose total exceeded strike.
+ * This is a transparent CLIMATOLOGY baseline, not a skill forecast — it knows
+ * nothing about ENSO, SSTs, or season-to-date progress. It is labelled as such
+ * everywhere it surfaces. If HURDAT2 is unreachable, the anchor stays null and the
+ * UI keeps showing MODEL DEFERRED rather than inventing a probability.
+ */
+const CLIM_FROM_YEAR = Number(process.env.MT_CLIM_FROM || 1991); // modern geostationary-satellite era
+
+function parseHurdat2(text, fromYear, excludeYear) {
+  const byYear = new Map();
+  let curId = null, curYear = null;
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const f = line.split(",");
+    const head = /^AL\d{2}(\d{4})$/.exec((f[0] || "").trim());
+    if (head && f.length <= 4) {
+      curId = f[0].trim(); curYear = Number(head[1]);
+      if (!byYear.has(curYear)) byYear.set(curYear, { hur: new Set(), maj: new Set() });
+      continue;
+    }
+    if (!curId || curYear == null) continue;
+    const status = (f[3] || "").trim();
+    const wind = Number((f[6] || "").trim());
+    if (status === "HU") {                       // hurricane-strength best-track point
+      const y = byYear.get(curYear);
+      y.hur.add(curId);
+      if (Number.isFinite(wind) && wind >= 96) y.maj.add(curId); // Cat 3+ = major
+    }
+  }
+  const years = [...byYear.keys()].filter((y) => y >= fromYear && y !== excludeYear).sort((a, b) => a - b);
+  if (!years.length) return null;
+  return {
+    years, from: years[0], to: years[years.length - 1],
+    hurricanes: years.map((y) => byYear.get(y).hur.size),
+    major: years.map((y) => byYear.get(y).maj.size),
+  };
+}
+
+async function fetchClimatology() {
+  // The HURDAT2 filename carries a revision date that changes yearly, so discover
+  // it from the directory index rather than hardcoding a URL that will rot.
+  const base = "https://www.nhc.noaa.gov/data/hurdat/";
+  const idx = await getText(base);
+  let names = [];
+  if (idx.ok) {
+    names = [...new Set([...idx.text.matchAll(/hurdat2-1851-\d{4}-\d+\.txt/g)].map((m) => m[0]))].sort().reverse();
+  }
+  if (!names.length) return { feed: { ok: false, source: "HURDAT2 (NOAA/NHC)", status: idx.status || null, note: "could not locate hurdat2 file: " + (idx.error || "no match in index") }, clim: null };
+  const r = await getText(base + names[0]);
+  if (!r.ok) return { feed: { ok: false, source: "HURDAT2 (NOAA/NHC)", status: r.status, note: r.error }, clim: null };
+  const clim = parseHurdat2(r.text, CLIM_FROM_YEAR, now.getUTCFullYear());
+  if (!clim) return { feed: { ok: false, source: "HURDAT2 (NOAA/NHC)", status: r.status, note: "parsed 0 seasons" }, clim: null };
+  return {
+    feed: { ok: true, status: r.status, source: `HURDAT2 ${clim.from}–${clim.to}`, latencyMs: r.latencyMs, count: clim.years.length,
+            note: `${clim.years.length}-season Atlantic climatology (baseline, not a skill forecast)` },
+    clim: Object.assign(clim, { file: names[0] }),
+  };
+}
+
+// Empirical P(count > strike) for Atlantic seasonal hurricane-count contracts.
+function climatologyAnchor(title, strike, clim) {
+  if (!clim || strike == null) return null;
+  const t = String(title).toLowerCase();
+  if (!/atlantic/.test(t) || !/hurricane/.test(t)) return null;
+  if (!/how many|total|count/.test(t)) return null;
+  const major = /\bmajor\b/.test(t);
+  const counts = major ? clim.major : clim.hurricanes;
+  if (!counts || !counts.length) return null;
+  const hits = counts.filter((c) => c > strike).length;
+  return {
+    p: hits / counts.length,
+    basis: `${clim.from}–${clim.to} ${major ? "major " : ""}Atlantic hurricane seasons (n=${counts.length}); ${hits} exceeded ${strike}`,
+  };
+}
+
 /* ---------------- Prediction markets ---------------- */
-const HUR_RE = /hurricane|tropical (storm|cyclone|depression)|\bcyclone\b|landfall|make landfall|category\s*\d|saffir|typhoon/i;
+const HUR_RE = /hurricane|tropical (storm|cyclone|depression)|named storm|\bcyclone\b|landfall|make landfall|category\s*\d|saffir|typhoon/i;
+// "Hurricanes" is also a sports franchise — exclude those so the board stays weather-only.
+const NOT_WEATHER_RE = /stanley cup|\bnhl\b|\bnfl\b|\bnba\b|carolina hurricanes|miami hurricanes|super bowl/i;
 
 function assocStorm(title, storms) {
   const t = title.toLowerCase();
@@ -96,32 +190,76 @@ function assocStorm(title, storms) {
   return hit ? hit.id : null;
 }
 
-async function fetchKalshi(storms) {
-  const url = "https://api.elections.kalshi.com/trade-api/v2/markets?status=open&limit=1000";
-  const r = await getJSON(url);
-  if (!r.ok) return { ok: false, status: r.status, source: "kalshi", note: r.error, contracts: [] };
-  const mkts = (r.json && r.json.markets) || [];
+// Kalshi caps a page at 1000 markets and there are far more open than that, so the
+// hurricane series only appears if we follow the cursor. (Not paginating was why the
+// board previously reported "0 hurricane markets" despite HTTP 200.)
+async function fetchKalshiPaged(maxPages = 15) {
+  let cursor = null, all = [], pages = 0, status = null;
+  do {
+    const url = "https://api.elections.kalshi.com/trade-api/v2/markets?status=open&limit=1000" +
+      (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
+    const r = await getJSON(url);
+    status = r.status;
+    if (!r.ok) return { ok: false, status: r.status, error: r.error, markets: all, pages };
+    const batch = (r.json && r.json.markets) || [];
+    all.push(...batch);
+    cursor = (r.json && r.json.cursor) || null;
+    pages++;
+    if (!batch.length) break;
+  } while (cursor && pages < maxPages);
+  return { ok: true, status, markets: all, pages };
+}
+
+function parseStrike(...vals) {
+  for (const v of vals) {
+    const m = /(?:above|over|more than|greater than|>=?)\s*(\d+(?:\.\d+)?)/i.exec(String(v || ""));
+    if (m) return Number(m[1]);
+  }
+  return null;
+}
+// seasonal/index contract vs. a single active storm
+function horizonOf(title) {
+  return /how many|total|this year|season|in 20\d\d|\bby (jan|dec)/i.test(String(title)) ? "seasonal" : "storm";
+}
+
+async function fetchKalshi(storms, clim) {
+  const paged = await fetchKalshiPaged();
+  if (!paged.ok) return { ok: false, status: paged.status, source: "kalshi", note: paged.error, contracts: [] };
+  const mkts = paged.markets;
   const contracts = [];
   for (const m of mkts) {
     const title = m.title || m.subtitle || m.ticker || "";
+    const sub = m.yes_sub_title || m.subtitle || "";
     if (!HUR_RE.test(title) && !HUR_RE.test(m.ticker || "")) continue;
+    if (NOT_WEATHER_RE.test(title)) continue; // sports teams named "Hurricanes"
     const bid = num(m.yes_bid), ask = num(m.yes_ask), last = num(m.last_price);
     let price = last != null ? last / 100 : (bid != null && ask != null ? (bid + ask) / 200 : null);
     if (price == null) continue;
     const spread = bid != null && ask != null ? (ask - bid) / 100 : 0.02;
     const liquidity = num(m.liquidity) != null ? Math.round(num(m.liquidity) / 100) : null; // cents → $
     const volume = num(m.dollar_volume) ?? num(m.volume) ?? 0;
+    const strike = parseStrike(sub, m.yes_sub_title, m.subtitle);
+    const anchor = climatologyAnchor(title, strike, clim);
     contracts.push({
-      id: m.ticker, label: title, short: (m.yes_sub_title || m.subtitle || title).slice(0, 34),
+      id: m.ticker, label: title, short: (sub ? title.replace(/\?$/, "") + " · " + sub : title).slice(0, 44),
       storm: assocStorm(title, storms), market: Math.max(0.01, Math.min(0.99, price)),
-      model: null, liquidity, spread, volume, proxy: false, source: "kalshi", url: "https://kalshi.com/markets/" + (m.event_ticker || m.ticker),
+      model: anchor ? anchor.p : null,
+      modelSource: anchor ? "HURDAT2 climatology" : null,
+      modelBasis: anchor ? anchor.basis : null,
+      horizon: horizonOf(title), strike,
+      liquidity, spread, volume, proxy: false, source: "kalshi",
+      url: "https://kalshi.com/markets/" + (m.event_ticker || m.ticker),
       _catFour: /category\s*[45]|cat\s*[45]/i.test(title),
     });
   }
-  return { ok: true, status: r.status, source: "kalshi", count: contracts.length, contracts, note: `${contracts.length} hurricane markets` };
+  // Highest-signal first: anchored contracts, then by volume.
+  contracts.sort((a, b) => (b.model != null) - (a.model != null) || (b.volume || 0) - (a.volume || 0));
+  const anchored = contracts.filter((c) => c.model != null).length;
+  return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts,
+           note: `${contracts.length} hurricane markets (${anchored} climatology-anchored, ${paged.pages}p)` };
 }
 
-async function fetchPolymarket(storms) {
+async function fetchPolymarket(storms, clim) {
   const url = "https://gamma-api.polymarket.com/markets?closed=false&limit=500&order=volume&ascending=false";
   const r = await getJSON(url);
   if (!r.ok) return { ok: false, status: r.status, source: "polymarket", note: r.error, contracts: [] };
@@ -129,14 +267,20 @@ async function fetchPolymarket(storms) {
   const contracts = [];
   for (const m of mkts) {
     const title = m.question || m.title || "";
-    if (!HUR_RE.test(title)) continue;
+    if (!HUR_RE.test(title) || NOT_WEATHER_RE.test(title)) continue;
     let price = null;
     try { const p = typeof m.outcomePrices === "string" ? JSON.parse(m.outcomePrices) : m.outcomePrices; if (Array.isArray(p) && p.length) price = Number(p[0]); } catch { /* skip */ }
     if (!Number.isFinite(price)) continue;
+    const strike = parseStrike(title);
+    const anchor = climatologyAnchor(title, strike, clim);
     contracts.push({
-      id: m.slug || m.conditionId || m.id, label: title, short: title.slice(0, 34),
+      id: m.slug || m.conditionId || m.id, label: title, short: title.slice(0, 44),
       storm: assocStorm(title, storms), market: Math.max(0.01, Math.min(0.99, price)),
-      model: null, liquidity: num(m.liquidityNum ?? m.liquidity), spread: 0.02,
+      model: anchor ? anchor.p : null,
+      modelSource: anchor ? "HURDAT2 climatology" : null,
+      modelBasis: anchor ? anchor.basis : null,
+      horizon: horizonOf(title), strike,
+      liquidity: num(m.liquidityNum ?? m.liquidity), spread: 0.02,
       volume: num(m.volumeNum ?? m.volume) ?? 0, proxy: false, source: "polymarket",
       url: m.slug ? "https://polymarket.com/event/" + m.slug : "https://polymarket.com",
       _catFour: /category\s*[45]|cat\s*[45]/i.test(title),
@@ -171,10 +315,13 @@ async function main() {
 
   const { feed: nhcFeed, storms } = await fetchStorms();
 
+  // Climatology baseline first — it supplies the fair-value anchor for seasonal contracts.
+  const { feed: climFeed, clim } = await fetchClimatology();
+
   // markets: Kalshi first, fall back to Polymarket if Kalshi unreachable/empty
-  let mkt = await fetchKalshi(storms);
+  let mkt = await fetchKalshi(storms, clim);
   if (!mkt.ok || mkt.count === 0) {
-    const poly = await fetchPolymarket(storms);
+    const poly = await fetchPolymarket(storms, clim);
     if (poly.ok && poly.count > 0) mkt = poly;
     else if (!mkt.ok && poly.ok) mkt = poly; // surface whichever responded
   }
@@ -206,7 +353,11 @@ async function main() {
     nhc: nhcFeed,
     markets: mkt.ok ? { ok: true, status: mkt.status, source: mkt.source, count: mkt.count, note: mkt.note } : { ok: false, status: mkt.status, source: mkt.source, count: 0, note: mkt.note },
     sst: { ok: false, source: sst.source, note: sst.note },
-    models: { ok: false, source: "ensemble consensus (GFS/ECMWF/HAFS)", note: "no clean public ensemble Cat-probability feed wired — probability shown as anchor only" },
+    models: climFeed.ok
+      ? Object.assign({}, climFeed, { note: climFeed.note + " — seasonal count contracts only; per-storm intensity has no fitted model" })
+      : Object.assign({}, climFeed, { note: (climFeed.note || "unavailable") + " — no fair-value anchor; allocations stay deferred" }),
+    climatology: climFeed.ok ? { ok: true, source: climFeed.source, file: clim.file, seasons: clim.years.length,
+      hurricanesPerSeason: clim.hurricanes, majorPerSeason: clim.major, years: clim.years } : { ok: false, note: climFeed.note },
     satellite: { ok: true, source: "NASA GIBS VIIRS/NOAA-20", note: "probed live in the browser" },
   };
 
@@ -232,8 +383,12 @@ async function main() {
 
   console.log(`[millibar] refreshed ${nowIso}`);
   console.log(`  NHC: ${nhcFeed.ok ? "ok" : "FAIL"} (${nhcFeed.note})`);
-  console.log(`  markets: ${feeds.markets.ok ? feeds.markets.source + " · " + feeds.markets.count : "FAIL — " + feeds.markets.note}`);
-  console.log(`  storms: ${storms.length} · contracts: ${contracts.length} · frames: ${framesJson.frames.length}`);
+  console.log(`  markets: ${feeds.markets.ok ? feeds.markets.source + " · " + feeds.markets.note : "FAIL — " + feeds.markets.note}`);
+  console.log(`  climatology: ${climFeed.ok ? climFeed.source + " · " + clim.years.length + " seasons" : "FAIL — " + climFeed.note}`);
+  console.log(`  storms: ${storms.length} · contracts: ${contracts.length} (${contracts.filter((c) => c.model != null).length} anchored) · frames: ${framesJson.frames.length}`);
+  if (contracts.length) for (const c of contracts.slice(0, 8)) {
+    console.log(`    · ${String(c.id).slice(0, 26).padEnd(26)} mkt ${Math.round(c.market * 100)}¢  model ${c.model != null ? Math.round(c.model * 100) + "%" : "—"}  ${c.horizon}`);
+  }
 }
 
 main().catch((e) => { console.error("[millibar] fatal:", e); process.exit(1); });

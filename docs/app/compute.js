@@ -24,7 +24,9 @@
     else if (age > 30) { reasons.push("Recon stale (" + Math.round(age) + "m) → −0.5"); score -= 0.5; }
     else { reasons.push("Recon fresh (" + Math.round(age) + "m) → +0.5"); score += 0.5; }
     reasons.push(feedOk("markets") ? "Market price: live" : "No market feed");
-    reasons.push(feedOk("models") ? "Ensemble consensus: live" : "No fitted model — probability is NHC-intensity anchor only");
+    reasons.push(feedOk("models")
+      ? "Fair value: HURDAT2 climatology baseline (seasonal contracts only — no per-storm model)"
+      : "No fitted model — allocations deferred");
     const t = score >= 2.5 ? "A" : score >= 1.5 ? "B" : "C";
     return { tier: t, reasons };
   }

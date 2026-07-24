@@ -81,7 +81,7 @@
       };
     });
 
-    // ---- contracts (real prices per frame) ----
+    // ---- contracts (real prices per frame; model = climatology anchor when present) ----
     const contracts = (latest.contracts || []).map((c) => {
       const fc = (f) => framesArr[clampF(f)].contracts[c.id] || null;
       return Object.assign({}, c, {
