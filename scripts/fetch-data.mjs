@@ -241,28 +241,30 @@ async function fetchKalshiEventsForSeries(host, series) {
 // call covers ~100), falling back to per-event queries.
 async function hydrateKalshiPrices(host, pairs) {
   const byTicker = new Map();
-  const tickers = [...new Set(pairs.map((p) => p.m && p.m.ticker).filter(Boolean))];
-  for (let i = 0; i < tickers.length && i < 600; i += 100) {
-    const batch = tickers.slice(i, i + 100);
-    const r = await getJSON(`${host}/markets?tickers=${encodeURIComponent(batch.join(","))}&limit=200`);
+  // Per-event is the reliable form; the batch `tickers=` param is not consistently honoured.
+  const evts = [...new Set(pairs.map((p) => p.eventTicker).filter(Boolean))].slice(0, 60);
+  for (const et of evts) {
+    const r = await getJSON(`${host}/markets?event_ticker=${encodeURIComponent(et)}&limit=200`);
     const list = (r.json && r.json.markets) || [];
     for (const m of list) if (m && m.ticker) byTicker.set(m.ticker, m);
   }
-  if (!byTicker.size) { // batch form unsupported — walk the distinct events instead
-    const evts = [...new Set(pairs.map((p) => p.eventTicker).filter(Boolean))].slice(0, 40);
-    for (const et of evts) {
-      const r = await getJSON(`${host}/markets?event_ticker=${encodeURIComponent(et)}&limit=200`);
+  if (!byTicker.size) { // last resort: batch by ticker
+    const tickers = [...new Set(pairs.map((p) => p.m && p.m.ticker).filter(Boolean))];
+    for (let i = 0; i < tickers.length && i < 600; i += 100) {
+      const r = await getJSON(`${host}/markets?tickers=${encodeURIComponent(tickers.slice(i, i + 100).join(","))}&limit=200`);
       const list = (r.json && r.json.markets) || [];
       for (const m of list) if (m && m.ticker) byTicker.set(m.ticker, m);
     }
   }
-  let hydrated = 0;
+  let hydrated = 0, priced = 0;
   const out = pairs.map((p) => {
     const full = p.m && byTicker.get(p.m.ticker);
-    if (full) { hydrated++; return Object.assign({}, p, { m: Object.assign({}, p.m, full) }); }
-    return p;
+    if (!full) return p;
+    hydrated++;
+    if (full.yes_bid != null || full.yes_ask != null || full.last_price != null) priced++;
+    return Object.assign({}, p, { m: Object.assign({}, p.m, full) });
   });
-  return { pairs: out, hydrated };
+  return { pairs: out, hydrated, priced, events: evts.length };
 }
 
 // Fallback path: page Kalshi EVENTS with nested markets. There are >15k open
@@ -338,7 +340,7 @@ async function collectKalshiMarkets() {
     if (out.length) {
       const h = await hydrateKalshiPrices(ser.host, out);
       return { ok: true, status: ser.status, pairs: h.pairs, pages: ser.series.length,
-        scanned: out.length, mode: `series(${ser.category}·${ser.series.length}·hyd${h.hydrated})`, tried: ser.tried };
+        scanned: out.length, mode: `series(${ser.series.length}s·${h.events}ev·hyd${h.hydrated}·px${h.priced})`, tried: ser.tried };
     }
   }
   // 2) broad event scan
@@ -374,7 +376,8 @@ async function fetchKalshi(storms, clim) {
     const m = pair.m;
     const title = pair.title || m.title || m.ticker || "";
     const sub = m.yes_sub_title || m.subtitle || "";
-    if (samples.length < 6) samples.push(`${title.slice(0, 44)} | ${sub.slice(0, 18)} | bid=${m.yes_bid} ask=${m.yes_ask} last=${m.last_price}`);
+    const hasQuote = m.yes_bid != null || m.yes_ask != null || m.last_price != null;
+    if (samples.length < 6 && hasQuote) samples.push(`${title.slice(0, 42)} | ${sub.slice(0, 16)} | bid=${m.yes_bid} ask=${m.yes_ask} last=${m.last_price}`);
     if (!HUR_RE.test(title) && !HUR_RE.test(m.ticker || "")) { drops.noKeyword++; continue; }
     if (NOT_WEATHER_RE.test(title)) { drops.sports++; continue; } // sports teams named "Hurricanes"
     const bid = num(m.yes_bid), ask = num(m.yes_ask), last = num(m.last_price);
