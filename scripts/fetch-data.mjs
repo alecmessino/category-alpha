@@ -227,7 +227,7 @@ async function fetchKalshiWeatherSeries() {
 
 async function fetchKalshiEventsForSeries(host, series) {
   const events = [];
-  for (const s of series.slice(0, 25)) {
+  for (const s of series.slice(0, 80)) {
     const t = s.ticker || s.series_ticker;
     if (!t) continue;
     const r = await getJSON(`${host}/events?series_ticker=${encodeURIComponent(t)}&with_nested_markets=true&status=open&limit=200`);
@@ -332,15 +332,22 @@ async function fetchKalshi(storms, clim) {
   const paged = await collectKalshiMarkets();
   if (!paged.ok) return { ok: false, status: paged.status, source: "kalshi", note: paged.error, contracts: [], diag: paged.tried };
   const contracts = [];
+  const drops = { noKeyword: 0, sports: 0, noPrice: 0 };
+  const samples = [];
   for (const pair of paged.pairs) {
     const m = pair.m;
     const title = pair.title || m.title || m.ticker || "";
     const sub = m.yes_sub_title || m.subtitle || "";
-    if (!HUR_RE.test(title) && !HUR_RE.test(m.ticker || "")) continue;
-    if (NOT_WEATHER_RE.test(title)) continue; // sports teams named "Hurricanes"
+    if (samples.length < 6) samples.push(`${title.slice(0, 44)} | ${sub.slice(0, 18)} | bid=${m.yes_bid} ask=${m.yes_ask} last=${m.last_price}`);
+    if (!HUR_RE.test(title) && !HUR_RE.test(m.ticker || "")) { drops.noKeyword++; continue; }
+    if (NOT_WEATHER_RE.test(title)) { drops.sports++; continue; } // sports teams named "Hurricanes"
     const bid = num(m.yes_bid), ask = num(m.yes_ask), last = num(m.last_price);
-    let price = last != null ? last / 100 : (bid != null && ask != null ? (bid + ask) / 200 : null);
-    if (price == null) continue;
+    // Prefer a live two-sided quote; fall back to last trade, then to any single side.
+    let price = (bid != null && ask != null) ? (bid + ask) / 200
+      : (last != null && last > 0) ? last / 100
+      : (bid != null) ? bid / 100
+      : (ask != null) ? ask / 100 : null;
+    if (price == null) { drops.noPrice++; continue; }
     const spread = bid != null && ask != null ? (ask - bid) / 100 : 0.02;
     const liquidity = num(m.liquidity) != null ? Math.round(num(m.liquidity) / 100) : null; // cents → $
     const volume = num(m.dollar_volume) ?? num(m.volume) ?? 0;
@@ -362,7 +369,8 @@ async function fetchKalshi(storms, clim) {
   contracts.sort((a, b) => (b.model != null) - (a.model != null) || (b.volume || 0) - (a.volume || 0));
   const anchored = contracts.filter((c) => c.model != null).length;
   return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts, diag: paged.tried,
-           note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} ${paged.mode} · ${paged.pages}p` };
+           drops, samples,
+           note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} ${paged.mode} · dropped ${drops.noKeyword}kw/${drops.sports}sport/${drops.noPrice}px` };
 }
 
 async function fetchPolymarket(storms, clim) {
@@ -435,7 +443,7 @@ async function main() {
   let mkt = kal;
   if (poly && ((poly.ok && poly.count > 0) || (!kal.ok && poly.ok))) mkt = poly;
   const marketAttempts = [
-    { source: "kalshi", ok: kal.ok, status: kal.status, count: kal.count || 0, note: kal.note, hosts: kal.diag || null },
+    { source: "kalshi", ok: kal.ok, status: kal.status, count: kal.count || 0, note: kal.note, hosts: kal.diag || null, drops: kal.drops || null, samples: kal.samples || null },
     poly ? { source: "polymarket", ok: poly.ok, status: poly.status, count: poly.count || 0, note: poly.note } : null,
   ].filter(Boolean);
   let contracts = mkt.contracts || [];
