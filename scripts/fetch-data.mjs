@@ -193,21 +193,33 @@ function assocStorm(title, storms) {
 // Kalshi caps a page at 1000 markets and there are far more open than that, so the
 // hurricane series only appears if we follow the cursor. (Not paginating was why the
 // board previously reported "0 hurricane markets" despite HTTP 200.)
+// Kalshi has published under a couple of API hosts; try them in order so a host
+// change doesn't silently kill the board. Diagnostics are recorded either way.
+const KALSHI_HOSTS = [
+  "https://api.elections.kalshi.com/trade-api/v2",
+  "https://api.kalshi.com/trade-api/v2",
+  "https://trading-api.kalshi.com/trade-api/v2",
+];
+
 async function fetchKalshiPaged(maxPages = 15) {
-  let cursor = null, all = [], pages = 0, status = null;
-  do {
-    const url = "https://api.elections.kalshi.com/trade-api/v2/markets?status=open&limit=1000" +
-      (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
-    const r = await getJSON(url);
-    status = r.status;
-    if (!r.ok) return { ok: false, status: r.status, error: r.error, markets: all, pages };
-    const batch = (r.json && r.json.markets) || [];
-    all.push(...batch);
-    cursor = (r.json && r.json.cursor) || null;
-    pages++;
-    if (!batch.length) break;
-  } while (cursor && pages < maxPages);
-  return { ok: true, status, markets: all, pages };
+  const tried = [];
+  for (const host of KALSHI_HOSTS) {
+    let cursor = null, all = [], pages = 0, status = null, err = null;
+    do {
+      const url = `${host}/markets?status=open&limit=1000` + (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
+      const r = await getJSON(url);
+      status = r.status;
+      if (!r.ok) { err = r.error; break; }
+      const batch = (r.json && r.json.markets) || [];
+      all.push(...batch);
+      cursor = (r.json && r.json.cursor) || null;
+      pages++;
+      if (!batch.length) break;
+    } while (cursor && pages < maxPages);
+    tried.push({ host, status, pages, scanned: all.length, error: err });
+    if (all.length) return { ok: true, host, status, markets: all, pages, scanned: all.length, tried };
+  }
+  return { ok: false, status: tried[0] && tried[0].status, error: (tried.find((t) => t.error) || {}).error || "no markets returned", markets: [], pages: 0, scanned: 0, tried };
 }
 
 function parseStrike(...vals) {
@@ -224,7 +236,7 @@ function horizonOf(title) {
 
 async function fetchKalshi(storms, clim) {
   const paged = await fetchKalshiPaged();
-  if (!paged.ok) return { ok: false, status: paged.status, source: "kalshi", note: paged.error, contracts: [] };
+  if (!paged.ok) return { ok: false, status: paged.status, source: "kalshi", note: paged.error, contracts: [], diag: paged.tried };
   const mkts = paged.markets;
   const contracts = [];
   for (const m of mkts) {
@@ -255,8 +267,8 @@ async function fetchKalshi(storms, clim) {
   // Highest-signal first: anchored contracts, then by volume.
   contracts.sort((a, b) => (b.model != null) - (a.model != null) || (b.volume || 0) - (a.volume || 0));
   const anchored = contracts.filter((c) => c.model != null).length;
-  return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts,
-           note: `${contracts.length} hurricane markets (${anchored} climatology-anchored, ${paged.pages}p)` };
+  return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts, diag: paged.tried,
+           note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} scanned · ${paged.pages}p` };
 }
 
 async function fetchPolymarket(storms, clim) {
@@ -264,6 +276,7 @@ async function fetchPolymarket(storms, clim) {
   const r = await getJSON(url);
   if (!r.ok) return { ok: false, status: r.status, source: "polymarket", note: r.error, contracts: [] };
   const mkts = Array.isArray(r.json) ? r.json : (r.json.markets || r.json.data || []);
+  const scanned = mkts.length;
   const contracts = [];
   for (const m of mkts) {
     const title = m.question || m.title || "";
@@ -286,7 +299,8 @@ async function fetchPolymarket(storms, clim) {
       _catFour: /category\s*[45]|cat\s*[45]/i.test(title),
     });
   }
-  return { ok: true, status: r.status, source: "polymarket", count: contracts.length, contracts, note: `${contracts.length} hurricane markets` };
+  return { ok: true, status: r.status, source: "polymarket", count: contracts.length, contracts,
+           note: `${contracts.length} hurricane markets from ${scanned} scanned` };
 }
 
 async function fetchKalshiOrderbook(ticker) {
@@ -318,13 +332,18 @@ async function main() {
   // Climatology baseline first — it supplies the fair-value anchor for seasonal contracts.
   const { feed: climFeed, clim } = await fetchClimatology();
 
-  // markets: Kalshi first, fall back to Polymarket if Kalshi unreachable/empty
-  let mkt = await fetchKalshi(storms, clim);
-  if (!mkt.ok || mkt.count === 0) {
-    const poly = await fetchPolymarket(storms, clim);
-    if (poly.ok && poly.count > 0) mkt = poly;
-    else if (!mkt.ok && poly.ok) mkt = poly; // surface whichever responded
-  }
+  // markets: Kalshi first, fall back to Polymarket if Kalshi unreachable/empty.
+  // BOTH attempts are recorded — a silent fallback previously hid a Kalshi failure
+  // behind a healthy-looking Polymarket "0 markets".
+  const kal = await fetchKalshi(storms, clim);
+  let poly = null;
+  if (!kal.ok || kal.count === 0) poly = await fetchPolymarket(storms, clim);
+  let mkt = kal;
+  if (poly && ((poly.ok && poly.count > 0) || (!kal.ok && poly.ok))) mkt = poly;
+  const marketAttempts = [
+    { source: "kalshi", ok: kal.ok, status: kal.status, count: kal.count || 0, note: kal.note, hosts: kal.diag || null },
+    poly ? { source: "polymarket", ok: poly.ok, status: poly.status, count: poly.count || 0, note: poly.note } : null,
+  ].filter(Boolean);
   let contracts = mkt.contracts || [];
 
   // real order books for up to 4 Kalshi contracts (keeps API calls bounded)
@@ -351,7 +370,7 @@ async function main() {
 
   const feeds = {
     nhc: nhcFeed,
-    markets: mkt.ok ? { ok: true, status: mkt.status, source: mkt.source, count: mkt.count, note: mkt.note } : { ok: false, status: mkt.status, source: mkt.source, count: 0, note: mkt.note },
+    markets: { ok: !!mkt.ok, status: mkt.status, source: mkt.source, count: mkt.count || 0, note: mkt.note, attempts: marketAttempts },
     sst: { ok: false, source: sst.source, note: sst.note },
     models: climFeed.ok
       ? Object.assign({}, climFeed, { note: climFeed.note + " — seasonal count contracts only; per-storm intensity has no fitted model" })
@@ -384,6 +403,10 @@ async function main() {
   console.log(`[millibar] refreshed ${nowIso}`);
   console.log(`  NHC: ${nhcFeed.ok ? "ok" : "FAIL"} (${nhcFeed.note})`);
   console.log(`  markets: ${feeds.markets.ok ? feeds.markets.source + " · " + feeds.markets.note : "FAIL — " + feeds.markets.note}`);
+  for (const a of marketAttempts) {
+    console.log(`    [${a.source}] ok=${a.ok} status=${a.status} → ${a.note}`);
+    if (a.hosts) for (const h of a.hosts) console.log(`        ${h.host} status=${h.status} pages=${h.pages} scanned=${h.scanned}${h.error ? " err=" + h.error : ""}`);
+  }
   console.log(`  climatology: ${climFeed.ok ? climFeed.source + " · " + clim.years.length + " seasons" : "FAIL — " + climFeed.note}`);
   console.log(`  storms: ${storms.length} · contracts: ${contracts.length} (${contracts.filter((c) => c.model != null).length} anchored) · frames: ${framesJson.frames.length}`);
   if (contracts.length) for (const c of contracts.slice(0, 8)) {
