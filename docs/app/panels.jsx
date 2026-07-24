@@ -145,14 +145,26 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
    Market-implied probability and the HURDAT2 baseline plotted against strike, with
    the gap between them shaded. Rich = market above climatology, cheap = below. */
 function MT_YieldCurve({ dense }) {
+  // Group by SERIES ticker (KXHURCTOTMAJ-26DEC01-T3 → KXHURCTOTMAJ-26DEC01). Grouping
+  // by prose label merged distinct series that share strike values, which produced a
+  // zig-zag curve instead of a monotone ladder.
   const groups = {};
   (MT.contracts || []).forEach((c) => {
     if (c.horizon !== "seasonal" || c.strike == null || c.model == null) return;
-    const key = c.label.replace(/more than\s*\d+\s*/i, "").replace(/\?$/, "").trim();
+    const key = String(c.id).replace(/-T\d+$/i, "");
     (groups[key] = groups[key] || []).push(c);
   });
   const series = Object.entries(groups)
-    .map(([k, arr]) => [k, arr.slice().sort((a, b) => a.strike - b.strike)])
+    .map(([k, arr]) => {
+      const byStrike = new Map();                       // one contract per strike
+      arr.forEach((c) => {
+        const prev = byStrike.get(c.strike);
+        if (!prev || (c.volume || 0) > (prev.volume || 0)) byStrike.set(c.strike, c);
+      });
+      const rows = [...byStrike.values()].sort((a, b) => a.strike - b.strike);
+      const name = (rows[0] && rows[0].label || k).replace(/more than\s*\d+\s*/i, "").replace(/\?$/, "").trim();
+      return [name, rows];
+    })
     .filter(([, arr]) => arr.length >= 3)
     .sort((a, b) => b[1].length - a[1].length)
     .slice(0, 2);
