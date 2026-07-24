@@ -201,6 +201,32 @@ const KALSHI_HOSTS = [
   "https://trading-api.kalshi.com/trade-api/v2",
 ];
 
+// Preferred path: page Kalshi EVENTS with nested markets. There are >15k open
+// markets (paging them all blew past the page cap and missed the hurricane series),
+// but far fewer events — and an event carries the question title we need for
+// strike/climatology matching, with its markets nested inside.
+async function fetchKalshiEvents(maxPages = 25) {
+  const tried = [];
+  for (const host of KALSHI_HOSTS) {
+    let cursor = null, events = [], pages = 0, status = null, err = null;
+    do {
+      const url = `${host}/events?limit=200&status=open&with_nested_markets=true` +
+        (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
+      const r = await getJSON(url);
+      status = r.status;
+      if (!r.ok) { err = r.error; break; }
+      const batch = (r.json && r.json.events) || [];
+      events.push(...batch);
+      cursor = (r.json && r.json.cursor) || null;
+      pages++;
+      if (!batch.length) break;
+    } while (cursor && pages < maxPages);
+    tried.push({ host, mode: "events", status, pages, scanned: events.length, error: err });
+    if (events.length) return { ok: true, host, status, events, pages, scanned: events.length, tried };
+  }
+  return { ok: false, status: tried[0] && tried[0].status, error: (tried.find((t) => t.error) || {}).error || "no events returned", events: [], pages: 0, scanned: 0, tried };
+}
+
 async function fetchKalshiPaged(maxPages = 15) {
   const tried = [];
   for (const host of KALSHI_HOSTS) {
@@ -234,13 +260,32 @@ function horizonOf(title) {
   return /how many|total|this year|season|in 20\d\d|\bby (jan|dec)/i.test(String(title)) ? "seasonal" : "storm";
 }
 
-async function fetchKalshi(storms, clim) {
+// Flatten either shape into {market, title} pairs, where title is the human question.
+async function collectKalshiMarkets() {
+  const ev = await fetchKalshiEvents();
+  if (ev.ok) {
+    const out = [];
+    for (const e of ev.events) {
+      const title = e.title || e.sub_title || e.event_ticker || "";
+      for (const m of (e.markets || [])) out.push({ m, title, eventTicker: e.event_ticker });
+    }
+    if (out.length) return { ok: true, status: ev.status, pairs: out, pages: ev.pages, scanned: ev.scanned, mode: "events", tried: ev.tried };
+  }
+  // Fallback: page the flat markets list (older/alternate API behaviour).
   const paged = await fetchKalshiPaged();
+  const tried = [...(ev.tried || []), ...(paged.tried || [])];
+  if (!paged.ok) return { ok: false, status: paged.status, error: paged.error || ev.error, pairs: [], pages: 0, scanned: 0, mode: "markets", tried };
+  return { ok: true, status: paged.status, mode: "markets", pages: paged.pages, scanned: paged.scanned, tried,
+           pairs: paged.markets.map((m) => ({ m, title: m.title || m.subtitle || m.ticker || "", eventTicker: m.event_ticker })) };
+}
+
+async function fetchKalshi(storms, clim) {
+  const paged = await collectKalshiMarkets();
   if (!paged.ok) return { ok: false, status: paged.status, source: "kalshi", note: paged.error, contracts: [], diag: paged.tried };
-  const mkts = paged.markets;
   const contracts = [];
-  for (const m of mkts) {
-    const title = m.title || m.subtitle || m.ticker || "";
+  for (const pair of paged.pairs) {
+    const m = pair.m;
+    const title = pair.title || m.title || m.ticker || "";
     const sub = m.yes_sub_title || m.subtitle || "";
     if (!HUR_RE.test(title) && !HUR_RE.test(m.ticker || "")) continue;
     if (NOT_WEATHER_RE.test(title)) continue; // sports teams named "Hurricanes"
@@ -260,7 +305,7 @@ async function fetchKalshi(storms, clim) {
       modelBasis: anchor ? anchor.basis : null,
       horizon: horizonOf(title), strike,
       liquidity, spread, volume, proxy: false, source: "kalshi",
-      url: "https://kalshi.com/markets/" + (m.event_ticker || m.ticker),
+      url: "https://kalshi.com/markets/" + (pair.eventTicker || m.event_ticker || m.ticker),
       _catFour: /category\s*[45]|cat\s*[45]/i.test(title),
     });
   }
@@ -268,7 +313,7 @@ async function fetchKalshi(storms, clim) {
   contracts.sort((a, b) => (b.model != null) - (a.model != null) || (b.volume || 0) - (a.volume || 0));
   const anchored = contracts.filter((c) => c.model != null).length;
   return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts, diag: paged.tried,
-           note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} scanned · ${paged.pages}p` };
+           note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} ${paged.mode} · ${paged.pages}p` };
 }
 
 async function fetchPolymarket(storms, clim) {
