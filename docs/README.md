@@ -49,13 +49,27 @@ scripts/fetch-data.mjs  server-side real-data fetch/normalize
 
 ## One-time deployment
 
-1. Create a GitHub repo and push this project (`git remote add origin … && git push -u origin main`).
+### Easiest — one command (uses the GitHub CLI)
+
+Install the [GitHub CLI](https://cli.github.com), run `gh auth login` once, then from the project root:
+
+```bash
+bash setup.sh                 # creates a private repo "millibar-terminal"
+# bash setup.sh my-name       # custom repo name
+# bash setup.sh my-name --public
+```
+
+That creates the repo, pushes the project, enables Pages, grants the workflow write access, and
+prints your live URL. Your push auto-triggers the first data fetch — **nothing to click**.
+
+### Manual (no CLI) — 3 steps
+
+1. Create a GitHub repo and push: `git remote add origin <url> && git push -u origin main`.
 2. **Settings → Pages → Source = "Deploy from a branch" → `main` / `/docs`.**
-3. **Settings → Actions → General →** allow workflows and set **Workflow permissions = Read and write**
-   (so the cron can commit refreshed data).
-4. **Actions → "Refresh Millibar Terminal data" → Run workflow** to populate real data immediately
-   (otherwise the first cron run fills it within ~15 min).
-5. Live URL: `https://<user>.github.io/<repo>/`.
+3. **Settings → Actions → General → Workflow permissions = Read and write.**
+
+Your push automatically runs the refresh workflow and populates real data within a minute or two
+(the bot's data commits carry `[skip ci]`, so it never loops). Live URL: `https://<user>.github.io/<repo>/`.
 
 The Claude terminal-console assistant only runs when the page is opened inside claude.ai; on plain
 Pages it degrades to local `help` / `status` / `clear` commands, which it states plainly.

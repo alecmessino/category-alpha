@@ -7,10 +7,10 @@ name: Refresh Millibar Terminal data
 on:
   schedule:
     - cron: "*/15 * * * *"   # every ~15 min (GitHub may delay under load)
-  workflow_dispatch: {}       # manual "Run workflow" button — use this for the first populate
+  workflow_dispatch: {}       # manual "Run workflow" button (optional)
   push:
-    branches: [main]
-    paths: [".github/workflows/refresh-data.yml", "scripts/fetch-data.mjs"]
+    branches: [main]          # your first push auto-populates real data — no manual step needed.
+                              # the bot's own data commits carry "[skip ci]", so this never loops.
 
 # One refresh at a time; don't cancel an in-flight commit.
 concurrency:
