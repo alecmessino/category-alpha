@@ -1,0 +1,49 @@
+/* Category Alpha — Color System
+   Two real surfaces coexist in Millibar Terminal:
+   (1) the LIGHT operational chrome (default), and
+   (2) the DARK tactical "Storm Command Center" (data-surface="tactical").
+   Base values are literal hues from the codebase; semantics are in semantic.css. */
+:root{
+  /* ---- tactical neutrals (dark command surfaces) ---- */
+  --slate-950:#04060c;   /* map stage / deepest */
+  --slate-925:#05070d;   /* command shell bg */
+  --slate-900:#070b14;   /* command card / rail */
+  --slate-850:#0b1220;   /* sunken dark */
+  --graphite-800:#10192b;/* dark hairline / metric grid */
+  --graphite-700:#1a2740;/* dark control border */
+  --graphite-600:#1e293b;/* command outer border */
+
+  /* ---- operational neutrals (light chrome) ---- */
+  --ink-900:#0f172a;     /* primary text / solid buttons */
+  --ink-700:#334155;
+  --ink-600:#475569;     /* muted text */
+  --ink-400:#94a3b8;
+  --line-300:#cbd5e1;    /* strong hairline / scrollbar */
+  --line-200:#e2e8f0;    /* default hairline */
+  --paper-50:#f8fafc;    /* sunken panel */
+  --paper-100:#f4f5f8;   /* app background */
+  --white:#ffffff;       /* card */
+
+  /* ---- operational accents (restricted, high-trust) ---- */
+  --cyan-500:#0ea5e9;    /* primary accent (light) */
+  --cyan-400:#38bdf8;    /* primary accent (dark) / live edge */
+  --blue-600:#0066ff;    /* logo gradient terminus */
+  --blue-300:#7fb2e6;    /* command brand text */
+  --green-600:#16a34a;   /* positive / BUY (light) */
+  --green-500:#10b981;   /* accumulation phase */
+  --green-400:#34d399;   /* positive / LIVE (dark) */
+  --red-600:#dc2626;     /* negative / SELL (light) */
+  --red-500:#ef4444;     /* exhaustion / negative (dark) */
+  --amber-700:#b45309;   /* warn (light) */
+  --amber-500:#f59e0b;   /* velocity phase */
+  --amber-400:#fbbf24;   /* warn / REPLAY (dark) */
+  --violet-600:#7c3aed;  /* special / watch (light) */
+  --violet-500:#8b5cf6;  /* watch phase (dark) */
+  --radioactive:#39ff14; /* extreme-edge glow only (edge >= 15%) */
+
+  /* ---- PAI lifecycle phase colors (behavioral states) ---- */
+  --pai-accumulation:#10b981;
+  --pai-velocity:#f59e0b;
+  --pai-exhaustion:#ef4444;
+  --pai-watch:#8b5cf6;
+}

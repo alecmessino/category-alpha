@@ -1,0 +1,16 @@
+<!-- @dsCard group="Spacing" viewport="700x160" name="Radii & border rules" subtitle="Corner radii + the accent left-rule system" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>html,body{margin:0}body{background:var(--surface-app);padding:20px;font-family:var(--font-mono);display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+.box{width:82px;height:56px;background:var(--white);border:1px solid var(--line-200)}
+.n{font-size:9px;color:var(--ink-600);margin-top:6px}
+.rule{width:150px;background:var(--white);border:1px solid var(--line-200);padding:9px 11px;font-size:10px;color:var(--ink-600)}</style></head>
+<body>
+<div><div class="box" style="border-radius:6px"></div><div class="n">--radius-sm · 6px</div></div>
+<div><div class="box" style="border-radius:8px"></div><div class="n">--radius-md · 8px</div></div>
+<div><div class="box" style="border-radius:12px"></div><div class="n">--radius-lg · 12px</div></div>
+<div><div class="box" style="border-radius:999px;width:56px"></div><div class="n">--radius-pill</div></div>
+<div style="display:flex;flex-direction:column;gap:8px">
+  <div class="rule" style="border-left:3px solid var(--cyan-500)">--bw-accent · 3px section rule</div>
+  <div class="rule" style="border-left:4px solid var(--green-600)">--bw-signal · 4px signal rule</div>
+</div>
+</body></html>

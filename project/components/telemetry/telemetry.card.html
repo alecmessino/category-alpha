@@ -1,0 +1,35 @@
+<!-- @dsCard group="Components" viewport="760x380" name="Telemetry — IngestionHUD · HealthRow · ReplayDeck" subtitle="Feed-freshness HUD, health checks, the temporal replay VCR deck (tactical surface)" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../../styles.css">
+<style>html,body{margin:0}body{background:var(--surface-app);font-family:var(--font-sans);padding:18px}
+.lbl{font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--text-2);margin:0 0 8px}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script></head>
+<body data-surface="tactical" style="background:var(--surface-app)">
+<div id="root"></div>
+<script type="text/babel">
+const { IngestionHUD, HealthRow, ReplayDeck } = window.CategoryAlphaDesignSystem_a835cf;
+function Demo(){return (<div>
+  <p className="lbl">Ingestion HUD — click to open latency diagnostics</p>
+  <div style={{marginBottom:18}}>
+    <IngestionHUD streams={[
+      {name:"ATCF", status:"ok", age:"2m"},
+      {name:"RECON", status:"stale", age:"41m", penalty:"−1 tier"},
+      {name:"SST", status:"missing"},
+    ]}/>
+  </div>
+  <p className="lbl">System health</p>
+  <div className="hgrid" style={{marginBottom:18}}>
+    <HealthRow name="Event store" detail="argus.db · 4,182 events" status="PASS"/>
+    <HealthRow name="Live NHC feed" detail="CurrentStorms.json · 200 OK" status="PASS"/>
+    <HealthRow name="Probability engine" detail="deferred until promotion" status="BLOCKED"/>
+    <HealthRow name="Recon ingester" detail="no valid-time parser yet" status="EMPTY"/>
+  </div>
+  <p className="lbl">Temporal replay VCR deck</p>
+  <ReplayDeck frames={36} stepMin={10} subLabel="GOES-19 · GeoColor"
+    bookmarks={[{i:8, label:"RI onset"}, {i:24, label:"Landfall watch", color:"var(--neg)"}]}/>
+</div>);}
+ReactDOM.createRoot(document.getElementById('root')).render(<Demo/>);
+</script></body></html>

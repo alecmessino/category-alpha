@@ -1,0 +1,31 @@
+<!-- @dsCard group="Colors" viewport="700x260" name="Semantic aliases (light ↔ tactical)" subtitle="The same tokens flip between operational chrome and the dark command surface" -->
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>html,body{margin:0}body{margin:0;font-family:var(--font-mono);display:grid;grid-template-columns:1fr 1fr}
+.pane{padding:18px;background:var(--surface-app)}.tag{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text-2);margin-bottom:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.chip{border:1px solid var(--border-dim);border-radius:6px;padding:8px 10px;background:var(--surface-card)}
+.dot{width:100%;height:22px;border-radius:4px}.lab{font-size:8.5px;color:var(--text-2);margin-top:5px}</style></head>
+<body>
+<div class="pane">
+  <div class="tag">default · operational</div>
+  <div class="grid">
+    <div class="chip"><div class="dot" style="background:var(--accent)"></div><div class="lab">--accent</div></div>
+    <div class="chip"><div class="dot" style="background:var(--pos)"></div><div class="lab">--pos</div></div>
+    <div class="chip"><div class="dot" style="background:var(--neg)"></div><div class="lab">--neg</div></div>
+    <div class="chip"><div class="dot" style="background:var(--warn)"></div><div class="lab">--warn</div></div>
+    <div class="chip"><div class="dot" style="background:var(--special)"></div><div class="lab">--special</div></div>
+    <div class="chip"><div class="dot" style="background:var(--text-1)"></div><div class="lab">--text-1</div></div>
+  </div>
+</div>
+<div class="pane" data-surface="tactical">
+  <div class="tag">data-surface="tactical"</div>
+  <div class="grid">
+    <div class="chip"><div class="dot" style="background:var(--accent)"></div><div class="lab">--accent</div></div>
+    <div class="chip"><div class="dot" style="background:var(--pos)"></div><div class="lab">--pos</div></div>
+    <div class="chip"><div class="dot" style="background:var(--neg)"></div><div class="lab">--neg</div></div>
+    <div class="chip"><div class="dot" style="background:var(--warn)"></div><div class="lab">--warn</div></div>
+    <div class="chip"><div class="dot" style="background:var(--special)"></div><div class="lab">--special</div></div>
+    <div class="chip"><div class="dot" style="background:var(--text-1)"></div><div class="lab">--text-1</div></div>
+  </div>
+</div>
+</body></html>
