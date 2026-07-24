@@ -564,7 +564,7 @@ async function fetchKalshi(storms, clim) {
     const anchor = climatologyAnchor(title, strike, clim, m.ticker);
     contracts.push({
       id: m.ticker, label: title, short: (sub ? title.replace(/\?$/, "") + " · " + sub : title).slice(0, 44),
-      storm: assocStorm(title, storms), market: Math.max(0.01, Math.min(0.99, price)),
+      storm: assocStorm(title + " " + sub, storms), market: Math.max(0.01, Math.min(0.99, price)),
       model: anchor ? anchor.p : null,
       modelSource: anchor ? "HURDAT2 climatology" : null,
       modelBasis: anchor ? anchor.basis : null,
