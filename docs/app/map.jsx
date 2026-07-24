@@ -4,39 +4,71 @@
    layer carries an honest provenance tag (live / seeded / no-feed). The eye position
    is bound to the bitemporal engine (MTX.at(T)) so scrubbing rewinds geometry too. */
 const MT_LAYERS = [
-  { id: "satellite", label: "VIIRS Satellite", prov: "live" },
+  { id: "satellite", label: "Satellite", prov: "live" },
   { id: "track", label: "Observed Track", prov: "live" },
-  { id: "cone", label: "NHC Forecast Cone", prov: "nofeed" },
+  { id: "forecast", label: "NHC Forecast Track", prov: "dynamic" },
+  { id: "cone", label: "NHC Cone", prov: "dynamic" },
   { id: "recon", label: "Recon Track", prov: "nofeed" },
   { id: "ascat", label: "ASCAT Winds", prov: "nofeed" },
   { id: "models", label: "Model Consensus", prov: "nofeed" },
   { id: "particles", label: "Particle Wind (SFMR)", prov: "nofeed" },
 ];
+// Layers whose provenance depends on what the current advisory actually delivered.
+function layerProv(layer, S) {
+  if (layer.prov !== "dynamic") return layer.prov;
+  if (layer.id === "forecast") return S && S.track ? "live" : "nofeed";
+  if (layer.id === "cone") return S && S.cone ? "live" : "nofeed";
+  return "nofeed";
+}
 
 function pad2(n) { return (n < 10 ? "0" : "") + n; }
-// NASA GIBS sub-hourly GOES layers aren't retained in this environment; VIIRS/NOAA-20
-// daily true-color IS, globally and reliably. Key the basemap to a recent UTC day and
-// probe before attaching so an unreachable feed degrades to vector-only with no 404s.
-const GIBS_SAT_LAYER = "VIIRS_NOAA20_CorrectedReflectance_TrueColor";
-const GIBS_SAT_TMS = "GoogleMapsCompatible_Level9";
-function gibsDay(back) {
+const GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/";
+
+/* Satellite imagery, freshest-first.
+   1) GOES ABI GeoColor — geostationary, published every 10 minutes. We step BACK in
+      10-minute increments from the last slot so a not-yet-published frame is skipped
+      instead of leaving the map blank (this is what made imagery look stale).
+   2) VIIRS/NOAA-20 daily true-color — the reliable global fallback, walked back by day.
+   Every candidate is probed on a tile over the actual storm before being attached, so
+   an unavailable product degrades silently to the next option, never to a 404 flood. */
+const GOES_TMS = "GoogleMapsCompatible_Level7";
+const VIIRS_LAYER = "VIIRS_NOAA20_CorrectedReflectance_TrueColor";
+const VIIRS_TMS = "GoogleMapsCompatible_Level9";
+
+function goesLayerFor(lon) { return lon != null && lon < -100 ? "GOES-West_ABI_GeoColor" : "GOES-East_ABI_GeoColor"; }
+function goesSlot(backSteps) {
+  // GOES full-disk publishes on 10-minute boundaries; allow a lag before "now".
+  const t = new Date(Date.now() - (backSteps * 10 + 15) * 60000);
+  t.setUTCMinutes(Math.floor(t.getUTCMinutes() / 10) * 10, 0, 0);
+  return t.toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+function goesUrl(layer, iso) {
+  return GIBS + layer + "/default/" + iso + "/" + GOES_TMS + "/{z}/{y}/{x}.png";
+}
+function viirsDay(back) {
   const d = new Date(Date.now() - back * 86400000);
   return d.getUTCFullYear() + "-" + pad2(d.getUTCMonth() + 1) + "-" + pad2(d.getUTCDate());
 }
-function gibsUrl(date) {
-  return "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" + GIBS_SAT_LAYER +
-    "/default/" + date + "/" + GIBS_SAT_TMS + "/{z}/{y}/{x}.jpg";
+function viirsUrl(date) {
+  return GIBS + VIIRS_LAYER + "/default/" + date + "/" + VIIRS_TMS + "/{z}/{y}/{x}.jpg";
 }
-function gibsProbe(date) {
-  // Probe the actual storm-region tile (z5, Gulf) rather than a global low-zoom tile,
-  // so a day whose regional pass hasn't published yet is skipped cleanly (no 404 flood).
+// Web-mercator tile covering the storm, so we probe imagery where it actually matters.
+function tileFor(lat, lon, z) {
+  const n = Math.pow(2, z);
+  const x = Math.floor(((lon + 180) / 360) * n);
+  const r = (lat * Math.PI) / 180;
+  const y = Math.floor(((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) * n);
+  return { x: Math.max(0, Math.min(n - 1, x)), y: Math.max(0, Math.min(n - 1, y)) };
+}
+function probe(urlTemplate, lat, lon, z) {
+  const { x, y } = tileFor(lat, lon, z);
+  const url = urlTemplate.replace("{z}", z).replace("{x}", x).replace("{y}", y);
   return new Promise((res) => {
     const img = new Image();
     const to = setTimeout(() => res(false), 6000);
     img.onload = () => { clearTimeout(to); res(true); };
     img.onerror = () => { clearTimeout(to); res(false); };
-    img.src = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/" + GIBS_SAT_LAYER +
-      "/default/" + date + "/" + GIBS_SAT_TMS + "/5/13/7.jpg";
+    img.src = url;
   });
 }
 function cssVar(v) {
@@ -44,7 +76,7 @@ function cssVar(v) {
   return getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim() || "#38bdf8";
 }
 
-function MT_Map({ stormId, frame, layers, onSelect, height = "100%" }) {
+function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }) {
   const elRef = React.useRef(null);
   const mapRef = React.useRef(null);
   const refs = React.useRef({});
@@ -71,30 +103,56 @@ function MT_Map({ stormId, frame, layers, onSelect, height = "100%" }) {
     mapRef.current.flyTo(S.center, S.basin === "east" ? 5 : 5, { duration: 0.7 });
   }, [stormId]);
 
-  // Satellite raster (VIIRS/NOAA-20 daily true-color via GIBS). Probe recent UTC days
-  // and attach the freshest that resolves; if none do, stay vector-only silently.
+  // Satellite raster: try 10-minute GOES GeoColor slots first (stepping back so an
+  // unpublished frame never blanks the map), then fall back to daily VIIRS.
   React.useEffect(() => {
     const map = mapRef.current; if (!map) return;
     if (refs.current.sat) { map.removeLayer(refs.current.sat); refs.current.sat = null; }
-    if (!layers.satellite) return;
+    if (refs.current.satTimer) { clearInterval(refs.current.satTimer); refs.current.satTimer = null; }
+    if (!layers.satellite || !S || !S.center) return;
     let cancelled = false;
-    (async () => {
-      for (let back = 0; back < 7 && !cancelled; back++) {
-        const date = gibsDay(back);
-        const ok = await gibsProbe(date);
-        if (cancelled || !mapRef.current) return;
-        if (ok) {
-          const sat = L.tileLayer(gibsUrl(date), {
-            opacity: 0.9, maxNativeZoom: 8, maxZoom: 8, minZoom: 2, tileSize: 256, updateWhenIdle: true,
-            attribution: "VIIRS/NOAA-20 true-color · " + date + " · NASA GIBS",
-            errorTileUrl: "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" });
-          sat.addTo(mapRef.current); refs.current.sat = sat;
+    const [la, lo] = S.center;
+    const blank = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+
+    const attach = (url, attribution, maxNative, fresh) => {
+      if (cancelled || !mapRef.current) return;
+      if (refs.current.sat) mapRef.current.removeLayer(refs.current.sat);
+      const sat = L.tileLayer(url, { opacity: 0.9, maxNativeZoom: maxNative, maxZoom: 8, minZoom: 2,
+        tileSize: 256, updateWhenIdle: true, attribution, errorTileUrl: blank });
+      sat.addTo(mapRef.current);
+      refs.current.sat = sat;
+      refs.current.satFresh = fresh;
+      if (typeof onImagery === "function") onImagery({ attribution, fresh });
+    };
+
+    const resolve = async () => {
+      const goes = goesLayerFor(lo);
+      for (let back = 0; back < 12 && !cancelled; back++) {   // up to ~2h back, 10-min steps
+        const iso = goesSlot(back);
+        const url = goesUrl(goes, iso);
+        if (await probe(url, la, lo, 4)) {
+          attach(url, goes.replace(/_/g, " ") + " · " + iso.replace("T", " ") + " · NASA GIBS", 7,
+            { product: "GOES GeoColor", at: iso });
           return;
         }
       }
-    })();
-    return () => { cancelled = true; };
-  }, [layers.satellite]);
+      for (let back = 0; back < 7 && !cancelled; back++) {     // daily VIIRS fallback
+        const date = viirsDay(back);
+        const url = viirsUrl(date);
+        if (await probe(url, la, lo, 5)) {
+          attach(url, "VIIRS/NOAA-20 true-color · " + date + " · NASA GIBS", 8,
+            { product: "VIIRS daily", at: date });
+          return;
+        }
+      }
+      if (typeof onImagery === "function" && !cancelled) onImagery({ attribution: null, fresh: null });
+    };
+
+    resolve();
+    // Re-resolve every 5 min so a fresh GOES slot replaces the current one automatically.
+    refs.current.satTimer = setInterval(resolve, 300000);
+    return () => { cancelled = true; if (refs.current.satTimer) clearInterval(refs.current.satTimer); };
+  }, [layers.satellite, stormId]);
 
   // vector overlays, rebuilt on storm/layers change
   React.useEffect(() => {
@@ -110,8 +168,18 @@ function MT_Map({ stormId, frame, layers, onSelect, height = "100%" }) {
       dot.addTo(g);
     });
     if (layers.cone && S.cone) {
-      L.polygon(S.cone, { stroke: false, fillColor: pc, fillOpacity: 0.09 }).addTo(g);
-      L.polygon(S.cone, { color: pc, weight: 1.1, opacity: 0.8, dashArray: "2,6", fill: false }).addTo(g);
+      L.polygon(S.cone, { stroke: false, fillColor: pc, fillOpacity: 0.10 })
+        .bindTooltip("NHC cone — reconstructed from forecast positions + published track-error radii", { className: "mt-tt", sticky: true }).addTo(g);
+      L.polygon(S.cone, { color: pc, weight: 1.1, opacity: 0.85, dashArray: "3,5", fill: false }).addTo(g);
+    }
+    if (layers.forecast && S.track && S.track.length > 1) {
+      L.polyline(S.track, { color: "#38bdf8", weight: 1.9, opacity: 0.95, dashArray: "5,5" }).addTo(g);
+      (S.trackPoints || []).forEach((tp, i) => {
+        if (i === 0) return; // current fix is the eye reticle
+        L.circleMarker(tp.at, { radius: 3.2, color: "#38bdf8", fillColor: "#0b1830", fillOpacity: 1, weight: 1.5 })
+          .bindTooltip("+" + tp.hr + "h · " + String(tp.validZ || "").replace("T", " ").replace(/\..*/, "Z"),
+            { direction: "top", className: "mt-tt" }).addTo(g);
+      });
     }
     if (layers.track) {
       // REAL observed track: the storm's committed positions across replay history.
@@ -119,11 +187,6 @@ function MT_Map({ stormId, frame, layers, onSelect, height = "100%" }) {
       if (obs.length >= 2) {
         L.polyline(obs, { color: "#e2e8f0", weight: 2, opacity: 0.9 }).addTo(g);
         obs.forEach((p) => L.circleMarker(p, { radius: 2.4, color: "#e2e8f0", fillColor: "#0b1830", fillOpacity: 1, weight: 1.3 }).addTo(g));
-      }
-      // NHC forecast track points, only if the feed actually supplied them.
-      if (S.track) {
-        L.polyline(S.track, { color: "#38bdf8", weight: 1.8, opacity: 0.9, dashArray: "5,5" }).addTo(g);
-        S.track.forEach((p) => L.circleMarker(p, { radius: 2.6, color: "#38bdf8", fillColor: "#0b1830", fillOpacity: 1, weight: 1.4 }).addTo(g));
       }
     }
     if (layers.recon && S.reconTracks) {
@@ -161,7 +224,7 @@ function MT_Map({ stormId, frame, layers, onSelect, height = "100%" }) {
         '<div style="position:absolute;inset:8px;border-radius:50%;border:1.5px solid currentColor;opacity:.5"></div>' +
         '<div style="position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;background:currentColor;transform:translate(-50%,-50%);box-shadow:0 0 7px 1px currentColor"></div></div>' });
     refs.current.eye = L.marker(eyeAt, { icon, interactive: false, zIndexOffset: 1000 }).addTo(g);
-  }, [stormId, layers.cone, layers.track, layers.recon, layers.ascat, layers.models]);
+  }, [stormId, layers.cone, layers.track, layers.forecast, layers.recon, layers.ascat, layers.models]);
 
   // bitemporal binding — move ONLY the eye marker as the as-of cursor scrubs, so
   // geometry rewinds with the tables and there is no overlay rebuild / tile flash.
@@ -174,3 +237,4 @@ function MT_Map({ stormId, frame, layers, onSelect, height = "100%" }) {
 }
 window.MT_Map = MT_Map;
 window.MT_LAYERS = MT_LAYERS;
+window.MT_layerProv = layerProv;

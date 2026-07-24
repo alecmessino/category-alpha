@@ -68,7 +68,8 @@
         id: s.id, name: s.name, cls: s.cls || cc.cls, full_cls: s.full_cls || cc.full,
         basin: s.basin || "east", color: s.color || PHASE_COLOR[phase] || "var(--accent)", phase,
         center: s.center, movement: s.movement || "—",
-        track: s.track || null, pastIdx: isNum(s.pastIdx) ? s.pastIdx : (s.track ? Math.max(0, s.track.length - 4) : 0),
+        track: s.track || null, trackPoints: s.trackPoints || null,
+        pastIdx: isNum(s.pastIdx) ? s.pastIdx : 0,
         cone: s.cone || null, reconTracks: s.reconTracks || null,
         advNum: s.advNum || null, advTimeZ: s.advTimeZ || null,
         // frame accessors read the REAL per-frame snapshot; fall back to the latest value
@@ -84,7 +85,15 @@
     // ---- contracts (real prices per frame; model = climatology anchor when present) ----
     const contracts = (latest.contracts || []).map((c) => {
       const fc = (f) => framesArr[clampF(f)].contracts[c.id] || null;
+      // Full committed price history for trend charts (nulls where the contract
+      // wasn't yet listed — the chart skips those rather than interpolating).
+      const histSeries = framesArr.map((fr) => {
+        const r = fr.contracts && fr.contracts[c.id];
+        return r && r.market != null ? r.market : null;
+      });
+      const histTimes = framesArr.map((fr) => fr.tsZ);
       return Object.assign({}, c, {
+        histSeries, histTimes,
         priceAt: (f) => { const r = fc(f); return r && r.market != null ? r.market : (c.market ?? null); },
         modelAt: (f) => { const r = fc(f); return r && r.model != null ? r.model : (c.model ?? null); },
       });

@@ -86,10 +86,12 @@ async function fetchStorms() {
     const movement = dir != null && spd != null ? `${compass(dir)} ${spd} kt` : "—";
     const basin = /^(AL|AT)/i.test(id) ? "east" : /^(EP|CP)/i.test(id) ? "west" : (lon != null && lon < -100 ? "west" : "east");
     const adv = s.publicAdvisory || {};
+    const fcst = s.forecastAdvisory || {};
     return {
       id, name: s.name || "Unnamed", cls: s.classification || cc.cls, full_cls: cc.full, basin,
       center: lat != null && lon != null ? [lat, lon] : null, movement, wind, pressure,
       advNum: adv.advNum || null, advTimeZ: adv.issuance || s.lastUpdate || null,
+      _fcstUrl: fcst.url || (typeof fcst === "string" ? fcst : null),
       track: null, cone: null, reconTracks: null, pastIdx: 0,
       modelCat4: null,        // no public ensemble Cat-probability feed wired — stays null
       marketCat4: null,       // filled from markets below if a Cat 4+ contract is found
@@ -98,7 +100,112 @@ async function fetchStorms() {
   }).filter((s) => s.center);
   feed.ok = true; feed.count = storms.length;
   feed.note = storms.length ? `${storms.length} active` : "no active tropical cyclones";
+  feed.raw = active.length ? JSON.stringify(active[0]).slice(0, 500) : null; // schema probe
+
+  // Forecast track + reconstructed cone, per storm, straight from the TCM product.
+  const fnotes = [];
+  for (const s of storms) {
+    const f = await fetchForecastFor(s, s._fcstUrl);
+    s.track = f.track; s.trackPoints = f.trackPoints || null; s.cone = f.cone;
+    s.pastIdx = 0;
+    fnotes.push(`${s.name}: ${f.note}`);
+    delete s._fcstUrl;
+  }
+  feed.forecast = fnotes.join(" | ");
   return { feed, storms };
+}
+
+/* ---------------- NHC forecast track + uncertainty cone ----------------
+ * The forecast positions come from the official Forecast/Advisory (TCM) text product
+ * linked by CurrentStorms.json — real published coordinates, parsed verbatim.
+ *
+ * The CONE is then reconstructed the way NHC defines it: the envelope of circles
+ * whose radii are NHC's published average track-forecast errors at each lead time.
+ * Those radii are documented constants, not invented — but this is a RECONSTRUCTION
+ * of the official graphic, and the UI labels it that way. If the advisory can't be
+ * fetched or parsed, track and cone stay null and the map shows NO FEED.
+ */
+// NHC average track-error radii (nautical miles) defining the 2/3-probability circle.
+const CONE_NM = {
+  east: { 12: 26, 24: 41, 36: 55, 48: 70, 60: 85, 72: 100, 96: 139, 120: 175 }, // Atlantic
+  west: { 12: 24, 24: 38, 36: 51, 48: 64, 60: 77, 72: 90, 96: 120, 120: 150 },  // E/C Pacific
+};
+function coneRadiusNm(basin, hr) {
+  const tbl = CONE_NM[basin] || CONE_NM.east;
+  const keys = Object.keys(tbl).map(Number).sort((a, b) => a - b);
+  if (hr <= 0) return 0;
+  if (hr <= keys[0]) return tbl[keys[0]] * (hr / keys[0]);
+  for (let i = 1; i < keys.length; i++) {
+    if (hr <= keys[i]) {
+      const a = keys[i - 1], b = keys[i];
+      return tbl[a] + (tbl[b] - tbl[a]) * ((hr - a) / (b - a));
+    }
+  }
+  return tbl[keys[keys.length - 1]];
+}
+
+function parseForecastAdvisory(text, baseIso) {
+  const pts = [];
+  const re = /(?:FORECAST|OUTLOOK)\s+VALID\s+(\d{2})\/(\d{2})(\d{2})Z\s+([\d.]+)\s*([NS])\s+([\d.]+)\s*([EW])/gi;
+  const base = baseIso ? new Date(baseIso) : new Date();
+  let m;
+  while ((m = re.exec(text))) {
+    let lat = Number(m[4]); if (/S/i.test(m[5])) lat = -lat;
+    let lon = Number(m[6]); if (/W/i.test(m[7])) lon = -lon;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+    // Valid times are day-of-month + HHMM; roll the month forward if it wrapped.
+    const d = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), Number(m[1]), Number(m[2]), Number(m[3])));
+    if (d.getTime() < base.getTime() - 3 * 3600e3) d.setUTCMonth(d.getUTCMonth() + 1);
+    const hr = Math.round((d.getTime() - base.getTime()) / 3600e3);
+    if (hr < 0 || hr > 168) continue;
+    pts.push({ lat, lon, hr, validZ: d.toISOString() });
+  }
+  return pts.sort((a, b) => a.hr - b.hr);
+}
+
+// Envelope of the error circles → cone polygon (lat/lon ring).
+function buildCone(points, basin) {
+  if (!points || points.length < 2) return null;
+  const rad = (x) => (x * Math.PI) / 180;
+  const left = [], right = [];
+  for (let i = 0; i < points.length; i++) {
+    const p = points[i];
+    const a = points[Math.max(0, i - 1)], b = points[Math.min(points.length - 1, i + 1)];
+    const cosLat = Math.max(0.2, Math.cos(rad(p.lat)));
+    const brg = Math.atan2((b.lon - a.lon) * cosLat, b.lat - a.lat); // radians from north
+    const rNm = coneRadiusNm(basin, p.hr);
+    const dLat = -Math.sin(brg) * (rNm / 60);
+    const dLon = (Math.cos(brg) * (rNm / 60)) / cosLat;
+    right.push([p.lat + dLat, p.lon + dLon]);
+    left.push([p.lat - dLat, p.lon - dLon]);
+  }
+  // rounded cap at the final forecast point
+  const last = points[points.length - 1];
+  const cosLat = Math.max(0.2, Math.cos(rad(last.lat)));
+  const rNm = coneRadiusNm(basin, last.hr);
+  const prev = points[points.length - 2];
+  const brg = Math.atan2((last.lon - prev.lon) * cosLat, last.lat - prev.lat);
+  const cap = [];
+  for (let k = 1; k <= 7; k++) {
+    const th = brg - Math.PI / 2 + (Math.PI * k) / 8;
+    cap.push([last.lat + Math.cos(th) * (rNm / 60), last.lon + (Math.sin(th) * (rNm / 60)) / cosLat]);
+  }
+  return right.concat(cap, left.reverse());
+}
+
+async function fetchForecastFor(storm, rawAdvisoryUrl) {
+  if (!rawAdvisoryUrl) return { track: null, cone: null, note: "no forecast-advisory link in feed" };
+  const r = await getText(rawAdvisoryUrl);
+  if (!r.ok) return { track: null, cone: null, note: "advisory fetch " + r.error };
+  const pts = parseForecastAdvisory(r.text, storm.advTimeZ);
+  if (!pts.length) return { track: null, cone: null, note: "no FORECAST VALID lines parsed" };
+  const withNow = [{ lat: storm.center[0], lon: storm.center[1], hr: 0 }, ...pts];
+  return {
+    track: withNow.map((p) => [p.lat, p.lon]),
+    trackPoints: withNow.map((p) => ({ at: [p.lat, p.lon], hr: p.hr, validZ: p.validZ || storm.advTimeZ })),
+    cone: buildCone(withNow, storm.basin),
+    note: `${pts.length} forecast positions · cone reconstructed from NHC track-error radii`,
+  };
 }
 
 /* ---------------- HURDAT2 climatology (fair-value baseline) ----------------
@@ -468,14 +575,16 @@ async function fetchKalshi(storms, clim) {
     });
   }
   // Highest-signal first: anchored contracts, then by volume.
-  // Anchored first, then real activity, then low strikes — the deep out-of-the-money
-  // rungs (">30 hurricanes") are near-worthless and shouldn't crowd out the live ones.
-  contracts.sort((a, b) => (b.model != null) - (a.model != null)
+  // Contracts tied to a CURRENTLY ACTIVE storm outrank everything — if telemetry is
+  // tracking it, its market belongs on the board ahead of any seasonal ladder.
+  // Then anchored, then real activity, then low strikes (deep OTM rungs last).
+  contracts.sort((a, b) => (b.storm ? 1 : 0) - (a.storm ? 1 : 0)
+    || (b.model != null) - (a.model != null)
     || (b.volume || 0) - (a.volume || 0)
     || (b.liquidity || 0) - (a.liquidity || 0)
     || (a.strike ?? 999) - (b.strike ?? 999));
   const anchored = contracts.filter((c) => c.model != null).length;
-  return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts: contracts.slice(0, 40), diag: paged.tried,
+  return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts: contracts.slice(0, 44), diag: paged.tried,
            drops, samples, raw: paged.raw || null,
            note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} ${paged.mode} · dropped ${drops.noKeyword}kw/${drops.sports}sport/${drops.noPrice}px` };
 }
@@ -604,7 +713,7 @@ async function main() {
   contracts.forEach((c) => { frameContracts[c.id] = { market: c.market, model: c.model }; });
   framesJson.stepMin = STEP_MIN;
   framesJson.frames.push({ tsZ: nowIso, storms: frameStorms, contracts: frameContracts });
-  framesJson.frames = framesJson.frames.slice(-24);
+  framesJson.frames = framesJson.frames.slice(-96); // 96 x 15min = 24h of real history
 
   await writeFile(resolve(DATA_DIR, "latest.json"), JSON.stringify(latest, null, 2) + "\n");
   await writeFile(resolve(DATA_DIR, "frames.json"), JSON.stringify(framesJson, null, 2) + "\n");

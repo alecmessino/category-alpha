@@ -56,12 +56,15 @@ function AwaitingTelemetry({ feeds, generatedAt, note }) {
   );
 }
 
-function LayerToggles({ layers, setLayers }) {
+function LayerToggles({ layers, setLayers, storm }) {
   const PROV = { live: "var(--pos)", seeded: "var(--warn)", nofeed: "var(--neg)" };
-  const PROV_TITLE = { live: "LIVE — real feed", seeded: "DERIVED — from live inputs", nofeed: "NO FEED — requires live backend telemetry; disabled" };
+  const PROV_TITLE = { live: "LIVE — real feed", seeded: "DERIVED — from live inputs", nofeed: "NO FEED — not published for this storm / not wired" };
+  const S = storm ? MT.storms[storm] : null;
   return (
     <div style={{ position: "absolute", left: 12, bottom: 12, zIndex: 500, display: "flex", gap: 5, flexWrap: "wrap", maxWidth: "72%" }}>
-      {window.MT_LAYERS.map((o) => {
+      {window.MT_LAYERS.map((o0) => {
+        const prov = window.MT_layerProv ? window.MT_layerProv(o0, S) : o0.prov;
+        const o = Object.assign({}, o0, { prov });
         const nofeed = o.prov === "nofeed";
         const on = layers[o.id] && !nofeed;
         return <span key={o.id} title={PROV_TITLE[o.prov]} onClick={() => { if (nofeed) return; setLayers((s) => ({ ...s, [o.id]: !s[o.id] })); }} style={{
@@ -132,8 +135,9 @@ function MillibarTerminalApp() {
   const [sel, setSel] = React.useState({ contract: (MT.contracts[0] && MT.contracts[0].id) || null, evidence: null });
   const [bankroll, setBankroll] = React.useState(10000);
   const [stake, setStake] = React.useState(0.25);
-  const [layers, setLayers] = React.useState({ satellite: true, track: true, cone: false, recon: false, ascat: false, models: false, particles: false });
+  const [layers, setLayers] = React.useState({ satellite: true, track: true, forecast: true, cone: true, recon: false, ascat: false, models: false, particles: false });
   const [narrow, setNarrow] = React.useState(typeof window !== "undefined" && window.innerWidth < 900);
+  const [imagery, setImagery] = React.useState(null);
   React.useEffect(() => {
     const onResize = () => setNarrow(window.innerWidth < 900);
     window.addEventListener("resize", onResize);
@@ -192,6 +196,17 @@ function MillibarTerminalApp() {
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: MT._generatedAt ? "var(--pos)" : "var(--warn)" }} />
           {MT._generatedAt ? "updated " + (fmtAgo(MT._generatedAt) || "—") : "awaiting refresh"}
         </span>
+        {imagery && imagery.fresh && (
+          <>
+            <span style={{ opacity: .4 }}>·</span>
+            <span title={imagery.attribution || ""} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: imagery.fresh.product === "GOES GeoColor" ? "var(--pos)" : "var(--warn)" }} />
+              {imagery.fresh.product === "GOES GeoColor"
+                ? "sat " + String(imagery.fresh.at).slice(11, 16) + "Z"
+                : "sat " + imagery.fresh.at + " (daily)"}
+            </span>
+          </>
+        )}
         <span style={{ opacity: .4 }}>·</span><span>as-of <b style={{ color: "var(--accent)" }}>{MTX.frameTime(frame)}</b></span>
       </div>
     </header>
@@ -229,7 +244,7 @@ function MillibarTerminalApp() {
         <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: 16 }}>
           <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) 320px" }}>
             <div style={{ position: "relative", minHeight: 480, background: "var(--slate-950)" }}>
-              <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} />
+              <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} onImagery={setImagery} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--blue-300)", textTransform: "uppercase" }}>Storm Command Center</span>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto", pointerEvents: "auto" }}>
@@ -238,7 +253,7 @@ function MillibarTerminalApp() {
                   ))}
                 </div>
               </div>
-              <LayerToggles layers={layers} setLayers={setLayers} />
+              <LayerToggles layers={layers} setLayers={setLayers} storm={storm} />
             </div>
             {/* rail */}
             <aside style={{ background: "var(--surface-card)", borderLeft: "1px solid var(--border-dim)", display: "flex", flexDirection: "column" }}>
@@ -277,6 +292,7 @@ function MillibarTerminalApp() {
           <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
             <window.MT_Confidence stormId={storm} frame={frame} />
             <window.MT_Probability stormId={storm} frame={frame} />
+            <window.MT_YieldCurve dense={dense} />
             <window.MT_OrderBook contractId={sel.contract} frame={frame} dense={dense} />
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>

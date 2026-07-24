@@ -141,14 +141,104 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
   );
 }
 
-/* ---- Prediction Markets board ---- */
-function MT_spark(vals, w, h, color) {
-  if (!vals || vals.length < 2) return null;
-  const mn = Math.min(...vals), mx = Math.max(...vals), r = (mx - mn) || 1;
-  const pts = vals.map((v, i) => ((i / (vals.length - 1)) * w).toFixed(1) + "," + (h - ((v - mn) / r) * h).toFixed(1)).join(" ");
+/* ---- Term structure: strike ladder vs climatology (the "yield curve") ----
+   Market-implied probability and the HURDAT2 baseline plotted against strike, with
+   the gap between them shaded. Rich = market above climatology, cheap = below. */
+function MT_YieldCurve({ dense }) {
+  const groups = {};
+  (MT.contracts || []).forEach((c) => {
+    if (c.horizon !== "seasonal" || c.strike == null || c.model == null) return;
+    const key = c.label.replace(/more than\s*\d+\s*/i, "").replace(/\?$/, "").trim();
+    (groups[key] = groups[key] || []).push(c);
+  });
+  const series = Object.entries(groups)
+    .map(([k, arr]) => [k, arr.slice().sort((a, b) => a.strike - b.strike)])
+    .filter(([, arr]) => arr.length >= 3)
+    .sort((a, b) => b[1].length - a[1].length)
+    .slice(0, 2);
+
+  if (!series.length) {
+    return (
+      <P title="Term Structure — strike ladder" right={<BG tone="neg">NO LADDER</BG>}
+        footer={<PF source="needs ≥3 anchored strikes in one series" latency="—" version="—" tier="C" />}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", lineHeight: 1.6 }}>
+          No multi-strike seasonal series with a climatology anchor is currently listed. The curve
+          renders as soon as a hurricane-count ladder is quoted.
+        </div>
+      </P>
+    );
+  }
+
+  const W = 300, H = dense ? 108 : 128, PADL = 26, PADB = 16, PADT = 8;
   return (
-    <svg width={w} height={h} style={{ display: "block", marginLeft: "auto" }} aria-hidden="true">
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.2" strokeLinejoin="round" strokeLinecap="round" />
+    <P title="Term Structure — market vs climatology" right={<BG tone="special">EDGE SHADED</BG>}
+      footer={<PF source="Kalshi ladder × HURDAT2 baseline" latency="live" version="—" tier="C" />}>
+      {series.map(([name, arr]) => {
+        const xs = arr.map((c) => c.strike);
+        const minX = Math.min(...xs), maxX = Math.max(...xs), spanX = (maxX - minX) || 1;
+        const px = (s) => PADL + ((s - minX) / spanX) * (W - PADL - 8);
+        const py = (p) => PADT + (1 - Math.max(0, Math.min(1, p))) * (H - PADT - PADB);
+        const mkPts = arr.map((c) => [px(c.strike), py(c.market)]);
+        const mdPts = arr.map((c) => [px(c.strike), py(c.model)]);
+        const band = mkPts.map((p) => p.join(",")).concat(mdPts.slice().reverse().map((p) => p.join(","))).join(" ");
+        const line = (pts) => pts.map((p) => p.join(",")).join(" ");
+        const avgEdge = arr.reduce((a, c) => a + (c.model - c.market), 0) / arr.length * 100;
+        return (
+          <div key={name} style={{ marginBottom: 10 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8, marginBottom: 3 }}>
+              <span style={{ fontSize: 11, color: "var(--text-1)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{name}</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, color: avgEdge >= 0 ? "var(--pos)" : "var(--neg)" }}>
+                {avgEdge >= 0 ? "+" : ""}{avgEdge.toFixed(1)} avg
+              </span>
+            </div>
+            <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block" }} aria-label={name + " term structure"}>
+              {[0, 0.5, 1].map((t) => (
+                <g key={t}>
+                  <line x1={PADL} x2={W - 8} y1={py(t)} y2={py(t)} stroke="var(--border-dim)" strokeWidth="1" />
+                  <text x={2} y={py(t) + 3} fill="var(--text-2)" style={{ fontSize: 8, fontFamily: "var(--font-mono)" }}>{Math.round(t * 100)}%</text>
+                </g>
+              ))}
+              <polygon points={band} fill={avgEdge >= 0 ? "var(--pos)" : "var(--neg)"} opacity="0.16" />
+              <polyline points={line(mdPts)} fill="none" stroke="var(--special)" strokeWidth="1.6" strokeDasharray="4,3" />
+              <polyline points={line(mkPts)} fill="none" stroke="var(--accent)" strokeWidth="1.8" />
+              {arr.map((c, i) => (
+                <g key={c.id}>
+                  <circle cx={mkPts[i][0]} cy={mkPts[i][1]} r="2.6" fill="var(--accent)" />
+                  <text x={mkPts[i][0]} y={H - 4} textAnchor="middle" fill="var(--text-2)" style={{ fontSize: 8, fontFamily: "var(--font-mono)" }}>{c.strike}</text>
+                </g>
+              ))}
+            </svg>
+          </div>
+        );
+      })}
+      <div style={{ display: "flex", gap: 12, fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", flexWrap: "wrap" }}>
+        <span><b style={{ color: "var(--accent)" }}>—</b> market</span>
+        <span><b style={{ color: "var(--special)" }}>- -</b> HURDAT2 climatology</span>
+        <span>x-axis = strike (count above)</span>
+      </div>
+    </P>
+  );
+}
+
+/* ---- Prediction Markets board ---- */
+// Price trend from the REAL committed history (nulls = not yet listed, skipped).
+function MT_spark(vals, w, h, color) {
+  const pts0 = (vals || []).map((v, i) => [i, v]).filter(([, v]) => v != null);
+  if (pts0.length < 2) return null;
+  const n = vals.length - 1 || 1;
+  const ys = pts0.map(([, v]) => v);
+  let mn = Math.min(...ys), mx = Math.max(...ys);
+  if (mx - mn < 0.02) { const mid = (mx + mn) / 2; mn = mid - 0.01; mx = mid + 0.01; } // flat-line guard
+  const r = mx - mn;
+  const P = pts0.map(([i, v]) => [((i / n) * w), (h - ((v - mn) / r) * h)]);
+  const area = `${P[0][0].toFixed(1)},${h} ` + P.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ") + ` ${P[P.length - 1][0].toFixed(1)},${h}`;
+  const last = P[P.length - 1];
+  return (
+    <svg width={w} height={h} style={{ display: "block", marginLeft: "auto", overflow: "visible" }} aria-hidden="true">
+      <polygon points={area} fill={color} opacity="0.14" />
+      <polyline points={P.map((p) => p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ")}
+        fill="none" stroke={color} strokeWidth="1.3" strokeLinejoin="round" strokeLinecap="round" />
+      <circle cx={last[0]} cy={last[1]} r="1.7" fill={color} />
     </svg>
   );
 }
@@ -161,7 +251,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
     const prev = MTX.mkt(c, Math.max(0, frame - 3));
     const edge = (model != null && px != null) ? (model - px) * 100 : null;
     const d = (px != null && prev != null) ? (px - prev) * 100 : 0;
-    return { c, px, model, edge, d, hist: MTX.priceHist(c, frame, 12) };
+    return { c, px, model, edge, d, hist: (c.histSeries && c.histSeries.length ? c.histSeries : MTX.priceHist(c, frame, 12)) };
   });
   const mktSource = (MT._feeds && MT._feeds.markets && MT._feeds.markets.source) || "market";
   const tvol = rows.reduce((a, r) => a + r.c.volume, 0);
@@ -193,7 +283,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
                     title={c.modelBasis ? "Climatology baseline — " + c.modelBasis : "No fair-value anchor for this contract"}>{model != null ? Math.round(model * 100) + "%" : "—"}</td>
                 <td style={{ ...cell, fontWeight: 800, ...eStyle }}>{edge == null ? "—" : (edge >= 0 ? "+" : "") + edge.toFixed(1)}</td>
                 <td style={{ ...cell, color: "var(--text-2)", fontSize: 10 }}>{fmtVol(c.volume)}</td>
-                <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{MT_spark(hist, 52, 15, edge > 0 ? "var(--pos)" : "var(--neg)")}</td>
+                <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{MT_spark(hist, 64, 18, edge == null ? "var(--accent)" : edge > 0 ? "var(--pos)" : "var(--neg)")}</td>
               </tr>
             );
           })}</tbody>
@@ -300,4 +390,4 @@ function MT_Observability({ narrow }) {
   );
 }
 
-Object.assign(window, { MT_Evidence, MT_Confidence, MT_Probability, MT_EdgeMatrix, MT_Markets, MT_OrderBook, MT_Ledger, MT_Observability });
+Object.assign(window, { MT_Evidence, MT_Confidence, MT_Probability, MT_EdgeMatrix, MT_Markets, MT_OrderBook, MT_Ledger, MT_Observability, MT_YieldCurve });
