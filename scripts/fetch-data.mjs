@@ -168,6 +168,9 @@ function climatologyAnchor(title, strike, clim, ticker) {
   if (!clim || strike == null) return null;
   const t = (String(title) + " " + String(ticker || "")).toLowerCase();
   if (!/hurricane/.test(t)) return null;
+  // The climatology counts HURRICANES. A named-storm/tropical-storm count contract has a
+  // different (much higher) base rate, so never anchor one with hurricane frequencies.
+  if (/named storm|tropical storm/.test(t)) return null;
   // Basin must be explicit — climatology is Atlantic-only, so never anchor a Pacific contract.
   if (!/atlantic/.test(t) && !/\bkxatl/.test(t)) return null;
   // Count-style phrasings: "how many …", "will there be more than N …", "at least N".
@@ -465,7 +468,12 @@ async function fetchKalshi(storms, clim) {
     });
   }
   // Highest-signal first: anchored contracts, then by volume.
-  contracts.sort((a, b) => (b.model != null) - (a.model != null) || (b.volume || 0) - (a.volume || 0));
+  // Anchored first, then real activity, then low strikes — the deep out-of-the-money
+  // rungs (">30 hurricanes") are near-worthless and shouldn't crowd out the live ones.
+  contracts.sort((a, b) => (b.model != null) - (a.model != null)
+    || (b.volume || 0) - (a.volume || 0)
+    || (b.liquidity || 0) - (a.liquidity || 0)
+    || (a.strike ?? 999) - (b.strike ?? 999));
   const anchored = contracts.filter((c) => c.model != null).length;
   return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts: contracts.slice(0, 40), diag: paged.tried,
            drops, samples, raw: paged.raw || null,
