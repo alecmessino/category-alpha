@@ -120,6 +120,93 @@
     return p(d.getUTCHours()) + ":" + p(d.getUTCMinutes()) + "Z";
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor };
+  /* ---------------- Signal Engine ----------------
+     Most refresh cycles change nothing — NHC advises 3-hourly while we poll every
+     15 min, so the majority of frames are byte-identical. This walks the committed
+     history and emits ONLY genuine state changes, scored by magnitude, so the
+     operator reads "what changed" instead of re-reading unchanged feeds.
+
+     Market moves carry a co-movement list: observations recorded in the preceding
+     window. That is TEMPORAL ASSOCIATION, deliberately not causal attribution —
+     decomposing a price move into weighted causes would need a fitted structural
+     model or sub-minute event-study data, neither of which exists here. Inventing
+     those weights would be fabricated precision, so the UI says "alongside", never
+     "because of". */
+  const NOISE = { wind: 5, pressure: 2, market: 0.02 };   // below this = not a signal
+  const SCALE = { wind: 30, pressure: 20, market: 0.15 }; // |Δ| that counts as maximal
+
+  function signals(opts) {
+    const o = opts || {};
+    const windowMin = o.windowMin || 180;                 // co-movement lookback
+    const frames = MT._frames || [];
+    if (frames.length < 2) return [];
+    const out = [];
+    const tOf = (fr) => Date.parse(fr.tsZ) || 0;
+
+    for (let i = 1; i < frames.length; i++) {
+      const a = frames[i - 1], b = frames[i], ts = b.tsZ;
+      // ---- storm state ----
+      Object.keys(b.storms || {}).forEach((sid) => {
+        const pv = (a.storms || {})[sid], cv = (b.storms || {})[sid];
+        if (!pv || !cv) return;
+        const S = MT.storms[sid];
+        const nm = (S && S.name) || sid;
+        const dW = (cv.wind != null && pv.wind != null) ? cv.wind - pv.wind : 0;
+        if (Math.abs(dW) >= NOISE.wind) out.push({
+          tsZ: ts, kind: "intensity", subject: nm, stormId: sid,
+          delta: dW, unit: "kt", from: pv.wind, to: cv.wind,
+          magnitude: Math.min(1, Math.abs(dW) / SCALE.wind),
+          label: `${nm} intensity ${dW > 0 ? "+" : ""}${dW} kt`, detail: `${pv.wind} → ${cv.wind} kt`,
+        });
+        const dP = (cv.pressure != null && pv.pressure != null) ? cv.pressure - pv.pressure : 0;
+        if (Math.abs(dP) >= NOISE.pressure) out.push({
+          tsZ: ts, kind: "pressure", subject: nm, stormId: sid,
+          delta: dP, unit: "mb", from: pv.pressure, to: cv.pressure,
+          magnitude: Math.min(1, Math.abs(dP) / SCALE.pressure),
+          // falling pressure = strengthening, so invert the "good/bad" sense downstream
+          label: `${nm} pressure ${dP > 0 ? "+" : ""}${dP} mb`, detail: `${pv.pressure} → ${cv.pressure} mb`,
+          inverted: true,
+        });
+      });
+      // ---- market prices ----
+      Object.keys(b.contracts || {}).forEach((cid) => {
+        const pv = (a.contracts || {})[cid], cv = (b.contracts || {})[cid];
+        if (!pv || !cv || pv.market == null || cv.market == null) return;
+        const d = cv.market - pv.market;
+        if (Math.abs(d) < NOISE.market) return;
+        const C = (MT.contracts || []).find((x) => x.id === cid);
+        out.push({
+          tsZ: ts, kind: "market", subject: (C && C.short) || cid, contractId: cid,
+          stormId: C && C.storm, delta: d * 100, unit: "¢",
+          from: Math.round(pv.market * 100), to: Math.round(cv.market * 100),
+          magnitude: Math.min(1, Math.abs(d) / SCALE.market),
+          label: `${(C && C.short) || cid} ${d > 0 ? "+" : ""}${(d * 100).toFixed(1)}¢`,
+          detail: `${Math.round(pv.market * 100)}¢ → ${Math.round(cv.market * 100)}¢`,
+        });
+      });
+    }
+
+    // ---- advisories (from the real event ledger) ----
+    (MT.events || []).forEach((e) => {
+      const fr = frames[Math.max(0, Math.min(frames.length - 1, e.frame))];
+      out.push({ tsZ: fr ? fr.tsZ : null, kind: "advisory", subject: e.source || "NHC",
+        magnitude: e.hot ? 0.9 : 0.6, label: e.label, detail: "tier " + (e.tier || "A") });
+    });
+
+    out.sort((x, y) => (Date.parse(y.tsZ) || 0) - (Date.parse(x.tsZ) || 0));
+
+    // Co-movement: what else was recorded in the window before each market move.
+    out.forEach((s) => {
+      if (s.kind !== "market") return;
+      const t = Date.parse(s.tsZ) || 0;
+      s.alongside = out.filter((o) => o.kind !== "market" && o.tsZ &&
+        (s.stormId ? o.stormId === s.stormId || o.kind === "advisory" : true) &&
+        Date.parse(o.tsZ) <= t && Date.parse(o.tsZ) >= t - windowMin * 60000)
+        .slice(0, 3);
+    });
+    return out;
+  }
+
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals };
 })();
 })();

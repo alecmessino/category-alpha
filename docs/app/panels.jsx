@@ -318,10 +318,25 @@ function MT_OrderBook({ contractId, frame, dense }) {
   const ob = c ? MTX.orderBookFor(c, frame) : { noFeed: true };
   if (ob.noFeed) {
     return (
-      <P pad={false} title="Order Book & Liquidity" right={<BG tone="neg">NO FEED</BG>}
-        footer={<PF source="depth not available" latency="—" version="—" tier="C" />}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", lineHeight: 1.6, padding: "16px 12px" }}>
-          {c ? <>Live depth is available only for Kalshi contracts. <b style={{ color: "var(--text-1)" }}>{c.short}</b>{ob.mid != null ? " · mid " + Math.round(ob.mid * 100) + "¢" : ""} has no order-book feed wired — shown as NO FEED rather than a synthesized book.</> : "No contract selected — no order book to display."}
+      <P pad={false} title="Order Book & Liquidity" right={<BG tone="warn">UNAVAILABLE</BG>}
+        footer={<PF source="exchange returned no depth" latency="—" version="—" tier="C" />}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", lineHeight: 1.75, padding: "14px 12px" }}>
+          <div style={{ color: "var(--text-1)", fontWeight: 700, letterSpacing: ".5px" }}>KELLY SIZING — UNAVAILABLE</div>
+          <div style={{ marginTop: 8 }}>Reason:</div>
+          <div style={{ paddingLeft: 10, color: "var(--text-1)" }}>
+            {c ? <>Exchange returned no order-book depth for <b>{c.short}</b>{ob.mid != null ? " (mid " + Math.round(ob.mid * 100) + "¢)" : ""}.</> : "No contract selected."}
+          </div>
+          <div style={{ marginTop: 8 }}>Required to size a position:</div>
+          <div style={{ paddingLeft: 10 }}>
+            <div>· bid <span style={{ color: "var(--neg)" }}>missing</span></div>
+            <div>· ask <span style={{ color: "var(--neg)" }}>missing</span></div>
+            <div>· executable size <span style={{ color: "var(--neg)" }}>missing</span></div>
+          </div>
+          <div style={{ marginTop: 8 }}>Status: <span style={{ color: "var(--warn)" }}>awaiting liquidity feed</span></div>
+          <div style={{ marginTop: 8, opacity: .8 }}>
+            Allocation stays uncapped rather than sized against a synthesized book — a liquidity
+            cap invented from volume would understate real slippage.
+          </div>
         </div>
       </P>
     );
@@ -350,6 +365,82 @@ function MT_OrderBook({ contractId, frame, dense }) {
       <div style={{ padding: "8px 11px", fontSize: 10.5, color: "var(--text-2)", lineHeight: 1.5, borderTop: "1px solid var(--border-dim)" }}>
         Cumulative depth beyond <b style={{ color: "var(--warn)" }}>${ob.liquidityCap.toLocaleString()}</b> exceeds the {ob.slippageBudget} slippage budget — the red threshold marks where liquidity caps the Kelly allocation.
       </div>
+    </P>
+  );
+}
+
+/* ---- Signal Engine — what changed, and what it moved alongside ---- */
+const SIG_META = {
+  intensity: { icon: "◈", label: "INTENSITY" },
+  pressure: { icon: "▼", label: "PRESSURE" },
+  market: { icon: "◧", label: "MARKET" },
+  advisory: { icon: "✦", label: "ADVISORY" },
+};
+function MT_Signals({ stormId, dense, onSeek }) {
+  const [scope, setScope] = React.useState("all");
+  const all = (MTX.signals ? MTX.signals({ windowMin: 180 }) : []);
+  const sigs = all.filter((s) => scope === "all" || (scope === "storm" ? s.stormId === stormId || s.kind === "advisory" : s.kind === "market"));
+  const shown = sigs.slice(0, dense ? 10 : 14);
+  const tone = (s) => {
+    if (s.kind === "advisory") return "var(--accent)";
+    const up = s.inverted ? s.delta < 0 : s.delta > 0;
+    return up ? "var(--pos)" : "var(--neg)";
+  };
+  const btn = (id, txt) => (
+    <span onClick={() => setScope(id)} style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 9,
+      fontWeight: 700, letterSpacing: ".4px", padding: "2px 7px", borderRadius: 5,
+      border: "1px solid " + (scope === id ? "var(--accent)" : "var(--border-dim)"),
+      color: scope === id ? "var(--accent)" : "var(--text-2)" }}>{txt}</span>
+  );
+  return (
+    <P pad={false} title="Signal Engine — what changed"
+      right={<div style={{ display: "flex", gap: 4 }}>{btn("all", "ALL")}{btn("storm", "STORM")}{btn("market", "MKT")}</div>}
+      footer={<PF source="frame-diff over committed history" latency="live" version="—" tier="A" />}>
+      {!shown.length && (
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", padding: "14px 12px", lineHeight: 1.6 }}>
+          [ NO STATE CHANGE ]<br />Every feed re-read identical values across the retained window. Nothing to report — which is itself the signal.
+        </div>
+      )}
+      {shown.map((s, i) => {
+        const m = SIG_META[s.kind] || { icon: "•", label: s.kind.toUpperCase() };
+        const c = tone(s);
+        return (
+          <div key={i} onClick={() => onSeek && onSeek(s.tsZ)} style={{ display: "flex", gap: 9, alignItems: "flex-start",
+            padding: dense ? "6px 11px" : "8px 12px", borderBottom: "1px solid var(--border-dim)", cursor: onSeek ? "pointer" : "default" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", minWidth: 42, paddingTop: 2 }}>
+              {String(s.tsZ || "").slice(11, 16)}Z
+            </span>
+            <span style={{ color: c, fontSize: 12, lineHeight: 1.2, paddingTop: 1 }}>{m.icon}</span>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{ fontSize: dense ? 11 : 11.5, color: "var(--text-1)", lineHeight: 1.35 }}>{s.label}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
+                <div style={{ position: "relative", height: 3, flex: 1, maxWidth: 90, borderRadius: 2, background: "var(--border-dim)" }}>
+                  <div style={{ position: "absolute", inset: 0, width: Math.round(s.magnitude * 100) + "%", background: c, borderRadius: 2 }} />
+                </div>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)" }}>{m.label}{s.detail ? " · " + s.detail : ""}</span>
+              </div>
+              {s.alongside && s.alongside.length > 0 && (
+                <div style={{ marginTop: 4, paddingLeft: 8, borderLeft: "2px solid var(--border-dim)" }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", letterSpacing: ".3px" }}>
+                    ALONGSIDE (same 3h window · association, not cause)
+                  </div>
+                  {s.alongside.map((o, j) => (
+                    <div key={j} style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", lineHeight: 1.4 }}>
+                      · {String(o.tsZ || "").slice(11, 16)}Z {o.label}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+      {shown.length > 0 && (
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", padding: "7px 11px", lineHeight: 1.5 }}>
+          {sigs.length} change{sigs.length === 1 ? "" : "s"} detected · thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢.
+          Co-movement is temporal only — no causal weights are computed, because the data can't support them.
+        </div>
+      )}
     </P>
   );
 }
@@ -402,4 +493,4 @@ function MT_Observability({ narrow }) {
   );
 }
 
-Object.assign(window, { MT_Evidence, MT_Confidence, MT_Probability, MT_EdgeMatrix, MT_Markets, MT_OrderBook, MT_Ledger, MT_Observability, MT_YieldCurve });
+Object.assign(window, { MT_Evidence, MT_Confidence, MT_Probability, MT_EdgeMatrix, MT_Markets, MT_OrderBook, MT_Ledger, MT_Observability, MT_YieldCurve, MT_Signals });

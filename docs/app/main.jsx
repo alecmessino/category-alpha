@@ -296,6 +296,10 @@ function MillibarTerminalApp() {
             <window.MT_OrderBook contractId={sel.contract} frame={frame} dense={dense} />
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+            <window.MT_Signals stormId={storm} dense={dense} onSeek={(tsZ) => {
+              const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ);
+              if (i >= 0) { setPlaying(false); setFrame(i); }
+            }} />
             <window.MT_Ledger frame={frame} onSeek={(f) => { setPlaying(false); setFrame(f); }} dense={dense} />
             <window.MT_Observability narrow={narrow} />
           </div>
