@@ -201,7 +201,42 @@ const KALSHI_HOSTS = [
   "https://trading-api.kalshi.com/trade-api/v2",
 ];
 
-// Preferred path: page Kalshi EVENTS with nested markets. There are >15k open
+// Best path: discover the WEATHER SERIES by category, then pull only those events.
+// Kalshi carries >5k open events / >15k open markets, so brute-force paging blows
+// past any sane page cap and misses the hurricane series entirely. Series discovery
+// is a couple of cheap calls and lands directly on the right contracts.
+const KALSHI_WEATHER_CATEGORIES = ["Climate and Weather", "Weather", "Climate", "Science and Technology"];
+
+async function fetchKalshiWeatherSeries() {
+  const tried = [];
+  for (const host of KALSHI_HOSTS) {
+    for (const cat of KALSHI_WEATHER_CATEGORIES) {
+      const r = await getJSON(`${host}/series?category=${encodeURIComponent(cat)}`);
+      const list = (r.json && (r.json.series || r.json.data)) || [];
+      tried.push({ host, mode: "series", category: cat, status: r.status, scanned: list.length, error: r.ok ? null : r.error });
+      if (!r.ok || !list.length) continue;
+      const hits = list.filter((s) => {
+        const hay = `${s.title || ""} ${s.ticker || ""} ${s.sub_title || ""}`;
+        return HUR_RE.test(hay) && !NOT_WEATHER_RE.test(hay);
+      });
+      if (hits.length) return { ok: true, host, series: hits, category: cat, status: r.status, tried };
+    }
+  }
+  return { ok: false, series: [], tried };
+}
+
+async function fetchKalshiEventsForSeries(host, series) {
+  const events = [];
+  for (const s of series.slice(0, 25)) {
+    const t = s.ticker || s.series_ticker;
+    if (!t) continue;
+    const r = await getJSON(`${host}/events?series_ticker=${encodeURIComponent(t)}&with_nested_markets=true&status=open&limit=200`);
+    if (r.ok && r.json && Array.isArray(r.json.events)) events.push(...r.json.events);
+  }
+  return events;
+}
+
+// Fallback path: page Kalshi EVENTS with nested markets. There are >15k open
 // markets (paging them all blew past the page cap and missed the hurricane series),
 // but far fewer events — and an event carries the question title we need for
 // strike/climatology matching, with its markets nested inside.
@@ -262,7 +297,21 @@ function horizonOf(title) {
 
 // Flatten either shape into {market, title} pairs, where title is the human question.
 async function collectKalshiMarkets() {
+  // 1) targeted: weather series → their events (cheap, lands on the hurricane board)
+  const ser = await fetchKalshiWeatherSeries();
+  if (ser.ok) {
+    const evs = await fetchKalshiEventsForSeries(ser.host, ser.series);
+    const out = [];
+    for (const e of evs) {
+      const title = e.title || e.sub_title || e.event_ticker || "";
+      for (const m of (e.markets || [])) out.push({ m, title, eventTicker: e.event_ticker });
+    }
+    if (out.length) return { ok: true, status: ser.status, pairs: out, pages: ser.series.length,
+      scanned: out.length, mode: `series(${ser.category}·${ser.series.length})`, tried: ser.tried };
+  }
+  // 2) broad event scan
   const ev = await fetchKalshiEvents();
+  ev.tried = [...(ser.tried || []), ...(ev.tried || [])];
   if (ev.ok) {
     const out = [];
     for (const e of ev.events) {
