@@ -219,6 +219,13 @@ async function fetchForecastFor(storm, rawAdvisoryUrl) {
  */
 const CLIM_FROM_YEAR = Number(process.env.MT_CLIM_FROM || 1991); // modern geostationary-satellite era
 
+function doyOf(yyyymmdd) {
+  const s = String(yyyymmdd).trim();
+  const y = Number(s.slice(0, 4)), m = Number(s.slice(4, 6)), d = Number(s.slice(6, 8));
+  if (!y || !m || !d) return null;
+  return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000);
+}
+
 function parseHurdat2(text, fromYear, excludeYear) {
   const byYear = new Map();
   let curId = null, curYear = null;
@@ -228,7 +235,7 @@ function parseHurdat2(text, fromYear, excludeYear) {
     const head = /^AL\d{2}(\d{4})$/.exec((f[0] || "").trim());
     if (head && f.length <= 4) {
       curId = f[0].trim(); curYear = Number(head[1]);
-      if (!byYear.has(curYear)) byYear.set(curYear, { hur: new Set(), maj: new Set() });
+      if (!byYear.has(curYear)) byYear.set(curYear, { hur: new Map(), maj: new Map() });
       continue;
     }
     if (!curId || curYear == null) continue;
@@ -236,16 +243,24 @@ function parseHurdat2(text, fromYear, excludeYear) {
     const wind = Number((f[6] || "").trim());
     if (status === "HU") {                       // hurricane-strength best-track point
       const y = byYear.get(curYear);
-      y.hur.add(curId);
-      if (Number.isFinite(wind) && wind >= 96) y.maj.add(curId); // Cat 3+ = major
+      // Record the day-of-year each storm FIRST reached each threshold, so the
+      // climatology can be conditioned on how much of the season remains.
+      const doy = doyOf(f[0]);
+      if (!y.hur.has(curId)) y.hur.set(curId, doy);
+      if (Number.isFinite(wind) && wind >= 96 && !y.maj.has(curId)) y.maj.set(curId, doy); // Cat 3+
     }
   }
   const years = [...byYear.keys()].filter((y) => y >= fromYear && y !== excludeYear).sort((a, b) => a - b);
   if (!years.length) return null;
+  const after = (map, doy) => [...map.values()].filter((d) => d != null && d >= doy).length;
   return {
     years, from: years[0], to: years[years.length - 1],
     hurricanes: years.map((y) => byYear.get(y).hur.size),
     major: years.map((y) => byYear.get(y).maj.size),
+    // Seasonal formation dates retained so we can ask: in each past season, how many
+    // hurricanes had NOT yet formed by this calendar date?
+    hurricanesAfter: (doy) => years.map((y) => after(byYear.get(y).hur, doy)),
+    majorAfter: (doy) => years.map((y) => after(byYear.get(y).maj, doy)),
   };
 }
 
@@ -271,6 +286,52 @@ async function fetchClimatology() {
 }
 
 // Empirical P(count > strike) for Atlantic seasonal hurricane-count contracts.
+/* Progressive conditional posterior.
+   L0 unconditional base rate  →  L1 conditioned on how much season remains.
+   L1 is the layer that matters most right now: an unconditional July estimate
+   silently assumes a full season ahead. Each layer is computed only where real
+   data supports it; anything else is reported as an unavailable layer rather
+   than folded in silently. */
+function posteriorFor(major, strike, clim, seasonToDate) {
+  if (!clim || strike == null) return null;
+  const counts = major ? clim.major : clim.hurricanes;
+  const n = counts.length;
+  const layers = [];
+
+  // L0 — unconditional seasonal frequency
+  const p0 = counts.filter((c) => c > strike).length / n;
+  layers.push({ id: "base", label: "Historical climatology", p: p0,
+    basis: `${clim.from}–${clim.to} full seasons (n=${n})` });
+
+  // L1 — condition on day-of-year: only count storms that had NOT yet formed by today
+  const doy = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86400000);
+  const remainFn = major ? clim.majorAfter : clim.hurricanesAfter;
+  let p1 = null;
+  if (typeof remainFn === "function") {
+    const remaining = remainFn(doy);
+    const need = strike - (seasonToDate == null ? 0 : seasonToDate);
+    p1 = remaining.filter((r) => r > need).length / n;
+    layers.push({ id: "doy", label: "Day-of-year conditional", p: p1,
+      basis: `hurricanes forming on/after day ${doy} in each past season; needs >${need} more` });
+  }
+
+  // L2 — season-to-date. Requires the current year's count, which HURDAT2 does not
+  // publish until after the season. Declared, not guessed.
+  layers.push(seasonToDate == null
+    ? { id: "std", label: "Season-to-date state", p: null, unavailable: true,
+        basis: "no in-season Atlantic count feed wired — L1 assumes 0 so far" }
+    : { id: "std", label: "Season-to-date state", p: p1, basis: `${seasonToDate} already recorded in ${now.getUTCFullYear()}` });
+
+  // L3 — ENSO stratification: needs an ONI feed + phase-matched seasons.
+  layers.push({ id: "enso", label: "ENSO-stratified", p: null, unavailable: true,
+    basis: "CPC ONI feed not wired — no phase stratification applied" });
+
+  const posterior = p1 != null ? p1 : p0;
+  return { p: posterior, layers, doy,
+    basis: layers.filter((l) => !l.unavailable).map((l) => l.label).join(" → ") };
+}
+
 function climatologyAnchor(title, strike, clim, ticker) {
   if (!clim || strike == null) return null;
   const t = (String(title) + " " + String(ticker || "")).toLowerCase();
@@ -287,9 +348,14 @@ function climatologyAnchor(title, strike, clim, ticker) {
   const counts = major ? clim.major : clim.hurricanes;
   if (!counts || !counts.length) return null;
   const hits = counts.filter((c) => c > strike).length;
+  const post = posteriorFor(major, strike, clim, null);
   return {
-    p: hits / counts.length,
-    basis: `${clim.from}–${clim.to} ${major ? "major " : ""}Atlantic hurricane seasons (n=${counts.length}); ${hits} exceeded ${strike}`,
+    p: post ? post.p : hits / counts.length,
+    unconditional: hits / counts.length,
+    layers: post ? post.layers : null,
+    basis: post
+      ? `${post.basis} · ${clim.from}–${clim.to} ${major ? "major " : ""}seasons (n=${counts.length}), day ${post.doy}`
+      : `${clim.from}–${clim.to} ${major ? "major " : ""}Atlantic hurricane seasons (n=${counts.length}); ${hits} exceeded ${strike}`,
   };
 }
 
@@ -578,6 +644,8 @@ async function fetchKalshi(storms, clim) {
       model: anchor ? anchor.p : null,
       modelSource: anchor ? "HURDAT2 climatology" : null,
       modelBasis: anchor ? anchor.basis : null,
+      modelUncond: anchor ? anchor.unconditional : null,
+      modelLayers: anchor ? anchor.layers : null,
       horizon: horizonOf(title), strike,
       liquidity, spread, volume, proxy: false, source: "kalshi",
       url: "https://kalshi.com/markets/" + (pair.eventTicker || m.event_ticker || m.ticker),

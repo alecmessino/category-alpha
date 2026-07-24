@@ -225,9 +225,37 @@ function MT_YieldCurve({ dense }) {
       })}
       <div style={{ display: "flex", gap: 12, fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", flexWrap: "wrap" }}>
         <span><b style={{ color: "var(--accent)" }}>—</b> market</span>
-        <span><b style={{ color: "var(--special)" }}>- -</b> HURDAT2 climatology</span>
+        <span><b style={{ color: "var(--special)" }}>- -</b> conditional posterior</span>
         <span>x-axis = strike (count above)</span>
       </div>
+      {/* Posterior layer stack — each conditioning step, and what isn't wired */}
+      {(() => {
+        const withLayers = series.map(([, arr]) => arr.find((c) => c.modelLayers))[0];
+        const layers = withLayers && withLayers.modelLayers;
+        if (!layers) return null;
+        return (
+          <div style={{ marginTop: 9, paddingTop: 8, borderTop: "1px solid var(--border-dim)" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 700, letterSpacing: ".5px", color: "var(--text-2)", marginBottom: 5 }}>
+              POSTERIOR STACK <span style={{ opacity: .7 }}>(strike &gt;{withLayers.strike})</span>
+            </div>
+            {layers.map((l, i) => (
+              <div key={l.id} style={{ display: "flex", alignItems: "baseline", gap: 7, fontFamily: "var(--font-mono)", fontSize: 9.5, lineHeight: 1.65 }}>
+                <span style={{ color: "var(--text-2)", minWidth: 12 }}>{i === 0 ? "" : "↓"}</span>
+                <span style={{ color: l.unavailable ? "var(--text-2)" : "var(--text-1)", minWidth: 148,
+                  textDecoration: l.unavailable ? "line-through" : "none" }}>{l.label}</span>
+                {l.unavailable
+                  ? <span style={{ color: "var(--neg)", fontWeight: 700, fontSize: 8.5 }}>NO FEED</span>
+                  : <span style={{ color: "var(--special)", fontWeight: 700 }}>{Math.round(l.p * 100)}%</span>}
+              </div>
+            ))}
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", marginTop: 5, lineHeight: 1.5, opacity: .85 }}>
+              Unwired layers are declared, never folded in silently. Day-of-year conditioning currently
+              assumes zero Atlantic hurricanes so far this season — that assumption becomes a real input
+              once an in-season count feed is wired.
+            </div>
+          </div>
+        );
+      })()}
     </P>
   );
 }
