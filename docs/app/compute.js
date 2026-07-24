@@ -135,6 +135,42 @@
   const NOISE = { wind: 5, pressure: 2, market: 0.02 };   // below this = not a signal
   const SCALE = { wind: 30, pressure: 20, market: 0.15 }; // |Δ| that counts as maximal
 
+  /* Operational classification — what deserves an operator's attention.
+     TRADE-RELEVANT is reserved for changes that can actually move a position:
+     a Saffir-Simpson boundary crossing (category contracts resolve on exactly
+     these), RI-scale intensification, or a price move large enough to reprice
+     risk. Everything else degrades to MATERIAL or COSMETIC. */
+  const SS_BOUNDS = [34, 64, 83, 96, 113, 137];           // TS, C1..C5 thresholds (kt)
+  function crossedCategory(from, to) {
+    if (from == null || to == null) return null;
+    const lo = Math.min(from, to), hi = Math.max(from, to);
+    const b = SS_BOUNDS.find((x) => lo < x && hi >= x);
+    return b == null ? null : b;
+  }
+  function classify(sig) {
+    if (sig.kind === "advisory") return sig.magnitude >= 0.85 ? "trade-relevant" : "material";
+    const a = Math.abs(sig.delta || 0);
+    if (sig.kind === "market") return a >= 5 ? "trade-relevant" : a >= 2 ? "material" : "cosmetic";
+    if (sig.kind === "intensity") {
+      if (sig.crossed != null || a >= 20) return "trade-relevant";
+      return a >= 10 ? "material" : "cosmetic";
+    }
+    if (sig.kind === "pressure") return a >= 5 ? "material" : "cosmetic";
+    return "cosmetic";
+  }
+  // Confidence in the OBSERVATION, separate from magnitude. NHC products are
+  // authoritative; a market print on a book with no depth is weaker evidence.
+  function confidenceOf(sig) {
+    if (sig.kind === "advisory") return 0.95;
+    if (sig.kind === "intensity" || sig.kind === "pressure") return 0.9; // NHC best-track
+    if (sig.kind === "market") {
+      const C = (MT.contracts || []).find((x) => x.id === sig.contractId);
+      return C && C.liquidity ? 0.8 : 0.6;   // no resting depth → thinner evidence
+    }
+    return 0.5;
+  }
+  const CLASS_RANK = { "trade-relevant": 3, material: 2, cosmetic: 1 };
+
   function signals(opts) {
     const o = opts || {};
     const windowMin = o.windowMin || 180;                 // co-movement lookback
@@ -195,18 +231,77 @@
 
     out.sort((x, y) => (Date.parse(y.tsZ) || 0) - (Date.parse(x.tsZ) || 0));
 
+    /* ---- Register metadata: give the terminal memory ----
+       Each change becomes a durable object rather than a line in a feed, so the
+       question "what has changed in the last 6 hours" is answerable, not just
+       "what changed on this render". */
+    const seenByTrack = new Map();   // track key -> most recent signal (walking newest→oldest)
+    out.forEach((s) => {
+      s.id = [s.kind, s.contractId || s.stormId || s.subject, s.tsZ].join("|");
+      s.source = s.kind === "advisory" ? "NHC"
+        : s.kind === "market" ? ((MT._feeds && MT._feeds.markets && MT._feeds.markets.source) || "market")
+        : "NHC CurrentStorms";
+      s.crossed = s.kind === "intensity" ? crossedCategory(s.from, s.to) : null;
+      s.class = classify(s);
+      s.confidence = confidenceOf(s);
+      s.ageMin = Math.max(0, Math.round((Date.now() - (Date.parse(s.tsZ) || 0)) / 60000));
+
+      const track = [s.kind, s.contractId || s.stormId || s.subject].join("|");
+      const newer = seenByTrack.get(track);
+      if (!newer) {
+        s.status = "active";           // most recent on this track
+        s.novelty = "new";
+        s.persistence = 1;
+        seenByTrack.set(track, s);
+      } else {
+        s.status = "superseded";       // a later observation on the same track exists
+        s.supersededBy = newer.id;
+        // Direction continuity, computed newest→oldest then read as oldest→newest.
+        const sameDir = (newer.delta || 0) * (s.delta || 0) > 0;
+        s.novelty = sameDir ? "continuation" : "reversal";
+        if (sameDir) newer.persistence = (newer.persistence || 1) + 1;
+      }
+    });
+    // Reversals matter more than their raw size suggests — a trend that flips is news.
+    out.forEach((s) => { if (s.novelty === "reversal" && s.class === "cosmetic") s.class = "material"; });
+
     // Co-movement: what else was recorded in the window before each market move.
+    // Temporal association only — no causal weights are derived from it.
     out.forEach((s) => {
       if (s.kind !== "market") return;
       const t = Date.parse(s.tsZ) || 0;
-      s.alongside = out.filter((o) => o.kind !== "market" && o.tsZ &&
-        (s.stormId ? o.stormId === s.stormId || o.kind === "advisory" : true) &&
-        Date.parse(o.tsZ) <= t && Date.parse(o.tsZ) >= t - windowMin * 60000)
+      s.alongside = out.filter((o2) => o2.kind !== "market" && o2.tsZ &&
+        (s.stormId ? (o2.stormId === s.stormId || o2.kind === "advisory") : true) &&
+        Date.parse(o2.tsZ) <= t && Date.parse(o2.tsZ) >= t - windowMin * 60000)
         .slice(0, 3);
     });
-    return out;
+    return finalize(out, o);
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals };
+  // Filtering / rollup shared by the panel.
+  function finalize(list, o) {
+    let res = list;
+    if (o.sinceMin) {
+      const cut = Date.now() - o.sinceMin * 60000;
+      res = res.filter((s) => (Date.parse(s.tsZ) || 0) >= cut);
+    }
+    if (o.minClass) res = res.filter((s) => CLASS_RANK[s.class] >= CLASS_RANK[o.minClass]);
+    if (o.activeOnly) res = res.filter((s) => s.status === "active");
+    return res;
+  }
+
+  // Rollup for the register header: what has changed over a window.
+  function signalSummary(sinceMin) {
+    const all = signals({ sinceMin: sinceMin || 360 });
+    const by = { "trade-relevant": 0, material: 0, cosmetic: 0 };
+    all.forEach((s) => { by[s.class] = (by[s.class] || 0) + 1; });
+    return {
+      windowMin: sinceMin || 360, total: all.length, byClass: by,
+      active: all.filter((s) => s.status === "active").length,
+      verdict: by["trade-relevant"] ? "TRADE-RELEVANT" : by.material ? "MATERIAL" : all.length ? "COSMETIC" : "NO CHANGE",
+    };
+  }
+
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary };
 })();
 })();

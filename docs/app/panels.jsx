@@ -376,9 +376,17 @@ const SIG_META = {
   market: { icon: "◧", label: "MARKET" },
   advisory: { icon: "✦", label: "ADVISORY" },
 };
+const CLASS_STYLE = {
+  "trade-relevant": { c: "var(--edge-glow)", t: "TRADE-RELEVANT" },
+  material: { c: "var(--warn)", t: "MATERIAL" },
+  cosmetic: { c: "var(--text-2)", t: "COSMETIC" },
+};
 function MT_Signals({ stormId, dense, onSeek }) {
   const [scope, setScope] = React.useState("all");
-  const all = (MTX.signals ? MTX.signals({ windowMin: 180 }) : []);
+  const [minClass, setMinClass] = React.useState("cosmetic");
+  const WINDOW = 360; // 6h — "what has changed today", not just this render
+  const summary = MTX.signalSummary ? MTX.signalSummary(WINDOW) : null;
+  const all = (MTX.signals ? MTX.signals({ windowMin: 180, sinceMin: WINDOW, minClass }) : []);
   const sigs = all.filter((s) => scope === "all" || (scope === "storm" ? s.stormId === stormId || s.kind === "advisory" : s.kind === "market"));
   const shown = sigs.slice(0, dense ? 10 : 14);
   const tone = (s) => {
@@ -393,12 +401,37 @@ function MT_Signals({ stormId, dense, onSeek }) {
       color: scope === id ? "var(--accent)" : "var(--text-2)" }}>{txt}</span>
   );
   return (
-    <P pad={false} title="Signal Engine — what changed"
+    <P pad={false} title="Signal Register"
       right={<div style={{ display: "flex", gap: 4 }}>{btn("all", "ALL")}{btn("storm", "STORM")}{btn("market", "MKT")}</div>}
-      footer={<PF source="frame-diff over committed history" latency="live" version="—" tier="A" />}>
+      footer={<PF source="frame-diff register over committed history" latency="live" version="—" tier="A" />}>
+      {/* Rollup verdict — answers "has anything mattered in the last 6h?" first */}
+      {summary && (
+        <div style={{ padding: "9px 12px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", letterSpacing: ".5px" }}>LAST 6H</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 800,
+              color: (CLASS_STYLE[summary.verdict.toLowerCase()] || {}).c || "var(--text-2)" }}>{summary.verdict}</span>
+            <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>
+              {summary.total} event{summary.total === 1 ? "" : "s"} · {summary.active} active
+            </span>
+          </div>
+          <div style={{ display: "flex", gap: 5, marginTop: 7, flexWrap: "wrap" }}>
+            {["cosmetic", "material", "trade-relevant"].map((k) => {
+              const st = CLASS_STYLE[k], on = minClass === k;
+              return (
+                <span key={k} onClick={() => setMinClass(k)} title={"Show " + st.t + " and above"} style={{
+                  cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, fontWeight: 700, letterSpacing: ".4px",
+                  padding: "3px 7px", borderRadius: 5, border: "1px solid " + (on ? st.c : "var(--border-dim)"),
+                  color: on ? st.c : "var(--text-2)", background: on ? `color-mix(in srgb, ${st.c} 12%, transparent)` : "transparent",
+                }}>{st.t} {summary.byClass[k] || 0}</span>
+              );
+            })}
+          </div>
+        </div>
+      )}
       {!shown.length && (
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", padding: "14px 12px", lineHeight: 1.6 }}>
-          [ NO STATE CHANGE ]<br />Every feed re-read identical values across the retained window. Nothing to report — which is itself the signal.
+          [ NO CHANGE ]<br />Every feed re-read identical values across this window at the selected threshold. Nothing to report — which is itself the signal.
         </div>
       )}
       {shown.map((s, i) => {
@@ -411,13 +444,27 @@ function MT_Signals({ stormId, dense, onSeek }) {
               {String(s.tsZ || "").slice(11, 16)}Z
             </span>
             <span style={{ color: c, fontSize: 12, lineHeight: 1.2, paddingTop: 1 }}>{m.icon}</span>
-            <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: dense ? 11 : 11.5, color: "var(--text-1)", lineHeight: 1.35 }}>{s.label}</div>
+            <div style={{ minWidth: 0, flex: 1, opacity: s.status === "superseded" ? 0.62 : 1 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" }}>
+                <span style={{ fontSize: dense ? 11 : 11.5, color: "var(--text-1)", lineHeight: 1.35 }}>{s.label}</span>
+                {s.crossed != null && (
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 8, fontWeight: 800, color: "var(--edge-glow)",
+                    border: "1px solid var(--edge-glow)", borderRadius: 4, padding: "1px 4px" }}>CROSSED {s.crossed}KT</span>
+                )}
+              </div>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3 }}>
                 <div style={{ position: "relative", height: 3, flex: 1, maxWidth: 90, borderRadius: 2, background: "var(--border-dim)" }}>
                   <div style={{ position: "absolute", inset: 0, width: Math.round(s.magnitude * 100) + "%", background: c, borderRadius: 2 }} />
                 </div>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)" }}>{m.label}{s.detail ? " · " + s.detail : ""}</span>
+              </div>
+              {/* Register metadata — the terminal's memory of this event */}
+              <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 3, fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)" }}>
+                <span style={{ color: (CLASS_STYLE[s.class] || {}).c, fontWeight: 700 }}>{(CLASS_STYLE[s.class] || {}).t}</span>
+                <span>conf {Math.round((s.confidence || 0) * 100)}%</span>
+                <span>{s.novelty}{s.persistence > 1 ? " ×" + s.persistence : ""}</span>
+                <span style={{ color: s.status === "active" ? "var(--pos)" : "var(--text-2)" }}>{s.status}</span>
+                <span>{s.source}</span>
               </div>
               {s.alongside && s.alongside.length > 0 && (
                 <div style={{ marginTop: 4, paddingLeft: 8, borderLeft: "2px solid var(--border-dim)" }}>
@@ -437,8 +484,9 @@ function MT_Signals({ stormId, dense, onSeek }) {
       })}
       {shown.length > 0 && (
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", padding: "7px 11px", lineHeight: 1.5 }}>
-          {sigs.length} change{sigs.length === 1 ? "" : "s"} detected · thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢.
-          Co-movement is temporal only — no causal weights are computed, because the data can't support them.
+          {sigs.length} shown · thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢. TRADE-RELEVANT = Saffir–Simpson
+          boundary crossing, ≥20 kt intensification, or ≥5¢ reprice. Co-movement is temporal only — no causal
+          weights are computed, because the data can't support them.
         </div>
       )}
     </P>
