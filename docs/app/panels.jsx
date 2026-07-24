@@ -203,6 +203,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
         <span>Click a market → order book + allocation.</span><span>Σ vol {fmtVol(tvol)}</span>
       </div>
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", padding: "0 10px 8px", lineHeight: 1.5, opacity: .85 }}>
+        Prices are Kalshi's exchange book — the same contracts surfaced in Coinbase Predictions (Kalshi-powered), so quotes here should track what you see there.<br />
         MODEL = empirical HURDAT2 season-count climatology, a <b style={{ color: "var(--warn)" }}>baseline</b> — it ignores ENSO, SSTs and season-to-date progress, which the market price already reflects. Treat EDGE as a reference spread, not alpha.
       </div>
     </P>
