@@ -236,6 +236,35 @@ async function fetchKalshiEventsForSeries(host, series) {
   return events;
 }
 
+// Markets nested inside /events carry ticker + sub-title but NO pricing fields, so
+// they must be hydrated from /markets before they're usable. Batch by ticker (one
+// call covers ~100), falling back to per-event queries.
+async function hydrateKalshiPrices(host, pairs) {
+  const byTicker = new Map();
+  const tickers = [...new Set(pairs.map((p) => p.m && p.m.ticker).filter(Boolean))];
+  for (let i = 0; i < tickers.length && i < 600; i += 100) {
+    const batch = tickers.slice(i, i + 100);
+    const r = await getJSON(`${host}/markets?tickers=${encodeURIComponent(batch.join(","))}&limit=200`);
+    const list = (r.json && r.json.markets) || [];
+    for (const m of list) if (m && m.ticker) byTicker.set(m.ticker, m);
+  }
+  if (!byTicker.size) { // batch form unsupported — walk the distinct events instead
+    const evts = [...new Set(pairs.map((p) => p.eventTicker).filter(Boolean))].slice(0, 40);
+    for (const et of evts) {
+      const r = await getJSON(`${host}/markets?event_ticker=${encodeURIComponent(et)}&limit=200`);
+      const list = (r.json && r.json.markets) || [];
+      for (const m of list) if (m && m.ticker) byTicker.set(m.ticker, m);
+    }
+  }
+  let hydrated = 0;
+  const out = pairs.map((p) => {
+    const full = p.m && byTicker.get(p.m.ticker);
+    if (full) { hydrated++; return Object.assign({}, p, { m: Object.assign({}, p.m, full) }); }
+    return p;
+  });
+  return { pairs: out, hydrated };
+}
+
 // Fallback path: page Kalshi EVENTS with nested markets. There are >15k open
 // markets (paging them all blew past the page cap and missed the hurricane series),
 // but far fewer events — and an event carries the question title we need for
@@ -306,8 +335,11 @@ async function collectKalshiMarkets() {
       const title = e.title || e.sub_title || e.event_ticker || "";
       for (const m of (e.markets || [])) out.push({ m, title, eventTicker: e.event_ticker });
     }
-    if (out.length) return { ok: true, status: ser.status, pairs: out, pages: ser.series.length,
-      scanned: out.length, mode: `series(${ser.category}·${ser.series.length})`, tried: ser.tried };
+    if (out.length) {
+      const h = await hydrateKalshiPrices(ser.host, out);
+      return { ok: true, status: ser.status, pairs: h.pairs, pages: ser.series.length,
+        scanned: out.length, mode: `series(${ser.category}·${ser.series.length}·hyd${h.hydrated})`, tried: ser.tried };
+    }
   }
   // 2) broad event scan
   const ev = await fetchKalshiEvents();
@@ -318,7 +350,11 @@ async function collectKalshiMarkets() {
       const title = e.title || e.sub_title || e.event_ticker || "";
       for (const m of (e.markets || [])) out.push({ m, title, eventTicker: e.event_ticker });
     }
-    if (out.length) return { ok: true, status: ev.status, pairs: out, pages: ev.pages, scanned: ev.scanned, mode: "events", tried: ev.tried };
+    if (out.length) {
+      const h = await hydrateKalshiPrices(ev.host, out.filter((p) => HUR_RE.test(p.title)));
+      return { ok: true, status: ev.status, pairs: h.pairs.length ? h.pairs : out, pages: ev.pages,
+        scanned: ev.scanned, mode: `events(hyd${h.hydrated})`, tried: ev.tried };
+    }
   }
   // Fallback: page the flat markets list (older/alternate API behaviour).
   const paged = await fetchKalshiPaged();
