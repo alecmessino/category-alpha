@@ -341,17 +341,27 @@ async function fetchKalshiWeatherSeries() {
 
 // Simplest reliable form: ask /markets directly per series. Returns FULL market
 // objects (with quotes) in one call each — no event indirection, no hydration.
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// 60+ rapid sequential series calls get throttled, which made the board's contents
+// swing between runs (116 -> 44 -> 8 contracts) and intermittently drop the active
+// storm's market. Pace the calls and retry once so a run comes back complete.
 async function fetchKalshiMarketsForSeries(host, series) {
-  const out = []; let raw = null;
+  const out = []; let raw = null, okCalls = 0, failCalls = 0;
   for (const s of series.slice(0, 80)) {
     const t = s.ticker || s.series_ticker;
     if (!t) continue;
-    const r = await getJSON(`${host}/markets?series_ticker=${encodeURIComponent(t)}&status=open&limit=200`);
+    const url = `${host}/markets?series_ticker=${encodeURIComponent(t)}&status=open&limit=200`;
+    let r = await getJSON(url);
+    if (!r.ok) { await sleep(700); r = await getJSON(url); }   // one retry on throttle/blip
+    if (!r.ok) { failCalls++; continue; }
+    okCalls++;
     const list = (r.json && r.json.markets) || [];
-    if (!raw && list.length) raw = JSON.stringify(list[0]).slice(0, 420); // schema probe for diagnostics
+    if (!raw && list.length) raw = JSON.stringify(list[0]).slice(0, 420); // schema probe
     for (const m of list) out.push({ m, title: m.title || s.title || "", eventTicker: m.event_ticker });
+    await sleep(120);                                          // stay under the rate limit
   }
-  return { pairs: out, raw };
+  return { pairs: out, raw, okCalls, failCalls };
 }
 
 async function fetchKalshiEventsForSeries(host, series) {
@@ -503,7 +513,7 @@ async function collectKalshiMarkets() {
     const direct = await fetchKalshiMarketsForSeries(ser.host, ser.series);
     if (direct.pairs.length) {
       return { ok: true, status: ser.status, pairs: direct.pairs, pages: ser.series.length,
-        scanned: direct.pairs.length, mode: `series-markets(${ser.series.length}s)`, tried: ser.tried, raw: direct.raw };
+        scanned: direct.pairs.length, mode: `series-markets(${ser.series.length}s·${direct.okCalls}ok/${direct.failCalls}fail)`, tried: ser.tried, raw: direct.raw };
     }
     // 1b) event indirection + price hydration
     const evs = await fetchKalshiEventsForSeries(ser.host, ser.series);
