@@ -1,0 +1,17 @@
+/* Category Alpha — Motion & effects.
+   Motion signals LIVE data state, not decoration. No bounces, no easing flourishes.
+   Fast .15s transitions; a slow status pulse; a cinematic camera dip. */
+:root{
+  --ease-ui:.15s; /* @kind other */
+  --ease-cam:.18s; /* @kind other */
+  --dur-veil:.2s; /* @kind other */
+  --dur-drawer:.25s; /* @kind other */
+
+  --glow-edge:0 0 8px rgba(57,255,20,.5);          /* extreme-edge number */
+  --glow-accent:0 0 0 1px rgba(56,189,248,.35),0 6px 18px -8px rgba(56,189,248,.6);
+  --ring-focus:0 0 0 1px rgba(56,189,248,.4);
+}
+/* live status pulse — the single sanctioned "live feed" animation */
+@keyframes ca-pulse{0%{box-shadow:0 0 0 0 rgba(16,185,129,.6)}70%{box-shadow:0 0 0 8px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+@keyframes ca-reticle{0%{transform:scale(.62);opacity:.9}70%{transform:scale(1.5);opacity:0}100%{opacity:0}}
+@keyframes ca-spin{to{transform:rotate(360deg)}}

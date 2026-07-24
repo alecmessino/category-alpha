@@ -1,0 +1,50 @@
+name: Refresh Millibar Terminal data
+
+# Pulls REAL data server-side (open internet, no browser CORS) and commits it into
+# docs/data/*.json. GitHub Pages then serves the refreshed snapshot from the same
+# origin the dashboard fetches — so the live URL stays permanent AND up to date.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"   # every ~15 min (GitHub may delay under load)
+  workflow_dispatch: {}       # manual "Run workflow" button — use this for the first populate
+  push:
+    branches: [main]
+    paths: [".github/workflows/refresh-data.yml", "scripts/fetch-data.mjs"]
+
+# One refresh at a time; don't cancel an in-flight commit.
+concurrency:
+  group: millibar-refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: write             # allow the bot to commit refreshed data back to the branch
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Fetch live NHC + market data
+        run: node scripts/fetch-data.mjs
+        env:
+          MT_STEP_MIN: "15"
+
+      - name: Commit refreshed data (only if changed)
+        run: |
+          git config user.name  "millibar-data-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/latest.json docs/data/frames.json
+          if git diff --cached --quiet; then
+            echo "No data changes this cycle."
+          else
+            git commit -m "data: refresh $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+            for i in 1 2 3 4; do
+              git push && break || { echo "push failed, retry $i"; sleep $((2 ** i)); git pull --rebase --autostash || true; }
+            done
+          fi

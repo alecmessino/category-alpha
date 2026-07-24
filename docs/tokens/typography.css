@@ -1,0 +1,37 @@
+/* Category Alpha — Typography scale.
+   Three families: Erode (serif display, brand wordmark), Satoshi (sans, UI),
+   IBM Plex Mono (all telemetry: timestamps, prices, ids, latencies, versions). */
+:root{
+  --font-display:'Erode',Georgia,serif;
+  --font-sans:'Satoshi','Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+
+  /* mono telemetry sizes */
+  --fs-mono-xs:9.5px;   /* micro-footers, kind tags */
+  --fs-mono-sm:10.5px;  /* HUD, chip labels */
+  --fs-mono-md:11.5px;  /* map stats, timestamps */
+  --fs-mono-lg:13px;    /* metric values, inputs */
+
+  /* sans UI sizes */
+  --fs-label:10px;      /* uppercase section labels */
+  --fs-caption:11px;
+  --fs-body:12.5px;
+  --fs-title:16px;      /* card / storm names */
+  --fs-stat:24px;       /* hero stat numbers */
+  --fs-hero:26px;       /* command rail storm name */
+
+  /* weights */
+  --fw-reg:500; /* @kind other */
+  --fw-bold:700; /* @kind other */
+  --fw-black:800; /* @kind other */
+
+  /* tracking */
+  --track-mono:.3px;
+  --track-label:.6px;
+  --track-caps:1px;
+  --track-brand:2.5px;
+
+  /* line-height */
+  --lh-tight:1.05; /* @kind other */
+  --lh-body:1.5; /* @kind other */
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "millibar-terminal/1",
+  "generatedAt": null,
+  "stepMin": 15,
+  "note": "Seed placeholder shipped with the repo. Before the first GitHub Actions refresh runs there is no live telemetry, so this file honestly declares an empty, awaiting state rather than any fabricated storm or price. The scheduled workflow overwrites this with real NHC + market data.",
+  "feeds": {
+    "nhc":       { "ok": false, "status": null, "source": "NHC CurrentStorms.json", "url": "https://www.nhc.noaa.gov/CurrentStorms.json", "latencyMs": null, "note": "awaiting first scheduled refresh" },
+    "markets":   { "ok": false, "status": null, "source": null, "count": 0, "note": "awaiting first scheduled refresh" },
+    "sst":       { "ok": false, "status": null, "source": "Open-Meteo", "note": "awaiting first scheduled refresh" },
+    "models":    { "ok": false, "status": null, "source": "ensemble consensus", "note": "no clean public ensemble Cat-probability feed wired" },
+    "satellite": { "ok": true,  "source": "NASA GIBS VIIRS/NOAA-20", "note": "probed live in the browser" }
+  },
+  "storms": [],
+  "contracts": [],
+  "models": [],
+  "events": [],
+  "sstAnomalyC": null
+}

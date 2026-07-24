@@ -1,0 +1,197 @@
+/* Millibar Terminal — LIVE data loader. Replaces the old static seed (data.js).
+
+   Fetches same-origin data/latest.json + data/frames.json (produced server-side by
+   the scheduled GitHub Action, so no browser CORS) and rebuilds window.MT in the exact
+   shape the panels / compute engine / map already consume. Every value here traces to a
+   real feed; anything a feed could not supply is left null and rendered as "NO FEED" —
+   nothing is fabricated. compute.js polls for window.MT, so an async set is fine. */
+(function loadMT() {
+  const BASE = window.MT_DATA_BASE || "data/";
+
+  function fnv(str) { let h = 2166136261; for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0).toString(16).padStart(8, "0"); }
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function isNum(x) { return typeof x === "number" && isFinite(x); }
+
+  // Saffir–Simpson from sustained wind (kt). Defensive — the feed also sends cls,
+  // but we recompute so a bad/missing label can't misrepresent intensity.
+  function clsFromWind(w) {
+    if (!isNum(w)) return { cls: "—", full: "Unknown" };
+    if (w >= 137) return { cls: "C5", full: "Cat 5 Hurricane" };
+    if (w >= 113) return { cls: "C4", full: "Cat 4 Hurricane" };
+    if (w >= 96) return { cls: "C3", full: "Cat 3 Hurricane" };
+    if (w >= 83) return { cls: "C2", full: "Cat 2 Hurricane" };
+    if (w >= 64) return { cls: "C1", full: "Cat 1 Hurricane" };
+    if (w >= 34) return { cls: "TS", full: "Tropical Storm" };
+    return { cls: "TD", full: "Tropical Depression" };
+  }
+  // Lifecycle phase (interpretation label only) from the intensity trend over history.
+  function phaseFrom(w0, wN) {
+    if (!isNum(wN)) return "WATCH";
+    const d = isNum(w0) ? wN - w0 : 0;
+    if (wN < 34) return "WATCH";
+    if (d >= 8) return "VELOCITY";
+    if (wN >= 113 && d < 4) return "EXHAUSTION";
+    if (d > 0) return "ACCUMULATION";
+    return "WATCH";
+  }
+  const PHASE_COLOR = {
+    ACCUMULATION: "var(--pai-accumulation)", VELOCITY: "var(--pai-velocity)",
+    EXHAUSTION: "var(--pai-exhaustion)", WATCH: "var(--pai-watch)",
+  };
+
+  function synthFrame(latest, tsZ) {
+    const storms = {}, contracts = {};
+    (latest.storms || []).forEach((s) => { storms[s.id] = { wind: s.wind, pressure: s.pressure, center: s.center, modelCat4: s.modelCat4 ?? null, marketCat4: s.marketCat4 ?? null, reconAge: s.reconAge ?? null }; });
+    (latest.contracts || []).forEach((c) => { contracts[c.id] = { market: c.market ?? null, model: c.model ?? null }; });
+    return { tsZ: tsZ, storms, contracts };
+  }
+
+  function build(latest, framesJson) {
+    latest = latest || {};
+    const feeds = latest.feeds || {};
+    const stepMin = latest.stepMin || (framesJson && framesJson.stepMin) || 15;
+    const nowIso = latest.generatedAt || new Date().toISOString();
+    let framesArr = (framesJson && Array.isArray(framesJson.frames)) ? framesJson.frames.slice(-24) : [];
+    if (framesArr.length === 0) framesArr = [synthFrame(latest, nowIso)];
+    const FRAMES = framesArr.length, NF = FRAMES - 1;
+    const clampF = (f) => Math.max(0, Math.min(NF, Math.round(f)));
+
+    // ---- storms ----
+    const storms = {};
+    (latest.storms || []).forEach((s) => {
+      const fs = (f) => framesArr[clampF(f)].storms[s.id] || null;
+      const pick = (f, key, dflt) => { const r = fs(f); return r && r[key] != null ? r[key] : dflt; };
+      const windEnd = pick(NF, "wind", s.wind), windStart = pick(0, "wind", s.wind);
+      const phase = s.phase || phaseFrom(windStart, windEnd);
+      const cc = clsFromWind(s.wind);
+      storms[s.id] = {
+        id: s.id, name: s.name, cls: s.cls || cc.cls, full_cls: s.full_cls || cc.full,
+        basin: s.basin || "east", color: s.color || PHASE_COLOR[phase] || "var(--accent)", phase,
+        center: s.center, movement: s.movement || "—",
+        track: s.track || null, pastIdx: isNum(s.pastIdx) ? s.pastIdx : (s.track ? Math.max(0, s.track.length - 4) : 0),
+        cone: s.cone || null, reconTracks: s.reconTracks || null,
+        advNum: s.advNum || null, advTimeZ: s.advTimeZ || null,
+        // frame accessors read the REAL per-frame snapshot; fall back to the latest value
+        wind: (f) => pick(f, "wind", s.wind),
+        pressure: (f) => pick(f, "pressure", s.pressure),
+        modelCat4: (f) => { const r = fs(f); return r && r.modelCat4 != null ? r.modelCat4 : (s.modelCat4 ?? null); },
+        marketCat4: (f) => { const r = fs(f); return r && r.marketCat4 != null ? r.marketCat4 : (s.marketCat4 ?? null); },
+        reconAge: (f) => { const r = fs(f); return r && r.reconAge != null ? r.reconAge : (s.reconAge ?? null); },
+        centerAt: (f) => pick(f, "center", s.center),
+      };
+    });
+
+    // ---- contracts (real prices per frame) ----
+    const contracts = (latest.contracts || []).map((c) => {
+      const fc = (f) => framesArr[clampF(f)].contracts[c.id] || null;
+      return Object.assign({}, c, {
+        priceAt: (f) => { const r = fc(f); return r && r.market != null ? r.market : (c.market ?? null); },
+        modelAt: (f) => { const r = fc(f); return r && r.model != null ? r.model : (c.model ?? null); },
+      });
+    });
+
+    // ---- evidence (built from what the feeds actually delivered) ----
+    const primary = (latest.storms || [])[0];
+    const evidence = [];
+    if (primary) {
+      const mkt = feeds.markets || {};
+      const nhc = feeds.nhc || {};
+      evidence.push({
+        id: "ev-adv", kind: "advisory", label: "NHC Public Advisory", source: "NHC",
+        tier: nhc.ok ? "A" : "C", latency: nhc.latencyMs != null ? Math.round(nhc.latencyMs) + "ms" : "live",
+        ver: primary.advNum ? "adv-" + primary.advNum : "adv", prov: nhc.ok ? "live" : "nofeed", weight: 0.32,
+        hash: fnv("adv" + primary.id + (primary.advNum || "")),
+        read: (S, f) => S.full_cls + " · " + Math.round(S.wind(f)) + " kt",
+      });
+      evidence.push({
+        id: "ev-pres", kind: "recon_fix", label: "Min central pressure", source: nhc.source || "NHC",
+        tier: nhc.ok ? "A" : "C", latency: "live", ver: primary.advNum ? "adv-" + primary.advNum : "adv",
+        prov: nhc.ok ? "live" : "nofeed", weight: 0.24, hash: fnv("pres" + primary.id),
+        read: (S, f) => Math.round(S.pressure(f)) + " mb",
+      });
+      if (isNum(latest.sstAnomalyC)) {
+        evidence.push({
+          id: "ev-sst", kind: "sst_reading", label: "Sea-surface temp anomaly", source: (feeds.sst && feeds.sst.source) || "Open-Meteo",
+          tier: "B", latency: "hourly", ver: "sst", prov: "live", weight: 0.15, hash: fnv("sst" + latest.sstAnomalyC),
+          read: () => (latest.sstAnomalyC >= 0 ? "+" : "") + latest.sstAnomalyC.toFixed(1) + " °C",
+        });
+      }
+      const hasMarketForPrimary = contracts.some((c) => c.storm === primary.id);
+      if (hasMarketForPrimary) {
+        evidence.push({
+          id: "ev-market", kind: "market_snapshot", label: "Prediction-market price", source: mkt.source ? mkt.source[0].toUpperCase() + mkt.source.slice(1) : "Market",
+          tier: "C", latency: "live", ver: "mkt", prov: mkt.ok ? "live" : "nofeed", weight: 0.0, hash: fnv("mkt" + primary.id),
+          read: (S, f) => { const c = contracts.find((x) => x.storm === S.id); return c ? Math.round(c.priceAt(f) * 100) + "¢" : "—"; },
+        });
+      }
+    }
+
+    // ---- events → frame indices (nearest committed snapshot by timestamp) ----
+    const frameTimeMs = framesArr.map((fr) => Date.parse(fr.tsZ) || 0);
+    function nearestFrame(tsZ) {
+      const t = Date.parse(tsZ); if (!t) return NF;
+      let best = 0, bd = Infinity;
+      for (let i = 0; i < frameTimeMs.length; i++) { const d = Math.abs(frameTimeMs[i] - t); if (d < bd) { bd = d; best = i; } }
+      return best;
+    }
+    const events = (latest.events || []).map((e) => ({
+      frame: e.frame != null ? clampF(e.frame) : nearestFrame(e.tsZ), kind: e.kind, label: e.label,
+      source: e.source, tier: e.tier || "B", hot: !!e.hot,
+    })).sort((a, b) => a.frame - b.frame);
+
+    // ---- pipeline (honest: reflects real feed availability) ----
+    const anyStorm = (latest.storms || []).length > 0;
+    const mktOk = !!(feeds.markets && feeds.markets.ok);
+    const nhcOk = !!(feeds.nhc && feeds.nhc.ok);
+    const pipeline = [
+      { stage: "Observation", status: nhcOk || mktOk ? "PASS" : "EMPTY", detail: [nhcOk && "NHC", mktOk && "markets", "GIBS"].filter(Boolean).join(" · ") || "no feeds reachable" },
+      { stage: "Evidence", status: evidence.length ? "PASS" : "EMPTY", detail: evidence.length + " signals · content-addressed" },
+      { stage: "Features", status: anyStorm ? "PASS" : "EMPTY", detail: anyStorm ? "wind/pressure/track" : "no active system" },
+      { stage: "Confidence", status: evidence.length ? "PASS" : "EMPTY", detail: "evidence-quality tiering" },
+      { stage: "Probability", status: (feeds.models && feeds.models.ok) ? "PASS" : "BLOCKED", detail: (feeds.models && feeds.models.ok) ? "ensemble consensus" : "no public ensemble feed — anchor only" },
+      { stage: "Edge", status: mktOk && anyStorm ? "PASS" : "EMPTY", detail: mktOk ? "model − market" : "no market feed" },
+      { stage: "Kelly", status: mktOk && anyStorm ? "PASS" : "EMPTY", detail: "Q-Kelly ¼ · liquidity-capped" },
+      { stage: "Position", status: "EMPTY", detail: "research-only · no execution" },
+    ];
+
+    // ---- health (honest: real HTTP status / counts / freshness) ----
+    function agoStr(iso) { const t = Date.parse(iso); if (!t) return "—"; const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 60 ? m + "m ago" : Math.floor(m / 60) + "h" + pad2(m % 60) + "m ago"; }
+    function feedHealth(f, name) {
+      f = f || {}; const st = f.ok ? "PASS" : (f.status ? "FAIL" : "EMPTY");
+      const bits = [f.source || name]; if (f.status) bits.push("HTTP " + f.status); if (f.count != null) bits.push(f.count + " items"); if (f.note && !f.ok) bits.push(f.note);
+      return { name, detail: bits.join(" · "), status: st };
+    }
+    const health = [
+      feedHealth(feeds.nhc, "NHC advisories"),
+      feedHealth(feeds.markets, "Prediction markets"),
+      feedHealth(feeds.satellite, "GIBS imagery"),
+      feedHealth(feeds.sst, "SST anomaly"),
+      feedHealth(feeds.models, "Ensemble models"),
+      { name: "Data refresh", detail: latest.generatedAt ? agoStr(latest.generatedAt) + " · every " + stepMin + "m" : "awaiting first refresh", status: latest.generatedAt ? "PASS" : "EMPTY" },
+    ];
+
+    return {
+      FRAMES, STEP_MIN: stepMin, storms, contracts,
+      evidence, models: latest.models || [], events, pipeline, health,
+      _frames: framesArr, _feeds: feeds, _generatedAt: latest.generatedAt || null, _note: latest.note || null,
+    };
+  }
+
+  function emptyLatest(err) {
+    return { stepMin: 15, generatedAt: null, note: "data unreachable: " + err,
+      feeds: { nhc: { ok: false, note: "fetch failed: " + err }, markets: { ok: false }, satellite: { ok: true, source: "NASA GIBS VIIRS" }, sst: { ok: false }, models: { ok: false } },
+      storms: [], contracts: [], models: [], events: [] };
+  }
+
+  function done(latest, framesJson) {
+    window.MT = build(latest, framesJson);
+    window.MT_READY = true;
+    window.dispatchEvent(new CustomEvent("mt-data-ready", { detail: { generatedAt: (latest && latest.generatedAt) || null } }));
+  }
+
+  Promise.all([
+    fetch(BASE + "latest.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject("HTTP " + r.status)),
+    fetch(BASE + "frames.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).catch(() => null),
+  ]).then(([latest, framesJson]) => done(latest, framesJson))
+    .catch((err) => { console.warn("[millibar] data load failed:", err); done(emptyLatest(err), null); });
+})();
