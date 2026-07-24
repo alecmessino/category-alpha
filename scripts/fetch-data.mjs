@@ -164,12 +164,16 @@ async function fetchClimatology() {
 }
 
 // Empirical P(count > strike) for Atlantic seasonal hurricane-count contracts.
-function climatologyAnchor(title, strike, clim) {
+function climatologyAnchor(title, strike, clim, ticker) {
   if (!clim || strike == null) return null;
-  const t = String(title).toLowerCase();
-  if (!/atlantic/.test(t) || !/hurricane/.test(t)) return null;
-  if (!/how many|total|count/.test(t)) return null;
-  const major = /\bmajor\b/.test(t);
+  const t = (String(title) + " " + String(ticker || "")).toLowerCase();
+  if (!/hurricane/.test(t)) return null;
+  // Basin must be explicit — climatology is Atlantic-only, so never anchor a Pacific contract.
+  if (!/atlantic/.test(t) && !/\bkxatl/.test(t)) return null;
+  // Count-style phrasings: "how many …", "will there be more than N …", "at least N".
+  if (!/how many|more than|at least|total|count/.test(t)) return null;
+  // "category 3 or above" is the major-hurricane definition; "category 1" is all hurricanes.
+  const major = /\bmajor\b/.test(t) || /categor(?:y|ies)\s*[345]\b/.test(t);
   const counts = major ? clim.major : clim.hurricanes;
   if (!counts || !counts.length) return null;
   const hits = counts.filter((c) => c > strike).length;
@@ -447,7 +451,7 @@ async function fetchKalshi(storms, clim) {
     const volume = volumeOf(m);
     // Kalshi exposes the ladder threshold numerically; fall back to the sub-title text.
     const strike = parseStrike(sub, m.yes_sub_title, m.subtitle) ?? num(m.floor_strike);
-    const anchor = climatologyAnchor(title, strike, clim);
+    const anchor = climatologyAnchor(title, strike, clim, m.ticker);
     contracts.push({
       id: m.ticker, label: title, short: (sub ? title.replace(/\?$/, "") + " · " + sub : title).slice(0, 44),
       storm: assocStorm(title, storms), market: Math.max(0.01, Math.min(0.99, price)),
@@ -463,7 +467,7 @@ async function fetchKalshi(storms, clim) {
   // Highest-signal first: anchored contracts, then by volume.
   contracts.sort((a, b) => (b.model != null) - (a.model != null) || (b.volume || 0) - (a.volume || 0));
   const anchored = contracts.filter((c) => c.model != null).length;
-  return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts, diag: paged.tried,
+  return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts: contracts.slice(0, 40), diag: paged.tried,
            drops, samples, raw: paged.raw || null,
            note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} ${paged.mode} · dropped ${drops.noKeyword}kw/${drops.sports}sport/${drops.noPrice}px` };
 }
