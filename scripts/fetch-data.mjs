@@ -225,6 +225,21 @@ async function fetchKalshiWeatherSeries() {
   return { ok: false, series: [], tried };
 }
 
+// Simplest reliable form: ask /markets directly per series. Returns FULL market
+// objects (with quotes) in one call each — no event indirection, no hydration.
+async function fetchKalshiMarketsForSeries(host, series) {
+  const out = []; let raw = null;
+  for (const s of series.slice(0, 80)) {
+    const t = s.ticker || s.series_ticker;
+    if (!t) continue;
+    const r = await getJSON(`${host}/markets?series_ticker=${encodeURIComponent(t)}&status=open&limit=200`);
+    const list = (r.json && r.json.markets) || [];
+    if (!raw && list.length) raw = JSON.stringify(list[0]).slice(0, 420); // schema probe for diagnostics
+    for (const m of list) out.push({ m, title: m.title || s.title || "", eventTicker: m.event_ticker });
+  }
+  return { pairs: out, raw };
+}
+
 async function fetchKalshiEventsForSeries(host, series) {
   const events = [];
   for (const s of series.slice(0, 80)) {
@@ -331,6 +346,13 @@ async function collectKalshiMarkets() {
   // 1) targeted: weather series → their events (cheap, lands on the hurricane board)
   const ser = await fetchKalshiWeatherSeries();
   if (ser.ok) {
+    // 1a) direct per-series market query — full objects incl. quotes
+    const direct = await fetchKalshiMarketsForSeries(ser.host, ser.series);
+    if (direct.pairs.length) {
+      return { ok: true, status: ser.status, pairs: direct.pairs, pages: ser.series.length,
+        scanned: direct.pairs.length, mode: `series-markets(${ser.series.length}s)`, tried: ser.tried, raw: direct.raw };
+    }
+    // 1b) event indirection + price hydration
     const evs = await fetchKalshiEventsForSeries(ser.host, ser.series);
     const out = [];
     for (const e of evs) {
@@ -408,7 +430,7 @@ async function fetchKalshi(storms, clim) {
   contracts.sort((a, b) => (b.model != null) - (a.model != null) || (b.volume || 0) - (a.volume || 0));
   const anchored = contracts.filter((c) => c.model != null).length;
   return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts, diag: paged.tried,
-           drops, samples,
+           drops, samples, raw: paged.raw || null,
            note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} ${paged.mode} · dropped ${drops.noKeyword}kw/${drops.sports}sport/${drops.noPrice}px` };
 }
 
@@ -482,7 +504,7 @@ async function main() {
   let mkt = kal;
   if (poly && ((poly.ok && poly.count > 0) || (!kal.ok && poly.ok))) mkt = poly;
   const marketAttempts = [
-    { source: "kalshi", ok: kal.ok, status: kal.status, count: kal.count || 0, note: kal.note, hosts: kal.diag || null, drops: kal.drops || null, samples: kal.samples || null },
+    { source: "kalshi", ok: kal.ok, status: kal.status, count: kal.count || 0, note: kal.note, hosts: kal.diag || null, drops: kal.drops || null, samples: kal.samples || null, raw: kal.raw || null },
     poly ? { source: "polymarket", ok: poly.ok, status: poly.status, count: poly.count || 0, note: poly.note } : null,
   ].filter(Boolean);
   let contracts = mkt.contracts || [];
