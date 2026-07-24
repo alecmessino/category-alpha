@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-07-24T20:49:56.730Z",
+  "generatedAt": "2026-07-24T20:56:34.591Z",
   "stepMin": 15,
   "note": null,
   "feeds": {
@@ -9,16 +9,41 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 238,
+      "latencyMs": 377,
       "count": 2,
       "note": "2 active"
     },
     "markets": {
       "ok": true,
       "status": 200,
-      "source": "polymarket",
+      "source": "kalshi",
       "count": 0,
-      "note": "0 hurricane markets"
+      "note": "0 hurricane markets (0 anchored) from 15000 scanned · 15p",
+      "attempts": [
+        {
+          "source": "kalshi",
+          "ok": true,
+          "status": 200,
+          "count": 0,
+          "note": "0 hurricane markets (0 anchored) from 15000 scanned · 15p",
+          "hosts": [
+            {
+              "host": "https://api.elections.kalshi.com/trade-api/v2",
+              "status": 200,
+              "pages": 15,
+              "scanned": 15000,
+              "error": null
+            }
+          ]
+        },
+        {
+          "source": "polymarket",
+          "ok": true,
+          "status": 200,
+          "count": 0,
+          "note": "0 hurricane markets from 100 scanned"
+        }
+      ]
     },
     "sst": {
       "ok": false,
@@ -29,7 +54,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 44,
+      "latencyMs": 50,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
