@@ -329,6 +329,45 @@ async function fetchKalshiPaged(maxPages = 15) {
   return { ok: false, status: tried[0] && tried[0].status, error: (tried.find((t) => t.error) || {}).error || "no markets returned", markets: [], pages: 0, scanned: 0, tried };
 }
 
+// Kalshi migrated to dollar-denominated STRING fields (last_price_dollars:"0.0300",
+// liquidity_dollars, …) alongside the legacy cent-denominated numbers. Read both so
+// the board survives either shape.
+function dollarNum(v) {
+  if (v == null) return null;
+  const n = Number(String(v).replace(/[$,\s]/g, ""));
+  return Number.isFinite(n) ? n : null;
+}
+// → probability in 0..1, or null when the contract carries no quote at all.
+function priceOf(m) {
+  const bidD = dollarNum(m.yes_bid_dollars), askD = dollarNum(m.yes_ask_dollars), lastD = dollarNum(m.last_price_dollars);
+  if (bidD != null && askD != null && (bidD > 0 || askD > 0)) return (bidD + askD) / 2;
+  if (lastD != null && lastD > 0) return lastD;
+  if (bidD != null && bidD > 0) return bidD;
+  if (askD != null && askD > 0) return askD;
+  const bid = num(m.yes_bid), ask = num(m.yes_ask), last = num(m.last_price);
+  if (bid != null && ask != null && (bid > 0 || ask > 0)) return (bid + ask) / 200;
+  if (last != null && last > 0) return last / 100;
+  if (bid != null && bid > 0) return bid / 100;
+  if (ask != null && ask > 0) return ask / 100;
+  return null;
+}
+function spreadOf(m) {
+  const bidD = dollarNum(m.yes_bid_dollars), askD = dollarNum(m.yes_ask_dollars);
+  if (bidD != null && askD != null) return Math.max(0, askD - bidD);
+  const bid = num(m.yes_bid), ask = num(m.yes_ask);
+  if (bid != null && ask != null) return Math.max(0, (ask - bid) / 100);
+  return 0.02;
+}
+function liquidityOf(m) {
+  const d = dollarNum(m.liquidity_dollars);
+  if (d != null && d > 0) return Math.round(d);
+  const c = num(m.liquidity);
+  return c != null && c > 0 ? Math.round(c / 100) : null;
+}
+function volumeOf(m) {
+  return dollarNum(m.volume_dollars) ?? num(m.dollar_volume) ?? num(m.volume) ?? 0;
+}
+
 function parseStrike(...vals) {
   for (const v of vals) {
     const m = /(?:above|over|more than|greater than|>=?)\s*(\d+(?:\.\d+)?)/i.exec(String(v || ""));
@@ -398,21 +437,16 @@ async function fetchKalshi(storms, clim) {
     const m = pair.m;
     const title = pair.title || m.title || m.ticker || "";
     const sub = m.yes_sub_title || m.subtitle || "";
-    const hasQuote = m.yes_bid != null || m.yes_ask != null || m.last_price != null;
-    if (samples.length < 6 && hasQuote) samples.push(`${title.slice(0, 42)} | ${sub.slice(0, 16)} | bid=${m.yes_bid} ask=${m.yes_ask} last=${m.last_price}`);
+    const price = priceOf(m);
+    if (samples.length < 6 && price != null) samples.push(`${title.slice(0, 40)} | ${sub.slice(0, 14)} | px=${price.toFixed(3)}`);
     if (!HUR_RE.test(title) && !HUR_RE.test(m.ticker || "")) { drops.noKeyword++; continue; }
     if (NOT_WEATHER_RE.test(title)) { drops.sports++; continue; } // sports teams named "Hurricanes"
-    const bid = num(m.yes_bid), ask = num(m.yes_ask), last = num(m.last_price);
-    // Prefer a live two-sided quote; fall back to last trade, then to any single side.
-    let price = (bid != null && ask != null) ? (bid + ask) / 200
-      : (last != null && last > 0) ? last / 100
-      : (bid != null) ? bid / 100
-      : (ask != null) ? ask / 100 : null;
-    if (price == null) { drops.noPrice++; continue; }
-    const spread = bid != null && ask != null ? (ask - bid) / 100 : 0.02;
-    const liquidity = num(m.liquidity) != null ? Math.round(num(m.liquidity) / 100) : null; // cents → $
-    const volume = num(m.dollar_volume) ?? num(m.volume) ?? 0;
-    const strike = parseStrike(sub, m.yes_sub_title, m.subtitle);
+    if (price == null) { drops.noPrice++; continue; }             // genuinely unquoted ladder rung
+    const spread = spreadOf(m);
+    const liquidity = liquidityOf(m);
+    const volume = volumeOf(m);
+    // Kalshi exposes the ladder threshold numerically; fall back to the sub-title text.
+    const strike = parseStrike(sub, m.yes_sub_title, m.subtitle) ?? num(m.floor_strike);
     const anchor = climatologyAnchor(title, strike, clim);
     contracts.push({
       id: m.ticker, label: title, short: (sub ? title.replace(/\?$/, "") + " · " + sub : title).slice(0, 44),
