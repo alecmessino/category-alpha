@@ -302,6 +302,67 @@
     };
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary };
+  /* ---------------- Situation ----------------
+     The 30-second read. Everything here is derived from the register and the feed
+     health — no narrative is generated that isn't backed by an observed change. */
+  function situation(windowMin) {
+    const W = windowMin || 360;
+    const sum = signalSummary(W);
+    const sigs = signals({ sinceMin: W });
+    const storms = Object.values(MT.storms || {});
+    const F = MT._feeds || {};
+
+    // Headline — the most intense active system, stated plainly.
+    const lead = storms.slice().sort((a, b) => (b.wind ? b.wind(NF) : 0) - (a.wind ? a.wind(NF) : 0))[0];
+    const headline = lead
+      ? `${lead.name} ${lead.full_cls.replace(" Hurricane", "")} · ${Math.round(lead.wind(NF))} kt, ${Math.round(lead.pressure(NF))} mb, moving ${lead.movement}`
+      : "No active tropical cyclones";
+
+    // What changed — the highest-class change, and whether anything did.
+    const ranked = sigs.slice().sort((a, b) => CLASS_RANK[b.class] - CLASS_RANK[a.class] || b.magnitude - a.magnitude);
+    const top = ranked[0] || null;
+    const material = sigs.filter((s) => CLASS_RANK[s.class] >= 2);
+    const lastMaterial = material[0] || null;  // signals are newest-first
+    const mktMoves = sigs.filter((s) => s.kind === "market" && s.class === "trade-relevant");
+
+    // Conflict — physical signal and market pointing opposite ways on the same storm.
+    const conflicts = [];
+    storms.forEach((S) => {
+      const phys = sigs.filter((s) => s.stormId === S.id && s.kind === "intensity");
+      const mk = sigs.filter((s) => s.stormId === S.id && s.kind === "market");
+      if (!phys.length || !mk.length) return;
+      const pDir = Math.sign(phys.reduce((a, s) => a + s.delta, 0));
+      const mDir = Math.sign(mk.reduce((a, s) => a + s.delta, 0));
+      if (pDir && mDir && pDir !== mDir) {
+        conflicts.push(`${S.name}: intensity ${pDir > 0 ? "rising" : "easing"} while market ${mDir > 0 ? "bids" : "fades"}`);
+      }
+    });
+
+    // Confidence in the PICTURE (feed health + evidence quality), not in any forecast.
+    const coreOk = !!(F.nhc && F.nhc.ok) && !!(F.markets && F.markets.ok);
+    const genAge = MT._generatedAt ? (Date.now() - Date.parse(MT._generatedAt)) / 60000 : null;
+    const stale = genAge != null && genAge > 45;
+    const confidence = !coreOk || stale ? (F.nhc && F.nhc.ok ? "MEDIUM" : "LOW") : "HIGH";
+    const confWhy = !coreOk ? "a core feed is down"
+      : stale ? `last refresh ${Math.round(genAge)}m ago` : "all core feeds live, data fresh";
+
+    return {
+      windowMin: W, headline, storms: storms.length,
+      verdict: sum.verdict, byClass: sum.byClass, totalEvents: sum.total,
+      topChange: top ? top.label : null,
+      topClass: top ? top.class : null,
+      changed: material.length
+        ? `${material.length} material change${material.length === 1 ? "" : "s"} in ${Math.round(W / 60)}h`
+        : `No material change in ${Math.round(W / 60)}h`,
+      marketsLine: mktMoves.length
+        ? `${mktMoves.length} contract${mktMoves.length === 1 ? "" : "s"} repriced ≥5¢`
+        : "No material repricing",
+      conflicts,
+      lastMaterialAgo: lastMaterial ? lastMaterial.ageMin : null,
+      confidence, confWhy,
+    };
+  }
+
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation };
 })();
 })();

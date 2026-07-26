@@ -12,6 +12,58 @@ function labelRow(k, v, tone) {
   );
 }
 
+/* ---- Situation — the 30-second read, top of the hierarchy ---- */
+const VERDICT_TONE = { "TRADE-RELEVANT": "var(--edge-glow)", MATERIAL: "var(--warn)", COSMETIC: "var(--text-2)", "NO CHANGE": "var(--text-2)" };
+function MT_Situation({ dense }) {
+  const s = MTX.situation ? MTX.situation(360) : null;
+  if (!s) return null;
+  const vc = VERDICT_TONE[s.verdict] || "var(--text-2)";
+  const ago = (m) => m == null ? "—" : m < 60 ? m + "m ago" : Math.floor(m / 60) + "h" + ("0" + (m % 60)).slice(-2) + "m ago";
+  const line = { fontFamily: "var(--font-mono)", fontSize: dense ? 11.5 : 12.5, color: "var(--text-2)", lineHeight: 1.75 };
+  return (
+    <section style={{ border: "1px solid var(--border-strong)", borderLeft: "3px solid " + vc, borderRadius: 12,
+      background: "var(--surface-card)", boxShadow: "var(--shadow-cmd)", padding: dense ? "12px 15px" : "15px 18px", marginBottom: 14 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 800, letterSpacing: 2, color: "var(--accent)" }}>SITUATION</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 800, letterSpacing: .8, color: vc,
+          border: "1px solid " + vc, borderRadius: 5, padding: "2px 7px" }}>{s.verdict}</span>
+        <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)" }}>
+          last {Math.round(s.windowMin / 60)}h · {s.totalEvents} event{s.totalEvents === 1 ? "" : "s"}
+        </span>
+      </div>
+      <div style={{ fontSize: dense ? 16 : 19, fontWeight: 800, color: "var(--text-1)", lineHeight: 1.25, marginBottom: 8 }}>{s.headline}</div>
+      <div style={line}>
+        <div>· {s.changed}{s.topChange ? " — latest: " + s.topChange : ""}</div>
+        <div>· {s.marketsLine}</div>
+        <div>· {s.conflicts.length
+          ? <span style={{ color: "var(--warn)" }}>Conflicting evidence — {s.conflicts.join("; ")}</span>
+          : "No conflicting evidence"}</div>
+        <div>· Last material update: <b style={{ color: "var(--text-1)" }}>{ago(s.lastMaterialAgo)}</b></div>
+        <div>· Confidence: <b style={{ color: s.confidence === "HIGH" ? "var(--pos)" : s.confidence === "MEDIUM" ? "var(--warn)" : "var(--neg)" }}>{s.confidence}</b>
+          <span style={{ opacity: .75 }}> ({s.confWhy})</span></div>
+      </div>
+    </section>
+  );
+}
+
+/* Progressive disclosure — supporting detail collapses so the hierarchy reads. */
+function MT_Section({ label, tier, defaultOpen, summary, children }) {
+  const [open, setOpen] = React.useState(!!defaultOpen);
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer",
+        padding: "6px 2px", borderBottom: "1px solid var(--border-dim)", marginBottom: open ? 12 : 0 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", width: 10 }}>{open ? "▾" : "▸"}</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 800, letterSpacing: 1.6,
+          color: open ? "var(--text-1)" : "var(--text-2)", textTransform: "uppercase" }}>{label}</span>
+        {tier && <span style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", opacity: .7 }}>{tier}</span>}
+        {!open && summary && <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>{summary}</span>}
+      </div>
+      {open && children}
+    </div>
+  );
+}
+
 /* ---- Evidence Matrix ---- */
 function MT_Evidence({ stormId, frame, selection, onSelect, dense }) {
   const S = MT.storms[stormId];
@@ -411,11 +463,14 @@ const CLASS_STYLE = {
 };
 function MT_Signals({ stormId, dense, onSeek }) {
   const [scope, setScope] = React.useState("all");
-  const [minClass, setMinClass] = React.useState("cosmetic");
+  const [minClass, setMinClass] = React.useState("material");
+  const [showSuperseded, setShowSuperseded] = React.useState(false);
   const WINDOW = 360; // 6h — "what has changed today", not just this render
   const summary = MTX.signalSummary ? MTX.signalSummary(WINDOW) : null;
   const all = (MTX.signals ? MTX.signals({ windowMin: 180, sinceMin: WINDOW, minClass }) : []);
-  const sigs = all.filter((s) => scope === "all" || (scope === "storm" ? s.stormId === stormId || s.kind === "advisory" : s.kind === "market"));
+  const sigs = all
+    .filter((s) => showSuperseded || s.status === "active")
+    .filter((s) => scope === "all" || (scope === "storm" ? s.stormId === stormId || s.kind === "advisory" : s.kind === "market"));
   const shown = sigs.slice(0, dense ? 10 : 14);
   const tone = (s) => {
     if (s.kind === "advisory") return "var(--accent)";
@@ -443,7 +498,7 @@ function MT_Signals({ stormId, dense, onSeek }) {
               {summary.total} event{summary.total === 1 ? "" : "s"} · {summary.active} active
             </span>
           </div>
-          <div style={{ display: "flex", gap: 5, marginTop: 7, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 5, marginTop: 7, flexWrap: "wrap", alignItems: "center" }}>
             {["cosmetic", "material", "trade-relevant"].map((k) => {
               const st = CLASS_STYLE[k], on = minClass === k;
               return (
@@ -454,6 +509,13 @@ function MT_Signals({ stormId, dense, onSeek }) {
                 }}>{st.t} {summary.byClass[k] || 0}</span>
               );
             })}
+            <span onClick={() => setShowSuperseded(!showSuperseded)} title="Superseded events are retained — this is the register's memory"
+              style={{ marginLeft: "auto", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, fontWeight: 700,
+                letterSpacing: ".4px", padding: "3px 7px", borderRadius: 5,
+                border: "1px solid " + (showSuperseded ? "var(--accent)" : "var(--border-dim)"),
+                color: showSuperseded ? "var(--accent)" : "var(--text-2)" }}>
+              {showSuperseded ? "HIDE HISTORY" : "SHOW HISTORY"}
+            </span>
           </div>
         </div>
       )}
@@ -569,4 +631,4 @@ function MT_Observability({ narrow }) {
   );
 }
 
-Object.assign(window, { MT_Evidence, MT_Confidence, MT_Probability, MT_EdgeMatrix, MT_Markets, MT_OrderBook, MT_Ledger, MT_Observability, MT_YieldCurve, MT_Signals });
+Object.assign(window, { MT_Evidence, MT_Confidence, MT_Probability, MT_EdgeMatrix, MT_Markets, MT_OrderBook, MT_Ledger, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section });

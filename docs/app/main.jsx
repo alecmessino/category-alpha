@@ -240,7 +240,10 @@ function MillibarTerminalApp() {
       {shellHeader}
 
       <main style={{ maxWidth: 1680, margin: "0 auto", padding: "16px 16px 48px" }}>
-        {/* command block */}
+        {/* 1 · SITUATION — the 30-second read */}
+        <window.MT_Situation dense={dense} />
+
+        {/* 2 · SITUATIONAL CONTEXT — command block */}
         <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: 16 }}>
           <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) 320px" }}>
             <div style={{ position: "relative", minHeight: 480, background: "var(--slate-950)" }}>
@@ -282,28 +285,47 @@ function MillibarTerminalApp() {
           <Transport frame={frame} setFrame={setFrame} playing={playing} setPlaying={setPlaying} speed={speed} setSpeed={setSpeed} />
         </section>
 
-        {/* panel grid */}
-        <div style={{ display: "grid", gridTemplateColumns: panelGrid, gap: 14, alignItems: "start" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
-            <window.MT_Evidence stormId={storm} frame={frame} selection={sel} onSelect={(id) => setSel((s) => ({ ...s, evidence: id }))} dense={dense} />
-            <window.MT_Markets frame={frame} selection={sel} onSelect={pickContract} dense={dense} />
-            <window.MT_EdgeMatrix frame={frame} bankroll={bankroll} stake={stake} setBankroll={setBankroll} setStake={setStake} selection={sel} onSelect={pickContract} dense={dense} />
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
-            <window.MT_Confidence stormId={storm} frame={frame} />
-            <window.MT_Probability stormId={storm} frame={frame} />
-            <window.MT_YieldCurve dense={dense} />
-            <window.MT_OrderBook contractId={sel.contract} frame={frame} dense={dense} />
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+        {/* 3 · WHAT MATTERS — why it changed, and what moved */}
+        <window.MT_Section label="What matters" tier="signal register · why it changed" defaultOpen
+          summary="collapsed">
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.15fr 1fr", gap: 14, alignItems: "start" }}>
             <window.MT_Signals stormId={storm} dense={dense} onSeek={(tsZ) => {
               const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ);
               if (i >= 0) { setPlaying(false); setFrame(i); }
             }} />
-            <window.MT_Ledger frame={frame} onSeek={(f) => { setPlaying(false); setFrame(f); }} dense={dense} />
-            <window.MT_Observability narrow={narrow} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+              <window.MT_YieldCurve dense={dense} />
+              <window.MT_Ledger frame={frame} onSeek={(f) => { setPlaying(false); setFrame(f); }} dense={dense} />
+            </div>
           </div>
-        </div>
+        </window.MT_Section>
+
+        {/* 4 · EVIDENCE — what the read rests on */}
+        <window.MT_Section label="Evidence" tier="inputs · confidence · fair value"
+          summary={MT.evidence.length + " signals · tier " + MTX.snap(storm, frame).tier}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: 14, alignItems: "start" }}>
+            <window.MT_Evidence stormId={storm} frame={frame} selection={sel} onSelect={(id) => setSel((s) => ({ ...s, evidence: id }))} dense={dense} />
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+              <window.MT_Confidence stormId={storm} frame={frame} />
+              <window.MT_Probability stormId={storm} frame={frame} />
+            </div>
+          </div>
+        </window.MT_Section>
+
+        {/* 5 · RAW DATA — the full board, on demand */}
+        <window.MT_Section label="Raw data" tier="full market board · depth · pipeline"
+          summary={MT.contracts.length + " contracts · " + (MT._feeds && MT._feeds.markets ? MT._feeds.markets.source : "—")}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: 14, alignItems: "start" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+              <window.MT_Markets frame={frame} selection={sel} onSelect={pickContract} dense={dense} />
+              <window.MT_EdgeMatrix frame={frame} bankroll={bankroll} stake={stake} setBankroll={setBankroll} setStake={setStake} selection={sel} onSelect={pickContract} dense={dense} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+              <window.MT_OrderBook contractId={sel.contract} frame={frame} dense={dense} />
+              <window.MT_Observability narrow={narrow} />
+            </div>
+          </div>
+        </window.MT_Section>
 
         <div style={{ marginTop: 14, height: 300 }}>
           <window.MT_Console stormId={storm} frame={frame} />

@@ -332,19 +332,42 @@ function posteriorFor(major, strike, clim, seasonToDate) {
     basis: layers.filter((l) => !l.unavailable).map((l) => l.label).join(" → ") };
 }
 
+/* What does this series actually COUNT? Derive it from the ticker, never the title.
+   Kalshi titles are unreliable for this: KXTROPSTORM-26DEC01-T10 counts tropical
+   storms but is titled "Will there be more than 10 Atlantic hurricanes in 2026?" —
+   byte-identical to the real hurricane-count market KXHURCTOT-26DEC01-T10. Title
+   matching therefore anchored a named-storm contract against hurricane frequencies
+   and manufactured a −43pt edge out of nothing. Tickers are structured and stable. */
+function seriesQuantity(ticker) {
+  const t = String(ticker || "").toUpperCase();
+  if (!t) return null;
+  if (/CPAC|EPAC|PACIFIC/.test(t)) return { q: "hurricane", basin: "pacific" }; // not Atlantic
+  if (/^KXHURCTOTMAJ/.test(t)) return { q: "major", basin: "atlantic" };
+  if (/^KXHURCTOT/.test(t)) return { q: "hurricane", basin: "atlantic" };
+  if (/^KXTROPSTORM/.test(t)) return { q: "namedstorm", basin: "atlantic" };  // different base rate
+  if (/^KXHURCAT-/.test(t)) return { q: "perstorm", basin: null };            // single-storm ladder
+  if (/^KXHURRICANENAMES|^KXFIRSTHURRICANE/.test(t)) return { q: "naming", basin: null };
+  return null;
+}
+
 function climatologyAnchor(title, strike, clim, ticker) {
   if (!clim || strike == null) return null;
   const t = (String(title) + " " + String(ticker || "")).toLowerCase();
-  if (!/hurricane/.test(t)) return null;
-  // The climatology counts HURRICANES. A named-storm/tropical-storm count contract has a
-  // different (much higher) base rate, so never anchor one with hurricane frequencies.
-  if (/named storm|tropical storm/.test(t)) return null;
-  // Basin must be explicit — climatology is Atlantic-only, so never anchor a Pacific contract.
-  if (!/atlantic/.test(t) && !/\bkxatl/.test(t)) return null;
-  // Count-style phrasings: "how many …", "will there be more than N …", "at least N".
-  if (!/how many|more than|at least|total|count/.test(t)) return null;
-  // "category 3 or above" is the major-hurricane definition; "category 1" is all hurricanes.
-  const major = /\bmajor\b/.test(t) || /categor(?:y|ies)\s*[345]\b/.test(t);
+  // Ticker-derived identification is authoritative; fall back to the title only for
+  // series we don't recognise (and then demand explicit Atlantic + hurricane wording).
+  const sq = seriesQuantity(ticker);
+  let major;
+  if (sq) {
+    if (sq.basin !== "atlantic") return null;          // climatology is Atlantic-only
+    if (sq.q !== "hurricane" && sq.q !== "major") return null; // TS / per-storm / naming: no anchor
+    major = sq.q === "major";
+  } else {
+    if (!/hurricane/.test(t)) return null;
+    if (/named storm|tropical storm/.test(t)) return null;
+    if (!/atlantic/.test(t) && !/\bkxatl/.test(t)) return null;
+    if (!/how many|more than|at least|total|count/.test(t)) return null;
+    major = /\bmajor\b/.test(t) || /categor(?:y|ies)\s*[345]\b/.test(t);
+  }
   const counts = major ? clim.major : clim.hurricanes;
   if (!counts || !counts.length) return null;
   const hits = counts.filter((c) => c > strike).length;
