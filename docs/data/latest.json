@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-07-25T23:12:32.780Z",
+  "generatedAt": "2026-07-26T00:15:19.653Z",
   "stepMin": 15,
   "note": null,
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 169,
+      "latencyMs": 199,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep062026\",\"binNumber\":\"EP1\",\"name\":\"Fausto\",\"classification\":\"HU\",\"intensity\":\"85\",\"pressure\":\"971\",\"latitude\":\"19.3N\",\"longitude\":\"137.6W\",\"latitudeNumeric\":19.3,\"longitudeNumeric\":-137.6,\"movementDir\":280,\"movementSpeed\":14,\"lastUpdate\":\"2026-07-25T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"028\",\"issuance\":\"2026-07-25T21:00:00.000Z\",\"fileUpdateTime\":\"2026-07-25T20:34:10.243Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP1.shtml\"},\"forecastAdvisory\":{\"advNum\":\"028\",\"issuance\":\"2026-07-25",
@@ -44,14 +44,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will Genevieve become a Category 5 hurri | Category 5 or  | px=0.500",
-            "Will Genevieve become a Category 4 hurri | Category 4 or  | px=0.495",
-            "Will Genevieve become a Category 3 hurri | Category 3 or  | px=0.800",
-            "Will Genevieve become a Category 2 hurri | Category 2 or  | px=0.995",
-            "Will Genevieve become a Category 1 hurri | Category 1 or  | px=0.995",
-            "Will Fausto become a Category 5 hurrican | Category 5 or  | px=0.005"
+            "Will there be more than 30  Atlantic hur | Above 30 | px=0.020",
+            "Will there be more than 25  Atlantic hur | Above 25 | px=0.020",
+            "Will there be more than 20  Atlantic hur | Above 20 | px=0.035",
+            "Will there be more than 18  Atlantic hur | Above 18 | px=0.050",
+            "Will there be more than 16  Atlantic hur | Above 16 | px=0.085",
+            "Will there be more than 14  Atlantic hur | Above 14 | px=0.290"
           ],
-          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-02T04:59:00Z\",\"created_time\":\"2026-07-25T14:49:03.896799Z\",\"event_ticker\":\"KXHURCAT-26GENEVIEVE\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-01T15:00:00Z\",\"expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":5,\"last_price_dollars\":\"0.9900\",\"latest_expiration_time\":\"2026-12-02T15:00:00Z\",\"liquidity_dollars\":\"0.0000\",\"market_type\":\"binary"
+          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-02T04:59:00Z\",\"created_time\":\"2025-10-09T18:33:57.03452Z\",\"event_ticker\":\"KXTROPSTORM-26DEC01\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":30,\"last_price_dollars\":\"0.0300\",\"latest_expiration_time\":\"2026-12-02T15:00:00Z\",\"liquidity_dollars\":\"0.0000\",\"market_type\":\"binary\""
         }
       ]
     },
@@ -64,7 +64,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 99,
+      "latencyMs": 124,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -789,7 +789,7 @@
       "label": "Will Genevieve become a Category 5 hurricane?",
       "short": "Will Genevieve become a Category 5 hurricane",
       "storm": "EP072026",
-      "market": 0.5,
+      "market": 0.48500000000000004,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -798,7 +798,7 @@
       "horizon": "storm",
       "strike": 5,
       "liquidity": null,
-      "spread": 0.8999999999999999,
+      "spread": 0.87,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -823,6 +823,46 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26FAUSTO"
+    },
+    {
+      "id": "KXFIRSTHURRICANE-26DEC01CPAC-GEN",
+      "label": "Will Genevieve be the first named hurricane in the Central Pacific in 2026?",
+      "short": "Will Genevieve be the first named hurricane ",
+      "storm": "EP072026",
+      "market": 0.01,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "liquidity": null,
+      "spread": 0.01,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01CPAC"
+    },
+    {
+      "id": "KXFIRSTHURRICANE-26DEC01CPAC-FAU",
+      "label": "Will Fausto be the first named hurricane in the Central Pacific in 2026?",
+      "short": "Will Fausto be the first named hurricane in ",
+      "storm": "EP062026",
+      "market": 0.955,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "liquidity": null,
+      "spread": 0.030000000000000027,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01CPAC"
     },
     {
       "id": "KXHURRICANENAMES-26DEC01EPAC-GEN",
@@ -865,46 +905,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01EPAC"
     },
     {
-      "id": "KXFIRSTHURRICANE-26DEC01CPAC-GEN",
-      "label": "Will Genevieve be the first named hurricane in the Central Pacific in 2026?",
-      "short": "Will Genevieve be the first named hurricane ",
-      "storm": "EP072026",
-      "market": 0.01,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "liquidity": null,
-      "spread": 0.01,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01CPAC"
-    },
-    {
-      "id": "KXFIRSTHURRICANE-26DEC01CPAC-FAU",
-      "label": "Will Fausto be the first named hurricane in the Central Pacific in 2026?",
-      "short": "Will Fausto be the first named hurricane in ",
-      "storm": "EP062026",
-      "market": 0.965,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "liquidity": null,
-      "spread": 0.050000000000000044,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01CPAC"
-    },
-    {
       "id": "KXHURCTOTMAJ-26DEC01-T0",
       "label": "Will there be more than 0 major Atlantic hurricanes in 2026?",
       "short": "Will there be more than 0 major Atlantic hur",
@@ -912,7 +912,7 @@
       "market": 0.805,
       "model": 0.9428571428571428,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 207",
       "modelUncond": 0.9428571428571428,
       "modelLayers": [
         {
@@ -925,7 +925,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.9428571428571428,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >0 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >0 more"
         },
         {
           "id": "std",
@@ -959,7 +959,7 @@
       "market": 0.655,
       "model": 0.8571428571428571,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 207",
       "modelUncond": 0.8571428571428571,
       "modelLayers": [
         {
@@ -972,7 +972,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.8571428571428571,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >1 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >1 more"
         },
         {
           "id": "std",
@@ -1006,7 +1006,7 @@
       "market": 0.375,
       "model": 0.5714285714285714,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 207",
       "modelUncond": 0.6,
       "modelLayers": [
         {
@@ -1019,7 +1019,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.5714285714285714,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >2 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >2 more"
         },
         {
           "id": "std",
@@ -1053,7 +1053,7 @@
       "market": 0.28500000000000003,
       "model": 0.42857142857142855,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 207",
       "modelUncond": 0.42857142857142855,
       "modelLayers": [
         {
@@ -1066,7 +1066,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.42857142857142855,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >3 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >3 more"
         },
         {
           "id": "std",
@@ -1093,53 +1093,6 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
-      "id": "KXHURCTOT-26DEC01-T4",
-      "label": "Will there be more than 4  Atlantic hurricanes in 2026?",
-      "short": "Will there be more than 4  Atlantic hurrican",
-      "storm": null,
-      "market": 0.6,
-      "model": 0.7428571428571429,
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
-      "modelUncond": 0.7428571428571429,
-      "modelLayers": [
-        {
-          "id": "base",
-          "label": "Historical climatology",
-          "p": 0.7428571428571429,
-          "basis": "1991–2025 full seasons (n=35)"
-        },
-        {
-          "id": "doy",
-          "label": "Day-of-year conditional",
-          "p": 0.7428571428571429,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >4 more"
-        },
-        {
-          "id": "std",
-          "label": "Season-to-date state",
-          "p": null,
-          "unavailable": true,
-          "basis": "no in-season Atlantic count feed wired — L1 assumes 0 so far"
-        },
-        {
-          "id": "enso",
-          "label": "ENSO-stratified",
-          "p": null,
-          "unavailable": true,
-          "basis": "CPC ONI feed not wired — no phase stratification applied"
-        }
-      ],
-      "horizon": "seasonal",
-      "strike": 4,
-      "liquidity": null,
-      "spread": 0.06000000000000005,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCTOT-26DEC01"
-    },
-    {
       "id": "KXHURCTOTMAJ-26DEC01-T4",
       "label": "Will there be more than 4 major Atlantic hurricanes in 2026?",
       "short": "Will there be more than 4 major Atlantic hur",
@@ -1147,7 +1100,7 @@
       "market": 0.13,
       "model": 0.22857142857142856,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 207",
       "modelUncond": 0.2857142857142857,
       "modelLayers": [
         {
@@ -1160,7 +1113,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.22857142857142856,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >4 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >4 more"
         },
         {
           "id": "std",
@@ -1187,27 +1140,27 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
-      "id": "KXHURCTOT-26DEC01-T5",
-      "label": "Will there be more than 5  Atlantic hurricanes in 2026?",
-      "short": "Will there be more than 5  Atlantic hurrican",
+      "id": "KXHURCTOT-26DEC01-T4",
+      "label": "Will there be more than 4  Atlantic hurricanes in 2026?",
+      "short": "Will there be more than 4  Atlantic hurrican",
       "storm": null,
-      "market": 0.48,
-      "model": 0.6,
+      "market": 0.6,
+      "model": 0.7428571428571429,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
-      "modelUncond": 0.6857142857142857,
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
+      "modelUncond": 0.7428571428571429,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.6857142857142857,
+          "p": 0.7428571428571429,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.6,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >5 more"
+          "p": 0.7428571428571429,
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >4 more"
         },
         {
           "id": "std",
@@ -1225,9 +1178,9 @@
         }
       ],
       "horizon": "seasonal",
-      "strike": 5,
+      "strike": 4,
       "liquidity": null,
-      "spread": 0.020000000000000018,
+      "spread": 0.06000000000000005,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -1241,7 +1194,7 @@
       "market": 0.10500000000000001,
       "model": 0.08571428571428572,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 207",
       "modelUncond": 0.14285714285714285,
       "modelLayers": [
         {
@@ -1254,7 +1207,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.08571428571428572,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >5 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -1281,27 +1234,27 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
-      "id": "KXHURCTOT-26DEC01-T6",
-      "label": "Will there be more than 6  Atlantic hurricanes in 2026?",
-      "short": "Will there be more than 6  Atlantic hurrican",
+      "id": "KXHURCTOT-26DEC01-T5",
+      "label": "Will there be more than 5  Atlantic hurricanes in 2026?",
+      "short": "Will there be more than 5  Atlantic hurrican",
       "storm": null,
-      "market": 0.24,
-      "model": 0.42857142857142855,
+      "market": 0.485,
+      "model": 0.6,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
-      "modelUncond": 0.6,
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
+      "modelUncond": 0.6857142857142857,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.6,
+          "p": 0.6857142857142857,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.42857142857142855,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >6 more"
+          "p": 0.6,
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -1319,9 +1272,9 @@
         }
       ],
       "horizon": "seasonal",
-      "strike": 6,
+      "strike": 5,
       "liquidity": null,
-      "spread": 0.04000000000000001,
+      "spread": 0.010000000000000009,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -1335,7 +1288,7 @@
       "market": 0.10500000000000001,
       "model": 0.02857142857142857,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 207",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
@@ -1348,7 +1301,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.02857142857142857,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >6 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -1375,27 +1328,27 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
-      "id": "KXHURCTOT-26DEC01-T7",
-      "label": "Will there be more than 7  Atlantic hurricanes in 2026?",
-      "short": "Will there be more than 7  Atlantic hurrican",
+      "id": "KXHURCTOT-26DEC01-T6",
+      "label": "Will there be more than 6  Atlantic hurricanes in 2026?",
+      "short": "Will there be more than 6  Atlantic hurrican",
       "storm": null,
-      "market": 0.265,
-      "model": 0.4,
+      "market": 0.24,
+      "model": 0.42857142857142855,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
-      "modelUncond": 0.45714285714285713,
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
+      "modelUncond": 0.6,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.45714285714285713,
+          "p": 0.6,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.4,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >7 more"
+          "p": 0.42857142857142855,
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -1413,9 +1366,9 @@
         }
       ],
       "horizon": "seasonal",
-      "strike": 7,
+      "strike": 6,
       "liquidity": null,
-      "spread": 0.010000000000000009,
+      "spread": 0.04000000000000001,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -1429,7 +1382,7 @@
       "market": 0.09,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 major seasons (n=35), day 207",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -1442,7 +1395,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >7 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >7 more"
         },
         {
           "id": "std",
@@ -1469,6 +1422,53 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
+      "id": "KXHURCTOT-26DEC01-T7",
+      "label": "Will there be more than 7  Atlantic hurricanes in 2026?",
+      "short": "Will there be more than 7  Atlantic hurrican",
+      "storm": null,
+      "market": 0.265,
+      "model": 0.4,
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
+      "modelUncond": 0.45714285714285713,
+      "modelLayers": [
+        {
+          "id": "base",
+          "label": "Historical climatology",
+          "p": 0.45714285714285713,
+          "basis": "1991–2025 full seasons (n=35)"
+        },
+        {
+          "id": "doy",
+          "label": "Day-of-year conditional",
+          "p": 0.4,
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >7 more"
+        },
+        {
+          "id": "std",
+          "label": "Season-to-date state",
+          "p": null,
+          "unavailable": true,
+          "basis": "no in-season Atlantic count feed wired — L1 assumes 0 so far"
+        },
+        {
+          "id": "enso",
+          "label": "ENSO-stratified",
+          "p": null,
+          "unavailable": true,
+          "basis": "CPC ONI feed not wired — no phase stratification applied"
+        }
+      ],
+      "horizon": "seasonal",
+      "strike": 7,
+      "liquidity": null,
+      "spread": 0.010000000000000009,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCTOT-26DEC01"
+    },
+    {
       "id": "KXHURCTOT-26DEC01-T8",
       "label": "Will there be more than 8  Atlantic hurricanes in 2026?",
       "short": "Will there be more than 8  Atlantic hurrican",
@@ -1476,7 +1476,7 @@
       "market": 0.14,
       "model": 0.2857142857142857,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0.34285714285714286,
       "modelLayers": [
         {
@@ -1489,7 +1489,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.2857142857142857,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >8 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >8 more"
         },
         {
           "id": "std",
@@ -1523,7 +1523,7 @@
       "market": 0.08,
       "model": 0.2,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0.22857142857142856,
       "modelLayers": [
         {
@@ -1536,7 +1536,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.2,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >9 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >9 more"
         },
         {
           "id": "std",
@@ -1570,7 +1570,7 @@
       "market": 0.515,
       "model": 0.08571428571428572,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0.14285714285714285,
       "modelLayers": [
         {
@@ -1583,7 +1583,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.08571428571428572,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >10 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >10 more"
         },
         {
           "id": "std",
@@ -1617,7 +1617,7 @@
       "market": 0.055,
       "model": 0.08571428571428572,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0.14285714285714285,
       "modelLayers": [
         {
@@ -1630,7 +1630,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.08571428571428572,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >10 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >10 more"
         },
         {
           "id": "std",
@@ -1661,10 +1661,10 @@
       "label": "Will there be more than 12  Atlantic hurricanes in 2026?",
       "short": "Will there be more than 12  Atlantic hurrica",
       "storm": null,
-      "market": 0.29500000000000004,
+      "market": 0.28500000000000003,
       "model": 0.02857142857142857,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
@@ -1677,7 +1677,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.02857142857142857,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >12 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >12 more"
         },
         {
           "id": "std",
@@ -1697,7 +1697,7 @@
       "horizon": "seasonal",
       "strike": 12,
       "liquidity": null,
-      "spread": 0.04999999999999999,
+      "spread": 0.07,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -1711,7 +1711,7 @@
       "market": 0.015,
       "model": 0.02857142857142857,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
@@ -1724,7 +1724,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.02857142857142857,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >12 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >12 more"
         },
         {
           "id": "std",
@@ -1758,7 +1758,7 @@
       "market": 0.29000000000000004,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0.02857142857142857,
       "modelLayers": [
         {
@@ -1771,7 +1771,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >14 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >14 more"
         },
         {
           "id": "std",
@@ -1805,7 +1805,7 @@
       "market": 0.015,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -1818,7 +1818,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >15 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >15 more"
         },
         {
           "id": "std",
@@ -1852,7 +1852,7 @@
       "market": 0.08499999999999999,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -1865,7 +1865,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >16 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >16 more"
         },
         {
           "id": "std",
@@ -1899,7 +1899,7 @@
       "market": 0.05,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -1912,7 +1912,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >18 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >18 more"
         },
         {
           "id": "std",
@@ -1946,7 +1946,7 @@
       "market": 0.035,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -1959,7 +1959,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >20 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >20 more"
         },
         {
           "id": "std",
@@ -1993,7 +1993,7 @@
       "market": 0.02,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -2006,7 +2006,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >25 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >25 more"
         },
         {
           "id": "std",
@@ -2040,7 +2040,7 @@
       "market": 0.02,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 206",
+      "modelBasis": "Historical climatology → Day-of-year conditional · 1991–2025 seasons (n=35), day 207",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -2053,7 +2053,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 206 in each past season; needs >30 more"
+          "basis": "hurricanes forming on/after day 207 in each past season; needs >30 more"
         },
         {
           "id": "std",
@@ -2100,26 +2100,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACMAJ"
     },
     {
-      "id": "KXHURCAT-26ELIDA-T1",
-      "label": "Will Elida become a Category 1 hurricane?",
-      "short": "Will Elida become a Category 1 hurricane · C",
-      "storm": null,
-      "market": 0.01,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": 1,
-      "liquidity": null,
-      "spread": 0.01,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
-    },
-    {
       "id": "KXHURRICANE-26DEC01CPACMAJ-1",
       "label": "Will there be more than 1 hurricane of category 3 or above in the Central Pacific in 2026?",
       "short": "Will there be more than 1 hurricane of categ",
@@ -2160,9 +2140,9 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
-      "id": "KXHURCAT-26ELIDA-T2",
-      "label": "Will Elida become a Category 2 hurricane?",
-      "short": "Will Elida become a Category 2 hurricane · C",
+      "id": "KXHURCAT-26ELIDA-T1",
+      "label": "Will Elida become a Category 1 hurricane?",
+      "short": "Will Elida become a Category 1 hurricane · C",
       "storm": null,
       "market": 0.01,
       "model": null,
@@ -2171,7 +2151,7 @@
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "storm",
-      "strike": 2,
+      "strike": 1,
       "liquidity": null,
       "spread": 0.01,
       "volume": 0,
@@ -2218,6 +2198,26 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACMAJ"
+    },
+    {
+      "id": "KXHURRICANE-26DEC01CPACTOT-2",
+      "label": "Will there be more than 2 hurricanes of category 1 or above in the Central Pacific in 2026?",
+      "short": "Will there be more than 2 hurricanes of cate",
+      "storm": null,
+      "market": 0.625,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": 2,
+      "liquidity": null,
+      "spread": 0.030000000000000027,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     }
   ],
   "models": [],
