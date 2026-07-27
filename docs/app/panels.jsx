@@ -31,16 +31,32 @@ function MT_Situation({ dense }) {
           last {Math.round(s.windowMin / 60)}h · {s.totalEvents} event{s.totalEvents === 1 ? "" : "s"}
         </span>
       </div>
-      <div style={{ fontSize: dense ? 16 : 19, fontWeight: 800, color: "var(--text-1)", lineHeight: 1.25, marginBottom: 8 }}>{s.headline}</div>
+      <div style={{ fontSize: dense ? 18 : 22, fontWeight: 800, color: "var(--text-1)", lineHeight: 1.2, letterSpacing: "-.2px", marginBottom: 11 }}>{s.headline}</div>
+      {/* Scannable metric strip — the numbers carry the read, prose only where it adds. */}
+      <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", borderRadius: 8, overflow: "hidden", flexWrap: "wrap", marginBottom: 10 }}>
+        {[
+          { k: "MATERIAL CHANGES", v: s.byClass.material + s.byClass["trade-relevant"], sub: "in " + Math.round(s.windowMin / 60) + "h" },
+          { k: "TRADE-RELEVANT", v: s.byClass["trade-relevant"], sub: "of those", tone: s.byClass["trade-relevant"] ? "var(--edge-glow)" : null },
+          { k: "REPRICED ≥5¢", v: (s.marketsLine.match(/^\d+/) || ["0"])[0], sub: "contracts" },
+          { k: "LAST UPDATE", v: ago(s.lastMaterialAgo).replace(" ago", ""), sub: "ago" },
+          { k: "CONFIDENCE", v: s.confidence, sub: s.confWhy,
+            tone: s.confidence === "HIGH" ? "var(--pos)" : s.confidence === "MEDIUM" ? "var(--warn)" : "var(--neg)" },
+        ].map((m) => (
+          <div key={m.k} style={{ flex: "1 1 110px", minWidth: 0, background: "var(--surface-card)", padding: "8px 11px" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: ".7px", color: "var(--text-2)" }}>{m.k}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 19, fontWeight: 800, lineHeight: 1.15, marginTop: 2,
+              color: m.tone || "var(--text-1)" }}>{m.v}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", marginTop: 1,
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.sub}</div>
+          </div>
+        ))}
+      </div>
       <div style={line}>
-        <div>· {s.changed}{s.topChange ? " — latest: " + s.topChange : ""}</div>
-        <div>· {s.marketsLine}</div>
+        {s.topChange && <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>· Latest: <b style={{ color: "var(--text-1)" }}>{s.topChange}</b></div>}
+        {!s.topChange && <div>· {s.changed}</div>}
         <div>· {s.conflicts.length
-          ? <span style={{ color: "var(--warn)" }}>Conflicting evidence — {s.conflicts.join("; ")}</span>
-          : "No conflicting evidence"}</div>
-        <div>· Last material update: <b style={{ color: "var(--text-1)" }}>{ago(s.lastMaterialAgo)}</b></div>
-        <div>· Confidence: <b style={{ color: s.confidence === "HIGH" ? "var(--pos)" : s.confidence === "MEDIUM" ? "var(--warn)" : "var(--neg)" }}>{s.confidence}</b>
-          <span style={{ opacity: .75 }}> ({s.confWhy})</span></div>
+          ? <span style={{ color: "var(--warn)" }}>⚠ Conflicting evidence — {s.conflicts.join("; ")}</span>
+          : "No conflicting evidence between physical and market signals."}</div>
       </div>
     </section>
   );

@@ -581,6 +581,14 @@ function volumeOf(m) {
   return dollarNum(m.volume_dollars) ?? num(m.dollar_volume) ?? num(m.volume) ?? 0;
 }
 
+function shortLabel(text, max) {
+  const t = String(text || "").replace(/\s+/g, " ").trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const sp = cut.lastIndexOf(" ");
+  return (sp > max * 0.6 ? cut.slice(0, sp) : cut).replace(/[\s·,]+$/, "") + "…";
+}
+
 function parseStrike(...vals) {
   for (const v of vals) {
     const m = /(?:above|over|more than|greater than|>=?)\s*(\d+(?:\.\d+)?)/i.exec(String(v || ""));
@@ -662,7 +670,7 @@ async function fetchKalshi(storms, clim) {
     const strike = parseStrike(sub, m.yes_sub_title, m.subtitle) ?? num(m.floor_strike);
     const anchor = climatologyAnchor(title, strike, clim, m.ticker);
     contracts.push({
-      id: m.ticker, label: title, short: (sub ? title.replace(/\?$/, "") + " · " + sub : title).slice(0, 44),
+      id: m.ticker, label: title, short: shortLabel(sub ? title.replace(/\?$/, "") + " · " + sub : title, 46),
       storm: assocStorm(title + " " + sub, storms), market: Math.max(0.01, Math.min(0.99, price)),
       model: anchor ? anchor.p : null,
       modelSource: anchor ? "HURDAT2 climatology" : null,
@@ -706,7 +714,7 @@ async function fetchPolymarket(storms, clim) {
     const strike = parseStrike(title);
     const anchor = climatologyAnchor(title, strike, clim);
     contracts.push({
-      id: m.slug || m.conditionId || m.id, label: title, short: title.slice(0, 44),
+      id: m.slug || m.conditionId || m.id, label: title, short: shortLabel(title, 46),
       storm: assocStorm(title, storms), market: Math.max(0.01, Math.min(0.99, price)),
       model: anchor ? anchor.p : null,
       modelSource: anchor ? "HURDAT2 climatology" : null,
