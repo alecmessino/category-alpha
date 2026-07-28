@@ -307,21 +307,41 @@ function MT_YieldCurve({ dense }) {
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 700, letterSpacing: ".5px", color: "var(--text-2)", marginBottom: 5 }}>
               POSTERIOR STACK <span style={{ opacity: .7 }}>(strike &gt;{withLayers.strike})</span>
             </div>
-            {layers.map((l, i) => (
-              <div key={l.id} style={{ display: "flex", alignItems: "baseline", gap: 7, fontFamily: "var(--font-mono)", fontSize: 9.5, lineHeight: 1.65 }}>
-                <span style={{ color: "var(--text-2)", minWidth: 12 }}>{i === 0 ? "" : "↓"}</span>
-                <span style={{ color: l.unavailable ? "var(--text-2)" : "var(--text-1)", minWidth: 148,
-                  textDecoration: l.unavailable ? "line-through" : "none" }}>{l.label}</span>
-                {l.unavailable
-                  ? <span style={{ color: "var(--neg)", fontWeight: 700, fontSize: 8.5 }}>NO FEED</span>
-                  : <span style={{ color: "var(--special)", fontWeight: 700 }}>{Math.round(l.p * 100)}%</span>}
-              </div>
-            ))}
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", marginTop: 5, lineHeight: 1.5, opacity: .85 }}>
-              Unwired layers are declared, never folded in silently. Day-of-year conditioning currently
-              assumes zero Atlantic hurricanes so far this season — that assumption becomes a real input
-              once an in-season count feed is wired.
-            </div>
+            {(() => {
+              // The deciding layer is the last one that actually produced a number —
+              // that is the estimate the edge is computed from, so it gets the callout.
+              const live = layers.filter((l) => !l.unavailable && l.p != null);
+              const gov = live[live.length - 1];
+              return (
+                <React.Fragment>
+                  {layers.map((l, i) => {
+                    const isGov = gov && l.id === gov.id;
+                    return (
+                      <div key={l.id} title={l.basis || ""} style={{ display: "flex", alignItems: "baseline", gap: 7, fontFamily: "var(--font-mono)", fontSize: 9.5, lineHeight: 1.65 }}>
+                        <span style={{ color: "var(--text-2)", minWidth: 12 }}>{i === 0 ? "" : "↓"}</span>
+                        <span style={{ color: l.unavailable ? "var(--text-2)" : "var(--text-1)", minWidth: 148,
+                          fontWeight: isGov ? 700 : 400,
+                          textDecoration: l.unavailable ? "line-through" : "none" }}>{l.label}</span>
+                        {l.unavailable
+                          ? <span style={{ color: "var(--neg)", fontWeight: 700, fontSize: 8.5 }}>NO FEED</span>
+                          : <span style={{ color: "var(--special)", fontWeight: 700 }}>{Math.round(l.p * 100)}%</span>}
+                        {isGov && <span style={{ color: "var(--text-2)", fontSize: 8.5, letterSpacing: ".5px" }}>← USED</span>}
+                      </div>
+                    );
+                  })}
+                  {gov && gov.basis && (
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", marginTop: 6, lineHeight: 1.5 }}>
+                      {gov.label}: {gov.basis}
+                    </div>
+                  )}
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", marginTop: 4, lineHeight: 1.5, opacity: .85 }}>
+                    Unwired layers are declared, never folded in silently. Day-of-year conditioning still
+                    assumes zero Atlantic hurricanes so far this season — that becomes a real input once an
+                    in-season count feed is wired.
+                  </div>
+                </React.Fragment>
+              );
+            })()}
           </div>
         );
       })()}
@@ -488,6 +508,8 @@ function MT_Signals({ stormId, dense, onSeek }) {
   const [scope, setScope] = React.useState("all");
   const [minClass, setMinClass] = React.useState("material");
   const [showSuperseded, setShowSuperseded] = React.useState(false);
+  const [along, setAlong] = React.useState(() => new Set());
+  const toggleAlong = (i) => setAlong((prev) => { const n = new Set(prev); n.has(i) ? n.delete(i) : n.add(i); return n; });
   const WINDOW = 360; // 6h — "what has changed today", not just this render
   const summary = MTX.signalSummary ? MTX.signalSummary(WINDOW) : null;
   const all = (MTX.signals ? MTX.signals({ windowMin: 180, sinceMin: WINDOW, minClass }) : []);
@@ -547,6 +569,9 @@ function MT_Signals({ stormId, dense, onSeek }) {
           [ NO CHANGE ]<br />Every feed re-read identical values across this window at the selected threshold. Nothing to report — which is itself the signal.
         </div>
       )}
+      {/* Capped + scrolled: an uncapped register grew to ~2x the command block next to
+          it, leaving a dead column of whitespace. The list scrolls in place instead. */}
+      <div style={{ maxHeight: dense ? 360 : 440, overflowY: "auto", minHeight: 0 }}>
       {shown.map((s, i) => {
         const m = SIG_META[s.kind] || { icon: "•", label: s.kind.toUpperCase() };
         const c = tone(s);
@@ -581,10 +606,11 @@ function MT_Signals({ stormId, dense, onSeek }) {
               </div>
               {s.alongside && s.alongside.length > 0 && (
                 <div style={{ marginTop: 4, paddingLeft: 8, borderLeft: "2px solid var(--border-dim)" }}>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", letterSpacing: ".3px" }}>
-                    ALONGSIDE (same 3h window · association, not cause)
+                  <div onClick={(ev) => { ev.stopPropagation(); toggleAlong(i); }}
+                    style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", letterSpacing: ".3px" }}>
+                    {along.has(i) ? "▾" : "▸"} ALONGSIDE {s.alongside.length} · same 3h window · association, not cause
                   </div>
-                  {s.alongside.map((o, j) => (
+                  {along.has(i) && s.alongside.map((o, j) => (
                     <div key={j} style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", lineHeight: 1.4 }}>
                       · {String(o.tsZ || "").slice(11, 16)}Z {o.label}
                     </div>
@@ -595,6 +621,7 @@ function MT_Signals({ stormId, dense, onSeek }) {
           </div>
         );
       })}
+      </div>
       {shown.length > 0 && (
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", padding: "7px 11px", lineHeight: 1.5 }}>
           {sigs.length} shown · thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢. TRADE-RELEVANT = Saffir–Simpson
@@ -611,11 +638,12 @@ function MT_Ledger({ frame, onSeek, dense }) {
   return (
     <P pad={false} title="Research Ledger — Event Timeline"
       footer={<PF source="event_store (immutable)" latency="live" version="1.2.4" tier="A" />}>
-      <div>{MT.events.slice().reverse().map((ev) => {
+      {/* Two advisories can land on the same snapshot, so the frame index alone is not a unique key. */}
+      <div>{MT.events.slice().reverse().map((ev, evi) => {
         const on = Math.abs(ev.frame - frame) <= 0;
         const near = ev.frame <= frame;
         return (
-          <div key={ev.frame} onClick={() => onSeek(ev.frame)} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: dense ? "6px 11px" : "8px 12px", borderBottom: "1px solid var(--border-dim)", cursor: "pointer", background: on ? "color-mix(in srgb,var(--accent) 12%,transparent)" : "transparent", opacity: near ? 1 : 0.45 }}>
+          <div key={ev.frame + "|" + evi} onClick={() => onSeek(ev.frame)} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: dense ? "6px 11px" : "8px 12px", borderBottom: "1px solid var(--border-dim)", cursor: "pointer", background: on ? "color-mix(in srgb,var(--accent) 12%,transparent)" : "transparent", opacity: near ? 1 : 0.45 }}>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", minWidth: 46, paddingTop: 1 }}>{MTX.frameTime(ev.frame)}</span>
             <span style={{ width: 7, height: 7, borderRadius: "50%", marginTop: 4, flex: "none", background: ev.hot ? "var(--warn)" : near ? "var(--pos)" : "var(--border-strong)" }} />
             <div style={{ minWidth: 0 }}>

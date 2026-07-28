@@ -143,6 +143,21 @@
       }
     }
 
+    // ENSO is a seasonal-scale input, not a storm-scale one, so it stands outside the
+    // per-storm block and reads the same whether or not a cyclone is active.
+    const enso = latest.enso;
+    if (enso && enso.ok && enso.phase) {
+      const sign = enso.anchorAnom >= 0 ? "+" : "";
+      evidence.push({
+        id: "ev-enso", kind: "enso_state", label: "ENSO phase (ONI)", source: enso.source || "CPC ONI",
+        tier: enso.assumed ? "B" : "A", latency: "monthly",
+        ver: (enso.anchorSeas || "") + " " + (enso.anchorYear || ""),
+        prov: "live", weight: 0, hash: fnv("enso" + enso.anchorSeas + enso.anchorYear + enso.anchorAnom),
+        read: () => enso.phaseLabel + " · " + sign + Number(enso.anchorAnom).toFixed(2)
+          + (enso.assumed ? " (carried)" : ""),
+      });
+    }
+
     // ---- events → frame indices (nearest committed snapshot by timestamp) ----
     const frameTimeMs = framesArr.map((fr) => Date.parse(fr.tsZ) || 0);
     function nearestFrame(tsZ) {
@@ -184,6 +199,7 @@
       feedHealth(feeds.satellite, "GIBS imagery"),
       feedHealth(feeds.sst, "SST anomaly"),
       feedHealth(feeds.models, "Ensemble models"),
+      feedHealth(feeds.enso, "ENSO / ONI"),
       { name: "Data refresh", status: latest.generatedAt ? "PASS" : "EMPTY",
         detail: latest.generatedAt
           ? agoStr(latest.generatedAt) + " · ~" + (observedStepMin != null ? observedStepMin + "m observed" : stepMin + "m") +

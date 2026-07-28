@@ -23,7 +23,7 @@ function MT_Provenance({ evidenceId, stormId, frame, onClose }) {
             <BGd tone={{ A: "pos", B: "warn", C: "neg" }[e.tier]}>TIER {e.tier}</BGd>
             <BGd tone="neutral">{e.kind}</BGd>
           </div>
-          {[["source", e.source], ["timestamp", MTX.frameTime(frame) + " (as-of cursor)"], ["latency", e.latency || "—"], ["revision", e.ver], ["content hash", "sha256:" + e.hash + "…"], ["weight in confidence", e.weight ? (e.weight * 100).toFixed(0) + "%" : "excluded"]].map(([k, v]) => (
+          {[["source", e.source], ["timestamp", MTX.frameTime(frame) + " (as-of cursor)"], ["latency", e.latency || "—"], ["revision", e.ver], ["content hash", "fnv1a32:" + e.hash], ["weight in confidence", e.weight ? (e.weight * 100).toFixed(0) + "%" : "excluded"]].map(([k, v]) => (
             <div key={k} style={{ display: "flex", justifyContent: "space-between", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--border-dim)", fontFamily: "var(--font-mono)", fontSize: 11 }}>
               <span style={{ color: "var(--text-2)" }}>{k}</span>
               <span style={{ color: "var(--text-1)", fontWeight: 600, textAlign: "right", wordBreak: "break-all" }}>{v}</span>

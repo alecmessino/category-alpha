@@ -34,6 +34,12 @@ jobs:
         with:
           node-version: "22"
 
+      # Offline unit test for the posterior stack (ONI parsers, phase thresholds,
+      # shrinkage, refusal paths). Runs against fixtures — no network — so a broken
+      # parser fails the job loudly instead of quietly degrading L3 to NO FEED.
+      - name: Test posterior stack
+        run: node scripts/test-enso.mjs
+
       - name: Fetch live NHC + market data
         run: node scripts/fetch-data.mjs
         env:

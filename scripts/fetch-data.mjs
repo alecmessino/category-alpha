@@ -285,6 +285,110 @@ async function fetchClimatology() {
   };
 }
 
+/* ---------------- ENSO / ONI (the L3 stratification) ----------------
+ * ENSO is the single best-established seasonal modulator of Atlantic hurricane
+ * activity: El Niño raises Caribbean/Atlantic vertical wind shear and suppresses
+ * counts; La Niña does the reverse. We do NOT model that mechanism — we condition
+ * empirically, exactly like L1: restrict the HURDAT2 seasons to those whose peak
+ * (Aug–Sep–Oct) ONI sat in the SAME phase as today's, and re-read the frequency.
+ *
+ * Two honesty constraints are enforced below rather than papered over:
+ *   1. Small samples. A phase bucket holds ~8–14 of the ~35 modern seasons, so the
+ *      raw stratified frequency is noisy. It is shrunk toward the unstratified
+ *      estimate by m/(m+k), and buckets under MIN_MATCH seasons are refused
+ *      outright (layer reports NO FEED rather than a 3-season "probability").
+ *   2. The current season's ASO ONI does not exist in July. We carry the most
+ *      recent observed 3-month ONI forward and LABEL that persistence assumption
+ *      everywhere the layer surfaces — it is an assumption, not an observation.
+ */
+const ONI_EL = 0.5, ONI_LA = -0.5;          // CPC's standard phase thresholds
+const ONI_SHRINK_K = Number(process.env.MT_ONI_K || 8);
+const ONI_MIN_MATCH = Number(process.env.MT_ONI_MIN || 6);
+const SEAS_ORDER = ["DJF", "JFM", "FMA", "MAM", "AMJ", "MJJ", "JJA", "JAS", "ASO", "SON", "OND", "NDJ"];
+const PHASE_LABEL = { el: "El Niño", la: "La Niña", neutral: "ENSO-neutral" };
+
+function phaseOf(v) { return v == null || !Number.isFinite(v) ? null : v >= ONI_EL ? "el" : v <= ONI_LA ? "la" : "neutral"; }
+
+// CPC's canonical oni.ascii.txt:  "SEAS YR TOTAL ANOM"  →  "  ASO 2023 27.94  1.75"
+function parseOniAscii(text) {
+  const rows = [];
+  for (const line of String(text).split(/\r?\n/)) {
+    const f = line.trim().split(/\s+/);
+    if (f.length < 4) continue;
+    const seas = f[0].toUpperCase(), year = Number(f[1]), anom = Number(f[3]);
+    if (SEAS_ORDER.indexOf(seas) < 0 || !Number.isFinite(year) || !Number.isFinite(anom)) continue;
+    rows.push({ seas, year, anom });
+  }
+  return rows;
+}
+
+// NOAA PSL oni.data mirror: one row per year, 12 centred 3-month means, -99.9 = missing.
+// Column m is the mean CENTRED on month m — so column 9 is ASO, matching SEAS_ORDER.
+function parseOniPsl(text) {
+  const rows = [];
+  for (const line of String(text).split(/\r?\n/)) {
+    const f = line.trim().split(/\s+/);
+    if (f.length !== 13) continue;
+    const year = Number(f[0]);
+    if (!Number.isInteger(year) || year < 1850 || year > 2200) continue;
+    for (let m = 0; m < 12; m++) {
+      const v = Number(f[m + 1]);
+      if (!Number.isFinite(v) || v <= -99) continue;
+      rows.push({ seas: SEAS_ORDER[m], year, anom: v });
+    }
+  }
+  return rows;
+}
+
+function buildOni(rows, sourceName, status, latencyMs) {
+  rows.sort((a, b) => a.year - b.year || SEAS_ORDER.indexOf(a.seas) - SEAS_ORDER.indexOf(b.seas));
+  const asoByYear = new Map(rows.filter((r) => r.seas === "ASO").map((r) => [r.year, r.anom]));
+  const latest = rows[rows.length - 1];
+  const yr = now.getUTCFullYear();
+  // Prefer this season's own peak-season value; if it doesn't exist yet, carry the
+  // most recent observed season forward and flag it as an assumption.
+  const observedPeak = asoByYear.has(yr);
+  const anchor = observedPeak ? { seas: "ASO", year: yr, anom: asoByYear.get(yr) } : latest;
+  const centre = Date.UTC(anchor.year, SEAS_ORDER.indexOf(anchor.seas), 15);
+  const ageMonths = Math.max(0, Math.round((now.getTime() - centre) / (30.44 * 86400000)));
+  return {
+    source: sourceName, status, latencyMs,
+    asoByYear, seasons: asoByYear.size,
+    phase: phaseOf(anchor.anom),
+    anchorSeas: anchor.seas, anchorYear: anchor.year, anchorAnom: anchor.anom,
+    assumed: !observedPeak, ageMonths,
+    recent: rows.slice(-6).map((r) => ({ seas: r.seas, year: r.year, anom: r.anom })),
+  };
+}
+
+async function fetchEnso() {
+  const sources = [
+    { url: "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt", name: "CPC ONI", parse: parseOniAscii },
+    { url: "https://psl.noaa.gov/data/correlation/oni.data",           name: "NOAA PSL ONI mirror", parse: parseOniPsl },
+  ];
+  const attempts = [];
+  for (const s of sources) {
+    const r = await getText(s.url);
+    if (!r.ok) { attempts.push({ source: s.name, ok: false, status: r.status, note: r.error }); continue; }
+    let rows = [];
+    try { rows = s.parse(r.text); } catch (e) { rows = []; }
+    // A truncated or reformatted file must not quietly become a two-season "climatology".
+    if (rows.length < 120) { attempts.push({ source: s.name, ok: false, status: r.status, note: `parsed ${rows.length} usable rows — format changed?` }); continue; }
+    const oni = buildOni(rows, s.name, r.status, r.latencyMs);
+    if (!oni.phase) { attempts.push({ source: s.name, ok: false, status: r.status, note: "no usable anchor value" }); continue; }
+    const sign = oni.anchorAnom >= 0 ? "+" : "";
+    return {
+      feed: {
+        ok: true, source: s.name, status: r.status, latencyMs: r.latencyMs, count: oni.seasons, attempts,
+        note: `${PHASE_LABEL[oni.phase]} · ${oni.anchorSeas} ${oni.anchorYear} ONI ${sign}${oni.anchorAnom.toFixed(2)}`
+            + (oni.assumed ? ` (peak-season ASO not yet observed — carried forward, ${oni.ageMonths}mo old)` : ""),
+      },
+      oni,
+    };
+  }
+  return { feed: { ok: false, source: "CPC ONI", note: "no ONI source reachable — L3 stays unstratified", attempts }, oni: null };
+}
+
 // Empirical P(count > strike) for Atlantic seasonal hurricane-count contracts.
 /* Progressive conditional posterior.
    L0 unconditional base rate  →  L1 conditioned on how much season remains.
@@ -292,7 +396,7 @@ async function fetchClimatology() {
    silently assumes a full season ahead. Each layer is computed only where real
    data supports it; anything else is reported as an unavailable layer rather
    than folded in silently. */
-function posteriorFor(major, strike, clim, seasonToDate) {
+function posteriorFor(major, strike, clim, seasonToDate, oni) {
   if (!clim || strike == null) return null;
   const counts = major ? clim.major : clim.hurricanes;
   const n = counts.length;
@@ -307,10 +411,10 @@ function posteriorFor(major, strike, clim, seasonToDate) {
   const doy = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
     - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86400000);
   const remainFn = major ? clim.majorAfter : clim.hurricanesAfter;
-  let p1 = null;
+  const need = strike - (seasonToDate == null ? 0 : seasonToDate);
+  let p1 = null, remaining = null;
   if (typeof remainFn === "function") {
-    const remaining = remainFn(doy);
-    const need = strike - (seasonToDate == null ? 0 : seasonToDate);
+    remaining = remainFn(doy);
     p1 = remaining.filter((r) => r > need).length / n;
     layers.push({ id: "doy", label: "Day-of-year conditional", p: p1,
       basis: `hurricanes forming on/after day ${doy} in each past season; needs >${need} more` });
@@ -323,11 +427,38 @@ function posteriorFor(major, strike, clim, seasonToDate) {
         basis: "no in-season Atlantic count feed wired — L1 assumes 0 so far" }
     : { id: "std", label: "Season-to-date state", p: p1, basis: `${seasonToDate} already recorded in ${now.getUTCFullYear()}` });
 
-  // L3 — ENSO stratification: needs an ONI feed + phase-matched seasons.
-  layers.push({ id: "enso", label: "ENSO-stratified", p: null, unavailable: true,
-    basis: "CPC ONI feed not wired — no phase stratification applied" });
+  // L3 — ENSO stratification: re-read the SAME conditional frequency, but only over
+  // seasons whose peak-season ONI shared today's phase. Shrunk for sample size, and
+  // refused entirely when the phase bucket is too thin to mean anything.
+  const anchorP = p1 != null ? p1 : p0;
+  let p3 = null;
+  if (!oni || !oni.phase) {
+    layers.push({ id: "enso", label: "ENSO-stratified", p: null, unavailable: true,
+      basis: "no CPC ONI feed this cycle — phase stratification not applied" });
+  } else {
+    const matched = [];
+    clim.years.forEach((y, i) => { if (phaseOf(oni.asoByYear.get(y)) === oni.phase) matched.push(i); });
+    const m = matched.length;
+    const pl = PHASE_LABEL[oni.phase];
+    if (m < ONI_MIN_MATCH) {
+      layers.push({ id: "enso", label: "ENSO-stratified", p: null, unavailable: true,
+        basis: `only ${m} ${pl} season${m === 1 ? "" : "s"} in ${clim.from}–${clim.to} — below the ${ONI_MIN_MATCH}-season floor, so no stratified estimate is published` });
+    } else {
+      const hit = remaining
+        ? matched.filter((i) => remaining[i] > need).length
+        : matched.filter((i) => counts[i] > strike).length;
+      const raw = hit / m;
+      const w = m / (m + ONI_SHRINK_K);              // shrink small buckets toward L1
+      p3 = w * raw + (1 - w) * anchorP;
+      const sign = oni.anchorAnom >= 0 ? "+" : "";
+      layers.push({ id: "enso", label: "ENSO-stratified", p: p3,
+        basis: `${m} ${pl} season${m === 1 ? "" : "s"} → ${Math.round(raw * 100)}% raw, shrunk ${Math.round((1 - w) * 100)}% toward the unstratified estimate (k=${ONI_SHRINK_K})`
+             + ` · phase from ${oni.anchorSeas} ${oni.anchorYear} ONI ${sign}${oni.anchorAnom.toFixed(2)}`
+             + (oni.assumed ? ` (ASO ${now.getUTCFullYear()} not yet observed — persistence assumed)` : "") });
+    }
+  }
 
-  const posterior = p1 != null ? p1 : p0;
+  const posterior = p3 != null ? p3 : anchorP;
   return { p: posterior, layers, doy,
     basis: layers.filter((l) => !l.unavailable).map((l) => l.label).join(" → ") };
 }
@@ -350,7 +481,7 @@ function seriesQuantity(ticker) {
   return null;
 }
 
-function climatologyAnchor(title, strike, clim, ticker) {
+function climatologyAnchor(title, strike, clim, ticker, oni) {
   if (!clim || strike == null) return null;
   const t = (String(title) + " " + String(ticker || "")).toLowerCase();
   // Ticker-derived identification is authoritative; fall back to the title only for
@@ -371,7 +502,7 @@ function climatologyAnchor(title, strike, clim, ticker) {
   const counts = major ? clim.major : clim.hurricanes;
   if (!counts || !counts.length) return null;
   const hits = counts.filter((c) => c > strike).length;
-  const post = posteriorFor(major, strike, clim, null);
+  const post = posteriorFor(major, strike, clim, null, oni);
   return {
     p: post ? post.p : hits / counts.length,
     unconditional: hits / counts.length,
@@ -648,7 +779,7 @@ async function collectKalshiMarkets() {
            pairs: paged.markets.map((m) => ({ m, title: m.title || m.subtitle || m.ticker || "", eventTicker: m.event_ticker })) };
 }
 
-async function fetchKalshi(storms, clim) {
+async function fetchKalshi(storms, clim, oni) {
   const paged = await collectKalshiMarkets();
   if (!paged.ok) return { ok: false, status: paged.status, source: "kalshi", note: paged.error, contracts: [], diag: paged.tried };
   const contracts = [];
@@ -668,7 +799,7 @@ async function fetchKalshi(storms, clim) {
     const volume = volumeOf(m);
     // Kalshi exposes the ladder threshold numerically; fall back to the sub-title text.
     const strike = parseStrike(sub, m.yes_sub_title, m.subtitle) ?? num(m.floor_strike);
-    const anchor = climatologyAnchor(title, strike, clim, m.ticker);
+    const anchor = climatologyAnchor(title, strike, clim, m.ticker, oni);
     contracts.push({
       id: m.ticker, label: title, short: shortLabel(sub ? title.replace(/\?$/, "") + " · " + sub : title, 46),
       storm: assocStorm(title + " " + sub, storms), market: Math.max(0.01, Math.min(0.99, price)),
@@ -698,7 +829,7 @@ async function fetchKalshi(storms, clim) {
            note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} ${paged.mode} · dropped ${drops.noKeyword}kw/${drops.sports}sport/${drops.noPrice}px` };
 }
 
-async function fetchPolymarket(storms, clim) {
+async function fetchPolymarket(storms, clim, oni) {
   const url = "https://gamma-api.polymarket.com/markets?closed=false&limit=500&order=volume&ascending=false";
   const r = await getJSON(url);
   if (!r.ok) return { ok: false, status: r.status, source: "polymarket", note: r.error, contracts: [] };
@@ -712,7 +843,7 @@ async function fetchPolymarket(storms, clim) {
     try { const p = typeof m.outcomePrices === "string" ? JSON.parse(m.outcomePrices) : m.outcomePrices; if (Array.isArray(p) && p.length) price = Number(p[0]); } catch { /* skip */ }
     if (!Number.isFinite(price)) continue;
     const strike = parseStrike(title);
-    const anchor = climatologyAnchor(title, strike, clim);
+    const anchor = climatologyAnchor(title, strike, clim, null, oni);
     contracts.push({
       id: m.slug || m.conditionId || m.id, label: title, short: shortLabel(title, 46),
       storm: assocStorm(title, storms), market: Math.max(0.01, Math.min(0.99, price)),
@@ -759,12 +890,16 @@ async function main() {
   // Climatology baseline first — it supplies the fair-value anchor for seasonal contracts.
   const { feed: climFeed, clim } = await fetchClimatology();
 
+  // ENSO phase (L3). Fetched before the markets so every anchor carries the same
+  // stratification; a failure here degrades the stack to L1, it never blocks it.
+  const { feed: ensoFeed, oni } = await fetchEnso();
+
   // markets: Kalshi first, fall back to Polymarket if Kalshi unreachable/empty.
   // BOTH attempts are recorded — a silent fallback previously hid a Kalshi failure
   // behind a healthy-looking Polymarket "0 markets".
-  const kal = await fetchKalshi(storms, clim);
+  const kal = await fetchKalshi(storms, clim, oni);
   let poly = null;
-  if (!kal.ok || kal.count === 0) poly = await fetchPolymarket(storms, clim);
+  if (!kal.ok || kal.count === 0) poly = await fetchPolymarket(storms, clim, oni);
   let mkt = kal;
   if (poly && ((poly.ok && poly.count > 0) || (!kal.ok && poly.ok))) mkt = poly;
   const marketAttempts = [
@@ -805,12 +940,18 @@ async function main() {
     climatology: climFeed.ok ? { ok: true, source: climFeed.source, file: clim.file, seasons: clim.years.length,
       hurricanesPerSeason: clim.hurricanes, majorPerSeason: clim.major, years: clim.years } : { ok: false, note: climFeed.note },
     satellite: { ok: true, source: "NASA GIBS VIIRS/NOAA-20", note: "probed live in the browser" },
+    enso: ensoFeed,
   };
 
   const latest = {
     schema: "millibar-terminal/1", generatedAt: nowIso, stepMin: STEP_MIN,
     note: storms.length ? null : "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
     feeds, storms, contracts, models: [], events, sstAnomalyC: null,
+    enso: oni ? {
+      ok: true, source: oni.source, phase: oni.phase, phaseLabel: PHASE_LABEL[oni.phase],
+      anchorSeas: oni.anchorSeas, anchorYear: oni.anchorYear, anchorAnom: oni.anchorAnom,
+      assumed: oni.assumed, ageMonths: oni.ageMonths, seasons: oni.seasons, recent: oni.recent,
+    } : { ok: false, note: ensoFeed.note },
   };
 
   // append a frame to the rolling history
@@ -835,10 +976,18 @@ async function main() {
     if (a.hosts) for (const h of a.hosts) console.log(`        ${h.host} status=${h.status} pages=${h.pages} scanned=${h.scanned}${h.error ? " err=" + h.error : ""}`);
   }
   console.log(`  climatology: ${climFeed.ok ? climFeed.source + " · " + clim.years.length + " seasons" : "FAIL — " + climFeed.note}`);
+  console.log(`  ENSO: ${ensoFeed.ok ? ensoFeed.source + " · " + ensoFeed.note : "FAIL — " + ensoFeed.note}`);
+  for (const a of (ensoFeed.attempts || [])) console.log(`    [${a.source}] ok=${a.ok} status=${a.status} → ${a.note}`);
   console.log(`  storms: ${storms.length} · contracts: ${contracts.length} (${contracts.filter((c) => c.model != null).length} anchored) · frames: ${framesJson.frames.length}`);
   if (contracts.length) for (const c of contracts.slice(0, 8)) {
     console.log(`    · ${String(c.id).slice(0, 26).padEnd(26)} mkt ${Math.round(c.market * 100)}¢  model ${c.model != null ? Math.round(c.model * 100) + "%" : "—"}  ${c.horizon}`);
   }
 }
 
-main().catch((e) => { console.error("[millibar] fatal:", e); process.exit(1); });
+// Run only when invoked directly, so the pure parsers/estimators above can be
+// imported by tests without kicking off a live fetch.
+if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))) {
+  main().catch((e) => { console.error("[millibar] fatal:", e); process.exit(1); });
+}
+
+export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity };

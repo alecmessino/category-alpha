@@ -18,6 +18,7 @@ anything a feed can't supply is labelled **NO FEED / MODEL DEFERRED**, never inv
 | Prediction-market prices, volume | Kalshi (paginated) → Polymarket fallback | **live** — per-storm *and* seasonal count contracts |
 | Order-book depth | Kalshi order book | **live** (Kalshi contracts only; else NO FEED) |
 | Fair-value anchor for **seasonal** count contracts → edge, Q-Kelly | HURDAT2 (NOAA best-track archive) | **live climatology baseline** |
+| ENSO phase (Oceanic Niño Index) | CPC `oni.ascii.txt` → NOAA PSL mirror | **live** — stratifies the seasonal anchor (L3) |
 | Forecast cone, recon, ASCAT, ensemble spaghetti | — | **NO FEED** (GIS/feeds not wired) |
 | Per-storm intensity probability (Cat 4+) | — | **MODEL DEFERRED** (no public ensemble Cat-probability feed; fabricating one would break the honesty rule) |
 
@@ -27,10 +28,34 @@ Seasonal contracts ("How many Atlantic hurricanes in 2026?") get a fair-value an
 past seasons (1991→last complete year) that exceeded the strike. The file name is discovered from the
 NHC directory index so it doesn't rot each year.
 
-This is an **empirical baseline, not a skill forecast** — it knows nothing about ENSO, SSTs, or
-season-to-date progress, all of which the market price already reflects. The UI labels it as such and
-tells the reader to treat EDGE as a reference spread rather than alpha. If HURDAT2 is unreachable the
-anchor stays `null` and allocations revert to MODEL DEFERRED — never a fabricated probability.
+This is an **empirical baseline, not a skill forecast**. The UI labels it as such and tells the reader
+to treat EDGE as a reference spread rather than alpha. If HURDAT2 is unreachable the anchor stays `null`
+and allocations revert to MODEL DEFERRED — never a fabricated probability.
+
+### The posterior stack
+The anchor is built in declared layers, and every layer that isn't wired says so on the page rather
+than being folded in silently. The last layer that produces a number is the one the edge uses, and the
+panel marks it `← USED`.
+
+| | Layer | Conditioning | Status |
+|---|---|---|---|
+| L0 | Historical climatology | none — unconditional seasonal frequency | live |
+| L1 | Day-of-year conditional | only counts storms that formed on/after today's day-of-year in each past season | live |
+| L2 | Season-to-date state | this year's count so far | **NO FEED** — HURDAT2 only publishes after the season; L1 assumes zero so far |
+| L3 | ENSO-stratified | restricts the L1 seasons to those whose peak-season ONI shared today's phase | live |
+
+**L3 in detail.** ENSO is the best-established seasonal modulator of Atlantic activity (El Niño raises
+shear and suppresses counts; La Niña does the reverse). We don't model that mechanism — we condition
+empirically, the same way L1 does. Three guards keep it honest:
+
+- **Small samples are shrunk.** A phase bucket holds roughly 8–14 of the ~35 modern seasons, so the raw
+  stratified frequency is noisy. It is shrunk toward the unstratified estimate by `m/(m+k)`, `k=8`, and
+  the panel prints both the raw rate and how far it was shrunk.
+- **Thin buckets are refused.** Under 6 phase-matched seasons the layer reports `NO FEED` instead of
+  publishing a 3-season "probability".
+- **The persistence assumption is labelled.** The current season's Aug–Sep–Oct ONI does not exist in
+  July. The most recent observed 3-month ONI is carried forward, and every surface that shows the layer
+  says so explicitly. It's an assumption, not an observation.
 | SST anomaly | — | **NO FEED** (live SST is available but an anomaly needs a climatology baseline that isn't wired) |
 
 When no storm is active (e.g. a quiet Atlantic), the terminal shows the honest
