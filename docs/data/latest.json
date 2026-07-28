@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-07-28T12:13:21.948Z",
+  "generatedAt": "2026-07-28T14:41:06.943Z",
   "stepMin": 15,
   "note": null,
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 295,
+      "latencyMs": 512,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep072026\",\"binNumber\":\"EP2\",\"name\":\"Genevieve\",\"classification\":\"HU\",\"intensity\":\"120\",\"pressure\":\"943\",\"latitude\":\"17.5N\",\"longitude\":\"115.4W\",\"latitudeNumeric\":17.5,\"longitudeNumeric\":-115.4,\"movementDir\":305,\"movementSpeed\":10,\"lastUpdate\":\"2026-07-28T09:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"016\",\"issuance\":\"2026-07-28T09:00:00.000Z\",\"fileUpdateTime\":\"2026-07-28T08:33:55.425Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP2.shtml\"},\"forecastAdvisory\":{\"advNum\":\"016\",\"issuance\":\"2026-0",
@@ -44,14 +44,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 26 named storms  | Above 26 | px=0.050",
-            "Will there be more than 24 named storms  | Above 24 | px=0.135",
-            "Will there be more than 22 named storms  | Above 22 | px=0.290",
-            "Will there be more than 20 named storms  | Above 20 | px=0.570",
-            "Will there be more than 19 named storms  | Above 19 | px=0.705",
-            "Will there be more than 18 named storms  | Above 18 | px=0.725"
+            "Will there be more than 7 major Atlantic | Above 7 | px=0.090",
+            "Will there be more than 6 major Atlantic | Above 6 | px=0.105",
+            "Will there be more than 5 major Atlantic | Above 5 | px=0.130",
+            "Will there be more than 4 major Atlantic | Above 4 | px=0.205",
+            "Will there be more than 3 major Atlantic | Above 3 | px=0.265",
+            "Will there be more than 2 major Atlantic | Above 2 | px=0.365"
           ],
-          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-01T15:00:00Z\",\"created_time\":\"2026-05-15T18:38:15.382078Z\",\"early_close_condition\":\"This market will close and expire early if the weather event occurs.\",\"event_ticker\":\"KXNAMEDSTORM-26DEC01EPACTOT\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-01T15:00:00Z\",\"expiration_time\":\"2026-12-08T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":26,\"last_price_dollars\":\"0.0"
+          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-02T04:59:00Z\",\"created_time\":\"2025-10-09T18:34:08.706612Z\",\"event_ticker\":\"KXHURCTOTMAJ-26DEC01\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":7,\"last_price_dollars\":\"0.0800\",\"latest_expiration_time\":\"2026-12-02T15:00:00Z\",\"liquidity_dollars\":\"0.0000\",\"market_type\":\"binary"
         }
       ]
     },
@@ -64,7 +64,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 45,
+      "latencyMs": 49,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -213,36 +213,36 @@
           -115.4
         ],
         [
-          18,
-          -116.5
+          18.3,
+          -117.2
         ],
         [
-          18.6,
-          -118
+          18.8,
+          -118.9
         ],
         [
-          19.1,
-          -119.7
+          19.5,
+          -120.7
         ],
         [
-          19.8,
-          -121.8
+          20.2,
+          -122.9
         ],
         [
-          20.5,
-          -124
+          20.9,
+          -125.3
         ],
         [
-          21.3,
-          -126.4
+          21.6,
+          -127.7
         ],
         [
-          22.7,
-          -131.5
+          23.1,
+          -133
         ],
         [
-          24.5,
-          -137.4
+          24.9,
+          -138.7
         ]
       ],
       "cone": [
@@ -251,96 +251,96 @@
           -115.4
         ],
         [
-          18.27410225306501,
-          -116.37179077013009
+          18.7268326873501,
+          -117.0241221227516
         ],
         [
-          19.140544615392354,
-          -117.79314320382097
+          19.44640985614285,
+          -118.65268926290625
         ],
         [
-          19.85480030474315,
-          -119.43306036795849
+          20.347625066428346,
+          -120.3661289734393
         ],
         [
-          20.756832376667898,
-          -121.44809433470029
+          21.266171673642397,
+          -122.53158674469896
         ],
         [
-          21.660833212463906,
-          -123.56855245614645
+          22.17672284534683,
+          -124.87332269635658
         ],
         [
-          22.67909723398972,
-          -125.93397169819791
+          23.09357202055406,
+          -127.2063706116497
         ],
         [
-          24.547807090096715,
-          -130.86839536279123
+          25.06084371732875,
+          -132.3047241814023
         ],
         [
-          26.811067744957597,
-          -136.54849470572245
+          27.261002900884815,
+          -137.79377206232678
         ],
         [
-          22.66136903354087,
-          -139.1586058720913
+          23.033279172607767,
+          -140.53335663503378
         ],
         [
-          23.413720709451525,
-          -139.79797464768103
+          23.81175257020438,
+          -141.18137340412972
         ],
         [
-          24.331448560201896,
-          -140.07227352085567
+          24.755901773999863,
+          -141.45162356615285
         ],
         [
-          25.27483683973892,
-          -139.9397429746998
+          25.72198862645019,
+          -141.30296398375893
         ],
         [
-          26.10026323433914,
-          -139.4205595834733
+          26.562935161868936,
+          -140.75802673076498
         ],
         [
-          26.682064057933566,
-          -138.59376431208122
+          27.15071489343791,
+          -139.89977356407084
         ],
         [
-          26.93166540916755,
-          -137.5852292456752
+          27.39584368526228,
+          -138.85886574822138
         ],
         [
-          22.188932255042403,
-          -138.25150529427756
+          22.538997099115182,
+          -139.6062279376732
         ],
         [
-          20.852192909903284,
-          -132.13160463720877
+          21.13915628267125,
+          -133.6952758185977
         ],
         [
-          19.920902766010283,
-          -126.8660283018021
+          20.106427979445943,
+          -128.1936293883503
         ],
         [
-          19.339166787536094,
-          -124.43144754385355
+          19.623277154653167,
+          -125.72667730364341
         ],
         [
-          18.843167623332103,
-          -122.15190566529971
+          19.1338283263576,
+          -123.26841325530106
         ],
         [
-          18.345199695256852,
-          -119.96693963204152
+          18.652374933571654,
+          -121.0338710265607
         ],
         [
-          18.05945538460765,
-          -118.20685679617903
+          18.15359014385715,
+          -119.14731073709376
         ],
         [
-          17.72589774693499,
-          -116.62820922986991
+          17.8731673126499,
+          -117.3758778772484
         ],
         [
           17.5,
@@ -363,67 +363,67 @@
         },
         {
           "at": [
-            18,
-            -116.5
+            18.3,
+            -117.2
           ],
-          "hr": 9,
-          "validZ": "2026-07-28T18:00:00.000Z"
+          "hr": 15,
+          "validZ": "2026-07-29T00:00:00.000Z"
         },
         {
           "at": [
-            18.6,
-            -118
+            18.8,
+            -118.9
           ],
-          "hr": 21,
-          "validZ": "2026-07-29T06:00:00.000Z"
+          "hr": 27,
+          "validZ": "2026-07-29T12:00:00.000Z"
         },
         {
           "at": [
-            19.1,
-            -119.7
+            19.5,
+            -120.7
           ],
-          "hr": 33,
-          "validZ": "2026-07-29T18:00:00.000Z"
+          "hr": 39,
+          "validZ": "2026-07-30T00:00:00.000Z"
         },
         {
           "at": [
-            19.8,
-            -121.8
+            20.2,
+            -122.9
           ],
-          "hr": 45,
-          "validZ": "2026-07-30T06:00:00.000Z"
+          "hr": 51,
+          "validZ": "2026-07-30T12:00:00.000Z"
         },
         {
           "at": [
-            20.5,
-            -124
+            20.9,
+            -125.3
           ],
-          "hr": 57,
-          "validZ": "2026-07-30T18:00:00.000Z"
+          "hr": 63,
+          "validZ": "2026-07-31T00:00:00.000Z"
         },
         {
           "at": [
-            21.3,
-            -126.4
+            21.6,
+            -127.7
           ],
-          "hr": 69,
-          "validZ": "2026-07-31T06:00:00.000Z"
+          "hr": 75,
+          "validZ": "2026-07-31T12:00:00.000Z"
         },
         {
           "at": [
-            22.7,
-            -131.5
+            23.1,
+            -133
           ],
-          "hr": 93,
-          "validZ": "2026-08-01T06:00:00.000Z"
+          "hr": 99,
+          "validZ": "2026-08-01T12:00:00.000Z"
         },
         {
           "at": [
-            24.5,
-            -137.4
+            24.9,
+            -138.7
           ],
-          "hr": 117,
-          "validZ": "2026-08-02T06:00:00.000Z"
+          "hr": 123,
+          "validZ": "2026-08-02T12:00:00.000Z"
         }
       ]
     },
@@ -448,28 +448,28 @@
           -150.3
         ],
         [
-          22.1,
-          -152.1
+          22.3,
+          -153.4
         ],
         [
-          22.6,
-          -154.4
+          22.7,
+          -155.6
         ],
         [
-          23.1,
-          -156.8
+          23.2,
+          -158
         ],
         [
           23.7,
-          -159.4
+          -160.6
         ],
         [
-          24.2,
-          -162
+          24.4,
+          -163.1
         ],
         [
-          24.7,
-          -164.3
+          25,
+          -165.7
         ]
       ],
       "cone": [
@@ -478,80 +478,80 @@
           -150.3
         ],
         [
-          22.39191905438732,
-          -152.02535453838894
+          22.749090080493787,
+          -153.30101321454768
         ],
         [
-          23.16031248688356,
-          -154.26012785377137
+          23.372541542887745,
+          -155.4453908540348
         ],
         [
-          23.874002575910854,
-          -156.59873976466082
+          24.083492772974687,
+          -157.79084219847
         ],
         [
-          24.68651636102014,
-          -159.15110126560856
+          24.785565464322943,
+          -160.29535353515223
         ],
         [
-          25.399508717382222,
-          -161.70575895065113
+          25.687997224022137,
+          -162.70412961463623
         ],
         [
-          26.106138180963796,
-          -163.92964988178784
+          26.514185292632998,
+          -165.2745921467113
         ],
         [
-          23.52965772093538,
-          -165.2344549226476
+          23.748618969301727,
+          -166.7323819435345
         ],
         [
-          23.943627625642964,
-          -165.65629743596486
+          24.201934649362975,
+          -167.18218524144282
         ],
         [
-          24.47274836781376,
-          -165.87165595952337
+          24.776748544578293,
+          -167.40633927238414
         ],
         [
-          25.036466110943735,
-          -165.8477441103412
+          25.38555045010208,
+          -167.370718617109
         ],
         [
-          25.54895993875542,
-          -165.58820225069488
+          25.93565579462136,
+          -167.08074619748098
         ],
         [
-          25.932207311732597,
-          -165.13254327596275
+          26.34331602615044,
+          -166.58056768578194
         ],
         [
-          26.127862291485584,
-          -164.5501371344889
+          26.546468569888212,
+          -165.94633072628855
         ],
         [
-          23.293861819036202,
-          -164.67035011821218
+          23.485814707367002,
+          -166.12540785328866
         ],
         [
-          23.000491282617777,
-          -162.29424104934887
+          23.11200277597786,
+          -163.49587038536376
         ],
         [
-          22.71348363897986,
-          -159.64889873439145
+          22.614434535677056,
+          -160.90464646484776
         ],
         [
-          22.32599742408915,
-          -157.0012602353392
+          22.316507227025312,
+          -158.20915780153
         ],
         [
-          22.039687513116444,
-          -154.53987214622865
+          22.027458457112253,
+          -155.7546091459652
         ],
         [
-          21.808080945612684,
-          -152.17464546161105
+          21.850909919506215,
+          -153.49898678545233
         ],
         [
           21.7,
@@ -574,51 +574,51 @@
         },
         {
           "at": [
-            22.1,
-            -152.1
+            22.3,
+            -153.4
           ],
-          "hr": 9,
-          "validZ": "2026-07-28T18:00:00.000Z"
+          "hr": 15,
+          "validZ": "2026-07-29T00:00:00.000Z"
         },
         {
           "at": [
-            22.6,
-            -154.4
+            22.7,
+            -155.6
           ],
-          "hr": 21,
-          "validZ": "2026-07-29T06:00:00.000Z"
+          "hr": 27,
+          "validZ": "2026-07-29T12:00:00.000Z"
         },
         {
           "at": [
-            23.1,
-            -156.8
+            23.2,
+            -158
           ],
-          "hr": 33,
-          "validZ": "2026-07-29T18:00:00.000Z"
+          "hr": 39,
+          "validZ": "2026-07-30T00:00:00.000Z"
         },
         {
           "at": [
             23.7,
-            -159.4
+            -160.6
           ],
-          "hr": 45,
-          "validZ": "2026-07-30T06:00:00.000Z"
+          "hr": 51,
+          "validZ": "2026-07-30T12:00:00.000Z"
         },
         {
           "at": [
-            24.2,
-            -162
+            24.4,
+            -163.1
           ],
-          "hr": 57,
-          "validZ": "2026-07-30T18:00:00.000Z"
+          "hr": 63,
+          "validZ": "2026-07-31T00:00:00.000Z"
         },
         {
           "at": [
-            24.7,
-            -164.3
+            25,
+            -165.7
           ],
-          "hr": 69,
-          "validZ": "2026-07-31T06:00:00.000Z"
+          "hr": 75,
+          "validZ": "2026-07-31T12:00:00.000Z"
         }
       ]
     }
@@ -1644,11 +1644,31 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACMAJ"
     },
     {
+      "id": "KXHURCAT-26ELIDA-T1",
+      "label": "Will Elida become a Category 1 hurricane?",
+      "short": "Will Elida become a Category 1 hurricane…",
+      "storm": null,
+      "market": 0.01,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": 1,
+      "liquidity": null,
+      "spread": 0.01,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
+    },
+    {
       "id": "KXHURRICANE-26DEC01CPACMAJ-1",
       "label": "Will there be more than 1 hurricane of category 3 or above in the Central Pacific in 2026?",
       "short": "Will there be more than 1 hurricane of…",
       "storm": null,
-      "market": 0.5900000000000001,
+      "market": 0.595,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1657,7 +1677,7 @@
       "horizon": "seasonal",
       "strike": 1,
       "liquidity": null,
-      "spread": 0.05999999999999994,
+      "spread": 0.050000000000000044,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -1684,26 +1704,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
-      "id": "KXHURCAT-26ELIDA-T1",
-      "label": "Will Elida become a Category 1 hurricane?",
-      "short": "Will Elida become a Category 1 hurricane…",
-      "storm": null,
-      "market": 0.01,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": 1,
-      "liquidity": null,
-      "spread": 0.01,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
-    },
-    {
       "id": "KXNAMEDSTORM-26DEC01CPACTOT-2",
       "label": "Will there be more than 2 named storms in the Central Pacific in 2026?",
       "short": "Will there be more than 2 named storms in the…",
@@ -1722,6 +1722,26 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
+    },
+    {
+      "id": "KXHURCAT-26ELIDA-T2",
+      "label": "Will Elida become a Category 2 hurricane?",
+      "short": "Will Elida become a Category 2 hurricane…",
+      "storm": null,
+      "market": 0.01,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": 2,
+      "liquidity": null,
+      "spread": 0.01,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
     },
     {
       "id": "KXHURRICANE-26DEC01CPACMAJ-2",
@@ -1748,7 +1768,7 @@
       "label": "Will there be more than 2 hurricanes of category 1 or above in the Central Pacific in 2026?",
       "short": "Will there be more than 2 hurricanes of…",
       "storm": null,
-      "market": 0.665,
+      "market": 0.6699999999999999,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1757,31 +1777,11 @@
       "horizon": "seasonal",
       "strike": 2,
       "liquidity": null,
-      "spread": 0.06999999999999995,
+      "spread": 0.05999999999999994,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
-    },
-    {
-      "id": "KXHURCAT-26ELIDA-T2",
-      "label": "Will Elida become a Category 2 hurricane?",
-      "short": "Will Elida become a Category 2 hurricane…",
-      "storm": null,
-      "market": 0.01,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": 2,
-      "liquidity": null,
-      "spread": 0.01,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
     },
     {
       "id": "KXNAMEDSTORM-26DEC01CPACTOT-3",
@@ -1804,11 +1804,31 @@
       "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
     },
     {
+      "id": "KXHURCAT-26ELIDA-T3",
+      "label": "Will Elida become a Category 3 hurricane?",
+      "short": "Will Elida become a Category 3 hurricane…",
+      "storm": null,
+      "market": 0.01,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": 3,
+      "liquidity": null,
+      "spread": 0.01,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
+    },
+    {
       "id": "KXHURRICANE-26DEC01EPACMAJ-3",
       "label": "Will there be more than 3 hurricanes of category 3 or above in the Eastern Pacific in 2026?",
       "short": "Will there be more than 3 hurricanes of…",
       "storm": null,
-      "market": 0.8049999999999999,
+      "market": 0.81,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1817,7 +1837,7 @@
       "horizon": "seasonal",
       "strike": 3,
       "liquidity": null,
-      "spread": 0.06999999999999995,
+      "spread": 0.05999999999999994,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -1848,7 +1868,7 @@
       "label": "Will there be more than 3 hurricanes of category 1 or above in the Central Pacific in 2026?",
       "short": "Will there be more than 3 hurricanes of…",
       "storm": null,
-      "market": 0.625,
+      "market": 0.62,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1857,38 +1877,18 @@
       "horizon": "seasonal",
       "strike": 3,
       "liquidity": null,
-      "spread": 0.030000000000000027,
+      "spread": 0.020000000000000018,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
-      "id": "KXHURCAT-26ELIDA-T3",
-      "label": "Will Elida become a Category 3 hurricane?",
-      "short": "Will Elida become a Category 3 hurricane…",
-      "storm": null,
-      "market": 0.01,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": 3,
-      "liquidity": null,
-      "spread": 0.01,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
-    },
-    {
       "id": "KXNAMEDSTORM-26DEC01CPACTOT-4",
       "label": "Will there be more than 4 named storms in the Central Pacific in 2026?",
       "short": "Will there be more than 4 named storms in the…",
       "storm": null,
-      "market": 0.9,
+      "market": 0.905,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1897,11 +1897,31 @@
       "horizon": "seasonal",
       "strike": 4,
       "liquidity": null,
-      "spread": 0.06000000000000005,
+      "spread": 0.050000000000000044,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
+    },
+    {
+      "id": "KXHURCAT-26ELIDA-T4",
+      "label": "Will Elida become a Category 4 hurricane?",
+      "short": "Will Elida become a Category 4 hurricane…",
+      "storm": null,
+      "market": 0.01,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": 4,
+      "liquidity": null,
+      "spread": 0.01,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
     },
     {
       "id": "KXHURRICANE-26DEC01EPACMAJ-4",
@@ -1928,7 +1948,7 @@
       "label": "Will there be more than 4 hurricanes of category 1 or above in the Central Pacific in 2026?",
       "short": "Will there be more than 4 hurricanes of…",
       "storm": null,
-      "market": 0.52,
+      "market": 0.525,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1937,31 +1957,11 @@
       "horizon": "seasonal",
       "strike": 4,
       "liquidity": null,
-      "spread": 0.06000000000000005,
+      "spread": 0.050000000000000044,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
-    },
-    {
-      "id": "KXHURCAT-26ELIDA-T4",
-      "label": "Will Elida become a Category 4 hurricane?",
-      "short": "Will Elida become a Category 4 hurricane…",
-      "storm": null,
-      "market": 0.01,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": 4,
-      "liquidity": null,
-      "spread": 0.01,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
     }
   ],
   "models": [],
