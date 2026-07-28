@@ -363,6 +363,12 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
     return { c, px, model, edge, d, hist: (c.histSeries && c.histSeries.length ? c.histSeries : MTX.priceHist(c, frame, 12)) };
   });
   const mktSource = (MT._feeds && MT._feeds.markets && MT._feeds.markets.source) || "market";
+  const spanH = (() => {
+    const fr = MT._frames || [];
+    if (fr.length < 2) return null;
+    const a = Date.parse(fr[0].tsZ), b = Date.parse(fr[fr.length - 1].tsZ);
+    return (a && b) ? Math.round((b - a) / 3600000) : null;
+  })();
   const tvol = rows.reduce((a, r) => a + r.c.volume, 0);
   const th = (h, right) => (
     <th key={h} style={{ textAlign: right ? "right" : "left", color: "var(--text-2)", fontWeight: 600, fontSize: 9.5, textTransform: "uppercase", letterSpacing: ".5px", padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{h}</th>

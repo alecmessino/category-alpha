@@ -98,26 +98,41 @@ function LayerToggles({ layers, setLayers, storm }) {
   );
 }
 
+// Age between frames must come from the REAL committed timestamps. Multiplying by the
+// configured STEP_MIN (15) understated it badly: GitHub Actions throttles the schedule,
+// so snapshots actually land ~90-100 min apart and a 4-frame scrub is hours, not an hour.
+function frameGapMin(a, b) {
+  const fr = (MT._frames || []);
+  const ta = fr[a] && Date.parse(fr[a].tsZ), tb = fr[b] && Date.parse(fr[b].tsZ);
+  if (!ta || !tb) return Math.abs(b - a) * (MT.STEP_MIN || 15);
+  return Math.round(Math.abs(tb - ta) / 60000);
+}
+function humanMin(m) {
+  if (m == null) return "—";
+  return m < 60 ? m + "m" : Math.floor(m / 60) + "h" + ("0" + (m % 60)).slice(-2) + "m";
+}
+
 function Transport({ frame, setFrame, playing, setPlaying, speed, setSpeed }) {
   const NF = lastFrame();
   const isLive = frame >= NF;
-  const ageMin = (NF - frame) * MT.STEP_MIN;
-  const human = ageMin < 60 ? ageMin + "m" : Math.floor(ageMin / 60) + "h" + ("0" + (ageMin % 60)).slice(-2) + "m";
+  const ageMin = frameGapMin(frame, NF);
+  const human = humanMin(ageMin);
   const [stepFlash, setStepFlash] = React.useState(null);
   const flashRef = React.useRef();
   const flash = (txt) => { setStepFlash(txt); clearTimeout(flashRef.current); flashRef.current = setTimeout(() => setStepFlash(null), 900); };
   const mode = isLive ? (playing ? "LIVE" : "HOLD") : (playing ? "REPLAY" : "PAUSED");
   const modeGreen = mode === "LIVE" || mode === "HOLD";
   const modeColor = modeGreen ? "var(--pos)" : "var(--warn)";
-  const step = MT.STEP_MIN;
+  const stepBack = frame > 0 ? frameGapMin(frame - 1, frame) : null;
+  const stepFwd = frame < NF ? frameGapMin(frame, frame + 1) : null;
   const btn = { cursor: "pointer", flex: "none", border: "1px solid var(--border-strong)", background: "var(--surface-sunken)", color: "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-mono)", borderRadius: 6 };
   const single = NF <= 0;
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "var(--surface-card)", borderTop: "1px solid var(--border-dim)" }}>
       <div style={{ display: "flex", gap: 6 }}>
-        <div title={"Step back " + step + "m (←)"} onClick={() => { setPlaying(false); setFrame(Math.max(0, frame - 1)); flash("STEP −" + step + "m"); }} style={{ ...btn, width: 30, height: 30, fontSize: 11, opacity: single ? 0.4 : 1 }}>◀◀</div>
+        <div title={"Step back " + humanMin(stepBack) + " (←)"} onClick={() => { setPlaying(false); setFrame(Math.max(0, frame - 1)); flash("STEP −" + humanMin(stepBack)); }} style={{ ...btn, width: 30, height: 30, fontSize: 11, opacity: single ? 0.4 : 1 }}>◀◀</div>
         <div title="Play/pause (space)" onClick={() => setPlaying(!playing)} style={{ ...btn, width: 36, height: 36, fontSize: 13, background: "var(--surface-solid)", color: "var(--text-inverse)", borderColor: "var(--surface-solid)", opacity: single ? 0.4 : 1 }}>{playing ? "❚❚" : "▶"}</div>
-        <div title={"Step forward " + step + "m (→)"} onClick={() => { setPlaying(false); setFrame(Math.min(NF, frame + 1)); flash("STEP +" + step + "m"); }} style={{ ...btn, width: 30, height: 30, fontSize: 11, opacity: single ? 0.4 : 1 }}>▶▶|</div>
+        <div title={"Step forward " + humanMin(stepFwd) + " (→)"} onClick={() => { setPlaying(false); setFrame(Math.min(NF, frame + 1)); flash("STEP +" + humanMin(stepFwd)); }} style={{ ...btn, width: 30, height: 30, fontSize: 11, opacity: single ? 0.4 : 1 }}>▶▶|</div>
         <div title="Jump to live" onClick={() => { setPlaying(true); setFrame(NF); }} style={{ ...btn, padding: "0 10px", height: 30, fontSize: 10, fontWeight: 700, color: isLive ? "var(--pos)" : "var(--text-2)", borderColor: isLive ? "var(--pos)" : "var(--border-strong)" }}>▶▶ Live</div>
       </div>
       <div style={{ flex: 1, position: "relative", height: 30, display: "flex", alignItems: "center", minWidth: 0 }}>
@@ -302,7 +317,7 @@ function MillibarTerminalApp() {
                     style={{ marginTop: 7, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-mono)",
                       fontSize: 9.5, fontWeight: 800, letterSpacing: ".5px", color: "var(--warn)", border: "1px solid var(--warn)",
                       borderRadius: 5, padding: "3px 8px" }}>
-                    ⏱ HISTORICAL — {MTX.frameTime(frame)} · click for live
+                    ⏱ HISTORICAL — {MTX.frameTime(frame)} · −{humanMin(frameGapMin(frame, NF))} · click for live
                   </div>
                 )}
               </div>

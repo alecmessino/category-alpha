@@ -6,7 +6,11 @@ name: Refresh Millibar Terminal data
 
 on:
   schedule:
-    - cron: "*/15 * * * *"   # every ~15 min (GitHub may delay under load)
+    # NOTE: GitHub throttles high-frequency schedules hard — a */15 cron was actually
+    # delivering ~106 min median. Asking for */10 does not help and can make GitHub
+    # drop runs entirely; a half-hourly ask is honoured far more reliably. The UI now
+    # reports the OBSERVED cadence rather than this configured value either way.
+    - cron: "*/30 * * * *"   # requested every 30 min; delivery is best-effort
   workflow_dispatch: {}       # manual "Run workflow" button (optional)
   push:
     branches: [main]          # your first push auto-populates real data — no manual step needed.

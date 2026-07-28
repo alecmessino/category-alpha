@@ -54,6 +54,14 @@
     let framesArr = (framesJson && Array.isArray(framesJson.frames)) ? framesJson.frames.slice(-24) : [];
     if (framesArr.length === 0) framesArr = [synthFrame(latest, nowIso)];
     const FRAMES = framesArr.length, NF = FRAMES - 1;
+    // Median gap between committed snapshots — what the pipeline ACTUALLY delivers.
+    const gaps = [];
+    for (let i = 1; i < framesArr.length; i++) {
+      const a = Date.parse(framesArr[i - 1].tsZ), b = Date.parse(framesArr[i].tsZ);
+      if (a && b && b > a) gaps.push((b - a) / 60000);
+    }
+    gaps.sort((x, y) => x - y);
+    const observedStepMin = gaps.length ? Math.round(gaps[Math.floor(gaps.length / 2)]) : null;
     const clampF = (f) => Math.max(0, Math.min(NF, Math.round(f)));
 
     // ---- storms ----
@@ -176,11 +184,15 @@
       feedHealth(feeds.satellite, "GIBS imagery"),
       feedHealth(feeds.sst, "SST anomaly"),
       feedHealth(feeds.models, "Ensemble models"),
-      { name: "Data refresh", detail: latest.generatedAt ? agoStr(latest.generatedAt) + " · every " + stepMin + "m" : "awaiting first refresh", status: latest.generatedAt ? "PASS" : "EMPTY" },
+      { name: "Data refresh", status: latest.generatedAt ? "PASS" : "EMPTY",
+        detail: latest.generatedAt
+          ? agoStr(latest.generatedAt) + " · ~" + (observedStepMin != null ? observedStepMin + "m observed" : stepMin + "m") +
+            (observedStepMin != null && observedStepMin > stepMin * 1.5 ? " (" + stepMin + "m scheduled — CI throttled)" : "")
+          : "awaiting first refresh" },
     ];
 
     return {
-      FRAMES, STEP_MIN: stepMin, storms, contracts,
+      FRAMES, STEP_MIN: stepMin, OBSERVED_STEP_MIN: observedStepMin, storms, contracts,
       evidence, models: latest.models || [], events, pipeline, health,
       _frames: framesArr, _feeds: feeds, _generatedAt: latest.generatedAt || null, _note: latest.note || null,
     };
