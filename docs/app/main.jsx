@@ -205,12 +205,31 @@ function MillibarTerminalApp() {
     { name: "GIBS imagery", ok: !!(F.satellite && F.satellite.ok), status: "EMPTY", detail: (F.satellite && F.satellite.source) || "NASA GIBS" },
   ];
 
+  const sitVerdict = (MTX.situation ? MTX.situation(360).verdict : null);
+  const VTONE = { "TRADE-RELEVANT": "var(--edge-glow)", MATERIAL: "var(--warn)", COSMETIC: "var(--text-2)", "NO CHANGE": "var(--text-2)" };
   const shellHeader = (
-    <header style={{ position: "sticky", top: 0, zIndex: 30, display: "flex", alignItems: "center", gap: 14, padding: "9px 20px", background: "var(--surface-card)", borderBottom: "1px solid var(--border-dim)" }}>
-      <img src={tactical ? "assets/logo-dark.svg" : "assets/logo.svg"} alt="Millibar Terminal" style={{ height: 40 }} onError={(e) => { e.target.style.display = "none"; }} />
+    <header style={{ position: "sticky", top: 0, zIndex: 30, display: "flex", alignItems: "center", gap: 12, padding: "9px 20px", background: "var(--surface-card)", borderBottom: "1px solid var(--border-dim)", flexWrap: "wrap" }}>
+      <img src={tactical ? "assets/logo-dark.svg" : "assets/logo.svg"} alt="Millibar Terminal" style={{ height: 34 }} onError={(e) => { e.target.style.display = "none"; }} />
       <PL>Category Alpha</PL>
       <HUD streams={feeds} />
+      {/* Active systems live in the top bar — switching storms shouldn't require
+          hunting inside the map overlay. */}
+      {stormIds.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 4, borderLeft: "1px solid var(--border-dim)", marginLeft: 2, flexWrap: "wrap" }}>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", letterSpacing: ".6px" }}>ACTIVE</span>
+          {Object.values(MT.storms).map((s2) => (
+            <PL key={s2.id} mono={false} size="sm" active={s2.id === storm} dotColor={s2.color} onClick={() => setStorm(s2.id)}>
+              {s2.name} <span style={{ opacity: .6, fontSize: 10 }}>{(s2.full_cls.match(/Cat \d/) || [s2.cls])[0].replace("Cat ", "C")}</span>
+            </PL>
+          ))}
+        </div>
+      )}
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>
+        {sitVerdict && (
+          <span title="Highest-severity change in the last 6h" style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: .6,
+            color: VTONE[sitVerdict] || "var(--text-2)", border: "1px solid " + (VTONE[sitVerdict] || "var(--border-dim)"),
+            borderRadius: 5, padding: "2px 7px" }}>{sitVerdict}</span>
+        )}
         <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: MT._generatedAt ? "var(--pos)" : "var(--warn)" }} />
           {MT._generatedAt ? "updated " + (fmtAgo(MT._generatedAt) || "—") : "awaiting refresh"}
@@ -220,9 +239,7 @@ function MillibarTerminalApp() {
             <span style={{ opacity: .4 }}>·</span>
             <span title={imagery.attribution || ""} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: imagery.fresh.product === "GOES GeoColor" ? "var(--pos)" : "var(--warn)" }} />
-              {imagery.fresh.product === "GOES GeoColor"
-                ? "sat " + String(imagery.fresh.at).slice(11, 16) + "Z"
-                : "sat " + imagery.fresh.at + " (daily)"}
+              {imagery.fresh.product === "GOES GeoColor" ? "sat " + String(imagery.fresh.at).slice(11, 16) + "Z" : "sat " + imagery.fresh.at}
             </span>
           </>
         )}
@@ -239,7 +256,7 @@ function MillibarTerminalApp() {
           <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />
           <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: 14, alignItems: "start" }}>
             <window.MT_Observability narrow={narrow} />
-            <div style={{ height: 300 }}><window.MT_Console stormId={null} frame={frame} /></div>
+            <div style={{ height: 210 }}><window.MT_Console stormId={null} frame={frame} /></div>
           </div>
         </main>
         <TweaksPanel>
@@ -270,11 +287,7 @@ function MillibarTerminalApp() {
               <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} onImagery={setImagery} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--blue-300)", textTransform: "uppercase" }}>Storm Command Center</span>
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginLeft: "auto", pointerEvents: "auto" }}>
-                  {Object.values(MT.storms).map((s) => (
-                    <PL key={s.id} mono={false} size="sm" active={s.id === storm} dotColor={s.color} onClick={() => setStorm(s.id)}>{s.name} <span style={{ opacity: .6, fontSize: 10 }}>{s.cls}</span></PL>
-                  ))}
-                </div>
+
               </div>
               <LayerToggles layers={layers} setLayers={setLayers} storm={storm} />
             </div>
@@ -327,14 +340,14 @@ function MillibarTerminalApp() {
         {/* 3b · ANALYSIS — term structure + event ledger */}
         <window.MT_Section label="Analysis" tier="term structure · event ledger" defaultOpen
           summary="collapsed">
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: 14, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.35fr 1fr", gap: 14, alignItems: "start" }}>
             <window.MT_YieldCurve dense={dense} />
             <window.MT_Ledger frame={frame} onSeek={(f) => { setPlaying(false); setFrame(f); }} dense={dense} />
           </div>
         </window.MT_Section>
 
         {/* 4 · EVIDENCE — what the read rests on */}
-        <window.MT_Section label="Evidence" tier="inputs · confidence · fair value"
+        <window.MT_Section label="Evidence" tier="inputs · confidence · fair value" defaultOpen
           summary={MT.evidence.length + " signals · tier " + MTX.snap(storm, frame).tier}>
           <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: 14, alignItems: "start" }}>
             <window.MT_Evidence stormId={storm} frame={frame} selection={sel} onSelect={(id) => setSel((s) => ({ ...s, evidence: id }))} dense={dense} />
@@ -360,7 +373,7 @@ function MillibarTerminalApp() {
           </div>
         </window.MT_Section>
 
-        <div style={{ marginTop: 14, height: 300 }}>
+        <div style={{ marginTop: 14, height: 210 }}>
           <window.MT_Console stormId={storm} frame={frame} />
         </div>
       </main>

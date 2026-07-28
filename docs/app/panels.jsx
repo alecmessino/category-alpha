@@ -249,7 +249,7 @@ function MT_YieldCurve({ dense }) {
     );
   }
 
-  const W = 300, H = dense ? 108 : 128, PADL = 26, PADB = 16, PADT = 8;
+  const W = 520, H = dense ? 132 : 150, PADL = 30, PADB = 18, PADT = 10;
   return (
     <P title="Term Structure — market vs climatology" right={<BG tone="special">EDGE SHADED</BG>}
       footer={<PF source="Kalshi ladder × HURDAT2 baseline" latency="live" version="—" tier="C" />}>
@@ -271,7 +271,8 @@ function MT_YieldCurve({ dense }) {
                 {avgEdge >= 0 ? "+" : ""}{avgEdge.toFixed(1)} avg
               </span>
             </div>
-            <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "auto", display: "block" }} aria-label={name + " term structure"}>
+            <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMinYMid meet"
+              style={{ width: "100%", maxWidth: W, height: "auto", display: "block" }} aria-label={name + " term structure"}>
               {[0, 0.5, 1].map((t) => (
                 <g key={t}>
                   <line x1={PADL} x2={W - 8} y1={py(t)} y2={py(t)} stroke="var(--border-dim)" strokeWidth="1" />

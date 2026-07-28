@@ -11,6 +11,23 @@ a{color:var(--text-link)}a:hover{color:var(--accent-bright)}
 input[type=number]{outline:none}input[type=number]:focus{border-color:var(--accent)!important;box-shadow:var(--ring-focus)}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:5px}
+/* Leaflet containment, inlined. The JS is vendored but the stylesheet still comes
+   from a CDN; if that request fails, Leaflet's own `overflow:hidden` never applies
+   and absolutely-positioned tiles spill out of the map and across the layout.
+   These are the minimum rules that keep the map inside its box regardless. */
+.leaflet-container{overflow:hidden;position:relative;-webkit-tap-highlight-color:transparent}
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,
+.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0}
+.leaflet-container img.leaflet-tile{max-width:none!important;max-height:none!important;width:256px;height:256px;border:0}
+.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}
+.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}
+.leaflet-control-container{position:absolute;inset:0;z-index:800;pointer-events:none}
+.leaflet-top,.leaflet-bottom{position:absolute;z-index:800;pointer-events:none}
+.leaflet-control{pointer-events:auto;clear:both;position:relative}
+.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}
+.leaflet-right .leaflet-control{float:right;margin-right:10px}
+.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}
+.leaflet-control-zoom a{display:block;width:26px;height:26px;line-height:26px;text-align:center;text-decoration:none;font:700 16px/26px var(--font-sans)}
 .leaflet-container{background:var(--slate-950);font-family:var(--font-sans)}
 .leaflet-control-zoom a{background:rgba(9,15,26,.9)!important;color:#9fb2ca!important;border-color:#1a2740!important}
 .leaflet-control-zoom a:hover{background:#132743!important;color:#fff!important}

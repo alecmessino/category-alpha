@@ -89,8 +89,8 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
       .setView(S.center, 5);
     L.control.zoom({ position: "topright" }).addTo(map);
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      { subdomains: "abcd", maxZoom: 9, opacity: 0.62, attribution: "© OpenStreetMap · © CARTO" }).addTo(map);
-    map.attributionControl.addAttribution("Imagery NASA GIBS/VIIRS · storm data NHC");
+      { subdomains: "abcd", maxZoom: 9, opacity: 0.62, attribution: "© OpenStreetMap · CARTO" }).addTo(map);
+    map.attributionControl.addAttribution("NASA GIBS · NHC");
     refs.current.ovl = L.layerGroup().addTo(map);
     mapRef.current = map;
     setTimeout(() => map.invalidateSize(), 200);
@@ -131,7 +131,7 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
         const iso = goesSlot(back);
         const url = goesUrl(goes, iso);
         if (await probe(url, la, lo, 4)) {
-          attach(url, goes.replace(/_/g, " ") + " · " + iso.replace("T", " ") + " · NASA GIBS", 7,
+          attach(url, goes.replace(/_/g, " ").replace(" ABI GeoColor", "") + " " + iso.slice(11, 16) + "Z", 7,
             { product: "GOES GeoColor", at: iso });
           return;
         }
@@ -140,7 +140,7 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
         const date = viirsDay(back);
         const url = viirsUrl(date);
         if (await probe(url, la, lo, 5)) {
-          attach(url, "VIIRS/NOAA-20 true-color · " + date + " · NASA GIBS", 8,
+          attach(url, "VIIRS " + date, 8,
             { product: "VIIRS daily", at: date });
           return;
         }
