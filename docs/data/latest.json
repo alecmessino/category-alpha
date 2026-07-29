@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-07-29T20:43:22.223Z",
+  "generatedAt": "2026-07-29T20:53:39.126Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,10 +9,10 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 143,
+      "latencyMs": 145,
       "count": 2,
       "note": "2 active",
-      "raw": "{\"id\":\"ep072026\",\"binNumber\":\"EP2\",\"name\":\"Genevieve\",\"classification\":\"HU\",\"intensity\":\"100\",\"pressure\":\"960\",\"latitude\":\"18.8N\",\"longitude\":\"119.2W\",\"latitudeNumeric\":18.8,\"longitudeNumeric\":-119.2,\"movementDir\":290,\"movementSpeed\":8,\"lastUpdate\":\"2026-07-29T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"022\",\"issuance\":\"2026-07-29T15:00:00.000Z\",\"fileUpdateTime\":\"2026-07-29T14:38:16.978Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP2.shtml\"},\"forecastAdvisory\":{\"advNum\":\"022\",\"issuance\":\"2026-07",
+      "raw": "{\"id\":\"ep072026\",\"binNumber\":\"EP2\",\"name\":\"Genevieve\",\"classification\":\"HU\",\"intensity\":\"85\",\"pressure\":\"970\",\"latitude\":\"19.2N\",\"longitude\":\"120.1W\",\"latitudeNumeric\":19.2,\"longitudeNumeric\":-120.1,\"movementDir\":290,\"movementSpeed\":9,\"lastUpdate\":\"2026-07-29T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"023\",\"issuance\":\"2026-07-29T21:00:00.000Z\",\"fileUpdateTime\":\"2026-07-29T20:38:26.547Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP2.shtml\"},\"forecastAdvisory\":{\"advNum\":\"023\",\"issuance\":\"2026-07-",
       "forecast": "Genevieve: 8 forecast positions · cone reconstructed from NHC track-error radii | Fausto: 3 forecast positions · cone reconstructed from NHC track-error radii"
     },
     "markets": {
@@ -44,14 +44,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 7 major Atlantic | Above 7 | px=0.085",
-            "Will there be more than 6 major Atlantic | Above 6 | px=0.105",
-            "Will there be more than 5 major Atlantic | Above 5 | px=0.165",
-            "Will there be more than 4 major Atlantic | Above 4 | px=0.195",
-            "Will there be more than 3 major Atlantic | Above 3 | px=0.280",
-            "Will there be more than 2 major Atlantic | Above 2 | px=0.385"
+            "Will there be more than 30  Atlantic hur | Above 30 | px=0.010",
+            "Will there be more than 25  Atlantic hur | Above 25 | px=0.015",
+            "Will there be more than 20  Atlantic hur | Above 20 | px=0.030",
+            "Will there be more than 18  Atlantic hur | Above 18 | px=0.070",
+            "Will there be more than 16  Atlantic hur | Above 16 | px=0.130",
+            "Will there be more than 14  Atlantic hur | Above 14 | px=0.305"
           ],
-          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-02T04:59:00Z\",\"created_time\":\"2025-10-09T18:34:08.706612Z\",\"event_ticker\":\"KXHURCTOTMAJ-26DEC01\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":7,\"last_price_dollars\":\"0.1000\",\"latest_expiration_time\":\"2026-12-02T15:00:00Z\",\"liquidity_dollars\":\"0.0000\",\"market_type\":\"binary"
+          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-02T04:59:00Z\",\"created_time\":\"2025-10-09T18:33:57.03452Z\",\"event_ticker\":\"KXTROPSTORM-26DEC01\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":30,\"last_price_dollars\":\"0.0300\",\"latest_expiration_time\":\"2026-12-02T15:00:00Z\",\"liquidity_dollars\":\"0.0000\",\"market_type\":\"binary\""
         }
       ]
     },
@@ -64,7 +64,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 103,
+      "latencyMs": 107,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -194,7 +194,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 429,
+      "latencyMs": 357,
       "count": 76,
       "attempts": [],
       "note": "El Niño · AMJ 2026 ONI +0.98 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -205,21 +205,21 @@
       "id": "EP072026",
       "name": "Genevieve",
       "cls": "HU",
-      "full_cls": "Cat 3 Hurricane",
+      "full_cls": "Cat 2 Hurricane",
       "basin": "west",
       "center": [
-        18.8,
-        -119.2
+        19.2,
+        -120.1
       ],
-      "movement": "WNW 8 kt",
-      "wind": 100,
-      "pressure": 960,
-      "advNum": "022",
-      "advTimeZ": "2026-07-29T15:00:00.000Z",
+      "movement": "WNW 9 kt",
+      "wind": 85,
+      "pressure": 970,
+      "advNum": "023",
+      "advTimeZ": "2026-07-29T21:00:00.000Z",
       "track": [
         [
-          18.8,
-          -119.2
+          19.2,
+          -120.1
         ],
         [
           19.7,
@@ -256,104 +256,104 @@
       ],
       "cone": [
         [
-          18.8,
-          -119.2
+          19.2,
+          -120.1
         ],
         [
-          20.13395155169217,
-          -121.64333291971502
+          19.986475930643653,
+          -121.70540415649543
         ],
         [
-          21.05220459563227,
-          -123.96799714321395
+          20.94548020725608,
+          -124.00596124705167
         ],
         [
-          22.05519534139746,
-          -126.28516590233642
+          21.952729540124032,
+          -126.322887960121
         ],
         [
-          23.073683830151076,
-          -128.85306973256064
+          22.969907697868816,
+          -128.8866020260678
         ],
         [
-          23.986194466427154,
-          -131.60230106521672
+          23.8820167214829,
+          -131.63451343999668
         ],
         [
-          24.970582381831854,
-          -134.32423707226758
+          24.860778897321744,
+          -134.3672273708716
         ],
         [
-          27.222792102338786,
-          -139.1316734270914
+          27.112319853712194,
+          -139.19642049211618
         ],
         [
-          29.923704438658447,
-          -142.43908169892802
+          29.873111827691986,
+          -142.48060465645483
         ],
         [
-          26.592067552406657,
-          -146.5107820180251
+          26.62476586359649,
+          -146.45051246757447
         ],
         [
-          27.506960402180688,
-          -146.89362602652733
+          27.51678639212617,
+          -146.82378537586413
         ],
         [
-          28.481689967809885,
-          -146.85116579677376
+          28.467147718614637,
+          -146.7823866518544
         ],
         [
-          29.36786250887271,
-          -146.38986551384144
+          29.331165946150893,
+          -146.3326188759954
         ],
         [
-          30.030566289166448,
-          -145.57995396410934
+          29.977302131937286,
+          -145.54295511500658
         ],
         [
-          30.368910665566098,
-          -144.54473283915766
+          30.307187898926944,
+          -144.53361451817872
         ],
         [
-          30.331385773864223,
-          -143.44180517095748
+          30.27060112951762,
+          -143.45826004168353
         ],
         [
-          25.87629556134155,
-          -145.76091830107197
+          25.92688817230801,
+          -145.71939534354516
         ],
         [
-          23.57720789766121,
-          -141.26832657290856
+          23.687680146287803,
+          -141.2035795078838
         ],
         [
-          22.029417618168146,
-          -135.47576292773243
+          22.139221102678256,
+          -135.4327726291284
         ],
         [
-          21.413805533572845,
-          -132.39769893478328
+          21.5179832785171,
+          -132.36548656000332
         ],
         [
-          20.926316169848924,
-          -129.54693026743934
+          21.030092302131184,
+          -129.51339797393217
         ],
         [
-          20.344804658602538,
-          -126.91483409766357
+          20.447270459875966,
+          -126.877112039879
         ],
         [
-          19.74779540436773,
-          -124.43200285678606
+          19.85451979274392,
+          -124.39403875294833
         ],
         [
-          19.266048448307828,
-          -121.95666708028497
+          19.413524069356345,
+          -121.89459584350456
         ],
         [
-          18.8,
-          -119.2
+          19.2,
+          -120.1
         ]
       ],
       "reconTracks": null,
@@ -364,18 +364,18 @@
       "trackPoints": [
         {
           "at": [
-            18.8,
-            -119.2
+            19.2,
+            -120.1
           ],
           "hr": 0,
-          "validZ": "2026-07-29T15:00:00.000Z"
+          "validZ": "2026-07-29T21:00:00.000Z"
         },
         {
           "at": [
             19.7,
             -121.8
           ],
-          "hr": 15,
+          "hr": 9,
           "validZ": "2026-07-30T06:00:00.000Z"
         },
         {
@@ -383,7 +383,7 @@
             20.4,
             -124.2
           ],
-          "hr": 27,
+          "hr": 21,
           "validZ": "2026-07-30T18:00:00.000Z"
         },
         {
@@ -391,7 +391,7 @@
             21.2,
             -126.6
           ],
-          "hr": 39,
+          "hr": 33,
           "validZ": "2026-07-31T06:00:00.000Z"
         },
         {
@@ -399,7 +399,7 @@
             22,
             -129.2
           ],
-          "hr": 51,
+          "hr": 45,
           "validZ": "2026-07-31T18:00:00.000Z"
         },
         {
@@ -407,7 +407,7 @@
             22.7,
             -132
           ],
-          "hr": 63,
+          "hr": 57,
           "validZ": "2026-08-01T06:00:00.000Z"
         },
         {
@@ -415,7 +415,7 @@
             23.5,
             -134.9
           ],
-          "hr": 75,
+          "hr": 69,
           "validZ": "2026-08-01T18:00:00.000Z"
         },
         {
@@ -423,7 +423,7 @@
             25.4,
             -140.2
           ],
-          "hr": 99,
+          "hr": 93,
           "validZ": "2026-08-02T18:00:00.000Z"
         },
         {
@@ -431,7 +431,7 @@
             27.9,
             -144.1
           ],
-          "hr": 123,
+          "hr": 117,
           "validZ": "2026-08-03T18:00:00.000Z"
         }
       ]
@@ -1496,6 +1496,26 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
     },
     {
+      "id": "KXNAMEDSTORM-26DEC01CPACTOT-2",
+      "label": "Will there be more than 2 named storms in the Central Pacific in 2026?",
+      "short": "Will there be more than 2 named storms in the…",
+      "storm": null,
+      "market": 0.965,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": 2,
+      "liquidity": null,
+      "spread": 0.050000000000000044,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
+    },
+    {
       "id": "KXHURRICANE-26DEC01CPACMAJ-2",
       "label": "Will there be more than 2 hurricanes of category 3 or above in the Central Pacific in 2026?",
       "short": "Will there be more than 2 hurricanes of…",
@@ -1536,26 +1556,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
-      "id": "KXNAMEDSTORM-26DEC01CPACTOT-2",
-      "label": "Will there be more than 2 named storms in the Central Pacific in 2026?",
-      "short": "Will there be more than 2 named storms in the…",
-      "storm": null,
-      "market": 0.965,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": 2,
-      "liquidity": null,
-      "spread": 0.050000000000000044,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
-    },
-    {
       "id": "KXHURCAT-26ELIDA-T2",
       "label": "Will Elida become a Category 2 hurricane?",
       "short": "Will Elida become a Category 2 hurricane…",
@@ -1574,6 +1574,26 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
+    },
+    {
+      "id": "KXNAMEDSTORM-26DEC01CPACTOT-3",
+      "label": "Will there be more than 3 named storms in the Central Pacific in 2026?",
+      "short": "Will there be more than 3 named storms in the…",
+      "storm": null,
+      "market": 0.9299999999999999,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": 3,
+      "liquidity": null,
+      "spread": 0.07999999999999996,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
     },
     {
       "id": "KXHURRICANE-26DEC01EPACMAJ-3",
@@ -1636,26 +1656,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
-      "id": "KXNAMEDSTORM-26DEC01CPACTOT-3",
-      "label": "Will there be more than 3 named storms in the Central Pacific in 2026?",
-      "short": "Will there be more than 3 named storms in the…",
-      "storm": null,
-      "market": 0.9299999999999999,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": 3,
-      "liquidity": null,
-      "spread": 0.07999999999999996,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
-    },
-    {
       "id": "KXHURCAT-26ELIDA-T3",
       "label": "Will Elida become a Category 3 hurricane?",
       "short": "Will Elida become a Category 3 hurricane…",
@@ -1674,6 +1674,26 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
+    },
+    {
+      "id": "KXNAMEDSTORM-26DEC01CPACTOT-4",
+      "label": "Will there be more than 4 named storms in the Central Pacific in 2026?",
+      "short": "Will there be more than 4 named storms in the…",
+      "storm": null,
+      "market": 0.88,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": 4,
+      "liquidity": null,
+      "spread": 0.08000000000000007,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
     },
     {
       "id": "KXHURRICANE-26DEC01EPACMAJ-4",
@@ -1716,26 +1736,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
-      "id": "KXNAMEDSTORM-26DEC01CPACTOT-4",
-      "label": "Will there be more than 4 named storms in the Central Pacific in 2026?",
-      "short": "Will there be more than 4 named storms in the…",
-      "storm": null,
-      "market": 0.88,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": 4,
-      "liquidity": null,
-      "spread": 0.08000000000000007,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
-    },
-    {
       "id": "KXHURCAT-26ELIDA-T4",
       "label": "Will Elida become a Category 4 hurricane?",
       "short": "Will Elida become a Category 4 hurricane…",
@@ -1754,6 +1754,26 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
+    },
+    {
+      "id": "KXNAMEDSTORM-26DEC01CPACTOT-5",
+      "label": "Will there be more than 5 named storms in the Central Pacific in 2026?",
+      "short": "Will there be more than 5 named storms in the…",
+      "storm": null,
+      "market": 0.26,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": 5,
+      "liquidity": null,
+      "spread": 0.12,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
     },
     {
       "id": "KXHURRICANE-26DEC01EPACMAJ-5",
@@ -1816,26 +1836,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
-      "id": "KXNAMEDSTORM-26DEC01CPACTOT-5",
-      "label": "Will there be more than 5 named storms in the Central Pacific in 2026?",
-      "short": "Will there be more than 5 named storms in the…",
-      "storm": null,
-      "market": 0.26,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": 5,
-      "liquidity": null,
-      "spread": 0.12,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
-    },
-    {
       "id": "KXHURCAT-26ELIDA-T5",
       "label": "Will Elida become a Category 5 hurricane?",
       "short": "Will Elida become a Category 5 hurricane…",
@@ -1856,6 +1856,26 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26ELIDA"
     },
     {
+      "id": "KXNAMEDSTORM-26DEC01CPACTOT-6",
+      "label": "Will there be more than 6 named storms in the Central Pacific in 2026?",
+      "short": "Will there be more than 6 named storms in the…",
+      "storm": null,
+      "market": 0.21500000000000002,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": 6,
+      "liquidity": null,
+      "spread": 0.09,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
+    },
+    {
       "id": "KXHURRICANE-26DEC01EPACMAJ-6",
       "label": "Will there be more than 6 hurricanes of category 3 or above in the Eastern Pacific in 2026?",
       "short": "Will there be more than 6 hurricanes of…",
@@ -1874,37 +1894,17 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACMAJ"
-    },
-    {
-      "id": "KXHURRICANE-26DEC01EPACTOT-6",
-      "label": "Will there be more than 6 hurricanes of category 1 or above in the Eastern Pacific in 2026?",
-      "short": "Will there be more than 6 hurricanes of…",
-      "storm": null,
-      "market": 0.935,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": 6,
-      "liquidity": null,
-      "spread": 0.04999999999999993,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACTOT"
     }
   ],
   "models": [],
   "events": [
     {
-      "tsZ": "2026-07-29T15:00:00.000Z",
+      "tsZ": "2026-07-29T21:00:00.000Z",
       "kind": "advisory",
-      "label": "Genevieve Advisory #022 — Cat 3 Hurricane, 100 kt",
+      "label": "Genevieve Advisory #023 — Cat 2 Hurricane, 85 kt",
       "source": "NHC",
       "tier": "A",
-      "hot": true
+      "hot": false
     },
     {
       "tsZ": "2026-07-29T15:00:00.000Z",
