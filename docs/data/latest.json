@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-07-29T17:49:33.178Z",
+  "generatedAt": "2026-07-29T17:59:50.584Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 368,
+      "latencyMs": 152,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep072026\",\"binNumber\":\"EP2\",\"name\":\"Genevieve\",\"classification\":\"HU\",\"intensity\":\"100\",\"pressure\":\"960\",\"latitude\":\"18.8N\",\"longitude\":\"119.2W\",\"latitudeNumeric\":18.8,\"longitudeNumeric\":-119.2,\"movementDir\":290,\"movementSpeed\":8,\"lastUpdate\":\"2026-07-29T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"022\",\"issuance\":\"2026-07-29T15:00:00.000Z\",\"fileUpdateTime\":\"2026-07-29T14:38:16.978Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP2.shtml\"},\"forecastAdvisory\":{\"advNum\":\"022\",\"issuance\":\"2026-07",
@@ -44,14 +44,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will Wale be categorized as a hurricane  | Wale | px=0.020",
-            "Will Ulana be categorized as a hurricane | Ulana | px=0.035",
-            "Will Pena be categorized as a hurricane  | Pena | px=0.030",
-            "Will Olana be categorized as a hurricane | Olana | px=0.025",
-            "Will Nolo be categorized as a hurricane  | Nolo | px=0.035",
-            "Will Moke be categorized as a hurricane  | Moke | px=0.065"
+            "Will there be more than 26 named storms  | Above 26 | px=0.050",
+            "Will there be more than 24 named storms  | Above 24 | px=0.135",
+            "Will there be more than 22 named storms  | Above 22 | px=0.200",
+            "Will there be more than 20 named storms  | Above 20 | px=0.610",
+            "Will there be more than 19 named storms  | Above 19 | px=0.735",
+            "Will there be more than 18 named storms  | Above 18 | px=0.730"
           ],
-          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-01T15:00:00Z\",\"created_time\":\"2026-05-15T20:46:32.004544Z\",\"custom_strike\":{\"storm\":\"Wale\"},\"early_close_condition\":\"This market will close and expire early if the event occurs.\",\"event_ticker\":\"KXHURRICANENAMES-26DEC01CPAC\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-01T15:00:00Z\",\"expiration_time\":\"2026-12-08T15:00:00Z\",\"expiration_value\":\"\",\"last_price_dolla"
+          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-01T15:00:00Z\",\"created_time\":\"2026-05-15T18:38:15.382078Z\",\"early_close_condition\":\"This market will close and expire early if the weather event occurs.\",\"event_ticker\":\"KXNAMEDSTORM-26DEC01EPACTOT\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-01T15:00:00Z\",\"expiration_time\":\"2026-12-08T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":26,\"last_price_dollars\":\"0.0"
         }
       ]
     },
@@ -64,7 +64,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 112,
+      "latencyMs": 109,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -194,7 +194,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 336,
+      "latencyMs": 419,
       "count": 76,
       "attempts": [],
       "note": "El Niño · AMJ 2026 ONI +0.98 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -638,7 +638,7 @@
       "label": "Will there be more than 0 major Atlantic hurricanes in 2026?",
       "short": "Will there be more than 0 major Atlantic…",
       "storm": null,
-      "market": 0.805,
+      "market": 0.8,
       "model": 0.919047619047619,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 210",
@@ -673,7 +673,7 @@
       "horizon": "seasonal",
       "strike": 0,
       "liquidity": null,
-      "spread": 0.010000000000000009,
+      "spread": 0.020000000000000018,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
