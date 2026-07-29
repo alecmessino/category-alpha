@@ -73,9 +73,9 @@ function MT_Console({ stormId, frame }) {
             {m.role === "user" && <div style={{ color: "var(--accent)" }}><span style={{ opacity: .6 }}>›</span> {m.text}</div>}
             {m.role === "sys" && <div style={{ color: "var(--text-2)", whiteSpace: "pre-wrap" }}>{m.text}</div>}
             {m.role === "assistant" && <div>
-              <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 1, color: "var(--special)", marginBottom: 3 }}>CATEGORY ALPHA ASSISTANT</div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: "var(--special)", marginBottom: 3 }}>CATEGORY ALPHA ASSISTANT</div>
               <div style={{ color: "var(--text-1)", whiteSpace: "pre-wrap" }}>{m.text}</div>
-              <div style={{ color: "var(--text-2)", fontSize: 9, marginTop: 4, opacity: .8 }}>[ traceable to evidence as-of {m.asof} · confidence tier {m.tier} ]</div>
+              <div style={{ color: "var(--text-2)", fontSize: 10, marginTop: 4, opacity: .8 }}>[ traceable to evidence as-of {m.asof} · confidence tier {m.tier} ]</div>
             </div>}
           </div>
         ))}

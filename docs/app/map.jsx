@@ -93,6 +93,7 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
     map.attributionControl.addAttribution("NASA GIBS · NHC");
     refs.current.ovl = L.layerGroup().addTo(map);
     mapRef.current = map;
+    window.__MT_MAP = map;   // handle for layout/interaction verification
     setTimeout(() => map.invalidateSize(), 200);
     return () => { map.remove(); mapRef.current = null; };
   }, []);

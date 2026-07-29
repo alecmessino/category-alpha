@@ -43,10 +43,10 @@ function MT_Situation({ dense }) {
             tone: s.confidence === "HIGH" ? "var(--pos)" : s.confidence === "MEDIUM" ? "var(--warn)" : "var(--neg)" },
         ].map((m) => (
           <div key={m.k} style={{ flex: "1 1 110px", minWidth: 0, background: "var(--surface-card)", padding: "8px 11px" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: ".7px", color: "var(--text-2)" }}>{m.k}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: ".7px", color: "var(--text-2)" }}>{m.k}</div>
             <div style={{ fontFamily: "var(--font-mono)", fontSize: 19, fontWeight: 800, lineHeight: 1.15, marginTop: 2,
               color: m.tone || "var(--text-1)" }}>{m.v}</div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", marginTop: 1,
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 1,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.sub}</div>
           </div>
         ))}
@@ -69,11 +69,11 @@ function MT_Section({ label, tier, defaultOpen, summary, children }) {
     <div style={{ marginBottom: 14 }}>
       <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer",
         padding: "6px 2px", borderBottom: "1px solid var(--border-dim)", marginBottom: open ? 12 : 0 }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", width: 10 }}>{open ? "▾" : "▸"}</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", width: 10 }}>{open ? "▾" : "▸"}</span>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 800, letterSpacing: 1.6,
           color: open ? "var(--text-1)" : "var(--text-2)", textTransform: "uppercase" }}>{label}</span>
-        {tier && <span style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", opacity: .7 }}>{tier}</span>}
-        {!open && summary && <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>{summary}</span>}
+        {tier && <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", opacity: .7 }}>{tier}</span>}
+        {!open && summary && <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>{summary}</span>}
       </div>
       {open && children}
     </div>
@@ -90,7 +90,7 @@ function MT_Evidence({ stormId, frame, selection, onSelect, dense }) {
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: dense ? 11 : 12 }}>
           <thead><tr>{["Evidence", "Value", "Source", "Tier"].map((h) => (
-            <th key={h} style={{ textAlign: "left", color: "var(--text-2)", fontWeight: 600, fontSize: 9.5, textTransform: "uppercase", letterSpacing: ".5px", padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{h}</th>
+            <th key={h} style={{ textAlign: "left", color: "var(--text-2)", fontWeight: 600, fontSize: 10.5, textTransform: "uppercase", letterSpacing: ".5px", padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{h}</th>
           ))}</tr></thead>
           <tbody>{MT.evidence.map((e) => {
             const on = selection.evidence === e.id;
@@ -105,7 +105,7 @@ function MT_Evidence({ stormId, frame, selection, onSelect, dense }) {
           })}</tbody>
         </table>
       </div>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", padding: "6px 10px" }}>Click a row → provenance drill-down. Values re-read at the as-of cursor.</div>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", padding: "6px 10px" }}>Click a row → provenance drill-down. Values re-read at the as-of cursor.</div>
     </P>
   );
 }
@@ -153,7 +153,7 @@ function MT_Probability({ stormId, frame }) {
           <GG value={m.cat4 * 100} color={m.color} height={5} />
         </div>
       ))}
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 8 }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", marginTop: 8 }}>
         {hasModel ? "Probability shown is an anchor, not a fitted model." : "No public ensemble Cat-probability feed is wired, so no independent probability is shown. Fabricating one would violate the data-honesty standard — market price is live above."}
       </div>
     </P>
@@ -189,14 +189,14 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
               <div style={{ border: "1px solid var(--border-dim)", borderRadius: 9, padding: "10px 11px", height: "100%" }}>
                 <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--text-1)", lineHeight: 1.25 }}>{c.short}</div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 8 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>MARKET</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>MARKET</span>
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 800, color: "var(--text-1)" }}>{k.market != null ? Math.round(k.market) + "¢" : "—"}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 4 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>KELLY</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>KELLY</span>
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, color: "var(--neg)" }}>{k.noData ? "NO PRICE" : "NO MODEL"}</span>
                 </div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", marginTop: 6, lineHeight: 1.4 }}>{c.liquidity != null ? "liq $" + Math.round(c.liquidity / 1000) + "k · " : ""}edge needs a model anchor</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 6, lineHeight: 1.4 }}>{c.liquidity != null ? "liq $" + Math.round(c.liquidity / 1000) + "k · " : ""}edge needs a model anchor</div>
               </div>
             ) : (
               <EC contract={c.label} edge={k.edge} marketPct={k.market} liquidity={c.liquidity}
@@ -249,7 +249,7 @@ function MT_YieldCurve({ dense }) {
     );
   }
 
-  const W = 520, H = dense ? 132 : 150, PADL = 30, PADB = 18, PADT = 10;
+  const W = 900, H = dense ? 150 : 168, PADL = 34, PADB = 20, PADT = 12;
   return (
     <P title="Term Structure — market vs climatology" right={<BG tone="special">EDGE SHADED</BG>}
       footer={<PF source="Kalshi ladder × HURDAT2 baseline" latency="live" version="—" tier="C" />}>
@@ -272,7 +272,7 @@ function MT_YieldCurve({ dense }) {
               </span>
             </div>
             <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMinYMid meet"
-              style={{ width: "100%", maxWidth: W, height: "auto", display: "block" }} aria-label={name + " term structure"}>
+              style={{ width: "100%", height: "auto", display: "block" }} aria-label={name + " term structure"}>
               {[0, 0.5, 1].map((t) => (
                 <g key={t}>
                   <line x1={PADL} x2={W - 8} y1={py(t)} y2={py(t)} stroke="var(--border-dim)" strokeWidth="1" />
@@ -292,7 +292,7 @@ function MT_YieldCurve({ dense }) {
           </div>
         );
       })}
-      <div style={{ display: "flex", gap: 12, fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 12, fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", flexWrap: "wrap" }}>
         <span><b style={{ color: "var(--accent)" }}>—</b> market</span>
         <span><b style={{ color: "var(--special)" }}>- -</b> conditional posterior</span>
         <span>x-axis = strike (count above)</span>
@@ -304,7 +304,7 @@ function MT_YieldCurve({ dense }) {
         if (!layers) return null;
         return (
           <div style={{ marginTop: 9, paddingTop: 8, borderTop: "1px solid var(--border-dim)" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 700, letterSpacing: ".5px", color: "var(--text-2)", marginBottom: 5 }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: ".5px", color: "var(--text-2)", marginBottom: 5 }}>
               POSTERIOR STACK <span style={{ opacity: .7 }}>(strike &gt;{withLayers.strike})</span>
             </div>
             {(() => {
@@ -317,24 +317,24 @@ function MT_YieldCurve({ dense }) {
                   {layers.map((l, i) => {
                     const isGov = gov && l.id === gov.id;
                     return (
-                      <div key={l.id} title={l.basis || ""} style={{ display: "flex", alignItems: "baseline", gap: 7, fontFamily: "var(--font-mono)", fontSize: 9.5, lineHeight: 1.65 }}>
+                      <div key={l.id} title={l.basis || ""} style={{ display: "flex", alignItems: "baseline", gap: 7, fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.65 }}>
                         <span style={{ color: "var(--text-2)", minWidth: 12 }}>{i === 0 ? "" : "↓"}</span>
                         <span style={{ color: l.unavailable ? "var(--text-2)" : "var(--text-1)", minWidth: 148,
                           fontWeight: isGov ? 700 : 400,
                           textDecoration: l.unavailable ? "line-through" : "none" }}>{l.label}</span>
                         {l.unavailable
-                          ? <span style={{ color: "var(--neg)", fontWeight: 700, fontSize: 8.5 }}>NO FEED</span>
+                          ? <span style={{ color: "var(--neg)", fontWeight: 700, fontSize: 9.5 }}>NO FEED</span>
                           : <span style={{ color: "var(--special)", fontWeight: 700 }}>{Math.round(l.p * 100)}%</span>}
-                        {isGov && <span style={{ color: "var(--text-2)", fontSize: 8.5, letterSpacing: ".5px" }}>← USED</span>}
+                        {isGov && <span style={{ color: "var(--text-2)", fontSize: 9.5, letterSpacing: ".5px" }}>← USED</span>}
                       </div>
                     );
                   })}
                   {gov && gov.basis && (
-                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", marginTop: 6, lineHeight: 1.5 }}>
+                    <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 6, lineHeight: 1.5 }}>
                       {gov.label}: {gov.basis}
                     </div>
                   )}
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", marginTop: 4, lineHeight: 1.5, opacity: .85 }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 4, lineHeight: 1.5, opacity: .85 }}>
                     Unwired layers are declared, never folded in silently. Day-of-year conditioning still
                     assumes zero Atlantic hurricanes so far this season — that becomes a real input once an
                     in-season count feed is wired.
@@ -391,7 +391,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
   })();
   const tvol = rows.reduce((a, r) => a + r.c.volume, 0);
   const th = (h, right) => (
-    <th key={h} style={{ textAlign: right ? "right" : "left", color: "var(--text-2)", fontWeight: 600, fontSize: 9.5, textTransform: "uppercase", letterSpacing: ".5px", padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{h}</th>
+    <th key={h} style={{ textAlign: right ? "right" : "left", color: "var(--text-2)", fontWeight: 600, fontSize: 10.5, textTransform: "uppercase", letterSpacing: ".5px", padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{h}</th>
   );
   const cell = { padding: pad, borderBottom: "1px solid var(--border-dim)", fontFamily: "var(--font-mono)", textAlign: "right" };
   return (
@@ -407,7 +407,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
               <tr key={c.id} onClick={() => onSelect(c.id)} style={{ cursor: "pointer", background: on ? "color-mix(in srgb,var(--accent) 12%,transparent)" : "transparent" }}>
                 <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)" }}>
                   <div style={{ color: "var(--text-1)", fontWeight: 600, fontSize: dense ? 11 : 11.5 }}>{c.short}</div>
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
                     {c.horizon && <span style={{ color: c.horizon === "seasonal" ? "var(--special)" : "var(--accent)", fontWeight: 700, letterSpacing: ".4px" }}>{c.horizon === "seasonal" ? "SEASONAL" : "STORM"}</span>}
                     <span>{c.id}</span>{c.proxy ? <span>· proxy</span> : null}
                   </div>
@@ -424,10 +424,10 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
           })}</tbody>
         </table>
       </div>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", padding: "6px 10px", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", padding: "6px 10px", flexWrap: "wrap" }}>
         <span>Click a market → order book + allocation.</span><span>Σ vol {fmtVol(tvol)}</span>
       </div>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", padding: "0 10px 8px", lineHeight: 1.5, opacity: .85 }}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "0 10px 8px", lineHeight: 1.5, opacity: .85 }}>
         Prices are Kalshi's exchange book — the same contracts surfaced in Coinbase Predictions (Kalshi-powered), so quotes here should track what you see there.<br />
         MODEL = empirical HURDAT2 season-count climatology, a <b style={{ color: "var(--warn)" }}>baseline</b> — it ignores ENSO, SSTs and season-to-date progress, which the market price already reflects. Treat EDGE as a reference spread, not alpha.
       </div>
@@ -477,7 +477,7 @@ function MT_OrderBook({ contractId, frame, dense }) {
   return (
     <P pad={false} title="Order Book & Liquidity" right={<BG tone="live" dot>LIVE ${Math.round(ob.liquidityCap / 1000)}k</BG>}
       footer={<PF source="Kalshi live depth" latency="live" version="—" tier="C" />}>
-      <div style={{ padding: "6px 11px", fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", display: "flex", justifyContent: "space-between", gap: 8 }}>
+      <div style={{ padding: "6px 11px", fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", display: "flex", justifyContent: "space-between", gap: 8 }}>
         <span style={{ color: "var(--text-1)", fontWeight: 700 }}>{c.short}</span><span>{c.id} · slippage {ob.slippageBudget}</span>
       </div>
       {ob.asks.slice().reverse().map((a) => row(a[0], a[1], "var(--neg)"))}
@@ -504,7 +504,7 @@ const CLASS_STYLE = {
   material: { c: "var(--warn)", t: "MATERIAL" },
   cosmetic: { c: "var(--text-2)", t: "COSMETIC" },
 };
-function MT_Signals({ stormId, dense, onSeek }) {
+function MT_Signals({ stormId, dense, maxH, onSeek }) {
   const [scope, setScope] = React.useState("all");
   const [minClass, setMinClass] = React.useState("material");
   const [showSuperseded, setShowSuperseded] = React.useState(false);
@@ -523,7 +523,7 @@ function MT_Signals({ stormId, dense, onSeek }) {
     return up ? "var(--pos)" : "var(--neg)";
   };
   const btn = (id, txt) => (
-    <span onClick={() => setScope(id)} style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 9,
+    <span onClick={() => setScope(id)} style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 10,
       fontWeight: 700, letterSpacing: ".4px", padding: "2px 7px", borderRadius: 5,
       border: "1px solid " + (scope === id ? "var(--accent)" : "var(--border-dim)"),
       color: scope === id ? "var(--accent)" : "var(--text-2)" }}>{txt}</span>
@@ -536,10 +536,10 @@ function MT_Signals({ stormId, dense, onSeek }) {
       {summary && (
         <div style={{ padding: "9px 12px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", letterSpacing: ".5px" }}>LAST 6H</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", letterSpacing: ".5px" }}>LAST 6H</span>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: 13, fontWeight: 800,
               color: (CLASS_STYLE[summary.verdict.toLowerCase()] || {}).c || "var(--text-2)" }}>{summary.verdict}</span>
-            <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>
+            <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>
               {summary.total} event{summary.total === 1 ? "" : "s"} · {summary.active} active
             </span>
           </div>
@@ -548,14 +548,14 @@ function MT_Signals({ stormId, dense, onSeek }) {
               const st = CLASS_STYLE[k], on = minClass === k;
               return (
                 <span key={k} onClick={() => setMinClass(k)} title={"Show " + st.t + " and above"} style={{
-                  cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, fontWeight: 700, letterSpacing: ".4px",
+                  cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 700, letterSpacing: ".4px",
                   padding: "3px 7px", borderRadius: 5, border: "1px solid " + (on ? st.c : "var(--border-dim)"),
                   color: on ? st.c : "var(--text-2)", background: on ? `color-mix(in srgb, ${st.c} 12%, transparent)` : "transparent",
                 }}>{st.t} {summary.byClass[k] || 0}</span>
               );
             })}
             <span onClick={() => setShowSuperseded(!showSuperseded)} title="Superseded events are retained — this is the register's memory"
-              style={{ marginLeft: "auto", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, fontWeight: 700,
+              style={{ marginLeft: "auto", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 700,
                 letterSpacing: ".4px", padding: "3px 7px", borderRadius: 5,
                 border: "1px solid " + (showSuperseded ? "var(--accent)" : "var(--border-dim)"),
                 color: showSuperseded ? "var(--accent)" : "var(--text-2)" }}>
@@ -571,14 +571,14 @@ function MT_Signals({ stormId, dense, onSeek }) {
       )}
       {/* Capped + scrolled: an uncapped register grew to ~2x the command block next to
           it, leaving a dead column of whitespace. The list scrolls in place instead. */}
-      <div style={{ maxHeight: dense ? 360 : 440, overflowY: "auto", minHeight: 0 }}>
+      <div style={{ maxHeight: maxH || (dense ? 360 : 440), overflowY: "auto", minHeight: 0 }}>
       {shown.map((s, i) => {
         const m = SIG_META[s.kind] || { icon: "•", label: s.kind.toUpperCase() };
         const c = tone(s);
         return (
           <div key={i} onClick={() => onSeek && onSeek(s.tsZ)} style={{ display: "flex", gap: 9, alignItems: "flex-start",
             padding: dense ? "6px 11px" : "8px 12px", borderBottom: "1px solid var(--border-dim)", cursor: onSeek ? "pointer" : "default" }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", minWidth: 42, paddingTop: 2 }}>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", minWidth: 42, paddingTop: 2 }}>
               {String(s.tsZ || "").slice(11, 16)}Z
             </span>
             <span style={{ color: c, fontSize: 12, lineHeight: 1.2, paddingTop: 1 }}>{m.icon}</span>
@@ -594,10 +594,10 @@ function MT_Signals({ stormId, dense, onSeek }) {
                 <div style={{ position: "relative", height: 3, flex: 1, maxWidth: 90, borderRadius: 2, background: "var(--border-dim)" }}>
                   <div style={{ position: "absolute", inset: 0, width: Math.round(s.magnitude * 100) + "%", background: c, borderRadius: 2 }} />
                 </div>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)" }}>{m.label}{s.detail ? " · " + s.detail : ""}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)" }}>{m.label}{s.detail ? " · " + s.detail : ""}</span>
               </div>
               {/* Register metadata — the terminal's memory of this event */}
-              <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 3, fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)" }}>
+              <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginTop: 3, fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>
                 <span style={{ color: (CLASS_STYLE[s.class] || {}).c, fontWeight: 700 }}>{(CLASS_STYLE[s.class] || {}).t}</span>
                 <span>conf {Math.round((s.confidence || 0) * 100)}%</span>
                 <span>{s.novelty}{s.persistence > 1 ? " ×" + s.persistence : ""}</span>
@@ -607,11 +607,11 @@ function MT_Signals({ stormId, dense, onSeek }) {
               {s.alongside && s.alongside.length > 0 && (
                 <div style={{ marginTop: 4, paddingLeft: 8, borderLeft: "2px solid var(--border-dim)" }}>
                   <div onClick={(ev) => { ev.stopPropagation(); toggleAlong(i); }}
-                    style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", letterSpacing: ".3px" }}>
+                    style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", letterSpacing: ".3px" }}>
                     {along.has(i) ? "▾" : "▸"} ALONGSIDE {s.alongside.length} · same 3h window · association, not cause
                   </div>
                   {along.has(i) && s.alongside.map((o, j) => (
-                    <div key={j} style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", lineHeight: 1.4 }}>
+                    <div key={j} style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", lineHeight: 1.4 }}>
                       · {String(o.tsZ || "").slice(11, 16)}Z {o.label}
                     </div>
                   ))}
@@ -623,7 +623,7 @@ function MT_Signals({ stormId, dense, onSeek }) {
       })}
       </div>
       {shown.length > 0 && (
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", padding: "7px 11px", lineHeight: 1.5 }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "7px 11px", lineHeight: 1.5 }}>
           {sigs.length} shown · thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢. TRADE-RELEVANT = Saffir–Simpson
           boundary crossing, ≥20 kt intensification, or ≥5¢ reprice. Co-movement is temporal only — no causal
           weights are computed, because the data can't support them.
@@ -648,7 +648,7 @@ function MT_Ledger({ frame, onSeek, dense }) {
             <span style={{ width: 7, height: 7, borderRadius: "50%", marginTop: 4, flex: "none", background: ev.hot ? "var(--warn)" : near ? "var(--pos)" : "var(--border-strong)" }} />
             <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 12, color: "var(--text-1)", lineHeight: 1.3 }}>{ev.label}</div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 1 }}>{ev.source} · tier {ev.tier}</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", marginTop: 1 }}>{ev.source} · tier {ev.tier}</div>
             </div>
           </div>
         );
@@ -666,12 +666,12 @@ function MT_Observability({ narrow }) {
       <div style={{ display: "flex", flexWrap: "wrap", gap: 1, padding: 12, background: "var(--border-dim)" }}>
         {MT.pipeline.map((s, i) => (
           <div key={s.stage} style={{ flex: narrow ? "1 1 100%" : "1 1 30%", minWidth: narrow ? 0 : 120, background: "var(--surface-card)", padding: "8px 10px" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", letterSpacing: ".5px" }}>{i + 1}. {s.stage.toUpperCase()}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", letterSpacing: ".5px" }}>{i + 1}. {s.stage.toUpperCase()}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: CHIP[s.status] }} />
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, color: CHIP[s.status] }}>{s.status}</span>
             </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", marginTop: 3 }}>{s.detail}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", marginTop: 3 }}>{s.detail}</div>
           </div>
         ))}
       </div>

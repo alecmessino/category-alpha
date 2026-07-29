@@ -6,20 +6,22 @@ name: Refresh Millibar Terminal data
 
 on:
   schedule:
-    # NOTE: GitHub throttles high-frequency schedules hard — a */15 cron was actually
-    # delivering ~106 min median. Asking for */10 does not help and can make GitHub
-    # drop runs entirely; a half-hourly ask is honoured far more reliably. The UI now
-    # reports the OBSERVED cadence rather than this configured value either way.
-    - cron: "*/30 * * * *"   # requested every 30 min; delivery is best-effort
-  workflow_dispatch: {}       # manual "Run workflow" button (optional)
+    # A cron fires ONCE an hour and the job then loops internally for ~55 minutes,
+    # refreshing every 10. This is deliberate: GitHub throttles high-frequency
+    # schedules hard — a */15 cron was measured delivering ~106 min median, so the
+    # board was routinely 2h+ stale. Scheduling jitter now only affects when the
+    # hour's run starts, not the cadence inside it.
+    - cron: "0 * * * *"
+  workflow_dispatch: {}       # manual "Run workflow" button
   push:
-    branches: [main]          # your first push auto-populates real data — no manual step needed.
+    branches: [main]          # a code push takes over immediately with the new code.
                               # the bot's own data commits carry "[skip ci]", so this never loops.
 
-# One refresh at a time; don't cancel an in-flight commit.
+# A newer run (new code, or the next hour) replaces the one in flight rather than
+# queueing behind it — two loops committing at once would just fight over the ref.
 concurrency:
   group: millibar-refresh
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write             # allow the bot to commit refreshed data back to the branch
@@ -27,6 +29,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v4
 
@@ -40,21 +43,31 @@ jobs:
       - name: Test posterior stack
         run: node scripts/test-enso.mjs
 
-      - name: Fetch live NHC + market data
-        run: node scripts/fetch-data.mjs
+      - name: Refresh loop (~55 min, 10-min cadence)
         env:
-          MT_STEP_MIN: "15"
-
-      - name: Commit refreshed data (only if changed)
+          MT_STEP_MIN: "10"
         run: |
+          set -u
           git config user.name  "millibar-data-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/data/latest.json docs/data/frames.json
-          if git diff --cached --quiet; then
-            echo "No data changes this cycle."
-          else
-            git commit -m "data: refresh $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
-            for i in 1 2 3 4; do
-              git push && break || { echo "push failed, retry $i"; sleep $((2 ** i)); git pull --rebase --autostash || true; }
-            done
-          fi
+          END=$(( $(date +%s) + 55*60 ))
+          TICK=0
+          while :; do
+            TICK=$((TICK+1))
+            echo "::group::tick $TICK — $(date -u +%H:%MZ)"
+            node scripts/fetch-data.mjs || echo "fetch failed this tick — keeping the last good snapshot"
+            git add docs/data/latest.json docs/data/frames.json
+            if git diff --cached --quiet; then
+              echo "No data changes this tick."
+            else
+              git commit -m "data: refresh $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+              for i in 1 2 3 4; do
+                git push && break || { echo "push failed, retry $i"; sleep $((2 ** i)); git pull --rebase --autostash || true; }
+              done
+            fi
+            echo "::endgroup::"
+            NOW=$(date +%s)
+            [ "$NOW" -ge "$END" ] && break
+            REMAIN=$(( END - NOW ))
+            if [ "$REMAIN" -lt 600 ]; then sleep "$REMAIN"; else sleep 600; fi
+          done

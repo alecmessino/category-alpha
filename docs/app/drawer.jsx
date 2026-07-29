@@ -14,7 +14,7 @@ function MT_Provenance({ evidenceId, stormId, frame, onClose }) {
       <aside style={{ position: "fixed", top: 0, right: 0, height: "100vh", width: 380, maxWidth: "92vw", background: "var(--surface-card)", borderLeft: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", transform: open ? "translateX(0)" : "translateX(100%)", transition: "transform .25s", zIndex: 61, overflowY: "auto", padding: 18 }}>
         {e && <>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "var(--accent)" }}>Data Provenance</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "var(--accent)" }}>Data Provenance</div>
             <span onClick={onClose} style={{ cursor: "pointer", color: "var(--text-2)", fontSize: 18, lineHeight: 1 }}>×</span>
           </div>
           <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)", marginTop: 6 }}>{e.label}</div>
@@ -29,7 +29,7 @@ function MT_Provenance({ evidenceId, stormId, frame, onClose }) {
               <span style={{ color: "var(--text-1)", fontWeight: 600, textAlign: "right", wordBreak: "break-all" }}>{v}</span>
             </div>
           ))}
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "var(--text-2)", margin: "16px 0 8px" }}>Pipeline lineage</div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", color: "var(--text-2)", margin: "16px 0 8px" }}>Pipeline lineage</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
             {chain.map((c, i) => (
               <div key={c} style={{ display: "flex", alignItems: "center", gap: 9, padding: "6px 0" }}>

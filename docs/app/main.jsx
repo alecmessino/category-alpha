@@ -29,7 +29,7 @@ function Anno({ tone, icon, title, desc }) {
     <div style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "6px 0", borderBottom: "1px solid var(--border-dim)" }}>
       <div style={{ width: 20, height: 20, flex: "none", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: c, background: `color-mix(in srgb, ${c} 14%, transparent)` }}>{icon}</div>
       <div><div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-1)", lineHeight: 1.2 }}>{title}</div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 1, lineHeight: 1.4 }}>{desc}</div></div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", marginTop: 1, lineHeight: 1.4 }}>{desc}</div></div>
     </div>
   );
 }
@@ -68,11 +68,11 @@ function LayerToggles({ layers, setLayers, storm }) {
   const off = all.filter((o) => o.prov === "nofeed");
   const chip = (extra) => Object.assign({
     display: "inline-flex", alignItems: "center", gap: 5, fontFamily: "var(--font-mono)",
-    fontSize: 9.5, fontWeight: 700, letterSpacing: ".3px", padding: "4px 9px", borderRadius: 6,
+    fontSize: 10.5, fontWeight: 700, letterSpacing: ".3px", padding: "4px 9px", borderRadius: 6,
     backdropFilter: "blur(4px)", cursor: "pointer",
   }, extra);
   return (
-    <div style={{ position: "absolute", left: 12, bottom: 12, zIndex: 500, display: "flex", gap: 5, flexWrap: "wrap", maxWidth: "78%" }}>
+    <div style={{ position: "absolute", left: 12, bottom: 26, zIndex: 500, display: "flex", gap: 5, flexWrap: "wrap", maxWidth: "72%" }}>
       {live.map((o) => {
         const on = !!layers[o.id];
         return <span key={o.id} title="LIVE — real feed"
@@ -144,11 +144,11 @@ function Transport({ frame, setFrame, playing, setPlaying, speed, setSpeed }) {
         </div>
         <input type="range" min={0} max={Math.max(0, NF)} value={frame} onChange={(e) => { setPlaying(false); setFrame(+e.target.value); }} style={{ position: "absolute", inset: 0, width: "100%", height: 30, margin: 0, opacity: 0, cursor: "pointer" }} />
       </div>
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 700, letterSpacing: 1, padding: "3px 9px", borderRadius: 999, color: modeColor, border: "1px solid " + ("color-mix(in srgb," + modeColor + " 35%,transparent)") }}>
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-mono)", fontSize: 10.5, fontWeight: 700, letterSpacing: 1, padding: "3px 9px", borderRadius: 999, color: modeColor, border: "1px solid " + ("color-mix(in srgb," + modeColor + " 35%,transparent)") }}>
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: modeColor, animation: mode === "LIVE" ? "ca-pulse 1.8s infinite" : "none" }} />
         {mode}{isLive ? "" : " −" + human}
       </span>
-      {stepFlash && <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 700, letterSpacing: .5, color: "var(--accent)", padding: "3px 8px", borderRadius: 6, border: "1px solid color-mix(in srgb,var(--accent) 35%,transparent)" }}>{stepFlash}</span>}
+      {stepFlash && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, fontWeight: 700, letterSpacing: .5, color: "var(--accent)", padding: "3px 8px", borderRadius: 6, border: "1px solid color-mix(in srgb,var(--accent) 35%,transparent)" }}>{stepFlash}</span>}
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700, color: "var(--text-1)", minWidth: 64, textAlign: "right" }}>{MTX.frameTime(frame)}</div>
       <div title="Speed" onClick={() => setSpeed(speed >= 4 ? 1 : speed * 2)} style={{ ...btn, padding: "5px 9px", height: 26, fontSize: 10, fontWeight: 700 }}>{speed}×</div>
     </div>
@@ -167,13 +167,39 @@ function MillibarTerminalApp() {
   const [bankroll, setBankroll] = React.useState(10000);
   const [stake, setStake] = React.useState(0.25);
   const [layers, setLayers] = React.useState({ satellite: true, track: true, forecast: true, cone: true, recon: false, ascat: false, models: false, particles: false });
-  const [narrow, setNarrow] = React.useState(typeof window !== "undefined" && window.innerWidth < 900);
+  const [vw, setVw] = React.useState(typeof window !== "undefined" ? window.innerWidth : 1440);
+  const narrow = vw < 900;
   const [imagery, setImagery] = React.useState(null);
   React.useEffect(() => {
-    const onResize = () => setNarrow(window.innerWidth < 900);
+    const onResize = () => setVw(window.innerWidth);
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
+  /* Very wide viewports (4K panels, or a zoomed-out browser) were rendering the whole
+     terminal as a narrow ~1680px band of 9px type marooned in gutters. Scale the shell
+     with the viewport so the layout keeps its proportions and the type stays legible,
+     then let the container use more of the width it has. */
+  const zoom = vw >= 3300 ? 1.65 : vw >= 2700 ? 1.4 : vw >= 2200 ? 1.2 : vw >= 1900 ? 1.08 : 1;
+  const cw = vw / zoom;                    // effective layout width after scaling
+  const wide = cw >= 1280;                 // room for a third column
+  const gap = wide ? 18 : 14;
+  const shell = { width: "100%", maxWidth: 2000, margin: "0 auto", boxSizing: "border-box",
+    padding: wide ? "22px 26px 56px" : "16px 16px 48px" };
+  const cmdH = wide ? 420 : 340;           // command block height; register matches it
+  /* Newer snapshot available. At live with playback stopped we take it immediately
+     (a reload is the honest way to rebuild MT — nothing is patched in place); if the
+     operator is scrubbing history we surface a chip and let them choose. */
+  const [newer, setNewer] = React.useState(null);
+  React.useEffect(() => {
+    const onNewer = (e) => setNewer((e.detail && e.detail.generatedAt) || null);
+    window.addEventListener("mt-data-newer", onNewer);
+    return () => window.removeEventListener("mt-data-newer", onNewer);
+  }, []);
+  const atLive = frame >= NF;
+  React.useEffect(() => {
+    if (newer && atLive && !playing && !sel.evidence) location.reload();
+  }, [newer, atLive, playing, sel.evidence]);
+
   const dense = t.density === "compact";
   const tactical = t.theme !== "light";
   const panelGrid = narrow ? "1fr" : "1.5fr 1fr 1fr";
@@ -221,6 +247,8 @@ function MillibarTerminalApp() {
   ];
 
   const sitVerdict = (MTX.situation ? MTX.situation(360).verdict : null);
+  // Real staleness of the snapshot itself — the dot was green regardless of age.
+  const staleMin = MT._generatedAt ? Math.max(0, Math.round((Date.now() - Date.parse(MT._generatedAt)) / 60000)) : null;
   const VTONE = { "TRADE-RELEVANT": "var(--edge-glow)", MATERIAL: "var(--warn)", COSMETIC: "var(--text-2)", "NO CHANGE": "var(--text-2)" };
   const shellHeader = (
     <header style={{ position: "sticky", top: 0, zIndex: 30, display: "flex", alignItems: "center", gap: 12, padding: "9px 20px", background: "var(--surface-card)", borderBottom: "1px solid var(--border-dim)", flexWrap: "wrap" }}>
@@ -231,7 +259,7 @@ function MillibarTerminalApp() {
           hunting inside the map overlay. */}
       {stormIds.length > 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 4, borderLeft: "1px solid var(--border-dim)", marginLeft: 2, flexWrap: "wrap" }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", letterSpacing: ".6px" }}>ACTIVE</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", letterSpacing: ".6px" }}>ACTIVE</span>
           {Object.values(MT.storms).map((s2) => (
             <PL key={s2.id} mono={false} size="sm" active={s2.id === storm} dotColor={s2.color} onClick={() => setStorm(s2.id)}>
               {s2.name} <span style={{ opacity: .6, fontSize: 10 }}>{(s2.full_cls.match(/Cat \d/) || [s2.cls])[0].replace("Cat ", "C")}</span>
@@ -241,14 +269,21 @@ function MillibarTerminalApp() {
       )}
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>
         {sitVerdict && (
-          <span title="Highest-severity change in the last 6h" style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: .6,
+          <span title="Highest-severity change in the last 6h" style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .6,
             color: VTONE[sitVerdict] || "var(--text-2)", border: "1px solid " + (VTONE[sitVerdict] || "var(--border-dim)"),
             borderRadius: 5, padding: "2px 7px" }}>{sitVerdict}</span>
         )}
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-          <span style={{ width: 6, height: 6, borderRadius: "50%", background: MT._generatedAt ? "var(--pos)" : "var(--warn)" }} />
+        <span title={MT._generatedAt || ""} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: staleMin == null ? "var(--warn)" : staleMin <= 25 ? "var(--pos)" : staleMin <= 75 ? "var(--warn)" : "var(--neg)" }} />
           {MT._generatedAt ? "updated " + (fmtAgo(MT._generatedAt) || "—") : "awaiting refresh"}
         </span>
+        {newer && (
+          <span onClick={() => location.reload()} title={"Newer snapshot committed at " + newer}
+            style={{ cursor: "pointer", fontSize: 10.5, fontWeight: 800, letterSpacing: .5, color: "var(--edge-glow)",
+              border: "1px solid var(--edge-glow)", borderRadius: 5, padding: "2px 7px" }}>
+            NEW DATA — LOAD
+          </span>
+        )}
         {imagery && imagery.fresh && (
           <>
             <span style={{ opacity: .4 }}>·</span>
@@ -265,11 +300,11 @@ function MillibarTerminalApp() {
 
   if (!storm || !MT.storms[storm]) {
     return (
-      <div data-surface={tactical ? "tactical" : undefined} style={{ minHeight: "100vh", background: "var(--surface-app)", color: "var(--text-1)", fontFamily: "var(--font-sans)" }}>
+      <div data-surface={tactical ? "tactical" : undefined} style={{ minHeight: "100vh", background: "var(--surface-app)", color: "var(--text-1)", fontFamily: "var(--font-sans)", zoom: zoom }}>
         {shellHeader}
-        <main style={{ maxWidth: 1680, margin: "0 auto", padding: "16px 16px 48px" }}>
+        <main style={shell}>
           <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: 14, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: gap, alignItems: "start" }}>
             <window.MT_Observability narrow={narrow} />
             <div style={{ height: 210 }}><window.MT_Console stormId={null} frame={frame} /></div>
           </div>
@@ -287,18 +322,18 @@ function MillibarTerminalApp() {
   const pickContract = (id) => { const c = MT.contracts.find((x) => x.id === id); setSel((s) => ({ ...s, contract: id })); if (c && c.storm && MT.storms[c.storm]) setStorm(c.storm); };
 
   return (
-    <div data-surface={tactical ? "tactical" : undefined} style={{ minHeight: "100vh", background: "var(--surface-app)", color: "var(--text-1)", fontFamily: "var(--font-sans)" }}>
+    <div data-surface={tactical ? "tactical" : undefined} style={{ minHeight: "100vh", background: "var(--surface-app)", color: "var(--text-1)", fontFamily: "var(--font-sans)", zoom: zoom }}>
       {shellHeader}
 
-      <main style={{ maxWidth: 1680, margin: "0 auto", padding: "16px 16px 48px" }}>
+      <main style={shell}>
         {/* 1 · SITUATION — the 30-second read */}
         <window.MT_Situation dense={dense} />
 
         {/* 2 · CONTEXT + 3 · WHAT MATTERS — side by side, both above the fold */}
-        <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.55fr 1fr", gap: 14, alignItems: "start", marginBottom: 14 }}>
+        <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.55fr 1fr", gap: gap, alignItems: "start", marginBottom: gap }}>
         <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: 16 }}>
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) 320px" }}>
-            <div style={{ position: "relative", minHeight: narrow ? 300 : 340, background: "var(--slate-950)" }}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) " + (wide ? 360 : 320) + "px" }}>
+            <div style={{ position: "relative", minHeight: narrow ? 300 : cmdH, background: "var(--slate-950)" }}>
               <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} onImagery={setImagery} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--blue-300)", textTransform: "uppercase" }}>Storm Command Center</span>
@@ -307,7 +342,7 @@ function MillibarTerminalApp() {
               <LayerToggles layers={layers} setLayers={setLayers} storm={storm} />
             </div>
             {/* rail */}
-            <aside style={{ background: "var(--surface-card)", borderLeft: narrow ? "none" : "1px solid var(--border-dim)", borderTop: narrow ? "1px solid var(--border-dim)" : "none", display: "flex", flexDirection: "column", maxHeight: narrow ? "none" : 340, overflow: "hidden" }}>
+            <aside style={{ background: "var(--surface-card)", borderLeft: narrow ? "none" : "1px solid var(--border-dim)", borderTop: narrow ? "1px solid var(--border-dim)" : "none", display: "flex", flexDirection: "column", maxHeight: narrow ? "none" : cmdH, overflow: "hidden" }}>
               <div style={{ padding: "11px 15px 8px", borderBottom: "1px solid var(--border-dim)" }}>
                 <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.05, display: "flex", alignItems: "center", gap: 9 }}>{S.name}
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 800, padding: "3px 8px", borderRadius: 6, color: S.color, background: `color-mix(in srgb,${S.color} 15%,transparent)` }}>{S.full_cls}</span></div>
@@ -315,7 +350,7 @@ function MillibarTerminalApp() {
                 {frame < NF && (
                   <div onClick={() => { setPlaying(false); setFrame(NF); }} title="Return to live"
                     style={{ marginTop: 7, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, fontFamily: "var(--font-mono)",
-                      fontSize: 9.5, fontWeight: 800, letterSpacing: ".5px", color: "var(--warn)", border: "1px solid var(--warn)",
+                      fontSize: 10.5, fontWeight: 800, letterSpacing: ".5px", color: "var(--warn)", border: "1px solid var(--warn)",
                       borderRadius: 5, padding: "3px 8px" }}>
                     ⏱ HISTORICAL — {MTX.frameTime(frame)} · −{humanMin(frameGapMin(frame, NF))} · click for live
                   </div>
@@ -328,17 +363,17 @@ function MillibarTerminalApp() {
                 <STt variant="metric" label="MOVING" value={String(S.movement).split(" ")[0] || "—"} unit={String(S.movement).split(" ")[1] || ""} sub="NHC" />
               </div>
               <div style={{ padding: "10px 15px 12px", flex: 1, overflowY: "auto", minHeight: 0 }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, fontWeight: 800, letterSpacing: 1.4, color: "var(--accent)", textTransform: "uppercase", marginBottom: 6 }}>Lifecycle</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 800, letterSpacing: 1.4, color: "var(--accent)", textTransform: "uppercase", marginBottom: 6 }}>Lifecycle</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
                   <span style={{ width: 7, height: 7, borderRadius: "50%", background: P0.c, flex: "none" }} />
                   <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--text-1)" }}>{P0.t}</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>PAI</span>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>PAI</span>
                 </div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", lineHeight: 1.5 }}>{P0.d}</div>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", lineHeight: 1.5 }}>{P0.d}</div>
                 {snap.reconAge != null && snap.reconAge >= 30 && (
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--warn)", marginTop: 6 }}>▼ Recon stale {Math.round(snap.reconAge)}m — confidence −0.5</div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--warn)", marginTop: 6 }}>▼ Recon stale {Math.round(snap.reconAge)}m — confidence −0.5</div>
                 )}
-                <div style={{ marginTop: 9, fontFamily: "var(--font-mono)", fontSize: 8.5, color: "var(--text-2)", opacity: .75, lineHeight: 1.45 }}>
+                <div style={{ marginTop: 9, fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", opacity: .75, lineHeight: 1.45 }}>
                   Interpretation, not observation. Research-only — no execution, no advice.
                 </div>
               </div>
@@ -346,7 +381,7 @@ function MillibarTerminalApp() {
           </div>
           <Transport frame={frame} setFrame={setFrame} playing={playing} setPlaying={setPlaying} speed={speed} setSpeed={setSpeed} />
         </section>
-        <window.MT_Signals stormId={storm} dense={dense} onSeek={(tsZ) => {
+        <window.MT_Signals stormId={storm} dense={dense} maxH={narrow ? 420 : cmdH + 120} onSeek={(tsZ) => {
           const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ);
           if (i >= 0) { setPlaying(false); setFrame(i); }
         }} />
@@ -355,40 +390,43 @@ function MillibarTerminalApp() {
         {/* 3b · ANALYSIS — term structure + event ledger */}
         <window.MT_Section label="Analysis" tier="term structure · event ledger" defaultOpen
           summary="collapsed">
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.35fr 1fr", gap: 14, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
             <window.MT_YieldCurve dense={dense} />
-            <window.MT_Ledger frame={frame} onSeek={(f) => { setPlaying(false); setFrame(f); }} dense={dense} />
+            <div style={{ display: "flex", flexDirection: "column", gap: gap, minWidth: 0 }}>
+              <window.MT_Ledger frame={frame} onSeek={(f) => { setPlaying(false); setFrame(f); }} dense={dense} />
+              <window.MT_Observability narrow={narrow} />
+            </div>
           </div>
         </window.MT_Section>
 
         {/* 4 · EVIDENCE — what the read rests on */}
         <window.MT_Section label="Evidence" tier="inputs · confidence · fair value" defaultOpen
           summary={MT.evidence.length + " signals · tier " + MTX.snap(storm, frame).tier}>
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: 14, alignItems: "start" }}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : wide ? "1.45fr 1fr 1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
             <window.MT_Evidence stormId={storm} frame={frame} selection={sel} onSelect={(id) => setSel((s) => ({ ...s, evidence: id }))} dense={dense} />
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
-              <window.MT_Confidence stormId={storm} frame={frame} />
-              <window.MT_Probability stormId={storm} frame={frame} />
-            </div>
+            {wide ? <window.MT_Confidence stormId={storm} frame={frame} /> : null}
+            {wide ? <window.MT_Probability stormId={storm} frame={frame} /> : (
+              <div style={{ display: "flex", flexDirection: "column", gap: gap, minWidth: 0 }}>
+                <window.MT_Confidence stormId={storm} frame={frame} />
+                <window.MT_Probability stormId={storm} frame={frame} />
+              </div>
+            )}
           </div>
         </window.MT_Section>
 
         {/* 5 · RAW DATA — the full board, on demand */}
         <window.MT_Section label="Raw data" tier="full market board · depth · pipeline"
           summary={MT.contracts.length + " contracts · " + (MT._feeds && MT._feeds.markets ? MT._feeds.markets.source : "—")}>
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: 14, alignItems: "start" }}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: gap, minWidth: 0 }}>
               <window.MT_Markets frame={frame} selection={sel} onSelect={pickContract} dense={dense} />
               <window.MT_EdgeMatrix frame={frame} bankroll={bankroll} stake={stake} setBankroll={setBankroll} setStake={setStake} selection={sel} onSelect={pickContract} dense={dense} />
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 14, minWidth: 0 }}>
-              <window.MT_OrderBook contractId={sel.contract} frame={frame} dense={dense} />
-              <window.MT_Observability narrow={narrow} />
-            </div>
+            <window.MT_OrderBook contractId={sel.contract} frame={frame} dense={dense} />
           </div>
         </window.MT_Section>
 
-        <div style={{ marginTop: 14, height: 210 }}>
+        <div style={{ marginTop: gap, height: wide ? 240 : 210 }}>
           <window.MT_Console stormId={storm} frame={frame} />
         </div>
       </main>

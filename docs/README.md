@@ -64,9 +64,18 @@ When no storm is active (e.g. a quiet Atlantic), the terminal shows the honest
 ## Architecture (permanent URL + fresh data, no CORS)
 
 - **`docs/`** is a static site served by **GitHub Pages** → a permanent `*.github.io` URL that never breaks.
-- **`.github/workflows/refresh-data.yml`** runs **`scripts/fetch-data.mjs`** on a ~15-min cron. It fetches
-  the real feeds *server-side* (open internet, no browser CORS) and commits `docs/data/latest.json` +
-  a rolling `docs/data/frames.json` (last 24 snapshots = the real replay history).
+- **`.github/workflows/refresh-data.yml`** runs **`scripts/fetch-data.mjs`** server-side (open internet,
+  no browser CORS) and commits `docs/data/latest.json` + a rolling `docs/data/frames.json`.
+  The cron fires **once an hour** and the job then **loops internally for ~55 minutes, refreshing every
+  10**. That structure is deliberate: GitHub throttles high-frequency schedules hard — a `*/15` cron was
+  measured delivering a **106-minute median**, so the board was routinely 2h+ stale. Scheduling jitter now
+  only affects when the hour's run starts, not the cadence inside it.
+- **Two clocks, reported separately.** The *snapshot* refreshes every ~10 min. *Replay frames* are spaced
+  ~20 min apart on purpose — appending one per tick would rewrite a ~400 KB history file six times an hour
+  for no added information. The header shows snapshot age; the health panel shows both.
+- **An open tab keeps itself current.** The page polls its own `latest.json` every 60s. At live with
+  playback stopped it reloads into the newer snapshot; mid-scrub it surfaces a `NEW DATA — LOAD` chip
+  instead, so a refresh never yanks the cursor out from under an investigation.
 - The page fetches its **own same-origin** JSON — so there are no CORS problems and the data is always
   as fresh as the last commit, honestly timestamped in the header ("updated Nm ago").
 - Libraries (React, ReactDOM, Babel, Leaflet JS) are **vendored** in `docs/vendor/` so the URL doesn't

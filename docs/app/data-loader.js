@@ -187,6 +187,7 @@
     ];
 
     // ---- health (honest: real HTTP status / counts / freshness) ----
+    const staleMin = latest.generatedAt ? Math.max(0, Math.round((Date.now() - Date.parse(latest.generatedAt)) / 60000)) : null;
     function agoStr(iso) { const t = Date.parse(iso); if (!t) return "—"; const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 60 ? m + "m ago" : Math.floor(m / 60) + "h" + pad2(m % 60) + "m ago"; }
     function feedHealth(f, name) {
       f = f || {}; const st = f.ok ? "PASS" : (f.status ? "FAIL" : "EMPTY");
@@ -200,10 +201,13 @@
       feedHealth(feeds.sst, "SST anomaly"),
       feedHealth(feeds.models, "Ensemble models"),
       feedHealth(feeds.enso, "ENSO / ONI"),
-      { name: "Data refresh", status: latest.generatedAt ? "PASS" : "EMPTY",
+      /* Two different clocks, and conflating them is what previously understated
+         staleness: the SNAPSHOT refreshes on the pipeline tick, while replay FRAMES
+         are spaced further apart on purpose. Report both. */
+      { name: "Data refresh", status: latest.generatedAt ? (staleMin != null && staleMin > 90 ? "FAIL" : "PASS") : "EMPTY",
         detail: latest.generatedAt
-          ? agoStr(latest.generatedAt) + " · ~" + (observedStepMin != null ? observedStepMin + "m observed" : stepMin + "m") +
-            (observedStepMin != null && observedStepMin > stepMin * 1.5 ? " (" + stepMin + "m scheduled — CI throttled)" : "")
+          ? "snapshot " + agoStr(latest.generatedAt) +
+            (observedStepMin != null ? " · replay frames ~" + observedStepMin + "m apart" : "")
           : "awaiting first refresh" },
     ];
 
@@ -226,9 +230,32 @@
     window.dispatchEvent(new CustomEvent("mt-data-ready", { detail: { generatedAt: (latest && latest.generatedAt) || null } }));
   }
 
+  /* An open tab used to sit on whatever snapshot it booted with — leave the terminal
+     up for two hours and it silently showed two-hour-old prices with a green LIVE dot.
+     Poll the same-origin snapshot and announce a newer one; the UI decides whether to
+     take it (at live) or offer it (mid-scrub), so a refresh never yanks the cursor
+     out from under someone mid-investigation. */
+  const POLL_MS = 60000;
+  function startPolling() {
+    let seen = window.MT && window.MT._generatedAt;
+    let announced = null;
+    setInterval(function () {
+      if (document.hidden) return;                 // don't poll a backgrounded tab
+      fetch(BASE + "latest.json", { cache: "no-store" })
+        .then((r) => r.ok ? r.json() : null)
+        .then((j) => {
+          if (!j || !j.generatedAt) return;
+          if (j.generatedAt === seen || j.generatedAt === announced) return;
+          announced = j.generatedAt;
+          window.dispatchEvent(new CustomEvent("mt-data-newer", { detail: { generatedAt: j.generatedAt } }));
+        })
+        .catch(() => { /* transient — the next tick retries */ });
+    }, POLL_MS);
+  }
+
   Promise.all([
     fetch(BASE + "latest.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject("HTTP " + r.status)),
     fetch(BASE + "frames.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).catch(() => null),
-  ]).then(([latest, framesJson]) => done(latest, framesJson))
-    .catch((err) => { console.warn("[millibar] data load failed:", err); done(emptyLatest(err), null); });
+  ]).then(([latest, framesJson]) => { done(latest, framesJson); startPolling(); })
+    .catch((err) => { console.warn("[millibar] data load failed:", err); done(emptyLatest(err), null); startPolling(); });
 })();

@@ -18,7 +18,9 @@ import { fileURLToPath } from "node:url";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = resolve(__dir, "../docs/data");
-const STEP_MIN = Number(process.env.MT_STEP_MIN || 15);
+const STEP_MIN = Number(process.env.MT_STEP_MIN || 10);
+const FRAME_GAP_MIN = Number(process.env.MT_FRAME_GAP_MIN || 20);  // replay-history granularity
+const FRAME_KEEP = Number(process.env.MT_FRAME_KEEP || 144);       // 144 x 20min = 48h of real history
 const UA = "MillibarTerminal/1.0 (+https://github.com; institutional weather research dashboard)";
 const now = new Date();
 const nowIso = now.toISOString();
@@ -961,12 +963,22 @@ async function main() {
   const frameStorms = {}, frameContracts = {};
   storms.forEach((s) => { frameStorms[s.id] = { wind: s.wind, pressure: s.pressure, center: s.center, modelCat4: s.modelCat4, marketCat4: s.marketCat4, reconAge: s.reconAge }; });
   contracts.forEach((c) => { frameContracts[c.id] = { market: c.market, model: c.model }; });
-  framesJson.stepMin = STEP_MIN;
-  framesJson.frames.push({ tsZ: nowIso, storms: frameStorms, contracts: frameContracts });
-  framesJson.frames = framesJson.frames.slice(-96); // 96 x 15min = 24h of real history
+  framesJson.stepMin = FRAME_GAP_MIN;
+  /* latest.json refreshes every tick, but the replay history does NOT need that
+     granularity — appending a frame every tick would rewrite a ~400KB file six times
+     an hour for no added information. Frames are spaced FRAME_GAP_MIN apart; the
+     header freshness ("updated Nm ago") still tracks the tick, not the frame. */
+  const lastFrameTs = framesJson.frames.length ? Date.parse(framesJson.frames[framesJson.frames.length - 1].tsZ) : 0;
+  const sinceLastFrameMin = lastFrameTs ? (now.getTime() - lastFrameTs) / 60000 : Infinity;
+  const appendFrame = sinceLastFrameMin >= FRAME_GAP_MIN * 0.9;
+  if (appendFrame) {
+    framesJson.frames.push({ tsZ: nowIso, storms: frameStorms, contracts: frameContracts });
+    framesJson.frames = framesJson.frames.slice(-FRAME_KEEP);
+  }
 
   await writeFile(resolve(DATA_DIR, "latest.json"), JSON.stringify(latest, null, 2) + "\n");
-  await writeFile(resolve(DATA_DIR, "frames.json"), JSON.stringify(framesJson, null, 2) + "\n");
+  // Minified: pure machine history, re-written often enough that formatting costs real bytes.
+  if (appendFrame) await writeFile(resolve(DATA_DIR, "frames.json"), JSON.stringify(framesJson) + "\n");
 
   console.log(`[millibar] refreshed ${nowIso}`);
   console.log(`  NHC: ${nhcFeed.ok ? "ok" : "FAIL"} (${nhcFeed.note})`);
@@ -978,7 +990,7 @@ async function main() {
   console.log(`  climatology: ${climFeed.ok ? climFeed.source + " · " + clim.years.length + " seasons" : "FAIL — " + climFeed.note}`);
   console.log(`  ENSO: ${ensoFeed.ok ? ensoFeed.source + " · " + ensoFeed.note : "FAIL — " + ensoFeed.note}`);
   for (const a of (ensoFeed.attempts || [])) console.log(`    [${a.source}] ok=${a.ok} status=${a.status} → ${a.note}`);
-  console.log(`  storms: ${storms.length} · contracts: ${contracts.length} (${contracts.filter((c) => c.model != null).length} anchored) · frames: ${framesJson.frames.length}`);
+  console.log(`  storms: ${storms.length} · contracts: ${contracts.length} (${contracts.filter((c) => c.model != null).length} anchored) · frames: ${framesJson.frames.length}${appendFrame ? " (+1)" : " (no append — " + Math.round(sinceLastFrameMin) + "m since last, gap is " + FRAME_GAP_MIN + "m)"}`);
   if (contracts.length) for (const c of contracts.slice(0, 8)) {
     console.log(`    · ${String(c.id).slice(0, 26).padEnd(26)} mkt ${Math.round(c.market * 100)}¢  model ${c.model != null ? Math.round(c.model * 100) + "%" : "—"}  ${c.horizon}`);
   }
