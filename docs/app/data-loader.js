@@ -175,19 +175,20 @@
     const anyStorm = (latest.storms || []).length > 0;
     const mktOk = !!(feeds.markets && feeds.markets.ok);
     const nhcOk = !!(feeds.nhc && feeds.nhc.ok);
+    /* Pipeline stage text is NOT authored here. Each row asks the claim registry,
+       which is the single owner of every capability statement on the page. This row
+       is where "ensemble consensus" was invented and survived for weeks. */
+    const stageStatus = (c) => c.ok ? "PASS" : "EMPTY";
     const pipeline = [
-      { stage: "Observation", status: nhcOk || mktOk ? "PASS" : "EMPTY", detail: [nhcOk && "NHC", mktOk && "markets", "GIBS"].filter(Boolean).join(" · ") || "no feeds reachable" },
-      { stage: "Evidence", status: evidence.length ? "PASS" : "EMPTY", detail: evidence.length + " signals · content-addressed" },
-      { stage: "Features", status: anyStorm ? "PASS" : "EMPTY", detail: anyStorm ? "wind/pressure/track" : "no active system" },
-      { stage: "Confidence", status: evidence.length ? "PASS" : "EMPTY", detail: "evidence-quality tiering" },
-      { stage: "Probability", status: (feeds.models && feeds.models.ok) ? "PASS" : "BLOCKED",
-        detail: (feeds.models && feeds.models.ok)
-          ? "HURDAT2 climatology anchor" + ((feeds.enso && feeds.enso.ok) ? " + ENSO layer" : "") + " — no ensemble feed"
-          : "no climatology anchor and no ensemble feed" },
-      { stage: "Edge", status: mktOk && anyStorm ? "PASS" : "EMPTY", detail: mktOk ? "model − market" : "no market feed" },
-      { stage: "Kelly", status: mktOk && anyStorm ? "PASS" : "EMPTY", detail: "Q-Kelly ¼ · liquidity-capped" },
-      { stage: "Position", status: "EMPTY", detail: "research-only · no execution" },
-    ];
+      ["Observation", "pipeline.observation"], ["Evidence", "pipeline.evidence"],
+      ["Features", "pipeline.features"], ["Confidence", "pipeline.confidence"],
+      ["Probability", "pipeline.probability"], ["Edge", "pipeline.edge"],
+      ["Kelly", "pipeline.kelly"], ["Position", "pipeline.position"],
+    ].map(([stage, id]) => {
+      // window.MT does not exist yet — hand the claim the state we are building.
+      const c = window.MTC.claim(id, { feeds, evidence, generatedAt: latest.generatedAt || null });
+      return { stage, status: stageStatus(c), detail: c.text, owner: c.owner };
+    });
 
     // ---- health (honest: real HTTP status / counts / freshness) ----
     const staleMin = latest.generatedAt ? Math.max(0, Math.round((Date.now() - Date.parse(latest.generatedAt)) / 60000)) : null;

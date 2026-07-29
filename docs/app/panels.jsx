@@ -36,8 +36,6 @@ function MT_Situation({ dense }) {
       <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", borderRadius: 8, overflow: "hidden", flexWrap: "wrap", marginBottom: 10 }}>
         {[
           { k: "MATERIAL CHANGES", v: s.byClass.material + s.byClass["trade-relevant"], sub: "in " + Math.round(s.windowMin / 60) + "h" },
-          { k: "TRADE-RELEVANT", v: s.byClass["trade-relevant"], sub: "of those", tone: s.byClass["trade-relevant"] ? "var(--edge-glow)" : null },
-          { k: "REPRICED ≥5¢", v: (s.marketsLine.match(/^\d+/) || ["0"])[0], sub: "contracts" },
           { k: "LAST UPDATE", v: ago(s.lastMaterialAgo).replace(" ago", ""), sub: "ago" },
           { k: "CONFIDENCE", v: s.confidence, sub: s.confWhy,
             tone: s.confidence === "HIGH" ? "var(--pos)" : s.confidence === "MEDIUM" ? "var(--warn)" : "var(--neg)" },
@@ -64,7 +62,9 @@ function MT_Situation({ dense }) {
         const F = MT._feeds || {};
         const live = Object.keys(F).filter((k) => F[k] && F[k].ok);
         const down = Object.keys(F).filter((k) => F[k] && !F[k].ok);
-        const stale = MT._generatedAt ? Math.round((Date.now() - Date.parse(MT._generatedAt)) / 60000) : null;
+        // Clamped: a client clock behind the server renders a negative age, which reads as
+        // nonsense ("snapshot -8m old") exactly when someone is checking whether to trust it.
+        const stale = MT._generatedAt ? Math.max(0, Math.round((Date.now() - Date.parse(MT._generatedAt)) / 60000)) : null;
         const tier = MT.evidence.every((e) => e.tier === "A") ? "A" : MT.evidence.some((e) => e.tier === "A") ? "A/B" : "B";
         return (
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "baseline", marginTop: 9, paddingTop: 8,
@@ -106,7 +106,7 @@ function MT_Evidence({ stormId, frame, selection, onSelect, dense }) {
   const pad = dense ? "4px 8px" : "7px 9px";
   return (
     <P pad={false} title="Evidence Matrix" right={<BG tone="live" dot>{MT.evidence.length} SIGNALS</BG>}
-      footer={<PF source="canonical.fix()" latency="live" version="1.2.4" tier="A" />}>
+      footer={<PF {...MTC.footer("panel.evidence")} />}>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: dense ? 11 : 12 }}>
           <thead><tr>{["Evidence", "Value", "Source", "Tier"].map((h) => (
@@ -135,7 +135,7 @@ function MT_Confidence({ stormId, frame }) {
   const s = MTX.snap(stormId, frame);
   return (
     <P title="Confidence" right={<BG tone={TIER_TONE[s.tier]}>TIER {s.tier}</BG>}
-      footer={<PF source="evidence_quality.py" latency="live" version="1.2.4" tier={s.tier} />}>
+      footer={<PF {...MTC.footer("panel.confidence")} tier={s.tier} />}>
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", lineHeight: 1.6 }}>
         {s.tierReasons.map((r, i) => <div key={i}>· {r}</div>)}
       </div>
@@ -155,7 +155,7 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
   const mktSrc = (MT._feeds && MT._feeds.markets && MT._feeds.markets.source) || "market";
   return (
     <P pad={false} title="Edge Matrix — Q-Kelly Allocation" right={<BG tone={hasModel ? "live" : "neg"} dot>{hasModel ? "CLIMATOLOGY ANCHOR" : "MODEL DEFERRED"}</BG>}
-      footer={<PF source={mktSrc + " prices × HURDAT2 climatology baseline"} latency="live" version="—" tier="C" />}>
+      footer={<PF {...MTC.footer("panel.edge")} />}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "10px 12px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: ".5px", textTransform: "uppercase", color: "var(--text-2)" }}>Bankroll</span>
         <input type="number" value={bankroll} min={100} step={500} onChange={(e) => setBankroll(+e.target.value || 0)}
@@ -227,7 +227,7 @@ function MT_YieldCurve({ dense }) {
   if (!series.length) {
     return (
       <P title="Term Structure — strike ladder" right={<BG tone="neg">NO LADDER</BG>}
-        footer={<PF source="needs ≥3 anchored strikes in one series" latency="—" version="—" tier="C" />}>
+        footer={<PF {...MTC.footer("panel.fairvalue")} source="needs ≥3 anchored strikes in one series" />}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", lineHeight: 1.6 }}>
           No multi-strike seasonal series with a climatology anchor is currently listed. The curve
           renders as soon as a hurricane-count ladder is quoted.
@@ -239,7 +239,7 @@ function MT_YieldCurve({ dense }) {
   const W = 900, H = dense ? 150 : 168, PADL = 34, PADB = 20, PADT = 12;
   return (
     <P title="Term Structure — market vs climatology" right={<BG tone="special">EDGE SHADED</BG>}
-      footer={<PF source="Kalshi ladder × HURDAT2 baseline" latency="live" version="—" tier="C" />}>
+      footer={<PF {...MTC.footer("panel.fairvalue")} />}>
       {series.map(([name, arr]) => {
         const xs = arr.map((c) => c.strike);
         const minX = Math.min(...xs), maxX = Math.max(...xs), spanX = (maxX - minX) || 1;
@@ -349,8 +349,51 @@ const PRIO_STYLE = {
 };
 const KIND_ICON = { intensity: "◆", pressure: "▼", market: "▮", advisory: "✦", divergence: "⚠", schedule: "◷", feed: "○", pipeline: "◌" };
 
+/* Operator marks. The terminal cannot observe whether a human has acknowledged an
+   item or checked their exposure, so it does not pretend to derive it: these are
+   asserted by the operator, stored in this browser, and labelled as such. They are
+   kept visually and structurally apart from the machine-derived lifecycle. */
+const MARKS_KEY = "mt.marks.v1";
+function loadMarks() {
+  try { return JSON.parse(localStorage.getItem(MARKS_KEY) || "{}"); } catch (e) { return {}; }
+}
+function saveMarks(m) {
+  try { localStorage.setItem(MARKS_KEY, JSON.stringify(m)); } catch (e) { /* private mode — marks just don't persist */ }
+}
+
+const LC_LABEL = { observed: "OBSERVED", validated: "VALIDATED", assessed: "ASSESSED", resolved: "RESOLVED", archived: "ARCHIVED" };
+function LifecycleRail({ lc }) {
+  if (!lc) return null;
+  return (
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 5, fontFamily: "var(--font-mono)", fontSize: 9.5 }}>
+      {MTX.LIFECYCLE.map((k, i) => {
+        const v = lc[k];
+        const na = v === "n/a";
+        const on = v === true;
+        return (
+          <span key={k} title={(lc.why && lc.why[k]) || ""} style={{ display: "inline-flex", alignItems: "center", gap: 4,
+            color: na ? "var(--text-2)" : on ? "var(--pos)" : "var(--text-2)", opacity: na ? .45 : 1 }}>
+            {i > 0 && <span style={{ opacity: .4, marginRight: 2 }}>›</span>}
+            <span>{na ? "–" : on ? "\u2713" : "\u25a1"}</span>
+            <span style={{ letterSpacing: ".3px" }}>{LC_LABEL[k]}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 function MT_Attention({ dense, imagery, onSeek, onSelectContract }) {
   const [minPrio, setMinPrio] = React.useState("LOW");
+  const [marks, setMarks] = React.useState(loadMarks);
+  const [openId, setOpenId] = React.useState(null);
+  const toggleMark = (id, field) => setMarks((m) => {
+    const cur = Object.assign({}, m[id]);
+    if (cur[field]) delete cur[field]; else cur[field] = new Date().toISOString();
+    const next = Object.assign({}, m, { [id]: cur });
+    saveMarks(next);
+    return next;
+  });
   const imageryAgeMin = imagery && imagery.ageMin != null ? imagery.ageMin : null;
   const a = MTX.attention ? MTX.attention({ windowMin: 360, imageryAgeMin, imageryProduct: imagery && imagery.product }) : null;
   if (!a) return null;
@@ -376,7 +419,7 @@ function MT_Attention({ dense, imagery, onSeek, onSelectContract }) {
       right={<div style={{ display: "flex", gap: 5, alignItems: "center" }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", letterSpacing: ".4px" }}>SHOW DOWN TO</span>
         {order.map((p, i) => chip(p, counts[i]))}</div>}
-      footer={<PF source="prioritised over the committed register" latency="live" version="—" tier="A" />}>
+      footer={<PF {...MTC.footer("panel.attention")} />}>
       {!total && (
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 11.5, color: "var(--text-2)", padding: "18px 14px", lineHeight: 1.7 }}>
           [ NOTHING REQUIRES ATTENTION ]<br />
@@ -396,23 +439,51 @@ function MT_Attention({ dense, imagery, onSeek, onSelectContract }) {
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, color: st.c }}>{st.label}</span>
               <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)" }}>{rows.length}</span>
             </div>
-            {rows.map((it) => (
-              <div key={it.id}
-                onClick={() => { if (it.seekTs && onSeek) onSeek(it.seekTs); if (it.contractId && onSelectContract) onSelectContract(it.contractId); }}
-                style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: dense ? "7px 14px" : "9px 15px",
-                  borderTop: "1px solid var(--border-dim)", cursor: (it.seekTs || it.contractId) ? "pointer" : "default" }}>
-                <span style={{ color: st.c, fontSize: 12, lineHeight: 1.35, width: 12, flex: "none" }}>{KIND_ICON[it.kind] || "•"}</span>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: dense ? 12.5 : 13.5, color: "var(--text-1)", lineHeight: 1.4, fontWeight: 600 }}>{it.title}</div>
-                  <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 3, fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)" }}>
-                    {it.ageMin != null && <span>{it.ageMin < 60 ? it.ageMin + "m ago" : Math.floor(it.ageMin / 60) + "h" + ("0" + (it.ageMin % 60)).slice(-2) + "m ago"}</span>}
-                    {it.source && <span>{it.source}</span>}
-                    {it.confidence != null && <span>conf {Math.round(it.confidence * 100)}%</span>}
-                    {it.detail && <span style={{ opacity: .85 }}>· {it.detail}</span>}
+            {rows.map((it) => {
+              const mk = marks[it.id] || {};
+              const open = openId === it.id;
+              const done = MTX.LIFECYCLE.filter((k) => it.lifecycle && it.lifecycle[k] === true).length;
+              return (
+              <div key={it.id} style={{ borderTop: "1px solid var(--border-dim)" }}>
+                <div
+                  onClick={() => { setOpenId(open ? null : it.id); if (it.seekTs && onSeek) onSeek(it.seekTs); if (it.contractId && onSelectContract) onSelectContract(it.contractId); }}
+                  style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: dense ? "7px 14px" : "9px 15px", cursor: "pointer" }}>
+                  <span style={{ color: st.c, fontSize: 12, lineHeight: 1.35, width: 12, flex: "none" }}>{KIND_ICON[it.kind] || "•"}</span>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: dense ? 12.5 : 13.5, color: "var(--text-1)", lineHeight: 1.4, fontWeight: 600 }}>{it.title}</div>
+                    <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 3, fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)" }}>
+                      {it.ageMin != null && <span>{it.ageMin < 60 ? it.ageMin + "m ago" : Math.floor(it.ageMin / 60) + "h" + ("0" + (it.ageMin % 60)).slice(-2) + "m ago"}</span>}
+                      {it.source && <span>{it.source}</span>}
+                      {it.confidence != null && <span>conf {Math.round(it.confidence * 100)}%</span>}
+                      {it.lifecycle && <span style={{ color: done >= 3 ? "var(--pos)" : "var(--text-2)" }}>{done}/5 state{done === 1 ? "" : "s"}</span>}
+                      {mk.ack && <span style={{ color: "var(--accent)" }}>ACK</span>}
+                      {mk.reviewed && <span style={{ color: "var(--accent)" }}>REVIEWED</span>}
+                      {it.detail && <span style={{ opacity: .85 }}>· {it.detail}</span>}
+                    </div>
+                    {open && <LifecycleRail lc={it.lifecycle} />}
+                    {open && it.waitingOn && (
+                      <div style={{ marginTop: 6, fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", lineHeight: 1.6 }}>
+                        <div>WAITING ON <b style={{ color: "var(--text-1)" }}>{it.waitingOn}</b></div>
+                        {it.nextAutomatic && <div>NEXT AUTOMATIC ACTION <span style={{ color: "var(--text-1)" }}>{it.nextAutomatic}</span></div>}
+                      </div>
+                    )}
+                    {open && (
+                      <div style={{ marginTop: 7, paddingTop: 6, borderTop: "1px dashed var(--border-dim)", display: "flex", gap: 7, flexWrap: "wrap", alignItems: "center" }}>
+                        <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", letterSpacing: ".3px" }}>YOUR MARKS — this browser only, not observed by the system</span>
+                        {[["ack", "ACKNOWLEDGED"], ["reviewed", "EXPOSURE REVIEWED"]].map(([f, lab]) => (
+                          <span key={f} onClick={(ev) => { ev.stopPropagation(); toggleMark(it.id, f); }}
+                            title={mk[f] ? "marked " + String(mk[f]).slice(11, 16) + "Z — click to clear" : "click to mark"}
+                            style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 700, padding: "2px 7px", borderRadius: 5,
+                              border: "1px solid " + (mk[f] ? "var(--accent)" : "var(--border-dim)"), color: mk[f] ? "var(--accent)" : "var(--text-2)" }}>
+                            {mk[f] ? "\u2713 " : "\u25a1 "}{lab}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            ))}
+            );})}
           </div>
         );
       })}
@@ -436,7 +507,7 @@ function MT_Exposure({ frame, dense, onSelect, selection }) {
   const pad = dense ? "5px 9px" : "7px 11px";
   return (
     <P pad={false} title="Board Impact" right={<BG tone={x.repriced ? "live" : "neutral"} dot={!!x.repriced}>{x.repriced} REPRICED</BG>}
-      footer={<PF source="frame-diff × HURDAT2 anchor" latency="live" version="—" tier="B" />}>
+      footer={<PF {...MTC.footer("panel.exposure")} />}>
       <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", flexWrap: "wrap" }}>
         {[
           { k: "REPRICED", v: x.repriced, sub: "in 6h" },
@@ -526,7 +597,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
   const cell = { padding: pad, borderBottom: "1px solid var(--border-dim)", fontFamily: "var(--font-mono)", textAlign: "right" };
   return (
     <P pad={false} title={"Prediction Markets — " + (mktSource[0].toUpperCase() + mktSource.slice(1)) + " board"} right={<BG tone={rows.length ? "live" : "neg"} dot>{rows.length} MKTS</BG>}
-      footer={<PF source={mktSource + " · live prices · model = HURDAT2 climatology"} latency="live" version="—" tier="C" />}>
+      footer={<PF {...MTC.footer("panel.markets")} />}>
       <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: dense ? 11 : 12 }}>
           <thead><tr>{th("Contract")}{th("Px", 1)}{th("Δ", 1)}{th("Model", 1)}{th("Edge", 1)}{th("Vol", 1)}{th("4h", 1)}</tr></thead>
@@ -572,7 +643,7 @@ function MT_OrderBook({ contractId, frame, dense }) {
   if (ob.noFeed) {
     return (
       <P pad={false} title="Order Book & Liquidity" right={<BG tone="warn">UNAVAILABLE</BG>}
-        footer={<PF source="exchange returned no depth" latency="—" version="—" tier="C" />}>
+        footer={<PF {...MTC.footer("panel.orderbook")} />}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", lineHeight: 1.75, padding: "14px 12px" }}>
           <div style={{ color: "var(--text-1)", fontWeight: 700, letterSpacing: ".5px" }}>KELLY SIZING — UNAVAILABLE</div>
           <div style={{ marginTop: 8 }}>Reason:</div>
@@ -606,7 +677,7 @@ function MT_OrderBook({ contractId, frame, dense }) {
   let cum = 0;
   return (
     <P pad={false} title="Order Book & Liquidity" right={<BG tone="live" dot>LIVE ${Math.round(ob.liquidityCap / 1000)}k</BG>}
-      footer={<PF source="Kalshi live depth" latency="live" version="—" tier="C" />}>
+      footer={<PF {...MTC.footer("panel.orderbook")} />}>
       <div style={{ padding: "6px 11px", fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", display: "flex", justifyContent: "space-between", gap: 8 }}>
         <span style={{ color: "var(--text-1)", fontWeight: 700 }}>{c.short}</span><span>{c.id} · slippage {ob.slippageBudget}</span>
       </div>
@@ -661,7 +732,7 @@ function MT_Signals({ stormId, dense, maxH, onSeek }) {
   return (
     <P pad={false} title="Signal Register"
       right={<div style={{ display: "flex", gap: 4 }}>{btn("all", "ALL")}{btn("storm", "STORM")}{btn("market", "MKT")}</div>}
-      footer={<PF source="frame-diff register over committed history" latency="live" version="—" tier="A" />}>
+      footer={<PF {...MTC.footer("panel.register")} />}>
       {/* Rollup verdict — answers "has anything mattered in the last 6h?" first */}
       {summary && (
         <div style={{ padding: "9px 12px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
@@ -770,7 +841,8 @@ function MT_Observability({ narrow }) {
   const CHIP = { PASS: "var(--pos)", EMPTY: "var(--text-2)", BLOCKED: "var(--special)", FAIL: "var(--neg)" };
   return (
     <P pad={false} title="Observability — Pipeline Status"
-      footer={<PF source="verify_stack.py" latency="live" version="1.2.4" tier="A" />}>
+      footer={<PF {...MTC.footer("panel.observability")} />}>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", borderBottom: "1px solid var(--border-dim)", lineHeight: 1.5 }}>{MTC.claim("capability.notIngested").text}</div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 1, padding: 12, background: "var(--border-dim)" }}>
         {MT.pipeline.map((s, i) => (
           <div key={s.stage} style={{ flex: narrow ? "1 1 100%" : "1 1 30%", minWidth: narrow ? 0 : 120, background: "var(--surface-card)", padding: "8px 10px" }}>

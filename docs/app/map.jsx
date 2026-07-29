@@ -1,17 +1,17 @@
-/* Storm Command Map — Leaflet, dark tactical. A CARTO dark raster field under
-   vector-first cartography: real NASA GIBS VIIRS imagery (probed live), NHC cone +
-   track, recon flight track, ASCAT vectors, and multi-model consensus spread. Each
-   layer carries an honest provenance tag (live / seeded / no-feed). The eye position
-   is bound to the bitemporal engine (MTX.at(T)) so scrubbing rewinds geometry too. */
+/* Storm Command Map — Leaflet, dark tactical. Real satellite imagery probed live,
+   plus the NHC forecast track and a cone reconstructed from NHC's published
+   track-error radii. Every layer carries a provenance tag and the eye position is
+   bound to the bitemporal engine (MTX.at(T)), so scrubbing rewinds geometry too.
+
+   The catalogue used to carry four permanently-dead toggles for feeds that were
+   never wired. Four switches that can never move do not make an operator faster,
+   so they are gone; what is deliberately not ingested is stated once, as an owned
+   claim, in the observability panel. */
 const MT_LAYERS = [
   { id: "satellite", label: "Satellite", prov: "live" },
   { id: "track", label: "Observed Track", prov: "live" },
   { id: "forecast", label: "NHC Forecast Track", prov: "dynamic" },
   { id: "cone", label: "NHC Cone", prov: "dynamic" },
-  { id: "recon", label: "Recon Track", prov: "nofeed" },
-  { id: "ascat", label: "ASCAT Winds", prov: "nofeed" },
-  { id: "models", label: "Model Consensus", prov: "nofeed" },
-  { id: "particles", label: "Particle Wind (SFMR)", prov: "nofeed" },
 ];
 // Layers whose provenance depends on what the current advisory actually delivered.
 function layerProv(layer, S) {

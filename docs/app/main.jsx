@@ -1,14 +1,9 @@
 const A = window.CategoryAlphaDesignSystem_a835cf || {};
-const { Pill: PL, Badge: BA, IngestionHUD: HUD, StatTile: STt, EmptyState: ES } = A;
+const { Pill: PL, Badge: BA, StatTile: STt, EmptyState: ES } = A;
 // Live-frame index. MUST be evaluated per render: the data-loader sets window.MT
 // asynchronously, so a module-level constant resolved to 0 and pinned the whole
 // terminal to the oldest frame while the transport still displayed LIVE.
 function lastFrame() { return (window.MT ? MT.FRAMES : 1) - 1; }
-
-const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "theme": "tactical",
-  "density": "comfortable"
-}/*EDITMODE-END*/;
 
 const PAI = {
   ACCUMULATION: { c: "var(--pai-accumulation)", t: "Accumulation", d: "Pressure trend building — early organization." },
@@ -156,7 +151,6 @@ function Transport({ frame, setFrame, playing, setPlaying, speed, setSpeed }) {
 }
 
 function MillibarTerminalApp() {
-  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const NF = lastFrame();
   const stormIds = Object.keys(MT.storms);
   const [frame, setFrame] = React.useState(NF);
@@ -200,8 +194,7 @@ function MillibarTerminalApp() {
     if (newer && atLive && !playing && !sel.evidence) location.reload();
   }, [newer, atLive, playing, sel.evidence]);
 
-  const dense = t.density === "compact";
-  const tactical = t.theme !== "light";
+  const dense = false;   // one density; the switch was design-tool residue
   const panelGrid = narrow ? "1fr" : "1.5fr 1fr 1fr";
 
   React.useEffect(() => {
@@ -230,14 +223,8 @@ function MillibarTerminalApp() {
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
-  // ---- honest ingestion HUD (real feed status) ----
+
   const F = MT._feeds || {};
-  const hud = (name, f, extra) => Object.assign({ name, status: f && f.ok ? "ok" : (f && f.status ? "stale" : "missing"), source: (f && f.source) || name, timestamp: MTX.frameTime(frame), latency: f && f.latencyMs != null ? Math.round(f.latencyMs) + "ms" : "live", penalty: f && f.ok ? null : "feed unavailable", tier: f && f.ok ? "HIGH" : "LOW", buffer: (f && f.note) || "" }, extra);
-  const feeds = [
-    hud("ATCF", F.nhc, { source: (F.nhc && F.nhc.source) || "NHC ATCF", buffer: (F.nhc && F.nhc.count != null) ? F.nhc.count + " active" : (F.nhc && F.nhc.note) || "" }),
-    hud("MKT", F.markets, { source: (F.markets && F.markets.source) || "market", latency: "live", buffer: (F.markets && F.markets.count != null) ? F.markets.count + " mkts" : "" }),
-    hud("SAT", F.satellite, { status: "ok", latency: "daily", penalty: null, tier: "MEDIUM", buffer: "client-probed" }),
-  ];
 
   // ---- empty / awaiting-telemetry state (honest current condition) ----
   const healthLines = [
@@ -265,9 +252,8 @@ function MillibarTerminalApp() {
   const VTONE = { "TRADE-RELEVANT": "var(--edge-glow)", MATERIAL: "var(--warn)", COSMETIC: "var(--text-2)", "NO CHANGE": "var(--text-2)" };
   const shellHeader = (
     <header style={{ position: "sticky", top: 0, zIndex: 30, display: "flex", alignItems: "center", gap: 12, padding: "9px 20px", background: "var(--surface-card)", borderBottom: "1px solid var(--border-dim)", flexWrap: "wrap" }}>
-      <img src={tactical ? "assets/logo-dark.svg" : "assets/logo.svg"} alt="Millibar Terminal" style={{ height: 34 }} onError={(e) => { e.target.style.display = "none"; }} />
+      <img src="assets/logo-dark.svg" alt="Millibar Terminal" style={{ height: 34 }} onError={(e) => { e.target.style.display = "none"; }} />
       <PL>Category Alpha</PL>
-      <HUD streams={feeds} />
       {/* Active systems live in the top bar — switching storms shouldn't require
           hunting inside the map overlay. */}
       {stormIds.length > 0 && (
@@ -313,20 +299,14 @@ function MillibarTerminalApp() {
 
   if (!storm || !MT.storms[storm]) {
     return (
-      <div data-surface={tactical ? "tactical" : undefined} style={{ minHeight: "100vh", background: "var(--surface-app)", color: "var(--text-1)", fontFamily: "var(--font-sans)", zoom: zoom }}>
+      <div data-surface="tactical" style={{ minHeight: "100vh", background: "var(--surface-app)", color: "var(--text-1)", fontFamily: "var(--font-sans)", zoom: zoom }}>
         {shellHeader}
         <main style={shell}>
           <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />
           <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: gap, alignItems: "start" }}>
             <window.MT_Observability narrow={narrow} />
-            <div style={{ height: 210 }}><window.MT_Console stormId={null} frame={frame} /></div>
           </div>
         </main>
-        <TweaksPanel>
-          <TweakSection label="Display" />
-          <TweakRadio label="Theme" value={t.theme} options={["tactical", "light"]} onChange={(v) => setTweak("theme", v)} />
-          <TweakRadio label="Density" value={t.density} options={["compact", "comfortable"]} onChange={(v) => setTweak("density", v)} />
-        </TweaksPanel>
       </div>
     );
   }
@@ -335,7 +315,7 @@ function MillibarTerminalApp() {
   const pickContract = (id) => { const c = MT.contracts.find((x) => x.id === id); setSel((s) => ({ ...s, contract: id })); if (c && c.storm && MT.storms[c.storm]) setStorm(c.storm); };
 
   return (
-    <div data-surface={tactical ? "tactical" : undefined} style={{ minHeight: "100vh", background: "var(--surface-app)", color: "var(--text-1)", fontFamily: "var(--font-sans)", zoom: zoom }}>
+    <div data-surface="tactical" style={{ minHeight: "100vh", background: "var(--surface-app)", color: "var(--text-1)", fontFamily: "var(--font-sans)", zoom: zoom }}>
       {shellHeader}
 
       <main style={shell}>
@@ -444,18 +424,9 @@ function MillibarTerminalApp() {
           </div>
         </window.MT_Section>
 
-        <div style={{ marginTop: gap, height: wide ? 240 : 210 }}>
-          <window.MT_Console stormId={storm} frame={frame} />
-        </div>
       </main>
 
       <window.MT_Provenance evidenceId={sel.evidence} stormId={storm} frame={frame} onClose={() => setSel((s) => ({ ...s, evidence: null }))} />
-
-      <TweaksPanel>
-        <TweakSection label="Display" />
-        <TweakRadio label="Theme" value={t.theme} options={["tactical", "light"]} onChange={(v) => setTweak("theme", v)} />
-        <TweakRadio label="Density" value={t.density} options={["compact", "comfortable"]} onChange={(v) => setTweak("density", v)} />
-      </TweaksPanel>
     </div>
   );
 }

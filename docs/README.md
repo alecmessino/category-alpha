@@ -98,6 +98,50 @@ so on the panel.
 **Target: a 27–32" analyst workstation** (~2560px). The layout is responsive and holds
 down to phone width, but that is a floor, not a design target.
 
+## Decision lifecycle
+
+Events do not become history, they progress through states. Every state below is
+**machine-derived from committed data**, and each one names what would have to be true:
+
+| State | Asserted when | Owner |
+|---|---|---|
+| Observed | it appeared in a committed frame diff | frame-diff |
+| Validated | corroborated by a second independent source — an NHC advisory within 3h of a summary-feed intensity change, or ≥2 strikes in the same series moving the same way | cross-feed |
+| Assessed | it can be priced — an anchored contract exists for this storm / strike | HURDAT2 anchor |
+| Resolved | a newer reading on the same track superseded it | register |
+| Archived | older than the retained history window | retention |
+
+States the terminal cannot observe are rendered `–` (n/a), never as an unticked box —
+an empty checkbox implies the system is watching something, and it is not.
+
+**Operator marks are kept separate on purpose.** Whether a human has acknowledged an
+item or checked their exposure is not observable by the terminal, so it is not derived:
+those are the operator's assertions, stored in `localStorage`, labelled *this browser
+only, not observed by the system*. That is one analyst's memory on one machine — useful,
+but it is not institutional memory, and the UI does not call it that.
+
+## Provenance ownership (enforced, not aspirational)
+
+**Every visible claim has exactly one owner** — not just numbers. Labels, status text,
+capability descriptions, health indicators, provenance footers.
+
+This is a build step because the UI drifted ahead of the code three separate times, each
+the same way: a capability written as a string literal inside a component, where no feed
+could contradict it.
+
+- a hardcoded `Live NHC feed · 200 OK` with no fetch behind it
+- a pipeline row reading `ensemble consensus` when the only model was climatology
+- footers citing `canonical.fix() · v1.2.4` — a module and a version that do not exist
+
+`docs/app/claims.js` is the only place such statements may be authored. Each is a
+function of the real feed result and carries a named owner (a feed key, `derived`,
+`operator`, or `none` — where `none` means the claim is that the capability is absent).
+Components read claims; they never write them. Footers derive latency from snapshot age
+and cite the actual snapshot instead of a made-up semver.
+
+`scripts/audit-claims.mjs` runs in CI and fails the build if capability language
+reappears as a literal, or if a component references a claim id that is not registered.
+
 ## Architecture (permanent URL + fresh data, no CORS)
 
 - **`docs/`** is a static site served by **GitHub Pages** → a permanent `*.github.io` URL that never breaks.

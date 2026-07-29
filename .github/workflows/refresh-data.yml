@@ -43,6 +43,13 @@ jobs:
       - name: Test posterior stack
         run: node scripts/test-enso.mjs
 
+      # Every visible claim must have a provenance owner. This fails the build if
+      # capability / liveness language reappears as a literal inside a component
+      # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of
+      # the code three times before this existed.
+      - name: Audit claim provenance
+        run: node scripts/audit-claims.mjs
+
       - name: Refresh loop (~55 min, 10-min cadence)
         env:
           MT_STEP_MIN: "10"

@@ -20,7 +20,7 @@
     if (feedOk("nhc")) { reasons.push("NHC advisory: live, tier-A source → +1.5"); score += 1.5; }
     else { reasons.push("NHC feed unreachable → tier-A source lost"); }
     const age = S.reconAge ? S.reconAge(frame) : null;
-    if (age == null) reasons.push("No recon coverage (remote basin / none tasked)");
+    if (age == null) reasons.push(window.MTC.claim("capability.recon").text);
     else if (age > 30) { reasons.push("Recon stale (" + Math.round(age) + "m) → −0.5"); score -= 0.5; }
     else { reasons.push("Recon fresh (" + Math.round(age) + "m) → +0.5"); score += 0.5; }
     reasons.push(feedOk("markets") ? "Market price: live" : "No market feed");
@@ -388,6 +388,66 @@
     return { dueMs: due, inMin: Math.round((due - now) / 60000) };
   }
 
+  /* ---- Decision lifecycle -----------------------------------------------
+     Events stop being history and become state machines:
+
+       Observed → Validated → Assessed → Resolved → Archived
+
+     Every state here is MACHINE-derived from committed data, and each one names
+     what would have to be true. States we cannot observe are "n/a", never an
+     unticked box that implies the system is watching something it isn't.
+
+     Operator-owned states (has a human acknowledged this, has a human checked
+     their exposure) are deliberately NOT in this function. The terminal cannot
+     observe them, so they live separately, are stored in the browser, and are
+     labelled as the operator's assertion rather than the system's. */
+  const LIFECYCLE = ["observed", "validated", "assessed", "resolved", "archived"];
+
+  function lifecycleFor(sig, sigs) {
+    const st = { observed: true, validated: "n/a", assessed: "n/a", resolved: false, archived: false, why: {} };
+    st.why.observed = "appeared in a committed frame diff";
+
+    if (sig.kind === "intensity" || sig.kind === "pressure") {
+      // Corroborated when the authoritative advisory product lands near the same time.
+      const t = Date.parse(sig.tsZ) || 0;
+      const adv = (MT.events || []).some((e) => {
+        const fr = (MT._frames || [])[e.frame];
+        const et = fr ? Date.parse(fr.tsZ) : 0;
+        return et && Math.abs(et - t) <= 3 * 3600000;
+      });
+      st.validated = adv;
+      st.why.validated = adv ? "an NHC advisory landed within 3h" : "no advisory yet within 3h — summary feed only";
+      const anchored = (MT.contracts || []).some((c) => c.storm === sig.stormId && mdl(c, NF) != null);
+      st.assessed = anchored;
+      st.why.assessed = anchored ? "a priced contract exists for this storm" : "no anchored contract for this storm";
+    } else if (sig.kind === "market") {
+      // One tick on one strike is noise; the same direction across the ladder is a move.
+      const series = String(sig.contractId || "").replace(/-[^-]*$/, "");
+      const peers = sigs.filter((x) => x.kind === "market" && x.contractId
+        && String(x.contractId).replace(/-[^-]*$/, "") === series
+        && Math.sign(x.delta) === Math.sign(sig.delta));
+      st.validated = peers.length >= 2;
+      st.why.validated = peers.length >= 2
+        ? peers.length + " strikes in the same series moved the same way"
+        : "single strike moved — not corroborated across the ladder";
+      const C = (MT.contracts || []).find((x) => x.id === sig.contractId);
+      const anchored = !!(C && mdl(C, NF) != null);
+      st.assessed = anchored;
+      st.why.assessed = anchored ? "climatology anchor available for this strike" : "no anchor — edge is not computable";
+    } else if (sig.kind === "advisory") {
+      st.validated = true;
+      st.why.validated = "the advisory IS the authoritative product";
+    }
+
+    st.resolved = sig.status === "superseded";
+    st.why.resolved = st.resolved ? "a newer reading on the same track replaced it" : "still the current reading on this track";
+    const frames = MT._frames || [];
+    const oldest = frames.length ? Date.parse(frames[0].tsZ) : 0;
+    st.archived = !!(oldest && Date.parse(sig.tsZ) < oldest);
+    st.why.archived = st.archived ? "older than the retained history" : "inside the retained history window";
+    return st;
+  }
+
   function attention(opts) {
     const o = opts || {};
     const W = o.windowMin || 360;
@@ -422,6 +482,7 @@
         id: "sig:" + s.id, priority, title,
         detail: s.detail, kind: s.kind, source: s.source, tsZ: s.tsZ, ageMin: s.ageMin,
         confidence: s.confidence, seekTs: s.tsZ, contractId: s.contractId, stormId: s.stormId,
+        lifecycle: lifecycleFor(s, sigs),
       });
     });
 
@@ -441,6 +502,8 @@
         title: S.name + " Advisory #" + ((S.advNum ? Number(S.advNum) + 1 : "?")) + " expected in " + Math.max(0, n.inMin) + " min",
         detail: "NHC 6-hourly cycle from advisory #" + (S.advNum || "?") + " — scheduled, not observed",
         kind: "schedule", source: "NHC cadence", ageMin: null,
+        waitingOn: "NHC issuance",
+        nextAutomatic: window.MTC ? window.MTC.claim("action.automatic").text : null,
       });
     });
 
@@ -515,6 +578,6 @@
     };
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory };
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, lifecycleFor, LIFECYCLE };
 })();
 })();
