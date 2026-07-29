@@ -363,6 +363,158 @@
     };
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation };
+  /* ---- ATTENTION — a prioritised work queue, not a log ----------------------
+     The register answered "what happened, in order". This answers "what needs you,
+     and in what order" — which is a different question, and the one an operator
+     returning after two hours actually has.
+
+     Everything here is derived from something already on screen. The one piece of
+     new arithmetic is the advisory ETA, which is NHC's published 6-hourly cycle
+     applied to the last advisory we actually received; it is labelled as a
+     schedule, never as an observation, and it is never used as an input to a
+     probability. */
+  const PRIO_RANK = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+
+  function nextAdvisory(S) {
+    if (!S || !S.advTimeZ) return null;
+    const t = Date.parse(S.advTimeZ);
+    if (!t) return null;
+    let due = t + 6 * 3600000;                    // full advisories run 03/09/15/21Z
+    const now = Date.now();
+    // If we are past a slot the feed has not caught up to yet, roll forward rather
+    // than reporting a time in the past.
+    let guard = 0;
+    while (due < now - 20 * 60000 && guard++ < 8) due += 6 * 3600000;
+    return { dueMs: due, inMin: Math.round((due - now) / 60000) };
+  }
+
+  function attention(opts) {
+    const o = opts || {};
+    const W = o.windowMin || 360;
+    const F = MT._feeds || {};
+    const out = [];
+    const push = (it) => { if (it) out.push(it); };
+
+    // 1 ---- state + market changes, one row per track (newest wins). A physical
+    //        change carries its co-moving repricing on the same line, so the
+    //        operator reads one item instead of five.
+    const sigs = signals({ sinceMin: W }).filter((s) => s.status === "active");
+    const seen = new Set();
+    sigs.forEach((s) => {
+      const key = s.kind + "|" + (s.contractId || s.stormId || s.subject);
+      if (seen.has(key)) return;
+      seen.add(key);
+      const priority = s.class === "trade-relevant" ? "HIGH" : s.class === "material" ? "MEDIUM" : "LOW";
+      let title = s.label;
+      if (s.kind === "market" && s.contractId) {
+        // The register abbreviates contract names to fit a dense log. The queue is
+        // the primary read, so it gets the question in full.
+        const C = (MT.contracts || []).find((x) => x.id === s.contractId);
+        if (C && C.label) title = C.label.replace(/\?$/, "") + " \u00b7 " + (s.delta > 0 ? "+" : "") + s.delta.toFixed(1) + "\u00a2";
+      }
+      if (s.crossed != null) title = (s.subject || "Storm") + " crossed the " + s.crossed + " kt Saffir-Simpson boundary";
+      const co = (s.alongside || []).filter((x) => x.kind === "market");
+      if (co.length) {
+        const net = co.reduce((a, x) => a + (x.delta || 0), 0);
+        title += " (" + (net > 0 ? "+" : "") + net.toFixed(1) + "\u00a2 across " + co.length + " contract" + (co.length === 1 ? "" : "s") + ")";
+      }
+      push({
+        id: "sig:" + s.id, priority, title,
+        detail: s.detail, kind: s.kind, source: s.source, tsZ: s.tsZ, ageMin: s.ageMin,
+        confidence: s.confidence, seekTs: s.tsZ, contractId: s.contractId, stormId: s.stormId,
+      });
+    });
+
+    // 2 ---- disagreement between the physical signal and the market on one storm.
+    (situation(W).conflicts || []).forEach((c, i) => push({
+      id: "conflict:" + i, priority: "MEDIUM", title: c,
+      detail: "physical and market signals point opposite ways", kind: "divergence",
+      source: "cross-feed", ageMin: null,
+    }));
+
+    // 3 ---- the next scheduled advisory, when it is close enough to wait for.
+    Object.values(MT.storms || {}).forEach((S) => {
+      const n = nextAdvisory(S);
+      if (!n || n.inMin > 90 || n.inMin < -20) return;
+      push({
+        id: "adv:" + S.id, priority: n.inMin <= 30 ? "MEDIUM" : "LOW",
+        title: S.name + " Advisory #" + ((S.advNum ? Number(S.advNum) + 1 : "?")) + " expected in " + Math.max(0, n.inMin) + " min",
+        detail: "NHC 6-hourly cycle from advisory #" + (S.advNum || "?") + " — scheduled, not observed",
+        kind: "schedule", source: "NHC cadence", ageMin: null,
+      });
+    });
+
+    // 4 ---- the terminal's own trustworthiness. A degraded feed is a reason to
+    //        discount everything above it, so it belongs in the same queue.
+    const stale = MT._generatedAt ? Math.round((Date.now() - Date.parse(MT._generatedAt)) / 60000) : null;
+    if (stale != null && stale > 45) push({
+      id: "stale", priority: stale > 90 ? "HIGH" : "MEDIUM",
+      title: "Data pipeline stale — " + stale + " min since the last refresh",
+      detail: "every number on screen is at least this old", kind: "pipeline", source: "refresh", ageMin: stale,
+    });
+    const FEEDS = [
+      ["nhc", "NHC advisories", true], ["markets", "Prediction markets", true],
+      ["models", "Climatology anchor", false], ["enso", "ENSO / ONI layer", false],
+      ["sst", "SST anomaly", false],
+    ];
+    FEEDS.forEach(([k, name, core]) => {
+      const f = F[k];
+      if (f && f.ok) return;
+      push({
+        id: "feed:" + k, priority: core ? "HIGH" : "LOW",
+        title: name + " — NO FEED",
+        detail: (f && f.note) || "not reachable this cycle",
+        kind: "feed", source: (f && f.source) || name, ageMin: null,
+      });
+    });
+    if (o.imageryAgeMin != null && o.imageryAgeMin > 20) push({
+      id: "sat", priority: "LOW",
+      title: "Satellite imagery delayed " + Math.round(o.imageryAgeMin) + " min",
+      detail: o.imageryProduct || "GIBS", kind: "feed", source: "NASA GIBS", ageMin: o.imageryAgeMin,
+    });
+
+    out.sort((a, b) => PRIO_RANK[a.priority] - PRIO_RANK[b.priority]
+      || (a.ageMin == null ? 1 : b.ageMin == null ? -1 : a.ageMin - b.ageMin));
+    const byPriority = { HIGH: [], MEDIUM: [], LOW: [] };
+    out.forEach((i) => byPriority[i.priority].push(i));
+    return { items: out, byPriority, windowMin: W,
+      topPriority: out.length ? out[0].priority : null };
+  }
+
+  /* ---- BOARD IMPACT — the honest answer to "does this touch my positions?" ----
+     There is no position feed wired, so we cannot answer it at portfolio level and
+     do not pretend to. What we can answer is board level: what repriced, and where
+     the spread to the climatology anchor widened or narrowed. */
+  function exposure(windowMin) {
+    const W = windowMin || 360;
+    const moves = signals({ sinceMin: W }).filter((s) => s.kind === "market" && s.status === "active");
+    const byContract = new Map();
+    moves.forEach((s) => {
+      if (!s.contractId) return;
+      const cur = byContract.get(s.contractId) || { id: s.contractId, net: 0, n: 0, label: s.subject };
+      cur.net += s.delta; cur.n += 1;
+      byContract.set(s.contractId, cur);
+    });
+    const rows = [...byContract.values()].map((r) => {
+      const C = (MT.contracts || []).find((x) => x.id === r.id);
+      const price = C ? mkt(C, NF) : null;
+      const model = C ? mdl(C, NF) : null;
+      const edge = (price != null && model != null) ? (model - price) * 100 : null;
+      const prevEdge = (C && model != null && price != null) ? (model - (price - r.net / 100)) * 100 : null;
+      return Object.assign(r, { price, model, edge, prevEdge,
+        widened: (edge != null && prevEdge != null) ? Math.abs(edge) > Math.abs(prevEdge) : null,
+        anchored: model != null, contract: C });
+    }).sort((a, b) => Math.abs(b.net) - Math.abs(a.net));
+    const anchored = rows.filter((r) => r.anchored);
+    return {
+      windowMin: W, rows,
+      repriced: rows.length,
+      widened: anchored.filter((r) => r.widened === true).length,
+      narrowed: anchored.filter((r) => r.widened === false).length,
+      unanchored: rows.length - anchored.length,
+    };
+  }
+
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory };
 })();
 })();

@@ -61,6 +61,43 @@ empirically, the same way L1 does. Three guards keep it honest:
 When no storm is active (e.g. a quiet Atlantic), the terminal shows the honest
 `[ SYSTEM AWAITING TELEMETRY ]` state — that's the real condition, not an error.
 
+## Information architecture
+
+The screen answers five questions in order, and everything that does not answer one of
+them collapses or is gone:
+
+| | Question | Where |
+|---|---|---|
+| 1 | What changed? | **Situation** — headline, material-change counts, the latest event |
+| 2 | Why should I believe it? | **Why believe it** — one line: feeds live, evidence tier, snapshot age, what is NO FEED |
+| 3 | Does it affect the board? | **Board Impact** — what repriced, where the spread to the anchor widened or narrowed |
+| 4 | What deserves investigation? | **Attention** — a prioritised HIGH/MEDIUM/LOW queue |
+| 5 | Where can I verify it? | **Spatial context**, **Fair value**, **Verify**, **Raw data** — progressive disclosure |
+
+**Attention is a work queue, not a log.** The register (still available in full under
+Verify) answered "here is everything that happened, newest first". The queue answers
+"here is what requires you, in order". It merges four sources and ranks them: register
+signals (trade-relevant → HIGH, material → MEDIUM, cosmetic → LOW), cross-feed
+divergences, the terminal's own health (a stale pipeline or a dead feed is a reason to
+discount everything above it, so it competes in the same list), and the next scheduled
+advisory. A physical change carries its co-moving repricing on the same row, so one
+event reads as one item rather than five.
+
+The only new derivation is the advisory ETA — NHC's published 6-hourly cycle applied to
+the last advisory actually received. It is labelled *scheduled, not observed*, and it is
+never an input to a probability.
+
+**The map is no longer the hero.** When the project started the map *was* the product,
+because it was the data. The product is now the interpretation, so the map sits under
+Situation and Attention as spatial context.
+
+**Question 3 is answered honestly, not completely.** There is no position feed, so the
+terminal cannot answer it at portfolio level and does not pretend to — Board Impact says
+so on the panel.
+
+**Target: a 27–32" analyst workstation** (~2560px). The layout is responsive and holds
+down to phone width, but that is a floor, not a design target.
+
 ## Architecture (permanent URL + fresh data, no CORS)
 
 - **`docs/`** is a static site served by **GitHub Pages** → a permanent `*.github.io` URL that never breaks.

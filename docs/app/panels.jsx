@@ -58,6 +58,26 @@ function MT_Situation({ dense }) {
           ? <span style={{ color: "var(--warn)" }}>⚠ Conflicting evidence — {s.conflicts.join("; ")}</span>
           : "No conflicting evidence between physical and market signals."}</div>
       </div>
+      {/* Why believe it — question 2, answered in one line rather than a panel.
+          Feed provenance, not forecast confidence; the two are kept separate. */}
+      {(() => {
+        const F = MT._feeds || {};
+        const live = Object.keys(F).filter((k) => F[k] && F[k].ok);
+        const down = Object.keys(F).filter((k) => F[k] && !F[k].ok);
+        const stale = MT._generatedAt ? Math.round((Date.now() - Date.parse(MT._generatedAt)) / 60000) : null;
+        const tier = MT.evidence.every((e) => e.tier === "A") ? "A" : MT.evidence.some((e) => e.tier === "A") ? "A/B" : "B";
+        return (
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "baseline", marginTop: 9, paddingTop: 8,
+            borderTop: "1px solid var(--border-dim)", fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>
+            <span style={{ fontWeight: 800, letterSpacing: ".8px", color: "var(--text-2)" }}>WHY BELIEVE IT</span>
+            <span>{live.length}/{live.length + down.length} feeds live</span>
+            <span>evidence tier <b style={{ color: "var(--text-1)" }}>{tier}</b></span>
+            <span>snapshot <b style={{ color: stale == null ? "var(--text-1)" : stale <= 25 ? "var(--pos)" : stale <= 75 ? "var(--warn)" : "var(--neg)" }}>{stale == null ? "—" : stale + "m old"}</b></span>
+            {down.length > 0 && <span style={{ color: "var(--neg)" }}>NO FEED: {down.join(", ")}</span>}
+            <span style={{ opacity: .75 }}>· every number traces to a named feed under Verify</span>
+          </div>
+        );
+      })()}
     </section>
   );
 }
@@ -126,39 +146,6 @@ function MT_Confidence({ stormId, frame }) {
   );
 }
 
-/* ---- Probability (model consensus) ---- */
-function MT_Probability({ stormId, frame }) {
-  const s = MTX.snap(stormId, frame);
-  const models = MT.models || [];
-  const hasModel = s.model != null;
-  return (
-    <P title="Probability — Cat4+" right={<BG tone={hasModel ? "special" : "neg"}>{hasModel ? "ANCHOR ONLY" : "NO MODEL FEED"}</BG>}
-      footer={<PF source={hasModel ? "ensemble consensus" : "no ensemble feed wired"} latency={hasModel ? "40m" : "—"} version="—" tier={hasModel ? "B" : "C"} />}>
-      {hasModel ? (
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 800, color: "var(--accent)" }}>{Math.round(s.model * 100)}%</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)" }}>model anchor · vs mkt {s.market != null ? Math.round(s.market * 100) + "%" : "—"}</span>
-        </div>
-      ) : (
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 10 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 22, fontWeight: 800, color: "var(--neg)" }}>NO FEED</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)" }}>market {s.market != null ? Math.round(s.market * 100) + "%" : "—"}</span>
-        </div>
-      )}
-      {models.map((m) => (
-        <div key={m.id} style={{ marginBottom: 7 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", marginBottom: 3 }}>
-            <span>{m.label}</span><span style={{ color: "var(--text-1)" }}>{Math.round(m.cat4 * 100)}%</span>
-          </div>
-          <GG value={m.cat4 * 100} color={m.color} height={5} />
-        </div>
-      ))}
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", marginTop: 8 }}>
-        {hasModel ? "Probability shown is an anchor, not a fitted model." : "No public ensemble Cat-probability feed is wired, so no independent probability is shown. Fabricating one would violate the data-honesty standard — market price is live above."}
-      </div>
-    </P>
-  );
-}
 
 /* ---- Edge Matrix / Q-Kelly ---- */
 function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selection, onSelect, dense }) {
@@ -345,6 +332,149 @@ function MT_YieldCurve({ dense }) {
           </div>
         );
       })()}
+    </P>
+  );
+}
+
+
+/* ---- ATTENTION — the work queue -------------------------------------------
+   Replaces the scrolling register as the primary object. The register said "here
+   is everything that happened"; this says "here is what requires you, in order".
+   The full register is still one click away under Verify — nothing is hidden,
+   it is just no longer competing for the top of the screen. */
+const PRIO_STYLE = {
+  HIGH:   { c: "var(--neg)", label: "HIGH" },
+  MEDIUM: { c: "var(--warn)",      label: "MEDIUM" },
+  LOW:    { c: "var(--text-2)",    label: "LOW" },
+};
+const KIND_ICON = { intensity: "◆", pressure: "▼", market: "▮", advisory: "✦", divergence: "⚠", schedule: "◷", feed: "○", pipeline: "◌" };
+
+function MT_Attention({ dense, imagery, onSeek, onSelectContract }) {
+  const [minPrio, setMinPrio] = React.useState("LOW");
+  const imageryAgeMin = imagery && imagery.ageMin != null ? imagery.ageMin : null;
+  const a = MTX.attention ? MTX.attention({ windowMin: 360, imageryAgeMin, imageryProduct: imagery && imagery.product }) : null;
+  if (!a) return null;
+  const order = ["HIGH", "MEDIUM", "LOW"];
+  const cutoff = order.indexOf(minPrio);
+  const shown = order.slice(0, cutoff + 1);
+  const total = a.items.length;
+  const counts = order.map((p) => a.byPriority[p].length);
+
+  const chip = (p, n) => (
+    <span key={p} onClick={() => setMinPrio(p)} title={"Show " + p + " and above"}
+      style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: ".4px",
+        padding: "3px 8px", borderRadius: 5,
+        border: "1px solid " + (minPrio === p ? PRIO_STYLE[p].c : "var(--border-dim)"),
+        color: minPrio === p ? PRIO_STYLE[p].c : "var(--text-2)",
+        background: minPrio === p ? "color-mix(in srgb," + PRIO_STYLE[p].c + " 12%,transparent)" : "transparent" }}>
+      {p} {n}
+    </span>
+  );
+
+  return (
+    <P pad={false} title="Attention"
+      right={<div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", letterSpacing: ".4px" }}>SHOW DOWN TO</span>
+        {order.map((p, i) => chip(p, counts[i]))}</div>}
+      footer={<PF source="prioritised over the committed register" latency="live" version="—" tier="A" />}>
+      {!total && (
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 11.5, color: "var(--text-2)", padding: "18px 14px", lineHeight: 1.7 }}>
+          [ NOTHING REQUIRES ATTENTION ]<br />
+          Every feed re-read identical values across the last 6 hours and all core feeds are live.
+          Nothing to action — which is itself the answer.
+        </div>
+      )}
+      {shown.map((p) => {
+        const rows = a.byPriority[p];
+        if (!rows.length) return null;
+        const st = PRIO_STYLE[p];
+        return (
+          <div key={p}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: dense ? "7px 13px 4px" : "9px 14px 5px",
+              borderTop: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: st.c }} />
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, fontWeight: 800, letterSpacing: 1.2, color: st.c }}>{st.label}</span>
+              <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)" }}>{rows.length}</span>
+            </div>
+            {rows.map((it) => (
+              <div key={it.id}
+                onClick={() => { if (it.seekTs && onSeek) onSeek(it.seekTs); if (it.contractId && onSelectContract) onSelectContract(it.contractId); }}
+                style={{ display: "flex", gap: 10, alignItems: "flex-start", padding: dense ? "7px 14px" : "9px 15px",
+                  borderTop: "1px solid var(--border-dim)", cursor: (it.seekTs || it.contractId) ? "pointer" : "default" }}>
+                <span style={{ color: st.c, fontSize: 12, lineHeight: 1.35, width: 12, flex: "none" }}>{KIND_ICON[it.kind] || "•"}</span>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ fontSize: dense ? 12.5 : 13.5, color: "var(--text-1)", lineHeight: 1.4, fontWeight: 600 }}>{it.title}</div>
+                  <div style={{ display: "flex", gap: 9, flexWrap: "wrap", marginTop: 3, fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)" }}>
+                    {it.ageMin != null && <span>{it.ageMin < 60 ? it.ageMin + "m ago" : Math.floor(it.ageMin / 60) + "h" + ("0" + (it.ageMin % 60)).slice(-2) + "m ago"}</span>}
+                    {it.source && <span>{it.source}</span>}
+                    {it.confidence != null && <span>conf {Math.round(it.confidence * 100)}%</span>}
+                    {it.detail && <span style={{ opacity: .85 }}>· {it.detail}</span>}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+      {total > 0 && cutoff < 2 && (
+        <div onClick={() => setMinPrio("LOW")} style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 10,
+          color: "var(--text-2)", padding: "8px 14px", borderTop: "1px solid var(--border-dim)" }}>
+          + {a.items.length - shown.reduce((n, p) => n + a.byPriority[p].length, 0)} lower-priority item(s) — show all
+        </div>
+      )}
+    </P>
+  );
+}
+
+/* ---- BOARD IMPACT — "does this touch what I would trade?" -------------------
+   Deliberately board-level. No position feed is wired, so a portfolio answer would
+   have to be invented; the panel says that outright rather than implying coverage
+   it does not have. */
+function MT_Exposure({ frame, dense, onSelect, selection }) {
+  const x = MTX.exposure ? MTX.exposure(360) : null;
+  if (!x) return null;
+  const pad = dense ? "5px 9px" : "7px 11px";
+  return (
+    <P pad={false} title="Board Impact" right={<BG tone={x.repriced ? "live" : "neutral"} dot={!!x.repriced}>{x.repriced} REPRICED</BG>}
+      footer={<PF source="frame-diff × HURDAT2 anchor" latency="live" version="—" tier="B" />}>
+      <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", flexWrap: "wrap" }}>
+        {[
+          { k: "REPRICED", v: x.repriced, sub: "in 6h" },
+          { k: "EDGE WIDENED", v: x.widened, sub: "vs anchor", tone: x.widened ? "var(--pos)" : null },
+          { k: "EDGE NARROWED", v: x.narrowed, sub: "vs anchor", tone: x.narrowed ? "var(--neg)" : null },
+          { k: "NO ANCHOR", v: x.unanchored, sub: "not priceable" },
+        ].map((m) => (
+          <div key={m.k} style={{ flex: "1 1 92px", minWidth: 0, background: "var(--surface-card)", padding: "8px 11px" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: ".6px", color: "var(--text-2)" }}>{m.k}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 800, lineHeight: 1.15, marginTop: 2, color: m.tone || "var(--text-1)" }}>{m.v}</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>{m.sub}</div>
+          </div>
+        ))}
+      </div>
+      {x.rows.length > 0 && (
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: dense ? 11 : 12 }}>
+          <thead><tr>{["Contract", "Move", "Price", "Anchor", "Edge"].map((h) => (
+            <th key={h} style={{ textAlign: h === "Contract" ? "left" : "right", color: "var(--text-2)", fontWeight: 600,
+              fontSize: 10, textTransform: "uppercase", letterSpacing: ".5px", padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{h}</th>
+          ))}</tr></thead>
+          <tbody>{x.rows.slice(0, 6).map((r) => (
+            <tr key={r.id} onClick={() => onSelect && onSelect(r.id)}
+              style={{ cursor: "pointer", background: selection && selection.contract === r.id ? "color-mix(in srgb,var(--accent) 12%,transparent)" : "transparent" }}>
+              <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)", color: "var(--text-1)", maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.label}</td>
+              <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700,
+                color: r.net > 0 ? "var(--pos)" : "var(--neg)" }}>{r.net > 0 ? "+" : ""}{r.net.toFixed(1)}¢</td>
+              <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--text-1)" }}>{r.price != null ? Math.round(r.price * 100) + "¢" : "—"}</td>
+              <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)", textAlign: "right", fontFamily: "var(--font-mono)", color: "var(--text-2)" }}>{r.model != null ? Math.round(r.model * 100) + "%" : "—"}</td>
+              <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)", textAlign: "right", fontFamily: "var(--font-mono)", fontWeight: 700,
+                color: r.edge == null ? "var(--text-2)" : r.edge > 0 ? "var(--pos)" : "var(--neg)" }}>{r.edge == null ? "—" : (r.edge > 0 ? "+" : "") + r.edge.toFixed(0) + "pt"}</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      )}
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", lineHeight: 1.55 }}>
+        No position feed is wired, so this is <b style={{ color: "var(--text-1)" }}>board level, not portfolio level</b> — it says what moved and
+        where the spread to the climatology anchor changed, not what you hold. Anchor is a climatology baseline, not a skill forecast.
+      </div>
     </P>
   );
 }
@@ -634,28 +764,6 @@ function MT_Signals({ stormId, dense, maxH, onSeek }) {
 }
 
 /* ---- Event Ledger (VCR bookmarks) ---- */
-function MT_Ledger({ frame, onSeek, dense }) {
-  return (
-    <P pad={false} title="Research Ledger — Event Timeline"
-      footer={<PF source="event_store (immutable)" latency="live" version="1.2.4" tier="A" />}>
-      {/* Two advisories can land on the same snapshot, so the frame index alone is not a unique key. */}
-      <div>{MT.events.slice().reverse().map((ev, evi) => {
-        const on = Math.abs(ev.frame - frame) <= 0;
-        const near = ev.frame <= frame;
-        return (
-          <div key={ev.frame + "|" + evi} onClick={() => onSeek(ev.frame)} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: dense ? "6px 11px" : "8px 12px", borderBottom: "1px solid var(--border-dim)", cursor: "pointer", background: on ? "color-mix(in srgb,var(--accent) 12%,transparent)" : "transparent", opacity: near ? 1 : 0.45 }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", minWidth: 46, paddingTop: 1 }}>{MTX.frameTime(ev.frame)}</span>
-            <span style={{ width: 7, height: 7, borderRadius: "50%", marginTop: 4, flex: "none", background: ev.hot ? "var(--warn)" : near ? "var(--pos)" : "var(--border-strong)" }} />
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 12, color: "var(--text-1)", lineHeight: 1.3 }}>{ev.label}</div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", marginTop: 1 }}>{ev.source} · tier {ev.tier}</div>
-            </div>
-          </div>
-        );
-      })}</div>
-    </P>
-  );
-}
 
 /* ---- Observability / Pipeline ---- */
 function MT_Observability({ narrow }) {
@@ -682,4 +790,4 @@ function MT_Observability({ narrow }) {
   );
 }
 
-Object.assign(window, { MT_Evidence, MT_Confidence, MT_Probability, MT_EdgeMatrix, MT_Markets, MT_OrderBook, MT_Ledger, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section });
+Object.assign(window, { MT_Evidence, MT_Confidence, MT_EdgeMatrix, MT_Markets, MT_OrderBook, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section, MT_Attention, MT_Exposure });

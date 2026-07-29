@@ -246,6 +246,19 @@ function MillibarTerminalApp() {
     { name: "GIBS imagery", ok: !!(F.satellite && F.satellite.ok), status: "EMPTY", detail: (F.satellite && F.satellite.source) || "NASA GIBS" },
   ];
 
+  /* Satellite freshness, normalised for the attention queue. GOES carries a real
+     10-minute slot timestamp; the VIIRS fallback is a daily composite, so its age
+     is reported as a fallback condition rather than a misleading minute count. */
+  const imageryState = React.useMemo(() => {
+    const f = imagery && imagery.fresh;
+    if (!f) return null;
+    if (f.product === "GOES GeoColor") {
+      const t = Date.parse(f.at);
+      return { product: f.product, ageMin: t ? Math.round((Date.now() - t) / 60000) : null };
+    }
+    return { product: f.product + " (GOES slot unavailable)", ageMin: 999 };
+  }, [imagery]);
+
   const sitVerdict = (MTX.situation ? MTX.situation(360).verdict : null);
   // Real staleness of the snapshot itself — the dot was green regardless of age.
   const staleMin = MT._generatedAt ? Math.max(0, Math.round((Date.now() - Date.parse(MT._generatedAt)) / 60000)) : null;
@@ -326,18 +339,33 @@ function MillibarTerminalApp() {
       {shellHeader}
 
       <main style={shell}>
-        {/* 1 · SITUATION — the 30-second read */}
+        {/* The screen answers five questions, in order:
+              1 what changed  ·  2 why believe it  ·  3 does it touch the board
+              4 what deserves investigation  ·  5 where can I verify it
+            Everything below Attention is supporting material and collapses. */}
+
+        {/* 1 + 2 — what changed, and whether to trust it */}
         <window.MT_Situation dense={dense} />
 
-        {/* 2 · CONTEXT + 3 · WHAT MATTERS — side by side, both above the fold */}
-        <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.55fr 1fr", gap: gap, alignItems: "start", marginBottom: gap }}>
-        <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: 16 }}>
+        {/* 4 + 3 — what needs you, and what it touches. This is the hero row now;
+            the map moved below it, because the product stopped being the data and
+            became the interpretation of the data. */}
+        <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: gap, alignItems: "start", marginBottom: gap }}>
+          <window.MT_Attention dense={dense} imagery={imageryState}
+            onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
+            onSelectContract={pickContract} />
+          <window.MT_Exposure frame={frame} dense={dense} selection={sel} onSelect={pickContract} />
+        </div>
+
+        {/* 5a — spatial context. Supporting, not the headline. */}
+        <window.MT_Section label="Spatial context" tier="track · cone · satellite · replay" defaultOpen
+          summary={S.name + " " + S.cls + " · " + Math.round(snap.wind) + " kt"}>
+        <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: gap }}>
           <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) " + (wide ? 360 : 320) + "px" }}>
             <div style={{ position: "relative", minHeight: narrow ? 300 : cmdH, background: "var(--slate-950)" }}>
               <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} onImagery={setImagery} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--blue-300)", textTransform: "uppercase" }}>Storm Command Center</span>
-
               </div>
               <LayerToggles layers={layers} setLayers={setLayers} storm={storm} />
             </div>
@@ -381,41 +409,31 @@ function MillibarTerminalApp() {
           </div>
           <Transport frame={frame} setFrame={setFrame} playing={playing} setPlaying={setPlaying} speed={speed} setSpeed={setSpeed} />
         </section>
-        <window.MT_Signals stormId={storm} dense={dense} maxH={narrow ? 420 : cmdH + 120} onSeek={(tsZ) => {
-          const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ);
-          if (i >= 0) { setPlaying(false); setFrame(i); }
-        }} />
-        </div>
+        </window.MT_Section>
 
-        {/* 3b · ANALYSIS — term structure + event ledger */}
-        <window.MT_Section label="Analysis" tier="term structure · event ledger" defaultOpen
-          summary="collapsed">
+        {/* 5b — fair value and the posterior stack behind every edge on screen */}
+        <window.MT_Section label="Fair value" tier="term structure · posterior stack" defaultOpen summary="collapsed">
           <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
             <window.MT_YieldCurve dense={dense} />
-            <div style={{ display: "flex", flexDirection: "column", gap: gap, minWidth: 0 }}>
-              <window.MT_Ledger frame={frame} onSeek={(f) => { setPlaying(false); setFrame(f); }} dense={dense} />
-              <window.MT_Observability narrow={narrow} />
-            </div>
+            <window.MT_Observability narrow={narrow} />
           </div>
         </window.MT_Section>
 
-        {/* 4 · EVIDENCE — what the read rests on */}
-        <window.MT_Section label="Evidence" tier="inputs · confidence · fair value" defaultOpen
-          summary={MT.evidence.length + " signals · tier " + MTX.snap(storm, frame).tier}>
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : wide ? "1.45fr 1fr 1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
+        {/* 5c — the audit trail: every input, and the full unfiltered register */}
+        <window.MT_Section label="Verify" tier="inputs · confidence · full register"
+          summary={MT.evidence.length + " inputs · tier " + MTX.snap(storm, frame).tier}>
+          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : wide ? "1.2fr 1fr 1.1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
             <window.MT_Evidence stormId={storm} frame={frame} selection={sel} onSelect={(id) => setSel((s) => ({ ...s, evidence: id }))} dense={dense} />
-            {wide ? <window.MT_Confidence stormId={storm} frame={frame} /> : null}
-            {wide ? <window.MT_Probability stormId={storm} frame={frame} /> : (
-              <div style={{ display: "flex", flexDirection: "column", gap: gap, minWidth: 0 }}>
-                <window.MT_Confidence stormId={storm} frame={frame} />
-                <window.MT_Probability stormId={storm} frame={frame} />
-              </div>
-            )}
+            <window.MT_Confidence stormId={storm} frame={frame} />
+            <window.MT_Signals stormId={storm} dense={dense} maxH={520} onSeek={(tsZ) => {
+              const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ);
+              if (i >= 0) { setPlaying(false); setFrame(i); }
+            }} />
           </div>
         </window.MT_Section>
 
-        {/* 5 · RAW DATA — the full board, on demand */}
-        <window.MT_Section label="Raw data" tier="full market board · depth · pipeline"
+        {/* 5d — the full board, on demand */}
+        <window.MT_Section label="Raw data" tier="full market board · depth · sizing"
           summary={MT.contracts.length + " contracts · " + (MT._feeds && MT._feeds.markets ? MT._feeds.markets.source : "—")}>
           <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: gap, minWidth: 0 }}>

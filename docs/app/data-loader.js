@@ -180,7 +180,10 @@
       { stage: "Evidence", status: evidence.length ? "PASS" : "EMPTY", detail: evidence.length + " signals · content-addressed" },
       { stage: "Features", status: anyStorm ? "PASS" : "EMPTY", detail: anyStorm ? "wind/pressure/track" : "no active system" },
       { stage: "Confidence", status: evidence.length ? "PASS" : "EMPTY", detail: "evidence-quality tiering" },
-      { stage: "Probability", status: (feeds.models && feeds.models.ok) ? "PASS" : "BLOCKED", detail: (feeds.models && feeds.models.ok) ? "ensemble consensus" : "no public ensemble feed — anchor only" },
+      { stage: "Probability", status: (feeds.models && feeds.models.ok) ? "PASS" : "BLOCKED",
+        detail: (feeds.models && feeds.models.ok)
+          ? "HURDAT2 climatology anchor" + ((feeds.enso && feeds.enso.ok) ? " + ENSO layer" : "") + " — no ensemble feed"
+          : "no climatology anchor and no ensemble feed" },
       { stage: "Edge", status: mktOk && anyStorm ? "PASS" : "EMPTY", detail: mktOk ? "model − market" : "no market feed" },
       { stage: "Kelly", status: mktOk && anyStorm ? "PASS" : "EMPTY", detail: "Q-Kelly ¼ · liquidity-capped" },
       { stage: "Position", status: "EMPTY", detail: "research-only · no execution" },
