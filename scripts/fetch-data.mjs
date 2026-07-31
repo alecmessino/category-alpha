@@ -20,7 +20,8 @@ const __dir = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = resolve(__dir, "../docs/data");
 const STEP_MIN = Number(process.env.MT_STEP_MIN || 10);
 const FRAME_GAP_MIN = Number(process.env.MT_FRAME_GAP_MIN || 20);  // replay-history granularity
-const FRAME_KEEP = Number(process.env.MT_FRAME_KEEP || 144);       // 144 x 20min = 48h of real history
+const FRAME_KEEP = Number(process.env.MT_FRAME_KEEP || 96);        // 96 x 20min = 32h of real history
+const MAX_CONTRACTS = Number(process.env.MT_MAX_CONTRACTS || 300); // runaway guard only — never a silent trim
 const UA = "MillibarTerminal/1.0 (+https://github.com; institutional weather research dashboard)";
 const now = new Date();
 const nowIso = now.toISOString();
@@ -847,9 +848,22 @@ async function fetchKalshi(storms, clim, oni) {
     || (b.liquidity || 0) - (a.liquidity || 0)
     || (a.strike ?? 999) - (b.strike ?? 999));
   const anchored = contracts.filter((c) => c.model != null).length;
-  return { ok: true, status: paged.status, source: "kalshi", count: contracts.length, contracts: contracts.slice(0, 44), diag: paged.tried,
-           drops, samples, raw: paged.raw || null,
-           note: `${contracts.length} hurricane markets (${anchored} anchored) from ${paged.scanned} ${paged.mode} · dropped ${drops.noKeyword}kw/${drops.sports}sport/${drops.noPrice}px` };
+  /* This used to be slice(0, 44). Kalshi was returning 147 qualifying hurricane
+     markets and the board silently kept the top 44 — which dropped WHOLE SERIES,
+     not just deep rungs: Atlantic tropical-storm counts and Eastern Pacific named
+     storms vanished entirely while the header still read "44 contracts · kalshi".
+     A cap that hides entire markets is worse than a slow board. The ceiling now
+     exists only as a runaway guard, and anything it removes is counted and
+     reported rather than disappearing. */
+  const kept = contracts.slice(0, MAX_CONTRACTS);
+  const droppedForCap = contracts.length - kept.length;
+  const seriesOf = (c) => String(c.id).replace(/-[^-]*$/, "");
+  const seriesKept = new Set(kept.map(seriesOf)).size;
+  return { ok: true, status: paged.status, source: "kalshi", count: kept.length, contracts: kept, diag: paged.tried,
+           drops, samples, raw: paged.raw || null, droppedForCap, seriesKept,
+           note: `${kept.length} hurricane markets across ${seriesKept} series (${anchored} anchored) from ${paged.scanned} ${paged.mode}`
+               + ` · dropped ${drops.noKeyword}kw/${drops.sports}sport/${drops.noPrice}px`
+               + (droppedForCap ? ` · ${droppedForCap} BEYOND THE ${MAX_CONTRACTS}-CONTRACT CEILING` : "") };
 }
 
 async function fetchPolymarket(storms, clim, oni) {
@@ -955,7 +969,8 @@ async function main() {
 
   const feeds = {
     nhc: nhcFeed,
-    markets: { ok: !!mkt.ok, status: mkt.status, source: mkt.source, count: mkt.count || 0, note: mkt.note, attempts: marketAttempts },
+    markets: { ok: !!mkt.ok, status: mkt.status, source: mkt.source, count: mkt.count || 0, note: mkt.note,
+               seriesKept: mkt.seriesKept || null, droppedForCap: mkt.droppedForCap || 0, attempts: marketAttempts },
     sst: { ok: false, source: sst.source, note: sst.note },
     models: climFeed.ok
       ? Object.assign({}, climFeed, { note: climFeed.note + " — seasonal count contracts only; per-storm intensity has no fitted model" })
@@ -983,7 +998,10 @@ async function main() {
   if (!Array.isArray(framesJson.frames)) framesJson.frames = [];
   const frameStorms = {}, frameContracts = {};
   storms.forEach((s) => { frameStorms[s.id] = { wind: s.wind, pressure: s.pressure, center: s.center, modelCat4: s.modelCat4, marketCat4: s.marketCat4, reconAge: s.reconAge }; });
-  contracts.forEach((c) => { frameContracts[c.id] = { market: c.market, model: c.model }; });
+  // 4dp is well past tick size; "model": 0.919047619047619 was ~14 wasted bytes per
+  // contract per frame, which matters once every listed market is carried.
+  const r4 = (v) => (v == null ? null : Math.round(v * 10000) / 10000);
+  contracts.forEach((c) => { frameContracts[c.id] = { market: r4(c.market), model: r4(c.model) }; });
   framesJson.stepMin = FRAME_GAP_MIN;
   /* latest.json refreshes every tick, but the replay history does NOT need that
      granularity — appending a frame every tick would rewrite a ~400KB file six times

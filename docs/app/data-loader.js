@@ -201,7 +201,8 @@
     }
     const health = [
       feedHealth(feeds.nhc, "NHC advisories"),
-      feedHealth(feeds.markets, "Prediction markets"),
+      Object.assign(feedHealth(feeds.markets, "Prediction markets"),
+        (feeds.markets && feeds.markets.droppedForCap) ? { status: "FAIL" } : {}),
       feedHealth(feeds.satellite, "GIBS imagery"),
       feedHealth(feeds.sst, "SST anomaly"),
       feedHealth(feeds.models, "Ensemble models"),

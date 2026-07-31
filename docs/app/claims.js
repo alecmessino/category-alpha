@@ -110,6 +110,28 @@
     text: "subject not in the active NHC feed",
     ok: false,
   }));
+  /* No silent caps. If the ingest ceiling ever removes a market, the board says so
+     instead of quietly showing a shorter list under an unchanged header. */
+  define("markets.coverage", "markets", (s) => {
+    const f = s.feeds.markets || {};
+    if (!f.ok) return { text: "market feed unavailable this cycle", ok: false };
+    const over = f.droppedForCap || 0;
+    return {
+      text: (f.count || 0) + " markets across " + (f.seriesKept || "?") + " series"
+          + (over ? " · " + over + " BEYOND THE INGEST CEILING — not shown" : " · every qualifying market listed"),
+      ok: over === 0,
+    };
+  });
+  /* Drifted the moment L3 shipped: the board still read "it ignores ENSO, SSTs and
+     season-to-date progress" after the ENSO layer was wired. State what the anchor
+     actually conditions on, from the feeds. */
+  define("model.caveat", "models", (s) => ({
+    text: "MODEL = empirical HURDAT2 season-count climatology conditioned on day-of-year"
+        + (okOf(s, "enso") ? " and ENSO phase" : "")
+        + ". It has no in-season count feed and no SST term, and it is a baseline rather than a skill"
+        + " forecast — treat EDGE as a reference spread, not alpha.",
+    ok: okOf(s, "models"),
+  }));
   define("capability.positions", "none", () => ({
     text: "No position feed is wired — board level, not portfolio level.",
     ok: false,

@@ -583,6 +583,27 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
     const d = (px != null && prev != null) ? (px - prev) * 100 : 0;
     return { c, px, model, edge, d, hist: (c.histSeries && c.histSeries.length ? c.histSeries : MTX.priceHist(c, frame, 12)) };
   });
+  /* One row per rung, grouped under the question it belongs to. Series with an
+     active-storm or anchored rung float to the top; within a series, strike order. */
+  const grouped = (() => {
+    const bySeries = new Map();
+    rows.forEach((r) => {
+      const key = String(r.c.id).replace(/-[^-]*$/, "");
+      if (!bySeries.has(key)) bySeries.set(key, []);
+      bySeries.get(key).push(r);
+    });
+    const groups = [...bySeries.entries()].map(([series, rs]) => {
+      rs.sort((a, b) => (a.c.strike ?? 999) - (b.c.strike ?? 999));
+      const lead = rs.find((r) => r.c.storm) || rs.find((r) => r.model != null) || rs[0];
+      return { series, rs, label: String(lead.c.label || lead.c.short || series).replace(/\?$/, ""),
+        rank: (rs.some((r) => r.c.storm) ? 0 : rs.some((r) => r.model != null) ? 1 : 2),
+        vol: rs.reduce((s, r) => s + (r.c.volume || 0), 0) };
+    });
+    groups.sort((a, b) => a.rank - b.rank || b.vol - a.vol);
+    const out = [];
+    groups.forEach((g) => { out.push({ groupHead: { series: g.series, label: g.label, n: g.rs.length } }); out.push(...g.rs); });
+    return out;
+  })();
   const mktSource = (MT._feeds && MT._feeds.markets && MT._feeds.markets.source) || "market";
   const spanH = (() => {
     const fr = MT._frames || [];
@@ -598,10 +619,24 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
   return (
     <P pad={false} title={"Prediction Markets — " + (mktSource[0].toUpperCase() + mktSource.slice(1)) + " board"} right={<BG tone={rows.length ? "live" : "neg"} dot>{rows.length} MKTS</BG>}
       footer={<PF {...MTC.footer("panel.markets")} />}>
-      <div style={{ overflowX: "auto" }}>
+      {/* Grouped by series and capped. Every listed market is now carried, and a flat
+          147-row list ordered by volume interleaves ladders from different questions —
+          which is precisely the layout that makes an operator slower. Rungs of one
+          question stay together, in strike order, the way the exchange presents them. */}
+      <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: dense ? 460 : 560 }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: dense ? 11 : 12 }}>
           <thead><tr>{th("Contract")}{th("Px", 1)}{th("Δ", 1)}{th("Model", 1)}{th("Edge", 1)}{th("Vol", 1)}{th("4h", 1)}</tr></thead>
-          <tbody>{rows.map(({ c, px, model, edge, d, hist }) => {
+          <tbody>{grouped.map(({ c, px, model, edge, d, hist, groupHead }) => {
+            if (groupHead) return (
+              <tr key={"g:" + groupHead.series}>
+                <td colSpan={7} style={{ padding: dense ? "5px 9px" : "7px 11px", background: "var(--surface-sunken)",
+                  borderBottom: "1px solid var(--border-dim)", borderTop: "1px solid var(--border-dim)",
+                  fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".5px", color: "var(--text-2)" }}>
+                  <b style={{ color: "var(--text-1)" }}>{groupHead.label}</b> · {groupHead.n} strike{groupHead.n === 1 ? "" : "s"} · {groupHead.series}
+                </td>
+              </tr>
+            );
+            return ((({ c, px, model, edge, d, hist }) => {
             const on = selection.contract === c.id;
             const eStyle = edge == null ? { color: "var(--text-2)" } : edge >= 15 ? { color: "var(--edge-glow)", textShadow: "var(--glow-edge)" } : edge > 0 ? { color: "var(--pos)" } : { color: "var(--text-2)" };
             return (
@@ -628,6 +663,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
                 <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{MT_spark(hist, 64, 18, edge == null ? "var(--accent)" : edge > 0 ? "var(--pos)" : "var(--neg)")}</td>
               </tr>
             );
+            })({ c, px, model, edge, d, hist }));
           })}</tbody>
         </table>
       </div>
@@ -636,7 +672,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
       </div>
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "0 10px 8px", lineHeight: 1.5, opacity: .85 }}>
         Prices are Kalshi's exchange book — the same contracts surfaced in Coinbase Predictions (Kalshi-powered), so quotes here should track what you see there.<br />
-        MODEL = empirical HURDAT2 season-count climatology, a <b style={{ color: "var(--warn)" }}>baseline</b> — it ignores ENSO, SSTs and season-to-date progress, which the market price already reflects. Treat EDGE as a reference spread, not alpha.
+        {MTC.claim("model.caveat").text}
       </div>
     </P>
   );
@@ -848,7 +884,10 @@ function MT_Observability({ narrow }) {
   return (
     <P pad={false} title="Observability — Pipeline Status"
       footer={<PF {...MTC.footer("panel.observability")} />}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", borderBottom: "1px solid var(--border-dim)", lineHeight: 1.5 }}>{MTC.claim("capability.notIngested").text}</div>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", borderBottom: "1px solid var(--border-dim)", lineHeight: 1.5 }}>
+        <div style={{ color: MTC.claim("markets.coverage").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("markets.coverage").text}</div>
+        <div>{MTC.claim("capability.notIngested").text}</div>
+      </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 1, padding: 12, background: "var(--border-dim)" }}>
         {MT.pipeline.map((s, i) => (
           <div key={s.stage} style={{ flex: narrow ? "1 1 100%" : "1 1 30%", minWidth: narrow ? 0 : 120, background: "var(--surface-card)", padding: "8px 10px" }}>
