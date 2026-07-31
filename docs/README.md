@@ -151,6 +151,10 @@ reappears as a literal, or if a component references a claim id that is not regi
   10**. That structure is deliberate: GitHub throttles high-frequency schedules hard — a `*/15` cron was
   measured delivering a **106-minute median**, so the board was routinely 2h+ stale. Scheduling jitter now
   only affects when the hour's run starts, not the cadence inside it.
+  Measured over 39 consecutive refreshes: a clean **10-minute median inside each run**,
+  but 51–104 minute gaps *across the hour boundary*, because the hourly cron itself
+  lands up to ~45 min late. The loop therefore overruns into the next hour so the
+  successor overlaps rather than leaving dead air; `cancel-in-progress` hands over.
 - **Two clocks, reported separately.** The *snapshot* refreshes every ~10 min. *Replay frames* are spaced
   ~20 min apart on purpose — appending one per tick would rewrite a ~400 KB history file six times an hour
   for no added information. The header shows snapshot age; the health panel shows both.

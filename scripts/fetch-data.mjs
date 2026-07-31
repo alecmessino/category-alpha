@@ -526,6 +526,26 @@ function assocStorm(title, storms) {
   return hit ? hit.id : null;
 }
 
+/* A per-storm ladder outlives its storm. Kalshi keeps "Will Fausto become a Category 3
+   hurricane?" listed after Fausto is gone from the NHC feed, and the board showed it
+   with no indication that the subject no longer exists — an operator scanning the board
+   reads a live question about a dead storm. The ticker carries the name, so say so.
+   Note the careful wording: absence from CurrentStorms.json means NOT IN THE ACTIVE
+   FEED. It does not tell us the storm dissipated, went post-tropical, or anything else,
+   and we do not claim it does. */
+function subjectFromTicker(ticker) {
+  const m = /^KXHURCAT-\d*([A-Z]+)-/i.exec(String(ticker || ""));
+  if (!m) return null;
+  const n = m[1];
+  return n.charAt(0) + n.slice(1).toLowerCase();
+}
+function subjectStatus(ticker, storms) {
+  const name = subjectFromTicker(ticker);
+  if (!name) return null;
+  const active = storms.some((s) => (s.name || "").toLowerCase() === name.toLowerCase());
+  return { subject: name, active };
+}
+
 // Kalshi caps a page at 1000 markets and there are far more open than that, so the
 // hurricane series only appears if we follow the cursor. (Not paginating was why the
 // board previously reported "0 hurricane markets" despite HTTP 200.)
@@ -804,7 +824,8 @@ async function fetchKalshi(storms, clim, oni) {
     const anchor = climatologyAnchor(title, strike, clim, m.ticker, oni);
     contracts.push({
       id: m.ticker, label: title, short: shortLabel(sub ? title.replace(/\?$/, "") + " · " + sub : title, 46),
-      storm: assocStorm(title + " " + sub, storms), market: Math.max(0.01, Math.min(0.99, price)),
+      storm: assocStorm(title + " " + sub, storms), subject: subjectStatus(m.ticker, storms),
+      market: Math.max(0.01, Math.min(0.99, price)),
       model: anchor ? anchor.p : null,
       modelSource: anchor ? "HURDAT2 climatology" : null,
       modelBasis: anchor ? anchor.basis : null,

@@ -6,12 +6,17 @@ name: Refresh Millibar Terminal data
 
 on:
   schedule:
-    # A cron fires ONCE an hour and the job then loops internally for ~55 minutes,
-    # refreshing every 10. This is deliberate: GitHub throttles high-frequency
-    # schedules hard — a */15 cron was measured delivering ~106 min median, so the
-    # board was routinely 2h+ stale. Scheduling jitter now only affects when the
-    # hour's run starts, not the cadence inside it.
-    - cron: "0 * * * *"
+    # A cron fires ONCE an hour and the job then loops internally, refreshing every
+    # 10 minutes. This is deliberate: GitHub throttles high-frequency schedules hard
+    # — a */15 cron was measured delivering ~106 min median, so the board was
+    # routinely 2h+ stale.
+    #
+    # The loop runs LONGER than an hour on purpose. With a 55-minute loop the
+    # measured cadence was a clean 10 min inside each run but 51-104 min across the
+    # hour boundary, because the hourly cron itself lands up to ~45 min late. The
+    # loop now overruns into the next hour so the successor run overlaps rather than
+    # leaving dead air; cancel-in-progress hands over cleanly.
+    - cron: "0 * * * *"     # fires hourly; the loop below deliberately outlives the hour
   workflow_dispatch: {}       # manual "Run workflow" button
   push:
     branches: [main]          # a code push takes over immediately with the new code.
@@ -29,7 +34,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 125
     steps:
       - uses: actions/checkout@v4
 
@@ -50,14 +55,14 @@ jobs:
       - name: Audit claim provenance
         run: node scripts/audit-claims.mjs
 
-      - name: Refresh loop (~55 min, 10-min cadence)
+      - name: Refresh loop (~110 min, 10-min cadence — overlaps the next hour)
         env:
           MT_STEP_MIN: "10"
         run: |
           set -u
           git config user.name  "millibar-data-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          END=$(( $(date +%s) + 55*60 ))
+          END=$(( $(date +%s) + 110*60 ))
           TICK=0
           while :; do
             TICK=$((TICK+1))

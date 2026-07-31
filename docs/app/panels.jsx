@@ -610,6 +610,12 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
                   <div style={{ color: "var(--text-1)", fontWeight: 600, fontSize: dense ? 11 : 11.5 }}>{c.short}</div>
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", display: "flex", alignItems: "center", gap: 5, flexWrap: "wrap" }}>
                     {c.horizon && <span style={{ color: c.horizon === "seasonal" ? "var(--special)" : "var(--accent)", fontWeight: 700, letterSpacing: ".4px" }}>{c.horizon === "seasonal" ? "SEASONAL" : "STORM"}</span>}
+                    {c.subject && !c.subject.active && (
+                      <span title={c.subject.subject + " is not in NHC CurrentStorms.json this cycle"}
+                        style={{ color: "var(--warn)", fontWeight: 700, letterSpacing: ".3px", border: "1px solid var(--warn)", borderRadius: 4, padding: "0 4px" }}>
+                        {MTC.claim("contract.subjectInactive").text.toUpperCase()}
+                      </span>
+                    )}
                     <span>{c.id}</span>{c.proxy ? <span>· proxy</span> : null}
                   </div>
                 </td>
