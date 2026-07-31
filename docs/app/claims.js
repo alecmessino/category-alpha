@@ -104,8 +104,8 @@
     text: "Not ingested: reconnaissance tracks · scatterometer winds · model-consensus tracks · SFMR surface winds",
     ok: false,
   }));
-  /* Deliberately narrow: absence from CurrentStorms.json is all we observe. It does
-     not tell us the storm dissipated or went post-tropical, and we do not say so. */
+  /* Inactive is defined narrowly: the storm is absent from CurrentStorms.json. The
+     tag makes no claim about dissipation or post-tropical status. */
   define("contract.subjectInactive", "nhc", () => ({
     text: "subject not in the active NHC feed",
     ok: false,

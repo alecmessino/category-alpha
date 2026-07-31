@@ -531,9 +531,8 @@ function assocStorm(title, storms) {
    hurricane?" listed after Fausto is gone from the NHC feed, and the board showed it
    with no indication that the subject no longer exists — an operator scanning the board
    reads a live question about a dead storm. The ticker carries the name, so say so.
-   Note the careful wording: absence from CurrentStorms.json means NOT IN THE ACTIVE
-   FEED. It does not tell us the storm dissipated, went post-tropical, or anything else,
-   and we do not claim it does. */
+   Inactive is defined narrowly: the storm is absent from CurrentStorms.json. The tag
+   makes no claim about dissipation or post-tropical status. */
 function subjectFromTicker(ticker) {
   const m = /^KXHURCAT-\d*([A-Z]+)-/i.exec(String(ticker || ""));
   if (!m) return null;
