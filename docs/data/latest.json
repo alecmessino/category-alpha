@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-07-31T19:03:23.841Z",
+  "generatedAt": "2026-07-31T19:08:54.731Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 174,
+      "latencyMs": 493,
       "count": 1,
       "note": "1 active",
       "raw": "{\"id\":\"ep072026\",\"binNumber\":\"EP2\",\"name\":\"Genevieve\",\"classification\":\"TS\",\"intensity\":\"50\",\"pressure\":\"996\",\"latitude\":\"22.1N\",\"longitude\":\"128.6W\",\"latitudeNumeric\":22.1,\"longitudeNumeric\":-128.6,\"movementDir\":290,\"movementSpeed\":15,\"lastUpdate\":\"2026-07-31T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"030\",\"issuance\":\"2026-07-31T15:00:00.000Z\",\"fileUpdateTime\":\"2026-07-31T14:42:20.812Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP2.shtml\"},\"forecastAdvisory\":{\"advNum\":\"030\",\"issuance\":\"2026-07",
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 30  Atlantic hur | Above 30 | px=0.015",
-            "Will there be more than 25  Atlantic hur | Above 25 | px=0.015",
-            "Will there be more than 20  Atlantic hur | Above 20 | px=0.030",
-            "Will there be more than 18  Atlantic hur | Above 18 | px=0.045",
-            "Will there be more than 16  Atlantic hur | Above 16 | px=0.090",
-            "Will there be more than 14  Atlantic hur | Above 14 | px=0.265"
+            "Will Fausto become a Category 5 hurrican | Category 5 or  | px=0.005",
+            "Will Fausto become a Category 4 hurrican | Category 4 or  | px=0.005",
+            "Will Fausto become a Category 3 hurrican | Category 3 or  | px=0.005",
+            "Will Elida become a Category 5 hurricane | Category 5 or  | px=0.005",
+            "Will Elida become a Category 4 hurricane | Category 4 or  | px=0.005",
+            "Will Elida become a Category 3 hurricane | Category 3 or  | px=0.005"
           ],
-          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-02T04:59:00Z\",\"created_time\":\"2025-10-09T18:33:57.03452Z\",\"event_ticker\":\"KXTROPSTORM-26DEC01\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":30,\"last_price_dollars\":\"0.0300\",\"latest_expiration_time\":\"2026-12-02T15:00:00Z\",\"liquidity_dollars\":\"0.0000\",\"market_type\":\"binary\""
+          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-02T04:59:00Z\",\"created_time\":\"2026-07-20T14:56:34.968448Z\",\"event_ticker\":\"KXHURCAT-26FAUSTO\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-01T15:00:00Z\",\"expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":5,\"last_price_dollars\":\"0.0100\",\"latest_expiration_time\":\"2026-12-02T15:00:00Z\",\"liquidity_dollars\":\"0.0000\",\"market_type\":\"binary\",\""
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 285,
+      "latencyMs": 59,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 311,
+      "latencyMs": 146,
       "count": 76,
       "attempts": [],
       "note": "El Niño · AMJ 2026 ONI +0.98 (peak-season ASO not yet observed — carried forward, 3mo old)"
@@ -629,53 +629,6 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
-      "id": "KXHURCTOT-26DEC01-T4",
-      "label": "Will there be more than 4  Atlantic hurricanes in 2026?",
-      "short": "Will there be more than 4 Atlantic hurricanes…",
-      "storm": null,
-      "subject": null,
-      "market": 0.59,
-      "model": 0.5523809523809524,
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 212",
-      "modelUncond": 0.7428571428571429,
-      "modelLayers": [
-        {
-          "id": "base",
-          "label": "Historical climatology",
-          "p": 0.7428571428571429,
-          "basis": "1991–2025 full seasons (n=35)"
-        },
-        {
-          "id": "doy",
-          "label": "Day-of-year conditional",
-          "p": 0.7428571428571429,
-          "basis": "hurricanes forming on/after day 212 in each past season; needs >4 more"
-        },
-        {
-          "id": "std",
-          "label": "Season-to-date state",
-          "p": null,
-          "unavailable": true,
-          "basis": "no in-season Atlantic count feed wired — L1 assumes 0 so far"
-        },
-        {
-          "id": "enso",
-          "label": "ENSO-stratified",
-          "p": 0.5523809523809524,
-          "basis": "10 El Niño seasons → 40% raw, shrunk 44% toward the unstratified estimate (k=8) · phase from AMJ 2026 ONI +0.98 (ASO 2026 not yet observed — persistence assumed)"
-        }
-      ],
-      "horizon": "seasonal",
-      "strike": 4,
-      "liquidity": null,
-      "spread": 0.040000000000000036,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCTOT-26DEC01"
-    },
-    {
       "id": "KXHURCTOTMAJ-26DEC01-T4",
       "label": "Will there be more than 4 major Atlantic hurricanes in 2026?",
       "short": "Will there be more than 4 major Atlantic…",
@@ -723,28 +676,28 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
-      "id": "KXHURCTOT-26DEC01-T5",
-      "label": "Will there be more than 5  Atlantic hurricanes in 2026?",
-      "short": "Will there be more than 5 Atlantic hurricanes…",
+      "id": "KXHURCTOT-26DEC01-T4",
+      "label": "Will there be more than 4  Atlantic hurricanes in 2026?",
+      "short": "Will there be more than 4 Atlantic hurricanes…",
       "storm": null,
       "subject": null,
-      "market": 0.42500000000000004,
-      "model": 0.43333333333333335,
+      "market": 0.5900000000000001,
+      "model": 0.5523809523809524,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 212",
-      "modelUncond": 0.6857142857142857,
+      "modelUncond": 0.7428571428571429,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.6857142857142857,
+          "p": 0.7428571428571429,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.6,
-          "basis": "hurricanes forming on/after day 212 in each past season; needs >5 more"
+          "p": 0.7428571428571429,
+          "basis": "hurricanes forming on/after day 212 in each past season; needs >4 more"
         },
         {
           "id": "std",
@@ -756,14 +709,14 @@
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.43333333333333335,
-          "basis": "10 El Niño seasons → 30% raw, shrunk 44% toward the unstratified estimate (k=8) · phase from AMJ 2026 ONI +0.98 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.5523809523809524,
+          "basis": "10 El Niño seasons → 40% raw, shrunk 44% toward the unstratified estimate (k=8) · phase from AMJ 2026 ONI +0.98 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
-      "strike": 5,
+      "strike": 4,
       "liquidity": null,
-      "spread": 0.04999999999999999,
+      "spread": 0.05999999999999994,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -817,28 +770,28 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
-      "id": "KXHURCTOT-26DEC01-T6",
-      "label": "Will there be more than 6  Atlantic hurricanes in 2026?",
-      "short": "Will there be more than 6 Atlantic hurricanes…",
+      "id": "KXHURCTOT-26DEC01-T5",
+      "label": "Will there be more than 5  Atlantic hurricanes in 2026?",
+      "short": "Will there be more than 5 Atlantic hurricanes…",
       "storm": null,
       "subject": null,
-      "market": 0.265,
-      "model": 0.24603174603174602,
+      "market": 0.42500000000000004,
+      "model": 0.43333333333333335,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 212",
-      "modelUncond": 0.6,
+      "modelUncond": 0.6857142857142857,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.6,
+          "p": 0.6857142857142857,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.42857142857142855,
-          "basis": "hurricanes forming on/after day 212 in each past season; needs >6 more"
+          "p": 0.6,
+          "basis": "hurricanes forming on/after day 212 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -850,12 +803,12 @@
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.24603174603174602,
-          "basis": "10 El Niño seasons → 10% raw, shrunk 44% toward the unstratified estimate (k=8) · phase from AMJ 2026 ONI +0.98 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.43333333333333335,
+          "basis": "10 El Niño seasons → 30% raw, shrunk 44% toward the unstratified estimate (k=8) · phase from AMJ 2026 ONI +0.98 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
-      "strike": 6,
+      "strike": 5,
       "liquidity": null,
       "spread": 0.04999999999999999,
       "volume": 0,
@@ -911,28 +864,28 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
-      "id": "KXHURCTOT-26DEC01-T7",
-      "label": "Will there be more than 7  Atlantic hurricanes in 2026?",
-      "short": "Will there be more than 7 Atlantic hurricanes…",
+      "id": "KXHURCTOT-26DEC01-T6",
+      "label": "Will there be more than 6  Atlantic hurricanes in 2026?",
+      "short": "Will there be more than 6 Atlantic hurricanes…",
       "storm": null,
       "subject": null,
-      "market": 0.20500000000000002,
-      "model": 0.22063492063492063,
+      "market": 0.265,
+      "model": 0.24603174603174602,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 212",
-      "modelUncond": 0.45714285714285713,
+      "modelUncond": 0.6,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.45714285714285713,
+          "p": 0.6,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.37142857142857144,
-          "basis": "hurricanes forming on/after day 212 in each past season; needs >7 more"
+          "p": 0.42857142857142855,
+          "basis": "hurricanes forming on/after day 212 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -944,14 +897,14 @@
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.22063492063492063,
+          "p": 0.24603174603174602,
           "basis": "10 El Niño seasons → 10% raw, shrunk 44% toward the unstratified estimate (k=8) · phase from AMJ 2026 ONI +0.98 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
-      "strike": 7,
+      "strike": 6,
       "liquidity": null,
-      "spread": 0.009999999999999981,
+      "spread": 0.04999999999999999,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -1003,6 +956,53 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
+    },
+    {
+      "id": "KXHURCTOT-26DEC01-T7",
+      "label": "Will there be more than 7  Atlantic hurricanes in 2026?",
+      "short": "Will there be more than 7 Atlantic hurricanes…",
+      "storm": null,
+      "subject": null,
+      "market": 0.20500000000000002,
+      "model": 0.22063492063492063,
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 212",
+      "modelUncond": 0.45714285714285713,
+      "modelLayers": [
+        {
+          "id": "base",
+          "label": "Historical climatology",
+          "p": 0.45714285714285713,
+          "basis": "1991–2025 full seasons (n=35)"
+        },
+        {
+          "id": "doy",
+          "label": "Day-of-year conditional",
+          "p": 0.37142857142857144,
+          "basis": "hurricanes forming on/after day 212 in each past season; needs >7 more"
+        },
+        {
+          "id": "std",
+          "label": "Season-to-date state",
+          "p": null,
+          "unavailable": true,
+          "basis": "no in-season Atlantic count feed wired — L1 assumes 0 so far"
+        },
+        {
+          "id": "enso",
+          "label": "ENSO-stratified",
+          "p": 0.22063492063492063,
+          "basis": "10 El Niño seasons → 10% raw, shrunk 44% toward the unstratified estimate (k=8) · phase from AMJ 2026 ONI +0.98 (ASO 2026 not yet observed — persistence assumed)"
+        }
+      ],
+      "horizon": "seasonal",
+      "strike": 7,
+      "liquidity": null,
+      "spread": 0.009999999999999981,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCTOT-26DEC01"
     },
     {
       "id": "KXHURCTOT-26DEC01-T8",
