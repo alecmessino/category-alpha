@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-01T19:36:11.172Z",
+  "generatedAt": "2026-08-01T19:46:27.662Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 128,
+      "latencyMs": 129,
       "count": 1,
       "note": "1 active",
       "raw": "{\"id\":\"ep072026\",\"binNumber\":\"EP2\",\"name\":\"Genevieve\",\"classification\":\"TS\",\"intensity\":\"40\",\"pressure\":\"1003\",\"latitude\":\"23.0N\",\"longitude\":\"133.7W\",\"latitudeNumeric\":23,\"longitudeNumeric\":-133.7,\"movementDir\":285,\"movementSpeed\":14,\"lastUpdate\":\"2026-08-01T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"034\",\"issuance\":\"2026-08-01T15:00:00.000Z\",\"fileUpdateTime\":\"2026-08-01T14:34:41.638Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP2.shtml\"},\"forecastAdvisory\":{\"advNum\":\"034\",\"issuance\":\"2026-08-",
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will Wale be categorized as a hurricane  | Wale | px=0.020",
-            "Will Ulana be categorized as a hurricane | Ulana | px=0.035",
-            "Will Pena be categorized as a hurricane  | Pena | px=0.030",
-            "Will Olana be categorized as a hurricane | Olana | px=0.030",
-            "Will Nolo be categorized as a hurricane  | Nolo | px=0.035",
-            "Will Moke be categorized as a hurricane  | Moke | px=0.035"
+            "Will there be more than 26 named storms  | Above 26 | px=0.075",
+            "Will there be more than 24 named storms  | Above 24 | px=0.135",
+            "Will there be more than 22 named storms  | Above 22 | px=0.180",
+            "Will there be more than 20 named storms  | Above 20 | px=0.535",
+            "Will there be more than 19 named storms  | Above 19 | px=0.705",
+            "Will there be more than 18 named storms  | Above 18 | px=0.730"
           ],
-          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-01T15:00:00Z\",\"created_time\":\"2026-05-15T20:46:32.004544Z\",\"custom_strike\":{\"storm\":\"Wale\"},\"early_close_condition\":\"This market will close and expire early if the event occurs.\",\"event_ticker\":\"KXHURRICANENAMES-26DEC01CPAC\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-01T15:00:00Z\",\"expiration_time\":\"2026-12-08T15:00:00Z\",\"expiration_value\":\"\",\"last_price_dolla"
+          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-01T15:00:00Z\",\"created_time\":\"2026-05-15T18:38:15.382078Z\",\"early_close_condition\":\"This market will close and expire early if the weather event occurs.\",\"event_ticker\":\"KXNAMEDSTORM-26DEC01EPACTOT\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-01T15:00:00Z\",\"expiration_time\":\"2026-12-08T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":26,\"last_price_dollars\":\"0.0"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 275,
+      "latencyMs": 272,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -1367,30 +1367,6 @@
       "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
     },
     {
-      "id": "KXHURCAT-26FAUSTO-T3",
-      "label": "Will Fausto become a Category 3 hurricane?",
-      "short": "Will Fausto become a Category 3 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Fausto",
-        "active": false
-      },
-      "market": 0.01,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": 3,
-      "liquidity": null,
-      "spread": 0.01,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26FAUSTO"
-    },
-    {
       "id": "KXHURRICANE-26DEC01EPACMAJ-3",
       "label": "Will there be more than 3 hurricanes of category 3 or above in the Eastern Pacific in 2026?",
       "short": "Will there be more than 3 hurricanes of…",
@@ -1454,6 +1430,30 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
+      "id": "KXHURCAT-26FAUSTO-T3",
+      "label": "Will Fausto become a Category 3 hurricane?",
+      "short": "Will Fausto become a Category 3 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Fausto",
+        "active": false
+      },
+      "market": 0.01,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": 3,
+      "liquidity": null,
+      "spread": 0.01,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26FAUSTO"
+    },
+    {
       "id": "KXNAMEDSTORM-26DEC01CPACTOT-4",
       "label": "Will there be more than 4 named storms in the Central Pacific in 2026?",
       "short": "Will there be more than 4 named storms in the…",
@@ -1468,35 +1468,11 @@
       "horizon": "seasonal",
       "strike": 4,
       "liquidity": null,
-      "spread": 0.06000000000000005,
+      "spread": 0.08000000000000007,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
-    },
-    {
-      "id": "KXHURCAT-26FAUSTO-T4",
-      "label": "Will Fausto become a Category 4 hurricane?",
-      "short": "Will Fausto become a Category 4 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Fausto",
-        "active": false
-      },
-      "market": 0.01,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": 4,
-      "liquidity": null,
-      "spread": 0.01,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26FAUSTO"
     },
     {
       "id": "KXHURRICANE-26DEC01EPACMAJ-4",
@@ -1541,6 +1517,30 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
+      "id": "KXHURCAT-26FAUSTO-T4",
+      "label": "Will Fausto become a Category 4 hurricane?",
+      "short": "Will Fausto become a Category 4 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Fausto",
+        "active": false
+      },
+      "market": 0.01,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": 4,
+      "liquidity": null,
+      "spread": 0.01,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26FAUSTO"
+    },
+    {
       "id": "KXNAMEDSTORM-26DEC01CPACTOT-5",
       "label": "Will there be more than 5 named storms in the Central Pacific in 2026?",
       "short": "Will there be more than 5 named storms in the…",
@@ -1560,30 +1560,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXNAMEDSTORM-26DEC01CPACTOT"
-    },
-    {
-      "id": "KXHURCAT-26FAUSTO-T5",
-      "label": "Will Fausto become a Category 5 hurricane?",
-      "short": "Will Fausto become a Category 5 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Fausto",
-        "active": false
-      },
-      "market": 0.01,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": 5,
-      "liquidity": null,
-      "spread": 0.01,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26FAUSTO"
     },
     {
       "id": "KXHURRICANE-26DEC01EPACMAJ-5",
@@ -1647,6 +1623,30 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
+    },
+    {
+      "id": "KXHURCAT-26FAUSTO-T5",
+      "label": "Will Fausto become a Category 5 hurricane?",
+      "short": "Will Fausto become a Category 5 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Fausto",
+        "active": false
+      },
+      "market": 0.01,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": 5,
+      "liquidity": null,
+      "spread": 0.01,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26FAUSTO"
     },
     {
       "id": "KXNAMEDSTORM-26DEC01CPACTOT-6",
@@ -1838,27 +1838,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACTOT"
     },
     {
-      "id": "KXHURRICANE-26DEC01EPACTOT-10",
-      "label": "Will there be more than 10 hurricanes of category 1 or above in the Eastern Pacific in 2026?",
-      "short": "Will there be more than 10 hurricanes of…",
-      "storm": null,
-      "subject": null,
-      "market": 0.6950000000000001,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": 10,
-      "liquidity": null,
-      "spread": 0.04999999999999993,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACTOT"
-    },
-    {
       "id": "KXTROPSTORM-26DEC01-T10",
       "label": "Will there be more than 10  Atlantic hurricanes in 2026?",
       "short": "Will there be more than 10 Atlantic…",
@@ -1880,6 +1859,27 @@
       "url": "https://kalshi.com/markets/KXTROPSTORM-26DEC01"
     },
     {
+      "id": "KXHURRICANE-26DEC01EPACTOT-10",
+      "label": "Will there be more than 10 hurricanes of category 1 or above in the Eastern Pacific in 2026?",
+      "short": "Will there be more than 10 hurricanes of…",
+      "storm": null,
+      "subject": null,
+      "market": 0.6950000000000001,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": 10,
+      "liquidity": null,
+      "spread": 0.04999999999999993,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACTOT"
+    },
+    {
       "id": "KXHURRICANE-26DEC01EPACTOT-11",
       "label": "Will there be more than 11 hurricanes of category 1 or above in the Eastern Pacific in 2026?",
       "short": "Will there be more than 11 hurricanes of…",
@@ -1895,27 +1895,6 @@
       "strike": 11,
       "liquidity": null,
       "spread": 0.07000000000000006,
-      "volume": 0,
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACTOT"
-    },
-    {
-      "id": "KXHURRICANE-26DEC01EPACTOT-12",
-      "label": "Will there be more than 12 hurricanes of category 1 or above in the Eastern Pacific in 2026?",
-      "short": "Will there be more than 12 hurricanes of…",
-      "storm": null,
-      "subject": null,
-      "market": 0.345,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": 12,
-      "liquidity": null,
-      "spread": 0.04999999999999999,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -1941,6 +1920,27 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXTROPSTORM-26DEC01"
+    },
+    {
+      "id": "KXHURRICANE-26DEC01EPACTOT-12",
+      "label": "Will there be more than 12 hurricanes of category 1 or above in the Eastern Pacific in 2026?",
+      "short": "Will there be more than 12 hurricanes of…",
+      "storm": null,
+      "subject": null,
+      "market": 0.345,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": 12,
+      "liquidity": null,
+      "spread": 0.04999999999999999,
+      "volume": 0,
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACTOT"
     },
     {
       "id": "KXHURRICANE-26DEC01EPACTOT-13",
@@ -3733,7 +3733,7 @@
       "short": "Will Fay be the first named hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.09,
+      "market": 0.085,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -3742,7 +3742,7 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": null,
-      "spread": 0.020000000000000004,
+      "spread": 0.03,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -3754,7 +3754,7 @@
       "short": "Will Edouard be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.165,
+      "market": 0.16999999999999998,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -3763,7 +3763,7 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": null,
-      "spread": 0.04999999999999999,
+      "spread": 0.04000000000000001,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
