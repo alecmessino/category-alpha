@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-02T01:11:03.626Z",
+  "generatedAt": "2026-08-02T01:20:16.293Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 152,
+      "latencyMs": 164,
       "count": 1,
       "note": "1 active",
       "raw": "{\"id\":\"ep072026\",\"binNumber\":\"EP2\",\"name\":\"Genevieve\",\"classification\":\"TS\",\"intensity\":\"40\",\"pressure\":\"1003\",\"latitude\":\"23.3N\",\"longitude\":\"135.0W\",\"latitudeNumeric\":23.3,\"longitudeNumeric\":-135,\"movementDir\":285,\"movementSpeed\":14,\"lastUpdate\":\"2026-08-01T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"035\",\"issuance\":\"2026-08-01T21:00:00.000Z\",\"fileUpdateTime\":\"2026-08-01T20:31:13.842Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP2.shtml\"},\"forecastAdvisory\":{\"advNum\":\"035\",\"issuance\":\"2026-08-",
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
+            "Will Fausto become a Category 5 hurrican | Category 5 or  | px=0.005",
+            "Will Fausto become a Category 4 hurrican | Category 4 or  | px=0.005",
+            "Will Fausto become a Category 3 hurrican | Category 3 or  | px=0.005",
             "Will there be more than 30  Atlantic hur | Above 30 | px=0.015",
             "Will there be more than 25  Atlantic hur | Above 25 | px=0.015",
-            "Will there be more than 20  Atlantic hur | Above 20 | px=0.030",
-            "Will there be more than 18  Atlantic hur | Above 18 | px=0.040",
-            "Will there be more than 16  Atlantic hur | Above 16 | px=0.090",
-            "Will there be more than 14  Atlantic hur | Above 14 | px=0.200"
+            "Will there be more than 20  Atlantic hur | Above 20 | px=0.030"
           ],
-          "raw": "{\"can_close_early\":true,\"close_time\":\"2026-12-02T04:59:00Z\",\"created_time\":\"2025-10-09T18:33:57.03452Z\",\"event_ticker\":\"KXTROPSTORM-26DEC01\",\"exchange_index\":0,\"expected_expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_time\":\"2026-12-02T15:00:00Z\",\"expiration_value\":\"\",\"floor_strike\":30,\"last_price_dollars\":\"0.0300\",\"latest_expiration_time\":\"2026-12-02T15:00:00Z\",\"liquidity_dollars\":\"0.0000\",\"market_type\":\"binary\""
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"8214.17\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"15658.18\"},\"px\":{\"last_price_dollars\":\"0.0100\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0100\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"12229.85\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 60,
+      "latencyMs": 129,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 119,
+      "latencyMs": 4502,
       "count": 76,
       "attempts": [],
       "note": "El Niño · AMJ 2026 ONI +0.98 (peak-season ASO not yet observed — carried forward, 3mo old)"
@@ -406,7 +406,7 @@
       "short": "Will there be more than 0 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.735,
+      "market": 0.73,
       "model": 0.919047619047619,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 214",
@@ -441,7 +441,7 @@
       "horizon": "seasonal",
       "strike": 0,
       "liquidity": null,
-      "spread": 0.030000000000000027,
+      "spread": 0.040000000000000036,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -735,7 +735,7 @@
       "short": "Will there be more than 5 Atlantic hurricanes…",
       "storm": null,
       "subject": null,
-      "market": 0.365,
+      "market": 0.37,
       "model": 0.43333333333333335,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 214",
@@ -770,7 +770,7 @@
       "horizon": "seasonal",
       "strike": 5,
       "liquidity": null,
-      "spread": 0.010000000000000009,
+      "spread": 0.020000000000000018,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
@@ -3713,7 +3713,7 @@
       "short": "Will Fay be the first named hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.09,
+      "market": 0.085,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -3722,7 +3722,7 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": null,
-      "spread": 0.020000000000000004,
+      "spread": 0.03,
       "volume": 0,
       "proxy": false,
       "source": "kalshi",
