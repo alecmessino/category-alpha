@@ -599,7 +599,16 @@ async function fetchKalshiMarketsForSeries(host, series) {
     if (!r.ok) { failCalls++; continue; }
     okCalls++;
     const list = (r.json && r.json.markets) || [];
-    if (!raw && list.length) raw = JSON.stringify(list[0]).slice(0, 420); // schema probe
+    /* A truncated JSON blob sorted its keys alphabetically and cut off right after
+       "market_type" — which put volume, volume_24h, open_interest and liquidity
+       outside the sample on every single cycle. Capture a targeted inventory
+       instead: the full key list, plus the values of anything that looks like size
+       or price. */
+    if (!raw && list.length) raw = JSON.stringify({
+      keys: Object.keys(list[0]).sort(),
+      size: Object.fromEntries(Object.entries(list[0]).filter(([k]) => /volume|liquid|interest|notional|count/i.test(k))),
+      px: Object.fromEntries(Object.entries(list[0]).filter(([k]) => /price|bid|ask/i.test(k))),
+    });
     for (const m of list) out.push({ m, title: m.title || s.title || "", eventTicker: m.event_ticker });
     await sleep(120);                                          // stay under the rate limit
   }
