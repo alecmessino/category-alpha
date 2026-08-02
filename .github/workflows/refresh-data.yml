@@ -11,22 +11,27 @@ on:
     # — a */15 cron was measured delivering ~106 min median, so the board was
     # routinely 2h+ stale.
     #
-    # The loop runs LONGER than an hour on purpose. With a 55-minute loop the
-    # measured cadence was a clean 10 min inside each run but 51-104 min across the
-    # hour boundary, because the hourly cron itself lands up to ~45 min late. The
-    # loop now overruns into the next hour so the successor run overlaps rather than
-    # leaving dead air; cancel-in-progress hands over cleanly.
+    # The loop runs LONGER than an hour on purpose, so the next scheduled run is
+    # always already queued when this one ends. See the concurrency block below for
+    # why a scheduled run must not cancel the loop it is replacing.
     - cron: "0 * * * *"     # fires hourly; the loop below deliberately outlives the hour
   workflow_dispatch: {}       # manual "Run workflow" button
   push:
     branches: [main]          # a code push takes over immediately with the new code.
                               # the bot's own data commits carry "[skip ci]", so this never loops.
 
-# A newer run (new code, or the next hour) replaces the one in flight rather than
-# queueing behind it — two loops committing at once would just fight over the ref.
+# Only a PUSH may cancel the run in flight — new code should take over at once.
+#
+# A scheduled run must NOT: measured over 139 refreshes and 26 hour boundaries, the
+# cadence was a median of 10 min with a within-hour maximum of 11, but four boundaries
+# produced 28-77 min gaps. Cause: the hourly cron cancelled a perfectly healthy loop,
+# and its replacement then had to queue for a runner and clear checkout, tests and the
+# claim audit before its first tick. The cron now queues behind the running loop
+# instead. GitHub keeps at most one pending run per group, so this cannot pile up, and
+# the 110-minute loop guarantees the successor is already waiting when it ends.
 concurrency:
   group: millibar-refresh
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 permissions:
   contents: write             # allow the bot to commit refreshed data back to the branch
