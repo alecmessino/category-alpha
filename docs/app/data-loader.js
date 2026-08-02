@@ -101,7 +101,8 @@
       });
       const histTimes = framesArr.map((fr) => fr.tsZ);
       return Object.assign({}, c, {
-        subject: c.subject || null,
+        subject: c.subject || null, depth: c.depth || null,
+        volume24h: c.volume24h ?? null, openInterest: c.openInterest ?? null,
         histSeries, histTimes,
         priceAt: (f) => { const r = fc(f); return r && r.market != null ? r.market : (c.market ?? null); },
         modelAt: (f) => { const r = fc(f); return r && r.model != null ? r.model : (c.model ?? null); },

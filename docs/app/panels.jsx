@@ -625,7 +625,7 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
           question stay together, in strike order, the way the exchange presents them. */}
       <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: dense ? 460 : 560 }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: dense ? 11 : 12 }}>
-          <thead><tr>{th("Contract")}{th("Px", 1)}{th("Δ", 1)}{th("Model", 1)}{th("Edge", 1)}{th("Vol", 1)}{th("4h", 1)}</tr></thead>
+          <thead><tr>{th("Contract")}{th("Px", 1)}{th("Δ", 1)}{th("Model", 1)}{th("Edge", 1)}{th("OI", 1)}{th("4h", 1)}</tr></thead>
           <tbody>{grouped.map(({ c, px, model, edge, d, hist, groupHead }) => {
             if (groupHead) return (
               <tr key={"g:" + groupHead.series}>
@@ -659,7 +659,9 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
                 <td style={{ ...cell, color: model != null ? "var(--special)" : "var(--text-2)" }}
                     title={c.modelBasis ? "Climatology baseline — " + c.modelBasis : "No fair-value anchor for this contract"}>{model != null ? Math.round(model * 100) + "%" : "—"}</td>
                 <td style={{ ...cell, fontWeight: 800, ...eStyle }}>{edge == null ? "—" : (edge >= 0 ? "+" : "") + edge.toFixed(1)}</td>
-                <td style={{ ...cell, color: "var(--text-2)", fontSize: 10 }}>{fmtVol(c.volume)}</td>
+                <td style={{ ...cell, color: "var(--text-2)", fontSize: 10 }}
+                    title={"lifetime volume " + fmtVol(c.volume) + (c.volume24h != null ? " · 24h " + fmtVol(c.volume24h) : "") + (c.openInterest != null ? " · open interest " + fmtVol(c.openInterest) : "")}>
+                  {c.openInterest != null ? fmtVol(c.openInterest) : fmtVol(c.volume)}</td>
                 <td style={{ padding: pad, borderBottom: "1px solid var(--border-dim)" }}>{MT_spark(hist, 64, 18, edge == null ? "var(--accent)" : edge > 0 ? "var(--pos)" : "var(--neg)")}</td>
               </tr>
             );
@@ -703,6 +705,36 @@ function MT_OrderBook({ contractId, frame, dense }) {
             Allocation stays uncapped rather than sized against a synthesized book — a liquidity
             cap invented from volume would understate real slippage.
           </div>
+        </div>
+      </P>
+    );
+  }
+  if (ob.topOfBook) {
+    /* One level per side is what the market list actually gives us. Showing it beats
+       "UNAVAILABLE" — it is the size a taker can fill right now — but it is labelled
+       top-of-book so nobody reads it as a depth curve. */
+    const px = ob.mid != null ? Math.round(ob.mid * 100) : null;
+    const cell = (k, v, sub, tone) => (
+      <div key={k} style={{ flex: "1 1 120px", minWidth: 0, background: "var(--surface-card)", padding: "9px 12px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: ".6px", color: "var(--text-2)" }}>{k}</div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 18, fontWeight: 800, marginTop: 2, color: tone || "var(--text-1)" }}>{v}</div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>{sub}</div>
+      </div>
+    );
+    return (
+      <P pad={false} title="Order Book & Liquidity" right={<BG tone="warn">TOP OF BOOK</BG>}
+        footer={<PF {...MTC.footer("panel.orderbook")} />}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", padding: "8px 12px" }}>{c.short}</div>
+        <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", flexWrap: "wrap" }}>
+          {cell("BID SIZE", Math.round(ob.bidSize), "contracts resting", "var(--pos)")}
+          {cell("ASK SIZE", Math.round(ob.askSize), "contracts resting", "var(--neg)")}
+          {cell("MID", px != null ? px + "¢" : "—", ob.spread != null ? "spread " + Math.round(ob.spread * 100) + "¢" : "—")}
+          {cell("FILLABLE NOW", ob.liquidityCap != null ? "$" + ob.liquidityCap.toLocaleString() : "—", "ask size × price")}
+        </div>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "9px 12px", lineHeight: 1.55 }}>
+          One level per side — the size the exchange will fill at the touch, not a depth curve.
+          The full book is fetched for a handful of contracts only; everything else shows the touch.
+          FILLABLE NOW is what caps the Kelly allocation.
         </div>
       </P>
     );

@@ -733,14 +733,43 @@ function spreadOf(m) {
   if (bid != null && ask != null) return Math.max(0, (ask - bid) / 100);
   return 0.02;
 }
+/* Kalshi carries sizes in fixed-point STRING fields suffixed "_fp" — volume_fp,
+   volume_24h_fp, open_interest_fp, yes_bid_size_fp, yes_ask_size_fp — all in
+   contracts. The older liquidity_dollars field is still present and still returns
+   "0.0000", which is what made the whole board read as zero-volume, zero-depth: we
+   were reading the deprecated names. The resting depth was there the entire time.
+   Legacy names are kept as fallbacks so a rollback does not blank the board. */
+function fpNum(v) { const n = Number(String(v ?? "").trim()); return Number.isFinite(n) ? n : null; }
+function notionalOf(m) { return dollarNum(m.notional_value_dollars) ?? 1; }
+
+function volumeOf(m) {
+  return fpNum(m.volume_fp) ?? dollarNum(m.volume_dollars) ?? num(m.dollar_volume) ?? num(m.volume) ?? 0;
+}
+function volume24hOf(m) { return fpNum(m.volume_24h_fp) ?? num(m.volume_24h) ?? null; }
+function openInterestOf(m) { return fpNum(m.open_interest_fp) ?? num(m.open_interest) ?? null; }
+
+/* Top-of-book resting size, in contracts on each side. This is what the exchange
+   will actually fill right now — not a modelled depth curve. */
+function depthOf(m) {
+  const bid = fpNum(m.yes_bid_size_fp), ask = fpNum(m.yes_ask_size_fp);
+  if (bid == null && ask == null) return null;
+  return { bidSize: bid ?? 0, askSize: ask ?? 0, notional: notionalOf(m) };
+}
+
+/* The Kelly cap is a DOLLAR ceiling, so it must be the dollars a taker can actually
+   put to work right now: contracts resting on the ask x the price they cost. Sizing
+   against total volume or open interest would let an allocation exceed what the book
+   can fill. */
 function liquidityOf(m) {
-  const d = dollarNum(m.liquidity_dollars);
-  if (d != null && d > 0) return Math.round(d);
+  const d = depthOf(m), px = priceOf(m);
+  if (d && d.askSize > 0 && px != null) {
+    const dollars = d.askSize * px * d.notional;
+    if (dollars > 0) return Math.round(dollars);
+  }
+  const legacy = dollarNum(m.liquidity_dollars);
+  if (legacy != null && legacy > 0) return Math.round(legacy);
   const c = num(m.liquidity);
   return c != null && c > 0 ? Math.round(c / 100) : null;
-}
-function volumeOf(m) {
-  return dollarNum(m.volume_dollars) ?? num(m.dollar_volume) ?? num(m.volume) ?? 0;
 }
 
 function shortLabel(text, max) {
@@ -841,7 +870,8 @@ async function fetchKalshi(storms, clim, oni) {
       modelUncond: anchor ? anchor.unconditional : null,
       modelLayers: anchor ? anchor.layers : null,
       horizon: horizonOf(title), strike,
-      liquidity, spread, volume, proxy: false, source: "kalshi",
+      liquidity, spread, volume, volume24h: volume24hOf(m), openInterest: openInterestOf(m),
+      depth: depthOf(m), proxy: false, source: "kalshi",
       url: "https://kalshi.com/markets/" + (pair.eventTicker || m.event_ticker || m.ticker),
       _catFour: /category\s*[45]|cat\s*[45]/i.test(title),
     });

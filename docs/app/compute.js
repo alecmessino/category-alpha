@@ -85,6 +85,16 @@
     if (!c) return { noFeed: true };
     const mid = mkt(c, frame);
     if (!c.orderbook || (!c.orderbook.bids.length && !c.orderbook.asks.length)) {
+      /* The full book is fetched for a handful of contracts only, but every market
+         carries top-of-book size. That is one level, not a depth curve, and the
+         panel says so rather than drawing a ladder we do not have. */
+      if (c.depth && (c.depth.bidSize > 0 || c.depth.askSize > 0)) {
+        return { contract: c.id, mid, topOfBook: true, real: true,
+          bidSize: c.depth.bidSize, askSize: c.depth.askSize,
+          notional: c.depth.notional || 1,
+          liquidityCap: c.liquidity || null,
+          spread: c.spread != null ? c.spread : null };
+      }
       return { noFeed: true, contract: c.id, mid };
     }
     const bids = c.orderbook.bids.map(([p, q]) => [p, Math.max(1, Math.round(q * p))]); // $ notional ≈ contracts × price
