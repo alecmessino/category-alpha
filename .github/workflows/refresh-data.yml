@@ -53,6 +53,13 @@ jobs:
       - name: Test posterior stack
         run: node scripts/test-enso.mjs
 
+      # Kalshi has renamed its market fields twice. Both times the parser kept reading
+      # the old names, the values degraded to zero, and the honest-degradation path
+      # rendered that as "NO FEED" — so it looked like an exchange outage rather than
+      # a parsing bug. This asserts the CURRENT payload shape and both previous ones.
+      - name: Test market payload parsers
+        run: node scripts/test-markets.mjs
+
       # Every visible claim must have a provenance owner. This fails the build if
       # capability / liveness language reappears as a literal inside a component
       # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of
