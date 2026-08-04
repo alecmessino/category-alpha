@@ -3,7 +3,10 @@
 <meta name="description" content="Institutional hurricane-divergence research terminal — live NHC storm data, prediction markets, and satellite imagery. Research-only.">
 <link rel="icon" href="assets/millibar-icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<!-- Vendored: the last third-party runtime dependency. Everything else was already
+     local, so a CDN outage could still have degraded the map alone. v1.9.4, matching
+     vendor/leaflet.js. The containment rules further down remain as a backstop. -->
+<link rel="stylesheet" href="vendor/leaflet.css">
 <style>
 html,body{margin:0}
 body{background:var(--surface-app)}
