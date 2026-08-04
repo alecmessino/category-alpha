@@ -297,21 +297,14 @@ function MillibarTerminalApp() {
     </header>
   );
 
-  if (!storm || !MT.storms[storm]) {
-    return (
-      <div data-surface="tactical" style={{ minHeight: "100vh", background: "var(--surface-app)", color: "var(--text-1)", fontFamily: "var(--font-sans)", zoom: zoom }}>
-        {shellHeader}
-        <main style={shell}>
-          <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: gap, alignItems: "start" }}>
-            <window.MT_Observability narrow={narrow} />
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  const S = MT.storms[storm], P0 = PAI[S.phase] || PAI.WATCH, snap = MTX.snap(storm, frame);
+  /* No active cyclone used to short-circuit the ENTIRE terminal to the
+     awaiting-telemetry notice — which also hid 142 live seasonal markets, their
+     anchors, the posterior stack and the whole board. Those markets do not depend
+     on a storm existing: the Atlantic season runs to November and the count ladders
+     trade every day. Only the storm-SPECIFIC block is swapped out now. */
+  const S = storm ? MT.storms[storm] : null;
+  const P0 = (S && PAI[S.phase]) || PAI.WATCH;
+  const snap = MTX.snap(storm, frame);
   const pickContract = (id) => { const c = MT.contracts.find((x) => x.id === id); setSel((s) => ({ ...s, contract: id })); if (c && c.storm && MT.storms[c.storm]) setStorm(c.storm); };
 
   return (
@@ -337,7 +330,9 @@ function MillibarTerminalApp() {
           <window.MT_Exposure frame={frame} dense={dense} selection={sel} onSelect={pickContract} />
         </div>
 
-        {/* 5a — spatial context. Supporting, not the headline. */}
+        {/* 5a — spatial context, or the honest reason there is none. */}
+        {!S && <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />}
+        {S && (
         <window.MT_Section label="Spatial context" tier="track · cone · satellite · replay" defaultOpen
           summary={S.name + " " + S.cls + " · " + Math.round(snap.wind) + " kt"}>
         <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: gap }}>
@@ -390,6 +385,7 @@ function MillibarTerminalApp() {
           <Transport frame={frame} setFrame={setFrame} playing={playing} setPlaying={setPlaying} speed={speed} setSpeed={setSpeed} />
         </section>
         </window.MT_Section>
+        )}
 
         {/* 5b — fair value and the posterior stack behind every edge on screen */}
         <window.MT_Section label="Fair value" tier="term structure · posterior stack" defaultOpen summary="collapsed">
