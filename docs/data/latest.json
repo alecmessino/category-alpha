@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-04T16:48:22.689Z",
+  "generatedAt": "2026-08-04T16:58:39.110Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 227,
+      "latencyMs": 232,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 9  Atlantic hurr | Above 9 | px=0.055",
-            "Will there be more than 8  Atlantic hurr | Above 8 | px=0.100",
-            "Will there be more than 7  Atlantic hurr | Above 7 | px=0.220",
-            "Will there be more than 6  Atlantic hurr | Above 6 | px=0.265",
-            "Will there be more than 5  Atlantic hurr | Above 5 | px=0.355",
-            "Will there be more than 4  Atlantic hurr | Above 4 | px=0.505"
+            "Will Wale be categorized as a hurricane  | Wale | px=0.020",
+            "Will Ulana be categorized as a hurricane | Ulana | px=0.035",
+            "Will Pena be categorized as a hurricane  | Pena | px=0.030",
+            "Will Olana be categorized as a hurricane | Olana | px=0.030",
+            "Will Nolo be categorized as a hurricane  | Nolo | px=0.035",
+            "Will Moke be categorized as a hurricane  | Moke | px=0.040"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2474.11\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"3192.17\"},\"px\":{\"last_price_dollars\":\"0.0300\",\"no_ask_dollars\":\"0.9600\",\"no_bid_dollars\":\"0.9300\",\"previous_price_dollars\":\"0.0300\",\"previous_yes_ask_dollars\":\"0.0700\",\"previous_yes_bid_dollars\":\"0.0400\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0700\",\"yes_ask_size_fp\":\"200.00\",\"yes_bid_dollars\":\"0.0400\",\"yes_bid_size_fp\":\"50.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"486.56\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"524.56\"},\"px\":{\"last_price_dollars\":\"0.0300\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9600\",\"previous_price_dollars\":\"0.0300\",\"previous_yes_ask_dollars\":\"0.0400\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0400\",\"yes_ask_size_fp\":\"200.00\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 59,
+      "latencyMs": 54,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 149,
+      "latencyMs": 180,
       "count": 76,
       "attempts": [],
       "note": "El Niño · AMJ 2026 ONI +0.98 (peak-season ASO not yet observed — carried forward, 3mo old)"
@@ -301,7 +301,7 @@
       "liquidity": 8,
       "spread": 0.010000000000000009,
       "volume": 13190.75,
-      "volume24h": 68.78,
+      "volume24h": 75.83,
       "openInterest": 5303.82,
       "depth": {
         "bidSize": 9,
@@ -462,11 +462,11 @@
       "strike": 5,
       "liquidity": 76,
       "spread": 0.04999999999999999,
-      "volume": 9059.2,
+      "volume": 9060.2,
       "volume24h": 35.18,
       "openInterest": 4543.6,
       "depth": {
-        "bidSize": 23,
+        "bidSize": 22,
         "askSize": 200,
         "notional": 1
       },
@@ -804,7 +804,7 @@
       "short": "Will there be more than 7 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.07,
+      "market": 0.075,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 216",
@@ -838,14 +838,14 @@
       ],
       "horizon": "seasonal",
       "strike": 7,
-      "liquidity": 0,
-      "spread": 0.020000000000000004,
+      "liquidity": 6,
+      "spread": 0.03,
       "volume": 2798.04,
       "volume24h": 0,
       "openInterest": 2271.67,
       "depth": {
         "bidSize": 126,
-        "askSize": 3.21,
+        "askSize": 61.79,
         "notional": 1
       },
       "proxy": false,
@@ -1320,7 +1320,7 @@
       "openInterest": 4094.18,
       "depth": {
         "bidSize": 30,
-        "askSize": 35,
+        "askSize": 34,
         "notional": 1
       },
       "proxy": false,
@@ -1537,14 +1537,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 6,
+      "liquidity": 5,
       "spread": 0.03,
       "volume": 6606.49,
       "volume24h": 35.38,
       "openInterest": 3416.15,
       "depth": {
         "bidSize": 25,
-        "askSize": 29,
+        "askSize": 28,
         "notional": 1
       },
       "proxy": false,
@@ -2576,7 +2576,7 @@
       "liquidity": 194,
       "spread": 0.05999999999999994,
       "volume": 660,
-      "volume24h": 250,
+      "volume24h": 255,
       "openInterest": 250,
       "depth": {
         "bidSize": 200,
@@ -3918,12 +3918,12 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 4,
-      "spread": 0.52,
+      "spread": 0.5,
       "volume": 10,
       "volume24h": 0,
       "openInterest": 10,
       "depth": {
-        "bidSize": 11,
+        "bidSize": 6,
         "askSize": 6,
         "notional": 1
       },
