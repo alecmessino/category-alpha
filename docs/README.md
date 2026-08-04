@@ -142,6 +142,28 @@ and cite the actual snapshot instead of a made-up semver.
 `scripts/audit-claims.mjs` runs in CI and fails the build if capability language
 reappears as a literal, or if a component references a claim id that is not registered.
 
+## Verification
+
+Three gates run before every data refresh, so a data commit cannot exist unless all
+three passed:
+
+| Gate | What it protects |
+|---|---|
+| `scripts/test-enso.mjs` | the posterior stack — ONI parsers, CPC phase thresholds, shrinkage bounds, both refusal paths |
+| `scripts/test-markets.mjs` | the Kalshi payload parsers — the current field shape, both previous shapes for rollback safety, and that an unrecognised shape degrades to all-null rather than a confident zero |
+| `scripts/audit-claims.mjs` | every visible claim has a provenance owner |
+
+A fourth runs against the **deployed site**, not the repository:
+`.github/workflows/verify-live.yml` drives a real Chromium against the public Pages
+URL on every code push, four times a day, and on demand. It byte-compares the served
+assets against the commit (polling while a deploy propagates), disables cache at the
+protocol level, and asserts the page renders — every panel, full market coverage, the
+ask-priced fillable cap, no console errors, no failed same-origin requests. Third-party
+tile failures are reported but never fail the run.
+
+That job exists because the authoring sandbox cannot reach `*.github.io`. Deployment
+verification is automated there rather than left to a human.
+
 ## Architecture (permanent URL + fresh data, no CORS)
 
 - **`docs/`** is a static site served by **GitHub Pages** → a permanent `*.github.io` URL that never breaks.

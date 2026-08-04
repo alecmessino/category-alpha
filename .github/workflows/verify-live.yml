@@ -1,0 +1,62 @@
+name: Verify the deployed site
+
+# Every other check in this repo tests the code or the committed files. This one
+# tests the thing none of those can: that GitHub Pages is actually serving the
+# current commit over the public internet, and that the page renders correctly when
+# it does. It runs here because the authoring sandbox cannot reach *.github.io.
+#
+# This is deliberately NOT a manual step. If the deployed site breaks, the failure
+# should arrive as a red build, not as something a human has to remember to check.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "scripts/verify-live.mjs"
+      - ".github/workflows/verify-live.yml"
+  schedule:
+    - cron: "17 */6 * * *"   # four times a day, offset off the hour to avoid the refresh loop
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Override the URL to verify"
+        required: false
+
+# A newer verification supersedes one still waiting for a deploy to propagate.
+concurrency:
+  group: millibar-verify-live
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright@1.49.1
+          npx playwright install --with-deps chromium
+
+      # The data commits land every ~10 min, so the checkout may be a few data
+      # commits behind the tip. Only the app assets are byte-compared, and those
+      # only change on a code push, so this is stable.
+      - name: Verify the live site
+        run: node scripts/verify-live.mjs --wait-min 12
+        env:
+          MT_LIVE_URL: ${{ github.event.inputs.url || 'https://alecmessino.github.io/category-alpha/' }}
+
+      - name: Upload screenshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: live-verify-screenshot
+          path: live-verify.png
+          if-no-files-found: ignore
+          retention-days: 7
