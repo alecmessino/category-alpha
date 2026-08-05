@@ -1,13 +1,18 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-05T00:28:13.782Z",
+  "ranAt": "2026-08-05T03:30:30.805Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "9ac7ac03d81e2d98c0852cc7dc3bb0e799fab5aa",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/30963339643",
-  "ok": true,
-  "passed": 24,
+  "sha": "cb818542416dfe056f9ee0dea8c4b5df55249652",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/30972415372",
+  "ok": false,
+  "passed": 23,
   "total": 24,
-  "failures": [],
+  "failures": [
+    {
+      "check": "served snapshot is fresh",
+      "detail": "2026-08-05T02:17:56.185Z · 73m old"
+    }
+  ],
   "thirdPartyFailures": 0,
   "checks": [
     {
@@ -27,8 +32,8 @@
     },
     {
       "check": "served snapshot is fresh",
-      "pass": true,
-      "detail": "2026-08-05T00:23:21.386Z · 5m old"
+      "pass": false,
+      "detail": "2026-08-05T02:17:56.185Z · 73m old"
     },
     {
       "check": "renders: Situation",
