@@ -1,13 +1,134 @@
 {
   "schema": "millibar-verify-live/1",
-  "note": "Seed record. The deployed-site check has not run yet against this URL. .github/workflows/verify-live.yml overwrites this file with a real verdict on every code push and four times a day; the page reports whatever is here, including its age.",
-  "ranAt": null,
-  "url": null,
-  "sha": null,
-  "runUrl": null,
-  "ok": null,
-  "passed": 0,
-  "total": 0,
+  "ranAt": "2026-08-05T00:28:13.782Z",
+  "url": "https://alecmessino.github.io/category-alpha/",
+  "sha": "9ac7ac03d81e2d98c0852cc7dc3bb0e799fab5aa",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/30963339643",
+  "ok": true,
+  "passed": 24,
+  "total": 24,
   "failures": [],
-  "checks": []
+  "thirdPartyFailures": 0,
+  "checks": [
+    {
+      "check": "Pages is serving this commit",
+      "pass": true,
+      "detail": "6 assets byte-match the checkout (attempt 1)"
+    },
+    {
+      "check": "live URL responds",
+      "pass": true,
+      "detail": "HTTP 200 at https://alecmessino.github.io/category-alpha/"
+    },
+    {
+      "check": "app mounted",
+      "pass": true,
+      "detail": "{\"MT\":true,\"MTX\":true,\"MTC\":true}"
+    },
+    {
+      "check": "served snapshot is fresh",
+      "pass": true,
+      "detail": "2026-08-05T00:23:21.386Z · 5m old"
+    },
+    {
+      "check": "renders: Situation",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "renders: Attention",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "renders: Board Impact",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "renders: Term structure",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "renders: Posterior stack",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "renders: Evidence Matrix",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "renders: Signal Register",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "renders: Market board",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "renders: Observability",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "storm block swaps correctly",
+      "pass": true,
+      "detail": "0 storm(s) · notice=true commandCentre=false"
+    },
+    {
+      "check": "all markets carried",
+      "pass": true,
+      "detail": "142 contracts · 14 series · droppedForCap=0"
+    },
+    {
+      "check": "board grouped by series",
+      "pass": true,
+      "detail": "14 group headers vs 14 series"
+    },
+    {
+      "check": "resting depth populated",
+      "pass": true,
+      "detail": "142/142 carry depth"
+    },
+    {
+      "check": "fillable cap priced at the ask",
+      "pass": true,
+      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 112704 × $0.01 = $1127"
+    },
+    {
+      "check": "order book shows depth",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no unregistered claims",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no horizontal overflow",
+      "pass": true,
+      "detail": "0px"
+    },
+    {
+      "check": "no failed same-origin requests",
+      "pass": true,
+      "detail": "all app assets loaded"
+    },
+    {
+      "check": "no page errors",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "check": "no console errors from our code",
+      "pass": true,
+      "detail": "none"
+    }
+  ]
 }
