@@ -79,8 +79,16 @@ async function waitForDeploy() {
 
 const deployed = await waitForDeploy();
 
-/* ---- 2-6. render the live page ------------------------------------------ */
-const browser = await chromium.launch();
+/* ---- 2-6. render the live page ------------------------------------------
+   Everything below runs inside a try/finally. A crash here previously produced NO
+   report at all, and the workflow's commit step then found no file and exited 0 —
+   so a hard failure looked exactly like a quiet success. Silence must never be
+   mistaken for a pass. */
+let browser = null;
+const origin = new URL(BASE).origin;
+let ours = [], third = [], thirdConsole = [];      // read by the report, so hoisted
+try {
+browser = await chromium.launch();
 const ctx = await browser.newContext({ viewport: { width: 2560, height: 1400 } });
 const page = await ctx.newPage();
 
@@ -188,19 +196,22 @@ add("no horizontal overflow", probe.overflow <= 0, `${probe.overflow}px`);
 /* Same-origin failures are ours and must fail the build. Map tiles come from CARTO
    and NASA GIBS; those legitimately 404 for slots that do not exist, so they are
    reported but never fail the run. */
-const origin = new URL(BASE).origin;
-const ours = netFailures.filter((f) => f.url.startsWith(origin));
-const third = netFailures.filter((f) => !f.url.startsWith(origin));
+ours = netFailures.filter((f) => f.url.startsWith(origin));
+third = netFailures.filter((f) => !f.url.startsWith(origin));
 add("no failed same-origin requests", ours.length === 0,
   ours.slice(0, 4).map((f) => `${f.why} ${f.url.replace(origin, "")}`).join(", ") || "all app assets loaded");
 add("no page errors", pageErrors.length === 0, pageErrors.slice(0, 3).join(" | ") || "none");
 const ourConsole = consoleErrors.filter((e) => !e.at || e.at.startsWith(origin));
-const thirdConsole = consoleErrors.filter((e) => e.at && !e.at.startsWith(origin));
+thirdConsole = consoleErrors.filter((e) => e.at && !e.at.startsWith(origin));
 add("no console errors from our code", ourConsole.length === 0,
   ourConsole.slice(0, 3).map((e) => e.text).join(" | ") || "none");
 
 await page.screenshot({ path: "live-verify.png", fullPage: false });
-await browser.close();
+} catch (err) {
+  add("verification completed without crashing", false, String(err && err.message || err).split("\n")[0]);
+} finally {
+  if (browser) await browser.close().catch(() => {});
+}
 
 /* ---- report -------------------------------------------------------------- */
 const pad = (s, n) => String(s).padEnd(n).slice(0, n);

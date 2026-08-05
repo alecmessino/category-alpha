@@ -60,8 +60,24 @@ jobs:
       # re-triggering the workflow.
       - name: Commit the verification result
         if: always()
+        env:
+          MT_LIVE_URL: ${{ github.event.inputs.url || 'https://alecmessino.github.io/category-alpha/' }}
         run: |
-          if [ ! -f docs/data/verify-live.json ]; then echo "no report written"; exit 0; fi
+          # If the verifier was killed outright (OOM, step timeout) it leaves no file,
+          # and committing nothing would make a hard failure look like a quiet pass.
+          # Record the absence instead.
+          if [ ! -f docs/data/verify-live.json ]; then
+            printf '%s\n' "{" \
+              '  "schema": "millibar-verify-live/1",' \
+              "  \"ranAt\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"," \
+              "  \"url\": \"${MT_LIVE_URL}\"," \
+              "  \"sha\": \"${GITHUB_SHA}\"," \
+              "  \"runUrl\": \"${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\"," \
+              '  "ok": false, "passed": 0, "total": 0,' \
+              '  "failures": [{ "check": "verifier produced no report", "detail": "the run was killed before writing a verdict — see the run log" }],' \
+              '  "checks": []' \
+              "}" > docs/data/verify-live.json
+          fi
           git config user.name  "millibar-data-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/data/verify-live.json
