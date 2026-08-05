@@ -30,7 +30,7 @@
   function state(ctx) {
     if (ctx && ctx.feeds) return ctx;
     const M = window.MT || {};
-    return { feeds: M._feeds || {}, evidence: M.evidence || [], generatedAt: M._generatedAt || null };
+    return { feeds: M._feeds || {}, evidence: M.evidence || [], generatedAt: M._generatedAt || null, verify: M._verify || null };
   }
   const okOf = (s, k) => { const f = s.feeds[k]; return !!(f && f.ok); };
   const srcOf = (s, k, fallback) => { const f = s.feeds[k]; return (f && f.source) || fallback || k; };
@@ -132,6 +132,21 @@
         + " forecast — treat EDGE as a reference spread, not alpha.",
     ok: okOf(s, "models"),
   }));
+  /* The terminal's own deployment check, written into the repo by the CI job that
+     drives a real browser against the public URL. Reported here so the last verdict
+     is visible on the page rather than only in a build log. */
+  define("deploy.verified", "derived", (s) => {
+    const v = s.verify;
+    if (!v || !v.ranAt) return { text: "no deployed-site check on record", ok: false };
+    const ageMin = Math.max(0, Math.round((Date.now() - Date.parse(v.ranAt)) / 60000));
+    const ago = ageMin < 60 ? ageMin + "m" : Math.floor(ageMin / 60) + "h" + ("0" + (ageMin % 60)).slice(-2) + "m";
+    return {
+      text: v.ok
+        ? `deployed site verified ${ago} ago — ${v.passed}/${v.total} checks in a real browser against ${v.url}`
+        : `deployed-site check FAILED ${ago} ago — ${(v.failures || []).map((f) => f.check).join(", ") || "see the run log"}`,
+      ok: !!v.ok,
+    };
+  });
   define("capability.positions", "none", () => ({
     text: "No position feed is wired — board level, not portfolio level.",
     ok: false,

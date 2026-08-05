@@ -20,7 +20,7 @@
  *
  * Usage: node scripts/verify-live.mjs [--url https://...] [--wait-min 12]
  */
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -211,4 +211,28 @@ if (thirdTotal) console.log(`\n  note: ${thirdTotal} third-party request(s) fail
 
 const failed = results.filter((r) => !r.pass);
 console.log(failed.length ? `\n${failed.length} FAILED\n` : `\nall ${results.length} checks passed\n`);
+
+/* Write the verdict into the repo. A red build is visible in the Actions tab, but the
+   RESULT should not be locked behind API access — this makes it readable over git by
+   anyone, and lets the terminal report its own last deployment check. */
+const report = {
+  schema: "millibar-verify-live/1",
+  ranAt: new Date().toISOString(),
+  url: BASE,
+  sha: process.env.GITHUB_SHA || null,
+  runUrl: process.env.GITHUB_SERVER_URL && process.env.GITHUB_REPOSITORY && process.env.GITHUB_RUN_ID
+    ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}` : null,
+  ok: failed.length === 0 && deployed,
+  passed: results.length - failed.length,
+  total: results.length,
+  failures: failed.map((r) => ({ check: r.check, detail: r.detail })),
+  thirdPartyFailures: thirdTotal,
+  checks: results.map((r) => ({ check: r.check, pass: r.pass, detail: r.detail })),
+};
+try {
+  await mkdir(resolve(ROOT, "docs/data"), { recursive: true });
+  await writeFile(resolve(ROOT, "docs/data/verify-live.json"), JSON.stringify(report, null, 2) + "\n");
+  console.log("wrote docs/data/verify-live.json");
+} catch (e) { console.log("could not write report: " + e.message); }
+
 process.exit(failed.length || !deployed ? 1 : 0);

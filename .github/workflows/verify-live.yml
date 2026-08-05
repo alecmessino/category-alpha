@@ -28,6 +28,9 @@ concurrency:
   group: millibar-verify-live
   cancel-in-progress: true
 
+permissions:
+  contents: write             # the job commits its own verdict back to the branch
+
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -51,6 +54,25 @@ jobs:
         run: node scripts/verify-live.mjs --wait-min 12
         env:
           MT_LIVE_URL: ${{ github.event.inputs.url || 'https://alecmessino.github.io/category-alpha/' }}
+
+      # The verdict goes into the repo as well as the Actions log, so the result is
+      # readable over git rather than only through the API. [skip ci] keeps this from
+      # re-triggering the workflow.
+      - name: Commit the verification result
+        if: always()
+        run: |
+          if [ ! -f docs/data/verify-live.json ]; then echo "no report written"; exit 0; fi
+          git config user.name  "millibar-data-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/verify-live.json
+          if git diff --cached --quiet; then
+            echo "verification result unchanged."
+          else
+            git commit -m "verify: live check $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+            for i in 1 2 3 4; do
+              git push && break || { echo "push failed, retry $i"; sleep $((2 ** i)); git pull --rebase --autostash || true; }
+            done
+          fi
 
       - name: Upload screenshot
         if: always()

@@ -222,6 +222,7 @@
       FRAMES, STEP_MIN: stepMin, OBSERVED_STEP_MIN: observedStepMin, storms, contracts,
       evidence, models: latest.models || [], events, pipeline, health,
       _frames: framesArr, _feeds: feeds, _generatedAt: latest.generatedAt || null, _note: latest.note || null,
+      _verify: window.__MT_VERIFY || null,
     };
   }
 
@@ -263,6 +264,8 @@
   Promise.all([
     fetch(BASE + "latest.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : Promise.reject("HTTP " + r.status)),
     fetch(BASE + "frames.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).catch(() => null),
-  ]).then(([latest, framesJson]) => { done(latest, framesJson); startPolling(); })
+    // Verdict of the CI job that drives a real browser against the public URL.
+    fetch(BASE + "verify-live.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).catch(() => null),
+  ]).then(([latest, framesJson, verify]) => { window.__MT_VERIFY = verify; done(latest, framesJson); startPolling(); })
     .catch((err) => { console.warn("[millibar] data load failed:", err); done(emptyLatest(err), null); startPolling(); });
 })();

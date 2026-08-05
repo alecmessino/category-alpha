@@ -917,6 +917,7 @@ function MT_Observability({ narrow }) {
     <P pad={false} title="Observability — Pipeline Status"
       footer={<PF {...MTC.footer("panel.observability")} />}>
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", borderBottom: "1px solid var(--border-dim)", lineHeight: 1.5 }}>
+        <div style={{ color: MTC.claim("deploy.verified").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("deploy.verified").text}</div>
         <div style={{ color: MTC.claim("markets.coverage").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("markets.coverage").text}</div>
         <div>{MTC.claim("capability.notIngested").text}</div>
       </div>
