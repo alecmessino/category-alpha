@@ -11,9 +11,16 @@ on:
     # — a */15 cron was measured delivering ~106 min median, so the board was
     # routinely 2h+ stale.
     #
-    # The loop runs LONGER than an hour on purpose, so the next scheduled run is
-    # always already queued when this one ends. See the concurrency block below for
-    # why a scheduled run must not cancel the loop it is replacing.
+    # The cron is now only a SAFETY NET. Each run dispatches its own successor before
+    # exiting, so the chain does not depend on cron delivery at all.
+    #
+    # History, because this has been wrong twice: a */15 cron delivered a ~106 min
+    # median. Moving to an hourly cron with a 55-min loop gave a clean 10 min inside
+    # each run but 51-104 min across the hour boundary, because the cron itself lands
+    # up to ~45 min late. Extending the loop to 110 min to cover that made it worse —
+    # gaps of 111, 112 and once 478 minutes, sizes that track the loop length, because
+    # a scheduled run that arrives while the previous one is still going gets dropped
+    # rather than queued. Self-dispatch removes the dependency instead of tuning it.
     - cron: "0 * * * *"     # fires hourly; the loop below deliberately outlives the hour
   workflow_dispatch: {}       # manual "Run workflow" button
   push:
@@ -35,11 +42,12 @@ concurrency:
 
 permissions:
   contents: write             # allow the bot to commit refreshed data back to the branch
+  actions: write              # allow a run to dispatch its own successor
 
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 125
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@v4
 
@@ -67,14 +75,14 @@ jobs:
       - name: Audit claim provenance
         run: node scripts/audit-claims.mjs
 
-      - name: Refresh loop (~110 min, 10-min cadence — overlaps the next hour)
+      - name: Refresh loop (~50 min, 10-min cadence)
         env:
           MT_STEP_MIN: "10"
         run: |
           set -u
           git config user.name  "millibar-data-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          END=$(( $(date +%s) + 110*60 ))
+          END=$(( $(date +%s) + 50*60 ))
           TICK=0
           while :; do
             TICK=$((TICK+1))
@@ -95,3 +103,18 @@ jobs:
             REMAIN=$(( END - NOW ))
             if [ "$REMAIN" -lt 600 ]; then sleep "$REMAIN"; else sleep 600; fi
           done
+
+      # Hand off explicitly rather than hoping the next cron lands. A dispatched run
+      # is delivered reliably; the hourly cron above only matters if this step never
+      # runs (job cancelled, runner lost), which is exactly when a safety net helps.
+      - name: Dispatch the successor run
+        # Including push: a code deploy should continue the chain, not break it and
+        # wait for the next cron. Data commits carry [skip ci] so this cannot spin.
+        if: success()
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/workflows/refresh-data.yml/dispatches" \
+            -d '{"ref":"${{ github.ref_name }}"}' \
+            -w "dispatch http=%{http_code}\n"
