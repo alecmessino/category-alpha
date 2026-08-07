@@ -11,8 +11,7 @@ on:
     # — a */15 cron was measured delivering ~106 min median, so the board was
     # routinely 2h+ stale.
     #
-    # The cron is now only a SAFETY NET. Each run dispatches its own successor before
-    # exiting, so the chain does not depend on cron delivery at all.
+    # The loop MUST finish before the next cron fires. That is the whole design.
     #
     # History, because this has been wrong twice: a */15 cron delivered a ~106 min
     # median. Moving to an hourly cron with a 55-min loop gave a clean 10 min inside
@@ -20,7 +19,17 @@ on:
     # up to ~45 min late. Extending the loop to 110 min to cover that made it worse —
     # gaps of 111, 112 and once 478 minutes, sizes that track the loop length, because
     # a scheduled run that arrives while the previous one is still going gets dropped
-    # rather than queued. Self-dispatch removes the dependency instead of tuning it.
+    # rather than queued.
+    #
+    # That is the actual rule, and it is the one to design around: a scheduled event
+    # is delivered when NOTHING is running, and dropped when something is. So the loop
+    # is 45 minutes against an hourly cron, leaving ~15 minutes idle for the next
+    # event to land in. Longer loops swallow their own successors.
+    #
+    # Self-dispatch was tried and does not work: the repository GITHUB_TOKEN cannot
+    # trigger workflow runs. The API returns 204 and nothing starts, so it fails
+    # silently — which is why the chain stopped dead after one loop. It is kept below
+    # but gated on a user-supplied PAT, and skipped cleanly when there is not one.
     - cron: "0 * * * *"     # fires hourly; the loop below deliberately outlives the hour
   workflow_dispatch: {}       # manual "Run workflow" button
   push:
@@ -47,7 +56,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 70
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
 
@@ -75,14 +84,14 @@ jobs:
       - name: Audit claim provenance
         run: node scripts/audit-claims.mjs
 
-      - name: Refresh loop (~50 min, 10-min cadence)
+      - name: Refresh loop (~45 min, 10-min cadence — must end before the next cron)
         env:
           MT_STEP_MIN: "10"
         run: |
           set -u
           git config user.name  "millibar-data-bot"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          END=$(( $(date +%s) + 50*60 ))
+          END=$(( $(date +%s) + 45*60 ))
           TICK=0
           while :; do
             TICK=$((TICK+1))
@@ -104,16 +113,22 @@ jobs:
             if [ "$REMAIN" -lt 600 ]; then sleep "$REMAIN"; else sleep 600; fi
           done
 
-      # Hand off explicitly rather than hoping the next cron lands. A dispatched run
-      # is delivered reliably; the hourly cron above only matters if this step never
-      # runs (job cancelled, runner lost), which is exactly when a safety net helps.
-      - name: Dispatch the successor run
-        # Including push: a code deploy should continue the chain, not break it and
-        # wait for the next cron. Data commits carry [skip ci] so this cannot spin.
+      # OPTIONAL hand-off. GITHUB_TOKEN cannot trigger workflow runs — the dispatch
+      # returns 204 and nothing starts — so this only does anything if a PAT with
+      # `actions: write` is stored as MT_DISPATCH_TOKEN. Without one the step is
+      # skipped and the hourly cron drives the chain, which is the supported path.
+      # This is an upgrade, not a requirement, and it says so when it is inactive.
+      - name: Dispatch the successor run (only with a PAT)
         if: success()
+        env:
+          PAT: ${{ secrets.MT_DISPATCH_TOKEN }}
         run: |
+          if [ -z "${PAT}" ]; then
+            echo "No MT_DISPATCH_TOKEN — relying on the hourly cron. This is expected."
+            exit 0
+          fi
           curl -sS -X POST \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Authorization: Bearer ${PAT}" \
             -H "Accept: application/vnd.github+json" \
             "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/workflows/refresh-data.yml/dispatches" \
             -d '{"ref":"${{ github.ref_name }}"}' \
