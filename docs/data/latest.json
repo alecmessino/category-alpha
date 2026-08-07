@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-07T00:51:24.153Z",
+  "generatedAt": "2026-08-07T01:01:40.025Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 195,
+      "latencyMs": 129,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 30  Atlantic hur | Above 30 | px=0.015",
-            "Will there be more than 25  Atlantic hur | Above 25 | px=0.015",
-            "Will there be more than 20  Atlantic hur | Above 20 | px=0.030",
-            "Will there be more than 18  Atlantic hur | Above 18 | px=0.035",
-            "Will there be more than 16  Atlantic hur | Above 16 | px=0.060",
-            "Will there be more than 14  Atlantic hur | Above 14 | px=0.190"
+            "When will the next hurricane form? | Before Sep 15, | px=0.320",
+            "When will the next hurricane form? | Before Sep 1,  | px=0.160",
+            "When will the next hurricane form? | Before Oct 15, | px=0.380",
+            "When will the next hurricane form? | Before Oct 1,  | px=0.705",
+            "When will the next hurricane form? | Before Nov 15, | px=0.480",
+            "When will the next hurricane form? | Before Nov 1,  | px=0.435"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"233.77\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"412.64\"},\"px\":{\"last_price_dollars\":\"0.0300\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9700\",\"previous_price_dollars\":\"0.0300\",\"previous_yes_ask_dollars\":\"0.0300\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0300\",\"yes_ask_size_fp\":\"240.00\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"0.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"0.00\"},\"px\":{\"last_price_dollars\":\"0.0000\",\"no_ask_dollars\":\"0.9300\",\"no_bid_dollars\":\"0.4300\",\"previous_price_dollars\":\"0.0000\",\"previous_yes_ask_dollars\":\"0.0000\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.5700\",\"yes_ask_size_fp\":\"5.00\",\"yes_bid_dollars\":\"0.0700\",\"yes_bid_size_fp\":\"5.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 12,
+      "latencyMs": 50,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 148,
+      "latencyMs": 149,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -1361,7 +1361,7 @@
       "short": "Will Cristobal be the first named hurricane…",
       "storm": null,
       "subject": null,
-      "market": 0.37,
+      "market": 0.375,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1369,14 +1369,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 4,
-      "spread": 0.12,
+      "liquidity": 8,
+      "spread": 0.08999999999999997,
       "volume": 9207.71,
       "volume24h": 199.58,
       "openInterest": 3949.69,
       "depth": {
-        "bidSize": 5.24,
-        "askSize": 10,
+        "bidSize": 6.09,
+        "askSize": 18,
         "notional": 1
       },
       "proxy": false,
@@ -3447,7 +3447,7 @@
       "volume24h": 1.82,
       "openInterest": 23.92,
       "depth": {
-        "bidSize": 206.63,
+        "bidSize": 207.63,
         "askSize": 200,
         "notional": 1
       },
@@ -4632,6 +4632,34 @@
       "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
     },
     {
+      "id": "KXNEXTHURDATE-26DEC01-26SEP15",
+      "label": "When will the next hurricane form?",
+      "short": "When will the next hurricane form · Before…",
+      "storm": null,
+      "subject": null,
+      "market": 0.31999999999999995,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": null,
+      "liquidity": 3,
+      "spread": 0.49999999999999994,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 5,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
+    },
+    {
       "id": "KXHURRICANENAMES-26DEC01EPAC-SIM",
       "label": "Will Simon be categorized as a hurricane in the Eastern Pacific in 2026?",
       "short": "Will Simon be categorized as a hurricane in…",
@@ -4882,34 +4910,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01ATL"
-    },
-    {
-      "id": "KXNEXTHURDATE-26DEC01-26SEP15",
-      "label": "When will the next hurricane form?",
-      "short": "When will the next hurricane form · Before…",
-      "storm": null,
-      "subject": null,
-      "market": 0.31999999999999995,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": null,
-      "liquidity": 3,
-      "spread": 0.49999999999999994,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 5,
-        "askSize": 5,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
     },
     {
       "id": "KXHURRICANENAMES-26DEC01EPAC-TRU",
