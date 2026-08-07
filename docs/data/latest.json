@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-07T01:11:54.560Z",
+  "generatedAt": "2026-08-07T01:22:09.815Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 271,
+      "latencyMs": 192,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 82,
+      "latencyMs": 53,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 174,
+      "latencyMs": 149,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -247,7 +247,7 @@
       "liquidity": 3,
       "spread": 0.040000000000000036,
       "volume": 21834.18,
-      "volume24h": 614.97,
+      "volume24h": 612.43,
       "openInterest": 8026.65,
       "depth": {
         "bidSize": 87.07,
@@ -463,7 +463,7 @@
       "liquidity": 1,
       "spread": 0.03999999999999998,
       "volume": 9070.58,
-      "volume24h": 3.49,
+      "volume24h": 2.52,
       "openInterest": 4542.6,
       "depth": {
         "bidSize": 2,
@@ -1361,7 +1361,7 @@
       "short": "Will Cristobal be the first named hurricane…",
       "storm": null,
       "subject": null,
-      "market": 0.385,
+      "market": 0.395,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1369,14 +1369,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 5,
-      "spread": 0.07,
+      "liquidity": 12,
+      "spread": 0.09000000000000002,
       "volume": 9207.73,
-      "volume24h": 199.6,
+      "volume24h": 198.41,
       "openInterest": 3949.69,
       "depth": {
-        "bidSize": 6.09,
-        "askSize": 13,
+        "bidSize": 23.16,
+        "askSize": 28,
         "notional": 1
       },
       "proxy": false,
@@ -1481,14 +1481,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 2,
+      "liquidity": 3,
       "spread": 0.01,
       "volume": 7466.78,
       "volume24h": 0,
       "openInterest": 4613.26,
       "depth": {
         "bidSize": 160.21,
-        "askSize": 108.79,
+        "askSize": 159.79,
         "notional": 1
       },
       "proxy": false,
@@ -2828,7 +2828,7 @@
       "liquidity": 3,
       "spread": 0.17,
       "volume": 422.16,
-      "volume24h": 11,
+      "volume24h": 5,
       "openInterest": 405.16,
       "depth": {
         "bidSize": 110,
@@ -4632,34 +4632,6 @@
       "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
     },
     {
-      "id": "KXNEXTHURDATE-26DEC01-26SEP15",
-      "label": "When will the next hurricane form?",
-      "short": "When will the next hurricane form · Before…",
-      "storm": null,
-      "subject": null,
-      "market": 0.31999999999999995,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": null,
-      "liquidity": 3,
-      "spread": 0.49999999999999994,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 5,
-        "askSize": 5,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
-    },
-    {
       "id": "KXHURRICANENAMES-26DEC01EPAC-SIM",
       "label": "Will Simon be categorized as a hurricane in the Eastern Pacific in 2026?",
       "short": "Will Simon be categorized as a hurricane in…",
@@ -4910,6 +4882,34 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01ATL"
+    },
+    {
+      "id": "KXNEXTHURDATE-26DEC01-26SEP15",
+      "label": "When will the next hurricane form?",
+      "short": "When will the next hurricane form · Before…",
+      "storm": null,
+      "subject": null,
+      "market": 0.31999999999999995,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": null,
+      "liquidity": 3,
+      "spread": 0.49999999999999994,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 5,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
     },
     {
       "id": "KXHURRICANENAMES-26DEC01EPAC-TRU",
