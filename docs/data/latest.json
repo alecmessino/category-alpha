@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-07T03:30:11.142Z",
+  "generatedAt": "2026-08-07T03:40:26.670Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 212,
+      "latencyMs": 283,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "When will the next Category 5 hurricane  | Before Sep 1,  | px=0.500",
-            "When will the next Category 5 hurricane  | Before Oct 1,  | px=0.500",
-            "When will the next Category 5 hurricane  | Before Nov 1,  | px=0.500",
-            "When will the next Category 5 hurricane  | Before Dec 1,  | px=0.500",
-            "When will the next hurricane form? | Before Sep 15, | px=0.320",
-            "When will the next hurricane form? | Before Sep 1,  | px=0.160"
+            "Will there be more than 26 named storms  | Above 26 | px=0.055",
+            "Will there be more than 24 named storms  | Above 24 | px=0.075",
+            "Will there be more than 22 named storms  | Above 22 | px=0.175",
+            "Will there be more than 20 named storms  | Above 20 | px=0.375",
+            "Will there be more than 19 named storms  | Above 19 | px=0.395",
+            "Will there be more than 18 named storms  | Above 18 | px=0.515"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"0.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"0.00\"},\"px\":{\"last_price_dollars\":\"0.0000\",\"no_ask_dollars\":\"0.9800\",\"no_bid_dollars\":\"0.0200\",\"previous_price_dollars\":\"0.0000\",\"previous_yes_ask_dollars\":\"0.0000\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.9800\",\"yes_ask_size_fp\":\"5.00\",\"yes_bid_dollars\":\"0.0200\",\"yes_bid_size_fp\":\"5.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"63.75\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"63.75\"},\"px\":{\"last_price_dollars\":\"0.0800\",\"no_ask_dollars\":\"0.9700\",\"no_bid_dollars\":\"0.9200\",\"previous_price_dollars\":\"0.0800\",\"previous_yes_ask_dollars\":\"0.0800\",\"previous_yes_bid_dollars\":\"0.0300\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0800\",\"yes_ask_size_fp\":\"175.00\",\"yes_bid_dollars\":\"0.0300\",\"yes_bid_size_fp\":\"5.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 52,
+      "latencyMs": 57,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -1361,7 +1361,7 @@
       "short": "Will Cristobal be the first named hurricane…",
       "storm": null,
       "subject": null,
-      "market": 0.44499999999999995,
+      "market": 0.45499999999999996,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1369,14 +1369,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 0,
-      "spread": 0.07,
+      "liquidity": 7,
+      "spread": 0.04999999999999999,
       "volume": 9240.41,
       "volume24h": 186.29,
       "openInterest": 3974.58,
       "depth": {
         "bidSize": 5.44,
-        "askSize": 1,
+        "askSize": 14,
         "notional": 1
       },
       "proxy": false,
@@ -1529,7 +1529,7 @@
       "short": "Will Edouard be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.16999999999999998,
+      "market": 0.165,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1538,13 +1538,13 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 2,
-      "spread": 0.04000000000000001,
+      "spread": 0.04999999999999999,
       "volume": 6695.45,
       "volume24h": 36,
       "openInterest": 3454.59,
       "depth": {
-        "bidSize": 10,
-        "askSize": 10,
+        "bidSize": 15,
+        "askSize": 11,
         "notional": 1
       },
       "proxy": false,
@@ -4688,34 +4688,6 @@
       "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
     },
     {
-      "id": "KXNEXTHURDATE-26DEC01-26SEP15",
-      "label": "When will the next hurricane form?",
-      "short": "When will the next hurricane form · Before…",
-      "storm": null,
-      "subject": null,
-      "market": 0.31999999999999995,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "storm",
-      "strike": null,
-      "liquidity": 3,
-      "spread": 0.49999999999999994,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 5,
-        "askSize": 5,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
-    },
-    {
       "id": "KXHURRICANENAMES-26DEC01EPAC-ODA",
       "label": "Will Odalys be categorized as a hurricane in the Eastern Pacific in 2026?",
       "short": "Will Odalys be categorized as a hurricane in…",
@@ -4938,6 +4910,34 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01ATL"
+    },
+    {
+      "id": "KXNEXTHURDATE-26DEC01-26SEP15",
+      "label": "When will the next hurricane form?",
+      "short": "When will the next hurricane form · Before…",
+      "storm": null,
+      "subject": null,
+      "market": 0.31999999999999995,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "storm",
+      "strike": null,
+      "liquidity": 3,
+      "spread": 0.49999999999999994,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 5,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
     },
     {
       "id": "KXNEXTHURDATE-26DEC01-26SEP01",
