@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-06T23:49:46.835Z",
+  "generatedAt": "2026-08-07T00:00:02.363Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 402,
+      "latencyMs": 277,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 69,
+      "latencyMs": 50,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 272,
+      "latencyMs": 149,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -210,10 +210,10 @@
       "short": "Will there be more than 2 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.33499999999999996,
+      "market": 0.31,
       "model": 0.38655462184873945,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 219",
       "modelUncond": 0.6,
       "modelLayers": [
         {
@@ -226,7 +226,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.5714285714285714,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >2 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >2 more"
         },
         {
           "id": "std",
@@ -245,13 +245,13 @@
       "horizon": "seasonal",
       "strike": 2,
       "liquidity": 3,
-      "spread": 0.09000000000000002,
+      "spread": 0.040000000000000036,
       "volume": 21823.25,
-      "volume24h": 606.67,
+      "volume24h": 609.49,
       "openInterest": 8027.65,
       "depth": {
         "bidSize": 11,
-        "askSize": 8,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -267,7 +267,7 @@
       "market": 0.225,
       "model": 0.26050420168067223,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 219",
       "modelUncond": 0.42857142857142855,
       "modelLayers": [
         {
@@ -280,7 +280,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.42857142857142855,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >3 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >3 more"
         },
         {
           "id": "std",
@@ -300,11 +300,11 @@
       "strike": 3,
       "liquidity": 9,
       "spread": 0.010000000000000009,
-      "volume": 13587.02,
+      "volume": 13603.02,
       "volume24h": 266.51,
-      "openInterest": 5297.57,
+      "openInterest": 5307.57,
       "depth": {
-        "bidSize": 16,
+        "bidSize": 4,
         "askSize": 40.22,
         "notional": 1
       },
@@ -321,7 +321,7 @@
       "market": 0.15,
       "model": 0.16638655462184873,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 219",
       "modelUncond": 0.2857142857142857,
       "modelLayers": [
         {
@@ -334,7 +334,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.22857142857142856,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >4 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >4 more"
         },
         {
           "id": "std",
@@ -358,7 +358,7 @@
       "volume24h": 163.5,
       "openInterest": 3835.88,
       "depth": {
-        "bidSize": 151,
+        "bidSize": 136,
         "askSize": 209,
         "notional": 1
       },
@@ -375,7 +375,7 @@
       "market": 0.275,
       "model": 0.26050420168067223,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 219",
       "modelUncond": 0.6,
       "modelLayers": [
         {
@@ -388,7 +388,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.42857142857142855,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >6 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -429,7 +429,7 @@
       "market": 0.36,
       "model": 0.4453781512605042,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 219",
       "modelUncond": 0.6857142857142857,
       "modelLayers": [
         {
@@ -442,7 +442,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.5714285714285714,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >5 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -483,7 +483,7 @@
       "market": 0.47,
       "model": 0.5714285714285714,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 219",
       "modelUncond": 0.7428571428571429,
       "modelLayers": [
         {
@@ -496,7 +496,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.7142857142857143,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >4 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >4 more"
         },
         {
           "id": "std",
@@ -537,7 +537,7 @@
       "market": 0.595,
       "model": 0.8739495798319328,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 219",
       "modelUncond": 0.8571428571428571,
       "modelLayers": [
         {
@@ -550,7 +550,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.8571428571428571,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >1 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >1 more"
         },
         {
           "id": "std",
@@ -589,9 +589,9 @@
       "storm": null,
       "subject": null,
       "market": 0.1,
-      "model": 0.09915966386554623,
+      "model": 0.026890756302521007,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 219",
       "modelUncond": 0.14285714285714285,
       "modelLayers": [
         {
@@ -603,8 +603,8 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.08571428571428572,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >5 more"
+          "p": 0.05714285714285714,
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -616,8 +616,8 @@
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.09915966386554623,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.026890756302521007,
+          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -645,7 +645,7 @@
       "market": 0.185,
       "model": 0.23361344537815126,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 219",
       "modelUncond": 0.45714285714285713,
       "modelLayers": [
         {
@@ -658,7 +658,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.37142857142857144,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >7 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >7 more"
         },
         {
           "id": "std",
@@ -697,9 +697,9 @@
       "storm": null,
       "subject": null,
       "market": 0.05,
-      "model": 0.08067226890756303,
+      "model": 0.06722689075630252,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 219",
       "modelUncond": 0.22857142857142856,
       "modelLayers": [
         {
@@ -711,8 +711,8 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.17142857142857143,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >9 more"
+          "p": 0.14285714285714285,
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >9 more"
         },
         {
           "id": "std",
@@ -724,7 +724,7 @@
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.08067226890756303,
+          "p": 0.06722689075630252,
           "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
@@ -753,7 +753,7 @@
       "market": 0.74,
       "model": 0.973109243697479,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 219",
       "modelUncond": 0.9428571428571428,
       "modelLayers": [
         {
@@ -766,7 +766,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.9428571428571428,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >0 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >0 more"
         },
         {
           "id": "std",
@@ -807,7 +807,7 @@
       "market": 0.065,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 219",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -820,7 +820,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >7 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >7 more"
         },
         {
           "id": "std",
@@ -861,7 +861,7 @@
       "market": 0.09,
       "model": 0.12100840336134452,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 219",
       "modelUncond": 0.34285714285714286,
       "modelLayers": [
         {
@@ -874,7 +874,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.2571428571428571,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >8 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >8 more"
         },
         {
           "id": "std",
@@ -915,7 +915,7 @@
       "market": 0.05500000000000001,
       "model": 0.040336134453781515,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 219",
       "modelUncond": 0.14285714285714285,
       "modelLayers": [
         {
@@ -928,7 +928,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.08571428571428572,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >10 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >10 more"
         },
         {
           "id": "std",
@@ -969,7 +969,7 @@
       "market": 0.06,
       "model": 0.013445378151260503,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 219",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
@@ -982,7 +982,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.02857142857142857,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >6 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -1023,7 +1023,7 @@
       "market": 0.02,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 219",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
@@ -1036,7 +1036,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >12 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >12 more"
         },
         {
           "id": "std",
@@ -1077,7 +1077,7 @@
       "market": 0.015,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 218",
+      "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 seasons (n=35), day 219",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -1090,7 +1090,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0,
-          "basis": "hurricanes forming on/after day 218 in each past season; needs >15 more"
+          "basis": "hurricanes forming on/after day 219 in each past season; needs >15 more"
         },
         {
           "id": "std",
@@ -1501,7 +1501,7 @@
       "short": "Will there be more than 14 Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.195,
+      "market": 0.19,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1510,12 +1510,12 @@
       "horizon": "seasonal",
       "strike": 14,
       "liquidity": 8,
-      "spread": 0.010000000000000009,
+      "spread": 0.020000000000000018,
       "volume": 7005.76,
       "volume24h": 0,
       "openInterest": 2880.76,
       "depth": {
-        "bidSize": 9,
+        "bidSize": 151,
         "askSize": 38.16,
         "notional": 1
       },
