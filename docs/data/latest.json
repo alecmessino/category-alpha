@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-08T18:32:42.968Z",
+  "generatedAt": "2026-08-08T18:42:59.074Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 182,
+      "latencyMs": 230,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will Wilfred be the first named hurrican | Wilfred | px=0.005",
-            "Will Vicky be the first named hurricane  | Vicky | px=0.005",
-            "Will Teddy be the first named hurricane  | Teddy | px=0.005",
-            "Will Sally be the first named hurricane  | Sally | px=0.005",
-            "Will Rene be the first named hurricane i | Rene | px=0.005",
-            "Will Paulette be the first named hurrica | Paulette | px=0.005"
+            "When will the next hurricane form? | Before Sep 15, | px=0.670",
+            "When will the next hurricane form? | Before Sep 1,  | px=0.345",
+            "When will the next hurricane form? | Before Oct 15, | px=0.465",
+            "When will the next hurricane form? | Before Oct 1,  | px=0.755",
+            "When will the next hurricane form? | Before Nov 15, | px=0.480",
+            "When will the next hurricane form? | Before Nov 1,  | px=0.555"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2100.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"2413.36\"},\"px\":{\"last_price_dollars\":\"0.0100\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0100\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"5793.20\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"158.87\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"158.87\"},\"px\":{\"last_price_dollars\":\"0.7500\",\"no_ask_dollars\":\"0.4100\",\"no_bid_dollars\":\"0.2500\",\"previous_price_dollars\":\"0.7500\",\"previous_yes_ask_dollars\":\"0.7500\",\"previous_yes_bid_dollars\":\"0.5500\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.7500\",\"yes_ask_size_fp\":\"40.83\",\"yes_bid_dollars\":\"0.5900\",\"yes_bid_size_fp\":\"10.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 73,
+      "latencyMs": 82,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 255,
+      "latencyMs": 378,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -301,7 +301,7 @@
       "liquidity": 44,
       "spread": 0.06,
       "volume": 13973.05,
-      "volume24h": 301.36,
+      "volume24h": 297.56,
       "openInterest": 5595.27,
       "depth": {
         "bidSize": 100,
@@ -534,7 +534,7 @@
       "short": "Will there be more than 1 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.56,
+      "market": 0.565,
       "model": 0.8739495798319328,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 220",
@@ -568,14 +568,14 @@
       ],
       "horizon": "seasonal",
       "strike": 1,
-      "liquidity": 14,
-      "spread": 0.039999999999999925,
+      "liquidity": 133,
+      "spread": 0.04999999999999993,
       "volume": 6402.67,
       "volume24h": 224.76,
       "openInterest": 4520,
       "depth": {
         "bidSize": 10,
-        "askSize": 25,
+        "askSize": 225,
         "notional": 1
       },
       "proxy": false,
@@ -804,7 +804,7 @@
       "short": "Will there be more than 7 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.06,
+      "market": 0.065,
       "model": 0,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 220",
@@ -839,12 +839,12 @@
       "horizon": "seasonal",
       "strike": 7,
       "liquidity": 5,
-      "spread": 0.04,
+      "spread": 0.03,
       "volume": 2900.04,
-      "volume24h": 1.07,
+      "volume24h": 0,
       "openInterest": 2195.74,
       "depth": {
-        "bidSize": 357,
+        "bidSize": 179,
         "askSize": 58,
         "notional": 1
       },
@@ -966,7 +966,7 @@
       "short": "Will there be more than 6 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.08,
+      "market": 0.085,
       "model": 0.013445378151260503,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 major seasons (n=35), day 220",
@@ -1001,12 +1001,12 @@
       "horizon": "seasonal",
       "strike": 6,
       "liquidity": 20,
-      "spread": 0.04000000000000001,
+      "spread": 0.03,
       "volume": 1375.89,
       "volume24h": 0,
       "openInterest": 965.26,
       "depth": {
-        "bidSize": 135,
+        "bidSize": 117,
         "askSize": 200,
         "notional": 1
       },
@@ -1537,14 +1537,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 15,
+      "liquidity": 14,
       "spread": 0.06,
       "volume": 6704.52,
       "volume24h": 4.73,
       "openInterest": 3463.66,
       "depth": {
         "bidSize": 55,
-        "askSize": 72.62,
+        "askSize": 72.41,
         "notional": 1
       },
       "proxy": false,
