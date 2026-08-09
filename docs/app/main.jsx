@@ -45,6 +45,19 @@ function AwaitingTelemetry({ feeds, generatedAt, note }) {
             {f.name} — <span style={{ color: "var(--text-1)" }}>{f.detail}</span>
           </div>
         ))}
+        {/* Macro block. A quiet basin is not an absence of information — the reason it
+            is quiet IS the read. Every figure is an owned claim computed from a feed or
+            from the HURDAT2 record; the mechanism line exists so the numbers are not
+            mistaken for a shear observation we do not have. */}
+        {window.MTC && MTC.claim("macro.enso").ok && (
+          <div style={{ margin: "14px 0", padding: "11px 13px", border: "1px solid var(--border-strong)",
+            borderLeft: "3px solid var(--special)", borderRadius: 8, background: "var(--surface-sunken)" }}>
+            <div style={{ color: "var(--special)", fontWeight: 800, letterSpacing: 1.4, fontSize: 11 }}>MACRO ENVIRONMENT</div>
+            <div style={{ color: "var(--text-1)", marginTop: 5 }}>{MTC.claim("macro.enso").text}</div>
+            <div style={{ marginTop: 6, lineHeight: 1.65 }}>{MTC.claim("macro.suppression").text}</div>
+            <div style={{ marginTop: 6, color: "var(--warn)", lineHeight: 1.55 }}>{MTC.claim("macro.mechanism").text}</div>
+          </div>
+        )}
         <div style={{ marginTop: 14 }}>Pipeline Status: <span style={{ color: "var(--pos)" }}>INGESTION READY</span></div>
         <div>Last refresh: <span style={{ color: "var(--text-1)" }}>{generatedAt ? (fmtAgo(generatedAt) + " (" + generatedAt.replace("T", " ").replace(/\..*/, "Z") + ")") : "awaiting first scheduled refresh"}</span></div>
         {note && <div style={{ marginTop: 10, color: "var(--text-2)", maxWidth: 640 }}>{note}</div>}

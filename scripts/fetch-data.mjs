@@ -238,12 +238,23 @@ function parseHurdat2(text, fromYear, excludeYear) {
     const head = /^AL\d{2}(\d{4})$/.exec((f[0] || "").trim());
     if (head && f.length <= 4) {
       curId = f[0].trim(); curYear = Number(head[1]);
-      if (!byYear.has(curYear)) byYear.set(curYear, { hur: new Map(), maj: new Map() });
+      if (!byYear.has(curYear)) byYear.set(curYear, { ts: new Map(), hur: new Map(), maj: new Map() });
       continue;
     }
     if (!curId || curYear == null) continue;
     const status = (f[3] || "").trim();
     const wind = Number((f[6] || "").trim());
+    const doyTs = doyOf(f[0]);
+    /* Named storms — tropical/subtropical systems that reached 34 kt. The board
+       carries eight KXTROPSTORM rungs that had NO anchor at all, because this
+       parser only ever counted hurricanes. "More than 15 Atlantic named storms"
+       is a different base rate from "more than 15 Atlantic hurricanes", and
+       anchoring one with the other is the mis-classification we already fixed
+       once on the ticker side. */
+    if ((status === "TS" || status === "HU" || status === "SS") && Number.isFinite(wind) && wind >= 34) {
+      const y = byYear.get(curYear);
+      if (!y.ts.has(curId)) y.ts.set(curId, doyTs);
+    }
     if (status === "HU") {                       // hurricane-strength best-track point
       const y = byYear.get(curYear);
       // Record the day-of-year each storm FIRST reached each threshold, so the
@@ -258,10 +269,12 @@ function parseHurdat2(text, fromYear, excludeYear) {
   const after = (map, doy) => [...map.values()].filter((d) => d != null && d >= doy).length;
   return {
     years, from: years[0], to: years[years.length - 1],
+    namedstorms: years.map((y) => byYear.get(y).ts.size),
     hurricanes: years.map((y) => byYear.get(y).hur.size),
     major: years.map((y) => byYear.get(y).maj.size),
     // Seasonal formation dates retained so we can ask: in each past season, how many
     // hurricanes had NOT yet formed by this calendar date?
+    namedstormsAfter: (doy) => years.map((y) => after(byYear.get(y).ts, doy)),
     hurricanesAfter: (doy) => years.map((y) => after(byYear.get(y).hur, doy)),
     majorAfter: (doy) => years.map((y) => after(byYear.get(y).maj, doy)),
   };
@@ -392,6 +405,45 @@ async function fetchEnso() {
   return { feed: { ok: false, source: "CPC ONI", note: "no ONI source reachable — L3 stays unstratified", attempts }, oni: null };
 }
 
+/* What the current ENSO phase has historically meant for Atlantic season TOTALS.
+   This is the honest version of a "genesis suppression %": not a quoted figure, but
+   the median count in phase-matched seasons against the median across all seasons in
+   the same record. It is a description of history, not a forecast, and the UI says so.
+
+   Also reported: a STRONG bucket (|ASO ONI| >= 1.0, sign-matched). ONI +1.39 is not
+   the same animal as +0.55, and phase alone throws that away. It is only published
+   when the bucket clears the same minimum-sample floor the posterior uses. */
+const ONI_STRONG = 1.0;
+function median(a) {
+  if (!a.length) return null;
+  const s = a.slice().sort((x, y) => x - y), m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+function ensoClimate(clim, oni) {
+  if (!clim || !oni || !oni.phase || !oni.asoByYear) return null;
+  const pick = (pred) => {
+    const idx = [];
+    clim.years.forEach((y, i) => { const v = oni.asoByYear.get(y); if (v != null && pred(v)) idx.push(i); });
+    return idx;
+  };
+  const sameSign = (v) => phaseOf(v) === oni.phase;
+  const strongSign = (v) => sameSign(v) && Math.abs(v) >= ONI_STRONG;
+  const build = (idx) => {
+    if (idx.length < ONI_MIN_MATCH) return null;
+    const out = { n: idx.length };
+    for (const [k, arr] of [["namedstorms", clim.namedstorms], ["hurricanes", clim.hurricanes], ["major", clim.major]]) {
+      if (!arr || !arr.length) continue;
+      const all = median(arr), phase = median(idx.map((i) => arr[i]));
+      out[k] = { all, phase, deltaPct: all ? Math.round((phase / all - 1) * 100) : null };
+    }
+    return out;
+  };
+  return { phase: oni.phase, phaseLabel: PHASE_LABEL[oni.phase],
+    seasons: `${clim.from}–${clim.to}`, all: build(clim.years.map((_, i) => i)),
+    matched: build(pick(sameSign)), strong: build(pick(strongSign)),
+    strongThreshold: ONI_STRONG };
+}
+
 // Empirical P(count > strike) for Atlantic seasonal hurricane-count contracts.
 /* Progressive conditional posterior.
    L0 unconditional base rate  →  L1 conditioned on how much season remains.
@@ -399,9 +451,13 @@ async function fetchEnso() {
    silently assumes a full season ahead. Each layer is computed only where real
    data supports it; anything else is reported as an unavailable layer rather
    than folded in silently. */
-function posteriorFor(major, strike, clim, seasonToDate, oni) {
+function posteriorFor(quantity, strike, clim, seasonToDate, oni) {
   if (!clim || strike == null) return null;
-  const counts = major ? clim.major : clim.hurricanes;
+  // `quantity` was a boolean "is this the major-hurricane series". Named storms made
+  // that a third case, so it is now the series quantity itself.
+  const q = quantity === true ? "major" : quantity === false ? "hurricane" : quantity;
+  const counts = q === "major" ? clim.major : q === "namedstorm" ? clim.namedstorms : clim.hurricanes;
+  if (!counts || !counts.length) return null;
   const n = counts.length;
   const layers = [];
 
@@ -413,14 +469,15 @@ function posteriorFor(major, strike, clim, seasonToDate, oni) {
   // L1 — condition on day-of-year: only count storms that had NOT yet formed by today
   const doy = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
     - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86400000);
-  const remainFn = major ? clim.majorAfter : clim.hurricanesAfter;
+  const remainFn = q === "major" ? clim.majorAfter : q === "namedstorm" ? clim.namedstormsAfter : clim.hurricanesAfter;
   const need = strike - (seasonToDate == null ? 0 : seasonToDate);
   let p1 = null, remaining = null;
   if (typeof remainFn === "function") {
     remaining = remainFn(doy);
     p1 = remaining.filter((r) => r > need).length / n;
+    const noun = q === "namedstorm" ? "named storms" : q === "major" ? "major hurricanes" : "hurricanes";
     layers.push({ id: "doy", label: "Day-of-year conditional", p: p1,
-      basis: `hurricanes forming on/after day ${doy} in each past season; needs >${need} more` });
+      basis: `${noun} forming on/after day ${doy} in each past season; needs >${need} more` });
   }
 
   // L2 — season-to-date. Requires the current year's count, which HURDAT2 does not
@@ -490,29 +547,33 @@ function climatologyAnchor(title, strike, clim, ticker, oni) {
   // Ticker-derived identification is authoritative; fall back to the title only for
   // series we don't recognise (and then demand explicit Atlantic + hurricane wording).
   const sq = seriesQuantity(ticker);
-  let major;
+  let q;
   if (sq) {
     if (sq.basin !== "atlantic") return null;          // climatology is Atlantic-only
-    if (sq.q !== "hurricane" && sq.q !== "major") return null; // TS / per-storm / naming: no anchor
-    major = sq.q === "major";
+    // namedstorm is anchorable now that HURDAT2 gives us a 34 kt base rate; per-storm
+    // ladders and naming markets still are not, and still return null.
+    if (!["hurricane", "major", "namedstorm"].includes(sq.q)) return null;
+    q = sq.q;
   } else {
-    if (!/hurricane/.test(t)) return null;
-    if (/named storm|tropical storm/.test(t)) return null;
     if (!/atlantic/.test(t) && !/\bkxatl/.test(t)) return null;
     if (!/how many|more than|at least|total|count/.test(t)) return null;
-    major = /\bmajor\b/.test(t) || /categor(?:y|ies)\s*[345]\b/.test(t);
+    if (/named storm|tropical storm/.test(t)) q = "namedstorm";
+    else if (!/hurricane/.test(t)) return null;
+    else q = (/\bmajor\b/.test(t) || /categor(?:y|ies)\s*[345]\b/.test(t)) ? "major" : "hurricane";
   }
-  const counts = major ? clim.major : clim.hurricanes;
+  const counts = q === "major" ? clim.major : q === "namedstorm" ? clim.namedstorms : clim.hurricanes;
   if (!counts || !counts.length) return null;
+  const noun = q === "namedstorm" ? "named-storm" : q === "major" ? "major-hurricane" : "hurricane";
   const hits = counts.filter((c) => c > strike).length;
-  const post = posteriorFor(major, strike, clim, null, oni);
+  const post = posteriorFor(q, strike, clim, null, oni);
   return {
     p: post ? post.p : hits / counts.length,
     unconditional: hits / counts.length,
     layers: post ? post.layers : null,
+    quantity: q,
     basis: post
-      ? `${post.basis} · ${clim.from}–${clim.to} ${major ? "major " : ""}seasons (n=${counts.length}), day ${post.doy}`
-      : `${clim.from}–${clim.to} ${major ? "major " : ""}Atlantic hurricane seasons (n=${counts.length}); ${hits} exceeded ${strike}`,
+      ? `${post.basis} · ${clim.from}–${clim.to} Atlantic ${noun} seasons (n=${counts.length}), day ${post.doy}`
+      : `${clim.from}–${clim.to} Atlantic ${noun} seasons (n=${counts.length}); ${hits} exceeded ${strike}`,
   };
 }
 
@@ -1051,6 +1112,7 @@ async function main() {
       ok: true, source: oni.source, phase: oni.phase, phaseLabel: PHASE_LABEL[oni.phase],
       anchorSeas: oni.anchorSeas, anchorYear: oni.anchorYear, anchorAnom: oni.anchorAnom,
       assumed: oni.assumed, ageMonths: oni.ageMonths, seasons: oni.seasons, recent: oni.recent,
+      climate: ensoClimate(clim, oni),
     } : { ok: false, note: ensoFeed.note },
   };
 

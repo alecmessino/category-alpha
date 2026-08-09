@@ -222,7 +222,7 @@
       FRAMES, STEP_MIN: stepMin, OBSERVED_STEP_MIN: observedStepMin, storms, contracts,
       evidence, models: latest.models || [], events, pipeline, health,
       _frames: framesArr, _feeds: feeds, _generatedAt: latest.generatedAt || null, _note: latest.note || null,
-      _verify: window.__MT_VERIFY || null,
+      _verify: window.__MT_VERIFY || null, _enso: latest.enso || null,
     };
   }
 

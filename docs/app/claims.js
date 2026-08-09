@@ -30,7 +30,8 @@
   function state(ctx) {
     if (ctx && ctx.feeds) return ctx;
     const M = window.MT || {};
-    return { feeds: M._feeds || {}, evidence: M.evidence || [], generatedAt: M._generatedAt || null, verify: M._verify || null };
+    return { feeds: M._feeds || {}, evidence: M.evidence || [], generatedAt: M._generatedAt || null,
+             verify: M._verify || null, enso: M._enso || null };
   }
   const okOf = (s, k) => { const f = s.feeds[k]; return !!(f && f.ok); };
   const srcOf = (s, k, fallback) => { const f = s.feeds[k]; return (f && f.source) || fallback || k; };
@@ -147,6 +148,46 @@
       ok: !!v.ok,
     };
   });
+  /* Macro context for the quiet-basin state. Every number here comes from a feed or
+     from the HURDAT2 record; nothing is quoted from elsewhere. */
+  define("macro.enso", "enso", (s) => {
+    const e = s.enso;
+    if (!e || !e.ok) return { text: "ENSO state unavailable", ok: false };
+    const sign = e.anchorAnom >= 0 ? "+" : "";
+    return {
+      text: e.phaseLabel.toUpperCase() + " · ONI " + sign + Number(e.anchorAnom).toFixed(2)
+          + " (" + e.anchorSeas + " " + e.anchorYear + (e.assumed ? ", ASO not yet observed" : "") + ")",
+      ok: true,
+    };
+  });
+  /* The honest form of a "genesis suppression" figure: measured from the same record
+     the anchor uses, phrased as history rather than forecast. */
+  define("macro.suppression", "models", (s) => {
+    const c = s.enso && s.enso.climate;
+    if (!c || !c.matched) return { text: "too few phase-matched seasons to characterise", ok: false };
+    const m = c.matched, part = [];
+    for (const [k, lbl] of [["namedstorms", "named storms"], ["hurricanes", "hurricanes"], ["major", "major"]]) {
+      if (m[k] && m[k].phase != null) part.push(lbl + " " + m[k].phase + " vs " + m[k].all
+        + " (" + (m[k].deltaPct > 0 ? "+" : "") + m[k].deltaPct + "%)");
+    }
+    const strong = c.strong
+      ? " · strong-phase subset (|ONI| ≥ " + c.strongThreshold + ", n=" + c.strong.n + "): hurricanes "
+        + c.strong.hurricanes.phase + " (" + (c.strong.hurricanes.deltaPct > 0 ? "+" : "") + c.strong.hurricanes.deltaPct + "%)"
+      : " · strong-phase subset below the sample floor, not published";
+    return {
+      text: "MEDIAN SEASON, " + c.phaseLabel.toUpperCase() + " YEARS vs ALL (" + c.seasons + ", n=" + m.n + "): "
+          + part.join(" · ") + strong,
+      ok: true,
+    };
+  });
+  /* Named because it is the accepted mechanism, and flagged because we do not measure
+     it. Asserting "shear: elevated" from an ONI reading would be inventing an
+     observation out of a correlation. */
+  define("macro.mechanism", "none", () => ({
+    text: "Mechanism is Atlantic vertical wind shear — NOT INGESTED here. The figures above are"
+        + " an empirical count record, not a shear measurement and not a seasonal forecast.",
+    ok: false,
+  }));
   define("capability.positions", "none", () => ({
     text: "No position feed is wired — board level, not portfolio level.",
     ok: false,
