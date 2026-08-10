@@ -195,10 +195,37 @@
     // ---- health (honest: real HTTP status / counts / freshness) ----
     const staleMin = latest.generatedAt ? Math.max(0, Math.round((Date.now() - Date.parse(latest.generatedAt)) / 60000)) : null;
     function agoStr(iso) { const t = Date.parse(iso); if (!t) return "—"; const m = Math.max(0, Math.round((Date.now() - t) / 60000)); return m < 60 ? m + "m ago" : Math.floor(m / 60) + "h" + pad2(m % 60) + "m ago"; }
+    /* The row summarises; `diag` carries what the fetch actually reported, so the
+       panel can expand rather than hiding it in a title attribute. Every entry is a
+       field the feed really returned — absent fields are omitted, never filled in. */
+    function diagOf(f) {
+      const d = [];
+      const put = (k, v) => { if (v !== undefined && v !== null && v !== "") d.push({ k, v: String(v) }); };
+      put("source", f.source);
+      put("endpoint", f.url);
+      put("http status", f.status);
+      put("latency", f.latencyMs != null ? Math.round(f.latencyMs) + " ms" : null);
+      put("items returned", f.count);
+      put("note", f.note);
+      put("archive file", f.file);
+      put("seasons", f.seasons);
+      put("series kept", f.seriesKept);
+      if (f.droppedForCap) put("DROPPED FOR CAP", f.droppedForCap);
+      put("forecast products", f.forecast);
+      (f.attempts || []).forEach((a) => {
+        put("attempt · " + (a.source || "?"), [a.ok ? "ok" : "FAILED", a.status ? "HTTP " + a.status : null,
+          a.count != null ? a.count + " items" : null, a.note].filter(Boolean).join(" · "));
+        (a.hosts || []).forEach((h) => put("   host " + String(h.host || "").replace(/^https?:\/\//, ""),
+          ["status " + h.status, h.mode, h.category,
+           h.pages != null ? h.pages + " pages" : null,
+           h.scanned != null ? h.scanned + " scanned" : null, h.error].filter(Boolean).join(" · ")));
+      });
+      return d;
+    }
     function feedHealth(f, name) {
       f = f || {}; const st = f.ok ? "PASS" : (f.status ? "FAIL" : "EMPTY");
       const bits = [f.source || name]; if (f.status) bits.push("HTTP " + f.status); if (f.count != null) bits.push(f.count + " items"); if (f.note && !f.ok) bits.push(f.note);
-      return { name, detail: bits.join(" · "), status: st };
+      return { name, detail: bits.join(" · "), status: st, diag: diagOf(f) };
     }
     const health = [
       feedHealth(feeds.nhc, "NHC advisories"),
@@ -215,7 +242,17 @@
         detail: latest.generatedAt
           ? "snapshot " + agoStr(latest.generatedAt) +
             (observedStepMin != null ? " · replay frames ~" + observedStepMin + "m apart" : "")
-          : "awaiting first refresh" },
+          : "awaiting first refresh",
+        diag: [
+          { k: "snapshot written", v: latest.generatedAt || "never" },
+          { k: "snapshot age", v: staleMin != null ? staleMin + " min" : "—" },
+          { k: "replay frames retained", v: String(framesArr.length) },
+          { k: "frame spacing (observed)", v: observedStepMin != null ? observedStepMin + " min" : "—" },
+          { k: "frame spacing (configured)", v: stepMin + " min" },
+          { k: "history span", v: framesArr.length > 1
+              ? Math.round((Date.parse(framesArr[framesArr.length - 1].tsZ) - Date.parse(framesArr[0].tsZ)) / 3600000) + " h"
+              : "—" },
+        ] },
     ];
 
     return {

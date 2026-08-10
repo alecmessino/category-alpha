@@ -913,6 +913,11 @@ function MT_Signals({ stormId, dense, maxH, onSeek }) {
 /* ---- Observability / Pipeline ---- */
 function MT_Observability({ narrow }) {
   const CHIP = { PASS: "var(--pos)", EMPTY: "var(--text-2)", BLOCKED: "var(--special)", FAIL: "var(--neg)" };
+  /* Feed rows expand into what the fetch actually reported — status, latency, item
+     counts, per-host attempts. These are real telemetry rows being opened up, not new
+     indicators invented for feeds we do not ingest. */
+  const [open, setOpen] = React.useState(() => new Set());
+  const toggle = (n) => setOpen((prev) => { const s = new Set(prev); s.has(n) ? s.delete(n) : s.add(n); return s; });
   return (
     <P pad={false} title="Observability — Pipeline Status"
       footer={<PF {...MTC.footer("panel.observability")} />}>
@@ -933,8 +938,40 @@ function MT_Observability({ narrow }) {
           </div>
         ))}
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: 8, padding: 12 }}>
-        {MT.health.map((h) => <HR key={h.name} {...h} />)}
+      <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1fr 1fr", gap: 8, padding: 12, alignItems: "start" }}>
+        {MT.health.map((h) => {
+          const rows = h.diag || [];
+          const isOpen = open.has(h.name);
+          return (
+            <div key={h.name} style={{ minWidth: 0 }}>
+              <div onClick={() => rows.length && toggle(h.name)}
+                title={rows.length ? "Click for the fetch detail" : "No diagnostic detail reported for this feed"}
+                style={{ cursor: rows.length ? "pointer" : "default", position: "relative" }}>
+                <HR {...h} />
+                {rows.length > 0 && (
+                  <span style={{ position: "absolute", right: 8, bottom: 6, fontFamily: "var(--font-mono)",
+                    fontSize: 9, color: "var(--text-2)", letterSpacing: ".4px" }}>{isOpen ? "▾ HIDE" : "▸ " + rows.length + " FIELDS"}</span>
+                )}
+              </div>
+              {isOpen && (
+                <div style={{ marginTop: 4, padding: "8px 10px", border: "1px solid var(--border-dim)", borderTop: "none",
+                  borderRadius: "0 0 8px 8px", background: "var(--surface-sunken)" }}>
+                  {rows.map((r, i) => (
+                    <div key={i} style={{ display: "flex", gap: 8, alignItems: "baseline", padding: "2px 0",
+                      fontFamily: "var(--font-mono)", fontSize: 10, lineHeight: 1.5 }}>
+                      <span style={{ color: "var(--text-2)", minWidth: 132, flex: "none",
+                        color: /DROPPED/.test(r.k) ? "var(--neg)" : "var(--text-2)" }}>{r.k}</span>
+                      <span style={{ color: "var(--text-1)", wordBreak: "break-word", minWidth: 0 }}>{r.v}</span>
+                    </div>
+                  ))}
+                  <div style={{ marginTop: 6, fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", opacity: .8 }}>
+                    As reported by this cycle's fetch. Fields the feed did not return are omitted rather than filled in.
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </P>
   );
