@@ -1,13 +1,22 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-10T08:03:24.753Z",
+  "ranAt": "2026-08-10T13:42:07.158Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "1aaae415f0f593c7bb782d79fb02b626bbe4c366",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31368343227",
-  "ok": true,
-  "passed": 24,
+  "sha": "adcfec9b94ffd44d5d0d90bb85ad27769ea58366",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31394154682",
+  "ok": false,
+  "passed": 22,
   "total": 24,
-  "failures": [],
+  "failures": [
+    {
+      "check": "no failed same-origin requests",
+      "detail": "HTTP 503 /category-alpha/assets/fonts/Satoshi-Bold.woff2, net::ERR_ABORTED /category-alpha/assets/fonts/Satoshi-Bold.woff2"
+    },
+    {
+      "check": "no console errors from our code",
+      "detail": "Failed to load resource: the server responded with a status of 503 ()"
+    }
+  ],
   "thirdPartyFailures": 0,
   "checks": [
     {
@@ -28,7 +37,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-10T07:56:11.303Z · 7m old"
+      "detail": "2026-08-10T13:29:51.807Z · 12m old"
     },
     {
       "check": "renders: Situation",
@@ -117,8 +126,8 @@
     },
     {
       "check": "no failed same-origin requests",
-      "pass": true,
-      "detail": "all app assets loaded"
+      "pass": false,
+      "detail": "HTTP 503 /category-alpha/assets/fonts/Satoshi-Bold.woff2, net::ERR_ABORTED /category-alpha/assets/fonts/Satoshi-Bold.woff2"
     },
     {
       "check": "no page errors",
@@ -127,8 +136,8 @@
     },
     {
       "check": "no console errors from our code",
-      "pass": true,
-      "detail": "none"
+      "pass": false,
+      "detail": "Failed to load resource: the server responded with a status of 503 ()"
     }
   ]
 }
