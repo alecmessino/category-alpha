@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-10T21:32:28.403Z",
+  "generatedAt": "2026-08-10T21:42:44.906Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 501,
+      "latencyMs": 220,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 30  Atlantic hur | Above 30 | px=0.015",
-            "Will there be more than 25  Atlantic hur | Above 25 | px=0.015",
-            "Will there be more than 20  Atlantic hur | Above 20 | px=0.035",
-            "Will there be more than 18  Atlantic hur | Above 18 | px=0.040",
-            "Will there be more than 16  Atlantic hur | Above 16 | px=0.100",
-            "Will there be more than 14  Atlantic hur | Above 14 | px=0.215"
+            "When will the next Category 5 hurricane  | Before Sep 1,  | px=0.490",
+            "When will the next Category 5 hurricane  | Before Oct 1,  | px=0.310",
+            "When will the next Category 5 hurricane  | Before Nov 1,  | px=0.280",
+            "When will the next Category 5 hurricane  | Before Dec 1,  | px=0.325",
+            "When will the next hurricane form? | Before Sep 15, | px=0.855",
+            "When will the next hurricane form? | Before Sep 1,  | px=0.455"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"233.77\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"412.64\"},\"px\":{\"last_price_dollars\":\"0.0300\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9700\",\"previous_price_dollars\":\"0.0300\",\"previous_yes_ask_dollars\":\"0.0300\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0300\",\"yes_ask_size_fp\":\"250.00\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"1.00\",\"volume_24h_fp\":\"1.00\",\"volume_fp\":\"1.00\"},\"px\":{\"last_price_dollars\":\"0.0500\",\"no_ask_dollars\":\"0.9500\",\"no_bid_dollars\":\"0.0700\",\"previous_price_dollars\":\"0.0000\",\"previous_yes_ask_dollars\":\"0.9700\",\"previous_yes_bid_dollars\":\"0.0400\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.9300\",\"yes_ask_size_fp\":\"6.00\",\"yes_bid_dollars\":\"0.0500\",\"yes_bid_size_fp\":\"4.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 60,
+      "latencyMs": 81,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 195,
+      "latencyMs": 180,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -625,7 +625,7 @@
       "liquidity": 5,
       "spread": 0.030000000000000027,
       "volume": 7323.85,
-      "volume24h": 276.03,
+      "volume24h": 251.85,
       "openInterest": 5096.22,
       "depth": {
         "bidSize": 9,
@@ -1658,7 +1658,7 @@
       "volume24h": 93.95,
       "openInterest": 4118.64,
       "depth": {
-        "bidSize": 30,
+        "bidSize": 25,
         "askSize": 10,
         "notional": 1
       },
@@ -2680,7 +2680,7 @@
       "short": "Will there be more than 18 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.615,
+      "market": 0.5700000000000001,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -2688,14 +2688,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": 18,
-      "liquidity": 0,
-      "spread": 0.27,
+      "liquidity": 3,
+      "spread": 0.18000000000000005,
       "volume": 756.69,
       "volume24h": 0,
       "openInterest": 212.89,
       "depth": {
         "bidSize": 5,
-        "askSize": 0.12,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
