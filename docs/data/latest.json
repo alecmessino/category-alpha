@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-10T00:25:07.279Z",
+  "generatedAt": "2026-08-10T00:35:23.516Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 251,
+      "latencyMs": 265,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will Fausto become a Category 5 hurrican | Category 5 or  | px=0.005",
-            "Will Fausto become a Category 4 hurrican | Category 4 or  | px=0.005",
-            "Will Fausto become a Category 3 hurrican | Category 3 or  | px=0.005",
-            "When will the next hurricane form? | Before Sep 15, | px=0.680",
-            "When will the next hurricane form? | Before Sep 1,  | px=0.415",
-            "When will the next hurricane form? | Before Oct 15, | px=0.605"
+            "Will there be more than 9  Atlantic hurr | Above 9 | px=0.050",
+            "Will there be more than 8  Atlantic hurr | Above 8 | px=0.085",
+            "Will there be more than 7  Atlantic hurr | Above 7 | px=0.155",
+            "Will there be more than 6  Atlantic hurr | Above 6 | px=0.255",
+            "Will there be more than 5  Atlantic hurr | Above 5 | px=0.380",
+            "Will there be more than 4  Atlantic hurr | Above 4 | px=0.505"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"7550.17\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"17971.52\"},\"px\":{\"last_price_dollars\":\"0.0100\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0100\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"4225.34\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2474.11\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"3192.17\"},\"px\":{\"last_price_dollars\":\"0.0300\",\"no_ask_dollars\":\"0.9600\",\"no_bid_dollars\":\"0.9400\",\"previous_price_dollars\":\"0.0300\",\"previous_yes_ask_dollars\":\"0.0700\",\"previous_yes_bid_dollars\":\"0.0400\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0600\",\"yes_ask_size_fp\":\"2.00\",\"yes_bid_dollars\":\"0.0400\",\"yes_bid_size_fp\":\"35.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 68,
+      "latencyMs": 136,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 262,
+      "latencyMs": 250,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -1776,7 +1776,7 @@
       "liquidity": 4,
       "spread": 0.010000000000000009,
       "volume": 9494.82,
-      "volume24h": 197.1,
+      "volume24h": 193.1,
       "openInterest": 4067.53,
       "depth": {
         "bidSize": 0.81,
