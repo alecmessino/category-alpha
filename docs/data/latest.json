@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-11T18:20:43.966Z",
+  "generatedAt": "2026-08-11T18:31:00.232Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 74,
+      "latencyMs": 150,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will Wale be categorized as a hurricane  | Wale | px=0.125",
-            "Will Ulana be categorized as a hurricane | Ulana | px=0.315",
-            "Will Pena be categorized as a hurricane  | Pena | px=0.135",
-            "Will Olana be categorized as a hurricane | Olana | px=0.030",
-            "Will Nolo be categorized as a hurricane  | Nolo | px=0.080",
-            "Will Moke be categorized as a hurricane  | Moke | px=0.385"
+            "When will the next hurricane form? | Before Sep 15, | px=0.835",
+            "When will the next hurricane form? | Before Sep 1,  | px=0.395",
+            "When will the next hurricane form? | Before Oct 15, | px=0.710",
+            "When will the next hurricane form? | Before Oct 1,  | px=0.890",
+            "When will the next hurricane form? | Before Nov 15, | px=0.595",
+            "When will the next hurricane form? | Before Nov 1,  | px=0.695"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"486.56\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"524.56\"},\"px\":{\"last_price_dollars\":\"0.0300\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.7500\",\"previous_price_dollars\":\"0.0300\",\"previous_yes_ask_dollars\":\"0.0400\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.2500\",\"yes_ask_size_fp\":\"24.00\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"192.41\",\"volume_24h_fp\":\"25.00\",\"volume_fp\":\"224.70\"},\"px\":{\"last_price_dollars\":\"0.7500\",\"no_ask_dollars\":\"0.2300\",\"no_bid_dollars\":\"0.1000\",\"previous_price_dollars\":\"0.7500\",\"previous_yes_ask_dollars\":\"0.9400\",\"previous_yes_bid_dollars\":\"0.7600\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.9000\",\"yes_ask_size_fp\":\"5.00\",\"yes_bid_dollars\":\"0.7700\",\"yes_bid_size_fp\":\"5.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 105,
+      "latencyMs": 107,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 344,
+      "latencyMs": 363,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -1658,8 +1658,8 @@
       "volume24h": 1195.95,
       "openInterest": 4931.51,
       "depth": {
-        "bidSize": 5,
-        "askSize": 7.12,
+        "bidSize": 6.71,
+        "askSize": 6.79,
         "notional": 1
       },
       "proxy": false,
@@ -1672,7 +1672,7 @@
       "short": "Will Dolly be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.24,
+      "market": 0.235,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1680,14 +1680,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 3,
-      "spread": 0.01999999999999999,
+      "liquidity": 2,
+      "spread": 0.009999999999999981,
       "volume": 10414.91,
       "volume24h": 257.48,
       "openInterest": 3955.46,
       "depth": {
-        "bidSize": 195,
-        "askSize": 10,
+        "bidSize": 201,
+        "askSize": 8,
         "notional": 1
       },
       "proxy": false,
@@ -1798,7 +1798,7 @@
       "volume24h": 125.38,
       "openInterest": 3458.89,
       "depth": {
-        "bidSize": 112.49,
+        "bidSize": 111.67,
         "askSize": 0.91,
         "notional": 1
       },
@@ -2019,7 +2019,7 @@
       "liquidity": 2,
       "spread": 0.10999999999999999,
       "volume": 4122.84,
-      "volume24h": 809.55,
+      "volume24h": 689.55,
       "openInterest": 2497.11,
       "depth": {
         "bidSize": 5,
@@ -2680,7 +2680,7 @@
       "short": "Will there be more than 18 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.645,
+      "market": 0.64,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -2688,14 +2688,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": 18,
-      "liquidity": 0,
-      "spread": 0.20999999999999996,
+      "liquidity": 4,
+      "spread": 0.19999999999999996,
       "volume": 756.69,
       "volume24h": 0,
       "openInterest": 212.89,
       "depth": {
         "bidSize": 5,
-        "askSize": 0.12,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -3419,7 +3419,7 @@
       "liquidity": 5,
       "spread": 0.13,
       "volume": 224.7,
-      "volume24h": 64.52,
+      "volume24h": 25,
       "openInterest": 192.41,
       "depth": {
         "bidSize": 5,
@@ -4304,7 +4304,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.34,
+      "market": 0.265,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -4312,14 +4312,14 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "liquidity": 1,
-      "spread": 0.42000000000000004,
+      "liquidity": 3,
+      "spread": 0.27,
       "volume": 7,
       "volume24h": 6,
       "openInterest": 6,
       "depth": {
         "bidSize": 2,
-        "askSize": 2,
+        "askSize": 7,
         "notional": 1
       },
       "proxy": false,
