@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-11T23:40:42.820Z",
+  "generatedAt": "2026-08-11T23:50:59.118Z",
   "stepMin": 10,
   "note": "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 224,
+      "latencyMs": 234,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will Wilfred be the first named hurrican | Wilfred | px=0.005",
-            "Will Vicky be the first named hurricane  | Vicky | px=0.005",
-            "Will Teddy be the first named hurricane  | Teddy | px=0.005",
-            "Will Sally be the first named hurricane  | Sally | px=0.005",
-            "Will Rene be the first named hurricane i | Rene | px=0.005",
-            "Will Paulette be the first named hurrica | Paulette | px=0.005"
+            "Will there be more than 30  Atlantic hur | Above 30 | px=0.015",
+            "Will there be more than 25  Atlantic hur | Above 25 | px=0.015",
+            "Will there be more than 20  Atlantic hur | Above 20 | px=0.045",
+            "Will there be more than 18  Atlantic hur | Above 18 | px=0.035",
+            "Will there be more than 16  Atlantic hur | Above 16 | px=0.095",
+            "Will there be more than 14  Atlantic hur | Above 14 | px=0.190"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2100.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"2413.36\"},\"px\":{\"last_price_dollars\":\"0.0100\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0100\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"5793.20\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"233.77\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"412.64\"},\"px\":{\"last_price_dollars\":\"0.0300\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9700\",\"previous_price_dollars\":\"0.0300\",\"previous_yes_ask_dollars\":\"0.0300\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0300\",\"yes_ask_size_fp\":\"50.00\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 94,
+      "latencyMs": 145,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 358,
+      "latencyMs": 299,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -301,7 +301,7 @@
       "liquidity": 54,
       "spread": 0.07999999999999999,
       "volume": 14094.71,
-      "volume24h": 106.46,
+      "volume24h": 20.24,
       "openInterest": 5706.19,
       "depth": {
         "bidSize": 3,
@@ -642,7 +642,7 @@
       "short": "Will there be more than 1 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.55,
+      "market": 0.54,
       "model": 0.8739495798319328,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 Atlantic major-hurricane seasons (n=35), day 223",
@@ -676,14 +676,14 @@
       ],
       "horizon": "seasonal",
       "strike": 1,
-      "liquidity": 31,
+      "liquidity": 5,
       "spread": 0.05999999999999994,
-      "volume": 7217.5,
+      "volume": 7227.5,
       "volume24h": 78.22,
-      "openInterest": 5000.03,
+      "openInterest": 5006.47,
       "depth": {
-        "bidSize": 10,
-        "askSize": 53.6,
+        "bidSize": 13,
+        "askSize": 9.6,
         "notional": 1
       },
       "proxy": false,
@@ -2008,7 +2008,7 @@
       "short": "Will Lala be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.37,
+      "market": 0.39,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -2016,14 +2016,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 0,
-      "spread": 0.12,
+      "liquidity": 3,
+      "spread": 0.09999999999999998,
       "volume": 4153,
       "volume24h": 367.11,
       "openInterest": 2502.11,
       "depth": {
-        "bidSize": 4.35,
-        "askSize": 0.65,
+        "bidSize": 15.59,
+        "askSize": 7.15,
         "notional": 1
       },
       "proxy": false,
@@ -2689,7 +2689,7 @@
       "horizon": "seasonal",
       "strike": 18,
       "liquidity": 0,
-      "spread": 0.17000000000000004,
+      "spread": 0.19000000000000006,
       "volume": 756.69,
       "volume24h": 0,
       "openInterest": 212.89,
@@ -4304,7 +4304,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.34,
+      "market": 0.32,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -4313,7 +4313,7 @@
       "horizon": "storm",
       "strike": null,
       "liquidity": 1,
-      "spread": 0.42000000000000004,
+      "spread": 0.38,
       "volume": 7,
       "volume24h": 6,
       "openInterest": 6,
