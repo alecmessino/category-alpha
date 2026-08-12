@@ -152,7 +152,46 @@ eq("HTML-wrapped area count", wrapped.areas.length, 1);
 eq("HTML-wrapped ID", wrapped.areas[0] && wrapped.areas[0].id, "AL92");
 eq("HTML-wrapped 7-day", wrapped.areas[0] && wrapped.areas[0].pct7d, 80);
 
-console.log("\n[6] malformed input degrades to empty rather than inventing areas");
+console.log("\n[6] a <br>-delimited product parses — this is the case that broke production");
+/* The .shtml page returned HTTP 200 and parsed zero areas because line structure lives in
+   <br> tags, not newlines. Stripping tags first collapsed the product to a single line and
+   every ^-anchored regex stopped matching. This fixture has NO newlines at all. */
+const BR = "<div class=\"textproduct\">Tropical Weather Outlook<br />" +
+  "NWS National Hurricane Center Miami FL<br />" +
+  "800 PM EDT Tue Aug 11 2026<br /><br />" +
+  "For the North Atlantic...Caribbean Sea and the Gulf of America:<br /><br />" +
+  "1. Central Tropical Atlantic (AL92):<br />" +
+  "Showers and thunderstorms are showing some signs of organization.<br />" +
+  "* Formation chance through 48 hours...medium...60 percent.<br />" +
+  "* Formation chance through 7 days...high...80 percent.<br /><br />" +
+  "2. Central Subtropical Atlantic (AL93):<br />" +
+  "Satellite images indicate a better-defined low-level circulation.<br />" +
+  "* Formation chance through 48 hours...medium...40 percent.<br />" +
+  "* Formation chance through 7 days...medium...40 percent.<br /></div>";
+ck("fixture genuinely has no newlines", !BR.includes("\n"));
+const br = parseTWO(BR, "atlantic");
+eq("<br> area count", br.areas.length, 2);
+eq("<br> issued", br.issued, "800 PM EDT Tue Aug 11 2026");
+eq("<br> IDs", br.areas.map((x) => x.id), ["AL92", "AL93"]);
+eq("<br> 48h", br.areas.map((x) => x.pct48), [60, 40]);
+eq("<br> 7-day", br.areas.map((x) => x.pct7d), [80, 40]);
+
+console.log("\n[7] an RSS item carrying ESCAPED markup parses");
+/* index-at.xml is the fallback source. It delivers the product as entity-escaped HTML, so
+   line structure only exists after decoding — entities must be decoded before tags are
+   converted, or this collapses exactly like [6]. */
+const RSS = `<rss version="2.0"><channel><item>
+<title>Atlantic Tropical Weather Outlook</title>
+<description>Tropical Weather Outlook&lt;br /&gt;NWS National Hurricane Center Miami FL&lt;br /&gt;800 PM EDT Tue Aug 11 2026&lt;br /&gt;&lt;br /&gt;1. Central Tropical Atlantic (AL92):&lt;br /&gt;Showers and thunderstorms are showing some signs of organization.&lt;br /&gt;* Formation chance through 48 hours...medium...60 percent.&lt;br /&gt;* Formation chance through 7 days...high...80 percent.&lt;br /&gt;</description>
+</item></channel></rss>`;
+const rss = parseTWO(RSS, "atlantic");
+eq("RSS area count", rss.areas.length, 1);
+eq("RSS ID", rss.areas[0] && rss.areas[0].id, "AL92");
+eq("RSS 48h", rss.areas[0] && rss.areas[0].pct48, 60);
+eq("RSS 7-day", rss.areas[0] && rss.areas[0].pct7d, 80);
+eq("RSS issued", rss.issued, "800 PM EDT Tue Aug 11 2026");
+
+console.log("\n[8] malformed input degrades to empty rather than inventing areas");
 eq("garbage", parseTWO("not a product at all", "atlantic").areas.length, 0);
 eq("empty", parseTWO("", "atlantic").areas.length, 0);
 ck("a heading with no percentages is not treated as an area",

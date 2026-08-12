@@ -129,25 +129,41 @@ async function fetchStorms() {
  * Those percentages are published forecasts, not our inference; we parse and attribute
  * them, and we do not convert them into anything else.
  */
-/* The .shtml pages fetched fine and parsed to ZERO areas while the product plainly
-   had five — the issue line survived, the numbered headings did not, so the HTML
-   wrapper is mangling something the fixtures do not contain. The raw NWS products are
-   the same text with no wrapper at all, so they go first and the HTML pages stay as a
-   fallback. A schema sample is captured either way; guessing at the difference is what
-   cost a cycle here. */
+/* Source list, corrected by evidence rather than by guessing again.
+   The tgftp raw paths I reached for returned 404 — that mirror is gone, so they are
+   removed rather than left in as dead attempts. The .shtml pages DO return 200 and DO
+   contain the product; it simply sits below ~35 lines of site navigation, and the
+   product's line breaks do not survive tag-stripping unless <br> and block closes are
+   converted to newlines first. That is the actual defect. The NHC RSS feeds carry the
+   same text and are kept as a second source. */
 const TWO_SOURCES = [
-  { basin: "atlantic", name: "Atlantic TWO (raw)", url: "https://tgftp.nws.noaa.gov/data/raw/ab/abnt20.knhc.txt" },
-  { basin: "atlantic", name: "Atlantic TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOAT.shtml", fallbackFor: "atlantic" },
-  { basin: "pacific",  name: "E/C Pacific TWO (raw)", url: "https://tgftp.nws.noaa.gov/data/raw/ab/abpz20.knhc.txt" },
-  { basin: "pacific",  name: "E/C Pacific TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOEP.shtml", fallbackFor: "pacific" },
+  { basin: "atlantic", name: "Atlantic TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOAT.shtml" },
+  { basin: "atlantic", name: "Atlantic TWO (rss)", url: "https://www.nhc.noaa.gov/index-at.xml" },
+  { basin: "pacific",  name: "E/C Pacific TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOEP.shtml" },
+  { basin: "pacific",  name: "E/C Pacific TWO (rss)", url: "https://www.nhc.noaa.gov/index-ep.xml" },
 ];
 
-function stripHtml(t) {
-  return String(t || "")
-    .replace(/<[^>]*>/g, "")
+/* &amp; is decoded LAST so "&amp;lt;" survives as "&lt;" rather than becoming a tag. */
+function decodeEntities(s) {
+  return String(s || "")
     .replace(/&nbsp;/gi, " ")            // a non-breaking space after the colon defeats /:\s*$/
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
     .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
-    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
+    .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
+function stripHtml(t) {
+  /* Entities first, then line structure, then tags — in that order for two reasons.
+     The RSS feeds carry the product as ESCAPED markup, so "&lt;br /&gt;" is only a line
+     break after decoding. And the whole product is anchored on "^N. Title:" and
+     "* Formation chance ...", so stripping tags before converting <br> and block closes
+     collapses it into one line and every multiline anchor stops matching. That is why a
+     200 response parsed to zero areas. */
+  return decodeEntities(t)
+    .replace(/<\s*br\s*\/?\s*>/gi, "\n")
+    .replace(/<\s*\/\s*(p|div|tr|li|h[1-6]|pre|blockquote)\s*>/gi, "\n")
+    .replace(/<[^>]*>/g, "");
 }
 
 /* The product is fixed-format text. Each area is "N. Title (ID):" followed by prose
@@ -192,9 +208,16 @@ async function fetchOutlook() {
        first lines as received so the next cycle explains itself instead of needing
        another guess. A genuinely quiet basin also parses to zero, so the sample is what
        distinguishes "nothing to report" from "parser is behind the product". */
-    const sample = parsed.areas.length === 0
-      ? stripHtml(r.text).split(/\n/).map((l) => l.replace(/\s+$/, "")).filter((l, i) => i < 40).join("\u23ce").slice(0, 700)
-      : null;
+    /* Sample from the PRODUCT, not from the top of the document. The first attempt at
+       this captured 40 lines of "Home / Mobile Site" navigation and told me nothing. */
+    let sample = null;
+    if (parsed.areas.length === 0) {
+      const flat = stripHtml(r.text);
+      const at = flat.search(/Tropical Weather Outlook/i);
+      sample = flat.slice(at > -1 ? at : 0)
+        .split(/\n/).map((l) => l.replace(/\s+$/, "")).filter((l) => l.trim())
+        .slice(0, 25).join(" \u23ce ").slice(0, 700);
+    }
     out.attempts.push({ source: src.name, ok: true, status: r.status, count: parsed.areas.length,
       note: parsed.areas.length + " area(s)" + (parsed.issued ? " · issued " + parsed.issued : ""),
       quietOrUnparsed: parsed.areas.length === 0 ? (/not expected during the next 7 days/i.test(stripHtml(r.text)) ? "quiet basin — product says formation not expected" : "NO AREAS PARSED and the product does not say 'not expected' — parser may be behind") : null,
