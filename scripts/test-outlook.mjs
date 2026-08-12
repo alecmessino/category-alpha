@@ -224,6 +224,35 @@ ck("the basin line did not become an area",
    !li.areas.some((x) => /^For the /i.test(x.title)), JSON.stringify(li.areas.map((x) => x.title)));
 ck("AL92's percentages stayed with AL92", li.areas[0].pct7d === 80 && li.areas[0].id === "AL92");
 
+console.log("\n[8c] a structural heading does not become an area and steal the next one's odds");
+/* Seen live: the Pacific outlook published an area titled "Active Systems" carrying
+   90%/90%, which were CP93's numbers. "Active Systems:" precedes the advisories note
+   whenever a classified cyclone exists, ends in a colon like every area heading, and
+   sits directly above the first real area. */
+const ACTIVE = `Tropical Weather Outlook
+NWS National Hurricane Center Miami FL
+500 PM PDT Tue Aug 11 2026
+
+For the eastern and central North Pacific east of 180 longitude:
+
+Active Systems:
+The National Hurricane Center is issuing advisories on Tropical Depression One-C.
+
+Central Pacific (CP93):
+A well-defined low-level center has formed.
+* Formation chance through 48 hours...high...90 percent.
+* Formation chance through 7 days...high...90 percent.
+
+Forecaster Hagen
+`;
+const act = parseTWO(ACTIVE, "pacific");
+eq("one area, not two", act.areas.length, 1);
+eq("and it is the real one", act.areas[0].id, "CP93");
+eq("with its own percentages", [act.areas[0].pct48, act.areas[0].pct7d], [90, 90]);
+ck("no area is titled after a structural line",
+   !act.areas.some((a) => /^(Active Systems|For the|Forecaster)/i.test(a.title)),
+   JSON.stringify(act.areas.map((a) => a.title)));
+
 console.log("\n[8b] malformed input degrades to empty rather than inventing areas");
 eq("garbage", parseTWO("not a product at all", "atlantic").areas.length, 0);
 eq("empty", parseTWO("", "atlantic").areas.length, 0);

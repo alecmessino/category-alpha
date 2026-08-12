@@ -242,9 +242,14 @@ function stripHtml(t) {
    Atlantic...Caribbean Sea and the Gulf of America:" \u2014 is excluded by name, because it
    precedes the first area and would otherwise adopt that area's percentages. */
 const TWO_HEADING_SRC = "^[ \\t]*(?:(\\d+)\\.[ \\t]+)?([A-Za-z][^\\n:]{2,90}):[ \\t\\u00a0]*$";
-/* The line introducing the basin also ends in a colon and sits immediately above the
-   first area, so without this it would adopt that area's percentages. */
-const isAreaHeading = (title) => !!title && !/^For the /i.test(String(title).trim());
+/* Structural lines in the product also end in a colon and sit immediately above an area,
+   so without this they adopt that area's percentages. "For the North Atlantic...:"
+   introduces the basin; "Active Systems:" precedes the advisories note whenever a
+   classified cyclone exists — and it was seen on the live board carrying a 90% formation
+   chance that belonged to the area below it. They are excluded from being EMITTED as
+   areas, not from splitting the text, so a real area beneath one still parses. */
+const TWO_STRUCTURAL = /^(For the\b|Active Systems\b|Special Feature\b|Forecaster\b|Public Advisories\b|Tropical Weather Outlook\b)/i;
+const isAreaHeading = (title) => !!title && !TWO_STRUCTURAL.test(String(title).trim());
 
 function parseTWO(text, basin) {
   const t = stripHtml(text).replace(/\r/g, "");
