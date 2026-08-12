@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-12T18:33:49.977Z",
+  "generatedAt": "2026-08-12T18:41:59.476Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 215,
+      "latencyMs": 302,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"al032026\",\"binNumber\":\"AT3\",\"name\":\"Cristobal\",\"classification\":\"TS\",\"intensity\":\"40\",\"pressure\":\"1008\",\"latitude\":\"36.7N\",\"longitude\":\"43.0W\",\"latitudeNumeric\":36.7,\"longitudeNumeric\":-43,\"movementDir\":90,\"movementSpeed\":25,\"lastUpdate\":\"2026-08-12T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"001\",\"issuance\":\"2026-08-12T15:00:00.000Z\",\"fileUpdateTime\":\"2026-08-12T14:49:55.947Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPAT3.shtml\"},\"forecastAdvisory\":{\"advNum\":\"001\",\"issuance\":\"2026-08-12T",
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 9  Atlantic hurr | Above 9 | px=0.045",
-            "Will there be more than 8  Atlantic hurr | Above 8 | px=0.065",
-            "Will there be more than 7  Atlantic hurr | Above 7 | px=0.125",
-            "Will there be more than 6  Atlantic hurr | Above 6 | px=0.215",
-            "Will there be more than 5  Atlantic hurr | Above 5 | px=0.245",
-            "Will there be more than 4  Atlantic hurr | Above 4 | px=0.450"
+            "When will the next hurricane form? | Before Sep 15, | px=0.875",
+            "When will the next hurricane form? | Before Sep 1,  | px=0.450",
+            "When will the next hurricane form? | Before Oct 15, | px=0.910",
+            "When will the next hurricane form? | Before Oct 1,  | px=0.905",
+            "When will the next hurricane form? | Before Nov 15, | px=0.885",
+            "When will the next hurricane form? | Before Nov 1,  | px=0.900"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2513.43\",\"volume_24h_fp\":\"35.23\",\"volume_fp\":\"3274.31\"},\"px\":{\"last_price_dollars\":\"0.0800\",\"no_ask_dollars\":\"0.9600\",\"no_bid_dollars\":\"0.9500\",\"previous_price_dollars\":\"0.0600\",\"previous_yes_ask_dollars\":\"0.0800\",\"previous_yes_bid_dollars\":\"0.0400\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0500\",\"yes_ask_size_fp\":\"200.00\",\"yes_bid_dollars\":\"0.0400\",\"yes_bid_size_fp\":\"35.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"192.41\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"224.70\"},\"px\":{\"last_price_dollars\":\"0.7500\",\"no_ask_dollars\":\"0.2200\",\"no_bid_dollars\":\"0.0300\",\"previous_price_dollars\":\"0.7500\",\"previous_yes_ask_dollars\":\"0.9000\",\"previous_yes_bid_dollars\":\"0.7700\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.9700\",\"yes_ask_size_fp\":\"5.00\",\"yes_bid_dollars\":\"0.7800\",\"yes_bid_size_fp\":\"5.00\"}}"
         }
       ]
     },
@@ -219,14 +219,14 @@
           "peakKt": 140
         },
         "cpac": {
-          "systems": 2,
-          "namedstorms": 0,
-          "hurricanes": 0,
+          "systems": 3,
+          "namedstorms": 1,
+          "hurricanes": 1,
           "major": 0,
-          "peakKt": 30
+          "peakKt": 90
         }
       },
-      "note": "2026 season to date (named/hurricanes/major): Atlantic 3/0/0 · eastern Pacific 7/2/1 · central Pacific 0/0/0"
+      "note": "2026 season to date (named/hurricanes/major): Atlantic 3/0/0 · eastern Pacific 7/2/1 · central Pacific 1/1/0"
     },
     "satellite": {
       "ok": true,
@@ -237,7 +237,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 179,
+      "latencyMs": 244,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -248,7 +248,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 4,
       "note": "4 area(s) under watch · 2 Atlantic · highest 7-day 80%",
-      "latencyMs": 226,
+      "latencyMs": 276,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -737,7 +737,7 @@
       "liquidity": 1,
       "spread": 0.04999999999999999,
       "volume": 23207.9,
-      "volume24h": 416.5,
+      "volume24h": 421.54,
       "openInterest": 9092.75,
       "depth": {
         "bidSize": 10,
@@ -825,14 +825,14 @@
       "yesBid": 0.33,
       "yesAsk": 0.36,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 5,
+      "liquidity": 3,
       "spread": 0.02999999999999997,
-      "volume": 13201.21,
-      "volume24h": 2786.3,
-      "openInterest": 5065.17,
+      "volume": 13206.52,
+      "volume24h": 2791.61,
+      "openInterest": 5070.48,
       "depth": {
         "bidSize": 28,
-        "askSize": 13,
+        "askSize": 7.69,
         "notional": 1
       },
       "proxy": false,
@@ -885,9 +885,9 @@
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 20,
       "spread": 0.010000000000000009,
-      "volume": 11587.92,
-      "volume24h": 430,
-      "openInterest": 3563.81,
+      "volume": 11787.92,
+      "volume24h": 630,
+      "openInterest": 3392.9,
       "depth": {
         "bidSize": 183.5,
         "askSize": 200,
@@ -943,9 +943,9 @@
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 44,
       "spread": 0.010000000000000009,
-      "volume": 10992.28,
+      "volume": 10996.28,
       "volume24h": 113.9,
-      "openInterest": 4720.16,
+      "openInterest": 4724.16,
       "depth": {
         "bidSize": 83,
         "askSize": 200,
@@ -1143,7 +1143,7 @@
       "short": "Will there be more than 4 Atlantic hurricanes…",
       "storm": null,
       "subject": null,
-      "market": 0.44999999999999996,
+      "market": 0.45499999999999996,
       "model": 0.5715686274509805,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
@@ -1179,10 +1179,10 @@
       "horizon": "seasonal",
       "strike": 4,
       "yesBid": 0.42,
-      "yesAsk": 0.48,
+      "yesAsk": 0.49,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 2,
-      "spread": 0.06,
+      "spread": 0.07,
       "volume": 7867.2,
       "volume24h": 465.23,
       "openInterest": 5283.21,
@@ -1292,7 +1292,7 @@
       "short": "Will there be more than 1 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.55,
+      "market": 0.5449999999999999,
       "model": 0.8486928104575163,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -1327,17 +1327,17 @@
       ],
       "horizon": "seasonal",
       "strike": 1,
-      "yesBid": 0.54,
-      "yesAsk": 0.56,
+      "yesBid": 0.52,
+      "yesAsk": 0.57,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 7,
-      "spread": 0.020000000000000018,
+      "liquidity": 34,
+      "spread": 0.04999999999999993,
       "volume": 7273.5,
       "volume24h": 114.06,
       "openInterest": 5036.87,
       "depth": {
-        "bidSize": 2,
-        "askSize": 13,
+        "bidSize": 9.4,
+        "askSize": 60,
         "notional": 1
       },
       "proxy": false,
@@ -1365,11 +1365,11 @@
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 5,
       "spread": 0.009999999999999953,
-      "volume": 7182.75,
-      "volume24h": 256.75,
+      "volume": 7196.51,
+      "volume24h": 261.51,
       "openInterest": 3536.1,
       "depth": {
-        "bidSize": 301.72,
+        "bidSize": 317.96,
         "askSize": 16.24,
         "notional": 1
       },
@@ -1451,17 +1451,17 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.07,
-      "yesAsk": 0.11,
+      "yesBid": 0.06,
+      "yesAsk": 0.12,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 2,
-      "spread": 0.039999999999999994,
+      "liquidity": 24,
+      "spread": 0.06,
       "volume": 6290.76,
       "volume24h": 205,
       "openInterest": 3444.44,
       "depth": {
-        "bidSize": 13,
-        "askSize": 14,
+        "bidSize": 194,
+        "askSize": 200,
         "notional": 1
       },
       "proxy": false,
@@ -2335,7 +2335,7 @@
       "storm": null,
       "subject": null,
       "market": 0.9299999999999999,
-      "model": 0.2441176470588235,
+      "model": 0.323202614379085,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -2351,20 +2351,20 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.125,
-          "basis": "named storms forming on/after day 224 in each past season; needs >4 more"
+          "p": 0.18055555555555555,
+          "basis": "named storms forming on/after day 224 in each past season; needs >3 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.125,
-          "basis": "0 already recorded in 2026"
+          "p": 0.18055555555555555,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.2441176470588235,
-          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.323202614379085,
+          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2451,7 +2451,7 @@
       "storm": null,
       "subject": null,
       "market": 0.98,
-      "model": 0.5604575163398693,
+      "model": 0.7179738562091503,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -2467,20 +2467,20 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.3472222222222222,
-          "basis": "named storms forming on/after day 224 in each past season; needs >2 more"
+          "p": 0.5694444444444444,
+          "basis": "named storms forming on/after day 224 in each past season; needs >1 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.3472222222222222,
-          "basis": "0 already recorded in 2026"
+          "p": 0.5694444444444444,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.5604575163398693,
-          "basis": "9 El Niño seasons → 75% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.7179738562091503,
+          "basis": "9 El Niño seasons → 85% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2567,7 +2567,7 @@
       "storm": null,
       "subject": null,
       "market": 0.98,
-      "model": 0.323202614379085,
+      "model": 0.5604575163398693,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -2583,20 +2583,20 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.18055555555555555,
-          "basis": "named storms forming on/after day 224 in each past season; needs >3 more"
+          "p": 0.3472222222222222,
+          "basis": "named storms forming on/after day 224 in each past season; needs >2 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.18055555555555555,
-          "basis": "0 already recorded in 2026"
+          "p": 0.3472222222222222,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.323202614379085,
-          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.5604575163398693,
+          "basis": "9 El Niño seasons → 75% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2658,7 +2658,7 @@
       "storm": null,
       "subject": null,
       "market": 0.655,
-      "model": 0.09901960784313725,
+      "model": 0.11209150326797385,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -2674,19 +2674,19 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.041666666666666664,
-          "basis": "named storms forming on/after day 224 in each past season; needs >6 more"
+          "p": 0.06944444444444445,
+          "basis": "named storms forming on/after day 224 in each past season; needs >5 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.041666666666666664,
-          "basis": "0 already recorded in 2026"
+          "p": 0.06944444444444445,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.09901960784313725,
+          "p": 0.11209150326797385,
           "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
@@ -2774,7 +2774,7 @@
       "storm": null,
       "subject": null,
       "market": 0.825,
-      "model": 0.11209150326797385,
+      "model": 0.2441176470588235,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -2790,20 +2790,20 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.06944444444444445,
-          "basis": "named storms forming on/after day 224 in each past season; needs >5 more"
+          "p": 0.125,
+          "basis": "named storms forming on/after day 224 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.06944444444444445,
-          "basis": "0 already recorded in 2026"
+          "p": 0.125,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.11209150326797385,
-          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.2441176470588235,
+          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2832,7 +2832,7 @@
       "storm": null,
       "subject": null,
       "market": 0.94,
-      "model": 0.34934640522875815,
+      "model": 0.5866013071895425,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -2848,20 +2848,20 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.2361111111111111,
-          "basis": "hurricanes forming on/after day 224 in each past season; needs >2 more"
+          "p": 0.4027777777777778,
+          "basis": "hurricanes forming on/after day 224 in each past season; needs >1 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.2361111111111111,
-          "basis": "0 already recorded in 2026"
+          "p": 0.4027777777777778,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.34934640522875815,
-          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.5866013071895425,
+          "basis": "9 El Niño seasons → 75% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2923,7 +2923,7 @@
       "storm": null,
       "subject": null,
       "market": 0.28,
-      "model": 0.09901960784313725,
+      "model": 0.1650326797385621,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -2939,20 +2939,20 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.041666666666666664,
-          "basis": "hurricanes forming on/after day 224 in each past season; needs >5 more"
+          "p": 0.06944444444444445,
+          "basis": "hurricanes forming on/after day 224 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.041666666666666664,
-          "basis": "0 already recorded in 2026"
+          "p": 0.06944444444444445,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.09901960784313725,
-          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.1650326797385621,
+          "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3220,7 +3220,7 @@
       "short": "Will there be more than 6 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.32,
+      "market": 0.315,
       "model": 0.2310457516339869,
       "modelQuantity": "major",
       "modelBasin": "epac",
@@ -3256,10 +3256,10 @@
       "horizon": "seasonal",
       "strike": 6,
       "yesBid": 0.31,
-      "yesAsk": 0.33,
+      "yesAsk": 0.32,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 49,
-      "spread": 0.020000000000000018,
+      "liquidity": 47,
+      "spread": 0.010000000000000009,
       "volume": 497.08,
       "volume24h": 0,
       "openInterest": 282.05,
@@ -3337,7 +3337,7 @@
       "storm": null,
       "subject": null,
       "market": 0.455,
-      "model": 0.1650326797385621,
+      "model": 0.19117647058823528,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -3353,19 +3353,19 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.06944444444444445,
-          "basis": "hurricanes forming on/after day 224 in each past season; needs >4 more"
+          "p": 0.125,
+          "basis": "hurricanes forming on/after day 224 in each past season; needs >3 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.06944444444444445,
-          "basis": "0 already recorded in 2026"
+          "p": 0.125,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.1650326797385621,
+          "p": 0.19117647058823528,
           "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
@@ -3594,13 +3594,13 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.041666666666666664,
-          "basis": "named storms forming on/after day 224 in each past season; needs >7 more"
+          "basis": "named storms forming on/after day 224 in each past season; needs >6 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
           "p": 0.041666666666666664,
-          "basis": "0 already recorded in 2026"
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
@@ -3817,7 +3817,7 @@
       "storm": null,
       "subject": null,
       "market": 0.36,
-      "model": 0.19117647058823528,
+      "model": 0.34934640522875815,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -3833,20 +3833,20 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.125,
-          "basis": "hurricanes forming on/after day 224 in each past season; needs >3 more"
+          "p": 0.2361111111111111,
+          "basis": "hurricanes forming on/after day 224 in each past season; needs >2 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.125,
-          "basis": "0 already recorded in 2026"
+          "p": 0.2361111111111111,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.19117647058823528,
-          "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.34934640522875815,
+          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4760,7 +4760,7 @@
       "short": "Will there be more than 13 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.095,
+      "market": 0.19,
       "model": 0.03300653594771242,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
@@ -4795,17 +4795,17 @@
       ],
       "horizon": "seasonal",
       "strike": 13,
-      "yesBid": 0.09,
-      "yesAsk": 0.1,
+      "yesBid": 0.08,
+      "yesAsk": 0.3,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 20,
-      "spread": 0.010000000000000009,
+      "liquidity": 0,
+      "spread": 0.21999999999999997,
       "volume": 57.14,
       "volume24h": 1.24,
       "openInterest": 49.9,
       "depth": {
-        "bidSize": 5,
-        "askSize": 200,
+        "bidSize": 0.38,
+        "askSize": 1,
         "notional": 1
       },
       "proxy": false,
@@ -5621,7 +5621,7 @@
       "storm": null,
       "subject": null,
       "market": 0.98,
-      "model": 0.5866013071895425,
+      "model": 0.8101307189542484,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
@@ -5637,20 +5637,20 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.4027777777777778,
-          "basis": "hurricanes forming on/after day 224 in each past season; needs >1 more"
+          "p": 0.6527777777777778,
+          "basis": "hurricanes forming on/after day 224 in each past season; needs >0 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.4027777777777778,
-          "basis": "0 already recorded in 2026"
+          "p": 0.6527777777777778,
+          "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.5866013071895425,
-          "basis": "9 El Niño seasons → 75% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.8101307189542484,
+          "basis": "9 El Niño seasons → 95% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -7155,7 +7155,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.39,
+      "market": 0.385,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -7165,16 +7165,16 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.04,
+      "yesBid": 0.03,
       "yesAsk": 0.74,
       "closeTime": "2026-12-01T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.7,
+      "spread": 0.71,
       "volume": 1.1,
       "volume24h": 0,
       "openInterest": 1.1,
       "depth": {
-        "bidSize": 3.9,
+        "bidSize": 5,
         "askSize": 1.1,
         "notional": 1
       },
