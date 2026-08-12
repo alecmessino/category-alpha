@@ -1,19 +1,19 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-12T14:45:01.906Z",
+  "generatedAt": "2026-08-12T14:55:20.417Z",
   "stepMin": 10,
-  "note": "No CLASSIFIED tropical cyclones. 5 area(s) under NHC watch — see the genesis outlook below.",
+  "note": null,
   "feeds": {
     "nhc": {
       "ok": true,
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 168,
-      "count": 0,
-      "note": "no active tropical cyclones",
-      "raw": null,
-      "forecast": ""
+      "latencyMs": 195,
+      "count": 1,
+      "note": "1 active",
+      "raw": "{\"id\":\"al032026\",\"binNumber\":\"AT3\",\"name\":\"Cristobal\",\"classification\":\"TS\",\"intensity\":\"40\",\"pressure\":\"1008\",\"latitude\":\"36.7N\",\"longitude\":\"43.0W\",\"latitudeNumeric\":36.7,\"longitudeNumeric\":-43,\"movementDir\":90,\"movementSpeed\":25,\"lastUpdate\":\"2026-08-12T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"001\",\"issuance\":\"2026-08-12T15:00:00.000Z\",\"fileUpdateTime\":\"2026-08-12T14:49:55.947Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPAT3.shtml\"},\"forecastAdvisory\":{\"advNum\":\"001\",\"issuance\":\"2026-08-12T",
+      "forecast": "Cristobal: 2 forecast positions · cone reconstructed from NHC track-error radii"
     },
     "markets": {
       "ok": true,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will Wilfred be the first named hurrican | Wilfred | px=0.005",
-            "Will Vicky be the first named hurricane  | Vicky | px=0.005",
-            "Will Teddy be the first named hurricane  | Teddy | px=0.005",
-            "Will Sally be the first named hurricane  | Sally | px=0.005",
-            "Will Rene be the first named hurricane i | Rene | px=0.005",
-            "Will Paulette be the first named hurrica | Paulette | px=0.005"
+            "Will there be more than 7 major Atlantic | Above 7 | px=0.025",
+            "Will there be more than 6 major Atlantic | Above 6 | px=0.040",
+            "Will there be more than 5 major Atlantic | Above 5 | px=0.095",
+            "Will there be more than 4 major Atlantic | Above 4 | px=0.095",
+            "Will there be more than 3 major Atlantic | Above 3 | px=0.155",
+            "Will there be more than 2 major Atlantic | Above 2 | px=0.325"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2100.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"2413.36\"},\"px\":{\"last_price_dollars\":\"0.0100\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0100\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"5793.20\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2255.40\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"2959.70\"},\"px\":{\"last_price_dollars\":\"0.0800\",\"no_ask_dollars\":\"0.9800\",\"no_bid_dollars\":\"0.9700\",\"previous_price_dollars\":\"0.0800\",\"previous_yes_ask_dollars\":\"0.0800\",\"previous_yes_bid_dollars\":\"0.0300\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0300\",\"yes_ask_size_fp\":\"200.00\",\"yes_bid_dollars\":\"0.0200\",\"yes_bid_size_fp\":\"72.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 147,
+      "latencyMs": 132,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 434,
+      "latencyMs": 385,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -207,7 +207,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 5,
       "note": "5 area(s) under watch · 3 Atlantic · highest 7-day 80%",
-      "latencyMs": 516,
+      "latencyMs": 373,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -230,8 +230,180 @@
       ]
     }
   },
-  "storms": [],
+  "storms": [
+    {
+      "id": "AL032026",
+      "name": "Cristobal",
+      "cls": "TS",
+      "full_cls": "Tropical Storm",
+      "basin": "east",
+      "center": [
+        36.7,
+        -43
+      ],
+      "movement": "E 25 kt",
+      "wind": 40,
+      "pressure": 1008,
+      "advNum": "001",
+      "advTimeZ": "2026-08-12T15:00:00.000Z",
+      "track": [
+        [
+          36.7,
+          -43
+        ],
+        [
+          37.4,
+          -40.2
+        ],
+        [
+          38.5,
+          -37.2
+        ]
+      ],
+      "cone": [
+        [
+          36.7,
+          -43
+        ],
+        [
+          37.09727979894737,
+          -40.05113539207537
+        ],
+        [
+          37.93781097801176,
+          -36.86343802228174
+        ],
+        [
+          39.120192273207174,
+          -37.23604087975443
+        ],
+        [
+          39.08377687288727,
+          -36.93003288455936
+        ],
+        [
+          38.958486735620816,
+          -36.66512493543214
+        ],
+        [
+          38.763396149048695,
+          -36.48164686623084
+        ],
+        [
+          38.528205886475945,
+          -36.407531549758524
+        ],
+        [
+          38.288721533374236,
+          -36.45406237109108
+        ],
+        [
+          38.08140241157223,
+          -36.61415543448358
+        ],
+        [
+          39.06218902198824,
+          -37.536561977718264
+        ],
+        [
+          37.70272020105263,
+          -40.34886460792463
+        ],
+        [
+          36.7,
+          -43
+        ]
+      ],
+      "reconTracks": null,
+      "pastIdx": 0,
+      "modelCat4": null,
+      "marketCat4": null,
+      "reconAge": null,
+      "trackPoints": [
+        {
+          "at": [
+            36.7,
+            -43
+          ],
+          "hr": 0,
+          "validZ": "2026-08-12T15:00:00.000Z"
+        },
+        {
+          "at": [
+            37.4,
+            -40.2
+          ],
+          "hr": 9,
+          "validZ": "2026-08-13T00:00:00.000Z"
+        },
+        {
+          "at": [
+            38.5,
+            -37.2
+          ],
+          "hr": 21,
+          "validZ": "2026-08-13T12:00:00.000Z"
+        }
+      ]
+    }
+  ],
   "contracts": [
+    {
+      "id": "KXFIRSTHURRICANE-26DEC01ATL-CRI",
+      "label": "Will Cristobal be the first named hurricane in the Atlantic in 2026?",
+      "short": "Will Cristobal be the first named hurricane…",
+      "storm": "AL032026",
+      "subject": null,
+      "market": 0.02,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "liquidity": 1,
+      "spread": 0.04,
+      "volume": 12571.43,
+      "volume24h": 1848.43,
+      "openInterest": 6041.14,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 12.62,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
+    },
+    {
+      "id": "KXHURRICANENAMES-26DEC01ATL-CRI",
+      "label": "Will Cristobal be categorized as a hurricane in the Atlantic in 2026?",
+      "short": "Will Cristobal be categorized as a hurricane…",
+      "storm": "AL032026",
+      "subject": null,
+      "market": 0.01,
+      "model": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "liquidity": 1,
+      "spread": 0.01,
+      "volume": 263.15,
+      "volume24h": 28.24,
+      "openInterest": 114.07,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 100,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01ATL"
+    },
     {
       "id": "KXHURCTOTMAJ-26DEC01-T2",
       "label": "Will there be more than 2 major Atlantic hurricanes in 2026?",
@@ -508,7 +680,7 @@
       "short": "Will there be more than 5 Atlantic hurricanes…",
       "storm": null,
       "subject": null,
-      "market": 0.28,
+      "market": 0.29500000000000004,
       "model": 0.4453781512605042,
       "modelSource": "HURDAT2 climatology",
       "modelBasis": "Historical climatology → Day-of-year conditional → ENSO-stratified · 1991–2025 Atlantic hurricane seasons (n=35), day 224",
@@ -543,12 +715,12 @@
       "horizon": "seasonal",
       "strike": 5,
       "liquidity": 67,
-      "spread": 0.06,
+      "spread": 0.02999999999999997,
       "volume": 9738.43,
       "volume24h": 191,
       "openInterest": 4706.99,
       "depth": {
-        "bidSize": 178,
+        "bidSize": 20,
         "askSize": 215,
         "notional": 1
       },
@@ -707,7 +879,7 @@
       "liquidity": 0,
       "spread": 0.05999999999999994,
       "volume": 7237.5,
-      "volume24h": 84.06,
+      "volume24h": 94.06,
       "openInterest": 5010.03,
       "depth": {
         "bidSize": 10,
@@ -1639,34 +1811,6 @@
       "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
     },
     {
-      "id": "KXFIRSTHURRICANE-26DEC01ATL-CRI",
-      "label": "Will Cristobal be the first named hurricane in the Atlantic in 2026?",
-      "short": "Will Cristobal be the first named hurricane…",
-      "storm": null,
-      "subject": null,
-      "market": 0.16499999999999998,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "liquidity": 78,
-      "spread": 0.09,
-      "volume": 12483.07,
-      "volume24h": 1817.85,
-      "openInterest": 6055.67,
-      "depth": {
-        "bidSize": 4,
-        "askSize": 371.46,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
-    },
-    {
       "id": "KXHURRICANENAMES-26DEC01CPAC-EMA",
       "label": "Will Ema be categorized as a hurricane in the Central Pacific in 2026?",
       "short": "Will Ema be categorized as a hurricane in the…",
@@ -1700,7 +1844,7 @@
       "short": "Will Dolly be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.275,
+      "market": 0.2,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1708,14 +1852,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 29,
-      "spread": 0.02999999999999997,
-      "volume": 11321.94,
-      "volume24h": 507.28,
-      "openInterest": 4488.34,
+      "liquidity": 4,
+      "spread": 0.1,
+      "volume": 12164.56,
+      "volume24h": 1516.29,
+      "openInterest": 4403.71,
       "depth": {
-        "bidSize": 16.36,
-        "askSize": 101.36,
+        "bidSize": 15,
+        "askSize": 16.36,
         "notional": 1
       },
       "proxy": false,
@@ -1812,7 +1956,7 @@
       "short": "Will Edouard be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.20500000000000002,
+      "market": 0.21000000000000002,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1820,14 +1964,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 2,
-      "spread": 0.15000000000000002,
+      "liquidity": 4,
+      "spread": 0.1,
       "volume": 6936.87,
       "volume24h": 87.87,
       "openInterest": 3460.61,
       "depth": {
-        "bidSize": 3.91,
-        "askSize": 5.57,
+        "bidSize": 8.6,
+        "askSize": 15,
         "notional": 1
       },
       "proxy": false,
@@ -1840,7 +1984,7 @@
       "short": "Will Gonzalo be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.07,
+      "market": 0.13999999999999999,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1848,14 +1992,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 20,
-      "spread": 0.060000000000000005,
+      "liquidity": 1,
+      "spread": 0.19999999999999998,
       "volume": 6290.76,
       "volume24h": 205,
       "openInterest": 3444.44,
       "depth": {
-        "bidSize": 193,
-        "askSize": 200,
+        "bidSize": 119.34,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -1896,7 +2040,7 @@
       "short": "Will Hanna be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.030000000000000002,
+      "market": 0.025,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1904,8 +2048,8 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 10,
-      "spread": 0.04,
+      "liquidity": 8,
+      "spread": 0.03,
       "volume": 6062.88,
       "volume24h": 7.8,
       "openInterest": 3804.23,
@@ -1952,7 +2096,7 @@
       "short": "Will Isaias be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.03,
+      "market": 0.035,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1961,12 +2105,12 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 8,
-      "spread": 0.02,
+      "spread": 0.010000000000000002,
       "volume": 5161.91,
       "volume24h": 0,
       "openInterest": 3075.95,
       "depth": {
-        "bidSize": 65.02,
+        "bidSize": 5,
         "askSize": 200,
         "notional": 1
       },
@@ -1980,7 +2124,7 @@
       "short": "Will Fay be the first named hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.135,
+      "market": 0.16,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1988,14 +2132,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 31,
-      "spread": 0.05,
+      "liquidity": 1,
+      "spread": 0.09999999999999999,
       "volume": 4829.12,
-      "volume24h": 0,
+      "volume24h": 200,
       "openInterest": 3421.74,
       "depth": {
-        "bidSize": 15,
-        "askSize": 193,
+        "bidSize": 32.28,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -2036,7 +2180,7 @@
       "short": "Will Lala be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.345,
+      "market": 0.355,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -2045,12 +2189,12 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 0,
-      "spread": 0.12999999999999995,
+      "spread": 0.10999999999999999,
       "volume": 4153,
       "volume24h": 30.16,
       "openInterest": 2502.11,
       "depth": {
-        "bidSize": 14.59,
+        "bidSize": 4.35,
         "askSize": 0.65,
         "notional": 1
       },
@@ -2540,7 +2684,7 @@
       "short": "Will Isaias be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.29,
+      "market": 0.285,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -2549,7 +2693,7 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 2,
-      "spread": 0.13999999999999999,
+      "spread": 0.12999999999999998,
       "volume": 1309.02,
       "volume24h": 0,
       "openInterest": 811,
@@ -2680,7 +2824,7 @@
       "short": "Will Gonzalo be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.315,
+      "market": 0.31,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -2689,7 +2833,7 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 3,
-      "spread": 0.39,
+      "spread": 0.38,
       "volume": 887.17,
       "volume24h": 0,
       "openInterest": 805.09,
@@ -2764,7 +2908,7 @@
       "short": "Will Leah be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.345,
+      "market": 0.33999999999999997,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -2772,14 +2916,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 3,
-      "spread": 0.31,
+      "liquidity": 2,
+      "spread": 0.3,
       "volume": 690.4,
       "volume24h": 0,
       "openInterest": 616.4,
       "depth": {
         "bidSize": 1.4,
-        "askSize": 5,
+        "askSize": 3.6,
         "notional": 1
       },
       "proxy": false,
@@ -2792,7 +2936,7 @@
       "short": "Will Moke be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.555,
+      "market": 0.56,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -2801,12 +2945,12 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 4,
-      "spread": 0.49000000000000005,
+      "spread": 0.48000000000000004,
       "volume": 690.08,
       "volume24h": 0,
       "openInterest": 511.52,
       "depth": {
-        "bidSize": 200,
+        "bidSize": 5,
         "askSize": 5,
         "notional": 1
       },
@@ -3044,7 +3188,7 @@
       "short": "Will Kyle be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.345,
+      "market": 0.33999999999999997,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -3053,13 +3197,13 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 2,
-      "spread": 0.16999999999999998,
+      "spread": 0.15999999999999998,
       "volume": 411.4,
       "volume24h": 0,
       "openInterest": 401,
       "depth": {
         "bidSize": 1,
-        "askSize": 5,
+        "askSize": 4,
         "notional": 1
       },
       "proxy": false,
@@ -3347,34 +3491,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACMAJ"
     },
     {
-      "id": "KXHURRICANENAMES-26DEC01ATL-CRI",
-      "label": "Will Cristobal be categorized as a hurricane in the Atlantic in 2026?",
-      "short": "Will Cristobal be categorized as a hurricane…",
-      "storm": null,
-      "subject": null,
-      "market": 0.295,
-      "model": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "liquidity": 3,
-      "spread": 0.59,
-      "volume": 263.15,
-      "volume24h": 28.24,
-      "openInterest": 114.07,
-      "depth": {
-        "bidSize": 0,
-        "askSize": 5,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01ATL"
-    },
-    {
       "id": "KXNAMEDSTORM-26DEC01EPACTOT-16",
       "label": "Will there be more than 16 named storms in the Eastern Pacific in 2026?",
       "short": "Will there be more than 16 named storms in…",
@@ -3548,7 +3664,7 @@
       "short": "Will Nana be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.295,
+      "market": 0.29000000000000004,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -3557,7 +3673,7 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 2,
-      "spread": 0.35,
+      "spread": 0.34,
       "volume": 201.04,
       "volume24h": 0,
       "openInterest": 201.04,
@@ -3828,7 +3944,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.75,
+      "market": 0.79,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -3837,7 +3953,7 @@
       "horizon": "storm",
       "strike": null,
       "liquidity": 3,
-      "spread": 0.45999999999999996,
+      "spread": 0.38,
       "volume": 80.02,
       "volume24h": 0,
       "openInterest": 79.92,
@@ -4257,12 +4373,12 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 3,
-      "spread": 0.13,
+      "spread": 0.10999999999999999,
       "volume": 19.24,
       "volume24h": 0,
       "openInterest": 18.24,
       "depth": {
-        "bidSize": 4,
+        "bidSize": 5,
         "askSize": 5,
         "notional": 1
       },
@@ -5112,7 +5228,16 @@
     }
   ],
   "models": [],
-  "events": [],
+  "events": [
+    {
+      "tsZ": "2026-08-12T15:00:00.000Z",
+      "kind": "advisory",
+      "label": "Cristobal Advisory #001 — Tropical Storm, 40 kt",
+      "source": "NHC",
+      "tier": "A",
+      "hot": false
+    }
+  ],
   "sstAnomalyC": null,
   "outlook": [
     {
