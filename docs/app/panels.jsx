@@ -347,7 +347,7 @@ const PRIO_STYLE = {
   MEDIUM: { c: "var(--warn)",      label: "MEDIUM" },
   LOW:    { c: "var(--text-2)",    label: "LOW" },
 };
-const KIND_ICON = { intensity: "◆", pressure: "▼", market: "▮", advisory: "✦", divergence: "⚠", schedule: "◷", feed: "○", pipeline: "◌" };
+const KIND_ICON = { intensity: "◆", pressure: "▼", market: "▮", advisory: "✦", divergence: "⚠", schedule: "◷", feed: "○", pipeline: "◌", genesis: "◉" };
 
 /* Operator marks. The terminal cannot observe whether a human has acknowledged an
    item or checked their exposure, so it does not pretend to derive it: these are

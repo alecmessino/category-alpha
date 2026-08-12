@@ -118,6 +118,77 @@ async function fetchStorms() {
   return { feed, storms };
 }
 
+/* ---------------- NHC Tropical Weather Outlook (pre-genesis) ----------------
+ * CurrentStorms.json lists only systems ALREADY classified as a depression or
+ * stronger. It is silent on invests and areas of interest — so with three Atlantic
+ * disturbances up, one of them at 80% over seven days, the terminal was reporting
+ * "no active tropical cyclones" and meaning it literally while being blind to the
+ * entire formation pipeline the count ladders are priced on.
+ *
+ * The TWO is the product that carries them, with NHC's own formation probabilities.
+ * Those percentages are published forecasts, not our inference; we parse and attribute
+ * them, and we do not convert them into anything else.
+ */
+const TWO_SOURCES = [
+  { basin: "atlantic", name: "Atlantic TWO", url: "https://www.nhc.noaa.gov/text/MIATWOAT.shtml" },
+  { basin: "pacific",  name: "E/C Pacific TWO", url: "https://www.nhc.noaa.gov/text/MIATWOEP.shtml" },
+];
+
+function stripHtml(t) {
+  return String(t || "").replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+}
+
+/* The product is fixed-format text. Each area is "N. Title (ID):" followed by prose
+   and two "* Formation chance through ..." lines. An area without an invest ID is
+   normal and keeps id null rather than being skipped. */
+function parseTWO(text, basin) {
+  const t = stripHtml(text).replace(/\r/g, "");
+  const issuedM = /^\s*(\d{3,4}\s+(?:AM|PM)\s+[A-Z]{2,4}\s+\w{3}\s+\w{3}\s+\d{1,2}\s+\d{4})\s*$/m.exec(t);
+  const areas = [];
+  // Split on the numbered headings, keeping each heading with its body.
+  const parts = t.split(/^\s*(\d+)\.\s+(.+?):\s*$/m);
+  for (let i = 1; i + 2 < parts.length + 1; i += 3) {
+    const n = Number(parts[i]), title = (parts[i + 1] || "").trim(), body = parts[i + 2] || "";
+    if (!n || !title) continue;
+    const pct = (re) => { const m = re.exec(body); return m ? Number(m[1]) : null; };
+    const p48 = pct(/Formation chance through 48 hours[.\s]*\w+[.\s]*(\d+)\s*percent/i);
+    const p7 = pct(/Formation chance through 7 days[.\s]*\w+[.\s]*(\d+)\s*percent/i);
+    if (p48 == null && p7 == null) continue;          // not an outlook area
+    const idM = /\(([A-Z]{2}\d{2})\)/.exec(title);
+    areas.push({
+      n, basin,
+      id: idM ? idM[1] : null,
+      title: title.replace(/\s*\([A-Z]{2}\d{2}\)\s*$/, "").trim(),
+      pct48: p48, pct7d: p7,
+      summary: body.split(/\n\s*\*/)[0].replace(/\s+/g, " ").trim().slice(0, 320),
+    });
+  }
+  return { basin, issued: issuedM ? issuedM[1].replace(/\s+/g, " ") : null, areas };
+}
+
+async function fetchOutlook() {
+  const out = { ok: false, source: "NHC Tropical Weather Outlook", areas: [], attempts: [] };
+  for (const src of TWO_SOURCES) {
+    const r = await getText(src.url);
+    if (!r.ok) { out.attempts.push({ source: src.name, ok: false, status: r.status, note: r.error }); continue; }
+    let parsed = null;
+    try { parsed = parseTWO(r.text, src.basin); } catch (e) { parsed = null; }
+    if (!parsed) { out.attempts.push({ source: src.name, ok: false, status: r.status, note: "parse failed" }); continue; }
+    out.attempts.push({ source: src.name, ok: true, status: r.status, count: parsed.areas.length,
+      note: parsed.areas.length + " area(s)" + (parsed.issued ? " · issued " + parsed.issued : "") });
+    out.areas.push(...parsed.areas.map((a) => Object.assign(a, { issued: parsed.issued, url: src.url })));
+    out.status = r.status; out.latencyMs = r.latencyMs;
+  }
+  out.ok = out.attempts.some((a) => a.ok);
+  out.count = out.areas.length;
+  const atl = out.areas.filter((a) => a.basin === "atlantic");
+  out.note = out.ok
+    ? `${out.areas.length} area(s) under watch · ${atl.length} Atlantic` +
+      (atl.length ? ` · highest 7-day ${Math.max(...atl.map((a) => a.pct7d ?? 0))}%` : "")
+    : "no outlook product reachable";
+  return out;
+}
+
 /* ---------------- NHC forecast track + uncertainty cone ----------------
  * The forecast positions come from the official Forecast/Advisory (TCM) text product
  * linked by CurrentStorms.json — real published coordinates, parsed verbatim.
@@ -1047,6 +1118,9 @@ async function main() {
 
   const { feed: nhcFeed, storms } = await fetchStorms();
 
+  // Pre-genesis areas. Independent of whether anything is classified yet.
+  const outlook = await fetchOutlook();
+
   // Climatology baseline first — it supplies the fair-value anchor for seasonal contracts.
   const { feed: climFeed, clim } = await fetchClimatology();
 
@@ -1102,12 +1176,18 @@ async function main() {
       hurricanesPerSeason: clim.hurricanes, majorPerSeason: clim.major, years: clim.years } : { ok: false, note: climFeed.note },
     satellite: { ok: true, source: "NASA GIBS VIIRS/NOAA-20", note: "probed live in the browser" },
     enso: ensoFeed,
+    outlook: { ok: outlook.ok, status: outlook.status, source: outlook.source, count: outlook.count,
+               note: outlook.note, latencyMs: outlook.latencyMs, attempts: outlook.attempts },
   };
 
   const latest = {
     schema: "millibar-terminal/1", generatedAt: nowIso, stepMin: STEP_MIN,
-    note: storms.length ? null : "No active tropical cyclones — terminal is in awaiting-telemetry state (honest current condition, not an error).",
+    note: storms.length ? null
+      : (outlook.areas.length
+          ? `No CLASSIFIED tropical cyclones. ${outlook.areas.length} area(s) under NHC watch — see the genesis outlook below.`
+          : "No active tropical cyclones and no areas under watch — honest current condition, not an error."),
     feeds, storms, contracts, models: [], events, sstAnomalyC: null,
+    outlook: outlook.ok ? outlook.areas : [],
     enso: oni ? {
       ok: true, source: oni.source, phase: oni.phase, phaseLabel: PHASE_LABEL[oni.phase],
       anchorSeas: oni.anchorSeas, anchorYear: oni.anchorYear, anchorAnom: oni.anchorAnom,
@@ -1152,6 +1232,8 @@ async function main() {
   }
   console.log(`  climatology: ${climFeed.ok ? climFeed.source + " · " + clim.years.length + " seasons" : "FAIL — " + climFeed.note}`);
   console.log(`  ENSO: ${ensoFeed.ok ? ensoFeed.source + " · " + ensoFeed.note : "FAIL — " + ensoFeed.note}`);
+  console.log(`  outlook: ${outlook.ok ? outlook.note : "FAIL — " + outlook.note}`);
+  for (const a of outlook.areas) console.log(`    · ${a.basin} #${a.n} ${a.id || "(no id)"} ${a.title} — ${a.pct48}%/48h ${a.pct7d}%/7d`);
   for (const a of (ensoFeed.attempts || [])) console.log(`    [${a.source}] ok=${a.ok} status=${a.status} → ${a.note}`);
   console.log(`  storms: ${storms.length} · contracts: ${contracts.length} (${contracts.filter((c) => c.model != null).length} anchored) · frames: ${framesJson.frames.length}${appendFrame ? " (+1)" : " (no append — " + Math.round(sinceLastFrameMin) + "m since last, gap is " + FRAME_GAP_MIN + "m)"}`);
   if (contracts.length) for (const c of contracts.slice(0, 8)) {
@@ -1165,5 +1247,5 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
   main().catch((e) => { console.error("[millibar] fatal:", e); process.exit(1); });
 }
 
-export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity,
+export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity, parseTWO,
          priceOf, askPriceOf, spreadOf, depthOf, liquidityOf, volumeOf, volume24hOf, openInterestOf, notionalOf };

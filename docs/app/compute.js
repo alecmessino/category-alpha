@@ -324,9 +324,15 @@
 
     // Headline — the most intense active system, stated plainly.
     const lead = storms.slice().sort((a, b) => (b.wind ? b.wind(NF) : 0) - (a.wind ? a.wind(NF) : 0))[0];
+    const watch = (MT._outlook || []);
+    const topWatch = watch.slice().sort((a, b) => (b.pct7d ?? 0) - (a.pct7d ?? 0))[0];
     const headline = lead
       ? `${lead.name} ${lead.full_cls.replace(" Hurricane", "")} · ${Math.round(lead.wind(NF))} kt, ${Math.round(lead.pressure(NF))} mb, moving ${lead.movement}`
-      : "No active tropical cyclones";
+      : watch.length
+        // "No active tropical cyclones" is true of the classified list and misleading
+        // when the basin has areas under watch. Say which is which.
+        ? `No classified cyclones · ${watch.length} area${watch.length === 1 ? "" : "s"} under watch, top ${topWatch.pct7d ?? "?"}% in 7 days`
+        : "No active tropical cyclones";
 
     // What changed — the highest-class change, and whether anything did.
     const ranked = sigs.slice().sort((a, b) => CLASS_RANK[b.class] - CLASS_RANK[a.class] || b.magnitude - a.magnitude);
@@ -502,6 +508,24 @@
       detail: "physical and market signals point opposite ways", kind: "divergence",
       source: "cross-feed", ageMin: null,
     }));
+
+    // 2b --- pre-genesis areas. A 7-day formation probability is the leading
+    //        indicator for every seasonal count ladder on the board, and it exists
+    //        well before anything reaches CurrentStorms.json.
+    (MT._outlook || []).forEach((a) => {
+      const p7 = a.pct7d ?? 0, p48 = a.pct48 ?? 0;
+      const priority = p7 >= 70 ? "HIGH" : p7 >= 40 ? "MEDIUM" : "LOW";
+      push({
+        id: "twa:" + a.basin + ":" + (a.id || a.n),
+        priority,
+        title: (a.id ? a.id + " · " : "") + a.title + " — " + p7 + "% formation within 7 days"
+             + (p48 ? " (" + p48 + "% within 48h)" : ""),
+        detail: a.basin === "atlantic" ? "Atlantic · counts toward the season ladders" : a.basin,
+        kind: "genesis", source: "NHC Tropical Weather Outlook", ageMin: null,
+        waitingOn: "NHC classification (this becomes an advisory only once it is a depression)",
+        nextAutomatic: window.MTC ? window.MTC.claim("action.automatic").text : null,
+      });
+    });
 
     // 3 ---- the next scheduled advisory, when it is close enough to wait for.
     Object.values(MT.storms || {}).forEach((S) => {

@@ -235,6 +235,7 @@
       feedHealth(feeds.sst, "SST anomaly"),
       feedHealth(feeds.models, "Ensemble models"),
       feedHealth(feeds.enso, "ENSO / ONI"),
+      feedHealth(feeds.outlook, "Genesis outlook"),
       /* Two different clocks, and conflating them is what previously understated
          staleness: the SNAPSHOT refreshes on the pipeline tick, while replay FRAMES
          are spaced further apart on purpose. Report both. */
@@ -260,6 +261,7 @@
       evidence, models: latest.models || [], events, pipeline, health,
       _frames: framesArr, _feeds: feeds, _generatedAt: latest.generatedAt || null, _note: latest.note || null,
       _verify: window.__MT_VERIFY || null, _enso: latest.enso || null,
+      _outlook: latest.outlook || [],
     };
   }
 

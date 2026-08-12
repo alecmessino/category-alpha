@@ -31,7 +31,7 @@
     if (ctx && ctx.feeds) return ctx;
     const M = window.MT || {};
     return { feeds: M._feeds || {}, evidence: M.evidence || [], generatedAt: M._generatedAt || null,
-             verify: M._verify || null, enso: M._enso || null };
+             verify: M._verify || null, enso: M._enso || null, outlook: M._outlook || [] };
   }
   const okOf = (s, k) => { const f = s.feeds[k]; return !!(f && f.ok); };
   const srcOf = (s, k, fallback) => { const f = s.feeds[k]; return (f && f.source) || fallback || k; };
@@ -188,6 +188,22 @@
         + " an empirical count record, not a shear measurement and not a seasonal forecast.",
     ok: false,
   }));
+  /* Pre-genesis areas. The percentages are NHC's own published formation forecasts,
+     lifted verbatim — we attribute them and never convert them into anything else. */
+  define("outlook.summary", "outlook", (s) => {
+    const f = s.feeds.outlook || {};
+    const areas = s.outlook || [];
+    if (!f.ok) return { text: "genesis outlook unavailable this cycle", ok: false };
+    if (!areas.length) return { text: "No areas under NHC watch in either basin.", ok: true };
+    const atl = areas.filter((a) => a.basin === "atlantic");
+    const top = areas.slice().sort((a, b) => (b.pct7d ?? 0) - (a.pct7d ?? 0))[0];
+    return {
+      text: areas.length + " area(s) under NHC watch (" + atl.length + " Atlantic) · highest 7-day "
+          + (top.pct7d ?? "?") + "% — " + (top.id || top.title)
+          + ". NHC formation probabilities, quoted as published.",
+      ok: true,
+    };
+  });
   define("capability.positions", "none", () => ({
     text: "No position feed is wired — board level, not portfolio level.",
     ok: false,

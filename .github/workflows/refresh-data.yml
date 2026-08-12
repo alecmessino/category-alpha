@@ -77,6 +77,12 @@ jobs:
       - name: Test market payload parsers
         run: node scripts/test-markets.mjs
 
+      # The Tropical Weather Outlook is fixed-format text. If NHC reformats it the
+      # parser would silently yield zero areas, and the terminal would go back to
+      # reporting a quiet basin while systems were under watch.
+      - name: Test outlook parser
+        run: node scripts/test-outlook.mjs
+
       # Every visible claim must have a provenance owner. This fails the build if
       # capability / liveness language reappears as a literal inside a component
       # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of
