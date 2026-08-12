@@ -154,14 +154,42 @@ const TWO_SOURCES = [
 /* The NWS product API is a two-step: list the issuances of a WMO collective, then fetch
    the newest one for its productText. Returns the same {ok,status,latencyMs,text} shape
    as getText so fetchOutlook does not have to care which kind of source it is holding. */
+/* The list is fetched ONCE per process and shared. All three outlooks are issuances of
+   the same product type — TWO — and are told apart by WMO collective, not by URL:
+   ABNT20 Atlantic, ABPZ20 eastern Pacific, ABCP20 central Pacific. The first version of
+   this put the collective in the type slot and got a 200 with an empty list, which is
+   how a wrong URL looks on this API. */
+let _twoList = null;
+function nwsTwoList() {
+  if (_twoList) return _twoList;
+  _twoList = (async () => {
+    const urls = [
+      "https://api.weather.gov/products/types/TWO/locations/NHC",
+      "https://api.weather.gov/products/types/TWO",
+    ];
+    let last = { ok: false, status: null, error: "not attempted" };
+    for (const url of urls) {
+      const r = await getJSON(url, { headers: { Accept: "application/ld+json" } });
+      if (!r.ok) { last = { ok: false, status: r.status, error: r.error }; continue; }
+      const items = (r.json && (r.json["@graph"] || r.json.graph)) || [];
+      if (items.length) return { ok: true, status: r.status, items, url };
+      last = { ok: false, status: r.status, error: "200 but no issuances listed at " + url };
+    }
+    return last;
+  })();
+  return _twoList;
+}
+
 async function fetchNwsProduct(wmo) {
   const t0 = Date.now();
-  const list = await getJSON(`https://api.weather.gov/products/types/${wmo}/locations/NHC`,
-    { headers: { Accept: "application/ld+json" } });
+  const list = await nwsTwoList();
   if (!list.ok) return { ok: false, status: list.status, latencyMs: Date.now() - t0, error: "list: " + (list.error || "?") };
-  const items = (list.json && (list.json["@graph"] || list.json.graph)) || [];
-  if (!items.length) return { ok: false, status: list.status, latencyMs: Date.now() - t0, error: "no issuances listed for " + wmo };
-  const newest = items.slice().sort((a, b) => String(b.issuanceTime || "").localeCompare(String(a.issuanceTime || "")))[0];
+  const mine = list.items.filter((it) => String(it.wmoCollectiveId || "").toUpperCase() === wmo);
+  if (!mine.length) {
+    const seen = [...new Set(list.items.map((it) => it.wmoCollectiveId).filter(Boolean))].join(",") || "none";
+    return { ok: false, status: list.status, latencyMs: Date.now() - t0, error: `no ${wmo} issuance in the TWO list (collectives present: ${seen})` };
+  }
+  const newest = mine.slice().sort((a, b) => String(b.issuanceTime || "").localeCompare(String(a.issuanceTime || "")))[0];
   const href = newest["@id"] || newest.id;
   if (!href) return { ok: false, status: list.status, latencyMs: Date.now() - t0, error: "issuance carried no id" };
   const doc = await getJSON(href, { headers: { Accept: "application/ld+json" } });

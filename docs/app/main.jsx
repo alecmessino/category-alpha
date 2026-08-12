@@ -30,6 +30,36 @@ function Anno({ tone, icon, title, desc }) {
 }
 
 // Cinematic terminal empty state — honest awaiting-telemetry, per the design spec.
+/* Genesis watch — areas NHC is watching that are not yet classified cyclones.
+   This lived inside the awaiting-telemetry block, which meant it disappeared the moment
+   one of these areas became a storm. That is backwards: the day a wave gets a name is
+   the day the two behind it matter most, because the season-count ladders price off the
+   whole queue, not off the lead system. It renders wherever the board is. */
+function GenesisWatch({ compact }) {
+  const areas = (window.MT && MT._outlook) || [];
+  if (!areas.length) return null;
+  const tone = (p) => ((p ?? 0) >= 70 ? "var(--neg)" : (p ?? 0) >= 40 ? "var(--warn)" : "var(--text-2)");
+  return (
+    <div style={{ margin: compact ? "0 0 14px" : "14px 0", padding: "11px 13px", border: "1px solid var(--border-strong)",
+      borderLeft: "3px solid var(--warn)", borderRadius: 8, background: "var(--surface-sunken)",
+      fontFamily: "var(--font-mono)", fontSize: 12.5, lineHeight: 1.7, color: "var(--text-2)" }}>
+      <div style={{ color: "var(--warn)", fontWeight: 800, letterSpacing: 1.4, fontSize: 11 }}>GENESIS WATCH — NHC TROPICAL WEATHER OUTLOOK</div>
+      {areas.map((a) => (
+        <div key={a.basin + (a.id || a.n)} style={{ display: "flex", gap: 10, marginTop: 5, flexWrap: "wrap", alignItems: "baseline" }}>
+          <span style={{ color: tone(a.pct7d), fontWeight: 800, minWidth: 62 }}>{a.pct7d ?? "?"}% / 7d</span>
+          <span style={{ color: "var(--text-2)", minWidth: 62 }}>{a.pct48 ?? "?"}% / 48h</span>
+          <span style={{ color: "var(--text-1)" }}>{a.id ? a.id + " · " : ""}{a.title}</span>
+          <span style={{ color: "var(--text-2)", opacity: .8 }}>{a.basin}</span>
+        </div>
+      ))}
+      <div style={{ marginTop: 7, opacity: .9, lineHeight: 1.5 }}>
+        NHC formation probabilities, quoted as published. These systems are not yet classified, so
+        they carry no advisory, track or cone — CurrentStorms.json is silent on them by design.
+      </div>
+    </div>
+  );
+}
+
 function AwaitingTelemetry({ feeds, generatedAt, note }) {
   const line = "──────────────────────────────────────────────";
   return (
@@ -58,28 +88,7 @@ function AwaitingTelemetry({ feeds, generatedAt, note }) {
             <div style={{ marginTop: 6, color: "var(--warn)", lineHeight: 1.55 }}>{MTC.claim("macro.mechanism").text}</div>
           </div>
         )}
-        {/* Genesis watch. The reason the storm list is empty is not that nothing is
-            happening — it is that nothing has been CLASSIFIED yet. Percentages are
-            NHC's, quoted as published. */}
-        {window.MT && (MT._outlook || []).length > 0 && (
-          <div style={{ margin: "14px 0", padding: "11px 13px", border: "1px solid var(--border-strong)",
-            borderLeft: "3px solid var(--warn)", borderRadius: 8, background: "var(--surface-sunken)" }}>
-            <div style={{ color: "var(--warn)", fontWeight: 800, letterSpacing: 1.4, fontSize: 11 }}>GENESIS WATCH — NHC TROPICAL WEATHER OUTLOOK</div>
-            {MT._outlook.map((a) => (
-              <div key={a.basin + (a.id || a.n)} style={{ display: "flex", gap: 10, marginTop: 5, flexWrap: "wrap", alignItems: "baseline" }}>
-                <span style={{ color: (a.pct7d ?? 0) >= 70 ? "var(--neg)" : (a.pct7d ?? 0) >= 40 ? "var(--warn)" : "var(--text-2)",
-                  fontWeight: 800, minWidth: 62 }}>{a.pct7d ?? "?"}% / 7d</span>
-                <span style={{ color: "var(--text-2)", minWidth: 62 }}>{a.pct48 ?? "?"}% / 48h</span>
-                <span style={{ color: "var(--text-1)" }}>{a.id ? a.id + " · " : ""}{a.title}</span>
-                <span style={{ color: "var(--text-2)", opacity: .8 }}>{a.basin}</span>
-              </div>
-            ))}
-            <div style={{ marginTop: 7, color: "var(--text-2)", opacity: .9, lineHeight: 1.5 }}>
-              NHC formation probabilities, quoted as published. These systems are not yet classified, so
-              they carry no advisory, track or cone — CurrentStorms.json is silent on them by design.
-            </div>
-          </div>
-        )}
+        <GenesisWatch />
         <div style={{ marginTop: 14 }}>Pipeline Status: <span style={{ color: "var(--pos)" }}>INGESTION READY</span></div>
         <div>Last refresh: <span style={{ color: "var(--text-1)" }}>{generatedAt ? (fmtAgo(generatedAt) + " (" + generatedAt.replace("T", " ").replace(/\..*/, "Z") + ")") : "awaiting first scheduled refresh"}</span></div>
         {note && <div style={{ marginTop: 10, color: "var(--text-2)", maxWidth: 640 }}>{note}</div>}
@@ -354,6 +363,10 @@ function MillibarTerminalApp() {
 
         {/* 1 + 2 — what changed, and whether to trust it */}
         <window.MT_Situation dense={dense} />
+
+        {/* With a storm on the board the awaiting-telemetry block is gone, and the watch
+            list would go with it. Surface it here instead, above the queue it feeds. */}
+        {S && <GenesisWatch compact />}
 
         {/* 4 + 3 — what needs you, and what it touches. This is the hero row now;
             the map moved below it, because the product stopped being the data and

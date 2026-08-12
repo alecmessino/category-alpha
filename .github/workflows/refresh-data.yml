@@ -83,6 +83,15 @@ jobs:
       - name: Test outlook parser
         run: node scripts/test-outlook.mjs
 
+      # The JSX modules are transformed in the browser — there is no build step, so
+      # nothing parses them between an editor and the permanent URL. An unbalanced brace
+      # does not fail anything; it renders a blank page while the pipeline underneath
+      # keeps committing healthy data. This runs the browser's own parser first.
+      - name: Check JSX parses
+        run: |
+          npm i --silent --no-fund --no-audit --no-save @babel/core @babel/preset-react
+          node scripts/check-jsx.mjs
+
       # Every visible claim must have a provenance owner. This fails the build if
       # capability / liveness language reappears as a literal inside a component
       # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of
