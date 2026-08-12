@@ -1,87 +1,14 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-12T18:10:02.122Z",
+  "ranAt": "2026-08-12T19:04:36.611Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "9ce2d898e84d03869c69f754616c3619938785d4",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31626232616",
-  "ok": false,
-  "passed": 8,
+  "sha": "67c4fd739e5a02b38ff7250137a31b9eb58c8b77",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31630789491",
+  "ok": true,
+  "passed": 26,
   "total": 26,
-  "failures": [
-    {
-      "check": "live URL responds",
-      "detail": "HTTP 503 at https://alecmessino.github.io/category-alpha/"
-    },
-    {
-      "check": "app mounted",
-      "detail": "{\"MT\":false,\"MTX\":false,\"MTC\":false}"
-    },
-    {
-      "check": "served snapshot is fresh",
-      "detail": "null · nullm old"
-    },
-    {
-      "check": "renders: Situation",
-      "detail": ""
-    },
-    {
-      "check": "renders: Attention",
-      "detail": ""
-    },
-    {
-      "check": "renders: Board Impact",
-      "detail": ""
-    },
-    {
-      "check": "renders: Term structure",
-      "detail": ""
-    },
-    {
-      "check": "renders: Posterior stack",
-      "detail": ""
-    },
-    {
-      "check": "renders: Evidence Matrix",
-      "detail": ""
-    },
-    {
-      "check": "renders: Signal Register",
-      "detail": ""
-    },
-    {
-      "check": "renders: Market board",
-      "detail": ""
-    },
-    {
-      "check": "renders: Observability",
-      "detail": ""
-    },
-    {
-      "check": "storm block swaps correctly",
-      "detail": "-1 storm(s) · notice=false commandCentre=false"
-    },
-    {
-      "check": "edge book renders and ranks nothing it cannot support",
-      "detail": "undefined ranked of undefined candidates · undefined/undefined anchored · unanchored-ranked=undefined negativeEV=undefined overStaked=undefined dupLadders=undefined accounted=undefined"
-    },
-    {
-      "check": "all markets carried",
-      "detail": "0 contracts · 0 series · droppedForCap=0"
-    },
-    {
-      "check": "order book shows depth",
-      "detail": ""
-    },
-    {
-      "check": "no failed same-origin requests",
-      "detail": "HTTP 503 /category-alpha/"
-    },
-    {
-      "check": "no console errors from our code",
-      "detail": "Failed to load resource: the server responded with a status of 503 ()"
-    }
-  ],
-  "thirdPartyFailures": 0,
+  "failures": [],
+  "thirdPartyFailures": 2,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -90,102 +17,102 @@
     },
     {
       "check": "live URL responds",
-      "pass": false,
-      "detail": "HTTP 503 at https://alecmessino.github.io/category-alpha/"
+      "pass": true,
+      "detail": "HTTP 200 at https://alecmessino.github.io/category-alpha/"
     },
     {
       "check": "app mounted",
-      "pass": false,
-      "detail": "{\"MT\":false,\"MTX\":false,\"MTC\":false}"
+      "pass": true,
+      "detail": "{\"MT\":true,\"MTX\":true,\"MTC\":true}"
     },
     {
       "check": "served snapshot is fresh",
-      "pass": false,
-      "detail": "null · nullm old"
+      "pass": true,
+      "detail": "2026-08-12T18:52:18.371Z · 12m old"
     },
     {
       "check": "renders: Situation",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Attention",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Board Impact",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Term structure",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Posterior stack",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Evidence Matrix",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Signal Register",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Market board",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Observability",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "storm block swaps correctly",
-      "pass": false,
-      "detail": "-1 storm(s) · notice=false commandCentre=false"
+      "pass": true,
+      "detail": "2 storm(s) · notice=false commandCentre=true"
     },
     {
       "check": "genesis watch matches the outlook feed",
       "pass": true,
-      "detail": "0 area(s) · block=false"
+      "detail": "4 area(s) · block=true"
     },
     {
       "check": "edge book renders and ranks nothing it cannot support",
-      "pass": false,
-      "detail": "undefined ranked of undefined candidates · undefined/undefined anchored · unanchored-ranked=undefined negativeEV=undefined overStaked=undefined dupLadders=undefined accounted=undefined"
+      "pass": true,
+      "detail": "8 ranked of 24 candidates · 116/151 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "all markets carried",
-      "pass": false,
-      "detail": "0 contracts · 0 series · droppedForCap=0"
+      "pass": true,
+      "detail": "151 contracts · 15 series · droppedForCap=0"
     },
     {
       "check": "board grouped by series",
       "pass": true,
-      "detail": "0 group headers vs 0 series"
+      "detail": "15 group headers vs 15 series"
     },
     {
       "check": "resting depth populated",
       "pass": true,
-      "detail": "0/0 carry depth"
+      "detail": "151/151 carry depth"
     },
     {
       "check": "fillable cap priced at the ask",
       "pass": true,
-      "detail": "no book to sample"
+      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 143568 × $0.01 = $1436"
     },
     {
       "check": "order book shows depth",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
@@ -200,8 +127,8 @@
     },
     {
       "check": "no failed same-origin requests",
-      "pass": false,
-      "detail": "HTTP 503 /category-alpha/"
+      "pass": true,
+      "detail": "all app assets loaded"
     },
     {
       "check": "no page errors",
@@ -210,8 +137,8 @@
     },
     {
       "check": "no console errors from our code",
-      "pass": false,
-      "detail": "Failed to load resource: the server responded with a status of 503 ()"
+      "pass": true,
+      "detail": "none"
     }
   ]
 }
