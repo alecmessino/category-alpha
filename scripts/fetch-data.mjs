@@ -145,8 +145,12 @@ const TWO_SOURCES = [
   { basin: "atlantic", name: "Atlantic TWO (NWS API)", kind: "nws", wmo: "ABNT20" },
   { basin: "atlantic", name: "Atlantic TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOAT.shtml" },
   { basin: "atlantic", name: "Atlantic TWO (rss)", url: "https://www.nhc.noaa.gov/index-at.xml" },
+  /* ABCP20 was here and is gone: the NHC-located TWO list carries ABNT20, ABPZ20/21 and
+     the ACPN/ACCA collectives, never ABCP20 — the central Pacific outlook is issued by
+     CPHC Honolulu, not Miami. It cost nothing, because the eastern Pacific product
+     already carries the central Pacific areas (CP93 came through ABPZ20), but a source
+     that cannot exist should not sit in the health panel as a standing failure. */
   { basin: "pacific",  name: "E/C Pacific TWO (NWS API)", kind: "nws", wmo: "ABPZ20" },
-  { basin: "pacific",  name: "Central Pacific TWO (NWS API)", kind: "nws", wmo: "ABCP20" },
   { basin: "pacific",  name: "E/C Pacific TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOEP.shtml" },
   { basin: "pacific",  name: "E/C Pacific TWO (rss)", url: "https://www.nhc.noaa.gov/index-ep.xml" },
 ];

@@ -162,6 +162,20 @@ const probe = await page.evaluate(() => {
       implied: +(biggest.liquidity / (biggest.depth.askSize * (biggest.depth.notional || 1))).toFixed(4),
       fillable: biggest.liquidity } : null,
     orderBookLive: /TOP OF BOOK|BID SIZE/i.test(T) && !/KELLY SIZING — UNAVAILABLE/.test(T),
+    /* Feed to pixels for the outlook. The board reported a quiet basin for days while
+       NHC had three Atlantic areas under watch, one at 80% over seven days, because
+       the parser yielded nothing and nothing downstream could tell that apart from a
+       genuinely quiet basin. This asserts the published numbers reach the page. */
+    genesis: (() => {
+      const areas = (MT && MT._outlook) || [];
+      return {
+        count: areas.length,
+        blockShown: /GENESIS WATCH/.test(T),
+        missing: areas
+          .filter((a) => !(T.includes(a.title) && (a.pct7d == null || T.includes(a.pct7d + "%"))))
+          .map((a) => a.id || a.title),
+      };
+    })(),
     unregisteredClaim: /UNREGISTERED CLAIM|CLAIM ERROR/.test(T),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   };
@@ -180,6 +194,15 @@ const stormState = probe.storms === 0
   : (probe.commandCentre && !probe.awaitingNotice);
 add("storm block swaps correctly", stormState,
   `${probe.storms} storm(s) · notice=${probe.awaitingNotice} commandCentre=${probe.commandCentre}`);
+
+/* Both directions. Areas under watch must appear; a genuinely quiet basin must not
+   render an empty watch block. */
+add("genesis watch matches the outlook feed",
+  probe.genesis.count > 0
+    ? (probe.genesis.blockShown && probe.genesis.missing.length === 0)
+    : !probe.genesis.blockShown,
+  `${probe.genesis.count} area(s) · block=${probe.genesis.blockShown}` +
+  (probe.genesis.missing.length ? ` · NOT RENDERED: ${probe.genesis.missing.join(", ")}` : ""));
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,
   `${probe.contracts} contracts · ${probe.seriesCount} series · droppedForCap=${probe.droppedForCap}`);
