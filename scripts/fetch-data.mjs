@@ -130,18 +130,46 @@ async function fetchStorms() {
  * them, and we do not convert them into anything else.
  */
 /* Source list, corrected by evidence rather than by guessing again.
-   The tgftp raw paths I reached for returned 404 — that mirror is gone, so they are
-   removed rather than left in as dead attempts. The .shtml pages DO return 200 and DO
-   contain the product; it simply sits below ~35 lines of site navigation, and the
-   product's line breaks do not survive tag-stripping unless <br> and block closes are
-   converted to newlines first. That is the actual defect. The NHC RSS feeds carry the
-   same text and are kept as a second source. */
+   Three rounds of evidence got us here. The tgftp raw paths 404 — that mirror is gone.
+   The .shtml pages return 200, but a captured sample showed the anchor landing in ~35
+   lines of site navigation, so scraping them is a bet on page furniture staying put.
+   The NHC RSS feeds return 200 and carry the outlook, but as escaped markup inside a
+   channel that also advertises "There are no tropical cyclones at this time" — a line
+   about CLASSIFIED systems that says nothing about what is under watch.
+
+   So the primary source is now the NWS product API, which serves the identical AWIPS
+   product as a plain-text field in JSON. No markup, no navigation, no scraping. The two
+   scrapes stay behind it as fallbacks: if the API changes shape, the board degrades to
+   a page that has been serving this product for twenty years rather than to nothing. */
 const TWO_SOURCES = [
+  { basin: "atlantic", name: "Atlantic TWO (NWS API)", kind: "nws", wmo: "ABNT20" },
   { basin: "atlantic", name: "Atlantic TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOAT.shtml" },
   { basin: "atlantic", name: "Atlantic TWO (rss)", url: "https://www.nhc.noaa.gov/index-at.xml" },
+  { basin: "pacific",  name: "E/C Pacific TWO (NWS API)", kind: "nws", wmo: "ABPZ20" },
+  { basin: "pacific",  name: "Central Pacific TWO (NWS API)", kind: "nws", wmo: "ABCP20" },
   { basin: "pacific",  name: "E/C Pacific TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOEP.shtml" },
   { basin: "pacific",  name: "E/C Pacific TWO (rss)", url: "https://www.nhc.noaa.gov/index-ep.xml" },
 ];
+
+/* The NWS product API is a two-step: list the issuances of a WMO collective, then fetch
+   the newest one for its productText. Returns the same {ok,status,latencyMs,text} shape
+   as getText so fetchOutlook does not have to care which kind of source it is holding. */
+async function fetchNwsProduct(wmo) {
+  const t0 = Date.now();
+  const list = await getJSON(`https://api.weather.gov/products/types/${wmo}/locations/NHC`,
+    { headers: { Accept: "application/ld+json" } });
+  if (!list.ok) return { ok: false, status: list.status, latencyMs: Date.now() - t0, error: "list: " + (list.error || "?") };
+  const items = (list.json && (list.json["@graph"] || list.json.graph)) || [];
+  if (!items.length) return { ok: false, status: list.status, latencyMs: Date.now() - t0, error: "no issuances listed for " + wmo };
+  const newest = items.slice().sort((a, b) => String(b.issuanceTime || "").localeCompare(String(a.issuanceTime || "")))[0];
+  const href = newest["@id"] || newest.id;
+  if (!href) return { ok: false, status: list.status, latencyMs: Date.now() - t0, error: "issuance carried no id" };
+  const doc = await getJSON(href, { headers: { Accept: "application/ld+json" } });
+  if (!doc.ok) return { ok: false, status: doc.status, latencyMs: Date.now() - t0, error: "product: " + (doc.error || "?") };
+  const text = doc.json && doc.json.productText;
+  if (!text) return { ok: false, status: doc.status, latencyMs: Date.now() - t0, error: "product carried no productText" };
+  return { ok: true, status: doc.status, latencyMs: Date.now() - t0, text, issuanceTime: newest.issuanceTime || null };
+}
 
 /* &amp; is decoded LAST so "&amp;lt;" survives as "&lt;" rather than becoming a tag. */
 function decodeEntities(s) {
@@ -194,38 +222,60 @@ function parseTWO(text, basin) {
   return { basin, issued: issuedM ? issuedM[1].replace(/\s+/g, " ") : null, areas };
 }
 
+/* Why a zero-area response was zero, answered in ONE cycle rather than three.
+   The previous samples were guesses at where the product lived and both landed in site
+   navigation. This does not guess: it reports whether the product's own marker phrases
+   are present at all, how many headings the split regex can see, and — if the marker is
+   there — the exact bytes around it with newlines and non-breaking spaces made visible.
+   Either the text is absent (wrong source) or it is present and the window shows why the
+   anchors failed. There is no third answer for this to be ambiguous about. */
+function diagnoseTWO(raw) {
+  const flat = stripHtml(raw);
+  const vis = (s) => s.replace(/ /g, "␣").replace(/\n/g, " ⏎ ").replace(/[ \t]+/g, " ");
+  const d = {
+    bytes: String(raw || "").length,
+    hasFormationChance: /Formation chance/i.test(flat),
+    hasNotExpected: /not expected during the next\s*\d*\s*days?/i.test(flat),
+    headingsVisibleToSplit: (flat.match(/^[ \t]*\d+\.[ \t]+.+?:[ \t ]*$/gm) || []).length,
+  };
+  const at = flat.search(/Formation chance/i);
+  if (at > -1) d.window = vis(flat.slice(Math.max(0, at - 320), at + 200));
+  else {
+    // No marker at all: show what the document does carry near the outlook heading.
+    const h = flat.search(/For the (North Atlantic|eastern and central North Pacific)/i);
+    d.window = vis(flat.slice(h > -1 ? h : 0, (h > -1 ? h : 0) + 420));
+  }
+  return d;
+}
+
 async function fetchOutlook() {
   const out = { ok: false, source: "NHC Tropical Weather Outlook", areas: [], attempts: [] };
   const done = new Set();                       // first source to yield areas wins per basin
   for (const src of TWO_SOURCES) {
     if (done.has(src.basin)) continue;
-    const r = await getText(src.url);
+    const r = src.kind === "nws" ? await fetchNwsProduct(src.wmo) : await getText(src.url);
     if (!r.ok) { out.attempts.push({ source: src.name, ok: false, status: r.status, note: r.error }); continue; }
     let parsed = null;
     try { parsed = parseTWO(r.text, src.basin); } catch (e) { parsed = null; }
     if (!parsed) { out.attempts.push({ source: src.name, ok: false, status: r.status, note: "parse failed" }); continue; }
-    /* When the fetch succeeds but nothing parses, the text is the evidence. Capture the
-       first lines as received so the next cycle explains itself instead of needing
-       another guess. A genuinely quiet basin also parses to zero, so the sample is what
-       distinguishes "nothing to report" from "parser is behind the product". */
-    /* Sample from the PRODUCT, not from the top of the document. The first attempt at
-       this captured 40 lines of "Home / Mobile Site" navigation and told me nothing. */
-    let sample = null;
-    if (parsed.areas.length === 0) {
-      const flat = stripHtml(r.text);
-      const at = flat.search(/Tropical Weather Outlook/i);
-      sample = flat.slice(at > -1 ? at : 0)
-        .split(/\n/).map((l) => l.replace(/\s+$/, "")).filter((l) => l.trim())
-        .slice(0, 25).join(" \u23ce ").slice(0, 700);
-    }
+    /* A fetch that succeeds and parses nothing is the case that has cost three cycles.
+       A genuinely quiet basin also parses to zero, so the diagnostic is what separates
+       "nothing to report" from "the parser is behind the product". */
+    const quiet = /not expected during the next\s*\d*\s*days?/i.test(stripHtml(r.text));
     out.attempts.push({ source: src.name, ok: true, status: r.status, count: parsed.areas.length,
       note: parsed.areas.length + " area(s)" + (parsed.issued ? " · issued " + parsed.issued : ""),
-      quietOrUnparsed: parsed.areas.length === 0 ? (/not expected during the next 7 days/i.test(stripHtml(r.text)) ? "quiet basin — product says formation not expected" : "NO AREAS PARSED and the product does not say 'not expected' — parser may be behind") : null,
-      sample });
+      quietOrUnparsed: parsed.areas.length === 0
+        ? (quiet ? "quiet basin — product says formation not expected"
+                 : "NO AREAS PARSED and the product does not say 'not expected' — parser may be behind")
+        : null,
+      diag: parsed.areas.length === 0 ? diagnoseTWO(r.text) : null });
     if (parsed.areas.length) {
       done.add(src.basin);
-      out.areas.push(...parsed.areas.map((a) => Object.assign(a, { issued: parsed.issued, url: src.url })));
-    } else if (/not expected during the next 7 days/i.test(stripHtml(r.text))) {
+      out.areas.push(...parsed.areas.map((a) => Object.assign(a, {
+        issued: parsed.issued,
+        url: src.url || `https://api.weather.gov/products/types/${src.wmo}/locations/NHC`,
+      })));
+    } else if (quiet) {
       done.add(src.basin);                      // genuinely quiet; do not try the fallback
     }
     out.status = r.status; out.latencyMs = r.latencyMs;
@@ -1298,5 +1348,5 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
   main().catch((e) => { console.error("[millibar] fatal:", e); process.exit(1); });
 }
 
-export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity, parseTWO,
+export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity, parseTWO, diagnoseTWO,
          priceOf, askPriceOf, spreadOf, depthOf, liquidityOf, volumeOf, volume24hOf, openInterestOf, notionalOf };

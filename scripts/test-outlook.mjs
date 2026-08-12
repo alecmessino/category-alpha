@@ -11,7 +11,7 @@
  *
  * Run: node scripts/test-outlook.mjs
  */
-import { parseTWO } from "./fetch-data.mjs";
+import { parseTWO, diagnoseTWO } from "./fetch-data.mjs";
 
 let fail = 0;
 const eq = (name, got, want) => {
@@ -196,6 +196,21 @@ eq("garbage", parseTWO("not a product at all", "atlantic").areas.length, 0);
 eq("empty", parseTWO("", "atlantic").areas.length, 0);
 ck("a heading with no percentages is not treated as an area",
    parseTWO("1. Somewhere (AL99):\nprose with no formation lines\n", "atlantic").areas.length === 0);
+
+console.log("\n[9] the zero-area diagnostic is total — it runs on anything and answers the question");
+/* This only ever executes on the failure path, which is exactly when it must not throw:
+   a diagnostic that crashes takes the whole outlook feed down with it. */
+for (const [label, input] of [["garbage", "not a product"], ["empty", ""], ["null", null], ["the real product", ATL]]) {
+  let d = null, threw = null;
+  try { d = diagnoseTWO(input); } catch (e) { threw = String(e && e.message || e); }
+  ck("survives " + label, !threw, threw || "");
+  if (d) ck("  reports a window for " + label, typeof d.window === "string");
+}
+const dq = diagnoseTWO(`Tropical cyclone formation is not expected during the next 7 days.`);
+ck("recognises a quiet product", dq.hasNotExpected === true && dq.hasFormationChance === false);
+const dl = diagnoseTWO(ATL);
+ck("sees the three headings in the real product", dl.headingsVisibleToSplit === 3, "got " + dl.headingsVisibleToSplit);
+ck("finds the formation marker in the real product", dl.hasFormationChance === true);
 
 console.log(fail ? `\n${fail} FAILURE(S)\n` : "\nall assertions passed\n");
 process.exit(fail ? 1 : 0);
