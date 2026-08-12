@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-12T04:12:03.656Z",
+  "generatedAt": "2026-08-12T04:17:41.747Z",
   "stepMin": 10,
   "note": "No active tropical cyclones and no areas under watch — honest current condition, not an error.",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 243,
+      "latencyMs": 1229,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "When will the next hurricane form? | Before Sep 15, | px=0.835",
-            "When will the next hurricane form? | Before Sep 1,  | px=0.435",
-            "When will the next hurricane form? | Before Oct 15, | px=0.730",
-            "When will the next hurricane form? | Before Oct 1,  | px=0.900",
-            "When will the next hurricane form? | Before Nov 15, | px=0.605",
-            "When will the next hurricane form? | Before Nov 1,  | px=0.755"
+            "Will Wilfred be the first named hurrican | Wilfred | px=0.005",
+            "Will Vicky be the first named hurricane  | Vicky | px=0.005",
+            "Will Teddy be the first named hurricane  | Teddy | px=0.005",
+            "Will Sally be the first named hurricane  | Sally | px=0.005",
+            "Will Rene be the first named hurricane i | Rene | px=0.005",
+            "Will Paulette be the first named hurrica | Paulette | px=0.005"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"192.41\",\"volume_24h_fp\":\"25.00\",\"volume_fp\":\"224.70\"},\"px\":{\"last_price_dollars\":\"0.7500\",\"no_ask_dollars\":\"0.2300\",\"no_bid_dollars\":\"0.1000\",\"previous_price_dollars\":\"0.7500\",\"previous_yes_ask_dollars\":\"0.9400\",\"previous_yes_bid_dollars\":\"0.7900\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.9000\",\"yes_ask_size_fp\":\"5.00\",\"yes_bid_dollars\":\"0.7700\",\"yes_bid_size_fp\":\"5.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2100.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"2413.36\"},\"px\":{\"last_price_dollars\":\"0.0100\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0100\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"5793.20\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
         }
       ]
     },
@@ -66,7 +66,7 @@
       "ok": true,
       "status": 200,
       "source": "HURDAT2 1991–2025",
-      "latencyMs": 91,
+      "latencyMs": 206,
       "count": 35,
       "note": "35-season Atlantic climatology (baseline, not a skill forecast) — seasonal count contracts only; per-storm intensity has no fitted model"
     },
@@ -196,7 +196,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 290,
+      "latencyMs": 1100,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -207,8 +207,14 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 0,
       "note": "0 area(s) under watch · 0 Atlantic",
-      "latencyMs": 52,
+      "latencyMs": 213,
       "attempts": [
+        {
+          "source": "Atlantic TWO (NWS API)",
+          "ok": false,
+          "status": 200,
+          "note": "no issuances listed for ABNT20"
+        },
         {
           "source": "Atlantic TWO (html)",
           "ok": true,
@@ -216,7 +222,13 @@
           "count": 0,
           "note": "0 area(s) · issued 800 PM EDT Tue Aug 11 2026",
           "quietOrUnparsed": "NO AREAS PARSED and the product does not say 'not expected' — parser may be behind",
-          "sample": "Tropical Weather Outlooks ⏎             Marine Products ⏎             Rip Currents Map ⏎             RSS Feeds ⏎             GIS Products ⏎             Alternate Formats ⏎             Tropical Cyclone Product Descriptions ⏎             Tropical Cyclone Product Examples ⏎             Marine Product Descriptions ⏎             Data & Tools ⏎             Satellite Imagery ⏎             Radar Imagery ⏎             Aircraft Reconnaissance ⏎             Tropical Analysis Tools ⏎             Experimental Products ⏎             Lat/Lon Distance Calculator ⏎             Blank Tracking Maps ⏎             Educational Resources ⏎                 Be Prepared! ⏎ NWS Hurricane Prep Week ⏎             Outrea"
+          "diag": {
+            "bytes": 24544,
+            "hasFormationChance": true,
+            "hasNotExpected": false,
+            "headingsVisibleToSplit": 0,
+            "window": "ted around 700 miles southwest ⏎ of the Cabo Verde Islands. Environmental conditions are forecast to ⏎ be conducive for development during the next few days, and a ⏎ tropical depression will likely form within a couple of days while ⏎ the system moves westward to west-northwestward across the central ⏎ tropical Atlantic. ⏎ * Formation chance through 48 hours...medium...60 percent. ⏎ * Formation chance through 7 days...high...80 percent. ⏎ ⏎ Central Subtropical Atlantic (AL93): ⏎ Satellite images indicate that the low-level circu"
+          }
         },
         {
           "source": "Atlantic TWO (rss)",
@@ -225,7 +237,25 @@
           "count": 0,
           "note": "0 area(s)",
           "quietOrUnparsed": "NO AREAS PARSED and the product does not say 'not expected' — parser may be behind",
-          "sample": "Tropical Weather Outlook ⏎       Tue, 11 Aug 2026 23:40:48 GMT ⏎       https://www.nhc.noaa.gov/gtwo.php?basin=atlc ⏎       https://www.nhc.noaa.gov/gtwo.php?basin=atlc&202608112340 ⏎       nhcwebmaster@noaa.gov (NHC Webmaster) ⏎       There are no tropical cyclones at this time. ⏎       No tropical cyclones as of Wed, 12 Aug 2026 03:21:05 GMT ⏎       Thu, 13 Aug 2026 11:40:48 GMT ⏎       https://www.nhc.noaa.gov/ ⏎       https://www.nhc.noaa.gov/ ⏎       nhcwebmaster@noaa.gov (NHC Webmaster)"
+          "diag": {
+            "bytes": 3882,
+            "hasFormationChance": false,
+            "hasNotExpected": false,
+            "headingsVisibleToSplit": 0,
+            "window": " ⏎ ⏎ ⏎ Wed, 12 Aug 2026 04:15:06 GMT ⏎ NHC Atlantic ⏎ Active tropical cyclones in the Atlantic, Caribbean, and the Gulf of America ⏎ https://www.nhc.noaa.gov/ ⏎ none ⏎ nhcwebmaster@noaa.gov (NHC Webmaster) ⏎ en-us ⏎ nhcwebmaster@noaa.gov (NHC Webmaster) ⏎ ⏎ https://www.nhc.noaa.gov/gifs/xml_logo_nhc.gif ⏎ https://www.nhc.noaa.gov/ ⏎ NHC Atlantic ⏎ NOAA logo ⏎ 95 ⏎ 45 ⏎ ⏎ "
+          }
+        },
+        {
+          "source": "E/C Pacific TWO (NWS API)",
+          "ok": false,
+          "status": 200,
+          "note": "no issuances listed for ABPZ20"
+        },
+        {
+          "source": "Central Pacific TWO (NWS API)",
+          "ok": false,
+          "status": 200,
+          "note": "no issuances listed for ABCP20"
         },
         {
           "source": "E/C Pacific TWO (html)",
@@ -234,7 +264,13 @@
           "count": 0,
           "note": "0 area(s) · issued 500 PM PDT Tue Aug 11 2026",
           "quietOrUnparsed": "NO AREAS PARSED and the product does not say 'not expected' — parser may be behind",
-          "sample": "Tropical Weather Outlooks ⏎             Marine Products ⏎             Rip Currents Map ⏎             RSS Feeds ⏎             GIS Products ⏎             Alternate Formats ⏎             Tropical Cyclone Product Descriptions ⏎             Tropical Cyclone Product Examples ⏎             Marine Product Descriptions ⏎             Data & Tools ⏎             Satellite Imagery ⏎             Radar Imagery ⏎             Aircraft Reconnaissance ⏎             Tropical Analysis Tools ⏎             Experimental Products ⏎             Lat/Lon Distance Calculator ⏎             Blank Tracking Maps ⏎             Educational Resources ⏎                 Be Prepared! ⏎ NWS Hurricane Prep Week ⏎             Outrea"
+          "diag": {
+            "bytes": 24164,
+            "hasFormationChance": true,
+            "hasNotExpected": false,
+            "headingsVisibleToSplit": 0,
+            "window": "y remains disorganized. ⏎ Environmental conditions are conducive for further development, and ⏎ a tropical depression or storm is expected to form on Wednesday ⏎ while the system moves generally west-northwestward at around 15 ⏎ mph. Interests in the Hawaiian Islands should closely monitor the ⏎ progress of this system. ⏎ * Formation chance through 48 hours...high...90 percent. ⏎ * Formation chance through 7 days...high...90 percent. ⏎ ⏎ Western East Pacific (EP99): ⏎ A well-defined low pressure system located about midway betw"
+          }
         },
         {
           "source": "E/C Pacific TWO (rss)",
@@ -243,7 +279,13 @@
           "count": 0,
           "note": "0 area(s)",
           "quietOrUnparsed": "NO AREAS PARSED and the product does not say 'not expected' — parser may be behind",
-          "sample": "Tropical Weather Outlook ⏎       Tue, 11 Aug 2026 23:35:43 GMT ⏎       https://www.nhc.noaa.gov/gtwo.php?basin=epac ⏎       https://www.nhc.noaa.gov/gtwo.php?basin=epac&202608112335 ⏎       nhcwebmaster@noaa.gov (NHC Webmaster) ⏎       There are no tropical cyclones at this time. ⏎       No tropical cyclones as of Wed, 12 Aug 2026 03:21:05 GMT ⏎       Thu, 13 Aug 2026 11:35:43 GMT ⏎       https://www.nhc.noaa.gov/ ⏎       https://www.nhc.noaa.gov/ ⏎       nhcwebmaster@noaa.gov (NHC Webmaster)"
+          "diag": {
+            "bytes": 3471,
+            "hasFormationChance": false,
+            "hasNotExpected": false,
+            "headingsVisibleToSplit": 0,
+            "window": " ⏎ ⏎ ⏎ Wed, 12 Aug 2026 04:15:06 GMT ⏎ NHC Eastern North Pacific ⏎ Active tropical cyclones in the Eastern North Pacific ⏎ https://www.nhc.noaa.gov/ ⏎ none ⏎ nhcwebmaster@noaa.gov (NHC Webmaster) ⏎ en-us ⏎ nhcwebmaster@noaa.gov (NHC Webmaster) ⏎ ⏎ https://www.nhc.noaa.gov/gifs/xml_logo_nhc.gif ⏎ https://www.nhc.noaa.gov/ ⏎ NHC Eastern North Pacific ⏎ NOAA logo ⏎ 95 ⏎ 45 ⏎ "
+          }
         }
       ]
     }
@@ -290,14 +332,14 @@
       ],
       "horizon": "seasonal",
       "strike": 2,
-      "liquidity": 12,
+      "liquidity": 13,
       "spread": 0.02999999999999997,
       "volume": 22925,
       "volume24h": 264.1,
       "openInterest": 8982.14,
       "depth": {
-        "bidSize": 5,
-        "askSize": 34,
+        "bidSize": 89,
+        "askSize": 35,
         "notional": 1
       },
       "proxy": false,
@@ -1690,7 +1732,7 @@
       "short": "Will Cristobal be the first named hurricane…",
       "storm": null,
       "subject": null,
-      "market": 0.425,
+      "market": 0.41,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -1698,14 +1740,14 @@
       "modelLayers": null,
       "horizon": "seasonal",
       "strike": null,
-      "liquidity": 63,
-      "spread": 0.10999999999999999,
+      "liquidity": 1,
+      "spread": 0.12,
       "volume": 11307.47,
       "volume24h": 848.11,
       "openInterest": 5120.96,
       "depth": {
         "bidSize": 5,
-        "askSize": 130.48,
+        "askSize": 1.38,
         "notional": 1
       },
       "proxy": false,
@@ -1845,7 +1887,7 @@
       "openInterest": 3460.61,
       "depth": {
         "bidSize": 7.34,
-        "askSize": 20,
+        "askSize": 20.71,
         "notional": 1
       },
       "proxy": false,
@@ -2054,7 +2096,7 @@
       "short": "Will Lala be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.32,
+      "market": 0.325,
       "model": null,
       "modelSource": null,
       "modelBasis": null,
@@ -2063,7 +2105,7 @@
       "horizon": "seasonal",
       "strike": null,
       "liquidity": 0,
-      "spread": 0.22,
+      "spread": 0.21,
       "volume": 4153,
       "volume24h": 119.3,
       "openInterest": 2502.11,
@@ -2629,7 +2671,7 @@
       "openInterest": 1086.74,
       "depth": {
         "bidSize": 4.54,
-        "askSize": 110,
+        "askSize": 109,
         "notional": 1
       },
       "proxy": false,
