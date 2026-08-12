@@ -224,16 +224,33 @@ function stripHtml(t) {
 
 /* The product is fixed-format text. Each area is "N. Title (ID):" followed by prose
    and two "* Formation chance through ..." lines. An area without an invest ID is
-   normal and keeps id null rather than being skipped. */
+   normal and keeps id null rather than being skipped.
+
+   The NUMBER is optional, and that is not defensiveness \u2014 it is measured. The raw
+   product numbers its areas; the .shtml page marks them up as list items, so the "2."
+   is a CSS marker rather than text and never reaches the parser. A captured diagnostic
+   showed the formation lines present and headings visible to the split at zero, which
+   is exactly that shape. Positional numbering is assigned here instead.
+
+   Loosening the heading cannot invent areas: a candidate is only kept if it carries a
+   published formation percentage, so a stray line ending in a colon is dropped a few
+   lines later. The one line that would otherwise be tempting \u2014 "For the North
+   Atlantic...Caribbean Sea and the Gulf of America:" \u2014 is excluded by name, because it
+   precedes the first area and would otherwise adopt that area's percentages. */
+const TWO_HEADING_SRC = "^[ \\t]*(?:(\\d+)\\.[ \\t]+)?([A-Za-z][^\\n:]{2,90}):[ \\t\\u00a0]*$";
+/* The line introducing the basin also ends in a colon and sits immediately above the
+   first area, so without this it would adopt that area's percentages. */
+const isAreaHeading = (title) => !!title && !/^For the /i.test(String(title).trim());
+
 function parseTWO(text, basin) {
   const t = stripHtml(text).replace(/\r/g, "");
   const issuedM = /^\s*(\d{3,4}\s+(?:AM|PM)\s+[A-Z]{2,4}\s+\w{3}\s+\w{3}\s+\d{1,2}\s+\d{4})\s*$/m.exec(t);
   const areas = [];
-  // Split on the numbered headings, keeping each heading with its body.
-  const parts = t.split(/^[ \t]*(\d+)\.[ \t]+(.+?):[ \t\u00a0]*$/m);
+  const parts = t.split(new RegExp(TWO_HEADING_SRC, "m"));
   for (let i = 1; i + 2 < parts.length + 1; i += 3) {
-    const n = Number(parts[i]), title = (parts[i + 1] || "").trim(), body = parts[i + 2] || "";
-    if (!n || !title) continue;
+    const title = (parts[i + 1] || "").trim(), body = parts[i + 2] || "";
+    const n = Number(parts[i]) || areas.length + 1;   // the page drops the number; keep the order
+    if (!isAreaHeading(title)) continue;
     const pct = (re) => { const m = re.exec(body); return m ? Number(m[1]) : null; };
     const p48 = pct(/Formation chance through 48 hours[.\s]*\w+[.\s]*(\d+)\s*percent/i);
     const p7 = pct(/Formation chance through 7 days[.\s]*\w+[.\s]*(\d+)\s*percent/i);
@@ -264,7 +281,11 @@ function diagnoseTWO(raw) {
     bytes: String(raw || "").length,
     hasFormationChance: /Formation chance/i.test(flat),
     hasNotExpected: /not expected during the next\s*\d*\s*days?/i.test(flat),
-    headingsVisibleToSplit: (flat.match(/^[ \t]*\d+\.[ \t]+.+?:[ \t ]*$/gm) || []).length,
+    /* Counted with the parser's OWN heading pattern. A diagnostic that measures
+       something the parser does not use is how the last three cycles were spent. */
+    headingsVisibleToSplit: (flat.match(new RegExp(TWO_HEADING_SRC, "gm")) || [])
+      .map((l) => l.trim().replace(/^\d+\.\s*/, "").replace(/:$/, ""))
+      .filter(isAreaHeading).length,
   };
   const at = flat.search(/Formation chance/i);
   if (at > -1) d.window = vis(flat.slice(Math.max(0, at - 320), at + 200));

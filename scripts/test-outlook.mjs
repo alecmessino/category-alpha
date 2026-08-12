@@ -191,7 +191,40 @@ eq("RSS 48h", rss.areas[0] && rss.areas[0].pct48, 60);
 eq("RSS 7-day", rss.areas[0] && rss.areas[0].pct7d, 80);
 eq("RSS issued", rss.issued, "800 PM EDT Tue Aug 11 2026");
 
-console.log("\n[8] malformed input degrades to empty rather than inventing areas");
+console.log("\n[8] the .shtml shape — list markup, so the area numbers are CSS and never reach the parser");
+/* This is what production actually served. A captured diagnostic showed the formation
+   lines present, correct line structure, and headings visible to the split at ZERO,
+   because the areas are <li> items whose "1." / "2." is a list marker rather than text.
+   The basin line ends in a colon too and sits directly above the first area, so it must
+   not be mistaken for a heading and adopt AL92's percentages. */
+const LIST = `<div class="textproduct"><pre>Tropical Weather Outlook
+NWS National Hurricane Center Miami FL
+800 PM EDT Tue Aug 11 2026
+
+For the North Atlantic...Caribbean Sea and the Gulf of America:</pre>
+<ol>
+<li>Central Tropical Atlantic (AL92):<br />
+Showers and thunderstorms are showing some signs of organization.<br />
+* Formation chance through 48 hours...medium...60 percent.<br />
+* Formation chance through 7 days...high...80 percent.</li>
+<li>Central Subtropical Atlantic (AL93):<br />
+Satellite images indicate a better-defined low-level circulation.<br />
+* Formation chance through 48 hours...medium...40 percent.<br />
+* Formation chance through 7 days...medium...40 percent.</li>
+</ol></div>`;
+ck("fixture carries no area numbers in its text", !/[12]\.\s*Central/.test(LIST));
+const li = parseTWO(LIST, "atlantic");
+eq("list-markup area count", li.areas.length, 2);
+eq("list-markup IDs", li.areas.map((x) => x.id), ["AL92", "AL93"]);
+eq("list-markup 48h", li.areas.map((x) => x.pct48), [60, 40]);
+eq("list-markup 7-day", li.areas.map((x) => x.pct7d), [80, 40]);
+eq("numbering restored positionally", li.areas.map((x) => x.n), [1, 2]);
+eq("issued still parsed", li.issued, "800 PM EDT Tue Aug 11 2026");
+ck("the basin line did not become an area",
+   !li.areas.some((x) => /^For the /i.test(x.title)), JSON.stringify(li.areas.map((x) => x.title)));
+ck("AL92's percentages stayed with AL92", li.areas[0].pct7d === 80 && li.areas[0].id === "AL92");
+
+console.log("\n[8b] malformed input degrades to empty rather than inventing areas");
 eq("garbage", parseTWO("not a product at all", "atlantic").areas.length, 0);
 eq("empty", parseTWO("", "atlantic").areas.length, 0);
 ck("a heading with no percentages is not treated as an area",
