@@ -67,6 +67,30 @@ eq("central Pacific keeps all three seasons", cp.years, [2001, 2002, 2003]);
 eq("central Pacific counts, zeros included", cp.namedstorms, [0, 1, 0]);
 eq("eastern Pacific keeps the season it had none", ep.namedstorms.length, 3);
 
+console.log("\n[2b] the central Pacific is counted by TRACK, because crossovers keep their EP id");
+/* HURDAT2 numbers a storm for where it FORMED, so a system that develops east of 140W
+   and crosses into the central Pacific carries an EP id for life — while CPHC, and the
+   market's resolution source, count it as a central Pacific storm. Counting on the
+   prefix alone undercounts the basin by exactly the crossovers. */
+const trkAt = (date, status, wind, lon) => `${date}, 0000,  , ${status}, 18.0N, ${lon}, ${String(wind).padStart(3)}, 1000,`;
+const CROSS = [
+  "EP012004,        CROSSER,      2,", trkAt("20040801", "TS", 45, " 130.0W"), trkAt("20040805", "HU", 80, " 150.0W"),
+  "EP022004,         STAYER,      1,", trkAt("20040810", "TS", 50, " 120.0W"),
+  "CP012004,          LOCAL,      1,", trkAt("20040901", "TS", 40, " 160.0W"),
+].join("\n");
+const cpBox = parseHurdat2(CROSS, 2000, 9999, ["CP", "EP"], [-180, -140]);
+const cpPrefix = parseHurdat2(CROSS, 2000, 9999, ["CP"]);
+const epOnly = parseHurdat2(CROSS, 2000, 9999, ["EP"]);
+eq("counting by id alone finds only the storm that formed there", cpPrefix.namedstorms, [1]);
+eq("counting by track finds the crossover too", cpBox.namedstorms, [2]);
+eq("and the crossover's hurricane status comes with it", cpBox.hurricanes, [1]);
+eq("the storm that never went west is excluded", cpBox.namedstorms[0], 2);
+eq("the eastern Pacific still counts both storms that formed east of 140W", epOnly.namedstorms, [2]);
+ck("a crossover counts in BOTH basins, which is how the agencies report it",
+   epOnly.namedstorms[0] === 2 && cpBox.namedstorms[0] === 2);
+eq("the ordered season sequence respects the box too", cpBox.seasonNamed[0].length, 2);
+eq("and the day-of-year view does as well", cpBox.namedstormsAfter(0), [2]);
+
 console.log("\n[3] excludeYear drops the running season so it is never its own climatology");
 eq("2003 excluded", parseHurdat2(HURDAT, 2000, 2003, ["AL"]).years, [2001, 2002]);
 
@@ -119,16 +143,31 @@ console.log("\n[6] the ordinal estimator counts seasons, and the fixture answer 
    1st storm of the season reached hurricane strength in 0 of 3 seasons.
    2nd storm reached hurricane strength in 2 of 3 (2001 Beta, 2003 Beta).
    3rd storm exists in 1 of 3 and was not a hurricane. */
+/* The raw counts assert the counting; the published rates assert the prior. Keeping
+   them separate means a change to the prior cannot quietly mask a counting bug. */
+const J = (hits, n) => (hits + 0.5) / (n + 1);
 const o1 = ordinalOutcome(atl, 1, 0);
-eq("every season has a first storm", o1.pUsed, 1);
-eq("the first storm is never a hurricane here", o1.pHurricane, 0);
+eq("all 3 seasons have a first storm", o1.rawUsed, 3);
+eq("none of those first storms was a hurricane", o1.rawHurricane, 0);
+near("and the published rate is smoothed, not 1.0", o1.pUsed, J(3, 3));
 const o2 = ordinalOutcome(atl, 2, 0);
-near("two of three seasons have a second storm reaching hurricane strength", o2.pHurricane, 2 / 3);
-near("and in both it was the season's first hurricane", o2.pFirstHurricane, 2 / 3);
+eq("2 of 3 seasons have a second storm reaching hurricane strength", o2.rawHurricane, 2);
+eq("in both it was the season's first hurricane", o2.rawFirst, 2);
+near("published as the smoothed rate", o2.pHurricane, J(2, 3));
 const o3 = ordinalOutcome(atl, 3, 0);
-near("only one season reaches a third storm", o3.pUsed, 1 / 3);
-eq("that third storm was not a hurricane", o3.pHurricane, 0);
-ck("a position past every season returns zero rather than throwing", ordinalOutcome(atl, 99, 0).pUsed === 0);
+eq("only one season reaches a third storm", o3.rawUsed, 1);
+eq("that third storm was not a hurricane", o3.rawHurricane, 0);
+
+console.log("\n[6b] a never-observed outcome is not published as impossible");
+/* This is the failure the prior exists for. A raw frequency prints 0.0000 for an
+   outcome absent from the record; against a market quoting 2c the edge book would read
+   a riskless bet with the whole resting size behind it and rank it first. */
+ck("zero occurrences still publishes a positive probability", o3.pHurricane > 0, String(o3.pHurricane));
+near("specifically the Jeffreys rate", o3.pHurricane, J(0, 3));
+ck("and it stays small — the prior corrects, it does not invent", o3.pHurricane < 0.2, String(o3.pHurricane));
+ck("a universally-observed outcome is likewise not published as certain", o1.pUsed < 1, String(o1.pUsed));
+ck("a position past every season is near zero but never exactly zero",
+   ordinalOutcome(atl, 99, 0).pUsed > 0 && ordinalOutcome(atl, 99, 0).rawUsed === 0);
 eq("kRemaining below 1 is refused", ordinalOutcome(atl, 0, 0), null);
 eq("a climatology with no season sequence is refused", ordinalOutcome({ seasonNamed: [] }, 1, 0), null);
 
@@ -139,11 +178,11 @@ console.log("\n[7] day-of-year restricts history to the part of the season still
    Note what is NOT in that list: 2002's Dos is a hurricane forming 20 Aug, but it is an
    EP storm. If the basin filter leaked, this assertion would read 2/3. */
 const late = ordinalOutcome(atl, 1, 220);
-near("the next storm to form is a hurricane in 1 of 3 seasons after 8 August", late.pHurricane, 1 / 3);
-eq("no Atlantic season in the fixture has a SECOND storm left after 8 August", ordinalOutcome(atl, 2, 220).pUsed, 0);
-near("the eastern Pacific's next storm after 8 August is a hurricane in 1 of 3 — Dos", ordinalOutcome(ep, 1, 220).pHurricane, 1 / 3);
+eq("the next storm to form is a hurricane in 1 of 3 seasons after 8 August", late.rawHurricane, 1);
+eq("no Atlantic season in the fixture has a SECOND storm left after 8 August", ordinalOutcome(atl, 2, 220).rawUsed, 0);
+eq("the eastern Pacific's next storm after 8 August is a hurricane in 1 of 3 — Dos", ordinalOutcome(ep, 1, 220).rawHurricane, 1);
 ck("later in the season is not the same question as the whole season",
-   late.pHurricane !== o1.pHurricane, `day0=${o1.pHurricane} day220=${late.pHurricane}`);
+   late.rawHurricane !== o1.rawHurricane, `day0=${o1.rawHurricane} day220=${late.rawHurricane}`);
 
 console.log("\n[8] the per-name anchor refuses every case where the ordinal is the wrong question");
 const clims = { atlantic: atl, epac: ep, cpac: cp };

@@ -461,7 +461,7 @@ function doyOf(yyyymmdd) {
    which is also exactly how NHC draws the 140°W boundary between those two basins.
 
    Defaults to Atlantic so existing callers are unchanged. */
-function parseHurdat2(text, fromYear, excludeYear, basins = ["AL"]) {
+function parseHurdat2(text, fromYear, excludeYear, basins = ["AL"], lonBox = null) {
   const want = new Set(basins.map((b) => String(b).toUpperCase()));
   const byYear = new Map();
   /* Every season the FILE covers, regardless of which basin the storm belongs to.
@@ -469,7 +469,7 @@ function parseHurdat2(text, fromYear, excludeYear, basins = ["AL"]) {
      sample — dropping it would silently delete the quietest seasons and bias every
      central-Pacific probability upward. Seeding the year from any header in the file is
      what keeps those zeros. */
-  const seedYear = (y) => { if (!byYear.has(y)) byYear.set(y, { ts: new Map(), hur: new Map(), maj: new Map() }); };
+  const seedYear = (y) => { if (!byYear.has(y)) byYear.set(y, { ts: new Map(), hur: new Map(), maj: new Map(), box: new Set() }); };
   let curId = null, curYear = null;
   for (const line of text.split(/\r?\n/)) {
     if (!line.trim()) continue;
@@ -485,6 +485,15 @@ function parseHurdat2(text, fromYear, excludeYear, basins = ["AL"]) {
     const status = (f[3] || "").trim();
     const wind = Number((f[6] || "").trim());
     const doyTs = doyOf(f[0]);
+    /* Basin membership by TRACK, not by identifier. HURDAT2 numbers a storm for where it
+       formed, so a system that develops east of 140W and crosses into the central Pacific
+       keeps its EP id for life — while CPHC, and the market's resolution source, count it
+       as a central Pacific storm. Counting on the prefix alone therefore undercounts the
+       basin by exactly the crossovers, which in a strong El Nino is not a small number. */
+    if (lonBox) {
+      const lon = parseLon(f[5]);
+      if (lon != null && lon >= lonBox[0] && lon <= lonBox[1]) byYear.get(curYear).box.add(curId);
+    }
     /* Named storms — tropical/subtropical systems that reached 34 kt. The board
        carries eight KXTROPSTORM rungs that had NO anchor at all, because this
        parser only ever counted hurricanes. "More than 15 Atlantic named storms"
@@ -506,7 +515,11 @@ function parseHurdat2(text, fromYear, excludeYear, basins = ["AL"]) {
   }
   const years = [...byYear.keys()].filter((y) => y >= fromYear && y !== excludeYear).sort((a, b) => a - b);
   if (!years.length) return null;
-  const after = (map, doy) => [...map.values()].filter((d) => d != null && d >= doy).length;
+  /* When a longitude box is in force, only storms that actually entered it count. */
+  const inBox = (y, id) => !lonBox || byYear.get(y).box.has(id);
+  const sized = (y, which) => [...byYear.get(y)[which].keys()].filter((id) => inBox(y, id)).length;
+  const after = (y, which, doy) => [...byYear.get(y)[which].entries()]
+    .filter(([id, d]) => d != null && d >= doy && inBox(y, id)).length;
   /* Each season's named storms in FORMATION ORDER, with what each went on to become.
      This is what makes the per-name markets answerable: a name is the k-th slot on an
      ordered list, so "will Dolly be a hurricane" is "did the 4th named storm of the
@@ -515,20 +528,21 @@ function parseHurdat2(text, fromYear, excludeYear, basins = ["AL"]) {
   const seasonNamed = years.map((y) => {
     const Y = byYear.get(y);
     return [...Y.ts.entries()]
+      .filter(([id]) => inBox(y, id))
       .map(([id, doy]) => ({ doy, hu: Y.hur.has(id), maj: Y.maj.has(id) }))
       .filter((s) => s.doy != null)
       .sort((a, b) => a.doy - b.doy);
   });
   return {
     years, from: years[0], to: years[years.length - 1], seasonNamed,
-    namedstorms: years.map((y) => byYear.get(y).ts.size),
-    hurricanes: years.map((y) => byYear.get(y).hur.size),
-    major: years.map((y) => byYear.get(y).maj.size),
+    namedstorms: years.map((y) => sized(y, "ts")),
+    hurricanes: years.map((y) => sized(y, "hur")),
+    major: years.map((y) => sized(y, "maj")),
     // Seasonal formation dates retained so we can ask: in each past season, how many
     // hurricanes had NOT yet formed by this calendar date?
-    namedstormsAfter: (doy) => years.map((y) => after(byYear.get(y).ts, doy)),
-    hurricanesAfter: (doy) => years.map((y) => after(byYear.get(y).hur, doy)),
-    majorAfter: (doy) => years.map((y) => after(byYear.get(y).maj, doy)),
+    namedstormsAfter: (doy) => years.map((y) => after(y, "ts", doy)),
+    hurricanesAfter: (doy) => years.map((y) => after(y, "hur", doy)),
+    majorAfter: (doy) => years.map((y) => after(y, "maj", doy)),
   };
 }
 
@@ -540,7 +554,9 @@ function parseHurdat2(text, fromYear, excludeYear, basins = ["AL"]) {
 const CLIM_ARCHIVES = [
   { key: "atlantic", file: /hurdat2-1851-\d{4}-\d+\.txt/g, basins: ["AL"], label: "Atlantic" },
   { key: "epac", file: /hurdat2-nepac-\d{4}-\d{4}-\d+\.txt/g, basins: ["EP"], label: "eastern Pacific" },
-  { key: "cpac", file: /hurdat2-nepac-\d{4}-\d{4}-\d+\.txt/g, basins: ["CP"], label: "central Pacific" },
+  /* Both prefixes, filtered to the 140W-180 box: the central Pacific basin as CPHC
+     defines it, which includes systems that formed to the east and crossed in. */
+  { key: "cpac", file: /hurdat2-nepac-\d{4}-\d{4}-\d+\.txt/g, basins: ["CP", "EP"], lonBox: [-180, -140], label: "central Pacific" },
 ];
 
 async function fetchClimatology() {
@@ -563,7 +579,7 @@ async function fetchClimatology() {
     }
     const r = texts.get(name);
     if (!r) continue;
-    const c = parseHurdat2(r.text, CLIM_FROM_YEAR, now.getUTCFullYear(), a.basins);
+    const c = parseHurdat2(r.text, CLIM_FROM_YEAR, now.getUTCFullYear(), a.basins, a.lonBox || null);
     if (!c) { notes.push(`${a.key}: parsed 0 seasons from ${name}`); continue; }
     clims[a.key] = Object.assign(c, { file: name, basin: a.key, label: a.label });
   }
@@ -702,6 +718,22 @@ const PHASE_LABEL = { el: "El Niño", la: "La Niña", neutral: "ENSO-neutral" };
 
 function phaseOf(v) { return v == null || !Number.isFinite(v) ? null : v >= ONI_EL ? "el" : v <= ONI_LA ? "la" : "neutral"; }
 
+/* Every empirical frequency on this board goes through here.
+ *
+ * A raw hits/n publishes 0.0000 for anything that has not happened in the sample, and
+ * the central Pacific major-hurricane ladders are full of those — no season in the
+ * record exceeded the strike. Against a market quoting 2c that reads as a riskless bet
+ * with the whole resting size behind it, and it would have ranked at the top of the edge
+ * book. "Never observed in 33 seasons" is not "impossible", and the difference is the
+ * difference between a good bet and a fabricated one.
+ *
+ * Jeffreys — Beta(1/2, 1/2), the reference prior for a binomial rate — is the smallest
+ * honest correction: 0 of 33 becomes 1.5%, 33 of 33 becomes 98.5%, and anything with
+ * real support in the sample is barely moved. It is applied at every layer so the stack
+ * cannot disagree with itself.
+ */
+function jeffreys(hits, n) { return n > 0 ? (hits + 0.5) / (n + 1) : null; }
+
 // CPC's canonical oni.ascii.txt:  "SEAS YR TOTAL ANOM"  →  "  ASO 2023 27.94  1.75"
 function parseOniAscii(text) {
   const rows = [];
@@ -839,7 +871,7 @@ function posteriorFor(quantity, strike, clim, seasonToDate, oni) {
   const layers = [];
 
   // L0 — unconditional seasonal frequency
-  const p0 = counts.filter((c) => c > strike).length / n;
+  const p0 = jeffreys(counts.filter((c) => c > strike).length, n);
   layers.push({ id: "base", label: "Historical climatology", p: p0,
     basis: `${clim.from}–${clim.to} full seasons (n=${n})` });
 
@@ -851,7 +883,7 @@ function posteriorFor(quantity, strike, clim, seasonToDate, oni) {
   let p1 = null, remaining = null;
   if (typeof remainFn === "function") {
     remaining = remainFn(doy);
-    p1 = remaining.filter((r) => r > need).length / n;
+    p1 = jeffreys(remaining.filter((r) => r > need).length, n);
     const noun = q === "namedstorm" ? "named storms" : q === "major" ? "major hurricanes" : "hurricanes";
     layers.push({ id: "doy", label: "Day-of-year conditional", p: p1,
       basis: `${noun} forming on/after day ${doy} in each past season; needs >${need} more` });
@@ -884,7 +916,7 @@ function posteriorFor(quantity, strike, clim, seasonToDate, oni) {
       const hit = remaining
         ? matched.filter((i) => remaining[i] > need).length
         : matched.filter((i) => counts[i] > strike).length;
-      const raw = hit / m;
+      const raw = jeffreys(hit, m);
       const w = m / (m + ONI_SHRINK_K);              // shrink small buckets toward L1
       p3 = w * raw + (1 - w) * anchorP;
       const sign = oni.anchorAnom >= 0 ? "+" : "";
@@ -986,7 +1018,8 @@ function ordinalOutcome(clim, kRemaining, doy) {
       if (!later.slice(0, kRemaining - 1).some((x) => x.hu)) first++;
     }
   }
-  return { n, pUsed: used / n, pHurricane: hur / n, pFirstHurricane: first / n, kRemaining, doy };
+  return { n, pUsed: jeffreys(used, n), pHurricane: jeffreys(hur, n), pFirstHurricane: jeffreys(first, n),
+           rawUsed: used, rawHurricane: hur, rawFirst: first, kRemaining, doy };
 }
 
 /* `clims` is the per-basin map from fetchClimatology. The second argument used to be a
@@ -1080,9 +1113,16 @@ function climatologyAnchor(title, strike, clims, ticker, oni, std) {
     unconditional: hits / counts.length,
     layers: post ? post.layers : null,
     quantity: q, basin, seasonToDate: soFar ?? null,
-    basis: post
+    /* The ENSO layer keys off the ASO ONI, which is the Atlantic's peak season. The
+       eastern Pacific peaks earlier, so on a Pacific ladder that window is a borrowed
+       one — the empirical conditioning still carries the right SIGN, because it reads the
+       Pacific record rather than assuming a direction, but the window is stated rather
+       than left for the reader to assume. */
+    basis: (post
       ? `${post.basis} · ${clim.from}–${clim.to} ${label} ${noun} seasons (n=${counts.length}), day ${post.doy}`
-      : `${clim.from}–${clim.to} ${label} ${noun} seasons (n=${counts.length}); ${hits} exceeded ${strike}`,
+      : `${clim.from}–${clim.to} ${label} ${noun} seasons (n=${counts.length}); ${hits} exceeded ${strike}`)
+      + (basin === "atlantic" ? "" : " · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's")
+      + (basin === "cpac" ? " · central Pacific counted by track through 140\u00b0W\u2013180\u00b0, so systems that formed east and crossed in are included" : ""),
   };
 }
 
@@ -1660,7 +1700,9 @@ async function main() {
       ok: true, source: oni.source, phase: oni.phase, phaseLabel: PHASE_LABEL[oni.phase],
       anchorSeas: oni.anchorSeas, anchorYear: oni.anchorYear, anchorAnom: oni.anchorAnom,
       assumed: oni.assumed, ageMonths: oni.ageMonths, seasons: oni.seasons, recent: oni.recent,
-      climate: ensoClimate(clim, oni),
+      // Atlantic stratification. fetchClimatology reports ok when ANY basin parsed,
+      // so an Atlantic-only failure must degrade this to null rather than throw.
+      climate: clim ? ensoClimate(clim, oni) : null,
     } : { ok: false, note: ensoFeed.note },
   };
 
@@ -1698,7 +1740,7 @@ async function main() {
     console.log(`    [${a.source}] ok=${a.ok} status=${a.status} → ${a.note}`);
     if (a.hosts) for (const h of a.hosts) console.log(`        ${h.host} status=${h.status} pages=${h.pages} scanned=${h.scanned}${h.error ? " err=" + h.error : ""}`);
   }
-  console.log(`  climatology: ${climFeed.ok ? climFeed.source + " · " + clim.years.length + " seasons" : "FAIL — " + climFeed.note}`);
+  console.log(`  climatology: ${climFeed.ok ? climFeed.source + " · " + (clim ? clim.years.length + " seasons" : "Atlantic MISSING") + " · " + (climFeed.note || "") : "FAIL — " + climFeed.note}`);
   console.log(`  ENSO: ${ensoFeed.ok ? ensoFeed.source + " · " + ensoFeed.note : "FAIL — " + ensoFeed.note}`);
   console.log(`  outlook: ${outlook.ok ? outlook.note : "FAIL — " + outlook.note}`);
   for (const a of outlook.areas) console.log(`    · ${a.basin} #${a.n} ${a.id || "(no id)"} ${a.title} — ${a.pct48}%/48h ${a.pct7d}%/7d`);
