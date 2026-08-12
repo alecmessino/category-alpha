@@ -176,6 +176,25 @@ const probe = await page.evaluate(() => {
           .map((a) => a.id || a.title),
       };
     })(),
+    /* The edge book is the surface that tells an operator what to buy. Two things must
+       hold on the live page: it renders at all, and nothing it ranks is a bet the model
+       does not actually support. Anything ranked without an anchor, or with a negative
+       expected value, is a defect that reaches straight through to a position. */
+    edgebook: (() => {
+      if (!window.MTX || typeof MTX.edgeBook !== "function") return { present: false };
+      let b = null;
+      try { b = MTX.edgeBook(null, 10000, 0.25, {}); } catch (e) { return { present: true, threw: String(e && e.message || e) }; }
+      return {
+        present: true, rendered: /EDGE BOOK/i.test(T),
+        ranked: b.rows.length, candidates: b.candidates,
+        anchored: b.coverage.anchored, total: b.coverage.total,
+        unanchoredRanked: b.rows.filter((r) => r.model == null).length,
+        negativeEV: b.rows.filter((r) => !(r.ev > 0)).length,
+        overStaked: b.rows.filter((r) => r.stake > r.capacityDollars + 1e-6).length,
+        duplicateLadders: b.rows.length - new Set(b.rows.map((r) => r.ladder)).size,
+        accounted: Object.values(b.skipped).reduce((a, x) => a + x, 0) + b.candidates === b.coverage.total,
+      };
+    })(),
     unregisteredClaim: /UNREGISTERED CLAIM|CLAIM ERROR/.test(T),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   };
@@ -203,6 +222,15 @@ add("genesis watch matches the outlook feed",
     : !probe.genesis.blockShown,
   `${probe.genesis.count} area(s) · block=${probe.genesis.blockShown}` +
   (probe.genesis.missing.length ? ` · NOT RENDERED: ${probe.genesis.missing.join(", ")}` : ""));
+
+const eb = probe.edgebook || {};
+add("edge book renders and ranks nothing it cannot support",
+  eb.present && !eb.threw && eb.rendered && eb.unanchoredRanked === 0 && eb.negativeEV === 0
+    && eb.overStaked === 0 && eb.duplicateLadders === 0 && eb.accounted === true,
+  eb.threw ? "threw: " + eb.threw
+    : `${eb.ranked} ranked of ${eb.candidates} candidates · ${eb.anchored}/${eb.total} anchored`
+      + ` · unanchored-ranked=${eb.unanchoredRanked} negativeEV=${eb.negativeEV}`
+      + ` overStaked=${eb.overStaked} dupLadders=${eb.duplicateLadders} accounted=${eb.accounted}`);
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,
   `${probe.contracts} contracts · ${probe.seriesCount} series · droppedForCap=${probe.droppedForCap}`);

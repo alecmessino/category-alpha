@@ -368,6 +368,14 @@ function MillibarTerminalApp() {
             list would go with it. Surface it here instead, above the queue it feeds. */}
         {S && <GenesisWatch compact />}
 
+        {/* 3.5 — what to actually do about it. This sits above the attention queue on
+            purpose: the queue says what changed, and a list of changes is not a list of
+            trades. Ranked, short, and net of what it costs to get the position on. */}
+        <div style={{ marginBottom: gap }}>
+          <window.MT_EdgeBook frame={frame} bankroll={bankroll} stake={stake}
+            setBankroll={setBankroll} setStake={setStake} onSelect={pickContract} dense={dense} />
+        </div>
+
         {/* 4 + 3 — what needs you, and what it touches. This is the hero row now;
             the map moved below it, because the product stopped being the data and
             became the interpretation of the data. */}

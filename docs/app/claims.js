@@ -227,6 +227,31 @@
     ok: true,
   }));
 
+  /* Edge book. Two claims, because the ranked list and the reason most of the board is
+     absent from it are different statements with different owners. */
+  define("edgebook.coverage", "models", (s) => {
+    const cs = (window.MT && MT.contracts) || [];
+    const anchored = cs.filter((c) => c.model != null).length;
+    if (!cs.length) return { text: "no market ladder this cycle — nothing to rank", ok: false };
+    return {
+      text: anchored + " of " + cs.length + " contracts carry a climatology anchor; the remaining "
+          + (cs.length - anchored) + " are unmodelled, which is not the same as unattractive",
+      ok: anchored > 0,
+    };
+  });
+  define("edgebook.method", "derived", (s) => ({
+    text: "Ranked by expected dollars: model probability against the price you would pay to take"
+        + " the side, less the exchange fee, sized by Kelly and capped at the depth actually resting."
+        + " One rung per ladder — the rungs of a ladder are one view, not several.",
+    ok: true,
+  }));
+  define("edgebook.limits", "none", () => ({
+    text: "The anchor is a count record, not a seasonal forecast, and there is no per-storm"
+        + " intensity model. Depth is top-of-book only, so a stake larger than the first level"
+        + " would move the price by an amount this does not estimate.",
+    ok: false,
+  }));
+
   // ---- provenance footers --------------------------------------------------
   // source/latency/version/tier, each traced rather than typed.
   const FOOTERS = {
@@ -238,6 +263,7 @@
     "panel.fairvalue": { owner: "models",   source: (s) => srcOf(s, "markets", "market") + " ladder × HURDAT2 baseline", tier: () => "C" },
     "panel.markets":   { owner: "markets",  source: (s) => srcOf(s, "markets", "market") + " prices · anchor = HURDAT2 climatology", tier: () => "C" },
     "panel.edge":      { owner: "models",   source: (s) => srcOf(s, "markets", "market") + " prices × HURDAT2 baseline", tier: () => "C" },
+    "panel.edgebook":  { owner: "models",   source: (s) => srcOf(s, "markets", "market") + " executable prices × HURDAT2 baseline, net of fee", tier: () => "C" },
     "panel.orderbook": { owner: "markets",  source: (s) => okOf(s, "markets") ? srcOf(s, "markets") + " resting depth" : "exchange returned no depth", tier: () => "C" },
     "panel.observability": { owner: "derived", source: () => "feed results as returned this cycle", tier: () => "A" },
   };

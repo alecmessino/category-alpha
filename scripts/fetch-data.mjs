@@ -454,16 +454,31 @@ function doyOf(yyyymmdd) {
   return Math.floor((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86400000);
 }
 
-function parseHurdat2(text, fromYear, excludeYear) {
+/* `basins` selects which storm-ID prefixes count toward the totals. HURDAT2 ships two
+   files: the Atlantic archive (AL ids) and the northeast/north-central Pacific archive,
+   which carries BOTH eastern-Pacific (EP) and central-Pacific (CP) ids in one file. So
+   the eastern and central Pacific climatologies come from one fetch, split by prefix —
+   which is also exactly how NHC draws the 140°W boundary between those two basins.
+
+   Defaults to Atlantic so existing callers are unchanged. */
+function parseHurdat2(text, fromYear, excludeYear, basins = ["AL"]) {
+  const want = new Set(basins.map((b) => String(b).toUpperCase()));
   const byYear = new Map();
+  /* Every season the FILE covers, regardless of which basin the storm belongs to.
+     A central-Pacific season with no CP storms is a genuine zero and has to stay in the
+     sample — dropping it would silently delete the quietest seasons and bias every
+     central-Pacific probability upward. Seeding the year from any header in the file is
+     what keeps those zeros. */
+  const seedYear = (y) => { if (!byYear.has(y)) byYear.set(y, { ts: new Map(), hur: new Map(), maj: new Map() }); };
   let curId = null, curYear = null;
   for (const line of text.split(/\r?\n/)) {
     if (!line.trim()) continue;
     const f = line.split(",");
-    const head = /^AL\d{2}(\d{4})$/.exec((f[0] || "").trim());
+    const head = /^(AL|EP|CP)(\d{2})(\d{4})$/.exec((f[0] || "").trim());
     if (head && f.length <= 4) {
-      curId = f[0].trim(); curYear = Number(head[1]);
-      if (!byYear.has(curYear)) byYear.set(curYear, { ts: new Map(), hur: new Map(), maj: new Map() });
+      seedYear(Number(head[3]));
+      if (!want.has(head[1])) { curId = null; curYear = null; continue; }  // other basin, same file
+      curId = f[0].trim(); curYear = Number(head[3]);
       continue;
     }
     if (!curId || curYear == null) continue;
@@ -492,8 +507,20 @@ function parseHurdat2(text, fromYear, excludeYear) {
   const years = [...byYear.keys()].filter((y) => y >= fromYear && y !== excludeYear).sort((a, b) => a - b);
   if (!years.length) return null;
   const after = (map, doy) => [...map.values()].filter((d) => d != null && d >= doy).length;
+  /* Each season's named storms in FORMATION ORDER, with what each went on to become.
+     This is what makes the per-name markets answerable: a name is the k-th slot on an
+     ordered list, so "will Dolly be a hurricane" is "did the 4th named storm of the
+     season reach hurricane strength" — a question this sequence answers by counting,
+     with no independence assumption between formation and intensification. */
+  const seasonNamed = years.map((y) => {
+    const Y = byYear.get(y);
+    return [...Y.ts.entries()]
+      .map(([id, doy]) => ({ doy, hu: Y.hur.has(id), maj: Y.maj.has(id) }))
+      .filter((s) => s.doy != null)
+      .sort((a, b) => a.doy - b.doy);
+  });
   return {
-    years, from: years[0], to: years[years.length - 1],
+    years, from: years[0], to: years[years.length - 1], seasonNamed,
     namedstorms: years.map((y) => byYear.get(y).ts.size),
     hurricanes: years.map((y) => byYear.get(y).hur.size),
     major: years.map((y) => byYear.get(y).maj.size),
@@ -505,26 +532,151 @@ function parseHurdat2(text, fromYear, excludeYear) {
   };
 }
 
+/* Two archives, three basins. The Atlantic file is AL only; the northeast/north-central
+   Pacific file carries EP and CP ids together, which is the same 140°W split Kalshi uses
+   to separate its "Eastern Pacific" and "Central Pacific" ladders.
+   Both filenames carry a revision date that changes yearly, so they are discovered from
+   the directory index rather than hardcoded into a URL that will rot. */
+const CLIM_ARCHIVES = [
+  { key: "atlantic", file: /hurdat2-1851-\d{4}-\d+\.txt/g, basins: ["AL"], label: "Atlantic" },
+  { key: "epac", file: /hurdat2-nepac-\d{4}-\d{4}-\d+\.txt/g, basins: ["EP"], label: "eastern Pacific" },
+  { key: "cpac", file: /hurdat2-nepac-\d{4}-\d{4}-\d+\.txt/g, basins: ["CP"], label: "central Pacific" },
+];
+
 async function fetchClimatology() {
-  // The HURDAT2 filename carries a revision date that changes yearly, so discover
-  // it from the directory index rather than hardcoding a URL that will rot.
   const base = "https://www.nhc.noaa.gov/data/hurdat/";
   const idx = await getText(base);
-  let names = [];
-  if (idx.ok) {
-    names = [...new Set([...idx.text.matchAll(/hurdat2-1851-\d{4}-\d+\.txt/g)].map((m) => m[0]))].sort().reverse();
+  const texts = new Map();                       // one fetch per FILE, reused across basins
+  const clims = {};
+  const notes = [];
+
+  for (const a of CLIM_ARCHIVES) {
+    const names = idx.ok
+      ? [...new Set([...idx.text.matchAll(a.file)].map((m) => m[0]))].sort().reverse()
+      : [];
+    if (!names.length) { notes.push(`${a.key}: no archive matching ${a.file.source} in the index`); continue; }
+    const name = names[0];
+    if (!texts.has(name)) {
+      const r = await getText(base + name);
+      texts.set(name, r.ok ? r : null);
+      if (!r.ok) notes.push(`${a.key}: ${name} ${r.error}`);
+    }
+    const r = texts.get(name);
+    if (!r) continue;
+    const c = parseHurdat2(r.text, CLIM_FROM_YEAR, now.getUTCFullYear(), a.basins);
+    if (!c) { notes.push(`${a.key}: parsed 0 seasons from ${name}`); continue; }
+    clims[a.key] = Object.assign(c, { file: name, basin: a.key, label: a.label });
   }
-  if (!names.length) return { feed: { ok: false, source: "HURDAT2 (NOAA/NHC)", status: idx.status || null, note: "could not locate hurdat2 file: " + (idx.error || "no match in index") }, clim: null };
-  const r = await getText(base + names[0]);
-  if (!r.ok) return { feed: { ok: false, source: "HURDAT2 (NOAA/NHC)", status: r.status, note: r.error }, clim: null };
-  const clim = parseHurdat2(r.text, CLIM_FROM_YEAR, now.getUTCFullYear());
-  if (!clim) return { feed: { ok: false, source: "HURDAT2 (NOAA/NHC)", status: r.status, note: "parsed 0 seasons" }, clim: null };
+
+  const got = Object.keys(clims);
+  if (!got.length) {
+    return { feed: { ok: false, source: "HURDAT2 (NOAA/NHC)", status: idx.status || null,
+                     note: "no climatology parsed · " + (notes.join(" · ") || idx.error || "index unreachable") },
+             clim: null, clims: {} };
+  }
+  const atl = clims.atlantic || null;
   return {
-    feed: { ok: true, status: r.status, source: `HURDAT2 ${clim.from}–${clim.to}`, latencyMs: r.latencyMs, count: clim.years.length,
-            note: `${clim.years.length}-season Atlantic climatology (baseline, not a skill forecast)` },
-    clim: Object.assign(clim, { file: names[0] }),
+    feed: {
+      ok: true, status: idx.status, source: `HURDAT2 ${(atl || clims[got[0]]).from}–${(atl || clims[got[0]]).to}`,
+      count: got.reduce((n, k) => n + clims[k].years.length, 0),
+      note: got.map((k) => `${clims[k].label} ${clims[k].years.length}`).join(" · ") +
+            " seasons (baseline, not a skill forecast)" + (notes.length ? " · unavailable: " + notes.join(" · ") : ""),
+      basins: got, missing: notes,
+    },
+    clim: atl,                                   // the Atlantic stays the default clim
+    clims,
   };
 }
+
+/* ---------------- Season-to-date (the L2 layer) ----------------
+ * The posterior stack has always had an L2 slot and never a feed for it, so every
+ * seasonal probability was computed as if the season had not started. In August that
+ * is a large error in a known direction: "more than 5 hurricanes" is a very different
+ * bet when four have already formed.
+ *
+ * HURDAT2 is not the source — it is a post-season archive and does not carry the
+ * current year at all. ATCF b-decks are: NHC writes one best-track file per numbered
+ * system, in season, at bal/bep/bcpNN<year>.dat. Counting them gives the in-season
+ * total for all three basins from a single directory listing.
+ *
+ * The thresholds here are deliberately IDENTICAL to parseHurdat2's — 34 kt with a
+ * TS/HU/SS status for a named storm, HU status for a hurricane, 96 kt for a major.
+ * An L2 count measured differently from the climatology it is subtracted from would
+ * be worse than no L2 at all.
+ */
+const STD_MAX_FILES = Number(process.env.MT_STD_MAX || 80);
+const STD_CONCURRENCY = 6;
+
+function parseBdeck(text) {
+  let vmax = 0, named = false, hurricane = false, major = false;
+  for (const line of String(text || "").split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const f = line.split(",").map((x) => x.trim());
+    if (f.length < 11) continue;
+    const w = Number(f[8]);
+    const status = (f[10] || "").toUpperCase();
+    if (!Number.isFinite(w)) continue;
+    if (w > vmax) vmax = w;
+    if ((status === "TS" || status === "HU" || status === "SS") && w >= 34) named = true;
+    if (status === "HU") { hurricane = true; if (w >= 96) major = true; }
+  }
+  return { vmax, named, hurricane, major };
+}
+
+const STD_BASIN = { al: "atlantic", ep: "epac", cp: "cpac" };
+
+async function fetchSeasonToDate(year) {
+  const base = "https://ftp.nhc.noaa.gov/atcf/btk/";
+  const idx = await getText(base);
+  if (!idx.ok) {
+    return { ok: false, source: "NHC ATCF b-decks", status: idx.status, note: "directory unreachable: " + idx.error, counts: null };
+  }
+  const re = new RegExp(`b(al|ep|cp)(\\d{2})${year}\\.dat`, "gi");
+  const files = [...new Set([...idx.text.matchAll(re)].map((m) => m[0].toLowerCase()))].sort();
+  if (!files.length) {
+    /* A season with no systems yet is a real state, not a failure — but so is a
+       renamed directory. They are distinguished by the listing having parsed at all. */
+    return { ok: true, source: "NHC ATCF b-decks", status: idx.status, files: 0,
+             counts: { atlantic: zeroStd(), epac: zeroStd(), cpac: zeroStd() },
+             note: `no ${year} b-decks listed yet — every basin counted as zero so far` };
+  }
+  const take = files.slice(0, STD_MAX_FILES);
+  const counts = { atlantic: zeroStd(), epac: zeroStd(), cpac: zeroStd() };
+  const failed = [];
+  for (let i = 0; i < take.length; i += STD_CONCURRENCY) {
+    const batch = take.slice(i, i + STD_CONCURRENCY);
+    const got = await Promise.all(batch.map((f) => getText(base + f, { timeout: 15000 })));
+    got.forEach((r, k) => {
+      const f = batch[k];
+      if (!r.ok) { failed.push(f); return; }
+      const basin = STD_BASIN[f.slice(1, 3)];
+      const c = counts[basin];
+      if (!c) return;
+      const b = parseBdeck(r.text);
+      c.systems++;
+      if (b.named) c.namedstorms++;
+      if (b.hurricane) c.hurricanes++;
+      if (b.major) c.major++;
+      if (b.vmax > c.peakKt) c.peakKt = b.vmax;
+    });
+  }
+  /* A partial read would UNDERCOUNT, and an undercount silently inflates every
+     "more than N" probability. Refuse rather than publish a number we know is short. */
+  if (failed.length) {
+    return { ok: false, source: "NHC ATCF b-decks", status: idx.status, files: files.length,
+             note: `${failed.length}/${take.length} b-decks unreadable (${failed.slice(0, 4).join(", ")}) — a partial count would undercount the season, so none is published`,
+             counts: null };
+  }
+  const summary = Object.entries(counts)
+    .map(([b, c]) => `${BASIN_LABEL[b] || b} ${c.namedstorms}/${c.hurricanes}/${c.major}`).join(" · ");
+  return {
+    ok: true, source: "NHC ATCF b-decks", status: idx.status, files: files.length,
+    truncated: files.length > take.length ? files.length - take.length : 0,
+    counts, note: `${year} season to date (named/hurricanes/major): ${summary}`,
+  };
+}
+
+function zeroStd() { return { systems: 0, namedstorms: 0, hurricanes: 0, major: 0, peakKt: 0 }; }
 
 /* ---------------- ENSO / ONI (the L3 stratification) ----------------
  * ENSO is the single best-established seasonal modulator of Atlantic hurricane
@@ -754,51 +906,183 @@ function posteriorFor(quantity, strike, clim, seasonToDate, oni) {
    byte-identical to the real hurricane-count market KXHURCTOT-26DEC01-T10. Title
    matching therefore anchored a named-storm contract against hurricane frequencies
    and manufactured a −43pt edge out of nothing. Tickers are structured and stable. */
+/* Ticker to {quantity, basin}. Order matters: the naming and per-storm families are
+   matched BEFORE the basin ladders, because a naming ticker also carries EPAC/CPAC in
+   its id and would otherwise be mistaken for a season-count ladder.
+
+   This used to collapse everything Pacific to a single {hurricane, pacific}, which was
+   both too coarse and unanchorable: it merged the named-storm, hurricane and major
+   ladders into one quantity, and merged two basins with very different climatologies —
+   the eastern Pacific averages several times the central Pacific's activity, and they
+   respond to ENSO with different strength. Sixty-plus contracts sat unpriced behind it. */
 function seriesQuantity(ticker) {
   const t = String(ticker || "").toUpperCase();
   if (!t) return null;
-  if (/CPAC|EPAC|PACIFIC/.test(t)) return { q: "hurricane", basin: "pacific" }; // not Atlantic
+  if (/^KXHURCAT-/.test(t)) return { q: "perstorm", basin: null };            // single-storm ladder
+  if (/^KXHURRICANENAMES|^KXFIRSTHURRICANE/.test(t)) return { q: "naming", basin: null };
+  if (/^KXNEXTHURDATE|^KXNEXTCAT5HURDATE/.test(t)) return { q: "timing", basin: null };
+  const basin = /CPAC/.test(t) ? "cpac" : /EPAC/.test(t) ? "epac" : "atlantic";
+  if (basin !== "atlantic") {
+    // KXHURRICANE-…EPACMAJ / …CPACMAJ are major-hurricane ladders; …TOT are hurricanes;
+    // KXNAMEDSTORM-…TOT are 34 kt named storms.
+    if (/^KXNAMEDSTORM/.test(t)) return { q: "namedstorm", basin };
+    if (/MAJ(?:$|[^A-Z])/.test(t)) return { q: "major", basin };
+    if (/^KXHURRICANE/.test(t)) return { q: "hurricane", basin };
+    return null;
+  }
   if (/^KXHURCTOTMAJ/.test(t)) return { q: "major", basin: "atlantic" };
   if (/^KXHURCTOT/.test(t)) return { q: "hurricane", basin: "atlantic" };
   if (/^KXTROPSTORM/.test(t)) return { q: "namedstorm", basin: "atlantic" };  // different base rate
-  if (/^KXHURCAT-/.test(t)) return { q: "perstorm", basin: null };            // single-storm ladder
-  if (/^KXHURRICANENAMES|^KXFIRSTHURRICANE/.test(t)) return { q: "naming", basin: null };
   return null;
 }
 
-function climatologyAnchor(title, strike, clim, ticker, oni) {
-  if (!clim || strike == null) return null;
+const BASIN_LABEL = { atlantic: "Atlantic", epac: "eastern Pacific", cpac: "central Pacific" };
+
+/* ---------------- Per-name markets ----------------
+ * "Will Dolly be categorized as a hurricane in the Atlantic in 2026?" is not a question
+ * about Dolly. Names are assigned strictly in list order, so it is a question about the
+ * FOURTH named storm of the season — an ordinal, which HURDAT2 answers by counting.
+ *
+ * The position comes from the first letter, because the lists are alphabetical with a
+ * fixed set of skipped letters. The Atlantic list is 21 names (no Q, U, X, Y, Z); the
+ * eastern Pacific list is 24 (no Q, U). Both were confirmed against the live board: the
+ * 21 Atlantic tickers are exactly ART BER CRI DOL EDO FAY GON HAN ISA JOS KYL LEA MAR
+ * NAN OMA PAU REN SAL TED VIC WIL, and the 22 eastern Pacific tickers are the 24-letter
+ * alphabet less F and G, whose storms have already formed and settled.
+ *
+ * The central Pacific is deliberately absent. Its names come from four sequential lists
+ * that carry over between seasons rather than restarting each year, so a name's position
+ * is not a function of its letter and this derivation does not apply. Those twelve
+ * contracts stay unanchored rather than being priced by an assumption that is false.
+ */
+const NAME_ALPHABET = {
+  atlantic: "ABCDEFGHIJKLMNOPRSTVW",
+  epac: "ABCDEFGHIJKLMNOPRSTVWXYZ",
+};
+
+function namePosition(basin, name) {
+  const alpha = NAME_ALPHABET[basin];
+  if (!alpha || !name) return null;
+  const i = alpha.indexOf(String(name).trim().toUpperCase()[0]);
+  return i < 0 ? null : i + 1;
+}
+
+/* The k-th name, given m named storms already recorded, is the (k − m)-th storm still
+ * to form. Restricting each past season to storms forming on or after today's day-of-year
+ * asks the same question of history that the operator is asking of this season. */
+function ordinalOutcome(clim, kRemaining, doy) {
+  if (!clim || !clim.seasonNamed || !clim.seasonNamed.length || !(kRemaining >= 1)) return null;
+  const n = clim.seasonNamed.length;
+  let used = 0, hur = 0, first = 0;
+  for (const seq of clim.seasonNamed) {
+    const later = seq.filter((s) => s.doy >= doy);
+    if (later.length < kRemaining) continue;
+    used++;
+    const s = later[kRemaining - 1];
+    if (s.hu) {
+      hur++;
+      // First hurricane of the REMAINDER — the caller decides whether the season
+      // already has one, in which case no unformed name can be the season's first.
+      if (!later.slice(0, kRemaining - 1).some((x) => x.hu)) first++;
+    }
+  }
+  return { n, pUsed: used / n, pHurricane: hur / n, pFirstHurricane: first / n, kRemaining, doy };
+}
+
+/* `clims` is the per-basin map from fetchClimatology. The second argument used to be a
+   single Atlantic climatology and every Pacific ticker returned null here; the basin now
+   selects which archive answers the question. A basin whose archive did not parse still
+   returns null — a missing central-Pacific file must leave those rungs unanchored rather
+   than borrow the eastern Pacific's much larger counts. */
+/* Anchors for the two per-name families. Returns null — never a guess — whenever the
+   ordinal question is not the question being asked. */
+function namingAnchor(label, ticker, clims, std, oni) {
+  const t = String(ticker || "").toUpperCase();
+  const kind = /^KXFIRSTHURRICANE/.test(t) ? "first" : /^KXHURRICANENAMES/.test(t) ? "hurricane" : null;
+  if (!kind) return null;
+  const basin = /CPAC/.test(t) ? "cpac" : /EPAC/.test(t) ? "epac" : "atlantic";
+  const clim = clims && (clims.years ? (basin === "atlantic" ? clims : null) : clims[basin]);
+  if (!clim) return null;                       // includes the central Pacific by design
+
+  // The name: prefer the human label, fall back to the ticker suffix.
+  const m = /^Will\s+([A-Za-z'-]+)\s/i.exec(String(label || ""));
+  const name = m ? m[1] : (t.split("-").pop() || "");
+  const k = namePosition(basin, name);
+  if (!k) return null;
+
+  /* Season-to-date is REQUIRED here, not optional. Without it the ordinal is measured
+     from the start of the season, which in August would price the fourth name as though
+     the first three had not happened. */
+  if (!std || !std[basin]) return null;
+  const done = std[basin].namedstorms, hurSoFar = std[basin].hurricanes;
+
+  /* A name already in use is no longer an ordinal question — it is a question about one
+     specific storm, and there is no per-storm intensity model. Cristobal is a 40 kt
+     system heading for cold water; climatology for "the third named storm" knows nothing
+     about that and would price it near coin-flip against a market at 1c. Refuse. */
+  if (k <= done) return null;
+
+  const doy = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+    - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86400000);
+  const o = ordinalOutcome(clim, k - done, doy);
+  if (!o) return null;
+
+  // Once the season has a hurricane, no name still unformed can be its first.
+  const p = kind === "first" ? (hurSoFar > 0 ? 0 : o.pFirstHurricane) : o.pHurricane;
+  const label2 = BASIN_LABEL[basin] || basin;
+  const noun = kind === "first" ? "was the season's FIRST hurricane" : "reached hurricane strength";
+  return {
+    p, unconditional: null, layers: null, quantity: kind === "first" ? "firsthurricane" : "namedhurricane",
+    basin, seasonToDate: done, position: k,
+    basis: kind === "first" && hurSoFar > 0
+      ? `${label2} already has ${hurSoFar} hurricane${hurSoFar === 1 ? "" : "s"} in ${now.getUTCFullYear()} — no unformed name can still be the first`
+      : `${name} is name #${k} on the ${label2} list and ${done} have been used, so this is the #${k - done} storm still to form`
+        + ` · in ${clim.from}–${clim.to} (n=${o.n}), that storm ${noun} in ${Math.round(p * 100)}% of seasons`
+        + ` · used at all in ${Math.round(o.pUsed * 100)}%`,
+  };
+}
+
+function climatologyAnchor(title, strike, clims, ticker, oni, std) {
+  if (!clims || strike == null) return null;
+  const byBasin = clims.years ? { atlantic: clims } : clims;   // tolerate a bare Atlantic clim
   const t = (String(title) + " " + String(ticker || "")).toLowerCase();
   // Ticker-derived identification is authoritative; fall back to the title only for
   // series we don't recognise (and then demand explicit Atlantic + hurricane wording).
   const sq = seriesQuantity(ticker);
-  let q;
+  let q, basin;
   if (sq) {
-    if (sq.basin !== "atlantic") return null;          // climatology is Atlantic-only
-    // namedstorm is anchorable now that HURDAT2 gives us a 34 kt base rate; per-storm
-    // ladders and naming markets still are not, and still return null.
+    // Naming, per-storm and timing families are still unanchorable and still return null.
     if (!["hurricane", "major", "namedstorm"].includes(sq.q)) return null;
-    q = sq.q;
+    q = sq.q; basin = sq.basin || "atlantic";
   } else {
-    if (!/atlantic/.test(t) && !/\bkxatl/.test(t)) return null;
     if (!/how many|more than|at least|total|count/.test(t)) return null;
+    basin = /central pacific/.test(t) ? "cpac" : /eastern pacific/.test(t) ? "epac"
+          : (/atlantic/.test(t) || /\bkxatl/.test(t)) ? "atlantic" : null;
+    if (!basin) return null;
     if (/named storm|tropical storm/.test(t)) q = "namedstorm";
     else if (!/hurricane/.test(t)) return null;
     else q = (/\bmajor\b/.test(t) || /categor(?:y|ies)\s*[345]\b/.test(t)) ? "major" : "hurricane";
   }
+  const clim = byBasin[basin];
+  if (!clim) return null;
   const counts = q === "major" ? clim.major : q === "namedstorm" ? clim.namedstorms : clim.hurricanes;
   if (!counts || !counts.length) return null;
   const noun = q === "namedstorm" ? "named-storm" : q === "major" ? "major-hurricane" : "hurricane";
+  const label = BASIN_LABEL[basin] || basin;
   const hits = counts.filter((c) => c > strike).length;
-  const post = posteriorFor(q, strike, clim, null, oni);
+  /* The season-to-date count must come from the SAME basin and the SAME quantity as
+     the strike, or L2 subtracts hurricanes from a named-storm ladder. */
+  const key = q === "major" ? "major" : q === "namedstorm" ? "namedstorms" : "hurricanes";
+  const soFar = std && std[basin] ? std[basin][key] : null;
+  const post = posteriorFor(q, strike, clim, soFar ?? null, oni);
   return {
     p: post ? post.p : hits / counts.length,
     unconditional: hits / counts.length,
     layers: post ? post.layers : null,
-    quantity: q,
+    quantity: q, basin, seasonToDate: soFar ?? null,
     basis: post
-      ? `${post.basis} · ${clim.from}–${clim.to} Atlantic ${noun} seasons (n=${counts.length}), day ${post.doy}`
-      : `${clim.from}–${clim.to} Atlantic ${noun} seasons (n=${counts.length}); ${hits} exceeded ${strike}`,
+      ? `${post.basis} · ${clim.from}–${clim.to} ${label} ${noun} seasons (n=${counts.length}), day ${post.doy}`
+      : `${clim.from}–${clim.to} ${label} ${noun} seasons (n=${counts.length}); ${hits} exceeded ${strike}`,
   };
 }
 
@@ -1070,6 +1354,17 @@ function askPriceOf(m) {
   if (c != null && c > 0) return c / 100;
   return priceOf(m);
 }
+/* The bid mirrors the ask, with one deliberate difference: a missing or zero bid stays
+   zero rather than falling back to the mid. "Nobody is bidding" is a real state on this
+   board — 22 of 151 rungs sit with an empty bid side — and reporting the mid there would
+   invent a buyer. */
+function bidPriceOf(m) {
+  const d = dollarNum(m.yes_bid_dollars);
+  if (d != null && d > 0) return d;
+  const c = num(m.yes_bid);
+  if (c != null && c >= 0) return c / 100;
+  return null;
+}
 function liquidityOf(m) {
   const d = depthOf(m), px = askPriceOf(m);
   if (d && d.askSize > 0 && px != null && px > 0) {
@@ -1149,7 +1444,7 @@ async function collectKalshiMarkets() {
            pairs: paged.markets.map((m) => ({ m, title: m.title || m.subtitle || m.ticker || "", eventTicker: m.event_ticker })) };
 }
 
-async function fetchKalshi(storms, clim, oni) {
+async function fetchKalshi(storms, clims, oni, std) {
   const paged = await collectKalshiMarkets();
   if (!paged.ok) return { ok: false, status: paged.status, source: "kalshi", note: paged.error, contracts: [], diag: paged.tried };
   const contracts = [];
@@ -1169,17 +1464,28 @@ async function fetchKalshi(storms, clim, oni) {
     const volume = volumeOf(m);
     // Kalshi exposes the ladder threshold numerically; fall back to the sub-title text.
     const strike = parseStrike(sub, m.yes_sub_title, m.subtitle) ?? num(m.floor_strike);
-    const anchor = climatologyAnchor(title, strike, clim, m.ticker, oni);
+    /* Two anchor families. The count ladders need a strike; the per-name markets have
+       none and are answered by list position instead, so they are tried separately. */
+    const anchor = climatologyAnchor(title, strike, clims, m.ticker, oni, std)
+                || namingAnchor(title, m.ticker, clims, std, oni);
     contracts.push({
       id: m.ticker, label: title, short: shortLabel(sub ? title.replace(/\?$/, "") + " · " + sub : title, 46),
       storm: assocStorm(title + " " + sub, storms), subject: subjectStatus(m.ticker, storms),
       market: Math.max(0.01, Math.min(0.99, price)),
       model: anchor ? anchor.p : null,
+      modelQuantity: anchor ? anchor.quantity : null,
+      modelBasin: anchor ? anchor.basin : null,
       modelSource: anchor ? "HURDAT2 climatology" : null,
       modelBasis: anchor ? anchor.basis : null,
       modelUncond: anchor ? anchor.unconditional : null,
       modelLayers: anchor ? anchor.layers : null,
       horizon: horizonOf(title), strike,
+      /* The board carried a mid and a spread and left every consumer to reconstruct the
+         two sides from them. That reconstruction is wrong exactly where it matters: the
+         mid is clamped into [0.01, 0.99], so on a 0/2c book it reports 1c and a taker
+         who "pays the mid" is short by half the edge. Both sides are now carried. */
+      yesBid: bidPriceOf(m), yesAsk: askPriceOf(m),
+      closeTime: m.close_time || m.expiration_time || null,
       liquidity, spread, volume, volume24h: volume24hOf(m), openInterest: openInterestOf(m),
       depth: depthOf(m), proxy: false, source: "kalshi",
       url: "https://kalshi.com/markets/" + (pair.eventTicker || m.event_ticker || m.ticker),
@@ -1214,7 +1520,7 @@ async function fetchKalshi(storms, clim, oni) {
                + (droppedForCap ? ` · ${droppedForCap} BEYOND THE ${MAX_CONTRACTS}-CONTRACT CEILING` : "") };
 }
 
-async function fetchPolymarket(storms, clim, oni) {
+async function fetchPolymarket(storms, clims, oni, std) {
   const url = "https://gamma-api.polymarket.com/markets?closed=false&limit=500&order=volume&ascending=false";
   const r = await getJSON(url);
   if (!r.ok) return { ok: false, status: r.status, source: "polymarket", note: r.error, contracts: [] };
@@ -1228,7 +1534,7 @@ async function fetchPolymarket(storms, clim, oni) {
     try { const p = typeof m.outcomePrices === "string" ? JSON.parse(m.outcomePrices) : m.outcomePrices; if (Array.isArray(p) && p.length) price = Number(p[0]); } catch { /* skip */ }
     if (!Number.isFinite(price)) continue;
     const strike = parseStrike(title);
-    const anchor = climatologyAnchor(title, strike, clim, null, oni);
+    const anchor = climatologyAnchor(title, strike, clims, null, oni, std);
     contracts.push({
       id: m.slug || m.conditionId || m.id, label: title, short: shortLabel(title, 46),
       storm: assocStorm(title, storms), market: Math.max(0.01, Math.min(0.99, price)),
@@ -1276,18 +1582,24 @@ async function main() {
   const outlook = await fetchOutlook();
 
   // Climatology baseline first — it supplies the fair-value anchor for seasonal contracts.
-  const { feed: climFeed, clim } = await fetchClimatology();
+  const { feed: climFeed, clim, clims } = await fetchClimatology();
 
   // ENSO phase (L3). Fetched before the markets so every anchor carries the same
   // stratification; a failure here degrades the stack to L1, it never blocks it.
   const { feed: ensoFeed, oni } = await fetchEnso();
 
+  // Season-to-date (L2). Same rule: a failure degrades the stack, it never blocks it —
+  // and a partial read publishes nothing, because an undercount would inflate every
+  // "more than N" probability in a direction an operator could not see.
+  const stdFeed = await fetchSeasonToDate(now.getUTCFullYear());
+  const std = stdFeed.ok ? stdFeed.counts : null;
+
   // markets: Kalshi first, fall back to Polymarket if Kalshi unreachable/empty.
   // BOTH attempts are recorded — a silent fallback previously hid a Kalshi failure
   // behind a healthy-looking Polymarket "0 markets".
-  const kal = await fetchKalshi(storms, clim, oni);
+  const kal = await fetchKalshi(storms, clims, oni, std);
   let poly = null;
-  if (!kal.ok || kal.count === 0) poly = await fetchPolymarket(storms, clim, oni);
+  if (!kal.ok || kal.count === 0) poly = await fetchPolymarket(storms, clims, oni, std);
   let mkt = kal;
   if (poly && ((poly.ok && poly.count > 0) || (!kal.ok && poly.ok))) mkt = poly;
   const marketAttempts = [
@@ -1326,8 +1638,10 @@ async function main() {
     models: climFeed.ok
       ? Object.assign({}, climFeed, { note: climFeed.note + " — seasonal count contracts only; per-storm intensity has no fitted model" })
       : Object.assign({}, climFeed, { note: (climFeed.note || "unavailable") + " — no fair-value anchor; allocations stay deferred" }),
-    climatology: climFeed.ok ? { ok: true, source: climFeed.source, file: clim.file, seasons: clim.years.length,
-      hurricanesPerSeason: clim.hurricanes, majorPerSeason: clim.major, years: clim.years } : { ok: false, note: climFeed.note },
+    climatology: climFeed.ok ? { ok: true, source: climFeed.source, file: clim && clim.file, seasons: clim ? clim.years.length : 0,
+      basins: climFeed.basins || null,
+      hurricanesPerSeason: clim ? clim.hurricanes : null, majorPerSeason: clim ? clim.major : null, years: clim ? clim.years : null } : { ok: false, note: climFeed.note },
+    seasonToDate: stdFeed,
     satellite: { ok: true, source: "NASA GIBS VIIRS/NOAA-20", note: "probed live in the browser" },
     enso: ensoFeed,
     outlook: { ok: outlook.ok, status: outlook.status, source: outlook.source, count: outlook.count,
@@ -1402,4 +1716,5 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
 }
 
 export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity, parseTWO, diagnoseTWO,
+         namePosition, ordinalOutcome, namingAnchor, climatologyAnchor, parseBdeck,
          priceOf, askPriceOf, spreadOf, depthOf, liquidityOf, volumeOf, volume24hOf, openInterestOf, notionalOf };

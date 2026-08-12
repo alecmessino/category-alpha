@@ -92,6 +92,18 @@ jobs:
           npm i --silent --no-fund --no-audit --no-save @babel/core @babel/preset-react
           node scripts/check-jsx.mjs
 
+      # The board went from 25 anchored contracts to most of them in one change, and
+      # every new number is a probability shown next to a price. These check each
+      # estimator against a fixture whose answer is arithmetic, and check every refusal
+      # path — the refusals are what keeps an unanswerable question unanswered.
+      - name: Test basin climatologies and per-name ordinals
+        run: node scripts/test-climatology.mjs
+
+      # The ranking decides what an operator is told to buy. It must not be the one piece
+      # of arithmetic on the board whose only test is that the page renders.
+      - name: Test the edge book
+        run: node scripts/test-edgebook.mjs
+
       # Every visible claim must have a provenance owner. This fails the build if
       # capability / liveness language reappears as a literal inside a component
       # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of

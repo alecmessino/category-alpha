@@ -612,6 +612,119 @@
     };
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, lifecycleFor, LIFECYCLE };
+  /* ---------------- Edge book ----------------
+   * The board could say what MOVED and what a contract was worth, but never which bet
+   * to take. Every existing surface either ordered by ladder, by recency, or by the size
+   * of the last tick — so the operator's actual question, "what should I buy and how
+   * much", was answered by reading 151 cards.
+   *
+   * Four things this does that the old edge display did not:
+   *
+   *  1. Prices the side you can ACTUALLY trade. Edge was computed against the mid, which
+   *     is not a price anyone fills at. On a 0/2c book the mid says 1c and a taker pays
+   *     2c — the whole edge, twice over, on the cheap rungs where it matters most.
+   *  2. Charges the fee. Kalshi takes 0.07 x P x (1-P) per contract, which peaks at
+   *     1.75c near a coin flip. A 3c gross edge at 50c is a 1.25c net edge; the board
+   *     used to show the 3c.
+   *  3. Considers the NO side. Half a mispricing is the market being too HIGH, and a
+   *     board that only ever buys YES cannot see it.
+   *  4. Ranks by expected dollars, not by edge. A 20-point edge with $17 of resting size
+   *     is worth less than a 6-point edge with $1,400 behind it, and the old cards gave
+   *     both the same visual weight.
+   *
+   * What it deliberately does NOT do: weight the score by an invented confidence factor.
+   * The governing posterior layer and its sample size are shown as their own column so
+   * the operator can gate on them, rather than being folded into a number whose
+   * construction nobody can see.
+   */
+  const FEE_RATE = 0.07;                                    // Kalshi's published taker fee
+  const feePerContract = (p) => FEE_RATE * p * (1 - p);
+
+  // Rungs of one ladder are the same underlying bet. "More than 3 hurricanes" and "more
+  // than 4" cannot be sized independently without staking the same view twice.
+  function ladderOf(c) { return String(c.id).replace(/-[^-]*$/, ""); }
+
+  function edgeBook(frame, bankroll, stakeFrac, opts) {
+    const o = Object.assign({ minEdge: 0.02, minDollars: 25, limit: 8 }, opts || {});
+    const f = clampF(frame == null ? NF : frame);
+    const all = MT.contracts || [];
+    const skipped = { noModel: 0, noBook: 0, noEdge: 0, tooThin: 0 };
+    const rows = [];
+
+    for (const c of all) {
+      const p = mdl(c, f);
+      if (p == null) { skipped.noModel++; continue; }
+      const d = c.depth || {};
+      const notional = d.notional || 1;
+      const ask = c.yesAsk != null ? c.yesAsk : null;
+      const bid = c.yesBid != null ? c.yesBid : null;
+
+      /* Two ways to take the same view. Buying YES at the ask wins when the model is
+         above the price; buying NO — selling YES into the bid — wins when it is below.
+         Each is evaluated against the size actually resting on that side. */
+      const legs = [];
+      if (ask != null && ask > 0 && ask < 1 && d.askSize > 0) {
+        const cost = ask + feePerContract(ask);
+        legs.push({ side: "YES", price: ask, cost, edge: p - cost, size: d.askSize, notional });
+      }
+      if (bid != null && bid > 0 && bid < 1 && d.bidSize > 0) {
+        const cost = (1 - bid) + feePerContract(1 - bid);
+        legs.push({ side: "NO", price: 1 - bid, cost, edge: (1 - p) - cost, size: d.bidSize, notional });
+      }
+      if (!legs.length) { skipped.noBook++; continue; }
+
+      const best = legs.slice().sort((a, b) => b.edge - a.edge)[0];
+      if (best.edge < o.minEdge) { skipped.noEdge++; continue; }
+
+      /* Kelly on a binary at this cost, then capped by what is actually resting. The cap
+         binds constantly on this board — most rungs have two-figure depth — which is the
+         point: an edge you cannot get size on is not an opportunity. */
+      const kf = Math.max(0, best.edge / (1 - best.cost));
+      const idealDollars = bankroll * kf * (stakeFrac == null ? 1 : stakeFrac);
+      const capacityContracts = best.size;
+      const capacityDollars = capacityContracts * best.cost * notional;
+      const stakeDollars = Math.min(idealDollars, capacityDollars);
+      const contracts = best.cost > 0 ? stakeDollars / (best.cost * notional) : 0;
+      const ev = contracts * best.edge * notional;
+      if (stakeDollars < o.minDollars) { skipped.tooThin++; continue; }
+
+      const layers = c.modelLayers || [];
+      const governing = layers.filter((l) => l && !l.unavailable).slice(-1)[0] || null;
+      rows.push({
+        c, id: c.id, label: c.label || c.short || c.id,
+        side: best.side, model: p, price: best.price, cost: best.cost,
+        fee: feePerContract(best.side === "YES" ? best.price : best.price),
+        edge: best.edge, edgeGross: best.side === "YES" ? p - best.price : (1 - p) - best.price,
+        kellyFrac: kf, capacityContracts, capacityDollars,
+        stake: stakeDollars, contracts, ev, roi: stakeDollars > 0 ? ev / stakeDollars : null,
+        capped: idealDollars > capacityDollars,
+        layer: governing ? governing.label : null, basis: c.modelBasis || null,
+        ladder: ladderOf(c), spread: c.spread ?? null, volume24h: c.volume24h ?? null,
+      });
+    }
+
+    /* Expected dollars first — that is the quantity being maximised. Return on the stake
+       breaks ties so a thin, very mispriced rung outranks a fat, barely mispriced one at
+       equal expected value; then the tighter book, then the busier market. */
+    rows.sort((a, b) => b.ev - a.ev || b.roi - a.roi
+      || (a.spread ?? 1) - (b.spread ?? 1) || (b.volume24h || 0) - (a.volume24h || 0));
+
+    // One rung per ladder in the headline list; the rest stay available underneath.
+    const seen = new Set(), top = [], alsoInLadder = [];
+    for (const r of rows) {
+      if (seen.has(r.ladder)) { alsoInLadder.push(r); continue; }
+      seen.add(r.ladder); top.push(r);
+    }
+
+    const anchored = all.filter((c) => mdl(c, f) != null).length;
+    return {
+      rows: top.slice(0, o.limit), overflow: top.slice(o.limit), alsoInLadder,
+      candidates: rows.length, ladders: seen.size,
+      coverage: { anchored, total: all.length },
+      skipped, thresholds: o, bankroll, stakeFrac,
+    };
+  }
+
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, lifecycleFor, LIFECYCLE, edgeBook, feePerContract };
 })();
 })();

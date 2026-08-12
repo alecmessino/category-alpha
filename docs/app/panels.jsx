@@ -196,6 +196,98 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
   );
 }
 
+/* ---- Edge book: the ranked answer to "what do I buy" ----
+   Everything else on this board answers a question about the world. This answers a
+   question about the operator's next action, which is why it sits at the top and why
+   it is a short list rather than a grid of every contract. */
+function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, dense }) {
+  const [showAll, setShowAll] = React.useState(false);
+  const book = MTX.edgeBook(frame, bankroll, stake, { limit: showAll ? 40 : 6 });
+  const cov = MTC.claim("edgebook.coverage");
+  const mono = { fontFamily: "var(--font-mono)" };
+  const pct = (v) => (v * 100).toFixed(1) + "¢";
+  const money = (v) => "$" + Math.round(v).toLocaleString();
+
+  const head = (t, align) => (
+    <th style={{ ...mono, fontSize: 9.5, fontWeight: 700, letterSpacing: ".6px", textTransform: "uppercase",
+      color: "var(--text-2)", textAlign: align || "left", padding: "7px 8px", borderBottom: "1px solid var(--border-dim)", whiteSpace: "nowrap" }}>{t}</th>
+  );
+  const cell = (v, align, style) => (
+    <td style={{ ...mono, fontSize: 11.5, padding: "7px 8px", textAlign: align || "left",
+      borderBottom: "1px solid var(--border-dim)", whiteSpace: "nowrap", ...(style || {}) }}>{v}</td>
+  );
+
+  return (
+    <P pad={false} title="Edge Book — ranked by expected value"
+      right={<BG tone={book.rows.length ? "live" : "warn"} dot>{book.rows.length ? book.rows.length + " ACTIONABLE" : "NOTHING CLEARS"}</BG>}
+      footer={<PF {...MTC.footer("panel.edgebook")} />}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "10px 12px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
+        <span style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: ".5px", textTransform: "uppercase", color: "var(--text-2)" }}>Bankroll</span>
+        <input type="number" value={bankroll} min={100} step={500} onChange={(e) => setBankroll(+e.target.value || 0)}
+          style={{ width: 104, ...mono, fontSize: 13, padding: "5px 8px", border: "1px solid var(--border-dim)", borderRadius: 6, background: "var(--surface-card)", color: "var(--text-1)" }} />
+        <div style={{ display: "flex" }}>
+          {[[1, "FULL"], [0.5, "½"], [0.25, "¼"]].map(([f, l], i) => (
+            <BT key={l} variant="preset" mono active={stake === f} onClick={() => setStake(f)}
+              style={{ borderRadius: i === 0 ? "6px 0 0 6px" : i === 2 ? "0 6px 6px 0" : 0, marginLeft: i ? "-1px" : 0 }}>{l}</BT>
+          ))}
+        </div>
+        <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-2)" }}>
+          Expected <b style={{ ...mono, color: "var(--pos)", fontSize: 13 }}>{money(book.rows.reduce((a, r) => a + r.ev, 0))}</b>
+          {" "}on <b style={{ ...mono, color: "var(--text-1)", fontSize: 13 }}>{money(book.rows.reduce((a, r) => a + r.stake, 0))}</b> staked
+        </span>
+      </div>
+
+      {book.rows.length === 0 ? (
+        <div style={{ ...mono, fontSize: 11.5, color: "var(--text-2)", padding: "14px 12px", lineHeight: 1.7 }}>
+          <div style={{ color: "var(--text-1)" }}>No contract clears the bar right now.</div>
+          <div style={{ marginTop: 6 }}>
+            {book.skipped.noModel} unmodelled · {book.skipped.noBook} with nothing resting ·{" "}
+            {book.skipped.noEdge} inside the fee and spread · {book.skipped.tooThin} too small to stake
+          </div>
+          <div style={{ marginTop: 6 }}>{cov.text}</div>
+        </div>
+      ) : (
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+            <thead><tr>
+              {head("Contract")}{head("Side", "center")}{head("Pay", "right")}{head("Model", "right")}
+              {head("Net edge", "right")}{head("Size", "right")}{head("Stake", "right")}{head("Expected", "right")}{head("Basis")}
+            </tr></thead>
+            <tbody>
+              {book.rows.map((r) => (
+                <tr key={r.id} onClick={() => onSelect && onSelect(r.id)} style={{ cursor: "pointer" }}>
+                  <td style={{ fontSize: 11.5, padding: "7px 8px", borderBottom: "1px solid var(--border-dim)", color: "var(--text-1)", maxWidth: 320 }}>{r.label}</td>
+                  {cell(<span style={{ fontWeight: 800, color: r.side === "YES" ? "var(--pos)" : "var(--neg)" }}>{r.side}</span>, "center")}
+                  {cell(pct(r.price), "right")}
+                  {cell(pct(r.model), "right", { color: "var(--text-2)" })}
+                  {cell(<span style={{ fontWeight: 800, color: "var(--edge-glow)" }}>+{(r.edge * 100).toFixed(1)}</span>, "right")}
+                  {cell(Math.round(r.capacityContracts).toLocaleString(), "right", { color: "var(--text-2)" })}
+                  {cell(<span>{money(r.stake)}{r.capped && <span style={{ color: "var(--warn)" }} title="capped by resting depth"> ▲</span>}</span>, "right")}
+                  {cell(<span style={{ color: "var(--pos)", fontWeight: 700 }}>{money(r.ev)}</span>, "right")}
+                  {cell(<span style={{ fontSize: 10, color: "var(--text-2)" }}>{r.layer || "climatology"}</span>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div style={{ ...mono, fontSize: 10.5, color: "var(--text-2)", padding: "9px 12px", lineHeight: 1.65, borderTop: "1px solid var(--border-dim)" }}>
+            <div>{MTC.claim("edgebook.method").text}</div>
+            <div style={{ marginTop: 5, color: "var(--warn)" }}>{MTC.claim("edgebook.limits").text}</div>
+            <div style={{ marginTop: 5 }}>{cov.text}</div>
+            {(book.overflow.length > 0 || book.alsoInLadder.length > 0) && (
+              <div style={{ marginTop: 6 }}>
+                <BT variant="preset" mono onClick={() => setShowAll(!showAll)}>{showAll ? "TOP 6" : "SHOW ALL " + (book.rows.length + book.overflow.length)}</BT>
+                <span style={{ marginLeft: 8 }}>
+                  {book.alsoInLadder.length} further rung{book.alsoInLadder.length === 1 ? "" : "s"} on ladders already listed — the same view, not a second bet
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </P>
+  );
+}
+
 /* ---- Term structure: strike ladder vs climatology (the "yield curve") ----
    Market-implied probability and the HURDAT2 baseline plotted against strike, with
    the gap between them shaded. Rich = market above climatology, cheap = below. */
@@ -977,4 +1069,4 @@ function MT_Observability({ narrow }) {
   );
 }
 
-Object.assign(window, { MT_Evidence, MT_Confidence, MT_EdgeMatrix, MT_Markets, MT_OrderBook, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section, MT_Attention, MT_Exposure });
+Object.assign(window, { MT_Evidence, MT_Confidence, MT_EdgeMatrix, MT_EdgeBook, MT_Markets, MT_OrderBook, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section, MT_Attention, MT_Exposure });
