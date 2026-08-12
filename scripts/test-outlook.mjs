@@ -131,7 +131,28 @@ Forecaster Blake
 eq("no areas", quiet.areas.length, 0);
 ck("still reports an issue time", !!quiet.issued, quiet.issued || "");
 
-console.log("\n[5] malformed input degrades to empty rather than inventing areas");
+console.log("\n[5] an HTML-wrapped product parses — the .shtml page is not the raw text");
+/* The live .shtml fetch returned HTTP 200, the issue line parsed, and zero areas came
+   out. Entity padding after the heading colon defeats /:\s*$/, which is the most
+   likely difference between the served page and the raw product. */
+const WRAPPED = `<html><body><pre>
+Tropical Weather Outlook
+NWS National Hurricane Center Miami FL
+800 PM EDT Tue Aug 11 2026
+
+For the North Atlantic...Caribbean Sea and the Gulf of America:
+
+1. Central Tropical Atlantic (AL92):&nbsp;
+Showers and thunderstorms are showing some signs of organization.
+* Formation chance through 48 hours...medium...60 percent.
+* Formation chance through 7 days...high...80 percent.
+</pre></body></html>`;
+const wrapped = parseTWO(WRAPPED, "atlantic");
+eq("HTML-wrapped area count", wrapped.areas.length, 1);
+eq("HTML-wrapped ID", wrapped.areas[0] && wrapped.areas[0].id, "AL92");
+eq("HTML-wrapped 7-day", wrapped.areas[0] && wrapped.areas[0].pct7d, 80);
+
+console.log("\n[6] malformed input degrades to empty rather than inventing areas");
 eq("garbage", parseTWO("not a product at all", "atlantic").areas.length, 0);
 eq("empty", parseTWO("", "atlantic").areas.length, 0);
 ck("a heading with no percentages is not treated as an area",

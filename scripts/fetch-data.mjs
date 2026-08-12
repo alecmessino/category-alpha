@@ -129,13 +129,25 @@ async function fetchStorms() {
  * Those percentages are published forecasts, not our inference; we parse and attribute
  * them, and we do not convert them into anything else.
  */
+/* The .shtml pages fetched fine and parsed to ZERO areas while the product plainly
+   had five — the issue line survived, the numbered headings did not, so the HTML
+   wrapper is mangling something the fixtures do not contain. The raw NWS products are
+   the same text with no wrapper at all, so they go first and the HTML pages stay as a
+   fallback. A schema sample is captured either way; guessing at the difference is what
+   cost a cycle here. */
 const TWO_SOURCES = [
-  { basin: "atlantic", name: "Atlantic TWO", url: "https://www.nhc.noaa.gov/text/MIATWOAT.shtml" },
-  { basin: "pacific",  name: "E/C Pacific TWO", url: "https://www.nhc.noaa.gov/text/MIATWOEP.shtml" },
+  { basin: "atlantic", name: "Atlantic TWO (raw)", url: "https://tgftp.nws.noaa.gov/data/raw/ab/abnt20.knhc.txt" },
+  { basin: "atlantic", name: "Atlantic TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOAT.shtml", fallbackFor: "atlantic" },
+  { basin: "pacific",  name: "E/C Pacific TWO (raw)", url: "https://tgftp.nws.noaa.gov/data/raw/ab/abpz20.knhc.txt" },
+  { basin: "pacific",  name: "E/C Pacific TWO (html)", url: "https://www.nhc.noaa.gov/text/MIATWOEP.shtml", fallbackFor: "pacific" },
 ];
 
 function stripHtml(t) {
-  return String(t || "").replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  return String(t || "")
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/gi, " ")            // a non-breaking space after the colon defeats /:\s*$/
+    .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"');
 }
 
 /* The product is fixed-format text. Each area is "N. Title (ID):" followed by prose
@@ -146,7 +158,7 @@ function parseTWO(text, basin) {
   const issuedM = /^\s*(\d{3,4}\s+(?:AM|PM)\s+[A-Z]{2,4}\s+\w{3}\s+\w{3}\s+\d{1,2}\s+\d{4})\s*$/m.exec(t);
   const areas = [];
   // Split on the numbered headings, keeping each heading with its body.
-  const parts = t.split(/^\s*(\d+)\.\s+(.+?):\s*$/m);
+  const parts = t.split(/^[ \t]*(\d+)\.[ \t]+(.+?):[ \t\u00a0]*$/m);
   for (let i = 1; i + 2 < parts.length + 1; i += 3) {
     const n = Number(parts[i]), title = (parts[i + 1] || "").trim(), body = parts[i + 2] || "";
     if (!n || !title) continue;
@@ -168,15 +180,31 @@ function parseTWO(text, basin) {
 
 async function fetchOutlook() {
   const out = { ok: false, source: "NHC Tropical Weather Outlook", areas: [], attempts: [] };
+  const done = new Set();                       // first source to yield areas wins per basin
   for (const src of TWO_SOURCES) {
+    if (done.has(src.basin)) continue;
     const r = await getText(src.url);
     if (!r.ok) { out.attempts.push({ source: src.name, ok: false, status: r.status, note: r.error }); continue; }
     let parsed = null;
     try { parsed = parseTWO(r.text, src.basin); } catch (e) { parsed = null; }
     if (!parsed) { out.attempts.push({ source: src.name, ok: false, status: r.status, note: "parse failed" }); continue; }
+    /* When the fetch succeeds but nothing parses, the text is the evidence. Capture the
+       first lines as received so the next cycle explains itself instead of needing
+       another guess. A genuinely quiet basin also parses to zero, so the sample is what
+       distinguishes "nothing to report" from "parser is behind the product". */
+    const sample = parsed.areas.length === 0
+      ? stripHtml(r.text).split(/\n/).map((l) => l.replace(/\s+$/, "")).filter((l, i) => i < 40).join("\u23ce").slice(0, 700)
+      : null;
     out.attempts.push({ source: src.name, ok: true, status: r.status, count: parsed.areas.length,
-      note: parsed.areas.length + " area(s)" + (parsed.issued ? " · issued " + parsed.issued : "") });
-    out.areas.push(...parsed.areas.map((a) => Object.assign(a, { issued: parsed.issued, url: src.url })));
+      note: parsed.areas.length + " area(s)" + (parsed.issued ? " · issued " + parsed.issued : ""),
+      quietOrUnparsed: parsed.areas.length === 0 ? (/not expected during the next 7 days/i.test(stripHtml(r.text)) ? "quiet basin — product says formation not expected" : "NO AREAS PARSED and the product does not say 'not expected' — parser may be behind") : null,
+      sample });
+    if (parsed.areas.length) {
+      done.add(src.basin);
+      out.areas.push(...parsed.areas.map((a) => Object.assign(a, { issued: parsed.issued, url: src.url })));
+    } else if (/not expected during the next 7 days/i.test(stripHtml(r.text))) {
+      done.add(src.basin);                      // genuinely quiet; do not try the fallback
+    }
     out.status = r.status; out.latencyMs = r.latencyMs;
   }
   out.ok = out.attempts.some((a) => a.ok);

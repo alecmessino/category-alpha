@@ -194,7 +194,18 @@
     const f = s.feeds.outlook || {};
     const areas = s.outlook || [];
     if (!f.ok) return { text: "genesis outlook unavailable this cycle", ok: false };
-    if (!areas.length) return { text: "No areas under NHC watch in either basin.", ok: true };
+    if (!areas.length) {
+      /* Zero areas has two very different causes and they must not read the same:
+         the product saying formation is not expected, versus the parser failing to
+         find headings it should have found. The fetch records which. */
+      const susp = (f.attempts || []).filter((a) => a.quietOrUnparsed && /may be behind/.test(a.quietOrUnparsed));
+      if (susp.length) return {
+        text: "OUTLOOK PARSED 0 AREAS but the product does not say formation is unexpected — "
+            + "treat the quiet-basin reading as unverified (" + susp.map((a) => a.source).join(", ") + ")",
+        ok: false,
+      };
+      return { text: "No areas under NHC watch in either basin.", ok: true };
+    }
     const atl = areas.filter((a) => a.basin === "atlantic");
     const top = areas.slice().sort((a, b) => (b.pct7d ?? 0) - (a.pct7d ?? 0))[0];
     return {
