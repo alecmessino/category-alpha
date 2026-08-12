@@ -227,9 +227,24 @@ eq("HU status is a hurricane", bd([["2026081200", " 70", "HU"]]).hurricane, true
 eq("95 kt is not a major", bd([["2026081200", " 95", "HU"]]).major, false);
 eq("96 kt is", bd([["2026081200", " 96", "HU"]]).major, true);
 eq("peak wind is the max over the track", bd([["2026081200", " 40", "TS"], ["2026081206", " 85", "HU"], ["2026081212", " 50", "TS"]]).vmax, 85);
-eq("a storm that never reaches 34 kt is nothing", bd([["2026081200", " 30", "TD"]]), { vmax: 30, named: false, hurricane: false, major: false });
-eq("garbage yields a zero record rather than throwing", parseBdeck("not a b-deck"), { vmax: 0, named: false, hurricane: false, major: false });
-eq("empty input is safe", parseBdeck(""), { vmax: 0, named: false, hurricane: false, major: false });
+eq("a storm that never reaches 34 kt is nothing", bd([["2026081200", " 30", "TD"]]), { vmax: 30, named: false, hurricane: false, major: false, enteredCpac: false });
+eq("garbage yields a zero record rather than throwing", parseBdeck("not a b-deck"), { vmax: 0, named: false, hurricane: false, major: false, enteredCpac: false });
+eq("empty input is safe", parseBdeck(""), { vmax: 0, named: false, hurricane: false, major: false, enteredCpac: false });
+
+console.log("\n[11b] the in-season count uses the SAME basin rule as the climatology");
+/* The climatology counts the central Pacific by track. If the season-to-date counter
+   used the filename instead, it would miss exactly the storms that formed east and
+   crossed in — and L2 would subtract a count measured one way from a climatology
+   measured another, which inflates every central Pacific probability. B-deck longitudes
+   are tenths of a degree with a hemisphere suffix. */
+const bdLon = (lon) => parseBdeck(`EP, 05, 2026081200,   , BEST,   0, 180N, ${lon}, 65, 985, HU,`);
+eq("1300W is 130 degrees west — east of the boundary", bdLon("1300W").enteredCpac, false);
+eq("1400W is on the boundary and counts", bdLon("1400W").enteredCpac, true);
+eq("1650W is inside the central Pacific", bdLon("1650W").enteredCpac, true);
+eq("an Atlantic longitude never counts", bdLon("0600W").enteredCpac, false);
+ck("a track that crosses is caught on the western point",
+   parseBdeck([`EP, 05, 2026081200,   , BEST,   0, 180N, 1300W, 45, 1000, TS,`,
+               `EP, 05, 2026081600,   , BEST,   0, 190N, 1500W, 80, 975, HU,`].join("\n")).enteredCpac === true);
 
 console.log(fail ? `\n${fail} FAILURE(S)\n` : "\nall assertions passed\n");
 process.exit(fail ? 1 : 0);

@@ -624,19 +624,29 @@ const STD_MAX_FILES = Number(process.env.MT_STD_MAX || 80);
 const STD_CONCURRENCY = 6;
 
 function parseBdeck(text) {
-  let vmax = 0, named = false, hurricane = false, major = false;
+  let vmax = 0, named = false, hurricane = false, major = false, enteredCpac = false;
   for (const line of String(text || "").split(/\r?\n/)) {
     if (!line.trim()) continue;
     const f = line.split(",").map((x) => x.trim());
     if (f.length < 11) continue;
     const w = Number(f[8]);
     const status = (f[10] || "").toUpperCase();
+    /* Longitude, so the in-season count uses the same basin rule as the climatology it
+       is subtracted from. The climatology counts the central Pacific by track through
+       140W-180; counting the season to date by filename instead would miss exactly the
+       storms that formed east and crossed in, and every central Pacific probability
+       would come out too high. B-decks give tenths of a degree, hemisphere-suffixed. */
+    const lonM = /^(\d+)([EW])$/.exec(f[7] || "");
+    if (lonM) {
+      const lon = (Number(lonM[1]) / 10) * (lonM[2] === "W" ? -1 : 1);
+      if (lon >= -180 && lon <= -140) enteredCpac = true;
+    }
     if (!Number.isFinite(w)) continue;
     if (w > vmax) vmax = w;
     if ((status === "TS" || status === "HU" || status === "SS") && w >= 34) named = true;
     if (status === "HU") { hurricane = true; if (w >= 96) major = true; }
   }
-  return { vmax, named, hurricane, major };
+  return { vmax, named, hurricane, major, enteredCpac };
 }
 
 const STD_BASIN = { al: "atlantic", ep: "epac", cp: "cpac" };
@@ -666,14 +676,20 @@ async function fetchSeasonToDate(year) {
       const f = batch[k];
       if (!r.ok) { failed.push(f); return; }
       const basin = STD_BASIN[f.slice(1, 3)];
-      const c = counts[basin];
-      if (!c) return;
       const b = parseBdeck(r.text);
-      c.systems++;
-      if (b.named) c.namedstorms++;
-      if (b.hurricane) c.hurricanes++;
-      if (b.major) c.major++;
-      if (b.vmax > c.peakKt) c.peakKt = b.vmax;
+      /* A storm can count in two basins, exactly as the climatology counts it: the
+         eastern Pacific by where it formed, the central Pacific by whether it got there. */
+      const into = [basin];
+      if (basin === "epac" && b.enteredCpac) into.push("cpac");
+      for (const key of into) {
+        const c = counts[key];
+        if (!c) continue;
+        c.systems++;
+        if (b.named) c.namedstorms++;
+        if (b.hurricane) c.hurricanes++;
+        if (b.major) c.major++;
+        if (b.vmax > c.peakKt) c.peakKt = b.vmax;
+      }
     });
   }
   /* A partial read would UNDERCOUNT, and an undercount silently inflates every
