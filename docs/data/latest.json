@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-12T18:20:35.765Z",
+  "generatedAt": "2026-08-12T18:23:32.387Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 207,
+      "latencyMs": 308,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"al032026\",\"binNumber\":\"AT3\",\"name\":\"Cristobal\",\"classification\":\"TS\",\"intensity\":\"40\",\"pressure\":\"1008\",\"latitude\":\"36.7N\",\"longitude\":\"43.0W\",\"latitudeNumeric\":36.7,\"longitudeNumeric\":-43,\"movementDir\":90,\"movementSpeed\":25,\"lastUpdate\":\"2026-08-12T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"001\",\"issuance\":\"2026-08-12T15:00:00.000Z\",\"fileUpdateTime\":\"2026-08-12T14:49:55.947Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPAT3.shtml\"},\"forecastAdvisory\":{\"advNum\":\"001\",\"issuance\":\"2026-08-12T",
@@ -237,7 +237,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 193,
+      "latencyMs": 160,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -248,7 +248,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 4,
       "note": "4 area(s) under watch · 2 Atlantic · highest 7-day 80%",
-      "latencyMs": 383,
+      "latencyMs": 221,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -697,7 +697,7 @@
       "storm": null,
       "subject": null,
       "market": 0.355,
-      "model": 0.38655462184873945,
+      "model": 0.40032679738562094,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -707,26 +707,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.6,
+          "p": 0.5972222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.5714285714285714,
+          "p": 0.5694444444444444,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >2 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.5714285714285714,
+          "p": 0.5694444444444444,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.38655462184873945,
-          "basis": "9 El Niño seasons → 22% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.40032679738562094,
+          "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -755,7 +755,7 @@
       "storm": null,
       "subject": null,
       "market": 0.155,
-      "model": 0.26050420168067223,
+      "model": 0.28202614379084967,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -765,26 +765,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.42857142857142855,
+          "p": 0.4305555555555556,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.42857142857142855,
+          "p": 0.4305555555555556,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >3 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.42857142857142855,
+          "p": 0.4305555555555556,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.26050420168067223,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.28202614379084967,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -813,11 +813,11 @@
       "storm": null,
       "subject": null,
       "market": 0.345,
-      "model": 0.5142857142857142,
+      "model": 0.5138888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Dolly is name #4 on the Atlantic list and 3 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 51% of seasons · used at all in 100%",
+      "modelBasis": "Dolly is name #4 on the Atlantic list and 3 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 51% of seasons · used at all in 99%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -846,7 +846,7 @@
       "storm": null,
       "subject": null,
       "market": 0.095,
-      "model": 0.16638655462184873,
+      "model": 0.19052287581699345,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -856,26 +856,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.2857142857142857,
+          "p": 0.2916666666666667,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.16638655462184873,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.19052287581699345,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -904,7 +904,7 @@
       "storm": null,
       "subject": null,
       "market": 0.215,
-      "model": 0.26050420168067223,
+      "model": 0.28202614379084967,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -914,26 +914,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.6,
+          "p": 0.5972222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.42857142857142855,
+          "p": 0.4305555555555556,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >6 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.42857142857142855,
+          "p": 0.4305555555555556,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.26050420168067223,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.28202614379084967,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -962,7 +962,7 @@
       "storm": null,
       "subject": null,
       "market": 0.05,
-      "model": 0.05378151260504201,
+      "model": 0.08529411764705883,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -972,26 +972,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.11428571428571428,
+          "p": 0.125,
           "basis": "named storms forming on/after day 224 in each past season; needs >15 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.11428571428571428,
+          "p": 0.125,
           "basis": "3 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.05378151260504201,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.08529411764705883,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1020,7 +1020,7 @@
       "storm": null,
       "subject": null,
       "market": 0.245,
-      "model": 0.4453781512605042,
+      "model": 0.4532679738562091,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1030,26 +1030,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.6857142857142857,
+          "p": 0.6805555555555556,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.5714285714285714,
+          "p": 0.5694444444444444,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >5 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.5714285714285714,
+          "p": 0.5694444444444444,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.4453781512605042,
-          "basis": "9 El Niño seasons → 33% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.4532679738562091,
+          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1078,11 +1078,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Nana is name #14 on the Atlantic list and 3 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 60%",
+      "modelBasis": "Nana is name #14 on the Atlantic list and 3 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 60%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1111,11 +1111,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Omar is name #15 on the Atlantic list and 3 have been used, so this is the #12 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 46%",
+      "modelBasis": "Omar is name #15 on the Atlantic list and 3 have been used, so this is the #12 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 46%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1144,7 +1144,7 @@
       "storm": null,
       "subject": null,
       "market": 0.45499999999999996,
-      "model": 0.5714285714285714,
+      "model": 0.5715686274509805,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1154,26 +1154,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.7428571428571429,
+          "p": 0.7361111111111112,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.7142857142857143,
+          "p": 0.7083333333333334,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.7142857142857143,
+          "p": 0.7083333333333334,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.5714285714285714,
-          "basis": "9 El Niño seasons → 44% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.5715686274509805,
+          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1202,7 +1202,7 @@
       "storm": null,
       "subject": null,
       "market": 0.1,
-      "model": 0.17983193277310922,
+      "model": 0.20359477124183006,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1212,26 +1212,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.3142857142857143,
+          "p": 0.3194444444444444,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.2571428571428571,
+          "p": 0.2638888888888889,
           "basis": "named storms forming on/after day 224 in each past season; needs >13 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.2571428571428571,
+          "p": 0.2638888888888889,
           "basis": "3 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.17983193277310922,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.20359477124183006,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1260,11 +1260,11 @@
       "storm": null,
       "subject": null,
       "market": 0.02,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Josephine is name #10 on the Atlantic list and 3 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 83%",
+      "modelBasis": "Josephine is name #10 on the Atlantic list and 3 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 82%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1292,8 +1292,8 @@
       "short": "Will there be more than 1 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.545,
-      "model": 0.8739495798319328,
+      "market": 0.55,
+      "model": 0.8486928104575163,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1303,41 +1303,41 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.8571428571428571,
+          "p": 0.8472222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.8571428571428571,
+          "p": 0.8472222222222222,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >1 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.8571428571428571,
+          "p": 0.8472222222222222,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.8739495798319328,
-          "basis": "9 El Niño seasons → 89% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.8486928104575163,
+          "basis": "9 El Niño seasons → 85% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
       "strike": 1,
-      "yesBid": 0.53,
+      "yesBid": 0.54,
       "yesAsk": 0.56,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 6,
-      "spread": 0.030000000000000027,
+      "liquidity": 7,
+      "spread": 0.020000000000000018,
       "volume": 7273.5,
       "volume24h": 114.06,
       "openInterest": 5036.87,
       "depth": {
-        "bidSize": 5,
-        "askSize": 10,
+        "bidSize": 2,
+        "askSize": 13,
         "notional": 1
       },
       "proxy": false,
@@ -1351,11 +1351,11 @@
       "storm": null,
       "subject": null,
       "market": 0.28500000000000003,
-      "model": 0.2571428571428571,
+      "model": 0.2638888888888889,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Edouard is name #5 on the Atlantic list and 3 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 26% of seasons · used at all in 100%",
+      "modelBasis": "Edouard is name #5 on the Atlantic list and 3 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 26% of seasons · used at all in 99%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1365,11 +1365,11 @@
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 5,
       "spread": 0.009999999999999953,
-      "volume": 7119.75,
-      "volume24h": 158.47,
+      "volume": 7162.75,
+      "volume24h": 193.75,
       "openInterest": 3536.1,
       "depth": {
-        "bidSize": 364.72,
+        "bidSize": 321.72,
         "askSize": 16.24,
         "notional": 1
       },
@@ -1384,7 +1384,7 @@
       "storm": null,
       "subject": null,
       "market": 0.21000000000000002,
-      "model": 0.33277310924369746,
+      "model": 0.3480392156862745,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1394,26 +1394,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.5428571428571428,
+          "p": 0.5416666666666666,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.45714285714285713,
+          "p": 0.4583333333333333,
           "basis": "named storms forming on/after day 224 in each past season; needs >11 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.45714285714285713,
+          "p": 0.4583333333333333,
           "basis": "3 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.33277310924369746,
-          "basis": "9 El Niño seasons → 22% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.3480392156862745,
+          "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1442,11 +1442,11 @@
       "storm": null,
       "subject": null,
       "market": 0.09,
-      "model": 0.05714285714285714,
+      "model": 0.06944444444444445,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 3 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 6% of seasons · used at all in 97%",
+      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 3 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 7% of seasons · used at all in 96%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1475,11 +1475,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Marco is name #13 on the Atlantic list and 3 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 69%",
+      "modelBasis": "Marco is name #13 on the Atlantic list and 3 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 68%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1508,11 +1508,11 @@
       "storm": null,
       "subject": null,
       "market": 0.04,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Hanna is name #8 on the Atlantic list and 3 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 97%",
+      "modelBasis": "Hanna is name #8 on the Atlantic list and 3 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 96%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1541,7 +1541,7 @@
       "storm": null,
       "subject": null,
       "market": 0.635,
-      "model": 0.7294117647058823,
+      "model": 0.7166666666666666,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1551,26 +1551,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.7714285714285715,
+          "p": 0.7638888888888888,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.8,
+          "p": 0.7916666666666666,
           "basis": "named storms forming on/after day 224 in each past season; needs >7 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.8,
+          "p": 0.7916666666666666,
           "basis": "3 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.7294117647058823,
-          "basis": "9 El Niño seasons → 67% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.7166666666666666,
+          "basis": "9 El Niño seasons → 65% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1599,11 +1599,11 @@
       "storm": null,
       "subject": null,
       "market": 0.035,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Isaias is name #9 on the Atlantic list and 3 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 97%",
+      "modelBasis": "Isaias is name #9 on the Atlantic list and 3 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 96%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1632,11 +1632,11 @@
       "storm": null,
       "subject": null,
       "market": 0.185,
-      "model": 0.17142857142857143,
+      "model": 0.18055555555555555,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Fay is name #6 on the Atlantic list and 3 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 17% of seasons · used at all in 100%",
+      "modelBasis": "Fay is name #6 on the Atlantic list and 3 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 18% of seasons · used at all in 99%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1665,7 +1665,7 @@
       "storm": null,
       "subject": null,
       "market": 0.08499999999999999,
-      "model": 0.026890756302521007,
+      "model": 0.059150326797385626,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1675,26 +1675,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.14285714285714285,
+          "p": 0.1527777777777778,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >5 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.026890756302521007,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.059150326797385626,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1723,11 +1723,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Kyle is name #11 on the Atlantic list and 3 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 80%",
+      "modelBasis": "Kyle is name #11 on the Atlantic list and 3 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 79%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1756,7 +1756,7 @@
       "storm": null,
       "subject": null,
       "market": 0.405,
-      "model": 0.4991596638655462,
+      "model": 0.5055555555555555,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1766,26 +1766,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.6857142857142857,
+          "p": 0.6805555555555556,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.6857142857142857,
+          "p": 0.6805555555555556,
           "basis": "named storms forming on/after day 224 in each past season; needs >9 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.6857142857142857,
+          "p": 0.6805555555555556,
           "basis": "3 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.4991596638655462,
-          "basis": "9 El Niño seasons → 33% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.5055555555555555,
+          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1814,7 +1814,7 @@
       "storm": null,
       "subject": null,
       "market": 0.125,
-      "model": 0.22016806722689075,
+      "model": 0.24281045751633987,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1824,26 +1824,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.45714285714285713,
+          "p": 0.4583333333333333,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.34285714285714286,
+          "p": 0.3472222222222222,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >7 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.34285714285714286,
+          "p": 0.3472222222222222,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.22016806722689075,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.24281045751633987,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1872,11 +1872,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Vicky is name #20 on the Atlantic list and 3 have been used, so this is the #17 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 6%",
+      "modelBasis": "Vicky is name #20 on the Atlantic list and 3 have been used, so this is the #17 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 7%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -1905,7 +1905,7 @@
       "storm": null,
       "subject": null,
       "market": 0.765,
-      "model": 0.973109243697479,
+      "model": 0.9408496732026144,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1915,26 +1915,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.9428571428571428,
+          "p": 0.9305555555555556,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.9428571428571428,
+          "p": 0.9305555555555556,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >0 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.9428571428571428,
+          "p": 0.9305555555555556,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.973109243697479,
-          "basis": "9 El Niño seasons → 100% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.9408496732026144,
+          "basis": "9 El Niño seasons → 95% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -1963,7 +1963,7 @@
       "storm": null,
       "subject": null,
       "market": 0.045,
-      "model": 0.05378151260504201,
+      "model": 0.08529411764705883,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -1973,26 +1973,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.11428571428571428,
+          "p": 0.125,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >9 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.11428571428571428,
+          "p": 0.125,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.05378151260504201,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.08529411764705883,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2021,11 +2021,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Leah is name #12 on the Atlantic list and 3 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 74%",
+      "modelBasis": "Leah is name #12 on the Atlantic list and 3 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 74%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -2054,7 +2054,7 @@
       "storm": null,
       "subject": null,
       "market": 0.025,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -2064,26 +2064,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >7 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2112,11 +2112,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Rene is name #17 on the Atlantic list and 3 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 26%",
+      "modelBasis": "Rene is name #17 on the Atlantic list and 3 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 26%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -2145,11 +2145,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Wilfred is name #21 on the Atlantic list and 3 have been used, so this is the #18 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 6%",
+      "modelBasis": "Wilfred is name #21 on the Atlantic list and 3 have been used, so this is the #18 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 7%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -2178,7 +2178,7 @@
       "storm": null,
       "subject": null,
       "market": 0.065,
-      "model": 0.09411764705882353,
+      "model": 0.12450980392156863,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -2188,26 +2188,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.34285714285714286,
+          "p": 0.3472222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.2,
+          "p": 0.20833333333333334,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >8 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.2,
+          "p": 0.20833333333333334,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.09411764705882353,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.12450980392156863,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2236,11 +2236,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Sally is name #18 on the Atlantic list and 3 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 17%",
+      "modelBasis": "Sally is name #18 on the Atlantic list and 3 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 18%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -2269,11 +2269,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Paulette is name #16 on the Atlantic list and 3 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 34%",
+      "modelBasis": "Paulette is name #16 on the Atlantic list and 3 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 35%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -2302,11 +2302,11 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Teddy is name #19 on the Atlantic list and 3 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 0% of seasons · used at all in 11%",
+      "modelBasis": "Teddy is name #19 on the Atlantic list and 3 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · used at all in 13%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -2335,36 +2335,36 @@
       "storm": null,
       "subject": null,
       "market": 0.9299999999999999,
-      "model": 0.0722689075630252,
+      "model": 0.2441176470588235,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224",
-      "modelUncond": 0.02857142857142857,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.45714285714285713,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.02857142857142857,
+          "p": 0.4583333333333333,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.02857142857142857,
+          "p": 0.125,
           "basis": "named storms forming on/after day 224 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.02857142857142857,
+          "p": 0.125,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.0722689075630252,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.2441176470588235,
+          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2393,7 +2393,7 @@
       "storm": null,
       "subject": null,
       "market": 0.02,
-      "model": 0.040336134453781515,
+      "model": 0.07222222222222222,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -2403,26 +2403,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.14285714285714285,
+          "p": 0.1527777777777778,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.08571428571428572,
+          "p": 0.09722222222222222,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >10 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.08571428571428572,
+          "p": 0.09722222222222222,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.040336134453781515,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.07222222222222222,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2451,36 +2451,36 @@
       "storm": null,
       "subject": null,
       "market": 0.98,
-      "model": 0.1445378151260504,
+      "model": 0.5604575163398693,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224",
-      "modelUncond": 0.05714285714285714,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.6857142857142857,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.05714285714285714,
+          "p": 0.6805555555555556,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.05714285714285714,
+          "p": 0.3472222222222222,
           "basis": "named storms forming on/after day 224 in each past season; needs >2 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.05714285714285714,
+          "p": 0.3472222222222222,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.1445378151260504,
-          "basis": "9 El Niño seasons → 22% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.5604575163398693,
+          "basis": "9 El Niño seasons → 75% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2509,7 +2509,7 @@
       "storm": null,
       "subject": null,
       "market": 0.035,
-      "model": 0.013445378151260503,
+      "model": 0.04607843137254902,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -2519,26 +2519,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.02857142857142857,
+          "p": 0.041666666666666664,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >6 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.02857142857142857,
+          "p": 0.041666666666666664,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.013445378151260503,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.04607843137254902,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2567,36 +2567,36 @@
       "storm": null,
       "subject": null,
       "market": 0.98,
-      "model": 0.0722689075630252,
+      "model": 0.323202614379085,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224",
-      "modelUncond": 0.02857142857142857,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.5714285714285714,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.02857142857142857,
+          "p": 0.5694444444444444,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.02857142857142857,
+          "p": 0.18055555555555555,
           "basis": "named storms forming on/after day 224 in each past season; needs >3 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.02857142857142857,
+          "p": 0.18055555555555555,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.0722689075630252,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.323202614379085,
+          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2625,11 +2625,11 @@
       "storm": null,
       "subject": null,
       "market": 0.285,
-      "model": 0.7142857142857143,
+      "model": 0.7083333333333334,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Isaias is name #9 on the Atlantic list and 3 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 71% of seasons · used at all in 97%",
+      "modelBasis": "Isaias is name #9 on the Atlantic list and 3 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 71% of seasons · used at all in 96%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -2658,36 +2658,36 @@
       "storm": null,
       "subject": null,
       "market": 0.655,
-      "model": 0,
+      "model": 0.09901960784313725,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224",
-      "modelUncond": 0.02857142857142857,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.17142857142857143,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.02857142857142857,
+          "p": 0.18055555555555555,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.041666666666666664,
           "basis": "named storms forming on/after day 224 in each past season; needs >6 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.041666666666666664,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.09901960784313725,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2716,7 +2716,7 @@
       "storm": null,
       "subject": null,
       "market": 0.02,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -2726,26 +2726,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >12 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2774,36 +2774,36 @@
       "storm": null,
       "subject": null,
       "market": 0.825,
-      "model": 0,
+      "model": 0.11209150326797385,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224",
-      "modelUncond": 0.02857142857142857,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.2857142857142857,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.02857142857142857,
+          "p": 0.2916666666666667,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.06944444444444445,
           "basis": "named storms forming on/after day 224 in each past season; needs >5 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.06944444444444445,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.11209150326797385,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -2831,52 +2831,52 @@
       "short": "Will there be more than 2 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.845,
-      "model": 0.0722689075630252,
+      "market": 0.94,
+      "model": 0.34934640522875815,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224",
-      "modelUncond": 0.02857142857142857,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.5142857142857142,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.02857142857142857,
+          "p": 0.5138888888888888,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.02857142857142857,
+          "p": 0.2361111111111111,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >2 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.02857142857142857,
+          "p": 0.2361111111111111,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.0722689075630252,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.34934640522875815,
+          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
       "strike": 2,
-      "yesBid": 0.82,
-      "yesAsk": 0.87,
+      "yesBid": 0.91,
+      "yesAsk": 0.97,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 141,
-      "spread": 0.050000000000000044,
+      "liquidity": 156,
+      "spread": 0.05999999999999994,
       "volume": 966.07,
       "volume24h": 0,
       "openInterest": 715.79,
       "depth": {
-        "bidSize": 5,
-        "askSize": 162,
+        "bidSize": 200,
+        "askSize": 161,
         "notional": 1
       },
       "proxy": false,
@@ -2890,11 +2890,11 @@
       "storm": null,
       "subject": null,
       "market": 0.31,
-      "model": 0.42857142857142855,
+      "model": 0.4305555555555556,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 3 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 43% of seasons · used at all in 97%",
+      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 3 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 43% of seasons · used at all in 96%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -2922,52 +2922,52 @@
       "short": "Will there be more than 5 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.185,
-      "model": 0,
+      "market": 0.28,
+      "model": 0.09901960784313725,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224",
-      "modelUncond": 0,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.2,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0,
+          "p": 0.20833333333333334,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.041666666666666664,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >5 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.041666666666666664,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.09901960784313725,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
       "strike": 5,
-      "yesBid": 0.16,
-      "yesAsk": 0.21,
+      "yesBid": 0.26,
+      "yesAsk": 0.3,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 42,
-      "spread": 0.04999999999999999,
+      "liquidity": 0,
+      "spread": 0.03999999999999998,
       "volume": 781.49,
       "volume24h": 67.37,
       "openInterest": 108.04,
       "depth": {
-        "bidSize": 5,
-        "askSize": 200,
+        "bidSize": 161,
+        "askSize": 1,
         "notional": 1
       },
       "proxy": false,
@@ -2981,36 +2981,36 @@
       "storm": null,
       "subject": null,
       "market": 0.46499999999999997,
-      "model": 0.08571428571428572,
+      "model": 0.11209150326797385,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.2,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.2,
+          "p": 0.20833333333333334,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "named storms forming on/after day 224 in each past season; needs >11 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "7 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.08571428571428572,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.11209150326797385,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3039,7 +3039,7 @@
       "storm": null,
       "subject": null,
       "market": 0.355,
-      "model": 0.5428571428571428,
+      "model": 0.5416666666666666,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -3072,11 +3072,11 @@
       "storm": null,
       "subject": null,
       "market": 0.97,
-      "model": 0.6571428571428571,
+      "model": 0.6527777777777778,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Iselle is name #9 on the eastern Pacific list and 7 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 66% of seasons · used at all in 100%",
+      "modelBasis": "Iselle is name #9 on the eastern Pacific list and 7 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 65% of seasons · used at all in 99%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -3105,36 +3105,36 @@
       "storm": null,
       "subject": null,
       "market": 0.185,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.11428571428571428,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.11428571428571428,
+          "p": 0.125,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >10 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3163,7 +3163,7 @@
       "storm": null,
       "subject": null,
       "market": 0.015,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -3173,26 +3173,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >15 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3221,36 +3221,36 @@
       "storm": null,
       "subject": null,
       "market": 0.65,
-      "model": 0.2168067226890756,
+      "model": 0.2310457516339869,
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.22857142857142856,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.08571428571428572,
+          "p": 0.09722222222222222,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >5 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.08571428571428572,
+          "p": 0.09722222222222222,
           "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.2168067226890756,
-          "basis": "9 El Niño seasons → 33% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.2310457516339869,
+          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3279,7 +3279,7 @@
       "storm": null,
       "subject": null,
       "market": 0.04,
-      "model": 0.026890756302521007,
+      "model": 0.059150326797385626,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -3289,26 +3289,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.08571428571428572,
+          "p": 0.09722222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "named storms forming on/after day 224 in each past season; needs >17 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "3 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.026890756302521007,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.059150326797385626,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3336,52 +3336,52 @@
       "short": "Will there be more than 4 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.28,
-      "model": 0,
+      "market": 0.455,
+      "model": 0.1650326797385621,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224",
-      "modelUncond": 0,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.22857142857142856,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0,
+          "p": 0.2361111111111111,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.06944444444444445,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.06944444444444445,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.1650326797385621,
+          "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.11,
-      "yesAsk": 0.45,
+      "yesBid": 0.45,
+      "yesAsk": 0.46,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 2,
-      "spread": 0.34,
+      "liquidity": 3,
+      "spread": 0.010000000000000009,
       "volume": 464.28,
       "volume24h": 0,
       "openInterest": 396.41,
       "depth": {
-        "bidSize": 5,
-        "askSize": 5,
+        "bidSize": 161,
+        "askSize": 7,
         "notional": 1
       },
       "proxy": false,
@@ -3395,36 +3395,36 @@
       "storm": null,
       "subject": null,
       "market": 0.30000000000000004,
-      "model": 0,
+      "model": 0.2441176470588235,
       "modelQuantity": "major",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific major-hurricane seasons (n=35), day 224",
-      "modelUncond": 0,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.34285714285714286,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0,
+          "p": 0.3472222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.125,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >2 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.125,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.2441176470588235,
+          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3453,11 +3453,11 @@
       "storm": null,
       "subject": null,
       "market": 0.29500000000000004,
-      "model": 0.3142857142857143,
+      "model": 0.3194444444444444,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Marco is name #13 on the Atlantic list and 3 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 31% of seasons · used at all in 69%",
+      "modelBasis": "Marco is name #13 on the Atlantic list and 3 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 32% of seasons · used at all in 68%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -3486,7 +3486,7 @@
       "storm": null,
       "subject": null,
       "market": 0.015,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -3496,26 +3496,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "named storms forming on/after day 224 in each past season; needs >27 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "3 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3544,11 +3544,11 @@
       "storm": null,
       "subject": null,
       "market": 0.36,
-      "model": 0.5428571428571428,
+      "model": 0.5416666666666666,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Kyle is name #11 on the Atlantic list and 3 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 54% of seasons · used at all in 80%",
+      "modelBasis": "Kyle is name #11 on the Atlantic list and 3 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 54% of seasons · used at all in 79%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -3577,36 +3577,36 @@
       "storm": null,
       "subject": null,
       "market": 0.075,
-      "model": 0,
+      "model": 0.09901960784313725,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224",
-      "modelUncond": 0,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.11428571428571428,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0,
+          "p": 0.125,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.041666666666666664,
           "basis": "named storms forming on/after day 224 in each past season; needs >7 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.041666666666666664,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.09901960784313725,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3635,11 +3635,11 @@
       "storm": null,
       "subject": null,
       "market": 0.265,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Winnie is name #21 on the eastern Pacific list and 7 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 0% of seasons · used at all in 3%",
+      "modelBasis": "Winnie is name #21 on the eastern Pacific list and 7 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 1% of seasons · used at all in 4%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -3668,36 +3668,36 @@
       "storm": null,
       "subject": null,
       "market": 0.695,
-      "model": 0.2436974789915966,
+      "model": 0.2571895424836601,
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.2857142857142857,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.2857142857142857,
+          "p": 0.2916666666666667,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.14285714285714285,
+          "p": 0.1527777777777778,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.14285714285714285,
+          "p": 0.1527777777777778,
           "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.2436974789915966,
-          "basis": "9 El Niño seasons → 33% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.2571895424836601,
+          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3726,11 +3726,11 @@
       "storm": null,
       "subject": null,
       "market": 0.495,
-      "model": 0.5142857142857142,
+      "model": 0.5138888888888888,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Dolly is name #4 on the Atlantic list and 3 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · used at all in 100%",
+      "modelBasis": "Dolly is name #4 on the Atlantic list and 3 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · used at all in 99%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -3759,36 +3759,36 @@
       "storm": null,
       "subject": null,
       "market": 0.295,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.14285714285714285,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.14285714285714285,
+          "p": 0.1527777777777778,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >9 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3817,36 +3817,36 @@
       "storm": null,
       "subject": null,
       "market": 0.36,
-      "model": 0,
+      "model": 0.19117647058823528,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224",
-      "modelUncond": 0.02857142857142857,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.34285714285714286,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.02857142857142857,
+          "p": 0.3472222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.125,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >3 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.125,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.19117647058823528,
+          "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3875,36 +3875,36 @@
       "storm": null,
       "subject": null,
       "market": 0.365,
-      "model": 0.013445378151260503,
+      "model": 0.04607843137254902,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.11428571428571428,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.11428571428571428,
+          "p": 0.125,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.02857142857142857,
+          "p": 0.041666666666666664,
           "basis": "named storms forming on/after day 224 in each past season; needs >12 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.02857142857142857,
+          "p": 0.041666666666666664,
           "basis": "7 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.013445378151260503,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.04607843137254902,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3933,36 +3933,36 @@
       "storm": null,
       "subject": null,
       "market": 0.53,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.17142857142857143,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.17142857142857143,
+          "p": 0.18055555555555555,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >6 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -3991,36 +3991,36 @@
       "storm": null,
       "subject": null,
       "market": 0.935,
-      "model": 0.4957983193277311,
+      "model": 0.49379084967320264,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.5428571428571428,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.5428571428571428,
+          "p": 0.5416666666666666,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.42857142857142855,
+          "p": 0.4305555555555556,
           "basis": "named storms forming on/after day 224 in each past season; needs >9 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.42857142857142855,
+          "p": 0.4305555555555556,
           "basis": "7 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.4957983193277311,
-          "basis": "9 El Niño seasons → 56% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.49379084967320264,
+          "basis": "9 El Niño seasons → 55% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4049,36 +4049,36 @@
       "storm": null,
       "subject": null,
       "market": 0.775,
-      "model": 0.34285714285714286,
+      "model": 0.34934640522875815,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.4,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.4,
+          "p": 0.4027777777777778,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "named storms forming on/after day 224 in each past season; needs >10 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "7 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.34285714285714286,
-          "basis": "9 El Niño seasons → 44% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.34934640522875815,
+          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4107,36 +4107,36 @@
       "storm": null,
       "subject": null,
       "market": 0.305,
-      "model": 0.013445378151260503,
+      "model": 0.04607843137254902,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.08571428571428572,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.08571428571428572,
+          "p": 0.09722222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.02857142857142857,
+          "p": 0.041666666666666664,
           "basis": "named storms forming on/after day 224 in each past season; needs >13 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.02857142857142857,
+          "p": 0.041666666666666664,
           "basis": "7 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.013445378151260503,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.04607843137254902,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4165,7 +4165,7 @@
       "storm": null,
       "subject": null,
       "market": 0.015,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -4175,26 +4175,26 @@
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "named storms forming on/after day 224 in each past season; needs >22 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "3 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4223,36 +4223,36 @@
       "storm": null,
       "subject": null,
       "market": 0.55,
-      "model": 0.0722689075630252,
+      "model": 0.49444444444444446,
       "modelQuantity": "major",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific major-hurricane seasons (n=35), day 224",
-      "modelUncond": 0.02857142857142857,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.5714285714285714,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.02857142857142857,
+          "p": 0.5694444444444444,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.02857142857142857,
+          "p": 0.3194444444444444,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >1 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.02857142857142857,
+          "p": 0.3194444444444444,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.0722689075630252,
-          "basis": "9 El Niño seasons → 11% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.49444444444444446,
+          "basis": "9 El Niño seasons → 65% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4281,36 +4281,36 @@
       "storm": null,
       "subject": null,
       "market": 0.665,
-      "model": 0.34285714285714286,
+      "model": 0.34934640522875815,
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.42857142857142855,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.42857142857142855,
+          "p": 0.4305555555555556,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >3 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.34285714285714286,
-          "basis": "9 El Niño seasons → 44% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.34934640522875815,
+          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4339,7 +4339,7 @@
       "storm": null,
       "subject": null,
       "market": 0.29000000000000004,
-      "model": 0.2857142857142857,
+      "model": 0.2916666666666667,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -4372,36 +4372,36 @@
       "storm": null,
       "subject": null,
       "market": 0.525,
-      "model": 0.040336134453781515,
+      "model": 0.07222222222222222,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.4,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.4,
+          "p": 0.4027777777777778,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.08571428571428572,
+          "p": 0.09722222222222222,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >7 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.08571428571428572,
+          "p": 0.09722222222222222,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.040336134453781515,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.07222222222222222,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4430,36 +4430,36 @@
       "storm": null,
       "subject": null,
       "market": 0.825,
-      "model": 0.5949579831932772,
+      "model": 0.5859477124183006,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.7428571428571429,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.7428571428571429,
+          "p": 0.7361111111111112,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.5142857142857142,
+          "p": 0.5138888888888888,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.5142857142857142,
+          "p": 0.5138888888888888,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.5949579831932772,
-          "basis": "9 El Niño seasons → 67% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.5859477124183006,
+          "basis": "9 El Niño seasons → 65% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4488,11 +4488,11 @@
       "storm": null,
       "subject": null,
       "market": 0.565,
-      "model": 0.2,
+      "model": 0.20833333333333334,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Rachel is name #17 on the eastern Pacific list and 7 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 20% of seasons · used at all in 43%",
+      "modelBasis": "Rachel is name #17 on the eastern Pacific list and 7 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 21% of seasons · used at all in 43%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -4521,11 +4521,11 @@
       "storm": null,
       "subject": null,
       "market": 0.435,
-      "model": 0.37142857142857144,
+      "model": 0.375,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Josephine is name #10 on the Atlantic list and 3 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 37% of seasons · used at all in 83%",
+      "modelBasis": "Josephine is name #10 on the Atlantic list and 3 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 38% of seasons · used at all in 82%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -4554,36 +4554,36 @@
       "storm": null,
       "subject": null,
       "market": 0.385,
-      "model": 0.026890756302521007,
+      "model": 0.059150326797385626,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.17142857142857143,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.17142857142857143,
+          "p": 0.18055555555555555,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >8 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.026890756302521007,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.059150326797385626,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4612,36 +4612,36 @@
       "storm": null,
       "subject": null,
       "market": 0.14500000000000002,
-      "model": 0,
+      "model": 0.1650326797385621,
       "modelQuantity": "major",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific major-hurricane seasons (n=35), day 224",
-      "modelUncond": 0,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.2571428571428571,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0,
+          "p": 0.2638888888888889,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.06944444444444445,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >3 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.06944444444444445,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.1650326797385621,
+          "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4670,11 +4670,11 @@
       "storm": null,
       "subject": null,
       "market": 0.665,
-      "model": 0.5142857142857142,
+      "model": 0.5138888888888888,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Hanna is name #8 on the Atlantic list and 3 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · used at all in 97%",
+      "modelBasis": "Hanna is name #8 on the Atlantic list and 3 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · used at all in 96%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -4703,36 +4703,36 @@
       "storm": null,
       "subject": null,
       "market": 0.030000000000000002,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "named storms forming on/after day 224 in each past season; needs >19 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "7 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4760,52 +4760,52 @@
       "short": "Will there be more than 13 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.19,
-      "model": 0,
+      "market": 0.09,
+      "model": 0.03300653594771242,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.05714285714285714,
+          "p": 0.06944444444444445,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >11 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
       "strike": 13,
       "yesBid": 0.08,
-      "yesAsk": 0.3,
+      "yesAsk": 0.1,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 0,
-      "spread": 0.21999999999999997,
+      "liquidity": 20,
+      "spread": 0.020000000000000004,
       "volume": 57.14,
       "volume24h": 1.24,
       "openInterest": 49.9,
       "depth": {
         "bidSize": 0.38,
-        "askSize": 1,
+        "askSize": 200,
         "notional": 1
       },
       "proxy": false,
@@ -4819,36 +4819,36 @@
       "storm": null,
       "subject": null,
       "market": 0.135,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.02857142857142857,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.02857142857142857,
+          "p": 0.041666666666666664,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "named storms forming on/after day 224 in each past season; needs >15 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "7 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4877,36 +4877,36 @@
       "storm": null,
       "subject": null,
       "market": 0.625,
-      "model": 0.28403361344537814,
+      "model": 0.2964052287581699,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.5142857142857142,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.5142857142857142,
+          "p": 0.5138888888888888,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >6 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.22857142857142856,
+          "p": 0.2361111111111111,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.28403361344537814,
-          "basis": "9 El Niño seasons → 33% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.2964052287581699,
+          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -4935,11 +4935,11 @@
       "storm": null,
       "subject": null,
       "market": 0.5449999999999999,
-      "model": 0.6285714285714286,
+      "model": 0.625,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Fay is name #6 on the Atlantic list and 3 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 63% of seasons · used at all in 100%",
+      "modelBasis": "Fay is name #6 on the Atlantic list and 3 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 63% of seasons · used at all in 99%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -4968,11 +4968,11 @@
       "storm": null,
       "subject": null,
       "market": 0.13,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Yolanda is name #23 on the eastern Pacific list and 7 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 0% of seasons · used at all in 0%",
+      "modelBasis": "Yolanda is name #23 on the eastern Pacific list and 7 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 1% of seasons · used at all in 1%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5001,11 +5001,11 @@
       "storm": null,
       "subject": null,
       "market": 0.495,
-      "model": 0.17142857142857143,
+      "model": 0.18055555555555555,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Paulette is name #16 on the Atlantic list and 3 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 17% of seasons · used at all in 34%",
+      "modelBasis": "Paulette is name #16 on the Atlantic list and 3 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 18% of seasons · used at all in 35%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5034,11 +5034,11 @@
       "storm": null,
       "subject": null,
       "market": 0.575,
-      "model": 0.5714285714285714,
+      "model": 0.5694444444444444,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Edouard is name #5 on the Atlantic list and 3 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · used at all in 100%",
+      "modelBasis": "Edouard is name #5 on the Atlantic list and 3 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · used at all in 99%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5067,11 +5067,11 @@
       "storm": null,
       "subject": null,
       "market": 0.72,
-      "model": 0.4857142857142857,
+      "model": 0.4861111111111111,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Hernan is name #8 on the eastern Pacific list and 7 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 49% of seasons · used at all in 100%",
+      "modelBasis": "Hernan is name #8 on the eastern Pacific list and 7 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 49% of seasons · used at all in 99%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5100,36 +5100,36 @@
       "storm": null,
       "subject": null,
       "market": 0.055,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific named-storm seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.02857142857142857,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.02857142857142857,
+          "p": 0.041666666666666664,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "named storms forming on/after day 224 in each past season; needs >17 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "7 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -5158,36 +5158,36 @@
       "storm": null,
       "subject": null,
       "market": 0.745,
-      "model": 0.38319327731092434,
+      "model": 0.388562091503268,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.5714285714285714,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.5714285714285714,
+          "p": 0.5694444444444444,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.3142857142857143,
+          "p": 0.3194444444444444,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >5 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.3142857142857143,
+          "p": 0.3194444444444444,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.38319327731092434,
-          "basis": "9 El Niño seasons → 44% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.388562091503268,
+          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -5216,36 +5216,36 @@
       "storm": null,
       "subject": null,
       "market": 0.13,
-      "model": 0,
+      "model": 0.03300653594771242,
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.11428571428571428,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.11428571428571428,
+          "p": 0.125,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >7 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0,
+          "p": 0.013888888888888888,
           "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0,
-          "basis": "9 El Niño seasons → 0% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.03300653594771242,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -5274,11 +5274,11 @@
       "storm": null,
       "subject": null,
       "market": 0.08,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Zeke is name #24 on the eastern Pacific list and 7 have been used, so this is the #17 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 0% of seasons · used at all in 0%",
+      "modelBasis": "Zeke is name #24 on the eastern Pacific list and 7 have been used, so this is the #17 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 1% of seasons · used at all in 1%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5307,11 +5307,11 @@
       "storm": null,
       "subject": null,
       "market": 0.625,
-      "model": 0.5428571428571428,
+      "model": 0.5416666666666666,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Karina is name #11 on the eastern Pacific list and 7 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 54% of seasons · used at all in 97%",
+      "modelBasis": "Karina is name #11 on the eastern Pacific list and 7 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 54% of seasons · used at all in 96%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5340,11 +5340,11 @@
       "storm": null,
       "subject": null,
       "market": 0.625,
-      "model": 0.5142857142857142,
+      "model": 0.5138888888888888,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Julio is name #10 on the eastern Pacific list and 7 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · used at all in 97%",
+      "modelBasis": "Julio is name #10 on the eastern Pacific list and 7 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · used at all in 96%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5373,11 +5373,11 @@
       "storm": null,
       "subject": null,
       "market": 0.635,
-      "model": 0.2571428571428571,
+      "model": 0.2638888888888889,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Norbert is name #14 on the eastern Pacific list and 7 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 26% of seasons · used at all in 77%",
+      "modelBasis": "Norbert is name #14 on the eastern Pacific list and 7 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 26% of seasons · used at all in 76%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5406,7 +5406,7 @@
       "storm": null,
       "subject": null,
       "market": 0.6,
-      "model": 0.2571428571428571,
+      "model": 0.2638888888888889,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
@@ -5439,11 +5439,11 @@
       "storm": null,
       "subject": null,
       "market": 0.17,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Xavier is name #22 on the eastern Pacific list and 7 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 0% of seasons · used at all in 3%",
+      "modelBasis": "Xavier is name #22 on the eastern Pacific list and 7 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 1% of seasons · used at all in 4%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5472,11 +5472,11 @@
       "storm": null,
       "subject": null,
       "market": 0.635,
-      "model": 0.6285714285714286,
+      "model": 0.625,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Lowell is name #12 on the eastern Pacific list and 7 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 63% of seasons · used at all in 89%",
+      "modelBasis": "Lowell is name #12 on the eastern Pacific list and 7 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 63% of seasons · used at all in 88%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5505,36 +5505,36 @@
       "storm": null,
       "subject": null,
       "market": 0.855,
-      "model": 0.6857142857142857,
+      "model": 0.6656862745098039,
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.5714285714285714,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.5714285714285714,
+          "p": 0.5694444444444444,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.45714285714285713,
+          "p": 0.4583333333333333,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >2 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.45714285714285713,
+          "p": 0.4583333333333333,
           "basis": "1 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.6857142857142857,
-          "basis": "9 El Niño seasons → 89% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.6656862745098039,
+          "basis": "9 El Niño seasons → 85% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -5563,36 +5563,36 @@
       "storm": null,
       "subject": null,
       "market": 0.85,
-      "model": 0.44705882352941173,
+      "model": 0.7049019607843137,
       "modelQuantity": "major",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific major-hurricane seasons (n=35), day 224",
-      "modelUncond": 0.2571428571428571,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific major-hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.8571428571428571,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.2571428571428571,
+          "p": 0.8472222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.2,
+          "p": 0.5416666666666666,
           "basis": "major hurricanes forming on/after day 224 in each past season; needs >0 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.2,
+          "p": 0.5416666666666666,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.44705882352941173,
-          "basis": "9 El Niño seasons → 67% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.7049019607843137,
+          "basis": "9 El Niño seasons → 85% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -5620,46 +5620,46 @@
       "short": "Will there be more than 1 hurricane of…",
       "storm": null,
       "subject": null,
-      "market": 0.97,
-      "model": 0.2168067226890756,
+      "market": 0.98,
+      "model": 0.5866013071895425,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224",
-      "modelUncond": 0.08571428571428572,
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 central Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelUncond": 0.7428571428571429,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.08571428571428572,
+          "p": 0.7361111111111112,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.08571428571428572,
+          "p": 0.4027777777777778,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >1 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.08571428571428572,
+          "p": 0.4027777777777778,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.2168067226890756,
-          "basis": "9 El Niño seasons → 33% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.5866013071895425,
+          "basis": "9 El Niño seasons → 75% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
       "strike": 1,
-      "yesBid": 0.95,
+      "yesBid": 0.97,
       "yesAsk": 0.99,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 99,
-      "spread": 0.040000000000000036,
+      "spread": 0.020000000000000018,
       "volume": 2,
       "volume24h": 0,
       "openInterest": 1,
@@ -5679,7 +5679,7 @@
       "storm": null,
       "subject": null,
       "market": 0.5,
-      "model": 0.2571428571428571,
+      "model": 0.2638888888888889,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -5712,11 +5712,11 @@
       "storm": null,
       "subject": null,
       "market": 0.355,
-      "model": 0,
+      "model": 0.013888888888888888,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Vance is name #20 on the eastern Pacific list and 7 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 0% of seasons · used at all in 3%",
+      "modelBasis": "Vance is name #20 on the eastern Pacific list and 7 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 1% of seasons · used at all in 4%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5745,36 +5745,36 @@
       "storm": null,
       "subject": null,
       "market": 0.915,
-      "model": 0.7798319327731092,
+      "model": 0.7571895424836601,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified · 1991–2025 eastern Pacific hurricane seasons (n=35), day 224 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.8571428571428571,
       "modelLayers": [
         {
           "id": "base",
           "label": "Historical climatology",
-          "p": 0.8571428571428571,
+          "p": 0.8472222222222222,
           "basis": "1991–2025 full seasons (n=35)"
         },
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.6571428571428571,
+          "p": 0.6527777777777778,
           "basis": "hurricanes forming on/after day 224 in each past season; needs >3 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.6571428571428571,
+          "p": 0.6527777777777778,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.7798319327731092,
-          "basis": "9 El Niño seasons → 89% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.7571895424836601,
+          "basis": "9 El Niño seasons → 85% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         }
       ],
       "horizon": "seasonal",
@@ -5803,11 +5803,11 @@
       "storm": null,
       "subject": null,
       "market": 0.62,
-      "model": 0.22857142857142856,
+      "model": 0.2361111111111111,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Odalys is name #15 on the eastern Pacific list and 7 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 23% of seasons · used at all in 66%",
+      "modelBasis": "Odalys is name #15 on the eastern Pacific list and 7 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 24% of seasons · used at all in 65%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5836,11 +5836,11 @@
       "storm": null,
       "subject": null,
       "market": 0.49,
-      "model": 0.11428571428571428,
+      "model": 0.125,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Simon is name #18 on the eastern Pacific list and 7 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 11% of seasons · used at all in 23%",
+      "modelBasis": "Simon is name #18 on the eastern Pacific list and 7 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 13% of seasons · used at all in 24%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5869,11 +5869,11 @@
       "storm": null,
       "subject": null,
       "market": 0.41000000000000003,
-      "model": 0.02857142857142857,
+      "model": 0.041666666666666664,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Trudy is name #19 on the eastern Pacific list and 7 have been used, so this is the #12 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 3% of seasons · used at all in 6%",
+      "modelBasis": "Trudy is name #19 on the eastern Pacific list and 7 have been used, so this is the #12 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 4% of seasons · used at all in 7%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5902,11 +5902,11 @@
       "storm": null,
       "subject": null,
       "market": 0.495,
-      "model": 0.05714285714285714,
+      "model": 0.06944444444444445,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Wilfred is name #21 on the Atlantic list and 3 have been used, so this is the #18 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 6% of seasons · used at all in 6%",
+      "modelBasis": "Wilfred is name #21 on the Atlantic list and 3 have been used, so this is the #18 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · used at all in 7%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5935,11 +5935,11 @@
       "storm": null,
       "subject": null,
       "market": 0.495,
-      "model": 0.02857142857142857,
+      "model": 0.041666666666666664,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Vicky is name #20 on the Atlantic list and 3 have been used, so this is the #17 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 3% of seasons · used at all in 6%",
+      "modelBasis": "Vicky is name #20 on the Atlantic list and 3 have been used, so this is the #17 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 4% of seasons · used at all in 7%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -5968,11 +5968,11 @@
       "storm": null,
       "subject": null,
       "market": 0.495,
-      "model": 0.05714285714285714,
+      "model": 0.06944444444444445,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Teddy is name #19 on the Atlantic list and 3 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 6% of seasons · used at all in 11%",
+      "modelBasis": "Teddy is name #19 on the Atlantic list and 3 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · used at all in 13%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -6001,11 +6001,11 @@
       "storm": null,
       "subject": null,
       "market": 0.495,
-      "model": 0.11428571428571428,
+      "model": 0.125,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Sally is name #18 on the Atlantic list and 3 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 11% of seasons · used at all in 17%",
+      "modelBasis": "Sally is name #18 on the Atlantic list and 3 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 13% of seasons · used at all in 18%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -6034,11 +6034,11 @@
       "storm": null,
       "subject": null,
       "market": 0.495,
-      "model": 0.05714285714285714,
+      "model": 0.06944444444444445,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Rene is name #17 on the Atlantic list and 3 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 6% of seasons · used at all in 26%",
+      "modelBasis": "Rene is name #17 on the Atlantic list and 3 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · used at all in 26%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -6067,11 +6067,11 @@
       "storm": null,
       "subject": null,
       "market": 0.635,
-      "model": 0.5714285714285714,
+      "model": 0.5694444444444444,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Marie is name #13 on the eastern Pacific list and 7 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · used at all in 86%",
+      "modelBasis": "Marie is name #13 on the eastern Pacific list and 7 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · used at all in 85%",
       "modelUncond": null,
       "modelLayers": null,
       "horizon": "seasonal",
@@ -6693,7 +6693,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.865,
+      "market": 0.875,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6703,11 +6703,11 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.76,
+      "yesBid": 0.78,
       "yesAsk": 0.97,
       "closeTime": "2026-09-15T03:59:00Z",
       "liquidity": 5,
-      "spread": 0.20999999999999996,
+      "spread": 0.18999999999999995,
       "volume": 224.7,
       "volume24h": 0,
       "openInterest": 192.41,
@@ -6726,7 +6726,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.895,
+      "market": 0.9,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6736,16 +6736,16 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.8,
+      "yesBid": 0.81,
       "yesAsk": 0.99,
       "closeTime": "2026-11-01T03:59:00Z",
       "liquidity": 99,
-      "spread": 0.18999999999999995,
+      "spread": 0.17999999999999994,
       "volume": 142.94,
       "volume24h": 0,
       "openInterest": 142.94,
       "depth": {
-        "bidSize": 37.94,
+        "bidSize": 5,
         "askSize": 100,
         "notional": 1
       },
@@ -6759,7 +6759,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.9,
+      "market": 0.905,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6769,11 +6769,11 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.81,
+      "yesBid": 0.82,
       "yesAsk": 0.99,
       "closeTime": "2026-10-01T03:59:00Z",
       "liquidity": 99,
-      "spread": 0.17999999999999994,
+      "spread": 0.17000000000000004,
       "volume": 126,
       "volume24h": 0,
       "openInterest": 126,
@@ -6825,7 +6825,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.9450000000000001,
+      "market": 0.95,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6835,16 +6835,16 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.9,
+      "yesBid": 0.91,
       "yesAsk": 0.99,
       "closeTime": "2026-12-01T04:59:00Z",
       "liquidity": 94,
-      "spread": 0.08999999999999997,
+      "spread": 0.07999999999999996,
       "volume": 85.13,
       "volume24h": 0,
       "openInterest": 85.13,
       "depth": {
-        "bidSize": 25,
+        "bidSize": 5,
         "askSize": 94.87,
         "notional": 1
       },
@@ -6891,7 +6891,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.86,
+      "market": 0.89,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6901,11 +6901,11 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.74,
+      "yesBid": 0.8,
       "yesAsk": 0.98,
       "closeTime": "2026-10-15T03:59:00Z",
       "liquidity": 3,
-      "spread": 0.24,
+      "spread": 0.17999999999999994,
       "volume": 80.02,
       "volume24h": 0,
       "openInterest": 79.92,
@@ -6924,7 +6924,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.43999999999999995,
+      "market": 0.44999999999999996,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6934,11 +6934,11 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.3,
+      "yesBid": 0.32,
       "yesAsk": 0.58,
       "closeTime": "2026-09-01T03:59:00Z",
       "liquidity": 16,
-      "spread": 0.27999999999999997,
+      "spread": 0.25999999999999995,
       "volume": 76.88,
       "volume24h": 1.58,
       "openInterest": 65.3,
@@ -7023,7 +7023,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.875,
+      "market": 0.885,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -7033,11 +7033,11 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.76,
+      "yesBid": 0.78,
       "yesAsk": 0.99,
       "closeTime": "2026-11-15T04:59:00Z",
       "liquidity": 99,
-      "spread": 0.22999999999999998,
+      "spread": 0.20999999999999996,
       "volume": 30,
       "volume24h": 0,
       "openInterest": 30,
@@ -7056,7 +7056,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.105,
+      "market": 0.095,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -7067,15 +7067,15 @@
       "horizon": "storm",
       "strike": null,
       "yesBid": 0.02,
-      "yesAsk": 0.19,
+      "yesAsk": 0.17,
       "closeTime": "2026-10-01T03:59:00Z",
       "liquidity": 0,
-      "spread": 0.17,
+      "spread": 0.15000000000000002,
       "volume": 15,
       "volume24h": 8,
       "openInterest": 13,
       "depth": {
-        "bidSize": 4,
+        "bidSize": 5,
         "askSize": 2,
         "notional": 1
       },
@@ -7155,7 +7155,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.38,
+      "market": 0.39,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -7165,11 +7165,11 @@
       "modelLayers": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.02,
+      "yesBid": 0.04,
       "yesAsk": 0.74,
       "closeTime": "2026-12-01T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.72,
+      "spread": 0.7,
       "volume": 1.1,
       "volume24h": 0,
       "openInterest": 1.1,
