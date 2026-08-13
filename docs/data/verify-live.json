@@ -1,13 +1,18 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-12T19:18:47.001Z",
+  "ranAt": "2026-08-13T02:45:18.957Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "943653750131e3183c48f2505574f8a2deabc7f2",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31631962199",
-  "ok": true,
-  "passed": 26,
+  "sha": "df3c33db3e6554081dc0315eb740486b6c489e75",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31661756024",
+  "ok": false,
+  "passed": 25,
   "total": 26,
-  "failures": [],
+  "failures": [
+    {
+      "check": "served snapshot is fresh",
+      "detail": "2026-08-13T01:52:44.587Z · 53m old"
+    }
+  ],
   "thirdPartyFailures": 2,
   "checks": [
     {
@@ -27,8 +32,8 @@
     },
     {
       "check": "served snapshot is fresh",
-      "pass": true,
-      "detail": "2026-08-12T19:14:45.356Z · 4m old"
+      "pass": false,
+      "detail": "2026-08-13T01:52:44.587Z · 53m old"
     },
     {
       "check": "renders: Situation",
@@ -88,7 +93,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "8 ranked of 25 candidates · 116/151 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "8 ranked of 31 candidates · 116/151 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "all markets carried",
@@ -108,7 +113,7 @@
     {
       "check": "fillable cap priced at the ask",
       "pass": true,
-      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 143568 × $0.01 = $1436"
+      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 144413 × $0.01 = $1444"
     },
     {
       "check": "order book shows depth",
