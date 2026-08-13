@@ -710,10 +710,18 @@
       /* Absence of disagreement is NOT agreement. An anchor that publishes no layer
          detail cannot be shown to be robust to method, so it must not earn the top
          grade on the strength of having nothing to contradict it. */
-      const measured = live.length > 1 && dispersion != null;
+      /* Three layers, not two. The per-name anchors publish an unweighted ordinal and an
+         ONI-weighted one — but the second is a shrunk transformation of the first, so the
+         two cannot disagree by much no matter how wrong they both are. Agreement between
+         nested estimates is not corroboration. The count ladders carry five genuinely
+         different conditionings (base, day-of-year, season-to-date, phase bucket, ONI
+         kernel) and can earn the top grade; a two-layer anchor tops out at SMALL. */
+      const measured = live.length >= 3 && dispersion != null;
       const agrees = measured && dispersion <= 0.10;
       const deep = capacityDollarsOf >= o.minDollars * 2;
-      if (!measured) why.push("no layer detail to check the estimate against");
+      if (!live.length) why.push("no layer detail to check the estimate against");
+      else if (live.length < 3) why.push("only " + live.length + " layer" + (live.length === 1 ? "" : "s")
+        + ", and the second is a shrunk form of the first — not independent corroboration");
       else if (!agrees) why.push("layers disagree by " + Math.round(dispersion * 100) + " pts");
       if (!frictionOk) why.push("edge is under 1.5x the " + Math.round((c.spread || 0) * 100) + "c spread");
       if (!deep) why.push("only $" + Math.round(capacityDollarsOf) + " resting");

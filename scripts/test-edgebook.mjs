@@ -187,7 +187,7 @@ console.log("\n[10c] verdict outranks expected value in the ordering");
 const graded10c = buildMTX([
   C({ id: "KXBIG-26-T1", market: 0.5, model: 0.9, modelAt: () => 0.9, modelLayers: L(0.40, 0.65, 0.90),
       yesBid: 0.49, yesAsk: 0.5, spread: 0.01, depth: { bidSize: 0, askSize: 40000, notional: 1 } }),
-  C({ id: "KXOK-26-T1", market: 0.5, model: 0.58, modelAt: () => 0.58, modelLayers: L(0.57, 0.58),
+  C({ id: "KXOK-26-T1", market: 0.5, model: 0.58, modelAt: () => 0.58, modelLayers: L(0.57, 0.575, 0.58),
       yesBid: 0.49, yesAsk: 0.5, spread: 0.01, depth: { bidSize: 0, askSize: 3000, notional: 1 } }),
 ]).edgeBook(0, 100000, 1, { minEdge: 0, minDollars: 25, limit: 5 });
 eq("the TAKE sorts first", graded10c.rows[0].grade, "TAKE");
