@@ -196,6 +196,55 @@ ck("even though the SUSPECT has far more expected value", graded10c.rows[1].ev >
    `suspect=$${graded10c.rows[1].ev.toFixed(0)} take=$${graded10c.rows[0].ev.toFixed(0)}`);
 eq("the grade tally is reported", graded10c.byGrade, { TAKE: 1, SMALL: 0, SUSPECT: 1 });
 
+console.log("\n[10d] ladder consistency — the only edge with no forecasting risk");
+const rung = (strike, bid, ask, bidSize, askSize) => C({
+  id: "KXHURCTOTMAJ-26DEC01-T" + strike, strike, market: (bid + ask) / 2,
+  yesBid: bid, yesAsk: ask, spread: ask - bid, modelLayers: null, model: null, modelAt: () => null,
+  depth: { bidSize, askSize, notional: 1 },
+});
+
+/* Executable violation: "more than 5" can be BOUGHT at 8c while "more than 6" can be
+   SOLD at 12c. The second outcome implies the first, so the pair cannot lose. */
+const arb = buildMTX([rung(5, 0.07, 0.08, 100, 400), rung(6, 0.12, 0.13, 300, 100)]).ladderArbs(0);
+eq("one locked spread found", arb.executable.length, 1);
+eq("buy the lower strike", arb.executable[0].buyStrike, 5);
+eq("sell the higher strike", arb.executable[0].sellStrike, 6);
+near("gross is the bid minus the ask", arb.executable[0].gross, 0.12 - 0.08, 1e-9);
+ck("net is smaller than gross, because the fee is charged on both legs",
+   arb.executable[0].net < arb.executable[0].gross, `${arb.executable[0].net} vs ${arb.executable[0].gross}`);
+/* You BUY the low rung, so its ASK side is the constraint (400); you SELL the high rung,
+   so its BID side is (300). The binding side is 300 — not either contract's other half. */
+eq("size is the ask on the leg you buy against the bid on the leg you sell",
+   Math.round(arb.executable[0].size), 300);
+
+/* The case that matters more, because it is what an exchange screen shows. Mids invert
+   on thin books constantly; the touch is ordered correctly and there is nothing to take.
+   Calling this an arbitrage is how you lose money confirming a screenshot. */
+const midOnly = buildMTX([rung(4, 0.07, 0.09, 100, 100), rung(5, 0.08, 0.10, 100, 100)]).ladderArbs(0);
+eq("no locked spread", midOnly.executable.length, 0);
+eq("but the displayed inversion is reported", midOnly.displayed.length, 1);
+eq("with both displayed prices", [Math.round(midOnly.displayed[0].loP * 100), Math.round(midOnly.displayed[0].hiP * 100)], [8, 9]);
+
+const clean = buildMTX([rung(4, 0.20, 0.22, 100, 100), rung(5, 0.10, 0.12, 100, 100)]).ladderArbs(0);
+eq("a correctly ordered ladder reports nothing", [clean.executable.length, clean.displayed.length], [0, 0]);
+
+/* A spread with nothing resting is not a spread. */
+const noSize = buildMTX([rung(5, 0.07, 0.08, 100, 0), rung(6, 0.12, 0.13, 300, 100)]).ladderArbs(0);
+eq("zero resting size is not an opportunity", noSize.executable.length, 0);
+
+/* Non-adjacent rungs: the implication holds all the way up the ladder. */
+const skip = buildMTX([rung(3, 0.05, 0.06, 100, 500), rung(4, 0.05, 0.055, 100, 100), rung(6, 0.20, 0.21, 200, 100)]).ladderArbs(0);
+ck("a violation two rungs apart is caught", skip.executable.some((x) => x.buyStrike === 3 && x.sellStrike === 6),
+   JSON.stringify(skip.executable.map((x) => x.buyStrike + "->" + x.sellStrike)));
+
+/* Ladders must not be crossed with each other — different questions entirely. */
+const crossed = buildMTX([
+  rung(5, 0.07, 0.08, 100, 400),
+  C({ id: "KXNAMEDSTORM-26DEC01EPACTOT-6", strike: 6, market: 0.5, yesBid: 0.5, yesAsk: 0.52,
+      model: null, modelAt: () => null, modelLayers: null, depth: { bidSize: 900, askSize: 900, notional: 1 } }),
+]).ladderArbs(0);
+eq("two different ladders never form a spread", crossed.executable.length, 0);
+
 console.log("\n[11] the committed board runs through it without throwing");
 /* A smoke test against real data — shapes in the wild that the fixtures do not cover
    (null depth, missing yesAsk on legacy rows) must degrade, not crash. */

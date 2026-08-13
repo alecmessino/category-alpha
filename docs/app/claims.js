@@ -261,6 +261,14 @@
     ok: false,
   }));
 
+  define("edgebook.ladder", "derived", () => ({
+    text: "A locked spread needs the ASK on the lower strike and the BID on the higher one."
+        + " Exchange screens show a last trade or a mid, and on thin books those invert"
+        + " constantly without being tradeable — so displayed inversions are listed"
+        + " separately and are not opportunities.",
+    ok: true,
+  }));
+
   // ---- provenance footers --------------------------------------------------
   // source/latency/version/tier, each traced rather than typed.
   const FOOTERS = {

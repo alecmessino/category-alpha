@@ -195,6 +195,24 @@ const probe = await page.evaluate(() => {
         accounted: Object.values(b.skipped).reduce((a, x) => a + x, 0) + b.candidates === b.coverage.total,
       };
     })(),
+    /* A ladder spread is reported as risk-free, so a false positive here is worse than
+       any mispriced model row: it tells an operator to take a position on arithmetic that
+       does not hold. Re-derive every claimed spread from the raw book on the live page. */
+    ladder: (() => {
+      if (!window.MTX || typeof MTX.ladderArbs !== "function") return { present: false };
+      let L = null;
+      try { L = MTX.ladderArbs(null); } catch (e) { return { present: true, threw: String(e && e.message || e) }; }
+      const bad = L.executable.filter((x) => {
+        const buy = MT.contracts.find((c) => c.id === x.buyId);
+        const sell = MT.contracts.find((c) => c.id === x.sellId);
+        if (!buy || !sell) return true;
+        return !(sell.yesBid > buy.yesAsk)                       // the inequality must hold
+            || buy.strike >= sell.strike                          // and in the right direction
+            || String(buy.id).replace(/-[^-]*$/, "") !== String(sell.id).replace(/-[^-]*$/, "")
+            || !(x.net > 0) || !(x.size > 0);
+      }).length;
+      return { present: true, executable: L.executable.length, displayed: L.displayed.length, bad };
+    })(),
     unregisteredClaim: /UNREGISTERED CLAIM|CLAIM ERROR/.test(T),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   };
@@ -231,6 +249,12 @@ add("edge book renders and ranks nothing it cannot support",
     : `${eb.ranked} ranked of ${eb.candidates} candidates · ${eb.anchored}/${eb.total} anchored`
       + ` · unanchored-ranked=${eb.unanchoredRanked} negativeEV=${eb.negativeEV}`
       + ` overStaked=${eb.overStaked} dupLadders=${eb.duplicateLadders} accounted=${eb.accounted}`);
+
+const ld = probe.ladder || {};
+add("every ladder spread claimed is re-derivable from the book",
+  ld.present && !ld.threw && ld.bad === 0,
+  ld.threw ? "threw: " + ld.threw
+    : `${ld.executable} executable · ${ld.displayed} displayed-only · unverifiable=${ld.bad}`);
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,
   `${probe.contracts} contracts · ${probe.seriesCount} series · droppedForCap=${probe.droppedForCap}`);

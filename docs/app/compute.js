@@ -775,6 +775,61 @@
     };
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, lifecycleFor, LIFECYCLE, edgeBook, feePerContract };
+  /* ---------------- Ladder consistency ----------------
+   * "More than 4" cannot be less likely than "more than 5" — the second outcome implies
+   * the first. When a ladder prints otherwise there is a locked spread available that
+   * does not depend on the model being right about anything, which makes it the only
+   * edge on this board with no forecasting risk at all.
+   *
+   * The distinction that matters is EXECUTABLE versus DISPLAYED. Exchange screens show a
+   * last trade or a mid, and those invert constantly on thin books — the Atlantic major
+   * ladder and the eastern Pacific named-storm ladder are both inverted on mids right
+   * now. Neither is tradeable: at the touch the prices are ordered correctly. So this
+   * compares the ask you would pay on the lower strike against the bid you would hit on
+   * the higher one, and reports the two cases separately. Calling a mid inversion an
+   * arbitrage is how you lose money confirming someone else's screenshot.
+   */
+  function ladderArbs(frame) {
+    const f = clampF(frame == null ? NF : frame);
+    const by = {};
+    for (const c of (MT.contracts || [])) {
+      if (c.strike == null) continue;
+      (by[ladderOf(c)] = by[ladderOf(c)] || []).push(c);
+    }
+    const executable = [], displayed = [];
+    for (const [key, arr] of Object.entries(by)) {
+      arr.sort((a, b) => a.strike - b.strike);
+      for (let i = 0; i + 1 < arr.length; i++) {
+        const lo = arr[i], hi = arr[i + 1];
+        const loP = mkt(lo, f), hiP = mkt(hi, f);
+        if (loP != null && hiP != null && hiP > loP + 1e-9) {
+          displayed.push({ ladder: key, lo: lo.strike, hi: hi.strike, loP, hiP,
+            gap: hiP - loP, label: lo.label || lo.id });
+        }
+      }
+      // Every pair, not just adjacent rungs — the implication holds across the ladder.
+      for (let i = 0; i < arr.length; i++) {
+        for (let j = i + 1; j < arr.length; j++) {
+          const lo = arr[i], hi = arr[j];
+          const a = lo.yesAsk, b = hi.yesBid;
+          if (a == null || b == null || !(b > a)) continue;
+          const size = Math.min((lo.depth && lo.depth.askSize) || 0, (hi.depth && hi.depth.bidSize) || 0);
+          if (!(size > 0)) continue;
+          const fee = feePerContract(a) + feePerContract(1 - b);
+          const net = (b - a) - fee;
+          if (!(net > 0)) continue;
+          executable.push({ ladder: key, buyStrike: lo.strike, sellStrike: hi.strike,
+            buyId: lo.id, sellId: hi.id, buyAsk: a, sellBid: b,
+            gross: b - a, fee, net, size, profit: net * size,
+            label: (lo.label || lo.id) });
+        }
+      }
+    }
+    executable.sort((x, y) => y.profit - x.profit);
+    displayed.sort((x, y) => y.gap - x.gap);
+    return { executable, displayed };
+  }
+
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, lifecycleFor, LIFECYCLE, edgeBook, feePerContract, ladderArbs };
 })();
 })();

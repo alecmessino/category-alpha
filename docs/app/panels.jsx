@@ -248,6 +248,36 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
         </span>
       </div>
 
+      {(() => {
+        const lad = MTX.ladderArbs(frame);
+        if (!lad.executable.length && !lad.displayed.length) return null;
+        return (
+          <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--border-dim)",
+            background: lad.executable.length ? "rgba(34,197,94,.07)" : "var(--surface-sunken)" }}>
+            <div style={{ ...mono, fontSize: 10, fontWeight: 800, letterSpacing: 1.2,
+              color: lad.executable.length ? "var(--pos)" : "var(--text-2)" }}>
+              LADDER CONSISTENCY — {lad.executable.length ? lad.executable.length + " LOCKED SPREAD(S)" : "NONE TRADEABLE"}
+            </div>
+            {lad.executable.map((x) => (
+              <div key={x.buyId + x.sellId} style={{ ...mono, fontSize: 11.5, marginTop: 4, color: "var(--text-1)" }}>
+                buy &gt;{x.buyStrike} at {(x.buyAsk * 100).toFixed(0)}¢ · sell &gt;{x.sellStrike} at {(x.sellBid * 100).toFixed(0)}¢
+                {" → "}<b style={{ color: "var(--pos)" }}>{(x.net * 100).toFixed(1)}¢ locked</b>
+                {" "}on {Math.round(x.size).toLocaleString()} contracts ({money(x.profit)}), net of fee
+              </div>
+            ))}
+            {lad.displayed.map((x) => (
+              <div key={x.ladder + x.lo} style={{ ...mono, fontSize: 10.5, marginTop: 4, color: "var(--text-2)" }}>
+                displayed only: &gt;{x.lo} shows {(x.loP * 100).toFixed(0)}¢ under &gt;{x.hi} at {(x.hiP * 100).toFixed(0)}¢ —
+                {" "}the touch is ordered correctly, so there is nothing to take
+              </div>
+            ))}
+            <div style={{ ...mono, fontSize: 10, marginTop: 5, color: "var(--text-2)", lineHeight: 1.5 }}>
+              {MTC.claim("edgebook.ladder").text}
+            </div>
+          </div>
+        );
+      })()}
+
       {book.rows.length === 0 ? (
         <div style={{ ...mono, fontSize: 11.5, color: "var(--text-2)", padding: "14px 12px", lineHeight: 1.7 }}>
           <div style={{ color: "var(--text-1)" }}>No contract clears the bar right now.</div>
