@@ -830,6 +830,55 @@
     return { executable, displayed };
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, lifecycleFor, LIFECYCLE, edgeBook, feePerContract, ladderArbs };
+  /* ---------------- Exit cost ----------------
+   * A quoted market is not a tradeable one. Twenty-one of the contracts on this board
+   * have a bid and an ask more than fifteen cents apart, and several are quoted 5c bid
+   * against 57c offered with five contracts resting on each side. Buying one of those
+   * is close to irreversible: you pay the ask, you are marked at the bid, and there is
+   * nobody to sell back to at any size.
+   *
+   * That is not a hypothetical. It is the difference between a position showing "63%"
+   * when you bought it and "5%" an hour later with nothing having happened in the
+   * atmosphere at all — the first number was the offer, the second is the bid, and the
+   * gap between them was always the cost of the trade.
+   *
+   * So the board states the round trip explicitly: what you pay to get in, what you
+   * would receive to get out RIGHT NOW, and how many contracts the exit is actually
+   * good for. A market whose exit is five contracts deep is a hold-to-expiry position
+   * whatever the screen says.
+   */
+  const EXIT_WIDE = 0.15;          // a spread this wide costs more than most edges here
+  const EXIT_THIN = 25;            // contracts; below this the quote is decorative
+
+  function exitCost(c, contracts) {
+    const bid = c.yesBid, ask = c.yesAsk;
+    if (bid == null || ask == null) return null;
+    const spread = ask - bid;
+    const n = contracts || 1;
+    const inAt = ask + feePerContract(ask);
+    const outAt = bid - feePerContract(bid);
+    const exitDepth = (c.depth && c.depth.bidSize) || 0;
+    return {
+      bid, ask, spread,
+      roundTrip: inAt - outAt,                       // per contract, both fees charged
+      roundTripPct: inAt > 0 ? (inAt - outAt) / inAt : null,
+      costToEnter: n * inAt, valueOnExit: n * Math.max(0, outAt), payoutIfYes: n,
+      exitDepth, fillableOnExit: Math.min(n, exitDepth),
+      wide: spread >= EXIT_WIDE, thin: exitDepth < EXIT_THIN,
+      tradeable: spread < EXIT_WIDE && exitDepth >= EXIT_THIN,
+    };
+  }
+
+  function liquidityTraps() {
+    const out = [];
+    for (const c of (MT.contracts || [])) {
+      const e = exitCost(c, 100);
+      if (!e || e.tradeable) continue;
+      out.push({ id: c.id, label: c.label || c.short || c.id, ...e });
+    }
+    return out.sort((a, b) => b.spread - a.spread);
+  }
+
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, lifecycleFor, LIFECYCLE, edgeBook, feePerContract, ladderArbs, exitCost, liquidityTraps };
 })();
 })();

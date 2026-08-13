@@ -269,6 +269,18 @@
     ok: true,
   }));
 
+  define("edgebook.exit", "markets", () => {
+    const cs = (window.MT && MT.contracts) || [];
+    const traps = (window.MTX && MTX.liquidityTraps) ? MTX.liquidityTraps().length : null;
+    if (traps == null) return { text: "exit costs not computed this cycle", ok: false };
+    return {
+      text: traps + " of " + cs.length + " quoted contracts cannot be round-tripped: the spread or the"
+          + " resting size means you pay the offer, get marked at the bid, and have nobody to sell back"
+          + " to at size. Those are hold-to-expiry positions whatever the screen says.",
+      ok: traps === 0,
+    };
+  });
+
   // ---- provenance footers --------------------------------------------------
   // source/latency/version/tier, each traced rather than typed.
   const FOOTERS = {

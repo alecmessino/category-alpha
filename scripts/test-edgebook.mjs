@@ -245,6 +245,36 @@ const crossed = buildMTX([
 ]).ladderArbs(0);
 eq("two different ladders never form a spread", crossed.executable.length, 0);
 
+console.log("\n[10e] exit cost — a quoted market is not a tradeable one");
+/* The real case: 5c bid against 57c offered, five contracts resting on each side. A
+   position bought at the offer is marked at the bid and has nobody to sell back to. The
+   screen shows this as a collapse; nothing happened except the trade itself. */
+const trap = C({ id: "KXHURPATHHAWAII-26DEC", market: 0.31, yesBid: 0.05, yesAsk: 0.57,
+  spread: 0.52, model: null, modelAt: () => null, modelLayers: null,
+  depth: { bidSize: 5, askSize: 5, notional: 1 } });
+const MX = buildMTX([trap]);
+const e = MX.exitCost(trap, 307.67);
+near("entry is the ask plus its fee", e.costToEnter, 307.67 * (0.57 + 0.07 * 0.57 * 0.43), 1e-6);
+ck("exit at the bid is a small fraction of entry", e.valueOnExit < e.costToEnter * 0.12,
+   `$${e.valueOnExit.toFixed(2)} vs $${e.costToEnter.toFixed(2)}`);
+ck("round trip is most of the stake", e.roundTripPct > 0.85, (e.roundTripPct * 100).toFixed(0) + "%");
+eq("the exit is only good for what is resting", Math.round(e.fillableOnExit), 5);
+ck("so it is flagged both wide and thin", e.wide && e.thin);
+eq("and not tradeable", e.tradeable, false);
+eq("the full payout is still the contract count", Math.round(e.payoutIfYes), 308);
+
+const fine = C({ id: "KXOK-26-T9", market: 0.5, yesBid: 0.49, yesAsk: 0.51, spread: 0.02,
+  model: null, modelAt: () => null, modelLayers: null,
+  depth: { bidSize: 900, askSize: 900, notional: 1 } });
+const fe = buildMTX([fine]).exitCost(fine, 100);
+ck("a real two-sided book IS tradeable", fe.tradeable);
+ck("and its round trip is small", fe.roundTripPct < 0.12, (fe.roundTripPct * 100).toFixed(0) + "%");
+
+const list = buildMTX([trap, fine]).liquidityTraps();
+eq("only the untradeable one is listed", list.length, 1);
+eq("and it is the right one", list[0].id, "KXHURPATHHAWAII-26DEC");
+eq("a contract with no quote at all is not listed", buildMTX([C({ id: "KXQ-26-T1", yesBid: null, yesAsk: null })]).liquidityTraps().length, 0);
+
 console.log("\n[11] the committed board runs through it without throwing");
 /* A smoke test against real data — shapes in the wild that the fixtures do not cover
    (null depth, missing yesAsk on legacy rows) must degrade, not crash. */

@@ -249,6 +249,34 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
       </div>
 
       {(() => {
+        const traps = MTX.liquidityTraps();
+        if (!traps.length) return null;
+        const worst = traps.slice(0, 4);
+        return (
+          <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--border-dim)", background: "rgba(234,179,8,.07)" }}>
+            <div style={{ ...mono, fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: "var(--warn)" }}>
+              CANNOT BE ROUND-TRIPPED — {traps.length} CONTRACT{traps.length === 1 ? "" : "S"}
+            </div>
+            {worst.map((t) => (
+              <div key={t.id} style={{ ...mono, fontSize: 11, marginTop: 4, color: "var(--text-2)" }}>
+                <span style={{ color: "var(--text-1)" }}>{String(t.label).slice(0, 54)}</span>
+                {" — pay "}{(t.ask * 100).toFixed(0)}¢, exit at {(t.bid * 100).toFixed(0)}¢
+                {" ("}{Math.round(t.roundTripPct * 100)}% round trip{t.thin ? `, only ${Math.round(t.exitDepth)} resting to sell into` : ""}{")"}
+              </div>
+            ))}
+            {traps.length > worst.length && (
+              <div style={{ ...mono, fontSize: 10.5, marginTop: 4, color: "var(--text-2)" }}>
+                …and {traps.length - worst.length} more
+              </div>
+            )}
+            <div style={{ ...mono, fontSize: 10, marginTop: 5, color: "var(--text-2)", lineHeight: 1.5 }}>
+              {MTC.claim("edgebook.exit").text}
+            </div>
+          </div>
+        );
+      })()}
+
+      {(() => {
         const lad = MTX.ladderArbs(frame);
         if (!lad.executable.length && !lad.displayed.length) return null;
         return (
