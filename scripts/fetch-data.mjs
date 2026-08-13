@@ -755,6 +755,48 @@ function phaseOf(v) { return v == null || !Number.isFinite(v) ? null : v >= ONI_
  */
 function jeffreys(hits, n) { return n > 0 ? (hits + 0.5) / (n + 1) : null; }
 
+/* ---------------- ONI similarity weighting (L4) ----------------
+ * The phase bucket treats +0.55 and +2.50 as the same season. They are not: the eastern
+ * Pacific in a strong El Nino runs far hotter than in a marginal one, and 2026 is at
+ * +1.39. The strong-phase subset that would answer this stays refused because it never
+ * clears the six-season floor — so the honest fix is not a narrower bucket, it is to stop
+ * bucketing. Every season is weighted by how close its ONI was to today's, with a
+ * Gaussian kernel whose width is the phase threshold itself.
+ *
+ * Nothing is thrown away and nothing is counted equally. A 2015 (+2.6) and a 1997 (+2.4)
+ * carry real weight against +1.39; a +0.6 season carries some; a La Nina carries almost
+ * none. The effective sample size is Kish's, and it is published — a weighted estimate
+ * standing on three seasons' worth of information must not look like one standing on
+ * thirty-five.
+ */
+const ONI_KERNEL_H = Number(process.env.MT_ONI_H || 0.6);
+const ONI_MIN_EFF = Number(process.env.MT_ONI_MIN_EFF || 5);
+
+function oniWeights(years, oni) {
+  if (!oni || oni.anchorAnom == null || !oni.asoByYear) return null;
+  const w = years.map((y) => {
+    const v = oni.asoByYear.get(y);
+    if (v == null || !Number.isFinite(v)) return 0;
+    const d = (v - oni.anchorAnom) / ONI_KERNEL_H;
+    return Math.exp(-0.5 * d * d);
+  });
+  const sum = w.reduce((a, b) => a + b, 0);
+  if (!(sum > 0)) return null;
+  const sumSq = w.reduce((a, b) => a + b * b, 0);
+  return { w, sum, nEff: (sum * sum) / sumSq };            // Kish effective sample size
+}
+
+/* Weighted Jeffreys: the same prior, with the weighted hit mass and effective n in place
+   of raw counts, so a kernel estimate cannot claim more certainty than it has. */
+function weightedRate(hitFlags, weights) {
+  const { w, nEff } = weights;
+  let hit = 0, tot = 0;
+  for (let i = 0; i < w.length; i++) { tot += w[i]; if (hitFlags[i]) hit += w[i]; }
+  if (!(tot > 0)) return null;
+  const share = hit / tot;
+  return { p: (share * nEff + 0.5) / (nEff + 1), share, nEff };
+}
+
 // CPC's canonical oni.ascii.txt:  "SEAS YR TOTAL ANOM"  →  "  ASO 2023 27.94  1.75"
 function parseOniAscii(text) {
   const rows = [];
@@ -948,7 +990,32 @@ function posteriorFor(quantity, strike, clim, seasonToDate, oni) {
     }
   }
 
-  const posterior = p3 != null ? p3 : anchorP;
+  /* L4 — ONI similarity. Same question as L3, without the bucket: every season weighted
+     by how close its ONI was to today's. This governs when it is available, because the
+     bucket cannot see the difference between a marginal and a strong event and 2026 is a
+     strong one. L3 is kept above it precisely so the two can be compared — when the
+     bucket and the kernel agree, the answer does not depend on the method. */
+  let p4 = null;
+  const wts = oniWeights(clim.years, oni);
+  if (!oni || !oni.phase) {
+    layers.push({ id: "onisim", label: "ONI-similarity weighted", p: null, unavailable: true,
+      basis: "no CPC ONI feed this cycle — similarity weighting not applied" });
+  } else if (!wts || wts.nEff < ONI_MIN_EFF) {
+    layers.push({ id: "onisim", label: "ONI-similarity weighted", p: null, unavailable: true,
+      basis: `effective sample ${wts ? wts.nEff.toFixed(1) : "0"} seasons is below the ${ONI_MIN_EFF}-season floor — no weighted estimate published` });
+  } else {
+    const flags = remaining ? remaining.map((r) => r > need) : counts.map((c) => c > strike);
+    const wr = weightedRate(flags, wts);
+    const shrink = wts.nEff / (wts.nEff + ONI_SHRINK_K);
+    p4 = shrink * wr.p + (1 - shrink) * anchorP;
+    const sign = oni.anchorAnom >= 0 ? "+" : "";
+    layers.push({ id: "onisim", label: "ONI-similarity weighted", p: p4,
+      basis: `${clim.years.length} seasons weighted by ONI distance from ${sign}${oni.anchorAnom.toFixed(2)}`
+           + ` (Gaussian, h=${ONI_KERNEL_H}) → ${Math.round(wr.p * 100)}% at an effective ${wts.nEff.toFixed(1)} seasons,`
+           + ` shrunk ${Math.round((1 - shrink) * 100)}% toward the unstratified estimate` });
+  }
+
+  const posterior = p4 != null ? p4 : p3 != null ? p3 : anchorP;
   return { p: posterior, layers, doy,
     basis: layers.filter((l) => !l.unavailable).map((l) => l.label).join(" → ") };
 }
@@ -1023,24 +1090,44 @@ function namePosition(basin, name) {
 /* The k-th name, given m named storms already recorded, is the (k − m)-th storm still
  * to form. Restricting each past season to storms forming on or after today's day-of-year
  * asks the same question of history that the operator is asking of this season. */
-function ordinalOutcome(clim, kRemaining, doy) {
+function ordinalOutcome(clim, kRemaining, doy, oni) {
   if (!clim || !clim.seasonNamed || !clim.seasonNamed.length || !(kRemaining >= 1)) return null;
   const n = clim.seasonNamed.length;
   let used = 0, hur = 0, first = 0;
+  // Per-season outcome flags, kept so the same seasons can be re-read under a weighting.
+  const fUsed = [], fHur = [], fFirst = [];
   for (const seq of clim.seasonNamed) {
     const later = seq.filter((s) => s.doy >= doy);
-    if (later.length < kRemaining) continue;
-    used++;
-    const s = later[kRemaining - 1];
-    if (s.hu) {
-      hur++;
-      // First hurricane of the REMAINDER — the caller decides whether the season
-      // already has one, in which case no unformed name can be the season's first.
-      if (!later.slice(0, kRemaining - 1).some((x) => x.hu)) first++;
-    }
+    const has = later.length >= kRemaining;
+    const s = has ? later[kRemaining - 1] : null;
+    const isHur = !!(s && s.hu);
+    // First hurricane of the REMAINDER — the caller decides whether the season already
+    // has one, in which case no unformed name can be the season's first.
+    const isFirst = isHur && !later.slice(0, kRemaining - 1).some((x) => x.hu);
+    fUsed.push(has); fHur.push(isHur); fFirst.push(isFirst);
+    if (has) used++;
+    if (isHur) hur++;
+    if (isFirst) first++;
   }
-  return { n, pUsed: jeffreys(used, n), pHurricane: jeffreys(hur, n), pFirstHurricane: jeffreys(first, n),
-           rawUsed: used, rawHurricane: hur, rawFirst: first, kRemaining, doy };
+  const out = { n, pUsed: jeffreys(used, n), pHurricane: jeffreys(hur, n), pFirstHurricane: jeffreys(first, n),
+                rawUsed: used, rawHurricane: hur, rawFirst: first, kRemaining, doy, enso: null };
+  /* The count ladders have been ENSO-conditioned since L3 existed; these ordinals were
+     not, and that asymmetry had a direction. Atlantic hurricane counts run about 43%
+     below the median in El Nino seasons while the eastern Pacific runs above it — so an
+     unconditioned Atlantic per-name probability was biased HIGH and an eastern Pacific
+     one biased LOW, both in exactly the direction that made them look like buys. */
+  const wts = oniWeights(clim.years, oni);
+  if (wts && wts.nEff >= ONI_MIN_EFF) {
+    const rU = weightedRate(fUsed, wts), rH = weightedRate(fHur, wts), rF = weightedRate(fFirst, wts);
+    const shrink = wts.nEff / (wts.nEff + ONI_SHRINK_K);
+    const blend = (weighted, flat) => (weighted == null ? flat : shrink * weighted.p + (1 - shrink) * flat);
+    out.enso = {
+      nEff: wts.nEff, shrink,
+      pUsed: blend(rU, out.pUsed), pHurricane: blend(rH, out.pHurricane), pFirstHurricane: blend(rF, out.pFirstHurricane),
+      rawWeighted: { used: rU && rU.p, hurricane: rH && rH.p, first: rF && rF.p },
+    };
+  }
+  return out;
 }
 
 /* `clims` is the per-basin map from fetchClimatology. The second argument used to be a
@@ -1078,21 +1165,42 @@ function namingAnchor(label, ticker, clims, std, oni) {
 
   const doy = Math.floor((Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
     - Date.UTC(now.getUTCFullYear(), 0, 0)) / 86400000);
-  const o = ordinalOutcome(clim, k - done, doy);
+  const o = ordinalOutcome(clim, k - done, doy, oni);
   if (!o) return null;
 
-  // Once the season has a hurricane, no name still unformed can be its first.
-  const p = kind === "first" ? (hurSoFar > 0 ? 0 : o.pFirstHurricane) : o.pHurricane;
   const label2 = BASIN_LABEL[basin] || basin;
   const noun = kind === "first" ? "was the season's FIRST hurricane" : "reached hurricane strength";
+  const pick = (src) => (kind === "first" ? src.pFirstHurricane : src.pHurricane);
+  const flat = pick(o);
+  const weighted = o.enso ? pick(o.enso) : null;
+
+  /* Once the season has a hurricane, no name still unformed can be its first. This is a
+     logical zero, not an empirical one, so it bypasses both the prior and the weighting. */
+  const settled = kind === "first" && hurSoFar > 0;
+  const p = settled ? 0 : (weighted != null ? weighted : flat);
+
+  const layers = [
+    { id: "ordinal", label: "Ordinal climatology", p: flat,
+      basis: `${clim.from}–${clim.to} (n=${o.n}), unweighted — the #${k - done} storm still to form ${noun} in ${o.rawUsed ? Math.round((kind === "first" ? o.rawFirst : o.rawHurricane) / o.n * 100) : 0}% of seasons` },
+    o.enso
+      ? { id: "onisim", label: "ONI-similarity weighted", p: weighted,
+          basis: `same seasons weighted by ONI distance from ${oni && oni.anchorAnom >= 0 ? "+" : ""}${oni ? oni.anchorAnom.toFixed(2) : "?"}`
+               + ` (effective ${o.enso.nEff.toFixed(1)} seasons, shrunk ${Math.round((1 - o.enso.shrink) * 100)}% toward unweighted)` }
+      : { id: "onisim", label: "ONI-similarity weighted", p: null, unavailable: true,
+          basis: "no usable ONI weighting this cycle — the ordinal is unconditioned, which in a strong ENSO event is a known bias" },
+  ];
+  if (settled) layers.push({ id: "settled", label: "Already determined", p: 0,
+    basis: `${label2} already has ${hurSoFar} hurricane${hurSoFar === 1 ? "" : "s"} in ${now.getUTCFullYear()}` });
+
   return {
-    p, unconditional: null, layers: null, quantity: kind === "first" ? "firsthurricane" : "namedhurricane",
+    p, unconditional: flat, layers, quantity: kind === "first" ? "firsthurricane" : "namedhurricane",
     basin, seasonToDate: done, position: k,
-    basis: kind === "first" && hurSoFar > 0
+    basis: settled
       ? `${label2} already has ${hurSoFar} hurricane${hurSoFar === 1 ? "" : "s"} in ${now.getUTCFullYear()} — no unformed name can still be the first`
       : `${name} is name #${k} on the ${label2} list and ${done} have been used, so this is the #${k - done} storm still to form`
-        + ` · in ${clim.from}–${clim.to} (n=${o.n}), that storm ${noun} in ${Math.round(p * 100)}% of seasons`
-        + ` · used at all in ${Math.round(o.pUsed * 100)}%`,
+        + ` · in ${clim.from}–${clim.to} (n=${o.n}), that storm ${noun} in ${Math.round(flat * 100)}% of seasons`
+        + (weighted != null ? ` · ${Math.round(weighted * 100)}% once seasons are weighted by ONI similarity` : "")
+        + ` · used at all in ${Math.round((o.enso ? o.enso.pUsed : o.pUsed) * 100)}%`,
   };
 }
 
@@ -1779,5 +1887,5 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
 }
 
 export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity, parseTWO, diagnoseTWO,
-         namePosition, ordinalOutcome, namingAnchor, climatologyAnchor, parseBdeck,
+         namePosition, ordinalOutcome, namingAnchor, climatologyAnchor, parseBdeck, oniWeights, weightedRate,
          priceOf, askPriceOf, spreadOf, depthOf, liquidityOf, volumeOf, volume24hOf, openInterestOf, notionalOf };

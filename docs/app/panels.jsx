@@ -200,6 +200,12 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
    Everything else on this board answers a question about the world. This answers a
    question about the operator's next action, which is why it sits at the top and why
    it is a short list rather than a grid of every contract. */
+const GRADE_TONE = {
+  TAKE:    { fg: "var(--pos)",  bg: "rgba(34,197,94,.10)" },
+  SMALL:   { fg: "var(--warn)", bg: "rgba(234,179,8,.10)" },
+  SUSPECT: { fg: "var(--text-2)", bg: "transparent" },
+};
+
 function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, dense }) {
   const [showAll, setShowAll] = React.useState(false);
   const book = MTX.edgeBook(frame, bankroll, stake, { limit: showAll ? 40 : 6 });
@@ -232,8 +238,13 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
           ))}
         </div>
         <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-2)" }}>
-          Expected <b style={{ ...mono, color: "var(--pos)", fontSize: 13 }}>{money(book.rows.reduce((a, r) => a + r.ev, 0))}</b>
-          {" "}on <b style={{ ...mono, color: "var(--text-1)", fontSize: 13 }}>{money(book.rows.reduce((a, r) => a + r.stake, 0))}</b> staked
+          <b style={{ ...mono, color: "var(--pos)", fontSize: 13 }}>{book.byGrade.TAKE}</b> take ·{" "}
+          <b style={{ ...mono, color: "var(--warn)", fontSize: 13 }}>{book.byGrade.SMALL}</b> small ·{" "}
+          <b style={{ ...mono, color: "var(--text-2)", fontSize: 13 }}>{book.byGrade.SUSPECT}</b> suspect
+          {"  ·  "}expected <b style={{ ...mono, color: "var(--pos)", fontSize: 13 }}>
+            {money(book.rows.filter((r) => r.grade !== "SUSPECT").reduce((a, r) => a + r.ev, 0))}</b>
+          {" "}on <b style={{ ...mono, color: "var(--text-1)", fontSize: 13 }}>
+            {money(book.rows.filter((r) => r.grade !== "SUSPECT").reduce((a, r) => a + r.stake, 0))}</b> staked
         </span>
       </div>
 
@@ -250,27 +261,31 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr>
-              {head("Contract")}{head("Side", "center")}{head("Pay", "right")}{head("Model", "right")}
-              {head("Net edge", "right")}{head("Size", "right")}{head("Stake", "right")}{head("Expected", "right")}{head("Basis")}
+              {head("Verdict", "center")}{head("Contract")}{head("Side", "center")}{head("Pay", "right")}{head("Model", "right")}
+              {head("Net edge", "right")}{head("Agree", "right")}{head("Stake", "right")}{head("Expected", "right")}{head("Why")}
             </tr></thead>
             <tbody>
               {book.rows.map((r) => (
-                <tr key={r.id} onClick={() => onSelect && onSelect(r.id)} style={{ cursor: "pointer" }}>
-                  <td style={{ fontSize: 11.5, padding: "7px 8px", borderBottom: "1px solid var(--border-dim)", color: "var(--text-1)", maxWidth: 320 }}>{r.label}</td>
+                <tr key={r.id} onClick={() => onSelect && onSelect(r.id)} style={{ cursor: "pointer", opacity: r.grade === "SUSPECT" ? .62 : 1 }}>
+                  {cell(<span style={{ fontWeight: 800, fontSize: 10, letterSpacing: ".5px", padding: "2px 7px", borderRadius: 4,
+                    color: GRADE_TONE[r.grade].fg, background: GRADE_TONE[r.grade].bg, border: "1px solid " + GRADE_TONE[r.grade].fg }}>{r.grade}</span>, "center")}
+                  <td style={{ fontSize: 11.5, padding: "7px 8px", borderBottom: "1px solid var(--border-dim)", color: "var(--text-1)", maxWidth: 300 }}>{r.label}</td>
                   {cell(<span style={{ fontWeight: 800, color: r.side === "YES" ? "var(--pos)" : "var(--neg)" }}>{r.side}</span>, "center")}
                   {cell(pct(r.price), "right")}
                   {cell(pct(r.model), "right", { color: "var(--text-2)" })}
-                  {cell(<span style={{ fontWeight: 800, color: "var(--edge-glow)" }}>+{(r.edge * 100).toFixed(1)}</span>, "right")}
-                  {cell(Math.round(r.capacityContracts).toLocaleString(), "right", { color: "var(--text-2)" })}
+                  {cell(<span style={{ fontWeight: 800, color: r.grade === "SUSPECT" ? "var(--text-2)" : "var(--edge-glow)" }}>+{(r.edge * 100).toFixed(1)}</span>, "right")}
+                  {cell(<span style={{ color: r.dispersion == null ? "var(--text-2)" : r.dispersion <= 0.10 ? "var(--pos)" : "var(--warn)" }}>
+                    {r.dispersion == null ? "—" : "±" + (r.dispersion * 100).toFixed(0)}</span>, "right")}
                   {cell(<span>{money(r.stake)}{r.capped && <span style={{ color: "var(--warn)" }} title="capped by resting depth"> ▲</span>}</span>, "right")}
-                  {cell(<span style={{ color: "var(--pos)", fontWeight: 700 }}>{money(r.ev)}</span>, "right")}
-                  {cell(<span style={{ fontSize: 10, color: "var(--text-2)" }}>{r.layer || "climatology"}</span>)}
+                  {cell(<span style={{ color: r.grade === "SUSPECT" ? "var(--text-2)" : "var(--pos)", fontWeight: 700 }}>{money(r.ev)}</span>, "right")}
+                  {cell(<span style={{ fontSize: 10, color: "var(--text-2)", whiteSpace: "normal", display: "block", maxWidth: 300 }}>{(r.why || []).join(" · ")}</span>)}
                 </tr>
               ))}
             </tbody>
           </table>
           <div style={{ ...mono, fontSize: 10.5, color: "var(--text-2)", padding: "9px 12px", lineHeight: 1.65, borderTop: "1px solid var(--border-dim)" }}>
             <div>{MTC.claim("edgebook.method").text}</div>
+            <div style={{ marginTop: 5 }}>{MTC.claim("edgebook.verdict").text}</div>
             <div style={{ marginTop: 5, color: "var(--warn)" }}>{MTC.claim("edgebook.limits").text}</div>
             <div style={{ marginTop: 5 }}>{cov.text}</div>
             {(book.overflow.length > 0 || book.alsoInLadder.length > 0) && (

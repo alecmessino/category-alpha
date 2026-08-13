@@ -86,7 +86,24 @@ if (matched >= 6) {
     const anchor = L.doy && L.doy.p != null ? L.doy.p : L.base.p;
     return L.enso.p >= Math.min(raw, anchor) - 1e-9 && L.enso.p <= Math.max(raw, anchor) + 1e-9;
   })());
-  ck("posterior adopts L3", Math.abs(post.p - L.enso.p) < 1e-12);
+  /* The governing layer is the LAST available one, not L3 specifically. L4 — the ONI
+     similarity weighting — was added because the phase bucket cannot tell a marginal
+     El Nino from a strong one, and it takes precedence when it clears its own floor. */
+  const governing = post.layers.filter((l) => !l.unavailable && l.p != null).slice(-1)[0];
+  ck("posterior adopts the last available layer", Math.abs(post.p - governing.p) < 1e-12,
+     `posterior=${post.p.toFixed(4)} governing=${governing.id}@${governing.p.toFixed(4)}`);
+  ck("and that layer is the ONI-similarity one when it is available",
+     governing.id === "onisim" || L.onisim.unavailable,
+     `governing=${governing.id} onisimAvailable=${!L.onisim.unavailable}`);
+  if (!L.onisim.unavailable) {
+    ck("L4 publishes an effective sample size, not a raw count",
+       /effective [\d.]+ seasons/.test(L.onisim.basis), L.onisim.basis);
+    ck("L4 is shrunk toward the unstratified estimate like L3 is",
+       /shrunk \d+% toward/.test(L.onisim.basis));
+    ck("L4 and L3 answer the same question, so they should be within 25 points",
+       Math.abs(L.onisim.p - L.enso.p) < 0.25,
+       `L3=${(L.enso.p * 100).toFixed(0)}% L4=${(L.onisim.p * 100).toFixed(0)}%`);
+  }
   ck("basis discloses sample size + shrinkage", /season/.test(L.enso.basis) && /shrunk/.test(L.enso.basis));
   ck("basis discloses the persistence assumption", /persistence assumed/.test(L.enso.basis), L.enso.basis);
 } else {

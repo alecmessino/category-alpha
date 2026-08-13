@@ -11,7 +11,7 @@
  *
  * Run: node scripts/test-climatology.mjs
  */
-import { parseHurdat2, seriesQuantity, namePosition, ordinalOutcome, namingAnchor, parseBdeck } from "./fetch-data.mjs";
+import { parseHurdat2, seriesQuantity, namePosition, ordinalOutcome, namingAnchor, parseBdeck, oniWeights, weightedRate } from "./fetch-data.mjs";
 
 let fail = 0;
 const eq = (name, got, want) => {
@@ -245,6 +245,77 @@ eq("an Atlantic longitude never counts", bdLon("0600W").enteredCpac, false);
 ck("a track that crosses is caught on the western point",
    parseBdeck([`EP, 05, 2026081200,   , BEST,   0, 180N, 1300W, 45, 1000, TS,`,
                `EP, 05, 2026081600,   , BEST,   0, 190N, 1500W, 80, 975, HU,`].join("\n")).enteredCpac === true);
+
+console.log("\n[12] ONI similarity weighting — the fix for a bucket that cannot see strength");
+/* The phase bucket treats +0.55 and +2.50 as the same season. 2026 is at +1.39, and the
+   strong-phase subset that would answer the question never clears the six-season floor.
+   The kernel stops bucketing: every season is weighted by ONI distance. */
+const oniOf = (map, anom) => ({ anchorAnom: anom, phase: "el", asoByYear: new Map(Object.entries(map).map(([k, v]) => [Number(k), v])) });
+const YEARS = [2001, 2002, 2003, 2004, 2005];
+const ANOM = { 2001: -1.5, 2002: 0.0, 2003: 1.4, 2004: 1.5, 2005: 2.6 };
+const w = oniWeights(YEARS, oniOf(ANOM, 1.39));
+ck("a season at the anchor gets near-full weight", w.w[2] > 0.99, String(w.w[2]));
+ck("a La Nina season is all but excluded", w.w[0] < 0.001, String(w.w[0]));
+ck("a neutral season is downweighted but not zero", w.w[1] > 0 && w.w[1] < 0.1, String(w.w[1]));
+ck("a much stronger event still counts, less", w.w[4] > 0.01 && w.w[4] < w.w[3], String(w.w[4]));
+ck("effective sample is below the raw count", w.nEff < YEARS.length, w.nEff.toFixed(2));
+ck("and above one, because several seasons are close", w.nEff > 1, w.nEff.toFixed(2));
+eq("no ONI means no weighting", oniWeights(YEARS, null), null);
+
+console.log("\n[12b] the weighted rate follows the seasons that resemble today");
+/* Outcome true only in the two seasons nearest +1.39. An unweighted rate calls that
+   2 of 5; the weighted rate should be far higher, because the three seasons voting no
+   are the ones that look nothing like 2026. */
+const flags = [false, false, true, true, false];
+const wr = weightedRate(flags, w);
+ck("weighted share exceeds the raw share", wr.share > 2 / 5, `${wr.share.toFixed(3)} vs 0.400`);
+ck("and it is still shrunk off 1.0 by the prior", wr.p < 1, wr.p.toFixed(3));
+ck("effective n is carried through", Math.abs(wr.nEff - w.nEff) < 1e-9);
+
+console.log("\n[13] per-name anchors now carry the ENSO conditioning the ladders always had");
+/* The asymmetry this removes had a direction: Atlantic hurricane counts run well below
+   the median in El Nino seasons, so an unconditioned Atlantic per-name probability was
+   biased HIGH — exactly the direction that made it look like a buy. */
+/* Twelve seasons: six El Nino-like (ONI near +1.4) where the first storm stays a
+   tropical storm, six La Nina/neutral where it reaches hurricane strength. Unweighted
+   that is 6 of 12; weighted toward +1.39 it must collapse, because the seasons voting
+   yes are the ones that look nothing like 2026. The El Nino side is sized to clear the
+   effective-sample floor — the floor is a real guard and the fixture bends to it, not
+   the other way round. */
+const EL_YEARS = [2001, 2002, 2003, 2004, 2005, 2006];
+const COLD_YEARS = [2007, 2008, 2009, 2010, 2011, 2012];
+const anomMap = {};
+EL_YEARS.forEach((y, i) => { anomMap[y] = 1.25 + i * 0.06; });
+COLD_YEARS.forEach((y, i) => { anomMap[y] = -1.2 - i * 0.05; });
+const oniEl = oniOf(anomMap, 1.39);
+const SEQ = {
+  years: [...EL_YEARS, ...COLD_YEARS],
+  seasonNamed: [
+    ...EL_YEARS.map(() => [{ doy: 200, hu: false, maj: false }]),
+    ...COLD_YEARS.map(() => [{ doy: 200, hu: true, maj: false }]),
+  ],
+};
+const flatOut = ordinalOutcome(SEQ, 1, 0, null);
+const ensoOut = ordinalOutcome(SEQ, 1, 0, oniEl);
+eq("unweighted counts 6 of 12", flatOut.rawHurricane, 6);
+eq("no ONI leaves the estimator unconditioned", flatOut.enso, null);
+ck("with ONI, a weighted estimate is attached", ensoOut.enso != null);
+ck("and it is BELOW the unweighted one — the El Nino seasons were the quiet ones",
+   ensoOut.enso.pHurricane < ensoOut.pHurricane,
+   `weighted=${ensoOut.enso.pHurricane.toFixed(3)} flat=${ensoOut.pHurricane.toFixed(3)}`);
+ck("the effective sample is published so the shrink is auditable", ensoOut.enso.nEff > 0);
+
+console.log("\n[13b] the naming anchor exposes both methods as layers");
+const climEl = Object.assign({}, SEQ, { from: 2001, to: 2012 });
+const anch = namingAnchor("Will Dolly be categorized as a hurricane in the Atlantic in 2026?",
+  "KXHURRICANENAMES-26DEC01ATL-DOL", { atlantic: climEl },
+  { atlantic: { namedstorms: 3, hurricanes: 0, major: 0 } }, oniEl);
+ck("an anchor is produced", anch != null);
+ck("it carries layers, which it never used to", anch && Array.isArray(anch.layers) && anch.layers.length >= 2,
+   JSON.stringify(anch && (anch.layers || []).map((l) => l.id)));
+ck("the unweighted ordinal is retained for comparison", anch && anch.layers[0].id === "ordinal");
+ck("and the published probability is the weighted one when available",
+   anch && anch.layers[1].p != null && Math.abs(anch.p - anch.layers[1].p) < 1e-9);
 
 console.log(fail ? `\n${fail} FAILURE(S)\n` : "\nall assertions passed\n");
 process.exit(fail ? 1 : 0);

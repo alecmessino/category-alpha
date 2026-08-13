@@ -240,9 +240,18 @@
     };
   });
   define("edgebook.method", "derived", (s) => ({
-    text: "Ranked by expected dollars: model probability against the price you would pay to take"
-        + " the side, less the exchange fee, sized by Kelly and capped at the depth actually resting."
-        + " One rung per ladder — the rungs of a ladder are one view, not several.",
+    text: "Ranked by verdict, then expected dollars: model probability against the price you would"
+        + " pay to take the side, less the exchange fee, sized by Kelly and capped at the depth"
+        + " actually resting. One rung per ladder — the rungs of a ladder are one view, not several.",
+    ok: true,
+  }));
+  define("edgebook.verdict", "derived", () => ({
+    text: "TAKE means every posterior layer agrees within 10 points, the edge is at least 1.5x the"
+        + " spread, and there is real size resting. SMALL clears the edge but fails one of those."
+        + " SUSPECT is a large edge whose own layers disagree — a climatology baseline that differs"
+        + " from a traded market by 25 points while disagreeing with itself is more likely to be"
+        + " missing something than to have found free money, so it sorts last and is not counted"
+        + " in the expected total. AGREE is the spread between layers: smaller is more robust.",
     ok: true,
   }));
   define("edgebook.limits", "none", () => ({

@@ -142,6 +142,60 @@ const cov = buildMTX(mixed).edgeBook(0, 100000, 1, { minEdge: 0, minDollars: 0, 
 eq("total counts every contract", cov.coverage.total, 3);
 eq("anchored counts those with a model", cov.coverage.anchored, 2);
 
+console.log("\n[10b] the verdict — what the operator actually reads off the row");
+const L = (...ps) => ps.map((p, i) => ({ id: "l" + i, label: "layer " + i, p }));
+const graded = (over) => buildMTX([C(Object.assign({
+  id: "KXG-26-T1", market: 0.5, yesBid: 0.49, yesAsk: 0.5, spread: 0.01,
+  depth: { bidSize: 0, askSize: 5000, notional: 1 },
+}, over))]).edgeBook(0, 100000, 1, { minEdge: 0, minDollars: 25, limit: 5 }).rows[0];
+
+const take = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.60, 0.61, 0.62) });
+eq("agreeing layers, real size, edge over the spread -> TAKE", take.grade, "TAKE");
+near("dispersion is the spread between layers", take.dispersion, 0.02, 1e-9);
+
+const scattered = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.40, 0.55, 0.62) });
+eq("the same edge with layers 22 points apart is only SMALL", scattered.grade, "SMALL");
+ck("and it says why", scattered.why.some((w) => /layers disagree/.test(w)), scattered.why.join("; "));
+
+/* The rule that matters most: a huge edge whose own layers disagree is demoted, not
+   celebrated. A climatology baseline differing from a traded market by 30 points while
+   disagreeing with itself is far likelier to be missing something than to be right. */
+const suspect = graded({ model: 0.85, modelAt: () => 0.85, modelLayers: L(0.45, 0.65, 0.85) });
+eq("a 30-point edge with scattered layers is SUSPECT", suspect.grade, "SUSPECT");
+ck("and the reason names the model, not the market",
+   suspect.why.some((w) => /more likely a model gap/.test(w)), suspect.why.join("; "));
+ck("SUSPECT still carries the larger raw edge", suspect.edge > take.edge);
+
+/* Absence of disagreement is not agreement. */
+const blind = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: null });
+ck("an anchor with no layer detail is never TAKE", blind.grade !== "TAKE", blind.grade);
+ck("and it says the estimate could not be checked",
+   blind.why.some((w) => /no layer detail/.test(w)), blind.why.join("; "));
+eq("its dispersion is null, not zero", blind.dispersion, null);
+
+const thinBook = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.61, 0.62),
+  depth: { bidSize: 0, askSize: 60, notional: 1 } });
+ck("a good edge with almost nothing resting is not TAKE", thinBook.grade !== "TAKE", thinBook.grade + " " + thinBook.why.join("; "));
+
+const wide = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.61, 0.62),
+  spread: 0.10, yesAsk: 0.55, yesBid: 0.45 });
+ck("an edge that does not clear 1.5x the spread is not TAKE", wide.grade !== "TAKE", wide.grade + " " + wide.why.join("; "));
+
+console.log("\n[10c] verdict outranks expected value in the ordering");
+/* A big SUSPECT must not sit above a modest TAKE — the whole point of the grade is that
+   scanning the top of the list is safe. */
+const graded10c = buildMTX([
+  C({ id: "KXBIG-26-T1", market: 0.5, model: 0.9, modelAt: () => 0.9, modelLayers: L(0.40, 0.65, 0.90),
+      yesBid: 0.49, yesAsk: 0.5, spread: 0.01, depth: { bidSize: 0, askSize: 40000, notional: 1 } }),
+  C({ id: "KXOK-26-T1", market: 0.5, model: 0.58, modelAt: () => 0.58, modelLayers: L(0.57, 0.58),
+      yesBid: 0.49, yesAsk: 0.5, spread: 0.01, depth: { bidSize: 0, askSize: 3000, notional: 1 } }),
+]).edgeBook(0, 100000, 1, { minEdge: 0, minDollars: 25, limit: 5 });
+eq("the TAKE sorts first", graded10c.rows[0].grade, "TAKE");
+eq("the SUSPECT sorts last", graded10c.rows[1].grade, "SUSPECT");
+ck("even though the SUSPECT has far more expected value", graded10c.rows[1].ev > graded10c.rows[0].ev,
+   `suspect=$${graded10c.rows[1].ev.toFixed(0)} take=$${graded10c.rows[0].ev.toFixed(0)}`);
+eq("the grade tally is reported", graded10c.byGrade, { TAKE: 1, SMALL: 0, SUSPECT: 1 });
+
 console.log("\n[11] the committed board runs through it without throwing");
 /* A smoke test against real data — shapes in the wild that the fixtures do not cover
    (null depth, missing yesAsk on legacy rows) must degrade, not crash. */

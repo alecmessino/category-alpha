@@ -683,14 +683,48 @@
       const idealDollars = bankroll * kf * (stakeFrac == null ? 1 : stakeFrac);
       const capacityContracts = best.size;
       const capacityDollars = capacityContracts * best.cost * notional;
+      const capacityDollarsOf = capacityDollars;
       const stakeDollars = Math.min(idealDollars, capacityDollars);
       const contracts = best.cost > 0 ? stakeDollars / (best.cost * notional) : 0;
       const ev = contracts * best.edge * notional;
       if (stakeDollars < o.minDollars) { skipped.tooThin++; continue; }
 
       const layers = c.modelLayers || [];
-      const governing = layers.filter((l) => l && !l.unavailable).slice(-1)[0] || null;
+      const live = layers.filter((l) => l && !l.unavailable && l.p != null);
+      const governing = live.slice(-1)[0] || null;
+
+      /* How much the answer depends on WHICH conditioning you use. Every layer asks the
+         same question of the same record under a different restriction, so when they
+         cluster the estimate is robust to method, and when they scatter the number is an
+         artefact of one choice. This is the single most useful thing to show next to an
+         edge, and it costs nothing to compute. */
+      const ps = live.map((l) => l.p);
+      const dispersion = ps.length > 1 ? Math.max(...ps) - Math.min(...ps) : null;
+
+      /* The verdict. Deliberately demotes very large edges rather than celebrating them:
+         a climatology baseline that disagrees with a traded market by 25 points, while
+         its own layers disagree with each other, is far more likely to be missing
+         something than to have found free money. */
+      const why = [];
+      const frictionOk = c.spread == null || best.edge >= 1.5 * c.spread;
+      /* Absence of disagreement is NOT agreement. An anchor that publishes no layer
+         detail cannot be shown to be robust to method, so it must not earn the top
+         grade on the strength of having nothing to contradict it. */
+      const measured = live.length > 1 && dispersion != null;
+      const agrees = measured && dispersion <= 0.10;
+      const deep = capacityDollarsOf >= o.minDollars * 2;
+      if (!measured) why.push("no layer detail to check the estimate against");
+      else if (!agrees) why.push("layers disagree by " + Math.round(dispersion * 100) + " pts");
+      if (!frictionOk) why.push("edge is under 1.5x the " + Math.round((c.spread || 0) * 100) + "c spread");
+      if (!deep) why.push("only $" + Math.round(capacityDollarsOf) + " resting");
+      if (best.edge >= 0.25 && !agrees) why.push("a " + Math.round(best.edge * 100) + "-pt disagreement with a traded market is more likely a model gap than free money");
+      const grade = (best.edge >= 0.25 && !agrees) ? "SUSPECT"
+        : (agrees && frictionOk && deep && best.edge >= 0.03) ? "TAKE"
+        : "SMALL";
+      if (grade === "TAKE") why.push("every layer within " + Math.round(dispersion * 100) + " pts, edge clears the spread, real size resting");
+
       rows.push({
+        grade, why, dispersion,
         c, id: c.id, label: c.label || c.short || c.id,
         side: best.side, model: p, price: best.price, cost: best.cost,
         fee: feePerContract(best.side === "YES" ? best.price : best.price),
@@ -706,7 +740,12 @@
     /* Expected dollars first — that is the quantity being maximised. Return on the stake
        breaks ties so a thin, very mispriced rung outranks a fat, barely mispriced one at
        equal expected value; then the tighter book, then the busier market. */
-    rows.sort((a, b) => b.ev - a.ev || b.roi - a.roi
+    /* Grade first, then expected dollars. An operator scanning this wants the bets that
+       survive scrutiny at the top, not the biggest numbers — the biggest numbers are the
+       ones most likely to be a model gap, which is exactly why SUSPECT sorts last. */
+    const GRADE_RANK = { TAKE: 0, SMALL: 1, SUSPECT: 2 };
+    rows.sort((a, b) => GRADE_RANK[a.grade] - GRADE_RANK[b.grade]
+      || b.ev - a.ev || b.roi - a.roi
       || (a.spread ?? 1) - (b.spread ?? 1) || (b.volume24h || 0) - (a.volume24h || 0));
 
     // One rung per ladder in the headline list; the rest stay available underneath.
@@ -720,6 +759,9 @@
     return {
       rows: top.slice(0, o.limit), overflow: top.slice(o.limit), alsoInLadder,
       candidates: rows.length, ladders: seen.size,
+      byGrade: { TAKE: top.filter((r) => r.grade === "TAKE").length,
+                 SMALL: top.filter((r) => r.grade === "SMALL").length,
+                 SUSPECT: top.filter((r) => r.grade === "SUSPECT").length },
       coverage: { anchored, total: all.length },
       skipped, thresholds: o, bankroll, stakeFrac,
     };
