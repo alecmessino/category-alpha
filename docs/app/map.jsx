@@ -14,6 +14,10 @@ const MT_LAYERS = [
      sees convection at any hour, so it is the layer that keeps the map informative
      overnight rather than pretty. */
   { id: "infrared", label: "Enhanced IR", prov: "live" },
+  /* GFS 10 m wind. A MODEL ANALYSIS, not an observation — a different class of thing from
+     an advisory, and the provenance tag says so rather than sitting alongside satellite
+     imagery as if they were the same kind of fact. */
+  { id: "wind", label: "Surface wind (GFS)", prov: "dynamic" },
   { id: "track", label: "Observed Track", prov: "live" },
   { id: "forecast", label: "NHC Forecast Track", prov: "dynamic" },
   { id: "cone", label: "NHC Cone", prov: "dynamic" },
@@ -84,7 +88,7 @@ function cssVar(v) {
   return getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim() || "#38bdf8";
 }
 
-function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }) {
+function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", resizeKey }) {
   const elRef = React.useRef(null);
   const mapRef = React.useRef(null);
   const refs = React.useRef({});
@@ -112,6 +116,25 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
     window.__MT_MAP = map;   // handle for layout/interaction verification
     setTimeout(() => map.invalidateSize(), 200);
     return () => { map.remove(); mapRef.current = null; };
+  }, []);
+
+  /* Leaflet caches the container size and does not observe it. Anything that changes the
+     box without a window resize — a tab switch, a panel collapsing, the shell rescaling —
+     leaves it rendering into stale dimensions: grey bands where tiles should be, and a
+     click landing several degrees from where it looked. invalidateSize is the fix and it
+     has to be called on every one of those, not only on window resize. */
+  React.useEffect(() => {
+    const map = mapRef.current; if (!map) return;
+    const id = setTimeout(() => map.invalidateSize({ animate: false }), 60);
+    return () => clearTimeout(id);
+  }, [resizeKey]);
+
+  React.useEffect(() => {
+    const map = mapRef.current, el = elRef.current;
+    if (!map || !el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => map.invalidateSize({ animate: false }));
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   // recenter on storm change
@@ -203,6 +226,98 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
     refs.current.irTimer = setInterval(resolveIr, 300000);
     return () => { cancelled = true; if (refs.current.irTimer) clearInterval(refs.current.irTimer); };
   }, [layers.infrared, stormId]);
+
+  /* ---- Wind particles ----
+     A canvas layer over the map, advecting particles through the GFS grid. Written here
+     rather than pulled in, for the same reason nothing else in this project has a CDN
+     dependency: the field is 7,400 vectors and the renderer is bilinear interpolation
+     plus a fading trail. Roughly eighty lines against a vendored library and its own
+     coordinate conventions to get wrong.
+
+     Every particle position comes from the ingested u/v grid. There is no noise term and
+     no synthetic motion anywhere in it — if the field is absent, nothing draws. */
+  React.useEffect(() => {
+    const map = mapRef.current; if (!map) return;
+    const W = window.MT && MT._wind;
+    const kill = () => {
+      if (refs.current.windRaf) cancelAnimationFrame(refs.current.windRaf);
+      if (refs.current.windCanvas && refs.current.windCanvas.parentNode) refs.current.windCanvas.parentNode.removeChild(refs.current.windCanvas);
+      if (refs.current.windMove) { map.off("move zoom resize", refs.current.windMove); refs.current.windMove = null; }
+      refs.current.windRaf = null; refs.current.windCanvas = null;
+    };
+    kill();
+    if (!layers.wind || !W || !W.fields || W.fields.length < 2) return;
+
+    const g = W.grid, u = W.fields[0].data, v = W.fields[1].data;
+    const pane = map.getPanes().overlayPane;
+    const cv = L.DomUtil.create("canvas", "mt-wind");
+    cv.style.position = "absolute"; cv.style.pointerEvents = "none"; cv.style.zIndex = 401;
+    pane.appendChild(cv);
+    refs.current.windCanvas = cv;
+    const ctx = cv.getContext("2d");
+
+    /* Bilinear sample of the grid at a lat/lon. Rows run north-first — the fetcher
+       normalises scan mode before writing — so row 0 is la1 and j grows southward. */
+    const sample = (lat, lon) => {
+      let x = (((lon - g.lo1) % 360) + 360) % 360 / g.dx;
+      const y = (g.la1 - lat) / g.dy;
+      if (y < 0 || y > g.ny - 1 || x < 0 || x > g.nx - 1) return null;
+      const i0 = Math.floor(x), j0 = Math.floor(y);
+      const i1 = Math.min(i0 + 1, g.nx - 1), j1 = Math.min(j0 + 1, g.ny - 1);
+      const fx = x - i0, fy = y - j0;
+      const at = (arr, i, j) => arr[j * g.nx + i];
+      const bil = (arr) =>
+        at(arr, i0, j0) * (1 - fx) * (1 - fy) + at(arr, i1, j0) * fx * (1 - fy) +
+        at(arr, i0, j1) * (1 - fx) * fy + at(arr, i1, j1) * fx * fy;
+      return [bil(u), bil(v)];
+    };
+
+    const N = 2200;
+    let parts = [];
+    const reset = (p) => {
+      const b = map.getBounds();
+      p.lat = b.getSouth() + Math.random() * (b.getNorth() - b.getSouth());
+      p.lon = b.getWest() + Math.random() * (b.getEast() - b.getWest());
+      p.age = Math.random() * 60;
+      return p;
+    };
+    const resize = () => {
+      const size = map.getSize();
+      cv.width = size.x; cv.height = size.y;
+      const tl = map.containerPointToLayerPoint([0, 0]);
+      L.DomUtil.setPosition(cv, tl);
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      parts = new Array(N).fill(0).map(() => reset({}));
+    };
+    resize();
+    refs.current.windMove = resize;
+    map.on("move zoom resize", resize);
+
+    const step = () => {
+      // Fade rather than clear: the trail IS the streamline.
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.fillStyle = "rgba(0,0,0,0.10)";
+      ctx.fillRect(0, 0, cv.width, cv.height);
+      ctx.globalCompositeOperation = "source-over";
+      ctx.lineWidth = 1;
+      const zScale = 0.06 / Math.pow(2, map.getZoom() - 4);
+      for (const p of parts) {
+        const s = sample(p.lat, p.lon);
+        if (!s || p.age > 60) { reset(p); continue; }
+        const [uu, vv] = s;
+        const nlat = p.lat + vv * zScale, nlon = p.lon + uu * zScale / Math.max(0.2, Math.cos(p.lat * Math.PI / 180));
+        const a = map.latLngToContainerPoint([p.lat, p.lon]);
+        const b = map.latLngToContainerPoint([nlat, nlon]);
+        const spd = Math.hypot(uu, vv);
+        ctx.strokeStyle = spd > 17 ? "rgba(248,113,113,.85)" : spd > 10 ? "rgba(251,191,36,.75)" : "rgba(125,211,252,.55)";
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        p.lat = nlat; p.lon = nlon; p.age++;
+      }
+      refs.current.windRaf = requestAnimationFrame(step);
+    };
+    step();
+    return kill;
+  }, [layers.wind, stormId]);
 
   // vector overlays, rebuilt on storm/layers change
   React.useEffect(() => {

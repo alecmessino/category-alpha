@@ -325,6 +325,19 @@
     };
   });
 
+  define("wind.field", "wind", () => {
+    const w = window.MT && MT._wind;
+    if (!w) return { text: "no surface wind field ingested this cycle", ok: false };
+    const ageH = Math.round((Date.now() - Date.parse(w.cycleZ)) / 3600e3);
+    return {
+      text: w.source + " · " + w.grid.nx + "x" + w.grid.ny + " vectors at " + w.grid.dx + "\u00b0 · cycle "
+          + w.cycleZ.replace("T", " ").replace(":00:00Z", "Z") + " (" + ageH + "h old). This is a MODEL"
+          + " ANALYSIS, not an observation — a different class of thing from an advisory. GFS runs four"
+          + " times a day, so the field is refreshed on that cadence and not on the board's.",
+      ok: true,
+    };
+  });
+
   // ---- provenance footers --------------------------------------------------
   // source/latency/version/tier, each traced rather than typed.
   const FOOTERS = {

@@ -262,6 +262,7 @@
       _frames: framesArr, _feeds: feeds, _generatedAt: latest.generatedAt || null, _note: latest.note || null,
       _verify: window.__MT_VERIFY || null, _enso: latest.enso || null,
       _outlook: latest.outlook || [],
+      _wind: window.__MT_WIND || null,
     };
   }
 
@@ -305,6 +306,10 @@
     fetch(BASE + "frames.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).catch(() => null),
     // Verdict of the CI job that drives a real browser against the public URL.
     fetch(BASE + "verify-live.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).catch(() => null),
-  ]).then(([latest, framesJson, verify]) => { window.__MT_VERIFY = verify; done(latest, framesJson); startPolling(); })
+    /* GFS surface wind. Cached hard rather than no-store: it changes four times a day,
+       not every ten minutes, and re-pulling 64 KB on every poll would be waste. Absent is
+       a normal state — the map simply has no wind layer to offer. */
+    fetch(BASE + "wind.json").then((r) => r.ok ? r.json() : null).catch(() => null),
+  ]).then(([latest, framesJson, verify, wind]) => { window.__MT_VERIFY = verify; window.__MT_WIND = wind; done(latest, framesJson); startPolling(); })
     .catch((err) => { console.warn("[millibar] data load failed:", err); done(emptyLatest(err), null); startPolling(); });
 })();

@@ -88,7 +88,12 @@ let browser = null;
 const origin = new URL(BASE).origin;
 let ours = [], third = [], thirdConsole = [];      // read by the report, so hoisted
 try {
-browser = await chromium.launch();
+/* CI installs its own browser and this resolves to nothing there. The authoring
+   sandbox ships a pinned Chromium whose build number does not match whatever
+   playwright npm resolves to, so allow pointing at it — that is what makes this
+   runnable as a pre-flight before a push instead of only after one. */
+browser = await chromium.launch(
+  process.env.MT_CHROMIUM_PATH ? { executablePath: process.env.MT_CHROMIUM_PATH } : {});
 const ctx = await browser.newContext({ viewport: { width: 2560, height: 1400 } });
 const page = await ctx.newPage();
 
@@ -120,18 +125,50 @@ if (nav) add("live URL responds", nav.status() === 200, `HTTP ${nav.status()} at
 
 await page.waitForTimeout(4000);
 
-// Open the sections that are collapsed by default. Fair value and Spatial context
-// are open already — clicking them would CLOSE them and fake a failure.
-for (const label of ["Verify", "Raw data"]) {
+/* The board is four tabs now, so only one view is mounted at a time. Walk all of them,
+   union the rendered text, and come back to Situation — otherwise every panel that lives
+   behind a tab reads as missing, which is a false failure with exactly the shape of a
+   real one. */
+let tabText = "";
+let groupHeaders = 0;                       // DOM counts must be taken while the tab is up
+for (const label of ["Situation", "Markets", "Models", "Optimizer"]) {
   await page.evaluate((l) => {
-    const s = [...document.querySelectorAll("span")].find((x) => x.textContent.trim() === l);
-    if (s) s.parentElement.click();
+    const b = [...document.querySelectorAll("button[role=tab]")].find((x) => x.textContent.trim().toLowerCase() === l.toLowerCase());
+    if (b) b.click();
   }, label);
-  await page.waitForTimeout(600);
+  await page.waitForTimeout(700);
+  /* Open anything collapsed within this tab before reading it — and ONLY if it is
+     collapsed. An unconditional click toggles, so it CLOSED the sections that open by
+     default and their panels then read as missing. The chevron carries the state. */
+  for (const sec of ["Verify", "Raw data", "Fair value"]) {
+    await page.evaluate((l) => {
+      const s = [...document.querySelectorAll("span")].find((x) => x.textContent.trim() === l);
+      const head = s && s.parentElement;
+      if (!head) return;
+      const chev = head.querySelector("span");
+      if (chev && chev.textContent.trim() === "▸") head.click();   // ▸ = collapsed
+    }, sec);
+    await page.waitForTimeout(250);
+  }
+  const seen = await page.evaluate(() => ({
+    text: document.body.innerText,
+    groupHeaders: document.querySelectorAll('td[colspan="7"]').length,
+  }));
+  tabText += "\n" + seen.text;
+  groupHeaders = Math.max(groupHeaders, seen.groupHeaders);
 }
+await page.evaluate(() => {
+  const b = [...document.querySelectorAll("button[role=tab]")].find((x) => x.textContent.trim().toLowerCase() === "situation");
+  if (b) b.click();
+});
+await page.waitForTimeout(700);
 
-const probe = await page.evaluate(() => {
-  const T = document.body.innerText;
+const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
+  /* Panels are asserted against the union across tabs; layout is measured on the tab that
+     is actually showing. Mixing those up is how a check passes on text that is not on
+     screen. */
+  const T = unionText + "\n" + document.body.innerText;
+  const VISIBLE = document.body.innerText;
   const MT = window.MT, C = (MT && MT.contracts) || [];
   const series = new Set(C.map((c) => String(c.id).replace(/-[^-]*$/, "")));
   const withDepth = C.filter((c) => c.depth && c.depth.askSize > 0 && c.liquidity > 0);
@@ -153,7 +190,7 @@ const probe = await page.evaluate(() => {
     commandCentre: /STORM COMMAND CENTER/.test(T),
     contracts: C.length,
     seriesCount: series.size,
-    groupHeaders: document.querySelectorAll('td[colspan="7"]').length,
+    groupHeaders: groupHeadersSeen,
     droppedForCap: (MT && MT._feeds && MT._feeds.markets && MT._feeds.markets.droppedForCap) || 0,
     depthCount: C.filter((c) => c.depth).length,
     // Ask-priced cap: the dollars resting must be >= size x the displayed (mid) price.
@@ -232,13 +269,22 @@ const probe = await page.evaluate(() => {
            only panel that shows you WHERE the storm is comes into view. */
         mapTop: map ? Math.round(map.getBoundingClientRect().top + window.scrollY) : null,
         stormConsole: /ACTIVE SYSTEMS/i.test(T),
+        tabs: document.querySelectorAll("button[role=tab]").length,
+        /* The complaint that started this: a page you scroll a mile down. Four tabs exist
+           so no single view is a wall, and this measures the actual document height
+           against the viewport rather than trusting that. */
+        pageHeight: document.documentElement.scrollHeight,
+        viewportHeight: window.innerHeight,
+        screensToScroll: Math.round((document.documentElement.scrollHeight / window.innerHeight) * 10) / 10,
+        windLayer: !!(window.MT && MT._wind && MT._wind.fields && MT._wind.fields.length === 2),
+        windCycle: (window.MT && MT._wind && MT._wind.cycleZ) || null,
         hud: /\bADV\b/.test(T) && /\bSNAP\b/.test(T),
       };
     })(),
-    unregisteredClaim: /UNREGISTERED CLAIM|CLAIM ERROR/.test(T),
+    unregisteredClaim: /UNREGISTERED CLAIM|CLAIM ERROR/.test(VISIBLE),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   };
-});
+}, { unionText: tabText, groupHeadersSeen: groupHeaders });
 
 add("app mounted", probe.booted, JSON.stringify(probe.globals));
 const ageMin = probe.generatedAt ? Math.round((Date.now() - Date.parse(probe.generatedAt)) / 60000) : null;
@@ -295,6 +341,12 @@ add("the map is a centrepiece, not a thumbnail",
 add("and it is the first thing under the header",
   LY.mapTop != null && LY.mapTop <= 200,
   `map starts ${LY.mapTop}px down the page`);
+
+add("four tabs, so no single view is a wall",
+  LY.tabs === 4 && LY.screensToScroll <= 2.2,
+  `${LY.tabs} tabs · ${LY.screensToScroll} screens tall (${LY.pageHeight}px / ${LY.viewportHeight}px)`);
+add("the GFS wind field is ingested and both components present",
+  LY.windLayer === true, `cycle ${LY.windCycle}`);
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,
   `${probe.contracts} contracts · ${probe.seriesCount} series · droppedForCap=${probe.droppedForCap}`);

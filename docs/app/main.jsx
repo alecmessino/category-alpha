@@ -226,6 +226,36 @@ function humanMin(m) {
   return m < 60 ? m + "m" : Math.floor(m / 60) + "h" + ("0" + (m % 60)).slice(-2) + "m";
 }
 
+/* Four views, so no single scroll is a wall. The map and the header sit ABOVE this and
+   never change with the tab — spatial context and the active-system switcher are
+   permanent furniture, and only the analysis below them swaps. */
+const TABS = [
+  { id: "Situation", hint: "what changed and whether to trust it" },
+  { id: "Markets",   hint: "the full board, depth and sizing" },
+  { id: "Models",    hint: "fair value, posterior stack, audit trail" },
+  { id: "Optimizer", hint: "ranked trades, net of what they cost to put on" },
+];
+function TabBar({ tab, setTab }) {
+  return (
+    <div role="tablist" aria-label="Terminal views"
+      style={{ display: "flex", gap: 2, marginBottom: 14, borderBottom: "1px solid var(--border-dim)", overflowX: "auto" }}>
+      {TABS.map((t) => {
+        const on = t.id === tab;
+        return (
+          <button key={t.id} role="tab" aria-selected={on} title={t.hint} onClick={() => setTab(t.id)}
+            style={{ flex: "1 1 0", minWidth: 96, cursor: "pointer", background: on ? "var(--surface-card)" : "transparent",
+              border: "1px solid " + (on ? "var(--border-strong)" : "transparent"), borderBottom: on ? "1px solid var(--surface-card)" : "1px solid transparent",
+              borderRadius: "8px 8px 0 0", marginBottom: -1, padding: "9px 14px",
+              fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase",
+              color: on ? "var(--accent)" : "var(--text-2)", whiteSpace: "nowrap" }}>
+            {t.id}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function Transport({ frame, setFrame, playing, setPlaying, speed, setSpeed }) {
   const NF = lastFrame();
   const isLive = frame >= NF;
@@ -303,7 +333,7 @@ function MillibarTerminalApp() {
      sized like a supporting chart. Half the viewport, floored at 500px so it stays a
      centrepiece on a laptop and grows on a wall display. The register alongside it
      matches, so the two never disagree about how tall the block is. */
-  const cmdH = Math.max(500, Math.round(vh * 0.5 / zoom));
+  const cmdH = Math.max(420, Math.round(vh * 0.6 / zoom));
   /* Newer snapshot available. At live with playback stopped we take it immediately
      (a reload is the honest way to rebuild MT — nothing is patched in place); if the
      operator is scrubbing history we surface a chip and let them choose. */
@@ -319,6 +349,7 @@ function MillibarTerminalApp() {
   }, [newer, atLive, playing, sel.evidence]);
 
   const dense = false;   // one density; the switch was design-tool residue
+  const [tab, setTab] = React.useState("Situation");
   const panelGrid = narrow ? "1fr" : "1.5fr 1fr 1fr";
 
   React.useEffect(() => {
@@ -453,10 +484,14 @@ function MillibarTerminalApp() {
         {true && (
         <window.MT_Section label="Spatial context" tier="track · cone · satellite · replay" defaultOpen
           summary={S ? (S.name + " " + S.cls + " · " + Math.round(snap.wind) + " kt") : "basin view — nothing classified"}>
-        <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: gap }}>
+        {/* Sticky, so the map stays put while a tab scrolls under it. overflow:hidden on the
+            shell because Leaflet paints tiles outside its own box during a pan and they
+            spill over whatever is beneath. */}
+        <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: gap,
+          position: narrow ? "static" : "sticky", top: 8, zIndex: 400 }}>
           <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: (narrow || !S) ? "1fr" : "minmax(0,1fr) " + (wide ? 360 : 320) + "px" }}>
-            <div style={{ position: "relative", minHeight: narrow ? 300 : cmdH, background: "var(--slate-950)" }}>
-              <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} onImagery={setImagery} />
+            <div style={{ position: "relative", height: narrow ? 300 : cmdH, overflow: "hidden", background: "var(--slate-950)" }}>
+              <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} onImagery={setImagery} resizeKey={tab + ":" + vw + ":" + vh} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--blue-300)", textTransform: "uppercase" }}>Storm Command Center</span>
               </div>
@@ -508,6 +543,9 @@ function MillibarTerminalApp() {
         )}
         {!S && <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />}
 
+        <TabBar tab={tab} setTab={setTab} />
+
+        {tab === "Situation" && (<>
         {/* 1 + 2 — what changed, and whether to trust it */}
         <window.MT_Situation dense={dense} />
 
@@ -522,14 +560,6 @@ function MillibarTerminalApp() {
             not a detail to be found after scrolling past the trades. */}
         <window.MT_StormConsoles dense={dense} />
 
-        {/* 3.5 — what to actually do about it. This sits above the attention queue on
-            purpose: the queue says what changed, and a list of changes is not a list of
-            trades. Ranked, short, and net of what it costs to get the position on. */}
-        <div style={{ marginBottom: gap }}>
-          <window.MT_EdgeBook frame={frame} bankroll={bankroll} stake={stake}
-            setBankroll={setBankroll} setStake={setStake} onSelect={pickContract} dense={dense} />
-        </div>
-
         {/* 4 + 3 — what needs you, and what it touches. This is the hero row now;
             the map moved below it, because the product stopped being the data and
             became the interpretation of the data. */}
@@ -541,6 +571,20 @@ function MillibarTerminalApp() {
         </div>
 
 
+        </>)}
+
+        {tab === "Optimizer" && (<>
+        {/* 3.5 — what to actually do about it. This sits above the attention queue on
+            purpose: the queue says what changed, and a list of changes is not a list of
+            trades. Ranked, short, and net of what it costs to get the position on. */}
+        <div style={{ marginBottom: gap }}>
+          <window.MT_EdgeBook frame={frame} bankroll={bankroll} stake={stake}
+            setBankroll={setBankroll} setStake={setStake} onSelect={pickContract} dense={dense} />
+        </div>
+
+        </>)}
+
+        {tab === "Models" && (<>
         {/* 5b — fair value and the posterior stack behind every edge on screen */}
         <window.MT_Section label="Fair value" tier="term structure · posterior stack" defaultOpen summary="collapsed">
           <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start" }}>
@@ -562,6 +606,9 @@ function MillibarTerminalApp() {
           </div>
         </window.MT_Section>
 
+        </>)}
+
+        {tab === "Markets" && (<>
         {/* 5d — the full board, on demand */}
         <window.MT_Section label="Raw data" tier="full market board · depth · sizing"
           summary={MT.contracts.length + " contracts · " + (MT._feeds && MT._feeds.markets ? MT._feeds.markets.source : "—")}>
@@ -573,6 +620,9 @@ function MillibarTerminalApp() {
             <window.MT_OrderBook contractId={sel.contract} frame={frame} dense={dense} />
           </div>
         </window.MT_Section>
+
+
+        </>)}
 
       </main>
 
