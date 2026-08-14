@@ -16,11 +16,22 @@ name: Checks
 # any branch and fast enough to be worth waiting for.
 
 on:
+  # PULL REQUESTS ONLY, and that is the whole trigger list on purpose.
+  #
+  # This first shipped with `push: branches-ignore: [main]` alongside, which fired BOTH
+  # events on every push to a branch with an open PR — two identical runs of the same
+  # twenty steps, on the same commit, every time. The concurrency group did not collapse
+  # them either, because a pull_request event runs on refs/pull/N/merge while a push runs
+  # on refs/heads/..., so the two never shared a group.
+  #
+  # Collapsing them with a shared group would have been worse than the waste: one run
+  # would be CANCELLED, and a cancelled check reads as a failed one to a reviewer and to
+  # branch protection. So the duplicate trigger is gone instead.
+  #
+  # main is covered by the refresh job, which runs these same suites before it fetches
+  # anything. A branch with no pull request is not under review, and can be checked on
+  # demand from the Actions tab.
   pull_request:
-  push:
-    # main is already covered: the refresh job runs the same suites before it fetches
-    # anything. Running them twice there would just double the queue.
-    branches-ignore: [main]
   workflow_dispatch: {}
 
 # A newer push supersedes a review still in flight.
