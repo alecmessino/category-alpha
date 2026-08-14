@@ -1,28 +1,19 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T15:47:35.270Z",
+  "ranAt": "2026-08-14T16:07:20.244Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "bcf7bfb8b2848f09996a749e3344dbc00b2395e3",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31816153567",
-  "ok": false,
-  "passed": 36,
+  "sha": "86daeb91d2ca3229d05bfca5dde885913708dc67",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31817687273",
+  "ok": true,
+  "passed": 38,
   "total": 38,
-  "failures": [
-    {
-      "check": "no watch area is truncated at a line wrap",
-      "detail": "an area ends in a dangling conjunction — the continuation line was dropped"
-    },
-    {
-      "check": "the initial forecast point carries its intensity",
-      "detail": "0/2 storm(s) have an hour-zero intensity"
-    }
-  ],
-  "thirdPartyFailures": 36,
+  "failures": [],
+  "thirdPartyFailures": 28,
   "checks": [
     {
       "check": "Pages is serving this commit",
       "pass": true,
-      "detail": "7 assets byte-match the checkout (attempt 1)"
+      "detail": "7 assets byte-match the checkout (attempt 3)"
     },
     {
       "check": "live URL responds",
@@ -37,7 +28,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T15:41:52.991Z · 6m old"
+      "detail": "2026-08-14T16:06:08.310Z · 1m old"
     },
     {
       "check": "renders: Situation",
@@ -97,12 +88,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "8 ranked of 27 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "8 ranked of 33 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 3 displayed-only · unverifiable=0"
+      "detail": "0 executable · 2 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -122,22 +113,22 @@
     {
       "check": "four tabs, so no single view is a wall",
       "pass": true,
-      "detail": "4 tabs · 1.8 screens tall (2510px / 1400px)"
+      "detail": "4 tabs · 1.9 screens tall (2645px / 1400px)"
     },
     {
       "check": "the official-advisory console reaches the page",
       "pass": true,
-      "detail": "2 storm(s) · console=true · forecast=2 · P=2 · watches=1 · discussion=0"
+      "detail": "2 storm(s) · console=true · forecast=2 · P=2 · watches=1 · discussion=2"
     },
     {
       "check": "no watch area is truncated at a line wrap",
-      "pass": false,
-      "detail": "an area ends in a dangling conjunction — the continuation line was dropped"
+      "pass": true,
+      "detail": "all areas end cleanly"
     },
     {
       "check": "the initial forecast point carries its intensity",
-      "pass": false,
-      "detail": "0/2 storm(s) have an hour-zero intensity"
+      "pass": true,
+      "detail": "2/2 storm(s) have an hour-zero intensity"
     },
     {
       "check": "the GFS wind field is ingested and both components present",
@@ -152,12 +143,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "38 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "57 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "38 tile(s) served on reload · 38 in cache"
+      "detail": "35 tile(s) served on reload · 57 in cache"
     },
     {
       "check": "all markets carried",
