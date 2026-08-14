@@ -66,18 +66,33 @@ async function getBuf(url, timeout = 60000) {
 /* Thin the grid by taking every STRIDE-th row and column. Averaging neighbours would be
    defensible too, but a wind field is already a smooth model product and sampling keeps
    the values EXACTLY what NCEP published — no derived number enters the file. */
+/* Scan mode decides which corner the data starts in, and getting it wrong renders a wind
+   field that is upside down and entirely plausible. NCEP sent scan mode 64 for this
+   subset: bit 0x40 set means rows run SOUTH to NORTH, so la1 is the southern edge. Every
+   renderer in this space — leaflet-velocity, grib2json, the earth.nullschool format —
+   expects the first row to be the NORTHERN one. So the rows are reversed here and the
+   emitted la1 is the northern latitude, rather than trusting that GFS will always send
+   the same corner. */
 export function downsample(field, stride) {
   const nx = Math.floor((field.nx + stride - 1) / stride);
-  const ny = Math.floor((field.ny + stride - 1) / stride);
-  const out = new Array(nx * ny);
-  let k = 0;
+  const rows = [];
   for (let j = 0; j < field.ny; j += stride) {
+    const row = [];
     for (let i = 0; i < field.nx; i += stride) {
-      const v = field.values[j * field.nx + i];
-      out[k++] = Math.round(v * 10) / 10;          // 0.1 m/s — finer than the model's skill
+      row.push(Math.round(field.values[j * field.nx + i] * 10) / 10);  // 0.1 m/s
     }
+    rows.push(row);
   }
-  return { nx, ny, dx: field.dx * stride, dy: field.dy * stride, data: out.slice(0, k) };
+  const northUp = (field.scanMode & 0x40) !== 0;   // +j means south-to-north
+  if (northUp) rows.reverse();
+  const ny = rows.length;
+  return {
+    nx, ny, dx: field.dx * stride, dy: field.dy * stride,
+    data: rows.flat(),
+    flipped: northUp,
+    la1: northUp ? Math.max(field.la1, field.la2) : field.la1,
+    la2: northUp ? Math.min(field.la1, field.la2) : field.la2,
+  };
 }
 
 async function main() {
@@ -117,9 +132,9 @@ async function main() {
 
     const du = downsample(u, STRIDE), dv = downsample(v, STRIDE);
     const header = {
-      nx: du.nx, ny: du.ny, lo1: u.lo1, la1: u.la1, dx: du.dx, dy: du.dy,
+      nx: du.nx, ny: du.ny, lo1: u.lo1, la1: du.la1, la2: du.la2, dx: du.dx, dy: du.dy,
       refTime: (u.refTime || now).toISOString(),
-      scanMode: u.scanMode,
+      scanMode: u.scanMode, rowsReversed: du.flipped,
     };
     const speeds = du.data.map((x, i) => Math.hypot(x, dv.data[i]));
     const out = {

@@ -97,7 +97,7 @@ ck("GRIB edition 1 is refused", !!edThrew && /edition/.test(edThrew), edThrew ||
 ck("garbage yields no messages rather than throwing", splitMessages(Buffer.from("not grib at all")).length === 0);
 
 console.log("\n[8] downsampling samples published values and never invents one");
-const field = { nx: 9, ny: 5, dx: 0.25, dy: 0.25, values: grid(9, 5, (i, j) => i + j * 100) };
+const field = { nx: 9, ny: 5, dx: 0.25, dy: 0.25, scanMode: 0, la1: 45, la2: 44, values: grid(9, 5, (i, j) => i + j * 100) };
 const ds = downsample(field, 4);
 eq("dimensions shrink by the stride", [ds.nx, ds.ny], [3, 2]);
 eq("spacing grows by the stride", [ds.dx, ds.dy], [1, 1]);
@@ -106,6 +106,25 @@ ck("every output value exists in the input — nothing averaged into being",
    ds.data.every((v) => field.values.includes(v)));
 const ds1 = downsample(field, 1);
 eq("a stride of 1 is a copy", ds1.data.length, 45);
+
+console.log("\n[9] scan mode 64 runs south-to-north and must be flipped");
+/* The live subset came back with scan mode 64. Every renderer expects the first row to
+   be the NORTHERN one, so getting this wrong draws the whole field upside down — and an
+   upside-down wind field looks entirely plausible. */
+const southFirst = { nx: 3, ny: 3, dx: 1, dy: 1, scanMode: 64, la1: 0, la2: 2,
+                values: grid(3, 3, (i, j) => j) };      // row 0 is the SOUTHERN row
+const flipped = downsample(southFirst, 1);
+eq("flip is applied", flipped.flipped, true);
+eq("the northern row comes first", flipped.data.slice(0, 3), [2, 2, 2]);
+eq("and the southern row last", flipped.data.slice(-3), [0, 0, 0]);
+eq("la1 becomes the northern edge", [flipped.la1, flipped.la2], [2, 0]);
+
+const northAlready = { nx: 3, ny: 3, dx: 1, dy: 1, scanMode: 0, la1: 2, la2: 0,
+                       values: grid(3, 3, (i, j) => j) };
+const notFlipped = downsample(northAlready, 1);
+eq("a north-first grid is left alone", notFlipped.flipped, false);
+eq("its first row is untouched", notFlipped.data.slice(0, 3), [0, 0, 0]);
+eq("and la1 is unchanged", notFlipped.la1, 2);
 
 console.log(fail ? `\n${fail} FAILURE(S)\n` : "\nall assertions passed\n");
 process.exit(fail ? 1 : 0);
