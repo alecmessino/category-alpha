@@ -120,6 +120,15 @@ jobs:
       - name: Test the discussion parser and wrapped watch bullets
         run: node scripts/test-discussion.mjs
 
+      # Staleness is a HARD rule — past half an advisory cycle a storm's contracts are
+      # held whatever their edge — and it is enforced in two places that must agree: the
+      # register row that reports the crossing and the grade that acts on it. These assert
+      # they read the same line, that the crossing fires once rather than every frame, and
+      # that a held row carries no stake, so no total can quietly include money that
+      # cannot be put on.
+      - name: Test the stale-advisory crossing and the HOLD rule
+        run: node scripts/test-staleness.mjs
+
       # A GRIB2 reader with no system dependency, which is only possible because the
       # probe established the packing template first. Its refusal paths matter more than
       # its happy path: a decoder that guesses at complex packing produces a plausible

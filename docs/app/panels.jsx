@@ -423,8 +423,15 @@ function MT_StormConsoles({ dense, frame }) {
 const GRADE_TONE = {
   TAKE:    { fg: "var(--pos)",  bg: "rgba(34,197,94,.10)" },
   SMALL:   { fg: "var(--warn)", bg: "rgba(234,179,8,.10)" },
+  /* HOLD is a timing verdict, not a quality one, so it gets its own colour rather than
+     borrowing SUSPECT's grey — an operator must be able to tell "wait" from "wrong". */
+  HOLD:    { fg: "var(--special)", bg: "rgba(139,92,246,.12)" },
   SUSPECT: { fg: "var(--text-2)", bg: "transparent" },
 };
+/* The rows an operator may act on right now. HOLD is excluded for the same reason
+   SUSPECT is: totalling stake and expected value over rows that must not be traded
+   yet hands back a number nobody can put on. */
+const ACTIONABLE = (r) => r.grade === "TAKE" || r.grade === "SMALL";
 
 function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, dense }) {
   const [showAll, setShowAll] = React.useState(false);
@@ -453,7 +460,9 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
   return (
     <P pad={false} title="Edge Book — ranked by expected value"
       right={<div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-        <BG tone={book.rows.length ? "live" : "warn"} dot>{book.rows.length ? book.rows.length + " ACTIONABLE" : "NOTHING CLEARS"}</BG>
+        <BG tone={book.rows.filter(ACTIONABLE).length ? "live" : "warn"} dot>
+          {book.rows.filter(ACTIONABLE).length ? book.rows.filter(ACTIONABLE).length + " ACTIONABLE" : "NOTHING CLEARS"}</BG>
+        {book.byGrade.HOLD > 0 && <BG tone="neutral">{book.byGrade.HOLD} ON HOLD</BG>}
         <Hint id="note.edgebook" /></div>}
       footer={<PF {...MTC.footer("panel.edgebook")} />}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "10px 12px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
@@ -469,11 +478,12 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
         <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-2)" }}>
           <b style={{ ...mono, color: "var(--pos)", fontSize: 13 }}>{book.byGrade.TAKE}</b> take ·{" "}
           <b style={{ ...mono, color: "var(--warn)", fontSize: 13 }}>{book.byGrade.SMALL}</b> small ·{" "}
+          <b style={{ ...mono, color: "var(--special)", fontSize: 13 }}>{book.byGrade.HOLD}</b> hold ·{" "}
           <b style={{ ...mono, color: "var(--text-2)", fontSize: 13 }}>{book.byGrade.SUSPECT}</b> suspect
           {"  ·  "}expected <b style={{ ...mono, color: "var(--pos)", fontSize: 13 }}>
-            {money(book.rows.filter((r) => r.grade !== "SUSPECT").reduce((a, r) => a + r.ev, 0))}</b>
+            {money(book.rows.filter(ACTIONABLE).reduce((a, r) => a + r.ev, 0))}</b>
           {" "}on <b style={{ ...mono, color: "var(--text-1)", fontSize: 13 }}>
-            {money(book.rows.filter((r) => r.grade !== "SUSPECT").reduce((a, r) => a + r.stake, 0))}</b> staked
+            {money(book.rows.filter(ACTIONABLE).reduce((a, r) => a + r.stake, 0))}</b> staked
         </span>
       </div>
 
@@ -590,7 +600,7 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
             </tr></thead>
             <tbody>
               {book.rows.map((r) => (
-                <tr key={r.id} onClick={() => onSelect && onSelect(r.id)} style={{ cursor: "pointer", opacity: r.grade === "SUSPECT" ? .62 : 1 }}>
+                <tr key={r.id} onClick={() => onSelect && onSelect(r.id)} style={{ cursor: "pointer", opacity: ACTIONABLE(r) ? 1 : .62 }}>
                   {cell(<span style={{ fontWeight: 800, fontSize: 10, letterSpacing: ".5px", padding: "2px 7px", borderRadius: 4,
                     color: GRADE_TONE[r.grade].fg, background: GRADE_TONE[r.grade].bg, border: "1px solid " + GRADE_TONE[r.grade].fg }}>{r.grade}</span>, "center")}
                   <td style={{ fontSize: 11.5, padding: "7px 8px", borderBottom: "1px solid var(--border-dim)", color: "var(--text-1)", maxWidth: 300 }}>{r.label}</td>
@@ -621,8 +631,11 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
                       : "the advisory under this anchor was " + r.lagMin + " min old when it was read"}
                     style={{ color: r.lagMin == null ? "var(--text-2)" : r.lagStale ? "var(--warn)" : "var(--pos)" }}>
                     {r.lagMin == null ? "—" : r.lagMin + "m"}</span>, "right")}
-                  {cell(<span>{money(r.stake)}{r.capped && <span style={{ color: "var(--warn)" }} title="capped by resting depth"> ▲</span>}</span>, "right")}
-                  {cell(<span style={{ color: r.grade === "SUSPECT" ? "var(--text-2)" : "var(--pos)", fontWeight: 700 }}>{money(r.ev)}</span>, "right")}
+                  {cell(r.grade === "HOLD"
+                    ? <span style={{ color: "var(--special)" }} title={"would be " + money(r.stakeIfCurrent || 0) + " once the advisory refreshes"}>held</span>
+                    : <span>{money(r.stake)}{r.capped && <span style={{ color: "var(--warn)" }} title="capped by resting depth"> ▲</span>}</span>, "right")}
+                  {cell(<span style={{ color: ACTIONABLE(r) ? "var(--pos)" : "var(--text-2)", fontWeight: 700 }}>
+                    {r.grade === "HOLD" ? "—" : money(r.ev)}</span>, "right")}
                   {cell(<span style={{ fontSize: 10, color: "var(--text-2)", whiteSpace: "normal", display: "block", maxWidth: 300 }}>{(r.why || []).join(" · ")}</span>)}
                 </tr>
               ))}
@@ -631,6 +644,9 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
           <div style={{ ...mono, fontSize: 10.5, color: "var(--text-2)", padding: "9px 12px", lineHeight: 1.65, borderTop: "1px solid var(--border-dim)" }}>
             {/* The provenance itself stays on screen — it is feed-derived and is the point
                 of the panel — but as one line, with the method behind the header's "?". */}
+            {book.byGrade.HOLD > 0 && (
+              <div style={{ color: "var(--special)", marginBottom: 4 }}>{MTC.claim("edgebook.hold").text}</div>
+            )}
             <div onClick={() => setShowMethod(!showMethod)} style={{ cursor: "pointer" }}>
               {showMethod ? "▾" : "▸"} provenance · {cov.text}
             </div>
@@ -805,7 +821,7 @@ const PRIO_STYLE = {
   MEDIUM: { c: "var(--warn)",      label: "MEDIUM" },
   LOW:    { c: "var(--text-2)",    label: "LOW" },
 };
-const KIND_ICON = { intensity: "◆", pressure: "▼", market: "▮", advisory: "✦", divergence: "⚠", schedule: "◷", feed: "○", pipeline: "◌", genesis: "◉" };
+const KIND_ICON = { intensity: "◆", pressure: "▼", market: "▮", advisory: "✦", stale: "◷", divergence: "⚠", schedule: "◷", feed: "○", pipeline: "◌", genesis: "◉" };
 
 /* Operator marks. The terminal cannot observe whether a human has acknowledged an
    item or checked their exposure, so it does not pretend to derive it: these are
@@ -1389,6 +1405,9 @@ function MT_Observability({ narrow }) {
             TAKE and whether it is priced at all — so it is reported where the other
             pipeline facts are, not only inside the storm console. */}
         <div style={{ color: MTC.claim("advisory.lag").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("advisory.lag").text}</div>
+        {/* The same crossing the Signal Register reports, from the same threshold, so the
+            two surfaces cannot disagree about whether a storm is actionable. */}
+        <div style={{ color: MTC.claim("edgebook.hold").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("edgebook.hold").text}</div>
         <div>{MTC.claim("capability.notIngested").text}</div>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 1, padding: 12, background: "var(--border-dim)" }}>

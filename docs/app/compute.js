@@ -145,6 +145,20 @@
   const NOISE = { wind: 5, pressure: 2, market: 0.02 };   // below this = not a signal
   const SCALE = { wind: 30, pressure: 20, market: 0.15 }; // |Δ| that counts as maximal
 
+  /* One advisory cycle, and the half of it past which a storm anchor stops being
+     actionable. Shared by the register and the edge book so the row that says a storm has
+     gone stale and the grade that acts on it can never disagree about where the line is. */
+  /* The server is the authority on the cycle length — it is what refuses an anchor
+     outright — and it ships the value on every storm-anchored contract. Read it from
+     there rather than hard-coding a second copy that can drift out of step with the
+     refusal it is supposed to be half of. */
+  const ADV_CYCLE_FALLBACK_MIN = 360;
+  function advCycleMin() {
+    const c = (MT.contracts || []).find((x) => Number.isFinite(x.modelMaxLagMin));
+    return c ? c.modelMaxLagMin : ADV_CYCLE_FALLBACK_MIN;
+  }
+  const staleAt = () => advCycleMin() / 2;
+
   /* Operational classification — what deserves an operator's attention.
      TRADE-RELEVANT is reserved for changes that can actually move a position:
      a Saffir-Simpson boundary crossing (category contracts resolve on exactly
@@ -158,6 +172,10 @@
     return b == null ? null : b;
   }
   function classify(sig) {
+    /* Going stale is trade-relevant: it removes every TAKE grade for that storm, which is
+       a change in what an operator may do. Coming back is material — it restores an
+       option rather than closing one. */
+    if (sig.kind === "stale") return sig.stale ? "trade-relevant" : "material";
     if (sig.kind === "advisory") return sig.magnitude >= 0.85 ? "trade-relevant" : "material";
     const a = Math.abs(sig.delta || 0);
     if (sig.kind === "market") return a >= 5 ? "trade-relevant" : a >= 2 ? "material" : "cosmetic";
@@ -171,6 +189,9 @@
   // Confidence in the OBSERVATION, separate from magnitude. NHC products are
   // authoritative; a market print on a book with no depth is weaker evidence.
   function confidenceOf(sig) {
+    /* Measured from the WMO header against this cycle's clock — as observed as anything
+       on this board gets. */
+    if (sig.kind === "stale") return 1;
     if (sig.kind === "advisory") return 0.95;
     if (sig.kind === "intensity" || sig.kind === "pressure") return 0.9; // NHC best-track
     if (sig.kind === "market") {
@@ -225,6 +246,29 @@
               + (cv.peakKt != null ? ` · peak ${cv.peakKt} kt` : "")
               + (cv.guidance ? ` · forecast ${cv.guidance} guidance` : ""),
           });
+        }
+        /* CROSSING the staleness line, once, at the moment it happens.
+           Not "the advisory is old" every frame — that is a condition, and a register full
+           of the same condition restated is how a register stops being read. This fires on
+           the transition in either direction, so the board can never show a storm as stale
+           without also showing when it stopped being stale. It is the same threshold the
+           edge book grades HOLD on, from the same constant. */
+        if (pv.advisoryLagMin != null && cv.advisoryLagMin != null) {
+          const wasStale = pv.advisoryLagMin > staleAt(), isStale = cv.advisoryLagMin > staleAt();
+          if (wasStale !== isStale) {
+            out.push({
+              tsZ: ts, kind: "stale", subject: nm, stormId: sid, stale: isStale,
+              delta: cv.advisoryLagMin - pv.advisoryLagMin, unit: "min",
+              from: pv.advisoryLagMin, to: cv.advisoryLagMin,
+              magnitude: isStale ? 1 : 0.5,
+              label: isStale
+                ? `${nm} advisory went stale — ${cv.advisoryLagMin} min old, past the ${staleAt()}-min line`
+                : `${nm} advisory refreshed — ${cv.advisoryLagMin} min old, back inside the ${staleAt()}-min line`,
+              detail: isStale
+                ? `every ${nm} contract is held until the next advisory lands`
+                : `${nm} contracts can be graded on the forecast again`,
+            });
+          }
         }
         const dP = (cv.pressure != null && pv.pressure != null) ? cv.pressure - pv.pressure : 0;
         if (Math.abs(dP) >= NOISE.pressure) out.push({
@@ -781,7 +825,7 @@
          but not yet fetched is a stale forecast wearing a current timestamp. Half a cycle
          is the line: past it the next advisory is likelier out than not. */
       const lagMin = Number.isFinite(c.modelLagMin) ? c.modelLagMin : null;
-      const lagLimit = Number.isFinite(c.modelMaxLagMin) ? c.modelMaxLagMin : 360;
+      const lagLimit = Number.isFinite(c.modelMaxLagMin) ? c.modelMaxLagMin : advCycleMin();
       const lagStale = lagMin != null && lagMin > lagLimit / 2;
       if (!live.length) why.push("no layer detail to check the estimate against");
       else if (live.length < 3) why.push("only " + live.length + " layer" + (live.length === 1 ? "" : "s")
@@ -796,23 +840,44 @@
         + Math.abs(Math.round((p - c.modelRawP) * 100)) + " pts "
         + (p < c.modelRawP ? "below" : "above") + " the unadjusted " + Math.round(c.modelRawP * 100) + "%");
       if (best.edge >= 0.25 && !agrees) why.push("a " + Math.round(best.edge * 100) + "-pt disagreement with a traded market is more likely a model gap than free money");
+      /* HOLD is a HARD rule, and it is a different statement from the other three.
+         TAKE, SMALL and SUSPECT are all judgements about the estimate. HOLD is a
+         judgement about the PRODUCT under it: past half an advisory cycle the next
+         advisory is likelier out than not, so what is on screen may already have been
+         superseded by a forecast nobody here has fetched. That is a timing fact, and no
+         amount of edge, agreement or resting depth argues against it — which is why it
+         sits outside the scoring rather than as one more conjunct inside the TAKE test,
+         where it was a soft demotion to SMALL and a row could still read as actionable.
+
+         SUSPECT still outranks it. "The model cannot support this" is a stronger and more
+         durable statement than "wait for the next product", and an operator who acts on a
+         SUSPECT row after the advisory refreshes is still wrong. */
       const grade = bandKills ? "SUSPECT"
         : (best.edge >= 0.25 && !agrees) ? "SUSPECT"
-        /* A stale advisory cannot earn the top grade. It does not make the estimate wrong,
-           so it does not force SUSPECT — it removes the claim that this is current, and
-           TAKE is a claim that it is. */
-        : (agrees && frictionOk && deep && !lagStale && best.edge >= 0.03) ? "TAKE"
+        : lagStale ? "HOLD"
+        : (agrees && frictionOk && deep && best.edge >= 0.03) ? "TAKE"
         : "SMALL";
+      if (grade === "HOLD") why.unshift("HOLD until the next advisory — do not act on a forecast that may already be superseded");
       if (grade === "TAKE") why.push("every layer within " + Math.round(dispersion * 100) + " pts, edge clears the spread, real size resting");
 
+      /* A row nobody may act on must not carry a size. The stake, contract count and
+         expected value are computed before the grade exists, so leaving them on a HOLD row
+         puts a dollar figure next to a bet that is not available — and every total
+         downstream, including ones not written yet, would quietly include it. They are
+         zeroed here, at the source, and the figure the row WOULD carry once the advisory
+         refreshes is kept separately for reference. */
+      const held = grade === "HOLD";
       rows.push({
         grade, why, dispersion,
+        stakeIfCurrent: held ? stakeDollars : null,
+        evIfCurrent: held ? ev : null,
         c, id: c.id, label: c.label || c.short || c.id,
         side: best.side, model: p, price: best.price, cost: best.cost,
         fee: feePerContract(best.side === "YES" ? best.price : best.price),
         edge: best.edge, edgeGross: best.side === "YES" ? p - best.price : (1 - p) - best.price,
         kellyFrac: kf, capacityContracts, capacityDollars,
-        stake: stakeDollars, contracts, ev, roi: stakeDollars > 0 ? ev / stakeDollars : null,
+        stake: held ? 0 : stakeDollars, contracts: held ? 0 : contracts,
+        ev: held ? 0 : ev, roi: held || !(stakeDollars > 0) ? null : ev / stakeDollars,
         capped: idealDollars > capacityDollars,
         layer: governing ? governing.label : null, basis: c.modelBasis || null,
         lagMin, lagStale, guidance: c.modelGuidance || null, rawModel: c.modelRawP ?? null,
@@ -826,7 +891,10 @@
     /* Grade first, then expected dollars. An operator scanning this wants the bets that
        survive scrutiny at the top, not the biggest numbers — the biggest numbers are the
        ones most likely to be a model gap, which is exactly why SUSPECT sorts last. */
-    const GRADE_RANK = { TAKE: 0, SMALL: 1, SUSPECT: 2 };
+    /* HOLD sorts below SMALL and above SUSPECT: it is not a worse estimate than SMALL,
+       it is one you may not act on yet, and that is still better news than an estimate
+       the model cannot support at all. */
+    const GRADE_RANK = { TAKE: 0, SMALL: 1, HOLD: 2, SUSPECT: 3 };
     rows.sort((a, b) => GRADE_RANK[a.grade] - GRADE_RANK[b.grade]
       || b.ev - a.ev || b.roi - a.roi
       || (a.spread ?? 1) - (b.spread ?? 1) || (b.volume24h || 0) - (a.volume24h || 0));
@@ -844,6 +912,7 @@
       candidates: rows.length, ladders: seen.size,
       byGrade: { TAKE: top.filter((r) => r.grade === "TAKE").length,
                  SMALL: top.filter((r) => r.grade === "SMALL").length,
+                 HOLD: top.filter((r) => r.grade === "HOLD").length,
                  SUSPECT: top.filter((r) => r.grade === "SUSPECT").length },
       coverage: { anchored, total: all.length },
       skipped, thresholds: o, bankroll, stakeFrac,

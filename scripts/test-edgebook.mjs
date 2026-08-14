@@ -211,11 +211,47 @@ eq("a fresh advisory can still take the top grade", fresh.grade, "TAKE");
 eq("and the age is carried on the row", fresh.lagMin, 20);
 eq("and it is not flagged stale", fresh.lagStale, false);
 
+/* The HARD rule. Not a conjunct inside the TAKE test that a strong edge can survive —
+   a branch of its own, above the scoring, that no edge, agreement or depth argues with. */
 const stale = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.60, 0.61, 0.62),
   modelLagMin: 200, modelMaxLagMin: 360 });
-ck("past half a cycle the same edge cannot be TAKE", stale.grade !== "TAKE", stale.grade);
-eq("but it is not condemned either — the estimate is not wrong, just not current", stale.grade, "SMALL");
-ck("and the row says so", stale.why.some((w) => /superseded/.test(w)), stale.why.join("; "));
+eq("past half a cycle the same TAKE becomes HOLD", stale.grade, "HOLD");
+ck("and HOLD leads the reasons, because it is the reason", /^HOLD until the next advisory/.test(stale.why[0]), stale.why[0]);
+ck("the row still explains the age", stale.why.some((w) => /superseded/.test(w)), stale.why.join("; "));
+
+/* No amount of edge buys it back. A 40-point edge on a five-hour-old forecast is a
+   five-hour-old forecast. */
+const hugeEdgeStale = graded({ model: 0.95, modelAt: () => 0.95, modelLayers: L(0.94, 0.95, 0.96),
+  modelLagMin: 350, modelMaxLagMin: 360 });
+eq("a huge edge on a stale advisory is still HOLD", hugeEdgeStale.grade, "HOLD");
+
+/* A row nobody may act on must not carry a size, or every total downstream silently
+   includes money that cannot be put on. */
+eq("a held row stakes nothing", stale.stake, 0);
+eq("and buys nothing", stale.contracts, 0);
+eq("and expects nothing", stale.ev, 0);
+eq("and reports no return on a stake it did not take", stale.roi, null);
+ck("but it keeps what it would have been, for when the advisory refreshes",
+   stale.stakeIfCurrent > 0 && stale.evIfCurrent > 0, `${stale.stakeIfCurrent} / ${stale.evIfCurrent}`);
+
+/* SUSPECT still outranks HOLD: "the model cannot support this" survives the next
+   advisory, "wait for the next advisory" does not. */
+const staleAndStraddled = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.60, 0.61, 0.62),
+  modelLow: 0.40, modelHigh: 0.85, modelLagMin: 300, modelMaxLagMin: 360 });
+eq("a straddling band on a stale advisory is SUSPECT, not HOLD", staleAndStraddled.grade, "SUSPECT");
+
+/* Exactly at the line is not past it. */
+const atLine = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.60, 0.61, 0.62),
+  modelLagMin: 180, modelMaxLagMin: 360 });
+eq("exactly half a cycle is still actionable", atLine.grade, "TAKE");
+const overLine = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.60, 0.61, 0.62),
+  modelLagMin: 181, modelMaxLagMin: 360 });
+eq("one minute past it is not", overLine.grade, "HOLD");
+
+/* The line follows the server's cycle rather than a second hard-coded copy. */
+const shortCycle = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.60, 0.61, 0.62),
+  modelLagMin: 100, modelMaxLagMin: 180 });
+eq("a shorter cycle moves the line with it", shortCycle.grade, "HOLD");
 
 /* A climatology anchor has no advisory behind it. null is not zero and must not be
    graded as though the product were fresh — or as though it were stale. */
@@ -245,7 +281,7 @@ eq("the TAKE sorts first", graded10c.rows[0].grade, "TAKE");
 eq("the SUSPECT sorts last", graded10c.rows[1].grade, "SUSPECT");
 ck("even though the SUSPECT has far more expected value", graded10c.rows[1].ev > graded10c.rows[0].ev,
    `suspect=$${graded10c.rows[1].ev.toFixed(0)} take=$${graded10c.rows[0].ev.toFixed(0)}`);
-eq("the grade tally is reported", graded10c.byGrade, { TAKE: 1, SMALL: 0, SUSPECT: 1 });
+eq("the grade tally is reported", graded10c.byGrade, { TAKE: 1, SMALL: 0, HOLD: 0, SUSPECT: 1 });
 
 console.log("\n[10d] ladder consistency — the only edge with no forecasting risk");
 const rung = (strike, bid, ask, bidSize, askSize) => C({

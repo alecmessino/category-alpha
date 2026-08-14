@@ -396,6 +396,30 @@
     };
   });
 
+  /* The hard rule, stated where the grade it produces can be checked against it. This is
+     a claim about the PRODUCT, not the estimate — which is why it is not a demotion to
+     SMALL and not an accusation of SUSPECT, and why no amount of edge argues against it. */
+  define("edgebook.hold", "nhc", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const NF = (window.MT ? window.MT.FRAMES : 1) - 1;
+    const at = (x) => (typeof x.advisoryLagMin === "function" ? x.advisoryLagMin(NF) : x.advisoryLagMin);
+    const cyc = (window.MT && (MT.contracts || []).find((c) => Number.isFinite(c.modelMaxLagMin)));
+    const cycle = cyc ? cyc.modelMaxLagMin : 360;
+    const held = storms.map((x) => ({ name: x.name, lag: at(x) }))
+      .filter((x) => x.lag != null && x.lag > cycle / 2);
+    const rule = "Past " + (cycle / 2) + " minutes the next advisory is likelier out than not, so the"
+      + " forecast on screen may already have been superseded by one nobody here has fetched."
+      + " Every contract anchored on that storm is graded HOLD regardless of its edge,"
+      + " agreement or resting depth, and is excluded from the staked and expected totals."
+      + " Past " + cycle + " minutes the anchor is withdrawn and the contract is not priced at all.";
+    if (!held.length) return { text: "no active system is past the " + (cycle / 2) + "-minute line. " + rule, ok: true };
+    return {
+      text: held.map((x) => x.name + " is " + x.lag + "m old — its contracts are on HOLD").join(" · ")
+        + ". " + rule,
+      ok: false,
+    };
+  });
+
   define("wind.field", "wind", () => {
     const w = window.MT && MT._wind;
     if (!w) return { text: "no surface wind field ingested this cycle", ok: false };

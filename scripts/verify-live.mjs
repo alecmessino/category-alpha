@@ -347,6 +347,70 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
               ? MTX.signals({ sinceMin: 100000 }).filter((x) => x.kind === "advisory" && x.stormId).length : 0,
           };
         })(),
+        /* ---- the hard rule, checked against the rendered board -------------------
+           Past half an advisory cycle a storm's contracts may not carry a TAKE grade,
+           whatever their edge. Re-derived here from the live edge book and the live
+           storm lags rather than trusting the grade string, so a rule that stops being
+           applied fails instead of quietly letting a superseded forecast look tradeable. */
+        holdRule: (() => {
+          if (!window.MTX || typeof MTX.edgeBook !== "function") return { present: false };
+          const NF = (window.MT ? MT.FRAMES : 1) - 1;
+          const cycC = (MT.contracts || []).find((c) => Number.isFinite(c.modelMaxLagMin));
+          const cycle = cycC ? cycC.modelMaxLagMin : 360;
+          const lagOf = (x) => (typeof x.advisoryLagMin === "function" ? x.advisoryLagMin(NF) : x.advisoryLagMin);
+          const stale = Object.values(MT.storms || {})
+            .map((x) => ({ id: x.id, name: x.name, lag: lagOf(x) }))
+            .filter((x) => x.lag != null && x.lag > cycle / 2);
+          let book = null;
+          try { book = MTX.edgeBook(null, 10000, 0.25, { limit: 200 }); } catch (e) { return { present: true, threw: String(e && e.message || e) }; }
+          const all = book.rows.concat(book.overflow || []);
+          const staleIds = new Set(stale.map((x) => x.id));
+          /* A row belongs to a storm either through the contract's storm association or
+             through the anchor naming it; both are checked so a renamed association
+             cannot slip a row past the rule. */
+          const rowsForStale = all.filter((r) => {
+            const sid = r.c && (r.c.storm || (r.c.subject && r.c.subject.storm));
+            if (sid && staleIds.has(sid)) return true;
+            return stale.some((x) => new RegExp("\\b" + x.name + "\\b", "i").test(String(r.label || "")));
+          });
+          return {
+            present: true, cycle, staleStorms: stale.map((x) => `${x.name} ${x.lag}m`),
+            rows: rowsForStale.length,
+            takes: rowsForStale.filter((r) => r.grade === "TAKE").map((r) => r.id),
+            holds: rowsForStale.filter((r) => r.grade === "HOLD").length,
+            /* And no HOLD row may be counted as money an operator can put on. */
+            stakedOnHold: all.filter((r) => r.grade === "HOLD").reduce((a, r) => a + (r.stake || 0), 0),
+            holdTotal: book.byGrade ? book.byGrade.HOLD : null,
+            staleSignals: (window.MTX && MTX.signals)
+              ? MTX.signals({ sinceMin: 100000 }).filter((x) => x.kind === "stale").length : 0,
+            /* Whether any storm HAPPENS to be stale today is weather, not wiring. A check
+               that only fires in weather it cannot control is a check that mostly passes
+               vacuously, so the rule is also exercised directly: push every anchored
+               contract past the line, re-derive the book from the DEPLOYED code, and
+               require that nothing comes back TAKE. Then put it back. */
+            forced: (() => {
+              const anchored = (MT.contracts || []).filter((c) => Number.isFinite(c.modelLagMin));
+              if (!anchored.length) return { rows: 0, takes: 0, holds: 0, staked: 0, applicable: false };
+              const saved = anchored.map((c) => c.modelLagMin);
+              anchored.forEach((c) => { c.modelLagMin = (c.modelMaxLagMin || 360) - 1; });
+              let out;
+              try {
+                const b2 = MTX.edgeBook(null, 10000, 0.25, { limit: 200 });
+                const rows2 = b2.rows.concat(b2.overflow || [])
+                  .filter((r) => Number.isFinite(r.lagMin));
+                out = {
+                  applicable: true, rows: rows2.length,
+                  takes: rows2.filter((r) => r.grade === "TAKE").length,
+                  holds: rows2.filter((r) => r.grade === "HOLD").length,
+                  staked: rows2.filter((r) => r.grade === "HOLD").reduce((a, r) => a + (r.stake || 0), 0),
+                };
+              } finally {
+                anchored.forEach((c, i) => { c.modelLagMin = saved[i]; });
+              }
+              return out;
+            })(),
+          };
+        })(),
         advisory: (() => {
           const S = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
           const has = (k) => S.filter((x) => x[k]).length;
@@ -468,6 +532,25 @@ add("a new advisory moves P(hurricane) and the Situation strip",
   + ` · situation P=${AF.situationP == null ? "—" : Math.round(AF.situationP * 100) + "% at adv #" + AF.situationAdv}`
   + (AF.missed.length ? ` · DID NOT MOVE: ${AF.missed.slice(0, 3).join(" | ")}` : "")
   + (AF.advisoryChanges === 0 ? " (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)" : ""));
+
+/* The hard rule. A stale advisory removes TAKE for that storm — no exceptions, and none
+   that an edge can buy back. */
+const HR = LY.holdRule;
+const F = (HR.forced) || {};
+add("a stale advisory forces HOLD, so no storm on it can grade TAKE",
+  HR.present === true && !HR.threw && HR.takes.length === 0
+    && (F.applicable !== true || (F.takes === 0 && F.holds === F.rows && F.rows > 0)),
+  HR.threw ? "edgeBook threw: " + HR.threw
+    : (HR.staleStorms.length
+        ? `live: past the ${HR.cycle / 2}-min line — ${HR.staleStorms.join(", ")} · ${HR.rows} row(s), ${HR.holds} held, ${HR.takes.length} TAKE`
+        : `live: no storm past the ${HR.cycle / 2}-min line`)
+    + ` · forced: ${F.applicable ? `${F.rows} anchored row(s) pushed past it → ${F.holds} HOLD, ${F.takes} TAKE` : "no advisory-anchored rows to force"}`
+    + ` · ${HR.staleSignals} stale-crossing row(s) in the register`
+    + (HR.takes.length ? ` · LEAKED: ${HR.takes.join(", ")}` : ""));
+add("nothing on HOLD is counted as stakeable",
+  HR.present === true && !HR.threw && HR.stakedOnHold === 0 && !(F.staked > 0),
+  `${HR.holdTotal == null ? "?" : HR.holdTotal} row(s) on HOLD live · $${Math.round(HR.stakedOnHold || 0)} staked`
+  + ` · forced: $${Math.round(F.staked || 0)} across ${F.holds || 0} held row(s)`);
 
 add("the GFS wind field is ingested and both components present",
   LY.windLayer === true, `cycle ${LY.windCycle}`);
