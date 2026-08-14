@@ -142,7 +142,9 @@ async function fetchStorms() {
         if (nA) s.advNumFull = nA[1];                    // keeps the "6A" of an intermediate
       }
     }
+    if (f.diag) s.forecastDiag = f.diag;
     fnotes.push(`${s.name}: ${f.note}`
+      + (f.diag ? ` · NO INTENSITY PARSED (maxWind present=${f.diag.hasMaxWind}, count=${f.diag.maxWindCount})` : "")
       + (s.hurricaneP ? ` · P(hurricane) ${Math.round(s.hurricaneP.p * 100)}%` : "")
       + (s.watches && s.watches.highest ? ` · ${s.watches.highest}` : "")
       + (s.advisoryLagMin != null ? ` · advisory ${s.advisoryLagMin}m old` : ""));
@@ -422,6 +424,22 @@ function coneRadiusNm(basin, hr) {
    The INITIAL line is captured too, because the analysis intensity is the anchor the
    forecast departs from, and because a contract asking whether a storm EVER reaches
    hurricane strength has to know where it starts. */
+/* Why an intensity did not parse, answered in ONE cycle. Shows the bytes around the
+   first position line with whitespace made visible, plus whether the marker phrases are
+   present at all — the same instrument that settled the outlook parser. */
+function sampleTCM(raw) {
+  const t = String(raw || "").replace(/\r/g, "");
+  const at = t.search(/(FORECAST\s+VALID|INITIAL)/i);
+  const vis = (x) => x.replace(/\n/g, " \u23ce ").replace(/[ \t]{2,}/g, (m) => "\u00b7".repeat(Math.min(m.length, 6)));
+  return {
+    bytes: t.length,
+    hasMaxWind: /MAX\s+WIND/i.test(t),
+    hasForecastValid: /FORECAST\s+VALID/i.test(t),
+    maxWindCount: (t.match(/MAX\s+WIND/gi) || []).length,
+    window: at > -1 ? vis(t.slice(at, at + 420)) : vis(t.slice(0, 420)),
+  };
+}
+
 function parseForecastAdvisory(text, baseIso) {
   const pts = [];
   /* Position and intensity together. The MAX WIND line is optional so a product that
@@ -612,11 +630,18 @@ async function fetchForecastFor(storm, rawAdvisoryUrl) {
   const r = await getText(rawAdvisoryUrl);
   if (!r.ok) return { track: null, cone: null, note: "advisory fetch " + r.error };
   const pts = parseForecastAdvisory(r.text, storm.advTimeZ);
-  if (!pts.length) return { track: null, cone: null, note: "no FORECAST VALID lines parsed" };
+  if (!pts.length) return { track: null, cone: null, note: "no FORECAST VALID lines parsed", diag: sampleTCM(r.text) };
+  /* Positions parsed but no intensity: the MAX WIND line is there in every real product,
+     so a miss means the shape is not what the regex expects. Capture the bytes around the
+     first position rather than guessing at the format for a second cycle. */
+  const kt = pts.filter((p) => Number.isFinite(p.kt));
+  const diag = kt.length ? null : sampleTCM(r.text);
   const withNow = [{ lat: storm.center[0], lon: storm.center[1], hr: 0 }, ...pts];
   return {
+    diag,
     track: withNow.map((p) => [p.lat, p.lon]),
-    trackPoints: withNow.map((p) => ({ at: [p.lat, p.lon], hr: p.hr, validZ: p.validZ || storm.advTimeZ })),
+    trackPoints: withNow.map((p) => ({ at: [p.lat, p.lon], hr: p.hr, validZ: p.validZ || storm.advTimeZ,
+      kt: p.kt ?? null, gustKt: p.gustKt ?? null })),
     cone: buildCone(withNow, storm.basin),
     note: `${pts.length} forecast positions · cone reconstructed from NHC track-error radii`,
   };
