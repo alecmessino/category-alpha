@@ -165,6 +165,15 @@ jobs:
       - name: Test the probability engine
         run: node scripts/test-probability.mjs
 
+      # What happens when the guidance deck and the aircraft disagree. This was the last
+      # piece of the engine implemented in code and owned by nobody — a rule that decides
+      # a price, described only in a comment, where no feed could contradict it and no
+      # reader could check it. Both halves are asserted: that the engine applies the
+      # measured difference to the forecast curve rather than averaging two answers to
+      # different questions, and that the claim on the board SAYS it does.
+      - name: Test the consensus-versus-recon conflict rule
+        run: node scripts/test-conflict.mjs
+
       # Every ingested field has to reach the FRAME, and from there the register, the
       # probability update and the Situation strip. A field that lives only on the newest
       # snapshot cannot be diffed, so it can never be seen to have changed — the number

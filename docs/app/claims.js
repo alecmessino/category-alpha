@@ -563,6 +563,81 @@
     };
   });
 
+  /* ---- THE CONFLICT RULE ------------------------------------------------------------
+   * What happens when the guidance deck and the aircraft disagree.
+   *
+   * This is the last piece of the engine that was implemented in code and owned by
+   * nobody, which is precisely the shape of the three drifts this registry exists to
+   * prevent — a rule that decides a price, described only in a comment, where no feed can
+   * contradict it and no reader can check it.
+   *
+   * THE RULE, and the reason it is not a weighting:
+   *
+   *   A consensus peak and an aircraft fix are NEVER AVERAGED, because they do not answer
+   *   the same question. The deck forecasts what the storm WILL PEAK AT; the aircraft
+   *   measures what it IS RIGHT NOW. Averaging them would be a category error dressed up
+   *   as caution — the arithmetic would run and the number would mean nothing.
+   *
+   *   So the apparent conflict is resolved BY CONSTRUCTION rather than by a weight. Every
+   *   forecast on this board is anchored on an initial intensity, and the aircraft has
+   *   just measured that initial intensity. The measured difference is applied to the
+   *   whole forecast curve — the deck's peak and the official peak alike — because a
+   *   forecast built on an initial condition that has since been measured wrong is wrong
+   *   by roughly that amount all the way along.
+   *
+   *   NEITHER CAN VETO THE OTHER. The deck keeps its shape and its weight in the blend;
+   *   the fix keeps its full measured difference, undamped. There is no tunable parameter
+   *   between them, which is the point: there is nothing here to fit.
+   *
+   *   The published answer is then the LARGER of two probabilities — the corrected
+   *   forecast peak clearing the strike, or the measured current intensity already
+   *   clearing it — because reaching a threshold now implies reaching it at some point.
+   *
+   * The one thing this claim must never let slide: the correction is a SHIFT, so it moves
+   * the estimate without narrowing it. A disagreement between the deck and the aircraft is
+   * not evidence that either is sharper. */
+  define("model.conflict", "recon", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const rule = "A guidance consensus and an aircraft fix are never averaged: the deck forecasts the peak,"
+      + " the aircraft measures the present, and the measured difference is applied to the forecast curve"
+      + " rather than weighed against it. Neither can veto the other, there is no tunable weight between"
+      + " them, and the correction shifts the estimate without narrowing it.";
+    const rows = [];
+    for (const s of storms) {
+      const c = s.hurricanePCal;
+      if (!c || !c.ok) continue;
+      const deckKt = s.consensus ? s.consensus.peakKt : null;
+      const shifted = (c.sources || []).find((x) => x.id === "consensus");
+      const measured = s.recon && s.recon.ok ? s.recon.intensityKt : null;
+      const d = c.reconDeltaKt;
+      if (c.used.consensus && c.used.recon && d != null) {
+        /* Both in hand: state the deck's own peak, the measurement that moved it, and
+           where it entered the blend — raw and corrected, side by side, for the same
+           reason every other pair on this board is. */
+        rows.push(s.name + ": the deck peaks at " + deckKt + " kt and the aircraft measured "
+          + measured + " kt against the advisory's " + Math.round((measured - d) * 10) / 10 + " kt"
+          + (Math.abs(d) < 0.05
+              ? " — the fix confirms the advisory, so the deck enters uncorrected"
+              : ", so the whole curve is read " + Math.abs(d) + " kt "
+                + (d < 0 ? "lower" : "higher") + " and the deck's peak enters at "
+                + (shifted ? shifted.peakKt : "—") + " kt")
+          + ". Answer driven by the " + c.drivenBy + ".");
+      } else if (c.used.consensus) {
+        rows.push(s.name + ": the deck peaks at " + deckKt + " kt with no aircraft fix to correct it"
+          + (s.recon && s.recon.ok ? " (a fix exists but was not applied — see the refusals above)" : "")
+          + ". Answer driven by the " + c.drivenBy + ".");
+      } else if (c.used.recon) {
+        rows.push(s.name + ": an aircraft measured " + measured + " kt and no guidance deck was usable"
+          + " this cycle, so the correction is applied to the official forecast alone."
+          + " Answer driven by the " + c.drivenBy + ".");
+      } else {
+        rows.push(s.name + ": neither a usable deck nor an aircraft fix — the official forecast stands alone.");
+      }
+    }
+    if (!rows.length) return { text: rule + " No active system is being calibrated, so nothing is in conflict.", ok: true };
+    return { text: rows.join(" ") + " " + rule, ok: true };
+  });
+
   /* Where the published number comes from, in one line, per storm. This is the claim that
      makes "raw and calibrated, side by side" enforceable rather than aspirational: if the
      engine ever stopped publishing both, this sentence could not be written. */
@@ -686,6 +761,9 @@
       for (const n of (c.notes || [])) out.push(s.name + " — " + n);
     }
     if (!out.length) out.push("No active system, so nothing is being calibrated.");
+    /* The conflict rule is composed in rather than restated, so the drawer and the rule's
+       own claim can never drift into two different accounts of the same arithmetic. */
+    out.push(claim("model.conflict").text);
     out.push("The scatterometer never moves the estimate, only the width of its band, and only when no aircraft is in the storm.");
     out.push("SHIPS features are published on every cycle and score into a probability only under an operator claim.");
     return out;

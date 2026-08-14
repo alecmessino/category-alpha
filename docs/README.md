@@ -67,6 +67,19 @@ errors by lead time, the SFMR's specified accuracy, the scatterometer's specifie
 and the spread the aids actually printed this cycle. **No weight in the engine was fitted,
 tuned, or chosen to make an edge appear.**
 
+**When the deck and the aircraft disagree** they are *never averaged*, because they do not
+answer the same question: the deck forecasts what the storm will **peak at**, the aircraft
+measures what it **is now**. Every forecast here is anchored on an initial intensity and
+the aircraft has just measured that initial intensity, so the measured difference is
+applied to the whole curve — the deck's peak and the official peak alike. Neither can veto
+the other: the deck keeps its weight, the fix keeps its full undamped difference, and
+there is no tunable parameter between them. The published answer is then the larger of the
+corrected forecast peak clearing the strike and the measured current intensity already
+clearing it. Because both sources shift by the same amount, **a correction moves the
+estimate without narrowing it** — disagreement between the deck and the aircraft is not
+evidence that either is sharper. The rule is owned by the `model.conflict` claim, rendered
+in the storm console's drawer, and asserted end to end by `scripts/test-conflict.mjs`.
+
 Four rules are enforced by tests rather than by convention:
 
 - **Raw and calibrated are published side by side, everywhere** — on the frame, on the
@@ -227,6 +240,7 @@ three passed:
 | `scripts/test-recon.mjs` | the vortex-data-message parser, and above all its refusals — a fix about a storm that dissipated weeks ago sits in the "latest" file until an aircraft flies again |
 | `scripts/test-ships.mjs` | the SHIPS parser's missing-value handling (`N/A`, `xx.x`, `LOST` all become NaN under a looser reader) and that the RI floor is a sufficient condition rather than a proxy |
 | `scripts/test-probability.mjs` | the engine's rules — raw never overwritten and always inside the band, never sharper than its sharpest input, disagreement only widens, scatterometer never moves the mean, SHIPS unscored until claimed, staleness caps quality |
+| `scripts/test-conflict.mjs` | the consensus-versus-recon rule — that the measured difference shifts the forecast curve rather than being averaged against it, that neither source can veto the other, that a correction never narrows the band, **and that the claim on the board says all of it** |
 | `scripts/test-intel-register.mjs` | that every ingested field reaches the **frame**, and from there the register, the probability update and the Situation strip |
 | `scripts/check-intel-coverage.mjs` | **the coverage gate** — the build fails when Priority 1 or 2 is missing on an active storm |
 | `scripts/audit-claims.mjs` | every visible claim has a provenance owner |
