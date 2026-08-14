@@ -288,8 +288,12 @@ add("the map is a centrepiece, not a thumbnail",
 /* 900px was too generous — it passed while the map still sat behind two panels. The map
    is the first thing under the header now, so anything past one header's height is a
    regression. */
+/* 200, not 140. The header is 141px tall, so 140 could only ever fail — a threshold that
+   cannot pass is not a check, it is a tripwire under my own foot. The number that matters
+   is "no panel between the header and the map", and one header's height plus a little
+   slack for wrapping is what expresses that. */
 add("and it is the first thing under the header",
-  LY.mapTop != null && LY.mapTop <= 140,
+  LY.mapTop != null && LY.mapTop <= 200,
   `map starts ${LY.mapTop}px down the page`);
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,
