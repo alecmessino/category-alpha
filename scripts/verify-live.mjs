@@ -308,14 +308,21 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
            move the number. */
         advisoryFrames: (() => {
           const FR = (window.MT && MT._frames) || [];
-          const withAdv = [], moved = [], missed = [];
+          const moved = [], missed = [];
           let pairs = 0;
+          /* Only the NEWEST frame is asserted to carry advisory state. The retained window
+             is 32 hours of history and the older frames were written by older code, so
+             requiring them to carry fields that did not exist when they were written is
+             asserting something about the past that cannot be true. The newest frame is
+             the one this pipeline wrote, and it is the one that must be right. */
+          const last = FR.length ? (FR[FR.length - 1].storms || {}) : {};
+          const withAdv = Object.keys(last).filter((id) => last[id]
+            && last[id].advNum != null && last[id].hurricaneP != null);
           for (let i = 1; i < FR.length; i++) {
             const A = FR[i - 1].storms || {}, B = FR[i].storms || {};
             for (const id of Object.keys(B)) {
               const a = A[id], b = B[id];
               if (!a || !b) continue;
-              if (b.advNum != null && b.hurricaneP != null) withAdv.push(id);
               if (!a.advNum || !b.advNum || a.advNum === b.advNum) continue;
               pairs++;
               const forecastChanged = (a.peakKt !== b.peakKt) || (a.wind !== b.wind);
@@ -328,7 +335,8 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
           }
           const sit = (window.MTX && MTX.situation) ? MTX.situation(360) : null;
           return {
-            frames: FR.length, carrying: withAdv.length, advisoryChanges: pairs,
+            frames: FR.length, storms: Object.keys(last).length,
+            carrying: withAdv.length, advisoryChanges: pairs,
             moved: moved.length, missed,
             /* And the Situation strip must be reading the same per-frame value, not a
                latest-only one pinned to the newest snapshot. */
@@ -453,8 +461,9 @@ add("the initial forecast point carries its intensity",
 const AF = LY.advisoryFrames;
 add("a new advisory moves P(hurricane) and the Situation strip",
   AD.storms === 0
-    || (AF.carrying > 0 && AF.situationHasP && AF.missed.length === 0),
-  `${AF.frames} frames · ${AF.carrying} carry advisory state · ${AF.advisoryChanges} advisory change(s)`
+    || (AF.carrying === AF.storms && AF.storms > 0 && AF.situationHasP && AF.missed.length === 0),
+  `${AF.frames} frames · newest carries advisory state for ${AF.carrying}/${AF.storms} storm(s)`
+  + ` · ${AF.advisoryChanges} advisory change(s)`
   + ` · ${AF.moved} moved P · ${AF.advisorySignals} register row(s)`
   + ` · situation P=${AF.situationP == null ? "—" : Math.round(AF.situationP * 100) + "% at adv #" + AF.situationAdv}`
   + (AF.missed.length ? ` · DID NOT MOVE: ${AF.missed.slice(0, 3).join(" | ")}` : "")
