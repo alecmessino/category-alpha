@@ -249,6 +249,33 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
       </div>
 
       {(() => {
+        const storms = Object.values((window.MT && MT.storms) || {});
+        const live = storms.filter((x) => x.hurricaneP || (x.watches && x.watches.highest));
+        if (!live.length) return null;
+        return (
+          <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--border-dim)", background: "rgba(56,189,248,.07)" }}>
+            <div style={{ ...mono, fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: "var(--accent)" }}>
+              OFFICIAL FORECAST — NHC ADVISORY
+            </div>
+            {live.map((x) => (
+              <div key={x.id} style={{ ...mono, fontSize: 11.5, marginTop: 4, color: "var(--text-1)" }}>
+                {x.name} {x.wind}kt
+                {x.hurricaneP && <span> · <b style={{ color: "var(--accent)" }}>{Math.round(x.hurricaneP.p * 100)}%</b> to reach hurricane strength</span>}
+                {x.watches && x.watches.highest && <span style={{ color: "var(--warn)" }}> · {x.watches.highest}</span>}
+                {x.advisoryLagMin != null && <span style={{ color: "var(--text-2)" }}> · advisory {x.advisoryLagMin}m old at fetch</span>}
+              </div>
+            ))}
+            <div style={{ ...mono, fontSize: 10, marginTop: 5, color: "var(--text-2)", lineHeight: 1.5 }}>
+              {MTC.claim("advisory.forecast").text}
+            </div>
+            <div style={{ ...mono, fontSize: 10, marginTop: 4, color: "var(--text-2)", lineHeight: 1.5 }}>
+              {MTC.claim("advisory.latency").text}
+            </div>
+          </div>
+        );
+      })()}
+
+      {(() => {
         const traps = MTX.liquidityTraps();
         if (!traps.length) return null;
         const worst = traps.slice(0, 4);

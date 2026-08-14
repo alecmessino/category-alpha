@@ -95,6 +95,8 @@ async function fetchStorms() {
       center: lat != null && lon != null ? [lat, lon] : null, movement, wind, pressure,
       advNum: adv.advNum || null, advTimeZ: adv.issuance || s.lastUpdate || null,
       _fcstUrl: fcst.url || (typeof fcst === "string" ? fcst : null),
+      _advUrl: adv.url || (typeof adv === "string" ? adv : null),
+      watches: null, forecastKt: null, hurricaneP: null, advisoryLagMin: null,
       track: null, cone: null, reconTracks: null, pastIdx: 0,
       modelCat4: null,        // no public ensemble Cat-probability feed wired — stays null
       marketCat4: null,       // filled from markets below if a Cat 4+ contract is found
@@ -111,10 +113,44 @@ async function fetchStorms() {
     const f = await fetchForecastFor(s, s._fcstUrl);
     s.track = f.track; s.trackPoints = f.trackPoints || null; s.cone = f.cone;
     s.pastIdx = 0;
-    fnotes.push(`${s.name}: ${f.note}`);
-    delete s._fcstUrl;
+    /* The intensity forecast was already being downloaded and thrown away — the MAX WIND
+       lines sit directly under the positions this parser has always read. */
+    const kts = (f.trackPoints || []).filter((p) => Number.isFinite(p.kt));
+    s.forecastKt = kts.length ? kts.map((p) => ({ hr: p.hr, kt: p.kt, gustKt: p.gustKt ?? null })) : null;
+    s.hurricaneP = reachesHurricaneP(f.trackPoints || []);
+
+    /* The Public Advisory, for watches and warnings. A Hurricane Watch is a discrete
+       official act and the sharpest single line in the product; nothing here read it. */
+    if (s._advUrl) {
+      const a2 = await getText(s._advUrl);
+      if (a2.ok) {
+        s.watches = parseWatchesWarnings(a2.text);
+        /* Ingestion lag, MEASURED rather than asserted. The WMO header carries the exact
+           minute the product left Miami or Honolulu — "WTPA32 PHFO 132343" is day 13,
+           23:43 UTC. Comparing that with this cycle's clock is the only honest answer to
+           "how current is this", and it is published so nobody has to take a claim about
+           polling speed on trust. */
+        const wmo = /^\s*[A-Z]{4}\d{2}\s+[A-Z]{4}\s+(\d{2})(\d{2})(\d{2})\s*$/m.exec(a2.text);
+        if (wmo) {
+          const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(),
+            Number(wmo[1]), Number(wmo[2]), Number(wmo[3])));
+          if (d.getTime() - now.getTime() > 3 * 86400e3) d.setUTCMonth(d.getUTCMonth() - 1);
+          s.advisoryIssuedZ = d.toISOString();
+          s.advisoryLagMin = Math.round((now.getTime() - d.getTime()) / 60000);
+        }
+        const nA = /Advisory\s+Number\s+(\d+[A-Z]?)/i.exec(a2.text);
+        if (nA) s.advNumFull = nA[1];                    // keeps the "6A" of an intermediate
+      }
+    }
+    fnotes.push(`${s.name}: ${f.note}`
+      + (s.hurricaneP ? ` · P(hurricane) ${Math.round(s.hurricaneP.p * 100)}%` : "")
+      + (s.watches && s.watches.highest ? ` · ${s.watches.highest}` : "")
+      + (s.advisoryLagMin != null ? ` · advisory ${s.advisoryLagMin}m old` : ""));
+    delete s._fcstUrl; delete s._advUrl;
   }
   feed.forecast = fnotes.join(" | ");
+  const lags = storms.map((s) => s.advisoryLagMin).filter((v) => v != null);
+  if (lags.length) feed.advisoryLagMin = Math.max(...lags);
   return { feed, storms };
 }
 
@@ -377,23 +413,168 @@ function coneRadiusNm(basin, hr) {
   return tbl[keys[keys.length - 1]];
 }
 
+/* The MAX WIND line sits directly beneath every position line in the TCM and was being
+   thrown away — the single most valuable number in the whole product, discarded by a
+   regex that stopped at the longitude. It is the official forecast intensity, published
+   every six hours by the people who decide whether the storm IS a hurricane, and it is
+   what makes a per-storm contract answerable at all.
+
+   The INITIAL line is captured too, because the analysis intensity is the anchor the
+   forecast departs from, and because a contract asking whether a storm EVER reaches
+   hurricane strength has to know where it starts. */
 function parseForecastAdvisory(text, baseIso) {
   const pts = [];
-  const re = /(?:FORECAST|OUTLOOK)\s+VALID\s+(\d{2})\/(\d{2})(\d{2})Z\s+([\d.]+)\s*([NS])\s+([\d.]+)\s*([EW])/gi;
+  /* Position and intensity together. The MAX WIND line is optional so a product that
+     omits it still yields a track rather than nothing; wind then stays null and every
+     consumer treats it as absent instead of as zero. */
+  const re = new RegExp(
+    "(INITIAL|FORECAST\\s+VALID|OUTLOOK\\s+VALID)\\s+(\\d{2})\\/(\\d{2})(\\d{2})Z\\s+([\\d.]+)\\s*([NS])\\s+([\\d.]+)\\s*([EW])" +
+    "(?:[^\\n]*\\n\\s*MAX\\s+WIND\\s+(\\d+)\\s*KT(?:[.\\s]*GUSTS\\s+(\\d+)\\s*KT)?)?",
+    "gi");
   const base = baseIso ? new Date(baseIso) : new Date();
   let m;
   while ((m = re.exec(text))) {
-    let lat = Number(m[4]); if (/S/i.test(m[5])) lat = -lat;
-    let lon = Number(m[6]); if (/W/i.test(m[7])) lon = -lon;
+    let lat = Number(m[5]); if (/S/i.test(m[6])) lat = -lat;
+    let lon = Number(m[7]); if (/W/i.test(m[8])) lon = -lon;
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
     // Valid times are day-of-month + HHMM; roll the month forward if it wrapped.
-    const d = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), Number(m[1]), Number(m[2]), Number(m[3])));
+    const d = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), Number(m[2]), Number(m[3]), Number(m[4])));
     if (d.getTime() < base.getTime() - 3 * 3600e3) d.setUTCMonth(d.getUTCMonth() + 1);
     const hr = Math.round((d.getTime() - base.getTime()) / 3600e3);
     if (hr < 0 || hr > 168) continue;
-    pts.push({ lat, lon, hr, validZ: d.toISOString() });
+    const kt = m[9] != null ? Number(m[9]) : null;
+    pts.push({ lat, lon, hr, validZ: d.toISOString(),
+      kt: Number.isFinite(kt) ? kt : null,
+      gustKt: m[10] != null && Number.isFinite(Number(m[10])) ? Number(m[10]) : null,
+      initial: /^INITIAL/i.test(m[1]),
+      outlook: /^OUTLOOK/i.test(m[1]) });
   }
   return pts.sort((a, b) => a.hr - b.hr);
+}
+
+/* ---------------- Official-forecast intensity → P(reaches hurricane) ----------------
+ * This is a DIFFERENT KIND of estimate from everything else on the board. The count
+ * ladders are anchored on what happened in 35 seasons of HURDAT2. This is anchored on
+ * what NHC says is going to happen to one storm in the next five days, widened by how
+ * wrong NHC's intensity forecasts have historically been. It must never be presented as
+ * the same sort of number, and it carries its own source string for that reason.
+ *
+ * NHC's published official-forecast mean absolute intensity errors, in knots, by lead
+ * time. These are verification statistics from NHC's own forecast reports, not fitted
+ * here. A normal with sigma = MAE * sqrt(pi/2) reproduces that MAE.
+ *
+ * THREE BIASES, ALL NAMED:
+ *  - Normality. Intensity errors are right-skewed: rapid intensification is a fat tail
+ *    that a normal does not have. For a threshold ABOVE the forecast this understates;
+ *    below it, overstates. Stated rather than corrected, because correcting it would be
+ *    fitting a skew nobody published.
+ *  - Serial correlation. The contract needs 64 kt at ANY point, and errors at adjacent
+ *    lead times are strongly correlated — nearly the same error all the way along. So
+ *    the peak forecast is evaluated ONCE at its own lead time rather than treating each
+ *    period as an independent try. Independent tries would be badly too high; one shot
+ *    is mildly too low. The mildly-too-low direction is the one to be wrong in.
+ *  - Analysis uncertainty. The current intensity is itself an estimate with roughly
+ *    5 kt of uncertainty. It is folded in when the storm is ALREADY at or above the
+ *    threshold, which is the only case where it decides the answer.
+ */
+const INTENSITY_MAE = { 0: 0, 12: 5.5, 24: 7.5, 36: 9.0, 48: 10.0, 72: 11.5, 96: 12.5, 120: 13.5 };
+const HURRICANE_KT = 64;
+
+function maeAt(hr) {
+  const keys = Object.keys(INTENSITY_MAE).map(Number).sort((a, b) => a - b);
+  if (hr <= keys[0]) return INTENSITY_MAE[keys[0]];
+  for (let i = 1; i < keys.length; i++) {
+    if (hr <= keys[i]) {
+      const a = keys[i - 1], b = keys[i];
+      return INTENSITY_MAE[a] + (INTENSITY_MAE[b] - INTENSITY_MAE[a]) * ((hr - a) / (b - a));
+    }
+  }
+  return INTENSITY_MAE[keys[keys.length - 1]];
+}
+
+// Standard normal CDF via erf, good to ~1e-7 — no library available in this runtime.
+function normCdf(z) {
+  const t = 1 / (1 + 0.2316419 * Math.abs(z));
+  const d = 0.3989422804014327 * Math.exp(-z * z / 2);
+  const p = d * t * (0.319381530 + t * (-0.356563782 + t * (1.781477937 + t * (-1.821255978 + t * 1.330274429))));
+  return z > 0 ? 1 - p : p;
+}
+
+/* trackPoints must carry kt. Returns null — never a number — when the forecast cannot
+   answer the question, because silence is better than a probability with no forecast
+   under it. */
+function reachesHurricaneP(points, threshold) {
+  const thr = threshold || HURRICANE_KT;
+  if (!Array.isArray(points) || !points.length) return null;
+  const withKt = points.filter((p) => p && Number.isFinite(p.kt) && p.kt > 0);
+  if (!withKt.length) return null;
+
+  const current = withKt.find((p) => p.hr === 0 || p.initial) || null;
+  // Already there: the question is settled by observation, subject only to the analysis
+  // uncertainty in that observation.
+  if (current && current.kt >= thr) {
+    return { p: Math.min(0.99, normCdf((current.kt - thr) / (5 * Math.sqrt(Math.PI / 2)))),
+      peakKt: current.kt, peakHr: 0, sigma: 5, already: true,
+      basis: `already at ${current.kt} kt in the current advisory; ${thr} kt is the hurricane threshold` };
+  }
+
+  /* The peak of the forecast, evaluated at its own lead time's error.
+     This is the perfectly-correlated limit and it is the principled one. Intensity errors
+     at adjacent lead times are close to a single common error rather than independent
+     draws, so if one error epsilon shifts the whole curve, then max_t V(t) = Vmax + eps
+     and P(ever reaching the threshold) = P(eps >= thr - Vmax) exactly.
+     Two treatments were rejected on the way here. Multiplying independent per-period
+     probabilities assumes errors that are not independent and comes out far too high.
+     Scoring every point and keeping the best comes out too high a different way: it
+     cherry-picks whichever lead time happens to be luckiest, and because a wider error
+     RAISES the probability whenever the forecast already sits above the threshold, that
+     rule systematically rewards the least reliable point on the curve. Wider uncertainty
+     is not evidence. */
+  const tallest = withKt.reduce((a, b) => (b.kt > a.kt ? b : a), withKt[0]);
+  const mae = maeAt(tallest.hr);
+  const sigma = Math.max(1e-6, mae * Math.sqrt(Math.PI / 2));
+  const p = normCdf((tallest.kt - thr) / sigma);
+  return {
+    p: Math.max(0.01, Math.min(0.99, p)),
+    peakKt: tallest.kt, peakHr: tallest.hr, sigma, mae, already: false,
+    basis: `official forecast peaks at ${tallest.kt} kt at ${tallest.hr}h; NHC's published mean absolute`
+         + ` intensity error at that lead time is ${mae.toFixed(1)} kt, so ${thr} kt sits`
+         + ` ${((thr - tallest.kt) / sigma).toFixed(2)} standard deviations from the peak`,
+  };
+}
+
+/* ---------------- Watches and warnings ----------------
+ * A Hurricane Watch is a discrete, timestamped, official act — the sharpest single
+ * signal in the product and the one nothing here was reading. It is not a forecast of
+ * intensity; it is a statement that hurricane conditions are POSSIBLE somewhere specific
+ * within about 48 hours, which is a different and more decision-relevant claim.
+ */
+function parseWatchesWarnings(text) {
+  const t = String(text || "").replace(/\r/g, "");
+  const block = /WATCHES AND WARNINGS\s*\n-+\n([\s\S]*?)(?:\n\s*\n\s*[A-Z][A-Z ]{6,}\n-+|$)/i.exec(t);
+  if (!block) return null;
+  const body = block[1];
+  const changesM = /CHANGES WITH THIS ADVISORY:\s*\n+([\s\S]*?)(?:\n\s*SUMMARY OF WATCHES|$)/i.exec(body);
+  const changes = changesM ? changesM[1].trim() : null;
+  const inEffect = [];
+  const re = /^\s*(?:A|An)\s+(.+?)\s+is in effect for\.\.\.\s*\n((?:\s*\*.*\n?)+)/gim;
+  let m;
+  while ((m = re.exec(body))) {
+    const kind = m[1].trim();
+    const areas = m[2].split(/\n/).map((l) => l.replace(/^\s*\*\s*/, "").trim()).filter(Boolean);
+    inEffect.push({ kind, areas });
+  }
+  const severity = (k) => (/Hurricane Warning/i.test(k) ? 4 : /Hurricane Watch/i.test(k) ? 3
+    : /Tropical Storm Warning/i.test(k) ? 2 : /Tropical Storm Watch/i.test(k) ? 1 : 0);
+  const top = inEffect.slice().sort((a, b) => severity(b.kind) - severity(a.kind))[0] || null;
+  return {
+    inEffect, changes: changes && !/^none\.?$/i.test(changes) ? changes : null,
+    changed: !!(changes && !/^none\.?$/i.test(changes)),
+    highest: top ? top.kind : null, highestRank: top ? severity(top.kind) : 0,
+    /* Intermediate advisories run every 3 hours instead of 6 once any watch or warning
+       is up, so this also tells the board how often the next product is coming. */
+    intermediateCadence: inEffect.length > 0,
+  };
 }
 
 // Envelope of the error circles → cone polygon (lat/lon ring).
@@ -1204,6 +1385,54 @@ function namingAnchor(label, ticker, clims, std, oni) {
   };
 }
 
+/* An anchor for a contract about ONE named, currently-active storm.
+ *
+ * This replaces a refusal, and a refusal is only worth replacing when the replacement is
+ * genuinely better than silence. The test it has to pass: the number must come from the
+ * forecasters who will themselves decide the outcome, not from a model invented here.
+ * NHC's published forecast intensity meets that; a climatology of past seasons does not,
+ * which is why the ordinal path still refuses these and always will.
+ *
+ * It is deliberately fragile in one direction. Everything depends on the storm being in
+ * the CURRENT advisory feed with a CURRENT forecast. When the storm dissipates it leaves
+ * CurrentStorms.json, this returns null, and the contract goes back to unpriced — which
+ * is correct, because a five-day-old forecast for a storm that no longer exists is the
+ * most dangerous number this board could display: confidently precise and about nothing.
+ */
+const STORM_ANCHOR_MAX_LAG_MIN = Number(process.env.MT_ADV_MAX_LAG || 360);
+
+function stormAnchor(label, ticker, storms) {
+  const t = String(ticker || "").toUpperCase();
+  if (!/^KXHURRICANENAMES/.test(t)) return null;        // "will X be a hurricane" only
+  const m = /^Will\s+([A-Za-z'-]+)\s/i.exec(String(label || ""));
+  if (!m) return null;
+  const name = m[1].toLowerCase();
+  const S = (storms || []).find((x) => String(x.name || "").toLowerCase() === name);
+  if (!S) return null;                                   // not an active storm — not our question
+  const hp = S.hurricaneP;
+  if (!hp || hp.p == null) return null;                  // no intensity forecast parsed
+  /* A forecast this old is not a forecast. Six hours is one full advisory cycle; past
+     that the product has been superseded and we simply have not seen the new one. */
+  if (S.advisoryLagMin != null && S.advisoryLagMin > STORM_ANCHOR_MAX_LAG_MIN) return null;
+
+  const w = S.watches || {};
+  return {
+    p: hp.p, unconditional: null, quantity: "storm-intensity", basin: null,
+    storm: S.id, source: "NHC forecast",
+    layers: [
+      { id: "official", label: "Official forecast intensity", p: hp.p, basis: hp.basis },
+      { id: "watch", label: "Watches and warnings", p: null, unavailable: !w.highest,
+        basis: w.highest
+          ? `${w.highest} in effect for ${(w.inEffect[0] && w.inEffect[0].areas || []).join(", ")}`
+            + ` — advisories are running on the 3-hourly intermediate cycle`
+          : "no watch or warning in effect for this system" },
+    ],
+    basis: `${S.name} is ${S.wind} kt now · ` + hp.basis
+         + (w.highest ? ` · ${w.highest} in effect` : "")
+         + (S.advisoryLagMin != null ? ` · advisory ${S.advisoryLagMin} min old when fetched` : ""),
+  };
+}
+
 function climatologyAnchor(title, strike, clims, ticker, oni, std) {
   if (!clims || strike == null) return null;
   const byBasin = clims.years ? { atlantic: clims } : clims;   // tolerate a bare Atlantic clim
@@ -1635,7 +1864,11 @@ async function fetchKalshi(storms, clims, oni, std) {
     const strike = parseStrike(sub, m.yes_sub_title, m.subtitle) ?? num(m.floor_strike);
     /* Two anchor families. The count ladders need a strike; the per-name markets have
        none and are answered by list position instead, so they are tried separately. */
-    const anchor = climatologyAnchor(title, strike, clims, m.ticker, oni, std)
+    /* Order matters. A contract about a storm that EXISTS is answered by the official
+       forecast for that storm; the ordinal climatology only ever spoke to names that have
+       not been used yet, and it still refuses the rest. */
+    const anchor = stormAnchor(title, m.ticker, storms)
+                || climatologyAnchor(title, strike, clims, m.ticker, oni, std)
                 || namingAnchor(title, m.ticker, clims, std, oni);
     contracts.push({
       id: m.ticker, label: title, short: shortLabel(sub ? title.replace(/\?$/, "") + " · " + sub : title, 46),
@@ -1644,7 +1877,10 @@ async function fetchKalshi(storms, clims, oni, std) {
       model: anchor ? anchor.p : null,
       modelQuantity: anchor ? anchor.quantity : null,
       modelBasin: anchor ? anchor.basin : null,
-      modelSource: anchor ? "HURDAT2 climatology" : null,
+      /* Two KINDS of anchor now sit on this board and they must not read alike. One is
+         what happened in 35 seasons of record; the other is what NHC says will happen to
+         one storm this week. The source string is how a reader tells them apart. */
+      modelSource: anchor ? (anchor.source || "HURDAT2 climatology") : null,
       modelBasis: anchor ? anchor.basis : null,
       modelUncond: anchor ? anchor.unconditional : null,
       modelLayers: anchor ? anchor.layers : null,
@@ -1888,4 +2124,5 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
 
 export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity, parseTWO, diagnoseTWO,
          namePosition, ordinalOutcome, namingAnchor, climatologyAnchor, parseBdeck, oniWeights, weightedRate,
+         parseForecastAdvisory, parseWatchesWarnings, reachesHurricaneP, INTENSITY_MAE, stormAnchor,
          priceOf, askPriceOf, spreadOf, depthOf, liquidityOf, volumeOf, volume24hOf, openInterestOf, notionalOf };

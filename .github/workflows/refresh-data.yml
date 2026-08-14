@@ -104,6 +104,14 @@ jobs:
       - name: Test the edge book
         run: node scripts/test-edgebook.mjs
 
+      # The official advisory is the sharpest input on the board and the newest code path
+      # here. It replaces a REFUSAL, so most of what this asserts is the refusal cases —
+      # above all that a storm absent from the live feed stops being priced, because a
+      # stale forecast for a storm that no longer exists is the most dangerous number
+      # this terminal could display.
+      - name: Test advisory ingest and per-storm anchor
+        run: node scripts/test-advisory.mjs
+
       # Every visible claim must have a provenance owner. This fails the build if
       # capability / liveness language reappears as a literal inside a component
       # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of

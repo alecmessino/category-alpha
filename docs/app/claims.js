@@ -281,6 +281,47 @@
     };
   });
 
+  /* The honest answer to "are you reading these the moment they are released": no, and
+     here is the measured number instead of a claim. */
+  define("advisory.latency", "nhc", (s) => {
+    const f = s.feeds.nhc || {};
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const lags = storms.map((x) => x.advisoryLagMin).filter((v) => v != null);
+    if (!f.ok) return { text: "advisory feed unavailable this cycle", ok: false };
+    if (!lags.length) return { text: "no advisory issuance time parsed — ingestion lag unmeasured", ok: false };
+    const worst = Math.max(...lags);
+    return {
+      text: "Advisory ingestion lag " + worst + " min at fetch: the pipeline POLLS every ~10 minutes,"
+          + " it is not notified on release. Expected staleness is half the poll interval plus the"
+          + " scheduler's own delay, and this is the measured figure rather than a claim about speed.",
+      ok: worst <= 20,
+    };
+  });
+  define("advisory.forecast", "nhc", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const withP = storms.filter((x) => x.hurricaneP && x.hurricaneP.p != null);
+    if (!storms.length) return { text: "no active system carrying an official forecast", ok: false };
+    if (!withP.length) return { text: "no forecast intensity parsed from the advisory this cycle", ok: false };
+    return {
+      text: withP.map((x) => x.name + " " + Math.round(x.hurricaneP.p * 100) + "% to reach hurricane strength").join(" · ")
+          + " — from the official NHC forecast intensity widened by NHC's own published forecast error."
+          + " This is a deterministic forecast with an error bar, not a calibrated ensemble, and it is a"
+          + " different kind of estimate from the season-count anchors.",
+      ok: true,
+    };
+  });
+  define("advisory.watches", "nhc", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const w = storms.filter((x) => x.watches && x.watches.highest);
+    if (!w.length) return { text: "no watch or warning in effect for any active system", ok: true };
+    return {
+      text: w.map((x) => x.name + ": " + x.watches.highest
+        + (x.watches.inEffect[0] ? " for " + x.watches.inEffect[0].areas.join(", ") : "")).join(" · ")
+        + " — advisories move to the 3-hourly intermediate cycle while any watch or warning is up.",
+      ok: true,
+    };
+  });
+
   // ---- provenance footers --------------------------------------------------
   // source/latency/version/tier, each traced rather than typed.
   const FOOTERS = {
