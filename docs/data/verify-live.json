@@ -1,19 +1,24 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T16:07:20.244Z",
+  "ranAt": "2026-08-14T16:23:14.869Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "86daeb91d2ca3229d05bfca5dde885913708dc67",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31817687273",
-  "ok": true,
+  "sha": "cad2cca1a6d10adfdcc0f22a3145d7793ba598bd",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31819013814",
+  "ok": false,
   "passed": 38,
-  "total": 38,
-  "failures": [],
-  "thirdPartyFailures": 28,
+  "total": 39,
+  "failures": [
+    {
+      "check": "a new advisory moves P(hurricane) and the Situation strip",
+      "detail": "24 frames · 0 carry advisory state · 0 advisory change(s) · 0 moved P · 0 register row(s) · situation P=67% at adv #9 (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)"
+    }
+  ],
+  "thirdPartyFailures": 20,
   "checks": [
     {
       "check": "Pages is serving this commit",
       "pass": true,
-      "detail": "7 assets byte-match the checkout (attempt 3)"
+      "detail": "7 assets byte-match the checkout (attempt 1)"
     },
     {
       "check": "live URL responds",
@@ -28,7 +33,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T16:06:08.310Z · 1m old"
+      "detail": "2026-08-14T16:16:28.340Z · 7m old"
     },
     {
       "check": "renders: Situation",
@@ -88,7 +93,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "8 ranked of 33 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "8 ranked of 34 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -131,6 +136,11 @@
       "detail": "2/2 storm(s) have an hour-zero intensity"
     },
     {
+      "check": "a new advisory moves P(hurricane) and the Situation strip",
+      "pass": false,
+      "detail": "24 frames · 0 carry advisory state · 0 advisory change(s) · 0 moved P · 0 register row(s) · situation P=67% at adv #9 (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)"
+    },
+    {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
       "detail": "cycle 2026-08-14T06:00:00Z"
@@ -143,12 +153,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "57 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "42 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "35 tile(s) served on reload · 57 in cache"
+      "detail": "42 tile(s) served on reload · 42 in cache"
     },
     {
       "check": "all markets carried",
