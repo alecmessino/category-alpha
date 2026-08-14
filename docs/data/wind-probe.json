@@ -1,0 +1,83 @@
+{
+  "schema": "millibar-wind-probe/1",
+  "ranAt": "2026-08-14T01:08:34.408Z",
+  "box": {
+    "lat0": 0,
+    "lat1": 45,
+    "lon0": 180,
+    "lon1": 340
+  },
+  "verdict": "nomads-grib-filter",
+  "gribRequired": true,
+  "results": [
+    {
+      "path": "opendap-ascii",
+      "cycle": "20260813 18Z",
+      "url": "https://nomads.ncep.noaa.gov/dods/gfs_0p25/gfs20260813/gfs_0p25_18z.ascii?ugrd10m[0][360:540][720:1360]",
+      "ok": false,
+      "status": 301,
+      "ms": 317,
+      "bytes": 882,
+      "ctype": "text/html",
+      "error": null,
+      "parses": false,
+      "dims": null,
+      "head": "<!doctype html> <html> <head> <title>Request for OpenDAP Data</title> <style type=\"text/css\">body { text-align: center; padding: 150px; }h1 { font-size: 40px; }body { font: 16px Helvetica, sans-serif; color: #333; }#error { display: block; text-align: left; width: 650px; marg"
+    },
+    {
+      "path": "opendap-ascii",
+      "cycle": "20260813 12Z",
+      "url": "https://nomads.ncep.noaa.gov/dods/gfs_0p25/gfs20260813/gfs_0p25_12z.ascii?ugrd10m[0][360:540][720:1360]",
+      "ok": false,
+      "status": 301,
+      "ms": 23,
+      "bytes": 882,
+      "ctype": "text/html",
+      "error": null,
+      "parses": false,
+      "dims": null,
+      "head": "<!doctype html> <html> <head> <title>Request for OpenDAP Data</title> <style type=\"text/css\">body { text-align: center; padding: 150px; }h1 { font-size: 40px; }body { font: 16px Helvetica, sans-serif; color: #333; }#error { display: block; text-align: left; width: 650px; marg"
+    },
+    {
+      "path": "opendap-ascii",
+      "cycle": "20260813 06Z",
+      "url": "https://nomads.ncep.noaa.gov/dods/gfs_0p25/gfs20260813/gfs_0p25_06z.ascii?ugrd10m[0][360:540][720:1360]",
+      "ok": false,
+      "status": 301,
+      "ms": 14,
+      "bytes": 882,
+      "ctype": "text/html",
+      "error": null,
+      "parses": false,
+      "dims": null,
+      "head": "<!doctype html> <html> <head> <title>Request for OpenDAP Data</title> <style type=\"text/css\">body { text-align: center; padding: 150px; }h1 { font-size: 40px; }body { font: 16px Helvetica, sans-serif; color: #333; }#error { display: block; text-align: left; width: 650px; marg"
+    },
+    {
+      "path": "nomads-grib-filter",
+      "cycle": "20260813 18Z",
+      "url": "https://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_0p25.pl?file=gfs.t18z.pgrb2.0p25.f000&lev_10_m_above_ground=on&var_UGRD=on&var_VGRD=on&subregion=&leftlon=180&rightlon=340&toplat=45&bottomlat=0&dir=%2Fgfs.20260813%2F18%2Fatmos",
+      "ok": true,
+      "status": 200,
+      "ms": 204,
+      "bytes": 348422,
+      "ctype": "application/octet-stream",
+      "error": null,
+      "parses": true,
+      "note": "real GRIB2 returned — would still need a decoder",
+      "head": "GRIB\u0000\u0000\u0000\u0002\u0000\u0000\u0000\u0000\u0000\u0002��\u0000\u0000\u0000\u0015\u0001\u0000\u0007\u0000\u0000\u0002\u0001\u0001\u0007�\b \u0012\u0000\u0000\u0000\u0001\u0000\u0000\u0000H\u0003\u0000\u0000\u0001�5\u0000\u0000\u0000\u0000\u0006\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002�\u0000\u0000\u0000�\u0000\u0000\u0000\u0000����\u0000\u0000\u0000\u0000 ��\u00000\u0002��@\u0014C�\u0000\u0000\u0003А\u0000\u0003А@\u0000\u0000\u0000\"\u0004\u0000\u0000\u0000\u0000\u0002\u0002\u0002\u0000Q\u0000\u0000\u0000\u0001\u0000\u0000\u0000\u0000g\u0000\u0000\u0000\u0000 �\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0015\u0005\u0000\u0001�5\u0000\u0000�\u0007�|\u0000\u0000\u0000\u0002 \u0000\u0000\u0000\u0000\u0006\u0006�\u0000\u0002��\u0007��Z�x6�� ��{��\u0017�~���\b\u0011��\u0011�(9�Hp����s�����ڊ�s"
+    },
+    {
+      "path": "aws-s3-idx",
+      "cycle": "20260813 18Z",
+      "url": "https://noaa-gfs-bdp-pds.s3.amazonaws.com/gfs.20260813/18/atmos/gfs.t18z.pgrb2.0p25.f000.idx",
+      "ok": true,
+      "status": 200,
+      "ms": 62,
+      "bytes": 31820,
+      "error": null,
+      "parses": false,
+      "windMessages": [],
+      "note": "no 10 m wind messages found in the index"
+    }
+  ]
+}
