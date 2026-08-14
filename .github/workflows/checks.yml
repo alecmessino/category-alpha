@@ -16,22 +16,30 @@ name: Checks
 # any branch and fast enough to be worth waiting for.
 
 on:
-  # PULL REQUESTS ONLY, and that is the whole trigger list on purpose.
+  # BOTH TRIGGERS, DELIBERATELY, AND THE DUPLICATE RUN IS THE PRICE.
   #
-  # This first shipped with `push: branches-ignore: [main]` alongside, which fired BOTH
-  # events on every push to a branch with an open PR — two identical runs of the same
-  # twenty steps, on the same commit, every time. The concurrency group did not collapse
-  # them either, because a pull_request event runs on refs/pull/N/merge while a push runs
-  # on refs/heads/..., so the two never shared a group.
+  # These two together fire twice on a push to a branch with an open PR: two identical
+  # runs of the same twenty steps on the same commit. That is real waste, and removing
+  # the `push` trigger to stop it was tried and REVERTED, because it cost the guarantee
+  # the whole file exists for.
   #
-  # Collapsing them with a shared group would have been worse than the waste: one run
-  # would be CANCELLED, and a cancelled check reads as a failed one to a reviewer and to
-  # branch protection. So the duplicate trigger is gone instead.
+  # What happened, on f072cd2: with `pull_request` as the only trigger, the push produced
+  # NO RUN AT ALL. The head commit sat with zero checks. Both earlier pushes, when `push`
+  # was still listed, produced a run every time. The likeliest cause is that GitHub was
+  # still recomputing refs/pull/1/merge after a merge-conflict resolution two minutes
+  # earlier and skipped the synchronize — a pull_request run needs a mergeable ref, and a
+  # push run does not.
   #
-  # main is covered by the refresh job, which runs these same suites before it fetches
-  # anything. A branch with no pull request is not under review, and can be checked on
-  # demand from the Actions tab.
+  # Root cause unconfirmed, and that is exactly why the belt-and-braces version is the
+  # one that ships: a duplicate green run costs a runner minute, while a silently absent
+  # run costs the gate. The failure modes are not comparable and should not be traded off
+  # against each other.
+  #
+  # main is excluded because the refresh job already runs these same suites there before
+  # it fetches anything.
   pull_request:
+  push:
+    branches-ignore: [main]
   workflow_dispatch: {}
 
 # A newer push supersedes a review still in flight.
