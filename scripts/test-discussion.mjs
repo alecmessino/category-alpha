@@ -12,7 +12,7 @@
  *
  * Run: node scripts/test-discussion.mjs
  */
-import { parseDiscussion, parseWatchesWarnings, parseForecastAdvisory } from "./fetch-data.mjs";
+import { parseDiscussion, parseWatchesWarnings, parseForecastAdvisory, parseAdvisoryNow } from "./fetch-data.mjs";
 
 let fail = 0;
 const ck = (n, c, d = "") => { if (!c) fail++; console.log((c ? "  ok   " : "  FAIL ") + n + (d ? "  " + d : "")); };
@@ -203,6 +203,50 @@ eq("a MAX WIND line still wins where it exists", pts[1].kt, 55);
 eq("gusts come from the MAX WIND line", pts[1].gustKt, 65);
 eq("the peak is read correctly", Math.max(...pts.map((p) => p.kt)), 65);
 ck("no point invents a gust it was not given", pts[0].gustKt === null);
+
+/* ---- the current state, which this product states WITHOUT an INITIAL line -----------
+   Hour-zero intensity was null on every storm because the parser looked for an INITIAL
+   line and this product does not have one. The diagnostic that settled it captured a
+   window beginning at "FORECAST VALID 15/0000Z" — the first header in the file matching
+   either pattern, which is only possible if INITIAL is absent. */
+console.log("\nCurrent state, stated without an INITIAL line\n");
+const TCM_REAL = `
+ZCZC HFOTCMCP1 ALL
+TTAA00 PHFO DDHHMM
+
+TROPICAL STORM LALA FORECAST/ADVISORY NUMBER   9
+
+CENTER LOCATED NEAR 16.7N 149.5W AT 14/1500Z
+POSITION ACCURATE WITHIN  20 NM
+
+PRESENT MOVEMENT TOWARD THE WEST-NORTHWEST OR 290 DEGREES AT  10 KT
+
+ESTIMATED MINIMUM CENTRAL PRESSURE  997 MB
+MAX SUSTAINED WINDS  50 KT WITH GUSTS TO  60 KT.
+
+FORECAST VALID 15/0000Z 17.2N 151.2W
+MAX WIND  55 KT...GUSTS  65 KT.
+
+FORECAST VALID 15/1200Z 18.0N 153.3W
+MAX WIND  65 KT...GUSTS  80 KT.
+`;
+const nowPt = parseAdvisoryNow(TCM_REAL);
+ck("the current state parses without an INITIAL line", !!nowPt);
+eq("position comes from CENTER LOCATED NEAR", [nowPt.lat, nowPt.lon], [16.7, -149.5]);
+eq("valid time comes from the same line", [nowPt.day, nowPt.hh, nowPt.mm], [14, 15, 0]);
+eq("intensity comes from MAX SUSTAINED WINDS", nowPt.kt, 50);
+eq("gusts come from the same statement", nowPt.gustKt, 60);
+
+/* MAX SUSTAINED WINDS must not be confused with the MAX WIND lines of the forecast
+   hours — reading the wrong one would report a future intensity as the current one. */
+ck("it is the current intensity, not the first forecast hour", nowPt.kt !== 55 && nowPt.kt !== 65);
+
+const NO_WIND = TCM_REAL.replace(/MAX SUSTAINED WINDS.*\n/, "");
+const nw = parseAdvisoryNow(NO_WIND);
+ck("a missing intensity statement yields a position with null intensity", nw && nw.lat === 16.7 && nw.kt === null);
+ck("no position statement yields null, not a guess", parseAdvisoryNow("MAX SUSTAINED WINDS  50 KT.") === null);
+eq("the forecast hours still parse from the same product",
+  parseForecastAdvisory(TCM_REAL, "2026-08-14T15:00:00Z").map((p) => p.kt), [55, 65]);
 
 console.log(fail ? `\n${fail} FAILED\n` : "\nall discussion checks passed\n");
 process.exit(fail ? 1 : 0);

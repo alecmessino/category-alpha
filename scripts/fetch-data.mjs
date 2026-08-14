@@ -441,14 +441,46 @@ function coneRadiusNm(basin, hr) {
    present at all — the same instrument that settled the outlook parser. */
 function sampleTCM(raw) {
   const t = String(raw || "").replace(/\r/g, "");
-  const at = t.search(/(FORECAST\s+VALID|INITIAL)/i);
+  const at = t.search(/(CENTER\s+LOCATED|FORECAST\s+VALID|INITIAL)/i);
   const vis = (x) => x.replace(/\n/g, " \u23ce ").replace(/[ \t]{2,}/g, (m) => "\u00b7".repeat(Math.min(m.length, 6)));
   return {
     bytes: t.length,
     hasMaxWind: /MAX\s+WIND/i.test(t),
     hasForecastValid: /FORECAST\s+VALID/i.test(t),
+    hasInitial: /^\s*INITIAL\s/mi.test(t),
+    hasCenterLocated: /CENTER\s+LOCATED\s+NEAR/i.test(t),
+    hasMaxSustained: /MAX\s+SUSTAINED\s+WINDS/i.test(t),
     maxWindCount: (t.match(/MAX\s+WIND/gi) || []).length,
     window: at > -1 ? vis(t.slice(at, at + 420)) : vis(t.slice(0, 420)),
+  };
+}
+
+/* The current state of the storm, from the forecast advisory itself.
+ *
+ * There is no INITIAL line in this product. That was an assumption, it produced a null
+ * hour-zero intensity on every storm, and the diagnostic that finally settled it captured
+ * a window starting at "FORECAST VALID 15/0000Z" — the first thing in the file matching
+ * either header, which means INITIAL is not in the file. The TCM states the current
+ * position and intensity as two separate statements instead:
+ *
+ *   CENTER LOCATED NEAR 16.7N 149.5W AT 14/1500Z
+ *   MAX SUSTAINED WINDS  50 KT WITH GUSTS TO  60 KT.
+ *
+ * Both are optional here. A product that words it differently yields null and the caller
+ * falls back to CurrentStorms.json, labelled — it must never yield a guess. */
+function parseAdvisoryNow(text) {
+  const t = String(text || "").replace(/\r/g, "");
+  const pos = /CENTER\s+LOCATED\s+NEAR\s+([\d.]+)\s*([NS])\s+([\d.]+)\s*([EW])\s+AT\s+(\d{2})\/(\d{2})(\d{2})Z/i.exec(t);
+  if (!pos) return null;
+  let lat = Number(pos[1]); if (/S/i.test(pos[2])) lat = -lat;
+  let lon = Number(pos[3]); if (/W/i.test(pos[4])) lon = -lon;
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  const w = /MAX\s+SUSTAINED\s+WINDS\s+(\d+)\s*KT(?:[\s.]*WITH\s+GUSTS\s+TO\s+(\d+)\s*KT)?/i.exec(t);
+  return {
+    lat, lon,
+    day: Number(pos[5]), hh: Number(pos[6]), mm: Number(pos[7]),
+    kt: w ? Number(w[1]) : null,
+    gustKt: w && w[2] != null ? Number(w[2]) : null,
   };
 }
 
@@ -795,17 +827,33 @@ async function fetchForecastFor(storm, rawAdvisoryUrl) {
   /* Positions parsed but no intensity: the MAX WIND line is there in every real product,
      so a miss means the shape is not what the regex expects. Capture the bytes around the
      first position rather than guessing at the format for a second cycle. */
-  const kt = pts.filter((p) => Number.isFinite(p.kt));
-  /* The hour-zero point used to be SYNTHESIZED unconditionally from CurrentStorms.json
-     and prepended, which meant the product's own INITIAL line — the one that carries the
-     current intensity — was either duplicated or invisible. Prefer what the product says
-     and fall back to the feed position only when there is no INITIAL to read.
+  let kt = pts.filter((p) => Number.isFinite(p.kt));
+  /* The hour-zero point used to be SYNTHESIZED from CurrentStorms.json and prepended
+     unconditionally, so the product's own current state was invisible and hour-zero
+     intensity was null on every storm.
 
-     A separate diagnostic for exactly this: intensities parsed for the forecast hours but
-     not for hour zero means the INITIAL line has a layout the regex does not cover. That
-     was guessed at once already, so instead of guessing again the bytes around it are
-     captured and reported, which is the instrument that settled the outlook parser. */
-  const parsedInitial = pts.find((p) => p.hr === 0) || null;
+     Prefer what the product says, in this order: an INITIAL line if it has one, then
+     CENTER LOCATED NEAR + MAX SUSTAINED WINDS, then the feed position labelled with its
+     source. The middle one is what this product actually uses; that was established by
+     the diagnostic below rather than assumed, after assuming it once already. */
+  let parsedInitial = pts.find((p) => p.hr === 0) || null;
+  if (!parsedInitial || !Number.isFinite(parsedInitial.kt)) {
+    const nowPt = parseAdvisoryNow(r.text);
+    if (nowPt) {
+      const base = storm.advTimeZ ? new Date(storm.advTimeZ) : new Date();
+      const d = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth(), nowPt.day, nowPt.hh, nowPt.mm));
+      if (d.getTime() - base.getTime() > 3 * 86400e3) d.setUTCMonth(d.getUTCMonth() - 1);
+      const p0 = { lat: nowPt.lat, lon: nowPt.lon, hr: 0, validZ: d.toISOString(),
+                   kt: nowPt.kt, gustKt: nowPt.gustKt, initial: true, ktFrom: "forecast advisory" };
+      if (parsedInitial) pts[pts.indexOf(parsedInitial)] = p0; else pts.unshift(p0);
+      parsedInitial = p0;
+    }
+  }
+  /* Recomputed AFTER the recovery above, so the diagnostic describes the state that
+     actually shipped rather than the state before the fallback ran. It fires on "forecast
+     hours have intensities but hour zero does not", which is precisely the condition that
+     went unnoticed, and it reports which of the three layouts the product contains. */
+  kt = pts.filter((p) => Number.isFinite(p.kt));
   const diag = kt.length ? (parsedInitial && Number.isFinite(parsedInitial.kt) ? null
     : { reason: "no hour-zero intensity", ...sampleTCM(r.text) })
     : sampleTCM(r.text);
@@ -2333,5 +2381,5 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
 
 export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity, parseTWO, diagnoseTWO,
          namePosition, ordinalOutcome, namingAnchor, climatologyAnchor, parseBdeck, oniWeights, weightedRate,
-         parseForecastAdvisory, parseWatchesWarnings, parseDiscussion, reachesHurricaneP, INTENSITY_MAE, stormAnchor,
+         parseForecastAdvisory, parseAdvisoryNow, parseWatchesWarnings, parseDiscussion, reachesHurricaneP, INTENSITY_MAE, stormAnchor,
          priceOf, askPriceOf, spreadOf, depthOf, liquidityOf, volumeOf, volume24hOf, openInterestOf, notionalOf };
