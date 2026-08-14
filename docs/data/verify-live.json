@@ -1,12 +1,12 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T16:28:20.049Z",
+  "ranAt": "2026-08-14T16:49:02.113Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "680c329d974824637aa96b42983a978541a349de",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31819416601",
+  "sha": "63c41395f08f6ca5ea5d284196a01b6b41b91b9c",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31821017444",
   "ok": true,
-  "passed": 39,
-  "total": 39,
+  "passed": 41,
+  "total": 41,
   "failures": [],
   "thirdPartyFailures": 22,
   "checks": [
@@ -28,7 +28,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T16:22:49.618Z · 5m old"
+      "detail": "2026-08-14T16:38:19.701Z · 11m old"
     },
     {
       "check": "renders: Situation",
@@ -88,7 +88,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "8 ranked of 34 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "8 ranked of 35 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -136,6 +136,16 @@
       "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 0 advisory change(s) · 0 moved P · 0 register row(s) · situation P=60% at adv #9 (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)"
     },
     {
+      "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
+      "pass": true,
+      "detail": "live: no storm past the 180-min line · forced: 1 anchored row(s) pushed past it → 1 HOLD, 0 TAKE · 0 stale-crossing row(s) in the register"
+    },
+    {
+      "check": "nothing on HOLD is counted as stakeable",
+      "pass": true,
+      "detail": "0 row(s) on HOLD live · $0 staked · forced: $0 across 1 held row(s)"
+    },
+    {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
       "detail": "cycle 2026-08-14T06:00:00Z"
@@ -148,12 +158,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "42 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "43 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "42 tile(s) served on reload · 42 in cache"
+      "detail": "43 tile(s) served on reload · 43 in cache"
     },
     {
       "check": "all markets carried",
