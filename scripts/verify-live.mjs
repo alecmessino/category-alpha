@@ -355,7 +355,16 @@ add("the GFS wind field is ingested and both components present",
 
 /* The tile cache is the one piece of this build that could make a stale board look live.
    sw.js refuses same-origin by construction; this proves it on the deployed page, by
-   reading what actually landed in the cache rather than trusting the source. */
+   reading what actually landed in the cache rather than trusting the source.
+
+   The RELOAD matters. On first load the worker registers after the tiles have already
+   been requested, so nothing routes through it and the cache is empty — a check that
+   reads it there passes because there is nothing to find, which is not a pass. The
+   reload runs with the worker already controlling the page, so every asset and every
+   tile goes through its fetch handler, and an empty same-origin set then means it
+   declined them. */
+await page.reload({ waitUntil: "networkidle", timeout: 60000 });
+await page.waitForTimeout(3500);
 const swCache = await page.evaluate(async () => {
   if (!("caches" in window)) return { supported: false };
   const names = await caches.keys();
@@ -368,7 +377,7 @@ const swCache = await page.evaluate(async () => {
   };
 });
 add("the tile cache never holds a same-origin asset",
-  swCache.supported === false || swCache.sameOrigin.length === 0,
+  swCache.supported === false || (swCache.controlled && swCache.sameOrigin.length === 0),
   swCache.supported === false ? "CacheStorage unavailable"
     : `${swCache.entries} tile(s) cached · controlled=${swCache.controlled} · same-origin=${swCache.sameOrigin.length}`);
 
