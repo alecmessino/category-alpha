@@ -552,19 +552,16 @@ function MillibarTerminalApp() {
           {S && <GenesisWatch compact />}
         </div>
 
-        {/* 3.2 — the active systems, as the advisory states them. Above the queue because
-            a forecast intensity and a hurricane watch are the inputs to everything below,
-            not a detail to be found after scrolling past the trades. */}
-        <window.MT_StormConsoles dense={dense} />
-
-        {/* 4 + 3 — what needs you, and what it touches. This is the hero row now;
-            the map moved below it, because the product stopped being the data and
-            became the interpretation of the data. */}
-        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
+        {/* 3.2 — the active systems as the advisory states them, beside the queue rather
+            than above it. Stacked they were 1,650px and pushed Situation past its scroll
+            budget the moment this panel started rendering at all; side by side the row is
+            as tall as its taller half. Board Impact moved to Markets, where a table of
+            what repriced belongs. */}
+        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
+          <window.MT_StormConsoles dense={dense} frame={frame} />
           <window.MT_Attention dense={dense} imagery={imageryState} maxH={narrow ? 420 : cmdH}
             onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
             onSelectContract={pickContract} />
-          <window.MT_Exposure frame={frame} dense={dense} selection={sel} onSelect={pickContract} />
         </div>
 
 
@@ -611,6 +608,7 @@ function MillibarTerminalApp() {
           summary={MT.contracts.length + " contracts · " + (MT._feeds && MT._feeds.markets ? MT._feeds.markets.source : "—")}>
           <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: gap, minWidth: 0 }}>
+              <window.MT_Exposure frame={frame} dense={dense} selection={sel} onSelect={pickContract} />
               <window.MT_Markets frame={frame} selection={sel} onSelect={pickContract} dense={dense} />
               <window.MT_EdgeMatrix frame={frame} bankroll={bankroll} stake={stake} setBankroll={setBankroll} setStake={setStake} selection={sel} onSelect={pickContract} dense={dense} />
             </div>

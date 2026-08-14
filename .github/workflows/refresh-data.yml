@@ -112,6 +112,14 @@ jobs:
       - name: Test advisory ingest and per-storm anchor
         run: node scripts/test-advisory.mjs
 
+      # The discussion is the only NHC product that is PROSE, and prose is where invention
+      # gets in. What is asserted here is mostly that a classification never attaches to
+      # the wrong sentence — the first version read "the TRACK forecast is based on a
+      # blend of aids" and set the INTENSITY guidance position from it, which would have
+      # mislabelled the one number on this board built on the intensity forecast.
+      - name: Test the discussion parser and wrapped watch bullets
+        run: node scripts/test-discussion.mjs
+
       # A GRIB2 reader with no system dependency, which is only possible because the
       # probe established the packing template first. Its refusal paths matter more than
       # its happy path: a decoder that guesses at complex packing produces a plausible

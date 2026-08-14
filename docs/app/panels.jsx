@@ -253,13 +253,25 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
    surfaces: how intense it is now, what NHC says it becomes, whether an official watch
    is up, and how old the product was when we read it. An operator deciding on a position
    should not have to assemble that. */
-function StormConsole({ storm, dense }) {
+/* Above / below the guidance envelope is a direction, so it gets a direction's colour:
+   above is the one that makes a derived probability optimistic. */
+const GUIDE_TONE = { above: "var(--warn)", below: "var(--special)", with: "var(--text-2)" };
+function StormConsole({ storm, dense, frame }) {
   const S = storm;
   if (!S) return null;
   const mono = { fontFamily: "var(--font-mono)" };
+  /* wind and pressure are FRAME ACCESSORS on MT.storms, not plain numbers — this panel
+     was written against the raw snapshot shape and never ran against the real one,
+     because the loader was dropping the fields that make it render at all. Reading them
+     as values produced "(f) => pick(...) kt" on screen. Call them, at the frame the rest
+     of the board is showing, so scrubbing history moves these too. */
+  const at = Number.isFinite(frame) ? frame : (window.MT ? MT.FRAMES - 1 : 0);
+  const val = (v) => (typeof v === "function" ? v(at) : v);
+  const windKt = val(S.wind), pressureMb = val(S.pressure);
   const hp = S.hurricaneP || null;
   const w = S.watches || null;
   const fc = S.forecastKt || [];
+  const D = S.discussion || null;
   const peak = fc.length ? fc.reduce((a, b) => (b.kt > a.kt ? b : a), fc[0]) : null;
   /* Lag is the honest liveness number: how old the product was when it was fetched. It
      is green only inside one intermediate cycle. */
@@ -294,8 +306,8 @@ function StormConsole({ storm, dense }) {
 
       <div className="mt-grid" style={{ display: "grid",
         gridTemplateColumns: "repeat(auto-fit,minmax(min(112px,100%),1fr))", borderBottom: "1px solid var(--border-dim)" }}>
-        {cell("Now", (S.wind ?? "—") + " kt")}
-        {cell("Pressure", (S.pressure ?? "—") + " mb")}
+        {cell("Now", (windKt ?? "—") + " kt")}
+        {cell("Pressure", (pressureMb ?? "—") + " mb")}
         {cell("Moving", S.movement || "—")}
         {peak && cell("Forecast peak", peak.kt + " kt", "var(--accent)")}
         {peak && cell("At", "+" + peak.hr + "h")}
@@ -321,9 +333,55 @@ function StormConsole({ storm, dense }) {
         </div>
       )}
 
+      {/* Watches and warnings, as issued. A warning is a discrete official act and the
+          areas are the part someone checks for their own island, so they are listed
+          rather than summarised into a badge. */}
+      {w && w.inEffect && w.inEffect.length > 0 && (
+        <div style={{ padding: "0 11px 8px" }}>
+          {w.inEffect.map((g, i) => (
+            <div key={i} style={{ display: "flex", gap: 8, marginTop: 5, alignItems: "baseline", flexWrap: "wrap" }}>
+              <span style={{ ...mono, fontSize: 9.5, fontWeight: 800, letterSpacing: ".4px", padding: "1px 6px", borderRadius: 4,
+                color: /Hurricane/i.test(g.kind) ? "var(--neg)" : "var(--warn)", border: "1px solid currentColor", whiteSpace: "nowrap" }}>
+                {g.kind.toUpperCase()}
+              </span>
+              <span style={{ fontSize: 11.5, color: "var(--text-1)", minWidth: 0 }}>{g.areas.join(" · ")}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* The Tropical Cyclone Discussion. Where the official forecast sits inside the
+          guidance envelope is the caveat that belongs next to P(hurricane), because
+          P(hurricane) is built ON that forecast. Quoted, never scored. */}
+      {D && (D.guidance || D.cues.length > 0) && (
+        <div style={{ padding: "0 11px 9px" }}>
+          <div style={{ ...mono, fontSize: 9.5, letterSpacing: ".6px", color: "var(--text-2)", textTransform: "uppercase", marginBottom: 4 }}>
+            Forecaster{D.forecaster ? " · " + D.forecaster : ""}{D.lagMin != null ? " · discussion " + D.lagMin + "m old at fetch" : ""}
+          </div>
+          {D.guidance && D.guidance.intensity && (
+            <div title={D.guidance.intensity.quote}
+              style={{ display: "flex", gap: 7, alignItems: "baseline", flexWrap: "wrap", marginBottom: 3 }}>
+              <span style={{ ...mono, fontSize: 9.5, fontWeight: 800, letterSpacing: ".4px", padding: "1px 6px", borderRadius: 4,
+                color: GUIDE_TONE[D.guidance.intensity.position], border: "1px solid currentColor", whiteSpace: "nowrap" }}>
+                INTENSITY {D.guidance.intensity.position.toUpperCase()} GUIDANCE
+              </span>
+              <span style={{ ...mono, fontSize: 10.5, color: "var(--text-2)", minWidth: 0 }}>“{D.guidance.intensity.quote}”</span>
+            </div>
+          )}
+          {D.cues.map((c, i) => (
+            <div key={i} style={{ ...mono, fontSize: 10, color: "var(--text-2)", lineHeight: 1.5, marginTop: 2 }}>· “{c.quote}”</div>
+          ))}
+        </div>
+      )}
+
       {(hp || (w && w.highest)) && (
         <div style={{ ...mono, fontSize: 10, color: "var(--text-2)", padding: "0 11px 9px", lineHeight: 1.55 }}>
           {hp && <div>{hp.basis}</div>}
+          {/* An intensity forecast at the top of the guidance envelope makes every number
+              derived from it optimistic. Say so where the number is, not in a drawer. */}
+          {hp && D && D.guidance && D.guidance.intensity && D.guidance.intensity.position !== "with" && (
+            <div style={{ marginTop: 4, color: "var(--warn)" }}>{MTC.claim("advisory.guidance").text}</div>
+          )}
           {w && w.highest && <div style={{ marginTop: 4 }}>{MTC.claim("advisory.watches").text}</div>}
         </div>
       )}
@@ -331,7 +389,7 @@ function StormConsole({ storm, dense }) {
   );
 }
 
-function MT_StormConsoles({ dense }) {
+function MT_StormConsoles({ dense, frame }) {
   const storms = Object.values((window.MT && MT.storms) || {});
   const live = storms.filter((s) => s.forecastKt || s.hurricaneP || (s.watches && s.watches.highest));
   if (!live.length) return null;
@@ -340,9 +398,10 @@ function MT_StormConsoles({ dense }) {
       right={<BG tone="live" dot>{live.length} TRACKED</BG>}
       footer={<PF {...MTC.footer("panel.storms")} />}>
       <div style={{ padding: dense ? 9 : 11 }}>
-        {live.map((s) => <StormConsole key={s.id} storm={s} dense={dense} />)}
+        {live.map((s) => <StormConsole key={s.id} storm={s} dense={dense} frame={frame} />)}
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", lineHeight: 1.55 }}>
-          {MTC.claim("advisory.latency").text}
+          <div>{MTC.claim("advisory.latency").text}</div>
+          <div>{MTC.claim("advisory.discussion").text}</div>
         </div>
       </div>
     </P>
@@ -415,9 +474,13 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
             <div style={{ ...mono, fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: "var(--accent)" }}>
               OFFICIAL FORECAST — NHC ADVISORY
             </div>
+            {/* x.wind is a FRAME ACCESSOR, not a number. This strip only started rendering
+                when the loader stopped dropping the advisory fields, and React silently
+                dropped the function child and warned — so the line read "Lala kt".
+                Dead code does not get exercised; it just waits. */}
             {live.map((x) => (
               <div key={x.id} style={{ ...mono, fontSize: 11.5, marginTop: 4, color: "var(--text-1)" }}>
-                {x.name} {x.wind}kt
+                {x.name} {typeof x.wind === "function" ? x.wind(frame) : x.wind}kt
                 {x.hurricaneP && <span> · <b style={{ color: "var(--accent)" }}>{Math.round(x.hurricaneP.p * 100)}%</b> to reach hurricane strength</span>}
                 {x.watches && x.watches.highest && <span style={{ color: "var(--warn)" }}> · {x.watches.highest}</span>}
                 {x.advisoryLagMin != null && <span style={{ color: "var(--text-2)" }}> · advisory {x.advisoryLagMin}m old at fetch</span>}

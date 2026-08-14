@@ -90,13 +90,15 @@ async function fetchStorms() {
     const basin = /^(AL|AT)/i.test(id) ? "east" : /^(EP|CP)/i.test(id) ? "west" : (lon != null && lon < -100 ? "west" : "east");
     const adv = s.publicAdvisory || {};
     const fcst = s.forecastAdvisory || {};
+    const disc = s.forecastDiscussion || {};
     return {
       id, name: s.name || "Unnamed", cls: s.classification || cc.cls, full_cls: cc.full, basin,
       center: lat != null && lon != null ? [lat, lon] : null, movement, wind, pressure,
       advNum: adv.advNum || null, advTimeZ: adv.issuance || s.lastUpdate || null,
       _fcstUrl: fcst.url || (typeof fcst === "string" ? fcst : null),
       _advUrl: adv.url || (typeof adv === "string" ? adv : null),
-      watches: null, forecastKt: null, hurricaneP: null, advisoryLagMin: null,
+      _discUrl: disc.url || (typeof disc === "string" ? disc : null),
+      watches: null, forecastKt: null, hurricaneP: null, advisoryLagMin: null, discussion: null,
       track: null, cone: null, reconTracks: null, pastIdx: 0,
       modelCat4: null,        // no public ensemble Cat-probability feed wired — stays null
       marketCat4: null,       // filled from markets below if a Cat 4+ contract is found
@@ -142,13 +144,23 @@ async function fetchStorms() {
         if (nA) s.advNumFull = nA[1];                    // keeps the "6A" of an intermediate
       }
     }
+    /* The discussion. Isolated in its own try: it is commentary, and commentary must
+       never be able to stop the advisory numbers from publishing. */
+    if (s._discUrl) {
+      const d2 = await getText(s._discUrl);
+      if (d2.ok) {
+        try { s.discussion = parseDiscussion(d2.text, now.getTime()); }
+        catch (e) { s.discussion = null; }
+      }
+    }
     if (f.diag) s.forecastDiag = f.diag;
     fnotes.push(`${s.name}: ${f.note}`
       + (f.diag ? ` · NO INTENSITY PARSED (maxWind present=${f.diag.hasMaxWind}, count=${f.diag.maxWindCount})` : "")
       + (s.hurricaneP ? ` · P(hurricane) ${Math.round(s.hurricaneP.p * 100)}%` : "")
       + (s.watches && s.watches.highest ? ` · ${s.watches.highest}` : "")
+      + (s.discussion && s.discussion.guidance ? ` · forecast ${s.discussion.guidance.position} guidance` : "")
       + (s.advisoryLagMin != null ? ` · advisory ${s.advisoryLagMin}m old` : ""));
-    delete s._fcstUrl; delete s._advUrl;
+    delete s._fcstUrl; delete s._advUrl; delete s._discUrl;
   }
   feed.forecast = fnotes.join(" | ");
   const lags = storms.map((s) => s.advisoryLagMin).filter((v) => v != null);
@@ -445,8 +457,19 @@ function parseForecastAdvisory(text, baseIso) {
   /* Position and intensity together. The MAX WIND line is optional so a product that
      omits it still yields a track rather than nothing; wind then stays null and every
      consumer treats it as absent instead of as zero. */
+  /* Two layouts are in service and the INITIAL line usually uses the other one:
+
+       INITIAL        14/1500Z 16.7N 149.5W    50 KT  60 MPH      <- intensity same line
+       FORECAST VALID 15/0000Z 17.2N 151.2W
+       MAX WIND  55 KT...GUSTS  65 KT.                            <- intensity next line
+
+     Reading only the MAX WIND form left hr 0 with a null intensity on every storm while
+     every forecast hour parsed fine — invisible, because the peak drives P(hurricane)
+     and the peak is never at hour zero. Both forms are read; the MAX WIND line wins when
+     both are present, since that is the one that carries gusts. */
   const re = new RegExp(
     "(INITIAL|FORECAST\\s+VALID|OUTLOOK\\s+VALID)\\s+(\\d{2})\\/(\\d{2})(\\d{2})Z\\s+([\\d.]+)\\s*([NS])\\s+([\\d.]+)\\s*([EW])" +
+    "(?:[ \\t]+(\\d+)[ \\t]*KT)?" +
     "(?:[^\\n]*\\n\\s*MAX\\s+WIND\\s+(\\d+)\\s*KT(?:[.\\s]*GUSTS\\s+(\\d+)\\s*KT)?)?",
     "gi");
   const base = baseIso ? new Date(baseIso) : new Date();
@@ -460,10 +483,11 @@ function parseForecastAdvisory(text, baseIso) {
     if (d.getTime() < base.getTime() - 3 * 3600e3) d.setUTCMonth(d.getUTCMonth() + 1);
     const hr = Math.round((d.getTime() - base.getTime()) / 3600e3);
     if (hr < 0 || hr > 168) continue;
-    const kt = m[9] != null ? Number(m[9]) : null;
+    const ktRaw = m[10] != null ? m[10] : m[9];
+    const kt = ktRaw != null ? Number(ktRaw) : null;
     pts.push({ lat, lon, hr, validZ: d.toISOString(),
       kt: Number.isFinite(kt) ? kt : null,
-      gustKt: m[10] != null && Number.isFinite(Number(m[10])) ? Number(m[10]) : null,
+      gustKt: m[11] != null && Number.isFinite(Number(m[11])) ? Number(m[11]) : null,
       initial: /^INITIAL/i.test(m[1]),
       outlook: /^OUTLOOK/i.test(m[1]) });
   }
@@ -599,12 +623,28 @@ function parseWatchesWarnings(text) {
   const changesM = /CHANGES WITH THIS ADVISORY:\s*\n+([\s\S]*?)(?:\n\s*SUMMARY OF WATCHES|$)/i.exec(body);
   const changes = changesM ? changesM[1].trim() : null;
   const inEffect = [];
-  const re = /^\s*(?:A|An)\s+(.+?)\s+is in effect for\.\.\.\s*\n((?:\s*\*.*\n?)+)/gim;
+  /* Bullets WRAP. NHC hard-wraps this product at ~70 columns, so a long area runs onto
+     an unmarked continuation line:
+
+         * Maui County, including the islands of Maui, Lanai, Molokai and
+         Kahoolawe
+
+     Matching only lines that begin with "*" truncated that to "...Molokai and" — an
+     island silently dropped off a Tropical Storm Warning, which is precisely the kind of
+     detail someone checks this board for. Take every line until the blank line that ends
+     the group, then fold each unmarked line onto the bullet above it. */
+  const re = /^\s*(?:A|An)\s+(.+?)\s+is in effect for\.\.\.\s*\n((?:[^\n]+\n?)+)/gim;
   let m;
   while ((m = re.exec(body))) {
     const kind = m[1].trim();
-    const areas = m[2].split(/\n/).map((l) => l.replace(/^\s*\*\s*/, "").trim()).filter(Boolean);
-    inEffect.push({ kind, areas });
+    const areas = [];
+    for (const raw of m[2].split(/\n/)) {
+      const line = raw.trim();
+      if (!line) break;
+      if (/^\*/.test(line)) areas.push(line.replace(/^\*\s*/, "").trim());
+      else if (areas.length) areas[areas.length - 1] += " " + line;   // continuation
+    }
+    if (areas.length) inEffect.push({ kind, areas: areas.filter(Boolean) });
   }
   const severity = (k) => (/Hurricane Warning/i.test(k) ? 4 : /Hurricane Watch/i.test(k) ? 3
     : /Tropical Storm Warning/i.test(k) ? 2 : /Tropical Storm Watch/i.test(k) ? 1 : 0);
@@ -617,6 +657,98 @@ function parseWatchesWarnings(text) {
        is up, so this also tells the board how often the next product is coming. */
     intermediateCadence: inEffect.length > 0,
   };
+}
+
+/* ---------------- Tropical Cyclone Discussion ----------------
+ * The richest product NHC issues and the one this board was throwing away. The public
+ * advisory says WHAT the forecast is; the discussion says how much the forecaster
+ * believes it, what observations it rests on, and — the line that actually matters here
+ * — where the official forecast sits inside the guidance envelope.
+ *
+ * That last one is not a nicety. P(reaches hurricane) on this board is built ON the
+ * official intensity forecast. When the forecaster writes that the forecast is "near the
+ * upper end of the guidance envelope", every number derived from it inherits that tilt,
+ * and an operator sizing a position off it should be told so.
+ *
+ * NOTHING here is scored. The discussion is prose written by a human, and turning prose
+ * into a probability is exactly the kind of invention this project refuses. What is
+ * extracted is a category plus the VERBATIM sentence it came from, so the classification
+ * can be checked against the source in one glance. When no sentence matches, the field
+ * is absent — never a default.
+ */
+/* Guidance phrasing, and the aspect it is about. The aspect matters more than the
+   phrasing: the first version classified on phrasing alone and the sentence
+
+     "The NHC TRACK forecast ... is based on a BLEND of the latest ... aids"
+
+   set the guidance position to "with", when the sentence that actually bears on this
+   board said the INTENSITY forecast "remains near the upper end of the guidance
+   envelope". A confident category attached to the wrong sentence is worse than no
+   category, so a sentence that does not name its aspect is not classified at all. */
+const GUIDANCE_PHRASE = [
+  { value: "above", re: /\b(?:upper end|high end|above|stronger than|higher than)\b/i },
+  { value: "below", re: /\b(?:lower end|low end|below|weaker than)\b/i },
+  { value: "with",  re: /\b(?:in line with|close to|near the middle of|follows|blend of)\b/i },
+];
+const GUIDANCE_ASPECT = [
+  { key: "intensity", re: /\b(?:intensity|strength|wind speed)\b/i },
+  { key: "track",     re: /\b(?:track|motion|position)\b/i },
+];
+const DISCUSSION_CUES = [
+  { value: "aircraft",
+    re: /[^.]*\b(?:reconnaissance|Air Force|dropsonde|aircraft)\b[^.]*\./i },
+  { value: "scatterometer",
+    re: /[^.]*\b(?:scatterometer|OSCAT|ASCAT|SAR)\b[^.]*\./i },
+  { value: "strengthening",
+    re: /[^.]*\b(?:strengthening|intensification) is (?:expected|forecast|anticipated)[^.]*\./i },
+  { value: "weakening",
+    re: /[^.]*\bweakening is (?:expected|forecast|anticipated)[^.]*\./i },
+];
+
+function parseDiscussion(text, nowMs) {
+  const t = String(text || "").replace(/\r/g, "");
+  if (!/\S/.test(t)) return null;
+  const out = { forecaster: null, issuedZ: null, lagMin: null,
+                guidance: { intensity: null, track: null }, cues: [] };
+
+  const wmo = /^\s*[A-Z]{4}\d{2}\s+[A-Z]{4}\s+(\d{2})(\d{2})(\d{2})\s*$/m.exec(t);
+  if (wmo) {
+    const ref = new Date(nowMs);
+    const d = new Date(Date.UTC(ref.getUTCFullYear(), ref.getUTCMonth(),
+      Number(wmo[1]), Number(wmo[2]), Number(wmo[3])));
+    if (d.getTime() - ref.getTime() > 3 * 86400e3) d.setUTCMonth(d.getUTCMonth() - 1);
+    out.issuedZ = d.toISOString();
+    out.lagMin = Math.round((ref.getTime() - d.getTime()) / 60000);
+  }
+  const fc = /^\s*Forecaster\s+(.+?)\s*$/mi.exec(t);
+  if (fc) out.forecaster = fc[1].trim();
+
+  const clean = (x) => x.replace(/\s+/g, " ").trim();
+
+  /* Sentence by sentence, so a match cannot span two of them and so the quote returned
+     is the sentence the classification was actually made from. */
+  for (const raw of t.split(/(?<=\.)\s+/)) {
+    const sent = clean(raw);
+    if (sent.length < 20 || sent.length > 400) continue;
+    if (!/guidance|envelope|consensus|\baids?\b/i.test(sent)) continue;
+    const aspect = GUIDANCE_ASPECT.find((a) => a.re.test(sent));
+    const phrase = GUIDANCE_PHRASE.find((p) => p.re.test(sent));
+    if (!aspect || !phrase) continue;                    // unclassifiable stays unclassified
+    if (!out.guidance[aspect.key]) out.guidance[aspect.key] = { position: phrase.value, quote: sent };
+  }
+
+  const seen = new Set();
+  for (const c of DISCUSSION_CUES) {
+    const m = c.re.exec(t);
+    if (!m) continue;
+    const quote = clean(m[0]);
+    if (quote.length > 400 || seen.has(quote)) continue;   // a runaway match is not a sentence
+    seen.add(quote);
+    out.cues.push({ value: c.value, quote });
+  }
+  const any = out.guidance.intensity || out.guidance.track || out.cues.length;
+  if (!any) out.guidance = null;
+  return (out.issuedZ || any) ? out : null;
 }
 
 // Envelope of the error circles → cone polygon (lat/lon ring).
@@ -2176,5 +2308,5 @@ if (process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import
 
 export { parseOniAscii, parseOniPsl, buildOni, phaseOf, posteriorFor, parseHurdat2, seriesQuantity, parseTWO, diagnoseTWO,
          namePosition, ordinalOutcome, namingAnchor, climatologyAnchor, parseBdeck, oniWeights, weightedRate,
-         parseForecastAdvisory, parseWatchesWarnings, reachesHurricaneP, INTENSITY_MAE, stormAnchor,
+         parseForecastAdvisory, parseWatchesWarnings, parseDiscussion, reachesHurricaneP, INTENSITY_MAE, stormAnchor,
          priceOf, askPriceOf, spreadOf, depthOf, liquidityOf, volumeOf, volume24hOf, openInterestOf, notionalOf };

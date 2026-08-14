@@ -325,6 +325,37 @@
     };
   });
 
+  /* The forecaster's own statement about where the official intensity forecast sits
+     inside the guidance envelope. This board's P(reaches hurricane) is built ON that
+     forecast, so the position is not trivia — it is the direction of the bias in a
+     number an operator sizes a position from. Quoted, never converted into an
+     adjustment: there is no defensible way to turn "near the upper end" into a number
+     of knots, and inventing one would be worse than saying it plainly. */
+  define("advisory.guidance", "nhc", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const g = storms
+      .map((x) => ({ name: x.name, g: x.discussion && x.discussion.guidance && x.discussion.guidance.intensity }))
+      .filter((x) => x.g && x.g.position !== "with");
+    if (!g.length) return { text: "no intensity-guidance position stated in the discussion", ok: true };
+    return {
+      text: g.map((x) => x.name + ": NHC places its own intensity forecast " + x.g.position
+        + " the guidance envelope, so the probability above — which is derived from that forecast — leans the same way").join(" · "),
+      ok: true,
+    };
+  });
+  define("advisory.discussion", "nhc", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const d = storms.filter((x) => x.discussion);
+    if (!d.length) return { text: "no forecast discussion ingested for any active system", ok: false };
+    const lags = d.map((x) => x.discussion.lagMin).filter((v) => v != null);
+    return {
+      text: "Tropical Cyclone Discussion read for " + d.length + " system" + (d.length === 1 ? "" : "s")
+        + (lags.length ? " · " + Math.max(...lags) + "m old at fetch" : "")
+        + " — quoted verbatim, not scored",
+      ok: true,
+    };
+  });
+
   define("wind.field", "wind", () => {
     const w = window.MT && MT._wind;
     if (!w) return { text: "no surface wind field ingested this cycle", ok: false };

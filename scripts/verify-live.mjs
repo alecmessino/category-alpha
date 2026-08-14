@@ -285,6 +285,28 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
            only panel that shows you WHERE the storm is comes into view. */
         mapTop: map ? Math.round(map.getBoundingClientRect().top + window.scrollY) : null,
         stormConsole: /ACTIVE SYSTEMS/i.test(T),
+        /* The console renders only if MT.storms carries the advisory block. Those fields
+           are computed server-side and were being dropped by the loader's whitelist, so
+           the panel silently did not exist while latest.json was full of the data it
+           needed — and nothing failed, because "storm console" was measured here and
+           never asserted. Both ends are compared now: what the snapshot has, and what
+           reached the page. */
+        advisory: (() => {
+          const S = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+          const has = (k) => S.filter((x) => x[k]).length;
+          return {
+            storms: S.length,
+            withForecast: has("forecastKt"), withP: has("hurricaneP"),
+            withWatches: S.filter((x) => x.watches && x.watches.highest).length,
+            withDiscussion: has("discussion"),
+            /* A wrapped bullet used to truncate mid-phrase and drop an island off a
+               warning. Any area ending in a dangling conjunction is that bug. */
+            truncatedArea: S.some((x) => (x.watches && x.watches.inEffect || [])
+              .some((g) => g.areas.some((a) => /\b(?:and|or|the|of)$/i.test(a.trim())))),
+            hourZeroIntensity: S.filter((x) => (x.trackPoints || [])
+              .some((p) => p.hr === 0 && Number.isFinite(p.kt))).length,
+          };
+        })(),
         tabs: document.querySelectorAll("button[role=tab]").length,
         /* The complaint that started this: a page you scroll a mile down. Four tabs exist
            so no single view is a wall, and this measures the actual document height
@@ -366,6 +388,18 @@ add("and it is the first thing under the header",
 add("four tabs, so no single view is a wall",
   LY.tabs === 4 && LY.screensToScroll <= 2.0,
   `${LY.tabs} tabs · ${LY.screensToScroll} screens tall (${LY.pageHeight}px / ${LY.viewportHeight}px)`);
+/* The advisory block: computed server-side, and for a long time never delivered. */
+const AD = LY.advisory;
+add("the official-advisory console reaches the page",
+  AD.storms === 0 || (LY.stormConsole && AD.withForecast > 0 && AD.withP > 0),
+  `${AD.storms} storm(s) · console=${LY.stormConsole} · forecast=${AD.withForecast} · P=${AD.withP} · watches=${AD.withWatches} · discussion=${AD.withDiscussion}`);
+add("no watch area is truncated at a line wrap",
+  AD.truncatedArea === false,
+  AD.truncatedArea ? "an area ends in a dangling conjunction — the continuation line was dropped" : "all areas end cleanly");
+add("the initial forecast point carries its intensity",
+  AD.storms === 0 || AD.hourZeroIntensity === AD.withForecast,
+  `${AD.hourZeroIntensity}/${AD.withForecast} storm(s) have an hour-zero intensity`);
+
 add("the GFS wind field is ingested and both components present",
   LY.windLayer === true, `cycle ${LY.windCycle}`);
 

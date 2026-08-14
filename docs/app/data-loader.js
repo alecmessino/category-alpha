@@ -87,6 +87,19 @@
         marketCat4: (f) => { const r = fs(f); return r && r.marketCat4 != null ? r.marketCat4 : (s.marketCat4 ?? null); },
         reconAge: (f) => { const r = fs(f); return r && r.reconAge != null ? r.reconAge : (s.reconAge ?? null); },
         centerAt: (f) => pick(f, "center", s.center),
+        /* The official-advisory block. Every one of these is computed server-side and
+           committed to latest.json, and this whitelist silently dropped all of them —
+           so MT_StormConsoles, whose render condition is exactly these fields, returned
+           null and the panel has never once appeared on the deployed page. The data was
+           there, the component was there, and nothing connected them.
+           Adding a field to latest.json is not the same as shipping it. */
+        advNumFull: s.advNumFull || null,
+        advisoryIssuedZ: s.advisoryIssuedZ || null,
+        advisoryLagMin: isNum(s.advisoryLagMin) ? s.advisoryLagMin : null,
+        forecastKt: s.forecastKt || null,
+        hurricaneP: s.hurricaneP || null,
+        watches: s.watches || null,
+        discussion: s.discussion || null,
       };
     });
 
