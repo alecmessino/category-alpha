@@ -623,29 +623,34 @@ function parseWatchesWarnings(text) {
   const changesM = /CHANGES WITH THIS ADVISORY:\s*\n+([\s\S]*?)(?:\n\s*SUMMARY OF WATCHES|$)/i.exec(body);
   const changes = changesM ? changesM[1].trim() : null;
   const inEffect = [];
-  /* Bullets WRAP. NHC hard-wraps this product at ~70 columns, so a long area runs onto
-     an unmarked continuation line:
+  /* Walked line by line rather than matched as one block, because both shapes here are
+     things a regex gets wrong in opposite directions:
 
-         * Maui County, including the islands of Maui, Lanai, Molokai and
-         Kahoolawe
+       * Maui County, including the islands of Maui, Lanai, Molokai and
+       Kahoolawe
 
-     Matching only lines that begin with "*" truncated that to "...Molokai and" — an
-     island silently dropped off a Tropical Storm Warning, which is precisely the kind of
-     detail someone checks this board for. Take every line until the blank line that ends
-     the group, then fold each unmarked line onto the bullet above it. */
-  const re = /^\s*(?:A|An)\s+(.+?)\s+is in effect for\.\.\.\s*\n((?:[^\n]+\n?)+)/gim;
-  let m;
-  while ((m = re.exec(body))) {
-    const kind = m[1].trim();
-    const areas = [];
-    for (const raw of m[2].split(/\n/)) {
-      const line = raw.trim();
-      if (!line) break;
-      if (/^\*/.test(line)) areas.push(line.replace(/^\*\s*/, "").trim());
-      else if (areas.length) areas[areas.length - 1] += " " + line;   // continuation
-    }
-    if (areas.length) inEffect.push({ kind, areas: areas.filter(Boolean) });
+     Bullets WRAP, so matching only lines that begin with "*" truncated that at the line
+     break and dropped an island off a Tropical Storm Warning. Widening the match to "any
+     non-empty line" then swallowed the REST OF THE PRODUCT — the separator lines in this
+     product are a single space, not empty, so the greedy group ran straight through the
+     next two "is in effect for..." headers and only the first group survived. Live data
+     showed one area where there were four.
+
+     A walk has neither failure: a header opens a group, a bullet adds an area, an
+     unmarked line folds onto the area above it, and a blank-or-whitespace line closes
+     the group. */
+  let cur = null;
+  for (const raw of body.split("\n")) {
+    const line = raw.trim();
+    const head = /^(?:A|An)\s+(.+?)\s+is in effect for\.\.\.$/i.exec(line);
+    if (head) { cur = { kind: head[1].trim(), areas: [] }; inEffect.push(cur); continue; }
+    if (!cur) continue;
+    if (!line) { cur = null; continue; }                        // whitespace-only ends it
+    if (/^\*/.test(line)) cur.areas.push(line.replace(/^\*\s*/, "").trim());
+    else if (cur.areas.length) cur.areas[cur.areas.length - 1] += " " + line;   // wrap
+    else cur = null;                    // prose directly under a header: not an area list
   }
+  for (let i = inEffect.length - 1; i >= 0; i--) if (!inEffect[i].areas.length) inEffect.splice(i, 1);
   const severity = (k) => (/Hurricane Warning/i.test(k) ? 4 : /Hurricane Watch/i.test(k) ? 3
     : /Tropical Storm Warning/i.test(k) ? 2 : /Tropical Storm Watch/i.test(k) ? 1 : 0);
   const top = inEffect.slice().sort((a, b) => severity(b.kind) - severity(a.kind))[0] || null;
@@ -791,13 +796,33 @@ async function fetchForecastFor(storm, rawAdvisoryUrl) {
      so a miss means the shape is not what the regex expects. Capture the bytes around the
      first position rather than guessing at the format for a second cycle. */
   const kt = pts.filter((p) => Number.isFinite(p.kt));
-  const diag = kt.length ? null : sampleTCM(r.text);
-  const withNow = [{ lat: storm.center[0], lon: storm.center[1], hr: 0 }, ...pts];
+  /* The hour-zero point used to be SYNTHESIZED unconditionally from CurrentStorms.json
+     and prepended, which meant the product's own INITIAL line — the one that carries the
+     current intensity — was either duplicated or invisible. Prefer what the product says
+     and fall back to the feed position only when there is no INITIAL to read.
+
+     A separate diagnostic for exactly this: intensities parsed for the forecast hours but
+     not for hour zero means the INITIAL line has a layout the regex does not cover. That
+     was guessed at once already, so instead of guessing again the bytes around it are
+     captured and reported, which is the instrument that settled the outlook parser. */
+  const parsedInitial = pts.find((p) => p.hr === 0) || null;
+  const diag = kt.length ? (parsedInitial && Number.isFinite(parsedInitial.kt) ? null
+    : { reason: "no hour-zero intensity", ...sampleTCM(r.text) })
+    : sampleTCM(r.text);
+  /* When the product's INITIAL line gives a position but no intensity, the current wind
+     is taken from CurrentStorms.json. That is not a substitute number — it is the SAME
+     advisory's intensity, published by the same centre in the sibling product — but the
+     point records where it came from so the two sources never blur together. */
+  const withNow = parsedInitial
+    ? pts.map((p) => (p.hr === 0 && !Number.isFinite(p.kt) && Number.isFinite(storm.wind)
+        ? { ...p, kt: storm.wind, ktFrom: "CurrentStorms.json" } : p))
+    : [{ lat: storm.center[0], lon: storm.center[1], hr: 0, kt: storm.wind ?? null,
+         ktFrom: Number.isFinite(storm.wind) ? "CurrentStorms.json" : null, initial: false }, ...pts];
   return {
     diag,
     track: withNow.map((p) => [p.lat, p.lon]),
     trackPoints: withNow.map((p) => ({ at: [p.lat, p.lon], hr: p.hr, validZ: p.validZ || storm.advTimeZ,
-      kt: p.kt ?? null, gustKt: p.gustKt ?? null })),
+      kt: p.kt ?? null, gustKt: p.gustKt ?? null, ktFrom: p.ktFrom || null })),
     cone: buildCone(withNow, storm.basin),
     note: `${pts.length} forecast positions · cone reconstructed from NHC track-error radii`,
   };

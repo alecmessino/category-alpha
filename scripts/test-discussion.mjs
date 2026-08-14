@@ -147,16 +147,16 @@ SUMMARY OF WATCHES AND WARNINGS IN EFFECT:
 
 A Hurricane Warning is in effect for...
 * Hawaii County
-
+ 
 A Tropical Storm Warning is in effect for...
 * Maui County, including the islands of Maui, Lanai, Molokai and
 Kahoolawe
-
+ 
 A Tropical Storm Watch is in effect for...
 * Oahu
 * Kauai County, including the islands of Kauai and Niihau
-
-A Hurricane Warning means that hurricane conditions are expected
+ 
+A Hurricane Warning means that hurricane conditions are expected 
 somewhere within the warning area.
 
 DISCUSSION AND OUTLOOK
@@ -175,6 +175,11 @@ eq("and it outranks the others", w.highestRank, 4);
 ck("the changes block is captured", /upgraded to a Tropical Storm Warning/.test(w.changes.replace(/\s+/g, " ")));
 ck("prose after the bullets is not swallowed as an area",
   !JSON.stringify(w.inEffect).includes("hurricane conditions are expected"));
+/* The separator lines in the real product are a single SPACE, not empty. A parser that
+   only stops at truly-blank lines ran through the next two headers and returned one
+   group where there were three — which is what the deployed board showed. */
+ck("a whitespace-only separator still closes a group",
+  w.inEffect.every((g) => !/is in effect for/i.test(JSON.stringify(g.areas))));
 
 /* ---- the INITIAL line carries its intensity inline in the compact TCM layout ---- */
 console.log("\nForecast advisory: both intensity layouts\n");
