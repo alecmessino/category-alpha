@@ -1,0 +1,47 @@
+name: Probe surface-wind sources
+
+# Reconnaissance, not a feature. The sandbox that authors this code cannot reach NOMADS
+# or AWS, so the question "can we get gridded 10 m winds, and does that force GRIB2
+# decoding into a job with no system dependencies" gets answered by asking the servers
+# from somewhere that can. The answer is committed as evidence.
+#
+# Deliberately NOT part of the refresh loop: it is a one-shot investigation, and wiring an
+# unproven external source into the job that publishes the board is how a working pipeline
+# acquires a new way to fail.
+
+on:
+  workflow_dispatch: {}
+  push:
+    paths: ["scripts/probe-wind.mjs", ".github/workflows/probe-wind.yml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: millibar-wind-probe
+  cancel-in-progress: true
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Probe candidate wind sources
+        run: node scripts/probe-wind.mjs
+      - name: Commit the evidence
+        run: |
+          git config user.name  "millibar-data-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/wind-probe.json
+          if git diff --cached --quiet; then
+            echo "probe result unchanged"
+          else
+            git commit -m "probe: surface-wind source reconnaissance [skip ci]"
+            for i in 1 2 3 4; do
+              git push && break || { sleep $((2 ** i)); git pull --rebase --autostash || true; }
+            done
+          fi
