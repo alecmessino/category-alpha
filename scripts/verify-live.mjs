@@ -285,8 +285,11 @@ add("no horizontal overflow and no jittering digits",
 add("the map is a centrepiece, not a thumbnail",
   LY.mapHeight != null && LY.mapHeight >= 480,
   `map ${LY.mapHeight}px`);
-add("and it is near the top, not buried",
-  LY.mapTop != null && LY.mapTop <= 900,
+/* 900px was too generous — it passed while the map still sat behind two panels. The map
+   is the first thing under the header now, so anything past one header's height is a
+   regression. */
+add("and it is the first thing under the header",
+  LY.mapTop != null && LY.mapTop <= 140,
   `map starts ${LY.mapTop}px down the page`);
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,

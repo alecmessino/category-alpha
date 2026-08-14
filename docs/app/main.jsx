@@ -442,19 +442,19 @@ function MillibarTerminalApp() {
               4 what deserves investigation  ·  5 where can I verify it
             Everything below Attention is supporting material and collapses. */}
 
-        {/* 1 + 2 — what changed, and whether to trust it */}
-        <window.MT_Situation dense={dense} />
-
         {/* 2 — WHERE. The map is the centrepiece and now sits like one: directly
             under the situation line, above every panel derived from it. It was
             previously made taller but never moved, so it stayed sixth down the page. */}
-        {/* 5a — spatial context, or the honest reason there is none. */}
-        {!S && <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />}
-        {S && (
+        {/* The map used to disappear whenever no storm was selected, which is backwards:
+            a basin with three areas under watch and nothing classified is exactly when you
+            want to see the water. It renders always. The awaiting-telemetry block moved
+            BELOW it — the honest "nothing is classified" note is a caption on the map, not
+            a replacement for it. */}
+        {true && (
         <window.MT_Section label="Spatial context" tier="track · cone · satellite · replay" defaultOpen
-          summary={S.name + " " + S.cls + " · " + Math.round(snap.wind) + " kt"}>
+          summary={S ? (S.name + " " + S.cls + " · " + Math.round(snap.wind) + " kt") : "basin view — nothing classified"}>
         <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: gap }}>
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) " + (wide ? 360 : 320) + "px" }}>
+          <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: (narrow || !S) ? "1fr" : "minmax(0,1fr) " + (wide ? 360 : 320) + "px" }}>
             <div style={{ position: "relative", minHeight: narrow ? 300 : cmdH, background: "var(--slate-950)" }}>
               <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} onImagery={setImagery} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
@@ -463,6 +463,7 @@ function MillibarTerminalApp() {
               <LayerToggles layers={layers} setLayers={setLayers} storm={storm} />
             </div>
             {/* rail */}
+            {S && (
             <aside style={{ background: "var(--surface-card)", borderLeft: narrow ? "none" : "1px solid var(--border-dim)", borderTop: narrow ? "1px solid var(--border-dim)" : "none", display: "flex", flexDirection: "column", maxHeight: narrow ? "none" : cmdH, overflow: "hidden" }}>
               <div style={{ padding: "11px 15px 8px", borderBottom: "1px solid var(--border-dim)" }}>
                 <div style={{ fontSize: 24, fontWeight: 800, lineHeight: 1.05, display: "flex", alignItems: "center", gap: 9 }}>{S.name}
@@ -499,11 +500,17 @@ function MillibarTerminalApp() {
                 </div>
               </div>
             </aside>
+            )}
           </div>
           <Transport frame={frame} setFrame={setFrame} playing={playing} setPlaying={setPlaying} speed={speed} setSpeed={setSpeed} />
         </section>
         </window.MT_Section>
         )}
+        {!S && <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />}
+
+        {/* 1 + 2 — what changed, and whether to trust it */}
+        <window.MT_Situation dense={dense} />
+
 
 
         {/* With a storm on the board the awaiting-telemetry block is gone, and the watch

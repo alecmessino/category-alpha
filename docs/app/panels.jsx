@@ -309,6 +309,13 @@ const GRADE_TONE = {
 
 function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, dense }) {
   const [showAll, setShowAll] = React.useState(false);
+  /* The page had become a wall of prose: sixty-six trap rows, four inversion lines and
+     three explanatory paragraphs, all inline, above the only table anyone reads. The
+     reasoning still has to be reachable — that is the whole provenance contract — but
+     reachable is not the same as unavoidable. Each collapses to its headline count. */
+  const [showTraps, setShowTraps] = React.useState(false);
+  const [showLadder, setShowLadder] = React.useState(false);
+  const [showMethod, setShowMethod] = React.useState(false);
   const book = MTX.edgeBook(frame, bankroll, stake, { limit: showAll ? 40 : 6 });
   const cov = MTC.claim("edgebook.coverage");
   const mono = { fontFamily: "var(--font-mono)" };
@@ -379,11 +386,11 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
       {(() => {
         const traps = MTX.liquidityTraps();
         if (!traps.length) return null;
-        const worst = traps.slice(0, 4);
+        const worst = showTraps ? traps.slice(0, 12) : [];
         return (
           <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--border-dim)", background: "rgba(234,179,8,.07)" }}>
-            <div style={{ ...mono, fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: "var(--warn)" }}>
-              CANNOT BE ROUND-TRIPPED — {traps.length} CONTRACT{traps.length === 1 ? "" : "S"}
+            <div onClick={() => setShowTraps(!showTraps)} style={{ ...mono, fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: "var(--warn)", cursor: "pointer" }}>
+              {showTraps ? "▾" : "▸"} CANNOT BE ROUND-TRIPPED — {traps.length} OF {(window.MT && MT.contracts || []).length} CONTRACTS
             </div>
             {worst.map((t) => (
               <div key={t.id} style={{ ...mono, fontSize: 11, marginTop: 4, color: "var(--text-2)" }}>
@@ -392,14 +399,16 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
                 {" ("}{Math.round(t.roundTripPct * 100)}% round trip{t.thin ? `, only ${Math.round(t.exitDepth)} resting to sell into` : ""}{")"}
               </div>
             ))}
-            {traps.length > worst.length && (
+            {showTraps && traps.length > worst.length && (
               <div style={{ ...mono, fontSize: 10.5, marginTop: 4, color: "var(--text-2)" }}>
                 …and {traps.length - worst.length} more
               </div>
             )}
-            <div style={{ ...mono, fontSize: 10, marginTop: 5, color: "var(--text-2)", lineHeight: 1.5 }}>
-              {MTC.claim("edgebook.exit").text}
-            </div>
+            {showTraps && (
+              <div style={{ ...mono, fontSize: 10, marginTop: 5, color: "var(--text-2)", lineHeight: 1.5 }}>
+                {MTC.claim("edgebook.exit").text}
+              </div>
+            )}
           </div>
         );
       })()}
@@ -410,9 +419,10 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
         return (
           <div style={{ padding: "10px 12px", borderBottom: "1px solid var(--border-dim)",
             background: lad.executable.length ? "rgba(34,197,94,.07)" : "var(--surface-sunken)" }}>
-            <div style={{ ...mono, fontSize: 10, fontWeight: 800, letterSpacing: 1.2,
-              color: lad.executable.length ? "var(--pos)" : "var(--text-2)" }}>
-              LADDER CONSISTENCY — {lad.executable.length ? lad.executable.length + " LOCKED SPREAD(S)" : "NONE TRADEABLE"}
+            <div onClick={() => setShowLadder(!showLadder)} style={{ ...mono, fontSize: 10, fontWeight: 800, letterSpacing: 1.2,
+              color: lad.executable.length ? "var(--pos)" : "var(--text-2)", cursor: "pointer" }}>
+              {lad.executable.length ? "" : (showLadder ? "▾ " : "▸ ")}
+              LADDER CONSISTENCY — {lad.executable.length ? lad.executable.length + " LOCKED SPREAD(S)" : lad.displayed.length + " DISPLAYED-ONLY INVERSIONS, NONE TRADEABLE"}
             </div>
             {lad.executable.map((x) => (
               <div key={x.buyId + x.sellId} style={{ ...mono, fontSize: 11.5, marginTop: 4, color: "var(--text-1)" }}>
@@ -421,15 +431,17 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
                 {" "}on {Math.round(x.size).toLocaleString()} contracts ({money(x.profit)}), net of fee
               </div>
             ))}
-            {lad.displayed.map((x) => (
+            {showLadder && lad.displayed.map((x) => (
               <div key={x.ladder + x.lo} style={{ ...mono, fontSize: 10.5, marginTop: 4, color: "var(--text-2)" }}>
                 displayed only: &gt;{x.lo} shows {(x.loP * 100).toFixed(0)}¢ under &gt;{x.hi} at {(x.hiP * 100).toFixed(0)}¢ —
                 {" "}the touch is ordered correctly, so there is nothing to take
               </div>
             ))}
-            <div style={{ ...mono, fontSize: 10, marginTop: 5, color: "var(--text-2)", lineHeight: 1.5 }}>
-              {MTC.claim("edgebook.ladder").text}
-            </div>
+            {showLadder && (
+              <div style={{ ...mono, fontSize: 10, marginTop: 5, color: "var(--text-2)", lineHeight: 1.5 }}>
+                {MTC.claim("edgebook.ladder").text}
+              </div>
+            )}
           </div>
         );
       })()}
@@ -485,10 +497,17 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
             </tbody>
           </table>
           <div style={{ ...mono, fontSize: 10.5, color: "var(--text-2)", padding: "9px 12px", lineHeight: 1.65, borderTop: "1px solid var(--border-dim)" }}>
-            <div>{MTC.claim("edgebook.method").text}</div>
-            <div style={{ marginTop: 5 }}>{MTC.claim("edgebook.verdict").text}</div>
-            <div style={{ marginTop: 5, color: "var(--warn)" }}>{MTC.claim("edgebook.limits").text}</div>
-            <div style={{ marginTop: 5 }}>{cov.text}</div>
+            <div onClick={() => setShowMethod(!showMethod)} style={{ cursor: "pointer", color: "var(--text-2)" }}>
+              {showMethod ? "▾" : "▸"} how this is ranked, what the verdicts mean, and what the model cannot do
+            </div>
+            {showMethod && (
+              <div style={{ marginTop: 5 }}>
+                <div>{MTC.claim("edgebook.method").text}</div>
+                <div style={{ marginTop: 5 }}>{MTC.claim("edgebook.verdict").text}</div>
+                <div style={{ marginTop: 5, color: "var(--warn)" }}>{MTC.claim("edgebook.limits").text}</div>
+                <div style={{ marginTop: 5 }}>{cov.text}</div>
+              </div>
+            )}
             {(book.overflow.length > 0 || book.alsoInLadder.length > 0) && (
               <div style={{ marginTop: 6 }}>
                 <BT variant="preset" mono onClick={() => setShowAll(!showAll)}>{showAll ? "TOP 6" : "SHOW ALL " + (book.rows.length + book.overflow.length)}</BT>

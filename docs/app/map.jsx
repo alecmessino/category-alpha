@@ -88,13 +88,21 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
   const elRef = React.useRef(null);
   const mapRef = React.useRef(null);
   const refs = React.useRef({});
-  const S = MT.storms[stormId];
+  /* The map now renders with no storm selected — a basin with areas under watch and
+     nothing classified is exactly when you want to see the water. Everything below has to
+     survive S being null, starting with the initial view: fall back to the centroid of the
+     watched areas, then to the Atlantic hurricane belt. */
+  const S = MT.storms[stormId] || null;
+  const watch = (window.MT && MT._outlook) || [];
+  const home = S && S.center ? S.center
+    : watch.length ? [15, watch.some((a) => a.basin === "pacific") ? -130 : -50]
+    : [18, -55];
 
   // init once
   React.useEffect(() => {
     if (mapRef.current || !elRef.current || typeof L === "undefined") return;
     const map = L.map(elRef.current, { preferCanvas: true, zoomControl: false, attributionControl: true, minZoom: 2, maxZoom: 8, zoomSnap: 0.25 })
-      .setView(S.center, 5);
+      .setView(home, S ? 5 : 3);
     L.control.zoom({ position: "topright" }).addTo(map);
     L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
       { subdomains: "abcd", maxZoom: 9, opacity: 0.62, attribution: "© OpenStreetMap · CARTO" }).addTo(map);
@@ -109,7 +117,7 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
   // recenter on storm change
   React.useEffect(() => {
     if (!mapRef.current) return;
-    mapRef.current.flyTo(S.center, S.basin === "east" ? 5 : 5, { duration: 0.7 });
+    mapRef.current.flyTo(home, S ? 5 : 3, { duration: 0.7 });
   }, [stormId]);
 
   // Satellite raster: try 10-minute GOES GeoColor slots first (stepping back so an
@@ -118,9 +126,9 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
     const map = mapRef.current; if (!map) return;
     if (refs.current.sat) { map.removeLayer(refs.current.sat); refs.current.sat = null; }
     if (refs.current.satTimer) { clearInterval(refs.current.satTimer); refs.current.satTimer = null; }
-    if (!layers.satellite || !S || !S.center) return;
+    if (!layers.satellite) return;   // imagery does not need a classified storm
     let cancelled = false;
-    const [la, lo] = S.center;
+    const [la, lo] = home;
     const blank = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
 
     const attach = (url, attribution, maxNative, fresh) => {
@@ -171,9 +179,9 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
     const map = mapRef.current; if (!map) return;
     if (refs.current.ir) { map.removeLayer(refs.current.ir); refs.current.ir = null; }
     if (refs.current.irTimer) { clearInterval(refs.current.irTimer); refs.current.irTimer = null; }
-    if (!layers.infrared || !S || !S.center) return;
+    if (!layers.infrared) return;
     let cancelled = false;
-    const [la, lo] = S.center;
+    const [la, lo] = home;
     const blank = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
     const resolveIr = async () => {
       const lyr = goesIrFor(lo);
@@ -200,6 +208,16 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
   React.useEffect(() => {
     const map = mapRef.current, g = refs.current.ovl; if (!map || !g) return;
     g.clearLayers();
+    if (!S) {
+      // No classified system: still plot every area NHC is watching, so the map is never blank.
+      watch.forEach((a) => {
+        if (a.lat == null || a.lon == null) return;
+        L.circleMarker([a.lat, a.lon], { radius: 6, color: "var(--warn)", weight: 2, fillOpacity: .25 })
+          .bindTooltip((a.id ? a.id + " · " : "") + a.title + " — " + (a.pct7d ?? "?") + "% / 7d", { className: "mt-tt" })
+          .addTo(g);
+      });
+      return;
+    }
     const pc = cssVar(S.color);
     // all storms as selectable dots
     Object.values(MT.storms).forEach((st) => {
