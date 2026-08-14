@@ -119,7 +119,18 @@ async function fetchStorms() {
        lines sit directly under the positions this parser has always read. */
     const kts = (f.trackPoints || []).filter((p) => Number.isFinite(p.kt));
     s.forecastKt = kts.length ? kts.map((p) => ({ hr: p.hr, kt: p.kt, gustKt: p.gustKt ?? null })) : null;
-    s.hurricaneP = reachesHurricaneP(f.trackPoints || []);
+    /* The discussion is fetched BEFORE the anchor is computed. It used to be read after,
+       which meant the guidance position always described the PREVIOUS advisory by the time
+       anything used it — a caveat one cycle behind the number it qualifies. */
+    if (s._discUrl) {
+      const d2 = await getText(s._discUrl);
+      if (d2.ok) {
+        try { s.discussion = parseDiscussion(d2.text, now.getTime()); }
+        catch (e) { s.discussion = null; }
+      }
+    }
+    const gI = s.discussion && s.discussion.guidance && s.discussion.guidance.intensity;
+    s.hurricaneP = reachesHurricaneP(f.trackPoints || [], null, gI || null);
 
     /* The Public Advisory, for watches and warnings. A Hurricane Watch is a discrete
        official act and the sharpest single line in the product; nothing here read it. */
@@ -142,15 +153,6 @@ async function fetchStorms() {
         }
         const nA = /Advisory\s+Number\s+(\d+[A-Z]?)/i.exec(a2.text);
         if (nA) s.advNumFull = nA[1];                    // keeps the "6A" of an intermediate
-      }
-    }
-    /* The discussion. Isolated in its own try: it is commentary, and commentary must
-       never be able to stop the advisory numbers from publishing. */
-    if (s._discUrl) {
-      const d2 = await getText(s._discUrl);
-      if (d2.ok) {
-        try { s.discussion = parseDiscussion(d2.text, now.getTime()); }
-        catch (e) { s.discussion = null; }
       }
     }
     if (f.diag) s.forecastDiag = f.diag;
@@ -567,6 +569,34 @@ const LATENT_THRESHOLD = HURRICANE_REPORTED_KT - KT_INCREMENT / 2;   // 62.5
    asymmetric and reported alongside the point rather than instead of it. */
 const SIGMA_BAND = { tight: 0.8, wide: 1.6 };
 
+/* ---- the guidance-envelope tilt ----------------------------------------------
+ * The Tropical Cyclone Discussion states where the forecaster placed the official
+ * intensity forecast inside the guidance envelope. For Lala on 14 Aug it is "remains near
+ * the upper end of the guidance envelope". P(reaches hurricane) is computed FROM that
+ * official forecast, so when the forecast sits at the top of the aids, the estimate
+ * inherits that position and reading it as a central estimate overstates the answer.
+ *
+ * This is the one place on the board where a piece of prose moves a number, so the rule
+ * it follows is narrow and stated here rather than inferred:
+ *
+ *   - It moves the estimate in the DIRECTION the forecaster stated, and only that.
+ *   - Its SIZE is a fraction of the forecast's own published mean absolute error at the
+ *     relevant lead time, so the adjustment scales with how uncertain that forecast
+ *     already is instead of being an absolute number of knots invented here.
+ *   - The fraction itself is an OPERATOR SETTING. It is not observed and there is no feed
+ *     that could produce it: NHC publishes the position in words, never a magnitude. It is
+ *     declared, small, and registered in claims.js under the "operator" owner, which is
+ *     exactly the owner class for a number a human asserted.
+ *   - The unadjusted estimate is always published alongside, and the reported band is
+ *     widened to contain it, so the adjustment can never move the answer somewhere the
+ *     unadjusted arithmetic does not reach.
+ *
+ * A quarter of one MAE is roughly a fifth of a category step at day-three lead times: big
+ * enough to matter at the margin, too small to manufacture an edge on its own. Anything
+ * larger would be asserting knowledge of the envelope's width, which we do not have. */
+const GUIDANCE_TILT = 0.25;
+const GUIDANCE_SIGN = { above: -1, below: +1, with: 0 };
+
 function maeAt(hr) {
   const keys = Object.keys(INTENSITY_MAE).map(Number).sort((a, b) => a - b);
   if (hr <= keys[0]) return INTENSITY_MAE[keys[0]];
@@ -590,7 +620,7 @@ function normCdf(z) {
 /* trackPoints must carry kt. Returns null — never a number — when the forecast cannot
    answer the question, because silence is better than a probability with no forecast
    under it. */
-function reachesHurricaneP(points, threshold) {
+function reachesHurricaneP(points, threshold, guidance) {
   const reported = threshold || HURRICANE_REPORTED_KT;
   const thr = threshold ? threshold - KT_INCREMENT / 2 : LATENT_THRESHOLD;
   if (!Array.isArray(points) || !points.length) return null;
@@ -624,20 +654,40 @@ function reachesHurricaneP(points, threshold) {
   const mae = maeAt(tallest.hr);
   const sigma = Math.max(1e-6, mae * Math.sqrt(Math.PI / 2));
   const clamp = (v) => Math.max(0.01, Math.min(0.99, v));
-  const at = (mult) => clamp(normCdf((tallest.kt - thr) / (sigma * mult)));
-  const p = clamp(normCdf((tallest.kt - thr) / sigma));
+  const at = (kt, mult) => clamp(normCdf((kt - thr) / (sigma * mult)));
+
+  /* The forecaster's placement of this forecast inside the guidance envelope, applied as
+     a displacement of the peak by a declared fraction of that lead time's own error.
+     Absent, unclassified, or "with the consensus" all leave the estimate untouched. */
+  const pos = guidance && GUIDANCE_SIGN[guidance.position] != null ? guidance.position : null;
+  const sign = pos ? GUIDANCE_SIGN[pos] : 0;
+  const shiftKt = sign * GUIDANCE_TILT * mae;
+  const effKt = tallest.kt + shiftKt;
+
+  const raw = at(tallest.kt, 1);
+  const p = at(effKt, 1);
   /* A narrower error moves the answer AWAY from a half, in whichever direction the
      forecast already points; a wider one pulls it toward a half. So the band is not
-     symmetric about the point and its ends are sorted rather than assumed. */
-  const ends = [at(SIGMA_BAND.tight), at(SIGMA_BAND.wide)].sort((a, b) => a - b);
+     symmetric about the point and its ends are sorted rather than assumed.
+     The UNADJUSTED estimate is forced inside the band: an adjustment that could push the
+     published answer outside the range the plain arithmetic reaches would be doing more
+     than tilting, and this is a tilt. */
+  const ends = [at(effKt, SIGMA_BAND.tight), at(effKt, SIGMA_BAND.wide), raw].sort((a, b) => a - b);
+  const adjustment = sign
+    ? { position: pos, shiftKt: Math.round(shiftKt * 10) / 10, tiltOfMae: GUIDANCE_TILT,
+        raw, delta: Math.round((p - raw) * 1000) / 1000, quote: (guidance && guidance.quote) || null }
+    : null;
   return {
-    p, pLow: ends[0], pHigh: ends[1],
+    p, raw, pLow: ends[0], pHigh: ends[ends.length - 1], adjustment,
     peakKt: tallest.kt, peakHr: tallest.hr, sigma, mae, already: false,
     basis: `official forecast peaks at ${tallest.kt} kt at ${tallest.hr}h; NHC's published mean absolute`
          + ` intensity error there is ${mae.toFixed(1)} kt, and reported intensities come in 5 kt steps`
          + ` so ${reported} kt needs ${thr} kt of latent wind —`
-         + ` ${Math.round(p * 100)}% central, ${Math.round(ends[0] * 100)}-${Math.round(ends[1] * 100)}%`
-         + ` across a plausible range of error widths`,
+         + ` ${Math.round(p * 100)}% central, ${Math.round(ends[0] * 100)}-${Math.round(ends[ends.length - 1] * 100)}%`
+         + ` across a plausible range of error widths`
+         + (sign ? `; NHC places this forecast ${pos} the guidance envelope, so the peak is read`
+                 + ` ${Math.abs(shiftKt).toFixed(1)} kt ${sign < 0 ? "lower" : "higher"}`
+                 + ` (${Math.round(raw * 100)}% unadjusted)` : ""),
   };
 }
 
@@ -1670,12 +1720,31 @@ function stormAnchor(label, ticker, storms) {
   if (S.advisoryLagMin != null && S.advisoryLagMin > STORM_ANCHOR_MAX_LAG_MIN) return null;
 
   const w = S.watches || {};
+  const gI = S.discussion && S.discussion.guidance && S.discussion.guidance.intensity;
   return {
     p: hp.p, pLow: hp.pLow ?? null, pHigh: hp.pHigh ?? null,
     unconditional: null, quantity: "storm-intensity", basin: null,
     storm: S.id, source: "NHC forecast",
+    /* Advisory age travels WITH the anchor rather than being looked up beside it, so a
+       consumer cannot price this without also being handed how old the forecast under it
+       is. The hard refusal above is a cliff at one full advisory cycle; this is the
+       continuous number the edge book grades on. */
+    advisoryLagMin: S.advisoryLagMin ?? null,
+    maxLagMin: STORM_ANCHOR_MAX_LAG_MIN,
+    guidance: gI ? { position: gI.position, quote: gI.quote } : null,
+    adjustment: hp.adjustment || null,
     layers: [
       { id: "official", label: "Official forecast intensity", p: hp.p, basis: hp.basis },
+      /* p: null on purpose. The guidance position is a statement ABOUT the official
+         forecast, not a second estimate of the same quantity, so it must not count as a
+         layer that agrees with anything — the TAKE grade requires independent layers and
+         this one is a transformation of the layer above it. */
+      { id: "guidance", label: "Position in the guidance envelope", p: null, unavailable: !gI,
+        basis: gI ? `NHC places its own intensity forecast ${gI.position} the guidance envelope`
+                  + (hp.adjustment ? ` — peak read ${Math.abs(hp.adjustment.shiftKt).toFixed(1)} kt`
+                     + ` ${hp.adjustment.shiftKt < 0 ? "lower" : "higher"},`
+                     + ` ${Math.round(hp.adjustment.raw * 100)}% unadjusted` : "")
+                  : "the discussion states no position for the intensity forecast" },
       { id: "watch", label: "Watches and warnings", p: null, unavailable: !w.highest,
         basis: w.highest
           ? `${w.highest} in effect for ${(w.inEffect[0] && w.inEffect[0].areas || []).join(", ")}`
@@ -2141,6 +2210,14 @@ async function fetchKalshi(storms, clims, oni, std) {
       modelLayers: anchor ? anchor.layers : null,
       modelLow: anchor && anchor.pLow != null ? anchor.pLow : null,
       modelHigh: anchor && anchor.pHigh != null ? anchor.pHigh : null,
+      /* How old the product under this anchor was when it was read, carried on the
+         contract so the ranking can grade on it. A climatology anchor has no advisory
+         behind it and reports null, which is not the same as zero and must not grade
+         like a fresh one. */
+      modelLagMin: anchor && anchor.advisoryLagMin != null ? anchor.advisoryLagMin : null,
+      modelMaxLagMin: anchor && anchor.maxLagMin != null ? anchor.maxLagMin : null,
+      modelGuidance: anchor && anchor.guidance ? anchor.guidance.position : null,
+      modelRawP: anchor && anchor.adjustment ? anchor.adjustment.raw : null,
       horizon: horizonOf(title), strike,
       /* The board carried a mid and a spread and left every consumer to reconstruct the
          two sides from them. That reconstruction is wrong exactly where it matters: the
@@ -2333,7 +2410,25 @@ async function main() {
   try { framesJson = JSON.parse(await readFile(resolve(DATA_DIR, "frames.json"), "utf8")); } catch { /* first run */ }
   if (!Array.isArray(framesJson.frames)) framesJson.frames = [];
   const frameStorms = {}, frameContracts = {};
-  storms.forEach((s) => { frameStorms[s.id] = { wind: s.wind, pressure: s.pressure, center: s.center, modelCat4: s.modelCat4, marketCat4: s.marketCat4, reconAge: s.reconAge }; });
+  /* The advisory state goes into the FRAME, not only into latest.json. Without it the
+     replay history cannot show P(hurricane) moving, the signal register cannot emit an
+     event when an advisory lands, and the Situation strip has nothing to react to — the
+     number changed on the page and nothing on the board recorded that it had. Four small
+     scalars per storm per frame; the contract rows dwarf it. */
+  storms.forEach((s) => {
+    const hp = s.hurricaneP || null;
+    const gI = s.discussion && s.discussion.guidance && s.discussion.guidance.intensity;
+    frameStorms[s.id] = {
+      wind: s.wind, pressure: s.pressure, center: s.center,
+      modelCat4: s.modelCat4, marketCat4: s.marketCat4, reconAge: s.reconAge,
+      advNum: s.advNumFull || s.advNum || null,
+      advisoryLagMin: s.advisoryLagMin ?? null,
+      hurricaneP: hp && hp.p != null ? Math.round(hp.p * 10000) / 10000 : null,
+      peakKt: hp ? hp.peakKt ?? null : null,
+      peakHr: hp ? hp.peakHr ?? null : null,
+      guidance: gI ? gI.position : null,
+    };
+  });
   // 4dp is well past tick size; "model": 0.919047619047619 was ~14 wasted bytes per
   // contract per frame, which matters once every listed market is carried.
   const r4 = (v) => (v == null ? null : Math.round(v * 10000) / 10000);

@@ -291,6 +291,54 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
            needed — and nothing failed, because "storm console" was measured here and
            never asserted. Both ends are compared now: what the snapshot has, and what
            reached the page. */
+        /* ---- when an advisory lands, the model must move with it ----------------
+           The whole point of putting the advisory state into the FRAME rather than only
+           into latest.json. Two halves, and the first is the one that can never be
+           vacuous:
+
+             wiring  — every frame carries an advisory number and a P(hurricane), so the
+                       mechanism to detect a change exists at all;
+             behaviour — wherever a new advisory arrived AND the forecast peak or the
+                       current intensity changed with it, P(hurricane) moved in that same
+                       frame, and the register carries a row saying so.
+
+           The behaviour half is conditional on purpose. An advisory that re-states the
+           same forecast SHOULD leave the probability alone — that is correct, not a
+           failure — so only advisories that actually changed the forecast are required to
+           move the number. */
+        advisoryFrames: (() => {
+          const FR = (window.MT && MT._frames) || [];
+          const withAdv = [], moved = [], missed = [];
+          let pairs = 0;
+          for (let i = 1; i < FR.length; i++) {
+            const A = FR[i - 1].storms || {}, B = FR[i].storms || {};
+            for (const id of Object.keys(B)) {
+              const a = A[id], b = B[id];
+              if (!a || !b) continue;
+              if (b.advNum != null && b.hurricaneP != null) withAdv.push(id);
+              if (!a.advNum || !b.advNum || a.advNum === b.advNum) continue;
+              pairs++;
+              const forecastChanged = (a.peakKt !== b.peakKt) || (a.wind !== b.wind);
+              if (!forecastChanged) continue;
+              const pMoved = a.hurricaneP != null && b.hurricaneP != null
+                && Math.abs(a.hurricaneP - b.hurricaneP) > 1e-9;
+              (pMoved ? moved : missed).push(
+                `${id} #${a.advNum}->#${b.advNum} peak ${a.peakKt}->${b.peakKt} P ${a.hurricaneP}->${b.hurricaneP}`);
+            }
+          }
+          const sit = (window.MTX && MTX.situation) ? MTX.situation(360) : null;
+          return {
+            frames: FR.length, carrying: withAdv.length, advisoryChanges: pairs,
+            moved: moved.length, missed,
+            /* And the Situation strip must be reading the same per-frame value, not a
+               latest-only one pinned to the newest snapshot. */
+            situationHasP: !!(sit && sit.lead && sit.lead.p != null),
+            situationP: sit && sit.lead ? sit.lead.p : null,
+            situationAdv: sit && sit.lead ? sit.lead.adv : null,
+            advisorySignals: (window.MTX && MTX.signals)
+              ? MTX.signals({ sinceMin: 100000 }).filter((x) => x.kind === "advisory" && x.stormId).length : 0,
+          };
+        })(),
         advisory: (() => {
           const S = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
           const has = (k) => S.filter((x) => x[k]).length;
@@ -399,6 +447,18 @@ add("no watch area is truncated at a line wrap",
 add("the initial forecast point carries its intensity",
   AD.storms === 0 || AD.hourZeroIntensity === AD.withForecast,
   `${AD.hourZeroIntensity}/${AD.withForecast} storm(s) have an hour-zero intensity`);
+
+/* The assertion the model layer exists for: a new advisory has to reach the numbers, not
+   just the console. */
+const AF = LY.advisoryFrames;
+add("a new advisory moves P(hurricane) and the Situation strip",
+  AD.storms === 0
+    || (AF.carrying > 0 && AF.situationHasP && AF.missed.length === 0),
+  `${AF.frames} frames · ${AF.carrying} carry advisory state · ${AF.advisoryChanges} advisory change(s)`
+  + ` · ${AF.moved} moved P · ${AF.advisorySignals} register row(s)`
+  + ` · situation P=${AF.situationP == null ? "—" : Math.round(AF.situationP * 100) + "% at adv #" + AF.situationAdv}`
+  + (AF.missed.length ? ` · DID NOT MOVE: ${AF.missed.slice(0, 3).join(" | ")}` : "")
+  + (AF.advisoryChanges === 0 ? " (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)" : ""));
 
 add("the GFS wind field is ingested and both components present",
   LY.windLayer === true, `cycle ${LY.windCycle}`);

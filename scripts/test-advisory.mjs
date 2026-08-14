@@ -95,6 +95,73 @@ ck("the point sits inside it", r.p >= r.pLow - 1e-9 && r.p <= r.pHigh + 1e-9);
 ck("the band is not degenerate", r.pHigh - r.pLow > 0.02, (r.pHigh - r.pLow).toFixed(3));
 
 
+console.log("\n[3c] the guidance-envelope tilt — the one place prose moves a number");
+/* The discussion states where the forecaster placed the official forecast inside the
+   guidance envelope. P(hurricane) is computed FROM that forecast, so at the upper end the
+   estimate inherits the position. The rules asserted here are the ones that keep this a
+   tilt rather than an invention: direction only, size scaled to the forecast's own
+   published error, the unadjusted number always published, and the band always containing
+   it. */
+const flat = reachesHurricaneP(pts, null, null);
+const above = reachesHurricaneP(pts, null, { position: "above", quote: "near the upper end of the guidance envelope." });
+const belowG = reachesHurricaneP(pts, null, { position: "below", quote: "at the lower end of the guidance envelope." });
+const withG = reachesHurricaneP(pts, null, { position: "with", quote: "in line with the consensus aids." });
+
+eq("no guidance leaves the estimate untouched", flat.p, flat.raw);
+eq("and reports no adjustment at all", flat.adjustment, null);
+eq("'with the consensus' is also untouched", withG.p, withG.raw);
+eq("and likewise reports none", withG.adjustment, null);
+
+ck("an upper-end forecast reads LOWER than the unadjusted number", above.p < above.raw,
+   `${above.raw.toFixed(3)} -> ${above.p.toFixed(3)}`);
+ck("a lower-end forecast reads HIGHER", belowG.p > belowG.raw,
+   `${belowG.raw.toFixed(3)} -> ${belowG.p.toFixed(3)}`);
+eq("the unadjusted number is the same one the no-guidance path gives", above.raw, flat.p);
+/* Symmetric in KNOTS, which is where the adjustment is applied. It is deliberately NOT
+   symmetric in probability: the normal CDF is nonlinear, so equal and opposite
+   displacements of the peak give unequal moves in the answer, and that is the correct
+   behaviour rather than something to normalise away. */
+eq("the two directions are equal and opposite in knots",
+   above.adjustment.shiftKt, -belowG.adjustment.shiftKt);
+ck("but not equal in probability, because the CDF is not linear",
+   Math.abs((above.raw - above.p) - (belowG.p - belowG.raw)) > 1e-6,
+   `down ${(above.raw - above.p).toFixed(4)} vs up ${(belowG.p - belowG.raw).toFixed(4)}`);
+
+/* Size, not just direction. The displacement must be a quarter of THAT lead time's
+   published error — so it shrinks at short range where the forecast is trustworthy. */
+eq("the shift is a quarter of the published error at the peak's lead time",
+   above.adjustment.shiftKt, Math.round(-0.25 * above.mae * 10) / 10);
+const nearG = reachesHurricaneP([{ hr: 12, kt: 70, initial: false }], null, { position: "above" });
+const farG = reachesHurricaneP([{ hr: 120, kt: 70, initial: false }], null, { position: "above" });
+ck("so it is smaller at short lead times than at long ones",
+   Math.abs(nearG.adjustment.shiftKt) < Math.abs(farG.adjustment.shiftKt),
+   `12h=${nearG.adjustment.shiftKt} 120h=${farG.adjustment.shiftKt}`);
+
+/* The containment property. A tilt must never move the published answer somewhere the
+   plain arithmetic does not reach, or it is doing more than tilting. */
+ck("the unadjusted estimate stays inside the published band",
+   above.raw >= above.pLow - 1e-9 && above.raw <= above.pHigh + 1e-9,
+   `${above.pLow.toFixed(3)} <= ${above.raw.toFixed(3)} <= ${above.pHigh.toFixed(3)}`);
+ck("and so does the adjusted one",
+   above.p >= above.pLow - 1e-9 && above.p <= above.pHigh + 1e-9);
+ck("the basis states the position, the size and the unadjusted figure",
+   /above the guidance envelope/.test(above.basis) && /unadjusted/.test(above.basis), above.basis);
+ck("the adjustment carries the sentence it came from",
+   /upper end/.test(above.adjustment.quote));
+
+/* It is a tilt, not a lever: a quarter of one MAE must not be able to flip the answer
+   across a half on its own. */
+ck("it cannot cross a coin flip by itself",
+   !((above.raw > 0.5) !== (above.p > 0.5)) || Math.abs(above.raw - 0.5) < 0.05,
+   `${above.raw.toFixed(3)} -> ${above.p.toFixed(3)}`);
+
+/* A storm already carried at hurricane strength is settled by observation, so nothing
+   a forecaster says about the guidance envelope may move it. */
+const settled = reachesHurricaneP([{ hr: 0, kt: 80, initial: true }, { hr: 24, kt: 90 }], null,
+  { position: "above", quote: "upper end of the guidance envelope." });
+eq("an already-classified hurricane is not tilted", settled.adjustment, undefined);
+eq("and it still reports itself as settled", settled.already, true);
+
 console.log("\n[4] a storm already at hurricane strength is settled by observation");
 const already = reachesHurricaneP([{ hr: 0, kt: 80, initial: true }, { hr: 24, kt: 90 }]);
 ck("high probability", already.p > 0.95, already.p.toFixed(3));
@@ -144,8 +211,24 @@ const L = "Will Lala be categorized as a hurricane in the Central Pacific in 202
 const a = stormAnchor(L, T, [LALA]);
 ck("an active storm is priced", a != null && a.p > 0, a && a.p.toFixed(3));
 eq("and the source is named as the forecast, not the climatology", a.source, "NHC forecast");
-ck("it carries both layers", a.layers.length === 2 && a.layers[0].id === "official");
-ck("the watch layer is populated", !a.layers[1].unavailable, JSON.stringify(a.layers[1]));
+const layerOf = (anch, id) => anch.layers.find((l) => l.id === id) || null;
+ck("the official-forecast layer leads", a.layers[0].id === "official");
+ck("the watch layer is populated", !layerOf(a, "watch").unavailable, JSON.stringify(layerOf(a, "watch")));
+
+/* The guidance layer must NOT count as corroboration. It is a statement ABOUT the
+   official forecast, not a second estimate of the same quantity, so a p value here would
+   let a transformation of one layer vote as a second — which is the exact mistake the
+   TAKE grade's three-layer rule exists to prevent. */
+ck("a guidance layer exists", !!layerOf(a, "guidance"));
+eq("and it never carries a probability", layerOf(a, "guidance").p, null);
+ck("with no discussion it reports itself unavailable", layerOf(a, "guidance").unavailable === true);
+eq("so the number of layers that can vote is unchanged",
+   a.layers.filter((l) => l.p != null).length, 1);
+
+/* Advisory age travels WITH the anchor, so nothing can price this without also being
+   handed how old the product under it is. */
+eq("the anchor carries the advisory age", a.advisoryLagMin, 20);
+eq("and the cycle it is measured against", a.maxLagMin, 360);
 
 /* THE failure this whole file exists for. */
 eq("a storm absent from the live feed is NOT priced", stormAnchor(L, T, []), null);

@@ -95,11 +95,18 @@
            Adding a field to latest.json is not the same as shipping it. */
         advNumFull: s.advNumFull || null,
         advisoryIssuedZ: s.advisoryIssuedZ || null,
-        advisoryLagMin: isNum(s.advisoryLagMin) ? s.advisoryLagMin : null,
         forecastKt: s.forecastKt || null,
         hurricaneP: s.hurricaneP || null,
         watches: s.watches || null,
         discussion: s.discussion || null,
+        /* Per-FRAME, like wind and pressure. These are what let the board see an advisory
+           land: scrubbing history moves them, and the register diffs them frame to frame.
+           Read as latest only, the number changed on the page and nothing recorded it. */
+        advisoryLagMin: (f) => { const r = fs(f); return r && r.advisoryLagMin != null ? r.advisoryLagMin : (isNum(s.advisoryLagMin) ? s.advisoryLagMin : null); },
+        advNumAt: (f) => pick(f, "advNum", s.advNumFull || s.advNum || null),
+        hurricanePAt: (f) => { const r = fs(f); return r && r.hurricaneP != null ? r.hurricaneP : (s.hurricaneP ? s.hurricaneP.p : null); },
+        peakKtAt: (f) => pick(f, "peakKt", s.hurricaneP ? s.hurricaneP.peakKt : null),
+        guidanceAt: (f) => pick(f, "guidance", null),
       };
     });
 

@@ -204,6 +204,28 @@
           magnitude: Math.min(1, Math.abs(dW) / SCALE.wind),
           label: `${nm} intensity ${dW > 0 ? "+" : ""}${dW} kt`, detail: `${pv.wind} → ${cv.wind} kt`,
         });
+        /* A NEW ADVISORY is an event in its own right, and until the frame carried the
+           advisory number there was nothing to diff — P(hurricane) could move on the page
+           with no row in the register saying why. Reported whether or not the intensity
+           moved, because "NHC re-issued and changed nothing" is itself information. */
+        if (cv.advNum && pv.advNum && cv.advNum !== pv.advNum) {
+          const dPk = (cv.hurricaneP != null && pv.hurricaneP != null) ? cv.hurricaneP - pv.hurricaneP : null;
+          const moved = dPk != null && Math.abs(dPk) >= 0.005;
+          out.push({
+            tsZ: ts, kind: "advisory", subject: nm, stormId: sid,
+            delta: dPk != null ? Math.round(dPk * 1000) / 10 : 0, unit: "pt",
+            from: pv.hurricaneP, to: cv.hurricaneP,
+            magnitude: dPk != null ? Math.min(1, Math.abs(dPk) / 0.10) : 0,
+            label: `${nm} advisory #${cv.advNum}` + (moved
+              ? ` — P(hurricane) ${dPk > 0 ? "+" : ""}${Math.round(dPk * 100)} pts`
+              : " — forecast unchanged"),
+            detail: (pv.hurricaneP != null && cv.hurricaneP != null
+              ? `${Math.round(pv.hurricaneP * 100)}% → ${Math.round(cv.hurricaneP * 100)}%`
+              : "no intensity forecast parsed")
+              + (cv.peakKt != null ? ` · peak ${cv.peakKt} kt` : "")
+              + (cv.guidance ? ` · forecast ${cv.guidance} guidance` : ""),
+          });
+        }
         const dP = (cv.pressure != null && pv.pressure != null) ? cv.pressure - pv.pressure : 0;
         if (Math.abs(dP) >= NOISE.pressure) out.push({
           tsZ: ts, kind: "pressure", subject: nm, stormId: sid,
@@ -362,8 +384,24 @@
     const confWhy = !coreOk ? "a core feed is down"
       : stale ? `last refresh ${Math.round(genAge)}m ago` : "all core feeds live, data fresh";
 
+    /* The sharpest per-storm number the board holds, read AT THE FRAME so it moves with
+       the scrubber and with a new advisory instead of being pinned to the latest snapshot.
+       It belongs on the 30-second read: it is the one figure here that a position is
+       taken directly against. */
+    const hurricaneNow = storms
+      .map((S) => ({
+        id: S.id, name: S.name,
+        p: typeof S.hurricanePAt === "function" ? S.hurricanePAt(NF) : (S.hurricaneP ? S.hurricaneP.p : null),
+        adv: typeof S.advNumAt === "function" ? S.advNumAt(NF) : (S.advNumFull || S.advNum || null),
+        lagMin: typeof S.advisoryLagMin === "function" ? S.advisoryLagMin(NF) : (S.advisoryLagMin ?? null),
+        guidance: typeof S.guidanceAt === "function" ? S.guidanceAt(NF) : null,
+      }))
+      .filter((x) => x.p != null)
+      .sort((a, b) => b.p - a.p);
+
     return {
       windowMin: W, headline, storms: storms.length,
+      hurricaneNow, lead: hurricaneNow[0] || null,
       verdict: sum.verdict, byClass: sum.byClass, totalEvents: sum.total,
       topChange: top ? top.label : null,
       topClass: top ? top.class : null,
@@ -735,16 +773,35 @@
       const measured = live.length >= 3 && dispersion != null;
       const agrees = measured && dispersion <= 0.10;
       const deep = capacityDollarsOf >= o.minDollars * 2;
+      /* How old the product under this anchor was when it was read. A climatology anchor
+         has no advisory behind it and reports null — that is NOT the same as zero and
+         must not be graded like a fresh forecast, so null simply does not trigger this.
+         The server refuses outright past one full advisory cycle; inside that window the
+         age still matters, because an anchor built on a product that has been superseded
+         but not yet fetched is a stale forecast wearing a current timestamp. Half a cycle
+         is the line: past it the next advisory is likelier out than not. */
+      const lagMin = Number.isFinite(c.modelLagMin) ? c.modelLagMin : null;
+      const lagLimit = Number.isFinite(c.modelMaxLagMin) ? c.modelMaxLagMin : 360;
+      const lagStale = lagMin != null && lagMin > lagLimit / 2;
       if (!live.length) why.push("no layer detail to check the estimate against");
       else if (live.length < 3) why.push("only " + live.length + " layer" + (live.length === 1 ? "" : "s")
         + ", and the second is a shrunk form of the first — not independent corroboration");
       else if (!agrees) why.push("layers disagree by " + Math.round(dispersion * 100) + " pts");
       if (!frictionOk) why.push("edge is under 1.5x the " + Math.round((c.spread || 0) * 100) + "c spread");
       if (!deep) why.push("only $" + Math.round(capacityDollarsOf) + " resting");
+      if (lagStale) why.push("the advisory under this anchor was " + lagMin
+        + " min old when read, over half the " + lagLimit + "-min cycle — it may already be superseded");
+      if (c.modelGuidance && c.modelRawP != null) why.push("NHC places its intensity forecast "
+        + c.modelGuidance + " the guidance envelope, so this reads "
+        + Math.abs(Math.round((p - c.modelRawP) * 100)) + " pts "
+        + (p < c.modelRawP ? "below" : "above") + " the unadjusted " + Math.round(c.modelRawP * 100) + "%");
       if (best.edge >= 0.25 && !agrees) why.push("a " + Math.round(best.edge * 100) + "-pt disagreement with a traded market is more likely a model gap than free money");
       const grade = bandKills ? "SUSPECT"
         : (best.edge >= 0.25 && !agrees) ? "SUSPECT"
-        : (agrees && frictionOk && deep && best.edge >= 0.03) ? "TAKE"
+        /* A stale advisory cannot earn the top grade. It does not make the estimate wrong,
+           so it does not force SUSPECT — it removes the claim that this is current, and
+           TAKE is a claim that it is. */
+        : (agrees && frictionOk && deep && !lagStale && best.edge >= 0.03) ? "TAKE"
         : "SMALL";
       if (grade === "TAKE") why.push("every layer within " + Math.round(dispersion * 100) + " pts, edge clears the spread, real size resting");
 
@@ -758,6 +815,7 @@
         stake: stakeDollars, contracts, ev, roi: stakeDollars > 0 ? ev / stakeDollars : null,
         capped: idealDollars > capacityDollars,
         layer: governing ? governing.label : null, basis: c.modelBasis || null,
+        lagMin, lagStale, guidance: c.modelGuidance || null, rawModel: c.modelRawP ?? null,
         ladder: ladderOf(c), spread: c.spread ?? null, volume24h: c.volume24h ?? null,
       });
     }

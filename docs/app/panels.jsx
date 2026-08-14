@@ -83,6 +83,13 @@ function MT_Situation({ dense }) {
       {/* Scannable metric strip — the numbers carry the read, prose only where it adds. */}
       <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", borderRadius: 8, overflow: "hidden", flexWrap: "wrap", marginBottom: 10 }}>
         {[
+          /* First cell, when there is an active system: the one number a position is
+             taken directly against, read at the frame so a new advisory moves it here
+             and not only inside the storm console. */
+          ...(s.lead ? [{ k: "P(HURRICANE) " + s.lead.name.toUpperCase(), v: Math.round(s.lead.p * 100) + "%",
+            sub: "adv #" + (s.lead.adv || "?") + (s.lead.lagMin != null ? " · " + s.lead.lagMin + "m old" : "")
+               + (s.lead.guidance ? " · " + s.lead.guidance + " guidance" : ""),
+            tone: "var(--accent)" }] : []),
           { k: "MATERIAL CHANGES", v: s.byClass.material + s.byClass["trade-relevant"], sub: "in " + Math.round(s.windowMin / 60) + "h" },
           { k: "LAST UPDATE", v: ago(s.lastMaterialAgo).replace(" ago", ""), sub: "ago" },
           { k: "CONFIDENCE", v: s.confidence, sub: s.confWhy,
@@ -275,7 +282,7 @@ function StormConsole({ storm, dense, frame }) {
   const peak = fc.length ? fc.reduce((a, b) => (b.kt > a.kt ? b : a), fc[0]) : null;
   /* Lag is the honest liveness number: how old the product was when it was fetched. It
      is green only inside one intermediate cycle. */
-  const lag = S.advisoryLagMin;
+  const lag = val(S.advisoryLagMin);
   const lagTone = lag == null ? "var(--text-2)" : lag <= 45 ? "var(--pos)" : lag <= 180 ? "var(--warn)" : "var(--neg)";
 
   const cell = (label, value, tone) => (
@@ -488,7 +495,8 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
                 {x.name} {typeof x.wind === "function" ? x.wind(frame) : x.wind}kt
                 {x.hurricaneP && <span> · <b style={{ color: "var(--accent)" }}>{Math.round(x.hurricaneP.p * 100)}%</b> to reach hurricane strength</span>}
                 {x.watches && x.watches.highest && <span style={{ color: "var(--warn)" }}> · {x.watches.highest}</span>}
-                {x.advisoryLagMin != null && <span style={{ color: "var(--text-2)" }}> · advisory {x.advisoryLagMin}m old at fetch</span>}
+                {(() => { const L = typeof x.advisoryLagMin === "function" ? x.advisoryLagMin(frame) : x.advisoryLagMin;
+                  return L != null && <span style={{ color: "var(--text-2)" }}> · advisory {L}m old at fetch</span>; })()}
               </div>
             ))}
             <div style={{ ...mono, fontSize: 10, marginTop: 5, color: "var(--text-2)", lineHeight: 1.5 }}>
@@ -578,7 +586,7 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr>
               {head("Verdict", "center")}{head("Contract")}{head("Side", "center")}{head("Pay", "right")}{head("Model / range", "right")}
-              {head("Net edge", "right")}{head("Agree", "right")}{head("Stake", "right")}{head("Expected", "right")}{head("Why")}
+              {head("Net edge", "right")}{head("Agree", "right")}{head("Age", "right")}{head("Stake", "right")}{head("Expected", "right")}{head("Why")}
             </tr></thead>
             <tbody>
               {book.rows.map((r) => (
@@ -607,6 +615,12 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
                   {cell(<span style={{ fontWeight: 800, color: r.grade === "SUSPECT" ? "var(--text-2)" : "var(--edge-glow)" }}>+{(r.edge * 100).toFixed(1)}</span>, "right")}
                   {cell(<span style={{ color: r.dispersion == null ? "var(--text-2)" : r.dispersion <= 0.10 ? "var(--pos)" : "var(--warn)" }}>
                     {r.dispersion == null ? "—" : "±" + (r.dispersion * 100).toFixed(0)}</span>, "right")}
+                  {/* Age of the product under the anchor. A climatology anchor has no
+                      advisory behind it and shows "—", which is not a fresh one. */}
+                  {cell(<span title={r.lagMin == null ? "climatology anchor — no advisory behind it"
+                      : "the advisory under this anchor was " + r.lagMin + " min old when it was read"}
+                    style={{ color: r.lagMin == null ? "var(--text-2)" : r.lagStale ? "var(--warn)" : "var(--pos)" }}>
+                    {r.lagMin == null ? "—" : r.lagMin + "m"}</span>, "right")}
                   {cell(<span>{money(r.stake)}{r.capped && <span style={{ color: "var(--warn)" }} title="capped by resting depth"> ▲</span>}</span>, "right")}
                   {cell(<span style={{ color: r.grade === "SUSPECT" ? "var(--text-2)" : "var(--pos)", fontWeight: 700 }}>{money(r.ev)}</span>, "right")}
                   {cell(<span style={{ fontSize: 10, color: "var(--text-2)", whiteSpace: "normal", display: "block", maxWidth: 300 }}>{(r.why || []).join(" · ")}</span>)}
@@ -1371,6 +1385,10 @@ function MT_Observability({ narrow }) {
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", borderBottom: "1px solid var(--border-dim)", lineHeight: 1.5 }}>
         <div style={{ color: MTC.claim("deploy.verified").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("deploy.verified").text}</div>
         <div style={{ color: MTC.claim("markets.coverage").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("markets.coverage").text}</div>
+        {/* Advisory age is a model input — it decides whether a storm anchor can grade
+            TAKE and whether it is priced at all — so it is reported where the other
+            pipeline facts are, not only inside the storm console. */}
+        <div style={{ color: MTC.claim("advisory.lag").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("advisory.lag").text}</div>
         <div>{MTC.claim("capability.notIngested").text}</div>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 1, padding: 12, background: "var(--border-dim)" }}>

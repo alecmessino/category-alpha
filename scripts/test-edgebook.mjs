@@ -199,6 +199,40 @@ const noBand = graded({ model: 0.70, modelAt: () => 0.70, modelLayers: L(0.68, 0
 eq("an anchor with no band is unaffected", noBand.grade, "TAKE");
 
 console.log("\n[10c] verdict outranks expected value in the ordering");
+console.log("\n[10e] advisory age is a model input, not a status light");
+/* A storm anchor is built on a product with an issue time. Inside the refusal window the
+   age still matters: an anchor built on an advisory that has been superseded but not yet
+   fetched is a stale forecast wearing a current timestamp. It does not make the estimate
+   wrong, so it does not force SUSPECT — it removes the claim that the number is current,
+   and TAKE is exactly that claim. */
+const fresh = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.60, 0.61, 0.62),
+  modelLagMin: 20, modelMaxLagMin: 360 });
+eq("a fresh advisory can still take the top grade", fresh.grade, "TAKE");
+eq("and the age is carried on the row", fresh.lagMin, 20);
+eq("and it is not flagged stale", fresh.lagStale, false);
+
+const stale = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.60, 0.61, 0.62),
+  modelLagMin: 200, modelMaxLagMin: 360 });
+ck("past half a cycle the same edge cannot be TAKE", stale.grade !== "TAKE", stale.grade);
+eq("but it is not condemned either — the estimate is not wrong, just not current", stale.grade, "SMALL");
+ck("and the row says so", stale.why.some((w) => /superseded/.test(w)), stale.why.join("; "));
+
+/* A climatology anchor has no advisory behind it. null is not zero and must not be
+   graded as though the product were fresh — or as though it were stale. */
+const clim = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.60, 0.61, 0.62) });
+eq("an anchor with no advisory behind it is unaffected", clim.grade, "TAKE");
+eq("and reports no age rather than zero", clim.lagMin, null);
+eq("and is not flagged stale", clim.lagStale, false);
+
+console.log("\n[10f] the guidance tilt is explained on the row that carries it");
+const tilted = graded({ model: 0.598, modelAt: () => 0.598, modelLayers: L(0.58, 0.59, 0.60),
+  modelGuidance: "above", modelRawP: 0.673 });
+ck("the row explains the direction and the size", tilted.why.some((w) => /guidance envelope/.test(w)),
+   tilted.why.join("; "));
+ck("and names the unadjusted figure", tilted.why.some((w) => /unadjusted 67%/.test(w)), tilted.why.join("; "));
+eq("the unadjusted estimate is carried for comparison", tilted.rawModel, 0.673);
+eq("and the position with it", tilted.guidance, "above");
+
 /* A big SUSPECT must not sit above a modest TAKE — the whole point of the grade is that
    scanning the top of the list is safe. */
 const graded10c = buildMTX([

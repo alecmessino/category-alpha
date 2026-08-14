@@ -356,6 +356,46 @@
     };
   });
 
+  /* The one place on this board where prose moves a number, and the fraction that does
+     it is an OPERATOR SETTING — declared by a human, not observed. NHC publishes the
+     position in words and never a magnitude, so no feed can produce this; the owner class
+     exists for exactly that. Registered here so the constant, its direction rule and its
+     unadjusted counterpart are all one click from the number they change. */
+  define("model.guidanceTilt", "operator", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const adj = storms.map((x) => ({ name: x.name, a: x.hurricaneP && x.hurricaneP.adjustment }))
+      .filter((x) => x.a);
+    const rule = "The discussion's placement of the official intensity forecast inside the guidance"
+      + " envelope displaces the forecast peak by 0.25 of that lead time's published mean absolute"
+      + " error, in the stated direction only. The fraction is an operator setting, not an"
+      + " observation — NHC states the position in words and never a magnitude. The unadjusted"
+      + " estimate is published alongside and the reported band is widened to contain it, so the"
+      + " tilt can never move the answer outside what the plain arithmetic reaches.";
+    if (!adj.length) return { text: rule + " No active system has a stated position, so nothing is tilted.", ok: true };
+    return {
+      text: adj.map((x) => x.name + ": peak read " + Math.abs(x.a.shiftKt).toFixed(1) + " kt "
+        + (x.a.shiftKt < 0 ? "lower" : "higher") + " (" + Math.round(x.a.raw * 100) + "% unadjusted → "
+        + Math.round((x.a.raw + x.a.delta) * 100) + "%)").join(" · ") + " — " + rule,
+      ok: true,
+    };
+  });
+
+  /* Advisory age is a model input, not a status light. An anchor built on a product that
+     has been superseded but not yet fetched is a stale forecast wearing a current
+     timestamp, so the ranking grades on it and this states the thresholds it grades by. */
+  define("advisory.lag", "nhc", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const at = (x) => (typeof x.advisoryLagMin === "function" ? x.advisoryLagMin(window.MT.FRAMES - 1) : x.advisoryLagMin);
+    const lags = storms.map((x) => ({ name: x.name, lag: at(x) })).filter((x) => x.lag != null);
+    const rule = "Past half an advisory cycle (180 min) a storm anchor cannot grade TAKE; past a"
+      + " full cycle (360 min) it is not priced at all.";
+    if (!lags.length) return { text: "no advisory age measured for any active system. " + rule, ok: false };
+    return {
+      text: lags.map((x) => x.name + " " + x.lag + "m at fetch").join(" · ") + " — " + rule,
+      ok: lags.every((x) => x.lag <= 180),
+    };
+  });
+
   define("wind.field", "wind", () => {
     const w = window.MT && MT._wind;
     if (!w) return { text: "no surface wind field ingested this cycle", ok: false };
