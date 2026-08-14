@@ -1,12 +1,12 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T00:21:02.795Z",
+  "ranAt": "2026-08-14T00:44:01.809Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "707e91417c1d8ae5a8e9d5a54a382bd7e865b41b",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31756997717",
+  "sha": "aae448af20e51a3233b30eae4e52ede4879cbf0a",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31758311640",
   "ok": true,
-  "passed": 27,
-  "total": 27,
+  "passed": 29,
+  "total": 29,
   "failures": [],
   "thirdPartyFailures": 1,
   "checks": [
@@ -28,7 +28,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T00:18:04.823Z · 3m old"
+      "detail": "2026-08-14T00:41:23.542Z · 3m old"
     },
     {
       "check": "renders: Situation",
@@ -88,12 +88,22 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "8 ranked of 26 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "7 ranked of 23 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 1 displayed-only · unverifiable=0"
+      "detail": "0 executable · 2 displayed-only · unverifiable=0"
+    },
+    {
+      "check": "no horizontal overflow and no jittering digits",
+      "pass": true,
+      "detail": "bodyOverflow=0px tabularNums=true grids=5 overflowing=0"
+    },
+    {
+      "check": "the map is a centrepiece, not a thumbnail",
+      "pass": true,
+      "detail": "map 700px"
     },
     {
       "check": "all markets carried",
