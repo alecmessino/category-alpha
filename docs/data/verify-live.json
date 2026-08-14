@@ -1,19 +1,14 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T16:23:14.869Z",
+  "ranAt": "2026-08-14T16:28:20.049Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "cad2cca1a6d10adfdcc0f22a3145d7793ba598bd",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31819013814",
-  "ok": false,
-  "passed": 38,
+  "sha": "680c329d974824637aa96b42983a978541a349de",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31819416601",
+  "ok": true,
+  "passed": 39,
   "total": 39,
-  "failures": [
-    {
-      "check": "a new advisory moves P(hurricane) and the Situation strip",
-      "detail": "24 frames · 0 carry advisory state · 0 advisory change(s) · 0 moved P · 0 register row(s) · situation P=67% at adv #9 (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)"
-    }
-  ],
-  "thirdPartyFailures": 20,
+  "failures": [],
+  "thirdPartyFailures": 22,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -33,7 +28,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T16:16:28.340Z · 7m old"
+      "detail": "2026-08-14T16:22:49.618Z · 5m old"
     },
     {
       "check": "renders: Situation",
@@ -118,7 +113,7 @@
     {
       "check": "four tabs, so no single view is a wall",
       "pass": true,
-      "detail": "4 tabs · 1.9 screens tall (2645px / 1400px)"
+      "detail": "4 tabs · 1.9 screens tall (2663px / 1400px)"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -137,8 +132,8 @@
     },
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
-      "pass": false,
-      "detail": "24 frames · 0 carry advisory state · 0 advisory change(s) · 0 moved P · 0 register row(s) · situation P=67% at adv #9 (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)"
+      "pass": true,
+      "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 0 advisory change(s) · 0 moved P · 0 register row(s) · situation P=60% at adv #9 (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)"
     },
     {
       "check": "the GFS wind field is ingested and both components present",
