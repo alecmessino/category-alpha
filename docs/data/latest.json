@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-14T01:41:48.351Z",
+  "generatedAt": "2026-08-14T01:43:04.613Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 338,
+      "latencyMs": 171,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep082026\",\"binNumber\":\"EP3\",\"name\":\"Hernan\",\"classification\":\"TS\",\"intensity\":\"40\",\"pressure\":\"1003\",\"latitude\":\"17.3N\",\"longitude\":\"131.9W\",\"latitudeNumeric\":17.3,\"longitudeNumeric\":-131.9,\"movementDir\":180,\"movementSpeed\":6,\"lastUpdate\":\"2026-08-13T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"004\",\"issuance\":\"2026-08-13T21:00:00.000Z\",\"fileUpdateTime\":\"2026-08-13T20:47:43.234Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP3.shtml\"},\"forecastAdvisory\":{\"advNum\":\"004\",\"issuance\":\"2026-08-13",
-      "forecast": "Hernan: 5 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · advisory 295m old | Lala: 8 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 67% · Hurricane Watch · advisory 119m old",
-      "advisoryLagMin": 295
+      "forecast": "Hernan: 5 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · advisory 296m old | Lala: 8 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 67% · Hurricane Watch · advisory 120m old",
+      "advisoryLagMin": 296
     },
     "markets": {
       "ok": true,
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 148,
+      "latencyMs": 308,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 3,
       "note": "3 area(s) under watch · 2 Atlantic · highest 7-day 50%",
-      "latencyMs": 118,
+      "latencyMs": 135,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -334,7 +334,7 @@
         "already": false,
         "basis": "official forecast peaks at 35 kt at 9h; NHC's published mean absolute intensity error there is 4.1 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 295,
+      "advisoryLagMin": 296,
       "track": [
         [
           17.3,
@@ -592,7 +592,7 @@
         "already": false,
         "basis": "official forecast peaks at 70 kt at 114h; NHC's published mean absolute intensity error there is 13.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 67% central, 61-71% across a plausible range of error widths"
       },
-      "advisoryLagMin": 119,
+      "advisoryLagMin": 120,
       "track": [
         [
           15.6,
@@ -846,7 +846,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast",
-      "modelBasis": "Lala is 45 kt now · official forecast peaks at 70 kt at 114h; NHC's published mean absolute intensity error there is 13.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 67% central, 61-71% across a plausible range of error widths · Hurricane Watch in effect · advisory 119 min old when fetched",
+      "modelBasis": "Lala is 45 kt now · official forecast peaks at 70 kt at 114h; NHC's published mean absolute intensity error there is 13.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 67% central, 61-71% across a plausible range of error widths · Hurricane Watch in effect · advisory 120 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -895,7 +895,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast",
-      "modelBasis": "Hernan is 40 kt now · official forecast peaks at 35 kt at 9h; NHC's published mean absolute intensity error there is 4.1 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 295 min old when fetched",
+      "modelBasis": "Hernan is 40 kt now · official forecast peaks at 35 kt at 9h; NHC's published mean absolute intensity error there is 4.1 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 296 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -1033,14 +1033,14 @@
       "yesBid": 0.28,
       "yesAsk": 0.29,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 58,
+      "liquidity": 60,
       "spread": 0.009999999999999953,
       "volume": 15873.31,
       "volume24h": 2263.54,
       "openInterest": 5353.31,
       "depth": {
         "bidSize": 69.2,
-        "askSize": 200,
+        "askSize": 206.68,
         "notional": 1
       },
       "proxy": false,
@@ -7608,14 +7608,14 @@
       "yesBid": null,
       "yesAsk": 0.01,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 935,
+      "liquidity": 842,
       "spread": 0.01,
       "volume": 118323.37,
       "volume24h": 968.19,
       "openInterest": 90586.07,
       "depth": {
         "bidSize": 0,
-        "askSize": 93502.19,
+        "askSize": 84150.28,
         "notional": 1
       },
       "proxy": false,
@@ -8273,14 +8273,14 @@
       "yesBid": 0.1,
       "yesAsk": 0.6,
       "closeTime": "2027-01-01T04:59:00Z",
-      "liquidity": 4,
+      "liquidity": 3,
       "spread": 0.5,
       "volume": 308.67,
       "volume24h": 308.67,
       "openInterest": 308.67,
       "depth": {
         "bidSize": 5,
-        "askSize": 5.92,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
