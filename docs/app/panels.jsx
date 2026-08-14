@@ -309,24 +309,29 @@ function StormConsole({ storm, dense, frame }) {
         {cell("Now", (windKt ?? "—") + " kt")}
         {cell("Pressure", (pressureMb ?? "—") + " mb")}
         {cell("Moving", S.movement || "—")}
-        {peak && cell("Forecast peak", peak.kt + " kt", "var(--accent)")}
-        {peak && cell("At", "+" + peak.hr + "h")}
+        {peak && cell(peak.hr === 0 ? "Peak (now)" : "Forecast peak", peak.kt + " kt", "var(--accent)")}
+        {peak && peak.hr > 0 && cell("At", "+" + peak.hr + "h")}
         {hp && cell("To hurricane", Math.round(hp.p * 100) + "%", "var(--accent)")}
       </div>
 
       {/* The forecast curve as published, so the shape is readable at a glance rather
           than inferred from a single peak number. */}
+      {/* Hour zero is now a real point read from the advisory rather than a synthesized
+          position with no intensity, so the curve starts at NOW and the forecast is read
+          against it instead of floating free of the current state. */}
       {fc.length > 1 && (
         <div style={{ display: "flex", alignItems: "flex-end", gap: 3, padding: "9px 11px 6px", height: 58 }}>
           {fc.map((p) => {
             const h = Math.max(3, Math.min(1, p.kt / 100) * 40);
             const isHur = p.kt >= 65;
+            const isNow = p.hr === 0;
             return (
               <div key={p.hr} style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
                 <span style={{ ...mono, fontSize: 8.5, color: isHur ? "var(--neg)" : "var(--text-2)" }}>{p.kt}</span>
                 <div style={{ width: "100%", height: h, borderRadius: 2,
-                  background: isHur ? "var(--neg)" : "var(--accent)", opacity: isHur ? .9 : .5 }} />
-                <span style={{ ...mono, fontSize: 8, color: "var(--text-2)" }}>{p.hr}h</span>
+                  background: isHur ? "var(--neg)" : "var(--accent)", opacity: isNow ? 1 : isHur ? .9 : .5,
+                  outline: isNow ? "1px solid var(--text-2)" : "none" }} />
+                <span style={{ ...mono, fontSize: 8, color: isNow ? "var(--text-1)" : "var(--text-2)" }}>{isNow ? "now" : p.hr + "h"}</span>
               </div>
             );
           })}
