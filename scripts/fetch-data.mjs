@@ -497,6 +497,19 @@ function parseForecastAdvisory(text, baseIso) {
  */
 const INTENSITY_MAE = { 0: 0, 12: 5.5, 24: 7.5, 36: 9.0, 48: 10.0, 72: 11.5, 96: 12.5, 120: 13.5 };
 const HURRICANE_KT = 64;
+/* Best-track and advisory intensities are reported in 5-knot increments, so the values
+   that exist are 55, 60, 65 — never 64. A storm is CALLED a hurricane when the reported
+   number is 65, which means the latent wind only has to clear the midpoint between 60 and
+   65. Testing against 64 asks for a value that can never be published and understates
+   every one of these probabilities in the same direction. */
+const HURRICANE_REPORTED_KT = 65;
+const KT_INCREMENT = 5;
+const LATENT_THRESHOLD = HURRICANE_REPORTED_KT - KT_INCREMENT / 2;   // 62.5
+/* How far the answer moves if the error width is wrong. The published MAE is an
+   unconditional, mostly-Atlantic figure being applied to a Pacific storm forecast to
+   intensify — both of which argue the true spread is wider here — so the band is
+   asymmetric and reported alongside the point rather than instead of it. */
+const SIGMA_BAND = { tight: 0.8, wide: 1.6 };
 
 function maeAt(hr) {
   const keys = Object.keys(INTENSITY_MAE).map(Number).sort((a, b) => a - b);
@@ -522,7 +535,8 @@ function normCdf(z) {
    answer the question, because silence is better than a probability with no forecast
    under it. */
 function reachesHurricaneP(points, threshold) {
-  const thr = threshold || HURRICANE_KT;
+  const reported = threshold || HURRICANE_REPORTED_KT;
+  const thr = threshold ? threshold - KT_INCREMENT / 2 : LATENT_THRESHOLD;
   if (!Array.isArray(points) || !points.length) return null;
   const withKt = points.filter((p) => p && Number.isFinite(p.kt) && p.kt > 0);
   if (!withKt.length) return null;
@@ -531,9 +545,11 @@ function reachesHurricaneP(points, threshold) {
   // Already there: the question is settled by observation, subject only to the analysis
   // uncertainty in that observation.
   if (current && current.kt >= thr) {
-    return { p: Math.min(0.99, normCdf((current.kt - thr) / (5 * Math.sqrt(Math.PI / 2)))),
+    const pNow = Math.min(0.99, normCdf((current.kt - thr) / (5 * Math.sqrt(Math.PI / 2))));
+    return { p: pNow, pLow: pNow, pHigh: pNow,
       peakKt: current.kt, peakHr: 0, sigma: 5, already: true,
-      basis: `already at ${current.kt} kt in the current advisory; ${thr} kt is the hurricane threshold` };
+      basis: `already carried at ${current.kt} kt in the current advisory, at or above the ${reported} kt`
+           + ` hurricane threshold — the question is settled by the classification, not forecast` };
   }
 
   /* The peak of the forecast, evaluated at its own lead time's error.
@@ -551,13 +567,21 @@ function reachesHurricaneP(points, threshold) {
   const tallest = withKt.reduce((a, b) => (b.kt > a.kt ? b : a), withKt[0]);
   const mae = maeAt(tallest.hr);
   const sigma = Math.max(1e-6, mae * Math.sqrt(Math.PI / 2));
-  const p = normCdf((tallest.kt - thr) / sigma);
+  const clamp = (v) => Math.max(0.01, Math.min(0.99, v));
+  const at = (mult) => clamp(normCdf((tallest.kt - thr) / (sigma * mult)));
+  const p = clamp(normCdf((tallest.kt - thr) / sigma));
+  /* A narrower error moves the answer AWAY from a half, in whichever direction the
+     forecast already points; a wider one pulls it toward a half. So the band is not
+     symmetric about the point and its ends are sorted rather than assumed. */
+  const ends = [at(SIGMA_BAND.tight), at(SIGMA_BAND.wide)].sort((a, b) => a - b);
   return {
-    p: Math.max(0.01, Math.min(0.99, p)),
+    p, pLow: ends[0], pHigh: ends[1],
     peakKt: tallest.kt, peakHr: tallest.hr, sigma, mae, already: false,
     basis: `official forecast peaks at ${tallest.kt} kt at ${tallest.hr}h; NHC's published mean absolute`
-         + ` intensity error at that lead time is ${mae.toFixed(1)} kt, so ${thr} kt sits`
-         + ` ${((thr - tallest.kt) / sigma).toFixed(2)} standard deviations from the peak`,
+         + ` intensity error there is ${mae.toFixed(1)} kt, and reported intensities come in 5 kt steps`
+         + ` so ${reported} kt needs ${thr} kt of latent wind —`
+         + ` ${Math.round(p * 100)}% central, ${Math.round(ends[0] * 100)}-${Math.round(ends[1] * 100)}%`
+         + ` across a plausible range of error widths`,
   };
 }
 
@@ -1442,7 +1466,8 @@ function stormAnchor(label, ticker, storms) {
 
   const w = S.watches || {};
   return {
-    p: hp.p, unconditional: null, quantity: "storm-intensity", basin: null,
+    p: hp.p, pLow: hp.pLow ?? null, pHigh: hp.pHigh ?? null,
+    unconditional: null, quantity: "storm-intensity", basin: null,
     storm: S.id, source: "NHC forecast",
     layers: [
       { id: "official", label: "Official forecast intensity", p: hp.p, basis: hp.basis },
@@ -1909,6 +1934,8 @@ async function fetchKalshi(storms, clims, oni, std) {
       modelBasis: anchor ? anchor.basis : null,
       modelUncond: anchor ? anchor.unconditional : null,
       modelLayers: anchor ? anchor.layers : null,
+      modelLow: anchor && anchor.pLow != null ? anchor.pLow : null,
+      modelHigh: anchor && anchor.pHigh != null ? anchor.pHigh : null,
       horizon: horizonOf(title), strike,
       /* The board carried a mid and a spread and left every consumer to reconstruct the
          two sides from them. That reconstruction is wrong exactly where it matters: the

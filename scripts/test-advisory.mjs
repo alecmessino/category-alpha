@@ -74,8 +74,26 @@ ck("the same forecast at longer range is LESS informative, not more",
    near1.p > far1.p, `24h=${near1.p.toFixed(3)} 120h=${far1.p.toFixed(3)}`);
 const below = reachesHurricaneP([{ hr: 24, kt: 45, initial: false }]);
 ck("a forecast well below the threshold is unlikely", below.p < 0.1, below.p.toFixed(3));
-const at = reachesHurricaneP([{ hr: 24, kt: 64, initial: false }]);
-ck("a forecast exactly at the threshold is a coin flip", Math.abs(at.p - 0.5) < 0.02, at.p.toFixed(3));
+/* Reported intensities come in 5 kt steps, so 64 kt is a number NHC never publishes. A
+   storm is CALLED a hurricane when the reported figure is 65, which the latent wind
+   reaches from 62.5 up. Testing against 64 asks for a value that cannot exist and
+   understates every one of these in the same direction. */
+const half = reachesHurricaneP([{ hr: 24, kt: 62.5, initial: false }]);
+ck("the coin flip sits at the 62.5 kt midpoint, not at 64", Math.abs(half.p - 0.5) < 0.02, half.p.toFixed(3));
+const at65 = reachesHurricaneP([{ hr: 24, kt: 65, initial: false }]);
+ck("a forecast of 65 kt is better than even", at65.p > 0.55, at65.p.toFixed(3));
+const at60 = reachesHurricaneP([{ hr: 24, kt: 60, initial: false }]);
+ck("a forecast of 60 kt is worse than even", at60.p < 0.45, at60.p.toFixed(3));
+ck("and the basis explains the 5 kt step", /5 kt steps/.test(at65.basis), at65.basis);
+
+console.log("\n[3b] a band, because the error width itself is uncertain");
+/* The published MAE is unconditional and mostly Atlantic, applied here to a Pacific storm
+   forecast to intensify — both argue the true spread is wider. A point estimate hides
+   that; the band is what stops this being read as a calibrated ensemble. */
+ck("a band is reported", r.pLow != null && r.pHigh != null, `${r.pLow} .. ${r.pHigh}`);
+ck("the point sits inside it", r.p >= r.pLow - 1e-9 && r.p <= r.pHigh + 1e-9);
+ck("the band is not degenerate", r.pHigh - r.pLow > 0.02, (r.pHigh - r.pLow).toFixed(3));
+
 
 console.log("\n[4] a storm already at hurricane strength is settled by observation");
 const already = reachesHurricaneP([{ hr: 0, kt: 80, initial: true }, { hr: 24, kt: 90 }]);

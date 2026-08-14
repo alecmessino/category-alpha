@@ -181,6 +181,23 @@ const wide = graded({ model: 0.62, modelAt: () => 0.62, modelLayers: L(0.61, 0.6
   spread: 0.10, yesAsk: 0.55, yesBid: 0.45 });
 ck("an edge that does not clear 1.5x the spread is not TAKE", wide.grade !== "TAKE", wide.grade + " " + wide.why.join("; "));
 
+console.log("\n[10b2] an estimate whose own range straddles the price claims no edge");
+/* The official-forecast anchor repackages a public NHC product plus its published error.
+   It holds nothing the market has not also read, so a "point estimate beats the price"
+   result that its own uncertainty band does not survive is not an edge — it is the middle
+   of a range being mistaken for a number. */
+const banded = graded({ model: 0.70, modelAt: () => 0.70, modelLayers: L(0.68, 0.70, 0.72),
+  modelLow: 0.55, modelHigh: 0.85, yesBid: 0.59, yesAsk: 0.60 });
+eq("a straddling band is demoted, not ranked", banded.grade, "SUSPECT");
+ck("and it says the band is why",
+   banded.why.some((w) => /straddles/.test(w)), banded.why.join("; "));
+const clear = graded({ model: 0.70, modelAt: () => 0.70, modelLayers: L(0.68, 0.70, 0.72),
+  modelLow: 0.66, modelHigh: 0.74, yesBid: 0.49, yesAsk: 0.50 });
+eq("a band comfortably clear of the price still ranks", clear.grade, "TAKE");
+const noBand = graded({ model: 0.70, modelAt: () => 0.70, modelLayers: L(0.68, 0.70, 0.72),
+  yesBid: 0.49, yesAsk: 0.50 });
+eq("an anchor with no band is unaffected", noBand.grade, "TAKE");
+
 console.log("\n[10c] verdict outranks expected value in the ordering");
 /* A big SUSPECT must not sit above a modest TAKE — the whole point of the grade is that
    scanning the top of the list is safe. */

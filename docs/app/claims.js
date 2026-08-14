@@ -306,7 +306,10 @@
       text: withP.map((x) => x.name + " " + Math.round(x.hurricaneP.p * 100) + "% to reach hurricane strength").join(" · ")
           + " — from the official NHC forecast intensity widened by NHC's own published forecast error."
           + " This is a deterministic forecast with an error bar, not a calibrated ensemble, and it is a"
-          + " different kind of estimate from the season-count anchors.",
+          + " different kind of estimate from the season-count anchors. It holds no information the"
+          + " market has not also read — it repackages a public product — so it cannot be expected to"
+          + " beat a price set by people looking at the same advisory. Where its own range straddles"
+          + " the price, the board reports no edge rather than the middle of the range.",
       ok: true,
     };
   });

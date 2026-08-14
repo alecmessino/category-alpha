@@ -706,6 +706,22 @@
          its own layers disagree with each other, is far more likely to be missing
          something than to have found free money. */
       const why = [];
+      /* An anchor that carries a BAND rather than a point cannot claim an edge the band
+         does not survive. The official-forecast anchor is a repackaging of a public NHC
+         product plus its published error — it holds no information the market has not
+         also read, so when the honest range of that estimate straddles the price you
+         would pay, the correct output is that there is nothing here, not a number
+         derived from the middle of the band. */
+      let bandKills = false;
+      if (c.modelLow != null && c.modelHigh != null) {
+        const worst = best.side === "YES" ? c.modelLow - best.cost : (1 - c.modelHigh) - best.cost;
+        if (worst <= 0) {
+          bandKills = true;
+          why.push("the estimate's own range (" + Math.round(c.modelLow * 100) + "-"
+            + Math.round(c.modelHigh * 100) + "%) straddles the " + Math.round(best.price * 100)
+            + "c you would pay — no edge survives it");
+        }
+      }
       const frictionOk = c.spread == null || best.edge >= 1.5 * c.spread;
       /* Absence of disagreement is NOT agreement. An anchor that publishes no layer
          detail cannot be shown to be robust to method, so it must not earn the top
@@ -726,7 +742,8 @@
       if (!frictionOk) why.push("edge is under 1.5x the " + Math.round((c.spread || 0) * 100) + "c spread");
       if (!deep) why.push("only $" + Math.round(capacityDollarsOf) + " resting");
       if (best.edge >= 0.25 && !agrees) why.push("a " + Math.round(best.edge * 100) + "-pt disagreement with a traded market is more likely a model gap than free money");
-      const grade = (best.edge >= 0.25 && !agrees) ? "SUSPECT"
+      const grade = bandKills ? "SUSPECT"
+        : (best.edge >= 0.25 && !agrees) ? "SUSPECT"
         : (agrees && frictionOk && deep && best.edge >= 0.03) ? "TAKE"
         : "SMALL";
       if (grade === "TAKE") why.push("every layer within " + Math.round(dispersion * 100) + " pts, edge clears the spread, real size resting");
