@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-14T18:29:18.969Z",
+  "generatedAt": "2026-08-14T18:40:44.082Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 130,
+      "latencyMs": 382,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep082026\",\"binNumber\":\"EP3\",\"name\":\"Hernan\",\"classification\":\"TS\",\"intensity\":\"35\",\"pressure\":\"1004\",\"latitude\":\"15.4N\",\"longitude\":\"132.1W\",\"latitudeNumeric\":15.4,\"longitudeNumeric\":-132.1,\"movementDir\":190,\"movementSpeed\":9,\"lastUpdate\":\"2026-08-14T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"007\",\"issuance\":\"2026-08-14T15:00:00.000Z\",\"fileUpdateTime\":\"2026-08-14T14:37:54.249Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP3.shtml\"},\"forecastAdvisory\":{\"advNum\":\"007\",\"issuance\":\"2026-08-14",
-      "forecast": "Hernan: 6 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 232m old | Lala: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 60% · Hurricane Warning · forecast undefined guidance · advisory 58m old",
-      "advisoryLagMin": 232
+      "forecast": "Hernan: 6 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 244m old | Lala: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 60% · Hurricane Warning · forecast undefined guidance · advisory 70m old",
+      "advisoryLagMin": 244
     },
     "markets": {
       "ok": true,
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 417,
+      "latencyMs": 285,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 4,
       "note": "4 area(s) under watch · 2 Atlantic · highest 7-day 40%",
-      "latencyMs": 138,
+      "latencyMs": 119,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -341,11 +341,11 @@
         "already": false,
         "basis": "official forecast peaks at 35 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 232,
+      "advisoryLagMin": 244,
       "discussion": {
         "forecaster": "Adams/Cangialosi",
         "issuedZ": "2026-08-14T14:39:00.000Z",
-        "lagMin": 230,
+        "lagMin": 242,
         "guidance": {
           "intensity": null,
           "track": null
@@ -647,11 +647,11 @@
         "already": false,
         "basis": "official forecast peaks at 70 kt at 114h; NHC's published mean absolute intensity error there is 13.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 60% central, 56-67% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 3.3 kt lower (67% unadjusted)"
       },
-      "advisoryLagMin": 58,
+      "advisoryLagMin": 70,
       "discussion": {
         "forecaster": "Cangialosi/Pierce",
         "issuedZ": "2026-08-14T14:44:00.000Z",
-        "lagMin": 225,
+        "lagMin": 237,
         "guidance": {
           "intensity": {
             "position": "above",
@@ -939,7 +939,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast",
-      "modelBasis": "Lala is 50 kt now · official forecast peaks at 70 kt at 114h; NHC's published mean absolute intensity error there is 13.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 60% central, 56-67% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 3.3 kt lower (67% unadjusted) · Hurricane Warning in effect · advisory 58 min old when fetched",
+      "modelBasis": "Lala is 50 kt now · official forecast peaks at 70 kt at 114h; NHC's published mean absolute intensity error there is 13.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 60% central, 56-67% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 3.3 kt lower (67% unadjusted) · Hurricane Warning in effect · advisory 70 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -965,7 +965,7 @@
       ],
       "modelLow": 0.5626144127784473,
       "modelHigh": 0.6742332013260945,
-      "modelLagMin": 58,
+      "modelLagMin": 70,
       "modelMaxLagMin": 360,
       "modelGuidance": "above",
       "modelRawP": 0.6742332013260945,
@@ -999,7 +999,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast",
-      "modelBasis": "Hernan is 35 kt now · official forecast peaks at 35 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 232 min old when fetched",
+      "modelBasis": "Hernan is 35 kt now · official forecast peaks at 35 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 244 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -1025,7 +1025,7 @@
       ],
       "modelLow": 0.01,
       "modelHigh": 0.01,
-      "modelLagMin": 232,
+      "modelLagMin": 244,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -1107,7 +1107,7 @@
       "liquidity": 27,
       "spread": 0.010000000000000009,
       "volume": 24111.54,
-      "volume24h": 155.64,
+      "volume24h": 139.22,
       "openInterest": 9273.29,
       "depth": {
         "bidSize": 400,
@@ -1246,7 +1246,7 @@
       "short": "Will there be more than 4 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.105,
+      "market": 0.11,
       "model": 0.14739579442310768,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -1293,16 +1293,16 @@
       "modelRawP": null,
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.09,
+      "yesBid": 0.1,
       "yesAsk": 0.12,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 12,
-      "spread": 0.03,
+      "spread": 0.01999999999999999,
       "volume": 12302.78,
       "volume24h": 300,
       "openInterest": 3632.26,
       "depth": {
-        "bidSize": 8,
+        "bidSize": 12,
         "askSize": 100,
         "notional": 1
       },
@@ -2052,7 +2052,7 @@
       "volume24h": 28,
       "openInterest": 3865.09,
       "depth": {
-        "bidSize": 248.25,
+        "bidSize": 245.25,
         "askSize": 278.96,
         "notional": 1
       },
@@ -3932,7 +3932,7 @@
       "short": "Will there be more than 4 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.415,
+      "market": 0.42,
       "model": 0.14650802864715287,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
@@ -3980,16 +3980,16 @@
       "horizon": "seasonal",
       "strike": 4,
       "yesBid": 0.09,
-      "yesAsk": 0.74,
+      "yesAsk": 0.75,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 12,
-      "spread": 0.65,
+      "liquidity": 150,
+      "spread": 0.66,
       "volume": 932.28,
       "volume24h": 151,
       "openInterest": 562.41,
       "depth": {
         "bidSize": 5,
-        "askSize": 16,
+        "askSize": 200,
         "notional": 1
       },
       "proxy": false,
@@ -4350,7 +4350,7 @@
       "short": "Will there be more than 12 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.195,
+      "market": 0.39,
       "model": 0.02782418566056733,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
@@ -4398,16 +4398,16 @@
       "horizon": "seasonal",
       "strike": 12,
       "yesBid": 0.19,
-      "yesAsk": 0.2,
+      "yesAsk": 0.59,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 40,
-      "spread": 0.010000000000000009,
+      "liquidity": 6,
+      "spread": 0.39999999999999997,
       "volume": 558.92,
       "volume24h": 0,
       "openInterest": 332.02,
       "depth": {
         "bidSize": 5,
-        "askSize": 200,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -4738,7 +4738,7 @@
       "volume24h": 48.23,
       "openInterest": 211.58,
       "depth": {
-        "bidSize": 7.1,
+        "bidSize": 7,
         "askSize": 5,
         "notional": 1
       },
@@ -5940,7 +5940,7 @@
       "short": "Will there be more than 6 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.835,
+      "market": 0.9099999999999999,
       "model": 0.594005468570241,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
@@ -5988,16 +5988,16 @@
       "horizon": "seasonal",
       "strike": 6,
       "yesBid": 0.83,
-      "yesAsk": 0.84,
+      "yesAsk": 0.99,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 155,
-      "spread": 0.010000000000000009,
+      "liquidity": 99,
+      "spread": 0.16000000000000003,
       "volume": 121,
       "volume24h": 0,
       "openInterest": 110,
       "depth": {
         "bidSize": 5,
-        "askSize": 184,
+        "askSize": 100,
         "notional": 1
       },
       "proxy": false,
@@ -7677,76 +7677,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01EPAC"
     },
     {
-      "id": "KXHURRICANE-26DEC01EPACTOT-5",
-      "label": "Will there be more than 5 hurricanes of category 1 or above in the Eastern Pacific in 2026?",
-      "short": "Will there be more than 5 hurricanes of…",
-      "storm": null,
-      "subject": null,
-      "market": 0.905,
-      "model": 0.76132711945566,
-      "modelQuantity": "hurricane",
-      "modelBasin": "epac",
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 226 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
-      "modelUncond": 0.8571428571428571,
-      "modelLayers": [
-        {
-          "id": "base",
-          "label": "Historical climatology",
-          "p": 0.8472222222222222,
-          "basis": "1991–2025 full seasons (n=35)"
-        },
-        {
-          "id": "doy",
-          "label": "Day-of-year conditional",
-          "p": 0.6527777777777778,
-          "basis": "hurricanes forming on/after day 226 in each past season; needs >3 more"
-        },
-        {
-          "id": "std",
-          "label": "Season-to-date state",
-          "p": 0.6527777777777778,
-          "basis": "2 already recorded in 2026"
-        },
-        {
-          "id": "enso",
-          "label": "ENSO-stratified",
-          "p": 0.7571895424836601,
-          "basis": "9 El Niño seasons → 85% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
-        },
-        {
-          "id": "onisim",
-          "label": "ONI-similarity weighted",
-          "p": 0.76132711945566,
-          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 83% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
-        }
-      ],
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "horizon": "seasonal",
-      "strike": 5,
-      "yesBid": 0.9,
-      "yesAsk": 0.91,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 167,
-      "spread": 0.010000000000000009,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 5,
-        "askSize": 184,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACTOT"
-    },
-    {
       "id": "KXHURRICANENAMES-26DEC01EPAC-MAR",
       "label": "Will Marie be categorized as a hurricane in the Eastern Pacific in 2026?",
       "short": "Will Marie be categorized as a hurricane in…",
@@ -7849,6 +7779,76 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01EPAC"
+    },
+    {
+      "id": "KXHURRICANE-26DEC01EPACTOT-5",
+      "label": "Will there be more than 5 hurricanes of category 1 or above in the Eastern Pacific in 2026?",
+      "short": "Will there be more than 5 hurricanes of…",
+      "storm": null,
+      "subject": null,
+      "market": 0.9450000000000001,
+      "model": 0.76132711945566,
+      "modelQuantity": "hurricane",
+      "modelBasin": "epac",
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 226 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelUncond": 0.8571428571428571,
+      "modelLayers": [
+        {
+          "id": "base",
+          "label": "Historical climatology",
+          "p": 0.8472222222222222,
+          "basis": "1991–2025 full seasons (n=35)"
+        },
+        {
+          "id": "doy",
+          "label": "Day-of-year conditional",
+          "p": 0.6527777777777778,
+          "basis": "hurricanes forming on/after day 226 in each past season; needs >3 more"
+        },
+        {
+          "id": "std",
+          "label": "Season-to-date state",
+          "p": 0.6527777777777778,
+          "basis": "2 already recorded in 2026"
+        },
+        {
+          "id": "enso",
+          "label": "ENSO-stratified",
+          "p": 0.7571895424836601,
+          "basis": "9 El Niño seasons → 85% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+        },
+        {
+          "id": "onisim",
+          "label": "ONI-similarity weighted",
+          "p": 0.76132711945566,
+          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 83% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
+        }
+      ],
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "horizon": "seasonal",
+      "strike": 5,
+      "yesBid": 0.9,
+      "yesAsk": 0.99,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": 99,
+      "spread": 0.08999999999999997,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 100,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACTOT"
     },
     {
       "id": "KXHURRICANENAMES-26DEC01EPAC-TRU",
@@ -9377,7 +9377,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.5,
+      "market": 0.505,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -9393,11 +9393,11 @@
       "modelRawP": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.05,
+      "yesBid": 0.06,
       "yesAsk": 0.95,
       "closeTime": "2026-10-01T03:59:00Z",
       "liquidity": 5,
-      "spread": 0.8999999999999999,
+      "spread": 0.8899999999999999,
       "volume": 37.62,
       "volume24h": 14.62,
       "openInterest": 22.62,
@@ -9494,7 +9494,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.515,
+      "market": 0.52,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -9510,11 +9510,11 @@
       "modelRawP": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.06,
+      "yesBid": 0.07,
       "yesAsk": 0.97,
       "closeTime": "2026-12-01T04:59:00Z",
       "liquidity": 5,
-      "spread": 0.9099999999999999,
+      "spread": 0.8999999999999999,
       "volume": 2.6,
       "volume24h": 1.5,
       "openInterest": 1.5,
