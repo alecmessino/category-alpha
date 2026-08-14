@@ -43,7 +43,10 @@ function GenesisWatch({ compact }) {
     <div style={{ margin: compact ? "0 0 14px" : "14px 0", padding: "11px 13px", border: "1px solid var(--border-strong)",
       borderLeft: "3px solid var(--warn)", borderRadius: 8, background: "var(--surface-sunken)",
       fontFamily: "var(--font-mono)", fontSize: 12.5, lineHeight: 1.7, color: "var(--text-2)" }}>
-      <div style={{ color: "var(--warn)", fontWeight: 800, letterSpacing: 1.4, fontSize: 11 }}>GENESIS WATCH — NHC TROPICAL WEATHER OUTLOOK</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        <span style={{ color: "var(--warn)", fontWeight: 800, letterSpacing: 1.4, fontSize: 11 }}>GENESIS WATCH — NHC TROPICAL WEATHER OUTLOOK</span>
+        <window.MT_Hint id="note.genesis" />
+      </div>
       {areas.map((a) => (
         <div key={a.basin + (a.id || a.n)} style={{ display: "flex", gap: 10, marginTop: 5, flexWrap: "wrap", alignItems: "baseline" }}>
           <span style={{ color: tone(a.pct7d), fontWeight: 800, minWidth: 62 }}>{a.pct7d ?? "?"}% / 7d</span>
@@ -52,10 +55,6 @@ function GenesisWatch({ compact }) {
           <span style={{ color: "var(--text-2)", opacity: .8 }}>{a.basin}</span>
         </div>
       ))}
-      <div style={{ marginTop: 7, opacity: .9, lineHeight: 1.5 }}>
-        NHC formation probabilities, quoted as published. These systems are not yet classified, so
-        they carry no advisory, track or cone — CurrentStorms.json is silent on them by design.
-      </div>
     </div>
   );
 }
@@ -530,9 +529,7 @@ function MillibarTerminalApp() {
                 {snap.reconAge != null && snap.reconAge >= 30 && (
                   <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--warn)", marginTop: 6 }}>▼ Recon stale {Math.round(snap.reconAge)}m — confidence −0.5</div>
                 )}
-                <div style={{ marginTop: 9, fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", opacity: .75, lineHeight: 1.45 }}>
-                  Interpretation, not observation. Research-only — no execution, no advice.
-                </div>
+                <div style={{ marginTop: 9 }}><window.MT_Hint id="note.lifecycle" label="interpretation, not observation" /></div>
               </div>
             </aside>
             )}

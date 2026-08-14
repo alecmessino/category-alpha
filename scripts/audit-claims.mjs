@@ -69,15 +69,22 @@ for (const f of files) {
   });
 }
 
-// Every claim id referenced by a component must exist in the registry.
+/* Every claim id referenced by a component must exist in the registry.
+   The "?" drawers pass their id as a JSX attribute and read it through a variable, so
+   neither end matches the MTC.claim("literal") shape. That made a whole class of text
+   invisible here: a mistyped id renders an empty drawer, which looks identical to a
+   panel that simply has no caveat — a caveat silently disappearing is the exact failure
+   this file exists to prevent. Both ends are matched explicitly. */
 const registry = await readFile(resolve(APP, OWNER_FILE), "utf8");
-const defined = new Set([...registry.matchAll(/define\("([^"]+)"/g)].map((m) => m[1])
+const defined = new Set([...registry.matchAll(/\b(?:define|note)\("([^"]+)"/g)].map((m) => m[1])
   .concat([...registry.matchAll(/^\s*"(panel\.[a-z]+)":/gm)].map((m) => m[1])));
 const referenced = new Set();
 for (const f of files) {
   if (f.endsWith(OWNER_FILE)) continue;
   const text = await readFile(f, "utf8");
   for (const m of text.matchAll(/MTC\.(?:claim|footer)\("([^"]+)"\)/g)) referenced.add(m[1]);
+  for (const m of text.matchAll(/<(?:window\.)?MT_Hint\b[^>]*?\bid="([^"]+)"/g)) referenced.add(m[1]);
+  for (const m of text.matchAll(/<Hint\b[^>]*?\bid="([^"]+)"/g)) referenced.add(m[1]);
 }
 for (const id of referenced) {
   if (!defined.has(id)) findings.push({ file: "(reference)", line: 0, match: id, why: "claim id is used by a component but not registered in claims.js", text: id });

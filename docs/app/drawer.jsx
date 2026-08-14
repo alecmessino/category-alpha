@@ -39,9 +39,7 @@ function MT_Provenance({ evidenceId, stormId, frame, onClose }) {
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 14, padding: "10px 12px", borderRadius: 8, border: "1px solid var(--border-dim)", borderLeft: "3px solid var(--accent)", fontSize: 11, color: "var(--text-2)", lineHeight: 1.5 }}>
-            Content-addressed &amp; bitemporal: this fix is an immutable event; a correction is a new row with a higher revision, never an edit.
-          </div>
+          <div style={{ marginTop: 14 }}><window.MT_Hint id="note.provenance" label="content-addressed &amp; bitemporal" /></div>
         </>}
       </aside>
     </>

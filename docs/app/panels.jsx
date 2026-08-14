@@ -3,6 +3,54 @@ const { Panel: P, SectionHeader: SH, ProvenanceFooter: PF, Badge: BG, Gauge: GG,
         KellyBar: KB, EdgeCell: EC, StatTile: ST, HealthRow: HR, Button: BT } = CAns;
 const TIER_TONE = { A: "pos", B: "warn", C: "neg" };
 
+/* ---- "?" drawer ------------------------------------------------------------
+   Progressive disclosure for the caveats. Panels used to carry their explanation as a
+   permanent paragraph underneath, which cost a third of the page height and read as a
+   wall of text on a board whose entire point is that a number is scannable in a second.
+   The text is not gone — a board that quietly drops its caveats starts implying coverage
+   it does not have — it is one click away, and it is authored in claims.js next to the
+   claim it qualifies rather than inline where it can drift.
+
+   Deliberately click, not hover: these are three-line explanations, and a tooltip that
+   appears under the cursor on the way to something else is noise. */
+function Hint({ id, label }) {
+  const [open, setOpen] = React.useState(false);
+  const n = (window.MTC && MTC.claim(id)) || null;
+  /* An unknown id must be loud, not absent. Returning null here would make a dropped
+     caveat look like a panel that never had one. audit-claims.mjs catches this at build
+     time; this is the runtime backstop, and verify-live asserts the phrase is nowhere
+     on the deployed page. */
+  if (!n) return null;
+  if (!n.body) return <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--neg)" }}>{n.text}</span>;
+  return (
+    <span style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+      <button type="button" aria-expanded={open} aria-label={"About: " + (n.title || id)}
+        title={n.title || "Explain"} onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+        style={{ cursor: "pointer", width: 15, height: 15, lineHeight: "13px", padding: 0, borderRadius: "50%",
+          border: "1px solid " + (open ? "var(--accent)" : "var(--border-strong)"),
+          background: open ? "color-mix(in srgb,var(--accent) 16%,transparent)" : "transparent",
+          color: open ? "var(--accent)" : "var(--text-2)",
+          fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 800 }}>?</button>
+      {label && <span style={{ marginLeft: 5, fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>{label}</span>}
+      {open && (
+        <span onClick={(e) => e.stopPropagation()}
+          style={{ position: "absolute", top: 20, right: 0, zIndex: 950, width: "min(420px, calc(100vw - 32px))",
+            display: "block", textAlign: "left", background: "var(--surface-card)", border: "1px solid var(--border-strong)",
+            borderRadius: 10, boxShadow: "var(--shadow-cmd)", padding: "10px 12px", cursor: "default" }}>
+          <span style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 800, letterSpacing: 1.2,
+            textTransform: "uppercase", color: "var(--accent)" }}>{n.title}</span>
+          {n.body.map((l, i) => (
+            <span key={i} style={{ display: "block", marginTop: 5, fontFamily: "var(--font-mono)", fontSize: 10.5,
+              lineHeight: 1.55, color: "var(--text-2)" }}>· {l}</span>
+          ))}
+          <span onClick={() => setOpen(false)} style={{ display: "block", marginTop: 8, cursor: "pointer",
+            fontFamily: "var(--font-mono)", fontSize: 9.5, letterSpacing: ".5px", color: "var(--text-2)" }}>CLOSE</span>
+        </span>
+      )}
+    </span>
+  );
+}
+
 function labelRow(k, v, tone) {
   return (
     <div style={{ display: "flex", justifyContent: "space-between", gap: 8, padding: "3px 0", fontFamily: "var(--font-mono)", fontSize: 11 }}>
@@ -333,7 +381,9 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
 
   return (
     <P pad={false} title="Edge Book — ranked by expected value"
-      right={<BG tone={book.rows.length ? "live" : "warn"} dot>{book.rows.length ? book.rows.length + " ACTIONABLE" : "NOTHING CLEARS"}</BG>}
+      right={<div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        <BG tone={book.rows.length ? "live" : "warn"} dot>{book.rows.length ? book.rows.length + " ACTIONABLE" : "NOTHING CLEARS"}</BG>
+        <Hint id="note.edgebook" /></div>}
       footer={<PF {...MTC.footer("panel.edgebook")} />}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "10px 12px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
         <span style={{ ...mono, fontSize: 10, fontWeight: 700, letterSpacing: ".5px", textTransform: "uppercase", color: "var(--text-2)" }}>Bankroll</span>
@@ -497,23 +547,26 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
             </tbody>
           </table>
           <div style={{ ...mono, fontSize: 10.5, color: "var(--text-2)", padding: "9px 12px", lineHeight: 1.65, borderTop: "1px solid var(--border-dim)" }}>
-            <div onClick={() => setShowMethod(!showMethod)} style={{ cursor: "pointer", color: "var(--text-2)" }}>
-              {showMethod ? "▾" : "▸"} how this is ranked, what the verdicts mean, and what the model cannot do
+            {/* The provenance itself stays on screen — it is feed-derived and is the point
+                of the panel — but as one line, with the method behind the header's "?". */}
+            <div onClick={() => setShowMethod(!showMethod)} style={{ cursor: "pointer" }}>
+              {showMethod ? "▾" : "▸"} provenance · {cov.text}
             </div>
             {showMethod && (
               <div style={{ marginTop: 5 }}>
                 <div>{MTC.claim("edgebook.method").text}</div>
                 <div style={{ marginTop: 5 }}>{MTC.claim("edgebook.verdict").text}</div>
                 <div style={{ marginTop: 5, color: "var(--warn)" }}>{MTC.claim("edgebook.limits").text}</div>
-                <div style={{ marginTop: 5 }}>{cov.text}</div>
               </div>
             )}
             {(book.overflow.length > 0 || book.alsoInLadder.length > 0) && (
-              <div style={{ marginTop: 6 }}>
+              <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                 <BT variant="preset" mono onClick={() => setShowAll(!showAll)}>{showAll ? "TOP 6" : "SHOW ALL " + (book.rows.length + book.overflow.length)}</BT>
-                <span style={{ marginLeft: 8 }}>
-                  {book.alsoInLadder.length} further rung{book.alsoInLadder.length === 1 ? "" : "s"} on ladders already listed — the same view, not a second bet
-                </span>
+                {book.alsoInLadder.length > 0 && (
+                  <span title="Rungs of a ladder already listed above — the same view expressed at another strike, not a second independent bet">
+                    +{book.alsoInLadder.length} ladder rung{book.alsoInLadder.length === 1 ? "" : "s"}
+                  </span>
+                )}
               </div>
             )}
           </div>
@@ -648,11 +701,7 @@ function MT_YieldCurve({ dense }) {
                       {gov.label}: {gov.basis}
                     </div>
                   )}
-                  <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 4, lineHeight: 1.5, opacity: .85 }}>
-                    Unwired layers are declared, never folded in silently. Day-of-year conditioning still
-                    assumes zero Atlantic hurricanes so far this season — that becomes a real input once an
-                    in-season count feed is wired.
-                  </div>
+                  <div style={{ marginTop: 5 }}><Hint id="note.posterior" label="how the stack combines" /></div>
                 </React.Fragment>
               );
             })()}
@@ -838,7 +887,10 @@ function MT_Exposure({ frame, dense, onSelect, selection }) {
   if (!x) return null;
   const pad = dense ? "5px 9px" : "7px 11px";
   return (
-    <P pad={false} title="Board Impact" right={<BG tone={x.repriced ? "live" : "neutral"} dot={!!x.repriced}>{x.repriced} REPRICED</BG>}
+    <P pad={false} title="Board Impact"
+      right={<div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        <BG tone={x.repriced ? "live" : "neutral"} dot={!!x.repriced}>{x.repriced} REPRICED</BG>
+        <Hint id="note.exposure" label="board level" /></div>}
       footer={<PF {...MTC.footer("panel.exposure")} />}>
       <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", flexWrap: "wrap" }}>
         {[
@@ -879,10 +931,6 @@ function MT_Exposure({ frame, dense, onSelect, selection }) {
         </table>
         </div>
       )}
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", lineHeight: 1.55 }}>
-        No position feed is wired, so this is <b style={{ color: "var(--text-1)" }}>board level, not portfolio level</b> — it says what moved and
-        where the spread to the climatology anchor changed, not what you hold. Anchor is a climatology baseline, not a skill forecast.
-      </div>
     </P>
   );
 }
@@ -954,7 +1002,10 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
   );
   const cell = { padding: pad, borderBottom: "1px solid var(--border-dim)", fontFamily: "var(--font-mono)", textAlign: "right" };
   return (
-    <P pad={false} title={"Prediction Markets — " + (mktSource[0].toUpperCase() + mktSource.slice(1)) + " board"} right={<BG tone={rows.length ? "live" : "neg"} dot>{rows.length} MKTS</BG>}
+    <P pad={false} title={"Prediction Markets — " + (mktSource[0].toUpperCase() + mktSource.slice(1)) + " board"}
+      right={<div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        <BG tone={rows.length ? "live" : "neg"} dot>{rows.length} MKTS</BG>
+        <Hint id="note.markets" /></div>}
       footer={<PF {...MTC.footer("panel.markets")} />}>
       {/* Grouped by series and capped. Every listed market is now carried, and a flat
           147-row list ordered by volume interleaves ladders from different questions —
@@ -1009,10 +1060,6 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
       <div style={{ display: "flex", justifyContent: "space-between", gap: 8, fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", padding: "6px 10px", flexWrap: "wrap" }}>
         <span>Click a market → order book + allocation.</span><span>Σ vol {fmtVol(tvol)}</span>
       </div>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "0 10px 8px", lineHeight: 1.5, opacity: .85 }}>
-        Prices are Kalshi's exchange book — the same contracts surfaced in Coinbase Predictions (Kalshi-powered), so quotes here should track what you see there.<br />
-        {MTC.claim("model.caveat").text}
-      </div>
     </P>
   );
 }
@@ -1059,7 +1106,9 @@ function MT_OrderBook({ contractId, frame, dense }) {
       </div>
     );
     return (
-      <P pad={false} title="Order Book & Liquidity" right={<BG tone="warn">TOP OF BOOK</BG>}
+      <P pad={false} title="Order Book & Liquidity"
+        right={<div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <BG tone="warn">TOP OF BOOK</BG><Hint id="note.orderbook" /></div>}
         footer={<PF {...MTC.footer("panel.orderbook")} />}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)", padding: "8px 12px" }}>{c.short}</div>
         <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", flexWrap: "wrap" }}>
@@ -1067,11 +1116,6 @@ function MT_OrderBook({ contractId, frame, dense }) {
           {cell("ASK SIZE", Math.round(ob.askSize), "contracts resting", "var(--neg)")}
           {cell("MID", px != null ? px + "¢" : "—", ob.spread != null ? "spread " + Math.round(ob.spread * 100) + "¢" : "—")}
           {cell("FILLABLE NOW", ob.liquidityCap != null ? "$" + ob.liquidityCap.toLocaleString() : "—", "ask size × price")}
-        </div>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "9px 12px", lineHeight: 1.55 }}>
-          One level per side — the size the exchange will fill at the touch, not a depth curve.
-          The full book is fetched for a handful of contracts only; everything else shows the touch.
-          FILLABLE NOW is what caps the Kelly allocation.
         </div>
       </P>
     );
@@ -1142,7 +1186,7 @@ function MT_Signals({ stormId, dense, maxH, onSeek }) {
   );
   return (
     <P pad={false} title="Signal Register"
-      right={<div style={{ display: "flex", gap: 4 }}>{btn("all", "ALL")}{btn("storm", "STORM")}{btn("market", "MKT")}</div>}
+      right={<div style={{ display: "flex", gap: 4, alignItems: "center" }}>{btn("all", "ALL")}{btn("storm", "STORM")}{btn("market", "MKT")}<Hint id="note.register" /></div>}
       footer={<PF {...MTC.footer("panel.register")} />}>
       {/* Rollup verdict — answers "has anything mattered in the last 6h?" first */}
       {summary && (
@@ -1235,10 +1279,8 @@ function MT_Signals({ stormId, dense, maxH, onSeek }) {
       })}
       </div>
       {shown.length > 0 && (
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "7px 11px", lineHeight: 1.5 }}>
-          {sigs.length} shown · thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢. TRADE-RELEVANT = Saffir–Simpson
-          boundary crossing, ≥20 kt intensification, or ≥5¢ reprice. Co-movement is temporal only — no causal
-          weights are computed, because the data can't support them.
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "7px 11px" }}>
+          {sigs.length} shown · wind ≥5 kt · pressure ≥2 mb · price ≥2¢
         </div>
       )}
     </P>
@@ -1256,7 +1298,7 @@ function MT_Observability({ narrow }) {
   const [open, setOpen] = React.useState(() => new Set());
   const toggle = (n) => setOpen((prev) => { const s = new Set(prev); s.has(n) ? s.delete(n) : s.add(n); return s; });
   return (
-    <P pad={false} title="Observability — Pipeline Status"
+    <P pad={false} title="Observability — Pipeline Status" right={<Hint id="note.observability" />}
       footer={<PF {...MTC.footer("panel.observability")} />}>
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", borderBottom: "1px solid var(--border-dim)", lineHeight: 1.5 }}>
         <div style={{ color: MTC.claim("deploy.verified").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("deploy.verified").text}</div>
@@ -1301,9 +1343,6 @@ function MT_Observability({ narrow }) {
                       <span style={{ color: "var(--text-1)", wordBreak: "break-word", minWidth: 0 }}>{r.v}</span>
                     </div>
                   ))}
-                  <div style={{ marginTop: 6, fontFamily: "var(--font-mono)", fontSize: 9, color: "var(--text-2)", opacity: .8 }}>
-                    As reported by this cycle's fetch. Fields the feed did not return are omitted rather than filled in.
-                  </div>
                 </div>
               )}
             </div>
@@ -1314,4 +1353,4 @@ function MT_Observability({ narrow }) {
   );
 }
 
-Object.assign(window, { MT_Evidence, MT_Confidence, MT_EdgeMatrix, MT_EdgeBook, MT_StormConsoles, MT_Markets, MT_OrderBook, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section, MT_Attention, MT_Exposure });
+Object.assign(window, { MT_Hint: Hint, MT_Evidence, MT_Confidence, MT_EdgeMatrix, MT_EdgeBook, MT_StormConsoles, MT_Markets, MT_OrderBook, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section, MT_Attention, MT_Exposure });

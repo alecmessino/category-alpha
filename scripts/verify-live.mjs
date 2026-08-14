@@ -131,6 +131,7 @@ await page.waitForTimeout(4000);
    real one. */
 let tabText = "";
 let groupHeaders = 0;                       // DOM counts must be taken while the tab is up
+let hintCount = 0, hintText = "";           // the "?" drawers, opened and read
 for (const label of ["Situation", "Markets", "Models", "Optimizer"]) {
   await page.evaluate((l) => {
     const b = [...document.querySelectorAll("button[role=tab]")].find((x) => x.textContent.trim().toLowerCase() === l.toLowerCase());
@@ -149,6 +150,21 @@ for (const label of ["Situation", "Markets", "Models", "Optimizer"]) {
       if (chev && chev.textContent.trim() === "▸") head.click();   // ▸ = collapsed
     }, sec);
     await page.waitForTimeout(250);
+  }
+  /* Open every "?" drawer on this tab and read it. The caveats moved off the page and
+     behind these; if a drawer stops rendering, the caveat is gone and nothing else on
+     the page would show it missing. Reading them here also puts their text into the
+     union, so the honesty phrases stay assertable. */
+  const hints = await page.$$('button[aria-label^="About:"]');
+  hintCount += hints.length;
+  for (const h of hints) {
+    await h.click().catch(() => {});
+    await page.waitForTimeout(90);
+    hintText += "\n" + await page.evaluate(() => {
+      const o = document.querySelector("button[aria-expanded=true]");
+      return o && o.parentElement ? o.parentElement.innerText : "";
+    });
+    await h.click().catch(() => {});
   }
   const seen = await page.evaluate(() => ({
     text: document.body.innerText,
@@ -352,6 +368,23 @@ add("four tabs, so no single view is a wall",
   `${LY.tabs} tabs · ${LY.screensToScroll} screens tall (${LY.pageHeight}px / ${LY.viewportHeight}px)`);
 add("the GFS wind field is ingested and both components present",
   LY.windLayer === true, `cycle ${LY.windCycle}`);
+
+/* The caveats moved off the page and behind "?" drawers. That is only an improvement if
+   they are still THERE — a deleted caveat and a collapsed one look identical on a
+   screenshot. Every drawer was opened during the tab walk; these assert the ones that
+   carry the load-bearing admissions, so removing the text fails the build rather than
+   quietly making the board sound more capable than it is. */
+const MUST_SAY = [
+  ["no position feed", /No position feed is wired/i],
+  ["top of book is not depth", /not a depth curve/i],
+  ["omitted rather than invented", /omitted|never filled in/i],
+  ["genesis areas carry no advisory", /no advisory, track or cone/i],
+  ["the edge book cannot forecast", /cannot forecast/i],
+];
+const missing = MUST_SAY.filter(([, re]) => !re.test(hintText)).map(([n]) => n);
+add("the '?' drawers still carry the caveats",
+  hintCount >= 8 && missing.length === 0,
+  `${hintCount} drawer(s) opened` + (missing.length ? ` · MISSING: ${missing.join(", ")}` : " · all load-bearing caveats present"));
 
 /* The tile cache is the one piece of this build that could make a stale board look live.
    sw.js refuses same-origin by construction; this proves it on the deployed page, by

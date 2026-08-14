@@ -359,6 +359,69 @@
     define(id, f.owner, (s) => ({ text: f.source(s), tier: f.tier(s), ok: true }));
   });
 
+  /* ---- notes: the explanations, moved out of the panels ---------------------
+     Every panel used to carry a paragraph of caveat under it, permanently on screen
+     whether or not anyone was asking. That is where a third of the page height went,
+     and it read as a wall. The text is not dropped — deleting a caveat is how a board
+     starts implying coverage it does not have — it moves behind a "?" on the panel it
+     qualifies, and it lives HERE, next to the claims it is a caveat about, so it
+     cannot drift away from what the code actually does.
+
+     `body` is an array of short lines, not a paragraph, because a caveat that has to
+     be read as prose does not get read. */
+  const note = (id, owner, title, body) =>
+    define(id, owner, (s) => ({ text: title, title, body: typeof body === "function" ? body(s) : body, ok: true }));
+
+  note("note.exposure", "derived", "Board level, not portfolio level", () => [
+    "No position feed is wired, so this cannot know what you hold.",
+    "It reports what repriced on the board and how the spread to the anchor moved.",
+    "Anchor is a HURDAT2 climatology baseline — a base rate, not a skill forecast.",
+  ]);
+  note("note.markets", "markets", "Where these prices come from", (s) => [
+    srcOf(s, "markets", "the exchange") + " order book, taken at the touch.",
+    "The same contracts appear in Coinbase Predictions, which is Kalshi-powered, so quotes should track.",
+    "Model % is a climatology anchor. A blank means no anchor exists for that contract, not a 50/50.",
+  ]);
+  note("note.orderbook", "markets", "One level per side", [
+    "This is the size the exchange will fill at the touch, not a depth curve.",
+    "The full book is fetched for a handful of contracts; everything else shows the touch.",
+    "FILLABLE NOW caps the Kelly allocation — sizing above resting depth is a number you cannot trade.",
+  ]);
+  note("note.observability", "derived", "What this table is", [
+    "Feed results exactly as this cycle's fetch returned them.",
+    "A field the feed did not return is omitted, never filled in with a plausible value.",
+  ]);
+  note("note.genesis", "outlook", "Systems with no advisory yet", [
+    "NHC formation probabilities, quoted as published.",
+    "These are not classified cyclones, so they carry no advisory, track or cone.",
+    "CurrentStorms.json is silent on them by design — that is not a gap in ingestion.",
+  ]);
+  note("note.register", "derived", "How an event gets in here", [
+    "A frame-to-frame diff over committed snapshots, at fixed thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢.",
+    "TRADE-RELEVANT = a Saffir–Simpson boundary crossing, ≥20 kt intensification, or a ≥5¢ reprice.",
+    "Co-movement is temporal only. No causal weight is computed, because nothing here can establish one.",
+  ]);
+  note("note.lifecycle", "derived", "Read this as interpretation", [
+    "The stage is inferred from the advisory, not stated by it.",
+    "Research only — no execution, no advice.",
+  ]);
+  note("note.posterior", "models", "What the stack does and does not use", [
+    "Layers are applied in order; each shrinks toward the one above it by effective sample size.",
+    "An unwired layer is declared, never folded in silently.",
+    "Day-of-year conditioning still assumes zero Atlantic hurricanes to date — real once an in-season count feed exists.",
+  ]);
+  note("note.edgebook", "models", "How this is ranked", [
+    "Ranked by expected value after the exchange fee, not by raw edge.",
+    "Model range is the estimator's own band. Price inside the band = the estimate cannot separate it from fair.",
+    "Stake is Kelly, capped at resting depth, so it is never a size you could not get filled at.",
+    "TAKE needs ≥3 independent layers agreeing. Two layers where one is a shrunk form of the other is one layer.",
+    "It cannot forecast. Every anchor is a base rate plus what the advisory already published.",
+  ]);
+  note("note.provenance", "derived", "Content-addressed and bitemporal", [
+    "Each input is an immutable event keyed by an FNV-1a digest of its content.",
+    "A correction arrives as a new row at a higher revision. Nothing is edited in place.",
+  ]);
+
   function claim(id, ctx) {
     const c = REG[id];
     if (!c) return { id, owner: "none", text: "UNREGISTERED CLAIM (" + id + ")", ok: false };
