@@ -1,14 +1,19 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T02:43:53.003Z",
+  "ranAt": "2026-08-14T03:31:15.810Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "90c89bd8c594e4ea8720aa486372973a1d0acb70",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31764583522",
-  "ok": true,
-  "passed": 30,
-  "total": 30,
-  "failures": [],
-  "thirdPartyFailures": 2,
+  "sha": "05ac2159947939655b242e466dcbf04d166f5fb7",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31767012628",
+  "ok": false,
+  "passed": 31,
+  "total": 32,
+  "failures": [
+    {
+      "check": "four tabs, so no single view is a wall",
+      "detail": "4 tabs · 4.9 screens tall (6814px / 1400px)"
+    }
+  ],
+  "thirdPartyFailures": 1,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -28,7 +33,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T02:28:04.578Z · 16m old"
+      "detail": "2026-08-14T03:20:23.513Z · 11m old"
     },
     {
       "check": "renders: Situation",
@@ -88,7 +93,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "6 ranked of 24 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "7 ranked of 26 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -98,17 +103,27 @@
     {
       "check": "no horizontal overflow and no jittering digits",
       "pass": true,
-      "detail": "bodyOverflow=0px tabularNums=true grids=6 overflowing=0"
+      "detail": "bodyOverflow=0px tabularNums=true grids=2 overflowing=0"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
       "pass": true,
-      "detail": "map 700px"
+      "detail": "map 840px"
     },
     {
       "check": "and it is the first thing under the header",
       "pass": true,
       "detail": "map starts 141px down the page"
+    },
+    {
+      "check": "four tabs, so no single view is a wall",
+      "pass": false,
+      "detail": "4 tabs · 4.9 screens tall (6814px / 1400px)"
+    },
+    {
+      "check": "the GFS wind field is ingested and both components present",
+      "pass": true,
+      "detail": "cycle 2026-08-13T18:00:00Z"
     },
     {
       "check": "all markets carried",
