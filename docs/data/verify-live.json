@@ -1,24 +1,19 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T03:31:15.810Z",
+  "ranAt": "2026-08-14T03:38:56.382Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "05ac2159947939655b242e466dcbf04d166f5fb7",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31767012628",
-  "ok": false,
-  "passed": 31,
-  "total": 32,
-  "failures": [
-    {
-      "check": "four tabs, so no single view is a wall",
-      "detail": "4 tabs · 4.9 screens tall (6814px / 1400px)"
-    }
-  ],
-  "thirdPartyFailures": 1,
+  "sha": "f9e8f32f9e43cb51ad86f45029d4fbe78a1afbc9",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31767390797",
+  "ok": true,
+  "passed": 33,
+  "total": 33,
+  "failures": [],
+  "thirdPartyFailures": 4,
   "checks": [
     {
       "check": "Pages is serving this commit",
       "pass": true,
-      "detail": "6 assets byte-match the checkout (attempt 1)"
+      "detail": "7 assets byte-match the checkout (attempt 1)"
     },
     {
       "check": "live URL responds",
@@ -33,7 +28,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T03:20:23.513Z · 11m old"
+      "detail": "2026-08-14T03:30:55.149Z · 8m old"
     },
     {
       "check": "renders: Situation",
@@ -93,7 +88,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "7 ranked of 26 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "7 ranked of 27 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -103,7 +98,7 @@
     {
       "check": "no horizontal overflow and no jittering digits",
       "pass": true,
-      "detail": "bodyOverflow=0px tabularNums=true grids=2 overflowing=0"
+      "detail": "bodyOverflow=0px tabularNums=true grids=3 overflowing=0"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -117,13 +112,18 @@
     },
     {
       "check": "four tabs, so no single view is a wall",
-      "pass": false,
-      "detail": "4 tabs · 4.9 screens tall (6814px / 1400px)"
+      "pass": true,
+      "detail": "4 tabs · 1.8 screens tall (2510px / 1400px)"
     },
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
       "detail": "cycle 2026-08-13T18:00:00Z"
+    },
+    {
+      "check": "the tile cache never holds a same-origin asset",
+      "pass": true,
+      "detail": "0 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "all markets carried",
