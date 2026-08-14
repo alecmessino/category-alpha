@@ -189,6 +189,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           END=$(( $(date +%s) + 45*60 ))
           TICK=0
+          # Coverage failures are remembered across the whole loop and re-raised at the
+          # end, rather than breaking out of it. Both halves matter: the run must go RED
+          # so somebody looks, and the loop must keep refreshing so the board does not
+          # freeze while they do. Exiting on the first bad tick would trade a live board
+          # for a red X and get both wrong.
+          COVERAGE_FAILED=0
+          COVERAGE_TICKS=""
           while :; do
             TICK=$((TICK+1))
             echo "::group::tick $TICK — $(date -u +%H:%MZ)"
@@ -204,7 +211,7 @@ jobs:
             # JOB rather than the tick — a red run is the point. The commit below still
             # happens, because a snapshot that is honest about a missing feed is better
             # than no snapshot, and the board shows the feed as down either way.
-            node scripts/check-intel-coverage.mjs || COVERAGE_FAILED=1
+            node scripts/check-intel-coverage.mjs || { COVERAGE_FAILED=1; COVERAGE_TICKS="$COVERAGE_TICKS $TICK"; }
             # GFS runs four times a day, so this returns immediately unless the cycle has
             # advanced. Isolated from the main fetch: the wind field is decoration and must
             # never be able to stop the board from publishing.
@@ -224,6 +231,13 @@ jobs:
             REMAIN=$(( END - NOW ))
             if [ "$REMAIN" -lt 600 ]; then sleep "$REMAIN"; else sleep 600; fi
           done
+          if [ "$COVERAGE_FAILED" -ne 0 ]; then
+            echo "::error::Priority 1 or 2 coverage was missing on an active storm during tick(s):$COVERAGE_TICKS"
+            echo "The board kept publishing, and it kept saying the feed was down — but a probability"
+            echo "built without the decks or the recon poll is built from the product the market has"
+            echo "already read, and nothing on screen distinguishes that from having a head start."
+            exit 1
+          fi
 
       # OPTIONAL hand-off. GITHUB_TOKEN cannot trigger workflow runs — the dispatch
       # returns 204 and nothing starts — so this only does anything if a PAT with
