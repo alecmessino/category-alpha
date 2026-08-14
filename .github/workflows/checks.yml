@@ -1,0 +1,102 @@
+name: Checks
+
+# WHY THIS EXISTS. Every gate in this repo lived inside the data-refresh job, which only
+# runs on a push to main. That was fine while main was the only branch anyone pushed to —
+# and it means a PULL REQUEST RAN NOTHING. The parsers, the probability engine, the claim
+# audit, the JSX check and the coverage gate all sat behind a trigger the change under
+# review could not reach, so the first time a branch was tested was after it had already
+# been merged.
+#
+# That is the wrong way round for every check here, and it is exactly backwards for the
+# coverage gate, whose entire purpose is to fail a change that quietly removes the board's
+# only pre-advisory inputs. A gate that cannot see a pull request cannot stop one.
+#
+# Everything below is OFFLINE. Every suite runs against committed fixtures, so this job
+# needs no network, no secrets and no write access — which is what makes it safe to run on
+# any branch and fast enough to be worth waiting for.
+
+on:
+  pull_request:
+  push:
+    # main is already covered: the refresh job runs the same suites before it fetches
+    # anything. Running them twice there would just double the queue.
+    branches-ignore: [main]
+  workflow_dispatch: {}
+
+# A newer push supersedes a review still in flight.
+concurrency:
+  group: millibar-checks-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only on purpose. Nothing here commits, deploys or fetches.
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # The JSX modules are transformed in the browser — there is no build step, so
+      # nothing parses them between an editor and the permanent URL. An unbalanced brace
+      # does not fail anything; it renders a blank page while the pipeline underneath
+      # keeps committing healthy data.
+      - name: Check JSX parses
+        run: |
+          npm i --silent --no-fund --no-audit --no-save @babel/core @babel/preset-react
+          node scripts/check-jsx.mjs
+
+      # The estimators, in the order they were built. Each checks its arithmetic against a
+      # fixture whose answer is known, and — more importantly — checks every refusal path,
+      # because the refusals are what keep an unanswerable question unanswered.
+      - name: Test the posterior stack
+        run: node scripts/test-enso.mjs
+      - name: Test market payload parsers
+        run: node scripts/test-markets.mjs
+      - name: Test the outlook parser
+        run: node scripts/test-outlook.mjs
+      - name: Test basin climatologies and per-name ordinals
+        run: node scripts/test-climatology.mjs
+      - name: Test the edge book
+        run: node scripts/test-edgebook.mjs
+      - name: Test advisory ingest and per-storm anchor
+        run: node scripts/test-advisory.mjs
+      - name: Test the discussion parser and wrapped watch bullets
+        run: node scripts/test-discussion.mjs
+      - name: Test the stale-advisory crossing and the HOLD rule
+        run: node scripts/test-staleness.mjs
+      - name: Test the GRIB2 reader
+        run: node scripts/test-grib2.mjs
+
+      # The four pre-advisory feeds and the engine that combines them.
+      - name: Test the ATCF deck parsers
+        run: node scripts/test-atcf.mjs
+      - name: Test the reconnaissance parser
+        run: node scripts/test-recon.mjs
+      - name: Test the SHIPS parser and the RI floor
+        run: node scripts/test-ships.mjs
+      - name: Test the probability engine
+        run: node scripts/test-probability.mjs
+      - name: Test the consensus-versus-recon conflict rule
+        run: node scripts/test-conflict.mjs
+      - name: Test that the ingested fields reach the register
+        run: node scripts/test-intel-register.mjs
+
+      # Every visible claim must have a provenance owner. The UI drifted ahead of the code
+      # three times before this existed, always the same way: a capability written as a
+      # string literal inside a component, where no feed could contradict it.
+      - name: Audit claim provenance
+        run: node scripts/audit-claims.mjs
+
+      # THE COVERAGE GATE, applied to the snapshot the change is asking to merge. On main
+      # it runs against a snapshot the job has just fetched; here it runs against the
+      # committed one, which answers a different and equally useful question: does the
+      # state this branch would deploy still satisfy priorities 1 and 2?
+      - name: Coverage gate — priorities 1 and 2 on the committed snapshot
+        run: node scripts/check-intel-coverage.mjs
