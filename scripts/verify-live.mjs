@@ -363,8 +363,15 @@ add("the GFS wind field is ingested and both components present",
    reload runs with the worker already controlling the page, so every asset and every
    tile goes through its fetch handler, and an empty same-origin set then means it
    declined them. */
+const TILE_HOSTS = ["gibs.earthdata.nasa.gov", "basemaps.cartocdn.com"];
+let tilesServed = 0;
+const countTile = (r) => {
+  try { if (TILE_HOSTS.some((h) => new URL(r.url()).hostname.endsWith(h)) && r.status() === 200) tilesServed++; } catch { /* ignore */ }
+};
+page.on("response", countTile);
 await page.reload({ waitUntil: "networkidle", timeout: 60000 });
 await page.waitForTimeout(3500);
+page.off("response", countTile);
 const swCache = await page.evaluate(async () => {
   if (!("caches" in window)) return { supported: false };
   const names = await caches.keys();
@@ -376,10 +383,18 @@ const swCache = await page.evaluate(async () => {
     controlled: !!(navigator.serviceWorker && navigator.serviceWorker.controller),
   };
 });
+/* Two halves, and the second one is the half that was missing. It must hold no
+   same-origin asset — that is the safety property. And it must hold SOMETHING when the
+   run could actually reach the tile hosts — otherwise "no same-origin entries" is true
+   of an empty cache, which is how the first version of this passed while sw.js was
+   caching nothing at all. A sandbox with no egress serves no tiles and is exempt. */
 add("the tile cache never holds a same-origin asset",
   swCache.supported === false || (swCache.controlled && swCache.sameOrigin.length === 0),
   swCache.supported === false ? "CacheStorage unavailable"
     : `${swCache.entries} tile(s) cached · controlled=${swCache.controlled} · same-origin=${swCache.sameOrigin.length}`);
+add("the tile cache actually caches tiles",
+  swCache.supported === false || tilesServed === 0 || swCache.entries > 0,
+  `${tilesServed} tile(s) served on reload · ${swCache.entries} in cache` + (tilesServed === 0 ? " (no tile egress — exempt)" : ""));
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,
   `${probe.contracts} contracts · ${probe.seriesCount} series · droppedForCap=${probe.droppedForCap}`);

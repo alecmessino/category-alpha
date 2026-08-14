@@ -48,10 +48,24 @@ self.addEventListener("fetch", (event) => {
     const cache = await caches.open(CACHE);
     const hit = await cache.match(req);
     if (hit) return hit;
-    /* A tile request that fails must fail the way it would without this worker, so the
-       map's own errorTileUrl draws the dark skeleton instead of a broken image. */
-    const res = await fetch(req);
-    if (res && res.status === 200) { cache.put(req, res.clone()); trim(cache); }
-    return res;
+    /* Leaflet requests tiles from plain <img> tags, so the request mode is no-cors and
+       the response comes back OPAQUE — status 0, headers unreadable. The first version
+       of this guarded on `status === 200`, which is never true for an opaque response,
+       so it cached exactly nothing and the whole worker was decorative. The verifier
+       reported "0 tile(s) cached" and passed, because it was only asserting what was
+       NOT in the cache.
+       Both tile hosts send Access-Control-Allow-Origin: *, so re-issue the request in
+       cors mode: that yields a real status to check, and caching a 404 or a rate-limit
+       page as though it were imagery is exactly what an opaque response would let
+       happen silently. If the cors attempt fails, fall back to the plain request and
+       cache nothing — a tile that fails must fail the way it would without this worker,
+       so the map's own errorTileUrl draws the dark skeleton. */
+    try {
+      const res = await fetch(req.url, { mode: "cors", credentials: "omit" });
+      if (res && res.status === 200) { cache.put(req, res.clone()); trim(cache); }
+      return res;
+    } catch {
+      return fetch(req);
+    }
   })());
 });
