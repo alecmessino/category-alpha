@@ -1,12 +1,12 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T03:50:28.511Z",
+  "ranAt": "2026-08-14T03:53:22.113Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "14a52c397e5307de210d762f679b905790fd7b24",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31767963803",
+  "sha": "e0ade092ebb83f4c8698579141a48a59b92c5d04",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31768112736",
   "ok": true,
-  "passed": 33,
-  "total": 33,
+  "passed": 34,
+  "total": 34,
   "failures": [],
   "thirdPartyFailures": 4,
   "checks": [
@@ -28,7 +28,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T03:48:48.760Z · 2m old"
+      "detail": "2026-08-14T03:50:02.105Z · 3m old"
     },
     {
       "check": "renders: Situation",
@@ -123,7 +123,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "0 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "43 tile(s) cached · controlled=true · same-origin=0"
+    },
+    {
+      "check": "the tile cache actually caches tiles",
+      "pass": true,
+      "detail": "43 tile(s) served on reload · 43 in cache"
     },
     {
       "check": "all markets carried",
