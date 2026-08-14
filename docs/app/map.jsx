@@ -9,6 +9,11 @@
    claim, in the observability panel. */
 const MT_LAYERS = [
   { id: "satellite", label: "Satellite", prov: "live" },
+  /* GeoColor is a daylight product — it goes to a muted night rendering after dark, which
+     is exactly when a storm approaching Hawaii is worth watching. Clean-window IR band 13
+     sees convection at any hour, so it is the layer that keeps the map informative
+     overnight rather than pretty. */
+  { id: "infrared", label: "Enhanced IR", prov: "live" },
   { id: "track", label: "Observed Track", prov: "live" },
   { id: "forecast", label: "NHC Forecast Track", prov: "dynamic" },
   { id: "cone", label: "NHC Cone", prov: "dynamic" },
@@ -36,6 +41,9 @@ const VIIRS_LAYER = "VIIRS_NOAA20_CorrectedReflectance_TrueColor";
 const VIIRS_TMS = "GoogleMapsCompatible_Level9";
 
 function goesLayerFor(lon) { return lon != null && lon < -100 ? "GOES-West_ABI_GeoColor" : "GOES-East_ABI_GeoColor"; }
+function goesIrFor(lon) {
+  return (lon != null && lon < -100 ? "GOES-West" : "GOES-East") + "_ABI_Band13_Clean_Infrared";
+}
 function goesSlot(backSteps) {
   // GOES full-disk publishes on 10-minute boundaries; allow a lag before "now".
   const t = new Date(Date.now() - (backSteps * 10 + 15) * 60000);
@@ -154,6 +162,39 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%" }
     refs.current.satTimer = setInterval(resolve, 300000);
     return () => { cancelled = true; if (refs.current.satTimer) clearInterval(refs.current.satTimer); };
   }, [layers.satellite, stormId]);
+
+  /* Clean-window infrared, over the top. Same 10-minute cadence and the same
+     probe-before-attach discipline as GeoColor, so an unpublished slot degrades to the
+     previous one instead of tiling the ocean with 404s. Drawn above the visible product
+     because the convective structure is the point; opacity keeps the coastlines readable. */
+  React.useEffect(() => {
+    const map = mapRef.current; if (!map) return;
+    if (refs.current.ir) { map.removeLayer(refs.current.ir); refs.current.ir = null; }
+    if (refs.current.irTimer) { clearInterval(refs.current.irTimer); refs.current.irTimer = null; }
+    if (!layers.infrared || !S || !S.center) return;
+    let cancelled = false;
+    const [la, lo] = S.center;
+    const blank = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+    const resolveIr = async () => {
+      const lyr = goesIrFor(lo);
+      for (let back = 0; back < 12 && !cancelled; back++) {
+        const iso = goesSlot(back);
+        const url = goesUrl(lyr, iso);
+        if (await probe(url, la, lo, 4)) {
+          if (cancelled || !mapRef.current) return;
+          if (refs.current.ir) mapRef.current.removeLayer(refs.current.ir);
+          const ir = L.tileLayer(url, { opacity: 0.55, maxNativeZoom: 7, maxZoom: 8, minZoom: 2,
+            tileSize: 256, updateWhenIdle: true, errorTileUrl: blank, pane: "overlayPane" });
+          ir.addTo(mapRef.current);
+          refs.current.ir = ir;
+          return;
+        }
+      }
+    };
+    resolveIr();
+    refs.current.irTimer = setInterval(resolveIr, 300000);
+    return () => { cancelled = true; if (refs.current.irTimer) clearInterval(refs.current.irTimer); };
+  }, [layers.infrared, stormId]);
 
   // vector overlays, rebuilt on storm/layers change
   React.useEffect(() => {

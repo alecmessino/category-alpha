@@ -169,7 +169,7 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
         <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-2)" }}>Total deploy <b style={{ fontFamily: "var(--font-mono)", color: "var(--text-1)", fontSize: 13 }}>${total.toLocaleString()}</b></span>
       </div>
       {rows.length === 0 && <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", padding: "14px 12px" }}>No hurricane prediction markets currently listed.</div>}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 10, padding: dense ? 9 : 12 }}>
+      <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(200px,100%),1fr))", gap: 10, padding: dense ? 9 : 12 }}>
         {rows.map(({ c, k }) => (
           <div key={c.id} onClick={() => onSelect(c.id)} style={{ cursor: "pointer", borderRadius: 9, outline: selection.contract === c.id ? "1px solid var(--accent)" : "none", outlineOffset: 1 }}>
             {k.noModel || k.noData ? (
@@ -200,6 +200,107 @@ function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selectio
    Everything else on this board answers a question about the world. This answers a
    question about the operator's next action, which is why it sits at the top and why
    it is a short list rather than a grid of every contract. */
+/* ---- Mission control: one storm, everything that decides it ----
+   The advisory carries four things that matter and they were scattered across four
+   surfaces: how intense it is now, what NHC says it becomes, whether an official watch
+   is up, and how old the product was when we read it. An operator deciding on a position
+   should not have to assemble that. */
+function StormConsole({ storm, dense }) {
+  const S = storm;
+  if (!S) return null;
+  const mono = { fontFamily: "var(--font-mono)" };
+  const hp = S.hurricaneP || null;
+  const w = S.watches || null;
+  const fc = S.forecastKt || [];
+  const peak = fc.length ? fc.reduce((a, b) => (b.kt > a.kt ? b : a), fc[0]) : null;
+  /* Lag is the honest liveness number: how old the product was when it was fetched. It
+     is green only inside one intermediate cycle. */
+  const lag = S.advisoryLagMin;
+  const lagTone = lag == null ? "var(--text-2)" : lag <= 45 ? "var(--pos)" : lag <= 180 ? "var(--warn)" : "var(--neg)";
+
+  const cell = (label, value, tone) => (
+    <div style={{ padding: "8px 11px", borderRight: "1px solid var(--border-dim)", minWidth: 0 }}>
+      <div style={{ ...mono, fontSize: 9.5, letterSpacing: ".6px", textTransform: "uppercase", color: "var(--text-2)" }}>{label}</div>
+      <div style={{ ...mono, fontSize: 15, fontWeight: 800, color: tone || "var(--text-1)", marginTop: 2, whiteSpace: "nowrap" }}>{value}</div>
+    </div>
+  );
+
+  return (
+    <div style={{ border: "1px solid var(--border-strong)", borderRadius: 10, overflow: "hidden",
+      background: "var(--surface-card)", marginBottom: 10 }}>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "8px 11px",
+        borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)", flexWrap: "wrap" }}>
+        <span style={{ ...mono, fontWeight: 800, fontSize: 13, color: "var(--text-1)", letterSpacing: ".5px" }}>{S.name}</span>
+        <span style={{ ...mono, fontSize: 11, color: "var(--text-2)" }}>{S.full_cls || S.cls}</span>
+        {w && w.highest && (
+          <span style={{ ...mono, fontSize: 10, fontWeight: 800, padding: "2px 7px", borderRadius: 4,
+            color: w.highestRank >= 3 ? "var(--neg)" : "var(--warn)",
+            background: w.highestRank >= 3 ? "rgba(239,68,68,.12)" : "rgba(234,179,8,.12)",
+            border: "1px solid currentColor" }}>{w.highest.toUpperCase()}</span>
+        )}
+        <span style={{ marginLeft: "auto", ...mono, fontSize: 10.5, color: "var(--text-2)" }}>
+          adv #{S.advNumFull || S.advNum || "?"}
+          {lag != null && <span style={{ color: lagTone }}> · {lag}m old at fetch</span>}
+        </span>
+      </div>
+
+      <div className="mt-grid" style={{ display: "grid",
+        gridTemplateColumns: "repeat(auto-fit,minmax(min(112px,100%),1fr))", borderBottom: "1px solid var(--border-dim)" }}>
+        {cell("Now", (S.wind ?? "—") + " kt")}
+        {cell("Pressure", (S.pressure ?? "—") + " mb")}
+        {cell("Moving", S.movement || "—")}
+        {peak && cell("Forecast peak", peak.kt + " kt", "var(--accent)")}
+        {peak && cell("At", "+" + peak.hr + "h")}
+        {hp && cell("To hurricane", Math.round(hp.p * 100) + "%", "var(--accent)")}
+      </div>
+
+      {/* The forecast curve as published, so the shape is readable at a glance rather
+          than inferred from a single peak number. */}
+      {fc.length > 1 && (
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 3, padding: "9px 11px 6px", height: 58 }}>
+          {fc.map((p) => {
+            const h = Math.max(3, Math.min(1, p.kt / 100) * 40);
+            const isHur = p.kt >= 65;
+            return (
+              <div key={p.hr} style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                <span style={{ ...mono, fontSize: 8.5, color: isHur ? "var(--neg)" : "var(--text-2)" }}>{p.kt}</span>
+                <div style={{ width: "100%", height: h, borderRadius: 2,
+                  background: isHur ? "var(--neg)" : "var(--accent)", opacity: isHur ? .9 : .5 }} />
+                <span style={{ ...mono, fontSize: 8, color: "var(--text-2)" }}>{p.hr}h</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {(hp || (w && w.highest)) && (
+        <div style={{ ...mono, fontSize: 10, color: "var(--text-2)", padding: "0 11px 9px", lineHeight: 1.55 }}>
+          {hp && <div>{hp.basis}</div>}
+          {w && w.highest && <div style={{ marginTop: 4 }}>{MTC.claim("advisory.watches").text}</div>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MT_StormConsoles({ dense }) {
+  const storms = Object.values((window.MT && MT.storms) || {});
+  const live = storms.filter((s) => s.forecastKt || s.hurricaneP || (s.watches && s.watches.highest));
+  if (!live.length) return null;
+  return (
+    <P pad={false} title="Active systems — official advisory"
+      right={<BG tone="live" dot>{live.length} TRACKED</BG>}
+      footer={<PF {...MTC.footer("panel.storms")} />}>
+      <div style={{ padding: dense ? 9 : 11 }}>
+        {live.map((s) => <StormConsole key={s.id} storm={s} dense={dense} />)}
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", lineHeight: 1.55 }}>
+          {MTC.claim("advisory.latency").text}
+        </div>
+      </div>
+    </P>
+  );
+}
+
 const GRADE_TONE = {
   TAKE:    { fg: "var(--pos)",  bg: "rgba(34,197,94,.10)" },
   SMALL:   { fg: "var(--warn)", bg: "rgba(234,179,8,.10)" },
@@ -346,7 +447,7 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead><tr>
-              {head("Verdict", "center")}{head("Contract")}{head("Side", "center")}{head("Pay", "right")}{head("Model", "right")}
+              {head("Verdict", "center")}{head("Contract")}{head("Side", "center")}{head("Pay", "right")}{head("Model / range", "right")}
               {head("Net edge", "right")}{head("Agree", "right")}{head("Stake", "right")}{head("Expected", "right")}{head("Why")}
             </tr></thead>
             <tbody>
@@ -357,7 +458,22 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
                   <td style={{ fontSize: 11.5, padding: "7px 8px", borderBottom: "1px solid var(--border-dim)", color: "var(--text-1)", maxWidth: 300 }}>{r.label}</td>
                   {cell(<span style={{ fontWeight: 800, color: r.side === "YES" ? "var(--pos)" : "var(--neg)" }}>{r.side}</span>, "center")}
                   {cell(pct(r.price), "right")}
-                  {cell(pct(r.model), "right", { color: "var(--text-2)" })}
+                  {cell(r.c.modelLow != null && r.c.modelHigh != null ? (
+                    /* The band drawn to scale on 0-100, with the price marked on the same
+                       axis. When the marker sits inside the bar the estimate does not
+                       clear the price and the row is graded on exactly that. */
+                    <span style={{ display: "inline-block", width: 74, verticalAlign: "middle" }} title={`${(r.c.modelLow*100).toFixed(0)}-${(r.c.modelHigh*100).toFixed(0)}% · pay ${(r.price*100).toFixed(0)}c`}>
+                      <span style={{ display: "block", fontSize: 10, color: "var(--text-2)", textAlign: "right" }}>{pct(r.model)}</span>
+                      <span style={{ position: "relative", display: "block", height: 6, borderRadius: 3, background: "var(--surface-sunken)", border: "1px solid var(--border-dim)", marginTop: 2 }}>
+                        <span style={{ position: "absolute", left: (r.c.modelLow * 100) + "%",
+                          width: Math.max(2, (r.c.modelHigh - r.c.modelLow) * 100) + "%",
+                          top: 0, bottom: 0, borderRadius: 3,
+                          background: r.grade === "SUSPECT" ? "var(--text-2)" : "var(--accent)", opacity: .55 }} />
+                        <span style={{ position: "absolute", left: (r.price * 100) + "%", top: -2, bottom: -2, width: 2,
+                          background: "var(--warn)" }} />
+                      </span>
+                    </span>
+                  ) : pct(r.model), "right", { color: "var(--text-2)" })}
                   {cell(<span style={{ fontWeight: 800, color: r.grade === "SUSPECT" ? "var(--text-2)" : "var(--edge-glow)" }}>+{(r.edge * 100).toFixed(1)}</span>, "right")}
                   {cell(<span style={{ color: r.dispersion == null ? "var(--text-2)" : r.dispersion <= 0.10 ? "var(--pos)" : "var(--warn)" }}>
                     {r.dispersion == null ? "—" : "±" + (r.dispersion * 100).toFixed(0)}</span>, "right")}
@@ -1169,4 +1285,4 @@ function MT_Observability({ narrow }) {
   );
 }
 
-Object.assign(window, { MT_Evidence, MT_Confidence, MT_EdgeMatrix, MT_EdgeBook, MT_Markets, MT_OrderBook, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section, MT_Attention, MT_Exposure });
+Object.assign(window, { MT_Evidence, MT_Confidence, MT_EdgeMatrix, MT_EdgeBook, MT_StormConsoles, MT_Markets, MT_OrderBook, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section, MT_Attention, MT_Exposure });

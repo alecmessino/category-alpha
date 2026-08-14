@@ -39,6 +39,16 @@ input[type=number]{outline:none}input[type=number]:focus{border-color:var(--acce
 .mt-tt{background:#0b1220;border:1px solid #1a2740;color:#e6edf6;font-family:var(--font-mono);font-size:10px}
 .mt-tt:before{display:none}
 #root{min-height:100vh}
+.mt-num,[data-num],table td,table th{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+/* Every metric on this board is monospaced already, but monospace does not guarantee
+   proportional DIGITS in every fallback face. Without tabular figures the transport
+   clock, the countdown and every price cell shift horizontally by a fraction of a pixel
+   on each tick, which reads as the whole rail vibrating. */
+body,.mt-mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+/* A grid track defaults to min-content, so one long unbroken string (a contract title,
+   a basis line) forces the track wider than its share and pushes the row off-screen.
+   minmax(0,...) lets the track shrink below its content and the content wrap instead. */
+.mt-grid>*{min-width:0}
 .mt-boot{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--font-mono);font-size:12px;color:#61789b;letter-spacing:.5px}
 </style>
 <!-- Libraries are self-hosted (vendored) so the permanent URL never depends on a third-party

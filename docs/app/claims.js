@@ -336,6 +336,7 @@
     "panel.fairvalue": { owner: "models",   source: (s) => srcOf(s, "markets", "market") + " ladder × HURDAT2 baseline", tier: () => "C" },
     "panel.markets":   { owner: "markets",  source: (s) => srcOf(s, "markets", "market") + " prices · anchor = HURDAT2 climatology", tier: () => "C" },
     "panel.edge":      { owner: "models",   source: (s) => srcOf(s, "markets", "market") + " prices × HURDAT2 baseline", tier: () => "C" },
+    "panel.storms":    { owner: "nhc",       source: (s) => srcOf(s, "nhc", "NHC") + " advisory · forecast intensity and watches as published", tier: (s) => okOf(s, "nhc") ? "A" : "C" },
     "panel.edgebook":  { owner: "models",   source: (s) => srcOf(s, "markets", "market") + " executable prices × HURDAT2 baseline, net of fee", tier: () => "C" },
     "panel.orderbook": { owner: "markets",  source: (s) => okOf(s, "markets") ? srcOf(s, "markets") + " resting depth" : "exchange returned no depth", tier: () => "C" },
     "panel.observability": { owner: "derived", source: () => "feed results as returned this cycle", tier: () => "A" },

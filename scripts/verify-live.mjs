@@ -213,6 +213,24 @@ const probe = await page.evaluate(() => {
       }).length;
       return { present: true, executable: L.executable.length, displayed: L.displayed.length, bad };
     })(),
+    /* Layout regressions do not throw. They push a row off-screen, or make the whole
+       rail jitter as digits change width, and nothing fails. These are the two that were
+       just fixed, asserted against the rendered page so they cannot come back quietly. */
+    layout: (() => {
+      const de = document.documentElement;
+      const cs = getComputedStyle(document.body);
+      const grids = [...document.querySelectorAll(".mt-grid")];
+      const overflowing = grids.filter((g) => g.scrollWidth > g.clientWidth + 2).length;
+      const map = document.querySelector(".leaflet-container");
+      return {
+        bodyOverflow: de.scrollWidth - de.clientWidth,
+        tabularNums: /tabular-nums/.test(cs.fontVariantNumeric || "") || /tnum/.test(cs.fontFeatureSettings || ""),
+        grids: grids.length, overflowingGrids: overflowing,
+        mapHeight: map ? Math.round(map.getBoundingClientRect().height) : null,
+        stormConsole: /ACTIVE SYSTEMS/i.test(T),
+        hud: /\bADV\b/.test(T) && /\bSNAP\b/.test(T),
+      };
+    })(),
     unregisteredClaim: /UNREGISTERED CLAIM|CLAIM ERROR/.test(T),
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
   };
@@ -255,6 +273,14 @@ add("every ladder spread claimed is re-derivable from the book",
   ld.present && !ld.threw && ld.bad === 0,
   ld.threw ? "threw: " + ld.threw
     : `${ld.executable} executable · ${ld.displayed} displayed-only · unverifiable=${ld.bad}`);
+
+const LY = probe.layout || {};
+add("no horizontal overflow and no jittering digits",
+  LY.bodyOverflow <= 0 && LY.tabularNums === true && LY.overflowingGrids === 0,
+  `bodyOverflow=${LY.bodyOverflow}px tabularNums=${LY.tabularNums} grids=${LY.grids} overflowing=${LY.overflowingGrids}`);
+add("the map is a centrepiece, not a thumbnail",
+  LY.mapHeight != null && LY.mapHeight >= 480,
+  `map ${LY.mapHeight}px`);
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,
   `${probe.contracts} contracts · ${probe.seriesCount} series · droppedForCap=${probe.droppedForCap}`);

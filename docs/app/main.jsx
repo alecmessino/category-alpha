@@ -98,6 +98,81 @@ function AwaitingTelemetry({ feeds, generatedAt, note }) {
   );
 }
 
+/* ---- Ingestion health, in the header ----
+   Now that advisory lag is measured rather than asserted, it belongs where it is seen
+   without looking for it. Three states only, and the third is the one that matters: a
+   feed that was never wired is NOT a red light. Red means broken; grey means we never
+   claimed to have it. Conflating those is how a board ends up looking like it has
+   capabilities it does not — which is the failure this whole registry exists to stop. */
+function IngestionHUD() {
+  const [open, setOpen] = React.useState(false);
+  const F = (window.MT && MT._feeds) || {};
+  const storms = Object.values((window.MT && MT.storms) || {});
+  const lags = storms.map((s) => s.advisoryLagMin).filter((v) => v != null);
+  const advLag = lags.length ? Math.max(...lags) : null;
+  const snapAge = window.MTC ? MTC.snapshotAgeMin() : null;
+
+  const state = (ok, warn) => (ok ? "ok" : warn ? "warn" : "bad");
+  const pills = [
+    { k: "ADV", title: "NHC advisory ingestion lag",
+      st: advLag == null ? (F.nhc && F.nhc.ok ? "warn" : "off") : advLag <= 45 ? "ok" : advLag <= 180 ? "warn" : "bad",
+      v: advLag == null ? "—" : advLag + "m" },
+    { k: "MKT", title: "Prediction-market feed", st: state(F.markets && F.markets.ok, false),
+      v: F.markets && F.markets.count != null ? F.markets.count : "—" },
+    { k: "TWO", title: "Tropical Weather Outlook", st: state(F.outlook && F.outlook.ok, false),
+      v: F.outlook && F.outlook.count != null ? F.outlook.count : "—" },
+    { k: "SNAP", title: "Snapshot age", st: snapAge == null ? "bad" : snapAge <= 25 ? "ok" : snapAge <= 75 ? "warn" : "bad",
+      v: snapAge == null ? "—" : snapAge + "m" },
+    /* Never wired. Shown as absent, not as failed. */
+    { k: "RECON", title: "Reconnaissance", st: "off", v: "—" },
+    { k: "SST", title: "Sea-surface temperature anomaly", st: "off", v: "—" },
+  ];
+  const TONE = { ok: "var(--pos)", warn: "var(--warn)", bad: "var(--neg)", off: "var(--border-strong)" };
+
+  return (
+    <span style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
+      {pills.map((p) => (
+        <span key={p.k} title={p.title} onClick={() => setOpen(!open)}
+          style={{ display: "inline-flex", alignItems: "center", gap: 3, cursor: "pointer",
+            fontSize: 9, fontWeight: 800, letterSpacing: ".4px", padding: "2px 6px", borderRadius: 999,
+            color: p.st === "off" ? "var(--text-2)" : TONE[p.st],
+            border: "1px solid " + (p.st === "off" ? "var(--border-dim)" : TONE[p.st]),
+            background: p.st === "off" ? "transparent" : "color-mix(in srgb, " + TONE[p.st] + " 12%, transparent)",
+            opacity: p.st === "off" ? .55 : 1 }}>
+          <span style={{ width: 5, height: 5, borderRadius: "50%", background: p.st === "off" ? "var(--border-strong)" : TONE[p.st] }} />
+          {p.k}<span style={{ opacity: .75 }}>{p.v}</span>
+        </span>
+      ))}
+      {open && (
+        <div onClick={() => setOpen(false)} style={{ position: "absolute", top: 22, right: 0, zIndex: 900, width: 460,
+          background: "var(--surface-card)", border: "1px solid var(--border-strong)", borderRadius: 10,
+          boxShadow: "var(--shadow-cmd)", padding: "11px 13px", fontSize: 11, lineHeight: 1.6, cursor: "default" }}>
+          <div style={{ fontWeight: 800, letterSpacing: 1, fontSize: 10, color: "var(--accent)" }}>INGESTION HEALTH</div>
+          <div style={{ marginTop: 6, color: "var(--text-2)" }}>{MTC.claim("advisory.latency").text}</div>
+          <div style={{ marginTop: 6, color: "var(--text-2)" }}>{MTC.claim("capability.notIngested").text}</div>
+          {/* How staleness actually moved the evidence tier, from the same function
+              that computes it — not a restatement of it. */}
+          {(() => {
+            const sid = Object.keys((window.MT && MT.storms) || {})[0];
+            if (!sid || !window.MTX) return null;
+            const t = MTX.tier(sid, (window.MT ? MT.FRAMES : 1) - 1);
+            return (
+              <div style={{ marginTop: 8, borderTop: "1px solid var(--border-dim)", paddingTop: 7 }}>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)" }}>
+                  EVIDENCE TIER <b style={{ color: "var(--text-1)" }}>{t.tier}</b> — how each input moved it
+                </div>
+                {t.reasons.map((r, i) => (
+                  <div key={i} style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", paddingLeft: 8 }}>· {r}</div>
+                ))}
+              </div>
+            );
+          })()}
+        </div>
+      )}
+    </span>
+  );
+}
+
 function LayerToggles({ layers, setLayers, storm }) {
   const [showOff, setShowOff] = React.useState(false);
   const S = storm ? MT.storms[storm] : null;
@@ -204,12 +279,13 @@ function MillibarTerminalApp() {
   const [sel, setSel] = React.useState({ contract: (MT.contracts[0] && MT.contracts[0].id) || null, evidence: null });
   const [bankroll, setBankroll] = React.useState(10000);
   const [stake, setStake] = React.useState(0.25);
-  const [layers, setLayers] = React.useState({ satellite: true, track: true, forecast: true, cone: true, recon: false, ascat: false, models: false, particles: false });
+  const [layers, setLayers] = React.useState({ satellite: true, infrared: false, track: true, forecast: true, cone: true, recon: false, ascat: false, models: false, particles: false });
   const [vw, setVw] = React.useState(typeof window !== "undefined" ? window.innerWidth : 1440);
+  const [vh, setVh] = React.useState(typeof window !== "undefined" ? window.innerHeight : 900);
   const narrow = vw < 900;
   const [imagery, setImagery] = React.useState(null);
   React.useEffect(() => {
-    const onResize = () => setVw(window.innerWidth);
+    const onResize = () => { setVw(window.innerWidth); setVh(window.innerHeight); };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -223,7 +299,11 @@ function MillibarTerminalApp() {
   const gap = wide ? 18 : 14;
   const shell = { width: "100%", maxWidth: 2000, margin: "0 auto", boxSizing: "border-box",
     padding: wide ? "22px 26px 56px" : "16px 16px 48px" };
-  const cmdH = wide ? 420 : 340;           // command block height; register matches it
+  /* Spatial data is the reason this is a terminal and not a spreadsheet, and it was
+     sized like a supporting chart. Half the viewport, floored at 500px so it stays a
+     centrepiece on a laptop and grows on a wall display. The register alongside it
+     matches, so the two never disagree about how tall the block is. */
+  const cmdH = Math.max(500, Math.round(vh * 0.5 / zoom));
   /* Newer snapshot available. At live with playback stopped we take it immediately
      (a reload is the honest way to rebuild MT — nothing is patched in place); if the
      operator is scrubbing history we surface a chip and let them choose. */
@@ -337,6 +417,7 @@ function MillibarTerminalApp() {
           </>
         )}
         <span style={{ opacity: .4 }}>·</span><span>as-of <b style={{ color: "var(--accent)" }}>{MTX.frameTime(frame)}</b></span>
+        <IngestionHUD />
       </div>
     </header>
   );
@@ -368,6 +449,11 @@ function MillibarTerminalApp() {
             list would go with it. Surface it here instead, above the queue it feeds. */}
         {S && <GenesisWatch compact />}
 
+        {/* 3.2 — the active systems, as the advisory states them. Above the queue because
+            a forecast intensity and a hurricane watch are the inputs to everything below,
+            not a detail to be found after scrolling past the trades. */}
+        <window.MT_StormConsoles dense={dense} />
+
         {/* 3.5 — what to actually do about it. This sits above the attention queue on
             purpose: the queue says what changed, and a list of changes is not a list of
             trades. Ranked, short, and net of what it costs to get the position on. */}
@@ -379,7 +465,7 @@ function MillibarTerminalApp() {
         {/* 4 + 3 — what needs you, and what it touches. This is the hero row now;
             the map moved below it, because the product stopped being the data and
             became the interpretation of the data. */}
-        <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: gap, alignItems: "start", marginBottom: gap }}>
+        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
           <window.MT_Attention dense={dense} imagery={imageryState}
             onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
             onSelectContract={pickContract} />
@@ -445,7 +531,7 @@ function MillibarTerminalApp() {
 
         {/* 5b — fair value and the posterior stack behind every edge on screen */}
         <window.MT_Section label="Fair value" tier="term structure · posterior stack" defaultOpen summary="collapsed">
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
+          <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start" }}>
             <window.MT_YieldCurve dense={dense} />
             <window.MT_Observability narrow={narrow} />
           </div>
@@ -454,7 +540,7 @@ function MillibarTerminalApp() {
         {/* 5c — the audit trail: every input, and the full unfiltered register */}
         <window.MT_Section label="Verify" tier="inputs · confidence · full register"
           summary={MT.evidence.length + " inputs · tier " + MTX.snap(storm, frame).tier}>
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : wide ? "1.2fr 1fr 1.1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
+          <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : wide ? "minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.1fr)" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start" }}>
             <window.MT_Evidence stormId={storm} frame={frame} selection={sel} onSelect={(id) => setSel((s) => ({ ...s, evidence: id }))} dense={dense} />
             <window.MT_Confidence stormId={storm} frame={frame} />
             <window.MT_Signals stormId={storm} dense={dense} maxH={520} onSeek={(tsZ) => {
@@ -467,7 +553,7 @@ function MillibarTerminalApp() {
         {/* 5d — the full board, on demand */}
         <window.MT_Section label="Raw data" tier="full market board · depth · sizing"
           summary={MT.contracts.length + " contracts · " + (MT._feeds && MT._feeds.markets ? MT._feeds.markets.source : "—")}>
-          <div style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "1.5fr 1fr", gap: gap, alignItems: "start" }}>
+          <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: gap, minWidth: 0 }}>
               <window.MT_Markets frame={frame} selection={sel} onSelect={pickContract} dense={dense} />
               <window.MT_EdgeMatrix frame={frame} bankroll={bankroll} stake={stake} setBankroll={setBankroll} setStake={setStake} selection={sel} onSelect={pickContract} dense={dense} />
