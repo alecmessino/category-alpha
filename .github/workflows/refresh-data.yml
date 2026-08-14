@@ -112,6 +112,13 @@ jobs:
       - name: Test advisory ingest and per-storm anchor
         run: node scripts/test-advisory.mjs
 
+      # A GRIB2 reader with no system dependency, which is only possible because the
+      # probe established the packing template first. Its refusal paths matter more than
+      # its happy path: a decoder that guesses at complex packing produces a plausible
+      # wind field that is wrong, and a wrong wind field looks exactly like a right one.
+      - name: Test the GRIB2 reader
+        run: node scripts/test-grib2.mjs
+
       # Every visible claim must have a provenance owner. This fails the build if
       # capability / liveness language reappears as a literal inside a component
       # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of
@@ -132,7 +139,11 @@ jobs:
             TICK=$((TICK+1))
             echo "::group::tick $TICK — $(date -u +%H:%MZ)"
             node scripts/fetch-data.mjs || echo "fetch failed this tick — keeping the last good snapshot"
-            git add docs/data/latest.json docs/data/frames.json
+            # GFS runs four times a day, so this returns immediately unless the cycle has
+            # advanced. Isolated from the main fetch: the wind field is decoration and must
+            # never be able to stop the board from publishing.
+            node scripts/fetch-wind.mjs || echo "wind fetch failed this tick — keeping the last field"
+            git add docs/data/latest.json docs/data/frames.json docs/data/wind.json
             if git diff --cached --quiet; then
               echo "No data changes this tick."
             else
