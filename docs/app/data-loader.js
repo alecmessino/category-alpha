@@ -107,6 +107,52 @@
         hurricanePAt: (f) => { const r = fs(f); return r && r.hurricaneP != null ? r.hurricaneP : (s.hurricaneP ? s.hurricaneP.p : null); },
         peakKtAt: (f) => pick(f, "peakKt", s.hurricaneP ? s.hurricaneP.peakKt : null),
         guidanceAt: (f) => pick(f, "guidance", null),
+
+        /* ---- the four ingested feeds, and the engine's output ----------------------
+           The whole-object blocks (consensus / recon / ships / ascat) are the latest
+           snapshot and carry the detail a panel expands into. The *At accessors read the
+           FRAME, which is what makes these move under the scrubber and diff in the
+           register — a field that only ever reads "now" cannot be seen to have changed.
+
+           This whitelist is the exact place the advisory block was silently dropped
+           once before: every one of these fields is written server-side, and a field not
+           listed here does not exist as far as the page is concerned. */
+        consensus: s.consensus || null,
+        recon: s.recon || null,
+        ships: s.ships || null,
+        ascat: s.ascat || null,
+        aircraftFix: s.aircraftFix || null,
+        riFloor: s.riFloor || null,
+        hurricanePCal: s.hurricanePCal || null,
+        evidenceQuality: s.evidenceQuality || null,
+        bestTrack: s.bestTrack || null,
+
+        pCalAt: (f) => { const r = fs(f); return r && r.pCal != null ? r.pCal : (s.hurricanePCal ? s.hurricanePCal.p : null); },
+        pSigmaAt: (f) => { const r = fs(f); return r && r.pSigma != null ? r.pSigma : (s.hurricanePCal ? s.hurricanePCal.sigmaKt : null); },
+        qualityAt: (f) => { const r = fs(f); return r && r.quality != null ? r.quality : (s.evidenceQuality ? s.evidenceQuality.tier : null); },
+        conKtAt: (f) => { const r = fs(f); return r && r.conKt != null ? r.conKt : (s.consensus ? s.consensus.peakKt : null); },
+        conSpreadAt: (f) => { const r = fs(f); return r && r.conSpread != null ? r.conSpread : (s.consensus ? s.consensus.spreadKt : null); },
+        conCycleAt: (f) => { const r = fs(f); return r && r.conCycle != null ? r.conCycle : (s.consensus ? s.consensus.cycle : null); },
+        /* Age of the guidance cycle AT THE FRAME, derived from that frame's own clock so
+           scrubbing back does not report the deck as older than it was at the time. */
+        conAgeAt: (f) => {
+          const r = fs(f); const cyc = r && r.conCycle;
+          if (!cyc || String(cyc).length < 10) return null;
+          const c = String(cyc);
+          const t = Date.parse(c.slice(0, 4) + "-" + c.slice(4, 6) + "-" + c.slice(6, 8) + "T" + c.slice(8, 10) + ":00:00Z");
+          const at = Date.parse(framesArr[clampF(f)].tsZ);
+          return (t && at) ? Math.round((at - t) / 60000) : null;
+        },
+        reconMbAt: (f) => { const r = fs(f); return r && r.reconMb != null ? r.reconMb : (s.recon ? s.recon.mslp : null); },
+        reconKtAt: (f) => { const r = fs(f); return r && r.reconKt != null ? r.reconKt : (s.recon ? s.recon.intensityKt : null); },
+        reconFlKtAt: (f) => { const r = fs(f); return r && r.reconFlKt != null ? r.reconFlKt : (s.recon ? s.recon.flightLevelKt : null); },
+        shearAt: (f) => { const r = fs(f); return r && r.shShear != null ? r.shShear : (s.ships ? s.ships.features.shearKt : null); },
+        ohcAt: (f) => { const r = fs(f); return r && r.shOhc != null ? r.shOhc : (s.ships ? s.ships.features.ohc : null); },
+        mpiAt: (f) => { const r = fs(f); return r && r.shMpi != null ? r.shMpi : (s.ships ? s.ships.features.mpiKt : null); },
+        rhAt: (f) => { const r = fs(f); return r && r.shRh != null ? r.shRh : (s.ships ? s.ships.features.rhMid : null); },
+        riAt: (f) => { const r = fs(f); return r && r.shRi != null ? r.shRi : (s.riFloor ? s.riFloor.p : null); },
+        ascatKtAt: (f) => { const r = fs(f); return r && r.ascatKt != null ? r.ascatKt : (s.ascat ? s.ascat.kt : null); },
+        ascatAgeAt: (f) => { const r = fs(f); return r && r.ascatAge != null ? r.ascatAge : null; },
       };
     });
 
@@ -188,8 +234,13 @@
       for (let i = 0; i < frameTimeMs.length; i++) { const d = Math.abs(frameTimeMs[i] - t); if (d < bd) { bd = d; best = i; } }
       return best;
     }
+    /* `kind`, `detail` and `stormId` travel with the event. The register relabelled every
+       server event as an advisory while advisories were the only thing the server
+       emitted; it now emits recon fixes and guidance cycles, and a recon fix filed under
+       "advisory" is a false attribution on the one row an operator most needs to trust. */
     const events = (latest.events || []).map((e) => ({
       frame: e.frame != null ? clampF(e.frame) : nearestFrame(e.tsZ), kind: e.kind, label: e.label,
+      detail: e.detail || null, stormId: e.stormId || null,
       source: e.source, tier: e.tier || "B", hot: !!e.hot,
     })).sort((a, b) => a.frame - b.frame);
 
@@ -249,6 +300,13 @@
     }
     const health = [
       feedHealth(feeds.nhc, "NHC advisories"),
+      /* The four pre-advisory feeds sit directly under the advisory row, in priority
+         order, because that is the order in which they reach the board ahead of it and
+         the order in which their absence hurts. */
+      feedHealth(feeds.atcf, "ATCF decks (a/b/f)"),
+      feedHealth(feeds.recon, "Aircraft recon (VDM)"),
+      feedHealth(feeds.ships, "SHIPS diagnostics"),
+      feedHealth(feeds.ascat, "Scatterometer passes"),
       Object.assign(feedHealth(feeds.markets, "Prediction markets"),
         (feeds.markets && feeds.markets.droppedForCap) ? { status: "FAIL" } : {}),
       feedHealth(feeds.satellite, "GIBS imagery"),

@@ -15,6 +15,13 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+/* The four pre-advisory feeds and the engine that combines them. The fetching lives in
+   ingest.mjs and the arithmetic in lib/probability.mjs, so both can be exercised without
+   this file's live pulls — and so the guidance-envelope tilt below stays the single
+   implementation of itself. */
+import { ingestIntel, arrivalEvents } from "./ingest.mjs";
+import { calibratedIntensityP, evidenceQuality } from "./lib/probability.mjs";
+import { riFloorFor } from "./lib/ships.mjs";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = resolve(__dir, "../docs/data");
@@ -1689,6 +1696,58 @@ function namingAnchor(label, ticker, clims, std, oni) {
   };
 }
 
+/* ---------------- the probability engine, applied to the live storms ----------------
+ *
+ * The four ingested feeds land on the storm here, and the calibrated probability is
+ * computed once, so every consumer downstream — the anchor, the frame, the register, the
+ * Situation strip — reads the same number rather than each deriving its own.
+ *
+ * THE RAW ESTIMATE IS NEVER OVERWRITTEN. `hurricaneP` stays exactly what the official
+ * advisory estimator produced, and `hurricanePCal` sits beside it. Every surface that
+ * shows one can show the other, which is the whole of the raw-and-calibrated rule.
+ *
+ * SHIPS SCORING IS AN OPERATOR CLAIM. It is off unless MT_SHIPS_RI_SCORING is set, and
+ * the unscored floor is published either way. That is not a feature flag hiding an
+ * unfinished path — the RI floor is computed, carried and displayed on every cycle. It is
+ * a statement about who is responsible for a number entering a price. */
+const SHIPS_RI_SCORING = process.env.MT_SHIPS_RI_SCORING === "1";
+
+function applyIntel(storms, intel) {
+  for (const s of storms) {
+    const I = (intel && intel.byStorm && intel.byStorm[s.id]) || null;
+    s.consensus = I ? I.consensus : null;
+    s.recon = I ? I.recon : null;
+    s.aircraftFix = I ? I.aircraftFix : null;
+    s.ships = I ? I.ships : null;
+    s.ascat = I ? I.ascat : null;
+    s.bestTrack = I ? I.bestTrack : null;
+    s.intelNotes = I ? { atcf: I.atcfNote, ships: I.shipsNote } : null;
+
+    /* The rapid-intensification floor speaks to the gap between where the storm is now
+       and where the contract resolves. No gap, no floor — a storm already at hurricane
+       strength does not need to intensify rapidly to be a hurricane. */
+    const gap = s.wind != null ? HURRICANE_REPORTED_KT - s.wind : null;
+    const floor = (s.ships && gap != null && gap > 0) ? riFloorFor(s.ships, gap, 48) : null;
+    s.riFloor = floor;
+
+    const cal = calibratedIntensityP({
+      official: s.hurricaneP, currentKt: s.wind,
+      consensus: s.consensus, recon: s.recon, ascat: s.ascat, ships: s.ships,
+      riFloor: floor, shipsScoring: SHIPS_RI_SCORING,
+    }, {
+      nowMs: now.getTime(), maeTable: INTENSITY_MAE,
+      thresholdKt: LATENT_THRESHOLD, reportedKt: HURRICANE_REPORTED_KT,
+    });
+    s.hurricanePCal = cal && cal.ok ? cal : null;
+    /* Evidence quality is capped by staleness, and the cap is read from the SAME constant
+       the anchor refuses on. A measured initial condition under a superseded advisory is
+       not high-quality evidence about the present storm. */
+    s.evidenceQuality = evidenceQuality(cal, {
+      advisoryLagMin: s.advisoryLagMin, staleAtMin: STORM_ANCHOR_MAX_LAG_MIN / 2,
+    });
+  }
+}
+
 /* An anchor for a contract about ONE named, currently-active storm.
  *
  * This replaces a refusal, and a refusal is only worth replacing when the replacement is
@@ -1721,10 +1780,21 @@ function stormAnchor(label, ticker, storms) {
 
   const w = S.watches || {};
   const gI = S.discussion && S.discussion.guidance && S.discussion.guidance.intensity;
+  /* THE PRICE COMES FROM THE PROBABILITY ENGINE when the engine has something the
+     advisory alone does not — the guidance deck that landed before the advisory, or an
+     aircraft that measured the storm. When it has neither, this is exactly the estimate
+     it always was, which is why a storm with no intel prices identically to before. */
+  const cal = S.hurricanePCal && S.hurricanePCal.ok ? S.hurricanePCal : null;
   return {
-    p: hp.p, pLow: hp.pLow ?? null, pHigh: hp.pHigh ?? null,
+    p: cal ? cal.p : hp.p,
+    pLow: cal ? cal.pLow : (hp.pLow ?? null),
+    pHigh: cal ? cal.pHigh : (hp.pHigh ?? null),
+    /* RAW AND CALIBRATED, SIDE BY SIDE. The official-forecast estimate is carried on the
+       anchor whether or not anything moved it, so no surface has to reach back for it. */
+    pOfficial: hp.p, calibrated: !!cal, calibration: cal,
+    quality: S.evidenceQuality ? S.evidenceQuality.tier : null,
     unconditional: null, quantity: "storm-intensity", basin: null,
-    storm: S.id, source: "NHC forecast",
+    storm: S.id, source: cal ? "NHC forecast + ATCF/recon" : "NHC forecast",
     /* Advisory age travels WITH the anchor rather than being looked up beside it, so a
        consumer cannot price this without also being handed how old the forecast under it
        is. The hard refusal above is a cliff at one full advisory cycle; this is the
@@ -1750,8 +1820,13 @@ function stormAnchor(label, ticker, storms) {
           ? `${w.highest} in effect for ${(w.inEffect[0] && w.inEffect[0].areas || []).join(", ")}`
             + ` — advisories are running on the 3-hourly intermediate cycle`
           : "no watch or warning in effect for this system" },
+      /* The engine's own layers — the guidance consensus, the aircraft, the RI floor.
+         The official layer it also publishes is dropped here because it is already the
+         first row above; a duplicate would read as two sources agreeing when it is one
+         source counted twice, and the TAKE grade is decided by exactly that count. */
+      ...(cal ? cal.layers.filter((l) => l.id !== "official") : []),
     ],
-    basis: `${S.name} is ${S.wind} kt now · ` + hp.basis
+    basis: `${S.name} is ${S.wind} kt now · ` + (cal ? cal.basis + " · " + hp.basis : hp.basis)
          + (w.highest ? ` · ${w.highest} in effect` : "")
          + (S.advisoryLagMin != null ? ` · advisory ${S.advisoryLagMin} min old when fetched` : ""),
   };
@@ -2218,6 +2293,24 @@ async function fetchKalshi(storms, clims, oni, std) {
       modelMaxLagMin: anchor && anchor.maxLagMin != null ? anchor.maxLagMin : null,
       modelGuidance: anchor && anchor.guidance ? anchor.guidance.position : null,
       modelRawP: anchor && anchor.adjustment ? anchor.adjustment.raw : null,
+      /* RAW AND CALIBRATED, on the contract, side by side. `model` is what the board
+         prices against; `modelOfficialP` is the untouched official-advisory estimate, so
+         a reader can always see how far the pre-advisory feeds moved the number and in
+         which direction — including when the answer is "not at all". */
+      modelOfficialP: anchor && anchor.pOfficial != null ? anchor.pOfficial : null,
+      modelCalibrated: !!(anchor && anchor.calibrated),
+      modelQuality: anchor && anchor.quality ? anchor.quality : null,
+      modelIntel: anchor && anchor.calibration ? {
+        conKt: anchor.calibration.sources.find((x) => x.id === "consensus")?.peakKt ?? null,
+        conAgeMin: anchor.calibration.consensusAgeMin ?? null,
+        spreadKt: anchor.calibration.tauKt ?? null,
+        reconAgeMin: anchor.calibration.reconAgeMin ?? null,
+        reconDeltaKt: anchor.calibration.reconDeltaKt ?? null,
+        ascatUsed: !!anchor.calibration.ascatUsed,
+        riFloorP: anchor.calibration.riFloor ? anchor.calibration.riFloor.p : null,
+        riScored: !!anchor.calibration.shipsScoring,
+        drivenBy: anchor.calibration.drivenBy || null,
+      } : null,
       horizon: horizonOf(title), strike,
       /* The board carried a mid and a spread and left every consumer to reconstruct the
          two sides from them. That reconstruction is wrong exactly where it matters: the
@@ -2317,6 +2410,20 @@ async function main() {
 
   const { feed: nhcFeed, storms } = await fetchStorms();
 
+  /* THE INGESTION DAEMON. Four feeds that land before the advisory does: the ATCF decks,
+     aircraft reconnaissance, SHIPS and the latest scatterometer pass. Run immediately
+     after the storm list because everything downstream — the anchor, the frame, the
+     register — reads what it attaches. A failure in any of them degrades the estimate to
+     what the advisory alone supports; none of them can block the board. */
+  const intel = await ingestIntel(storms, { nowMs: now.getTime() });
+  applyIntel(storms, intel);
+
+  /* The previous committed snapshot, read ONLY to answer "what is new". Every one of the
+     four products sits in a file that is re-read every tick, so arrival can be decided
+     nowhere else. */
+  let prevLatest = null;
+  try { prevLatest = JSON.parse(await readFile(resolve(DATA_DIR, "latest.json"), "utf8")); } catch { /* first run */ }
+
   // Pre-genesis areas. Independent of whether anything is classified yet.
   const outlook = await fetchOutlook();
 
@@ -2368,6 +2475,13 @@ async function main() {
     label: `${s.name} Advisory #${s.advNum} — ${s.full_cls}, ${s.wind ?? "?"} kt`,
     source: "NHC", tier: "A", hot: (s.wind ?? 0) >= 96,
   }));
+  /* ARRIVALS. A new recon fix, a new guidance cycle, a new SHIPS run, a new pass — each
+     becomes a register row at the moment it lands, which is the whole point of polling
+     ahead of the advisory. Diffed against the previous snapshot so a file that has not
+     changed produces no row; a register that restates the same message every ten minutes
+     stops being read. */
+  const arrivals = arrivalEvents(prevLatest, storms, nowIso);
+  events.push(...arrivals);
 
   const feeds = {
     nhc: nhcFeed,
@@ -2385,6 +2499,14 @@ async function main() {
     enso: ensoFeed,
     outlook: { ok: outlook.ok, status: outlook.status, source: outlook.source, count: outlook.count,
                note: outlook.note, latencyMs: outlook.latencyMs, attempts: outlook.attempts },
+    /* The four pre-advisory feeds, reported exactly like every other feed so they appear
+       in the health panel, the claim registry and the attention queue without a special
+       case. ATCF and recon are CORE — the coverage gate fails the build when either is
+       missing on an active system. */
+    atcf: intel.feeds.atcf,
+    recon: intel.feeds.recon,
+    ships: intel.feeds.ships,
+    ascat: intel.feeds.ascat,
   };
 
   const latest = {
@@ -2415,18 +2537,58 @@ async function main() {
      event when an advisory lands, and the Situation strip has nothing to react to — the
      number changed on the page and nothing on the board recorded that it had. Four small
      scalars per storm per frame; the contract rows dwarf it. */
+  const rr = (v, n) => (v == null || !Number.isFinite(v) ? null : Math.round(v * n) / n);
   storms.forEach((s) => {
     const hp = s.hurricaneP || null;
     const gI = s.discussion && s.discussion.guidance && s.discussion.guidance.intensity;
+    const cal = s.hurricanePCal || null;
+    const con = s.consensus || null;
+    const rec = s.recon && s.recon.ok ? s.recon : null;
+    const sh = s.ships || null;
+    const asc = s.ascat || null;
+    const ageOf = (iso) => { const t = Date.parse(iso || ""); return t ? Math.round((now.getTime() - t) / 60000) : null; };
     frameStorms[s.id] = {
       wind: s.wind, pressure: s.pressure, center: s.center,
-      modelCat4: s.modelCat4, marketCat4: s.marketCat4, reconAge: s.reconAge,
+      modelCat4: s.modelCat4, marketCat4: s.marketCat4,
+      /* reconAge stops being a permanent null. It has always been on the frame and in the
+         evidence-quality tier; there was simply never a feed behind it. */
+      reconAge: rec ? ageOf(rec.fixIso) : s.reconAge,
       advNum: s.advNumFull || s.advNum || null,
       advisoryLagMin: s.advisoryLagMin ?? null,
       hurricaneP: hp && hp.p != null ? Math.round(hp.p * 10000) / 10000 : null,
       peakKt: hp ? hp.peakKt ?? null : null,
       peakHr: hp ? hp.peakHr ?? null : null,
       guidance: gI ? gI.position : null,
+      /* ---- the four ingested feeds, ON THE FRAME ---------------------------------
+         Not in latest.json only. A field that exists solely on the newest snapshot
+         cannot be diffed, which means it cannot raise a register row, cannot move under
+         the scrubber, and cannot be seen to have changed — the number moves on the page
+         and nothing on the board records that it did. Every one of these is a scalar;
+         the contract rows dwarf them. */
+      // Priority 1 — the pre-advisory guidance consensus
+      conKt: con ? rr(con.peakKt, 10) : null,
+      conHr: con ? con.peakHr ?? null : null,
+      conSpread: con ? rr(con.spreadKt, 10) : null,
+      conN: con ? con.n : null,
+      conCycle: con ? con.cycle : null,
+      // Priority 2 — aircraft reconnaissance
+      reconMb: rec ? rec.mslp ?? null : null,
+      reconKt: rec ? rec.intensityKt ?? null : null,
+      reconFlKt: rec ? rec.flightLevelKt ?? null : null,
+      reconOb: rec ? rec.obNumber ?? null : null,
+      // Priority 3 — SHIPS features
+      shShear: sh ? sh.features.shearKt ?? null : null,
+      shOhc: sh ? sh.features.ohc ?? null : null,
+      shRh: sh ? sh.features.rhMid ?? null : null,
+      shMpi: sh ? sh.features.mpiKt ?? null : null,
+      shRi: s.riFloor ? rr(s.riFloor.p, 1000) : null,
+      // Priority 4 — the latest scatterometer pass
+      ascatKt: asc ? asc.kt ?? null : null,
+      ascatAge: asc ? ageOf(asc.iso) : null,
+      // the engine's output, raw and calibrated together
+      pCal: cal ? rr(cal.p, 10000) : null,
+      pSigma: cal ? rr(cal.sigmaKt, 10) : null,
+      quality: s.evidenceQuality ? s.evidenceQuality.tier : null,
     };
   });
   // 4dp is well past tick size; "model": 0.919047619047619 was ~14 wasted bytes per
@@ -2460,6 +2622,19 @@ async function main() {
   console.log(`  climatology: ${climFeed.ok ? climFeed.source + " · " + (clim ? clim.years.length + " seasons" : "Atlantic MISSING") + " · " + (climFeed.note || "") : "FAIL — " + climFeed.note}`);
   console.log(`  ENSO: ${ensoFeed.ok ? ensoFeed.source + " · " + ensoFeed.note : "FAIL — " + ensoFeed.note}`);
   console.log(`  outlook: ${outlook.ok ? outlook.note : "FAIL — " + outlook.note}`);
+  for (const k of ["atcf", "recon", "ships", "ascat"]) {
+    console.log(`  ${k}: ${feeds[k].ok ? "ok" : "FAIL"} — ${feeds[k].note}`);
+  }
+  for (const s of storms) {
+    const cal = s.hurricanePCal;
+    console.log(`    · ${s.name} ${s.evidenceQuality ? "[" + s.evidenceQuality.tier + "]" : ""}`
+      + (cal ? ` P(hurricane) raw ${Math.round(cal.pRaw * 100)}% → calibrated ${Math.round(cal.p * 100)}%`
+             + ` · combined ${cal.meanKt} kt ±${cal.sigmaKt} · driven by the ${cal.drivenBy}`
+             + ` · used ${Object.entries(cal.used).filter(([, v]) => v).map(([k2]) => k2).join("+") || "nothing"}`
+           : " no calibrated probability"));
+    for (const n of ((cal && cal.notes) || [])) console.log(`        ${n}`);
+  }
+  if (arrivals.length) for (const a of arrivals) console.log(`    NEW [${a.kind}] ${a.label}`);
   for (const a of outlook.areas) console.log(`    · ${a.basin} #${a.n} ${a.id || "(no id)"} ${a.title} — ${a.pct48}%/48h ${a.pct7d}%/7d`);
   for (const a of (ensoFeed.attempts || [])) console.log(`    [${a.source}] ok=${a.ok} status=${a.status} → ${a.note}`);
   console.log(`  storms: ${storms.length} · contracts: ${contracts.length} (${contracts.filter((c) => c.model != null).length} anchored) · frames: ${framesJson.frames.length}${appendFrame ? " (+1)" : " (no append — " + Math.round(sinceLastFrameMin) + "m since last, gap is " + FRAME_GAP_MIN + "m)"}`);

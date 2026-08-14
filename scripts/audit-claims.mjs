@@ -28,8 +28,15 @@ const OWNER_FILE = "claims.js";      // the one place claims may be authored
 const RULES = [
   { re: /\bensemble\s+(consensus|mean|spread|probabilit)/i, why: "no ensemble feed is wired — this exact phrase drifted into the pipeline panel" },
   { re: /\bspaghetti\b/i,                                   why: "no model-track feed is wired" },
-  { re: /\b(ASCAT|SFMR)\b/,                                 why: "no scatterometer / SFMR feed is wired" },
-  { re: /\brecon\s+(fix|pass|coverage)\b/i,                 why: "no reconnaissance feed is wired" },
+  /* These two used to mean "no such feed is wired". Both are wired now, and that makes
+     the rule MORE necessary rather than less: an intermittent feed is exactly the kind
+     that a component will describe confidently on a cycle when it delivered nothing. A
+     scatterometer pass is an orbit and a recon fix is an aircraft that has to be flying,
+     so any sentence about either has to be a function of this cycle's fetch result. The
+     instrument names stay banned outside the registry; a panel renders what the pass
+     actually reported, from the data. */
+  { re: /\b(ASCAT|SFMR)\b/,                                 why: "scatterometer and SFMR winds are intermittent — name them only through a claim backed by this cycle's pass" },
+  { re: /\brecon\s+(fix|pass|coverage)\b/i,                 why: "an aircraft fix exists only when one is flying — assert it through a claim backed by the poll result, never as a literal" },
   { re: /\b200\s*OK\b/,                                     why: "HTTP status must come from the actual response, never a literal" },
   { re: /\bsha-?256\b/i,                                    why: "hashes are FNV-1a 32-bit; naming a different algorithm misstates the digest" },
   { re: /latency\s*=\s*["']live["']/,                       why: "liveness must be derived from snapshot age, not asserted" },

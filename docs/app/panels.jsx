@@ -87,9 +87,23 @@ function MT_Situation({ dense }) {
              taken directly against, read at the frame so a new advisory moves it here
              and not only inside the storm console. */
           ...(s.lead ? [{ k: "P(HURRICANE) " + s.lead.name.toUpperCase(), v: Math.round(s.lead.p * 100) + "%",
+            /* LAG, QUALITY TIER, GUIDANCE POSITION — the three qualifiers that have to
+               travel with this number, in the same cell, so it cannot be read without
+               them. And the raw estimate beside the calibrated one whenever the two
+               differ, because a probability that has been moved should say so where it
+               is shown, not in a drawer. */
             sub: "adv #" + (s.lead.adv || "?") + (s.lead.lagMin != null ? " · " + s.lead.lagMin + "m old" : "")
-               + (s.lead.guidance ? " · " + s.lead.guidance + " guidance" : ""),
+               + (s.lead.quality ? " · evidence " + s.lead.quality : "")
+               + (s.lead.guidance ? " · " + s.lead.guidance + " guidance" : "")
+               + (s.lead.calibrated && s.lead.pRaw != null ? " · raw " + Math.round(s.lead.pRaw * 100) + "%" : ""),
             tone: "var(--accent)" }] : []),
+          /* What has landed that the advisory has not caught up to yet. This is the cell
+             the whole ingest exists to fill: when it reads "guidance cycle 12m ago" and
+             the advisory is 90 minutes old, the board is holding something the market
+             has not been told. */
+          ...(s.intel && s.intel.last ? [{ k: "LATEST ARRIVAL", v: s.intel.last.ageMin != null ? s.intel.last.ageMin + "m" : "—",
+            sub: s.intel.last.what + " · " + s.intel.arrivals + " in " + Math.round(s.windowMin / 60) + "h",
+            tone: s.intel.last.kind === "recon" ? "var(--edge-glow)" : "var(--text-1)" }] : []),
           { k: "MATERIAL CHANGES", v: s.byClass.material + s.byClass["trade-relevant"], sub: "in " + Math.round(s.windowMin / 60) + "h" },
           { k: "LAST UPDATE", v: ago(s.lastMaterialAgo).replace(" ago", ""), sub: "ago" },
           { k: "CONFIDENCE", v: s.confidence, sub: s.confWhy,
@@ -284,6 +298,27 @@ function StormConsole({ storm, dense, frame }) {
      is green only inside one intermediate cycle. */
   const lag = val(S.advisoryLagMin);
   const lagTone = lag == null ? "var(--text-2)" : lag <= 45 ? "var(--pos)" : lag <= 180 ? "var(--warn)" : "var(--neg)";
+  /* The four ingested feeds, read AT THE FRAME like everything else here, so scrubbing
+     back shows what the board actually held at that moment rather than what it holds
+     now. Each is null when that feed had nothing for this storm, and null renders as
+     absent rather than as a zero. */
+  const cal = typeof S.pCalAt === "function" ? S.pCalAt(at) : null;
+  const quality = typeof S.qualityAt === "function" ? S.qualityAt(at) : null;
+  const conKt = typeof S.conKtAt === "function" ? S.conKtAt(at) : null;
+  const conSpread = typeof S.conSpreadAt === "function" ? S.conSpreadAt(at) : null;
+  const conAge = typeof S.conAgeAt === "function" ? S.conAgeAt(at) : null;
+  const reconAge = typeof S.reconAge === "function" ? S.reconAge(at) : null;
+  const reconMb = typeof S.reconMbAt === "function" ? S.reconMbAt(at) : null;
+  const reconKt = typeof S.reconKtAt === "function" ? S.reconKtAt(at) : null;
+  const reconFl = typeof S.reconFlKtAt === "function" ? S.reconFlKtAt(at) : null;
+  const shear = typeof S.shearAt === "function" ? S.shearAt(at) : null;
+  const ohc = typeof S.ohcAt === "function" ? S.ohcAt(at) : null;
+  const mpi = typeof S.mpiAt === "function" ? S.mpiAt(at) : null;
+  const ri = typeof S.riAt === "function" ? S.riAt(at) : null;
+  const ascatKt = typeof S.ascatKtAt === "function" ? S.ascatKtAt(at) : null;
+  const ascatAge = typeof S.ascatAgeAt === "function" ? S.ascatAgeAt(at) : null;
+  const C = S.consensus || null;
+  const CAL = S.hurricanePCal || null;
 
   const cell = (label, value, tone) => (
     <div style={{ padding: "8px 11px", borderRight: "1px solid var(--border-dim)", minWidth: 0 }}>
@@ -319,7 +354,72 @@ function StormConsole({ storm, dense, frame }) {
         {peak && cell(peak.hr === 0 ? "Peak (now)" : "Forecast peak", peak.kt + " kt", "var(--accent)")}
         {peak && peak.hr > 0 && cell("At", "+" + peak.hr + "h")}
         {hp && cell("To hurricane", Math.round(hp.p * 100) + "%", "var(--accent)")}
+        {/* RAW AND CALIBRATED, ADJACENT. The cell above is the official-forecast estimate
+            exactly as it always was; this one is what the pre-advisory feeds made of it.
+            Two cells, side by side, is the only presentation that lets a reader see the
+            size and the direction of the calibration at a glance — and lets them see when
+            it did nothing at all, which is most cycles. */}
+        {cal && cell("Calibrated", Math.round(cal * 100) + "%",
+          hp && Math.abs(cal - hp.p) >= 0.02 ? "var(--edge-glow)" : "var(--accent)")}
+        {quality && cell("Evidence", quality, quality === "HIGH" ? "var(--pos)" : quality === "MEDIUM" ? "var(--warn)" : "var(--neg)")}
       </div>
+
+      {/* ---- what arrived before the advisory --------------------------------------
+          The four ingested feeds, each stated as what it is and how old it is. This is
+          the panel's answer to "why is the calibrated number different from the raw
+          one", and it is deliberately above the forecast curve: the reason a number
+          moved is more urgent than the shape of the curve it moved on. */}
+      {(conKt != null || reconAge != null || shear != null || ascatKt != null) && (
+        <div style={{ padding: "8px 11px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
+            <span style={{ ...mono, fontSize: 9.5, letterSpacing: ".6px", textTransform: "uppercase", color: "var(--text-2)" }}>
+              Ahead of the advisory
+            </span>
+            {/* How the calibrated number was built, and every input the engine REFUSED
+                and why, one click away. The refusals matter more than the acceptances —
+                a reader who sees "the pass was 29 hours old, so the band was not
+                tightened" knows the board is checking. It is a drawer rather than three
+                more lines per storm for the same reason every other caveat here is: the
+                board is scannable in a second or it is not read at all. */}
+            <span style={{ marginLeft: "auto" }}><Hint id="note.intel" label="how this was built" /></span>
+          </div>
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "baseline" }}>
+            {conKt != null && (
+              <span style={{ ...mono, fontSize: 10.5, color: "var(--text-2)" }} title={C ? C.members.map((m) => m.tech + " " + m.label + " — peak " + m.peakKt + " kt at " + m.peakHr + "h").join("\n") : ""}>
+                GUIDANCE <b style={{ color: "var(--text-1)" }}>{conKt} kt</b>
+                {conSpread != null && <span> ±{conSpread}</span>}
+                {C && <span> · {C.members.map((m) => m.tech).join("/")}</span>}
+                {conAge != null && <span style={{ color: conAge <= 240 ? "var(--pos)" : "var(--warn)" }}> · {conAge}m old</span>}
+                {conAge != null && lag != null && conAge < lag && (
+                  <b style={{ color: "var(--edge-glow)" }}> · {lag - conAge}m ahead</b>
+                )}
+              </span>
+            )}
+            {reconAge != null && (
+              <span style={{ ...mono, fontSize: 10.5, color: "var(--text-2)" }}>
+                AIRCRAFT <b style={{ color: "var(--text-1)" }}>{reconMb != null ? reconMb + " mb" : "—"}</b>
+                {reconKt != null && <span> · {reconKt} kt surface</span>}
+                {reconFl != null && <span> · {reconFl} kt flight level</span>}
+                <span style={{ color: reconAge <= 180 ? "var(--pos)" : "var(--warn)" }}> · {reconAge}m ago</span>
+              </span>
+            )}
+            {shear != null && (
+              <span style={{ ...mono, fontSize: 10.5, color: "var(--text-2)" }}>
+                ENVIRONMENT shear <b style={{ color: "var(--text-1)" }}>{shear} kt</b>
+                {ohc != null && <span> · ocean heat {ohc}</span>}
+                {mpi != null && <span> · potential {mpi} kt</span>}
+                {ri != null && <span> · RI floor {Math.round(ri * 100)}%</span>}
+              </span>
+            )}
+            {ascatKt != null && (
+              <span style={{ ...mono, fontSize: 10.5, color: "var(--text-2)" }}>
+                SATELLITE WIND <b style={{ color: "var(--text-1)" }}>{ascatKt} kt</b>
+                {ascatAge != null && <span> · {Math.round(ascatAge / 60)}h ago</span>}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* The forecast curve as published, so the shape is readable at a glance rather
           than inferred from a single peak number. */}
@@ -1408,6 +1508,13 @@ function MT_Observability({ narrow }) {
         {/* The same crossing the Signal Register reports, from the same threshold, so the
             two surfaces cannot disagree about whether a storm is actionable. */}
         <div style={{ color: MTC.claim("edgebook.hold").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("edgebook.hold").text}</div>
+        {/* The four ingested feeds, mirrored here in priority order. Observability is
+            where an operator goes to decide whether to trust the board, and after this
+            build that decision turns on whether anything arrived ahead of the advisory
+            and whether the storm's intensity was measured or estimated. */}
+        {["intel.atcf", "intel.recon", "intel.ships", "intel.ascat", "intel.calibration"].map((id) => (
+          <div key={id} style={{ color: MTC.claim(id).ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim(id).text}</div>
+        ))}
         <div>{MTC.claim("capability.notIngested").text}</div>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 1, padding: 12, background: "var(--border-dim)" }}>

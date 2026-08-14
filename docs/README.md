@@ -19,8 +19,80 @@ anything a feed can't supply is labelled **NO FEED / MODEL DEFERRED**, never inv
 | Order-book depth | Kalshi order book | **live** (Kalshi contracts only; else NO FEED) |
 | Fair-value anchor for **seasonal** count contracts → edge, Q-Kelly | HURDAT2 (NOAA best-track archive) | **live climatology baseline** |
 | ENSO phase (Oceanic Niño Index) | CPC `oni.ascii.txt` → NOAA PSL mirror | **live** — stratifies the seasonal anchor (L3) |
-| Forecast cone, recon, ASCAT, ensemble spaghetti | — | **NO FEED** (GIS/feeds not wired) |
+| Model guidance consensus (track + intensity) | NHC ATCF **a-deck** (`aid_public`) — HCCA, variable consensus, DeepMind | **live** — the pre-advisory signal |
+| Best track and observed wind radii | NHC ATCF **b-deck** (`btk`) | **live** |
+| Fixes: satellite, scatterometer, aircraft | NHC ATCF **f-deck** (`fix`) | **live** |
+| Aircraft reconnaissance (central pressure, surface and flight-level wind) | TGFTP `URNT12`/`URPN12 KNHC` vortex data messages | **live** when an aircraft is flying — a measurement, not an estimate |
+| Recon mission arrival (coded observations) | TGFTP `URNT11`/`URPN11 KNHC` | **live** — arrival recorded, digits deliberately not decoded |
+| Shear, ocean heat content, mid-level RH, maximum potential intensity, RI probabilities | NHC ATCF SHIPS (`stext`) | **live** — published, and scored into a probability only under an operator claim |
+| Objective surface winds and radii | scatterometer fixes in the f-deck (ASCAT/OSCAT) | **live but intermittent** — an orbit either crossed the storm or it did not |
+| Forecast cone, ensemble spaghetti | — | **NO FEED** (GIS layers not wired) |
 | Per-storm intensity probability (Cat 4+) | — | **MODEL DEFERRED** (no public ensemble Cat-probability feed; fabricating one would break the honesty rule) |
+
+### The four pre-advisory feeds, and why they exist
+
+Everything above the divide in that table is a product NHC publishes **for the public** —
+the advisory, the discussion, the outlook. Those are the same products the market reads,
+at the same moment. An estimate built only from them cannot, even in principle, be earlier
+or better informed than the price it is being compared against.
+
+These four are earlier, in descending order of how much earlier:
+
+| | Feed | Lead | What it adds |
+|---|---|---|---|
+| 1 | **ATCF decks** | ~30–60 min | The guidance a forecaster is looking at *while writing* the advisory. It frequently disagrees with the official forecast, and that disagreement is tradeable before it is published in prose. |
+| 2 | **Aircraft reconnaissance** | often >1 h | A *measurement* of the initial condition every forecast rests on. When a plane finds the storm 12 mb deeper than the advisory carries, every forecast built on the old analysis is stale by a known amount. |
+| 3 | **SHIPS** | 6-hourly | The environment the forecast is standing on — shear, ocean heat, humidity, potential intensity — plus NHC's own calibrated rapid-intensification probabilities, which arrive with their climatological base rate on the same line. |
+| 4 | **Scatterometer** | intermittent | Objective surface winds. It **never moves an estimate**, only tightens the band around it, only when no aircraft is in the storm, and only below the wind speed where the retrieval saturates. |
+
+### The probability engine
+
+Per-storm probabilities are combined in **knots**, not in probability space, and converted
+once at the end. Averaging probabilities from sources of different sharpness is
+meaningless; averaging the intensities they forecast is not.
+
+The width is a random-effects combination, `sigma² = min(sigma_i)² + tau²`:
+
+- **`min(sigma_i)`, not the inverse-variance combination.** The sources are correlated —
+  the official forecast is a forecaster's judgement *over* these aids — so treating them as
+  independent draws would shrink the band as though the board had two independent looks at
+  the storm when it has roughly one and a half. **The combined answer is never sharper
+  than its sharpest single input.**
+- **`tau²` is the observed disagreement**, between the sources and between the consensus
+  members themselves. It is the only term in the engine that is measured rather than
+  published, and it can only ever make the band *wider*.
+
+Every sigma traces to something published or measured: NHC's own mean absolute intensity
+errors by lead time, the SFMR's specified accuracy, the scatterometer's specified accuracy,
+and the spread the aids actually printed this cycle. **No weight in the engine was fitted,
+tuned, or chosen to make an edge appear.**
+
+Four rules are enforced by tests rather than by convention:
+
+- **Raw and calibrated are published side by side, everywhere** — on the frame, on the
+  contract, in the Situation strip, in the console. The untouched official-forecast
+  estimate is never overwritten, and it is always inside the published band, so a
+  calibration can never reach somewhere the plain arithmetic does not.
+- **The scatterometer never moves the mean.** Band only.
+- **SHIPS does not score until it is claimed.** Its RI floor is computed, carried on the
+  frame and displayed on every cycle; it enters a published probability only when
+  `MT_SHIPS_RI_SCORING` is on, and the row says which state it is in.
+- **HOLD and staleness override everything.** A measured initial condition under a
+  superseded advisory describes a storm that no longer exists, so evidence quality is
+  capped by advisory age from the same constant the anchor refuses on, and the HOLD rule
+  is untouched by any of this.
+
+### Evidence quality means something specific
+
+The tier used to be earned by feeds being reachable, which every tier-A source here was,
+all the time — so the grade separated "the internet works" from "the internet does not".
+It now turns on one question: **was the storm's present intensity measured, or estimated?**
+
+| Tier | Earned by |
+|---|---|
+| **HIGH** | An aircraft flew through the storm and read the pressure off an instrument. |
+| **MEDIUM** | The guidance deck is in hand ahead of the advisory, but no aircraft is reporting. |
+| **LOW** | The advisory alone — or anything at all, when the advisory is past the staleness line. |
 
 ### About the climatology anchor
 Seasonal contracts ("How many Atlantic hurricanes in 2026?") get a fair-value anchor computed from
@@ -151,7 +223,30 @@ three passed:
 |---|---|
 | `scripts/test-enso.mjs` | the posterior stack — ONI parsers, CPC phase thresholds, shrinkage bounds, both refusal paths |
 | `scripts/test-markets.mjs` | the Kalshi payload parsers — the current field shape, both previous shapes for rollback safety, and that an unrecognised shape degrades to all-null rather than a confident zero |
+| `scripts/test-atcf.mjs` | the deck parsers, against the two things live decks actually do that a naive reader gets wrong: a track consensus that ships zero intensity, and one forecast spread across three wind-radius rows |
+| `scripts/test-recon.mjs` | the vortex-data-message parser, and above all its refusals — a fix about a storm that dissipated weeks ago sits in the "latest" file until an aircraft flies again |
+| `scripts/test-ships.mjs` | the SHIPS parser's missing-value handling (`N/A`, `xx.x`, `LOST` all become NaN under a looser reader) and that the RI floor is a sufficient condition rather than a proxy |
+| `scripts/test-probability.mjs` | the engine's rules — raw never overwritten and always inside the band, never sharper than its sharpest input, disagreement only widens, scatterometer never moves the mean, SHIPS unscored until claimed, staleness caps quality |
+| `scripts/test-intel-register.mjs` | that every ingested field reaches the **frame**, and from there the register, the probability update and the Situation strip |
+| `scripts/check-intel-coverage.mjs` | **the coverage gate** — the build fails when Priority 1 or 2 is missing on an active storm |
 | `scripts/audit-claims.mjs` | every visible claim has a provenance owner |
+
+**Why the coverage gate is a gate and not a warning.** The other feeds degrade *visibly*:
+when the market feed dies the panel says NO FEED and nobody is misled. The ATCF decks and
+the reconnaissance poll degrade *invisibly* — the terminal keeps publishing a probability,
+it just quietly goes back to being built from the advisory the market has already priced,
+and the board looks exactly as it did when it had a head start. The only symptom of losing
+the edge is that there is no longer an edge.
+
+The two priorities are checked differently, on purpose:
+
+- **Priority 1 must have delivered.** The decks exist for every active system, always —
+  NHC writes them as it works — so an active storm with no deck is a broken ingest.
+- **Priority 2 must have been polled, not to have found an aircraft.** Whether a plane is
+  flying is a decision the Air Force and NOAA make about hurricane hunting, not a property
+  of this pipeline; eastern Pacific storms are rarely flown at all. Failing a build because
+  no aircraft was tasked would be failing it for the weather, and a gate that fails for
+  reasons nobody can fix is a gate that gets turned off.
 
 A fourth runs against the **deployed site**, not the repository:
 `.github/workflows/verify-live.yml` drives a real Chromium against the public Pages
@@ -189,6 +284,17 @@ verification is automated there rather than left to a human.
   depend on any third-party CDN staying up. Leaflet's stylesheet is the one CDN `<link>`.
 
 ```
+scripts/
+  ingest.mjs            THE INGESTION DAEMON — polls the four pre-advisory feeds,
+                        normalises them, and emits the arrivals the register reads.
+                        Runnable on its own: `node scripts/ingest.mjs` prints what every
+                        feed answered, with every URL it tried.
+  lib/atcf.mjs          pure a/b/f-deck parsers + consensus extraction
+  lib/recon.mjs         pure vortex-data-message parser
+  lib/ships.mjs         pure SHIPS parser + the rapid-intensification floor
+  lib/probability.mjs   THE PROBABILITY ENGINE — one calibrated P(event) per storm
+  check-intel-coverage.mjs   the coverage gate
+
 docs/
   index.html            entry (vendored libs → DS bundle → data-loader → compute → app)
   _ds_bundle.js         Category Alpha design-system components (namespace only)

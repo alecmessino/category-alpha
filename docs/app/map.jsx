@@ -374,23 +374,18 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
           .bindTooltip(rt.id + " dropsonde", { direction: "top", className: "mt-tt" }).addTo(g));
       });
     }
-    if (layers.ascat) {
-      // seeded surface wind vectors near the core (schematic ASCAT swath)
-      const [la, lo] = S.center;
-      for (let i = 0; i < 12; i++) {
-        const ang = (i / 12) * Math.PI * 2, r = 1.4 + (i % 3) * 0.5;
-        const p0 = [la + Math.sin(ang) * r, lo + Math.cos(ang) * r];
-        const p1 = [p0[0] + Math.cos(ang + 1.4) * 0.5, p0[1] + Math.sin(ang + 1.4) * 0.5];
-        L.polyline([p0, p1], { color: "#34d399", weight: 1.2, opacity: 0.7 }).addTo(g);
-      }
-    }
-    if (layers.models && S.track) {
-      const c = S.track[S.pastIdx], end = S.track[S.track.length - 1];
-      MT.models.forEach((m, i) => {
-        const spread = (i - 1.5) * 0.9;
-        L.polyline([c, [end[0] + spread, end[1] - spread * 0.6]], { color: cssVar(m.color), weight: 1.3, opacity: 0.65, dashArray: "3,4" }).addTo(g);
-      });
-    }
+    /* TWO FABRICATING BRANCHES REMOVED HERE, and this note is the reason they are not
+       coming back as "harmless placeholders".
+
+       One drew twelve wind vectors in a ring around the eye from a loop counter and called
+       it a scatterometer swath. The other drew model tracks by fanning the observed track
+       out by a fixed offset per index. Neither read a feed. Both were unreachable — the
+       toggles that would switch them on are not in the layer registry — which is exactly
+       why they survived: dead code that draws invented data looks like a feature that has
+       not been turned on yet.
+       Real scatterometer passes and real consensus tracks are now ingested and carried on
+       the storm. When they are drawn it will be from those fields, and a cycle with no
+       pass will draw nothing, which is the honest picture of an intermittent orbit. */
     // eye reticle — position bound to the bitemporal engine (updated per-frame below)
     const eyeAt = (typeof MTX !== "undefined" && MTX.at) ? MTX.at(stormId, frame).center : S.center;
     const icon = L.divIcon({ className: "", iconSize: [30, 30], iconAnchor: [15, 15],

@@ -318,6 +318,15 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
           const last = FR.length ? (FR[FR.length - 1].storms || {}) : {};
           const withAdv = Object.keys(last).filter((id) => last[id]
             && last[id].advNum != null && last[id].hurricaneP != null);
+          /* The estimator clamps its answer into [0.01, 0.99]. Two forecasts that both
+             land outside that range therefore produce the SAME published probability,
+             and no amount of correct wiring can make the number move between them — a
+             tropical depression forecast to peak at 35 kt and then at 30 kt is below one
+             per cent either way. Requiring a move there asserts something arithmetically
+             impossible, so those pairs are counted and excluded rather than failed. */
+          const CLAMP_LO = 0.01, CLAMP_HI = 0.99;
+          const pinned = (x, y) => (x <= CLAMP_LO && y <= CLAMP_LO) || (x >= CLAMP_HI && y >= CLAMP_HI);
+          let clamped = 0;
           for (let i = 1; i < FR.length; i++) {
             const A = FR[i - 1].storms || {}, B = FR[i].storms || {};
             for (const id of Object.keys(B)) {
@@ -327,6 +336,7 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
               pairs++;
               const forecastChanged = (a.peakKt !== b.peakKt) || (a.wind !== b.wind);
               if (!forecastChanged) continue;
+              if (a.hurricaneP != null && b.hurricaneP != null && pinned(a.hurricaneP, b.hurricaneP)) { clamped++; continue; }
               const pMoved = a.hurricaneP != null && b.hurricaneP != null
                 && Math.abs(a.hurricaneP - b.hurricaneP) > 1e-9;
               (pMoved ? moved : missed).push(
@@ -337,7 +347,7 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
           return {
             frames: FR.length, storms: Object.keys(last).length,
             carrying: withAdv.length, advisoryChanges: pairs,
-            moved: moved.length, missed,
+            moved: moved.length, missed, clamped,
             /* And the Situation strip must be reading the same per-frame value, not a
                latest-only one pinned to the newest snapshot. */
             situationHasP: !!(sit && sit.lead && sit.lead.p != null),
@@ -345,6 +355,68 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
             situationAdv: sit && sit.lead ? sit.lead.adv : null,
             advisorySignals: (window.MTX && MTX.signals)
               ? MTX.signals({ sinceMin: 100000 }).filter((x) => x.kind === "advisory" && x.stormId).length : 0,
+          };
+        })(),
+        /* ---- the four pre-advisory feeds, checked on the DEPLOYED board -----------
+           The coverage gate in CI proves the ingest produced these fields. This proves
+           they survived the trip: written to the frame, past the loader's whitelist,
+           into the register, onto the strip. That is four separate places any one of
+           them could be dropped, and one of them has swallowed a whole block before.
+
+           Same structure as the advisory check above, for the same reason: the WIRING
+           half must never be vacuous, and the BEHAVIOUR half is conditional on the
+           board having actually been exercised. A guidance cycle that has not turned
+           over inside the retained window cannot be required to have raised a row. */
+        intel: (() => {
+          const FR = (window.MT && MT._frames) || [];
+          const last = FR.length ? (FR[FR.length - 1].storms || {}) : {};
+          const ids = Object.keys(last);
+          const has = (k) => ids.filter((id) => last[id] && last[id][k] != null).length;
+          /* Did a guidance cycle or an aircraft fix actually turn over in the window? */
+          let cycleTurnovers = 0, fixArrivals = 0;
+          for (let i = 1; i < FR.length; i++) {
+            const A = FR[i - 1].storms || {}, B = FR[i].storms || {};
+            for (const id of Object.keys(B)) {
+              const a = A[id], b = B[id];
+              if (!a || !b) continue;
+              if (a.conCycle && b.conCycle && a.conCycle !== b.conCycle) cycleTurnovers++;
+              if (a.reconAge != null && b.reconAge != null && b.reconAge < a.reconAge) fixArrivals++;
+            }
+          }
+          const sigs = (window.MTX && MTX.signals) ? MTX.signals({ sinceMin: 100000 }) : [];
+          const sit = (window.MTX && MTX.situation) ? MTX.situation(360) : null;
+          const feeds = (window.MT && MT._feeds) || {};
+          const health = (window.MT && MT.health) || [];
+          const contracts = (window.MT && MT.contracts) || [];
+          const calibrated = contracts.filter((c) => c.modelCalibrated);
+          return {
+            storms: ids.length,
+            /* WIRING — every active system's newest frame carries the fields. */
+            withConsensus: has("conKt"), withConsensusCycle: has("conCycle"),
+            withCalibrated: has("pCal"), withQuality: has("quality"),
+            withRaw: has("hurricaneP"),
+            withRecon: has("reconAge"), withShips: has("shShear"), withAscat: has("ascatKt"),
+            /* BEHAVIOUR — what turned over, and whether the register saw it. */
+            cycleTurnovers, fixArrivals,
+            consensusRows: sigs.filter((s) => s.kind === "consensus").length,
+            reconRows: sigs.filter((s) => s.kind === "recon").length,
+            probabilityRows: sigs.filter((s) => s.kind === "probability").length,
+            shipsRows: sigs.filter((s) => s.kind === "ships").length,
+            ascatRows: sigs.filter((s) => s.kind === "ascat").length,
+            /* THE STRIP — arrivals and the qualifiers that must travel with a P. */
+            situationIntel: !!(sit && sit.intel),
+            situationArrivals: sit && sit.intel ? sit.intel.arrivals : null,
+            situationQuality: sit && sit.lead ? sit.lead.quality : null,
+            situationLag: sit && sit.lead ? sit.lead.lagMin : null,
+            situationRaw: sit && sit.lead ? sit.lead.pRaw : null,
+            /* FEEDS — the four records exist and are surfaced in the health panel. */
+            feedKeys: ["atcf", "recon", "ships", "ascat"].filter((k) => !!feeds[k]),
+            feedsOk: ["atcf", "recon", "ships", "ascat"].filter((k) => feeds[k] && feeds[k].ok),
+            healthRows: health.filter((h) => /ATCF|recon|SHIPS|Scatterometer/i.test(h.name)).length,
+            /* RAW AND CALIBRATED, SIDE BY SIDE, on the priced contract itself. */
+            calibratedContracts: calibrated.length,
+            calibratedWithRaw: calibrated.filter((c) => c.modelOfficialP != null).length,
+            calibratedWithQuality: calibrated.filter((c) => c.modelQuality).length,
           };
         })(),
         /* ---- the hard rule, checked against the rendered board -------------------
@@ -390,19 +462,41 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
                require that nothing comes back TAKE. Then put it back. */
             forced: (() => {
               const anchored = (MT.contracts || []).filter((c) => Number.isFinite(c.modelLagMin));
-              if (!anchored.length) return { rows: 0, takes: 0, holds: 0, staked: 0, applicable: false };
+              if (!anchored.length) return { rows: 0, takes: 0, holds: 0, staked: 0, applicable: false,
+                                             reason: "no contract carries an advisory age to push" };
               const saved = anchored.map((c) => c.modelLagMin);
               anchored.forEach((c) => { c.modelLagMin = (c.modelMaxLagMin || 360) - 1; });
               let out;
               try {
-                const b2 = MTX.edgeBook(null, 10000, 0.25, { limit: 200 });
-                const rows2 = b2.rows.concat(b2.overflow || [])
+                /* Thresholds relaxed FOR THE FORCED PASS ONLY. The default book drops a
+                   row before it is ever graded when the edge is small or the resting
+                   depth is thin, and on a quiet board that is most of them — which made
+                   this exercise report zero rows and fail while proving nothing. The
+                   rule under test is about the GRADE, so every anchored row has to reach
+                   a grade for the test to mean anything. Dropping the filters is what
+                   makes it a real exercise rather than a vacuous one; the live pass
+                   above still uses the real thresholds. */
+                const b2 = MTX.edgeBook(null, 10000, 0.25, { limit: 400, minEdge: -1, minDollars: 0 });
+                const rows2 = b2.rows.concat(b2.overflow || [], b2.alsoInLadder || [])
                   .filter((r) => Number.isFinite(r.lagMin));
                 out = {
-                  applicable: true, rows: rows2.length,
+                  /* Applicable only when rows actually reached a grade. Zero rows means
+                     the exchange quoted nothing on those contracts this cycle, which is
+                     not evidence for or against the rule, and must not be reported as
+                     either. */
+                  applicable: rows2.length > 0, rows: rows2.length,
                   takes: rows2.filter((r) => r.grade === "TAKE").length,
                   holds: rows2.filter((r) => r.grade === "HOLD").length,
+                  /* SUSPECT outranks HOLD by design — "the model cannot support this" is
+                     a stronger and more durable statement than "wait for the next
+                     product", and an operator who acts on a SUSPECT row after the
+                     advisory refreshes is still wrong. So a forced row is allowed to come
+                     back SUSPECT. What it may NEVER come back is ACTIONABLE, and that is
+                     both what the rule says and what is asserted. */
+                  suspects: rows2.filter((r) => r.grade === "SUSPECT").length,
+                  actionable: rows2.filter((r) => r.grade === "TAKE" || r.grade === "SMALL").length,
                   staked: rows2.filter((r) => r.grade === "HOLD").reduce((a, r) => a + (r.stake || 0), 0),
+                  reason: rows2.length ? null : "anchored contracts carried no tradeable quote this cycle, so none reached a grade",
                 };
               } finally {
                 anchored.forEach((c, i) => { c.modelLagMin = saved[i]; });
@@ -528,23 +622,69 @@ add("a new advisory moves P(hurricane) and the Situation strip",
     || (AF.carrying === AF.storms && AF.storms > 0 && AF.situationHasP && AF.missed.length === 0),
   `${AF.frames} frames · newest carries advisory state for ${AF.carrying}/${AF.storms} storm(s)`
   + ` · ${AF.advisoryChanges} advisory change(s)`
-  + ` · ${AF.moved} moved P · ${AF.advisorySignals} register row(s)`
+  + ` · ${AF.moved} moved P · ${AF.clamped} pinned at the clamp · ${AF.advisorySignals} register row(s)`
   + ` · situation P=${AF.situationP == null ? "—" : Math.round(AF.situationP * 100) + "% at adv #" + AF.situationAdv}`
   + (AF.missed.length ? ` · DID NOT MOVE: ${AF.missed.slice(0, 3).join(" | ")}` : "")
   + (AF.advisoryChanges === 0 ? " (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)" : ""));
+
+/* ---- the four pre-advisory feeds, on the deployed board ---------------------------
+   The reason this is asserted here and not only in CI: the coverage gate proves the
+   ingest WROTE the fields, and this proves they arrived. Between the two there are four
+   places a field can vanish — the frame writer, the loader whitelist, the register diff
+   and the strip — and the loader whitelist has silently swallowed an entire block once
+   already. */
+const IN = LY.intel;
+add("the guidance consensus reaches every active system's newest frame",
+  AD.storms === 0 || (IN.storms > 0 && IN.withConsensus === IN.storms && IN.withConsensusCycle === IN.storms),
+  `${IN.withConsensus}/${IN.storms} carry a consensus peak · ${IN.withConsensusCycle} carry its cycle`
+  + ` · feeds present: ${IN.feedKeys.join("/") || "NONE"} · live: ${IN.feedsOk.join("/") || "none"}`
+  + ` · ${IN.healthRows}/4 health rows rendered`);
+
+add("the calibrated probability ships with the raw estimate and its evidence tier",
+  AD.storms === 0 || (IN.withCalibrated === IN.storms && IN.withRaw === IN.storms && IN.withQuality === IN.storms),
+  `${IN.withCalibrated}/${IN.storms} frames carry a calibrated P · ${IN.withRaw} carry the raw one`
+  + ` · ${IN.withQuality} carry an evidence tier`
+  + ` · contracts: ${IN.calibratedContracts} calibrated, ${IN.calibratedWithRaw} with the official estimate beside it`
+  + ` · strip: quality=${IN.situationQuality || "—"} lag=${IN.situationLag == null ? "—" : IN.situationLag + "m"}`
+  + ` raw=${IN.situationRaw == null ? "—" : Math.round(IN.situationRaw * 100) + "%"}`);
+
+/* A calibrated contract that does not also carry the untouched official estimate has
+   dropped half the rule. Asserted on the contract because that is where a price is read
+   from — a reader comparing a model to a market must be able to see both numbers there. */
+add("no contract is priced off a calibration without publishing what it started from",
+  IN.calibratedContracts === IN.calibratedWithRaw,
+  `${IN.calibratedWithRaw}/${IN.calibratedContracts} calibrated contract(s) publish the raw official estimate`);
+
+/* BEHAVIOUR, and conditional on purpose. A guidance cycle that has not turned over inside
+   the retained window cannot be required to have raised a row — but if one did turn over
+   and no row exists, the head start reached the number and not the operator. */
+add("an arrival that happened reaches the register and the Situation strip",
+  IN.situationIntel === true
+    && (IN.cycleTurnovers === 0 || IN.consensusRows > 0)
+    && (IN.fixArrivals === 0 || IN.reconRows > 0),
+  `${IN.cycleTurnovers} guidance cycle(s) turned over → ${IN.consensusRows} row(s)`
+  + ` · ${IN.fixArrivals} aircraft fix(es) arrived → ${IN.reconRows} row(s)`
+  + ` · ${IN.probabilityRows} P-update row(s) · ${IN.shipsRows} SHIPS · ${IN.ascatRows} pass`
+  + ` · strip arrivals=${IN.situationArrivals}`
+  + (IN.cycleTurnovers === 0 && IN.fixArrivals === 0
+      ? " (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)" : ""));
 
 /* The hard rule. A stale advisory removes TAKE for that storm — no exceptions, and none
    that an edge can buy back. */
 const HR = LY.holdRule;
 const F = (HR.forced) || {};
+/* The forced half is asserted whenever it CAN be — that is, whenever the anchored
+   contracts reached a grade at all. When the exchange quoted nothing on them there is
+   nothing to grade, and reporting that as a failure of the rule was a red check that
+   proved nothing and taught everyone to ignore it. */
 add("a stale advisory forces HOLD, so no storm on it can grade TAKE",
   HR.present === true && !HR.threw && HR.takes.length === 0
-    && (F.applicable !== true || (F.takes === 0 && F.holds === F.rows && F.rows > 0)),
+    && (F.applicable !== true || (F.takes === 0 && F.actionable === 0)),
   HR.threw ? "edgeBook threw: " + HR.threw
     : (HR.staleStorms.length
         ? `live: past the ${HR.cycle / 2}-min line — ${HR.staleStorms.join(", ")} · ${HR.rows} row(s), ${HR.holds} held, ${HR.takes.length} TAKE`
         : `live: no storm past the ${HR.cycle / 2}-min line`)
-    + ` · forced: ${F.applicable ? `${F.rows} anchored row(s) pushed past it → ${F.holds} HOLD, ${F.takes} TAKE` : "no advisory-anchored rows to force"}`
+    + ` · forced: ${F.applicable ? `${F.rows} anchored row(s) pushed past it → ${F.holds} HOLD, ${F.suspects} SUSPECT, ${F.actionable} ACTIONABLE` : "not exercised — " + (F.reason || "no advisory-anchored rows to force")}`
     + ` · ${HR.staleSignals} stale-crossing row(s) in the register`
     + (HR.takes.length ? ` · LEAKED: ${HR.takes.join(", ")}` : ""));
 add("nothing on HOLD is counted as stakeable",

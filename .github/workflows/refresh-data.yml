@@ -136,6 +136,43 @@ jobs:
       - name: Test the GRIB2 reader
         run: node scripts/test-grib2.mjs
 
+      # The ATCF decks are the only input that arrives BEFORE the advisory, so a parser
+      # bug here does not break the board — it silently removes the head start and leaves
+      # everything looking exactly as it did. The fixtures carry the two things the live
+      # decks actually do that a naive reader gets wrong: a track consensus that ships
+      # zero intensity, and one forecast spread across three wind-radius rows.
+      - name: Test the ATCF deck parsers
+        run: node scripts/test-atcf.mjs
+
+      # A vortex data message is the only MEASUREMENT of intensity this board holds, and
+      # the file it arrives in keeps the last message until an aircraft flies again. Most
+      # of what this asserts is therefore the refusals — above all that a fix about a
+      # storm that dissipated in July never attaches to an August storm.
+      - name: Test the reconnaissance parser
+        run: node scripts/test-recon.mjs
+
+      # SHIPS is full of non-numbers — N/A past the forecast, xx.x for an uncomputed
+      # position, LOST for a lost vortex — and every one of them becomes NaN under a
+      # looser reader. A NaN that reaches a probability is a wrong answer with no symptom.
+      - name: Test the SHIPS parser and the RI floor
+        run: node scripts/test-ships.mjs
+
+      # The engine that turns all of it into one number. What is asserted is the rules
+      # rather than the arithmetic: the raw estimate is never overwritten and always
+      # inside the band, the combination is never sharper than its sharpest input,
+      # disagreement can only widen, the scatterometer never moves the mean, and SHIPS
+      # does not score until it is claimed.
+      - name: Test the probability engine
+        run: node scripts/test-probability.mjs
+
+      # Every ingested field has to reach the FRAME, and from there the register, the
+      # probability update and the Situation strip. A field that lives only on the newest
+      # snapshot cannot be diffed, so it can never be seen to have changed — the number
+      # moves on the page and nothing records that it moved. That failure has happened
+      # here before, in the other direction, and went unnoticed for weeks.
+      - name: Test that the ingested fields reach the register
+        run: node scripts/test-intel-register.mjs
+
       # Every visible claim must have a provenance owner. This fails the build if
       # capability / liveness language reappears as a literal inside a component
       # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of
@@ -156,6 +193,18 @@ jobs:
             TICK=$((TICK+1))
             echo "::group::tick $TICK — $(date -u +%H:%MZ)"
             node scripts/fetch-data.mjs || echo "fetch failed this tick — keeping the last good snapshot"
+            # COVERAGE GATE. Priority 1 (ATCF decks) and Priority 2 (the reconnaissance
+            # poll) are the only inputs that arrive before the advisory, and they are the
+            # only two feeds on this board that degrade INVISIBLY: without them the
+            # terminal keeps publishing a probability, it just quietly goes back to being
+            # built from the product the market has already read. The only symptom of
+            # losing the edge is that there is no longer an edge.
+            #
+            # It runs inside the loop, against the snapshot just written, and it FAILS THE
+            # JOB rather than the tick — a red run is the point. The commit below still
+            # happens, because a snapshot that is honest about a missing feed is better
+            # than no snapshot, and the board shows the feed as down either way.
+            node scripts/check-intel-coverage.mjs || COVERAGE_FAILED=1
             # GFS runs four times a day, so this returns immediately unless the cycle has
             # advanced. Isolated from the main fetch: the wind field is decoration and must
             # never be able to stop the board from publishing.
