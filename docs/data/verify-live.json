@@ -1,14 +1,19 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T01:34:38.726Z",
+  "ranAt": "2026-08-14T01:42:03.872Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "dc375689c1970c793c55a338a239e3a29573b254",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31760999235",
-  "ok": true,
-  "passed": 30,
+  "sha": "a2414cfebcd158f7a1d4c8e6887e734d5dca3216",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31761383234",
+  "ok": false,
+  "passed": 29,
   "total": 30,
-  "failures": [],
-  "thirdPartyFailures": 1,
+  "failures": [
+    {
+      "check": "and it is the first thing under the header",
+      "detail": "map starts 141px down the page"
+    }
+  ],
+  "thirdPartyFailures": 2,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -28,7 +33,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T01:30:50.543Z · 4m old"
+      "detail": "2026-08-14T01:34:26.425Z · 8m old"
     },
     {
       "check": "renders: Situation",
@@ -98,7 +103,7 @@
     {
       "check": "no horizontal overflow and no jittering digits",
       "pass": true,
-      "detail": "bodyOverflow=0px tabularNums=true grids=5 overflowing=0"
+      "detail": "bodyOverflow=0px tabularNums=true grids=6 overflowing=0"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -106,9 +111,9 @@
       "detail": "map 700px"
     },
     {
-      "check": "and it is near the top, not buried",
-      "pass": true,
-      "detail": "map starts 463px down the page"
+      "check": "and it is the first thing under the header",
+      "pass": false,
+      "detail": "map starts 141px down the page"
     },
     {
       "check": "all markets carried",
