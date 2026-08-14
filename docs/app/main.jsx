@@ -445,33 +445,9 @@ function MillibarTerminalApp() {
         {/* 1 + 2 — what changed, and whether to trust it */}
         <window.MT_Situation dense={dense} />
 
-        {/* With a storm on the board the awaiting-telemetry block is gone, and the watch
-            list would go with it. Surface it here instead, above the queue it feeds. */}
-        {S && <GenesisWatch compact />}
-
-        {/* 3.2 — the active systems, as the advisory states them. Above the queue because
-            a forecast intensity and a hurricane watch are the inputs to everything below,
-            not a detail to be found after scrolling past the trades. */}
-        <window.MT_StormConsoles dense={dense} />
-
-        {/* 3.5 — what to actually do about it. This sits above the attention queue on
-            purpose: the queue says what changed, and a list of changes is not a list of
-            trades. Ranked, short, and net of what it costs to get the position on. */}
-        <div style={{ marginBottom: gap }}>
-          <window.MT_EdgeBook frame={frame} bankroll={bankroll} stake={stake}
-            setBankroll={setBankroll} setStake={setStake} onSelect={pickContract} dense={dense} />
-        </div>
-
-        {/* 4 + 3 — what needs you, and what it touches. This is the hero row now;
-            the map moved below it, because the product stopped being the data and
-            became the interpretation of the data. */}
-        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
-          <window.MT_Attention dense={dense} imagery={imageryState}
-            onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
-            onSelectContract={pickContract} />
-          <window.MT_Exposure frame={frame} dense={dense} selection={sel} onSelect={pickContract} />
-        </div>
-
+        {/* 2 — WHERE. The map is the centrepiece and now sits like one: directly
+            under the situation line, above every panel derived from it. It was
+            previously made taller but never moved, so it stayed sixth down the page. */}
         {/* 5a — spatial context, or the honest reason there is none. */}
         {!S && <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />}
         {S && (
@@ -528,6 +504,35 @@ function MillibarTerminalApp() {
         </section>
         </window.MT_Section>
         )}
+
+
+        {/* With a storm on the board the awaiting-telemetry block is gone, and the watch
+            list would go with it. Surface it here instead, above the queue it feeds. */}
+        {S && <GenesisWatch compact />}
+
+        {/* 3.2 — the active systems, as the advisory states them. Above the queue because
+            a forecast intensity and a hurricane watch are the inputs to everything below,
+            not a detail to be found after scrolling past the trades. */}
+        <window.MT_StormConsoles dense={dense} />
+
+        {/* 3.5 — what to actually do about it. This sits above the attention queue on
+            purpose: the queue says what changed, and a list of changes is not a list of
+            trades. Ranked, short, and net of what it costs to get the position on. */}
+        <div style={{ marginBottom: gap }}>
+          <window.MT_EdgeBook frame={frame} bankroll={bankroll} stake={stake}
+            setBankroll={setBankroll} setStake={setStake} onSelect={pickContract} dense={dense} />
+        </div>
+
+        {/* 4 + 3 — what needs you, and what it touches. This is the hero row now;
+            the map moved below it, because the product stopped being the data and
+            became the interpretation of the data. */}
+        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
+          <window.MT_Attention dense={dense} imagery={imageryState}
+            onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
+            onSelectContract={pickContract} />
+          <window.MT_Exposure frame={frame} dense={dense} selection={sel} onSelect={pickContract} />
+        </div>
+
 
         {/* 5b — fair value and the posterior stack behind every edge on screen */}
         <window.MT_Section label="Fair value" tier="term structure · posterior stack" defaultOpen summary="collapsed">

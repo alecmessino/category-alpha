@@ -227,6 +227,10 @@ const probe = await page.evaluate(() => {
         tabularNums: /tabular-nums/.test(cs.fontVariantNumeric || "") || /tnum/.test(cs.fontFeatureSettings || ""),
         grids: grids.length, overflowingGrids: overflowing,
         mapHeight: map ? Math.round(map.getBoundingClientRect().height) : null,
+        /* Position, not just size. The map was made taller and left sixth down the page,
+           which is the half-fix this asserts against: how far you must scroll before the
+           only panel that shows you WHERE the storm is comes into view. */
+        mapTop: map ? Math.round(map.getBoundingClientRect().top + window.scrollY) : null,
         stormConsole: /ACTIVE SYSTEMS/i.test(T),
         hud: /\bADV\b/.test(T) && /\bSNAP\b/.test(T),
       };
@@ -281,6 +285,9 @@ add("no horizontal overflow and no jittering digits",
 add("the map is a centrepiece, not a thumbnail",
   LY.mapHeight != null && LY.mapHeight >= 480,
   `map ${LY.mapHeight}px`);
+add("and it is near the top, not buried",
+  LY.mapTop != null && LY.mapTop <= 900,
+  `map starts ${LY.mapTop}px down the page`);
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,
   `${probe.contracts} contracts · ${probe.seriesCount} series · droppedForCap=${probe.droppedForCap}`);
