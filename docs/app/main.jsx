@@ -130,7 +130,7 @@ function IngestionHUD() {
   const TONE = { ok: "var(--pos)", warn: "var(--warn)", bad: "var(--neg)", off: "var(--border-strong)" };
 
   return (
-    <span style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 4, marginLeft: 8 }}>
+    <span style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 4, marginLeft: 8, flexWrap: "wrap", maxWidth: "100%" }}>
       {pills.map((p) => (
         <span key={p.k} title={p.title} onClick={() => setOpen(!open)}
           style={{ display: "inline-flex", alignItems: "center", gap: 3, cursor: "pointer",
@@ -144,7 +144,7 @@ function IngestionHUD() {
         </span>
       ))}
       {open && (
-        <div onClick={() => setOpen(false)} style={{ position: "absolute", top: 22, right: 0, zIndex: 900, width: 460,
+        <div onClick={() => setOpen(false)} style={{ position: "absolute", top: 22, right: 0, zIndex: 900, width: "min(460px, calc(100vw - 24px))",
           background: "var(--surface-card)", border: "1px solid var(--border-strong)", borderRadius: 10,
           boxShadow: "var(--shadow-cmd)", padding: "11px 13px", fontSize: 11, lineHeight: 1.6, cursor: "default" }}>
           <div style={{ fontWeight: 800, letterSpacing: 1, fontSize: 10, color: "var(--accent)" }}>INGESTION HEALTH</div>
@@ -243,9 +243,9 @@ function TabBar({ tab, setTab }) {
         const on = t.id === tab;
         return (
           <button key={t.id} role="tab" aria-selected={on} title={t.hint} onClick={() => setTab(t.id)}
-            style={{ flex: "1 1 0", minWidth: 96, cursor: "pointer", background: on ? "var(--surface-card)" : "transparent",
+            style={{ flex: "1 1 0", minWidth: 0, cursor: "pointer", background: on ? "var(--surface-card)" : "transparent",
               border: "1px solid " + (on ? "var(--border-strong)" : "transparent"), borderBottom: on ? "1px solid var(--surface-card)" : "1px solid transparent",
-              borderRadius: "8px 8px 0 0", marginBottom: -1, padding: "9px 14px",
+              borderRadius: "8px 8px 0 0", marginBottom: -1, padding: "9px 6px",
               fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 800, letterSpacing: 1.2, textTransform: "uppercase",
               color: on ? "var(--accent)" : "var(--text-2)", whiteSpace: "nowrap" }}>
             {t.id}
@@ -490,7 +490,7 @@ function MillibarTerminalApp() {
         <section style={{ borderRadius: 14, overflow: "hidden", border: "1px solid var(--border-strong)", boxShadow: "var(--shadow-cmd)", marginBottom: gap,
           position: narrow ? "static" : "sticky", top: 8, zIndex: 400 }}>
           <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: (narrow || !S) ? "1fr" : "minmax(0,1fr) " + (wide ? 360 : 320) + "px" }}>
-            <div style={{ position: "relative", height: narrow ? 300 : cmdH, overflow: "hidden", background: "var(--slate-950)" }}>
+            <div style={{ position: "relative", height: narrow ? Math.max(300, Math.round(vh * 0.42)) : cmdH, overflow: "hidden", background: "var(--slate-950)" }}>
               <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} onImagery={setImagery} resizeKey={tab + ":" + vw + ":" + vh} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--blue-300)", textTransform: "uppercase" }}>Storm Command Center</span>
@@ -546,14 +546,14 @@ function MillibarTerminalApp() {
         <TabBar tab={tab} setTab={setTab} />
 
         {tab === "Situation" && (<>
-        {/* 1 + 2 — what changed, and whether to trust it */}
-        <window.MT_Situation dense={dense} />
-
-
-
-        {/* With a storm on the board the awaiting-telemetry block is gone, and the watch
-            list would go with it. Surface it here instead, above the queue it feeds. */}
-        {S && <GenesisWatch compact />}
+        {/* 1 + 2 — what changed, and whether to trust it. Side by side with the genesis
+            watch: they answer the same question at two horizons (what moved in the last
+            six hours, what may exist in the next seven days) and stacking them cost a
+            third of a viewport before the queue was even reached. */}
+        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.4fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
+          <window.MT_Situation dense={dense} />
+          {S && <GenesisWatch compact />}
+        </div>
 
         {/* 3.2 — the active systems, as the advisory states them. Above the queue because
             a forecast intensity and a hurricane watch are the inputs to everything below,
@@ -564,7 +564,7 @@ function MillibarTerminalApp() {
             the map moved below it, because the product stopped being the data and
             became the interpretation of the data. */}
         <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
-          <window.MT_Attention dense={dense} imagery={imageryState}
+          <window.MT_Attention dense={dense} imagery={imageryState} maxH={narrow ? 420 : cmdH}
             onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
             onSelectContract={pickContract} />
           <window.MT_Exposure frame={frame} dense={dense} selection={sel} onSelect={pickContract} />

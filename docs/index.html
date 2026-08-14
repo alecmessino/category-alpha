@@ -50,6 +50,14 @@ body,.mt-mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
    minmax(0,...) lets the track shrink below its content and the content wrap instead. */
 .mt-grid>*{min-width:0}
 .mt-boot{display:flex;align-items:center;justify-content:center;min-height:100vh;font-family:var(--font-mono);font-size:12px;color:#61789b;letter-spacing:.5px}
+/* A tile that has not arrived yet, or never will, used to be a flat dark hole that was
+   indistinguishable from ocean at low zoom — you could not tell empty water from an
+   absent tile. The pane carries a faint 64px graticule so unpainted area reads as a
+   skeleton waiting for imagery. Tiles paint over it opaquely, so it is only ever visible
+   where there is nothing. */
+   Leaflet already hides an unloaded tile (visibility:hidden until .leaflet-tile-loaded),
+   so this needs no opacity rules of its own — overriding those would fight the fade. */
+.leaflet-tile-pane{background-color:#04060c;background-image:linear-gradient(rgba(120,160,220,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(120,160,220,.05) 1px,transparent 1px);background-size:64px 64px}
 </style>
 <!-- Libraries are self-hosted (vendored) so the permanent URL never depends on a third-party
      CDN staying up. Leaflet's stylesheet is the one exception — served from its pinned CDN tag. -->
@@ -68,4 +76,14 @@ body,.mt-mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 <script type="text/babel" src="app/panels.jsx"></script>
 <script type="text/babel" src="app/drawer.jsx"></script>
 <script type="text/babel" src="app/main.jsx"></script>
+<!-- Tile cache only. sw.js refuses same-origin requests by design: a cached index.html or
+     latest.json would make a stale board look live, which is the one failure this project
+     cannot have. Registration is best-effort — the page is fully functional without it. -->
+<script>
+if ("serviceWorker" in navigator) {
+  addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch((e) => console.warn("tile cache unavailable:", e.message));
+  });
+}
+</script>
 </body></html>

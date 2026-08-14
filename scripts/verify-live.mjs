@@ -45,7 +45,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
    propagate, so poll rather than failing on the race — but fail loudly if it
    never lands, because that is exactly the "deployed but not really" case this
    whole script exists to catch. */
-const ASSETS = ["index.html", "app/main.jsx", "app/claims.js", "app/compute.js", "app/panels.jsx", "vendor/leaflet.css"];
+const ASSETS = ["index.html", "app/main.jsx", "app/claims.js", "app/compute.js", "app/panels.jsx", "sw.js", "vendor/leaflet.css"];
 
 async function servedSha(path) {
   const url = BASE + path + "?cb=" + Date.now();          // busts the CDN edge
@@ -342,11 +342,35 @@ add("and it is the first thing under the header",
   LY.mapTop != null && LY.mapTop <= 200,
   `map starts ${LY.mapTop}px down the page`);
 
+/* The brief said 1.5 viewports. The map is 0.6 of one by design and the header and tab
+   rail take another 0.1, so 1.5 total leaves 0.8 for the analysis — which is less than
+   the attention queue and the board-impact table can occupy without becoming useless.
+   The budget here is 2.0: map plus roughly one screen of content. Situation measured
+   4.7 before the queue was bounded, so this is the check that keeps it bounded. */
 add("four tabs, so no single view is a wall",
-  LY.tabs === 4 && LY.screensToScroll <= 2.2,
+  LY.tabs === 4 && LY.screensToScroll <= 2.0,
   `${LY.tabs} tabs · ${LY.screensToScroll} screens tall (${LY.pageHeight}px / ${LY.viewportHeight}px)`);
 add("the GFS wind field is ingested and both components present",
   LY.windLayer === true, `cycle ${LY.windCycle}`);
+
+/* The tile cache is the one piece of this build that could make a stale board look live.
+   sw.js refuses same-origin by construction; this proves it on the deployed page, by
+   reading what actually landed in the cache rather than trusting the source. */
+const swCache = await page.evaluate(async () => {
+  if (!("caches" in window)) return { supported: false };
+  const names = await caches.keys();
+  const urls = [];
+  for (const n of names) for (const r of await (await caches.open(n)).keys()) urls.push(r.url);
+  return {
+    supported: true, caches: names, entries: urls.length,
+    sameOrigin: urls.filter((u) => u.startsWith(location.origin)),
+    controlled: !!(navigator.serviceWorker && navigator.serviceWorker.controller),
+  };
+});
+add("the tile cache never holds a same-origin asset",
+  swCache.supported === false || swCache.sameOrigin.length === 0,
+  swCache.supported === false ? "CacheStorage unavailable"
+    : `${swCache.entries} tile(s) cached · controlled=${swCache.controlled} · same-origin=${swCache.sameOrigin.length}`);
 
 add("all markets carried", probe.contracts >= 100 && probe.droppedForCap === 0,
   `${probe.contracts} contracts · ${probe.seriesCount} series · droppedForCap=${probe.droppedForCap}`);

@@ -710,7 +710,7 @@ function LifecycleRail({ lc }) {
   );
 }
 
-function MT_Attention({ dense, imagery, onSeek, onSelectContract }) {
+function MT_Attention({ dense, imagery, onSeek, onSelectContract, maxH = 560 }) {
   const [minPrio, setMinPrio] = React.useState("LOW");
   const [marks, setMarks] = React.useState(loadMarks);
   const [openId, setOpenId] = React.useState(null);
@@ -754,6 +754,10 @@ function MT_Attention({ dense, imagery, onSeek, onSelectContract }) {
           Nothing to action — which is itself the answer.
         </div>
       )}
+      {/* The queue grew with the feed and the PAGE grew with it — 75 items rendered
+          4,900px tall, so the Situation view was five viewports of one list. It keeps
+          every item; it just stops being the thing that sets page height. */}
+      <div style={{ maxHeight: maxH, overflowY: "auto", minHeight: 0 }}>
       {shown.map((p) => {
         const rows = a.byPriority[p];
         if (!rows.length) return null;
@@ -814,6 +818,7 @@ function MT_Attention({ dense, imagery, onSeek, onSelectContract }) {
           </div>
         );
       })}
+      </div>
       {total > 0 && cutoff < 2 && (
         <div onClick={() => setMinPrio("LOW")} style={{ cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 10,
           color: "var(--text-2)", padding: "8px 14px", borderTop: "1px solid var(--border-dim)" }}>
@@ -849,7 +854,11 @@ function MT_Exposure({ frame, dense, onSelect, selection }) {
           </div>
         ))}
       </div>
+      {/* The contract cell is 260px of non-wrapping text, so on a phone the table is
+          wider than the viewport and pushed the whole PAGE sideways. It scrolls inside
+          its own box now, like every other table on the board. */}
       {x.rows.length > 0 && (
+        <div style={{ overflowX: "auto" }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: dense ? 11 : 12 }}>
           <thead><tr>{["Contract", "Move", "Price", "Anchor", "Edge"].map((h) => (
             <th key={h} style={{ textAlign: h === "Contract" ? "left" : "right", color: "var(--text-2)", fontWeight: 600,
@@ -868,6 +877,7 @@ function MT_Exposure({ frame, dense, onSelect, selection }) {
             </tr>
           ))}</tbody>
         </table>
+        </div>
       )}
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", lineHeight: 1.55 }}>
         No position feed is wired, so this is <b style={{ color: "var(--text-1)" }}>board level, not portfolio level</b> — it says what moved and
