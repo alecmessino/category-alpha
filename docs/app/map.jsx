@@ -14,6 +14,11 @@ function layerProv(layer, S) {
   return "nofeed";
 }
 
+function cssVar(v) {
+  const m = /var\((--[\w-]+)\)/.exec(v); if (!m) return v;
+  return getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim() || "#38bdf8";
+}
+
 function MT_Map({ stormId, frame, layers, onSelect, height = "100%", resizeKey }) {
   const elRef = React.useRef(null);
   const mapRef = React.useRef(null);
