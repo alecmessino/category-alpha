@@ -619,6 +619,22 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
           walk(document.body, 0);
           return out.sort((a, b) => b.h - a.h).slice(0, 3).map((x) => `${x.t} ${x.h}px`).join(" · ");
         })(),
+        /* Map integrity: sample the rendered raster grid for holes. Leaflet draws tiles as
+           <img>, and a tile that 404'd resolves to the transparent errorTileUrl, which is
+           indistinguishable from ocean by eye. Canvas pixel reads are blocked here (the GIBS
+           images are cross-origin and taint the canvas), so this samples the DOM state that
+           produces the hole rather than the pixels it produces. */
+        rasterTiles: (() => {
+          const imgs = [...document.querySelectorAll(".leaflet-tile-pane img.leaflet-tile")];
+          const blank = /^data:image\/gif;base64,R0lGOD/;
+          let loaded = 0, holes = 0, pending = 0;
+          for (const im of imgs) {
+            if (blank.test(im.src)) { holes++; continue; }
+            if (!im.complete) { pending++; continue; }
+            if (im.naturalWidth === 0) holes++; else loaded++;
+          }
+          return { total: imgs.length, loaded, holes, pending };
+        })(),
         windLayer: !!(window.MT && MT._wind && MT._wind.fields && MT._wind.fields.length === 2),
         windCycle: (window.MT && MT._wind && MT._wind.cycleZ) || null,
         hud: /\bADV\b/.test(T) && /\bSNAP\b/.test(T),
@@ -671,6 +687,21 @@ const LY = probe.layout || {};
 add("no horizontal overflow and no jittering digits",
   LY.bodyOverflow <= 0 && LY.tabularNums === true && LY.overflowingGrids === 0,
   `bodyOverflow=${LY.bodyOverflow}px tabularNums=${LY.tabularNums} grids=${LY.grids} overflowing=${LY.overflowingGrids}`);
+/* Raster integrity, kept OUT of the layout assertions on purpose: a tile that failed to
+   render is a data problem, not a sizing one, and folding it into the height check would
+   make one failure read as the other. Holes are counted against tiles that actually
+   resolved, so a map still filling in reports pending rather than failing. */
+const RT = LY.rasterTiles || { total: 0, loaded: 0, holes: 0, pending: 0 };
+/* Not zero-tolerance. GOES is a disk, not a plane: tiles past its limb genuinely do not
+   exist and resolve to the error tile on a perfectly healthy map. What is NOT healthy is
+   nothing rendering at all, or holes across a third of the grid — that reads as ocean. */
+const RT_HOLE_FRACTION = 0.34;
+const rtBroken = RT.total > 0 && (RT.loaded === 0 || RT.holes > RT.total * RT_HOLE_FRACTION);
+add("the map has no missing raster chunks",
+  !rtBroken,
+  `${RT.loaded}/${RT.total} tile(s) rendered · ${RT.holes} hole(s) · ${RT.pending} still loading`
+  + (rtBroken ? " — a hole is a transparent error tile and looks like open ocean" : ""));
+
 add("the map is a centrepiece, not a thumbnail",
   LY.mapHeight != null && LY.mapHeight >= 480,
   `map ${LY.mapHeight}px`);
