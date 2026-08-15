@@ -177,6 +177,22 @@
   define("deploy.verified", "derived", (s) => {
     const v = s.verify;
     if (!v || !v.ranAt) return { text: "no deployed-site check on record", ok: false };
+    /* A verdict is only a DEPLOYMENT verdict if it came from a deployed origin. The
+       verifier now writes local runs to a different file so one cannot land here at all,
+       and this is the second lock: if a report ever appears whose url is not the deployed
+       site, it is reported as what it is rather than presented as a verification of a
+       deployment it never touched. An older report predating the flag has no isDeployment
+       field, so absence is judged on the url instead of assumed either way. */
+    const looksDeployed = v.isDeployment != null
+      ? v.isDeployment
+      : /^https:\/\//i.test(String(v.url || "")) && !/localhost|127\.0\.0\.1/i.test(String(v.url || ""));
+    if (!looksDeployed) {
+      return {
+        text: "the last verification ran against " + (v.url || "an unknown target")
+            + ", which is not the deployed site — this deployment has NOT been verified",
+        ok: false,
+      };
+    }
     const ageMin = Math.max(0, Math.round((Date.now() - Date.parse(v.ranAt)) / 60000));
     const ago = ageMin < 60 ? ageMin + "m" : Math.floor(ageMin / 60) + "h" + ("0" + (ageMin % 60)).slice(-2) + "m";
     return {
