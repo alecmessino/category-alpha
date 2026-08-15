@@ -116,6 +116,11 @@ jobs:
       - name: Test the deployment-target guard
         run: node scripts/test-deploy-target.mjs
 
+      # The historical replay. Its zero-peek gate is the only thing standing between a
+      # backtest and a confident lie, so it is asserted from both directions.
+      - name: Test the backtest harness and its zero-peek gate
+        run: node scripts/test-backtest.mjs
+
       # Every visible claim must have a provenance owner. The UI drifted ahead of the code
       # three times before this existed, always the same way: a capability written as a
       # string literal inside a component, where no feed could contradict it.
