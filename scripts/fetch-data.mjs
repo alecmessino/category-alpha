@@ -93,7 +93,8 @@ async function fetchStorms() {
     const id = (s.id || s.binNumber || (s.name || "storm")).toString().toUpperCase();
     const cc = clsFromWind(wind);
     const dir = num(s.movementDir), spd = num(s.movementSpeed);
-    const movement = dir != null && spd != null ? `${compass(dir)} ${spd} kt` : "—";
+    /* movementSpeed is mph in this feed; intensity is kt. Do not relabel either. */
+    const movement = dir != null && spd != null ? `${compass(dir)} ${spd} mph` : "—";
     const basin = /^(AL|AT)/i.test(id) ? "east" : /^(EP|CP)/i.test(id) ? "west" : (lon != null && lon < -100 ? "west" : "east");
     const adv = s.publicAdvisory || {};
     const fcst = s.forecastAdvisory || {};
