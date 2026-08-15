@@ -1,32 +1,10 @@
-/* Millibar Terminal — CLAIM REGISTRY.
- *
- * THE RULE: every visible claim has exactly one owner. Not just numbers — labels,
- * status text, capability descriptions, health indicators, provenance footers.
- *
- * This exists because the UI kept drifting ahead of the code. Three separate times a
- * panel described a capability the system did not have: a hardcoded "Live NHC feed ·
- * 200 OK" with no fetch behind it, a pipeline row reading "ensemble consensus" when
- * the only model was HURDAT2 climatology, and provenance footers citing
- * "canonical.fix() · v1.2.4" — files and versions that do not exist. Each was written
- * as a string literal inside a component, so nothing could contradict it.
- *
- * Now a claim is a function of the real feed state, registered once, with a named
- * owner. Components read claims; they never author them. `scripts/audit-claims.mjs`
- * fails CI if capability language reappears as a literal in a component.
- *
- * Owner values:
- *   a feed key ("nhc", "markets", "enso", …)  — asserted by that feed's fetch result
- *   "derived"                                  — computed from committed data on this page
- *   "operator"                                 — asserted by a human, not observed
- *   "none"                                     — not wired; the claim is that it is absent
- */
+/* Millibar Terminal — CLAIM REGISTRY. THE RULE: every visible claim has exactly one owner. Not
+   just numbers — labels, status text, capability descriptions, health indicators, provenance
+   footers. */
 (function () {
   const REG = {};
-  /* Claims are read both AFTER window.MT exists (from components) and DURING the
-     loader's build, before it is assigned. So state is passed in explicitly and only
-     falls back to the global — otherwise every claim evaluated at build time silently
-     reported "no feeds reachable", which is its own species of the bug this file
-     exists to prevent. */
+  /* Claims are read both AFTER window.MT exists (from components) and DURING the loader's
+     build, before it is assigned. */
   function state(ctx) {
     if (ctx && ctx.feeds) return ctx;
     const M = window.MT || {};
@@ -56,7 +34,7 @@
 
   // ---- pipeline stages -----------------------------------------------------
   define("pipeline.observation", "nhc+markets", (s) => {
-    const bits = [okOf(s, "nhc") && "NHC", okOf(s, "markets") && srcOf(s, "markets"), okOf(s, "satellite") && "GIBS"].filter(Boolean);
+    const bits = [okOf(s, "nhc") && "NHC", okOf(s, "markets") && srcOf(s, "markets")].filter(Boolean);
     return { text: bits.join(" · ") || "no feeds reachable", ok: bits.length > 0 };
   });
   define("pipeline.evidence", "derived", (s) => {
@@ -80,12 +58,9 @@
   }));
   /* The row that drifted. It is a climatology anchor and, when the ONI feed is up, an
      ENSO stratification of that anchor. It has never been an ensemble. */
-  /* The row that drifted, corrected a second time — in the other direction. It described
-     a climatology anchor and nothing else, which stopped being the whole truth the moment
-     the guidance decks and recon started feeding a per-storm estimate. Two anchors of
-     different kinds now share this stage and the row names both, because a reader who
-     believes a seasonal base rate is pricing an active storm is being misled by omission
-     as surely as by invention. */
+  /* The row that drifted, corrected a second time — in the other direction. It described a
+     climatology anchor and nothing else, which stopped being the whole truth the moment the
+     guidance decks and recon started feeding a per-storm estimate. */
   define("pipeline.probability", "models", (s) => {
     const seasonal = okOf(s, "models")
       ? "HURDAT2 climatology anchor" + (okOf(s, "enso") ? " + ENSO stratification" : "")
@@ -116,22 +91,14 @@
     text: "No public ensemble Cat-probability feed is wired, so no independent per-storm probability is published.",
     ok: false,
   }));
-  /* This claim has been wrong twice in opposite directions. It first asserted a REASON
-     the board could not know ("remote basin / none tasked"). It then asserted that no
-     recon feed was wired, which was true until the products were polled and is now the
-     stale half of the same mistake — a capability statement outliving the code it
-     describes. It is a function of the fetch result, so it can only ever say what this
-     cycle actually found. */
+  /* This claim has been wrong twice in opposite directions. */
   define("capability.recon", "recon", (s) => {
     const f = s.feeds.recon || {};
     if (!f.ok) return { text: "Reconnaissance products unreachable this cycle — intensity rests on the advisory's satellite estimate", ok: false };
     if (!f.count) return { text: "Reconnaissance polled, no aircraft reporting on an active system — intensity rests on the advisory's satellite estimate", ok: true };
     return { text: "Aircraft reconnaissance in hand — the storm's intensity is measured rather than estimated", ok: true };
   });
-  /* Stated once, in one place, instead of four dead toggles on the map. Two of the four
-     things this row used to list are now ingested, so it lists what is genuinely still
-     absent and names what replaced the rest. Shrinking this list is the only honest way
-     to shorten it. */
+  /* Stated once, in one place, instead of four dead toggles on the map. */
   define("capability.notIngested", "none", (s) => {
     const have = [];
     if (okOf(s, "recon")) have.push("aircraft reconnaissance");
@@ -177,12 +144,10 @@
   define("deploy.verified", "derived", (s) => {
     const v = s.verify;
     if (!v || !v.ranAt) return { text: "no deployed-site check on record", ok: false };
-    /* A verdict is only a DEPLOYMENT verdict if it came from a deployed origin. The
-       verifier now writes local runs to a different file so one cannot land here at all,
-       and this is the second lock: if a report ever appears whose url is not the deployed
-       site, it is reported as what it is rather than presented as a verification of a
-       deployment it never touched. An older report predating the flag has no isDeployment
-       field, so absence is judged on the url instead of assumed either way. */
+    /* A verdict is only a DEPLOYMENT verdict if it came from a deployed origin. The verifier
+       now writes local runs to a different file so one cannot land here at all, and this is the
+       second lock: if a report ever appears whose url is not the deployed site, it is reported
+       as what it is rather than presented as a verification of a deployment it never touched. */
     const looksDeployed = v.isDeployment != null
       ? v.isDeployment
       : /^https:\/\//i.test(String(v.url || "")) && !/localhost|127\.0\.0\.1/i.test(String(v.url || ""));
@@ -379,12 +344,10 @@
     };
   });
 
-  /* The forecaster's own statement about where the official intensity forecast sits
-     inside the guidance envelope. This board's P(reaches hurricane) is built ON that
-     forecast, so the position is not trivia — it is the direction of the bias in a
-     number an operator sizes a position from. Quoted, never converted into an
-     adjustment: there is no defensible way to turn "near the upper end" into a number
-     of knots, and inventing one would be worse than saying it plainly. */
+  /* The forecaster's own statement about where the official intensity forecast sits inside the
+     guidance envelope. This board's P(reaches hurricane) is built ON that forecast, so the
+     position is not trivia — it is the direction of the bias in a number an operator sizes a
+     position from. */
   define("advisory.guidance", "nhc", () => {
     const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
     const g = storms
@@ -410,11 +373,10 @@
     };
   });
 
-  /* The one place on this board where prose moves a number, and the fraction that does
-     it is an OPERATOR SETTING — declared by a human, not observed. NHC publishes the
-     position in words and never a magnitude, so no feed can produce this; the owner class
-     exists for exactly that. Registered here so the constant, its direction rule and its
-     unadjusted counterpart are all one click from the number they change. */
+  /* The one place on this board where prose moves a number, and the fraction that does it is an
+     OPERATOR SETTING — declared by a human, not observed. NHC publishes the position in words
+     and never a magnitude, so no feed can produce this; the owner class exists for exactly
+     that. */
   define("model.guidanceTilt", "operator", () => {
     const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
     const adj = storms.map((x) => ({ name: x.name, a: x.hurricaneP && x.hurricaneP.adjustment }))
@@ -474,11 +436,9 @@
     };
   });
 
-  /* ---- the four pre-advisory feeds ------------------------------------------------
-     Each of these is a capability statement about something this build now DOES ingest,
-     which is exactly the category that has drifted before. They are functions of the
-     fetch result, so a feed that goes down changes the sentence rather than leaving a
-     confident claim standing over a dead pipe. */
+  /* ---- the four pre-advisory feeds ------------------------------------------------ Each of
+     these is a capability statement about something this build now DOES ingest, which is
+     exactly the category that has drifted before. */
 
   /* Priority 1. The head start is a claim about TIMING, so it is stated as one and it is
      stated conditionally: the deck is ahead of the advisory when it is fresher than the
@@ -536,20 +496,17 @@
     const f = s.feeds.ships || {};
     const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
     const scored = storms.some((x) => x.hurricanePCal && x.hurricanePCal.shipsScoring);
-    if (!f.ok) return { text: "SHIPS diagnostics unavailable this cycle — no shear, ocean heat or RI table: " + (f.note || ""), ok: false };
+    if (!f.ok) return { text: "SHIPS unavailable this cycle: " + (f.note || ""), ok: false };
     const NF = (window.MT ? window.MT.FRAMES : 1) - 1;
     const rows = storms.map((x) => ({
       name: x.name,
       shear: typeof x.shearAt === "function" ? x.shearAt(NF) : null,
-      ohc: typeof x.ohcAt === "function" ? x.ohcAt(NF) : null,
-      mpi: typeof x.mpiAt === "function" ? x.mpiAt(NF) : null,
       ri: typeof x.riAt === "function" ? x.riAt(NF) : null,
     })).filter((x) => x.shear != null || x.ri != null);
     return {
       text: (rows.length
-        ? rows.map((r) => r.name + " shear " + (r.shear ?? "—") + " kt, ocean heat " + (r.ohc ?? "—")
-            + ", potential intensity " + (r.mpi ?? "—") + " kt"
-            + (r.ri != null ? ", rapid-intensification floor " + Math.round(r.ri * 100) + "%" : "")).join(" · ")
+        ? rows.map((r) => r.name + " shear " + (r.shear ?? "—") + " kt"
+            + (r.ri != null ? ", RI floor " + Math.round(r.ri * 100) + "%" : "")).join(" · ")
         : "SHIPS read, no features for an active system")
         + " — features are published and "
         + (scored ? "ARE scored into the probability under an active operator claim." : "are NOT scored into any probability. No feature here moves a price until that is claimed."),
@@ -580,38 +537,10 @@
   });
 
   /* ---- THE CONFLICT RULE ------------------------------------------------------------
-   * What happens when the guidance deck and the aircraft disagree.
-   *
-   * This is the last piece of the engine that was implemented in code and owned by
-   * nobody, which is precisely the shape of the three drifts this registry exists to
-   * prevent — a rule that decides a price, described only in a comment, where no feed can
-   * contradict it and no reader can check it.
-   *
-   * THE RULE, and the reason it is not a weighting:
-   *
-   *   A consensus peak and an aircraft fix are NEVER AVERAGED, because they do not answer
-   *   the same question. The deck forecasts what the storm WILL PEAK AT; the aircraft
-   *   measures what it IS RIGHT NOW. Averaging them would be a category error dressed up
-   *   as caution — the arithmetic would run and the number would mean nothing.
-   *
-   *   So the apparent conflict is resolved BY CONSTRUCTION rather than by a weight. Every
-   *   forecast on this board is anchored on an initial intensity, and the aircraft has
-   *   just measured that initial intensity. The measured difference is applied to the
-   *   whole forecast curve — the deck's peak and the official peak alike — because a
-   *   forecast built on an initial condition that has since been measured wrong is wrong
-   *   by roughly that amount all the way along.
-   *
-   *   NEITHER CAN VETO THE OTHER. The deck keeps its shape and its weight in the blend;
-   *   the fix keeps its full measured difference, undamped. There is no tunable parameter
-   *   between them, which is the point: there is nothing here to fit.
-   *
-   *   The published answer is then the LARGER of two probabilities — the corrected
-   *   forecast peak clearing the strike, or the measured current intensity already
-   *   clearing it — because reaching a threshold now implies reaching it at some point.
-   *
-   * The one thing this claim must never let slide: the correction is a SHIFT, so it moves
-   * the estimate without narrowing it. A disagreement between the deck and the aircraft is
-   * not evidence that either is sharper. */
+     What happens when the guidance deck and the aircraft disagree. This is the last piece of
+     the engine that was implemented in code and owned by nobody, which is precisely the shape
+     of the three drifts this registry exists to prevent — a rule that decides a price,
+     described only in a comment, where no feed can contradict it and no reader can check it. */
   define("model.conflict", "recon", () => {
     const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
     const rule = "A guidance consensus and an aircraft fix are never averaged: the deck forecasts the peak,"
@@ -672,18 +601,10 @@
     };
   });
 
-  /* HAS THE BOARD EVER BEEN RIGHT?
-   *
-   * Every other claim here describes what the board is doing. This one describes whether
-   * any of it has worked, which is the only claim a reader should weight heavily — and it
-   * is therefore the one most in need of a refusal path, because a calibration report is
-   * uniquely dangerous when wrong. Its entire purpose is to be believed.
-   *
-   * The sample size is DISTINCT RESOLVED STORMS, never forecasts. Every forecast made
-   * during one storm's life shares that storm's single outcome, so a season with three
-   * storms can produce hundreds of entries and a beautiful score that measures three coin
-   * flips. The scorer refuses below the threshold and this says so out loud, with the
-   * counts, so the ledger can be seen filling rather than looking like a dead panel. */
+  /* HAS THE BOARD EVER BEEN RIGHT? Every other claim here describes what the board is doing.
+     This one describes whether any of it has worked, which is the only claim a reader should
+     weight heavily — and it is therefore the one most in need of a refusal path, because a
+     calibration report is uniquely dangerous when wrong. */
   define("model.calibration", "derived", () => {
     const c = window.MT && MT._calibration;
     if (!c) return { short: "Calibration: no scorecard yet — nothing has been scored against an outcome.",
@@ -702,10 +623,10 @@
     }
     const pct = (v) => (v == null ? "—" : (v * 100).toFixed(1) + "%");
     const b = c.brier || {}, s = c.skill || {}, pr = c.paired || {};
-    /* A skill number divides two Brier scores, and the two must come from the same storms
-       or the quotient means nothing. The scorer pairs them and reports the sample it used;
-       when that sample is smaller than the headline count, say so here rather than let a
-       reader assume the skill number covers everything above it. */
+    /* A skill number divides two Brier scores, and the two must come from the same storms or
+       the quotient means nothing. The scorer pairs them and reports the sample it used; when
+       that sample is smaller than the headline count, say so here rather than let a reader
+       assume the skill number covers everything above it. */
     const mktN = (pr.calibratedVsMarket || {}).storms;
     const paired = mktN != null && mktN !== n.resolvedStorms
       ? " Skill is measured on the " + mktN + " storm(s) where both series quoted a number;"
@@ -768,15 +689,8 @@
   });
 
   /* ---- notes: the explanations, moved out of the panels ---------------------
-     Every panel used to carry a paragraph of caveat under it, permanently on screen
-     whether or not anyone was asking. That is where a third of the page height went,
-     and it read as a wall. The text is not dropped — deleting a caveat is how a board
-     starts implying coverage it does not have — it moves behind a "?" on the panel it
-     qualifies, and it lives HERE, next to the claims it is a caveat about, so it
-     cannot drift away from what the code actually does.
-
-     `body` is an array of short lines, not a paragraph, because a caveat that has to
-     be read as prose does not get read. */
+     Every panel used to carry a paragraph of caveat under it, permanently on screen whether or
+     not anyone was asking. */
   const note = (id, owner, title, body) =>
     define(id, owner, (s) => ({ text: title, title, body: typeof body === "function" ? body(s) : body, ok: true }));
 
@@ -798,10 +712,15 @@
   note("note.observability", "derived", "What this table is", () => [
     "Feed results exactly as this cycle's fetch returned them.",
     "A field the feed did not return is omitted, never filled in with a plausible value.",
-    /* The calibration verdict in full. The panel carries a one-line form of it because the
-       tab has a two-screen budget and this is a paragraph; the reasoning is one click away
-       rather than deleted, which is the same trade every other caveat here makes. */
+    /* The rows that no longer sit on the panel. Moved, not deleted. */
+    claim("markets.coverage").text,
+    claim("intel.atcf").text,
+    claim("intel.recon").text,
+    claim("intel.ships").text,
+    claim("intel.ascat").text,
+    claim("intel.calibration").text,
     claim("model.calibration").text,
+    claim("capability.notIngested").text,
   ]);
   note("note.genesis", "outlook", "Systems with no advisory yet", [
     "NHC formation probabilities, quoted as published.",
