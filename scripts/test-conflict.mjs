@@ -33,7 +33,7 @@ import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
-import { calibratedIntensityP, MAX_RECON_CORRECTION_KT } from "./lib/probability.mjs";
+import { calibratedIntensityP, evidenceQuality, SFMR_SIGMA_KT, MAX_RECON_CORRECTION_KT } from "./lib/probability.mjs";
 import { reachesHurricaneP, INTENSITY_MAE } from "./fetch-data.mjs";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
@@ -67,7 +67,11 @@ const fix = (measuredKt, ageMin = 60) => ({ ok: true, stormId: "CP012026", fixIs
   mslp: 990, extrapolated: false, intensityKt: measuredKt, intensitySource: "SFMR surface wind",
   surfaceKt: measuredKt, flightLevelKt: measuredKt + 6, mission: { aircraft: "AF305" }, obNumber: 4 });
 
-const run = (o) => calibratedIntensityP(Object.assign({ official: OFFICIAL, currentKt: ADVISORY_KT }, o), OPTS);
+/* Fixtures default to an advisory issued BEFORE the fix, which is the head-start case the
+   correction exists for. The already-priced case passes its own advisoryIso. */
+const DEFAULT_ADV_ISO = iso(240);
+const run = (o) => calibratedIntensityP(
+  Object.assign({ official: OFFICIAL, currentKt: ADVISORY_KT, advisoryIso: DEFAULT_ADV_ISO }, o), OPTS);
 const peakOf = (r, id) => (r.sources.find((s) => s.id === id) || {}).peakKt;
 
 console.log("\n[1] the two are not averaged — they are not answering the same question");
@@ -146,6 +150,41 @@ const staleDeck = run({ consensus: deck(95, 8, 600), recon: fix(ADVISORY_KT - 10
 eq("a stale deck drops out", staleDeck.used.consensus, false);
 eq("but the fix still corrects what is left", staleDeck.used.recon, true);
 near("shifting the official forecast by the measured difference", peakOf(staleDeck, "official"), peakOf(deckOnly, "official") - 10, 1e-9);
+
+console.log("\n[6b] a fix the forecaster has already read cannot be applied a second time");
+/* CAUGHT LIVE, on Lala, and it cost real accuracy before it was found. An aircraft
+   measured 48 kt at 21:56Z; NHC issued Intermediate Advisory 10A at 00:00Z carrying
+   55 kt; the engine then subtracted 7 kt from a forecast written by someone who had
+   already read that 48 kt.
+   The entire justification for shifting a published forecast is that the measurement
+   arrived AFTER it was written. Once the advisory postdates the fix, the forecaster's
+   number IS their reading of it — and shifting again counts one measurement twice, in
+   whichever direction they exercised judgement the board does not have. */
+const ADV_ISO = "2026-08-15T00:00:00.000Z";
+const seen = run({ consensus: deck(95), recon: fix(ADVISORY_KT - 7, 120),
+                   advisoryIso: ADV_ISO, advisoryLabel: "10A" });
+eq("the mean is not shifted", seen.reconDeltaKt, null);
+eq("and it is marked as already priced in", seen.reconAlreadyPriced, true);
+near("so the forecast peak is exactly the deck's own", seen.meanKt, deckOnly.meanKt, 1e-9);
+ck("the reason names the advisory and the gap", /issued \d+ min AFTER this fix/.test(seen.notes.join(" ")), seen.notes.join("; "));
+ck("and says it would be counted twice", /count it twice/.test(seen.notes.join(" ")), seen.notes.join("; "));
+/* What it must STILL do: the storm's intensity really was measured, so the band tightens
+   and the evidence tier stands. Only the mean shift is withheld. */
+eq("the band still tightens on a measured intensity", seen.sigmaInitKt, SFMR_SIGMA_KT);
+eq("and the top evidence tier still stands", evidenceQuality(seen, {}).tier, "HIGH");
+ck("with the reason saying the advisory already has it",
+   /already incorporated it/.test(evidenceQuality(seen, {}).reasons.join(" ")), evidenceQuality(seen, {}).reasons.join(" | "));
+/* A fix that arrives AFTER the advisory is the head start, and it must still work. */
+const fresh = run({ consensus: deck(95), recon: fix(ADVISORY_KT - 7, 5),
+                    advisoryIso: "2026-08-14T21:00:00.000Z", advisoryLabel: "10" });
+eq("a fix newer than the advisory still corrects it", fresh.reconDeltaKt, -7);
+eq("and is not marked already priced", fresh.reconAlreadyPriced, false);
+/* Unknown advisory time cannot establish that the fix is news. Refusing costs a head
+   start that may have been real; applying it risks double-counting into a price. Those
+   are not symmetric. */
+const unknownAdv = run({ consensus: deck(95), recon: fix(ADVISORY_KT - 7, 60), advisoryIso: null });
+eq("an unknown advisory time refuses the correction", unknownAdv.used.recon, false);
+ck("and says why", /issue time is unknown/.test(unknownAdv.notes.join(" ")), unknownAdv.notes.join("; "));
 
 console.log("\n[7] a fix that CONFIRMS the advisory changes the estimate not at all");
 /* The commonest real outcome, and the one a rule with a hidden weight in it would get

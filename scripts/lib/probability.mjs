@@ -177,15 +177,46 @@ export function calibratedIntensityP(input, opts) {
   /* ---- 3. recon: a measured initial condition -------------------------------------
      The correction is applied to the FORECAST CURVE, not to the probability, because a
      forecast anchored on an initial intensity that has since been measured wrong is wrong
-     by roughly that amount all the way along. */
+     by roughly that amount all the way along.
+
+     THE PRECONDITION, AND IT IS THE WHOLE JUSTIFICATION: the correction is only valid
+     while the forecaster HAS NOT SEEN THE FIX. The entire argument for shifting a
+     published forecast by a measured difference is that the measurement arrived after the
+     forecast was written — that is the head start, and it is the only thing being traded.
+
+     Once an advisory is issued AFTER the fix, the forecaster has had it in hand and has
+     already decided what to make of it. Their number IS the fix, as they read it. Shifting
+     their forecast by that same difference again counts one measurement twice, and it does
+     so in whichever direction the forecaster disagreed with the raw reading — which is
+     precisely where they were exercising judgement the board does not have.
+
+     Caught live on Lala: an aircraft measured 48 kt at 21:56Z, NHC issued Advisory 10A at
+     00:00Z carrying 55 kt, and the engine subtracted 7 kt from a forecast built by someone
+     who had already read that 48 kt. The fix still tightens the current-intensity band and
+     still earns the top evidence tier — the intensity really was measured — but it stops
+     moving a mean it has already moved once. */
   let reconAgeMin = null, reconDeltaKt = null, reconUsed = false, reconRefused = null;
+  let reconAlreadyPriced = false;
   if (recon) {
     reconAgeMin = ageMin(recon.fixIso, nowMs);
     const obsKt = recon.intensityKt;
+    const fixMs = Date.parse(recon.fixIso || "");
+    const advMs = Date.parse(input.advisoryIso || "");
     if (obsKt == null) reconRefused = "the fix carried no surface wind and its flight level has no published reduction factor";
     else if (reconAgeMin != null && reconAgeMin > RECON_FRESH_MIN) reconRefused = `the fix is ${reconAgeMin} min old, past the ${RECON_FRESH_MIN}-min line`;
     else if (currentKt == null) reconRefused = "no advisory intensity to correct against";
-    else {
+    else if (!advMs) {
+      /* Unknown advisory time means we cannot establish that the forecaster had not seen
+         the fix, and the correction's whole justification is that they had not. Refusing
+         costs a head start that may have been real; applying it risks double-counting a
+         measurement into a price. Those are not symmetric, so this refuses. */
+      reconRefused = "the advisory's issue time is unknown, so it cannot be shown that this fix arrived after it";
+    } else if (fixMs && fixMs <= advMs) {
+      reconAlreadyPriced = true;
+      reconRefused = `Advisory ${input.advisoryLabel || ""}`.trim()
+        + ` was issued ${Math.round((advMs - fixMs) / 60000)} min AFTER this fix, so the forecaster already had it`
+        + ` — their ${currentKt} kt is their reading of it, and shifting by the difference again would count it twice`;
+    } else {
       const d = obsKt - currentKt;
       if (Math.abs(d) > MAX_RECON_CORRECTION_KT) {
         reconRefused = `the fix differs from the advisory by ${Math.round(d)} kt, past the ${MAX_RECON_CORRECTION_KT} kt sanity limit — likelier a bad read than a real correction`;
@@ -223,9 +254,13 @@ export function calibratedIntensityP(input, opts) {
   let sigmaInit = DVORAK_SIGMA_KT;
   let initSource = "satellite intensity analysis";
   let ascatAgeMin = null, ascatUsed = false;
-  if (reconUsed) {
+  /* An already-priced fix still tightens the band. The forecaster having read it does not
+     make the storm's intensity less measured — it makes the ADVISORY's number a measured
+     one rather than a satellite estimate, which is exactly what this term describes. Only
+     the mean shift is withheld, because only the mean shift would be counted twice. */
+  if (reconUsed || reconAlreadyPriced) {
     sigmaInit = SFMR_SIGMA_KT;
-    initSource = "aircraft reconnaissance";
+    initSource = reconUsed ? "aircraft reconnaissance" : "aircraft reconnaissance, already incorporated by the advisory";
   } else if (ascat && ascat.kt != null) {
     ascatAgeMin = ageMin(ascat.iso, nowMs);
     if (ascatAgeMin != null && ascatAgeMin > ASCAT_FRESH_MIN) {
@@ -296,8 +331,8 @@ export function calibratedIntensityP(input, opts) {
          fix has already moved the answer, through the initial condition every forecast
          here is anchored on. It informs; it does not vote. */
       p: null,
-      unavailable: !reconUsed,
-      basis: reconUsed
+      unavailable: !(reconUsed || reconAlreadyPriced),
+      basis: reconUsed || reconAlreadyPriced
         ? `aircraft measured ${recon.intensityKt} kt (${recon.intensitySource})`
           + (recon.mslp != null ? ` and ${recon.mslp} mb${recon.extrapolated ? " extrapolated" : " measured"}` : "")
           + `, ${reconAgeMin} min ago`
@@ -324,7 +359,7 @@ export function calibratedIntensityP(input, opts) {
     sigmaInitKt: sigmaInit, initSource,
     tauKt: Math.round(Math.sqrt(tau2) * 10) / 10,
     reconDeltaKt: reconDeltaKt != null ? Math.round(reconDeltaKt * 10) / 10 : null,
-    reconAgeMin, reconUsed, ascatAgeMin, ascatUsed, consensusAgeMin: consensusAge,
+    reconAgeMin, reconUsed, reconAlreadyPriced, ascatAgeMin, ascatUsed, consensusAgeMin: consensusAge,
     shipsScoring, riFloor,
     sources: sources.map((s) => ({ id: s.id, label: s.label, peakKt: Math.round(s.peakKt * 10) / 10, peakHr: s.peakHr, sigmaKt: Math.round(s.sigma * 10) / 10 })),
     layers, notes,
@@ -354,9 +389,14 @@ export function evidenceQuality(cal, opts) {
   if (!cal || !cal.ok) return { tier: "LOW", reasons: ["no calibrated probability for this system"] };
   const reasons = [];
   let tier = "LOW";
-  if (cal.used.recon) {
+  if (cal.used.recon || cal.reconAlreadyPriced) {
     tier = "HIGH";
-    reasons.push(`aircraft reconnaissance ${cal.reconAgeMin} min old — the initial condition is measured, not estimated`);
+    /* Already-priced still earns the top tier. The question the tier answers is whether
+       the storm was MEASURED or ESTIMATED, and an aircraft flew through it either way —
+       the advisory having incorporated the fix changes who did the reading, not whether
+       an instrument did it. */
+    reasons.push(`aircraft reconnaissance ${cal.reconAgeMin} min old — the initial condition is measured, not estimated`
+      + (cal.reconAlreadyPriced ? ", and the advisory has already incorporated it" : ""));
   } else if (cal.used.consensus) {
     tier = "MEDIUM";
     reasons.push(`ATCF consensus ${cal.consensusAgeMin} min old, no aircraft in the storm`);

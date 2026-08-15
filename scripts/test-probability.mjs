@@ -33,6 +33,11 @@ const near = (n, g, w, tol) => { const ok = Math.abs(g - w) <= tol; if (!ok) fai
 
 const NOW = Date.UTC(2026, 7, 14, 22, 0);
 const OPTS = { nowMs: NOW, maeTable: INTENSITY_MAE, thresholdKt: 62.5, reportedKt: 65 };
+/* Recon fixtures here all test the HEAD-START case — a fix that reached the board after
+   the advisory was written, which is the only case where correcting a published forecast
+   is justified. The already-priced case (advisory issued after the fix) has its own
+   coverage in test-conflict.mjs. */
+const ADV_ISO = new Date(NOW - 300 * 60000).toISOString();
 const iso = (minAgo) => new Date(NOW - minAgo * 60000).toISOString();
 
 /* The official estimator's REAL output, not a hand-written stand-in.
@@ -90,19 +95,19 @@ ck("agreement between sources leaves a narrower band than disagreement",
    calibratedIntensityP({ official: OFFICIAL, currentKt: 50, consensus: consensus(70, 2) }, OPTS).sigmaKt <= wide.sigmaKt);
 
 console.log("\n[4] the aircraft corrects the initial condition every forecast rests on");
-const strongerRecon = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, recon: recon(65, 985) }, OPTS);
+const strongerRecon = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, advisoryIso: ADV_ISO, recon: recon(65, 985) }, OPTS);
 eq("the correction is the measured difference, not a weight", strongerRecon.reconDeltaKt, 15);
 ck("a storm measured stronger than the advisory raises the answer", strongerRecon.p > bare.p, `${bare.p} → ${strongerRecon.p}`);
 ck("and every forecast peak moves with it", strongerRecon.meanKt > 70, String(strongerRecon.meanKt));
-const weakerRecon = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, recon: recon(40, 1002) }, OPTS);
+const weakerRecon = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, advisoryIso: ADV_ISO, recon: recon(40, 1002) }, OPTS);
 ck("measured weaker lowers it", weakerRecon.p < bare.p, `${bare.p} → ${weakerRecon.p}`);
 /* The one guard that exists to stop a bad read reaching a price. A 60 kt disagreement
    between an aircraft and an advisory is far likelier to be a mis-parse or the wrong
    storm than a real analysis error of that size. */
-const absurd = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, recon: recon(50 + MAX_RECON_CORRECTION_KT + 10, 940) }, OPTS);
+const absurd = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, advisoryIso: ADV_ISO, recon: recon(50 + MAX_RECON_CORRECTION_KT + 10, 940) }, OPTS);
 eq("an impossible correction is refused", absurd.used.recon, false);
 ck("and named as a sanity limit", absurd.notes.some((n) => /sanity limit/.test(n)), absurd.notes.join("; "));
-const oldFix = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, recon: recon(65, 985, 400) }, OPTS);
+const oldFix = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, advisoryIso: ADV_ISO, recon: recon(65, 985, 400) }, OPTS);
 eq("a fix older than the freshness line is refused", oldFix.used.recon, false);
 
 console.log("\n[5] the scatterometer tightens the band and NOTHING else");
@@ -120,7 +125,7 @@ ck("and says why", saturated.notes.some((n) => /saturates/.test(n)), saturated.n
 const oldPass = calibratedIntensityP({ official: OFFICIAL, currentKt: 60, ascat: ascat(40, 900) }, OPTS);
 eq("a pass from a previous orbit tightens nothing", oldPass.used.ascat, false);
 /* "Only when recon is absent" — an aircraft is the better instrument and outranks it. */
-const both = calibratedIntensityP({ official: OFFICIAL, currentKt: 60, recon: recon(62, 990), ascat: ascat(40) }, OPTS);
+const both = calibratedIntensityP({ official: OFFICIAL, currentKt: 60, advisoryIso: ADV_ISO, recon: recon(62, 990), ascat: ascat(40) }, OPTS);
 eq("with an aircraft in the storm the pass is not used", both.used.ascat, false);
 eq("and the width comes from the aircraft", both.sigmaInitKt, SFMR_SIGMA_KT);
 
@@ -149,7 +154,7 @@ for (const [name, r] of [["bare", bare], ["consensus up", up], ["consensus down"
 }
 
 console.log("\n[8] a storm already at the threshold is answered by observation");
-const already = calibratedIntensityP({ official: OFFICIAL, currentKt: 75, recon: recon(78, 975) }, OPTS);
+const already = calibratedIntensityP({ official: OFFICIAL, currentKt: 75, advisoryIso: ADV_ISO, recon: recon(78, 975) }, OPTS);
 ck("the current intensity drives it", already.drivenBy === "current intensity", already.drivenBy);
 ck("and it is high", already.p > 0.9, String(already.p));
 /* Reaching the threshold now implies reaching it at some point, so the answer can never

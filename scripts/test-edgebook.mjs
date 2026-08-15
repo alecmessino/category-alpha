@@ -377,7 +377,15 @@ if (book) {
   const sum = Object.values(book.skipped).reduce((a, b) => a + b, 0);
   ck("every contract is either ranked or accounted for as skipped",
      sum + book.candidates === live.length, `skipped=${sum} candidates=${book.candidates} total=${live.length}`);
-  ck("no ranked row has a negative expected value", book.rows.every((r) => r.ev > 0));
+  /* HOLD rows are deliberately zeroed at the source — a row nobody may act on must not
+     carry a stake, a contract count or an expected value, or every total downstream would
+     quietly include money that cannot be put on. So the invariant is not "every row is
+     positive": it is that an ACTIONABLE row is positive and a HELD one is exactly zero.
+     The looser version passed only while no storm happened to be stale, which is weather,
+     not a property of the code. */
+  ck("actionable rows carry positive expected value and held rows carry none",
+     book.rows.every((r) => (r.grade === "HOLD" ? r.ev === 0 : r.ev > 0)),
+     book.rows.map((r) => r.grade + ":" + (r.ev == null ? "null" : r.ev.toFixed(2))).join(" "));
   ck("no ranked row lacks a model", book.rows.every((r) => r.model != null));
   console.log(`         live board: ${book.coverage.anchored}/${book.coverage.total} anchored · ${book.candidates} candidates · ${book.rows.length} shown`);
 }

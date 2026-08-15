@@ -1732,6 +1732,12 @@ function applyIntel(storms, intel) {
 
     const cal = calibratedIntensityP({
       official: s.hurricaneP, currentKt: s.wind,
+      /* The advisory the engine is calibrating, and WHEN it was issued. The time is what
+         decides whether a recon fix is still news or has already been read by the
+         forecaster — the WMO header time is preferred because it is when the product
+         actually left the office, with the feed's issuance as the fallback. */
+      advisoryIso: s.advisoryIssuedZ || s.advTimeZ || null,
+      advisoryLabel: s.advNumFull || s.advNum || null,
       consensus: s.consensus, recon: s.recon, ascat: s.ascat, ships: s.ships,
       riFloor: floor, shipsScoring: SHIPS_RI_SCORING,
     }, {
