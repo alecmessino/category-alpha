@@ -177,6 +177,22 @@
   define("deploy.verified", "derived", (s) => {
     const v = s.verify;
     if (!v || !v.ranAt) return { text: "no deployed-site check on record", ok: false };
+    /* A verdict is only a DEPLOYMENT verdict if it came from a deployed origin. The
+       verifier now writes local runs to a different file so one cannot land here at all,
+       and this is the second lock: if a report ever appears whose url is not the deployed
+       site, it is reported as what it is rather than presented as a verification of a
+       deployment it never touched. An older report predating the flag has no isDeployment
+       field, so absence is judged on the url instead of assumed either way. */
+    const looksDeployed = v.isDeployment != null
+      ? v.isDeployment
+      : /^https:\/\//i.test(String(v.url || "")) && !/localhost|127\.0\.0\.1/i.test(String(v.url || ""));
+    if (!looksDeployed) {
+      return {
+        text: "the last verification ran against " + (v.url || "an unknown target")
+            + ", which is not the deployed site — this deployment has NOT been verified",
+        ok: false,
+      };
+    }
     const ageMin = Math.max(0, Math.round((Date.now() - Date.parse(v.ranAt)) / 60000));
     const ago = ageMin < 60 ? ageMin + "m" : Math.floor(ageMin / 60) + "h" + ("0" + (ageMin % 60)).slice(-2) + "m";
     return {
@@ -670,10 +686,13 @@
    * counts, so the ledger can be seen filling rather than looking like a dead panel. */
   define("model.calibration", "derived", () => {
     const c = window.MT && MT._calibration;
-    if (!c) return { text: "No calibration scorecard has been written yet — nothing on this board has been scored against an outcome.", ok: false };
+    if (!c) return { short: "Calibration: no scorecard yet — nothing has been scored against an outcome.",
+                     text: "No calibration scorecard has been written yet — nothing on this board has been scored against an outcome.", ok: false };
     const n = c.counts || {};
     if (!c.ok) {
       return {
+        short: "Calibration: NOT YET SCORED — " + n.resolvedStorms + "/" + (c.minResolvedStorms || 10)
+             + " resolved storms, " + n.entries + " forecasts recorded. This board's accuracy is unmeasured.",
         text: "NOT YET SCORED. " + n.resolvedStorms + " resolved storm(s) of the " + (c.minResolvedStorms || 10)
             + " needed, behind " + n.resolvedEntries + " resolved forecast(s) and " + n.entries + " recorded in all."
             + " The threshold counts STORMS because every forecast made during one storm's life shares that storm's"
@@ -684,6 +703,11 @@
     const pct = (v) => (v == null ? "—" : (v * 100).toFixed(1) + "%");
     const b = c.brier || {}, s = c.skill || {};
     return {
+      short: "Calibration: Brier " + (b.calibrated == null ? "—" : b.calibrated.toFixed(3))
+           + " vs raw " + (b.raw == null ? "—" : b.raw.toFixed(3))
+           + " vs market " + (b.market == null ? "—" : b.market.toFixed(3))
+           + " over " + n.resolvedStorms + " storms · skill vs market " + pct(s.vsMarket)
+           + (s.vsMarket != null && s.vsMarket <= 0 ? " — NO EDGE ON THIS RECORD" : ""),
       text: "Scored over " + n.resolvedStorms + " resolved storms (" + n.resolvedEntries + " forecasts)."
           + " Brier: calibrated " + (b.calibrated == null ? "—" : b.calibrated.toFixed(4))
           + ", official-forecast estimate " + (b.raw == null ? "—" : b.raw.toFixed(4))
@@ -760,9 +784,13 @@
     "The full book is fetched for a handful of contracts; everything else shows the touch.",
     "FILLABLE NOW caps the Kelly allocation — sizing above resting depth is a number you cannot trade.",
   ]);
-  note("note.observability", "derived", "What this table is", [
+  note("note.observability", "derived", "What this table is", () => [
     "Feed results exactly as this cycle's fetch returned them.",
     "A field the feed did not return is omitted, never filled in with a plausible value.",
+    /* The calibration verdict in full. The panel carries a one-line form of it because the
+       tab has a two-screen budget and this is a paragraph; the reasoning is one click away
+       rather than deleted, which is the same trade every other caveat here makes. */
+    claim("model.calibration").text,
   ]);
   note("note.genesis", "outlook", "Systems with no advisory yet", [
     "NHC formation probabilities, quoted as published.",

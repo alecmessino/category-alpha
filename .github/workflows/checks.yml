@@ -109,6 +109,13 @@ jobs:
       - name: Test the calibration ledger and scorecard
         run: node scripts/test-calibration.mjs
 
+      # A guard that can fail silently is not a guard. The predicate deciding whether a
+      # verification run may write the verdict the board reads once disabled itself to a
+      # truthy regex object and `node --check` passed it, so it is now a pure function
+      # that gets MADE TO FIRE here rather than read and pronounced correct.
+      - name: Test the deployment-target guard
+        run: node scripts/test-deploy-target.mjs
+
       # Every visible claim must have a provenance owner. The UI drifted ahead of the code
       # three times before this existed, always the same way: a capability written as a
       # string literal inside a component, where no feed could contradict it.
