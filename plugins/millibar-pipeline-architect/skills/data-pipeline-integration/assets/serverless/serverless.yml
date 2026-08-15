@@ -1,0 +1,157 @@
+# NODD event-driven GOES ingestion — Serverless Framework expression of the same
+# topology as assets/terraform/nodd-goes-ingest.tf.
+#
+# The chain is NODD SNS -> your SQS queue -> worker. There is no polling loop, and
+# there is no schedule: GOES full disk lands every 10 minutes but the publish instant
+# moves with scan duration and reprocessing, so a cron aligned to the scan clock
+# drifts while a notification never does.
+#
+#   npx serverless deploy --param="satellite=19"
+
+service: millibar-nodd-ingest
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: python3.11
+  # NODD topics live in us-east-1. Keeping the consumer there avoids cross-region
+  # delivery charges on a topic that fires every 10 minutes, per product, forever.
+  region: us-east-1
+  memorySize: 1024
+  timeout: 30
+  environment:
+    SOURCE_BUCKET: noaa-goes${param:satellite, "19"}
+    DERIVED_BUCKET: ${self:custom.derivedBucket}
+    PRODUCT_PREFIX: ${self:custom.productPrefix}
+  iam:
+    role:
+      statements:
+        # Note what is absent: no s3:GetObject against noaa-goes*. The source bucket
+        # is public and is read UNSIGNED. A signed request from this role returns
+        # 403 AccessDenied, which reads identically to a missing object.
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+          Resource: "arn:aws:s3:::${self:custom.derivedBucket}/*"
+        - Effect: Allow
+          Action:
+            - sqs:ReceiveMessage
+            - sqs:DeleteMessage
+            - sqs:GetQueueAttributes
+          Resource:
+            Fn::GetAtt: [IngestQueue, Arn]
+
+custom:
+  satellite: ${param:satellite, "19"}
+  noddAccountId: "123901341784"
+  noddTopicArn: "arn:aws:sns:us-east-1:${self:custom.noddAccountId}:NewGOES${self:custom.satellite}Object"
+  derivedBucket: millibar-derived-imagery
+  # Subscribe per product, never per bucket: ABI-L1b-RadM1 alone is one object per
+  # minute per mesoscale sector.
+  productPrefix: "ABI-L2-CMIPF/"
+
+package:
+  patterns:
+    - "!./**"
+    - "../python/nodd_worker.py"
+
+functions:
+  worker:
+    handler: nodd_worker.handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt: [IngestQueue, Arn]
+          batchSize: 10
+          maximumBatchingWindow: 5
+          functionResponseType: ReportBatchItemFailures
+
+resources:
+  Resources:
+    # A single unparseable notification without a DLQ redelivers until the retention
+    # window expires, and every later object queues behind it.
+    IngestDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: millibar-nodd-goes${self:custom.satellite}-dlq
+        MessageRetentionPeriod: 1209600
+
+    IngestQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: millibar-nodd-goes${self:custom.satellite}
+        VisibilityTimeout: 180 # >= 6x function timeout
+        MessageRetentionPeriod: 3600
+        ReceiveMessageWaitTimeSeconds: 20
+        RedrivePolicy:
+          deadLetterTargetArn:
+            Fn::GetAtt: [IngestDLQ, Arn]
+          maxReceiveCount: 5
+
+    # Without the aws:SourceArn condition this queue is writable by any SNS topic in
+    # any account. With it pointed at the wrong ARN, NODD deliveries are rejected and
+    # the queue stays empty — which looks exactly like a quiet satellite.
+    IngestQueuePolicy:
+      Type: AWS::SQS::QueuePolicy
+      Properties:
+        Queues:
+          - Ref: IngestQueue
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Sid: AllowNODDSNSDelivery
+              Effect: Allow
+              Principal:
+                Service: sns.amazonaws.com
+              Action: sqs:SendMessage
+              Resource:
+                Fn::GetAtt: [IngestQueue, Arn]
+              Condition:
+                ArnEquals:
+                  aws:SourceArn: ${self:custom.noddTopicArn}
+
+    # NODD payloads are S3 Event Notification envelopes, so the object key lives in
+    # the message BODY. FilterPolicyScope: MessageBody is what makes this policy match
+    # anything — the default MessageAttributes scope with a body-shaped policy drops
+    # every message silently.
+    NoddSubscription:
+      Type: AWS::SNS::Subscription
+      Properties:
+        TopicArn: ${self:custom.noddTopicArn}
+        Protocol: sqs
+        Endpoint:
+          Fn::GetAtt: [IngestQueue, Arn]
+        RawMessageDelivery: false
+        FilterPolicyScope: MessageBody
+        FilterPolicy:
+          Records:
+            s3:
+              object:
+                key:
+                  - prefix: ${self:custom.productPrefix}
+
+    # Every misconfiguration in this chain produces an EMPTY QUEUE, indistinguishable
+    # from a healthy pipeline between scans. Alarm on absence of traffic.
+    NoDeliveriesAlarm:
+      Type: AWS::CloudWatch::Alarm
+      Properties:
+        AlarmName: millibar-nodd-goes${self:custom.satellite}-no-deliveries
+        Namespace: AWS/SQS
+        MetricName: NumberOfMessagesSent
+        Statistic: Sum
+        Period: 900
+        EvaluationPeriods: 2
+        Threshold: 1
+        ComparisonOperator: LessThanThreshold
+        TreatMissingData: breaching
+        Dimensions:
+          - Name: QueueName
+            Value:
+              Fn::GetAtt: [IngestQueue, QueueName]
+
+  Outputs:
+    IngestQueueUrl:
+      Value:
+        Ref: IngestQueue
+    SubscribedTopic:
+      Value: ${self:custom.noddTopicArn}
