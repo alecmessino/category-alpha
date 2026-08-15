@@ -324,7 +324,7 @@ function MillibarTerminalApp() {
   /* Spatial data is the reason this is a terminal and not a spreadsheet, and it was sized like
      a supporting chart. Half the viewport, floored at 500px so it stays a centrepiece on a
      laptop and grows on a wall display. */
-  const cmdH = Math.max(420, Math.round(vh * 0.6 / zoom));
+  const cmdH = Math.max(500, Math.round(vh * 0.38 / zoom));
   /* Newer snapshot available. At live with playback stopped we take it immediately
      (a reload is the honest way to rebuild MT — nothing is patched in place); if the
      operator is scrubbing history we surface a chip and let them choose. */
@@ -509,11 +509,13 @@ function MillibarTerminalApp() {
             setBankroll={setBankroll} setStake={setStake} onSelect={pickContract} dense={dense} />
         </div>
 
-        <div style={{ marginBottom: gap }}><window.MT_Situation dense={dense} /></div>
+        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.4fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
+          <window.MT_Situation dense={dense} />
+          {S && <GenesisWatch compact />}
+        </div>
 
-        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
-          <window.MT_StormConsoles dense={dense} frame={frame} />
-          <window.MT_Attention dense={dense} maxH={narrow ? 420 : cmdH}
+        <div style={{ marginBottom: gap }}>
+          <window.MT_Attention dense={dense} maxH={narrow ? 420 : 500}
             onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
             onSelectContract={pickContract} />
         </div>
@@ -533,6 +535,7 @@ function MillibarTerminalApp() {
         <window.MT_Section label="Verify" tier="inputs · confidence · full register"
           summary={MT.evidence.length + " inputs · tier " + MTX.snap(storm, frame).tier}>
           <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start" }}>
+            <window.MT_StormConsoles dense={dense} frame={frame} />
             <window.MT_Evidence stormId={storm} frame={frame} selection={sel} onSelect={(id) => setSel((s) => ({ ...s, evidence: id }))} dense={dense} />
             <window.MT_Signals stormId={storm} dense={dense} maxH={520} onSeek={(tsZ) => {
               const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ);
