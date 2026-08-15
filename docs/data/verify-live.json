@@ -1,9 +1,10 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-15T01:20:48.080Z",
+  "ranAt": "2026-08-15T01:38:32.900Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "52470f4598331e3ca005ee4244e5dfae8508b608",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31856196961",
+  "isDeployment": true,
+  "sha": "7b4389a786bd2910ae09842a9c068bc8c4ae8164",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31857020220",
   "ok": false,
   "passed": 44,
   "total": 45,
@@ -13,7 +14,7 @@
       "detail": "4 tabs · 2.1 screens tall (2871px / 1400px)"
     }
   ],
-  "thirdPartyFailures": 34,
+  "thirdPartyFailures": 8,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -33,7 +34,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-15T01:14:25.682Z · 6m old"
+      "detail": "2026-08-15T01:30:24.079Z · 8m old"
     },
     {
       "check": "renders: Situation",
@@ -93,7 +94,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "7 ranked of 12 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "7 ranked of 13 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -143,12 +144,12 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "2/2 frame(s) carry a consensus peak against 2 in the snapshot · 2 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "2/2 frame(s) carry a consensus peak against 2 in the snapshot · 2 carry its cycle · frame is 0m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 2 calibrated, 2 with the official estimate beside it · strip: quality=MEDIUM lag=66m raw=60%"
+      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 2 calibrated, 2 with the official estimate beside it · strip: quality=MEDIUM lag=92m raw=60%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -163,12 +164,12 @@
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: past the 180-min line — Hernan 270m · 1 row(s), 1 held, 0 TAKE · forced: 2 anchored row(s) pushed past it → 1 HOLD, 1 SUSPECT, 0 ACTIONABLE · 5 stale-crossing row(s) in the register"
+      "detail": "live: past the 180-min line — Hernan 296m · 0 row(s), 0 held, 0 TAKE · forced: 2 anchored row(s) pushed past it → 1 HOLD, 1 SUSPECT, 0 ACTIONABLE · 5 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
       "pass": true,
-      "detail": "1 row(s) on HOLD live · $0 staked · forced: $0 across 1 held row(s)"
+      "detail": "0 row(s) on HOLD live · $0 staked · forced: $0 across 1 held row(s)"
     },
     {
       "check": "the GFS wind field is ingested and both components present",
@@ -183,12 +184,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "41 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "43 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "41 tile(s) served on reload · 41 in cache"
+      "detail": "43 tile(s) served on reload · 43 in cache"
     },
     {
       "check": "all markets carried",
