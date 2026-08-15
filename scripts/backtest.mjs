@@ -28,6 +28,7 @@ import { reachesHurricaneP, parseAdeck, consensusFrom, parseBestTrack,
          INTENSITY_MAE, LATENT_THRESHOLD, HURRICANE_REPORTED_KT } from "./lib/estimator-core.mjs";
 import { calibratedIntensityP } from "./lib/probability.mjs";
 import { cycleMs, visibleAt, milestones, outcomeFrom, entryOf, aggregate } from "./lib/backtest.mjs";
+import { parseMessagesIndex, advisoryTimeline, advisoryInForce, cycleTransmitMs } from "./lib/advisories.mjs";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const DATA = resolve(__dir, "../docs/data");
@@ -71,43 +72,61 @@ async function listStorms(year) {
 /* THE ZERO-PEEK GATE, applied to raw text. Keeping it at the line level means nothing
    downstream — not the parser, not the consensus, not the estimator — can reach a cycle
    that had not been issued, because those lines are not in the string they are handed. */
-function deckTextAt(lines, tMs) {
+function deckTextAt(lines, tMs, visibleAtMs) {
   const keep = [];
   for (const ln of lines) {
-    const c = ln.split(",")[2];
-    const ms = cycleMs(c && c.trim());
-    if (ms != null && ms <= tMs) keep.push(ln);
+    const c = (ln.split(",")[2] || "").trim();
+    /* A cycle becomes readable when ITS ADVISORY WENT OUT, not at its DTG. Gating on the
+       DTG let the replay read guidance a median 2h41m before anyone had it — and that
+       guidance had already absorbed the recon fix the engine was about to apply again. */
+    const vis = visibleAtMs.get(c);
+    if (vis != null && vis <= tMs) keep.push(ln);
   }
   return keep.join("\n");
 }
 
 /* One storm, replayed. The outcome is read from the b-deck only after every prediction for
    the storm has already been computed, and is never passed into the simulation. */
-function replayStorm(stormId, aText, bRecords) {
+function replayStorm(stormId, aText, bRecords, timeline) {
   const truth = outcomeFrom(bRecords.map((r) => ({ vmax: r.kt, iso: r.iso })), HURRICANE_REPORTED_KT);
   const crossMs = truth && truth.firstCrossIso ? Date.parse(truth.firstCrossIso) : null;
   if (!truth) return { entries: [], skipped: "no usable best track" };
 
   const lines = aText.split(/\r?\n/).filter((l) => l.trim());
   const indexRows = lines.map((l) => ({ cycle: (l.split(",")[2] || "").trim() }));
-  const steps = milestones(indexRows);
+
+  /* Every cycle mapped to the moment its advisory transmitted. A cycle whose advisory is
+     absent from the archive (WPC-issued, mostly post-tropical) maps to nothing and is
+     dropped — assuming its DTG would put back the look-ahead this fix removes. */
+  const visibleAtMs = new Map();
+  let noAdvisory = 0;
+  for (const t of milestones(indexRows)) {
+    const dtg = new Date(t).toISOString().replace(/[-:T]/g, "").slice(0, 10);
+    const tx = cycleTransmitMs(timeline, t);
+    if (tx == null) { noAdvisory++; continue; }
+    visibleAtMs.set(dtg, tx);
+  }
+  /* Steps are advisory transmissions, in order — the moments an operator actually had
+     something new. */
+  const steps = [...new Set(visibleAtMs.values())].sort((a, b) => a - b);
 
   const entries = [];
-  const refusals = {};
+  const refusals = noAdvisory ? { noArchivedAdvisory: noAdvisory } : {};
   for (const t of steps) {
     /* Past the crossing the contract has already resolved, so there is no open question to
        score. Same exclusion the live ledger applies. */
     if (crossMs != null && t >= crossMs) { refusals.settled = (refusals.settled || 0) + 1; continue; }
-    const asOf = deckTextAt(lines, t);
+    const asOf = deckTextAt(lines, t, visibleAtMs);
     if (!asOf) continue;
     const deck = parseAdeck(asOf);
     if (!deck || !deck.ok) { refusals.deck = (refusals.deck || 0) + 1; continue; }
 
     /* Belt and braces: the parser's own latest cycle must not exceed t. If it ever does,
        the gate leaked and the run is void — better to abort than publish the score. */
-    const latest = cycleMs(deck.latestCycle);
-    if (latest == null || latest > t) {
-      throw new Error(`ZERO-PEEK VIOLATION on ${stormId}: deck latest ${deck.latestCycle} > t ${new Date(t).toISOString()}`);
+    const latestVis = visibleAtMs.get(String(deck.latestCycle));
+    if (latestVis == null || latestVis > t) {
+      throw new Error(`ZERO-PEEK VIOLATION on ${stormId}: cycle ${deck.latestCycle} transmitted `
+        + `${latestVis == null ? "never" : new Date(latestVis).toISOString()} but was read at ${new Date(t).toISOString()}`);
     }
 
     const ofcl = (deck.rows || []).filter((r) => (r.tech === "OFCL" || r.tech === "OFCI")
@@ -143,7 +162,11 @@ function replayStorm(stormId, aText, bRecords) {
          fix may only shift the estimate when it can be shown to post-date the advisory —
          cannot be evaluated without that timestamp, and guessing it would be the same
          double-count this build already fixed once. Stated in the output. */
-      advisoryIso: null, advisoryLabel: null,
+      /* The advisory in force at this instant, including intermediates: an intermediate
+         publishes a recon fix exactly as a full advisory does, so omitting them would make
+         a fix look like news NHC had already put on the wire. */
+      advisoryIso: (() => { const a = advisoryInForce(timeline, t); return a ? new Date(a.transmitMs).toISOString() : null; })(),
+      advisoryLabel: (() => { const a = advisoryInForce(timeline, t); return a ? `${a.product} ${a.advNum}` : null; })(),
       consensus, recon: null, ascat: null, ships: null, riFloor: null,
     }, {
       nowMs: t, maeTable: INTENSITY_MAE,
@@ -159,6 +182,19 @@ function replayStorm(stormId, aText, bRecords) {
     if (e) entries.push(e); else refusals.noEntry = (refusals.noEntry || 0) + 1;
   }
   return { entries, truth, refusals };
+}
+
+/* One index request per year covers every storm, basin and product — the send times are in
+   the filenames, so no advisory bodies are fetched. Cached in memory for the run. */
+const msgIndex = new Map();
+async function advisoriesFor(year) {
+  if (!msgIndex.has(year)) {
+    const html = await get(archiveFor(year) + "messages/", false);
+    const entries = html ? parseMessagesIndex(html, Number(year)) : [];
+    if (!entries.length) console.log(`  ! ${year}: no messages/ index — every storm that year will be skipped`);
+    msgIndex.set(year, entries);
+  }
+  return msgIndex.get(year);
 }
 
 const ids = [];
@@ -180,8 +216,12 @@ for (const { year, stem } of ids) {
   const b = parseBestTrack(bText);
   if (!b || !b.ok) { console.log(`  ${stem}: unreadable best track — skipped`); continue; }
 
+  const entries = await advisoriesFor(year);
+  const timeline = advisoryTimeline(entries, stem);
+  if (!timeline.length) { console.log(`  ${stem}: no archived advisories — skipped`); continue; }
+
   let r;
-  try { r = replayStorm(stem, aText, b.records); }
+  try { r = replayStorm(stem, aText, b.records, timeline); }
   catch (e) { console.error(`\n${e.message}\n`); process.exit(2); }
   if (r.skipped) { console.log(`  ${stem}: ${r.skipped}`); continue; }
 
@@ -201,6 +241,7 @@ await writeFile(resolve(DATA, "backtest.json"), JSON.stringify({
   thresholdKt: HURRICANE_REPORTED_KT,
   reconApplied: false,
   advisoryIntensityFromTau: true,
+  gatedOnTransmitTime: true,
   note: "Recon and SHIPS are absent from this replay: the archive carries no advisory issue"
       + " time, and the engine may only shift on a fix it can show post-dates the advisory."
       + " This scores the official-forecast and ATCF-consensus path only.",
