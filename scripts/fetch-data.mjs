@@ -2595,6 +2595,7 @@ async function main() {
       ascatAge: asc ? ageOf(asc.iso) : null,
       // the engine's output, raw and calibrated together
       pCal: cal ? rr(cal.p, 10000) : null,
+      pRaw: cal ? rr(cal.pRaw, 10000) : (s.hurricaneP ? rr(s.hurricaneP.p, 10000) : null),
       pSigma: cal ? rr(cal.sigmaKt, 10) : null,
       quality: s.evidenceQuality ? s.evidenceQuality.tier : null,
     };
