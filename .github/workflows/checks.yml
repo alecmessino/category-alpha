@@ -121,6 +121,12 @@ jobs:
       - name: Test the backtest harness and its zero-peek gate
         run: node scripts/test-backtest.mjs
 
+      # The estimator was MOVED into lib so the backtest replays the same function the board
+      # trades. This compares it field-by-field against outputs captured before the move and
+      # requires exact equality — a replica that drifts would score a model nobody trades.
+      - name: Verify the estimator extraction is still a pure move
+        run: node scripts/verify-extraction.mjs
+
       # Every visible claim must have a provenance owner. The UI drifted ahead of the code
       # three times before this existed, always the same way: a capability written as a
       # string literal inside a component, where no feed could contradict it.
