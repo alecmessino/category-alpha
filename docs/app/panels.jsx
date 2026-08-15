@@ -1512,7 +1512,7 @@ function MT_Observability({ narrow }) {
             where an operator goes to decide whether to trust the board, and after this
             build that decision turns on whether anything arrived ahead of the advisory
             and whether the storm's intensity was measured or estimated. */}
-        {["intel.atcf", "intel.recon", "intel.ships", "intel.ascat", "intel.calibration"].map((id) => (
+        {["intel.atcf", "intel.recon", "intel.ships", "intel.ascat", "intel.calibration", "model.calibration"].map((id) => (
           <div key={id} style={{ color: MTC.claim(id).ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim(id).text}</div>
         ))}
         <div>{MTC.claim("capability.notIngested").text}</div>

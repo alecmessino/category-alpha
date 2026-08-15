@@ -656,6 +656,48 @@
     };
   });
 
+  /* HAS THE BOARD EVER BEEN RIGHT?
+   *
+   * Every other claim here describes what the board is doing. This one describes whether
+   * any of it has worked, which is the only claim a reader should weight heavily — and it
+   * is therefore the one most in need of a refusal path, because a calibration report is
+   * uniquely dangerous when wrong. Its entire purpose is to be believed.
+   *
+   * The sample size is DISTINCT RESOLVED STORMS, never forecasts. Every forecast made
+   * during one storm's life shares that storm's single outcome, so a season with three
+   * storms can produce hundreds of entries and a beautiful score that measures three coin
+   * flips. The scorer refuses below the threshold and this says so out loud, with the
+   * counts, so the ledger can be seen filling rather than looking like a dead panel. */
+  define("model.calibration", "derived", () => {
+    const c = window.MT && MT._calibration;
+    if (!c) return { text: "No calibration scorecard has been written yet — nothing on this board has been scored against an outcome.", ok: false };
+    const n = c.counts || {};
+    if (!c.ok) {
+      return {
+        text: "NOT YET SCORED. " + n.resolvedStorms + " resolved storm(s) of the " + (c.minResolvedStorms || 10)
+            + " needed, behind " + n.resolvedEntries + " resolved forecast(s) and " + n.entries + " recorded in all."
+            + " The threshold counts STORMS because every forecast made during one storm's life shares that storm's"
+            + " single outcome. Until then this board's accuracy is unmeasured, and no claim is made about it.",
+        ok: false,
+      };
+    }
+    const pct = (v) => (v == null ? "—" : (v * 100).toFixed(1) + "%");
+    const b = c.brier || {}, s = c.skill || {};
+    return {
+      text: "Scored over " + n.resolvedStorms + " resolved storms (" + n.resolvedEntries + " forecasts)."
+          + " Brier: calibrated " + (b.calibrated == null ? "—" : b.calibrated.toFixed(4))
+          + ", official-forecast estimate " + (b.raw == null ? "—" : b.raw.toFixed(4))
+          + ", market " + (b.market == null ? "—" : b.market.toFixed(4)) + " (lower is better)."
+          + " Skill vs climatology " + pct(s.vsClimatology)
+          + " · the calibration against the raw estimate " + pct(s.calibrationVsRaw)
+          + " · against the market " + pct(s.vsMarket) + "."
+          + (s.vsMarket != null && s.vsMarket <= 0
+              ? " NEGATIVE AGAINST THE MARKET — on this record the board has no edge and the honest read is to stop."
+              : ""),
+      ok: s.vsMarket == null ? true : s.vsMarket > 0,
+    };
+  });
+
   define("wind.field", "wind", () => {
     const w = window.MT && MT._wind;
     if (!w) return { text: "no surface wind field ingested this cycle", ok: false };

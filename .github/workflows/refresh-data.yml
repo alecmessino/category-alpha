@@ -182,6 +182,14 @@ jobs:
       - name: Test that the ingested fields reach the register
         run: node scripts/test-intel-register.mjs
 
+      # The scorecard is the only thing on this board that says whether any of the rest of
+      # it works. Its refusals matter more than its arithmetic: forecasts within one storm
+      # share that storm single outcome, so a season with three storms can produce hundreds
+      # of entries and a beautiful score measuring three coin flips. The threshold counts
+      # STORMS, and this proves it.
+      - name: Test the calibration ledger and scorecard
+        run: node scripts/test-calibration.mjs
+
       # Every visible claim must have a provenance owner. This fails the build if
       # capability / liveness language reappears as a literal inside a component
       # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of
@@ -225,7 +233,11 @@ jobs:
             # advanced. Isolated from the main fetch: the wind field is decoration and must
             # never be able to stop the board from publishing.
             node scripts/fetch-wind.mjs || echo "wind fetch failed this tick — keeping the last field"
-            git add docs/data/latest.json docs/data/frames.json docs/data/wind.json
+            # Record every published probability, resolve the storms that have ended, and
+            # score. Never allowed to stop the board publishing: a report on the pipeline
+            # must not be able to break the thing it reports on.
+            node scripts/calibrate.mjs || echo "calibration pass failed this tick — the ledger keeps its last state"
+            git add docs/data/latest.json docs/data/frames.json docs/data/wind.json docs/data/forecast-log.json docs/data/calibration.json
             if git diff --cached --quiet; then
               echo "No data changes this tick."
             else
