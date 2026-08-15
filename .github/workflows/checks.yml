@@ -121,14 +121,14 @@ jobs:
       - name: Test the backtest harness and its zero-peek gate
         run: node scripts/test-backtest.mjs
 
-      # The estimator was MOVED into lib so the backtest replays the same function the board
-      # trades. This compares it field-by-field against outputs captured before the move and
-      # requires exact equality — a replica that drifts would score a model nobody trades.
       # When each advisory actually transmitted. The gate that decides whether a recon fix
       # was still news depends entirely on this being right.
       - name: Test the advisory transmission timeline
         run: node scripts/test-advisories.mjs
 
+      # The estimator was MOVED into lib so the backtest replays the same function the board
+      # trades. This compares it field-by-field against outputs captured before the move and
+      # requires exact equality — a replica that drifts would score a model nobody trades.
       - name: Verify the estimator extraction is still a pure move
         run: node scripts/verify-extraction.mjs
 
