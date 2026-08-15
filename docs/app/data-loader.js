@@ -1,10 +1,7 @@
-/* Millibar Terminal — LIVE data loader. Replaces the old static seed (data.js).
-
-   Fetches same-origin data/latest.json + data/frames.json (produced server-side by
-   the scheduled GitHub Action, so no browser CORS) and rebuilds window.MT in the exact
-   shape the panels / compute engine / map already consume. Every value here traces to a
-   real feed; anything a feed could not supply is left null and rendered as "NO FEED" —
-   nothing is fabricated. compute.js polls for window.MT, so an async set is fine. */
+/* Millibar Terminal — LIVE data loader. Replaces the old static seed (data.js). Fetches
+   same-origin data/latest.json + data/frames.json (produced server-side by the scheduled GitHub
+   Action, so no browser CORS) and rebuilds window.MT in the exact shape the panels / compute
+   engine / map already consume. */
 (function loadMT() {
   const BASE = window.MT_DATA_BASE || "data/";
 
@@ -87,12 +84,7 @@
         marketCat4: (f) => { const r = fs(f); return r && r.marketCat4 != null ? r.marketCat4 : (s.marketCat4 ?? null); },
         reconAge: (f) => { const r = fs(f); return r && r.reconAge != null ? r.reconAge : (s.reconAge ?? null); },
         centerAt: (f) => pick(f, "center", s.center),
-        /* The official-advisory block. Every one of these is computed server-side and
-           committed to latest.json, and this whitelist silently dropped all of them —
-           so MT_StormConsoles, whose render condition is exactly these fields, returned
-           null and the panel has never once appeared on the deployed page. The data was
-           there, the component was there, and nothing connected them.
-           Adding a field to latest.json is not the same as shipping it. */
+        /* The official-advisory block. */
         advNumFull: s.advNumFull || null,
         advisoryIssuedZ: s.advisoryIssuedZ || null,
         forecastKt: s.forecastKt || null,
@@ -109,20 +101,13 @@
         guidanceAt: (f) => pick(f, "guidance", null),
 
         /* ---- the four ingested feeds, and the engine's output ----------------------
-           The whole-object blocks (consensus / recon / ships / ascat) are the latest
-           snapshot and carry the detail a panel expands into. The *At accessors read the
-           FRAME, which is what makes these move under the scrubber and diff in the
-           register — a field that only ever reads "now" cannot be seen to have changed.
-
-           This whitelist is the exact place the advisory block was silently dropped
-           once before: every one of these fields is written server-side, and a field not
-           listed here does not exist as far as the page is concerned. */
+           The whole-object blocks (consensus / recon / ships / ascat) are the latest snapshot
+           and carry the detail a panel expands into. */
         consensus: s.consensus || null,
         recon: s.recon || null,
         ships: s.ships || null,
         ascat: s.ascat || null,
         aircraftFix: s.aircraftFix || null,
-        riFloor: s.riFloor || null,
         hurricanePCal: s.hurricanePCal || null,
         evidenceQuality: s.evidenceQuality || null,
         bestTrack: s.bestTrack || null,
@@ -148,9 +133,6 @@
         reconKtAt: (f) => { const r = fs(f); return r && r.reconKt != null ? r.reconKt : (s.recon ? s.recon.intensityKt : null); },
         reconFlKtAt: (f) => { const r = fs(f); return r && r.reconFlKt != null ? r.reconFlKt : (s.recon ? s.recon.flightLevelKt : null); },
         shearAt: (f) => { const r = fs(f); return r && r.shShear != null ? r.shShear : (s.ships ? s.ships.features.shearKt : null); },
-        ohcAt: (f) => { const r = fs(f); return r && r.shOhc != null ? r.shOhc : (s.ships ? s.ships.features.ohc : null); },
-        mpiAt: (f) => { const r = fs(f); return r && r.shMpi != null ? r.shMpi : (s.ships ? s.ships.features.mpiKt : null); },
-        rhAt: (f) => { const r = fs(f); return r && r.shRh != null ? r.shRh : (s.ships ? s.ships.features.rhMid : null); },
         riAt: (f) => { const r = fs(f); return r && r.shRi != null ? r.shRi : (s.riFloor ? s.riFloor.p : null); },
         ascatKtAt: (f) => { const r = fs(f); return r && r.ascatKt != null ? r.ascatKt : (s.ascat ? s.ascat.kt : null); },
         ascatAgeAt: (f) => { const r = fs(f); return r && r.ascatAge != null ? r.ascatAge : null; },
@@ -236,9 +218,9 @@
       return best;
     }
     /* `kind`, `detail` and `stormId` travel with the event. The register relabelled every
-       server event as an advisory while advisories were the only thing the server
-       emitted; it now emits recon fixes and guidance cycles, and a recon fix filed under
-       "advisory" is a false attribution on the one row an operator most needs to trust. */
+       server event as an advisory while advisories were the only thing the server emitted; it
+       now emits recon fixes and guidance cycles, and a recon fix filed under "advisory" is a
+       false attribution on the one row an operator most needs to trust. */
     const events = (latest.events || []).map((e) => ({
       frame: e.frame != null ? clampF(e.frame) : nearestFrame(e.tsZ), kind: e.kind, label: e.label,
       detail: e.detail || null, stormId: e.stormId || null,
@@ -358,11 +340,8 @@
     window.dispatchEvent(new CustomEvent("mt-data-ready", { detail: { generatedAt: (latest && latest.generatedAt) || null } }));
   }
 
-  /* An open tab used to sit on whatever snapshot it booted with — leave the terminal
-     up for two hours and it silently showed two-hour-old prices with a green LIVE dot.
-     Poll the same-origin snapshot and announce a newer one; the UI decides whether to
-     take it (at live) or offer it (mid-scrub), so a refresh never yanks the cursor
-     out from under someone mid-investigation. */
+  /* An open tab used to sit on whatever snapshot it booted with — leave the terminal up for two
+     hours and it silently showed two-hour-old prices with a green LIVE dot. */
   const POLL_MS = 60000;
   function startPolling() {
     let seen = window.MT && window.MT._generatedAt;

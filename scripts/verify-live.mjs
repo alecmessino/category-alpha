@@ -79,7 +79,11 @@ async function waitForDeploy() {
   for (const a of ASSETS) want[a] = sha(await readFile(resolve(ROOT, "docs", a)));
   const deadline = Date.now() + WAIT_MIN * 60000;
   let mismatch = null, attempt = 0;
-  while (Date.now() < deadline) {
+  /* do/while, not while: --wait-min 0 is the natural way to say "check once, do not sit
+     here waiting", and as a plain while loop it meant "never check at all" — the gate
+     failed with a null mismatch and skipped every assertion behind it, which reads exactly
+     like a broken page. Zero waiting still gets one attempt. */
+  do {
     attempt++;
     mismatch = null;
     for (const a of ASSETS) {
@@ -91,9 +95,11 @@ async function waitForDeploy() {
       add("Pages is serving this commit", true, `${ASSETS.length} assets byte-match the checkout (attempt ${attempt})`);
       return true;
     }
+    if (Date.now() >= deadline) break;
     await sleep(20000);
-  }
-  add("Pages is serving this commit", false, `still mismatched after ${WAIT_MIN}m — ${mismatch}`);
+  } while (Date.now() < deadline);
+  add("Pages is serving this commit", false,
+    `still mismatched after ${WAIT_MIN}m and ${attempt} attempt(s) — ${mismatch}`);
   return false;
 }
 
@@ -145,14 +151,14 @@ if (nav) add("live URL responds", nav.status() === 200, `HTTP ${nav.status()} at
 
 await page.waitForTimeout(4000);
 
-/* The board is four tabs now, so only one view is mounted at a time. Walk all of them,
+/* The board is three tabs, so only one view is mounted at a time. Walk all of them,
    union the rendered text, and come back to Situation — otherwise every panel that lives
    behind a tab reads as missing, which is a false failure with exactly the shape of a
    real one. */
 let tabText = "";
 let groupHeaders = 0;                       // DOM counts must be taken while the tab is up
 let hintCount = 0, hintText = "";           // the "?" drawers, opened and read
-for (const label of ["Situation", "Markets", "Models", "Optimizer"]) {
+for (const label of ["Situation", "Markets", "Models"]) {
   await page.evaluate((l) => {
     const b = [...document.querySelectorAll("button[role=tab]")].find((x) => x.textContent.trim().toLowerCase() === l.toLowerCase());
     if (b) b.click();
@@ -583,6 +589,36 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
         pageHeight: document.documentElement.scrollHeight,
         viewportHeight: window.innerHeight,
         screensToScroll: Math.round((document.documentElement.scrollHeight / window.innerHeight) * 10) / 10,
+        /* WHICH BLOCK. A bare "2871px against 2800px" costs an hour to diagnose, because
+           the number does not say which tab it measured (this one only ever measures
+           Situation) or what on it grew. It cost exactly that once: the failure was read as
+           a panel on a different tab, and the fix went somewhere it could not possibly
+           help. So the failure now names the three tallest blocks it found. */
+        tallest: (() => {
+          const doc = document.documentElement.scrollHeight;
+          const seen = new Set(), out = [];
+          const walk = (el, depth) => {
+            for (const c of el.children) {
+              const h = Math.round(c.getBoundingClientRect().height);
+              if (h >= 200 && depth <= 5) {
+                const label = (c.innerText || "").trim().split("\n")[0].slice(0, 28);
+                /* Skip the page wrappers — anything most of the document tall is the
+                   document, and naming it says nothing. Skip a container that is a single
+                   tall child, which is that child under another name. Dedupe by label so a
+                   panel and its inner div do not take two of the three slots. */
+                const inner = [...c.children].map((x) => Math.round(x.getBoundingClientRect().height));
+                const passthrough = inner.length === 1 && inner[0] >= h - 12;
+                if (h <= doc * 0.6 && !passthrough && label && !seen.has(label)) {
+                  seen.add(label);
+                  out.push({ h, t: label });
+                }
+              }
+              if (depth <= 5) walk(c, depth + 1);
+            }
+          };
+          walk(document.body, 0);
+          return out.sort((a, b) => b.h - a.h).slice(0, 3).map((x) => `${x.t} ${x.h}px`).join(" · ");
+        })(),
         windLayer: !!(window.MT && MT._wind && MT._wind.fields && MT._wind.fields.length === 2),
         windCycle: (window.MT && MT._wind && MT._wind.cycleZ) || null,
         hud: /\bADV\b/.test(T) && /\bSNAP\b/.test(T),
@@ -654,9 +690,13 @@ add("and it is the first thing under the header",
    the attention queue and the board-impact table can occupy without becoming useless.
    The budget here is 2.0: map plus roughly one screen of content. Situation measured
    4.7 before the queue was bounded, so this is the check that keeps it bounded. */
-add("four tabs, so no single view is a wall",
-  LY.tabs === 4 && LY.screensToScroll <= 2.0,
-  `${LY.tabs} tabs · ${LY.screensToScroll} screens tall (${LY.pageHeight}px / ${LY.viewportHeight}px)`);
+/* Measured on SITUATION specifically — the tab walk above resets here before probing — so
+   the number says nothing about the other three. Worth stating in the detail line, because
+   reading it as a whole-page figure sends the fix to the wrong tab. */
+add("three tabs, so no single view is a wall",
+  LY.tabs === 3 && LY.screensToScroll <= 2.0,
+  `${LY.tabs} tabs · Situation is ${LY.screensToScroll} screens tall (${LY.pageHeight}px / ${LY.viewportHeight}px)`
+  + (LY.tallest ? ` · tallest: ${LY.tallest}` : ""));
 /* The advisory block: computed server-side, and for a long time never delivered. */
 const AD = LY.advisory;
 add("the official-advisory console reaches the page",

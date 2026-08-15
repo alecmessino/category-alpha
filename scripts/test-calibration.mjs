@@ -149,7 +149,59 @@ const rel = reliability([{ p: 0.1, o: 0, stormId: "a" }, { p: 0.9, o: 1, stormId
 eq("a forecast lands in its own bin", [rel[0].n, rel[4].n], [1, 1]);
 eq("and the observed frequency is the frequency observed", [rel[0].observed, rel[4].observed], [0, 1]);
 
-console.log("\n[8] an empty ledger says so rather than dividing by zero");
+console.log("\n[8] a skill score compares the SAME storms, or it is not a skill score");
+/* THE LIVE SHAPE. The ledger's first entries were seeded from frames written before the
+   calibrated probability existed on them, so they carry pRaw and pMarket but pCal of null.
+   Scoring each series over whatever it happened to have would compare the board on a
+   handful of forecasts against the market on all of them and publish the quotient.
+   Built so the two samples disagree in a direction that is impossible to misread: on the
+   entries WITHOUT a calibrated number the market was perfect, and on the ones WITH it the
+   market was wrong. Any unpaired comparison flatters the board enormously. */
+const partial = [];
+for (let s = 0; s < MIN_RESOLVED_STORMS; s++) {
+  const hit = s % 2 === 0 ? 1 : 0;
+  /* Covered: the board and the market both quoted, and the market leaned the wrong way.
+     0.4/0.6 is chosen so the numbers land either side of the board's 0.25 — the market's
+     squared error here is 0.36, and averaging that with the free zeroes below drags its
+     marginal score to 0.18. That is what flips the sign. */
+  partial.push({ stormId: "PT" + s, key: "PT" + s + "|cov", tsZ: iso(100),
+    pCal: 0.5, pRaw: 0.5, pMarket: hit === 1 ? 0.4 : 0.6,
+    resolved: { outcome: hit, provisional: false } });
+  /* Uncovered: no calibrated number was published, and the market nailed it. */
+  partial.push({ stormId: "PT" + s, key: "PT" + s + "|unc", tsZ: iso(99),
+    pCal: null, pRaw: 0.5, pMarket: hit,
+    resolved: { outcome: hit, provisional: false } });
+}
+const P = summarize(partial, {});
+eq("it scores, because the storms are there", P.ok, true);
+eq("the calibrated series covers half the resolved forecasts", P.brierN.calibrated, MIN_RESOLVED_STORMS);
+eq("the market series covers all of them", P.brierN.market, MIN_RESOLVED_STORMS * 2);
+/* The marginal market Brier is dragged down by the perfect half it alone has. */
+near("so the marginal market Brier looks excellent", P.brier.market, 0.18, 1e-9);
+near("and the calibrated one is a coin flip", P.brier.calibrated, 0.25, 1e-9);
+/* Unpaired, skill vs market is 1 - 0.25/0.18 = -0.39: the board declared WORSE than the
+   market on the strength of ten forecasts it never made. Paired, both series are scored on
+   the ten entries that have both, where the market's 0.36 is the worse number and the true
+   answer is 1 - 0.25/0.36 = +0.31. The sign is the whole point — one of these says stop
+   trading and the other says the edge is real. */
+ck("unpaired, the comparison would have inverted the answer",
+   skill(P.brier.calibrated, P.brier.market) < 0, String(skill(P.brier.calibrated, P.brier.market)));
+eq("the paired comparison uses only the overlap", P.paired.calibratedVsMarket.entries, MIN_RESOLVED_STORMS);
+near("where the market scores its own quotes, not the ones it got for free",
+     P.paired.calibratedVsMarket.market, 0.36, 1e-9);
+ck("so the board is correctly credited with skill, not charged with a deficit",
+   P.skill.vsMarket > 0, String(P.skill.vsMarket));
+near("and the paired number is the one arithmetic says it should be",
+     P.skill.vsMarket, 1 - 0.25 / 0.36, 1e-9);
+ck("and the divergence is stated rather than left to be inferred",
+   /coverage differs across series/.test(P.coverageNote || ""), String(P.coverageNote));
+/* When coverage IS complete there is nothing to warn about and the paired numbers agree
+   with the marginal ones — the guard must not fire on the ordinary case. */
+eq("a complete ledger raises no coverage note", enough.coverageNote, null);
+near("and its paired market score matches the marginal one",
+     enough.paired.calibratedVsMarket.market, enough.brier.market, 1e-12);
+
+console.log("\n[9] an empty ledger says so rather than dividing by zero");
 const empty = summarize([], {});
 eq("it refuses", empty.ok, false);
 eq("with zero of everything", [empty.counts.entries, empty.counts.resolvedStorms], [0, 0]);

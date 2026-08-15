@@ -1,8 +1,7 @@
-/* Derived snapshot math — pure functions over the LIVE data at a replay frame.
-   Prices, positions and order books come from the real committed frames when present
-   (data-loader builds priceAt/centerAt/etc.); anything a feed didn't supply stays null
-   and surfaces as "—" / "NO FEED" downstream. Nothing is invented here. Keeps the
-   probability axis separate from the evidence-quality (confidence) axis, always. */
+/* Derived snapshot math — pure functions over the LIVE data at a replay frame. Prices,
+   positions and order books come from the real committed frames when present (data-loader
+   builds priceAt/centerAt/etc.); anything a feed didn't supply stays null and surfaces as "—" /
+   "NO FEED" downstream. */
 (function buildMTX() {
   if (typeof MT === "undefined" || !window.MT) { setTimeout(buildMTX, 20); return; }
   window.MTX = (function () {
@@ -12,19 +11,8 @@
   const feeds = MT._feeds || {};
   const feedOk = (k) => !!(feeds[k] && feeds[k].ok);
 
-  /* Evidence-quality tier (NOT probability): how live and how directly sourced the
-     inputs are.
-
-     THE TIER NOW HAS A TOP RUNG THAT MEANS SOMETHING. It used to be earned by feeds
-     being reachable, which every tier-A source on this board was, all the time — so the
-     grade separated "the internet works" from "the internet does not". The line that
-     matters is whether the storm's present intensity was MEASURED or ESTIMATED, and only
-     an aircraft can answer that. The server computes it (it is the same judgement the
-     probability engine makes about its own inputs) and publishes it per frame, so the
-     tier moves under the scrubber with everything else instead of describing now.
-
-     A frame from before the ingest existed carries no quality, and those fall through to
-     the original feed-reachability score rather than being retro-graded. */
+  /* Evidence-quality tier (NOT probability): how live and how directly sourced the inputs are.
+     THE TIER NOW HAS A TOP RUNG THAT MEANS SOMETHING. */
   const RECON_FRESH_MIN = 180;   // one aircraft fix cycle plus transmission
   function tier(stormId, frame) {
     const S = MT.storms[stormId]; const reasons = [];
@@ -165,31 +153,22 @@
   }
 
   /* ---------------- Signal Engine ----------------
-     Most refresh cycles change nothing — NHC advises 3-hourly while we poll every
-     15 min, so the majority of frames are byte-identical. This walks the committed
-     history and emits ONLY genuine state changes, scored by magnitude, so the
-     operator reads "what changed" instead of re-reading unchanged feeds.
-
-     Market moves carry a co-movement list: observations recorded in the preceding
-     window. That is TEMPORAL ASSOCIATION, deliberately not causal attribution —
-     decomposing a price move into weighted causes would need a fitted structural
-     model or sub-minute event-study data, neither of which exists here. Inventing
-     those weights would be fabricated precision, so the UI says "alongside", never
-     "because of". */
+     Most refresh cycles change nothing — NHC advises 3-hourly while we poll every 15 min, so
+     the majority of frames are byte-identical. */
   /* Below this = not a signal. The four ingested feeds get their own floors rather than
-     borrowing wind's: a 5 kt shear change is noise where a 5 kt intensity change is not,
-     and a 2-point move in a calibrated probability is not worth an operator's attention
-     when the same number carries a ±20 kt band behind it. */
+     borrowing wind's: a 5 kt shear change is noise where a 5 kt intensity change is not, and a
+     2-point move in a calibrated probability is not worth an operator's attention when the same
+     number carries a ±20 kt band behind it. */
   const NOISE = { wind: 5, pressure: 2, market: 0.02, shear: 5, ri: 0.05, p: 0.02 };
   const SCALE = { wind: 30, pressure: 20, market: 0.15 }; // |Δ| that counts as maximal
 
   /* One advisory cycle, and the half of it past which a storm anchor stops being
      actionable. Shared by the register and the edge book so the row that says a storm has
      gone stale and the grade that acts on it can never disagree about where the line is. */
-  /* The server is the authority on the cycle length — it is what refuses an anchor
-     outright — and it ships the value on every storm-anchored contract. Read it from
-     there rather than hard-coding a second copy that can drift out of step with the
-     refusal it is supposed to be half of. */
+  /* The server is the authority on the cycle length — it is what refuses an anchor outright —
+     and it ships the value on every storm-anchored contract. Read it from there rather than
+     hard-coding a second copy that can drift out of step with the refusal it is supposed to be
+     half of. */
   const ADV_CYCLE_FALLBACK_MIN = 360;
   function advCycleMin() {
     const c = (MT.contracts || []).find((x) => Number.isFinite(x.modelMaxLagMin));
@@ -197,11 +176,10 @@
   }
   const staleAt = () => advCycleMin() / 2;
 
-  /* Operational classification — what deserves an operator's attention.
-     TRADE-RELEVANT is reserved for changes that can actually move a position:
-     a Saffir-Simpson boundary crossing (category contracts resolve on exactly
-     these), RI-scale intensification, or a price move large enough to reprice
-     risk. Everything else degrades to MATERIAL or COSMETIC. */
+  /* Operational classification — what deserves an operator's attention. TRADE-RELEVANT is
+     reserved for changes that can actually move a position: a Saffir-Simpson boundary crossing
+     (category contracts resolve on exactly these), RI-scale intensification, or a price move
+     large enough to reprice risk. */
   const SS_BOUNDS = [34, 64, 83, 96, 113, 137];           // TS, C1..C5 thresholds (kt)
   function crossedCategory(from, to) {
     if (from == null || to == null) return null;
@@ -216,18 +194,9 @@
     if (sig.kind === "stale") return sig.stale ? "trade-relevant" : "material";
     if (sig.kind === "advisory") return sig.magnitude >= 0.85 ? "trade-relevant" : "material";
     const a = Math.abs(sig.delta || 0);
-    /* ---- the pre-advisory feeds -------------------------------------------------
-       These are classified on what they can DO to a position, exactly like everything
-       else here, and two of them can do a great deal.
-
-       A RECON FIX IS ALWAYS AT LEAST MATERIAL. An aircraft flew through the storm and
-       measured it; there is no version of that which is cosmetic, even when the numbers
-       come back unchanged — "the plane found it exactly where the advisory said" is a
-       confirmation an operator paid attention for.
-
-       A GUIDANCE CYCLE is trade-relevant when it moves the peak enough to matter or
-       crosses a Saffir-Simpson boundary, because the category contracts resolve on
-       exactly those boundaries and the deck says so before the advisory does. */
+    /* ---- the pre-advisory feeds ------------------------------------------------- These are
+       classified on what they can DO to a position, exactly like everything else here, and two
+       of them can do a great deal. */
     if (sig.kind === "recon") return (a >= 5 || sig.crossedKt != null) ? "trade-relevant" : "material";
     if (sig.kind === "consensus") return (a >= 10 || sig.crossedKt != null) ? "trade-relevant" : a >= 3 ? "material" : "cosmetic";
     if (sig.kind === "probability") return a >= 10 ? "trade-relevant" : a >= 3 ? "material" : "cosmetic";
@@ -290,10 +259,9 @@
           magnitude: Math.min(1, Math.abs(dW) / SCALE.wind),
           label: `${nm} intensity ${dW > 0 ? "+" : ""}${dW} kt`, detail: `${pv.wind} → ${cv.wind} kt`,
         });
-        /* A NEW ADVISORY is an event in its own right, and until the frame carried the
-           advisory number there was nothing to diff — P(hurricane) could move on the page
-           with no row in the register saying why. Reported whether or not the intensity
-           moved, because "NHC re-issued and changed nothing" is itself information. */
+        /* A NEW ADVISORY is an event in its own right, and until the frame carried the advisory
+           number there was nothing to diff — P(hurricane) could move on the page with no row in
+           the register saying why. */
         if (cv.advNum && pv.advNum && cv.advNum !== pv.advNum) {
           const dPk = (cv.hurricaneP != null && pv.hurricaneP != null) ? cv.hurricaneP - pv.hurricaneP : null;
           const moved = dPk != null && Math.abs(dPk) >= 0.005;
@@ -312,12 +280,9 @@
               + (cv.guidance ? ` · forecast ${cv.guidance} guidance` : ""),
           });
         }
-        /* CROSSING the staleness line, once, at the moment it happens.
-           Not "the advisory is old" every frame — that is a condition, and a register full
-           of the same condition restated is how a register stops being read. This fires on
-           the transition in either direction, so the board can never show a storm as stale
-           without also showing when it stopped being stale. It is the same threshold the
-           edge book grades HOLD on, from the same constant. */
+        /* CROSSING the staleness line, once, at the moment it happens. Not "the advisory is
+           old" every frame — that is a condition, and a register full of the same condition
+           restated is how a register stops being read. */
         if (pv.advisoryLagMin != null && cv.advisoryLagMin != null) {
           const wasStale = pv.advisoryLagMin > staleAt(), isStale = cv.advisoryLagMin > staleAt();
           if (wasStale !== isStale) {
@@ -335,15 +300,9 @@
             });
           }
         }
-        /* ---- the four pre-advisory feeds ------------------------------------------
-           Each of these lands BEFORE the advisory that will report it, which is the only
-           reason they are ingested at all. A feed that arrives early and is not diffed
-           has thrown its own head start away: the number moves on the page and nothing
-           tells the operator that it moved, or why, or when.
-
-           They are diffed here, in the same frame-to-frame walk as wind and pressure,
-           because that walk is what the register, the Situation strip and the attention
-           queue are all reading. One mechanism, four more inputs. */
+        /* ---- the four pre-advisory feeds ------------------------------------------ Each of
+           these lands BEFORE the advisory that will report it, which is the only reason they
+           are ingested at all. */
 
         // Priority 1 — a new guidance cycle. THE pre-advisory signal.
         if (cv.conCycle && pv.conCycle && cv.conCycle !== pv.conCycle) {
@@ -406,7 +365,7 @@
             label: `${nm} SHIPS — shear ${cv.shShear ?? "—"} kt`
                  + (dShear ? ` (${dShear > 0 ? "+" : ""}${dShear})` : "")
                  + (cv.shRi != null ? ` · RI ${Math.round(cv.shRi * 100)}%` : ""),
-            detail: `OHC ${cv.shOhc ?? "—"} kJ/cm2 · mid-level RH ${cv.shRh ?? "—"}% · MPI ${cv.shMpi ?? "—"} kt`
+            detail: `shear ${pv.shShear ?? "—"} → ${cv.shShear ?? "—"} kt`
                   + " — features published; they score only under an operator claim",
           });
         }
@@ -423,10 +382,9 @@
           });
         }
 
-        /* THE OUTPUT OF THE ENGINE. Everything above is an input; this is the number a
-           position is taken against, and it can move without an advisory — which is the
-           entire point of reading the decks early. It gets its own row so a P change is
-           never something the operator has to notice for themselves. */
+        /* THE OUTPUT OF THE ENGINE. Everything above is an input; this is the number a position
+           is taken against, and it can move without an advisory — which is the entire point of
+           reading the decks early. */
         const dPc = (cv.pCal != null && pv.pCal != null) ? cv.pCal - pv.pCal : null;
         if (dPc != null && Math.abs(dPc) >= NOISE.p) {
           out.push({
@@ -471,15 +429,10 @@
     }
 
     /* ---- the server's own event ledger ----
-       Arrivals the server saw between two of ITS ticks. The replay history is spaced
-       wider than the refresh, so a recon fix that lands and is superseded inside one
-       frame gap would otherwise leave no trace anywhere — the frame diff above can only
-       see what survived to a committed frame.
-
-       The kind is carried through rather than flattened to "advisory". Every one of
-       these rows used to be relabelled as an advisory on arrival, which was harmless
-       while advisories were the only thing the server emitted and is a lie now that it
-       emits recon fixes and guidance cycles. */
+       Arrivals the server saw between two of ITS ticks. The replay history is spaced wider than
+       the refresh, so a recon fix that lands and is superseded inside one frame gap would
+       otherwise leave no trace anywhere — the frame diff above can only see what survived to a
+       committed frame. */
     (MT.events || []).forEach((e) => {
       const fr = frames[Math.max(0, Math.min(frames.length - 1, e.frame))];
       out.push({ tsZ: fr ? fr.tsZ : null, kind: e.kind || "advisory", subject: e.subject || e.source || "NHC",
@@ -490,9 +443,8 @@
     out.sort((x, y) => (Date.parse(y.tsZ) || 0) - (Date.parse(x.tsZ) || 0));
 
     /* ---- Register metadata: give the terminal memory ----
-       Each change becomes a durable object rather than a line in a feed, so the
-       question "what has changed in the last 6 hours" is answerable, not just
-       "what changed on this render". */
+       Each change becomes a durable object rather than a line in a feed, so the question "what
+       has changed in the last 6 hours" is answerable, not just "what changed on this render". */
     const seenByTrack = new Map();   // track key -> most recent signal (walking newest→oldest)
     out.forEach((s) => {
       s.id = [s.kind, s.contractId || s.stormId || s.subject, s.tsZ].join("|");
@@ -561,8 +513,8 @@
   }
 
   /* ---------------- Situation ----------------
-     The 30-second read. Everything here is derived from the register and the feed
-     health — no narrative is generated that isn't backed by an observed change. */
+     The 30-second read. Everything here is derived from the register and the feed health — no
+     narrative is generated that isn't backed by an observed change. */
   function situation(windowMin) {
     const W = windowMin || 360;
     const sum = signalSummary(W);
@@ -610,10 +562,8 @@
     const confWhy = !coreOk ? "a core feed is down"
       : stale ? `last refresh ${Math.round(genAge)}m ago` : "all core feeds live, data fresh";
 
-    /* The sharpest per-storm number the board holds, read AT THE FRAME so it moves with
-       the scrubber and with a new advisory instead of being pinned to the latest snapshot.
-       It belongs on the 30-second read: it is the one figure here that a position is
-       taken directly against. */
+    /* The sharpest per-storm number the board holds, read AT THE FRAME so it moves with the
+       scrubber and with a new advisory instead of being pinned to the latest snapshot. */
     const hurricaneNow = storms
       .map((S) => {
         const at = (fn, dflt) => (typeof S[fn] === "function" ? S[fn](NF) : dflt);
@@ -641,10 +591,8 @@
       .sort((a, b) => b.p - a.p);
 
     /* ---- the intel line -------------------------------------------------------
-       The strip's job is the 30-second read, and after this build the 30-second read has
-       a new first question: has anything landed that the advisory has not caught up to
-       yet? This answers it from the register, so the strip and the register can never
-       disagree about what arrived. */
+       The strip's job is the 30-second read, and after this build the 30-second read has a new
+       first question: has anything landed that the advisory has not caught up to yet? */
     const ARRIVAL = { recon: "reconnaissance fix", consensus: "guidance cycle", ships: "SHIPS", ascat: "scatterometer pass", probability: "P update" };
     const arrivals = sigs.filter((s) => ARRIVAL[s.kind]);
     const lastArrival = arrivals[0] || null;         // signals are newest-first
@@ -677,15 +625,9 @@
   }
 
   /* ---- ATTENTION — a prioritised work queue, not a log ----------------------
-     The register answered "what happened, in order". This answers "what needs you,
-     and in what order" — which is a different question, and the one an operator
-     returning after two hours actually has.
-
-     Everything here is derived from something already on screen. The one piece of
-     new arithmetic is the advisory ETA, which is NHC's published 6-hourly cycle
-     applied to the last advisory we actually received; it is labelled as a
-     schedule, never as an observation, and it is never used as an input to a
-     probability. */
+     The register answered "what happened, in order". This answers "what needs you, and in what
+     order" — which is a different question, and the one an operator returning after two hours
+     actually has. */
   const PRIO_RANK = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 
   function nextAdvisory(S) {
@@ -702,18 +644,9 @@
   }
 
   /* ---- Decision lifecycle -----------------------------------------------
-     Events stop being history and become state machines:
-
-       Observed → Validated → Assessed → Resolved → Archived
-
-     Every state here is MACHINE-derived from committed data, and each one names
-     what would have to be true. States we cannot observe are "n/a", never an
-     unticked box that implies the system is watching something it isn't.
-
-     Operator-owned states (has a human acknowledged this, has a human checked
-     their exposure) are deliberately NOT in this function. The terminal cannot
-     observe them, so they live separately, are stored in the browser, and are
-     labelled as the operator's assertion rather than the system's. */
+     Events stop being history and become state machines: Observed → Validated → Assessed →
+     Resolved → Archived Every state here is MACHINE-derived from committed data, and each one
+     names what would have to be true. */
   const LIFECYCLE = ["observed", "validated", "assessed", "resolved", "archived"];
 
   function lifecycleFor(sig, sigs) {
@@ -759,11 +692,9 @@
       st.assessed = anchored;
       st.why.assessed = anchored ? "a priced contract exists for this storm" : "no anchored contract for this storm";
     } else if (sig.kind === "consensus" || sig.kind === "probability") {
-      /* THE HEAD START, MADE AUDITABLE. A guidance cycle is observed the moment it lands
-         in the deck; it is VALIDATED when the advisory built on it arrives and the
-         official product catches up. Until then the board is holding something the
-         market has not been told — which is the entire trade, and also exactly the claim
-         that has to be checkable after the fact rather than asserted. */
+      /* THE HEAD START, MADE AUDITABLE. A guidance cycle is observed the moment it lands in the
+         deck; it is VALIDATED when the advisory built on it arrives and the official product
+         catches up. */
       const t = Date.parse(sig.tsZ) || 0;
       const later = sigs.some((x) => x.kind === "advisory" && x.stormId === sig.stormId && (Date.parse(x.tsZ) || 0) > t);
       st.validated = later;
@@ -874,13 +805,10 @@
       title: "Data pipeline stale — " + stale + " min since the last refresh",
       detail: "every number on screen is at least this old", kind: "pipeline", source: "refresh", ageMin: stale,
     });
-    /* CORE means the board loses something it cannot substitute. Losing the ATCF decks
-       removes the only input that arrives before the advisory, and losing the recon poll
-       removes the only measured one — both are reasons to discount every probability
-       above them, so both compete in this queue at HIGH.
-       ASCAT is deliberately absent: it is intermittent by design and reports ok with a
-       count of zero when no orbit crossed the storm. A queue item every time a satellite
-       was somewhere else teaches an operator to ignore the queue. */
+    /* CORE means the board loses something it cannot substitute. Losing the ATCF decks removes
+       the only input that arrives before the advisory, and losing the recon poll removes the
+       only measured one — both are reasons to discount every probability above them, so both
+       compete in this queue at HIGH. */
     const FEEDS = [
       ["nhc", "NHC advisories", true], ["markets", "Prediction markets", true],
       ["atcf", "ATCF guidance decks", true], ["recon", "Aircraft reconnaissance poll", true],
@@ -898,11 +826,6 @@
         kind: "feed", source: (f && f.source) || name, ageMin: null,
       });
     });
-    if (o.imageryAgeMin != null && o.imageryAgeMin > 20) push({
-      id: "sat", priority: "LOW",
-      title: "Satellite imagery delayed " + Math.round(o.imageryAgeMin) + " min",
-      detail: o.imageryProduct || "GIBS", kind: "feed", source: "NASA GIBS", ageMin: o.imageryAgeMin,
-    });
 
     out.sort((a, b) => PRIO_RANK[a.priority] - PRIO_RANK[b.priority]
       || (a.ageMin == null ? 1 : b.ageMin == null ? -1 : a.ageMin - b.ageMin));
@@ -913,9 +836,8 @@
   }
 
   /* ---- BOARD IMPACT — the honest answer to "does this touch my positions?" ----
-     There is no position feed wired, so we cannot answer it at portfolio level and
-     do not pretend to. What we can answer is board level: what repriced, and where
-     the spread to the climatology anchor widened or narrowed. */
+     There is no position feed wired, so we cannot answer it at portfolio level and do not
+     pretend to. */
   function exposure(windowMin) {
     const W = windowMin || 360;
     const moves = signals({ sinceMin: W }).filter((s) => s.kind === "market" && s.status === "active");
@@ -947,30 +869,7 @@
   }
 
   /* ---------------- Edge book ----------------
-   * The board could say what MOVED and what a contract was worth, but never which bet
-   * to take. Every existing surface either ordered by ladder, by recency, or by the size
-   * of the last tick — so the operator's actual question, "what should I buy and how
-   * much", was answered by reading 151 cards.
-   *
-   * Four things this does that the old edge display did not:
-   *
-   *  1. Prices the side you can ACTUALLY trade. Edge was computed against the mid, which
-   *     is not a price anyone fills at. On a 0/2c book the mid says 1c and a taker pays
-   *     2c — the whole edge, twice over, on the cheap rungs where it matters most.
-   *  2. Charges the fee. Kalshi takes 0.07 x P x (1-P) per contract, which peaks at
-   *     1.75c near a coin flip. A 3c gross edge at 50c is a 1.25c net edge; the board
-   *     used to show the 3c.
-   *  3. Considers the NO side. Half a mispricing is the market being too HIGH, and a
-   *     board that only ever buys YES cannot see it.
-   *  4. Ranks by expected dollars, not by edge. A 20-point edge with $17 of resting size
-   *     is worth less than a 6-point edge with $1,400 behind it, and the old cards gave
-   *     both the same visual weight.
-   *
-   * What it deliberately does NOT do: weight the score by an invented confidence factor.
-   * The governing posterior layer and its sample size are shown as their own column so
-   * the operator can gate on them, rather than being folded into a number whose
-   * construction nobody can see.
-   */
+     The board could say what MOVED and what a contract was worth, but never which bet to take. */
   const FEE_RATE = 0.07;                                    // Kalshi's published taker fee
   const feePerContract = (p) => FEE_RATE * p * (1 - p);
 
@@ -1027,25 +926,23 @@
       const live = layers.filter((l) => l && !l.unavailable && l.p != null);
       const governing = live.slice(-1)[0] || null;
 
-      /* How much the answer depends on WHICH conditioning you use. Every layer asks the
-         same question of the same record under a different restriction, so when they
-         cluster the estimate is robust to method, and when they scatter the number is an
-         artefact of one choice. This is the single most useful thing to show next to an
-         edge, and it costs nothing to compute. */
+      /* How much the answer depends on WHICH conditioning you use. Every layer asks the same
+         question of the same record under a different restriction, so when they cluster the
+         estimate is robust to method, and when they scatter the number is an artefact of one
+         choice. */
       const ps = live.map((l) => l.p);
       const dispersion = ps.length > 1 ? Math.max(...ps) - Math.min(...ps) : null;
 
-      /* The verdict. Deliberately demotes very large edges rather than celebrating them:
-         a climatology baseline that disagrees with a traded market by 25 points, while
-         its own layers disagree with each other, is far more likely to be missing
-         something than to have found free money. */
+      /* The verdict. Deliberately demotes very large edges rather than celebrating them: a
+         climatology baseline that disagrees with a traded market by 25 points, while its own
+         layers disagree with each other, is far more likely to be missing something than to
+         have found free money. */
       const why = [];
-      /* An anchor that carries a BAND rather than a point cannot claim an edge the band
-         does not survive. The official-forecast anchor is a repackaging of a public NHC
-         product plus its published error — it holds no information the market has not
-         also read, so when the honest range of that estimate straddles the price you
-         would pay, the correct output is that there is nothing here, not a number
-         derived from the middle of the band. */
+      /* An anchor that carries a BAND rather than a point cannot claim an edge the band does
+         not survive. The official-forecast anchor is a repackaging of a public NHC product plus
+         its published error — it holds no information the market has not also read, so when the
+         honest range of that estimate straddles the price you would pay, the correct output is
+         that there is nothing here, not a number derived from the middle of the band. */
       let bandKills = false;
       if (c.modelLow != null && c.modelHigh != null) {
         const worst = best.side === "YES" ? c.modelLow - best.cost : (1 - c.modelHigh) - best.cost;
@@ -1061,31 +958,21 @@
          detail cannot be shown to be robust to method, so it must not earn the top
          grade on the strength of having nothing to contradict it. */
       /* Three layers, not two. The per-name anchors publish an unweighted ordinal and an
-         ONI-weighted one — but the second is a shrunk transformation of the first, so the
-         two cannot disagree by much no matter how wrong they both are. Agreement between
-         nested estimates is not corroboration. The count ladders carry five genuinely
-         different conditionings (base, day-of-year, season-to-date, phase bucket, ONI
-         kernel) and can earn the top grade; a two-layer anchor tops out at SMALL. */
+         ONI-weighted one — but the second is a shrunk transformation of the first, so the two
+         cannot disagree by much no matter how wrong they both are. */
       const measured = live.length >= 3 && dispersion != null;
       const agrees = measured && dispersion <= 0.10;
       const deep = capacityDollarsOf >= o.minDollars * 2;
-      /* How old the product under this anchor was when it was read. A climatology anchor
-         has no advisory behind it and reports null — that is NOT the same as zero and
-         must not be graded like a fresh forecast, so null simply does not trigger this.
-         The server refuses outright past one full advisory cycle; inside that window the
-         age still matters, because an anchor built on a product that has been superseded
-         but not yet fetched is a stale forecast wearing a current timestamp. Half a cycle
-         is the line: past it the next advisory is likelier out than not. */
+      /* How old the product under this anchor was when it was read. A climatology anchor has no
+         advisory behind it and reports null — that is NOT the same as zero and must not be
+         graded like a fresh forecast, so null simply does not trigger this. */
       const lagMin = Number.isFinite(c.modelLagMin) ? c.modelLagMin : null;
       const lagLimit = Number.isFinite(c.modelMaxLagMin) ? c.modelMaxLagMin : advCycleMin();
       const lagStale = lagMin != null && lagMin > lagLimit / 2;
       if (!live.length) why.push("no layer detail to check the estimate against");
-      /* The COUNT is the rule and it has not moved: under three voting layers, the top
-         grade is out. Only the explanation is now specific to which anchor this is,
-         because the two-layer cases are no longer the same failure. A per-name ordinal's
-         second layer really is a shrunk form of its first. A storm anchor's second layer
-         is the guidance deck, which is a genuinely separate estimate — it just is not a
-         third one, and two estimates cannot show that an answer is robust to method. */
+      /* The COUNT is the rule and it has not moved: under three voting layers, the top grade is
+         out. Only the explanation is now specific to which anchor this is, because the
+         two-layer cases are no longer the same failure. */
       else if (live.length < 3) why.push("only " + live.length + " layer" + (live.length === 1 ? "" : "s")
         + " voting — " + (c.modelCalibrated
           ? "the official forecast and the guidance deck are separate estimates, but two is not enough to show the answer survives a change of method"
@@ -1100,18 +987,11 @@
         + Math.abs(Math.round((p - c.modelRawP) * 100)) + " pts "
         + (p < c.modelRawP ? "below" : "above") + " the unadjusted " + Math.round(c.modelRawP * 100) + "%");
       if (best.edge >= 0.25 && !agrees) why.push("a " + Math.round(best.edge * 100) + "-pt disagreement with a traded market is more likely a model gap than free money");
-      /* HOLD is a HARD rule, and it is a different statement from the other three.
-         TAKE, SMALL and SUSPECT are all judgements about the estimate. HOLD is a
-         judgement about the PRODUCT under it: past half an advisory cycle the next
-         advisory is likelier out than not, so what is on screen may already have been
-         superseded by a forecast nobody here has fetched. That is a timing fact, and no
-         amount of edge, agreement or resting depth argues against it — which is why it
-         sits outside the scoring rather than as one more conjunct inside the TAKE test,
-         where it was a soft demotion to SMALL and a row could still read as actionable.
-
-         SUSPECT still outranks it. "The model cannot support this" is a stronger and more
-         durable statement than "wait for the next product", and an operator who acts on a
-         SUSPECT row after the advisory refreshes is still wrong. */
+      /* HOLD is a HARD rule, and it is a different statement from the other three. TAKE, SMALL
+         and SUSPECT are all judgements about the estimate. HOLD is a judgement about the
+         PRODUCT under it: past half an advisory cycle the next advisory is likelier out than
+         not, so what is on screen may already have been superseded by a forecast nobody here
+         has fetched. */
       const grade = bandKills ? "SUSPECT"
         : (best.edge >= 0.25 && !agrees) ? "SUSPECT"
         : lagStale ? "HOLD"
@@ -1120,12 +1000,10 @@
       if (grade === "HOLD") why.unshift("HOLD until the next advisory — do not act on a forecast that may already be superseded");
       if (grade === "TAKE") why.push("every layer within " + Math.round(dispersion * 100) + " pts, edge clears the spread, real size resting");
 
-      /* A row nobody may act on must not carry a size. The stake, contract count and
-         expected value are computed before the grade exists, so leaving them on a HOLD row
-         puts a dollar figure next to a bet that is not available — and every total
-         downstream, including ones not written yet, would quietly include it. They are
-         zeroed here, at the source, and the figure the row WOULD carry once the advisory
-         refreshes is kept separately for reference. */
+      /* A row nobody may act on must not carry a size. The stake, contract count and expected
+         value are computed before the grade exists, so leaving them on a HOLD row puts a dollar
+         figure next to a bet that is not available — and every total downstream, including ones
+         not written yet, would quietly include it. */
       const held = grade === "HOLD";
       rows.push({
         grade, why, dispersion,
@@ -1180,19 +1058,10 @@
   }
 
   /* ---------------- Ladder consistency ----------------
-   * "More than 4" cannot be less likely than "more than 5" — the second outcome implies
-   * the first. When a ladder prints otherwise there is a locked spread available that
-   * does not depend on the model being right about anything, which makes it the only
-   * edge on this board with no forecasting risk at all.
-   *
-   * The distinction that matters is EXECUTABLE versus DISPLAYED. Exchange screens show a
-   * last trade or a mid, and those invert constantly on thin books — the Atlantic major
-   * ladder and the eastern Pacific named-storm ladder are both inverted on mids right
-   * now. Neither is tradeable: at the touch the prices are ordered correctly. So this
-   * compares the ask you would pay on the lower strike against the bid you would hit on
-   * the higher one, and reports the two cases separately. Calling a mid inversion an
-   * arbitrage is how you lose money confirming someone else's screenshot.
-   */
+     "More than 4" cannot be less likely than "more than 5" — the second outcome implies the
+     first. When a ladder prints otherwise there is a locked spread available that does not
+     depend on the model being right about anything, which makes it the only edge on this board
+     with no forecasting risk at all. */
   function ladderArbs(frame) {
     const f = clampF(frame == null ? NF : frame);
     const by = {};
@@ -1235,22 +1104,9 @@
   }
 
   /* ---------------- Exit cost ----------------
-   * A quoted market is not a tradeable one. Twenty-one of the contracts on this board
-   * have a bid and an ask more than fifteen cents apart, and several are quoted 5c bid
-   * against 57c offered with five contracts resting on each side. Buying one of those
-   * is close to irreversible: you pay the ask, you are marked at the bid, and there is
-   * nobody to sell back to at any size.
-   *
-   * That is not a hypothetical. It is the difference between a position showing "63%"
-   * when you bought it and "5%" an hour later with nothing having happened in the
-   * atmosphere at all — the first number was the offer, the second is the bid, and the
-   * gap between them was always the cost of the trade.
-   *
-   * So the board states the round trip explicitly: what you pay to get in, what you
-   * would receive to get out RIGHT NOW, and how many contracts the exit is actually
-   * good for. A market whose exit is five contracts deep is a hold-to-expiry position
-   * whatever the screen says.
-   */
+     A quoted market is not a tradeable one. Twenty-one of the contracts on this board have a
+     bid and an ask more than fifteen cents apart, and several are quoted 5c bid against 57c
+     offered with five contracts resting on each side. */
   const EXIT_WIDE = 0.15;          // a spread this wide costs more than most edges here
   const EXIT_THIN = 25;            // contracts; below this the quote is decorative
 

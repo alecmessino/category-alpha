@@ -189,6 +189,27 @@ export function summarize(ledger, opts) {
     .filter((e) => Number.isFinite(e[field]))
     .map((e) => ({ p: e[field], o: e.resolved.outcome, stormId: e.stormId }));
 
+  /* PAIRED. A skill score is a ratio of two Brier scores, and a ratio of scores computed
+     over DIFFERENT samples is not a skill score — it is two unrelated numbers divided.
+     This is not hypothetical: the ledger's first five entries were seeded from frames
+     written before the calibrated probability existed, so they carry pRaw and pMarket but
+     pCal of null. Scoring each series over whatever it happens to have would have compared
+     the board on two forecasts against the market on seven and published the quotient to
+     four decimal places.
+     So every comparison is computed on the entries where BOTH series are present, and each
+     one carries the n it was computed over. The marginal Brier scores above still use every
+     entry that has that field, because as a standalone number that is the honest sample —
+     but they are not what the skill numbers divide. */
+  const pairedFor = (a, b) => {
+    const both = resolved.filter((e) => Number.isFinite(e[a]) && Number.isFinite(e[b]));
+    return {
+      a: brier(both.map((e) => ({ p: e[a], o: e.resolved.outcome, stormId: e.stormId }))),
+      b: brier(both.map((e) => ({ p: e[b], o: e.resolved.outcome, stormId: e.stormId }))),
+      entries: both.length,
+      storms: new Set(both.map((e) => e.stormId)).size,
+    };
+  };
+
   const counts = {
     entries: entries.length,
     storms: stormsAll.size,
@@ -217,25 +238,48 @@ export function summarize(ledger, opts) {
   const pairsCal = pairsFor("pCal"), pairsRaw = pairsFor("pRaw"), pairsMkt = pairsFor("pMarket");
   const bsCal = brier(pairsCal), bsRaw = brier(pairsRaw), bsMkt = brier(pairsMkt);
   /* The climatological reference: the base rate of this very sample, which is the score a
-     forecaster gets by ignoring every storm and quoting the long-run frequency. */
+     forecaster gets by ignoring every storm and quoting the long-run frequency. Computed on
+     the calibrated sample because that is the series it is the reference FOR. */
   const base = pairsCal.length ? pairsCal.reduce((a, x) => a + x.o, 0) / pairsCal.length : null;
   const bsClim = base != null ? base * (1 - base) : null;
+
+  const vsRaw = pairedFor("pCal", "pRaw"), vsMkt = pairedFor("pCal", "pMarket");
 
   return {
     ok: true, counts,
     baseRate: base,
+    /* Each marginal score with the sample it was computed over, because a Brier quoted
+       without its n invites exactly the comparison the paired numbers below exist to
+       prevent. */
     brier: { calibrated: bsCal, raw: bsRaw, market: bsMkt, climatology: bsClim },
+    brierN: { calibrated: pairsCal.length, raw: pairsRaw.length, market: pairsMkt.length },
     /* Skill against climatology answers "is this better than knowing nothing".
        Skill against the RAW estimate answers "did the four ingested feeds earn their
        keep", which is the question this whole build is accountable to.
        Skill against the MARKET answers "is there an edge", which is the only one that
        pays — and a negative number there is the most useful output this file can produce,
-       because it says stop. */
+       because it says stop.
+       The last two divide PAIRED scores, so they may not equal 1 - brier.calibrated /
+       brier.market when coverage differs. That discrepancy is the point: the paired ones
+       are the comparable pair, and `paired` below states the sample each used. */
     skill: {
       vsClimatology: skill(bsCal, bsClim),
-      calibrationVsRaw: skill(bsCal, bsRaw),
-      vsMarket: skill(bsCal, bsMkt),
+      calibrationVsRaw: skill(vsRaw.a, vsRaw.b),
+      vsMarket: skill(vsMkt.a, vsMkt.b),
     },
+    paired: {
+      calibratedVsRaw: { calibrated: vsRaw.a, raw: vsRaw.b, entries: vsRaw.entries, storms: vsRaw.storms },
+      calibratedVsMarket: { calibrated: vsMkt.a, market: vsMkt.b, entries: vsMkt.entries, storms: vsMkt.storms },
+    },
+    /* Named because the gap is a real operational condition, not a curiosity: it means the
+       board did not publish a calibrated number for some forecasts it has since had scored,
+       and a reader comparing the marginal Briers would be comparing different storms. */
+    coverageNote: pairsCal.length === pairsMkt.length && pairsCal.length === pairsRaw.length
+      ? null
+      : `coverage differs across series — calibrated ${pairsCal.length}, official-estimate ${pairsRaw.length},`
+        + ` market ${pairsMkt.length} of ${resolved.length} resolved forecasts. The skill numbers are computed`
+        + ` on the overlap (${vsRaw.entries} against the official estimate, ${vsMkt.entries} against the market)`
+        + ` so they compare the same storms; the marginal Brier scores above do not and must not be divided.`,
     reliability: stormsResolved.size >= (o.minReliabilityStorms || MIN_RELIABILITY_STORMS)
       ? reliability(pairsCal, o.bins || 5)
       : null,
