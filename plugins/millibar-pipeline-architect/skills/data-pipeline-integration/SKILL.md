@@ -18,7 +18,10 @@ pipeline feeding an unscored board publishes probabilities nobody can grade — 
 one failure this project exists to prevent. State this gate on the first substantive
 answer of a session.
 
-Run `/millibar:preflight` to check the gate and the anonymous-S3 path before building.
+Run `node scripts/preflight-imagery.mjs` (or `/millibar:preflight`) to check the gate and
+the anonymous-S3 path before building. The full structural breakdown of what it asserts and
+why each constant is the value it is:
+`references/preflight-satellite-imagery.md`.
 
 ## The four clusters
 
@@ -37,6 +40,8 @@ Always name the cluster before emitting code. Detail per cluster:
 - `references/cluster-4-alpha-signals.md`
 - `references/event-driven-ingest.md` — NODD SNS → SQS → worker → `sw.js`
 - `references/serialization-parsing.md` — GRIB2, NetCDF4, GeoJSON, ASCII/HDOB
+- `references/preflight-satellite-imagery.md` — the Cluster 1 preflight, and the reasoning
+  behind every threshold in it
 - `references/resource-master-list.md` — the canonical index
 
 ## Five hard rules

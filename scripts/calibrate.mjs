@@ -97,7 +97,7 @@ async function main() {
   for (const s of (latest.storms || [])) nameOf[s.id] = s.name;
   for (const fr of (framesJson.frames || [])) {
     for (const [sid, fs] of Object.entries(fr.storms || {})) {
-      if (fs.pCal == null && fs.hurricaneP == null) continue;
+      if (fs.pCal == null && fs.hurricaneP == null && fs.pRaw == null) continue;
       /* The market price AT THAT FRAME, not today's — scoring a past forecast against a
          present price would be marking it against information it never had. */
       const c = (latest.contracts || []).find((x) => x.storm === sid && x.modelCalibrated);
@@ -105,7 +105,11 @@ async function main() {
       entries.push(entryFrom({
         stormId: sid, name: nameOf[sid] || sid, tsZ: fr.tsZ,
         advNum: fs.advNum ?? null, conCycle: fs.conCycle ?? null,
-        pCal: fs.pCal ?? null, pRaw: fs.hurricaneP ?? null,
+        /* `pRaw` first: frames written by the current writer carry the raw estimate under
+           that name, taken from the value the calibration was actually computed from.
+           `hurricaneP` is the older name for the same number and answers for every frame
+           still in the retained window. */
+        pCal: fs.pCal ?? null, pRaw: fs.pRaw ?? fs.hurricaneP ?? null,
         pMarket: fc ? fc.market ?? null : null, contractId: c ? c.id : null,
         used: null, quality: fs.quality ?? null,
         advisoryLagMin: fs.advisoryLagMin ?? null, currentKt: fs.wind ?? null,

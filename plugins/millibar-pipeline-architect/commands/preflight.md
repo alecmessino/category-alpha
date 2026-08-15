@@ -6,6 +6,24 @@ allowed-tools: Read, Grep, Glob, Bash
 Run the pre-deploy checks. Report each as PASS / FAIL / UNKNOWN with the evidence, then
 give a single go / no-go verdict.
 
+**Run the script first.** Six of the seven checks below are decided mechanically from
+committed bytes, and a check decided by reading is a check that passes when somebody is
+tired:
+
+```
+node scripts/preflight-imagery.mjs          # or --json
+```
+
+It emits two verdicts, and they are different questions. BUILD says the code is fit to
+write and review; DEPLOY says it may run against live infrastructure. Only the second is
+blocked by the calibration gate. Its exit code tracks BUILD, so a gate that is expected to
+stay shut for months does not fail a pull request.
+
+Read its output, then use the sections below to explain any FAIL and to cover the one check
+it cannot make — the live unsigned LIST, which it reports as UNKNOWN. Full structural
+breakdown, including why each constant is the value it is:
+`skills/data-pipeline-integration/references/preflight-satellite-imagery.md`.
+
 ## 1. Baseline pre-requisite (the gate)
 
 These pipelines deploy only AFTER the historical calibration loop baseline is published.

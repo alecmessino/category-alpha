@@ -96,7 +96,11 @@
            Read as latest only, the number changed on the page and nothing recorded it. */
         advisoryLagMin: (f) => { const r = fs(f); return r && r.advisoryLagMin != null ? r.advisoryLagMin : (isNum(s.advisoryLagMin) ? s.advisoryLagMin : null); },
         advNumAt: (f) => pick(f, "advNum", s.advNumFull || s.advNum || null),
-        hurricanePAt: (f) => { const r = fs(f); return r && r.hurricaneP != null ? r.hurricaneP : (s.hurricaneP ? s.hurricaneP.p : null); },
+        /* The raw estimate, and the same strict rule as the calibrated one below. It is
+           the older name for what the frame now also writes as `pRaw`; both are read so a
+           frame from either side of that change answers, and neither reaches across time
+           to the current snapshot. */
+        hurricanePAt: (f) => { const r = fs(f); return r ? (r.hurricaneP != null ? r.hurricaneP : (r.pRaw != null ? r.pRaw : null)) : null; },
         peakKtAt: (f) => pick(f, "peakKt", s.hurricaneP ? s.hurricaneP.peakKt : null),
         guidanceAt: (f) => pick(f, "guidance", null),
 
@@ -113,9 +117,33 @@
         bestTrack: s.bestTrack || null,
         atcfDeck: s.atcfDeck || null,
 
-        pCalAt: (f) => { const r = fs(f); return r && r.pCal != null ? r.pCal : (s.hurricanePCal ? s.hurricanePCal.p : null); },
-        pSigmaAt: (f) => { const r = fs(f); return r && r.pSigma != null ? r.pSigma : (s.hurricanePCal ? s.hurricanePCal.sigmaKt : null); },
-        qualityAt: (f) => { const r = fs(f); return r && r.quality != null ? r.quality : (s.evidenceQuality ? s.evidenceQuality.tier : null); },
+        /* ---- the probability group, read STRICTLY from the frame --------------------
+           Every other accessor in this file falls back to the latest snapshot when the
+           frame is missing a field, and for most of them that is a reasonable convenience.
+           For these four it was a defect, and a sharp one.
+
+           The retained window holds frames written before the engine could calibrate. On
+           those, `r.pCal` is null and the old fallback returned `s.hurricanePCal.p` — the
+           CURRENT calibrated probability — which the scrubber then printed under a
+           timestamp from two days earlier. The board's whole claim is that scrubbing back
+           shows what it actually held at that moment; this was the one place it showed
+           what it holds now and labelled it with a past time. A stale value dressed as
+           current is the failure this project exists to prevent, and it was in the
+           control built to prevent it.
+
+           So there is no cross-time fallback here. A frame that carried no calibrated
+           probability reports none, the panels render their no-value state, and the
+           operator sees that the board had nothing rather than seeing today's answer.
+           The live view is unaffected: the newest frame carries the pair, and the panels
+           that want the full calibration object read `hurricanePCal` directly.
+
+           The four move together because they are one reading. A calibrated probability
+           from the frame beside an evidence tier from the snapshot describes no moment
+           that ever existed. */
+        pCalAt: (f) => { const r = fs(f); return r && r.pCal != null ? r.pCal : null; },
+        pRawAt: (f) => { const r = fs(f); return r ? (r.pRaw != null ? r.pRaw : (r.hurricaneP != null ? r.hurricaneP : null)) : null; },
+        pSigmaAt: (f) => { const r = fs(f); return r && r.pSigma != null ? r.pSigma : null; },
+        qualityAt: (f) => { const r = fs(f); return r && r.quality != null ? r.quality : null; },
         conKtAt: (f) => { const r = fs(f); return r && r.conKt != null ? r.conKt : (s.consensus ? s.consensus.peakKt : null); },
         conSpreadAt: (f) => { const r = fs(f); return r && r.conSpread != null ? r.conSpread : (s.consensus ? s.consensus.spreadKt : null); },
         conCycleAt: (f) => { const r = fs(f); return r && r.conCycle != null ? r.conCycle : (s.consensus ? s.consensus.cycle : null); },

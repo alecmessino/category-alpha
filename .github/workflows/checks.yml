@@ -109,6 +109,27 @@ jobs:
       - name: Test the calibration ledger and scorecard
         run: node scripts/test-calibration.mjs
 
+      # The satellite-imagery preflight: the ingest chain's IaC, the unsigned-read rule,
+      # the service worker's tile-only barrier, the probability pair on the frame, and the
+      # map-integrity grader. Every one of these is decided from committed bytes, and every
+      # one is made to FIRE against a deliberately broken fixture rather than confirmed by
+      # reading the code that implements it.
+      - name: Test the imagery preflight and the map-grid grader
+        run: node scripts/test-preflight.mjs
+      # The zero-peek gate. A backtest that leaks does not throw, does not warn, and does
+      # not look wrong — it returns a better number. So the gate is proven by watching it
+      # refuse a leaking bundle, which is the only evidence a silent failure mode admits.
+      - name: Test the backtest zero-peek gate and runner
+        run: node scripts/test-backtest.mjs
+
+      # The preflight itself, against the committed tree. Its exit code tracks BUILD, not
+      # DEPLOY: a closed calibration gate is the expected state for months and must not
+      # fail a pull request, while a filter policy scoped to the wrong half of the message
+      # must. The DEPLOY verdict is printed either way, so the log always says whether the
+      # imagery pipeline is allowed to run yet.
+      - name: Imagery preflight — BUILD gate on the committed tree
+        run: node scripts/preflight-imagery.mjs
+
       # A guard that can fail silently is not a guard. The predicate deciding whether a
       # verification run may write the verdict the board reads once disabled itself to a
       # truthy regex object and `node --check` passed it, so it is now a pure function

@@ -73,8 +73,17 @@ export function atcfTimeIso(s) {
 
 /* Returns every (tech, tau) row of the LATEST cycle in the deck, plus a census of what
    the deck contains. The census matters: it is how an operator sees that an aid they
-   expect is missing this cycle, instead of the board quietly blending fewer members. */
-export function parseAdeck(text) {
+   expect is missing this cycle, instead of the board quietly blending fewer members.
+
+   `opts.allCycles` keeps EVERY cycle instead of only the newest, merged per
+   (cycle, tech, tau). The live board never wants this — it is pricing now, and a
+   twelve-hour-old guidance cycle is not what "the guidance" means. A backtest wants
+   nothing else: an a-deck file accumulates every cycle of the storm's life, and
+   `scripts/lib/backtest-gate.mjs` has to see all of them to choose the ones that had been
+   issued by the simulated decision time. The default is unchanged, so no live caller
+   moves. */
+export function parseAdeck(text, opts) {
+  const allCycles = !!(opts && opts.allCycles);
   const rows = [];
   const cycles = new Set();
   for (const line of String(text || "").split(/\r?\n/)) {
@@ -103,23 +112,27 @@ export function parseAdeck(text) {
   const byKey = new Map();
   const techs = {};
   for (const r of rows) {
-    if (r.cycle !== latestCycle) continue;
-    techs[r.tech] = (techs[r.tech] || 0) + 1;
-    const k = r.tech + "|" + r.tau;
+    if (!allCycles && r.cycle !== latestCycle) continue;
+    /* The census stays a census OF THE LATEST CYCLE even when every cycle is kept.
+       "IVCN is missing this cycle" is a statement about one cycle; summing an aid's
+       appearances across a week of decks would answer a question nobody asked. */
+    if (r.cycle === latestCycle) techs[r.tech] = (techs[r.tech] || 0) + 1;
+    const k = (allCycles ? r.cycle + "|" : "") + r.tech + "|" + r.tau;
     const prev = byKey.get(k);
     if (!prev) { byKey.set(k, { ...r }); continue; }
     if (prev.vmax == null && r.vmax != null) prev.vmax = r.vmax;
     if (prev.mslp == null && r.mslp != null) prev.mslp = r.mslp;
     if (prev.lat == null && r.lat != null) { prev.lat = r.lat; prev.lon = r.lon; }
   }
-  const merged = [...byKey.values()].sort((a, b) => a.tau - b.tau || (a.tech < b.tech ? -1 : 1));
+  const merged = [...byKey.values()].sort((a, b) =>
+    (a.cycle < b.cycle ? -1 : a.cycle > b.cycle ? 1 : 0) || a.tau - b.tau || (a.tech < b.tech ? -1 : 1));
   /* Which techs actually FORECAST something. Derived from the data rather than from a list
      of names: an aid that forecasts has rows beyond tau 0, and an analysis-only record
      like CARQ carries -24h..0h and nothing after it.
      This is what separates "NHC ran no guidance for this system" from "the parser stopped
      finding the guidance NHC ran" — two states that look identical from a null consensus
      and need opposite responses. */
-  const forecastTechs = [...new Set(merged.filter((r) => r.tau > 0).map((r) => r.tech))].sort();
+  const forecastTechs = [...new Set(merged.filter((r) => r.tau > 0 && r.cycle === latestCycle).map((r) => r.tech))].sort();
   return {
     ok: true, cycles: sorted, latestCycle, cycleIso: atcfTimeIso(latestCycle),
     techs, forecastTechs, rows: merged,

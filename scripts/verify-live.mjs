@@ -26,6 +26,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 import { isDeploymentUrl, reportFileFor } from "./lib/deploy-target.mjs";
+import { collectTileGridInPage, gradeTileGrid } from "./lib/tile-grid.mjs";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dir, "..");
@@ -455,7 +456,16 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
             decksAidless: (window.MT ? Object.values(MT.storms || {}) : [])
               .filter((s) => s.atcfDeck && s.atcfDeck.forecastAids === 0).length,
             withCalibrated: has("pCal"), withQuality: has("quality"),
-            withRaw: has("hurricaneP"),
+            /* Either name counts. The frame writes the raw estimate as `pRaw` and, for the
+               retained window's older frames, as `hurricaneP`; a check pinned to one name
+               would read a schema change as a feed going dark. */
+            withRaw: ids.filter((id) => last[id] && (last[id].pRaw != null || last[id].hurricaneP != null)).length,
+            /* THE PAIR, which is the thing that actually has to hold. A raw estimate with
+               no calibrated one beside it is what makes the scrubber reach for the current
+               snapshot; counting them separately never showed that, because both counts
+               looked healthy on their own. */
+            withPair: ids.filter((id) => last[id] && last[id].pCal != null
+              && (last[id].pRaw != null || last[id].hurricaneP != null)).length,
             withRecon: has("reconAge"), withShips: has("shShear"), withAscat: has("ascatKt"),
             /* BEHAVIOUR — what turned over, and whether the register saw it. */
             cycleTurnovers, fixArrivals,
@@ -750,8 +760,12 @@ add("every consensus in the snapshot reaches the newest frame",
   + ` · ${IN.healthRows}/4 health rows rendered`);
 
 add("the calibrated probability ships with the raw estimate and its evidence tier",
-  AD.storms === 0 || (IN.withCalibrated === IN.storms && IN.withRaw === IN.storms && IN.withQuality === IN.storms),
+  AD.storms === 0 || (IN.withCalibrated === IN.storms && IN.withRaw === IN.storms
+    && IN.withPair === IN.storms && IN.withQuality === IN.storms),
   `${IN.withCalibrated}/${IN.storms} frames carry a calibrated P · ${IN.withRaw} carry the raw one`
+  + ` · ${IN.withPair} carry BOTH as a pair, which is the half that matters: a raw estimate`
+  + ` with no calibrated one beside it is what makes the scrubber print the current`
+  + ` snapshot's number at a past timestamp`
   + ` · ${IN.withQuality} carry an evidence tier`
   + ` · contracts: ${IN.calibratedContracts} calibrated, ${IN.calibratedWithRaw} with the official estimate beside it`
   + ` · strip: quality=${IN.situationQuality || "—"} lag=${IN.situationLag == null ? "—" : IN.situationLag + "m"}`
@@ -888,6 +902,39 @@ const ourConsole = consoleErrors.filter((e) => !e.at || e.at.startsWith(origin))
 thirdConsole = consoleErrors.filter((e) => e.at && !e.at.startsWith(origin));
 add("no console errors from our code", ourConsole.length === 0,
   ourConsole.slice(0, 3).map((e) => e.text).join(" | ") || "none");
+
+/* ---- MAP INTEGRITY: is the satellite layer actually drawn over the storm? ----------
+ *
+ * Everything above about the map asserts its GEOMETRY — that the pane is tall enough and
+ * high enough up the page to be seen without scrolling. A completely blank map satisfies
+ * every one of those checks perfectly, and a blank map is not a subtle failure: it is the
+ * panel that shows you WHERE the storm is, showing nothing, while the board around it
+ * reports healthy feeds.
+ *
+ * The grid is read from the DOM, never from pixels. Leaflet builds tiles as plain <img>
+ * elements with no crossOrigin attribute, so a canvas one is drawn into is tainted
+ * whatever CORS headers GIBS sends and the pixel read throws SecurityError — on the
+ * deployed board, while passing against any same-origin fixture. What IS readable
+ * cross-origin is naturalWidth/naturalHeight and where Leaflet placed the tile, and that
+ * is a complete census of which grid slots have imagery. `map.jsx` sets errorTileUrl to a
+ * 1x1 transparent GIF, so an unpublished slot resolves to a tile of natural size 1x1:
+ * an unambiguous empty-slot signal with no pixel read at all.
+ *
+ * The grading lives in scripts/lib/tile-grid.mjs so it can be tested against hand-built
+ * lattices — including the two failures that matter and cannot find each other. Too much
+ * of the picture missing is the layer never attaching; a single empty slot enclosed by
+ * loaded imagery is a tile failing, and it fails at an empty fraction of a few per cent,
+ * far under the limb allowance. */
+await page.waitForTimeout(2500);          // let the tile grid settle before censusing it
+const tileGrid = await page.evaluate(collectTileGridInPage);
+const gridVerdict = gradeTileGrid(tileGrid);
+/* UNKNOWN is not a failure of the board. A sandbox with no egress to GIBS, or a board with
+   no active cyclone and therefore no satellite layer, cannot be graded — and reporting
+   either as a layout error is the false positive that teaches an operator to ignore this
+   check. It is reported, and it does not fail the build. */
+add("the satellite tile grid is drawn, with no holes and no more limb than the disk explains",
+  gridVerdict.ok || gridVerdict.status === 503,
+  `status ${gridVerdict.status} · ${gridVerdict.note}`);
 
 await page.screenshot({ path: "live-verify.png", fullPage: false });
 } catch (err) {

@@ -97,6 +97,7 @@ skills/data-pipeline-integration/
     cluster-4-alpha-signals.md                    Kalshi, ADS-B, EIA + the triple
     event-driven-ingest.md                        NODD SNS -> SQS -> worker -> sw.js
     serialization-parsing.md                      GRIB2, NetCDF4, GeoJSON, HDOB
+    preflight-satellite-imagery.md                the Cluster 1 preflight, in full
   assets/
     terraform/nodd-goes-ingest.tf                 queue, DLQ, cross-account policy, filter
     serverless/serverless.yml                     same topology, Serverless Framework
