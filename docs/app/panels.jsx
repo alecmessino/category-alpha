@@ -1512,8 +1512,13 @@ function MT_Observability({ narrow }) {
             where an operator goes to decide whether to trust the board, and after this
             build that decision turns on whether anything arrived ahead of the advisory
             and whether the storm's intensity was measured or estimated. */}
+        {/* A claim may offer a one-line form for a panel with a height budget. The full
+            statement stays authored in the registry and reachable through the drawer, so
+            compacting the display never shortens the claim itself. */}
         {["intel.atcf", "intel.recon", "intel.ships", "intel.ascat", "intel.calibration", "model.calibration"].map((id) => (
-          <div key={id} style={{ color: MTC.claim(id).ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim(id).text}</div>
+          <div key={id} style={{ color: MTC.claim(id).ok ? "var(--text-2)" : "var(--warn)" }}>
+            {MTC.claim(id).short || MTC.claim(id).text}
+          </div>
         ))}
         <div>{MTC.claim("capability.notIngested").text}</div>
       </div>

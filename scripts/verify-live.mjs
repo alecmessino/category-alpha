@@ -25,6 +25,7 @@ import { createHash } from "node:crypto";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import { isDeploymentUrl, reportFileFor } from "./lib/deploy-target.mjs";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dir, "..");
@@ -51,9 +52,8 @@ const WAIT_MIN = Number(arg("wait-min", process.env.MT_WAIT_MIN || 12));
  * written by a run that actually went over the public internet. Being careful was already
  * tried — the file was deliberately restored twice — and a later 'git add -A' swept it in
  * anyway. A convention that depends on remembering is not a guard. */
-const isLoopback = /^https?:\/\/(localhost|127\.|0\.0\.0\.0|\[::1\])/i.test(BASE);
-const IS_DEPLOYMENT = /^https:///i.test(BASE) && !isLoopback;
-const REPORT_FILE = IS_DEPLOYMENT ? "verify-live.json" : "verify-live.local.json";
+const IS_DEPLOYMENT = isDeploymentUrl(BASE);
+const REPORT_FILE = reportFileFor(BASE);
 
 const results = [];
 const add = (check, pass, detail = "") => results.push({ check, pass, detail: String(detail) });
