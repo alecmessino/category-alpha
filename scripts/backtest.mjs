@@ -114,11 +114,24 @@ function replayStorm(stormId, aText, bRecords) {
       && r.tau >= 0 && Number.isFinite(r.vmax) && r.vmax > 0);
     if (!ofcl.length) { refusals.noOfficial = (refusals.noOfficial || 0) + 1; continue; }
 
-    const now = ofcl.find((r) => r.tau === 0);
+    /* THE ADVISORY'S OWN CURRENT INTENSITY, not the synoptic analysis.
+       TAU 0 is the analysis at the cycle DTG and equals CARQ; the advisory publishes the
+       TAU=T row, where T is the smallest positive sub-12h TAU in the set (3 for a scheduled
+       advisory, 4-7 when a special advisory displaced it). Verified on Helene: 7 of 18
+       cycles differ, up to 20 kt, and two of them straddle the hurricane threshold — so
+       reading TAU 0 scored a forecast where NHC had already said hurricane.
+       A cycle with no positive sub-12h TAU produced no advisory at all. */
+    const T = ofcl.map((r) => r.tau).filter((x) => x > 0 && x < 12).sort((a, b) => a - b)[0];
+    if (T == null) { refusals.noAdvisoryTau = (refusals.noAdvisoryTau || 0) + 1; continue; }
+    const now = ofcl.find((r) => r.tau === T);
     if (!now) { refusals.noAnalysis = (refusals.noAnalysis || 0) + 1; continue; }
 
-    /* The shape reachesHurricaneP expects: the official forecast as track points. */
-    const points = ofcl.map((r) => ({ hr: r.tau, kt: r.vmax, initial: r.tau === 0 }));
+    /* Rebased onto the ADVISORY's clock. a-deck TAUs run from the cycle DTG, so a TAU 12
+       row is 12h after the DTG but only 12-T hours after the advisory went out. The MAE
+       table is indexed by lead time from issuance, so feeding raw TAU looks the error up
+       T hours too far out. Rows before the advisory are dropped: they are not part of it. */
+    const points = ofcl.filter((r) => r.tau >= T)
+      .map((r) => ({ hr: r.tau - T, kt: r.vmax, initial: r.tau === T }));
     const official = reachesHurricaneP(points, null, null);
     if (!official || official.p == null) { refusals.noOfficialP = (refusals.noOfficialP || 0) + 1; continue; }
 
@@ -187,6 +200,7 @@ await writeFile(resolve(DATA, "backtest.json"), JSON.stringify({
   basin: BASIN, years: YEARS,
   thresholdKt: HURRICANE_REPORTED_KT,
   reconApplied: false,
+  advisoryIntensityFromTau: true,
   note: "Recon and SHIPS are absent from this replay: the archive carries no advisory issue"
       + " time, and the engine may only shift on a fix it can show post-dates the advisory."
       + " This scores the official-forecast and ATCF-consensus path only.",
