@@ -324,7 +324,7 @@ function MillibarTerminalApp() {
   /* Spatial data is the reason this is a terminal and not a spreadsheet, and it was sized like
      a supporting chart. Half the viewport, floored at 500px so it stays a centrepiece on a
      laptop and grows on a wall display. */
-  const cmdH = Math.max(500, Math.round(vh * 0.38 / zoom));
+  const cmdH = Math.max(480, Math.round(vh * 0.35 / zoom));
   /* Newer snapshot available. At live with playback stopped we take it immediately
      (a reload is the honest way to rebuild MT — nothing is patched in place); if the
      operator is scrubbing history we surface a chip and let them choose. */
@@ -515,7 +515,7 @@ function MillibarTerminalApp() {
         </div>
 
         <div style={{ marginBottom: gap }}>
-          <window.MT_Attention dense={dense} maxH={narrow ? 420 : 500}
+          <window.MT_Attention dense={dense} maxH={narrow ? 380 : 400}
             onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
             onSelectContract={pickContract} />
         </div>
