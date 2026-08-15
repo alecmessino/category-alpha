@@ -151,14 +151,14 @@ if (nav) add("live URL responds", nav.status() === 200, `HTTP ${nav.status()} at
 
 await page.waitForTimeout(4000);
 
-/* The board is four tabs now, so only one view is mounted at a time. Walk all of them,
+/* The board is three tabs, so only one view is mounted at a time. Walk all of them,
    union the rendered text, and come back to Situation — otherwise every panel that lives
    behind a tab reads as missing, which is a false failure with exactly the shape of a
    real one. */
 let tabText = "";
 let groupHeaders = 0;                       // DOM counts must be taken while the tab is up
 let hintCount = 0, hintText = "";           // the "?" drawers, opened and read
-for (const label of ["Situation", "Markets", "Models", "Optimizer"]) {
+for (const label of ["Situation", "Markets", "Models"]) {
   await page.evaluate((l) => {
     const b = [...document.querySelectorAll("button[role=tab]")].find((x) => x.textContent.trim().toLowerCase() === l.toLowerCase());
     if (b) b.click();
@@ -693,8 +693,8 @@ add("and it is the first thing under the header",
 /* Measured on SITUATION specifically — the tab walk above resets here before probing — so
    the number says nothing about the other three. Worth stating in the detail line, because
    reading it as a whole-page figure sends the fix to the wrong tab. */
-add("four tabs, so no single view is a wall",
-  LY.tabs === 4 && LY.screensToScroll <= 2.0,
+add("three tabs, so no single view is a wall",
+  LY.tabs === 3 && LY.screensToScroll <= 2.0,
   `${LY.tabs} tabs · Situation is ${LY.screensToScroll} screens tall (${LY.pageHeight}px / ${LY.viewportHeight}px)`
   + (LY.tallest ? ` · tallest: ${LY.tallest}` : ""));
 /* The advisory block: computed server-side, and for a long time never delivered. */
