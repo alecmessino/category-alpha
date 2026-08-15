@@ -4,22 +4,13 @@ const { Panel: P, SectionHeader: SH, ProvenanceFooter: PF, Badge: BG, Gauge: GG,
 const TIER_TONE = { A: "pos", B: "warn", C: "neg" };
 
 /* ---- "?" drawer ------------------------------------------------------------
-   Progressive disclosure for the caveats. Panels used to carry their explanation as a
-   permanent paragraph underneath, which cost a third of the page height and read as a
-   wall of text on a board whose entire point is that a number is scannable in a second.
-   The text is not gone — a board that quietly drops its caveats starts implying coverage
-   it does not have — it is one click away, and it is authored in claims.js next to the
-   claim it qualifies rather than inline where it can drift.
-
-   Deliberately click, not hover: these are three-line explanations, and a tooltip that
-   appears under the cursor on the way to something else is noise. */
+   Progressive disclosure for the caveats. */
 function Hint({ id, label }) {
   const [open, setOpen] = React.useState(false);
   const n = (window.MTC && MTC.claim(id)) || null;
-  /* An unknown id must be loud, not absent. Returning null here would make a dropped
-     caveat look like a panel that never had one. audit-claims.mjs catches this at build
-     time; this is the runtime backstop, and verify-live asserts the phrase is nowhere
-     on the deployed page. */
+  /* An unknown id must be loud, not absent. Returning null here would make a dropped caveat
+     look like a panel that never had one. audit-claims.mjs catches this at build time; this is
+     the runtime backstop, and verify-live asserts the phrase is nowhere on the deployed page. */
   if (!n) return null;
   if (!n.body) return <span style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--neg)" }}>{n.text}</span>;
   return (
@@ -87,20 +78,19 @@ function MT_Situation({ dense }) {
              taken directly against, read at the frame so a new advisory moves it here
              and not only inside the storm console. */
           ...(s.lead ? [{ k: "P(HURRICANE) " + s.lead.name.toUpperCase(), v: Math.round(s.lead.p * 100) + "%",
-            /* LAG, QUALITY TIER, GUIDANCE POSITION — the three qualifiers that have to
-               travel with this number, in the same cell, so it cannot be read without
-               them. And the raw estimate beside the calibrated one whenever the two
-               differ, because a probability that has been moved should say so where it
-               is shown, not in a drawer. */
+            /* LAG, QUALITY TIER, GUIDANCE POSITION — the three qualifiers that have to travel
+               with this number, in the same cell, so it cannot be read without them. And the
+               raw estimate beside the calibrated one whenever the two differ, because a
+               probability that has been moved should say so where it is shown, not in a drawer. */
             sub: "adv #" + (s.lead.adv || "?") + (s.lead.lagMin != null ? " · " + s.lead.lagMin + "m old" : "")
                + (s.lead.quality ? " · evidence " + s.lead.quality : "")
                + (s.lead.guidance ? " · " + s.lead.guidance + " guidance" : "")
                + (s.lead.calibrated && s.lead.pRaw != null ? " · raw " + Math.round(s.lead.pRaw * 100) + "%" : ""),
             tone: "var(--accent)" }] : []),
-          /* What has landed that the advisory has not caught up to yet. This is the cell
-             the whole ingest exists to fill: when it reads "guidance cycle 12m ago" and
-             the advisory is 90 minutes old, the board is holding something the market
-             has not been told. */
+          /* What has landed that the advisory has not caught up to yet. This is the cell the
+             whole ingest exists to fill: when it reads "guidance cycle 12m ago" and the
+             advisory is 90 minutes old, the board is holding something the market has not been
+             told. */
           ...(s.intel && s.intel.last ? [{ k: "LATEST ARRIVAL", v: s.intel.last.ageMin != null ? s.intel.last.ageMin + "m" : "—",
             sub: s.intel.last.what + " · " + s.intel.arrivals + " in " + Math.round(s.windowMin / 60) + "h",
             tone: s.intel.last.kind === "recon" ? "var(--edge-glow)" : "var(--text-1)" }] : []),
@@ -199,81 +189,14 @@ function MT_Evidence({ stormId, frame, selection, onSelect, dense }) {
   );
 }
 
-/* ---- Confidence (evidence-quality) ---- */
-function MT_Confidence({ stormId, frame }) {
-  const s = MTX.snap(stormId, frame);
-  return (
-    <P title="Confidence" right={<BG tone={TIER_TONE[s.tier]}>TIER {s.tier}</BG>}
-      footer={<PF {...MTC.footer("panel.confidence")} tier={s.tier} />}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", lineHeight: 1.6 }}>
-        {s.tierReasons.map((r, i) => <div key={i}>· {r}</div>)}
-      </div>
-      <div style={{ marginTop: 10, padding: "9px 11px", borderRadius: 8, border: "1px solid var(--border-dim)", borderLeft: "3px solid var(--special)", fontSize: 11, color: "var(--text-2)", lineHeight: 1.5 }}>
-        Evidence-quality is <b style={{ color: "var(--text-1)" }}>not</b> probability. This tier scores how real/live/sourced the inputs are — a 60% @ B ≠ 60% @ A.
-      </div>
-    </P>
-  );
-}
-
-
-/* ---- Edge Matrix / Q-Kelly ---- */
-function MT_EdgeMatrix({ frame, bankroll, stake, setBankroll, setStake, selection, onSelect, dense }) {
-  const rows = MT.contracts.map((c) => ({ c, k: MTX.kellyFor(c, frame, bankroll, stake) }));
-  const total = rows.reduce((a, r) => a + (r.k.allocation || 0), 0);
-  const hasModel = (MT._feeds && MT._feeds.models && MT._feeds.models.ok);
-  const mktSrc = (MT._feeds && MT._feeds.markets && MT._feeds.markets.source) || "market";
-  return (
-    <P pad={false} title="Edge Matrix — Q-Kelly Allocation" right={<BG tone={hasModel ? "live" : "neg"} dot>{hasModel ? "CLIMATOLOGY ANCHOR" : "MODEL DEFERRED"}</BG>}
-      footer={<PF {...MTC.footer("panel.edge")} />}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "10px 12px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: ".5px", textTransform: "uppercase", color: "var(--text-2)" }}>Bankroll</span>
-        <input type="number" value={bankroll} min={100} step={500} onChange={(e) => setBankroll(+e.target.value || 0)}
-          style={{ width: 104, fontFamily: "var(--font-mono)", fontSize: 13, padding: "5px 8px", border: "1px solid var(--border-dim)", borderRadius: 6, background: "var(--surface-card)", color: "var(--text-1)" }} />
-        <div style={{ display: "flex" }}>
-          {[[1, "FULL"], [0.5, "½"], [0.25, "¼"]].map(([f, l], i) => (
-            <BT key={l} variant="preset" mono active={stake === f} onClick={() => setStake(f)}
-              style={{ borderRadius: i === 0 ? "6px 0 0 6px" : i === 2 ? "0 6px 6px 0" : 0, marginLeft: i ? "-1px" : 0 }}>{l}</BT>
-          ))}
-        </div>
-        <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-2)" }}>Total deploy <b style={{ fontFamily: "var(--font-mono)", color: "var(--text-1)", fontSize: 13 }}>${total.toLocaleString()}</b></span>
-      </div>
-      {rows.length === 0 && <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-2)", padding: "14px 12px" }}>No hurricane prediction markets currently listed.</div>}
-      <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(200px,100%),1fr))", gap: 10, padding: dense ? 9 : 12 }}>
-        {rows.map(({ c, k }) => (
-          <div key={c.id} onClick={() => onSelect(c.id)} style={{ cursor: "pointer", borderRadius: 9, outline: selection.contract === c.id ? "1px solid var(--accent)" : "none", outlineOffset: 1 }}>
-            {k.noModel || k.noData ? (
-              <div style={{ border: "1px solid var(--border-dim)", borderRadius: 9, padding: "10px 11px", height: "100%" }}>
-                <div style={{ fontSize: 11.5, fontWeight: 600, color: "var(--text-1)", lineHeight: 1.25 }}>{c.short}</div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 8 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>MARKET</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 16, fontWeight: 800, color: "var(--text-1)" }}>{k.market != null ? Math.round(k.market) + "¢" : "—"}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginTop: 4 }}>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>KELLY</span>
-                  <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, color: "var(--neg)" }}>{k.noData ? "NO PRICE" : "NO MODEL"}</span>
-                </div>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 6, lineHeight: 1.4 }}>{c.liquidity != null ? "liq $" + Math.round(c.liquidity / 1000) + "k · " : ""}edge needs a model anchor</div>
-              </div>
-            ) : (
-              <EC contract={c.label} edge={k.edge} marketPct={k.market} liquidity={c.liquidity}
-                theoretical={k.noBet ? undefined : k.theoretical} capped={k.capped} allocation={k.allocation} stakePct={k.stakePct} rawPct={k.rawPct} />
-            )}
-          </div>
-        ))}
-      </div>
-    </P>
-  );
-}
-
 /* ---- Edge book: the ranked answer to "what do I buy" ----
-   Everything else on this board answers a question about the world. This answers a
-   question about the operator's next action, which is why it sits at the top and why
-   it is a short list rather than a grid of every contract. */
+   Everything else on this board answers a question about the world. This answers a question
+   about the operator's next action, which is why it sits at the top and why it is a short list
+   rather than a grid of every contract. */
 /* ---- Mission control: one storm, everything that decides it ----
-   The advisory carries four things that matter and they were scattered across four
-   surfaces: how intense it is now, what NHC says it becomes, whether an official watch
-   is up, and how old the product was when we read it. An operator deciding on a position
-   should not have to assemble that. */
+   The advisory carries four things that matter and they were scattered across four surfaces:
+   how intense it is now, what NHC says it becomes, whether an official watch is up, and how old
+   the product was when we read it. */
 /* Above / below the guidance envelope is a direction, so it gets a direction's colour:
    above is the one that makes a derived probability optimistic. */
 const GUIDE_TONE = { above: "var(--warn)", below: "var(--special)", with: "var(--text-2)" };
@@ -281,11 +204,9 @@ function StormConsole({ storm, dense, frame }) {
   const S = storm;
   if (!S) return null;
   const mono = { fontFamily: "var(--font-mono)" };
-  /* wind and pressure are FRAME ACCESSORS on MT.storms, not plain numbers — this panel
-     was written against the raw snapshot shape and never ran against the real one,
-     because the loader was dropping the fields that make it render at all. Reading them
-     as values produced "(f) => pick(...) kt" on screen. Call them, at the frame the rest
-     of the board is showing, so scrubbing history moves these too. */
+  /* wind and pressure are FRAME ACCESSORS on MT.storms, not plain numbers — this panel was
+     written against the raw snapshot shape and never ran against the real one, because the
+     loader was dropping the fields that make it render at all. */
   const at = Number.isFinite(frame) ? frame : (window.MT ? MT.FRAMES - 1 : 0);
   const val = (v) => (typeof v === "function" ? v(at) : v);
   const windKt = val(S.wind), pressureMb = val(S.pressure);
@@ -298,10 +219,8 @@ function StormConsole({ storm, dense, frame }) {
      is green only inside one intermediate cycle. */
   const lag = val(S.advisoryLagMin);
   const lagTone = lag == null ? "var(--text-2)" : lag <= 45 ? "var(--pos)" : lag <= 180 ? "var(--warn)" : "var(--neg)";
-  /* The four ingested feeds, read AT THE FRAME like everything else here, so scrubbing
-     back shows what the board actually held at that moment rather than what it holds
-     now. Each is null when that feed had nothing for this storm, and null renders as
-     absent rather than as a zero. */
+  /* The four ingested feeds, read AT THE FRAME like everything else here, so scrubbing back
+     shows what the board actually held at that moment rather than what it holds now. */
   const cal = typeof S.pCalAt === "function" ? S.pCalAt(at) : null;
   const quality = typeof S.qualityAt === "function" ? S.qualityAt(at) : null;
   const conKt = typeof S.conKtAt === "function" ? S.conKtAt(at) : null;
@@ -312,8 +231,6 @@ function StormConsole({ storm, dense, frame }) {
   const reconKt = typeof S.reconKtAt === "function" ? S.reconKtAt(at) : null;
   const reconFl = typeof S.reconFlKtAt === "function" ? S.reconFlKtAt(at) : null;
   const shear = typeof S.shearAt === "function" ? S.shearAt(at) : null;
-  const ohc = typeof S.ohcAt === "function" ? S.ohcAt(at) : null;
-  const mpi = typeof S.mpiAt === "function" ? S.mpiAt(at) : null;
   const ri = typeof S.riAt === "function" ? S.riAt(at) : null;
   const ascatKt = typeof S.ascatKtAt === "function" ? S.ascatKtAt(at) : null;
   const ascatAge = typeof S.ascatAgeAt === "function" ? S.ascatAgeAt(at) : null;
@@ -354,33 +271,27 @@ function StormConsole({ storm, dense, frame }) {
         {peak && cell(peak.hr === 0 ? "Peak (now)" : "Forecast peak", peak.kt + " kt", "var(--accent)")}
         {peak && peak.hr > 0 && cell("At", "+" + peak.hr + "h")}
         {hp && cell("To hurricane", Math.round(hp.p * 100) + "%", "var(--accent)")}
-        {/* RAW AND CALIBRATED, ADJACENT. The cell above is the official-forecast estimate
-            exactly as it always was; this one is what the pre-advisory feeds made of it.
-            Two cells, side by side, is the only presentation that lets a reader see the
-            size and the direction of the calibration at a glance — and lets them see when
-            it did nothing at all, which is most cycles. */}
+        {/* RAW AND CALIBRATED, ADJACENT. The cell above is the official-forecast estimate exactly as it
+   always was; this one is what the pre-advisory feeds made of it. */}
         {cal && cell("Calibrated", Math.round(cal * 100) + "%",
           hp && Math.abs(cal - hp.p) >= 0.02 ? "var(--edge-glow)" : "var(--accent)")}
         {quality && cell("Evidence", quality, quality === "HIGH" ? "var(--pos)" : quality === "MEDIUM" ? "var(--warn)" : "var(--neg)")}
       </div>
 
       {/* ---- what arrived before the advisory --------------------------------------
-          The four ingested feeds, each stated as what it is and how old it is. This is
-          the panel's answer to "why is the calibrated number different from the raw
-          one", and it is deliberately above the forecast curve: the reason a number
-          moved is more urgent than the shape of the curve it moved on. */}
+   The four ingested feeds, each stated as what it is and how old it is. This is the panel's
+   answer to "why is the calibrated number different from the raw one", and it is deliberately
+   above the forecast curve: the reason a number moved is more urgent than the shape of the
+   curve it moved on. */}
       {(conKt != null || reconAge != null || shear != null || ascatKt != null) && (
         <div style={{ padding: "8px 11px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 5 }}>
             <span style={{ ...mono, fontSize: 9.5, letterSpacing: ".6px", textTransform: "uppercase", color: "var(--text-2)" }}>
               Ahead of the advisory
             </span>
-            {/* How the calibrated number was built, and every input the engine REFUSED
-                and why, one click away. The refusals matter more than the acceptances —
-                a reader who sees "the pass was 29 hours old, so the band was not
-                tightened" knows the board is checking. It is a drawer rather than three
-                more lines per storm for the same reason every other caveat here is: the
-                board is scannable in a second or it is not read at all. */}
+            {/* How the calibrated number was built, and every input the engine REFUSED and why, one click
+   away. The refusals matter more than the acceptances — a reader who sees "the pass was 29
+   hours old, so the band was not tightened" knows the board is checking. */}
             <span style={{ marginLeft: "auto" }}><Hint id="note.intel" label="how this was built" /></span>
           </div>
           <div style={{ display: "flex", gap: 14, flexWrap: "wrap", alignItems: "baseline" }}>
@@ -406,8 +317,6 @@ function StormConsole({ storm, dense, frame }) {
             {shear != null && (
               <span style={{ ...mono, fontSize: 10.5, color: "var(--text-2)" }}>
                 ENVIRONMENT shear <b style={{ color: "var(--text-1)" }}>{shear} kt</b>
-                {ohc != null && <span> · ocean heat {ohc}</span>}
-                {mpi != null && <span> · potential {mpi} kt</span>}
                 {ri != null && <span> · RI floor {Math.round(ri * 100)}%</span>}
               </span>
             )}
@@ -509,24 +418,12 @@ function MT_StormConsoles({ dense, frame }) {
     <P pad={false} title="Active systems — official advisory"
       right={<BG tone="live" dot>{live.length} TRACKED</BG>}
       footer={<PF {...MTC.footer("panel.storms")} />}>
-      {/* BOUNDED, because this is the one block on the Situation tab whose height is a
-          function of how many storms exist. Everything else there is fixed by design (the
-          map) or already capped (the attention queue, 560px at MT_Attention). This list was
-          not, so the tab's height was the basin's business: two systems measured 2871px
-          against a 2800px budget and the deployed check failed on a quiet night in August.
-          Three would not have been close.
-
-          A cap rather than a truncation — every console stays in the DOM and in innerText,
-          so nothing is hidden from a reader or from the verifier, it just stops setting the
-          page's height. Same pattern, same reason, as the panel beside it. */}
+      {/* BOUNDED, because this is the one block on the Situation tab whose height is a function of how
+   many storms exist. Everything else there is fixed by design (the map) or already capped (the
+   attention queue, 560px at MT_Attention). */}
       <div style={{ padding: dense ? 9 : 11 }}>
-        {/* The same 460/560 the attention queue uses, and deliberately the same number: these
-            two panels share a grid row, so the row is as tall as the taller of them. Matching
-            the cap makes the row height a constant — set by the bounded side — instead of a
-            function of how many systems the basin happens to be running. Measured: the panel
-            goes 1189px → 930px, matching the attention queue exactly, and the tab 2730px →
-            2471px — 1.8 screens against a 2.0 budget, with a third storm now costing nothing
-            at all. */}
+        {/* The same 460/560 the attention queue uses, and deliberately the same number: these two panels
+   share a grid row, so the row is as tall as the taller of them. */}
         <div style={{ maxHeight: dense ? 460 : 560, overflowY: "auto", minHeight: 0 }}>
           {live.map((s) => <StormConsole key={s.id} storm={s} dense={dense} frame={frame} />)}
         </div>
@@ -557,10 +454,8 @@ const ACTIONABLE = (r) => r.grade === "TAKE" || r.grade === "SMALL";
 
 function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, dense }) {
   const [showAll, setShowAll] = React.useState(false);
-  /* The page had become a wall of prose: sixty-six trap rows, four inversion lines and
-     three explanatory paragraphs, all inline, above the only table anyone reads. The
-     reasoning still has to be reachable — that is the whole provenance contract — but
-     reachable is not the same as unavoidable. Each collapses to its headline count. */
+  /* The page had become a wall of prose: sixty-six trap rows, four inversion lines and three
+     explanatory paragraphs, all inline, above the only table anyone reads. */
   const [showTraps, setShowTraps] = React.useState(false);
   const [showLadder, setShowLadder] = React.useState(false);
   const [showMethod, setShowMethod] = React.useState(false);
@@ -618,10 +513,7 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
             <div style={{ ...mono, fontSize: 10, fontWeight: 800, letterSpacing: 1.2, color: "var(--accent)" }}>
               OFFICIAL FORECAST — NHC ADVISORY
             </div>
-            {/* x.wind is a FRAME ACCESSOR, not a number. This strip only started rendering
-                when the loader stopped dropping the advisory fields, and React silently
-                dropped the function child and warned — so the line read "Lala kt".
-                Dead code does not get exercised; it just waits. */}
+            {/* x.wind is a FRAME ACCESSOR, not a number. */}
             {live.map((x) => (
               <div key={x.id} style={{ ...mono, fontSize: 11.5, marginTop: 4, color: "var(--text-1)" }}>
                 {x.name} {typeof x.wind === "function" ? x.wind(frame) : x.wind}kt
@@ -797,8 +689,8 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
 }
 
 /* ---- Term structure: strike ladder vs climatology (the "yield curve") ----
-   Market-implied probability and the HURDAT2 baseline plotted against strike, with
-   the gap between them shaded. Rich = market above climatology, cheap = below. */
+   Market-implied probability and the HURDAT2 baseline plotted against strike, with the gap
+   between them shaded. Rich = market above climatology, cheap = below. */
 function MT_YieldCurve({ dense }) {
   // Group by SERIES ticker (KXHURCTOTMAJ-26DEC01-T3 → KXHURCTOTMAJ-26DEC01). Grouping
   // by prose label merged distinct series that share strike values, which produced a
@@ -934,10 +826,8 @@ function MT_YieldCurve({ dense }) {
 
 
 /* ---- ATTENTION — the work queue -------------------------------------------
-   Replaces the scrolling register as the primary object. The register said "here
-   is everything that happened"; this says "here is what requires you, in order".
-   The full register is still one click away under Verify — nothing is hidden,
-   it is just no longer competing for the top of the screen. */
+   Replaces the scrolling register as the primary object. The register said "here is everything
+   that happened"; this says "here is what requires you, in order". */
 const PRIO_STYLE = {
   HIGH:   { c: "var(--neg)", label: "HIGH" },
   MEDIUM: { c: "var(--warn)",      label: "MEDIUM" },
@@ -945,10 +835,9 @@ const PRIO_STYLE = {
 };
 const KIND_ICON = { intensity: "◆", pressure: "▼", market: "▮", advisory: "✦", stale: "◷", divergence: "⚠", schedule: "◷", feed: "○", pipeline: "◌", genesis: "◉" };
 
-/* Operator marks. The terminal cannot observe whether a human has acknowledged an
-   item or checked their exposure, so it does not pretend to derive it: these are
-   asserted by the operator, stored in this browser, and labelled as such. They are
-   kept visually and structurally apart from the machine-derived lifecycle. */
+/* Operator marks. The terminal cannot observe whether a human has acknowledged an item or
+   checked their exposure, so it does not pretend to derive it: these are asserted by the
+   operator, stored in this browser, and labelled as such. */
 const MARKS_KEY = "mt.marks.v1";
 function loadMarks() {
   try { return JSON.parse(localStorage.getItem(MARKS_KEY) || "{}"); } catch (e) { return {}; }
@@ -979,7 +868,7 @@ function LifecycleRail({ lc }) {
   );
 }
 
-function MT_Attention({ dense, imagery, onSeek, onSelectContract, maxH = 560 }) {
+function MT_Attention({ dense, onSeek, onSelectContract, maxH = 560 }) {
   const [minPrio, setMinPrio] = React.useState("LOW");
   const [marks, setMarks] = React.useState(loadMarks);
   const [openId, setOpenId] = React.useState(null);
@@ -990,8 +879,7 @@ function MT_Attention({ dense, imagery, onSeek, onSelectContract, maxH = 560 }) 
     saveMarks(next);
     return next;
   });
-  const imageryAgeMin = imagery && imagery.ageMin != null ? imagery.ageMin : null;
-  const a = MTX.attention ? MTX.attention({ windowMin: 360, imageryAgeMin, imageryProduct: imagery && imagery.product }) : null;
+  const a = MTX.attention ? MTX.attention({ windowMin: 360 }) : null;
   if (!a) return null;
   const order = ["HIGH", "MEDIUM", "LOW"];
   const cutoff = order.indexOf(minPrio);
@@ -1099,9 +987,8 @@ function MT_Attention({ dense, imagery, onSeek, onSelectContract, maxH = 560 }) 
 }
 
 /* ---- BOARD IMPACT — "does this touch what I would trade?" -------------------
-   Deliberately board-level. No position feed is wired, so a portfolio answer would
-   have to be invented; the panel says that outright rather than implying coverage
-   it does not have. */
+   Deliberately board-level. No position feed is wired, so a portfolio answer would have to be
+   invented; the panel says that outright rather than implying coverage it does not have. */
 function MT_Exposure({ frame, dense, onSelect, selection }) {
   const x = MTX.exposure ? MTX.exposure(360) : null;
   if (!x) return null;
@@ -1227,10 +1114,9 @@ function MT_Markets({ frame, selection, onSelect, dense }) {
         <BG tone={rows.length ? "live" : "neg"} dot>{rows.length} MKTS</BG>
         <Hint id="note.markets" /></div>}
       footer={<PF {...MTC.footer("panel.markets")} />}>
-      {/* Grouped by series and capped. Every listed market is now carried, and a flat
-          147-row list ordered by volume interleaves ladders from different questions —
-          which is precisely the layout that makes an operator slower. Rungs of one
-          question stay together, in strike order, the way the exchange presents them. */}
+      {/* Grouped by series and capped. Every listed market is now carried, and a flat 147-row list
+   ordered by volume interleaves ladders from different questions — which is precisely the
+   layout that makes an operator slower. */}
       <div style={{ overflowX: "auto", overflowY: "auto", maxHeight: dense ? 460 : 560 }}>
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: dense ? 11 : 12 }}>
           <thead><tr>{th("Contract")}{th("Px", 1)}{th("Δ", 1)}{th("Model", 1)}{th("Edge", 1)}{th("OI", 1)}{th("4h", 1)}</tr></thead>
@@ -1520,29 +1406,14 @@ function MT_Observability({ narrow }) {
   return (
     <P pad={false} title="Observability — Pipeline Status" right={<Hint id="note.observability" />}
       footer={<PF {...MTC.footer("panel.observability")} />}>
+      {/* Only the lines that change a decision: can this board be trusted, is a storm
+          held, and is it scored. Everything else moved to the drawer. */}
       <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", padding: "8px 12px", borderBottom: "1px solid var(--border-dim)", lineHeight: 1.5 }}>
-        <div style={{ color: MTC.claim("deploy.verified").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("deploy.verified").text}</div>
-        <div style={{ color: MTC.claim("markets.coverage").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("markets.coverage").text}</div>
-        {/* Advisory age is a model input — it decides whether a storm anchor can grade
-            TAKE and whether it is priced at all — so it is reported where the other
-            pipeline facts are, not only inside the storm console. */}
-        <div style={{ color: MTC.claim("advisory.lag").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("advisory.lag").text}</div>
-        {/* The same crossing the Signal Register reports, from the same threshold, so the
-            two surfaces cannot disagree about whether a storm is actionable. */}
-        <div style={{ color: MTC.claim("edgebook.hold").ok ? "var(--text-2)" : "var(--warn)" }}>{MTC.claim("edgebook.hold").text}</div>
-        {/* The four ingested feeds, mirrored here in priority order. Observability is
-            where an operator goes to decide whether to trust the board, and after this
-            build that decision turns on whether anything arrived ahead of the advisory
-            and whether the storm's intensity was measured or estimated. */}
-        {/* A claim may offer a one-line form for a panel with a height budget. The full
-            statement stays authored in the registry and reachable through the drawer, so
-            compacting the display never shortens the claim itself. */}
-        {["intel.atcf", "intel.recon", "intel.ships", "intel.ascat", "intel.calibration", "model.calibration"].map((id) => (
+        {["deploy.verified", "advisory.lag", "edgebook.hold", "model.calibration"].map((id) => (
           <div key={id} style={{ color: MTC.claim(id).ok ? "var(--text-2)" : "var(--warn)" }}>
             {MTC.claim(id).short || MTC.claim(id).text}
           </div>
         ))}
-        <div>{MTC.claim("capability.notIngested").text}</div>
       </div>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 1, padding: 12, background: "var(--border-dim)" }}>
         {MT.pipeline.map((s, i) => (
@@ -1592,4 +1463,4 @@ function MT_Observability({ narrow }) {
   );
 }
 
-Object.assign(window, { MT_Hint: Hint, MT_Evidence, MT_Confidence, MT_EdgeMatrix, MT_EdgeBook, MT_StormConsoles, MT_Markets, MT_OrderBook, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section, MT_Attention, MT_Exposure });
+Object.assign(window, { MT_Hint: Hint, MT_Evidence, MT_EdgeBook, MT_StormConsoles, MT_Markets, MT_OrderBook, MT_Observability, MT_YieldCurve, MT_Signals, MT_Situation, MT_Section, MT_Attention, MT_Exposure });

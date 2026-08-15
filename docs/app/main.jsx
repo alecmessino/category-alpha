@@ -30,11 +30,9 @@ function Anno({ tone, icon, title, desc }) {
 }
 
 // Cinematic terminal empty state — honest awaiting-telemetry, per the design spec.
-/* Genesis watch — areas NHC is watching that are not yet classified cyclones.
-   This lived inside the awaiting-telemetry block, which meant it disappeared the moment
-   one of these areas became a storm. That is backwards: the day a wave gets a name is
-   the day the two behind it matter most, because the season-count ladders price off the
-   whole queue, not off the lead system. It renders wherever the board is. */
+/* Genesis watch — areas NHC is watching that are not yet classified cyclones. This lived inside
+   the awaiting-telemetry block, which meant it disappeared the moment one of these areas became
+   a storm. */
 function GenesisWatch({ compact }) {
   const areas = (window.MT && MT._outlook) || [];
   if (!areas.length) return null;
@@ -74,10 +72,9 @@ function AwaitingTelemetry({ feeds, generatedAt, note }) {
             {f.name} — <span style={{ color: "var(--text-1)" }}>{f.detail}</span>
           </div>
         ))}
-        {/* Macro block. A quiet basin is not an absence of information — the reason it
-            is quiet IS the read. Every figure is an owned claim computed from a feed or
-            from the HURDAT2 record; the mechanism line exists so the numbers are not
-            mistaken for a shear observation we do not have. */}
+        {/* Macro block. A quiet basin is not an absence of information — the reason it is quiet IS the
+   read. Every figure is an owned claim computed from a feed or from the HURDAT2 record; the
+   mechanism line exists so the numbers are not mistaken for a shear observation we do not have. */}
         {window.MTC && MTC.claim("macro.enso").ok && (
           <div style={{ margin: "14px 0", padding: "11px 13px", border: "1px solid var(--border-strong)",
             borderLeft: "3px solid var(--special)", borderRadius: 8, background: "var(--surface-sunken)" }}>
@@ -98,11 +95,9 @@ function AwaitingTelemetry({ feeds, generatedAt, note }) {
 }
 
 /* ---- Ingestion health, in the header ----
-   Now that advisory lag is measured rather than asserted, it belongs where it is seen
-   without looking for it. Three states only, and the third is the one that matters: a
-   feed that was never wired is NOT a red light. Red means broken; grey means we never
-   claimed to have it. Conflating those is how a board ends up looking like it has
-   capabilities it does not — which is the failure this whole registry exists to stop. */
+   Now that advisory lag is measured rather than asserted, it belongs where it is seen without
+   looking for it. Three states only, and the third is the one that matters: a feed that was
+   never wired is NOT a red light. */
 function IngestionHUD() {
   const [open, setOpen] = React.useState(false);
   const F = (window.MT && MT._feeds) || {};
@@ -229,10 +224,9 @@ function humanMin(m) {
    never change with the tab — spatial context and the active-system switcher are
    permanent furniture, and only the analysis below them swaps. */
 const TABS = [
-  { id: "Situation", hint: "what changed and whether to trust it" },
+  { id: "Situation", hint: "the edge book, then what changed" },
   { id: "Markets",   hint: "the full board, depth and sizing" },
   { id: "Models",    hint: "fair value, posterior stack, audit trail" },
-  { id: "Optimizer", hint: "ranked trades, net of what they cost to put on" },
 ];
 function TabBar({ tab, setTab }) {
   return (
@@ -308,30 +302,28 @@ function MillibarTerminalApp() {
   const [sel, setSel] = React.useState({ contract: (MT.contracts[0] && MT.contracts[0].id) || null, evidence: null });
   const [bankroll, setBankroll] = React.useState(10000);
   const [stake, setStake] = React.useState(0.25);
-  const [layers, setLayers] = React.useState({ satellite: true, infrared: false, track: true, forecast: true, cone: true, recon: false, ascat: false, models: false, particles: false });
+  const [layers, setLayers] = React.useState({ track: true, forecast: true, cone: true });
   const [vw, setVw] = React.useState(typeof window !== "undefined" ? window.innerWidth : 1440);
   const [vh, setVh] = React.useState(typeof window !== "undefined" ? window.innerHeight : 900);
   const narrow = vw < 900;
-  const [imagery, setImagery] = React.useState(null);
   React.useEffect(() => {
     const onResize = () => { setVw(window.innerWidth); setVh(window.innerHeight); };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
-  /* Very wide viewports (4K panels, or a zoomed-out browser) were rendering the whole
-     terminal as a narrow ~1680px band of 9px type marooned in gutters. Scale the shell
-     with the viewport so the layout keeps its proportions and the type stays legible,
-     then let the container use more of the width it has. */
+  /* Very wide viewports (4K panels, or a zoomed-out browser) were rendering the whole terminal
+     as a narrow ~1680px band of 9px type marooned in gutters. Scale the shell with the viewport
+     so the layout keeps its proportions and the type stays legible, then let the container use
+     more of the width it has. */
   const zoom = vw >= 3300 ? 1.65 : vw >= 2700 ? 1.4 : vw >= 2200 ? 1.2 : vw >= 1900 ? 1.08 : 1;
   const cw = vw / zoom;                    // effective layout width after scaling
   const wide = cw >= 1280;                 // room for a third column
   const gap = wide ? 18 : 14;
   const shell = { width: "100%", maxWidth: 2000, margin: "0 auto", boxSizing: "border-box",
     padding: wide ? "22px 26px 56px" : "16px 16px 48px" };
-  /* Spatial data is the reason this is a terminal and not a spreadsheet, and it was
-     sized like a supporting chart. Half the viewport, floored at 500px so it stays a
-     centrepiece on a laptop and grows on a wall display. The register alongside it
-     matches, so the two never disagree about how tall the block is. */
+  /* Spatial data is the reason this is a terminal and not a spreadsheet, and it was sized like
+     a supporting chart. Half the viewport, floored at 500px so it stays a centrepiece on a
+     laptop and grows on a wall display. */
   const cmdH = Math.max(420, Math.round(vh * 0.6 / zoom));
   /* Newer snapshot available. At live with playback stopped we take it immediately
      (a reload is the honest way to rebuild MT — nothing is patched in place); if the
@@ -384,26 +376,14 @@ function MillibarTerminalApp() {
   const healthLines = [
     { name: "NHC advisories", ok: !!(F.nhc && F.nhc.ok), status: F.nhc && !F.nhc.ok && F.nhc.status ? "FAIL" : "EMPTY", detail: (F.nhc && F.nhc.note) || "—" },
     { name: "Prediction markets", ok: !!(F.markets && F.markets.ok), status: F.markets && !F.markets.ok && F.markets.status ? "FAIL" : "EMPTY", detail: (F.markets && F.markets.note) || "—" },
-    { name: "GIBS imagery", ok: !!(F.satellite && F.satellite.ok), status: "EMPTY", detail: (F.satellite && F.satellite.source) || "NASA GIBS" },
   ];
 
   /* Satellite freshness, normalised for the attention queue. GOES carries a real
      10-minute slot timestamp; the VIIRS fallback is a daily composite, so its age
      is reported as a fallback condition rather than a misleading minute count. */
-  const imageryState = React.useMemo(() => {
-    const f = imagery && imagery.fresh;
-    if (!f) return null;
-    if (f.product === "GOES GeoColor") {
-      const t = Date.parse(f.at);
-      return { product: f.product, ageMin: t ? Math.round((Date.now() - t) / 60000) : null };
-    }
-    return { product: f.product + " (GOES slot unavailable)", ageMin: 999 };
-  }, [imagery]);
 
-  const sitVerdict = (MTX.situation ? MTX.situation(360).verdict : null);
   // Real staleness of the snapshot itself — the dot was green regardless of age.
   const staleMin = MT._generatedAt ? Math.max(0, Math.round((Date.now() - Date.parse(MT._generatedAt)) / 60000)) : null;
-  const VTONE = { "TRADE-RELEVANT": "var(--edge-glow)", MATERIAL: "var(--warn)", COSMETIC: "var(--text-2)", "NO CHANGE": "var(--text-2)" };
   const shellHeader = (
     <header style={{ position: "sticky", top: 0, zIndex: 30, display: "flex", alignItems: "center", gap: 12, padding: "9px 20px", background: "var(--surface-card)", borderBottom: "1px solid var(--border-dim)", flexWrap: "wrap" }}>
       <img src="assets/logo-dark.svg" alt="Millibar Terminal" style={{ height: 34 }} onError={(e) => { e.target.style.display = "none"; }} />
@@ -421,11 +401,6 @@ function MillibarTerminalApp() {
         </div>
       )}
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>
-        {sitVerdict && (
-          <span title="Highest-severity change in the last 6h" style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .6,
-            color: VTONE[sitVerdict] || "var(--text-2)", border: "1px solid " + (VTONE[sitVerdict] || "var(--border-dim)"),
-            borderRadius: 5, padding: "2px 7px" }}>{sitVerdict}</span>
-        )}
         <span title={MT._generatedAt || ""} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: staleMin == null ? "var(--warn)" : staleMin <= 25 ? "var(--pos)" : staleMin <= 75 ? "var(--warn)" : "var(--neg)" }} />
           {MT._generatedAt ? "updated " + (fmtAgo(MT._generatedAt) || "—") : "awaiting refresh"}
@@ -437,26 +412,15 @@ function MillibarTerminalApp() {
             NEW DATA — LOAD
           </span>
         )}
-        {imagery && imagery.fresh && (
-          <>
-            <span style={{ opacity: .4 }}>·</span>
-            <span title={imagery.attribution || ""} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: imagery.fresh.product === "GOES GeoColor" ? "var(--pos)" : "var(--warn)" }} />
-              {imagery.fresh.product === "GOES GeoColor" ? "sat " + String(imagery.fresh.at).slice(11, 16) + "Z" : "sat " + imagery.fresh.at}
-            </span>
-          </>
-        )}
         <span style={{ opacity: .4 }}>·</span><span>as-of <b style={{ color: "var(--accent)" }}>{MTX.frameTime(frame)}</b></span>
         <IngestionHUD />
       </div>
     </header>
   );
 
-  /* No active cyclone used to short-circuit the ENTIRE terminal to the
-     awaiting-telemetry notice — which also hid 142 live seasonal markets, their
-     anchors, the posterior stack and the whole board. Those markets do not depend
-     on a storm existing: the Atlantic season runs to November and the count ladders
-     trade every day. Only the storm-SPECIFIC block is swapped out now. */
+  /* No active cyclone used to short-circuit the ENTIRE terminal to the awaiting-telemetry
+     notice — which also hid 142 live seasonal markets, their anchors, the posterior stack and
+     the whole board. */
   const S = storm ? MT.storms[storm] : null;
   const P0 = (S && PAI[S.phase]) || PAI.WATCH;
   const snap = MTX.snap(storm, frame);
@@ -467,19 +431,15 @@ function MillibarTerminalApp() {
       {shellHeader}
 
       <main style={shell}>
-        {/* The screen answers five questions, in order:
-              1 what changed  ·  2 why believe it  ·  3 does it touch the board
-              4 what deserves investigation  ·  5 where can I verify it
-            Everything below Attention is supporting material and collapses. */}
+        {/* The screen answers five questions, in order: 1 what changed · 2 why believe it · 3 does it
+   touch the board 4 what deserves investigation · 5 where can I verify it Everything below
+   Attention is supporting material and collapses. */}
 
         {/* 2 — WHERE. The map is the centrepiece and now sits like one: directly
             under the situation line, above every panel derived from it. It was
             previously made taller but never moved, so it stayed sixth down the page. */}
-        {/* The map used to disappear whenever no storm was selected, which is backwards:
-            a basin with three areas under watch and nothing classified is exactly when you
-            want to see the water. It renders always. The awaiting-telemetry block moved
-            BELOW it — the honest "nothing is classified" note is a caption on the map, not
-            a replacement for it. */}
+        {/* The map used to disappear whenever no storm was selected, which is backwards: a basin with
+   three areas under watch and nothing classified is exactly when you want to see the water. */}
         {true && (
         <window.MT_Section label="Spatial context" tier="track · cone · satellite · replay" defaultOpen
           summary={S ? (S.name + " " + S.cls + " · " + Math.round(snap.wind) + " kt") : "basin view — nothing classified"}>
@@ -490,7 +450,7 @@ function MillibarTerminalApp() {
           position: narrow ? "static" : "sticky", top: 8, zIndex: 400 }}>
           <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: (narrow || !S) ? "1fr" : "minmax(0,1fr) " + (wide ? 360 : 320) + "px" }}>
             <div style={{ position: "relative", height: narrow ? Math.max(300, Math.round(vh * 0.42)) : cmdH, overflow: "hidden", background: "var(--slate-950)" }}>
-              <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} onImagery={setImagery} resizeKey={tab + ":" + vw + ":" + vh} />
+              <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} resizeKey={tab + ":" + vw + ":" + vh} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--blue-300)", textTransform: "uppercase" }}>Storm Command Center</span>
               </div>
@@ -543,37 +503,19 @@ function MillibarTerminalApp() {
         <TabBar tab={tab} setTab={setTab} />
 
         {tab === "Situation" && (<>
-        {/* 1 + 2 — what changed, and whether to trust it. Side by side with the genesis
-            watch: they answer the same question at two horizons (what moved in the last
-            six hours, what may exist in the next seven days) and stacking them cost a
-            third of a viewport before the queue was even reached. */}
-        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.4fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
-          <window.MT_Situation dense={dense} />
-          {S && <GenesisWatch compact />}
-        </div>
-
-        {/* 3.2 — the active systems as the advisory states them, beside the queue rather
-            than above it. Stacked they were 1,650px and pushed Situation past its scroll
-            budget the moment this panel started rendering at all; side by side the row is
-            as tall as its taller half. Board Impact moved to Markets, where a table of
-            what repriced belongs. */}
-        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
-          <window.MT_StormConsoles dense={dense} frame={frame} />
-          <window.MT_Attention dense={dense} imagery={imageryState} maxH={narrow ? 420 : cmdH}
-            onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
-            onSelectContract={pickContract} />
-        </div>
-
-
-        </>)}
-
-        {tab === "Optimizer" && (<>
-        {/* 3.5 — what to actually do about it. This sits above the attention queue on
-            purpose: the queue says what changed, and a list of changes is not a list of
-            trades. Ranked, short, and net of what it costs to get the position on. */}
+        {/* The ranked answer to "what do I buy", first, above everything that explains it. */}
         <div style={{ marginBottom: gap }}>
           <window.MT_EdgeBook frame={frame} bankroll={bankroll} stake={stake}
             setBankroll={setBankroll} setStake={setStake} onSelect={pickContract} dense={dense} />
+        </div>
+
+        <div style={{ marginBottom: gap }}><window.MT_Situation dense={dense} /></div>
+
+        <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
+          <window.MT_StormConsoles dense={dense} frame={frame} />
+          <window.MT_Attention dense={dense} maxH={narrow ? 420 : cmdH}
+            onSeek={(tsZ) => { const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ); if (i >= 0) { setPlaying(false); setFrame(i); } }}
+            onSelectContract={pickContract} />
         </div>
 
         </>)}
@@ -590,9 +532,8 @@ function MillibarTerminalApp() {
         {/* 5c — the audit trail: every input, and the full unfiltered register */}
         <window.MT_Section label="Verify" tier="inputs · confidence · full register"
           summary={MT.evidence.length + " inputs · tier " + MTX.snap(storm, frame).tier}>
-          <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : wide ? "minmax(0,1.2fr) minmax(0,1fr) minmax(0,1.1fr)" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start" }}>
+          <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start" }}>
             <window.MT_Evidence stormId={storm} frame={frame} selection={sel} onSelect={(id) => setSel((s) => ({ ...s, evidence: id }))} dense={dense} />
-            <window.MT_Confidence stormId={storm} frame={frame} />
             <window.MT_Signals stormId={storm} dense={dense} maxH={520} onSeek={(tsZ) => {
               const i = (MT._frames || []).findIndex((fr) => fr.tsZ === tsZ);
               if (i >= 0) { setPlaying(false); setFrame(i); }
@@ -610,7 +551,6 @@ function MillibarTerminalApp() {
             <div style={{ display: "flex", flexDirection: "column", gap: gap, minWidth: 0 }}>
               <window.MT_Exposure frame={frame} dense={dense} selection={sel} onSelect={pickContract} />
               <window.MT_Markets frame={frame} selection={sel} onSelect={pickContract} dense={dense} />
-              <window.MT_EdgeMatrix frame={frame} bankroll={bankroll} stake={stake} setBankroll={setBankroll} setStake={setStake} selection={sel} onSelect={pickContract} dense={dense} />
             </div>
             <window.MT_OrderBook contractId={sel.contract} frame={frame} dense={dense} />
           </div>
