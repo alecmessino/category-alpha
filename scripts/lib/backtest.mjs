@@ -58,10 +58,21 @@ export function fixVisibleAt(fixes, tMs) {
 /* The truth, from the post-storm b-deck. Deliberately a SEPARATE input from anything the
    simulation touches: the outcome is read once, after every prediction is already made. */
 export function outcomeFrom(bdeckRows, thresholdKt) {
-  const kts = (bdeckRows || []).map((r) => r.vmax).filter((v) => Number.isFinite(v) && v > 0);
-  if (!kts.length) return null;
-  const peak = Math.max(...kts);
-  return { outcome: peak >= thresholdKt ? 1 : 0, peakKt: peak, records: kts.length };
+  const rows = (bdeckRows || []).filter((r) => Number.isFinite(r.vmax) && r.vmax > 0);
+  if (!rows.length) return null;
+  const peak = Math.max(...rows.map((r) => r.vmax));
+  /* WHEN the question stopped being open. A contract asking "does this storm reach
+     hurricane strength" resolves the moment it does, so a forecast issued after that
+     instant is not a forecast of anything — and scoring one against the settled outcome is
+     how a decaying remnant correctly priced at 1% gets recorded as a 1%-that-happened.
+     The live ledger already excludes these; this is the same rule. */
+  const hit = rows.find((r) => r.vmax >= thresholdKt) || null;
+  return {
+    outcome: peak >= thresholdKt ? 1 : 0,
+    peakKt: peak,
+    records: rows.length,
+    firstCrossIso: hit ? (hit.iso || null) : null,
+  };
 }
 
 /* The flat transactional payload, one per simulated prediction. */

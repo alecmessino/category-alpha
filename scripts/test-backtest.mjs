@@ -85,6 +85,30 @@ eq("just short is short", outcomeFrom([{ vmax: 60 }], 65).outcome, 0);
 eq("zeroes are missing, not calm", outcomeFrom([{ vmax: 0 }, { vmax: 70 }], 65).peakKt, 70);
 eq("an empty b-deck resolves to nothing", outcomeFrom([], 65), null);
 
+console.log("\n[5b] the b-deck also says WHEN the question stopped being open");
+/* THE TRAP THIS CAUGHT, on the first real run. Scoring every cycle in the deck recorded
+   forecasts made AFTER the storm had already been a hurricane — a decaying remnant
+   correctly priced at 1% went into the ledger as a 1%-that-happened, because the outcome
+   was 1. It put 124 entries in the lowest reliability bin at 47% observed against 2%
+   forecast, and made the whole Brier score meaningless. */
+const crossed = outcomeFrom([
+  { vmax: 35, iso: "2026-08-10T00:00:00Z" },
+  { vmax: 55, iso: "2026-08-10T12:00:00Z" },
+  { vmax: 70, iso: "2026-08-11T00:00:00Z" },
+  { vmax: 90, iso: "2026-08-11T12:00:00Z" },
+  { vmax: 40, iso: "2026-08-13T00:00:00Z" },
+], 65);
+eq("it resolves 1", crossed.outcome, 1);
+eq("and names the instant it first crossed", crossed.firstCrossIso, "2026-08-11T00:00:00Z");
+ck("which is the FIRST crossing, not the peak",
+   crossed.firstCrossIso !== "2026-08-11T12:00:00Z", crossed.firstCrossIso);
+eq("a storm that never crossed has no crossing",
+   outcomeFrom([{ vmax: 40, iso: "2026-08-10T00:00:00Z" }], 65).firstCrossIso, null);
+eq("and still reports its peak", outcomeFrom([{ vmax: 40, iso: "x" }], 65).peakKt, 40);
+/* Rows with no timestamp must not fabricate one. */
+eq("a crossing with no iso reports null rather than a guess",
+   outcomeFrom([{ vmax: 70 }], 65).firstCrossIso, null);
+
 console.log("\n[6] the payload is the shape the ledger stores");
 eq("a full entry", entryOf({ tMs: Date.UTC(2026, 7, 15, 4, 10), stormId: "AL012026",
                             rawP: 0.6731, calP: 0.7674, outcome: 1 }),

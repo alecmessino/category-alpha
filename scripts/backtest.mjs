@@ -84,7 +84,8 @@ function deckTextAt(lines, tMs) {
 /* One storm, replayed. The outcome is read from the b-deck only after every prediction for
    the storm has already been computed, and is never passed into the simulation. */
 function replayStorm(stormId, aText, bRecords) {
-  const truth = outcomeFrom(bRecords.map((r) => ({ vmax: r.kt })), HURRICANE_REPORTED_KT);
+  const truth = outcomeFrom(bRecords.map((r) => ({ vmax: r.kt, iso: r.iso })), HURRICANE_REPORTED_KT);
+  const crossMs = truth && truth.firstCrossIso ? Date.parse(truth.firstCrossIso) : null;
   if (!truth) return { entries: [], skipped: "no usable best track" };
 
   const lines = aText.split(/\r?\n/).filter((l) => l.trim());
@@ -94,6 +95,9 @@ function replayStorm(stormId, aText, bRecords) {
   const entries = [];
   const refusals = {};
   for (const t of steps) {
+    /* Past the crossing the contract has already resolved, so there is no open question to
+       score. Same exclusion the live ledger applies. */
+    if (crossMs != null && t >= crossMs) { refusals.settled = (refusals.settled || 0) + 1; continue; }
     const asOf = deckTextAt(lines, t);
     if (!asOf) continue;
     const deck = parseAdeck(asOf);
@@ -186,6 +190,7 @@ await writeFile(resolve(DATA, "backtest.json"), JSON.stringify({
   note: "Recon and SHIPS are absent from this replay: the archive carries no advisory issue"
       + " time, and the engine may only shift on a fix it can show post-dates the advisory."
       + " This scores the official-forecast and ATCF-consensus path only.",
+  excludesPostResolution: true,
   storms: perStorm, entries: all, score,
 }, null, 2) + "\n");
 
