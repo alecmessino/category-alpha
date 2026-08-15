@@ -126,6 +126,7 @@
         hurricanePCal: s.hurricanePCal || null,
         evidenceQuality: s.evidenceQuality || null,
         bestTrack: s.bestTrack || null,
+        atcfDeck: s.atcfDeck || null,
 
         pCalAt: (f) => { const r = fs(f); return r && r.pCal != null ? r.pCal : (s.hurricanePCal ? s.hurricanePCal.p : null); },
         pSigmaAt: (f) => { const r = fs(f); return r && r.pSigma != null ? r.pSigma : (s.hurricanePCal ? s.hurricanePCal.sigmaKt : null); },
@@ -341,6 +342,7 @@
       _verify: window.__MT_VERIFY || null, _enso: latest.enso || null,
       _outlook: latest.outlook || [],
       _wind: window.__MT_WIND || null,
+      _calibration: window.__MT_CALIBRATION || null,
     };
   }
 
@@ -388,6 +390,10 @@
        not every ten minutes, and re-pulling 64 KB on every poll would be waste. Absent is
        a normal state — the map simply has no wind layer to offer. */
     fetch(BASE + "wind.json").then((r) => r.ok ? r.json() : null).catch(() => null),
-  ]).then(([latest, framesJson, verify, wind]) => { window.__MT_VERIFY = verify; window.__MT_WIND = wind; done(latest, framesJson); startPolling(); })
+    /* The calibration scorecard. Absent is a normal state — it does not exist until the
+       loop has run once — and a board with no scorecard says so rather than implying it
+       has been checked. */
+    fetch(BASE + "calibration.json", { cache: "no-store" }).then((r) => r.ok ? r.json() : null).catch(() => null),
+  ]).then(([latest, framesJson, verify, wind, calibration]) => { window.__MT_VERIFY = verify; window.__MT_WIND = wind; window.__MT_CALIBRATION = calibration; done(latest, framesJson); startPolling(); })
     .catch((err) => { console.warn("[millibar] data load failed:", err); done(emptyLatest(err), null); startPolling(); });
 })();

@@ -106,6 +106,8 @@ jobs:
         run: node scripts/test-conflict.mjs
       - name: Test that the ingested fields reach the register
         run: node scripts/test-intel-register.mjs
+      - name: Test the calibration ledger and scorecard
+        run: node scripts/test-calibration.mjs
 
       # Every visible claim must have a provenance owner. The UI drifted ahead of the code
       # three times before this existed, always the same way: a capability written as a

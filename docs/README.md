@@ -353,3 +353,40 @@ Pages it degrades to local `help` / `status` / `clear` commands, which it states
 cd docs && python3 -m http.server 8099   # then open http://localhost:8099/
 ```
 (External feeds may show NO FEED locally depending on your network/CORS — that's the honest fallback.)
+
+## Calibration — has any of this ever been right?
+
+Every other section describes what the board does. This one describes whether it has
+worked, and it is the only claim here a reader should weight heavily.
+
+`scripts/calibrate.mjs` runs after every fetch and does three things:
+
+| | | |
+|---|---|---|
+| **Record** | a ledger entry per storm per forecast state | keyed on `(storm, advisory, guidance cycle)`, so re-reading the same two products ten minutes later is not a second forecast |
+| **Resolve** | when a storm leaves the active feed, its b-deck answers the question | did it ever carry 65 kt? |
+| **Score** | Brier for three estimates, side by side | the calibrated probability, the raw official-forecast estimate, and the market price |
+
+Scoring the calibrated probability alone says whether the board is any good. Scoring it
+**against the raw estimate** says whether the calibration earned its keep — whether four
+ingested feeds added anything, or have been decorating a number the advisory already gave
+us. Scoring both **against the market** says whether there is an edge, which is the only
+question that pays. A negative skill against the market is the most useful output this
+file can produce, because it says stop.
+
+### The sample size is storms, not forecasts
+
+Forecasts within one storm are **not independent**. A storm that becomes a hurricane makes
+every forecast issued during its life "correct"; one that doesn't makes them all wrong.
+Three storms can produce four hundred ledger entries and a beautiful Brier score that
+measures three coin flips and quotes them to three decimal places.
+
+So every threshold counts **distinct resolved storms** — 10 before any score is published,
+30 before a reliability curve is. Both counts are always shown, because the gap between
+them is itself the warning. Until the threshold is met the board says `NOT YET SCORED` and
+makes no claim about its own accuracy, which is the honest state of a system that has not
+yet been measured.
+
+Nothing is backfilled. The committed replay frames are seeded in, because those
+probabilities were genuinely published at the times they carry, but a forecast that was
+never made cannot be reconstructed and this build will not invent one.

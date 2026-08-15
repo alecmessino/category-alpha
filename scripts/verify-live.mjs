@@ -242,7 +242,13 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
         ranked: b.rows.length, candidates: b.candidates,
         anchored: b.coverage.anchored, total: b.coverage.total,
         unanchoredRanked: b.rows.filter((r) => r.model == null).length,
-        negativeEV: b.rows.filter((r) => !(r.ev > 0)).length,
+        /* A HOLD row carries no stake, no contracts and no expected value, deliberately
+           and at the source — a row nobody may act on must not put a dollar figure next to
+           a bet that is not available. So !(ev > 0) flags it as negative when it is
+           correctly zero. The invariant is: ACTIONABLE rows are positive, HELD rows are
+           exactly zero. The looser form passed only while no storm happened to be stale,
+           which is weather, not a property of the code. */
+        negativeEV: b.rows.filter((r) => (r.grade === "HOLD" ? r.ev !== 0 : !(r.ev > 0))).length,
         overStaked: b.rows.filter((r) => r.stake > r.capacityDollars + 1e-6).length,
         duplicateLadders: b.rows.length - new Set(b.rows.map((r) => r.ladder)).size,
         accounted: Object.values(b.skipped).reduce((a, x) => a + x, 0) + b.candidates === b.coverage.total,
@@ -393,6 +399,35 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
             storms: ids.length,
             /* WIRING — every active system's newest frame carries the fields. */
             withConsensus: has("conKt"), withConsensusCycle: has("conCycle"),
+            /* How many storms latest.json says HAVE a consensus. The frame check is a
+               WIRING question — did the field survive the trip from snapshot to frame —
+               and comparing the frame against the snapshot is the only form of it that
+               cannot fail for the weather.
+               Requiring every active storm to carry one made this an assertion about what
+               NHC had published, which this verifier cannot and should not police: an
+               a-deck FILLS IN PROGRESSIVELY after its cycle time, so a storm read minutes
+               past 00Z can legitimately show one CARQ record and thirty aids ten minutes
+               later. The coverage gate in CI is the stricter check and runs every fetch. */
+            snapshotWithConsensus: (window.MT ? Object.values(MT.storms || {}) : [])
+              .filter((s) => s.consensus && s.consensus.peakKt != null).length,
+            /* THE TWO CLOCKS, and this check has to know about both.
+               The snapshot refreshes every ~10 min; replay frames are spaced ~20 apart on
+               purpose, because appending one per tick would rewrite a ~400 KB history file
+               six times an hour for no added information. So between appends the snapshot
+               legitimately carries a field the newest frame does not yet have — as here,
+               where the frame was written while a deck was still filling in and the
+               snapshot thirteen minutes later had the consensus.
+               Full coverage is therefore required only when the frame IS current. When it
+               lags, the wiring is still asserted and the lag is reported, so a timing gap
+               never reads as a regression and a regression never hides behind one. */
+            frameLagMin: (() => {
+              const FRs = (window.MT && MT._frames) || [];
+              const g = window.MT && MT._generatedAt;
+              if (!FRs.length || !g) return null;
+              return Math.round((Date.parse(g) - Date.parse(FRs[FRs.length - 1].tsZ)) / 60000);
+            })(),
+            decksAidless: (window.MT ? Object.values(MT.storms || {}) : [])
+              .filter((s) => s.atcfDeck && s.atcfDeck.forecastAids === 0).length,
             withCalibrated: has("pCal"), withQuality: has("quality"),
             withRaw: has("hurricaneP"),
             withRecon: has("reconAge"), withShips: has("shShear"), withAscat: has("ascatKt"),
@@ -634,9 +669,23 @@ add("a new advisory moves P(hurricane) and the Situation strip",
    and the strip — and the loader whitelist has silently swallowed an entire block once
    already. */
 const IN = LY.intel;
-add("the guidance consensus reaches every active system's newest frame",
-  AD.storms === 0 || (IN.storms > 0 && IN.withConsensus === IN.storms && IN.withConsensusCycle === IN.storms),
-  `${IN.withConsensus}/${IN.storms} carry a consensus peak · ${IN.withConsensusCycle} carry its cycle`
+/* Current frame -> full coverage demanded. Lagging frame -> wiring demanded and the lag
+   printed, because a frame cannot be required to carry a field that did not exist when
+   it was written. FRAME_CURRENT_MIN is half the frame gap: inside it, an append has
+   happened since the snapshot moved and there is no excuse for a missing field. */
+const FRAME_CURRENT_MIN = 10;
+const frameCurrent = IN.frameLagMin != null && IN.frameLagMin <= FRAME_CURRENT_MIN;
+add("every consensus in the snapshot reaches the newest frame",
+  AD.storms === 0
+    || IN.snapshotWithConsensus === 0
+    || (frameCurrent
+        ? (IN.withConsensus >= IN.snapshotWithConsensus && IN.withConsensusCycle >= IN.snapshotWithConsensus)
+        : (IN.withConsensus >= 1 && IN.withConsensusCycle >= 1)),
+  `${IN.withConsensus}/${IN.storms} frame(s) carry a consensus peak against ${IN.snapshotWithConsensus} in the snapshot`
+  + ` · ${IN.withConsensusCycle} carry its cycle`
+  + ` · frame is ${IN.frameLagMin == null ? "?" : IN.frameLagMin}m behind the snapshot`
+  + (frameCurrent ? " (current — full coverage required)" : " (lagging — wiring asserted, coverage is the CI gate's job)")
+  + (IN.decksAidless ? ` · ${IN.decksAidless} deck(s) carried no forecasting aids yet` : "")
   + ` · feeds present: ${IN.feedKeys.join("/") || "NONE"} · live: ${IN.feedsOk.join("/") || "none"}`
   + ` · ${IN.healthRows}/4 health rows rendered`);
 
