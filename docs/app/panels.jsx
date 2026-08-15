@@ -509,9 +509,31 @@ function MT_StormConsoles({ dense, frame }) {
     <P pad={false} title="Active systems — official advisory"
       right={<BG tone="live" dot>{live.length} TRACKED</BG>}
       footer={<PF {...MTC.footer("panel.storms")} />}>
+      {/* BOUNDED, because this is the one block on the Situation tab whose height is a
+          function of how many storms exist. Everything else there is fixed by design (the
+          map) or already capped (the attention queue, 560px at MT_Attention). This list was
+          not, so the tab's height was the basin's business: two systems measured 2871px
+          against a 2800px budget and the deployed check failed on a quiet night in August.
+          Three would not have been close.
+
+          A cap rather than a truncation — every console stays in the DOM and in innerText,
+          so nothing is hidden from a reader or from the verifier, it just stops setting the
+          page's height. Same pattern, same reason, as the panel beside it. */}
       <div style={{ padding: dense ? 9 : 11 }}>
-        {live.map((s) => <StormConsole key={s.id} storm={s} dense={dense} frame={frame} />)}
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", lineHeight: 1.55 }}>
+        {/* The same 460/560 the attention queue uses, and deliberately the same number: these
+            two panels share a grid row, so the row is as tall as the taller of them. Matching
+            the cap makes the row height a constant — set by the bounded side — instead of a
+            function of how many systems the basin happens to be running. Measured: the panel
+            goes 1189px → 930px, matching the attention queue exactly, and the tab 2730px →
+            2471px — 1.8 screens against a 2.0 budget, with a third storm now costing nothing
+            at all. */}
+        <div style={{ maxHeight: dense ? 460 : 560, overflowY: "auto", minHeight: 0 }}>
+          {live.map((s) => <StormConsole key={s.id} storm={s} dense={dense} frame={frame} />)}
+        </div>
+        {/* Outside the scroll region: these two are caveats about every console above, and a
+            caveat you have to scroll to find is one that gets missed. */}
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", lineHeight: 1.55,
+                      paddingTop: live.length > 1 ? 8 : 0 }}>
           <div>{MTC.claim("advisory.latency").text}</div>
           <div>{MTC.claim("advisory.discussion").text}</div>
         </div>

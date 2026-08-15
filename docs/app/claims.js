@@ -701,12 +701,22 @@
       };
     }
     const pct = (v) => (v == null ? "—" : (v * 100).toFixed(1) + "%");
-    const b = c.brier || {}, s = c.skill || {};
+    const b = c.brier || {}, s = c.skill || {}, pr = c.paired || {};
+    /* A skill number divides two Brier scores, and the two must come from the same storms
+       or the quotient means nothing. The scorer pairs them and reports the sample it used;
+       when that sample is smaller than the headline count, say so here rather than let a
+       reader assume the skill number covers everything above it. */
+    const mktN = (pr.calibratedVsMarket || {}).storms;
+    const paired = mktN != null && mktN !== n.resolvedStorms
+      ? " Skill is measured on the " + mktN + " storm(s) where both series quoted a number;"
+        + " the Brier scores above each cover their own sample and must not be divided."
+      : "";
     return {
       short: "Calibration: Brier " + (b.calibrated == null ? "—" : b.calibrated.toFixed(3))
            + " vs raw " + (b.raw == null ? "—" : b.raw.toFixed(3))
            + " vs market " + (b.market == null ? "—" : b.market.toFixed(3))
            + " over " + n.resolvedStorms + " storms · skill vs market " + pct(s.vsMarket)
+           + (mktN != null && mktN !== n.resolvedStorms ? " (paired on " + mktN + ")" : "")
            + (s.vsMarket != null && s.vsMarket <= 0 ? " — NO EDGE ON THIS RECORD" : ""),
       text: "Scored over " + n.resolvedStorms + " resolved storms (" + n.resolvedEntries + " forecasts)."
           + " Brier: calibrated " + (b.calibrated == null ? "—" : b.calibrated.toFixed(4))
@@ -715,6 +725,7 @@
           + " Skill vs climatology " + pct(s.vsClimatology)
           + " · the calibration against the raw estimate " + pct(s.calibrationVsRaw)
           + " · against the market " + pct(s.vsMarket) + "."
+          + paired
           + (s.vsMarket != null && s.vsMarket <= 0
               ? " NEGATIVE AGAINST THE MARKET — on this record the board has no edge and the honest read is to stop."
               : ""),
