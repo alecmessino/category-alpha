@@ -126,6 +126,7 @@
         hurricanePCal: s.hurricanePCal || null,
         evidenceQuality: s.evidenceQuality || null,
         bestTrack: s.bestTrack || null,
+        atcfDeck: s.atcfDeck || null,
 
         pCalAt: (f) => { const r = fs(f); return r && r.pCal != null ? r.pCal : (s.hurricanePCal ? s.hurricanePCal.p : null); },
         pSigmaAt: (f) => { const r = fs(f); return r && r.pSigma != null ? r.pSigma : (s.hurricanePCal ? s.hurricanePCal.sigmaKt : null); },

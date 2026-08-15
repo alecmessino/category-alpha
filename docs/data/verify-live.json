@@ -1,23 +1,23 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-15T00:54:23.486Z",
-  "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "a8f7f9718309cddf41cbd4ea182148f977cc089e",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31854959274",
+  "ranAt": "2026-08-15T01:06:41.129Z",
+  "url": "http://localhost:8099/",
+  "sha": null,
+  "runUrl": null,
   "ok": false,
-  "passed": 43,
-  "total": 45,
+  "passed": 32,
+  "total": 34,
   "failures": [
     {
-      "check": "edge book renders and ranks nothing it cannot support",
-      "detail": "7 ranked of 12 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=1 overStaked=0 dupLadders=0 accounted=true"
+      "check": "live URL responds",
+      "detail": "page.goto: Timeout 60000ms exceeded."
     },
     {
-      "check": "the guidance consensus reaches every active system's newest frame",
-      "detail": "1/2 carry a consensus peak · 1 carry its cycle · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "check": "verification completed without crashing",
+      "detail": "page.reload: Timeout 60000ms exceeded."
     }
   ],
-  "thirdPartyFailures": 50,
+  "thirdPartyFailures": 0,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -26,8 +26,8 @@
     },
     {
       "check": "live URL responds",
-      "pass": true,
-      "detail": "HTTP 200 at https://alecmessino.github.io/category-alpha/"
+      "pass": false,
+      "detail": "page.goto: Timeout 60000ms exceeded."
     },
     {
       "check": "app mounted",
@@ -37,7 +37,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-15T00:43:06.279Z · 11m old"
+      "detail": "2026-08-15T00:53:37.931Z · 12m old"
     },
     {
       "check": "renders: Situation",
@@ -96,8 +96,8 @@
     },
     {
       "check": "edge book renders and ranks nothing it cannot support",
-      "pass": false,
-      "detail": "7 ranked of 12 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=1 overStaked=0 dupLadders=0 accounted=true"
+      "pass": true,
+      "detail": "7 ranked of 12 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -117,12 +117,12 @@
     {
       "check": "and it is the first thing under the header",
       "pass": true,
-      "detail": "map starts 141px down the page"
+      "detail": "map starts 135px down the page"
     },
     {
       "check": "four tabs, so no single view is a wall",
       "pass": true,
-      "detail": "4 tabs · 2 screens tall (2833px / 1400px)"
+      "detail": "4 tabs · 2 screens tall (2758px / 1400px)"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -145,9 +145,9 @@
       "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 4 advisory change(s) · 1 moved P · 1 pinned at the clamp · 4 register row(s) · situation P=75% at adv #10A"
     },
     {
-      "check": "the guidance consensus reaches every active system's newest frame",
-      "pass": false,
-      "detail": "1/2 carry a consensus peak · 1 carry its cycle · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "check": "every consensus in the snapshot reaches the newest frame",
+      "pass": true,
+      "detail": "1/2 frame(s) carry a consensus peak against 2 in the snapshot · 1 carry its cycle · frame is 13m behind the snapshot (lagging — wiring asserted, coverage is the CI gate's job) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
@@ -162,7 +162,7 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "0 guidance cycle(s) turned over → 0 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 0 SHIPS · 0 pass · strip arrivals=0 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
+      "detail": "0 guidance cycle(s) turned over → 1 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 1 SHIPS · 0 pass · strip arrivals=2 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
@@ -185,64 +185,9 @@
       "detail": "14 drawer(s) opened · all load-bearing caveats present"
     },
     {
-      "check": "the tile cache never holds a same-origin asset",
-      "pass": true,
-      "detail": "34 tile(s) cached · controlled=true · same-origin=0"
-    },
-    {
-      "check": "the tile cache actually caches tiles",
-      "pass": true,
-      "detail": "34 tile(s) served on reload · 34 in cache"
-    },
-    {
-      "check": "all markets carried",
-      "pass": true,
-      "detail": "152 contracts · 16 series · droppedForCap=0"
-    },
-    {
-      "check": "board grouped by series",
-      "pass": true,
-      "detail": "16 group headers vs 16 series"
-    },
-    {
-      "check": "resting depth populated",
-      "pass": true,
-      "detail": "152/152 carry depth"
-    },
-    {
-      "check": "fillable cap priced at the ask",
-      "pass": true,
-      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 144288 × $0.01 = $1443"
-    },
-    {
-      "check": "order book shows depth",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "check": "no unregistered claims",
-      "pass": true,
-      "detail": ""
-    },
-    {
-      "check": "no horizontal overflow",
-      "pass": true,
-      "detail": "0px"
-    },
-    {
-      "check": "no failed same-origin requests",
-      "pass": true,
-      "detail": "all app assets loaded"
-    },
-    {
-      "check": "no page errors",
-      "pass": true,
-      "detail": "none"
-    },
-    {
-      "check": "no console errors from our code",
-      "pass": true,
-      "detail": "none"
+      "check": "verification completed without crashing",
+      "pass": false,
+      "detail": "page.reload: Timeout 60000ms exceeded."
     }
   ]
 }
