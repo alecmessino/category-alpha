@@ -1721,6 +1721,7 @@ function applyIntel(storms, intel) {
     s.ships = I ? I.ships : null;
     s.ascat = I ? I.ascat : null;
     s.bestTrack = I ? I.bestTrack : null;
+    s.atcfDeck = I ? I.deck : null;
     s.intelNotes = I ? { atcf: I.atcfNote, ships: I.shipsNote } : null;
 
     /* The rapid-intensification floor speaks to the gap between where the storm is now

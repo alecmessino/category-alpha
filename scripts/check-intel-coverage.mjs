@@ -70,11 +70,36 @@ for (const s of storms) {
   if (!atcf.ok) {
     bad(`${name}: PRIORITY 1 — the ATCF feed failed this cycle (${atcf.note || "no detail"})`);
   } else if (!s.consensus) {
-    /* A deck that was read but carried no consensus aid is still a failure of coverage:
-       the board has lost the pre-advisory signal for this storm, whatever the reason. The
-       reason is reported so it is diagnosable in one cycle rather than three. */
+    /* A NULL CONSENSUS IS TWO DIFFERENT EVENTS AND THEY NEED OPPOSITE RESPONSES.
+     *
+     * Either NHC ran no guidance for this system this cycle, or this pipeline stopped
+     * finding the guidance NHC ran. The first is the atmosphere and the operations desk:
+     * a storm being wound down stops getting aids, and the 00Z deck for a dying 30 kt
+     * depression carries a single CARQ analysis record and nothing else. The second is
+     * the silent degradation this whole gate exists to catch.
+     *
+     * They are told apart by what the deck actually contains, derived from the data
+     * rather than from a list of names: a tech that FORECASTS has rows beyond tau 0.
+     * A deck with forecast aids in it and no consensus out of it is this pipeline's
+     * fault. A deck with no forecast aids at all had nothing to give.
+     *
+     * This is the same distinction already drawn for Priority 2 — polled, not flown —
+     * and it was missing here. Caught by the gate failing on Hernan for the weather,
+     * which is precisely how a gate earns a reputation for crying wolf and gets
+     * switched off. */
+    const deck = s.atcfDeck || null;
     const why = (s.intelNotes && s.intelNotes.atcf) || "no detail recorded";
-    bad(`${name}: PRIORITY 1 — no guidance consensus (${why})`);
+    if (deck && deck.forecastAids > 0) {
+      bad(`${name}: PRIORITY 1 — the ${deck.cycle} deck carries ${deck.forecastAids} forecasting aid(s)`
+        + ` but no consensus was extracted from it — that is this pipeline, not the deck (${why})`);
+    } else if (deck) {
+      console.log(`  ok  ${name}: ${deck.cycle} deck carries no forecasting aids at all`
+        + ` (${deck.techCount} record${deck.techCount === 1 ? "" : "s"}, analysis only)`
+        + ` — NHC ran no guidance for this system, so there is no consensus to lose`);
+      note(`${name}: no pre-advisory signal this cycle — the deck had nothing to give, and the board says so`);
+    } else {
+      bad(`${name}: PRIORITY 1 — no guidance consensus and no deck census to explain it (${why})`);
+    }
   } else {
     const c = s.consensus;
     if (c.peakKt == null) bad(`${name}: PRIORITY 1 — consensus present but carries no peak intensity`);

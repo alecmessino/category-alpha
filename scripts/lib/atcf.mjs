@@ -112,9 +112,17 @@ export function parseAdeck(text) {
     if (prev.mslp == null && r.mslp != null) prev.mslp = r.mslp;
     if (prev.lat == null && r.lat != null) { prev.lat = r.lat; prev.lon = r.lon; }
   }
+  const merged = [...byKey.values()].sort((a, b) => a.tau - b.tau || (a.tech < b.tech ? -1 : 1));
+  /* Which techs actually FORECAST something. Derived from the data rather than from a list
+     of names: an aid that forecasts has rows beyond tau 0, and an analysis-only record
+     like CARQ carries -24h..0h and nothing after it.
+     This is what separates "NHC ran no guidance for this system" from "the parser stopped
+     finding the guidance NHC ran" — two states that look identical from a null consensus
+     and need opposite responses. */
+  const forecastTechs = [...new Set(merged.filter((r) => r.tau > 0).map((r) => r.tech))].sort();
   return {
     ok: true, cycles: sorted, latestCycle, cycleIso: atcfTimeIso(latestCycle),
-    techs, rows: [...byKey.values()].sort((a, b) => a.tau - b.tau || (a.tech < b.tech ? -1 : 1)),
+    techs, forecastTechs, rows: merged,
   };
 }
 

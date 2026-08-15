@@ -143,6 +143,30 @@ eq("the aircraft fix is found by format, not only by type", air.mslp, 999);
 eq("and carries the measurement flag", air.pressureDerivation, "MEAS");
 eq("a deck with no pass reports none", latestScatPass(parseFdeck(FDECK.split("\n").filter((l) => !/OSCT/.test(l)).join("\n"))), null);
 
+console.log("\n[7b] a deck that forecasts nothing is distinguishable from a broken parser");
+/* CAUGHT BY THE GATE FAILING IN CI, on Hernan. A null consensus is two different events:
+   NHC ran no guidance for a system it is winding down, or this pipeline stopped finding
+   the guidance NHC ran. The first is the atmosphere; the second is the silent degradation
+   the coverage gate exists to catch. Failing on the first is how a gate gets switched off.
+   They are told apart from the data itself: a tech that FORECASTS has rows beyond tau 0. */
+const ANALYSIS_ONLY = `
+EP, 08, 2026081500, 03, CARQ, -24, 150N, 1320W,  35,    0,   ,   0,    ,    0,    0,    0,    0,
+EP, 08, 2026081500, 03, CARQ,   0, 156N, 1321W,  30, 1006,   ,   0,    ,    0,    0,    0,    0,
+`;
+const AO = parseAdeck(ANALYSIS_ONLY);
+eq("the deck parses", AO.ok, true);
+eq("and it has a record in it", Object.keys(AO.techs).length, 1);
+/* The discriminator: nothing here forecasts anything. */
+eq("but nothing in it forecasts", AO.forecastTechs.length, 0);
+eq("so there is no consensus to extract", consensusFrom(AO), null);
+/* The same shape of deck WITH a forecasting aid must report the opposite, because that is
+   the case where a null consensus means the pipeline broke. */
+eq("a deck with a forecasting aid says so", parseAdeck(ADECK).forecastTechs.length > 0, true);
+ck("and names them", parseAdeck(ADECK).forecastTechs.includes("HCCA"), parseAdeck(ADECK).forecastTechs.join(" "));
+/* CARQ carries negative and zero taus only, so it must never be counted as forecasting
+   even when it sits alongside aids that do. */
+eq("an analysis record is not a forecasting aid", parseAdeck(ADECK).forecastTechs.includes("CARQ"), false);
+
 console.log("\n[8] deck names are built, never guessed");
 eq("a real id resolves", deckStem("CP012026").stem, "cp012026");
 eq("case does not matter", deckStem("al942026").stem, "al942026");

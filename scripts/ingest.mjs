@@ -103,6 +103,11 @@ export async function fetchDecks(stormId) {
     latencyMs: a.latencyMs ?? null,
     bytes: a.bytes ?? null,
     consensus,
+    /* The deck census travels with the result. A null consensus is ambiguous on its own,
+       and this is what disambiguates it. */
+    cycle: adeck && adeck.ok ? adeck.latestCycle : null,
+    techCount: adeck && adeck.ok ? Object.keys(adeck.techs).length : 0,
+    forecastAids: adeck && adeck.ok ? adeck.forecastTechs.length : 0,
     bestTrack: bdeck && bdeck.ok ? bdeck.latest : null,
     bestTrackRecords: bdeck && bdeck.ok ? bdeck.records.length : 0,
     scat: fdeck ? latestScatPass(fdeck) : null,
@@ -217,6 +222,8 @@ export async function ingestIntel(storms, opts) {
       atcf: r.decks && r.decks.ok ? r.decks : null,
       atcfNote: r.decks ? r.decks.note : "not attempted",
       consensus: r.decks && r.decks.ok ? r.decks.consensus : null,
+      deck: r.decks && r.decks.ok
+        ? { cycle: r.decks.cycle, techCount: r.decks.techCount, forecastAids: r.decks.forecastAids } : null,
       bestTrack: r.decks ? r.decks.bestTrack : null,
       recon: r.vdm || null,
       aircraftFix: r.decks ? r.decks.aircraftFix : null,
