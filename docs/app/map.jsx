@@ -2,6 +2,8 @@
    published track-error radii. Layers carry a provenance tag; the eye position is bound to
    MTX.at(T) so scrubbing rewinds geometry too. */
 const MT_LAYERS = [
+  { id: "satellite", label: "Satellite", prov: "live" },
+  { id: "infrared", label: "Enhanced IR", prov: "live" },
   { id: "track", label: "Observed Track", prov: "live" },
   { id: "forecast", label: "NHC Forecast Track", prov: "dynamic" },
   { id: "cone", label: "NHC Cone", prov: "dynamic" },
@@ -14,15 +16,64 @@ function layerProv(layer, S) {
   return "nofeed";
 }
 
+function pad2(n) { return (n < 10 ? "0" : "") + n; }
+const GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/";
+
+/* GOES GeoColor 10-min slots, VIIRS daily as fallback. Each candidate is probed over the
+   storm before attaching, so an unpublished slot degrades instead of 404-flooding. */
+const GOES_TMS = "GoogleMapsCompatible_Level7";
+const VIIRS_LAYER = "VIIRS_NOAA20_CorrectedReflectance_TrueColor";
+const VIIRS_TMS = "GoogleMapsCompatible_Level9";
+
+function goesLayerFor(lon) { return lon != null && lon < -100 ? "GOES-West_ABI_GeoColor" : "GOES-East_ABI_GeoColor"; }
+function goesIrFor(lon) {
+  return (lon != null && lon < -100 ? "GOES-West" : "GOES-East") + "_ABI_Band13_Clean_Infrared";
+}
+function goesSlot(backSteps) {
+  // GOES full-disk publishes on 10-minute boundaries; allow a lag before "now".
+  const t = new Date(Date.now() - (backSteps * 10 + 15) * 60000);
+  t.setUTCMinutes(Math.floor(t.getUTCMinutes() / 10) * 10, 0, 0);
+  return t.toISOString().replace(/\.\d{3}Z$/, "Z");
+}
+function goesUrl(layer, iso) {
+  return GIBS + layer + "/default/" + iso + "/" + GOES_TMS + "/{z}/{y}/{x}.png";
+}
+function viirsDay(back) {
+  const d = new Date(Date.now() - back * 86400000);
+  return d.getUTCFullYear() + "-" + pad2(d.getUTCMonth() + 1) + "-" + pad2(d.getUTCDate());
+}
+function viirsUrl(date) {
+  return GIBS + VIIRS_LAYER + "/default/" + date + "/" + VIIRS_TMS + "/{z}/{y}/{x}.jpg";
+}
+function tileFor(lat, lon, z) {
+  const n = Math.pow(2, z);
+  const x = Math.floor(((lon + 180) / 360) * n);
+  const r = (lat * Math.PI) / 180;
+  const y = Math.floor(((1 - Math.log(Math.tan(r) + 1 / Math.cos(r)) / Math.PI) / 2) * n);
+  return { x: Math.max(0, Math.min(n - 1, x)), y: Math.max(0, Math.min(n - 1, y)) };
+}
+function probe(urlTemplate, lat, lon, z) {
+  const { x, y } = tileFor(lat, lon, z);
+  const url = urlTemplate.replace("{z}", z).replace("{x}", x).replace("{y}", y);
+  return new Promise((res) => {
+    const img = new Image();
+    const to = setTimeout(() => res(false), 6000);
+    img.onload = () => { clearTimeout(to); res(true); };
+    img.onerror = () => { clearTimeout(to); res(false); };
+    img.src = url;
+  });
+}
+
 function cssVar(v) {
   const m = /var\((--[\w-]+)\)/.exec(v); if (!m) return v;
   return getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim() || "#38bdf8";
 }
 
-function MT_Map({ stormId, frame, layers, onSelect, height = "100%", resizeKey }) {
+function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", resizeKey }) {
   const elRef = React.useRef(null);
   const mapRef = React.useRef(null);
   const refs = React.useRef({});
+  const [imgState, setImgState] = React.useState('loading');
   /* The map now renders with no storm selected — a basin with areas under watch and nothing
      classified is exactly when you want to see the water. Everything below has to survive S
      being null, starting with the initial view: fall back to the centroid of the watched areas,
@@ -73,6 +124,90 @@ function MT_Map({ stormId, frame, layers, onSelect, height = "100%", resizeKey }
     mapRef.current.flyTo(home, S ? 5 : 3, { duration: 0.7 });
   }, [stormId]);
 
+
+  // GOES GeoColor, falling back to VIIRS daily.
+  React.useEffect(() => {
+    const map = mapRef.current; if (!map) return;
+    if (refs.current.sat) { map.removeLayer(refs.current.sat); refs.current.sat = null; }
+    if (refs.current.satTimer) { clearInterval(refs.current.satTimer); refs.current.satTimer = null; }
+    if (!layers.satellite) { setImgState('off'); return; }
+    setImgState('loading');
+    let cancelled = false;
+    const [la, lo] = home;
+    const blank = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+
+    const attach = (url, attribution, maxNative, fresh) => {
+      if (cancelled || !mapRef.current) return;
+      if (refs.current.sat) mapRef.current.removeLayer(refs.current.sat);
+      const sat = L.tileLayer(url, { opacity: 0.9, maxNativeZoom: maxNative, maxZoom: 8, minZoom: 2,
+        tileSize: 256, updateWhenIdle: false, keepBuffer: 4, attribution, errorTileUrl: blank });
+      sat.on('load', () => setImgState('ready'));
+      sat.addTo(mapRef.current);
+      refs.current.sat = sat;
+      refs.current.satFresh = fresh;
+      if (typeof onImagery === "function") onImagery({ attribution, fresh });
+    };
+
+    const resolve = async () => {
+      const goes = goesLayerFor(lo);
+      for (let back = 0; back < 12 && !cancelled; back++) {   // up to ~2h back, 10-min steps
+        const iso = goesSlot(back);
+        const url = goesUrl(goes, iso);
+        if (await probe(url, la, lo, 4)) {
+          attach(url, goes.replace(/_/g, " ").replace(" ABI GeoColor", "") + " " + iso.slice(11, 16) + "Z", 7,
+            { product: "GOES GeoColor", at: iso });
+          return;
+        }
+      }
+      for (let back = 0; back < 7 && !cancelled; back++) {     // daily VIIRS fallback
+        const date = viirsDay(back);
+        const url = viirsUrl(date);
+        if (await probe(url, la, lo, 5)) {
+          attach(url, "VIIRS " + date, 8,
+            { product: "VIIRS daily", at: date });
+          return;
+        }
+      }
+      if (!cancelled) setImgState("none");
+      if (typeof onImagery === "function" && !cancelled) onImagery({ attribution: null, fresh: null });
+    };
+
+    resolve();
+    // Re-resolve every 5 min so a fresh GOES slot replaces the current one automatically.
+    refs.current.satTimer = setInterval(resolve, 300000);
+    return () => { cancelled = true; if (refs.current.satTimer) clearInterval(refs.current.satTimer); };
+  }, [layers.satellite, stormId]);
+
+  /* Band 13 clean-window IR, over the visible product. GeoColor goes dark at night; this
+     sees convection at any hour. */
+  React.useEffect(() => {
+    const map = mapRef.current; if (!map) return;
+    if (refs.current.ir) { map.removeLayer(refs.current.ir); refs.current.ir = null; }
+    if (refs.current.irTimer) { clearInterval(refs.current.irTimer); refs.current.irTimer = null; }
+    if (!layers.infrared) return;
+    let cancelled = false;
+    const [la, lo] = home;
+    const blank = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+    const resolveIr = async () => {
+      const lyr = goesIrFor(lo);
+      for (let back = 0; back < 12 && !cancelled; back++) {
+        const iso = goesSlot(back);
+        const url = goesUrl(lyr, iso);
+        if (await probe(url, la, lo, 4)) {
+          if (cancelled || !mapRef.current) return;
+          if (refs.current.ir) mapRef.current.removeLayer(refs.current.ir);
+          const ir = L.tileLayer(url, { opacity: 0.55, maxNativeZoom: 7, maxZoom: 8, minZoom: 2,
+            tileSize: 256, updateWhenIdle: false, keepBuffer: 4, errorTileUrl: blank, pane: "overlayPane" });
+          ir.addTo(mapRef.current);
+          refs.current.ir = ir;
+          return;
+        }
+      }
+    };
+    resolveIr();
+    refs.current.irTimer = setInterval(resolveIr, 300000);
+    return () => { cancelled = true; if (refs.current.irTimer) clearInterval(refs.current.irTimer); };
+  }, [layers.infrared, stormId]);
 
   // vector overlays, rebuilt on storm/layers change
   React.useEffect(() => {
@@ -149,7 +284,25 @@ function MT_Map({ stormId, frame, layers, onSelect, height = "100%", resizeKey }
     refs.current.eye.setLatLng(MTX.at(stormId, frame).center);
   }, [frame, stormId]);
 
-  return <div ref={elRef} style={{ position: "absolute", inset: 0, height, background: "var(--slate-950)" }} />;
+  /* Skeleton while the imagery resolves, so the map reads as loading rather than as empty
+     ocean. Cleared on the tile layer's first load event. */
+  return (
+    <div style={{ position: "absolute", inset: 0, height }}>
+      <div ref={elRef} style={{ position: "absolute", inset: 0, height, background: "var(--slate-950)" }} />
+      {layers.satellite && (imgState === "loading" || imgState === "none") && (
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 400,
+          display: "flex", alignItems: "flex-end", justifyContent: "flex-start", padding: 12 }}>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".5px",
+            color: "var(--text-2)", background: "color-mix(in srgb, var(--surface-card) 82%, transparent)",
+            border: "1px solid var(--border-dim)", borderRadius: 6, padding: "4px 9px" }}>
+            {imgState === "loading"
+              ? "◌ RESOLVING SATELLITE IMAGERY…"
+              : MTC.claim("map.imagery").text}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 window.MT_Map = MT_Map;
 window.MT_LAYERS = MT_LAYERS;
