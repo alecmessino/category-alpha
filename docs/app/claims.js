@@ -63,21 +63,43 @@
     const n = (s.evidence || []).length;
     return { text: n + " input" + (n === 1 ? "" : "s") + " · content-addressed (FNV-1a)", ok: n > 0 };
   });
-  define("pipeline.features", "nhc", (s) => ({
-    text: okOf(s, "nhc") ? "wind · pressure · track · reconstructed cone" : "no active system",
-    ok: okOf(s, "nhc"),
-  }));
-  define("pipeline.confidence", "derived", () => ({
-    text: "evidence-quality tiering (not forecast confidence)", ok: true,
+  define("pipeline.features", "nhc", (s) => {
+    const bits = ["wind", "pressure", "track", "reconstructed cone"];
+    if (okOf(s, "atcf")) bits.push("guidance consensus");
+    if (s.feeds.recon && s.feeds.recon.count) bits.push("recon fix");
+    if (okOf(s, "ships")) bits.push("shear", "ocean heat", "potential intensity");
+    if (s.feeds.ascat && s.feeds.ascat.count) bits.push("scatterometer wind");
+    return { text: okOf(s, "nhc") ? bits.join(" · ") : "no active system", ok: okOf(s, "nhc") };
+  });
+  /* The tier means something specific now and the row says what: whether the storm's
+     present intensity was measured by an aircraft or estimated from a satellite. */
+  define("pipeline.confidence", "derived", (s) => ({
+    text: "evidence-quality tiering (not forecast confidence) — HIGH requires a measured initial condition"
+        + (s.feeds.recon && s.feeds.recon.count ? "" : ", and no aircraft is reporting"),
+    ok: true,
   }));
   /* The row that drifted. It is a climatology anchor and, when the ONI feed is up, an
      ENSO stratification of that anchor. It has never been an ensemble. */
-  define("pipeline.probability", "models", (s) => ({
-    text: okOf(s, "models")
-      ? "HURDAT2 climatology anchor" + (okOf(s, "enso") ? " + ENSO stratification" : "") + " — no ensemble feed"
-      : "no climatology anchor and no ensemble feed",
-    ok: okOf(s, "models"),
-  }));
+  /* The row that drifted, corrected a second time — in the other direction. It described
+     a climatology anchor and nothing else, which stopped being the whole truth the moment
+     the guidance decks and recon started feeding a per-storm estimate. Two anchors of
+     different kinds now share this stage and the row names both, because a reader who
+     believes a seasonal base rate is pricing an active storm is being misled by omission
+     as surely as by invention. */
+  define("pipeline.probability", "models", (s) => {
+    const seasonal = okOf(s, "models")
+      ? "HURDAT2 climatology anchor" + (okOf(s, "enso") ? " + ENSO stratification" : "")
+      : null;
+    const perStorm = okOf(s, "atcf")
+      ? "per-storm: official forecast + ATCF consensus"
+        + (s.feeds.recon && s.feeds.recon.count ? " + aircraft recon" : "")
+      : null;
+    const bits = [seasonal, perStorm].filter(Boolean);
+    return {
+      text: bits.length ? bits.join(" · ") + " — no ensemble feed" : "no climatology anchor and no guidance decks",
+      ok: bits.length > 0,
+    };
+  });
   define("pipeline.edge", "derived", (s) => ({
     text: okOf(s, "markets") && okOf(s, "models") ? "anchor − market price" : "needs both a market and an anchor",
     ok: okOf(s, "markets") && okOf(s, "models"),
@@ -94,17 +116,33 @@
     text: "No public ensemble Cat-probability feed is wired, so no independent per-storm probability is published.",
     ok: false,
   }));
-  /* Previously read "No recon coverage (remote basin / none tasked)" — which asserted
-     a REASON we have no way to know. We do not ingest the feed; that is all we know. */
-  define("capability.recon", "none", () => ({
-    text: "No reconnaissance feed is wired — intensity rests on the advisory's satellite estimate",
-    ok: false,
-  }));
-  /* Stated once, in one place, instead of four dead toggles on the map. */
-  define("capability.notIngested", "none", () => ({
-    text: "Not ingested: reconnaissance tracks · scatterometer winds · model-consensus tracks · SFMR surface winds",
-    ok: false,
-  }));
+  /* This claim has been wrong twice in opposite directions. It first asserted a REASON
+     the board could not know ("remote basin / none tasked"). It then asserted that no
+     recon feed was wired, which was true until the products were polled and is now the
+     stale half of the same mistake — a capability statement outliving the code it
+     describes. It is a function of the fetch result, so it can only ever say what this
+     cycle actually found. */
+  define("capability.recon", "recon", (s) => {
+    const f = s.feeds.recon || {};
+    if (!f.ok) return { text: "Reconnaissance products unreachable this cycle — intensity rests on the advisory's satellite estimate", ok: false };
+    if (!f.count) return { text: "Reconnaissance polled, no aircraft reporting on an active system — intensity rests on the advisory's satellite estimate", ok: true };
+    return { text: "Aircraft reconnaissance in hand — the storm's intensity is measured rather than estimated", ok: true };
+  });
+  /* Stated once, in one place, instead of four dead toggles on the map. Two of the four
+     things this row used to list are now ingested, so it lists what is genuinely still
+     absent and names what replaced the rest. Shrinking this list is the only honest way
+     to shorten it. */
+  define("capability.notIngested", "none", (s) => {
+    const have = [];
+    if (okOf(s, "recon")) have.push("aircraft reconnaissance");
+    if (okOf(s, "atcf")) have.push("model-consensus tracks");
+    if (s.feeds.ascat && s.feeds.ascat.count) have.push("scatterometer winds");
+    return {
+      text: "Not ingested: SFMR flight-level wind traces · radar reflectivity · ensemble Cat-probability feeds"
+          + (have.length ? " — now ingested: " + have.join(" · ") : ""),
+      ok: false,
+    };
+  });
   /* Inactive is defined narrowly: the storm is absent from CurrentStorms.json. The
      tag makes no claim about dissipation or post-tropical status. */
   define("contract.subjectInactive", "nhc", () => ({
@@ -420,6 +458,204 @@
     };
   });
 
+  /* ---- the four pre-advisory feeds ------------------------------------------------
+     Each of these is a capability statement about something this build now DOES ingest,
+     which is exactly the category that has drifted before. They are functions of the
+     fetch result, so a feed that goes down changes the sentence rather than leaving a
+     confident claim standing over a dead pipe. */
+
+  /* Priority 1. The head start is a claim about TIMING, so it is stated as one and it is
+     stated conditionally: the deck is ahead of the advisory when it is fresher than the
+     advisory, and the board can check that rather than assert it. */
+  define("intel.atcf", "atcf", (s) => {
+    const f = s.feeds.atcf || {};
+    if (!f.ok) return { text: "ATCF guidance decks unavailable this cycle — the board is back to the advisory the market has already read: " + (f.note || "no detail"), ok: false };
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const NF = (window.MT ? window.MT.FRAMES : 1) - 1;
+    const rows = storms.map((x) => ({
+      name: x.name,
+      kt: typeof x.conKtAt === "function" ? x.conKtAt(NF) : null,
+      age: typeof x.conAgeAt === "function" ? x.conAgeAt(NF) : null,
+      lag: typeof x.advisoryLagMin === "function" ? x.advisoryLagMin(NF) : null,
+    })).filter((x) => x.kt != null);
+    if (!rows.length) return { text: "ATCF decks read, but no consensus aid for any active system this cycle", ok: false };
+    return {
+      text: rows.map((r) => r.name + " consensus peak " + r.kt + " kt"
+        + (r.age != null ? " from a deck " + r.age + "m old" : "")
+        + (r.age != null && r.lag != null
+            ? (r.age < r.lag ? " — AHEAD of the advisory by " + (r.lag - r.age) + "m" : " — the advisory has caught up")
+            : "")).join(" · "),
+      ok: true,
+    };
+  });
+
+  /* Priority 2. The distinction this claim exists to hold: measured versus estimated. */
+  define("intel.recon", "recon", (s) => {
+    const f = s.feeds.recon || {};
+    if (!f.ok) return { text: "reconnaissance products unreachable this cycle — no aircraft measurement available", ok: false };
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const NF = (window.MT ? window.MT.FRAMES : 1) - 1;
+    const fixes = storms.map((x) => ({
+      name: x.name,
+      age: typeof x.reconAge === "function" ? x.reconAge(NF) : null,
+      mb: typeof x.reconMbAt === "function" ? x.reconMbAt(NF) : null,
+      kt: typeof x.reconKtAt === "function" ? x.reconKtAt(NF) : null,
+    })).filter((x) => x.age != null);
+    if (!fixes.length) {
+      return { text: (f.count === 0 ? "all " + (f.polled || 4) + " reconnaissance products polled and no aircraft is reporting on an active system"
+                                    : "reconnaissance messages received, none for a currently active system")
+                   + " — intensity rests on the advisory's satellite estimate", ok: true };
+    }
+    return {
+      text: fixes.map((x) => x.name + " measured by aircraft " + x.age + "m ago"
+        + (x.mb != null ? " at " + x.mb + " mb" : "") + (x.kt != null ? ", " + x.kt + " kt surface" : "")).join(" · ")
+        + " — measured, not estimated",
+      ok: true,
+    };
+  });
+
+  /* Priority 3. The scoring gate is the claim. Whether SHIPS moves a price is an operator
+     decision, and this is where the operator's decision is recorded. */
+  define("intel.ships", "ships", (s) => {
+    const f = s.feeds.ships || {};
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const scored = storms.some((x) => x.hurricanePCal && x.hurricanePCal.shipsScoring);
+    if (!f.ok) return { text: "SHIPS diagnostics unavailable this cycle — no shear, ocean heat or RI table: " + (f.note || ""), ok: false };
+    const NF = (window.MT ? window.MT.FRAMES : 1) - 1;
+    const rows = storms.map((x) => ({
+      name: x.name,
+      shear: typeof x.shearAt === "function" ? x.shearAt(NF) : null,
+      ohc: typeof x.ohcAt === "function" ? x.ohcAt(NF) : null,
+      mpi: typeof x.mpiAt === "function" ? x.mpiAt(NF) : null,
+      ri: typeof x.riAt === "function" ? x.riAt(NF) : null,
+    })).filter((x) => x.shear != null || x.ri != null);
+    return {
+      text: (rows.length
+        ? rows.map((r) => r.name + " shear " + (r.shear ?? "—") + " kt, ocean heat " + (r.ohc ?? "—")
+            + ", potential intensity " + (r.mpi ?? "—") + " kt"
+            + (r.ri != null ? ", rapid-intensification floor " + Math.round(r.ri * 100) + "%" : "")).join(" · ")
+        : "SHIPS read, no features for an active system")
+        + " — features are published and "
+        + (scored ? "ARE scored into the probability under an active operator claim." : "are NOT scored into any probability. No feature here moves a price until that is claimed."),
+      ok: true,
+    };
+  });
+
+  /* Priority 4. Intermittent is the normal state, and saying so is the whole claim —
+     otherwise an empty cycle reads as a broken feed. */
+  define("intel.ascat", "ascat", (s) => {
+    const f = s.feeds.ascat || {};
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const NF = (window.MT ? window.MT.FRAMES : 1) - 1;
+    const rows = storms.map((x) => ({
+      name: x.name,
+      kt: typeof x.ascatKtAt === "function" ? x.ascatKtAt(NF) : null,
+      age: typeof x.ascatAgeAt === "function" ? x.ascatAgeAt(NF) : null,
+      used: !!(x.hurricanePCal && x.hurricanePCal.ascatUsed),
+    })).filter((x) => x.kt != null);
+    if (!rows.length) return { text: "no scatterometer pass over an active system — passes are orbits, not a continuous feed, and a cycle without one is the normal state", ok: true };
+    return {
+      text: rows.map((r) => r.name + " " + r.kt + " kt objective surface wind"
+        + (r.age != null ? " from a pass " + Math.round(r.age / 60) + "h ago" : "")
+        + (r.used ? " — tightening the current-intensity band" : " — not tightening the band")).join(" · ")
+        + ". A pass never moves the estimate, only its width.",
+      ok: true,
+    };
+  });
+
+  /* ---- THE CONFLICT RULE ------------------------------------------------------------
+   * What happens when the guidance deck and the aircraft disagree.
+   *
+   * This is the last piece of the engine that was implemented in code and owned by
+   * nobody, which is precisely the shape of the three drifts this registry exists to
+   * prevent — a rule that decides a price, described only in a comment, where no feed can
+   * contradict it and no reader can check it.
+   *
+   * THE RULE, and the reason it is not a weighting:
+   *
+   *   A consensus peak and an aircraft fix are NEVER AVERAGED, because they do not answer
+   *   the same question. The deck forecasts what the storm WILL PEAK AT; the aircraft
+   *   measures what it IS RIGHT NOW. Averaging them would be a category error dressed up
+   *   as caution — the arithmetic would run and the number would mean nothing.
+   *
+   *   So the apparent conflict is resolved BY CONSTRUCTION rather than by a weight. Every
+   *   forecast on this board is anchored on an initial intensity, and the aircraft has
+   *   just measured that initial intensity. The measured difference is applied to the
+   *   whole forecast curve — the deck's peak and the official peak alike — because a
+   *   forecast built on an initial condition that has since been measured wrong is wrong
+   *   by roughly that amount all the way along.
+   *
+   *   NEITHER CAN VETO THE OTHER. The deck keeps its shape and its weight in the blend;
+   *   the fix keeps its full measured difference, undamped. There is no tunable parameter
+   *   between them, which is the point: there is nothing here to fit.
+   *
+   *   The published answer is then the LARGER of two probabilities — the corrected
+   *   forecast peak clearing the strike, or the measured current intensity already
+   *   clearing it — because reaching a threshold now implies reaching it at some point.
+   *
+   * The one thing this claim must never let slide: the correction is a SHIFT, so it moves
+   * the estimate without narrowing it. A disagreement between the deck and the aircraft is
+   * not evidence that either is sharper. */
+  define("model.conflict", "recon", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const rule = "A guidance consensus and an aircraft fix are never averaged: the deck forecasts the peak,"
+      + " the aircraft measures the present, and the measured difference is applied to the forecast curve"
+      + " rather than weighed against it. Neither can veto the other, there is no tunable weight between"
+      + " them, and the correction shifts the estimate without narrowing it.";
+    const rows = [];
+    for (const s of storms) {
+      const c = s.hurricanePCal;
+      if (!c || !c.ok) continue;
+      const deckKt = s.consensus ? s.consensus.peakKt : null;
+      const shifted = (c.sources || []).find((x) => x.id === "consensus");
+      const measured = s.recon && s.recon.ok ? s.recon.intensityKt : null;
+      const d = c.reconDeltaKt;
+      if (c.used.consensus && c.used.recon && d != null) {
+        /* Both in hand: state the deck's own peak, the measurement that moved it, and
+           where it entered the blend — raw and corrected, side by side, for the same
+           reason every other pair on this board is. */
+        rows.push(s.name + ": the deck peaks at " + deckKt + " kt and the aircraft measured "
+          + measured + " kt against the advisory's " + Math.round((measured - d) * 10) / 10 + " kt"
+          + (Math.abs(d) < 0.05
+              ? " — the fix confirms the advisory, so the deck enters uncorrected"
+              : ", so the whole curve is read " + Math.abs(d) + " kt "
+                + (d < 0 ? "lower" : "higher") + " and the deck's peak enters at "
+                + (shifted ? shifted.peakKt : "—") + " kt")
+          + ". Answer driven by the " + c.drivenBy + ".");
+      } else if (c.used.consensus) {
+        rows.push(s.name + ": the deck peaks at " + deckKt + " kt with no aircraft fix to correct it"
+          + (s.recon && s.recon.ok ? " (a fix exists but was not applied — see the refusals above)" : "")
+          + ". Answer driven by the " + c.drivenBy + ".");
+      } else if (c.used.recon) {
+        rows.push(s.name + ": an aircraft measured " + measured + " kt and no guidance deck was usable"
+          + " this cycle, so the correction is applied to the official forecast alone."
+          + " Answer driven by the " + c.drivenBy + ".");
+      } else {
+        rows.push(s.name + ": neither a usable deck nor an aircraft fix — the official forecast stands alone.");
+      }
+    }
+    if (!rows.length) return { text: rule + " No active system is being calibrated, so nothing is in conflict.", ok: true };
+    return { text: rows.join(" ") + " " + rule, ok: true };
+  });
+
+  /* Where the published number comes from, in one line, per storm. This is the claim that
+     makes "raw and calibrated, side by side" enforceable rather than aspirational: if the
+     engine ever stopped publishing both, this sentence could not be written. */
+  define("intel.calibration", "atcf", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const rows = storms.map((x) => x.hurricanePCal).filter(Boolean);
+    if (!rows.length) return { text: "no per-storm probability is being calibrated — the official-forecast estimate stands alone", ok: false };
+    return {
+      text: rows.map((c) => {
+        const used = Object.entries(c.used).filter(([, v]) => v).map(([k]) => k);
+        return "raw " + Math.round(c.pRaw * 100) + "% → calibrated " + Math.round(c.p * 100) + "%"
+          + " from " + (used.join(" + ") || "nothing")
+          + " (combined peak " + c.meanKt + " kt, ±" + c.sigmaKt + " of which " + c.tauKt + " kt is measured disagreement)";
+      }).join(" · "),
+      ok: true,
+    };
+  });
+
   define("wind.field", "wind", () => {
     const w = window.MT && MT._wind;
     if (!w) return { text: "no surface wind field ingested this cycle", ok: false };
@@ -512,6 +748,27 @@
     "TAKE needs ≥3 independent layers agreeing. Two layers where one is a shrunk form of the other is one layer.",
     "It cannot forecast. Every anchor is a base rate plus what the advisory already published.",
   ]);
+  /* The engine's own account of itself, per storm: what it combined, what it refused,
+     and why. Authored here rather than in the panel because it is a statement about what
+     the code did, and this file is the only place such a statement may be made. */
+  note("note.intel", "atcf", "How the calibrated number was built", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const out = [];
+    for (const s of storms) {
+      const c = s.hurricanePCal;
+      if (!c) { out.push(s.name + ": no calibrated probability — the official forecast estimate stands alone."); continue; }
+      out.push(s.name + ": " + c.basis);
+      for (const n of (c.notes || [])) out.push(s.name + " — " + n);
+    }
+    if (!out.length) out.push("No active system, so nothing is being calibrated.");
+    /* The conflict rule is composed in rather than restated, so the drawer and the rule's
+       own claim can never drift into two different accounts of the same arithmetic. */
+    out.push(claim("model.conflict").text);
+    out.push("The scatterometer never moves the estimate, only the width of its band, and only when no aircraft is in the storm.");
+    out.push("SHIPS features are published on every cycle and score into a probability only under an operator claim.");
+    return out;
+  });
+
   note("note.provenance", "derived", "Content-addressed and bitemporal", [
     "Each input is an immutable event keyed by an FNV-1a digest of its content.",
     "A correction arrives as a new row at a higher revision. Nothing is edited in place.",

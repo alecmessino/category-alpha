@@ -136,6 +136,52 @@ jobs:
       - name: Test the GRIB2 reader
         run: node scripts/test-grib2.mjs
 
+      # The ATCF decks are the only input that arrives BEFORE the advisory, so a parser
+      # bug here does not break the board — it silently removes the head start and leaves
+      # everything looking exactly as it did. The fixtures carry the two things the live
+      # decks actually do that a naive reader gets wrong: a track consensus that ships
+      # zero intensity, and one forecast spread across three wind-radius rows.
+      - name: Test the ATCF deck parsers
+        run: node scripts/test-atcf.mjs
+
+      # A vortex data message is the only MEASUREMENT of intensity this board holds, and
+      # the file it arrives in keeps the last message until an aircraft flies again. Most
+      # of what this asserts is therefore the refusals — above all that a fix about a
+      # storm that dissipated in July never attaches to an August storm.
+      - name: Test the reconnaissance parser
+        run: node scripts/test-recon.mjs
+
+      # SHIPS is full of non-numbers — N/A past the forecast, xx.x for an uncomputed
+      # position, LOST for a lost vortex — and every one of them becomes NaN under a
+      # looser reader. A NaN that reaches a probability is a wrong answer with no symptom.
+      - name: Test the SHIPS parser and the RI floor
+        run: node scripts/test-ships.mjs
+
+      # The engine that turns all of it into one number. What is asserted is the rules
+      # rather than the arithmetic: the raw estimate is never overwritten and always
+      # inside the band, the combination is never sharper than its sharpest input,
+      # disagreement can only widen, the scatterometer never moves the mean, and SHIPS
+      # does not score until it is claimed.
+      - name: Test the probability engine
+        run: node scripts/test-probability.mjs
+
+      # What happens when the guidance deck and the aircraft disagree. This was the last
+      # piece of the engine implemented in code and owned by nobody — a rule that decides
+      # a price, described only in a comment, where no feed could contradict it and no
+      # reader could check it. Both halves are asserted: that the engine applies the
+      # measured difference to the forecast curve rather than averaging two answers to
+      # different questions, and that the claim on the board SAYS it does.
+      - name: Test the consensus-versus-recon conflict rule
+        run: node scripts/test-conflict.mjs
+
+      # Every ingested field has to reach the FRAME, and from there the register, the
+      # probability update and the Situation strip. A field that lives only on the newest
+      # snapshot cannot be diffed, so it can never be seen to have changed — the number
+      # moves on the page and nothing records that it moved. That failure has happened
+      # here before, in the other direction, and went unnoticed for weeks.
+      - name: Test that the ingested fields reach the register
+        run: node scripts/test-intel-register.mjs
+
       # Every visible claim must have a provenance owner. This fails the build if
       # capability / liveness language reappears as a literal inside a component
       # instead of as an owned claim in docs/app/claims.js. The UI drifted ahead of
@@ -152,10 +198,29 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           END=$(( $(date +%s) + 45*60 ))
           TICK=0
+          # Coverage failures are remembered across the whole loop and re-raised at the
+          # end, rather than breaking out of it. Both halves matter: the run must go RED
+          # so somebody looks, and the loop must keep refreshing so the board does not
+          # freeze while they do. Exiting on the first bad tick would trade a live board
+          # for a red X and get both wrong.
+          COVERAGE_FAILED=0
+          COVERAGE_TICKS=""
           while :; do
             TICK=$((TICK+1))
             echo "::group::tick $TICK — $(date -u +%H:%MZ)"
             node scripts/fetch-data.mjs || echo "fetch failed this tick — keeping the last good snapshot"
+            # COVERAGE GATE. Priority 1 (ATCF decks) and Priority 2 (the reconnaissance
+            # poll) are the only inputs that arrive before the advisory, and they are the
+            # only two feeds on this board that degrade INVISIBLY: without them the
+            # terminal keeps publishing a probability, it just quietly goes back to being
+            # built from the product the market has already read. The only symptom of
+            # losing the edge is that there is no longer an edge.
+            #
+            # It runs inside the loop, against the snapshot just written, and it FAILS THE
+            # JOB rather than the tick — a red run is the point. The commit below still
+            # happens, because a snapshot that is honest about a missing feed is better
+            # than no snapshot, and the board shows the feed as down either way.
+            node scripts/check-intel-coverage.mjs || { COVERAGE_FAILED=1; COVERAGE_TICKS="$COVERAGE_TICKS $TICK"; }
             # GFS runs four times a day, so this returns immediately unless the cycle has
             # advanced. Isolated from the main fetch: the wind field is decoration and must
             # never be able to stop the board from publishing.
@@ -175,6 +240,13 @@ jobs:
             REMAIN=$(( END - NOW ))
             if [ "$REMAIN" -lt 600 ]; then sleep "$REMAIN"; else sleep 600; fi
           done
+          if [ "$COVERAGE_FAILED" -ne 0 ]; then
+            echo "::error::Priority 1 or 2 coverage was missing on an active storm during tick(s):$COVERAGE_TICKS"
+            echo "The board kept publishing, and it kept saying the feed was down — but a probability"
+            echo "built without the decks or the recon poll is built from the product the market has"
+            echo "already read, and nothing on screen distinguishes that from having a head start."
+            exit 1
+          fi
 
       # OPTIONAL hand-off. GITHUB_TOKEN cannot trigger workflow runs — the dispatch
       # returns 204 and nothing starts — so this only does anything if a PAT with

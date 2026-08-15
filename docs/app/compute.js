@@ -12,16 +12,50 @@
   const feeds = MT._feeds || {};
   const feedOk = (k) => !!(feeds[k] && feeds[k].ok);
 
-  // Evidence-quality tier (NOT probability): how live/sourced the inputs are.
+  /* Evidence-quality tier (NOT probability): how live and how directly sourced the
+     inputs are.
+
+     THE TIER NOW HAS A TOP RUNG THAT MEANS SOMETHING. It used to be earned by feeds
+     being reachable, which every tier-A source on this board was, all the time — so the
+     grade separated "the internet works" from "the internet does not". The line that
+     matters is whether the storm's present intensity was MEASURED or ESTIMATED, and only
+     an aircraft can answer that. The server computes it (it is the same judgement the
+     probability engine makes about its own inputs) and publishes it per frame, so the
+     tier moves under the scrubber with everything else instead of describing now.
+
+     A frame from before the ingest existed carries no quality, and those fall through to
+     the original feed-reachability score rather than being retro-graded. */
+  const RECON_FRESH_MIN = 180;   // one aircraft fix cycle plus transmission
   function tier(stormId, frame) {
     const S = MT.storms[stormId]; const reasons = [];
     if (!S) return { tier: "C", reasons: ["No active system"] };
+    const q = typeof S.qualityAt === "function" ? S.qualityAt(frame) : null;
+    const age = S.reconAge ? S.reconAge(frame) : null;
+    const con = typeof S.conKtAt === "function" ? S.conKtAt(frame) : null;
+
+    if (q) {
+      if (age != null) {
+        reasons.push(age <= RECON_FRESH_MIN
+          ? "Aircraft reconnaissance " + Math.round(age) + "m old — the intensity is measured, not estimated"
+          : "Last aircraft fix " + Math.round(age) + "m old, past the " + RECON_FRESH_MIN + "m line — back to a satellite estimate");
+      } else {
+        reasons.push(MTC.claim("capability.recon").text);
+      }
+      reasons.push(con != null
+        ? "Guidance consensus in hand before the advisory — peak " + con + " kt"
+        : "No guidance consensus for this system this cycle");
+      reasons.push(feedOk("nhc") ? "NHC advisory: live, tier-A source" : "NHC feed unreachable → tier-A source lost");
+      reasons.push(feedOk("markets") ? "Market price: live" : "No market feed");
+      /* The published grade already contains the staleness cap, so a stale advisory
+         cannot be graded A here no matter what else arrived. */
+      return { tier: q === "HIGH" ? "A" : q === "MEDIUM" ? "B" : "C", reasons, quality: q };
+    }
+
     let score = 1; // start at C, earn up
     if (feedOk("nhc")) { reasons.push("NHC advisory: live, tier-A source → +1.5"); score += 1.5; }
     else { reasons.push("NHC feed unreachable → tier-A source lost"); }
-    const age = S.reconAge ? S.reconAge(frame) : null;
     if (age == null) reasons.push(window.MTC.claim("capability.recon").text);
-    else if (age > 30) { reasons.push("Recon stale (" + Math.round(age) + "m) → −0.5"); score -= 0.5; }
+    else if (age > RECON_FRESH_MIN) { reasons.push("Recon stale (" + Math.round(age) + "m) → −0.5"); score -= 0.5; }
     else { reasons.push("Recon fresh (" + Math.round(age) + "m) → +0.5"); score += 0.5; }
     reasons.push(feedOk("markets") ? "Market price: live" : "No market feed");
     reasons.push(feedOk("models")
@@ -142,7 +176,11 @@
      model or sub-minute event-study data, neither of which exists here. Inventing
      those weights would be fabricated precision, so the UI says "alongside", never
      "because of". */
-  const NOISE = { wind: 5, pressure: 2, market: 0.02 };   // below this = not a signal
+  /* Below this = not a signal. The four ingested feeds get their own floors rather than
+     borrowing wind's: a 5 kt shear change is noise where a 5 kt intensity change is not,
+     and a 2-point move in a calibrated probability is not worth an operator's attention
+     when the same number carries a ±20 kt band behind it. */
+  const NOISE = { wind: 5, pressure: 2, market: 0.02, shear: 5, ri: 0.05, p: 0.02 };
   const SCALE = { wind: 30, pressure: 20, market: 0.15 }; // |Δ| that counts as maximal
 
   /* One advisory cycle, and the half of it past which a storm anchor stops being
@@ -178,6 +216,25 @@
     if (sig.kind === "stale") return sig.stale ? "trade-relevant" : "material";
     if (sig.kind === "advisory") return sig.magnitude >= 0.85 ? "trade-relevant" : "material";
     const a = Math.abs(sig.delta || 0);
+    /* ---- the pre-advisory feeds -------------------------------------------------
+       These are classified on what they can DO to a position, exactly like everything
+       else here, and two of them can do a great deal.
+
+       A RECON FIX IS ALWAYS AT LEAST MATERIAL. An aircraft flew through the storm and
+       measured it; there is no version of that which is cosmetic, even when the numbers
+       come back unchanged — "the plane found it exactly where the advisory said" is a
+       confirmation an operator paid attention for.
+
+       A GUIDANCE CYCLE is trade-relevant when it moves the peak enough to matter or
+       crosses a Saffir-Simpson boundary, because the category contracts resolve on
+       exactly those boundaries and the deck says so before the advisory does. */
+    if (sig.kind === "recon") return (a >= 5 || sig.crossedKt != null) ? "trade-relevant" : "material";
+    if (sig.kind === "consensus") return (a >= 10 || sig.crossedKt != null) ? "trade-relevant" : a >= 3 ? "material" : "cosmetic";
+    if (sig.kind === "probability") return a >= 10 ? "trade-relevant" : a >= 3 ? "material" : "cosmetic";
+    /* SHIPS and the scatterometer inform the estimate; neither reprices anything on its
+       own, and SHIPS explicitly does not score until it is claimed. Material at most. */
+    if (sig.kind === "ships") return a >= 5 ? "material" : "cosmetic";
+    if (sig.kind === "ascat") return "cosmetic";
     if (sig.kind === "market") return a >= 5 ? "trade-relevant" : a >= 2 ? "material" : "cosmetic";
     if (sig.kind === "intensity") {
       if (sig.crossed != null || a >= 20) return "trade-relevant";
@@ -192,7 +249,15 @@
     /* Measured from the WMO header against this cycle's clock — as observed as anything
        on this board gets. */
     if (sig.kind === "stale") return 1;
+    /* A recon fix is the most confident observation this board can hold: an instrument
+       on an aircraft inside the storm, not an inference from one. It outranks the
+       advisory, which is a judgement built partly on it. */
+    if (sig.kind === "recon") return 1;
     if (sig.kind === "advisory") return 0.95;
+    if (sig.kind === "consensus") return 0.9;   // the deck is authoritative about what the aids said
+    if (sig.kind === "ships") return 0.9;
+    if (sig.kind === "ascat") return 0.85;      // objective, but a satellite retrieval with known limits
+    if (sig.kind === "probability") return 0.85; // derived from the above, never stronger than its inputs
     if (sig.kind === "intensity" || sig.kind === "pressure") return 0.9; // NHC best-track
     if (sig.kind === "market") {
       const C = (MT.contracts || []).find((x) => x.id === sig.contractId);
@@ -270,6 +335,113 @@
             });
           }
         }
+        /* ---- the four pre-advisory feeds ------------------------------------------
+           Each of these lands BEFORE the advisory that will report it, which is the only
+           reason they are ingested at all. A feed that arrives early and is not diffed
+           has thrown its own head start away: the number moves on the page and nothing
+           tells the operator that it moved, or why, or when.
+
+           They are diffed here, in the same frame-to-frame walk as wind and pressure,
+           because that walk is what the register, the Situation strip and the attention
+           queue are all reading. One mechanism, four more inputs. */
+
+        // Priority 1 — a new guidance cycle. THE pre-advisory signal.
+        if (cv.conCycle && pv.conCycle && cv.conCycle !== pv.conCycle) {
+          const dC = (cv.conKt != null && pv.conKt != null) ? cv.conKt - pv.conKt : null;
+          out.push({
+            tsZ: ts, kind: "consensus", subject: nm, stormId: sid,
+            delta: dC != null ? Math.round(dC * 10) / 10 : 0, unit: "kt",
+            from: pv.conKt, to: cv.conKt,
+            magnitude: dC != null ? Math.min(1, Math.abs(dC) / 20) : 0.4,
+            crossedKt: crossedCategory(pv.conKt, cv.conKt),
+            label: `${nm} guidance consensus ${String(cv.conCycle).slice(-2)}Z — peak ${cv.conKt} kt`
+                 + (dC != null && Math.abs(dC) >= 1 ? ` (${dC > 0 ? "+" : ""}${Math.round(dC)} kt on the cycle)` : ""),
+            detail: `${cv.conN || "?"} aid${cv.conN === 1 ? "" : "s"}`
+                  + (cv.conSpread != null ? ` disagreeing by ${cv.conSpread} kt` : "")
+                  + (cv.conHr != null ? ` · peak near ${cv.conHr}h` : "")
+                  + " — in the deck before the advisory built on it",
+          });
+        }
+
+        /* Priority 2 — a new reconnaissance fix. The age RESETS when a fix lands, which is the
+           cleanest possible detector: it is the one field that only ever counts upward
+           until an aircraft reports again. */
+        const newFix = (cv.reconOb != null && pv.reconOb != null && cv.reconOb !== pv.reconOb)
+          || (cv.reconAge != null && pv.reconAge != null && cv.reconAge < pv.reconAge);
+        if (newFix) {
+          const dMb = (cv.reconMb != null && pv.reconMb != null) ? cv.reconMb - pv.reconMb : null;
+          const dKt = (cv.reconKt != null && pv.reconKt != null) ? cv.reconKt - pv.reconKt : null;
+          const bits = [];
+          if (cv.reconMb != null) bits.push(cv.reconMb + " mb");
+          if (cv.reconKt != null) bits.push(cv.reconKt + " kt surface");
+          if (cv.reconFlKt != null) bits.push(cv.reconFlKt + " kt flight level");
+          out.push({
+            tsZ: ts, kind: "recon", subject: nm, stormId: sid,
+            /* Pressure carries the delta because it is the number a recon fix moves
+               first and hardest, and it is inverted — falling pressure is a storm
+               strengthening. */
+            delta: dMb != null ? dMb : (dKt != null ? dKt : 0), unit: dMb != null ? "mb" : "kt",
+            from: dMb != null ? pv.reconMb : pv.reconKt, to: dMb != null ? cv.reconMb : cv.reconKt,
+            inverted: dMb != null,
+            magnitude: Math.min(1, Math.max(dMb != null ? Math.abs(dMb) / 10 : 0, dKt != null ? Math.abs(dKt) / 20 : 0, 0.5)),
+            crossedKt: crossedCategory(pv.reconKt, cv.reconKt),
+            label: `${nm} reconnaissance fix — ${bits.join(", ") || "no numbers in the message"}`
+                 + (dMb != null && dMb !== 0 ? ` · ${dMb > 0 ? "+" : ""}${dMb} mb since the last fix` : ""),
+            detail: "aircraft measurement, not a satellite estimate"
+                  + (cv.reconOb != null ? ` · observation ${cv.reconOb}` : "")
+                  + (cv.reconAge != null ? ` · ${cv.reconAge} min old when read` : ""),
+          });
+        }
+
+        // Priority 3 — SHIPS. A 6-hourly environmental read; the RI probability is the part that prices.
+        const dShear = (cv.shShear != null && pv.shShear != null) ? cv.shShear - pv.shShear : null;
+        const dRi = (cv.shRi != null && pv.shRi != null) ? cv.shRi - pv.shRi : null;
+        if ((dShear != null && Math.abs(dShear) >= NOISE.shear) || (dRi != null && Math.abs(dRi) >= NOISE.ri)) {
+          out.push({
+            tsZ: ts, kind: "ships", subject: nm, stormId: sid,
+            delta: dRi != null && Math.abs(dRi) >= NOISE.ri ? Math.round(dRi * 1000) / 10 : (dShear || 0),
+            unit: dRi != null && Math.abs(dRi) >= NOISE.ri ? "pt" : "kt",
+            from: pv.shShear, to: cv.shShear,
+            magnitude: Math.min(1, Math.max(Math.abs(dRi || 0) / 0.15, Math.abs(dShear || 0) / 15)),
+            label: `${nm} SHIPS — shear ${cv.shShear ?? "—"} kt`
+                 + (dShear ? ` (${dShear > 0 ? "+" : ""}${dShear})` : "")
+                 + (cv.shRi != null ? ` · RI ${Math.round(cv.shRi * 100)}%` : ""),
+            detail: `OHC ${cv.shOhc ?? "—"} kJ/cm2 · mid-level RH ${cv.shRh ?? "—"}% · MPI ${cv.shMpi ?? "—"} kt`
+                  + " — features published; they score only under an operator claim",
+          });
+        }
+
+        // Priority 4 — a scatterometer pass. Same age-reset detector as recon.
+        if (cv.ascatAge != null && pv.ascatAge != null && cv.ascatAge < pv.ascatAge) {
+          out.push({
+            tsZ: ts, kind: "ascat", subject: nm, stormId: sid,
+            delta: (cv.ascatKt != null && pv.ascatKt != null) ? cv.ascatKt - pv.ascatKt : 0, unit: "kt",
+            from: pv.ascatKt, to: cv.ascatKt,
+            magnitude: 0.35,
+            label: `${nm} scatterometer pass — ${cv.ascatKt != null ? cv.ascatKt + " kt objective surface wind" : "position only"}`,
+            detail: "intermittent by nature — tightens the current-intensity band when no aircraft is in the storm",
+          });
+        }
+
+        /* THE OUTPUT OF THE ENGINE. Everything above is an input; this is the number a
+           position is taken against, and it can move without an advisory — which is the
+           entire point of reading the decks early. It gets its own row so a P change is
+           never something the operator has to notice for themselves. */
+        const dPc = (cv.pCal != null && pv.pCal != null) ? cv.pCal - pv.pCal : null;
+        if (dPc != null && Math.abs(dPc) >= NOISE.p) {
+          out.push({
+            tsZ: ts, kind: "probability", subject: nm, stormId: sid,
+            delta: Math.round(dPc * 1000) / 10, unit: "pt",
+            from: pv.pCal, to: cv.pCal,
+            magnitude: Math.min(1, Math.abs(dPc) / 0.10),
+            label: `${nm} P(hurricane) ${dPc > 0 ? "+" : ""}${Math.round(dPc * 100)} pts — now ${Math.round(cv.pCal * 100)}%`,
+            detail: `calibrated ${Math.round(cv.pCal * 100)}% against the official-forecast estimate's `
+                  + `${cv.hurricaneP != null ? Math.round(cv.hurricaneP * 100) + "%" : "—"}`
+                  + (cv.pSigma != null ? ` · ±${cv.pSigma} kt on the combined peak` : "")
+                  + (cv.quality ? ` · evidence ${cv.quality}` : ""),
+          });
+        }
+
         const dP = (cv.pressure != null && pv.pressure != null) ? cv.pressure - pv.pressure : 0;
         if (Math.abs(dP) >= NOISE.pressure) out.push({
           tsZ: ts, kind: "pressure", subject: nm, stormId: sid,
@@ -298,11 +470,21 @@
       });
     }
 
-    // ---- advisories (from the real event ledger) ----
+    /* ---- the server's own event ledger ----
+       Arrivals the server saw between two of ITS ticks. The replay history is spaced
+       wider than the refresh, so a recon fix that lands and is superseded inside one
+       frame gap would otherwise leave no trace anywhere — the frame diff above can only
+       see what survived to a committed frame.
+
+       The kind is carried through rather than flattened to "advisory". Every one of
+       these rows used to be relabelled as an advisory on arrival, which was harmless
+       while advisories were the only thing the server emitted and is a lie now that it
+       emits recon fixes and guidance cycles. */
     (MT.events || []).forEach((e) => {
       const fr = frames[Math.max(0, Math.min(frames.length - 1, e.frame))];
-      out.push({ tsZ: fr ? fr.tsZ : null, kind: "advisory", subject: e.source || "NHC",
-        magnitude: e.hot ? 0.9 : 0.6, label: e.label, detail: "tier " + (e.tier || "A") });
+      out.push({ tsZ: fr ? fr.tsZ : null, kind: e.kind || "advisory", subject: e.subject || e.source || "NHC",
+        stormId: e.stormId || null,
+        magnitude: e.hot ? 0.9 : 0.6, label: e.label, detail: e.detail || ("tier " + (e.tier || "A")) });
     });
 
     out.sort((x, y) => (Date.parse(y.tsZ) || 0) - (Date.parse(x.tsZ) || 0));
@@ -433,19 +615,52 @@
        It belongs on the 30-second read: it is the one figure here that a position is
        taken directly against. */
     const hurricaneNow = storms
-      .map((S) => ({
-        id: S.id, name: S.name,
-        p: typeof S.hurricanePAt === "function" ? S.hurricanePAt(NF) : (S.hurricaneP ? S.hurricaneP.p : null),
-        adv: typeof S.advNumAt === "function" ? S.advNumAt(NF) : (S.advNumFull || S.advNum || null),
-        lagMin: typeof S.advisoryLagMin === "function" ? S.advisoryLagMin(NF) : (S.advisoryLagMin ?? null),
-        guidance: typeof S.guidanceAt === "function" ? S.guidanceAt(NF) : null,
-      }))
+      .map((S) => {
+        const at = (fn, dflt) => (typeof S[fn] === "function" ? S[fn](NF) : dflt);
+        const raw = at("hurricanePAt", S.hurricaneP ? S.hurricaneP.p : null);
+        const cal = at("pCalAt", null);
+        return {
+          id: S.id, name: S.name,
+          /* The calibrated number leads because it is the one the board prices against.
+             The raw official-forecast estimate travels with it, always, so the strip can
+             show both and a reader can see what the pre-advisory feeds did to it. */
+          p: cal != null ? cal : raw, pRaw: raw, calibrated: cal != null && cal !== raw,
+          adv: at("advNumAt", S.advNumFull || S.advNum || null),
+          lagMin: at("advisoryLagMin", S.advisoryLagMin ?? null),
+          guidance: at("guidanceAt", null),
+          /* Lag, quality tier and guidance position — the three things the strip is
+             required to carry next to a probability, so nobody reads the number without
+             also reading how old and how well-sourced it is. */
+          quality: at("qualityAt", null),
+          reconAge: typeof S.reconAge === "function" ? S.reconAge(NF) : null,
+          conKt: at("conKtAt", null), conAge: at("conAgeAt", null),
+          sigmaKt: at("pSigmaAt", null),
+        };
+      })
       .filter((x) => x.p != null)
       .sort((a, b) => b.p - a.p);
 
+    /* ---- the intel line -------------------------------------------------------
+       The strip's job is the 30-second read, and after this build the 30-second read has
+       a new first question: has anything landed that the advisory has not caught up to
+       yet? This answers it from the register, so the strip and the register can never
+       disagree about what arrived. */
+    const ARRIVAL = { recon: "reconnaissance fix", consensus: "guidance cycle", ships: "SHIPS", ascat: "scatterometer pass", probability: "P update" };
+    const arrivals = sigs.filter((s) => ARRIVAL[s.kind]);
+    const lastArrival = arrivals[0] || null;         // signals are newest-first
+    const intel = {
+      arrivals: arrivals.length,
+      byKind: Object.keys(ARRIVAL).reduce((a, k) => { a[k] = arrivals.filter((s) => s.kind === k).length; return a; }, {}),
+      last: lastArrival ? { kind: lastArrival.kind, what: ARRIVAL[lastArrival.kind], label: lastArrival.label, ageMin: lastArrival.ageMin } : null,
+      /* Feed presence, stated the same way the rest of the strip states it: what is live,
+         and what is not, from the fetch result rather than from an assumption. */
+      feeds: ["atcf", "recon", "ships", "ascat"].map((k) => ({ k, ok: !!(F[k] && F[k].ok), note: (F[k] && F[k].note) || "not wired" })),
+      quality: hurricaneNow.length ? hurricaneNow[0].quality : null,
+    };
+
     return {
       windowMin: W, headline, storms: storms.length,
-      hurricaneNow, lead: hurricaneNow[0] || null,
+      hurricaneNow, lead: hurricaneNow[0] || null, intel,
       verdict: sum.verdict, byClass: sum.byClass, totalEvents: sum.total,
       topChange: top ? top.label : null,
       topClass: top ? top.class : null,
@@ -535,6 +750,34 @@
     } else if (sig.kind === "advisory") {
       st.validated = true;
       st.why.validated = "the advisory IS the authoritative product";
+    } else if (sig.kind === "recon") {
+      /* Nothing corroborates an aircraft. It is the measurement the other sources are
+         estimating, so asking what confirms it has the relationship backwards. */
+      st.validated = true;
+      st.why.validated = "an instrument aboard an aircraft inside the storm — this IS the observation";
+      const anchored = (MT.contracts || []).some((c) => c.storm === sig.stormId && mdl(c, NF) != null);
+      st.assessed = anchored;
+      st.why.assessed = anchored ? "a priced contract exists for this storm" : "no anchored contract for this storm";
+    } else if (sig.kind === "consensus" || sig.kind === "probability") {
+      /* THE HEAD START, MADE AUDITABLE. A guidance cycle is observed the moment it lands
+         in the deck; it is VALIDATED when the advisory built on it arrives and the
+         official product catches up. Until then the board is holding something the
+         market has not been told — which is the entire trade, and also exactly the claim
+         that has to be checkable after the fact rather than asserted. */
+      const t = Date.parse(sig.tsZ) || 0;
+      const later = sigs.some((x) => x.kind === "advisory" && x.stormId === sig.stormId && (Date.parse(x.tsZ) || 0) > t);
+      st.validated = later;
+      st.why.validated = later
+        ? "an advisory has since been issued for this system — the official product has caught up"
+        : "no advisory since this landed — the head start is still open";
+      const anchored = (MT.contracts || []).some((c) => c.storm === sig.stormId && mdl(c, NF) != null);
+      st.assessed = anchored;
+      st.why.assessed = anchored ? "a priced contract exists for this storm" : "no anchored contract for this storm";
+    } else if (sig.kind === "ships" || sig.kind === "ascat") {
+      st.validated = "n/a";
+      st.why.validated = sig.kind === "ships"
+        ? "a diagnostic of the environment, not an observation of the storm — nothing on this board corroborates it"
+        : "a single satellite pass; the next orbit is hours away and is not a second look at this moment";
     }
 
     st.resolved = sig.status === "superseded";
@@ -631,8 +874,17 @@
       title: "Data pipeline stale — " + stale + " min since the last refresh",
       detail: "every number on screen is at least this old", kind: "pipeline", source: "refresh", ageMin: stale,
     });
+    /* CORE means the board loses something it cannot substitute. Losing the ATCF decks
+       removes the only input that arrives before the advisory, and losing the recon poll
+       removes the only measured one — both are reasons to discount every probability
+       above them, so both compete in this queue at HIGH.
+       ASCAT is deliberately absent: it is intermittent by design and reports ok with a
+       count of zero when no orbit crossed the storm. A queue item every time a satellite
+       was somewhere else teaches an operator to ignore the queue. */
     const FEEDS = [
       ["nhc", "NHC advisories", true], ["markets", "Prediction markets", true],
+      ["atcf", "ATCF guidance decks", true], ["recon", "Aircraft reconnaissance poll", true],
+      ["ships", "SHIPS diagnostics", false],
       ["models", "Climatology anchor", false], ["enso", "ENSO / ONI layer", false],
       ["sst", "SST anomaly", false],
     ];
@@ -828,8 +1080,16 @@
       const lagLimit = Number.isFinite(c.modelMaxLagMin) ? c.modelMaxLagMin : advCycleMin();
       const lagStale = lagMin != null && lagMin > lagLimit / 2;
       if (!live.length) why.push("no layer detail to check the estimate against");
+      /* The COUNT is the rule and it has not moved: under three voting layers, the top
+         grade is out. Only the explanation is now specific to which anchor this is,
+         because the two-layer cases are no longer the same failure. A per-name ordinal's
+         second layer really is a shrunk form of its first. A storm anchor's second layer
+         is the guidance deck, which is a genuinely separate estimate — it just is not a
+         third one, and two estimates cannot show that an answer is robust to method. */
       else if (live.length < 3) why.push("only " + live.length + " layer" + (live.length === 1 ? "" : "s")
-        + ", and the second is a shrunk form of the first — not independent corroboration");
+        + " voting — " + (c.modelCalibrated
+          ? "the official forecast and the guidance deck are separate estimates, but two is not enough to show the answer survives a change of method"
+          : "and the second is a shrunk form of the first — not independent corroboration"));
       else if (!agrees) why.push("layers disagree by " + Math.round(dispersion * 100) + " pts");
       if (!frictionOk) why.push("edge is under 1.5x the " + Math.round((c.spread || 0) * 100) + "c spread");
       if (!deep) why.push("only $" + Math.round(capacityDollarsOf) + " resting");
