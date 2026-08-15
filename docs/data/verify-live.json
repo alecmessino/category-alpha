@@ -1,23 +1,19 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-15T01:06:41.129Z",
-  "url": "http://localhost:8099/",
-  "sha": null,
-  "runUrl": null,
+  "ranAt": "2026-08-15T01:20:48.080Z",
+  "url": "https://alecmessino.github.io/category-alpha/",
+  "sha": "52470f4598331e3ca005ee4244e5dfae8508b608",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31856196961",
   "ok": false,
-  "passed": 32,
-  "total": 34,
+  "passed": 44,
+  "total": 45,
   "failures": [
     {
-      "check": "live URL responds",
-      "detail": "page.goto: Timeout 60000ms exceeded."
-    },
-    {
-      "check": "verification completed without crashing",
-      "detail": "page.reload: Timeout 60000ms exceeded."
+      "check": "four tabs, so no single view is a wall",
+      "detail": "4 tabs · 2.1 screens tall (2871px / 1400px)"
     }
   ],
-  "thirdPartyFailures": 0,
+  "thirdPartyFailures": 34,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -26,8 +22,8 @@
     },
     {
       "check": "live URL responds",
-      "pass": false,
-      "detail": "page.goto: Timeout 60000ms exceeded."
+      "pass": true,
+      "detail": "HTTP 200 at https://alecmessino.github.io/category-alpha/"
     },
     {
       "check": "app mounted",
@@ -37,7 +33,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-15T00:53:37.931Z · 12m old"
+      "detail": "2026-08-15T01:14:25.682Z · 6m old"
     },
     {
       "check": "renders: Situation",
@@ -117,12 +113,12 @@
     {
       "check": "and it is the first thing under the header",
       "pass": true,
-      "detail": "map starts 135px down the page"
+      "detail": "map starts 141px down the page"
     },
     {
       "check": "four tabs, so no single view is a wall",
-      "pass": true,
-      "detail": "4 tabs · 2 screens tall (2758px / 1400px)"
+      "pass": false,
+      "detail": "4 tabs · 2.1 screens tall (2871px / 1400px)"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -147,12 +143,12 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "1/2 frame(s) carry a consensus peak against 2 in the snapshot · 1 carry its cycle · frame is 13m behind the snapshot (lagging — wiring asserted, coverage is the CI gate's job) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "2/2 frame(s) carry a consensus peak against 2 in the snapshot · 2 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 2 calibrated, 2 with the official estimate beside it · strip: quality=HIGH lag=43m raw=60%"
+      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 2 calibrated, 2 with the official estimate beside it · strip: quality=MEDIUM lag=66m raw=60%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -162,12 +158,12 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "0 guidance cycle(s) turned over → 1 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 1 SHIPS · 0 pass · strip arrivals=2 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
+      "detail": "0 guidance cycle(s) turned over → 0 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 1 SHIPS · 0 pass · strip arrivals=1 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: past the 180-min line — Hernan 247m · 1 row(s), 1 held, 0 TAKE · forced: 2 anchored row(s) pushed past it → 1 HOLD, 1 SUSPECT, 0 ACTIONABLE · 5 stale-crossing row(s) in the register"
+      "detail": "live: past the 180-min line — Hernan 270m · 1 row(s), 1 held, 0 TAKE · forced: 2 anchored row(s) pushed past it → 1 HOLD, 1 SUSPECT, 0 ACTIONABLE · 5 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
@@ -185,9 +181,64 @@
       "detail": "14 drawer(s) opened · all load-bearing caveats present"
     },
     {
-      "check": "verification completed without crashing",
-      "pass": false,
-      "detail": "page.reload: Timeout 60000ms exceeded."
+      "check": "the tile cache never holds a same-origin asset",
+      "pass": true,
+      "detail": "41 tile(s) cached · controlled=true · same-origin=0"
+    },
+    {
+      "check": "the tile cache actually caches tiles",
+      "pass": true,
+      "detail": "41 tile(s) served on reload · 41 in cache"
+    },
+    {
+      "check": "all markets carried",
+      "pass": true,
+      "detail": "152 contracts · 16 series · droppedForCap=0"
+    },
+    {
+      "check": "board grouped by series",
+      "pass": true,
+      "detail": "16 group headers vs 16 series"
+    },
+    {
+      "check": "resting depth populated",
+      "pass": true,
+      "detail": "152/152 carry depth"
+    },
+    {
+      "check": "fillable cap priced at the ask",
+      "pass": true,
+      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 144288 × $0.01 = $1443"
+    },
+    {
+      "check": "order book shows depth",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no unregistered claims",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "no horizontal overflow",
+      "pass": true,
+      "detail": "0px"
+    },
+    {
+      "check": "no failed same-origin requests",
+      "pass": true,
+      "detail": "all app assets loaded"
+    },
+    {
+      "check": "no page errors",
+      "pass": true,
+      "detail": "none"
+    },
+    {
+      "check": "no console errors from our code",
+      "pass": true,
+      "detail": "none"
     }
   ]
 }
