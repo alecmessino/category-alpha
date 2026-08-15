@@ -302,7 +302,7 @@ function MillibarTerminalApp() {
   const [sel, setSel] = React.useState({ contract: (MT.contracts[0] && MT.contracts[0].id) || null, evidence: null });
   const [bankroll, setBankroll] = React.useState(10000);
   const [stake, setStake] = React.useState(0.25);
-  const [layers, setLayers] = React.useState({ track: true, forecast: true, cone: true });
+  const [layers, setLayers] = React.useState({ satellite: true, infrared: false, track: true, forecast: true, cone: true });
   const [vw, setVw] = React.useState(typeof window !== "undefined" ? window.innerWidth : 1440);
   const [vh, setVh] = React.useState(typeof window !== "undefined" ? window.innerHeight : 900);
   const narrow = vw < 900;

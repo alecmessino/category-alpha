@@ -87,6 +87,14 @@
   }));
 
   // ---- capability statements ----------------------------------------------
+  /* What the map is showing, or why it is not. Owned by the imagery probe rather than
+     written into the map component. */
+  define("map.imagery", "satellite", (s) => {
+    const f = s.feeds.satellite || {};
+    if (!f.ok) return { text: "NO SATELLITE IMAGERY — GIBS unreachable this cycle", ok: false };
+    return { text: "NO SATELLITE IMAGERY — no published GOES or VIIRS slot covers this storm", ok: false };
+  });
+
   define("capability.ensemble", "none", () => ({
     text: "No public ensemble Cat-probability feed is wired, so no independent per-storm probability is published.",
     ok: false,
