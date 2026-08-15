@@ -1,19 +1,23 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-14T19:12:26.772Z",
+  "ranAt": "2026-08-15T00:54:23.486Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "6b0d55ecd2a85cda93416aa2344691a444539c69",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31832149635",
+  "sha": "a8f7f9718309cddf41cbd4ea182148f977cc089e",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31854959274",
   "ok": false,
-  "passed": 40,
-  "total": 41,
+  "passed": 43,
+  "total": 45,
   "failures": [
     {
-      "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
-      "detail": "live: past the 180-min line — Hernan 264m · 0 row(s), 0 held, 0 TAKE · forced: 0 anchored row(s) pushed past it → 0 HOLD, 0 TAKE · 1 stale-crossing row(s) in the register"
+      "check": "edge book renders and ranks nothing it cannot support",
+      "detail": "7 ranked of 12 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=1 overStaked=0 dupLadders=0 accounted=true"
+    },
+    {
+      "check": "the guidance consensus reaches every active system's newest frame",
+      "detail": "1/2 carry a consensus peak · 1 carry its cycle · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     }
   ],
-  "thirdPartyFailures": 18,
+  "thirdPartyFailures": 50,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -33,7 +37,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-14T19:01:23.328Z · 11m old"
+      "detail": "2026-08-15T00:43:06.279Z · 11m old"
     },
     {
       "check": "renders: Situation",
@@ -92,8 +96,8 @@
     },
     {
       "check": "edge book renders and ranks nothing it cannot support",
-      "pass": true,
-      "detail": "8 ranked of 27 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "pass": false,
+      "detail": "7 ranked of 12 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=1 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -118,7 +122,7 @@
     {
       "check": "four tabs, so no single view is a wall",
       "pass": true,
-      "detail": "4 tabs · 1.9 screens tall (2663px / 1400px)"
+      "detail": "4 tabs · 2 screens tall (2833px / 1400px)"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -138,37 +142,57 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": true,
-      "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 1 advisory change(s) · 0 moved P · 1 register row(s) · situation P=60% at adv #9A"
+      "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 4 advisory change(s) · 1 moved P · 1 pinned at the clamp · 4 register row(s) · situation P=75% at adv #10A"
+    },
+    {
+      "check": "the guidance consensus reaches every active system's newest frame",
+      "pass": false,
+      "detail": "1/2 carry a consensus peak · 1 carry its cycle · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+    },
+    {
+      "check": "the calibrated probability ships with the raw estimate and its evidence tier",
+      "pass": true,
+      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 2 calibrated, 2 with the official estimate beside it · strip: quality=HIGH lag=43m raw=60%"
+    },
+    {
+      "check": "no contract is priced off a calibration without publishing what it started from",
+      "pass": true,
+      "detail": "2/2 calibrated contract(s) publish the raw official estimate"
+    },
+    {
+      "check": "an arrival that happened reaches the register and the Situation strip",
+      "pass": true,
+      "detail": "0 guidance cycle(s) turned over → 0 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 0 SHIPS · 0 pass · strip arrivals=0 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
-      "pass": false,
-      "detail": "live: past the 180-min line — Hernan 264m · 0 row(s), 0 held, 0 TAKE · forced: 0 anchored row(s) pushed past it → 0 HOLD, 0 TAKE · 1 stale-crossing row(s) in the register"
+      "pass": true,
+      "detail": "live: past the 180-min line — Hernan 247m · 1 row(s), 1 held, 0 TAKE · forced: 2 anchored row(s) pushed past it → 1 HOLD, 1 SUSPECT, 0 ACTIONABLE · 5 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
       "pass": true,
-      "detail": "0 row(s) on HOLD live · $0 staked · forced: $0 across 0 held row(s)"
+      "detail": "1 row(s) on HOLD live · $0 staked · forced: $0 across 1 held row(s)"
     },
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-08-14T12:00:00Z"
+      "detail": "cycle 2026-08-14T18:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
       "pass": true,
-      "detail": "12 drawer(s) opened · all load-bearing caveats present"
+      "detail": "14 drawer(s) opened · all load-bearing caveats present"
     },
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "42 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "34 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "42 tile(s) served on reload · 42 in cache"
+      "detail": "34 tile(s) served on reload · 34 in cache"
     },
     {
       "check": "all markets carried",
@@ -188,7 +212,7 @@
     {
       "check": "fillable cap priced at the ask",
       "pass": true,
-      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 144320 × $0.01 = $1443"
+      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 144288 × $0.01 = $1443"
     },
     {
       "check": "order book shows depth",
