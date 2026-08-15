@@ -1,23 +1,19 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-15T00:54:23.486Z",
+  "ranAt": "2026-08-15T01:20:48.080Z",
   "url": "https://alecmessino.github.io/category-alpha/",
-  "sha": "a8f7f9718309cddf41cbd4ea182148f977cc089e",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31854959274",
+  "sha": "52470f4598331e3ca005ee4244e5dfae8508b608",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31856196961",
   "ok": false,
-  "passed": 43,
+  "passed": 44,
   "total": 45,
   "failures": [
     {
-      "check": "edge book renders and ranks nothing it cannot support",
-      "detail": "7 ranked of 12 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=1 overStaked=0 dupLadders=0 accounted=true"
-    },
-    {
-      "check": "the guidance consensus reaches every active system's newest frame",
-      "detail": "1/2 carry a consensus peak · 1 carry its cycle · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "check": "four tabs, so no single view is a wall",
+      "detail": "4 tabs · 2.1 screens tall (2871px / 1400px)"
     }
   ],
-  "thirdPartyFailures": 50,
+  "thirdPartyFailures": 34,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -37,7 +33,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-15T00:43:06.279Z · 11m old"
+      "detail": "2026-08-15T01:14:25.682Z · 6m old"
     },
     {
       "check": "renders: Situation",
@@ -96,8 +92,8 @@
     },
     {
       "check": "edge book renders and ranks nothing it cannot support",
-      "pass": false,
-      "detail": "7 ranked of 12 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=1 overStaked=0 dupLadders=0 accounted=true"
+      "pass": true,
+      "detail": "7 ranked of 12 candidates · 117/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -121,8 +117,8 @@
     },
     {
       "check": "four tabs, so no single view is a wall",
-      "pass": true,
-      "detail": "4 tabs · 2 screens tall (2833px / 1400px)"
+      "pass": false,
+      "detail": "4 tabs · 2.1 screens tall (2871px / 1400px)"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -145,14 +141,14 @@
       "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 4 advisory change(s) · 1 moved P · 1 pinned at the clamp · 4 register row(s) · situation P=75% at adv #10A"
     },
     {
-      "check": "the guidance consensus reaches every active system's newest frame",
-      "pass": false,
-      "detail": "1/2 carry a consensus peak · 1 carry its cycle · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "check": "every consensus in the snapshot reaches the newest frame",
+      "pass": true,
+      "detail": "2/2 frame(s) carry a consensus peak against 2 in the snapshot · 2 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 2 calibrated, 2 with the official estimate beside it · strip: quality=HIGH lag=43m raw=60%"
+      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 2 calibrated, 2 with the official estimate beside it · strip: quality=MEDIUM lag=66m raw=60%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -162,12 +158,12 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "0 guidance cycle(s) turned over → 0 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 0 SHIPS · 0 pass · strip arrivals=0 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
+      "detail": "0 guidance cycle(s) turned over → 0 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 1 SHIPS · 0 pass · strip arrivals=1 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: past the 180-min line — Hernan 247m · 1 row(s), 1 held, 0 TAKE · forced: 2 anchored row(s) pushed past it → 1 HOLD, 1 SUSPECT, 0 ACTIONABLE · 5 stale-crossing row(s) in the register"
+      "detail": "live: past the 180-min line — Hernan 270m · 1 row(s), 1 held, 0 TAKE · forced: 2 anchored row(s) pushed past it → 1 HOLD, 1 SUSPECT, 0 ACTIONABLE · 5 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
@@ -187,12 +183,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "34 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "41 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "34 tile(s) served on reload · 34 in cache"
+      "detail": "41 tile(s) served on reload · 41 in cache"
     },
     {
       "check": "all markets carried",
