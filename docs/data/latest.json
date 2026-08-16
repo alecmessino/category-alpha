@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-16T02:56:48.305Z",
+  "generatedAt": "2026-08-16T03:00:35.422Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 234,
+      "latencyMs": 201,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep082026\",\"binNumber\":\"EP3\",\"name\":\"Hernan\",\"classification\":\"PTC\",\"intensity\":\"25\",\"pressure\":\"1009\",\"latitude\":\"15.8N\",\"longitude\":\"135.9W\",\"latitudeNumeric\":15.8,\"longitudeNumeric\":-135.9,\"movementDir\":270,\"movementSpeed\":12,\"lastUpdate\":\"2026-08-15T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"012\",\"issuance\":\"2026-08-15T21:00:00.000Z\",\"fileUpdateTime\":\"2026-08-15T20:42:11.009Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP3.shtml\"},\"forecastAdvisory\":{\"advNum\":\"012\",\"issuance\":\"2026-08-",
-      "forecast": "Hernan: 5 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 375m old | Lala: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 88% · Hurricane Warning · forecast undefined guidance · advisory 4m old",
-      "advisoryLagMin": 375
+      "forecast": "Hernan: 5 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 379m old | Lala: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 88% · Hurricane Warning · forecast undefined guidance · advisory 8m old",
+      "advisoryLagMin": 379
     },
     "markets": {
       "ok": true,
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 204,
+      "latencyMs": 250,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 2,
       "note": "2 area(s) under watch · 0 Atlantic",
-      "latencyMs": 245,
+      "latencyMs": 694,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -282,9 +282,9 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 635,
+      "latencyMs": 378,
       "count": 2,
-      "note": "2/2 storm decks read · EP082026: a-deck cycle 2026081518 · 33 techs · consensus 3 member(s) peak 27.3 kt · b-deck 21 records · f-deck 88 fixes | CP012026: a-deck cycle 2026081600 · 33 techs · consensus 3 member(s) peak 90 kt · b-deck 25 records · f-deck 133 fixes",
+      "note": "2/2 storm decks read · EP082026: a-deck cycle 2026081518 · 33 techs · consensus 3 member(s) peak 27.3 kt · b-deck 21 records · f-deck 88 fixes | CP012026: a-deck cycle 2026081600 · 35 techs · consensus 3 member(s) peak 90 kt · b-deck 25 records · f-deck 138 fixes",
       "attempts": [
         {
           "source": "EP082026",
@@ -296,7 +296,7 @@
           "source": "CP012026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026081600 · 33 techs · consensus 3 member(s) peak 90 kt · b-deck 25 records · f-deck 133 fixes"
+          "note": "a-deck cycle 2026081600 · 35 techs · consensus 3 member(s) peak 90 kt · b-deck 25 records · f-deck 138 fixes"
         }
       ]
     },
@@ -305,7 +305,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 183,
+      "latencyMs": 178,
       "count": 2,
       "note": "2 vortex data message(s): AL022026 11:36Z, CP012026 05:56Z",
       "attempts": [
@@ -430,11 +430,11 @@
         "already": false,
         "basis": "official forecast peaks at 25 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 375,
+      "advisoryLagMin": 379,
       "discussion": {
         "forecaster": "Katz/Berg",
         "issuedZ": "2026-08-15T20:42:00.000Z",
-        "lagMin": 375,
+        "lagMin": 379,
         "guidance": {
           "intensity": null,
           "track": null
@@ -1927,9 +1927,9 @@
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 1102,
+        "ascatAgeMin": 1106,
         "ascatUsed": false,
-        "consensusAgeMin": 537,
+        "consensusAgeMin": 541,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 40,
@@ -1961,7 +1961,7 @@
             "label": "ATCF guidance consensus",
             "p": null,
             "unavailable": true,
-            "basis": "consensus present but stale (537 min) — not scored"
+            "basis": "consensus present but stale (541 min) — not scored"
           },
           {
             "id": "ships-ri",
@@ -1972,8 +1972,8 @@
           }
         ],
         "notes": [
-          "ATCF consensus cycle 2026081518 is 537 min old, past the 420-min line — not used",
-          "scatterometer pass is 1102 min old, past the 360-min line — band not tightened"
+          "ATCF consensus cycle 2026081518 is 541 min old, past the 420-min line — not used",
+          "scatterometer pass is 1106 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
@@ -1987,7 +1987,7 @@
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 375 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "the advisory under this estimate is 379 min old, past the 180-min line — quality is capped regardless of what else arrived",
           "official advisory only — no guidance deck and no aircraft",
           "SHIPS RI diagnostics present, published but not scored"
         ]
@@ -2088,11 +2088,11 @@
         "already": true,
         "basis": "already carried at 70 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 4,
+      "advisoryLagMin": 8,
       "discussion": {
         "forecaster": "Gibbs",
         "issuedZ": "2026-08-16T02:54:00.000Z",
-        "lagMin": 3,
+        "lagMin": 7,
         "guidance": {
           "intensity": null,
           "track": null
@@ -2715,9 +2715,9 @@
           ]
         },
         "official": {
-          "tech": "OFCI",
-          "peakKt": 76,
-          "peakHr": 120
+          "tech": "OFCL",
+          "peakKt": 70,
+          "peakHr": 3
         },
         "missing": [],
         "techsPresent": [
@@ -2728,6 +2728,7 @@
           "CLP5",
           "CMC2",
           "CTCI",
+          "DRCL",
           "DSHP",
           "GDMI",
           "HCCA",
@@ -2743,6 +2744,7 @@
           "NVGI",
           "OCD5",
           "OFCI",
+          "OFCL",
           "RI25",
           "RVCN",
           "SHF5",
@@ -3864,11 +3866,11 @@
       },
       "atcfDeck": {
         "cycle": "2026081600",
-        "techCount": 33,
-        "forecastAids": 32
+        "techCount": 35,
+        "forecastAids": 34
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026081600 · 33 techs · consensus 3 member(s) peak 90 kt · b-deck 25 records · f-deck 133 fixes",
+        "atcf": "a-deck cycle 2026081600 · 35 techs · consensus 3 member(s) peak 90 kt · b-deck 25 records · f-deck 138 fixes",
         "ships": "2026-08-16T00:00Z · shear 14 kt · OHC 9 · MPI 136 kt · 8 RI thresholds"
       },
       "riFloor": null,
@@ -3888,12 +3890,12 @@
         "initSource": "satellite intensity analysis",
         "tauKt": 15.7,
         "reconDeltaKt": null,
-        "reconAgeMin": 1260,
+        "reconAgeMin": 1264,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 1901,
+        "ascatAgeMin": 1905,
         "ascatUsed": false,
-        "consensusAgeMin": 177,
+        "consensusAgeMin": 181,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
@@ -3931,12 +3933,12 @@
             "label": "Aircraft reconnaissance",
             "p": null,
             "unavailable": true,
-            "basis": "recon fix present but not applied: the fix is 1260 min old, past the 180-min line"
+            "basis": "recon fix present but not applied: the fix is 1264 min old, past the 180-min line"
           }
         ],
         "notes": [
-          "recon fix not applied: the fix is 1260 min old, past the 180-min line",
-          "scatterometer pass is 1901 min old, past the 360-min line — band not tightened"
+          "recon fix not applied: the fix is 1264 min old, past the 180-min line",
+          "scatterometer pass is 1905 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
@@ -3950,7 +3952,7 @@
       "evidenceQuality": {
         "tier": "MEDIUM",
         "reasons": [
-          "ATCF consensus 177 min old, no aircraft in the storm"
+          "ATCF consensus 181 min old, no aircraft in the storm"
         ]
       }
     }
@@ -3967,7 +3969,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lala is 70 kt now · combined 2 intensity estimates at 70 kt (sigma 15.7 kt, of which 15.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 88%, calibrated 93% · already carried at 70 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 4 min old when fetched",
+      "modelBasis": "Lala is 70 kt now · combined 2 intensity estimates at 70 kt (sigma 15.7 kt, of which 15.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 88%, calibrated 93% · already carried at 70 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 8 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -4002,12 +4004,12 @@
           "label": "Aircraft reconnaissance",
           "p": null,
           "unavailable": true,
-          "basis": "recon fix present but not applied: the fix is 1260 min old, past the 180-min line"
+          "basis": "recon fix present but not applied: the fix is 1264 min old, past the 180-min line"
         }
       ],
       "modelLow": 0.6173646659245705,
       "modelHigh": 0.9331927712797292,
-      "modelLagMin": 4,
+      "modelLagMin": 8,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -4016,9 +4018,9 @@
       "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 90,
-        "conAgeMin": 177,
+        "conAgeMin": 181,
         "spreadKt": 15.7,
-        "reconAgeMin": 1260,
+        "reconAgeMin": 1264,
         "reconDeltaKt": null,
         "ascatUsed": false,
         "riFloorP": null,
@@ -4093,7 +4095,7 @@
       "short": "Will there be more than 2 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.30500000000000005,
+      "market": 0.31,
       "model": 0.40806607800928885,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -4144,16 +4146,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 2,
-      "yesBid": 0.28,
+      "yesBid": 0.29,
       "yesAsk": 0.33,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 20,
-      "spread": 0.04999999999999999,
+      "spread": 0.040000000000000036,
       "volume": 24389.49,
       "volume24h": 217.59,
       "openInterest": 9320.34,
       "depth": {
-        "bidSize": 20,
+        "bidSize": 6,
         "askSize": 60,
         "notional": 1
       },
@@ -4705,7 +4707,7 @@
       "short": "Will there be more than 4 Atlantic hurricanes…",
       "storm": null,
       "subject": null,
-      "market": 0.435,
+      "market": 0.43999999999999995,
       "model": 0.5474344895042562,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
@@ -4757,16 +4759,16 @@
       "horizon": "seasonal",
       "strike": 4,
       "yesBid": 0.41,
-      "yesAsk": 0.46,
+      "yesAsk": 0.47,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 4,
-      "spread": 0.050000000000000044,
+      "liquidity": 6,
+      "spread": 0.06,
       "volume": 8576.7,
       "volume24h": 279.97,
       "openInterest": 5358.34,
       "depth": {
         "bidSize": 26,
-        "askSize": 8,
+        "askSize": 13,
         "notional": 1
       },
       "proxy": false,
@@ -11839,7 +11841,7 @@
       "short": "Will a hurricane make landfall in Hawaii…",
       "storm": null,
       "subject": null,
-      "market": 0.14500000000000002,
+      "market": 0.12000000000000001,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -11859,17 +11861,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.13,
-      "yesAsk": 0.16,
+      "yesBid": 0.1,
+      "yesAsk": 0.14,
       "closeTime": "2027-01-01T04:59:00Z",
-      "liquidity": 1437,
-      "spread": 0.03,
-      "volume": 7504.72,
+      "liquidity": 4,
+      "spread": 0.04000000000000001,
+      "volume": 7634.72,
       "volume24h": 5505.76,
-      "openInterest": 5484.74,
+      "openInterest": 5514.74,
       "depth": {
-        "bidSize": 30,
-        "askSize": 8980.93,
+        "bidSize": 333,
+        "askSize": 30,
         "notional": 1
       },
       "proxy": false,
