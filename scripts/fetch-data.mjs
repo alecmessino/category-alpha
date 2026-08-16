@@ -22,6 +22,7 @@ import { fileURLToPath } from "node:url";
 import { ingestIntel, arrivalEvents } from "./ingest.mjs";
 import { calibratedIntensityP, evidenceQuality } from "./lib/probability.mjs";
 import { riFloorFor } from "./lib/ships.mjs";
+import { parseOutlookShapes, attachShapes } from "./lib/shapefile.mjs";
 /* Moved to lib so the backtest replays the same estimator the board trades. Pure move,
    proven by scripts/verify-extraction.mjs. */
 import { INTENSITY_MAE, HURRICANE_REPORTED_KT, KT_INCREMENT, LATENT_THRESHOLD,
@@ -62,6 +63,20 @@ async function getText(url, { timeout = 30000 } = {}) {
     const latencyMs = Date.now() - t0;
     if (!res.ok) return { ok: false, status: res.status, latencyMs, error: "HTTP " + res.status };
     return { ok: true, status: res.status, latencyMs, text: await res.text() };
+  } catch (e) {
+    return { ok: false, status: null, latencyMs: Date.now() - t0, error: String(e && e.message || e) };
+  } finally { clearTimeout(to); }
+}
+
+async function getBuffer(url, { timeout = 30000 } = {}) {
+  const t0 = Date.now();
+  const ctrl = new AbortController();
+  const to = setTimeout(() => ctrl.abort(), timeout);
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": UA, "Accept": "*/*" }, signal: ctrl.signal });
+    const latencyMs = Date.now() - t0;
+    if (!res.ok) return { ok: false, status: res.status, latencyMs, error: "HTTP " + res.status };
+    return { ok: true, status: res.status, latencyMs, buf: Buffer.from(await res.arrayBuffer()) };
   } catch (e) {
     return { ok: false, status: null, latencyMs: Date.now() - t0, error: String(e && e.message || e) };
   } finally { clearTimeout(to); }
@@ -411,6 +426,27 @@ async function fetchOutlook() {
       (atl.length ? ` · highest 7-day ${Math.max(...atl.map((a) => a.pct7d ?? 0))}%` : "")
     : "no outlook product reachable";
   return out;
+}
+
+/* Geometry for the outlook areas. The text product gives a probability and a prose location
+   but no coordinates, so until now the map could only list them. This is the same product
+   drawn on NHC's own graphical outlook. Failure is not fatal: the areas keep their text
+   entries and simply are not plotted. */
+async function fetchOutlookShapes(textAreas) {
+  const url = "https://www.nhc.noaa.gov/xgtwo/gtwo_shapefiles.zip";
+  const r = await getBuffer(url);
+  const feed = { ok: false, status: r.status, latencyMs: r.latencyMs, source: "NHC graphical TWO", count: 0 };
+  if (!r.ok) return { areas: textAreas, feed: Object.assign(feed, { note: r.error || "unreachable" }) };
+  let parsed;
+  try { parsed = parseOutlookShapes(r.buf); }
+  catch (e) { return { areas: textAreas, feed: Object.assign(feed, { note: "unparseable: " + (e && e.message) }) }; }
+  if (!parsed.areas.length) return { areas: textAreas, feed: Object.assign(feed, { note: parsed.note }) };
+  const j = attachShapes(textAreas, parsed.areas);
+  feed.ok = true;
+  feed.count = j.matched;
+  feed.note = `${j.matched} of ${textAreas.length} area(s) with geometry` +
+              (j.unmatched ? ` · ${j.unmatched} text-only` : "");
+  return { areas: j.areas, feed };
 }
 
 /* ---------------- NHC forecast track + uncertainty cone ----------------
@@ -2308,6 +2344,9 @@ async function main() {
 
   // Pre-genesis areas. Independent of whether anything is classified yet.
   const outlook = await fetchOutlook();
+  // ...and the polygons NHC draws for them, so the map can show WHERE, not just a list.
+  const shapes = await fetchOutlookShapes(outlook.areas);
+  outlook.areas = shapes.areas;
 
   // Climatology baseline first — it supplies the fair-value anchor for seasonal contracts.
   const { feed: climFeed, clim, clims } = await fetchClimatology();
@@ -2381,6 +2420,7 @@ async function main() {
     enso: ensoFeed,
     outlook: { ok: outlook.ok, status: outlook.status, source: outlook.source, count: outlook.count,
                note: outlook.note, latencyMs: outlook.latencyMs, attempts: outlook.attempts },
+    outlookShapes: shapes.feed,
     /* The four pre-advisory feeds, reported exactly like every other feed so they appear
        in the health panel, the claim registry and the attention queue without a special
        case. ATCF and recon are CORE — the coverage gate fails the build when either is

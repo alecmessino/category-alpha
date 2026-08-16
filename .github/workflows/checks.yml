@@ -126,6 +126,11 @@ jobs:
       - name: Test the advisory transmission timeline
         run: node scripts/test-advisories.mjs
 
+      # The outlook polygons the overview map shades. A shp/dbf pairing that slips by one
+      # draws a 50% probability over the wrong ocean and looks entirely normal doing it.
+      - name: Test the outlook shapefile reader
+        run: node scripts/test-shapefile.mjs
+
       # The estimator was MOVED into lib so the backtest replays the same function the board
       # trades. This compares it field-by-field against outputs captured before the move and
       # requires exact equality — a replica that drifts would score a model nobody trades.
