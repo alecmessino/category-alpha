@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-16T00:42:11.622Z",
+  "generatedAt": "2026-08-16T00:52:29.232Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 218,
+      "latencyMs": 242,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep082026\",\"binNumber\":\"EP3\",\"name\":\"Hernan\",\"classification\":\"PTC\",\"intensity\":\"25\",\"pressure\":\"1009\",\"latitude\":\"15.8N\",\"longitude\":\"135.9W\",\"latitudeNumeric\":15.8,\"longitudeNumeric\":-135.9,\"movementDir\":270,\"movementSpeed\":12,\"lastUpdate\":\"2026-08-15T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"012\",\"issuance\":\"2026-08-15T21:00:00.000Z\",\"fileUpdateTime\":\"2026-08-15T20:42:11.009Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP3.shtml\"},\"forecastAdvisory\":{\"advNum\":\"012\",\"issuance\":\"2026-08-",
-      "forecast": "Hernan: 5 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 240m old | Lala: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 66% · Hurricane Warning · forecast undefined guidance · advisory 46m old",
-      "advisoryLagMin": 240
+      "forecast": "Hernan: 5 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 250m old | Lala: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 66% · Hurricane Warning · forecast undefined guidance · advisory 56m old",
+      "advisoryLagMin": 250
     },
     "markets": {
       "ok": true,
@@ -47,14 +47,14 @@
             "noPrice": 0
           },
           "samples": [
-            "When will the next Category 5 hurricane  | Before Sep 1,  | px=0.105",
-            "When will the next Category 5 hurricane  | Before Oct 1,  | px=0.210",
-            "When will the next Category 5 hurricane  | Before Nov 1,  | px=0.275",
-            "When will the next Category 5 hurricane  | Before Dec 1,  | px=0.225",
-            "When will the next hurricane form? | Before Sep 15, | px=0.475",
-            "When will the next hurricane form? | Before Sep 1,  | px=0.400"
+            "Will there be more than 9  Atlantic hurr | Above 9 | px=0.055",
+            "Will there be more than 8  Atlantic hurr | Above 8 | px=0.085",
+            "Will there be more than 7  Atlantic hurr | Above 7 | px=0.140",
+            "Will there be more than 6  Atlantic hurr | Above 6 | px=0.220",
+            "Will there be more than 5  Atlantic hurr | Above 5 | px=0.225",
+            "Will there be more than 4  Atlantic hurr | Above 4 | px=0.445"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"9.09\",\"volume_24h_fp\":\"1.00\",\"volume_fp\":\"11.09\"},\"px\":{\"last_price_dollars\":\"0.2900\",\"no_ask_dollars\":\"0.9600\",\"no_bid_dollars\":\"0.8300\",\"previous_price_dollars\":\"0.0100\",\"previous_yes_ask_dollars\":\"0.8000\",\"previous_yes_bid_dollars\":\"0.0200\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.1700\",\"yes_ask_size_fp\":\"3.00\",\"yes_bid_dollars\":\"0.0400\",\"yes_bid_size_fp\":\"5.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2513.43\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"3274.31\"},\"px\":{\"last_price_dollars\":\"0.0800\",\"no_ask_dollars\":\"0.9600\",\"no_bid_dollars\":\"0.9300\",\"previous_price_dollars\":\"0.0800\",\"previous_yes_ask_dollars\":\"0.0700\",\"previous_yes_bid_dollars\":\"0.0400\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0700\",\"yes_ask_size_fp\":\"27.00\",\"yes_bid_dollars\":\"0.0400\",\"yes_bid_size_fp\":\"35.00\"}}"
         }
       ]
     },
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 176,
+      "latencyMs": 123,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 2,
       "note": "2 area(s) under watch · 0 Atlantic",
-      "latencyMs": 221,
+      "latencyMs": 133,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -282,9 +282,9 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 472,
+      "latencyMs": 524,
       "count": 2,
-      "note": "2/2 storm decks read · EP082026: a-deck cycle 2026081518 · 33 techs · consensus 3 member(s) peak 27.3 kt · b-deck 21 records · f-deck 88 fixes | CP012026: a-deck cycle 2026081600 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 25 records · f-deck 133 fixes",
+      "note": "2/2 storm decks read · EP082026: a-deck cycle 2026081518 · 33 techs · consensus 3 member(s) peak 27.3 kt · b-deck 21 records · f-deck 88 fixes | CP012026: a-deck cycle 2026081600 · 33 techs · consensus 3 member(s) peak 90 kt · b-deck 25 records · f-deck 133 fixes",
       "attempts": [
         {
           "source": "EP082026",
@@ -296,7 +296,7 @@
           "source": "CP012026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026081600 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 25 records · f-deck 133 fixes"
+          "note": "a-deck cycle 2026081600 · 33 techs · consensus 3 member(s) peak 90 kt · b-deck 25 records · f-deck 133 fixes"
         }
       ]
     },
@@ -305,7 +305,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 402,
+      "latencyMs": 380,
       "count": 2,
       "note": "2 vortex data message(s): AL022026 11:36Z, CP012026 05:56Z",
       "attempts": [
@@ -340,9 +340,9 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 34,
+      "latencyMs": 30,
       "count": 2,
-      "note": "2/2 storms · EP082026: 2026-08-15T18:00Z · shear 16 kt · OHC 21 · MPI 142 kt · 8 RI thresholds | CP012026: 2026-08-15T18:00Z · shear 12 kt · OHC 9 · MPI 136 kt · 8 RI thresholds",
+      "note": "2/2 storms · EP082026: 2026-08-15T18:00Z · shear 16 kt · OHC 21 · MPI 142 kt · 8 RI thresholds | CP012026: 2026-08-16T00:00Z · shear 14 kt · OHC 9 · MPI 136 kt · 8 RI thresholds",
       "attempts": [
         {
           "source": "EP082026",
@@ -354,7 +354,7 @@
           "source": "CP012026",
           "ok": true,
           "status": 200,
-          "note": "2026-08-15T18:00Z · shear 12 kt · OHC 9 · MPI 136 kt · 8 RI thresholds"
+          "note": "2026-08-16T00:00Z · shear 14 kt · OHC 9 · MPI 136 kt · 8 RI thresholds"
         }
       ]
     },
@@ -430,11 +430,11 @@
         "already": false,
         "basis": "official forecast peaks at 25 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 240,
+      "advisoryLagMin": 250,
       "discussion": {
         "forecaster": "Katz/Berg",
         "issuedZ": "2026-08-15T20:42:00.000Z",
-        "lagMin": 240,
+        "lagMin": 250,
         "guidance": {
           "intensity": null,
           "track": null
@@ -1927,9 +1927,9 @@
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 967,
+        "ascatAgeMin": 977,
         "ascatUsed": false,
-        "consensusAgeMin": 402,
+        "consensusAgeMin": 412,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 40,
@@ -1979,7 +1979,7 @@
           }
         ],
         "notes": [
-          "scatterometer pass is 967 min old, past the 360-min line — band not tightened"
+          "scatterometer pass is 977 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
@@ -1993,8 +1993,8 @@
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 240 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "ATCF consensus 402 min old, no aircraft in the storm",
+          "the advisory under this estimate is 250 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 412 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -2094,11 +2094,11 @@
         "already": true,
         "basis": "already carried at 65 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 46,
+      "advisoryLagMin": 56,
       "discussion": {
         "forecaster": "Berg",
         "issuedZ": "2026-08-15T20:44:00.000Z",
-        "lagMin": 238,
+        "lagMin": 248,
         "guidance": {
           "intensity": null,
           "track": null
@@ -2358,7 +2358,406 @@
       ],
       "advisoryIssuedZ": "2026-08-15T23:56:00.000Z",
       "advNumFull": "14A",
-      "consensus": null,
+      "consensus": {
+        "cycle": "2026081600",
+        "cycleIso": "2026-08-16T00:00:00.000Z",
+        "peakKt": 90,
+        "peakHr": 84,
+        "spreadKt": 15.7,
+        "minKt": 76,
+        "maxKt": 107,
+        "n": 3,
+        "members": [
+          {
+            "tech": "HCCA",
+            "label": "HFIP corrected consensus",
+            "peakKt": 107,
+            "peakHr": 144,
+            "initialKt": 65
+          },
+          {
+            "tech": "IVCN",
+            "label": "variable consensus (intensity)",
+            "peakKt": 76,
+            "peakHr": 84,
+            "initialKt": 65
+          },
+          {
+            "tech": "GDMI",
+            "label": "DeepMind (interpolated)",
+            "peakKt": 87,
+            "peakHr": 84,
+            "initialKt": 65
+          }
+        ],
+        "corrected": {
+          "tech": "HCCA",
+          "peakKt": 107,
+          "peakHr": 144,
+          "intensity": [
+            {
+              "hr": 0,
+              "kt": 65,
+              "mslp": null
+            },
+            {
+              "hr": 12,
+              "kt": 63,
+              "mslp": null
+            },
+            {
+              "hr": 24,
+              "kt": 61,
+              "mslp": null
+            },
+            {
+              "hr": 36,
+              "kt": 65,
+              "mslp": null
+            },
+            {
+              "hr": 48,
+              "kt": 70,
+              "mslp": null
+            },
+            {
+              "hr": 60,
+              "kt": 78,
+              "mslp": null
+            },
+            {
+              "hr": 72,
+              "kt": 83,
+              "mslp": null
+            },
+            {
+              "hr": 84,
+              "kt": 87,
+              "mslp": null
+            },
+            {
+              "hr": 96,
+              "kt": 95,
+              "mslp": null
+            },
+            {
+              "hr": 108,
+              "kt": 99,
+              "mslp": null
+            },
+            {
+              "hr": 120,
+              "kt": 100,
+              "mslp": null
+            },
+            {
+              "hr": 132,
+              "kt": 103,
+              "mslp": null
+            },
+            {
+              "hr": 144,
+              "kt": 107,
+              "mslp": null
+            },
+            {
+              "hr": 156,
+              "kt": 105,
+              "mslp": null
+            },
+            {
+              "hr": 168,
+              "kt": 102,
+              "mslp": null
+            }
+          ],
+          "track": [
+            {
+              "hr": 0,
+              "lat": 18.3,
+              "lon": -155.7
+            },
+            {
+              "hr": 12,
+              "lat": 19.5,
+              "lon": -158
+            },
+            {
+              "hr": 24,
+              "lat": 20.1,
+              "lon": -160.7
+            },
+            {
+              "hr": 36,
+              "lat": 20.3,
+              "lon": -163.1
+            },
+            {
+              "hr": 48,
+              "lat": 20.2,
+              "lon": -165.3
+            },
+            {
+              "hr": 60,
+              "lat": 20.1,
+              "lon": -167.3
+            },
+            {
+              "hr": 72,
+              "lat": 20.2,
+              "lon": -169.1
+            },
+            {
+              "hr": 84,
+              "lat": 20.7,
+              "lon": -170.8
+            },
+            {
+              "hr": 96,
+              "lat": 21.5,
+              "lon": -172.5
+            },
+            {
+              "hr": 108,
+              "lat": 22.3,
+              "lon": -174.2
+            },
+            {
+              "hr": 120,
+              "lat": 23,
+              "lon": -175.5
+            },
+            {
+              "hr": 132,
+              "lat": 23.3,
+              "lon": -176.6
+            },
+            {
+              "hr": 144,
+              "lat": 23.7,
+              "lon": -177.2
+            },
+            {
+              "hr": 156,
+              "lat": 24.2,
+              "lon": -176.8
+            },
+            {
+              "hr": 168,
+              "lat": 25.1,
+              "lon": -176.2
+            }
+          ]
+        },
+        "variableIntensity": {
+          "tech": "IVCN",
+          "peakKt": 76,
+          "peakHr": 84
+        },
+        "variableTrack": {
+          "tech": "TVCN",
+          "track": [
+            {
+              "hr": 0,
+              "lat": 18.3,
+              "lon": -155.7
+            },
+            {
+              "hr": 12,
+              "lat": 19.4,
+              "lon": -157.9
+            },
+            {
+              "hr": 24,
+              "lat": 20.1,
+              "lon": -160.3
+            },
+            {
+              "hr": 36,
+              "lat": 20.4,
+              "lon": -162.7
+            },
+            {
+              "hr": 48,
+              "lat": 20.3,
+              "lon": -164.9
+            },
+            {
+              "hr": 60,
+              "lat": 20.1,
+              "lon": -167
+            },
+            {
+              "hr": 72,
+              "lat": 20.2,
+              "lon": -168.9
+            },
+            {
+              "hr": 84,
+              "lat": 20.5,
+              "lon": -170.7
+            },
+            {
+              "hr": 96,
+              "lat": 21.1,
+              "lon": -172.5
+            },
+            {
+              "hr": 108,
+              "lat": 21.8,
+              "lon": -174.2
+            },
+            {
+              "hr": 120,
+              "lat": 22.3,
+              "lon": -175.5
+            },
+            {
+              "hr": 132,
+              "lat": 22.8,
+              "lon": -176.7
+            },
+            {
+              "hr": 144,
+              "lat": 22.6,
+              "lon": -178.7
+            },
+            {
+              "hr": 156,
+              "lat": 23.2,
+              "lon": -179.3
+            },
+            {
+              "hr": 168,
+              "lat": 23.9,
+              "lon": -179.9
+            }
+          ]
+        },
+        "deepmind": {
+          "tech": "GDMI",
+          "peakKt": 87,
+          "peakHr": 84,
+          "track": [
+            {
+              "hr": 0,
+              "lat": 18.3,
+              "lon": -155.7
+            },
+            {
+              "hr": 12,
+              "lat": 19.5,
+              "lon": -157.9
+            },
+            {
+              "hr": 24,
+              "lat": 20.2,
+              "lon": -160.5
+            },
+            {
+              "hr": 36,
+              "lat": 20.3,
+              "lon": -163
+            },
+            {
+              "hr": 48,
+              "lat": 20.2,
+              "lon": -165.1
+            },
+            {
+              "hr": 60,
+              "lat": 20.1,
+              "lon": -167.2
+            },
+            {
+              "hr": 72,
+              "lat": 20.3,
+              "lon": -169
+            },
+            {
+              "hr": 84,
+              "lat": 20.8,
+              "lon": -170.7
+            },
+            {
+              "hr": 96,
+              "lat": 21.5,
+              "lon": -172.3
+            },
+            {
+              "hr": 108,
+              "lat": 22.2,
+              "lon": -173.8
+            },
+            {
+              "hr": 120,
+              "lat": 22.9,
+              "lon": -175
+            },
+            {
+              "hr": 132,
+              "lat": 23.4,
+              "lon": -175.7
+            },
+            {
+              "hr": 144,
+              "lat": 24.1,
+              "lon": -176
+            },
+            {
+              "hr": 156,
+              "lat": 24.9,
+              "lon": -176
+            },
+            {
+              "hr": 168,
+              "lat": 26,
+              "lon": -176.1
+            }
+          ]
+        },
+        "official": {
+          "tech": "OFCI",
+          "peakKt": 76,
+          "peakHr": 120
+        },
+        "missing": [],
+        "techsPresent": [
+          "AEMI",
+          "AVNI",
+          "CARQ",
+          "CEM2",
+          "CLP5",
+          "CMC2",
+          "CTCI",
+          "DSHP",
+          "GDMI",
+          "HCCA",
+          "HFAI",
+          "HFBI",
+          "HMNI",
+          "HWFI",
+          "IVCN",
+          "LGEM",
+          "NGX2",
+          "NNIB",
+          "NNIC",
+          "NVGI",
+          "OCD5",
+          "OFCI",
+          "RI25",
+          "RVCN",
+          "SHF5",
+          "SHIP",
+          "TABD",
+          "TABM",
+          "TABS",
+          "TCLP",
+          "TVCN",
+          "UKX2",
+          "XTRP"
+        ]
+      },
       "recon": {
         "ok": true,
         "stormId": "CP012026",
@@ -2419,7 +2818,7 @@
         "ok": true,
         "stormId": "CP012026",
         "name": "LALA",
-        "cycleIso": "2026-08-15T18:00:00.000Z",
+        "cycleIso": "2026-08-16T00:00:00.000Z",
         "taus": [
           0,
           6,
@@ -2440,13 +2839,13 @@
           168
         ],
         "features": {
-          "shearKt": 12,
-          "shearAdjKt": 0,
+          "shearKt": 14,
+          "shearAdjKt": -2,
           "sstC": 27.2,
           "mpiKt": 136,
-          "rhMid": 51,
+          "rhMid": 48,
           "ohc": 9,
-          "landKm": 133,
+          "landKm": 69,
           "vNoLandKt": 65,
           "vLgemKt": 65
         },
@@ -2454,11 +2853,11 @@
           "shearKt": [
             {
               "hr": 0,
-              "v": 12
+              "v": 14
             },
             {
               "hr": 6,
-              "v": 16
+              "v": 15
             },
             {
               "hr": 12,
@@ -2466,19 +2865,19 @@
             },
             {
               "hr": 18,
-              "v": 19
+              "v": 16
             },
             {
               "hr": 24,
-              "v": 18
+              "v": 14
             },
             {
               "hr": 36,
-              "v": 13
+              "v": 15
             },
             {
               "hr": 48,
-              "v": 16
+              "v": 19
             },
             {
               "hr": 60,
@@ -2486,35 +2885,35 @@
             },
             {
               "hr": 72,
-              "v": 17
+              "v": 16
             },
             {
               "hr": 84,
-              "v": 18
+              "v": 23
             },
             {
               "hr": 96,
-              "v": 20
+              "v": 22
             },
             {
               "hr": 108,
-              "v": 25
+              "v": 28
             },
             {
               "hr": 120,
-              "v": 29
+              "v": 31
             },
             {
               "hr": 132,
-              "v": 38
+              "v": 41
             },
             {
               "hr": 144,
-              "v": 46
+              "v": 51
             },
             {
               "hr": 156,
-              "v": 54
+              "v": 50
             },
             {
               "hr": 168,
@@ -2524,7 +2923,7 @@
           "shearAdjKt": [
             {
               "hr": 0,
-              "v": 0
+              "v": -2
             },
             {
               "hr": 6,
@@ -2532,15 +2931,15 @@
             },
             {
               "hr": 12,
-              "v": -4
+              "v": -1
             },
             {
               "hr": 18,
-              "v": -2
+              "v": -4
             },
             {
               "hr": 24,
-              "v": -2
+              "v": -5
             },
             {
               "hr": 36,
@@ -2548,31 +2947,31 @@
             },
             {
               "hr": 48,
-              "v": 1
+              "v": -3
             },
             {
               "hr": 60,
-              "v": -3
+              "v": 0
             },
             {
               "hr": 72,
-              "v": 1
+              "v": 0
             },
             {
               "hr": 84,
-              "v": -3
+              "v": -4
             },
             {
               "hr": 96,
-              "v": -2
+              "v": 0
             },
             {
               "hr": 108,
-              "v": -3
+              "v": 1
             },
             {
               "hr": 120,
-              "v": -3
+              "v": 0
             },
             {
               "hr": 132,
@@ -2584,11 +2983,11 @@
             },
             {
               "hr": 156,
-              "v": -6
+              "v": -4
             },
             {
               "hr": 168,
-              "v": -4
+              "v": -6
             }
           ],
           "sstC": [
@@ -2598,27 +2997,27 @@
             },
             {
               "hr": 6,
-              "v": 27.4
-            },
-            {
-              "hr": 12,
-              "v": 27.3
-            },
-            {
-              "hr": 18,
               "v": 27.6
             },
             {
-              "hr": 24,
+              "hr": 12,
+              "v": 27.4
+            },
+            {
+              "hr": 18,
               "v": 27.7
             },
             {
+              "hr": 24,
+              "v": 27.8
+            },
+            {
               "hr": 36,
-              "v": 27.3
+              "v": 27.4
             },
             {
               "hr": 48,
-              "v": 27.8
+              "v": 27.9
             },
             {
               "hr": 60,
@@ -2626,7 +3025,7 @@
             },
             {
               "hr": 72,
-              "v": 27.8
+              "v": 27.9
             },
             {
               "hr": 84,
@@ -2634,7 +3033,7 @@
             },
             {
               "hr": 96,
-              "v": 28.3
+              "v": 28.4
             },
             {
               "hr": 108,
@@ -2642,11 +3041,11 @@
             },
             {
               "hr": 120,
-              "v": 28.1
+              "v": 28.2
             },
             {
               "hr": 132,
-              "v": 28
+              "v": 28.1
             },
             {
               "hr": 144,
@@ -2654,11 +3053,11 @@
             },
             {
               "hr": 156,
-              "v": 27.4
+              "v": 27.7
             },
             {
               "hr": 168,
-              "v": 27.2
+              "v": 27.4
             }
           ],
           "mpiKt": [
@@ -2668,11 +3067,11 @@
             },
             {
               "hr": 6,
-              "v": 139
+              "v": 141
             },
             {
               "hr": 12,
-              "v": 138
+              "v": 139
             },
             {
               "hr": 18,
@@ -2680,11 +3079,11 @@
             },
             {
               "hr": 24,
-              "v": 142
+              "v": 143
             },
             {
               "hr": 36,
-              "v": 137
+              "v": 138
             },
             {
               "hr": 48,
@@ -2696,7 +3095,7 @@
             },
             {
               "hr": 72,
-              "v": 141
+              "v": 142
             },
             {
               "hr": 84,
@@ -2704,7 +3103,7 @@
             },
             {
               "hr": 96,
-              "v": 146
+              "v": 147
             },
             {
               "hr": 108,
@@ -2716,7 +3115,7 @@
             },
             {
               "hr": 132,
-              "v": 142
+              "v": 143
             },
             {
               "hr": 144,
@@ -2724,17 +3123,17 @@
             },
             {
               "hr": 156,
-              "v": 137
+              "v": 140
             },
             {
               "hr": 168,
-              "v": 135
+              "v": 137
             }
           ],
           "rhMid": [
             {
               "hr": 0,
-              "v": 51
+              "v": 48
             },
             {
               "hr": 6,
@@ -2742,35 +3141,35 @@
             },
             {
               "hr": 12,
-              "v": 45
-            },
-            {
-              "hr": 18,
-              "v": 41
-            },
-            {
-              "hr": 24,
               "v": 43
             },
             {
+              "hr": 18,
+              "v": 45
+            },
+            {
+              "hr": 24,
+              "v": 48
+            },
+            {
               "hr": 36,
-              "v": 47
+              "v": 50
             },
             {
               "hr": 48,
-              "v": 48
-            },
-            {
-              "hr": 60,
-              "v": 48
-            },
-            {
-              "hr": 72,
               "v": 51
             },
             {
+              "hr": 60,
+              "v": 54
+            },
+            {
+              "hr": 72,
+              "v": 54
+            },
+            {
               "hr": 84,
-              "v": 52
+              "v": 56
             },
             {
               "hr": 96,
@@ -2778,27 +3177,27 @@
             },
             {
               "hr": 108,
-              "v": 53
+              "v": 56
             },
             {
               "hr": 120,
-              "v": 54
+              "v": 58
             },
             {
               "hr": 132,
-              "v": 57
-            },
-            {
-              "hr": 144,
               "v": 60
             },
             {
+              "hr": 144,
+              "v": 57
+            },
+            {
               "hr": 156,
-              "v": 64
+              "v": 57
             },
             {
               "hr": 168,
-              "v": 62
+              "v": 55
             }
           ],
           "ohc": [
@@ -2808,15 +3207,15 @@
             },
             {
               "hr": 6,
-              "v": 11
+              "v": 14
             },
             {
               "hr": 12,
-              "v": 7
+              "v": 10
             },
             {
               "hr": 18,
-              "v": 16
+              "v": 20
             },
             {
               "hr": 24,
@@ -2824,11 +3223,11 @@
             },
             {
               "hr": 36,
-              "v": 11
+              "v": 13
             },
             {
               "hr": 48,
-              "v": 25
+              "v": 26
             },
             {
               "hr": 60,
@@ -2840,11 +3239,11 @@
             },
             {
               "hr": 84,
-              "v": 29
+              "v": 28
             },
             {
               "hr": 96,
-              "v": 24
+              "v": 26
             },
             {
               "hr": 108,
@@ -2852,93 +3251,93 @@
             },
             {
               "hr": 120,
-              "v": 17
+              "v": 25
             },
             {
               "hr": 132,
-              "v": 18
+              "v": 16
             },
             {
               "hr": 144,
-              "v": 14
+              "v": 19
             },
             {
               "hr": 156,
-              "v": 9
+              "v": 10
             },
             {
               "hr": 168,
-              "v": 6
+              "v": 7
             }
           ],
           "landKm": [
             {
               "hr": 0,
-              "v": 133
+              "v": 69
             },
             {
               "hr": 6,
-              "v": 48
+              "v": 100
             },
             {
               "hr": 12,
-              "v": 112
+              "v": 169
             },
             {
               "hr": 18,
-              "v": 187
+              "v": 223
             },
             {
               "hr": 24,
-              "v": 200
+              "v": 236
             },
             {
               "hr": 36,
-              "v": 286
+              "v": 355
             },
             {
               "hr": 48,
-              "v": 484
+              "v": 538
             },
             {
               "hr": 60,
-              "v": 697
+              "v": 733
             },
             {
               "hr": 72,
-              "v": 864
+              "v": 888
             },
             {
               "hr": 84,
-              "v": 1022
+              "v": 1030
             },
             {
               "hr": 96,
-              "v": 1161
+              "v": 1164
             },
             {
               "hr": 108,
-              "v": 1285
+              "v": 1274
             },
             {
               "hr": 120,
-              "v": 1368
+              "v": 1350
             },
             {
               "hr": 132,
-              "v": 1444
+              "v": 1402
             },
             {
               "hr": 144,
-              "v": 1524
+              "v": 1429
             },
             {
               "hr": 156,
-              "v": 1561
+              "v": 1436
             },
             {
               "hr": 168,
-              "v": 1586
+              "v": 1455
             }
           ],
           "vNoLandKt": [
@@ -2948,39 +3347,39 @@
             },
             {
               "hr": 6,
-              "v": 66
+              "v": 67
             },
             {
               "hr": 12,
-              "v": 65
+              "v": 66
             },
             {
               "hr": 18,
-              "v": 63
+              "v": 65
             },
             {
               "hr": 24,
-              "v": 61
+              "v": 64
             },
             {
               "hr": 36,
-              "v": 59
+              "v": 63
             },
             {
               "hr": 48,
-              "v": 57
+              "v": 61
             },
             {
               "hr": 60,
-              "v": 57
+              "v": 61
             },
             {
               "hr": 72,
-              "v": 57
+              "v": 61
             },
             {
               "hr": 84,
-              "v": 57
+              "v": 59
             },
             {
               "hr": 96,
@@ -2996,19 +3395,19 @@
             },
             {
               "hr": 132,
-              "v": 57
+              "v": 56
             },
             {
               "hr": 144,
-              "v": 58
+              "v": 56
             },
             {
               "hr": 156,
-              "v": 57
+              "v": 52
             },
             {
               "hr": 168,
-              "v": 53
+              "v": 48
             }
           ],
           "vLgemKt": [
@@ -3022,35 +3421,35 @@
             },
             {
               "hr": 12,
-              "v": 67
+              "v": 68
             },
             {
               "hr": 18,
-              "v": 65
+              "v": 67
             },
             {
               "hr": 24,
-              "v": 64
+              "v": 66
             },
             {
               "hr": 36,
-              "v": 62
+              "v": 65
             },
             {
               "hr": 48,
-              "v": 60
+              "v": 64
             },
             {
               "hr": 60,
-              "v": 59
+              "v": 63
             },
             {
               "hr": 72,
-              "v": 59
+              "v": 62
             },
             {
               "hr": 84,
-              "v": 58
+              "v": 59
             },
             {
               "hr": 96,
@@ -3058,27 +3457,27 @@
             },
             {
               "hr": 108,
-              "v": 56
+              "v": 54
             },
             {
               "hr": 120,
-              "v": 57
+              "v": 53
             },
             {
               "hr": 132,
-              "v": 58
+              "v": 52
             },
             {
               "hr": 144,
-              "v": 59
+              "v": 51
             },
             {
               "hr": 156,
-              "v": 60
+              "v": 48
             },
             {
               "hr": 168,
-              "v": 58
+              "v": 45
             }
           ]
         },
@@ -3098,43 +3497,43 @@
             {
               "dvKt": 20,
               "hours": 12,
-              "p": 0.14,
-              "ratioToClimo": 2.3,
+              "p": 0.16,
+              "ratioToClimo": 2.5,
               "climoP": 0.063
             },
             {
               "dvKt": 25,
               "hours": 24,
-              "p": 0.22,
-              "ratioToClimo": 1.8,
+              "p": 0.24,
+              "ratioToClimo": 1.9,
               "climoP": 0.125
             },
             {
               "dvKt": 30,
               "hours": 24,
-              "p": 0.2,
-              "ratioToClimo": 2.3,
+              "p": 0.23,
+              "ratioToClimo": 2.6,
               "climoP": 0.086
             },
             {
               "dvKt": 35,
               "hours": 24,
-              "p": 0.18,
-              "ratioToClimo": 2.8,
+              "p": 0.21,
+              "ratioToClimo": 3.7,
               "climoP": 0.062
             },
             {
               "dvKt": 40,
               "hours": 24,
-              "p": 0.14,
-              "ratioToClimo": 3.4,
+              "p": 0.15,
+              "ratioToClimo": 3.6,
               "climoP": 0.042
             },
             {
               "dvKt": 45,
               "hours": 36,
-              "p": 0.21,
-              "ratioToClimo": 3.1,
+              "p": 0.22,
+              "ratioToClimo": 3.3,
               "climoP": 0.067
             },
             {
@@ -3156,27 +3555,27 @@
             "SHIPS-RII": [
               {
                 "threshold": "20/12",
-                "p": 0.14400000000000002
+                "p": 0.158
               },
               {
                 "threshold": "25/24",
-                "p": 0.22
+                "p": 0.239
               },
               {
                 "threshold": "30/24",
-                "p": 0.198
+                "p": 0.22899999999999998
               },
               {
                 "threshold": "35/24",
-                "p": 0.177
+                "p": 0.20800000000000002
               },
               {
                 "threshold": "40/24",
-                "p": 0.142
+                "p": 0.151
               },
               {
                 "threshold": "45/36",
-                "p": 0.20800000000000002
+                "p": 0.221
               },
               {
                 "threshold": "55/48",
@@ -3190,35 +3589,35 @@
             "Logistic": [
               {
                 "threshold": "20/12",
-                "p": 0.005
+                "p": 0.021
               },
               {
                 "threshold": "25/24",
-                "p": 0.005
+                "p": 0.027000000000000003
               },
               {
                 "threshold": "30/24",
-                "p": 0.002
+                "p": 0.011000000000000001
               },
               {
                 "threshold": "35/24",
-                "p": 0.001
+                "p": 0.009000000000000001
               },
               {
                 "threshold": "40/24",
-                "p": 0.001
+                "p": 0.011000000000000001
               },
               {
                 "threshold": "45/36",
-                "p": 0.002
+                "p": 0.006999999999999999
               },
               {
                 "threshold": "55/48",
-                "p": 0.006
+                "p": 0.009000000000000001
               },
               {
                 "threshold": "65/72",
-                "p": 0.001
+                "p": 0.002
               }
             ],
             "Bayesian": [
@@ -3228,7 +3627,7 @@
               },
               {
                 "threshold": "25/24",
-                "p": 0
+                "p": 0.001
               },
               {
                 "threshold": "30/24",
@@ -3258,35 +3657,35 @@
             "Consensus": [
               {
                 "threshold": "20/12",
-                "p": 0.049
+                "p": 0.06
               },
               {
                 "threshold": "25/24",
-                "p": 0.075
+                "p": 0.08900000000000001
               },
               {
                 "threshold": "30/24",
-                "p": 0.067
+                "p": 0.08
               },
               {
                 "threshold": "35/24",
-                "p": 0.059000000000000004
+                "p": 0.07200000000000001
               },
               {
                 "threshold": "40/24",
-                "p": 0.048
+                "p": 0.054000000000000006
               },
               {
                 "threshold": "45/36",
-                "p": 0.07
+                "p": 0.076
               },
               {
                 "threshold": "55/48",
-                "p": 0.002
+                "p": 0.003
               },
               {
                 "threshold": "65/72",
-                "p": 0
+                "p": 0.001
               }
             ],
             "DTOPS": [
@@ -3300,15 +3699,15 @@
               },
               {
                 "threshold": "30/24",
-                "p": 0
+                "p": 0.01
               },
               {
                 "threshold": "35/24",
-                "p": 0
+                "p": 0.01
               },
               {
                 "threshold": "40/24",
-                "p": 0
+                "p": 0.01
               },
               {
                 "threshold": "45/36",
@@ -3326,27 +3725,27 @@
             "SDCON": [
               {
                 "threshold": "20/12",
-                "p": 0.028999999999999998
+                "p": 0.035
               },
               {
                 "threshold": "25/24",
-                "p": 0.042
+                "p": 0.049
               },
               {
                 "threshold": "30/24",
-                "p": 0.033
+                "p": 0.045
               },
               {
                 "threshold": "35/24",
-                "p": 0.028999999999999998
+                "p": 0.040999999999999995
               },
               {
                 "threshold": "40/24",
-                "p": 0.024
+                "p": 0.032
               },
               {
                 "threshold": "45/36",
-                "p": 0.035
+                "p": 0.038
               },
               {
                 "threshold": "55/48",
@@ -3361,35 +3760,35 @@
           "consensus": [
             {
               "threshold": "20/12",
-              "p": 0.049
+              "p": 0.06
             },
             {
               "threshold": "25/24",
-              "p": 0.075
+              "p": 0.08900000000000001
             },
             {
               "threshold": "30/24",
-              "p": 0.067
+              "p": 0.08
             },
             {
               "threshold": "35/24",
-              "p": 0.059000000000000004
+              "p": 0.07200000000000001
             },
             {
               "threshold": "40/24",
-              "p": 0.048
+              "p": 0.054000000000000006
             },
             {
               "threshold": "45/36",
-              "p": 0.07
+              "p": 0.076
             },
             {
               "threshold": "55/48",
-              "p": 0.002
+              "p": 0.003
             },
             {
               "threshold": "65/72",
-              "p": 0
+              "p": 0.001
             }
           ],
           "schemes": [
@@ -3403,14 +3802,14 @@
           "prelim": {
             "dvKt": 35,
             "hours": 36,
-            "value": 1
+            "value": 4.6
           }
         },
         "availability": {
           "ohc": true,
           "ir": true
         },
-        "basis": "SHIPS LALA CP012026 2026-08-15T18:00Z · shear 12 kt · OHC 9 kJ/cm2 · MPI 136 kt · mid-level RH 51%"
+        "basis": "SHIPS LALA CP012026 2026-08-16T00:00Z · shear 14 kt · OHC 9 kJ/cm2 · MPI 136 kt · mid-level RH 48%"
       },
       "ascat": {
         "iso": "2026-08-14T19:16:00.000Z",
@@ -3467,36 +3866,36 @@
       },
       "atcfDeck": {
         "cycle": "2026081600",
-        "techCount": 1,
-        "forecastAids": 0
+        "techCount": 33,
+        "forecastAids": 32
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026081600 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 25 records · f-deck 133 fixes",
-        "ships": "2026-08-15T18:00Z · shear 12 kt · OHC 9 · MPI 136 kt · 8 RI thresholds"
+        "atcf": "a-deck cycle 2026081600 · 33 techs · consensus 3 member(s) peak 90 kt · b-deck 25 records · f-deck 133 fixes",
+        "ships": "2026-08-16T00:00Z · shear 14 kt · OHC 9 · MPI 136 kt · 8 RI thresholds"
       },
       "riFloor": null,
       "hurricanePCal": {
         "ok": true,
-        "p": 0.99,
+        "p": 0.6914624677873249,
         "pRaw": 0.655032087740506,
-        "pLow": 0.655032087740506,
-        "pHigh": 0.99,
-        "pPeak": 0.99,
+        "pLow": 0.5396382649604339,
+        "pHigh": 0.6914624677873249,
+        "pPeak": 0.5632584103501344,
         "pNow": 0.6914624677873249,
-        "pWithRi": 0.99,
-        "drivenBy": "forecast peak",
+        "pWithRi": 0.6914624677873249,
+        "drivenBy": "current intensity",
         "meanKt": 65,
-        "sigmaKt": 0,
+        "sigmaKt": 15.7,
         "sigmaInitKt": 5,
         "initSource": "satellite intensity analysis",
-        "tauKt": 0,
+        "tauKt": 15.7,
         "reconDeltaKt": null,
-        "reconAgeMin": 1125,
+        "reconAgeMin": 1136,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 1766,
+        "ascatAgeMin": 1776,
         "ascatUsed": false,
-        "consensusAgeMin": null,
+        "consensusAgeMin": 52,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
@@ -3506,6 +3905,13 @@
             "peakKt": 65,
             "peakHr": 0,
             "sigmaKt": 0
+          },
+          {
+            "id": "consensus",
+            "label": "ATCF consensus (HCCA/IVCN/GDMI)",
+            "peakKt": 90,
+            "peakHr": 84,
+            "sigmaKt": 15
           }
         ],
         "layers": [
@@ -3516,30 +3922,37 @@
             "basis": "already carried at 65 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
           },
           {
+            "id": "consensus",
+            "label": "ATCF guidance consensus",
+            "p": 0.9662616949152456,
+            "unavailable": false,
+            "basis": "3 aids in the 2026081600 deck peak at a mean of 90 kt near 84h, disagreeing by 15.7 kt"
+          },
+          {
             "id": "recon",
             "label": "Aircraft reconnaissance",
             "p": null,
             "unavailable": true,
-            "basis": "recon fix present but not applied: the fix is 1125 min old, past the 180-min line"
+            "basis": "recon fix present but not applied: the fix is 1136 min old, past the 180-min line"
           }
         ],
         "notes": [
-          "recon fix not applied: the fix is 1125 min old, past the 180-min line",
-          "scatterometer pass is 1766 min old, past the 360-min line — band not tightened"
+          "recon fix not applied: the fix is 1136 min old, past the 180-min line",
+          "scatterometer pass is 1776 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
-          "consensus": false,
+          "consensus": true,
           "recon": false,
           "ascat": false,
           "ships": false
         },
-        "basis": "combined 1 intensity estimate at 65 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 66%, calibrated 99%"
+        "basis": "combined 2 intensity estimates at 65 kt (sigma 15.7 kt, of which 15.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 66%, calibrated 69%"
       },
       "evidenceQuality": {
-        "tier": "LOW",
+        "tier": "MEDIUM",
         "reasons": [
-          "official advisory only — no guidance deck and no aircraft"
+          "ATCF consensus 52 min old, no aircraft in the storm"
         ]
       }
     }
@@ -3552,11 +3965,11 @@
       "storm": "CP012026",
       "subject": null,
       "market": 0.99,
-      "model": 0.99,
+      "model": 0.6914624677873249,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lala is 65 kt now · combined 1 intensity estimate at 65 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 66%, calibrated 99% · already carried at 65 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 46 min old when fetched",
+      "modelBasis": "Lala is 65 kt now · combined 2 intensity estimates at 65 kt (sigma 15.7 kt, of which 15.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 66%, calibrated 69% · already carried at 65 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 56 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -3580,32 +3993,39 @@
           "basis": "Hurricane Warning in effect for Hawaii County — advisories are running on the 3-hourly intermediate cycle"
         },
         {
+          "id": "consensus",
+          "label": "ATCF guidance consensus",
+          "p": 0.9662616949152456,
+          "unavailable": false,
+          "basis": "3 aids in the 2026081600 deck peak at a mean of 90 kt near 84h, disagreeing by 15.7 kt"
+        },
+        {
           "id": "recon",
           "label": "Aircraft reconnaissance",
           "p": null,
           "unavailable": true,
-          "basis": "recon fix present but not applied: the fix is 1125 min old, past the 180-min line"
+          "basis": "recon fix present but not applied: the fix is 1136 min old, past the 180-min line"
         }
       ],
-      "modelLow": 0.655032087740506,
-      "modelHigh": 0.99,
-      "modelLagMin": 46,
+      "modelLow": 0.5396382649604339,
+      "modelHigh": 0.6914624677873249,
+      "modelLagMin": 56,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
       "modelOfficialP": 0.655032087740506,
       "modelCalibrated": true,
-      "modelQuality": "LOW",
+      "modelQuality": "MEDIUM",
       "modelIntel": {
-        "conKt": null,
-        "conAgeMin": null,
-        "spreadKt": 0,
-        "reconAgeMin": 1125,
+        "conKt": 90,
+        "conAgeMin": 52,
+        "spreadKt": 15.7,
+        "reconAgeMin": 1136,
         "reconDeltaKt": null,
         "ascatUsed": false,
         "riFloorP": null,
         "riScored": false,
-        "drivenBy": "forecast peak"
+        "drivenBy": "current intensity"
       },
       "horizon": "seasonal",
       "strike": null,
@@ -3637,7 +4057,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Hernan is 25 kt now · combined 2 intensity estimates at 25 kt (sigma 2.5 kt, of which 2.5 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 25 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 240 min old when fetched",
+      "modelBasis": "Hernan is 25 kt now · combined 2 intensity estimates at 25 kt (sigma 2.5 kt, of which 2.5 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 25 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 250 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -3677,7 +4097,7 @@
       ],
       "modelLow": 0.01,
       "modelHigh": 0.01,
-      "modelLagMin": 240,
+      "modelLagMin": 250,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -3686,7 +4106,7 @@
       "modelQuality": "LOW",
       "modelIntel": {
         "conKt": 27.3,
-        "conAgeMin": 402,
+        "conAgeMin": 412,
         "spreadKt": 2.5,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -3720,7 +4140,7 @@
       "short": "Will there be more than 2 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.30500000000000005,
+      "market": 0.29500000000000004,
       "model": 0.40806607800928885,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -3771,11 +4191,11 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 2,
-      "yesBid": 0.28,
+      "yesBid": 0.26,
       "yesAsk": 0.33,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 19,
-      "spread": 0.04999999999999999,
+      "spread": 0.07,
       "volume": 24388.85,
       "volume24h": 217.79,
       "openInterest": 9320.94,
@@ -4052,14 +4472,14 @@
       "yesBid": 0.21,
       "yesAsk": 0.23,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 45,
+      "liquidity": 40,
       "spread": 0.020000000000000018,
-      "volume": 11213.9,
-      "volume24h": 167.62,
-      "openInterest": 4750.16,
+      "volume": 11234.52,
+      "volume24h": 188.24,
+      "openInterest": 4770.78,
       "depth": {
         "bidSize": 23,
-        "askSize": 197,
+        "askSize": 172.38,
         "notional": 1
       },
       "proxy": false,
@@ -7672,7 +8092,7 @@
       "short": "Will Dolly be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.265,
+      "market": 0.295,
       "model": 0.559828706572684,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -7705,16 +8125,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.05,
+      "yesBid": 0.11,
       "yesAsk": 0.48,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 2,
-      "spread": 0.43,
+      "spread": 0.37,
       "volume": 430.92,
       "volume24h": 0,
       "openInterest": 211.58,
       "depth": {
-        "bidSize": 7,
+        "bidSize": 0.01,
         "askSize": 5,
         "notional": 1
       },
@@ -7728,7 +8148,7 @@
       "short": "Will Kyle be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.295,
+      "market": 0.29,
       "model": 0.4986044297411273,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -7762,16 +8182,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.21,
-      "yesAsk": 0.38,
+      "yesAsk": 0.37,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 2,
-      "spread": 0.17,
+      "liquidity": 1,
+      "spread": 0.16,
       "volume": 423.69,
       "volume24h": 0,
       "openInterest": 401,
       "depth": {
         "bidSize": 1,
-        "askSize": 5,
+        "askSize": 4,
         "notional": 1
       },
       "proxy": false,
@@ -8391,17 +8811,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 1,
-      "yesBid": 0.27,
-      "yesAsk": 0.47,
+      "yesBid": 0.28,
+      "yesAsk": 0.46,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 47,
-      "spread": 0.19999999999999996,
+      "liquidity": 2,
+      "spread": 0.18,
       "volume": 261.3,
       "volume24h": 0,
       "openInterest": 247.7,
       "depth": {
-        "bidSize": 100,
-        "askSize": 100,
+        "bidSize": 5,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -8988,7 +9408,7 @@
       "short": "Will Rachel be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.8049999999999999,
+      "market": 0.8,
       "model": 0.2623702277369968,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
@@ -9022,16 +9442,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.63,
-      "yesAsk": 0.98,
+      "yesAsk": 0.97,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 5,
-      "spread": 0.35,
+      "spread": 0.33999999999999997,
       "volume": 103.91,
       "volume24h": 0,
       "openInterest": 24.12,
       "depth": {
         "bidSize": 0.2,
-        "askSize": 5,
+        "askSize": 4.8,
         "notional": 1
       },
       "proxy": false,
@@ -9600,7 +10020,7 @@
       "short": "Will Fay be categorized as a hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.535,
+      "market": 0.53,
       "model": 0.5031517214157374,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -9634,16 +10054,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.44,
-      "yesAsk": 0.63,
+      "yesAsk": 0.62,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 3,
-      "spread": 0.19,
+      "liquidity": 2,
+      "spread": 0.18,
       "volume": 27.55,
       "volume24h": 0,
       "openInterest": 20.79,
       "depth": {
         "bidSize": 1.75,
-        "askSize": 5,
+        "askSize": 3.25,
         "notional": 1
       },
       "proxy": false,
@@ -10563,17 +10983,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 0,
-      "yesBid": 0.59,
-      "yesAsk": 0.79,
+      "yesBid": 0.6,
+      "yesAsk": 0.78,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 79,
-      "spread": 0.20000000000000007,
+      "liquidity": 4,
+      "spread": 0.18000000000000005,
       "volume": 4,
       "volume24h": 0,
       "openInterest": 2,
       "depth": {
-        "bidSize": 100,
-        "askSize": 100,
+        "bidSize": 5,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -11466,7 +11886,7 @@
       "short": "Will a hurricane make landfall in Hawaii…",
       "storm": null,
       "subject": null,
-      "market": 0.275,
+      "market": 0.29500000000000004,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -11487,16 +11907,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.27,
-      "yesAsk": 0.28,
+      "yesAsk": 0.32,
       "closeTime": "2027-01-01T04:59:00Z",
-      "liquidity": 711,
-      "spread": 0.010000000000000009,
-      "volume": 5972.58,
-      "volume24h": 5186.68,
+      "liquidity": 7,
+      "spread": 0.04999999999999999,
+      "volume": 5989.58,
+      "volume24h": 5203.68,
       "openInterest": 4396.45,
       "depth": {
         "bidSize": 17,
-        "askSize": 2540,
+        "askSize": 21,
         "notional": 1
       },
       "proxy": false,
@@ -12068,7 +12488,7 @@
       "short": "Will Nolo be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.495,
+      "market": 0.49,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -12089,16 +12509,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.13,
-      "yesAsk": 0.86,
+      "yesAsk": 0.85,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 4,
-      "spread": 0.73,
+      "spread": 0.72,
       "volume": 415.02,
       "volume24h": 26.82,
       "openInterest": 67.1,
       "depth": {
         "bidSize": 0.29,
-        "askSize": 5,
+        "askSize": 4.71,
         "notional": 1
       },
       "proxy": false,
@@ -12670,7 +13090,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.10500000000000001,
+      "market": 0.11000000000000001,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -12690,16 +13110,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.04,
+      "yesBid": 0.05,
       "yesAsk": 0.17,
       "closeTime": "2026-09-01T03:59:00Z",
       "liquidity": 1,
-      "spread": 0.13,
+      "spread": 0.12000000000000001,
       "volume": 11.09,
       "volume24h": 1,
       "openInterest": 9.09,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 1,
         "askSize": 3,
         "notional": 1
       },
@@ -12766,6 +13186,26 @@
       "kind": "advisory",
       "label": "Lala Advisory #014a — Cat 1 Hurricane, 65 kt",
       "source": "NHC",
+      "tier": "A",
+      "hot": false
+    },
+    {
+      "tsZ": "2026-08-16T00:00:00.000Z",
+      "kind": "consensus",
+      "stormId": "CP012026",
+      "label": "Lala guidance consensus 00Z — peak 90 kt",
+      "detail": "3 aids (HCCA, IVCN, GDMI) disagreeing by 15.7 kt — in the deck before the advisory built on it",
+      "source": "NHC ATCF a-deck",
+      "tier": "A",
+      "hot": false
+    },
+    {
+      "tsZ": "2026-08-16T00:00:00.000Z",
+      "kind": "ships",
+      "stormId": "CP012026",
+      "label": "Lala SHIPS 00Z — shear 14 kt, OHC 9, MPI 136 kt",
+      "detail": "RI 16% for 20 kt in 12h against a 6% base rate — published, scored only under an operator claim",
+      "source": "NHC ATCF SHIPS",
       "tier": "A",
       "hot": false
     }
