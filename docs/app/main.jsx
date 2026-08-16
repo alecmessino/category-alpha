@@ -298,7 +298,10 @@ function MillibarTerminalApp() {
   const [frame, setFrame] = React.useState(NF);
   const [playing, setPlaying] = React.useState(false); // boot LIVE — never auto-scrub on load
   const [speed, setSpeed] = React.useState(2);
-  const [storm, setStorm] = React.useState(stormIds[0] || null);
+  /* Boot to the OVERVIEW, not to storm #1. The board is a scanning surface before it is a
+     single-storm surface: what is classified, what is forming, and where. Selecting a system
+     is the drill-down, and the map is how you do it. */
+  const [storm, setStorm] = React.useState(null);
   const [sel, setSel] = React.useState({ contract: (MT.contracts[0] && MT.contracts[0].id) || null, evidence: null });
   const [bankroll, setBankroll] = React.useState(10000);
   const [stake, setStake] = React.useState(0.25);
@@ -393,6 +396,7 @@ function MillibarTerminalApp() {
       {stormIds.length > 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 4, borderLeft: "1px solid var(--border-dim)", marginLeft: 2, flexWrap: "wrap" }}>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "var(--text-2)", letterSpacing: ".6px" }}>ACTIVE</span>
+          <PL mono={false} size="sm" active={storm == null} onClick={() => setStorm(null)}>All</PL>
           {Object.values(MT.storms).map((s2) => (
             <PL key={s2.id} mono={false} size="sm" active={s2.id === storm} dotColor={s2.color} onClick={() => setStorm(s2.id)}>
               {s2.name} <span style={{ opacity: .6, fontSize: 10 }}>{(s2.full_cls.match(/Cat \d/) || [s2.cls])[0].replace("Cat ", "C")}</span>
@@ -442,7 +446,8 @@ function MillibarTerminalApp() {
    three areas under watch and nothing classified is exactly when you want to see the water. */}
         {true && (
         <window.MT_Section label="Spatial context" tier="track · cone · satellite · replay" defaultOpen
-          summary={S ? (S.name + " " + S.cls + " · " + Math.round(snap.wind) + " kt") : "basin view — nothing classified"}>
+          summary={S ? (S.name + " " + S.cls + " · " + Math.round(snap.wind) + " kt")
+                     : (stormIds.length + " active · " + ((MT._outlook || []).length) + " area(s) watched")}>
         {/* Sticky, so the map stays put while a tab scrolls under it. overflow:hidden on the
             shell because Leaflet paints tiles outside its own box during a pan and they
             spill over whatever is beneath. */}
@@ -452,7 +457,19 @@ function MillibarTerminalApp() {
             <div style={{ position: "relative", height: narrow ? Math.max(300, Math.round(vh * 0.42)) : cmdH, overflow: "hidden", background: "var(--slate-950)" }}>
               <window.MT_Map stormId={storm} frame={frame} layers={layers} onSelect={setStorm} resizeKey={tab + ":" + vw + ":" + vh} />
               <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 500, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", padding: "12px 14px", background: "linear-gradient(180deg,rgba(4,6,12,.9),rgba(4,6,12,.4) 70%,transparent)", pointerEvents: "none" }}>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--blue-300)", textTransform: "uppercase" }}>Storm Command Center</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 700, letterSpacing: 2.5, color: "var(--blue-300)", textTransform: "uppercase" }}>
+                  {S ? S.name : "Storm Command Center"}
+                </span>
+                {/* Back out of the drill-down from the map itself, where the click that got
+                    you here happened. pointerEvents restored: the gradient bar disables it. */}
+                {S && (
+                  <span onClick={() => setStorm(null)} title="Back to all systems and formation areas"
+                    style={{ pointerEvents: "auto", cursor: "pointer", fontFamily: "var(--font-mono)", fontSize: 10,
+                      fontWeight: 800, letterSpacing: ".6px", color: "var(--text-1)", padding: "3px 9px",
+                      borderRadius: 6, border: "1px solid var(--border-strong)", background: "rgba(7,12,22,.8)" }}>
+                    ← ALL SYSTEMS
+                  </span>
+                )}
               </div>
               <LayerToggles layers={layers} setLayers={setLayers} storm={storm} />
             </div>
@@ -498,7 +515,10 @@ function MillibarTerminalApp() {
         </section>
         </window.MT_Section>
         )}
-        {!S && <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />}
+        {/* Gated on the FEED being empty, not on the selection being empty. Now that the board
+            boots to the overview, `!S` is the normal state with storms on screen — showing
+            "no active tropical cyclones" there would be a flat lie told by the layout. */}
+        {stormIds.length === 0 && <AwaitingTelemetry feeds={healthLines} generatedAt={MT._generatedAt} note={MT._note} />}
 
         <TabBar tab={tab} setTab={setTab} />
 
@@ -511,7 +531,7 @@ function MillibarTerminalApp() {
 
         <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.4fr) minmax(0,1fr)", gap: gap, alignItems: "start", marginBottom: gap }}>
           <window.MT_Situation dense={dense} />
-          {S && <GenesisWatch compact />}
+          <GenesisWatch compact />       {/* self-hides when nothing is under watch */}
         </div>
 
         <div style={{ marginBottom: gap }}>

@@ -69,6 +69,13 @@ function cssVar(v) {
   return getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim() || "#38bdf8";
 }
 
+/* NHC's own legend for the graphical outlook: yellow under 40, orange 40-60, red above.
+   Matching it is the point — an operator already reads these colours on hurricanes.gov. */
+function probColor(p) { return p == null ? "#8ea3bd" : p > 60 ? "#e5443b" : p >= 40 ? "#ff9e1b" : "#ffd23f"; }
+
+/* Marker size by class, so strength is legible on the basin view without opening anything. */
+function clsRadius(cls) { return /C[45]/.test(cls) ? 9 : /C[123]/.test(cls) ? 7.5 : cls === "TS" ? 6 : 5; }
+
 function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", resizeKey }) {
   const elRef = React.useRef(null);
   const mapRef = React.useRef(null);
@@ -213,14 +220,36 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
   React.useEffect(() => {
     const map = mapRef.current, g = refs.current.ovl; if (!map || !g) return;
     g.clearLayers();
+    /* OVERVIEW — every system and every formation area at once, which is the view you
+       actually scan from. The previous version of this branch read a.lat/a.lon; the outlook
+       feed has never carried either, so it drew nothing. The polygons are now the real ones
+       NHC publishes, joined to the text areas in the pipeline. */
     if (!S) {
-      // No classified system: still plot every area NHC is watching, so the map is never blank.
+      const bounds = [];
       watch.forEach((a) => {
-        if (a.lat == null || a.lon == null) return;
-        L.circleMarker([a.lat, a.lon], { radius: 6, color: "var(--warn)", weight: 2, fillOpacity: .25 })
-          .bindTooltip((a.id ? a.id + " · " : "") + a.title + " — " + (a.pct7d ?? "?") + "% / 7d", { className: "mt-tt" })
-          .addTo(g);
+        if (!a.rings || !a.rings.length) return;             // text-only area: listed, not drawn
+        const col = probColor(a.pct7d);
+        const label = "#" + a.n + " " + a.title + " — " + (a.pct7d ?? "?") + "% / 7d" +
+                      (a.pct48 != null ? " · " + a.pct48 + "% / 48h" : "");
+        a.rings.forEach((ring) => {
+          L.polygon(ring, { color: col, weight: 1.4, opacity: .95, fillColor: col, fillOpacity: .16 })
+            .bindTooltip(label, { className: "mt-tt", sticky: true }).addTo(g);
+          ring.forEach((pt) => bounds.push(pt));
+        });
       });
+      Object.values(MT.storms).forEach((st) => {
+        const col = cssVar(st.color);
+        const dot = L.circleMarker(st.center, { radius: clsRadius(st.cls), color: col, weight: 2.2,
+          fillColor: "#0b1830", fillOpacity: 1 });
+        dot.on("click", () => onSelect && onSelect(st.id));
+        dot.bindTooltip(st.name + " " + st.full_cls + " · " + st.wind + " kt — click to open",
+          { direction: "top", className: "mt-tt" });
+        dot.addTo(g);
+        bounds.push(st.center);
+      });
+      if (bounds.length > 1) {
+        try { map.fitBounds(L.latLngBounds(bounds).pad(0.18), { animate: false, maxZoom: 5 }); } catch { /* degenerate bounds */ }
+      }
       return;
     }
     const pc = cssVar(S.color);

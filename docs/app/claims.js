@@ -734,7 +734,17 @@
     "NHC formation probabilities, quoted as published.",
     "These are not classified cyclones, so they carry no advisory, track or cone.",
     "CurrentStorms.json is silent on them by design — that is not a gap in ingestion.",
+    "Shaded areas are NHC's own outlook polygons, not a shape derived here. An area with no",
+    "polygon this cycle is listed but not drawn.",
   ]);
+  /* Where the shaded areas on the overview map come from. Geometry is a separate product from
+     the text, so it can fail on its own — and when it does the areas are still listed. */
+  define("map.outlookShapes", "outlook", (s) => {
+    const f = s.feeds.outlookShapes || {};
+    const drawn = (s.outlook || []).filter((a) => a.rings && a.rings.length).length;
+    if (!f.ok) return { text: "outlook areas listed without geometry — " + (f.note || "shapes unavailable"), ok: false };
+    return { text: drawn + " outlook area(s) drawn from NHC graphical TWO polygons", ok: drawn > 0 };
+  });
   note("note.register", "derived", "How an event gets in here", [
     "A frame-to-frame diff over committed snapshots, at fixed thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢.",
     "TRADE-RELEVANT = a Saffir–Simpson boundary crossing, ≥20 kt intensification, or a ≥5¢ reprice.",
