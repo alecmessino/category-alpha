@@ -1,12 +1,12 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-17T01:54:59.613Z",
+  "ranAt": "2026-08-17T07:15:01.298Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "d26368bea664ba5932b583af50e4b4de1d66a617",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31986316106",
+  "sha": "6e5fc84916cdb1ec2eca738f3b1538f3ea1aa734",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32004920403",
   "ok": false,
-  "passed": 34,
+  "passed": 33,
   "total": 46,
   "failures": [
     {
@@ -43,7 +43,11 @@
     },
     {
       "check": "the official-advisory console reaches the page",
-      "detail": "1 storm(s) · console=false · forecast=1 · P=1 · watches=1 · discussion=1"
+      "detail": "1 storm(s) · console=false · forecast=1 · P=1 · watches=0 · discussion=1"
+    },
+    {
+      "check": "every consensus in the snapshot reaches the newest frame",
+      "detail": "0/1 frame(s) carry a consensus peak against 1 in the snapshot · 0 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the '?' drawers still carry the caveats",
@@ -58,7 +62,7 @@
       "detail": "The above error occurred in the <MT_Evidence> component:\n\n    at MT_Evidence (<anonymous>:453:23)\n    at div\n    at div\n    at MT_Section (<anonymous>:392:21)\n    at main\n    at div\n    at MillibarTer"
     }
   ],
-  "thirdPartyFailures": 8,
+  "thirdPartyFailures": 10,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -78,7 +82,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-17T01:14:17.797Z · 41m old"
+      "detail": "2026-08-17T07:05:10.097Z · 10m old"
     },
     {
       "check": "renders: Situation",
@@ -138,7 +142,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "7 ranked of 9 candidates · 116/151 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "5 ranked of 7 candidates · 116/151 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -173,7 +177,7 @@
     {
       "check": "the official-advisory console reaches the page",
       "pass": false,
-      "detail": "1 storm(s) · console=false · forecast=1 · P=1 · watches=1 · discussion=1"
+      "detail": "1 storm(s) · console=false · forecast=1 · P=1 · watches=0 · discussion=1"
     },
     {
       "check": "no watch area is truncated at a line wrap",
@@ -188,17 +192,17 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": true,
-      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 3 advisory change(s) · 2 moved P · 0 pinned at the clamp · 3 register row(s) · situation P=84% at adv #18A"
+      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 3 advisory change(s) · 1 moved P · 0 pinned at the clamp · 3 register row(s) · situation P=70% at adv #19A"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
-      "pass": true,
-      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 4m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "pass": false,
+      "detail": "0/1 frame(s) carry a consensus peak against 1 in the snapshot · 0 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=77m raw=77%"
+      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=LOW lag=76m raw=70%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -208,22 +212,22 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "2 guidance cycle(s) turned over → 2 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 2 P-update row(s) · 1 SHIPS · 0 pass · strip arrivals=2"
+      "detail": "1 guidance cycle(s) turned over → 2 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 2 P-update row(s) · 0 SHIPS · 1 pass · strip arrivals=4"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: no storm past the 180-min line · forced: 1 anchored row(s) pushed past it → 1 HOLD, 0 SUSPECT, 0 ACTIONABLE · 0 stale-crossing row(s) in the register"
+      "detail": "live: no storm past the 180-min line · forced: 1 anchored row(s) pushed past it → 0 HOLD, 1 SUSPECT, 0 ACTIONABLE · 0 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
       "pass": true,
-      "detail": "0 row(s) on HOLD live · $0 staked · forced: $0 across 1 held row(s)"
+      "detail": "0 row(s) on HOLD live · $0 staked · forced: $0 across 0 held row(s)"
     },
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-08-16T18:00:00Z"
+      "detail": "cycle 2026-08-17T00:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
@@ -233,12 +237,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "55 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "61 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "55 tile(s) served on reload · 55 in cache"
+      "detail": "61 tile(s) served on reload · 61 in cache"
     },
     {
       "check": "all markets carried",
