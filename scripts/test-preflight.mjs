@@ -19,7 +19,9 @@ import {
   auditCalibrationGate, auditNoPolling,
 } from "./lib/preflight.mjs";
 import {
-  gradeTileGrid, interiorHoles, auditNoCanvasReads, LIMB_EMPTY_MAX, MIN_GRADED_TILES,
+  gradeTileGrid, enclosedVoids, auditNoCanvasReads, anchorLattice, tileDiskClass,
+  tileLatRange, tileLonRange, geocentricAngleDeg,
+  LIMB_ANGLE_DEG, LIMB_MARGIN_DEG, LIMB_EMPTY_MAX, MIN_GRADED_TILES, SUB_SATELLITE_LON,
 } from "./lib/tile-grid.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -261,64 +263,145 @@ console.log("\n[8] no polling against a NODD bucket — and legitimate timers ar
     auditNoPolling([{ path: "docs/app/map.jsx", text: MAP }]).ok, "a tile URL refresh is not a bucket listing");
 }
 
-console.log("\n[9] the tile grid is graded from geometry, and the limb is not a fault");
+console.log("\n[9] the limb is PREDICTED from orbital geometry, not thresholded");
 {
-  /* A lattice builder: `pattern` rows of characters, L=loaded, B=blank placeholder,
-     F=failed to load, P=still pending. */
-  const lattice = (rows, host = "gibs.earthdata.nasa.gov") => ({
+  /* The horizon falls out of the orbit radius. It is not a number anyone chose. */
+  ck("the limb angle is 81.30 degrees", Math.abs(LIMB_ANGLE_DEG - 81.2995) < 0.001, String(LIMB_ANGLE_DEG));
+
+  /* Tile arithmetic, checked against values that can be worked by hand. z=4 gives a 16x16
+     lattice; x=6 spans 45W..22.5W and y=7 spans the equator to 21.94N. */
+  eq("tile lon range", tileLonRange(4, 6).map((v) => Math.round(v * 10) / 10), [-45, -22.5]);
+  eq("tile lat range", tileLatRange(4, 7).map((v) => Math.round(v * 10) / 10), [0, 21.9]);
+  /* The sub-satellite point is on the equator, so a point on the equator is exactly its
+     longitude difference away from nadir. */
+  eq("a point due east of nadir on the equator", Math.round(geocentricAngleDeg(0, -45, -75.2)), 30);
+  eq("and latitude adds to it", Math.round(geocentricAngleDeg(30, -75.2, -75.2)), 30);
+
+  const EAST = SUB_SATELLITE_LON["GOES-East"];
+  eq("a tile over the western Atlantic is squarely inside the GOES-East disk", tileDiskClass(4, 6, 7, EAST), "inside");
+  eq("a tile over west Africa straddles the limb and is judged by neither gate", tileDiskClass(4, 8, 8, EAST), "edge");
+  eq("a tile over the Indian Ocean is off the disk entirely", tileDiskClass(4, 11, 8, EAST), "outside");
+  eq("and a global mosaic has no limb at all — everything must be filled", tileDiskClass(4, 11, 8, null), "inside");
+
+  /* The lattice anchor: DOM column/row to tile x/y. */
+  eq("two agreeing loaded tiles fix the offset",
+    anchorLattice([{ col: 0, row: 0, key: "4/7/6" }, { col: 1, row: 0, key: "4/7/7" }]), { z: 4, dx: 6, dy: 7, anchors: 2 });
+  eq("one is not enough", anchorLattice([{ col: 0, row: 0, key: "4/7/6" }]), null);
+  ck("and disagreeing ones are refused rather than averaged",
+    anchorLattice([{ col: 0, row: 0, key: "4/7/6" }, { col: 1, row: 0, key: "4/9/9" }]) === null, "a bad fit must not be used");
+
+  /* A geolocated lattice: 4 columns x 3 rows anchored at z4 x3..x6, y6..y8. GOES-East sits
+     at 75.2W and a z4 tile is 22.5 degrees wide, so that block spans 112.5W..45W and
+     21.9S..41.0N — the Gulf and the western Atlantic, every corner inside the disk with the
+     worst at 53 degrees from nadir against a 78.3 degree bound.
+     Loaded tiles carry their key; blanks have had src replaced by errorTileUrl and carry
+     none, which is the real DOM state and the reason the lattice has to be anchored. */
+  const grid = (rows, layer = "GOES-East_ABI_GeoColor") => ({
     ok: true,
-    layers: [{ pane: "tile-pane", host, pitch: 256, tiles: rows.flatMap((row, r) =>
-      [...row].map((ch, c) => ({ col: c, row: r, w: ch === "L" ? 256 : ch === "B" ? 1 : 0, h: ch === "L" ? 256 : ch === "B" ? 1 : 0,
-        state: ch === "L" ? "loaded" : ch === "B" ? "blank" : ch === "F" ? "failed" : "pending" }))) }],
+    layers: [{ pane: "tile-pane", host: "gibs.earthdata.nasa.gov", layer, pitch: 256,
+      tiles: rows.flatMap((row, r) => [...row].map((ch, c) => {
+        const loaded = ch === "L";
+        return { col: c, row: r, w: loaded ? 256 : ch === "B" ? 1 : 0, h: loaded ? 256 : ch === "B" ? 1 : 0,
+          state: loaded ? "loaded" : ch === "B" ? "blank" : ch === "F" ? "failed" : "pending",
+          key: loaded ? `4/${r + 6}/${c + 3}` : null };
+      })) }],
   });
 
-  const full = lattice(["LLLLLL", "LLLLLL", "LLLLLL"]);
-  ck("a full grid passes", gradeTileGrid(full).ok, JSON.stringify(gradeTileGrid(full)).slice(0, 200));
+  const full = grid(["LLLL", "LLLL", "LLLL"]);
+  ck("a full in-disk grid passes", gradeTileGrid(full).ok, JSON.stringify(gradeTileGrid(full)).slice(0, 260));
+  ck("and the pass says the prediction was used, not a ratio",
+    /in-disk slot\(s\) all filled/.test(gradeTileGrid(full).note), gradeTileGrid(full).note);
 
-  /* THE LIMB. A GOES disk edge cutting the corner off the viewport: empty slots, all of
-     them connected to the edge of the lattice. 5 of 18 is 27.8%, under the allowance. */
-  const limb = lattice(["LLLLLB", "LLLLBB", "LLLLLB"]);
-  const rLimb = gradeTileGrid(limb);
-  ck("a limb along one edge passes", rLimb.ok, rLimb.note);
-  ck("and the report says how close it came", /22\.2% empty/.test(rLimb.note), rLimb.note);
+  /* THE CASE THE OLD RATIO GOT BACKWARDS, PART ONE. One missing tile over open water the
+     satellite is plainly looking at. 1 of 12 is 8.3% empty — nowhere near the old 33.3%
+     gate, and it is unambiguously imagery that should exist. */
+  const oneOut = grid(["LLLL", "LFLL", "LLLL"]);
+  const rOne = gradeTileGrid(oneOut);
+  ck("a single empty in-disk slot fails at 8.3% empty", !rOne.ok && rOne.status === 409, rOne.note);
+  ck("and the note gives its position and how far from nadir it is",
+    /from nadir, limb is 81\.3/.test(rOne.note), rOne.note);
 
-  /* Past the allowance the picture is missing rather than curved. 8 of 18 is 44.4%. */
-  const gone = lattice(["LLLBBB", "LLLBBB", "LLLLBB"]);
-  const rGone = gradeTileGrid(gone);
-  ck("more than a third empty is refused", !rGone.ok && rGone.status === 409, rGone.note);
-  ck("and the note points at the slot-resolution fallthrough", /VIIRS daily fallback/.test(rGone.note), rGone.note);
+  /* THE CASE THE OLD RATIO GOT BACKWARDS, PART TWO. A viewport straddling the eastern limb:
+     half of it is genuinely off the disk. The old gate failed this correct render at 50%;
+     the prediction passes it, because the geometry says the satellite cannot see those
+     slots. Anchored at x5..x10, y7..y8 — 67.5W..67.5E, so x5..x7 are inside, x8 straddles
+     the limb and is judged by neither gate, and x9..x10 are past the horizon. */
+  const atLimb = {
+    ok: true,
+    layers: [{ pane: "tile-pane", host: "gibs.earthdata.nasa.gov", layer: "GOES-East_ABI_GeoColor", pitch: 256,
+      tiles: ["LLLBBB", "LLLBBB"].flatMap((row, r) => [...row].map((ch, c) => {
+        const loaded = ch === "L";
+        return { col: c, row: r, w: loaded ? 256 : 1, h: loaded ? 256 : 1,
+          state: loaded ? "loaded" : "blank", key: loaded ? `4/${r + 7}/${c + 5}` : null };
+      })) }],
+  };
+  const rLimb = gradeTileGrid(atLimb);
+  ck("50% empty at the limb PASSES — the old 33.3% gate failed this correct render",
+    rLimb.ok, rLimb.note);
+  ck("and the report separates off-disk and straddling slots from judged ones",
+    /off-disk/.test(rLimb.note) && /straddling the limb \(unjudged\)/.test(rLimb.note), rLimb.note);
 
-  /* THE HOLE. One failed tile in the middle of the picture: 1 of 18 is 5.6%, far under the
-     ratio gate, and it is unambiguously a fault. This is why the ratio is not enough. */
-  const hole = lattice(["LLLLLL", "LLFLLL", "LLLLLL"]);
-  const rHole = gradeTileGrid(hole);
-  ck("a single enclosed empty slot is refused at 5.6% empty", !rHole.ok && rHole.status === 409, rHole.note);
-  ck("and the refusal explains why a limb cannot look like that",
-    /connected boundary/.test(rHole.note), rHole.note);
-  eq("the hole detector finds exactly the enclosed one", interiorHoles(hole.layers[0].tiles).length, 1);
-  eq("and finds none along an edge", interiorHoles(limb.layers[0].tiles).length, 0);
+  /* THE BLIND SPOT IN THE OLD HOLE TEST. A 2x2 block of failures — the shape a CDN error or
+     a rate limit actually produces. Every member had an empty orthogonal neighbour, so the
+     four-neighbours test caught none of them. The flood fill has no such gap. */
+  const block = [
+    { col: 1, row: 1, state: "failed" }, { col: 2, row: 1, state: "failed" },
+    { col: 1, row: 2, state: "failed" }, { col: 2, row: 2, state: "failed" },
+  ];
+  const ring = [];
+  for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) {
+    if (block.some((b) => b.col === c && b.row === r)) continue;
+    ring.push({ col: c, row: r, state: "loaded" });
+  }
+  const v = enclosedVoids([...ring, ...block]);
+  eq("a 2x2 enclosed block is four voids in one region", [v.voids.length, v.regions], [4, 1]);
+  eq("and an empty region touching the border is not a void",
+    enclosedVoids([{ col: 0, row: 0, state: "blank" }, { col: 1, row: 0, state: "loaded" },
+                   { col: 0, row: 1, state: "loaded" }, { col: 1, row: 1, state: "loaded" }]).voids.length, 0);
+  /* Eight-connected on purpose: the disk boundary is not tile-aligned, so a real limb is
+     ragged and can reach the viewport edge diagonally. Four-connected flooding would call
+     that a void and fail a correct render. */
+  eq("a diagonal limb sliver reaching the corner is not a void",
+    enclosedVoids([{ col: 0, row: 0, state: "loaded" }, { col: 1, row: 0, state: "loaded" }, { col: 2, row: 0, state: "blank" },
+                   { col: 0, row: 1, state: "loaded" }, { col: 1, row: 1, state: "blank" }, { col: 2, row: 1, state: "loaded" },
+                   { col: 0, row: 2, state: "loaded" }, { col: 1, row: 2, state: "loaded" }, { col: 2, row: 2, state: "loaded" }]).voids.length, 0);
 
-  /* The threshold is the LARGEST empty fraction still called limb, so exactly at it passes.
-     6 of 18 is 33.33%, which is above 33.3% and must fail; the boundary is asserted with a
-     lattice that lands on it exactly. */
-  eq("the constant is 33.3%", LIMB_EMPTY_MAX, 0.333);
-  const at333 = lattice(["LLLLLLLLLB", "LLLLLLLLLB", "LLLLLLLLLB", "LLLLLLLLLB", "LLLLLLLLLB",
-                         "LLLLLLLLLB", "LLLLLLLLLB", "LLLLLLLLLB", "LLLLLLLLLB", "LLLLLLLLLB"]);
-  ck("a grid at exactly 10% passes comfortably", gradeTileGrid(at333).ok, gradeTileGrid(at333).note);
+  /* A void with no geolocation at all still fails — gate 2 stands alone. */
+  const noKeys = { ok: true, layers: [{ pane: "tile-pane", host: "gibs.earthdata.nasa.gov", layer: null, pitch: 256,
+    tiles: [...ring, ...block].map((t) => ({ ...t, w: t.state === "loaded" ? 256 : 0, h: 0, key: null })) }] };
+  ck("an enclosed void fails even when the tiles cannot be geolocated", !gradeTileGrid(noKeys).ok, gradeTileGrid(noKeys).note);
 
-  /* UNKNOWN BEFORE FAIL, always. A pane that has not laid out must never be reported as a
-     layout error — that false positive is what teaches an operator to ignore the check. */
-  const tiny = lattice(["LB", "LL"]);
-  eq("too few tiles to measure is UNKNOWN", gradeTileGrid(tiny).status, 503);
-  const loading = lattice(["PPPPPP", "PPPPPP", "LLLLLL"]);
-  eq("a census taken mid-load is UNKNOWN", gradeTileGrid(loading).status, 503);
+  /* A GLOBAL MOSAIC HAS NO LIMB. If the map fell through to the VIIRS daily fallback, every
+     empty slot is a fault. The old ratio gate passed a broken VIIRS render happily. */
+  const viirs = grid(["LLLL", "LLBL", "LLLL"], "VIIRS_NOAA20_CorrectedReflectance_TrueColor");
+  const rViirs = gradeTileGrid(viirs);
+  ck("one empty slot in a global mosaic fails — a polar-orbiter mosaic has no limb",
+    !rViirs.ok, rViirs.note);
+  ck("and the note says so rather than quoting a disk", /global mosaic/.test(rViirs.note), rViirs.note);
+
+  /* GATE 3: the blank map. No in-disk fault (nothing is loaded to bound the disk against),
+     no enclosed void (every empty slot is border-connected). This is the failure the whole
+     check exists to catch and only the coverage bound sees it. */
+  const blank = { ok: true, layers: [{ pane: "tile-pane", host: "gibs.earthdata.nasa.gov", layer: "GOES-East_ABI_GeoColor", pitch: 256,
+    tiles: Array.from({ length: 16 }, (_, i) => ({ col: i % 4, row: Math.floor(i / 4), w: 1, h: 1, state: "blank", key: null })) }] };
+  const rBlank = gradeTileGrid(blank);
+  ck("a completely blank layer fails", !rBlank.ok && rBlank.status === 409, rBlank.note);
+  ck("and it fires the coarse ratio, saying the tiles could not be geolocated",
+    /could not be geolocated/.test(rBlank.note), rBlank.note);
+  eq("which is the only place the old 33.3% constant survives", LIMB_EMPTY_MAX, 0.333);
+
+  /* UNKNOWN BEFORE FAIL, always. A pane that has not laid out must never report as a layout
+     error — that false positive is what teaches an operator to ignore the check. */
+  eq("too few tiles to measure is UNKNOWN", gradeTileGrid(grid(["LB", "LL"])).status, 503);
+  eq("a census taken mid-load is UNKNOWN", gradeTileGrid(grid(["PPPP", "PPPP", "LLLL"])).status, 503);
   eq("and so is a document with no GIBS layer at all", gradeTileGrid({ ok: true, layers: [] }).status, 503);
   eq("the minimum graded size is stated, not implied", MIN_GRADED_TILES, 12);
+  eq("and so is the margin pulled in from the horizon", LIMB_MARGIN_DEG, 3);
 
-  /* CARTO is excluded on purpose: it has a tile everywhere on Earth, so folding it into
-     the same ratio would let a healthy basemap mask a missing satellite layer. */
+  /* CARTO is excluded on purpose: it has a tile everywhere on Earth, so folding it into the
+     same grading would let a healthy basemap mask a missing satellite layer. */
   eq("a CARTO-only document is not graded as if it were the satellite layer",
-    gradeTileGrid(lattice(["LLLLLL", "LLLLLL", "LLLLLL"], "basemaps.cartocdn.com")).status, 503);
+    gradeTileGrid({ ok: true, layers: [{ pane: "tile-pane", host: "basemaps.cartocdn.com", layer: null, pitch: 256, tiles: [] }] }).status, 503);
 }
 
 console.log("\n[10] and the canvas prohibition is a check, not a comment");

@@ -154,20 +154,58 @@ that are not there. Leaflet has already placed every tile on a regular lattice; 
 **measured** from the tiles rather than assumed to be 256, because `zoomSnap: 0.25` means a
 tile is CSS-scaled at most zooms.
 
-**Two gates, and neither finds the other's fault:**
+**Three gates, and the limb is predicted rather than thresholded.**
 
-- **`LIMB_EMPTY_MAX = 0.333`** — empty fraction above 33.3% fails. This is a **policy
-  constant, chosen, not derived**. No projection identity produces it: the empty fraction
-  depends on where the viewport sits relative to the limb and ranges from 0 under nadir to
-  well over half at the edge. A third is where a reader stops calling it "the edge of the
-  disk" and starts calling it "the imagery is missing". It is named and overridable so the
-  judgement is arguable rather than buried in an inequality. Strictly greater fails, so a
-  grid sitting exactly at 33.3% passes. This gate catches **the layer never attaching**.
-- **Interior holes** — an empty slot whose four orthogonal neighbours are all present and
-  loaded fails at *any* ratio. A limb is a connected boundary: every slot outside the disk
-  touches another outside slot or the edge of the lattice. An enclosed empty slot is a tile
-  that failed. This gate catches **tiles failing**, at an empty fraction of a few per cent,
-  where the ratio gate is nowhere near firing.
+The first version gated on a flat empty fraction — over 33.3% and the map fails. That
+measured the wrong quantity. The empty fraction of a viewport depends on **where the
+viewport is**, not on whether anything is broken: a storm under nadir shows 0% on a healthy
+render, one near the edge of the field shows well over half on an equally healthy render.
+The same constant failed correct pictures at the limb and passed broken ones at nadir. Every
+value is wrong somewhere, because the compared quantity is not the one that matters.
+
+The quantity that matters is per-tile and exactly knowable. A geostationary satellite sees a
+fixed cap bounded by the geometric horizon:
+
+```
+cos(limb angle) = R_earth / R_geostationary = 6378.137 / 42164.0  ->  81.30 degrees
+```
+
+That is not a policy number — it falls out of the orbit radius.
+
+1. **The prediction.** Each tile's four corners are converted to lat/lon and tested against
+   the cap around the sub-satellite point (GOES-East 75.2°W, GOES-West 137.0°W, read from
+   the GIBS layer name). All four inside → the slot **must** have imagery, and an empty one
+   fails at any count. All four outside → off-disk, no verdict. Straddling → judged by
+   neither gate, which is what removes the need for a fudge factor on the outside. One
+   margin (`LIMB_MARGIN_DEG = 3.0`) pulls the must-be-filled boundary in from the horizon,
+   because the outermost ring is extremely oblique and GIBS's EPSG:3857 reprojection does
+   not always render it. It applies to that side only — the only side that can FAIL.
+   *A single missing tile over the storm now fails at 8% empty; 50% empty at the limb passes.*
+   **A global mosaic has no limb**: if the map fell through to the VIIRS daily fallback,
+   every empty slot is a fault. The old ratio passed a broken VIIRS render happily.
+2. **The topology.** Flood-fill the empty slots from the lattice border, 8-connected.
+   Anything empty the flood does not reach is enclosed by imagery and fails at any size.
+   This is the whole gate when a layer cannot be geolocated. It supersedes an earlier
+   four-orthogonal-neighbours test that only caught a **single isolated tile**: a 2×2 block —
+   the shape a CDN error or a rate limit actually produces — had every member adjacent to
+   another empty member and escaped entirely. Eight-connected on purpose, because the disk
+   boundary is not tile-aligned, so a real limb is ragged and can reach the viewport edge
+   diagonally; flooding four-connected would call that a void and fail a correct render.
+3. **The absent layer.** A layer that attached and delivered nothing has no in-disk fault and
+   no enclosed void — every empty slot is border-connected — so neither gate above sees it,
+   and a blank map is the failure this check exists to catch. Bound: 90% empty when
+   geolocated. When the tiles **cannot** be geolocated the bound tightens to `LIMB_EMPTY_MAX
+   = 0.333`, the value it always was, because gate 1 is unavailable and gate 2 cannot see a
+   large failure that happens to touch the viewport edge. That is the only place the old
+   constant survives, and the report says which bound fired.
+
+**Anchoring.** Leaflet replaces `src` with `errorTileUrl` on failure, so the empty slots —
+the ones we most need to place — have lost their URL. Two loaded tiles fix the offset between
+DOM column/row and tile x/y, every further loaded tile must agree, and a disagreement refuses
+the whole geolocation rather than producing confident nonsense. A second check follows: if
+fewer than half the **loaded** tiles classify as inside the disk, the coordinate fit is
+transposed and is refused — believing it would fail every correct render with great
+confidence.
 
 **UNKNOWN before FAIL, always.** Fewer than 12 settled tiles, or more than 20% still
 loading, or no GIBS layer in the DOM at all, reports 503 rather than a layout error. That
