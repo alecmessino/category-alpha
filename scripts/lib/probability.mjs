@@ -146,6 +146,36 @@ export function calibratedIntensityP(input, opts) {
   const sources = [], notes = [], layers = [];
   const clamp = (v) => Math.max(0.01, Math.min(0.99, v));
 
+  /* SETTLED BY THE OBSERVED RECORD — there is nothing left to calibrate, and calibrating it
+     anyway makes the answer WORSE.
+     This engine does not floor its result at official.p: it rebuilds a mean from the
+     forecast peak, widens it by the guidance spread, and publishes max(pPeak, pNow). Hand it
+     a settled 0.99 and that machinery drags it back to 0.56 — measured on Lala. So a
+     question the best track has already closed must not enter it at all.
+     Gated on the estimator's own `settled` flag, which only the observed-peak path sets, so
+     every input reachable before this commit reaches the engine unchanged. */
+  if (official.settled === "observed") {
+    const ob = official.observed || {};
+    return {
+      ok: true, settled: "observed",
+      p: official.p, pRaw: official.p, pLow: official.p, pHigh: official.p,
+      pPeak: official.p, pNow: official.p, pWithRi: null,
+      drivenBy: "observed record",
+      meanKt: Number.isFinite(ob.peakKt) ? ob.peakKt : null, sigmaKt: null,
+      sigmaInitKt: null, initSource: ob.source || "NHC best track (b-deck)",
+      tauKt: null, reconDeltaKt: null,
+      reconAgeMin: null, reconUsed: false, reconAlreadyPriced: false,
+      ascatAgeMin: null, ascatUsed: false, consensusAgeMin: null,
+      shipsScoring: false, riFloor: null,
+      sources: [{ id: "observed", label: "NHC best track", peakKt: ob.peakKt ?? null, peakHr: 0, sigmaKt: null }],
+      layers: [{ id: "observed", label: "Observed record", p: official.p, basis: official.basis }],
+      notes: ["the question is settled by the best track; no forecast term can re-open it"],
+      used: { official: true, consensus: false, consensusSpread: false,
+              recon: false, ascat: false, ships: false, observed: true },
+      basis: official.basis,
+    };
+  }
+
   /* ---- 1. the official forecast, as published ------------------------------------- */
   const tilt = official.adjustment && Number.isFinite(official.adjustment.shiftKt) ? official.adjustment.shiftKt : 0;
   const officialPeakKt = Number.isFinite(official.peakKt) ? official.peakKt + tilt : null;

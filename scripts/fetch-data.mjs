@@ -1632,6 +1632,21 @@ function applyIntel(storms, intel) {
     s.ships = I ? I.ships : null;
     s.ascat = I ? I.ascat : null;
     s.bestTrack = I ? I.bestTrack : null;
+    s.bestTrackPeak = I ? I.bestTrackPeak : null;
+
+    /* THE ESTIMATE IS FINALISED HERE, AND ONLY HERE, BECAUSE ONLY HERE IS THE RECORD KNOWN.
+       fetchStorms() computes s.hurricaneP from the advisory alone because that is all it
+       has: the b-deck arrives with the ingest, which runs a full step later (main() calls
+       fetchStorms, then ingestIntel, then applyIntel). A question settled by what the storm
+       HAS ALREADY DONE cannot be answered before the observed record has been read. With no
+       b-deck peak the call is not made and the advisory-only estimate stands untouched. */
+    const bp = I && I.bestTrackPeak;
+    if (bp && Number.isFinite(bp.kt)) {
+      const gI2 = s.discussion && s.discussion.guidance && s.discussion.guidance.intensity;
+      s.hurricaneP = reachesHurricaneP(s.trackPoints || [], null, gI2 || null,
+        { peakKt: bp.kt, peakIso: bp.iso, classified: !!(I && I.bestTrackEverHurricane),
+          source: "NHC best track (b-deck)" });
+    }
     s.atcfDeck = I ? I.deck : null;
     s.intelNotes = I ? { atcf: I.atcfNote, ships: I.shipsNote } : null;
 

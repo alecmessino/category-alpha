@@ -7,6 +7,11 @@
  * NOTHING IN THIS FILE WAS EDITED IN THE MOVE — not the math, not GUIDANCE_TILT, not
  * GUIDANCE_SIGN, not a line of formatting. scripts/verify-extraction.mjs proves it against
  * outputs captured before the move, field by field, requiring exact equality.
+ *
+ * SINCE THE MOVE, one thing has been ADDED and nothing changed: reachesHurricaneP takes an
+ * optional 4th `observed` argument carrying the best track's peak to date. It is absent by
+ * default, and verify-extraction calls the function with three arguments, so the golden
+ * fixture still holds at exact equality. See the ratchet comment below.
  */
 const INTENSITY_MAE = { 0: 0, 12: 5.5, 24: 7.5, 36: 9.0, 48: 10.0, 72: 11.5, 96: 12.5, 120: 13.5 };
 const HURRICANE_REPORTED_KT = 65;
@@ -69,7 +74,7 @@ function normCdf(z) {
 /* trackPoints must carry kt. Returns null — never a number — when the forecast cannot
    answer the question, because silence is better than a probability with no forecast
    under it. */
-function reachesHurricaneP(points, threshold, guidance) {
+function reachesHurricaneP(points, threshold, guidance, observed) {
   const reported = threshold || HURRICANE_REPORTED_KT;
   const thr = threshold ? threshold - KT_INCREMENT / 2 : LATENT_THRESHOLD;
   if (!Array.isArray(points) || !points.length) return null;
@@ -77,6 +82,40 @@ function reachesHurricaneP(points, threshold, guidance) {
   if (!withKt.length) return null;
 
   const current = withKt.find((p) => p.hr === 0 || p.initial) || null;
+
+  /* ALREADY BEEN THERE. "Reaches hurricane strength" is a RATCHET: settled the first time
+     the storm gets there, and weakening afterwards cannot un-settle it. Every layer below
+     answers "is it one NOW", which is a different question — and it was the only one this
+     function could be asked until the best track was wired to it.
+
+     Caught on Lala: the b-deck carried 65 kt at three consecutive synoptic times, the storm
+     then weakened to 50 kt, and the board published 84% on a question that had already
+     resolved YES. The market had it at 99c.
+
+     `observed` is optional and absent by default, so with no b-deck this is exactly the
+     function it has always been. scripts/verify-extraction.mjs calls it with three
+     arguments, so its 1200 golden comparisons are untouched. */
+  const obsKt = observed && Number.isFinite(observed.peakKt) ? observed.peakKt : null;
+  const obsHu = !!(observed && observed.classified);
+  if ((obsKt != null && obsKt >= thr) || obsHu) {
+    /* Not the 5 kt analysis-uncertainty treatment below. That models how well a SATELLITE
+       estimate of the PRESENT wind is known; this is an entry already written into the best
+       track, and the contract resolves on that record. The 1% held back is post-season
+       reanalysis — the one thing that can still move it. */
+    const pObs = 0.99;
+    return { p: pObs, pLow: pObs, pHigh: pObs,
+      peakKt: obsKt != null ? obsKt : reported, peakHr: 0, sigma: null,
+      already: true, settled: "observed",
+      observed: { peakKt: obsKt, peakIso: (observed && observed.peakIso) || null,
+                  classified: obsHu, source: (observed && observed.source) || "NHC best track (b-deck)" },
+      basis: `the best track already carries ${obsKt != null ? obsKt : reported} kt`
+           + ((observed && observed.peakIso) ? ` at ${observed.peakIso}` : "")
+           + (obsHu ? " classified HU" : "")
+           + `, at or above the ${reported} kt hurricane threshold — settled by the observed`
+           + ` record and not un-settled by subsequent weakening; 1% held back for`
+           + ` post-season reanalysis of an operational best track` };
+  }
+
   // Already there: the question is settled by observation, subject only to the analysis
   // uncertainty in that observation.
   if (current && current.kt >= thr) {

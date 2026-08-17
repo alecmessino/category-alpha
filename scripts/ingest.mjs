@@ -109,6 +109,8 @@ export async function fetchDecks(stormId) {
     techCount: adeck && adeck.ok ? Object.keys(adeck.techs).length : 0,
     forecastAids: adeck && adeck.ok ? adeck.forecastTechs.length : 0,
     bestTrack: bdeck && bdeck.ok ? bdeck.latest : null,
+    bestTrackPeak: bdeck && bdeck.ok ? bdeck.peak : null,
+    bestTrackEverHurricane: bdeck && bdeck.ok ? bdeck.everHurricane : null,
     bestTrackRecords: bdeck && bdeck.ok ? bdeck.records.length : 0,
     scat: fdeck ? latestScatPass(fdeck) : null,
     aircraftFix: fdeck ? latestAircraftFix(fdeck) : null,
@@ -225,6 +227,8 @@ export async function ingestIntel(storms, opts) {
       deck: r.decks && r.decks.ok
         ? { cycle: r.decks.cycle, techCount: r.decks.techCount, forecastAids: r.decks.forecastAids } : null,
       bestTrack: r.decks ? r.decks.bestTrack : null,
+      bestTrackPeak: r.decks ? r.decks.bestTrackPeak : null,
+      bestTrackEverHurricane: r.decks ? r.decks.bestTrackEverHurricane : null,
       recon: r.vdm || null,
       aircraftFix: r.decks ? r.decks.aircraftFix : null,
       ascat: r.decks ? r.decks.scat : null,

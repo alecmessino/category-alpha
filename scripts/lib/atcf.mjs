@@ -295,7 +295,19 @@ export function parseBestTrack(text) {
     byTime.set(t, rec);
   }
   const recs = [...byTime.values()].sort((a, b) => (a.time < b.time ? -1 : 1));
-  return { ok: recs.length > 0, records: recs, latest: recs.length ? recs[recs.length - 1] : null };
+  const withKt = recs.filter((r) => Number.isFinite(r.kt) && r.kt > 0);
+  /* THE PEAK TO DATE, and the class that went with it. The best track is the observed
+     record, so "has this storm EVER been a hurricane" is answered here and nowhere else.
+     `latest` answers "is it one NOW" — a different question, and until now the only one
+     this parser could be asked. HU/MH are the Atlantic and Pacific hurricane classes;
+     TY/ST are the western-Pacific spellings of the same thing. */
+  const peak = withKt.length ? withKt.reduce((a, b) => (b.kt > a.kt ? b : a), withKt[0]) : null;
+  return {
+    ok: recs.length > 0, records: recs,
+    latest: recs.length ? recs[recs.length - 1] : null,
+    peak: peak ? { kt: peak.kt, iso: peak.iso, time: peak.time, ty: peak.ty } : null,
+    everHurricane: withKt.some((r) => /^(HU|MH|TY|ST)$/i.test(String(r.ty || ""))),
+  };
 }
 
 /* ---------------- f-deck: fixes ---------------- */

@@ -98,6 +98,36 @@ eq("a stale deck contributes no spread", stale.used.consensusSpread, false);
 eq("and a fresh one does", up.used.consensusSpread, true);
 ck("and the refusal is stated", stale.notes.some((n) => /past the .* line/.test(n)), stale.notes.join("; "));
 
+console.log("\n[2b] A QUESTION THE BEST TRACK HAS CLOSED IS NOT RE-OPENED");
+/* Caught on Lala: the b-deck carried 65 kt at three synoptic times, the storm weakened to
+   50 kt, and the board published 84% on a contract that had already resolved YES. The
+   market had it at 99c. "Reaches hurricane strength" is a ratchet. */
+const settledOfficial = { p: 0.99, pLow: 0.99, pHigh: 0.99, peakKt: 65, peakHr: 0, sigma: null,
+  already: true, settled: "observed", observed: { peakKt: 65, classified: true },
+  basis: "the best track already carries 65 kt" };
+const freshDeck = consensus(90, 15.7);
+const settled = calibratedIntensityP({ official: settledOfficial, currentKt: 50, consensus: freshDeck }, OPTS);
+eq("the settled probability is published unchanged", settled.p, 0.99);
+eq("and is flagged as settled", settled.settled, "observed");
+eq("driven by the record, not a forecast term", settled.drivenBy, "observed record");
+eq("no band is invented around a closed question", settled.sigmaKt, null);
+/* THE REGRESSION THIS BRANCH EXISTS TO STOP, asserted rather than described. The engine
+   does not floor its result at official.p — it rebuilds a mean from the forecast peak and
+   widens it by the deck's spread — so without the short-circuit a fresh 15.7 kt spread drags
+   a settled 0.99 down to ~0.56. A one-line fix in the estimator alone would have made the
+   published number WORSE than the bug it was fixing. */
+const unflagged = Object.assign({}, settledOfficial); delete unflagged.settled;
+const regressed = calibratedIntensityP({ official: unflagged, currentKt: 50, consensus: freshDeck }, OPTS);
+ck("without the short-circuit the same inputs collapse toward a half",
+   regressed.p < 0.6, `${regressed.p.toFixed(4)} with sigma ${regressed.sigmaKt}`);
+ck("so the short-circuit is load-bearing, not cosmetic", settled.p - regressed.p > 0.4,
+   `${regressed.p.toFixed(4)} -> ${settled.p}`);
+/* A stale deck contributes no spread, which is why the live snapshot did not show the
+   regression — the failure needs a FRESH deck, i.e. exactly an active storm. */
+const staleDeckSettled = calibratedIntensityP({ official: unflagged, currentKt: 50, consensus: consensus(90, 15.7, 600) }, OPTS);
+ck("with a stale deck it would not have shown at all", staleDeckSettled.p > 0.9,
+   `${staleDeckSettled.p.toFixed(4)} — why this needed a fresh-deck fixture to reproduce`);
+
 console.log("\n[3] disagreement can only ever widen");
 const tight = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, consensus: consensus(95, 2) }, OPTS);
 const wide = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, consensus: consensus(95, 25) }, OPTS);
