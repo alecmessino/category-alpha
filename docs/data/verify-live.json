@@ -1,14 +1,34 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-16T18:45:46.772Z",
+  "ranAt": "2026-08-17T00:29:59.922Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "307053ba9b15482933c5e85f2a8ca8caf076d006",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31965509363",
+  "sha": "4712d2dd4c5a570076d370b303425fbea513ca9f",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/31982155665",
   "ok": false,
-  "passed": 40,
-  "total": 45,
+  "passed": 34,
+  "total": 46,
   "failures": [
+    {
+      "check": "renders: Term structure",
+      "detail": ""
+    },
+    {
+      "check": "renders: Posterior stack",
+      "detail": ""
+    },
+    {
+      "check": "renders: Evidence Matrix",
+      "detail": ""
+    },
+    {
+      "check": "renders: Signal Register",
+      "detail": ""
+    },
+    {
+      "check": "renders: Observability",
+      "detail": ""
+    },
     {
       "check": "the map is a centrepiece, not a thumbnail",
       "detail": "map nullpx"
@@ -18,19 +38,27 @@
       "detail": "map starts nullpx down the page"
     },
     {
-      "check": "a new advisory moves P(hurricane) and the Situation strip",
-      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 3 advisory change(s) · 2 moved P · 0 pinned at the clamp · 3 register row(s) · situation P=82% at adv #17A · DID NOT MOVE: CP012026 #16->#16A peak 65->65 P 0.655->0.655"
+      "check": "three tabs, so no single view is a wall",
+      "detail": "0 tabs · Situation is 1 screens tall (1400px / 1400px)"
     },
     {
-      "check": "no failed same-origin requests",
-      "detail": "HTTP 503 /category-alpha/vendor/leaflet.js, net::ERR_ABORTED /category-alpha/vendor/leaflet.js"
+      "check": "the official-advisory console reaches the page",
+      "detail": "1 storm(s) · console=false · forecast=1 · P=1 · watches=1 · discussion=1"
+    },
+    {
+      "check": "the '?' drawers still carry the caveats",
+      "detail": "5 drawer(s) opened · MISSING: omitted rather than invented"
+    },
+    {
+      "check": "no page errors",
+      "detail": "Cannot read properties of undefined (reading 'full_cls') | Cannot read properties of undefined (reading 'full_cls') | Cannot read properties of undefined (reading 'full_cls')"
     },
     {
       "check": "no console errors from our code",
-      "detail": "Failed to load resource: the server responded with a status of 503 ()"
+      "detail": "The above error occurred in the <MT_Evidence> component:\n\n    at MT_Evidence (<anonymous>:453:23)\n    at div\n    at div\n    at MT_Section (<anonymous>:392:21)\n    at main\n    at div\n    at MillibarTer"
     }
   ],
-  "thirdPartyFailures": 8,
+  "thirdPartyFailures": 40,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -50,7 +78,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-16T18:35:17.260Z · 10m old"
+      "detail": "2026-08-16T23:56:12.327Z · 34m old"
     },
     {
       "check": "renders: Situation",
@@ -69,22 +97,22 @@
     },
     {
       "check": "renders: Term structure",
-      "pass": true,
+      "pass": false,
       "detail": ""
     },
     {
       "check": "renders: Posterior stack",
-      "pass": true,
+      "pass": false,
       "detail": ""
     },
     {
       "check": "renders: Evidence Matrix",
-      "pass": true,
+      "pass": false,
       "detail": ""
     },
     {
       "check": "renders: Signal Register",
-      "pass": true,
+      "pass": false,
       "detail": ""
     },
     {
@@ -94,7 +122,7 @@
     },
     {
       "check": "renders: Observability",
-      "pass": true,
+      "pass": false,
       "detail": ""
     },
     {
@@ -110,7 +138,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "4 ranked of 5 candidates · 116/151 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "4 ranked of 6 candidates · 116/151 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -120,7 +148,12 @@
     {
       "check": "no horizontal overflow and no jittering digits",
       "pass": true,
-      "detail": "bodyOverflow=0px tabularNums=true grids=2 overflowing=0"
+      "detail": "bodyOverflow=0px tabularNums=true grids=0 overflowing=0"
+    },
+    {
+      "check": "the map has no missing raster chunks",
+      "pass": true,
+      "detail": "0/0 tile(s) rendered · 0 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -134,13 +167,13 @@
     },
     {
       "check": "three tabs, so no single view is a wall",
-      "pass": true,
-      "detail": "3 tabs · Situation is 1.9 screens tall (2665px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 758px · ▾ 698px · BANKROLL 664px"
+      "pass": false,
+      "detail": "0 tabs · Situation is 1 screens tall (1400px / 1400px)"
     },
     {
       "check": "the official-advisory console reaches the page",
-      "pass": true,
-      "detail": "1 storm(s) · console=true · forecast=1 · P=1 · watches=1 · discussion=1"
+      "pass": false,
+      "detail": "1 storm(s) · console=false · forecast=1 · P=1 · watches=1 · discussion=1"
     },
     {
       "check": "no watch area is truncated at a line wrap",
@@ -154,18 +187,18 @@
     },
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
-      "pass": false,
-      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 3 advisory change(s) · 2 moved P · 0 pinned at the clamp · 3 register row(s) · situation P=82% at adv #17A · DID NOT MOVE: CP012026 #16->#16A peak 65->65 P 0.655->0.655"
+      "pass": true,
+      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 2 advisory change(s) · 2 moved P · 0 pinned at the clamp · 2 register row(s) · situation P=82% at adv #18"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 0m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 4m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=49m raw=83%"
+      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=178m raw=77%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -175,7 +208,7 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "0 guidance cycle(s) turned over → 0 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 4 P-update row(s) · 0 SHIPS · 0 pass · strip arrivals=2 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
+      "detail": "1 guidance cycle(s) turned over → 1 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 2 P-update row(s) · 1 SHIPS · 0 pass · strip arrivals=4"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
@@ -190,22 +223,22 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-08-16T12:00:00Z"
+      "detail": "cycle 2026-08-16T18:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
-      "pass": true,
-      "detail": "12 drawer(s) opened · all load-bearing caveats present"
+      "pass": false,
+      "detail": "5 drawer(s) opened · MISSING: omitted rather than invented"
     },
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "43 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "42 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "43 tile(s) served on reload · 43 in cache"
+      "detail": "42 tile(s) served on reload · 42 in cache"
     },
     {
       "check": "all markets carried",
@@ -244,18 +277,18 @@
     },
     {
       "check": "no failed same-origin requests",
-      "pass": false,
-      "detail": "HTTP 503 /category-alpha/vendor/leaflet.js, net::ERR_ABORTED /category-alpha/vendor/leaflet.js"
+      "pass": true,
+      "detail": "all app assets loaded"
     },
     {
       "check": "no page errors",
-      "pass": true,
-      "detail": "none"
+      "pass": false,
+      "detail": "Cannot read properties of undefined (reading 'full_cls') | Cannot read properties of undefined (reading 'full_cls') | Cannot read properties of undefined (reading 'full_cls')"
     },
     {
       "check": "no console errors from our code",
       "pass": false,
-      "detail": "Failed to load resource: the server responded with a status of 503 ()"
+      "detail": "The above error occurred in the <MT_Evidence> component:\n\n    at MT_Evidence (<anonymous>:453:23)\n    at div\n    at div\n    at MT_Section (<anonymous>:392:21)\n    at main\n    at div\n    at MillibarTer"
     }
   ]
 }
