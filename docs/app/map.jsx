@@ -21,9 +21,30 @@ const GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/";
 
 /* GOES GeoColor 10-min slots, VIIRS daily as fallback. Each candidate is probed over the
    storm before attaching, so an unpublished slot degrades instead of 404-flooding. */
+/* TILE MATRIX IS PER PRODUCT, NOT PER CONSTELLATION. GeoColor is published on Level7 and
+   Band13 Clean Infrared on Level6. One shared constant meant every IR tile asked for a
+   matrix set the product does not have and came back HTTP 400 — the Enhanced IR layer has
+   been 100% dead, at every zoom, for as long as the toggle has existed. */
 const GOES_TMS = "GoogleMapsCompatible_Level7";
+const GOES_IR_TMS = "GoogleMapsCompatible_Level6";
 const VIIRS_LAYER = "VIIRS_NOAA20_CorrectedReflectance_TrueColor";
 const VIIRS_TMS = "GoogleMapsCompatible_Level9";
+
+/* HOW LONG A GOES SLOT TAKES TO BECOME RELIABLY FETCHABLE.
+   GIBS does not publish a 10-minute slot atomically. For roughly an hour after the slot
+   time, a request for it succeeds with a probability that climbs with age and is
+   independent of tile position and zoom — consistent with backend replicas behind the CDN
+   receiving the granule at different times. Measured against the live endpoint:
+
+       slot age 30m -> 0/20 tiles      slot age 50m -> ~0.85-0.95
+       slot age 40m -> ~0.45-0.65      slot age 60m -> 20/20
+
+   The old 15-minute lag put every candidate inside that window, and `resolve()` accepted a
+   slot on the strength of ONE probe tile. A single 200 during a 50%-available window
+   committed the whole layer to a timestamp on which half of all subsequent tile requests
+   404 — each one an errorTileUrl blank, i.e. a transparent hole onto the dark basemap.
+   That is the patchwork. 65 minutes puts the first candidate past the window entirely. */
+const GOES_LAG_MIN = 65;
 
 function goesLayerFor(lon) { return lon != null && lon < -100 ? "GOES-West_ABI_GeoColor" : "GOES-East_ABI_GeoColor"; }
 function goesIrFor(lon) {
@@ -31,12 +52,12 @@ function goesIrFor(lon) {
 }
 function goesSlot(backSteps) {
   // GOES full-disk publishes on 10-minute boundaries; allow a lag before "now".
-  const t = new Date(Date.now() - (backSteps * 10 + 15) * 60000);
+  const t = new Date(Date.now() - (backSteps * 10 + GOES_LAG_MIN) * 60000);
   t.setUTCMinutes(Math.floor(t.getUTCMinutes() / 10) * 10, 0, 0);
   return t.toISOString().replace(/\.\d{3}Z$/, "Z");
 }
-function goesUrl(layer, iso) {
-  return GIBS + layer + "/default/" + iso + "/" + GOES_TMS + "/{z}/{y}/{x}.png";
+function goesUrl(layer, iso, tms) {
+  return GIBS + layer + "/default/" + iso + "/" + (tms || GOES_TMS) + "/{z}/{y}/{x}.png";
 }
 function viirsDay(back) {
   const d = new Date(Date.now() - back * 86400000);
@@ -148,6 +169,21 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
       if (refs.current.sat) mapRef.current.removeLayer(refs.current.sat);
       const sat = L.tileLayer(url, { opacity: 0.9, maxNativeZoom: maxNative, maxZoom: 8, minZoom: 2,
         tileSize: 256, updateWhenIdle: false, keepBuffer: 4, attribution, errorTileUrl: blank });
+      /* RETRY, BECAUSE THE FAILURE IS PER REQUEST AND NOT PER TILE. The same tile that 404s
+         now usually succeeds moments later — the granule is present on some CDN nodes and
+         not others — so a hole is a transient the layer never re-asks about. Leaflet 1.9
+         has no retry of its own. Two attempts, backed off, cache-busted so the negative is
+         not served back from the browser cache; after that the blank stands. */
+      sat.on("tileerror", (e) => {
+        const t = e.tile; if (!t || t._mtRetry >= 2) return;
+        t._mtRetry = (t._mtRetry || 0) + 1;
+        setTimeout(() => {
+          if (!t.parentNode) return;
+          t.src = e.target._url
+            .replace("{z}", e.coords.z).replace("{x}", e.coords.x).replace("{y}", e.coords.y)
+            + "?r=" + t._mtRetry;
+        }, 400 * t._mtRetry);
+      });
       sat.on('load', () => setImgState('ready'));
       sat.addTo(mapRef.current);
       refs.current.sat = sat;
@@ -199,11 +235,12 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
       const lyr = goesIrFor(lo);
       for (let back = 0; back < 12 && !cancelled; back++) {
         const iso = goesSlot(back);
-        const url = goesUrl(lyr, iso);
+        const url = goesUrl(lyr, iso, GOES_IR_TMS);
         if (await probe(url, la, lo, 4)) {
           if (cancelled || !mapRef.current) return;
           if (refs.current.ir) mapRef.current.removeLayer(refs.current.ir);
-          const ir = L.tileLayer(url, { opacity: 0.55, maxNativeZoom: 7, maxZoom: 8, minZoom: 2,
+          /* Level6 caps at TileMatrix 6; asking for 7 is the 400 this layer used to return. */
+          const ir = L.tileLayer(url, { opacity: 0.55, maxNativeZoom: 6, maxZoom: 8, minZoom: 2,
             tileSize: 256, updateWhenIdle: false, keepBuffer: 4, errorTileUrl: blank, pane: "overlayPane" });
           ir.addTo(mapRef.current);
           refs.current.ir = ir;
