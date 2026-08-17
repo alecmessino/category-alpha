@@ -126,6 +126,12 @@ jobs:
       - name: Test the advisory transmission timeline
         run: node scripts/test-advisories.mjs
 
+      # The coastline crossing test. NHC's landfall definition is the CENTRE crossing the
+      # coast, and the case that must never regress is Lala: eyewall ashore, centre 21 nm
+      # offshore, NOT a landfall. A boolean crossesCoast would have priced it as one.
+      - name: Test the coastline crossing test
+        run: node scripts/test-track.mjs
+
       # The outlook polygons the overview map shades. A shp/dbf pairing that slips by one
       # draws a 50% probability over the wrong ocean and looks entirely normal doing it.
       - name: Test the outlook shapefile reader
