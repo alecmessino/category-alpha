@@ -64,33 +64,51 @@ console.log("\n[1] with nothing ingested, the answer is exactly what it always w
 const bare = calibratedIntensityP({ official: OFFICIAL, currentKt: 50 }, OPTS);
 eq("it still answers", bare.ok, true);
 near("and it reproduces the advisory estimator exactly", bare.p, OFFICIAL.p, 0.001);
-eq("nothing but the official forecast was used", bare.used, { official: true, consensus: false, recon: false, ascat: false, ships: false });
+eq("nothing but the official forecast was used", bare.used, { official: true, consensus: false, consensusSpread: false, recon: false, ascat: false, ships: false });
 /* The regression that matters most: a storm with no deck and no aircraft must price
    identically to before this build existed. */
 eq("the raw estimate is carried unchanged", bare.pRaw, OFFICIAL.p);
 
-console.log("\n[2] the guidance consensus moves the number — that is the head start");
+console.log("\n[2] THE CONSENSUS MEAN DOES NOT MOVE THE NUMBER");
+/* It used to, and four seasons of replay say that was worth nothing: it moved 531 of 940
+   forecasts by a median 3.6 points for 0.4% Brier, and lost in three seasons of four. The
+   mean is gone. These assertions are the inverse of the ones they replace, deliberately —
+   they are what stops it being quietly reintroduced. */
 const up = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, consensus: consensus(95, 8) }, OPTS);
-ck("a consensus above the official forecast raises it", up.p > bare.p, `${bare.p} → ${up.p}`);
 const down = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, consensus: consensus(45, 8) }, OPTS);
-ck("and one below it lowers it", down.p < bare.p, `${bare.p} → ${down.p}`);
-ck("the combined peak sits between the two sources", up.meanKt > 70 && up.meanKt < 95, String(up.meanKt));
-/* A stale deck describes a storm that has moved on. It is refused, and the refusal is
-   published rather than silently degrading the answer. */
+/* 95 kt and 45 kt straddle the official forecast by 25 kt in each direction. Identical
+   answers is the whole claim: WHERE the aids point no longer reaches the estimate. */
+near("a deck 25 kt above and one 25 kt below give the SAME answer", up.p, down.p, 1e-12);
+eq("because the mean is the official forecast's alone", up.meanKt, bare.meanKt);
+eq("and it does not depend on the aids' direction", up.meanKt, down.meanKt);
+/* p still differs from bare, and must: identical spread widens the band either way, and a
+   wider band on a >50% estimate pulls it toward 0.5. That is the spread acting, not the
+   mean — asserting p === bare here would have been asserting the spread does nothing. */
+ck("p moves only via the widened band, toward 0.5", up.p < bare.p && up.sigmaKt > bare.sigmaKt,
+   `bare ${bare.p.toFixed(4)}/${bare.sigmaKt} → ${up.p.toFixed(4)}/${up.sigmaKt}`);
+eq("and no consensus source is in the blend", up.sources.map((s) => s.id), ["official"]);
+eq("nor is it reported as used", up.used.consensus, false);
+/* It is still INGESTED and still shown — removed from the estimate, not from the board. */
+ck("it is still stated as context", up.notes.some((n) => /does not move the estimate/.test(n)), up.notes.join("; "));
+/* A stale deck describes a storm that has moved on. Its spread is refused too — that was
+   ungated before, so a three-day-old deck went on widening the band after its mean had
+   been refused. */
 const stale = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, consensus: consensus(95, 8, 600) }, OPTS);
-eq("a stale deck is not used", stale.used.consensus, false);
+eq("a stale deck contributes no spread", stale.used.consensusSpread, false);
+eq("and a fresh one does", up.used.consensusSpread, true);
 ck("and the refusal is stated", stale.notes.some((n) => /past the .* line/.test(n)), stale.notes.join("; "));
 
 console.log("\n[3] disagreement can only ever widen");
 const tight = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, consensus: consensus(95, 2) }, OPTS);
 const wide = calibratedIntensityP({ official: OFFICIAL, currentKt: 50, consensus: consensus(95, 25) }, OPTS);
 ck("wider aid disagreement makes a wider answer", wide.sigmaKt > tight.sigmaKt, `${tight.sigmaKt} vs ${wide.sigmaKt}`);
-/* THE RULE THAT PREVENTS A MANUFACTURED EDGE. Two correlated sources must not produce a
-   sharper answer than the sharper of them; the official forecast IS a judgement over
-   these aids, so treating them as independent looks would be inventing a second look. */
-const sharpest = Math.min(OFFICIAL.sigma, tight.sources.find((s) => s.id === "consensus").sigmaKt);
-ck("and the combination is never sharper than its sharpest input",
-   tight.sigmaKt >= sharpest - 0.05, `${tight.sigmaKt} vs ${sharpest}`);
+/* THE RULE THAT PREVENTS A MANUFACTURED EDGE. Disagreement may only ever widen the band,
+   never sharpen it. With the consensus mean gone there is one source, so the floor is the
+   official forecast's own sigma — aid scatter can add to it and can never subtract. */
+ck("and the combination is never sharper than the official forecast alone",
+   tight.sigmaKt >= Math.min(OFFICIAL.sigma, bare.sigmaKt) - 0.05, `${tight.sigmaKt} vs ${bare.sigmaKt}`);
+ck("a deck that disagrees with itself is never sharper than no deck at all",
+   wide.sigmaKt >= bare.sigmaKt - 1e-9, `${wide.sigmaKt} vs bare ${bare.sigmaKt}`);
 ck("agreement between sources leaves a narrower band than disagreement",
    calibratedIntensityP({ official: OFFICIAL, currentKt: 50, consensus: consensus(70, 2) }, OPTS).sigmaKt <= wide.sigmaKt);
 

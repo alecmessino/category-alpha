@@ -1,31 +1,33 @@
 #!/usr/bin/env node
-/* THE CONFLICT RULE — what happens when the guidance deck and the aircraft disagree.
+/* THE RECON CORRECTION, and the conflict that no longer exists.
  *
- * This was the last piece of the engine implemented in code and owned by nobody: a rule
- * that decides a price, described only in a comment, where no feed could contradict it
- * and no reader could check it. That is the exact shape of the three drifts the claim
- * registry exists to prevent, so the rule now has a claim, and the claim has this.
+ * This file used to test an arbitration: a guidance deck and an aircraft both moved the
+ * estimate, they answer different questions, and averaging them would have been a category
+ * error that ran cleanly and meant nothing. The rule was that they are never averaged.
  *
- * THE RULE:
+ * THE DECK'S MEAN HAS SINCE BEEN MEASURED AND REMOVED. Four Atlantic seasons of replay:
+ * it moved 531 of 940 forecasts by a median 3.6 points and bought 0.4% Brier, losing in
+ * three seasons of four. So there is now ONE source, and the arbitration is a structural
+ * fact rather than a policy anyone has to enforce.
  *
- *   A consensus peak and an aircraft fix are NEVER AVERAGED, because they do not answer
- *   the same question. The deck forecasts what the storm WILL PEAK AT; the aircraft
- *   measures what it IS NOW. Averaging them would be a category error that runs cleanly
- *   and means nothing.
+ * WHAT REMAINS, and it is the part that was always doing the work:
  *
- *   The apparent conflict is resolved BY CONSTRUCTION rather than by a weight: every
- *   forecast is anchored on an initial intensity, the aircraft has just measured that
- *   initial intensity, and the measured difference is applied to the whole curve.
+ *   The aircraft measures the initial intensity every forecast is anchored on, and the
+ *   measured difference is applied to the whole forecast curve — undamped, no weight.
  *
- *   NEITHER CAN VETO THE OTHER — the deck keeps its weight, the fix keeps its full
- *   undamped difference, and there is no tunable parameter between them.
+ *   It applies ONLY while the forecaster had not yet seen the fix. Once an advisory
+ *   postdates it, their number IS their reading of it, and shifting again counts one
+ *   measurement twice. Caught live on Lala; see [6b].
+ *
+ *   The deck still sizes the uncertainty band. How much the guidance disagrees is real
+ *   information about how uncertain the forecast is, even when where it points is not.
  *
  *   The answer is the LARGER of the corrected forecast peak clearing the strike and the
  *   measured current intensity already clearing it.
  *
  * Two halves below: the engine does this, and the claim SAYS the engine does this. The
  * second half matters as much as the first — a rule nobody can read is a rule that gets
- * quietly changed.
+ * quietly changed, and the removal above is exactly that kind of change.
  *
  * Run: node scripts/test-conflict.mjs
  */
@@ -74,43 +76,42 @@ const run = (o) => calibratedIntensityP(
   Object.assign({ official: OFFICIAL, currentKt: ADVISORY_KT, advisoryIso: DEFAULT_ADV_ISO }, o), OPTS);
 const peakOf = (r, id) => (r.sources.find((s) => s.id === id) || {}).peakKt;
 
-console.log("\n[1] the two are not averaged — they are not answering the same question");
-/* A bullish deck (95 kt peak) and an aircraft finding the storm 10 kt WEAKER than the
-   advisory carries. If these were averaged as two estimates of one quantity the answer
-   would land somewhere between 95 and 40; it must not. */
+console.log("\n[1] the conflict CANNOT ARISE — the deck is not in the blend");
+/* This rule used to arbitrate between a deck and an aircraft because both moved the
+   estimate. The deck's mean was then measured over four Atlantic seasons at no skill and
+   removed, so the arbitration is now a structural fact instead of a policy: there is one
+   source, and the fix corrects it. These assertions guard that structure. */
 const conflict = run({ consensus: deck(95), recon: fix(ADVISORY_KT - 10) });
 const deckOnly = run({ consensus: deck(95) });
-ck("the deck's peak still enters the blend near its own value",
-   peakOf(conflict, "consensus") > 80, String(peakOf(conflict, "consensus")));
-ck("and nowhere near the measured current intensity",
-   peakOf(conflict, "consensus") > 60, String(peakOf(conflict, "consensus")));
-/* THE IDENTITY THAT DEFINES THE RULE. The correction is a translation of the whole
-   curve, so every source moves by exactly the measured difference — no damping, no
-   weight, no blend. */
+eq("only the official forecast is in the blend", conflict.sources.map((s) => s.id), ["official"]);
+eq("the deck is not recorded as used", conflict.used.consensus, false);
+eq("its spread is", conflict.used.consensusSpread, true);
+/* A 95 kt deck and a 45 kt deck are 50 kt apart and must price identically. */
+near("a 95 kt deck and a 45 kt deck give the same answer",
+     deckOnly.p, run({ consensus: deck(45) }).p, 1e-12);
+/* THE IDENTITY THAT DEFINES THE REMAINING RULE. The correction is a translation of the
+   forecast curve — no damping, no weight. */
 eq("the measured difference is applied undamped", conflict.reconDeltaKt, -10);
-near("the deck's peak shifts by exactly that much", peakOf(conflict, "consensus"), peakOf(deckOnly, "consensus") - 10, 1e-9);
-near("and so does the official peak", peakOf(conflict, "official"), peakOf(deckOnly, "official") - 10, 1e-9);
-near("so the combined peak shifts by exactly that much too", conflict.meanKt, deckOnly.meanKt - 10, 0.05);
+near("the official peak shifts by exactly that much", peakOf(conflict, "official"), peakOf(deckOnly, "official") - 10, 1e-9);
+near("and so does the combined mean", conflict.meanKt, deckOnly.meanKt - 10, 0.05);
 
-console.log("\n[2] neither can veto the other");
-/* The fix does not suppress the deck: a bullish deck under a weakening fix still prices
-   far above the advisory-only estimate. */
+console.log("\n[2] the fix acts on the official forecast alone");
 const fixOnly = run({ recon: fix(ADVISORY_KT - 10) });
-ck("a bullish deck survives a weakening fix", conflict.p > fixOnly.p, `${fixOnly.p} → ${conflict.p}`);
-/* And the deck does not suppress the fix: the correction is applied in full even when
-   the deck disagrees with its direction. */
-ck("a weakening fix still pulls a bullish deck down", conflict.p < deckOnly.p, `${deckOnly.p} → ${conflict.p}`);
-eq("both sources are in the blend", conflict.sources.map((s) => s.id).sort(), ["consensus", "official"]);
-eq("and both are recorded as used", [conflict.used.consensus, conflict.used.recon], [true, true]);
+/* With the deck's mean gone, a deck present or absent changes only the band — so the two
+   differ in width and not in centre. */
+near("deck present or absent, the mean is the same", conflict.meanKt, fixOnly.meanKt, 1e-9);
+ck("the deck's disagreement still widens the band", conflict.sigmaKt > fixOnly.sigmaKt,
+   `${fixOnly.sigmaKt} → ${conflict.sigmaKt}`);
+ck("a weakening fix lowers the estimate", conflict.p < deckOnly.p, `${deckOnly.p} → ${conflict.p}`);
 
 console.log("\n[3] the mirror case behaves identically");
-/* A bearish deck and an aircraft finding the storm STRONGER. The rule has no preferred
-   direction; if it did, it would be a bias rather than a correction. */
+/* An aircraft finding the storm STRONGER. The rule has no preferred direction; if it did,
+   it would be a bias rather than a correction. */
 const mirror = run({ consensus: deck(45), recon: fix(ADVISORY_KT + 10) });
 const bearOnly = run({ consensus: deck(45) });
 eq("the measured difference is applied undamped the other way", mirror.reconDeltaKt, 10);
-near("the combined peak shifts up by exactly that much", mirror.meanKt, bearOnly.meanKt + 10, 0.05);
-ck("a strengthening fix lifts a bearish deck", mirror.p > bearOnly.p, `${bearOnly.p} → ${mirror.p}`);
+near("the peak shifts up by exactly that much", mirror.meanKt, bearOnly.meanKt + 10, 0.05);
+ck("a strengthening fix lifts the estimate", mirror.p > bearOnly.p, `${bearOnly.p} → ${mirror.p}`);
 
 console.log("\n[4] a correction MOVES the estimate; it never sharpens it");
 /* The single most abusable thing a conflict rule could do is treat disagreement as
@@ -219,35 +220,36 @@ console.log("\n[8] the claim states the rule, and states it from the real number
 const MTC = evalClaims(stormWith("Lala", conflict, deck(95), fix(ADVISORY_KT - 10)));
 const c = MTC.claim("model.conflict");
 eq("it is registered and owned by the feed the conflict needs", c.owner, "recon");
-ck("it names the deck's own peak, uncorrected", /deck peaks at 95 kt/.test(c.text), c.text);
 ck("and what the aircraft measured, against what the advisory carried",
    /aircraft measured 40 kt against the advisory's 50 kt/.test(c.text), c.text);
 ck("it states the size and direction of the correction", /10 kt lower/.test(c.text), c.text);
-/* The corrected value the deck actually entered at — raw and calibrated, side by side,
-   for the same reason every other pair on this board is. */
-ck("and where the deck entered the blend after it", /enters at 85 kt/.test(c.text), c.text);
 ck("it names which term drove the answer", /driven by the forecast peak/i.test(c.text), c.text);
-/* THE RULE ITSELF, in words, on the board. */
-ck("it says they are never averaged", /never averaged/i.test(c.text), c.text);
-ck("it says why — they answer different questions",
-   /forecasts the peak.*measures the present/i.test(c.text), c.text);
-ck("it says neither can veto the other", /Neither can veto/i.test(c.text), c.text);
-ck("it says there is no tunable weight", /no tunable weight/i.test(c.text), c.text);
-ck("and it says a correction shifts without narrowing", /without narrowing/i.test(c.text), c.text);
+/* THE RULE ITSELF, in words, on the board — and it is now a smaller rule, because the
+   thing it used to arbitrate was measured and removed. */
+ck("it says the deck does not move the estimate", /deck does not move the estimate/i.test(c.text), c.text);
+ck("it says on what evidence", /four Atlantic seasons.*no skill/i.test(c.text), c.text);
+ck("it says what the deck still does", /sizes the uncertainty band/i.test(c.text), c.text);
+ck("and it keeps the recon precondition", /had not yet seen it/i.test(c.text), c.text);
+/* The old wording promised an arbitration that no longer exists. If it comes back, the
+   rule it describes has come back with it. */
+ck("it no longer promises an averaging rule it does not have",
+   !/never averaged|no tunable weight|veto/i.test(c.text), c.text);
 
 console.log("\n[9] the claim degrades honestly when one side is missing");
 const noFix = evalClaims(stormWith("Lala", deckOnly, deck(95), null)).claim("model.conflict");
-ck("with no aircraft it says so", /no aircraft fix to correct it/.test(noFix.text), noFix.text);
+ck("with no aircraft it says the forecast stands alone", /official forecast stands alone/.test(noFix.text), noFix.text);
+ck("and credits the deck with the band, which is all it does now",
+   /disagreement sizing the band/.test(noFix.text), noFix.text);
 const noDeck = evalClaims(stormWith("Lala", staleDeck, null, fix(ADVISORY_KT - 10))).claim("model.conflict");
-ck("with no usable deck it says the fix corrects the official forecast alone",
-   /official forecast alone/.test(noDeck.text), noDeck.text);
+ck("with a stale deck the fix still corrects the forecast",
+   /aircraft measured .* kt against the advisory/.test(noDeck.text), noDeck.text);
 const refused = evalClaims(stormWith("Lala", staleFix, deck(95), fix(ADVISORY_KT - 10, 400))).claim("model.conflict");
 /* A fix that exists but was refused must not read as a fix that never arrived. */
 ck("a refused fix is distinguished from an absent one",
    /a fix exists but was not applied/.test(refused.text), refused.text);
 const quiet = evalClaims({}).claim("model.conflict");
-ck("with no storms it still states the rule", /never averaged/i.test(quiet.text), quiet.text);
-ck("and says nothing is in conflict", /nothing is in conflict/.test(quiet.text), quiet.text);
+ck("with no storms it still states the rule", /deck does not move the estimate/i.test(quiet.text), quiet.text);
+ck("and says nothing is being calibrated", /No active system is being calibrated/.test(quiet.text), quiet.text);
 const confirmsClaim = evalClaims(stormWith("Lala", confirms, deck(95), fix(ADVISORY_KT))).claim("model.conflict");
 ck("a confirming fix is described as confirming, not as a correction of zero",
    /confirms the advisory/.test(confirmsClaim.text), confirmsClaim.text);
@@ -258,7 +260,7 @@ console.log("\n[10] the rule is reachable from the board, not just registered");
    same arithmetic. */
 const drawer = MTC.claim("note.intel");
 ck("the storm console's drawer carries it",
-   (drawer.body || []).some((l) => /never averaged/i.test(l)), JSON.stringify((drawer.body || []).slice(-3)));
+   (drawer.body || []).some((l) => /deck does not move the estimate/i.test(l)), JSON.stringify((drawer.body || []).slice(-3)));
 ck("and the drawer still carries the engine's own basis",
    (drawer.body || []).some((l) => /combined \d+ intensity estimate/.test(l)), JSON.stringify((drawer.body || []).slice(0, 2)));
 

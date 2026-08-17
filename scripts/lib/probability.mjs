@@ -158,19 +158,26 @@ export function calibratedIntensityP(input, opts) {
   }
   layers.push({ id: "official", label: "Official forecast intensity", p: official.p, basis: official.basis });
 
-  /* ---- 2. the ATCF consensus — the pre-advisory signal ----------------------------- */
+  /* ---- 2. the ATCF consensus — MEASURED, AND IT DOES NOT MOVE THE MEAN -------------
+   *
+   * The consensus mean used to be fused in here as a second source. Four Atlantic seasons
+   * of replay say that was worth nothing: it moved the estimate on 531 of 940 forecasts by
+   * a median 3.6 points, and bought 0.4% Brier. Per season +16.6 / -24.1 / -0.0 / -36.5 —
+   * it hurt in three of four. That is not a signal, and it was riding in the live edge book.
+   *
+   * The aids' SPREAD is a different quantity and is kept: how much the guidance disagrees
+   * is real information about how uncertain the forecast is, even when where it points is
+   * not. It still feeds tau2 below and still widens the band.
+   *
+   * So the consensus stays ingested, stays displayed as a layer, and stops moving P.
+   */
   let consensusAge = null;
   if (consensus && consensus.peakKt != null) {
     consensusAge = ageMin(consensus.cycleIso, nowMs);
     if (consensusAge != null && consensusAge > CONSENSUS_FRESH_MIN) {
-      notes.push(`ATCF consensus cycle ${consensus.cycle} is ${consensusAge} min old, past the ${CONSENSUS_FRESH_MIN}-min line — not used`);
+      notes.push(`ATCF consensus cycle ${consensus.cycle} is ${consensusAge} min old, past the ${CONSENSUS_FRESH_MIN}-min line — spread not used`);
     } else {
-      sources.push({ id: "consensus", label: `ATCF consensus (${consensus.members.map((m) => m.tech).join("/")})`,
-        peakKt: consensus.peakKt, peakHr: consensus.peakHr, sigma: Math.max(1e-6, maeAt(consensus.peakHr) * SQ),
-        spreadKt: consensus.spreadKt,
-        basis: `${consensus.n} aid${consensus.n === 1 ? "" : "s"} in the ${consensus.cycle} deck peak at a mean of`
-             + ` ${consensus.peakKt} kt near ${consensus.peakHr}h`
-             + (consensus.spreadKt != null ? `, disagreeing by ${consensus.spreadKt} kt` : "") });
+      notes.push(`ATCF consensus ${consensus.cycle} shown for context; its mean does not move the estimate (measured at no skill over four seasons)`);
     }
   }
 
@@ -246,7 +253,13 @@ export function calibratedIntensityP(input, opts) {
   /* The aids' own scatter is the same kind of quantity. The larger of the two governs —
      summing them would count one disagreement twice, and taking the smaller would let a
      tight pair of sources hide a wide field of aids behind it. */
-  const spreadKt = consensus && consensus.spreadKt != null ? consensus.spreadKt : 0;
+  /* Gated on the SAME freshness line the mean was. This was previously ungated — the mean
+     was refused past the line while the spread from that identical stale cycle went on
+     widening the band. A three-day-old deck's disagreement is not about this storm. It only
+     surfaced as a bug worth fixing once the spread became the only thing consensus does. */
+  const consensusFresh = consensus && consensus.peakKt != null &&
+    (consensusAge == null || consensusAge <= CONSENSUS_FRESH_MIN);
+  const spreadKt = consensusFresh && consensus.spreadKt != null ? consensus.spreadKt : 0;
   const tau2 = Math.max(varBetween, spreadKt * spreadKt);
   const sigmaTotal = Math.sqrt(sigmaMin * sigmaMin + tau2);
 
@@ -365,7 +378,11 @@ export function calibratedIntensityP(input, opts) {
     layers, notes,
     /* Which inputs are actually behind this number, for the quality tier and the CI gate.
        "Present" is not the same as "used", and only what was used is listed. */
-    used: { official: usedIds.includes("official"), consensus: usedIds.includes("consensus"),
+    /* consensus is the SPREAD only now — the mean was measured at no skill and removed.
+       Reporting it as "used" when only its disagreement acts would overstate what is
+       behind the number, which is the exact failure this block exists to prevent. */
+    used: { official: usedIds.includes("official"), consensus: false,
+            consensusSpread: spreadKt > 0,
             recon: reconUsed, ascat: ascatUsed, ships: shipsScoring && !!riFloor },
     basis: `combined ${sources.length} intensity estimate${sources.length === 1 ? "" : "s"} at`
          + ` ${Math.round(meanKt)} kt (sigma ${Math.round(sigmaTotal * 10) / 10} kt, of which`
@@ -397,9 +414,12 @@ export function evidenceQuality(cal, opts) {
        an instrument did it. */
     reasons.push(`aircraft reconnaissance ${cal.reconAgeMin} min old — the initial condition is measured, not estimated`
       + (cal.reconAlreadyPriced ? ", and the advisory has already incorporated it" : ""));
-  } else if (cal.used.consensus) {
+  } else if (cal.used.consensusSpread) {
+    /* MEDIUM still, but for a narrower reason than before. The deck no longer informs the
+       estimate — only how wide it is. That is genuinely more than the advisory alone, and
+       genuinely less than a measurement, which is what the middle tier is for. */
     tier = "MEDIUM";
-    reasons.push(`ATCF consensus ${cal.consensusAgeMin} min old, no aircraft in the storm`);
+    reasons.push(`ATCF deck ${cal.consensusAgeMin} min old sized the uncertainty band; its mean does not move the estimate, and no aircraft is in the storm`);
   } else {
     reasons.push("official advisory only — no guidance deck and no aircraft");
   }

@@ -549,45 +549,37 @@
      the engine that was implemented in code and owned by nobody, which is precisely the shape
      of the three drifts this registry exists to prevent — a rule that decides a price,
      described only in a comment, where no feed can contradict it and no reader can check it. */
+  /* This used to arbitrate a conflict between the guidance deck and the aircraft, because
+     both moved the estimate and averaging them would have been wrong. The deck's mean was
+     then measured over four Atlantic seasons at no skill and removed, so there are no
+     longer two things to arbitrate. Four branches collapse to two, and the rule is now a
+     structural fact rather than a policy that has to be enforced. */
   define("model.conflict", "recon", () => {
     const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
-    const rule = "A guidance consensus and an aircraft fix are never averaged: the deck forecasts the peak,"
-      + " the aircraft measures the present, and the measured difference is applied to the forecast curve"
-      + " rather than weighed against it. Neither can veto the other, there is no tunable weight between"
-      + " them, and the correction shifts the estimate without narrowing it.";
+    const rule = "The guidance deck does not move the estimate: measured over four Atlantic seasons its"
+      + " mean carried no skill, so the deck sizes the uncertainty band and nothing else. An aircraft fix"
+      + " corrects the official forecast curve directly, and only while the forecaster had not yet seen it.";
     const rows = [];
     for (const s of storms) {
       const c = s.hurricanePCal;
       if (!c || !c.ok) continue;
-      const deckKt = s.consensus ? s.consensus.peakKt : null;
-      const shifted = (c.sources || []).find((x) => x.id === "consensus");
       const measured = s.recon && s.recon.ok ? s.recon.intensityKt : null;
       const d = c.reconDeltaKt;
-      if (c.used.consensus && c.used.recon && d != null) {
-        /* Both in hand: state the deck's own peak, the measurement that moved it, and
-           where it entered the blend — raw and corrected, side by side, for the same
-           reason every other pair on this board is. */
-        rows.push(s.name + ": the deck peaks at " + deckKt + " kt and the aircraft measured "
-          + measured + " kt against the advisory's " + Math.round((measured - d) * 10) / 10 + " kt"
+      if (c.used.recon && d != null && measured != null) {
+        rows.push(s.name + ": an aircraft measured " + measured + " kt against the advisory's "
+          + Math.round((measured - d) * 10) / 10 + " kt"
           + (Math.abs(d) < 0.05
-              ? " — the fix confirms the advisory, so the deck enters uncorrected"
-              : ", so the whole curve is read " + Math.abs(d) + " kt "
-                + (d < 0 ? "lower" : "higher") + " and the deck's peak enters at "
-                + (shifted ? shifted.peakKt : "—") + " kt")
+              ? " — the fix confirms the advisory, so the curve is unshifted"
+              : ", so the forecast curve is read " + Math.abs(d) + " kt " + (d < 0 ? "lower" : "higher"))
           + ". Answer driven by the " + c.drivenBy + ".");
-      } else if (c.used.consensus) {
-        rows.push(s.name + ": the deck peaks at " + deckKt + " kt with no aircraft fix to correct it"
-          + (s.recon && s.recon.ok ? " (a fix exists but was not applied — see the refusals above)" : "")
-          + ". Answer driven by the " + c.drivenBy + ".");
-      } else if (c.used.recon) {
-        rows.push(s.name + ": an aircraft measured " + measured + " kt and no guidance deck was usable"
-          + " this cycle, so the correction is applied to the official forecast alone."
-          + " Answer driven by the " + c.drivenBy + ".");
       } else {
-        rows.push(s.name + ": neither a usable deck nor an aircraft fix — the official forecast stands alone.");
+        rows.push(s.name + ": the official forecast stands alone"
+          + (c.used.consensusSpread ? ", with the deck's disagreement sizing the band" : "")
+          + (s.recon && s.recon.ok && !c.used.recon ? " (a fix exists but was not applied — see the refusals above)" : "")
+          + ".");
       }
     }
-    if (!rows.length) return { text: rule + " No active system is being calibrated, so nothing is in conflict.", ok: true };
+    if (!rows.length) return { text: rule + " No active system is being calibrated.", ok: true };
     return { text: rows.join(" ") + " " + rule, ok: true };
   });
 

@@ -86,6 +86,27 @@ invalidation for `sw.js` — but they are plumbing for a model that does not exi
 yet. Per the standing sequence, they stay dormant until a calibration baseline is
 on disk.
 
+## Two things that were tried and did not survive
+
+**The consensus blend is gone.** Its mean moved 531 of 940 replayed forecasts by a median
+3.6 points and bought 0.4% Brier, losing in three seasons of four (+16.6 / −24.1 / −0.0 /
+−36.5). Removed from the fusion. The aids' *spread* is kept — how much the guidance
+disagrees is real information about uncertainty even when where it points is not.
+
+**Recalibrating the 0.8–0.9 bin does not generalise, and it was tested before shipping.**
+The bin says 85% and happens 98% on 57 forecasts across 17 storms — about 4 standard
+errors, real in-sample. But fitting a correction on it fails out-of-sample:
+
+| method | leave-one-season-out, pooled |
+|---|---|
+| isotonic (PAV) | **−13.0%** |
+| Platt scaling | **−10.1%** |
+
+Isotonic lost in 3 folds of 4; Platt's fitted slope swung 0.777 → 1.589 between folds. 17
+storms is not enough to fit a calibration map on. **Do not ship a recalibration until the
+sample is much larger, and re-run leave-one-season-out before believing any of it.** The
+in-sample gap is a finding, not a correction.
+
 ## What must not be repeated
 
 - **Do not ship a model before the backtest scores it.** The consensus blend rode
