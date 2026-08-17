@@ -2330,13 +2330,6 @@ async function fetchKalshiOrderbook(ticker) {
 }
 
 /* ---------------- SST (best-effort, honest about baseline) ---------------- */
-async function fetchSST(storms) {
-  // We can read live SST from Open-Meteo Marine, but a true ANOMALY needs a
-  // climatological baseline we do not have wired — so we do NOT publish a
-  // fabricated anomaly. Report the feed honestly as not-wired.
-  return { ok: false, source: "Open-Meteo Marine", note: "live SST available, but anomaly baseline not wired — omitted rather than fabricated", value: null };
-}
-
 /* ---------------- assemble ---------------- */
 async function main() {
   await mkdir(DATA_DIR, { recursive: true });
@@ -2403,7 +2396,6 @@ async function main() {
   }
   contracts.forEach((c) => { delete c._catFour; });
 
-  const sst = await fetchSST(storms);
 
   // events: one per active advisory (real), pinned to now
   const events = storms.filter((s) => s.advNum).map((s) => ({
@@ -2423,7 +2415,6 @@ async function main() {
     nhc: nhcFeed,
     markets: { ok: !!mkt.ok, status: mkt.status, source: mkt.source, count: mkt.count || 0, note: mkt.note,
                seriesKept: mkt.seriesKept || null, droppedForCap: mkt.droppedForCap || 0, attempts: marketAttempts },
-    sst: { ok: false, source: sst.source, note: sst.note },
     models: climFeed.ok
       ? Object.assign({}, climFeed, { note: climFeed.note + " — seasonal count contracts only; per-storm intensity has no fitted model" })
       : Object.assign({}, climFeed, { note: (climFeed.note || "unavailable") + " — no fair-value anchor; allocations stay deferred" }),
@@ -2452,7 +2443,7 @@ async function main() {
       : (outlook.areas.length
           ? `No CLASSIFIED tropical cyclones. ${outlook.areas.length} area(s) under NHC watch — see the genesis outlook below.`
           : "No active tropical cyclones and no areas under watch — honest current condition, not an error."),
-    feeds, storms, contracts, models: [], events, sstAnomalyC: null,
+    feeds, storms, contracts, models: [], events,
     outlook: outlook.ok ? outlook.areas : [],
     enso: oni ? {
       ok: true, source: oni.source, phase: oni.phase, phaseLabel: PHASE_LABEL[oni.phase],

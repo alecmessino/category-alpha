@@ -178,13 +178,6 @@
         prov: nhc.ok ? "live" : "nofeed", weight: 0.24, hash: fnv("pres" + primary.id),
         read: (S, f) => Math.round(S.pressure(f)) + " mb",
       });
-      if (isNum(latest.sstAnomalyC)) {
-        evidence.push({
-          id: "ev-sst", kind: "sst_reading", label: "Sea-surface temp anomaly", source: (feeds.sst && feeds.sst.source) || "Open-Meteo",
-          tier: "B", latency: "hourly", ver: "sst", prov: "live", weight: 0.15, hash: fnv("sst" + latest.sstAnomalyC),
-          read: () => (latest.sstAnomalyC >= 0 ? "+" : "") + latest.sstAnomalyC.toFixed(1) + " °C",
-        });
-      }
       const hasMarketForPrimary = contracts.some((c) => c.storm === primary.id);
       if (hasMarketForPrimary) {
         evidence.push({
@@ -294,7 +287,6 @@
       Object.assign(feedHealth(feeds.markets, "Prediction markets"),
         (feeds.markets && feeds.markets.droppedForCap) ? { status: "FAIL" } : {}),
       feedHealth(feeds.satellite, "GIBS imagery"),
-      feedHealth(feeds.sst, "SST anomaly"),
       feedHealth(feeds.models, "Ensemble models"),
       feedHealth(feeds.enso, "ENSO / ONI"),
       feedHealth(feeds.outlook, "Genesis outlook"),
@@ -331,7 +323,7 @@
 
   function emptyLatest(err) {
     return { stepMin: 15, generatedAt: null, note: "data unreachable: " + err,
-      feeds: { nhc: { ok: false, note: "fetch failed: " + err }, markets: { ok: false }, satellite: { ok: true, source: "NASA GIBS VIIRS" }, sst: { ok: false }, models: { ok: false } },
+      feeds: { nhc: { ok: false, note: "fetch failed: " + err }, markets: { ok: false }, satellite: { ok: true, source: "NASA GIBS VIIRS" }, models: { ok: false } },
       storms: [], contracts: [], models: [], events: [] };
   }
 

@@ -119,7 +119,6 @@ function IngestionHUD() {
       v: snapAge == null ? "—" : snapAge + "m" },
     /* Never wired. Shown as absent, not as failed. */
     { k: "RECON", title: "Reconnaissance", st: "off", v: "—" },
-    { k: "SST", title: "Sea-surface temperature anomaly", st: "off", v: "—" },
   ];
   const TONE = { ok: "var(--pos)", warn: "var(--warn)", bad: "var(--neg)", off: "var(--border-strong)" };
 

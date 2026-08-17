@@ -215,6 +215,45 @@ export function spreadOf(values) {
   return { n: v.length, mean: m, sd: Math.sqrt(s2), min: Math.min(...v), max: Math.max(...v) };
 }
 
+/* An aid's intensity at an arbitrary lead time, linearly between its own points. Outside
+   the aid's range returns null rather than clamping: an aid that stops at 72 h has said
+   nothing about 96 h, and treating its last value as its forecast there would manufacture
+   agreement out of a missing member. */
+export function intensityAt(curve, hr) {
+  if (!Array.isArray(curve) || !curve.length || !Number.isFinite(hr)) return null;
+  const pts = curve.filter((p) => p && Number.isFinite(p.hr) && Number.isFinite(p.kt))
+                   .sort((a, b) => a.hr - b.hr);
+  if (!pts.length) return null;
+  if (hr < pts[0].hr || hr > pts[pts.length - 1].hr) return null;
+  for (let i = 1; i < pts.length; i++) {
+    if (hr <= pts[i].hr) {
+      const a = pts[i - 1], b = pts[i];
+      if (b.hr === a.hr) return b.kt;
+      return a.kt + (b.kt - a.kt) * ((hr - a.hr) / (b.hr - a.hr));
+    }
+  }
+  return pts[pts.length - 1].kt;
+}
+
+/* DISAGREEMENT AT ONE LEAD TIME — which is what "the aids disagree" actually means.
+ *
+ * `spreadOf(members.map(m => m.peakKt))` is the scatter of each member's own MAXIMUM,
+ * and those maxima sit at different hours. Measured live on Lala's 2026081718 deck:
+ * HCCA peaks 104 kt at 36 h, IVCN 79 kt at 96 h, GDMI 87 kt at 36 h — an SD of 12.8 kt
+ * that is substantially TIMING, not disagreement about strength. Two aids can forecast
+ * the same storm and score a large "spread" purely by peaking at different times.
+ *
+ * This evaluates every member at the SAME hour and takes the dispersion there. A member
+ * whose forecast does not reach that hour is excluded rather than extrapolated, and
+ * fewer than two members left means null — one aid agreeing with itself is not agreement. */
+export function spreadAtHr(members, hr) {
+  const vals = (members || [])
+    .map((m) => intensityAt(m && m.intensity, hr))
+    .filter((v) => Number.isFinite(v));
+  const s = spreadOf(vals);
+  return s ? { hr, n: s.n, sd: s.sd, mean: s.mean, min: s.min, max: s.max } : null;
+}
+
 /* The pre-advisory consensus signal, assembled from one storm's a-deck.
  *
  * `members` is the set of aids whose peak intensity enters the spread. It is
@@ -241,15 +280,25 @@ export function consensusFrom(deck) {
      cancel each other and understate every one of them. */
   const peakKt = spread ? spread.mean : members[0].peakKt;
   const peakHr = members.map((m) => m.peakHr).sort((a, b) => a - b)[Math.floor(members.length / 2)];
+  /* Disagreement measured where the contract is decided — the consensus peak hour. */
+  const commonSpread = spreadAtHr(members, peakHr);
 
   return {
     cycle: deck.latestCycle, cycleIso: deck.cycleIso,
     peakKt: Math.round(peakKt * 10) / 10, peakHr,
     spreadKt: spread ? Math.round(spread.sd * 10) / 10 : null,
+    /* The same quantity measured honestly: dispersion at ONE lead time rather than across
+       maxima that occur at different ones. Published alongside the old figure rather than
+       replacing it, because which one should size the band is a question for the backtest
+       and not for whoever is editing this file. */
+    spreadCommonKt: commonSpread ? Math.round(commonSpread.sd * 10) / 10 : null,
+    spreadCommonHr: commonSpread ? commonSpread.hr : null,
+    spreadCommonN: commonSpread ? commonSpread.n : null,
     minKt: spread ? spread.min : members[0].peakKt,
     maxKt: spread ? spread.max : members[0].peakKt,
     n: members.length,
-    members: members.map((m) => ({ tech: m.tech, label: m.label, peakKt: m.peakKt, peakHr: m.peakHr, initialKt: m.initialKt })),
+    members: members.map((m) => ({ tech: m.tech, label: m.label, peakKt: m.peakKt, peakHr: m.peakHr,
+      initialKt: m.initialKt, intensity: m.intensity || null })),
     corrected: corrected ? { tech: corrected.tech, peakKt: corrected.peakKt, peakHr: corrected.peakHr, intensity: corrected.intensity, track: corrected.track } : null,
     variableIntensity: variableI ? { tech: variableI.tech, peakKt: variableI.peakKt, peakHr: variableI.peakHr } : null,
     variableTrack: variableT ? { tech: variableT.tech, track: variableT.track } : null,

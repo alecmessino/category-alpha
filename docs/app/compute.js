@@ -814,7 +814,6 @@
       ["atcf", "ATCF guidance decks", true], ["recon", "Aircraft reconnaissance poll", true],
       ["ships", "SHIPS diagnostics", false],
       ["models", "Climatology anchor", false], ["enso", "ENSO / ONI layer", false],
-      ["sst", "SST anomaly", false],
     ];
     FEEDS.forEach(([k, name, core]) => {
       const f = F[k];
