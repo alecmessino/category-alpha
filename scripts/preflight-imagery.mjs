@@ -20,10 +20,6 @@
  * Usage:
  *   node scripts/preflight-imagery.mjs              human-readable report, exits non-zero on NO-GO
  *   node scripts/preflight-imagery.mjs --json       machine-readable, same exit code
- *   node scripts/preflight-imagery.mjs --allow-legacy-frames
- *                                                   pass the frame check while legacy
- *                                                   raw-only rows remain in the retained
- *                                                   window (see check 4)
  */
 import { readFile } from "node:fs/promises";
 import { dirname, resolve, relative } from "node:path";
@@ -37,7 +33,6 @@ import { auditNoCanvasReads } from "./lib/tile-grid.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const JSON_OUT = process.argv.includes("--json");
-const ALLOW_LEGACY = process.argv.includes("--allow-legacy-frames");
 const PLUGIN = "plugins/millibar-pipeline-architect/skills/data-pipeline-integration";
 
 async function read(rel) {
@@ -99,24 +94,23 @@ async function main() {
     "a cached index.html or latest.json makes the board's freshness claim false while every indicator on the page keeps saying otherwise");
 
   /* ---- 4. the probability pair on the frame, and the loader that reads it ----
-     Audited as one thing. Legacy raw-only rows are tolerable ONLY while the loader
-     reports them as absent; the moment it falls back to the current snapshot they stop
-     being history and become a false reading. So the waiver is derived from 4b rather
-     than taken on trust from a command-line flag — a flag a person sets because they
-     believe the fix landed outlives the fix. */
+     Two independent checks. The frame check says the pair is written together; the loader
+     check says a frame without it reports nothing rather than borrowing the current
+     snapshot. Legacy raw-only rows cannot be fixed and age out on their own — what has to
+     hold while they are still in the window is the second check. */
   const loader = await read("docs/app/data-loader.js");
   const fallback = loader.text == null
     ? { ok: false, status: PF.MISSING, note: "docs/app/data-loader.js not found" }
     : auditLoaderProbabilityFallback(loader.text);
   record("frame-fallback", "the scrubber never borrows the current snapshot for a past frame",
     fallback,
-    "make pCalAt / pRawAt / pSigmaAt / qualityAt / hurricanePAt read strictly from the frame row and return null when it has nothing");
+    "make pCalAt / pSigmaAt / qualityAt / hurricanePAt read strictly from the frame row and return null when it has nothing");
 
   const frames = await readJson("docs/data/frames.json");
-  record("frame-pair", "every frame storm-row carries {pRaw, pCal} together",
+  record("frame-pair", "every frame storm-row carries {hurricaneP, pCal} together",
     frames === null ? { ok: false, status: PF.MISSING, note: "docs/data/frames.json not found" }
       : frames === undefined ? { ok: false, status: PF.MALFORMED, note: "docs/data/frames.json is not valid JSON" }
-      : auditFrameProbabilityPairs(frames, { allowLegacy: ALLOW_LEGACY || fallback.ok }),
+      : auditFrameProbabilityPairs(frames),
     "scripts/fetch-data.mjs writes the pair; docs/app/data-loader.js must return null for the probability group on a frame that lacks it rather than falling back to the current snapshot");
 
   /* ---- 5. no canvas pixel reads in the map-verification path ---- */

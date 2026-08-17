@@ -2594,26 +2594,17 @@ async function main() {
       ascatKt: asc ? asc.kt ?? null : null,
       ascatAge: asc ? ageOf(asc.iso) : null,
       /* ---- the engine's output, raw and calibrated, AS A PAIR ---------------------
-         `hurricaneP` above is the raw official-forecast estimate and has been on the frame
-         from the start; `pRaw` is the same number written under the name the ledger, the
-         scorer and the panels all use for it. Both are emitted: `hurricaneP` because 32
-         hours of retained frames and every consumer already read it, `pRaw` because a
-         reader holding a frame should not have to know that the raw estimate is filed
-         under a different word from the calibrated one.
+         `hurricaneP` above is the raw official-forecast estimate; `pCal` is what the
+         calibration made of it. They are written from ONE evaluation of one storm state,
+         and that pairing is the whole point — not the spelling.
 
-         THE PAIR IS WHY THIS MATTERS, not the name. `pCalAt()` in docs/app/data-loader.js
-         falls through to the CURRENT snapshot when a frame has no pCal, so a frame that
-         carries a raw probability and no calibrated one makes the scrubber print today's
-         calibrated number at a timestamp from two days ago — a stale value dressed as
-         current, inside the one control whose entire job is to show what the board held at
-         a past moment. Writing them together means a null pCal beside a real pRaw is now a
-         fact about that instant ("nothing was calibrated then") rather than a hole for a
-         fallback to fill.
-
-         Deriving pRaw from `cal.pRaw` FIRST is deliberate: that is the exact value the
-         calibration was computed from. Falling back to `hp.p` covers the case where the
-         engine declined entirely, and the two agree by construction when both exist. */
-      pRaw: cal && cal.pRaw != null ? rr(cal.pRaw, 10000) : (hp && hp.p != null ? rr(hp.p, 10000) : null),
+         Why it matters: pCalAt() in docs/app/data-loader.js used to fall through to the
+         CURRENT snapshot when a frame had no pCal, so a frame carrying a raw probability
+         and no calibrated one made the scrubber print today's number at a timestamp from
+         two days ago — a stale value dressed as current, inside the one control whose job
+         is to show what the board held at a past moment. That fallback is gone, so a null
+         pCal beside a real hurricaneP is now a fact about that instant ("nothing was
+         calibrated then") rather than a hole for a fallback to fill. */
       pCal: cal ? rr(cal.p, 10000) : null,
       pSigma: cal ? rr(cal.sigmaKt, 10) : null,
       quality: s.evidenceQuality ? s.evidenceQuality.tier : null,

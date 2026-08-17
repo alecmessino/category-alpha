@@ -103,28 +103,28 @@ to invalidate same-origin.
 
 ### The probability pair on the frame
 
-`docs/data/frames.json` is what the scrubber reads. The pair is `{pRaw, pCal}`.
+`docs/data/frames.json` is what the scrubber reads. The pair is `{hurricaneP, pCal}` — the
+raw official-forecast estimate and what the calibration made of it, written from **one
+evaluation of one storm state**. The pairing is the point, not the spelling: the number is
+already on the frame under `hurricaneP` and is read directly by six call sites, so adding a
+second field named `pRaw` would put the same value on every frame twice. `pRaw` is the
+*ledger* field name in `scripts/lib/calibration.mjs`, which is where it belongs.
 
-- `scripts/fetch-data.mjs` writes `pRaw` (from `cal.pRaw`, the exact value the calibration
-  was computed from, falling back to the raw estimator's own output) alongside `pCal`,
-  `pSigma` and `quality`, from one evaluation of one storm state. `hurricaneP` is still
-  written under its old name so the 32-hour retained window and every existing consumer
-  keep answering.
-- A calibrated probability with **no** raw beside it is refused unconditionally, at any
-  age: the calibration is computed *from* the raw estimate, so if `pCal` exists then `pRaw`
-  existed at that instant and was lost on write.
-- Legacy raw-only rows **cannot be backfilled**. The board genuinely had no calibrated
-  number then, and writing one in now would be inventing history.
+Two **independent** checks, not one with a waiver threaded between them:
 
-So the fix is in the reader, and it is audited separately (`frame-fallback`). Every
-probability accessor in `docs/app/data-loader.js` — `pCalAt`, `pRawAt`, `pSigmaAt`,
-`qualityAt`, `hurricanePAt` — must read **strictly from the frame row** and return `null`
-when it has nothing. The four move together because they are one reading: a calibrated
-probability from the frame beside an evidence tier from the snapshot describes no moment
-that ever existed.
-
-The legacy-row waiver is *derived* from that audit rather than taken from a command-line
-flag. A flag a person sets because they believe the fix landed outlives the fix.
+- **`frame-pair`** — a calibrated probability with no raw beside it is refused
+  unconditionally, at any age: the calibration is computed *from* the raw estimate, so if
+  `pCal` exists then `hurricaneP` existed at that instant and was lost on write. A raw-only
+  row written *since* the writer started pairing is a live regression and fails. Older
+  raw-only rows **cannot be backfilled** — the board genuinely had no calibrated number
+  then — so they are reported and age out of the 32-hour window on their own.
+- **`frame-fallback`** — every probability accessor in `docs/app/data-loader.js`
+  (`pCalAt`, `pSigmaAt`, `qualityAt`, `hurricanePAt`) reads **strictly from the frame row**
+  and returns `null` when it has nothing. This is what makes the legacy rows harmless.
+  Before it, `pCalAt` fell through to the *current* snapshot, so scrubbing back to any of
+  the 40 raw-only rows printed today's number under a two-day-old timestamp. The four move
+  together because they are one reading: a calibrated probability from the frame beside an
+  evidence tier from the snapshot describes no moment that ever existed.
 
 ---
 

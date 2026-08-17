@@ -3,75 +3,49 @@ description: Check the deploy gate before building a pipeline — calibration ba
 allowed-tools: Read, Grep, Glob, Bash
 ---
 
-Run the pre-deploy checks. Report each as PASS / FAIL / UNKNOWN with the evidence, then
-give a single go / no-go verdict.
-
-**Run the script first.** Six of the seven checks below are decided mechanically from
-committed bytes, and a check decided by reading is a check that passes when somebody is
-tired:
+## 1. Run the gate
 
 ```
-node scripts/preflight-imagery.mjs          # or --json
+node scripts/preflight-imagery.mjs          # add --json for a machine-readable report
 ```
 
-It emits two verdicts, and they are different questions. BUILD says the code is fit to
-write and review; DEPLOY says it may run against live infrastructure. Only the second is
-blocked by the calibration gate. Its exit code tracks BUILD, so a gate that is expected to
-stay shut for months does not fail a pull request.
+It decides seven of the eight checks from committed bytes and prints PASS / FAIL / UNKNOWN
+with the evidence for each. A check decided by reading is a check that passes when somebody
+is tired, so do not re-derive by hand what it already decided — read its output.
 
-Read its output, then use the sections below to explain any FAIL and to cover the one check
-it cannot make — the live unsigned LIST, which it reports as UNKNOWN. Full structural
-breakdown, including why each constant is the value it is:
-`skills/data-pipeline-integration/references/preflight-satellite-imagery.md`.
+**Two verdicts, and they are different questions.** BUILD says the code is fit to write and
+review. DEPLOY says it may run against live infrastructure. Only DEPLOY is blocked by the
+calibration gate, and the exit code tracks BUILD, so a gate expected to stay shut for months
+does not fail a pull request.
 
-## 1. Baseline pre-requisite (the gate)
+**UNKNOWN is not a pass.** It blocks a DEPLOY GO and is reported separately.
 
-These pipelines deploy only AFTER the historical calibration loop baseline is published.
+## 2. Settle the one check it cannot make
 
-- Read `docs/data/calibration.json`. Does it carry a published baseline, or is the scorer
-  still withholding one for want of resolved storms?
-- If it is absent or unpublished: **FAIL**. Say plainly that ingestion may be built and
-  tested but must not be deployed live, and why — a pipeline feeding an unscored board
-  publishes probabilities nobody can grade.
-- `node scripts/calibrate.mjs --dry` reports without writing, if the developer wants the
-  current state.
-
-## 2. Anonymous S3 path
-
-Confirm the public-bucket path works unsigned, before any IaC is written:
+`anonymous-egress` reports UNKNOWN by construction — no network here.
 
 ```bash
 aws s3 ls s3://noaa-goes19/ABI-L2-CMIPF/ --no-sign-request --region us-east-1 | head -3
 ```
 
-- `403 AccessDenied` here means the request was signed. Check for `AWS_PROFILE` /
-  credential-process interference, and confirm the SDK client uses
-  `Config(signature_version=UNSIGNED)`.
-- If the AWS CLI is not installed, report **UNKNOWN** rather than assuming either way.
+Run it **from the environment that will host the worker**, not from a laptop with a
+different credential chain. A `403 AccessDenied` means the request was signed after all:
+check `AWS_PROFILE` and any `credential_process` before touching the IaC. If the AWS CLI is
+absent, report UNKNOWN rather than assuming either way.
 
-## 3. Existing readers
+## 3. Do not duplicate an existing reader
 
-Grep `scripts/` and `docs/app/` for the host of whatever feed is about to be built. This
-repo already ingests NHC/ATCF (`scripts/ingest.mjs`, `scripts/lib/atcf.mjs`), TGFTP recon
+The preflight does not check this — it is a judgement about the feed being asked for, not
+about the tree. Grep `scripts/` and `docs/app/` for its host first. This repo already
+ingests NHC/ATCF (`scripts/ingest.mjs`, `scripts/lib/atcf.mjs`), TGFTP recon
 (`scripts/lib/recon.mjs`), SHIPS (`scripts/lib/ships.mjs`), NOMADS GFS
 (`scripts/fetch-wind.mjs`, `scripts/grib2.mjs`), Kalshi and Polymarket
-(`scripts/fetch-data.mjs`), and NASA GIBS tiles (`docs/app/map.jsx`, `docs/sw.js`).
-Report any overlap as **FAIL — extend, do not duplicate**, naming the file to extend.
+(`scripts/fetch-data.mjs`), and NASA GIBS tiles (`docs/app/map.jsx`, `docs/sw.js`). Overlap
+is **FAIL — extend, do not duplicate**, naming the file to extend.
 
-## 4. Service-worker contract
+## 4. Verdict
 
-If the work touches caching, confirm `docs/sw.js` still restricts itself to
-`gibs.earthdata.nasa.gov` and `basemaps.cartocdn.com` and still returns early on
-same-origin requests. Any change that lets it cache or evict same-origin is a **FAIL**:
-it would let a stale board look live.
+One line: **BUILD GO/NO-GO** and **DEPLOY GO/NO-GO**, each with its single blocking item.
 
-## 5. Polling check
-
-Grep the diff or the target script for `setInterval`, `while True`, and scheduled
-`s3 ls` against a NOAA bucket. Ingestion is event-driven off
-`arn:aws:sns:us-east-1:123901341784:NewGOES*`. A poll against a NODD bucket is a **FAIL**
-with the SNS topic named as the fix.
-
-## Verdict
-
-One line: **GO** or **NO-GO**, and if NO-GO, the single blocking item.
+Why every threshold in the script is the value it is, and what each check prevents:
+`skills/data-pipeline-integration/references/preflight-satellite-imagery.md`.

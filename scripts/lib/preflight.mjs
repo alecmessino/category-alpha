@@ -494,42 +494,35 @@ export function auditServiceWorkerBarrier(text, opts) {
  * written together, from one evaluation of one storm state, and that a reader can tell
  * "there was no calibrated number then" from "there is one and it is off screen".
  */
-export function auditFrameProbabilityPairs(framesJson, opts) {
-  const o = opts || {};
+export function auditFrameProbabilityPairs(framesJson) {
   const frames = (framesJson && Array.isArray(framesJson.frames)) ? framesJson.frames : null;
   if (!frames) return fail(PF.MALFORMED, "frames.json carries no frames array");
   if (!frames.length) return unknown("frames.json is empty — the replay history has not been written yet, so there is nothing to check");
 
-  /* Only frames written by the CURRENT writer can be held to the current schema. Older
-     frames in the retained window were written by older code, and requiring them to carry
-     fields that did not exist is asserting something about the past that cannot be true.
-     The cutover is identified from the data: the first frame that carries the pair at all
-     is where this writer started. */
   let rows = 0, paired = 0, rawOnly = 0, calOnly = 0, bare = 0;
   let firstPairedIso = null, lastBareIso = null;
-  const raw = (s) => (s.pRaw != null ? s.pRaw : (s.hurricaneP != null ? s.hurricaneP : null));
-
   for (const f of frames) {
     for (const id of Object.keys(f.storms || {})) {
       const s = f.storms[id] || {};
-      const r = raw(s), c = s.pCal;
       rows++;
-      if (r != null && c != null) { paired++; if (!firstPairedIso) firstPairedIso = f.tsZ; }
-      else if (r != null) { rawOnly++; lastBareIso = f.tsZ; }
-      else if (c != null) calOnly++;
+      if (s.hurricaneP != null && s.pCal != null) { paired++; if (!firstPairedIso) firstPairedIso = f.tsZ; }
+      else if (s.hurricaneP != null) { rawOnly++; lastBareIso = f.tsZ; }
+      else if (s.pCal != null) calOnly++;
       else bare++;
     }
   }
 
   /* A calibrated number with no raw beside it is unconditionally wrong, at any age. The
-     raw estimate is the input the calibration was computed FROM: if the calibrated value
-     exists, the raw one existed at the same instant and was dropped on the way to disk. */
+     calibration is computed FROM the raw estimate: if pCal exists, hurricaneP existed at
+     the same instant and was dropped on the way to disk. */
   if (calOnly) {
-    return fail(PF.BREACH, `${calOnly} frame storm-row(s) carry a calibrated probability with no raw estimate beside it. The calibration is computed from the raw estimate, so the raw one existed at that instant and was lost on write — and the ledger seeded from these frames scores pCal against nothing`);
+    return fail(PF.BREACH, `${calOnly} frame storm-row(s) carry a calibrated probability with no raw estimate beside it. The calibration is computed from the raw estimate, so it existed at that instant and was lost on write — and the ledger seeded from these frames scores pCal against nothing`);
   }
 
-  /* The current writer's frames must pair. Frames at or after the first paired frame are
-     this writer's; a raw-only row among them is a live regression, not history. */
+  /* Rows written since the writer started pairing must pair. Older rows in the retained
+     window CANNOT be fixed — the board genuinely had no calibrated number then — so they
+     are reported, not failed. What makes them safe is the loader, checked separately by
+     `auditLoaderProbabilityFallback`, and they age out of the 32-hour window on their own. */
   const cutMs = firstPairedIso ? Date.parse(firstPairedIso) : null;
   let regressions = 0;
   if (cutMs) {
@@ -537,22 +530,18 @@ export function auditFrameProbabilityPairs(framesJson, opts) {
       if (Date.parse(f.tsZ) < cutMs) continue;
       for (const id of Object.keys(f.storms || {})) {
         const s = f.storms[id] || {};
-        if (raw(s) != null && s.pCal == null) regressions++;
+        if (s.hurricaneP != null && s.pCal == null) regressions++;
       }
     }
   }
   if (regressions) {
-    return fail(PF.BREACH, `${regressions} storm-row(s) written since ${firstPairedIso} carry a raw estimate with no calibrated one. Scrubbing to those frames makes data-loader.js fall through to the CURRENT snapshot's calibrated probability and print it at a past timestamp`);
-  }
-
-  /* Legacy rows are reported, not failed — but they are reported as a LOADER
-     requirement, because they are exactly the input that makes the fallback fire. */
-  if (rawOnly && !o.allowLegacy) {
-    return fail(PF.GATE, `${rawOnly} of ${rows} storm-row(s) predate the paired writer (through ${lastBareIso}); the pair starts at ${firstPairedIso || "never"}. These cannot be backfilled — the board genuinely had no calibrated number then — so docs/app/data-loader.js must return null for the probability group on those frames instead of falling back to the current snapshot. Re-run with allowLegacy once that fallback is removed`);
+    return fail(PF.BREACH, `${regressions} storm-row(s) written since ${firstPairedIso} carry a raw estimate with no calibrated one. Scrubbing to those frames shows a probability with nothing to compare it against, and the ledger seeded from them scores one series over a different sample than the other`);
   }
 
   return pass(
-    `${paired}/${rows} storm-row(s) carry {pRaw, pCal} as a pair · ${rawOnly} legacy raw-only row(s) predating the paired writer · ${bare} row(s) with no probability at all, which is a storm the engine declined to price`,
+    `${paired}/${rows} storm-row(s) carry {hurricaneP, pCal} as a pair · ${rawOnly} legacy raw-only row(s)`
+    + (rawOnly ? ` through ${lastBareIso}, ageing out of the retained window` : "")
+    + ` · ${bare} row(s) with no probability at all, which is a storm the engine declined to price`,
     { rows, paired, rawOnly, calOnly, bare, firstPairedIso, lastBareIso });
 }
 
@@ -570,7 +559,7 @@ export function auditFrameProbabilityPairs(framesJson, opts) {
  * fallback is gone. A flag a human sets because they believe the fix landed is a flag that
  * outlives the fix.
  */
-const PROBABILITY_ACCESSORS = ["pCalAt", "pRawAt", "pSigmaAt", "qualityAt", "hurricanePAt"];
+const PROBABILITY_ACCESSORS = ["pCalAt", "pSigmaAt", "qualityAt", "hurricanePAt"];
 
 export function auditLoaderProbabilityFallback(text) {
   const src = String(text || "");

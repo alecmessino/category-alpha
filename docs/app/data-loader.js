@@ -96,11 +96,9 @@
            Read as latest only, the number changed on the page and nothing recorded it. */
         advisoryLagMin: (f) => { const r = fs(f); return r && r.advisoryLagMin != null ? r.advisoryLagMin : (isNum(s.advisoryLagMin) ? s.advisoryLagMin : null); },
         advNumAt: (f) => pick(f, "advNum", s.advNumFull || s.advNum || null),
-        /* The raw estimate, and the same strict rule as the calibrated one below. It is
-           the older name for what the frame now also writes as `pRaw`; both are read so a
-           frame from either side of that change answers, and neither reaches across time
-           to the current snapshot. */
-        hurricanePAt: (f) => { const r = fs(f); return r ? (r.hurricaneP != null ? r.hurricaneP : (r.pRaw != null ? r.pRaw : null)) : null; },
+        /* The raw estimate. Same strict rule as the calibrated one below: read from the
+           frame, and null when the frame has nothing. */
+        hurricanePAt: (f) => { const r = fs(f); return r && r.hurricaneP != null ? r.hurricaneP : null; },
         peakKtAt: (f) => pick(f, "peakKt", s.hurricaneP ? s.hurricaneP.peakKt : null),
         guidanceAt: (f) => pick(f, "guidance", null),
 
@@ -141,7 +139,6 @@
            from the frame beside an evidence tier from the snapshot describes no moment
            that ever existed. */
         pCalAt: (f) => { const r = fs(f); return r && r.pCal != null ? r.pCal : null; },
-        pRawAt: (f) => { const r = fs(f); return r ? (r.pRaw != null ? r.pRaw : (r.hurricaneP != null ? r.hurricaneP : null)) : null; },
         pSigmaAt: (f) => { const r = fs(f); return r && r.pSigma != null ? r.pSigma : null; },
         qualityAt: (f) => { const r = fs(f); return r && r.quality != null ? r.quality : null; },
         conKtAt: (f) => { const r = fs(f); return r && r.conKt != null ? r.conKt : (s.consensus ? s.consensus.peakKt : null); },

@@ -179,7 +179,7 @@ console.log("\n[4] the service-worker barrier is audited by ORDER, which a grep 
 console.log("\n[5] the probability pair on the frame");
 {
   const frame = (tsZ, storms) => ({ tsZ, storms });
-  const paired = { frames: [frame("2026-08-15T00:00:00Z", { AL092026: { pRaw: 0.4, pCal: 0.55 } })] };
+  const paired = { frames: [frame("2026-08-15T00:00:00Z", { AL092026: { hurricaneP: 0.4, pCal: 0.55 } })] };
   ck("a paired frame passes", auditFrameProbabilityPairs(paired).ok, JSON.stringify(auditFrameProbabilityPairs(paired)));
 
   /* Unconditionally wrong at any age: the calibration is COMPUTED from the raw estimate,
@@ -190,22 +190,23 @@ console.log("\n[5] the probability pair on the frame");
 
   /* A raw-only row written AFTER the writer started pairing is a live regression. */
   const regressed = { frames: [
-    frame("2026-08-15T00:00:00Z", { AL092026: { pRaw: 0.4, pCal: 0.55 } }),
-    frame("2026-08-15T00:20:00Z", { AL092026: { pRaw: 0.42 } }),
+    frame("2026-08-15T00:00:00Z", { AL092026: { hurricaneP: 0.4, pCal: 0.55 } }),
+    frame("2026-08-15T00:20:00Z", { AL092026: { hurricaneP: 0.42 } }),
   ] };
   const rReg = auditFrameProbabilityPairs(regressed);
   ck("a raw-only row from the paired writer is refused", !rReg.ok && rReg.status === PF.BREACH, rReg.note);
 
-  /* Legacy rows are a GATE, not a breach: they cannot be backfilled, so the fix is in the
-     loader and the waiver has to be earned there. */
+  /* Legacy rows predating the pairing writer CANNOT be fixed — the board genuinely had no
+     calibrated number then — so they are reported and age out. What keeps them safe is the
+     loader check in [6], which is why these are two independent checks and not one with a
+     waiver flag threaded between them. */
   const legacy = { frames: [
     frame("2026-08-14T00:00:00Z", { AL092026: { hurricaneP: 0.3 } }),
-    frame("2026-08-15T00:00:00Z", { AL092026: { pRaw: 0.4, pCal: 0.55 } }),
+    frame("2026-08-15T00:00:00Z", { AL092026: { hurricaneP: 0.4, pCal: 0.55 } }),
   ] };
-  eq("legacy raw-only rows gate rather than fail", auditFrameProbabilityPairs(legacy).status, PF.GATE);
-  eq("and are waived once the loader no longer falls back", auditFrameProbabilityPairs(legacy, { allowLegacy: true }).ok, true);
-  eq("the old hurricaneP name still counts as the raw estimate",
-    auditFrameProbabilityPairs({ frames: [frame("2026-08-15T00:00:00Z", { A: { hurricaneP: 0.4, pCal: 0.5 } })] }).ok, true);
+  const rLeg = auditFrameProbabilityPairs(legacy);
+  ck("legacy raw-only rows pass and are reported, not waived by a flag", rLeg.ok, rLeg.note);
+  ck("and the report says they are ageing out", /ageing out/.test(rLeg.note), rLeg.note);
   eq("an empty history is UNKNOWN, not a pass", auditFrameProbabilityPairs({ frames: [] }).status, PF.UNKNOWN);
 }
 
@@ -214,8 +215,8 @@ console.log("\n[6] and the loader that reads it must not reach across time");
   const LD = await slurp("docs/app/data-loader.js");
   const rOk = auditLoaderProbabilityFallback(LD);
   ck("the committed loader reads strictly from the frame", rOk.ok, rOk.note);
-  ck("and all five accessors were actually found — a check that finds none must not pass",
-    rOk.ok && rOk.value.accessors.length === 5, JSON.stringify(rOk.value));
+  ck("and all four accessors were actually found — a check that finds none must not pass",
+    rOk.ok && rOk.value.accessors.length === 4, JSON.stringify(rOk.value));
 
   /* The exact line that shipped, restored. It prints the CURRENT calibrated probability
      under a timestamp from two days earlier. */

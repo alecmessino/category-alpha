@@ -456,16 +456,12 @@ const probe = await page.evaluate(({ unionText, groupHeadersSeen }) => {
             decksAidless: (window.MT ? Object.values(MT.storms || {}) : [])
               .filter((s) => s.atcfDeck && s.atcfDeck.forecastAids === 0).length,
             withCalibrated: has("pCal"), withQuality: has("quality"),
-            /* Either name counts. The frame writes the raw estimate as `pRaw` and, for the
-               retained window's older frames, as `hurricaneP`; a check pinned to one name
-               would read a schema change as a feed going dark. */
-            withRaw: ids.filter((id) => last[id] && (last[id].pRaw != null || last[id].hurricaneP != null)).length,
+            withRaw: has("hurricaneP"),
             /* THE PAIR, which is the thing that actually has to hold. A raw estimate with
                no calibrated one beside it is what makes the scrubber reach for the current
                snapshot; counting them separately never showed that, because both counts
                looked healthy on their own. */
-            withPair: ids.filter((id) => last[id] && last[id].pCal != null
-              && (last[id].pRaw != null || last[id].hurricaneP != null)).length,
+            withPair: ids.filter((id) => last[id] && last[id].pCal != null && last[id].hurricaneP != null).length,
             withRecon: has("reconAge"), withShips: has("shShear"), withAscat: has("ascatKt"),
             /* BEHAVIOUR — what turned over, and whether the register saw it. */
             cycleTurnovers, fixArrivals,
