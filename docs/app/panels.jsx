@@ -517,7 +517,20 @@ function MT_EdgeBook({ frame, bankroll, stake, setBankroll, setStake, onSelect, 
             {live.map((x) => (
               <div key={x.id} style={{ ...mono, fontSize: 11.5, marginTop: 4, color: "var(--text-1)" }}>
                 {x.name} {typeof x.wind === "function" ? x.wind(frame) : x.wind}kt
-                {x.hurricaneP && <span> · <b style={{ color: "var(--accent)" }}>{Math.round(x.hurricaneP.p * 100)}%</b> to reach hurricane strength</span>}
+                {(() => {
+                  /* Calibrated first, raw beside it — the same pairing the Situation strip
+                     uses. Showing the raw number alone here made the two disagree on screen. */
+                  const cal = typeof x.pCalAt === "function" ? x.pCalAt(frame) : (x.hurricanePCal ? x.hurricanePCal.p : null);
+                  const raw = typeof x.pRawAt === "function" ? x.pRawAt(frame) : (x.hurricaneP ? x.hurricaneP.p : null);
+                  const shown = cal != null ? cal : raw;
+                  if (shown == null) return null;
+                  return (
+                    <span> · <b style={{ color: "var(--accent)" }}>{Math.round(shown * 100)}%</b> to reach hurricane strength
+                      {cal != null && raw != null && Math.round(cal * 100) !== Math.round(raw * 100) &&
+                        <span style={{ color: "var(--text-2)" }}> (raw {Math.round(raw * 100)}%)</span>}
+                    </span>
+                  );
+                })()}
                 {x.watches && x.watches.highest && <span style={{ color: "var(--warn)" }}> · {x.watches.highest}</span>}
                 {(() => { const L = typeof x.advisoryLagMin === "function" ? x.advisoryLagMin(frame) : x.advisoryLagMin;
                   return L != null && <span style={{ color: "var(--text-2)" }}> · advisory {L}m old at fetch</span>; })()}

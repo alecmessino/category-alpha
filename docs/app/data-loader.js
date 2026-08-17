@@ -114,6 +114,7 @@
         atcfDeck: s.atcfDeck || null,
 
         pCalAt: (f) => { const r = fs(f); return r && r.pCal != null ? r.pCal : (s.hurricanePCal ? s.hurricanePCal.p : null); },
+        pRawAt: (f) => { const r = fs(f); return r && r.pRaw != null ? r.pRaw : (s.hurricaneP ? s.hurricaneP.p : null); },
         pSigmaAt: (f) => { const r = fs(f); return r && r.pSigma != null ? r.pSigma : (s.hurricanePCal ? s.hurricanePCal.sigmaKt : null); },
         qualityAt: (f) => { const r = fs(f); return r && r.quality != null ? r.quality : (s.evidenceQuality ? s.evidenceQuality.tier : null); },
         conKtAt: (f) => { const r = fs(f); return r && r.conKt != null ? r.conKt : (s.consensus ? s.consensus.peakKt : null); },
