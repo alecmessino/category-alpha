@@ -99,9 +99,27 @@ def cmd_backtest(args) -> int:
         print(f"  {key:<28s} storms {s['n_storms']:4d}  base {s['base_rate']:.3f}  "
               f"Brier {s['brier']:.4f}  clim {s['brier_climatology'] if s['brier_climatology'] is None else format(s['brier_climatology'],'.4f')}  "
               f"skill {'n/a' if sk is None else format(sk, '+.1%')}")
-    d = run_disturbance_backtest(archive_dir=_archive(args))
-    print(f"\n  disturbance-conditioned: "
-          f"{'scored' if d.get('scored') else d.get('refused_reason')}")
+    d = run_disturbance_backtest(archive_dir=_archive(args),
+                                 out_path=Path(args.out).with_name("disturbance-backtest.json")
+                                 if args.out else None)
+    print(f"\n  disturbance-conditioned: {d.get('question', '')}")
+    if d.get("refused_reason"):
+        print(f"    NOT SCORED -- {d['refused_reason']}")
+        return 0
+    print(f"    {d['n_threads']} outlook threads, {d['n_threads_developed']} developed "
+          f"({100 * (d.get('observed_development_rate') or 0):.1f}%), "
+          f"{d['n_observations']} observations")
+    for name, label in (("nhc_published", "NHC published 7-day chance"),
+                        ("analog", "this archive's analog rate")):
+        b = d.get(name) or {}
+        if b.get("scored"):
+            print(f"    {label:<28s} threads {b['n_storms']:4d}  events {b.get('n_events', 0):4d}"
+                  f"  Brier {b['brier']:.4f}")
+        else:
+            print(f"    {label:<28s} NOT SCORED -- {b.get('refused_reason')}")
+    sk = d.get("skill_analog_vs_nhc")
+    print(f"    analog skill vs NHC's own number: "
+          f"{'n/a' if sk is None else format(sk, '+.1%')}")
     return 0
 
 

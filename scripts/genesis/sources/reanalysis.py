@@ -159,6 +159,10 @@ TILE_HALO = 1
 
 # Trip the breaker after this many consecutive network failures.
 MAX_CONSECUTIVE_FAILURES = 5
+# Seconds per OPeNDAP request. Windows are ~1.3 KB, so this is a liveness bound on the
+# server, not a transfer budget; provenance.fetch retries a transport failure 3 times, so a
+# genuinely dead endpoint costs at most ~3x this once, and then the breaker takes over.
+DEFAULT_TIMEOUT = 120
 
 # m/s -> kt. Exact: a nautical mile is 1852 m by definition, so 1 m/s = 3600/1852 kt.
 MS_TO_KT = 3600.0 / 1852.0
@@ -701,7 +705,8 @@ def _fail() -> None:
 # --- public extraction -------------------------------------------------------------------
 
 def fetch_point(variable: str, when: _dt.datetime, lat: float, lon: float,
-                level_hpa: float | None = None, *, timeout: int = 120) -> float | None:
+                level_hpa: float | None = None, *,
+                timeout: int = DEFAULT_TIMEOUT) -> float | None:
     """Nearest-grid-point value of `variable`, IN THE UNITS THE FILE PUBLISHES.
 
     No unit conversion happens here -- slp comes back in Pascals, air in degK, uwnd in m/s
@@ -911,7 +916,7 @@ def environment_at(lat: float, lon: float, when: _dt.datetime, *, source_key: st
 
     def tile(var: str, level: float | None):
         try:
-            return _tile(var, when_utc, level, ilat, ilon, 120)
+            return _tile(var, when_utc, level, ilat, ilon, DEFAULT_TIMEOUT)
         except _WindowError as exc:
             _record_gap(
                 "window_%s_%s_%s" % (var, level, _cause_tag(str(exc))),
@@ -1094,6 +1099,27 @@ def gaps() -> list[Gap]:
                     "two are not interchangeable and pooling them across env_source would "
                     "mix scales. Points on the first or last grid row get NULL rather than "
                     "a one-sided difference."),
+        ),
+        Gap(
+            key=ENV_SOURCE,
+            what="these columns are NOT drop-in replacements for the ships_dev columns of "
+                 "the same name, and the difference was MEASURED, not assumed",
+            why=("30 SHIPS CP developmental records at tau=0 were run through "
+                 "environment_at() at the same lat, lon and time and compared column by "
+                 "column: shear_kt median 11.6 kt (SHIPS) vs 16.6 kt (ncep_r1), median "
+                 "difference +3.1 kt, Pearson r=0.74. vort850_1e5 median 0.34 vs 2.55 "
+                 "(1e-5 s^-1), r=0.35. rh_mid_pct median 55.0 vs 57.5 percent, median "
+                 "difference -4.0, PEARSON r = -0.00 -- similar distributions and NO "
+                 "point-by-point relationship at all, which is what you get when a "
+                 "700-500 hPa layer average over a 200-800 km storm-relative annulus is "
+                 "set beside a single 600 hPa level in one 2.5 degree cell."),
+            impact=("Pooling env_source='ships_dev' and env_source='ncep_r1' rows in one "
+                    "humidity comparison is comparing two unrelated numbers; for shear and "
+                    "vorticity it is comparing related numbers with a scale offset. Match "
+                    "ncep_r1 rows against ncep_r1 rows. n=30, so these are magnitudes, not "
+                    "a calibration -- and no correction factor is published here, because "
+                    "fitting one from 30 points and applying it to the archive would be "
+                    "manufacturing agreement that the sources do not have."),
         ),
         Gap(
             key=ENV_SOURCE,
