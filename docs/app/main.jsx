@@ -344,6 +344,17 @@ function MillibarTerminalApp() {
 
   const dense = false;   // one density; the switch was design-tool residue
   const [tab, setTab] = React.useState("Situation");
+  /* The analog payload is fetched by its own panel, not by the data loader, so this
+     component does not re-render when it lands. Without this the collapsed summary of
+     the Analog prior section keeps whatever count it read at mount — "0 system(s) and
+     area(s) matched" over a panel showing three. Resolve on the shared promise the panel
+     publishes and re-read it once. */
+  const [, setAnalogsRead] = React.useState(0);
+  React.useEffect(() => {
+    let alive = true;
+    if (window.__MT_ANALOGS_P) window.__MT_ANALOGS_P.then(() => { if (alive) setAnalogsRead((n) => n + 1); });
+    return () => { alive = false; };
+  }, [tab]);
   const panelGrid = narrow ? "1fr" : "1.5fr 1fr 1fr";
 
   React.useEffect(() => {
@@ -548,7 +559,9 @@ function MillibarTerminalApp() {
             environment, what did the ones like it go on to do? Above fair value because it
             is the base rate every anchor below it is a refinement of. */}
         <window.MT_Section label="Analog prior" tier="genesis-to-intensity archive · empirical base rates, not a skill forecast"
-          defaultOpen summary={(((window.__MT_ANALOGS || {}).entries) || []).length + " system(s) and area(s) matched"}>
+          defaultOpen summary={window.__MT_ANALOGS
+            ? (((window.__MT_ANALOGS.entries) || []).length + " system(s) and area(s) matched")
+            : "archive payload not read yet"}>
           <window.MT_AnalogPrior dense={dense} narrow={narrow} />
         </window.MT_Section>
 

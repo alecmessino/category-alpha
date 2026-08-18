@@ -848,6 +848,8 @@
     if (!e.length) return { text: "no system or outlook area was matched this cycle", ok: false };
     const gen = e.filter((x) => x.position && x.position.which === "genesis").length;
     return {
+      short: "Matched on the archived GENESIS position: this system's CURRENT position was NOT queried"
+           + " — matching is on where a storm formed, and a query at where one is now returns few analogs or none.",
       text: "Matched on the archived GENESIS position: this system's CURRENT position was NOT queried."
           + " Matching is on where a storm formed, and a query at where one is now returns few analogs"
           + " or none, because systems arrive at those latitudes rather than form there. Both positions"
@@ -865,6 +867,9 @@
     const thin = e.filter((x) => x.effective_sample_size != null && x.min_sample != null
                                  && x.effective_sample_size < x.min_sample);
     return {
+      short: "The weighting has concentrated on a few analogs: the weighted column rests on fewer effective"
+           + " cases than the sample gate requires, while the unweighted rate beside it still runs over every"
+           + " matched storm.",
       text: "The effective sample size is published beside every matched-storm count, and the sample gate is"
           + " applied to the raw count of distinct storms, never to the flattering effective one. Where the"
           + " effective sample has fallen below that same gate, the weighting has concentrated on a few"
@@ -888,6 +893,8 @@
       if (rows.indexOf(k) < 0) rows.push(k);
     }));
     return {
+      short: "BASE RATE ONLY: too few events in the archive for a calibrated or skill-scored probability, so it"
+           + " publishes the base rate with its interval and produces no skill number for these contracts at all.",
       text: "BASE RATE ONLY marks a contract the archive holds too few events of to support a calibrated or"
           + " skill-scored probability. It publishes the empirical base rate with its interval and refuses to"
           + " produce a skill number, so no such number exists for these contracts anywhere in this repository"

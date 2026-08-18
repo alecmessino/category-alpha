@@ -45,6 +45,21 @@ const AX_LADDER = [
   { k: "cat5", label: "Cat 5", at: "≥ 137 kt", tone: "var(--neg)" },
 ];
 const AX_CONTRACT = { any: "landfall, any intensity", hurricane: "landfall ≥ 64 kt" };
+/* The ladder and the two contracts are the archive's own (scripts/genesis/schema.py
+   THRESHOLDS_KT, and any/hurricane). Iterating those lists alone would silently DROP an
+   outcome a future archive publishes — the same drift this board audits for, running the
+   other way. Anything the payload carries and this file does not know is rendered too,
+   under its raw key and marked as unknown to the panel rather than omitted. */
+function AXladderRows(intensity) {
+  const known = AX_LADDER.map((x) => x.k);
+  return AX_LADDER.concat(
+    Object.keys(intensity || {}).filter((k) => known.indexOf(k) < 0).sort()
+      .map((k) => ({ k, label: k, at: "threshold not in this panel's ladder", tone: "var(--warn)" })));
+}
+function AXcontracts(row) {
+  const known = ["any", "hurricane"];
+  return known.concat(Object.keys(row || {}).filter((k) => known.indexOf(k) < 0).sort());
+}
 const AX_MONTH = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const AX_ENV = [
   { k: "shear_kt", label: "SHEAR", unit: "kt", d: 0 },
@@ -71,7 +86,20 @@ function AXhours(h) {
   const r = Math.round(h);
   return r >= 72 ? r + " h (" + (h / 24).toFixed(1) + " d)" : r + " h";
 }
+/* A chance NHC published as a percent already — never suffix "%" onto a dash. */
+const AXpc0 = (x) => (x == null || !isFinite(x)) ? "not published" : Number(x).toFixed(0) + "%";
 const AXmonths = (ms) => (ms && ms.length) ? ms.map((m) => AX_MONTH[m] || m).join(" · ") : "—";
+/* Transit-time keys in the ladder's order, landfalls after the intensity crossings —
+   alphabetical order put "to TS" below three landfall rows, which reads as a sequence
+   that does not exist. */
+function AXtteOrder(tte) {
+  const keys = Object.keys(tte || {});
+  const rank = (k) => {
+    const i = AX_LADDER.map((x) => x.k).indexOf(k);
+    return i >= 0 ? i : 100;
+  };
+  return keys.sort((a, b) => (rank(a) - rank(b)) || (a < b ? -1 : a > b ? 1 : 0));
+}
 
 /* One fetch per page, shared by every mount. The payload is committed by the archive's
    own job and is not part of the ten-minute snapshot, so it is read here rather than in
@@ -193,7 +221,7 @@ function AXEntry({ e, dense }) {
         {e.is_invest === true && <AXBadge tone="special">INVEST</AXBadge>}
         <span style={{ marginLeft: "auto", fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)" }}>
           r={AXnum(q.radius_km, 0)} km · {AXmonths(q.season_months)} · pool {q.min_pool_season == null ? "—" : q.min_pool_season}+
-          {q.include_provisional === false ? " · provisional seasons excluded" : ""}
+          {q.include_provisional === false ? " · provisional storms excluded" : ""}
         </span>
       </div>
 
@@ -203,7 +231,7 @@ function AXEntry({ e, dense }) {
         <AXKV k={onGenesis ? "MATCHED ON — GENESIS POSITION" : "MATCHED ON — CURRENT POSITION"}
           v={pos.text || (AXnum(pos.lat) + " / " + AXnum(pos.lon))} tone="var(--accent)" />
         {e.current_position && (
-          <AXKV k="CURRENT POSITION — NOT QUERIED" v={e.current_position.text || (AXnum(e.current_position.lat) + " / " + AXnum(e.current_position.lon))}
+          <AXKV k={onGenesis ? "CURRENT POSITION — NOT QUERIED" : "CURRENT POSITION"} v={e.current_position.text || (AXnum(e.current_position.lat) + " / " + AXnum(e.current_position.lon))}
             tone="var(--text-2)" />
         )}
         <AXKV k="MATCHED STORMS" v={e.n_cases} tone={e.n_cases ? "var(--text-1)" : "var(--neg)"} />
@@ -219,13 +247,13 @@ function AXEntry({ e, dense }) {
       {onGenesis && (
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--warn)",
           border: "1px solid var(--warn)", borderRadius: 6, padding: "6px 9px", marginTop: 7 }}>
-          {AXclaim("analogs.matching").text}
+          {AXclaim("analogs.matching").short || AXclaim("analogs.matching").text}
         </div>
       )}
       {essUnderGate && (
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--warn)", marginTop: 7 }}>
           <AXBadge tone="warn">EFFECTIVE SAMPLE BELOW GATE</AXBadge>{" "}
-          {AXclaim("analogs.sample").text}
+          {AXclaim("analogs.sample").short || AXclaim("analogs.sample").text}
         </div>
       )}
       {e.env_unmatched_excluded > 0 && (
@@ -239,10 +267,10 @@ function AXEntry({ e, dense }) {
         <React.Fragment>
           <AXSubHead right={"observed " + AXstamp(e.formation.observed_utc)}>Formation chance — NHC, as published</AXSubHead>
           <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", borderRadius: 7, overflow: "hidden", flexWrap: "wrap" }}>
-            <AXKV k="7-DAY" v={<React.Fragment>{AXnum(e.formation.prob_7d_pct, 0)}%{e.formation.prob_7d_label ? <span style={{ fontWeight: 400, color: "var(--text-2)" }}> · {e.formation.prob_7d_label}</span> : null}</React.Fragment>}
+            <AXKV k="7-DAY" v={<React.Fragment>{AXpc0(e.formation.prob_7d_pct)}{e.formation.prob_7d_label ? <span style={{ fontWeight: 400, color: "var(--text-2)" }}> · {e.formation.prob_7d_label}</span> : null}</React.Fragment>}
               tone={(e.formation.prob_7d_pct || 0) >= 70 ? "var(--neg)" : (e.formation.prob_7d_pct || 0) >= 40 ? "var(--warn)" : "var(--text-1)"} />
-            <AXKV k="48-HOUR" v={AXnum(e.formation.prob_48h_pct, 0) + "%"} tone="var(--text-1)" />
-            <AXKV wide k="COMPOSES WITH THE RATES BELOW HOW?" v="by the conditioning rule at the top of this panel — not by eye" tone="var(--warn)" />
+            <AXKV k="48-HOUR" v={AXpc0(e.formation.prob_48h_pct)} tone="var(--text-1)" />
+            <AXKV wide k="COMBINING IT WITH THE RATES BELOW" v="only by the conditioning rule at the top of this panel" tone="var(--warn)" />
           </div>
         </React.Fragment>
       )}
@@ -292,7 +320,7 @@ function AXEntry({ e, dense }) {
                 <th style={th}>Rate</th><th style={th}>95% interval</th><th style={th}>Weighted</th>
               </tr></thead>
               <tbody>
-                {AX_LADDER.map((L) => {
+                {AXladderRows(e.intensity).map((L) => {
                   const r = (e.intensity || {})[L.k];
                   return (
                     <tr key={L.k}>
@@ -322,13 +350,13 @@ function AXEntry({ e, dense }) {
               </tr></thead>
               <tbody>
                 {Object.keys(e.landfall || {}).sort().map((region) => (
-                  ["any", "hurricane"].map((contract) => {
+                  AXcontracts(e.landfall[region]).map((contract) => {
                     const r = (e.landfall[region] || {})[contract];
                     const u = unsc[region + ":" + contract];
                     return (
                       <tr key={region + ":" + contract}>
                         <td style={{ ...td, fontWeight: 700 }}>{contract === "any" ? region : ""}</td>
-                        <td style={{ ...td, color: "var(--text-2)" }}>{AX_CONTRACT[contract]}</td>
+                        <td style={{ ...td, color: "var(--text-2)" }}>{AX_CONTRACT[contract] || contract}</td>
                         <AXRateCells r={r} dense={dense} span={4} />
                         <td style={{ ...td, whiteSpace: "normal" }}>
                           {u ? (
@@ -347,20 +375,6 @@ function AXEntry({ e, dense }) {
               </tbody>
             </table>
           </div>
-          {Object.keys(unsc).length > 0 && (
-            <div style={{ marginTop: 6, padding: "8px 10px", border: "1px solid var(--neg)", borderRadius: 7 }}>
-              {Object.keys(unsc).sort().map((key) => (
-                <div key={key} style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--text-2)", marginBottom: 4 }}>
-                  <span style={{ color: "var(--neg)", fontWeight: 800 }}>{key.replace(":", " · ")} — {unsc[key].status}</span>
-                  <span> {unsc[key].reason}</span>
-                </div>
-              ))}
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--text-2)" }}>
-                {AXclaim("analogs.scoring").text}
-              </div>
-            </div>
-          )}
-
           {/* transit times */}
           {Object.keys(tte).length > 0 && (
             <React.Fragment>
@@ -372,9 +386,10 @@ function AXEntry({ e, dense }) {
                     <th style={th}>p25</th><th style={th}>median</th><th style={th}>p75</th><th style={th}>p90</th>
                   </tr></thead>
                   <tbody>
-                    {Object.keys(tte).sort().map((k) => {
+                    {AXtteOrder(tte).map((k) => {
                       const t = tte[k] || {};
-                      const label = k.indexOf("landfall_") === 0 ? "landfall · " + k.slice(9) : "to " + k.toUpperCase();
+                      const L = AX_LADDER.filter((x) => x.k === k)[0];
+                      const label = k.indexOf("landfall_") === 0 ? "landfall · " + k.slice(9) : "to " + (L ? L.label : k);
                       if (!t.n) {
                         return (
                           <tr key={k}>
@@ -407,7 +422,7 @@ function AXEntry({ e, dense }) {
           {/* the analogs themselves */}
           {(e.cases || []).length > 0 && (
             <React.Fragment>
-              <AXSubHead right={"closest " + e.cases.length + " of " + e.n_cases + " matched, nearest first"}>Closest analogs</AXSubHead>
+              <AXSubHead right={"closest " + e.cases.length + " of " + Math.max(e.cases.length, e.n_cases || 0) + " matched, nearest first"}>Closest analogs</AXSubHead>
               <div style={{ overflowX: "auto" }}>
                 <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 620 }}>
                   <thead><tr>
@@ -444,6 +459,24 @@ function AXEntry({ e, dense }) {
         </React.Fragment>
       )}
 
+      {/* Rule 4, outside the pool guard. `unscoreable` is counted over the WHOLE archive,
+          not over the matched cases, so an entry that matched nothing still carries it —
+          dropping it there would delete the one statement that says no skill number for
+          these contracts exists. */}
+      {Object.keys(unsc).length > 0 && (
+        <div style={{ marginTop: 6, padding: "8px 10px", border: "1px solid var(--neg)", borderRadius: 7 }}>
+          {Object.keys(unsc).sort().map((key) => (
+            <div key={key} style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--text-2)", marginBottom: 4 }}>
+              <span style={{ color: "var(--neg)", fontWeight: 800 }}>{key.replace(":", " · ")} — {unsc[key].status}</span>
+              <span> {unsc[key].reason}</span>
+            </div>
+          ))}
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--text-2)" }}>
+            {AXclaim("analogs.scoring").short || AXclaim("analogs.scoring").text}
+          </div>
+        </div>
+      )}
+
       {/* what the archive says it could not do for this entry */}
       {(e.gaps || []).length > 0 && (
         <React.Fragment>
@@ -477,7 +510,7 @@ function MT_AnalogPrior({ dense, narrow }) {
     return (
       <AXPanel title="Analog Prior — genesis-to-intensity archive"
         right={<AXBadge tone={st === "loading" ? "neutral" : "neg"}>{st === "loading" ? "READING" : "NO PAYLOAD"}</AXBadge>}
-        footer={<AXProv {...MTC.footer("panel.analogs")} />}>
+        footer={<AXProv {...MTC.footer("panel.analogs")} latency="payload not read" version="—" />}>
         <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, lineHeight: 1.6, color: "var(--text-2)" }}>
           {head.text}
           {window.__MT_ANALOGS_ERR && <div style={{ marginTop: 5, color: "var(--neg)" }}>{AX_URL} — {window.__MT_ANALOGS_ERR}</div>}
@@ -500,7 +533,7 @@ function MT_AnalogPrior({ dense, narrow }) {
     <AXPanel title="Analog Prior — genesis-to-intensity archive"
       right={<React.Fragment>
         <AXBadge tone="neutral">SNAPSHOT {(ax.archive && ax.archive.snapshot) || "—"}</AXBadge>
-        <AXBadge tone={entries.length ? "live" : "warn"} dot={entries.length > 0}>
+        <AXBadge tone={entries.length ? "neutral" : "warn"}>
           {nLive} SYSTEM{nLive === 1 ? "" : "S"} · {entries.length - nLive} AREA{entries.length - nLive === 1 ? "" : "S"}
         </AXBadge>
         <window.MT_Hint id="note.analogs" />
