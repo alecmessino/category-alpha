@@ -33,24 +33,50 @@ python3 scripts/genesis/cli.py backtest --basins EP --min-season 1971   # zero-p
 > made Hawaii landfall as a hurricane?*
 
 ```bash
-python3 scripts/genesis/cli.py analogs --lat 12 --lon -140 --radius 500 --months 8,9,10
+python3 scripts/genesis/cli.py analogs --lat 12 --lon -140 --radius 500 \
+        --months 8,9,10 --min-pool-season 1971 --regions hawaii
 ```
 
 ```
 ANALOGS  12.0N 140.0W  r=500 km  months=[8, 9, 10]
-  matched 26 storms   effective sample 19.5   SUFFICIENT
+  matched 24 storms   effective sample 18.2   SUFFICIENT
   intensity outcomes:
-    reached td      26/26   100.0%  [87-100%]
-    reached ts      19/26    73.1%  [54-86%]
-    reached cat1     9/26    34.6%  [19-54%]
-    reached cat2     3/26    11.5%  [4-29%]
-    reached cat3     3/26    11.5%  [4-29%]
-    reached cat4     3/26    11.5%  [4-29%]
-    reached cat5     0/26     0.0%  [0-13%]
-  time to ts: n=19  median 12 h  p25 6  p75 24
-  time to cat1: n=9  median 60 h  p25 36  p75 78
-  time to cat3: n=3  median 72 h  p25 45  p75 123
+    reached td      24/24   100.0%  [86-100%]
+    reached ts      17/24    70.8%  [51-85%]
+    reached cat1     8/24    33.3%  [18-53%]
+    reached cat2     2/24     8.3%  [2-26%]
+    reached cat3     2/24     8.3%  [2-26%]
+    reached cat4     2/24     8.3%  [2-26%]
+    reached cat5     0/24     0.0%  [0-14%]
+  landfalls:
+    hawaii       any   0/24   0.0% [0-14%]        >=64kt   0 0.0% [0-14%]
+  time to ts: n=17  median 18 h  p25 6  p75 24
+  time to cat1: n=8  median 66 h  p25 45  p75 82
+  time to cat3: n=2  median 123 h  p25 98  p75 148
 ```
+
+**The answer is zero, with an interval.** Of the 24 disturbances that formed within 500 km of
+12°N 140°W in August–October since 1971, 71% became tropical storms and 33% became hurricanes,
+but **none** made landfall in Hawaii — and the honest bound on that is 0–14%, not 0. A zero
+count is a result, so it is printed with its Wilson interval rather than omitted; "0 of 24" and
+"0 of 400" are the same rate and completely different evidence.
+
+Move the query to where Hawaii's one modern hurricane landfall actually came from and the rate
+becomes non-zero, which is the check that the zero above means something:
+
+```bash
+python3 scripts/genesis/cli.py analogs --lat 16 --lon -134 --radius 900 \
+        --months 7,8,9,10 --min-pool-season 1971 --regions hawaii
+```
+
+```
+  matched 65 storms
+    hawaii       any   2/65   3.1% [1-11%]        >=64kt   1 1.5% [0-8%]
+  time to landfall_hawaii: n=4  median 142 h  p25 140  p75 146
+```
+
+That single ≥64 kt case is **Iniki**, and the ~142 h median transit is the real travel time from
+the East Pacific genesis belt to the islands.
 
 Brackets are Wilson 95% intervals. Note how wide they are: 26 storms is a real sample for
 "does it become a hurricane" and a thin one for anything rarer. That is the point of printing

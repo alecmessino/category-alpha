@@ -7,6 +7,13 @@ IBTrACS-only storms, foreign best tracks, forecast track members from the a-deck
 Central Pacific, where the archive's immediate question is "which ISLAND" and no source
 publishes a per-island landfall flag at all.
 
+And the older record, which is the case that surprised this build. Counting 'L' records in
+hurdat2.nepac.txt by decade: 1950s 1, 1960s 0, 1970s 0, 1980s 4, 1990s 29, 2000s 30,
+2010s 47, 2020s 28. NHC did not systematically flag East Pacific landfalls until about
+1988. Forty years of Mexican landfalls are in the best track as positions and in the
+landfall column as nothing at all, so for those seasons this fallback is not a
+cross-check -- it is the only answer there is.
+
 THE TRAP THIS MODULE EXISTS TO AVOID, from docs/PLAN-TRACK-MODEL.md, from a real incident
 on this project: a 6-hourly track cannot tell a physical traverse from a CENTRE
 RELOCATION. Seven of nine "landfall" members in one live cycle crossed an island only
@@ -498,6 +505,36 @@ _INDEX_CACHE: dict[int, tuple] = {}
 _INDEX_CACHE_MAX = 8
 
 
+def _prepare(region, name, rings):
+    """One polygon in query form: wrapped-frame edge arrays plus a bounding box."""
+    ref_lon = float(np.asarray(rings[0])[0, 0])
+    prepared = []
+    for r in rings:
+        r = np.asarray(r, dtype=float)
+        x = _wrap180(r[:, 0] - ref_lon)
+        y = r[:, 1]
+        # GeoJSON rings repeat the first vertex last; np.roll over the closed ring would
+        # manufacture a zero-length edge -- harmless to the parity count, but it puts a
+        # 0/0 into every intersection denominator. Drop the duplicate so roll produces
+        # exactly the n real edges.
+        if x.size > 1 and x[0] == x[-1] and y[0] == y[-1]:
+            x = x[:-1]
+            y = y[:-1]
+        if x.size < 3:
+            continue
+        prepared.append((x, y, np.roll(x, -1), np.roll(y, -1)))
+    if not prepared:
+        return None
+    ox, oy = prepared[0][0], prepared[0][1]
+    return {
+        "region": region,
+        "name": name,
+        "ref_lon": ref_lon,
+        "rings": prepared,
+        "bbox": (float(ox.min()), float(oy.min()), float(ox.max()), float(oy.max())),
+    }
+
+
 def _index(regions):
     ident = id(regions)
     hit = _INDEX_CACHE.get(ident)
@@ -507,31 +544,9 @@ def _index(regions):
     polys = []
     for region in sorted(regions):
         for name, rings in regions[region]:
-            outer = rings[0]
-            ref_lon = float(outer[0, 0])
-            prepared = []
-            for r in rings:
-                x = _wrap180(r[:, 0] - ref_lon)
-                y = r[:, 1].astype(float)
-                # Rings from GeoJSON repeat the first vertex last; np.roll on the closed
-                # ring would create a zero-length edge, harmless but wasteful. Drop the
-                # duplicate so roll gives exactly the n real edges.
-                if x.size > 1 and x[0] == x[-1] and y[0] == y[-1]:
-                    x = x[:-1]
-                    y = y[:-1]
-                if x.size < 3:
-                    continue
-                prepared.append((x, y, np.roll(x, -1), np.roll(y, -1)))
-            if not prepared:
-                continue
-            ox, oy = prepared[0][0], prepared[0][1]
-            polys.append({
-                "region": region,
-                "name": name,
-                "ref_lon": ref_lon,
-                "rings": prepared,
-                "bbox": (float(ox.min()), float(oy.min()), float(ox.max()), float(oy.max())),
-            })
+            poly = _prepare(region, name, rings)
+            if poly is not None:
+                polys.append(poly)
 
     if len(_INDEX_CACHE) >= _INDEX_CACHE_MAX:
         _INDEX_CACHE.clear()
@@ -624,6 +639,19 @@ def crossings(track_points, regions, *, max_implied_speed_kt: float = 40.0) -> l
         those too. That one is correct, not a limitation.
       - a track whose FIRST point is already over land produces no event for it. There is
         no preceding leg, so there is no crossing to observe.
+
+    HOW TO FILTER ON suspect_relocation, measured rather than asserted. Run over all 1,262
+    HURDAT2 NE Pacific storms this returns 411 crossings, 22 of them flagged suspect -- and
+    15 of those 22 are `bracketing_fix` rows with closest_approach_km = 0. A published fix
+    was inside the polygon: the centre WAS over land, however fast the leg that got it
+    there. The flag describes the path, not the landfall. The relocation trap lives in the
+    other seven, so the filter that reproduces the incident from PLAN-TRACK-MODEL.md is
+
+        detection = 'segment_crossing' AND suspect_relocation
+
+    and closest_approach_km ranks what survives (measured over the same 411: median 9.2 km
+    for segment crossings, 90th percentile 47.3 km, worst 109.5 km -- that last one is a
+    straight line's opinion and nothing else).
     """
     pts = []
     for p in track_points:
@@ -931,25 +959,18 @@ def build_coastlines(out_dir=None, force: bool = False) -> tuple[list, list]:
         doc = {"type": "FeatureCollection", "provenance": provenance, "features": feats}
         path = out_dir / ("%s.geojson" % region)
         path.write_text(json.dumps(doc, separators=(",", ":"), ensure_ascii=False) + "\n")
-        written[region] = {"path": str(path), "bytes": path.stat().st_size,
+        # Repo-relative, not absolute: SOURCES.json is committed, and an absolute path
+        # records the build machine rather than the archive.
+        try:
+            shown = str(path.relative_to(ARCHIVE_DIR.parents[1]))
+        except ValueError:
+            shown = str(path)
+        written[region] = {"path": shown, "bytes": path.stat().st_size,
                            "polygons": len(feats), "vertices": nverts}
 
     # ---- hawaii: polygons from Natural Earth, names from USGS GNIS --------------------
-    hi_polys = [[np.asarray(r, dtype=float) for r in poly]
-                for poly in _polygons_of(hawaii[0]["geometry"])]
-    hi_index = [{"ref_lon": float(p[0][0, 0]),
-                 "bbox": None, "rings": None, "raw": p} for p in hi_polys]
-    for entry in hi_index:
-        prepared = []
-        for r in entry["raw"]:
-            x = _wrap180(r[:, 0] - entry["ref_lon"])
-            y = r[:, 1]
-            if x.size > 1 and x[0] == x[-1] and y[0] == y[-1]:
-                x, y = x[:-1], y[:-1]
-            prepared.append((x, y, np.roll(x, -1), np.roll(y, -1)))
-        entry["rings"] = prepared
-        entry["bbox"] = (float(prepared[0][0].min()), float(prepared[0][1].min()),
-                         float(prepared[0][0].max()), float(prepared[0][1].max()))
+    hi_polys = _polygons_of(hawaii[0]["geometry"])
+    hi_index = [_prepare("hawaii", None, poly) for poly in hi_polys]
 
     islands = [r for r in gnis_rows if r.get("feature_class") == "Island"
                and r.get("prim_lat_dec") and r.get("prim_long_dec")]
@@ -1001,7 +1022,7 @@ def build_coastlines(out_dir=None, force: bool = False) -> tuple[list, list]:
             url=SOURCES["gnis.DomesticNames_HI_Text.zip"]["url"]))
 
     _emit("hawaii",
-          [(names.get(k), [r.tolist() for r in p]) for k, p in enumerate(hi_polys)],
+          [(names.get(k), p) for k, p in enumerate(hi_polys)],
           {"geometry_source": ne_src,
            "geometry_selection": "admin='United States of America' AND name='Hawaii'; each "
                                  "polygon of the MultiPolygon emitted separately",

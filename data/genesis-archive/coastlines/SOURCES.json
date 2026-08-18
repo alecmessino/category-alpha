@@ -1,5 +1,5 @@
 {
-  "built_utc": "2026-08-18T00:29:58Z",
+  "built_utc": "2026-08-18T00:36:19Z",
   "processing_version": "1.0.0",
   "regions": {
     "hawaii": {
@@ -79,7 +79,7 @@
       "why": "Natural Earth's Hawaii feature is unnamed per polygon, and the USGS GNIS join leaves these Northwestern Hawaiian Islands either with no Island-class point inside the polygon or with more than one (Kure Atoll / Green Island share a polygon). No name was invented for them.",
       "impact": "A landfall on one of these uninhabited NWHI polygons is published with region='hawaii' and sub_region=NULL. All eight MAIN Hawaiian islands -- the ones the use case asks about -- are named.",
       "url": "https://prd-tnm.s3.amazonaws.com/StagedProducts/GeographicNames/DomesticNames/DomesticNames_HI_Text.zip",
-      "attempted_utc": "2026-08-18T00:30:02Z"
+      "attempted_utc": "2026-08-18T00:36:23Z"
     },
     {
       "key": "coastlines.mexico.unnamed_unit",
@@ -87,7 +87,7 @@
       "why": "Natural Earth admin_1 publishes one Mexican unit with name=null (adm1_code 'MEX+99?', iso_3166_2 'MX-X01~', area_sqkm 0) covering Arrecife Alacranes off Yucatan. The source assigns it to no state and this build does not assign one either.",
       "impact": "A landfall on that reef is published with region='mexico' and sub_region=NULL rather than a guessed state.",
       "url": "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/10m/cultural/ne_10m_admin_1_states_provinces.json",
-      "attempted_utc": "2026-08-18T00:30:02Z"
+      "attempted_utc": "2026-08-18T00:36:23Z"
     },
     {
       "key": "coastlines.land_union_edge",
@@ -95,7 +95,7 @@
       "why": "Crossings are transitions of the union of all loaded polygons, so an overland entry from a landmass that is NOT loaded (Canada -> Montana, Colombia -> Panama) has no preceding land state and reads as a coastline crossing. Great Lakes shorelines have the same shape of problem: Natural Earth state polygons end at the lake shore, so the lakes are water.",
       "impact": "Possible false landfall rows for a track that reaches the US from Canada overland or re-enters from a Great Lake. Neither is reachable in the EP/CP basins this archive was built for. HURDAT2's 'L' records remain primary.",
       "url": "",
-      "attempted_utc": "2026-08-18T00:30:02Z"
+      "attempted_utc": "2026-08-18T00:36:23Z"
     }
   ]
 }

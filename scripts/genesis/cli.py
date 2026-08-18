@@ -53,6 +53,7 @@ def cmd_analogs(args) -> int:
         season_months=[int(m) for m in args.months.split(",")] if args.months else None,
         env_vector=env, min_sample=args.min_sample,
         min_pool_season=args.min_pool_season,
+        regions=args.regions.split(',') if args.regions else None,
         archive_dir=_archive(args), as_of=args.as_of,
         basins=args.basins.split(",") if args.basins else None,
         subbasins=args.subbasins.split(",") if args.subbasins else None,
@@ -156,6 +157,7 @@ def main(argv=None) -> int:
     a.add_argument("--env", help='JSON, e.g. {"shear_kt":10,"sst_c":28}')
     a.add_argument("--min-sample", type=int, default=10)
     a.add_argument("--min-pool-season", type=int)
+    a.add_argument("--regions", help="always report these landfall regions, e.g. hawaii")
     a.add_argument("--as-of", help="zero-peek cut-off, ISO 8601")
     a.add_argument("--basins")
     a.add_argument("--subbasins")

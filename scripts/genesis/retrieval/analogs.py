@@ -261,11 +261,17 @@ class AnalogResult:
         if self.landfall:
             out.append("  landfalls:")
             for region, r in sorted(self.landfall.items()):
-                rate = "n/a" if r["any"]["rate"] is None else f"{100*r['any']['rate']:.1f}%"
-                hrate = ("n/a" if r["hurricane"]["rate"] is None
-                         else f"{100*r['hurricane']['rate']:.1f}%")
-                out.append(f"    {region:<16s} any {r['any']['count']:3d} ({rate})"
-                           f"   >=64kt {r['hurricane']['count']:3d} ({hrate})")
+                def _fmt(x):
+                    # A zero rate is only informative WITH its interval: "0 of 24" and
+                    # "0 of 400" are the same rate and completely different evidence.
+                    if x["rate"] is None:
+                        return "n/a"
+                    ci = (f" [{100*x['ci95'][0]:.0f}-{100*x['ci95'][1]:.0f}%]"
+                          if x.get("ci95") else "")
+                    return f"{100*x['rate']:.1f}%{ci}"
+                out.append(f"    {region:<12s} any {r['any']['count']:3d}/{r['any']['n_storms']:<4d}"
+                           f" {_fmt(r['any']):<18s}  >=64kt {r['hurricane']['count']:3d}"
+                           f" {_fmt(r['hurricane'])}")
         for k, v in self.time_to_event.items():
             if v and v.get("n"):
                 out.append(f"  time to {k}: n={v['n']}  median {v['median']:.0f} h"
@@ -320,6 +326,7 @@ def get_analogs(
     include_provisional: bool = False,
     env_require_match: bool = True,
     min_pool_season: int | None = None,
+    regions: list[str] | None = None,
     max_cases: int | None = None,
     track_density_deg: float = 2.0,
 ) -> AnalogResult:
@@ -521,9 +528,10 @@ def get_analogs(
     ess = (wsum * wsum / wsq) if wsq > 0 else 0.0
 
     # ---- 4. landfalls for the matched storms -----------------------------------------
-    lf_rows = [r for r in _rows("landfalls", base) if r.get("storm_id") in ids]
-    if not lf_rows and ids:
-        gaps.append("no landfall rows for the matched storms -- check the landfalls table")
+    all_lf = _rows("landfalls", base)
+    lf_rows = [r for r in all_lf if r.get("storm_id") in ids]
+    if not all_lf:
+        gaps.append("the landfalls table is empty -- landfall rates cannot be computed")
     by_storm: dict = {}
     for r in lf_rows:
         by_storm.setdefault(r["storm_id"], []).append(r)
@@ -557,9 +565,22 @@ def get_analogs(
         intensity[cat] = _rate(num, den, unknown, min_sample, wnum, wden).as_dict()
 
     # ---- 6. landfall rates by region -------------------------------------------------
-    regions = sorted({r.get("region") for r in lf_rows if r.get("region")})
+    # A ZERO IS AN ANSWER, NOT AN ABSENCE.
+    #
+    # Reporting only the regions that the matched storms actually hit means the headline
+    # question -- "what fraction made Hawaii landfall as a hurricane?" -- returns SILENCE when
+    # the honest answer is "none of them, and here is the interval around that". Regions the
+    # caller names are therefore always reported, with an explicit 0 and its Wilson bound,
+    # whether or not any analog reached them.
+    hit_regions = {r.get("region") for r in lf_rows if r.get("region")}
+    asked = set(regions or [])
+    known = {r.get("region") for r in all_lf if r.get("region")}
+    unknown_asked = sorted(asked - known)
+    if unknown_asked:
+        gaps.append(f"regions requested but absent from the landfalls table: {unknown_asked}")
+    report_regions = sorted(hit_regions | (asked & known))
     landfall = {}
-    for region in regions:
+    for region in report_regions:
         any_n = hur_n = 0
         w_any = w_hur = 0.0
         for c in cases:
@@ -587,7 +608,7 @@ def get_analogs(
         "cat1": dist([c.hours_to_cat1 for c in cases]),
         "cat3": dist([c.hours_to_cat3 for c in cases]),
     }
-    for region in regions:
+    for region in report_regions:
         hrs = []
         for c in cases:
             gt = _as_dt(c.genesis_utc)
@@ -625,7 +646,7 @@ def get_analogs(
                "season_months": season_months, "env_vector": env_vector,
                "as_of": as_of_dt.isoformat() if as_of_dt else None,
                "basins": basins, "subbasins": subbasins,
-               "genesis_subbasins": genesis_subbasins,
+               "genesis_subbasins": genesis_subbasins, "regions": regions,
                "include_provisional": include_provisional,
                "min_pool_season": min_pool_season},
         n_cases=n_cases,
