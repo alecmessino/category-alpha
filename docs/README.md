@@ -354,6 +354,33 @@ cd docs && python3 -m http.server 8099   # then open http://localhost:8099/
 ```
 (External feeds may show NO FEED locally depending on your network/CORS — that's the honest fallback.)
 
+## The genesis-to-intensity analog archive
+
+`docs/GENESIS-ARCHIVE.md` documents a second, separable product in this repository: a
+versioned archive of every tropical cyclone from first fix to last, with the environment it
+formed in, so a **live NHC area of interest can be matched to the historical cases most like
+it**. It answers the question the board could not — `docs/PLAN-TRACK-MODEL.md` was written
+during Lala precisely because `reachesHurricaneP` answers *how strong* and nothing answered
+*where* — and it answers it empirically rather than with a model:
+
+> Disturbances that formed within 500 km of 12°N 140°W in August–October — what fraction later
+> made Hawaii landfall as a hurricane?
+
+It shares this project's standard and enforces it with its own gate suite: nothing is
+interpolated or imputed, an interpolated best-track point may never establish a threshold
+crossing, a rate is refused below its sample gate, and the back-test replays under a zero-peek
+cut-off with the reference climatology restricted to storms already past.
+
+It is **Python** (`scripts/genesis/`, Parquet + DuckDB) rather than Node, because the archive
+is a columnar-analytics problem and the terminal is not. The two share no runtime; they share
+only the data-honesty rule.
+
+```bash
+pip install -r scripts/genesis/requirements.txt
+python3 scripts/genesis/cli.py analogs --lat 12 --lon -140 --radius 500 --months 8,9,10
+python3 scripts/genesis/cli.py gaps      # every data gap, with the measurement behind it
+```
+
 ## Calibration — has any of this ever been right?
 
 Every other section describes what the board does. This one describes whether it has

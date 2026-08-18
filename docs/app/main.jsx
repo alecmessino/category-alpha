@@ -226,7 +226,7 @@ function humanMin(m) {
 const TABS = [
   { id: "Situation", hint: "the edge book, then what changed" },
   { id: "Markets",   hint: "the full board, depth and sizing" },
-  { id: "Models",    hint: "fair value, posterior stack, audit trail" },
+  { id: "Models",    hint: "fair value, posterior stack, analog prior, audit trail" },
 ];
 function TabBar({ tab, setTab }) {
   return (
@@ -344,6 +344,17 @@ function MillibarTerminalApp() {
 
   const dense = false;   // one density; the switch was design-tool residue
   const [tab, setTab] = React.useState("Situation");
+  /* The analog payload is fetched by its own panel, not by the data loader, so this
+     component does not re-render when it lands. Without this the collapsed summary of
+     the Analog prior section keeps whatever count it read at mount — "0 system(s) and
+     area(s) matched" over a panel showing three. Resolve on the shared promise the panel
+     publishes and re-read it once. */
+  const [, setAnalogsRead] = React.useState(0);
+  React.useEffect(() => {
+    let alive = true;
+    if (window.__MT_ANALOGS_P) window.__MT_ANALOGS_P.then(() => { if (alive) setAnalogsRead((n) => n + 1); });
+    return () => { alive = false; };
+  }, [tab]);
   const panelGrid = narrow ? "1fr" : "1.5fr 1fr 1fr";
 
   React.useEffect(() => {
@@ -543,6 +554,17 @@ function MillibarTerminalApp() {
         </>)}
 
         {tab === "Models" && (<>
+        {/* 5a — the empirical prior. A separate archive answering the question the rest of
+            this tab cannot: for a system that formed HERE, in this season, in this
+            environment, what did the ones like it go on to do? Above fair value because it
+            is the base rate every anchor below it is a refinement of. */}
+        <window.MT_Section label="Analog prior" tier="genesis-to-intensity archive · empirical base rates, not a skill forecast"
+          defaultOpen summary={window.__MT_ANALOGS
+            ? (((window.__MT_ANALOGS.entries) || []).length + " system(s) and area(s) matched")
+            : "archive payload not read yet"}>
+          <window.MT_AnalogPrior dense={dense} narrow={narrow} />
+        </window.MT_Section>
+
         {/* 5b — fair value and the posterior stack behind every edge on screen */}
         <window.MT_Section label="Fair value" tier="term structure · posterior stack" defaultOpen summary="collapsed">
           <div className="mt-grid" style={{ display: "grid", gridTemplateColumns: narrow ? "1fr" : "minmax(0,1.5fr) minmax(0,1fr)", gap: gap, alignItems: "start" }}>
@@ -592,7 +614,7 @@ function MillibarTerminalApp() {
   // Order-independent boot: wait for the plain-script globals (live data, compute
   // engine, DS bundle) before first render. The async data-loader sets window.MT
   // when the fetch resolves, so poll until everything is present.
-  if (window.MT && window.MTX && window.CategoryAlphaDesignSystem_a835cf && window.MT_Evidence) {
+  if (window.MT && window.MTX && window.CategoryAlphaDesignSystem_a835cf && window.MT_Evidence && window.MT_AnalogPrior) {
     ReactDOM.createRoot(document.getElementById("root")).render(<MillibarTerminalApp />);
   } else {
     setTimeout(mount, 30);

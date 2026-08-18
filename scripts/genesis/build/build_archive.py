@@ -1,0 +1,478 @@
+"""Build the archive end to end, from official sources to Parquet tables plus a manifest.
+
+ORDER MATTERS AND IS NOT ARBITRARY:
+
+  1. IBTrACS      the spine -- storms and track_points. Every other table joins to storm_id.
+  2. derivation   storms' intensity summary and genesis_events, from the points just loaded.
+  3. SHIPS        the environment table, joined on ATCF id. SHIPS is keyed by ATCF id and
+                  IBTrACS carries USA_ATCF_ID, so the join is exact where both exist -- and
+                  where it does not exist the row is KEPT with storm_id NULL, because an
+                  unjoined environment record is a measurable gap and a dropped one is not.
+  4. GPI          computed over the environment rows, refusing where inputs are unconfirmed.
+  5. landfalls    HURDAT2's official 'L' records first; polygon crossings only as a fallback
+                  for coastlines NHC does not flag.
+  6. TWO          the pre-genesis and live disturbance log.
+
+EVERY STAGE IS OPTIONAL AND EVERY FAILURE IS A RECORDED GAP, NOT AN EXCEPTION. A build that
+cannot reach CIRA still produces a usable archive with no environment table and a manifest that
+says exactly why. The alternative -- a build that dies on a 403 -- means one unreachable host
+costs the whole archive, and it is precisely the archive you want on the day the network is bad.
+"""
+
+from __future__ import annotations
+
+import importlib
+import traceback
+from pathlib import Path
+
+from ..provenance import ARCHIVE_DIR, Gap, Manifest, PROCESSING_VERSION, fetch, _now
+from ..schema import category_for
+from ..store import append, snapshot, summary, write_table
+from .genesis_events import build_genesis_events, summarise_storms
+
+IBTRACS_BASE = ("https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate"
+                "-stewardship-ibtracs/v04r01/access/csv")
+SHIPS_BASE = "https://rammb-data.cira.colostate.edu/ships/data"
+SHIPS_FILES = {
+    "AL": "AL/lsdiaga_1982_2023_sat_ts_7day.txt",
+    "EP": "EP/lsdiage_1982_2023_sat_ts_7day.txt",
+    "CP": "CP/lsdiagc_1982_2023_sat_ts_7day.txt",
+}
+HURDAT2_INDEX = "https://www.nhc.noaa.gov/data/hurdat/"
+
+
+def _try(name: str, manifest: Manifest, fn, *, impact: str):
+    """Run a build stage; convert any failure into a recorded Gap and carry on."""
+    try:
+        return fn()
+    except Exception as exc:                                   # noqa: BLE001 -- deliberate
+        manifest.add_gap(Gap(
+            key=name, what=f"build stage '{name}' failed", why=f"{type(exc).__name__}: {exc}",
+            impact=impact))
+        print(f"  ! {name} FAILED: {type(exc).__name__}: {exc}")
+        traceback.print_exc()
+        return None
+
+
+def _crossing_class(c: dict, pts: list) -> dict:
+    """Saffir-Simpson class and the two threshold booleans for one coastline crossing.
+
+    WHY THIS IS NOT `category_for(c["vmax_kt"])`. On a `bracketing_fix` the crossing IS a
+    published fix and its wind is NOAA's, so the class is a pure function of official data and
+    deriving it invents nothing. On a `segment_crossing` the crossing falls BETWEEN two
+    published fixes and `geo.crossings` linearly interpolates the wind to get there. Reading a
+    discrete class off that interpolated number turns a smooth guess into a categorical
+    assertion the published record never makes -- and the assertion flips at a threshold.
+
+    Measured over the archive as built: 1,013 of 3,379 landfall rows are segment crossings; on
+    **79** of them the bracketing fixes fall in different Saffir-Simpson categories, and on
+    **21** they straddle 64 kt, which is to say the interpolation would be DECIDING whether the
+    row counts as a hurricane landfall. Doreen (1977, Mexico) interpolates to 63.3 kt between
+    published fixes of 65 and 58; Isis (1998) to 63.7 between 65 and 63. Those are coin flips
+    resolved by arithmetic, and the archive's rates are built on exactly this boolean.
+
+    The rule is therefore the one `geo.crossings` already documents for `stage`: take the
+    bracketing fixes' common answer when they agree, and NULL when they do not. A NULL here is
+    an UNKNOWN outcome, which `get_analogs` already handles correctly -- it leaves the
+    denominator and is counted on its own rather than scored as a negative.
+
+    The most consequential row this changes is INIKI (1992), Hawaii's costliest hurricane:
+    HURDAT2 does not flag it 'L' at all, and the crossing interpolates to 112.0 kt between
+    published fixes of 115 kt (Cat 4) and 108 kt (Cat 3) -- one knot below the Cat 4 line. Its
+    `category` becomes NULL. Its `hurricane_at_landfall` stays True, because both bracketing
+    fixes agree it was a hurricane; only the CLASS was ever in doubt. The wind itself stays on
+    the row, flagged by `detection`, because a clearly-labelled interpolation is useful and a
+    class silently derived from one is not.
+    """
+    v = c.get("vmax_kt")
+    if c.get("detection") == "bracketing_fix":
+        return {"category": category_for(v),
+                "hurricane": None if v is None else v >= 64,
+                "ts": None if v is None else v >= 34}
+
+    t = c.get("iso_time")
+    a = b = None
+    for i in range(len(pts) - 1):
+        if pts[i]["iso_time"] <= t <= pts[i + 1]["iso_time"]:
+            a, b = pts[i], pts[i + 1]
+            break
+    if a is None:
+        # No bracketing pair means nothing published constrains the class. Say nothing.
+        return {"category": None, "hurricane": None, "ts": None}
+
+    va, vb = a.get("vmax_kt"), b.get("vmax_kt")
+    if va is None or vb is None:
+        return {"category": None, "hurricane": None, "ts": None}
+    ca, cb = category_for(va), category_for(vb)
+    return {
+        "category": ca if ca == cb else None,
+        "hurricane": (va >= 64) if (va >= 64) == (vb >= 64) else None,
+        "ts": (va >= 34) if (va >= 34) == (vb >= 34) else None,
+    }
+
+
+def _mod(path: str):
+    """Import a source module, returning None if it has not been written yet."""
+    try:
+        return importlib.import_module(path)
+    except Exception:
+        return None
+
+
+def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
+          with_environment: bool = True, with_landfalls: bool = True,
+          with_two: bool = False, ships_basins: tuple = ("EP", "CP"),
+          verbose: bool = True) -> dict:
+    base = archive_dir or ARCHIVE_DIR
+    base.mkdir(parents=True, exist_ok=True)
+    m = Manifest()
+    say = print if verbose else (lambda *a, **k: None)
+
+    storms: list[dict] = []
+    points: list[dict] = []
+    seen_storms: set = set()
+    seen_points: set = set()
+
+    # ---- 1. IBTrACS ------------------------------------------------------------------
+    ibtracs = _mod("genesis.sources.ibtracs")
+    if ibtracs is None:
+        m.add_gap(Gap(key="ibtracs", what="IBTrACS loader missing",
+                      why="genesis.sources.ibtracs not importable",
+                      impact="no storms or track points -- the archive cannot be built"))
+    else:
+        for b in basins:
+            def _load(b=b):
+                key = f"ibtracs.{b}.csv"
+                url = f"{IBTRACS_BASE}/ibtracs.{b}.list.v04r01.csv"
+                path, rec = fetch(key, url, note=f"IBTrACS v04r01 basin file {b}")
+                m.add_source(rec)
+                s, p = ibtracs.build_tables(path, source_key=key)
+                say(f"  IBTrACS {b}: {len(s)} storms, {len(p)} points")
+                return s, p
+            got = _try(f"ibtracs.{b}", m, _load,
+                       impact=f"basin {b} absent from storms and track_points")
+            if got:
+                # DE-DUPLICATE ACROSS BASIN FILES. IBTrACS per-basin files are not disjoint:
+                # a storm is included in every basin it ever entered, so a dateline crosser
+                # appears in both the EP and WP files in full. Concatenating them would
+                # double-count that storm in every rate the archive publishes -- silently,
+                # because nothing about the output would look wrong.
+                for row in got[0]:
+                    if row["storm_id"] not in seen_storms:
+                        seen_storms.add(row["storm_id"])
+                        storms.append(row)
+                for row in got[1]:
+                    k = (row["storm_id"], row["iso_time"])
+                    if k not in seen_points:
+                        seen_points.add(k)
+                        points.append(row)
+
+    # ---- 2. derivation ---------------------------------------------------------------
+    if points:
+        summarise_storms(points, storms)
+        genesis = build_genesis_events(points, storms, source_key="derived:ibtracs")
+        say(f"  derived: {len(genesis)} genesis events")
+    else:
+        genesis = []
+
+    # ---- 3. environment (SHIPS) ------------------------------------------------------
+    environment: list[dict] = []
+    if with_environment:
+        ships = _mod("genesis.sources.ships_dev")
+        if ships is None:
+            m.add_gap(Gap(key="ships_dev", what="SHIPS parser missing",
+                          why="genesis.sources.ships_dev not importable",
+                          impact="environment table empty -- env_vector matching unavailable"))
+        else:
+            # exact join: SHIPS is keyed by ATCF id, IBTrACS carries USA_ATCF_ID
+            by_atcf = {s["atcf_id"]: s["storm_id"] for s in storms if s.get("atcf_id")}
+            unjoined = {"n": 0}
+
+            def storm_id_for(atcf_id, iso_time=None):
+                sid = by_atcf.get(atcf_id)
+                if sid is None:
+                    unjoined["n"] += 1
+                return sid
+
+            for b in ships_basins:
+                def _env(b=b):
+                    key = f"ships.{b}.txt"
+                    path, rec = fetch(key, f"{SHIPS_BASE}/{SHIPS_FILES[b]}",
+                                      note=f"SHIPS developmental data {b} 1982-2023")
+                    m.add_source(rec)
+                    rows = ships.environment_rows(path, source_key=key,
+                                                  storm_id_for=storm_id_for)
+                    say(f"  SHIPS {b}: {len(rows)} environment rows")
+                    return rows
+                got = _try(f"ships.{b}", m, _env,
+                           impact=f"no SHIPS environment for basin {b}")
+                if got:
+                    environment.extend(got)
+            if unjoined["n"]:
+                m.add_gap(Gap(
+                    key="ships_join", what="SHIPS records with no IBTrACS storm",
+                    why=(f"{unjoined['n']} SHIPS records carry an ATCF id absent from the loaded "
+                         "IBTrACS basins (a basin not loaded, or a storm IBTrACS did not adopt)"),
+                    impact="those environment rows have storm_id NULL and cannot be analog-matched"))
+
+    # The ERA5 gap belongs in the manifest whether or not any reanalysis row is extracted:
+    # the spec asked for ERA5, the archive does not have it, and a reader must be told that
+    # from the archive's own record rather than from a document beside it.
+    rean = _mod("genesis.sources.reanalysis")
+    if rean is not None and hasattr(rean, "gaps"):
+        try:
+            for g in rean.gaps():
+                m.add_gap(g)
+        except Exception as exc:                                # noqa: BLE001
+            m.add_gap(Gap(key="reanalysis_gaps", what="could not read reanalysis gap list",
+                          why=f"{type(exc).__name__}: {exc}",
+                          impact="the ERA5 substitution is undocumented in this manifest"))
+    else:
+        m.add_gap(Gap(
+            key="era5", what="ERA5 along-track extracts are not in this archive",
+            why=("ERA5 is unreachable from this environment: the Copernicus CDS API requires "
+                 "an API key that is not provisioned, and the AWS era5-pds mirror returns "
+                 "HTTP 403. genesis.sources.reanalysis is also not importable."),
+            impact=("environment rows come from SHIPS developmental data (1982-2023, AL/EP/CP); "
+                    "there is no reanalysis fallback for pre-genesis or post-2023 fields")))
+
+    # ---- 4. GPI ----------------------------------------------------------------------
+    gpi_mod = _mod("genesis.indices.gpi")
+    if gpi_mod is None:
+        m.add_gap(Gap(key="gpi", what="GPI module missing",
+                      why="genesis.indices.gpi not importable",
+                      impact="environment.gpi is NULL for every row"))
+    elif environment:
+        computed = refused = 0
+        for row in environment:
+            try:
+                val, method = gpi_mod.gpi_for_environment_row(row)
+            except Exception as exc:                            # noqa: BLE001
+                val, method = None, f"error: {type(exc).__name__}"
+            row["gpi"], row["gpi_method"] = val, method
+            if val is None:
+                refused += 1
+            else:
+                computed += 1
+        say(f"  GPI: {computed} computed, {refused} refused (missing/unconfirmed inputs)")
+        if refused:
+            m.add_gap(Gap(key="gpi_refused",
+                          what=f"GPI not computed for {refused} of {len(environment)} rows",
+                          why="a required input was missing or its unit scaling is unconfirmed",
+                          impact="those rows carry gpi NULL; see gpi_method for the reason"))
+
+    # ---- 5. landfalls ----------------------------------------------------------------
+    landfalls: list[dict] = []
+    if with_landfalls:
+        hurdat = _mod("genesis.sources.hurdat2")
+        geo = _mod("genesis.geo")
+        region_for = None
+        regions = None
+        if geo is not None:
+            def _regions():
+                return geo.load_regions()
+            regions = _try("coastlines", m, _regions,
+                           impact="landfalls cannot be attributed to a region")
+            if regions is not None:
+                region_for = make_region_attributor(geo, regions)
+        else:
+            m.add_gap(Gap(key="geo", what="coastline geometry missing",
+                          why="genesis.geo not importable",
+                          impact="landfalls unattributed and no polygon-crossing fallback"))
+
+        if hurdat is None:
+            m.add_gap(Gap(key="hurdat2", what="HURDAT2 parser missing",
+                          why="genesis.sources.hurdat2 not importable",
+                          impact="no official 'L'-record landfalls"))
+        else:
+            def _lf():
+                # BOTH basins. The Atlantic file carries 1,175 official 'L' records against the
+                # NE Pacific's 139, so fetching only the Pacific one -- as this did at first --
+                # silently drops nine tenths of NHC's own landfall designations while the table
+                # still looks populated.
+                out = []
+                for which, key in (("nepac", "hurdat2.nepac.txt"), ("atl", "hurdat2.atl.txt")):
+                    path, rec = fetch(key, _discover_hurdat2(which),
+                                      note=f"HURDAT2 {which} best track")
+                    m.add_source(rec)
+                    part = hurdat.landfall_rows(path, source_key=key, region_for=region_for)
+                    say(f"  HURDAT2 {which} landfalls: {len(part)}")
+                    out.extend(part)
+                return out
+            got = _try("hurdat2.landfalls", m, _lf,
+                       impact="landfalls table lacks official NHC 'L' records")
+            if got:
+                # Map ATCF ids onto IBTrACS storm ids so landfalls join the rest of the archive.
+                by_atcf = {s["atcf_id"]: s["storm_id"] for s in storms if s.get("atcf_id")}
+                known = {s["storm_id"] for s in storms}
+                kept = 0
+                for r in got:
+                    # The parser pre-populates storm_id with its own identifier, so testing
+                    # "is storm_id set" let unmapped rows through carrying an id that resolves
+                    # to nothing. Six such rows reached the table and the validator caught them
+                    # as a referential break. The join is authoritative: clear it, then set it.
+                    sid = by_atcf.get(r.get("atcf_id"))
+                    r["storm_id"] = sid if (sid in known) else None
+                    if r["storm_id"]:
+                        kept += 1
+                landfalls.extend([r for r in got if r.get("storm_id")])
+                if kept < len(got):
+                    m.add_gap(Gap(
+                        key="landfall_join",
+                        what=f"{len(got) - kept} HURDAT2 landfalls unjoined to IBTrACS",
+                        why="the storm's ATCF id is not present in the loaded IBTrACS basins",
+                        impact="those landfalls are absent from the archive"))
+
+        # polygon fallback for coastlines NHC does not flag with 'L'
+        if geo is not None and regions and points:
+            def _cross():
+                by_storm: dict = {}
+                stage_at: dict = {}
+                for p in points:
+                    by_storm.setdefault(p["storm_id"], []).append(p)
+                    stage_at[(p["storm_id"], p["iso_time"])] = p.get("stage")
+                have = {(r["storm_id"], r.get("region")) for r in landfalls}
+                out = []
+                now = _now()
+                for sid, pts in by_storm.items():
+                    pts = sorted(pts, key=lambda p: p["iso_time"])
+                    for c in geo.crossings(pts, regions):
+                        if (sid, c.get("region")) in have:
+                            continue          # NHC already flagged this one officially
+                        cls = _crossing_class(c, pts)
+                        out.append({
+                            "storm_id": sid,
+                            "atcf_id": next((s.get("atcf_id") for s in storms
+                                             if s["storm_id"] == sid), None),
+                            "season": next((s.get("season") for s in storms
+                                            if s["storm_id"] == sid), None),
+                            "region": c.get("region"), "sub_region": c.get("sub_region"),
+                            "landfall_utc": c.get("iso_time"), "lat": c.get("lat"),
+                            "lon": c.get("lon"), "vmax_kt": c.get("vmax_kt"),
+                            "mslp_mb": c.get("mslp_mb"),
+                            # `category` and the two threshold booleans come from
+                            # _crossing_class, NOT from the interpolated wind on the row. See
+                            # that function: on a segment crossing the wind is interpolated, so
+                            # a class read off it is an assertion the published record does not
+                            # make -- and 21 of these rows have bracketing fixes that straddle
+                            # 64 kt, where the interpolation would be DECIDING the contract.
+                            "category": cls["category"],
+                            # `stage` is NOT returned by geo.crossings -- c.get("stage") read a
+                            # key that never existed and silently produced NULL on every row.
+                            # For a bracketing_fix the crossing IS a published fix, so its
+                            # stage is looked up from the track by exact timestamp. For a
+                            # segment_crossing there is no published stage at that instant and
+                            # it stays NULL rather than being carried over from a neighbour.
+                            "stage": (stage_at.get((sid, c.get("iso_time")))
+                                      if c.get("detection") == "bracketing_fix" else None),
+                            "hurricane_at_landfall": cls["hurricane"],
+                            "ts_at_landfall": cls["ts"],
+                            "detection": c.get("detection"),
+                            "implied_speed_kt": c.get("implied_speed_kt"),
+                            "suspect_relocation": c.get("suspect_relocation"),
+                            "closest_approach_km": c.get("closest_approach_km"),
+                            "source_key": "derived:geo", "processing_version": PROCESSING_VERSION,
+                            "ingested_utc": now,
+                        })
+                say(f"  polygon-crossing landfalls (fallback): {len(out)}")
+                return out
+            got = _try("geo.crossings", m, _cross,
+                       impact="no polygon-derived landfalls beyond HURDAT2's 'L' records")
+            if got:
+                landfalls.extend(got)
+
+    # ---- 6. write --------------------------------------------------------------------
+    if storms:
+        write_table("storms", storms, base)
+        m.add_table("storms", rows=len(storms), path="storms.parquet",
+                    sources=[f"ibtracs.{b}.csv" for b in basins])
+    if points:
+        write_table("track_points", points, base)
+        m.add_table("track_points", rows=len(points), path="track_points.parquet",
+                    sources=[f"ibtracs.{b}.csv" for b in basins])
+    if genesis:
+        write_table("genesis_events", genesis, base)
+        m.add_table("genesis_events", rows=len(genesis), path="genesis_events.parquet",
+                    sources=[f"ibtracs.{b}.csv" for b in basins],
+                    note="derived: first tropical point + first threshold crossings")
+    if environment:
+        write_table("environment", environment, base)
+        m.add_table("environment", rows=len(environment), path="environment.parquet",
+                    sources=[f"ships.{b}.txt" for b in ships_basins],
+                    note="SHIPS developmental data; ERA5 unavailable -- see gaps")
+    if landfalls:
+        write_table("landfalls", landfalls, base)
+        m.add_table("landfalls", rows=len(landfalls), path="landfalls.parquet",
+                    sources=["hurdat2.nepac.txt", "coastlines"],
+                    note="HURDAT2 'L' records primary; polygon crossings fallback")
+
+    m.write(base)
+    snap = snapshot(base)
+    say(f"  manifest + snapshot {snap.name}")
+    return {"summary": summary(base), "gaps": [g.as_dict() for g in m.gaps],
+            "snapshot": str(snap)}
+
+
+def make_region_attributor(geo, regions, *, tol_km: float = 30.0):
+    """Build the callable that attributes a landfall point to a region.
+
+    WHY STRICT CONTAINMENT IS THE WRONG TEST HERE. A landfall is ON the coast by definition,
+    and the Natural Earth 10m polygons are eroded by roughly 5 km (measured by walking inland
+    from Miami: a point registers as CONUS only ~5 km from the shoreline). Requiring the point
+    to be strictly inside therefore discards exactly the rows that matter. Measured before this
+    existed: 726 of 1,305 official HURDAT2 'L' records -- 56% -- came out 'unattributed', and
+    they clustered on the Florida, Louisiana, Texas and Carolina coasts, which is to say they
+    were all obviously CONUS.
+
+    So: exact containment first, and failing that the nearest region within `tol_km`. Distance
+    is measured to polygon VERTICES, which over-estimates the true distance to the polygon
+    edge, so the test is conservative -- it can only fail to attribute, never over-reach. A
+    point that matches nothing stays unattributed rather than being assigned to whatever is
+    least far away: a landfall NOAA published is a fact whether or not this code can name the
+    coast it hit.
+    """
+    # Flatten once: (region, sub_region, [(lat, lon), ...]) so the nearest-vertex scan is
+    # a plain loop rather than a re-walk of the GeoJSON per point.
+    flat = []
+    for region, entries in regions.items():
+        for name, rings in entries:
+            pts = [(y, x) for ring in rings for (x, y) in ring]
+            if pts:
+                flat.append((region, name, pts))
+
+    def attribute(lat, lon):
+        hit = geo.point_region(lat, lon, regions)
+        if hit:
+            return hit
+        best = None
+        bestd = tol_km
+        for region, name, pts in flat:
+            # cheap bounding reject before the per-vertex distance
+            if not any(abs(y - lat) <= 1.0 and abs(x - lon) <= 1.0 for y, x in pts[::16]):
+                continue
+            for y, x in pts:
+                d = geo.distance_km(lat, lon, y, x)
+                if d < bestd:
+                    best, bestd = (region, name), d
+        return best
+
+    return attribute
+
+
+def _discover_hurdat2(which: str) -> str:
+    """Find the current HURDAT2 filename from NHC's directory index.
+
+    The filename carries its own revision date and changes every year -- hardcoding it means
+    the build silently rots each spring. Discovery is cheap and it fails loudly.
+    """
+    import re
+    import urllib.request
+
+    with urllib.request.urlopen(HURDAT2_INDEX, timeout=60) as r:
+        html = r.read().decode("utf-8", "replace")
+    pat = r"hurdat2-nepac-[0-9]{4}-[0-9]{4}-[0-9]{6,8}\.txt" if which == "nepac" \
+        else r"hurdat2-[0-9]{4}-[0-9]{4}-[0-9]{6,8}\.txt"
+    names = sorted(set(re.findall(pat, html)))
+    if not names:
+        raise RuntimeError(f"no HURDAT2 {which} file found in the NHC index")
+    return HURDAT2_INDEX + names[-1]       # lexically last == most recent revision

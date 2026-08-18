@@ -1,0 +1,188 @@
+{
+  "built_utc": "2026-08-18T05:18:57Z",
+  "gaps": [
+    {
+      "attempted_utc": "2026-08-18T05:18:29Z",
+      "impact": "those environment rows have storm_id NULL and cannot be analog-matched",
+      "key": "ships_join",
+      "url": "",
+      "what": "SHIPS records with no IBTrACS storm",
+      "why": "167 SHIPS records carry an ATCF id absent from the loaded IBTrACS basins (a basin not loaded, or a storm IBTrACS did not adopt)"
+    },
+    {
+      "attempted_utc": "2026-08-18T05:18:29Z",
+      "impact": "Every environment row this module emits is 2.5 degrees and 6-hourly instead of ERA5's 0.25 degrees and hourly -- roughly 100x coarser in area and 6x in time. A TC inner core is not resolved at all, the 'environment' is an average over a ~275 km cell, and the sampled cell can be up to ~140 km from the position requested. Genesis-scale features (a mesoscale vortex inside a tropical wave) are below the grid and simply absent. Do not compare these fields quantitatively with any ERA5-derived study.",
+      "key": "era5",
+      "url": "https://cds.climate.copernicus.eu/",
+      "what": "ERA5 is not in this archive at all; NCEP/NCAR Reanalysis 1 was substituted, and it is a coarser instrument",
+      "why": "Both published routes to ERA5 were tried from this environment and both refused. (1) Copernicus CDS: POST to https://cds.climate.copernicus.eu/api/retrieve/v1/processes/reanalysis-era5-pressure-levels/execution returns HTTP 401 {\"detail\":\"authentication required\"}; the API needs a personal access token and none is provisioned here (no ~/.cdsapirc, no CDSAPI_* in the environment). The public process listing returns HTTP 200 from the same host, so the network path is open and the missing thing is a credential. (2) The AWS Open Data mirror era5-pds returns HTTP 403 <Code>AccessDenied</Code> for both an object GET and a bucket listing."
+    },
+    {
+      "attempted_utc": "2026-08-18T05:18:29Z",
+      "impact": "rh_mid_pct is read at 600 hPa, the published level nearest the middle of the SHIPS 700-500 hPa layer, and it is a SINGLE LEVEL, not a layer mean and not a storm-relative annulus average -- it is not the same quantity as the ships_dev rows in the same column. Upper-level (250/200 hPa) moisture cannot be obtained from this source at all.",
+      "key": "ncep_r1",
+      "url": "https://psl.noaa.gov/thredds/dodsC/Datasets/ncep.reanalysis/pressure/rhum.2020.nc.dds",
+      "what": "rhum is published on FEWER levels than the winds: 8, not 17",
+      "why": "Verified against the live files for 2020: uwnd/vwnd/air/hgt carry level[17] = 1000 925 850 700 600 500 400 300 250 200 150 100 70 50 30 20 10, while rhum and shum carry only level[8] = 1000 925 850 700 600 500 400 300. There is no relative humidity above 300 hPa in this dataset."
+    },
+    {
+      "attempted_utc": "2026-08-18T05:18:29Z",
+      "impact": "These are environmental (monsoon-trough / ITCZ) values. A SHIPS Z850 is a 0-1000 km storm-relative average that retains the vortex, so the two are not interchangeable and pooling them across env_source would mix scales. Points on the first or last grid row get NULL rather than a one-sided difference.",
+      "key": "ncep_r1",
+      "url": "",
+      "what": "vort850_1e5 and div200_1e7 are ~550 km centred differences, not storm-scale fields",
+      "why": "The grid is 2.5 degrees, so the tightest centred difference available spans two cells: 5 degrees of longitude (~545 km at 12 N) and 5 degrees of latitude (~556 km). The spherical form used is zeta = (1/(a cos phi)) [dv/dlam - d(u cos phi)/dphi]."
+    },
+    {
+      "attempted_utc": "2026-08-18T05:18:29Z",
+      "impact": "Match ncep_r1 rows against ncep_r1 rows. Pooling env_source across a humidity comparison pools two columns that share only about 3 percent of their variance (r=+0.16); for shear, vorticity, divergence and temperature it pools related numbers carrying a scale offset; only u200_kt is close to interchangeable. These are magnitudes from n=150, not a calibration: at n=30 the humidity correlation alone ranges from -0.40 to +0.61 across random subsets, which is why no correction factor is published here -- fitting one and applying it to the archive would be manufacturing agreement the sources do not have.",
+      "key": "ncep_r1",
+      "url": "",
+      "what": "these columns are NOT drop-in replacements for the ships_dev columns of the same name, and the difference was MEASURED, not assumed",
+      "why": "150 SHIPS CP developmental records at tau=0, drawn at random from the 996 in the cached file, were run through environment_at() at the same lat, lon and time and compared column by column. Every difference below is stated in ONE direction, ncep_r1 minus ships_dev, as a median of the paired differences (which is not the difference of the two medians). shear_kt: SHIPS median 11.7 kt, ncep_r1 15.0 kt, median difference +4.4 kt, Pearson r=+0.66. vort850_1e5: 0.40 vs 2.07, +1.64, r=+0.49. rh_mid_pct: 55.5 vs 49.5 percent, -8.0, r=+0.16. u200_kt: -2.0 vs -2.1, +0.2, r=+0.88 -- the one column where the two sources nearly agree, because U200 is a plain gridded single-level wind in both. t200_c: -53.4 vs -51.8, +1.6, r=+0.66. tpw_mm: 59.8 vs 46.2, -11.9, r=+0.39, the SHIPS column being a 0-200 km storm-centred average and this one a single 2.5 degree cell. div200_1e7: 36.5 vs 53.7, +18.8, r=+0.47. Humidity is the weakest link of the set and the reason is structural: a 700-500 hPa layer average over a 200-800 km storm-relative annulus is not a single 600 hPa level in one 2.5 degree cell."
+    },
+    {
+      "attempted_utc": "2026-08-18T05:18:29Z",
+      "impact": "A query that pools mslp_env_mb across env_source is comparing ambient pressure with storm intensity. Filter on env_source.",
+      "key": "ncep_r1",
+      "url": "",
+      "what": "mslp_env_mb means something different here than it does on ships_dev rows",
+      "why": "Here it is the NCEP R1 grid-cell sea level pressure (DAS units 'Pascals', divided by 100), i.e. a genuine ambient pressure. On ships_dev rows the same column carries SHIPS MSLP, which that module documents as the storm's own minimum central pressure."
+    },
+    {
+      "attempted_utc": "2026-08-18T05:18:36Z",
+      "impact": "those landfalls are absent from the archive",
+      "key": "landfall_join",
+      "url": "",
+      "what": "9 HURDAT2 landfalls unjoined to IBTrACS",
+      "why": "the storm's ATCF id is not present in the loaded IBTrACS basins"
+    }
+  ],
+  "processing_version": "1.0.0",
+  "sources": [
+    {
+      "bytes": 46539726,
+      "downloaded_utc": "2026-08-18T05:18:13Z",
+      "key": "ibtracs.EP.csv",
+      "last_modified": null,
+      "note": "IBTrACS v04r01 basin file EP (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "2e9467ba4a4f12a86ecdcc3174c247903bd87a4e60dfc9ad550d3a7e0c066520",
+      "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.EP.list.v04r01.csv"
+    },
+    {
+      "bytes": 57120823,
+      "downloaded_utc": "2026-08-18T05:18:16Z",
+      "key": "ibtracs.NA.csv",
+      "last_modified": null,
+      "note": "IBTrACS v04r01 basin file NA (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "1b67895f53fdfd78742bd90a585f871b5d735638aed17b6b8e91ec0befb3fff7",
+      "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.NA.list.v04r01.csv"
+    },
+    {
+      "bytes": 438633202,
+      "downloaded_utc": "2026-08-18T05:18:22Z",
+      "key": "ships.EP.txt",
+      "last_modified": null,
+      "note": "SHIPS developmental data EP 1982-2023 (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "d71cc4eb8641c5f5cf3e7b3774075c64d258ed7d9b10c367867bc0379e374d3d",
+      "url": "https://rammb-data.cira.colostate.edu/ships/data/EP/lsdiage_1982_2023_sat_ts_7day.txt"
+    },
+    {
+      "bytes": 24938844,
+      "downloaded_utc": "2026-08-18T05:18:25Z",
+      "key": "ships.CP.txt",
+      "last_modified": null,
+      "note": "SHIPS developmental data CP 1982-2023 (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "443822caa9c2fb00540eb51a32ee85f9512cc43cb39c0fed374c0b228f30fe31",
+      "url": "https://rammb-data.cira.colostate.edu/ships/data/CP/lsdiagc_1982_2023_sat_ts_7day.txt"
+    },
+    {
+      "bytes": 358758792,
+      "downloaded_utc": "2026-08-18T05:18:26Z",
+      "key": "ships.AL.txt",
+      "last_modified": null,
+      "note": "SHIPS developmental data AL 1982-2023 (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "3fef6609f633f55f5f95114b88d69dd0b6f76f35264a6ce833de128ed99847c7",
+      "url": "https://rammb-data.cira.colostate.edu/ships/data/AL/lsdiaga_1982_2023_sat_ts_7day.txt"
+    },
+    {
+      "bytes": 4083231,
+      "downloaded_utc": "2026-08-18T05:18:30Z",
+      "key": "hurdat2.nepac.txt",
+      "last_modified": null,
+      "note": "HURDAT2 nepac best track (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "db65f8bc538d5c05e15f738c96111861d6ce3572c007879de58e44d4d05a9cd6",
+      "url": "https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2025-02272026.txt"
+    },
+    {
+      "bytes": 7082381,
+      "downloaded_utc": "2026-08-18T05:18:31Z",
+      "key": "hurdat2.atl.txt",
+      "last_modified": null,
+      "note": "HURDAT2 atl best track (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "1b9b0c7beed5b4505838658b1d30e159fc84330c60891a58cfcf43ae55c37202",
+      "url": "https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2025-02272026.txt"
+    }
+  ],
+  "started_utc": "2026-08-18T05:18:13Z",
+  "tables": {
+    "environment": {
+      "note": "SHIPS developmental data; ERA5 unavailable -- see gaps",
+      "path": "environment.parquet",
+      "processing_version": "1.0.0",
+      "rows": 32842,
+      "sources": [
+        "ships.EP.txt",
+        "ships.CP.txt",
+        "ships.AL.txt"
+      ]
+    },
+    "genesis_events": {
+      "note": "derived: first tropical point + first threshold crossings",
+      "path": "genesis_events.parquet",
+      "processing_version": "1.0.0",
+      "rows": 3959,
+      "sources": [
+        "ibtracs.EP.csv",
+        "ibtracs.NA.csv"
+      ]
+    },
+    "landfalls": {
+      "note": "HURDAT2 'L' records primary; polygon crossings fallback",
+      "path": "landfalls.parquet",
+      "processing_version": "1.0.0",
+      "rows": 3379,
+      "sources": [
+        "hurdat2.nepac.txt",
+        "coastlines"
+      ]
+    },
+    "storms": {
+      "note": "",
+      "path": "storms.parquet",
+      "processing_version": "1.0.0",
+      "rows": 3959,
+      "sources": [
+        "ibtracs.EP.csv",
+        "ibtracs.NA.csv"
+      ]
+    },
+    "track_points": {
+      "note": "",
+      "path": "track_points.parquet",
+      "processing_version": "1.0.0",
+      "rows": 224153,
+      "sources": [
+        "ibtracs.EP.csv",
+        "ibtracs.NA.csv"
+      ]
+    }
+  }
+}
