@@ -149,3 +149,19 @@ jobs:
       # state this branch would deploy still satisfy priorities 1 and 2?
       - name: Coverage gate — priorities 1 and 2 on the committed snapshot
         run: node scripts/check-intel-coverage.mjs
+
+      # The genesis-analog archive is Python, and its gates are not tests of plumbing: they
+      # assert the four properties that, if they broke, would let it publish a confident wrong
+      # number without crashing — an interpolated value becoming an observation, a rate
+      # surviving a sample that cannot support it, the zero-peek gate letting the future in,
+      # and an unknown outcome being scored as a negative one.
+      - name: Set up Python for the genesis archive
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install the genesis archive's pinned dependencies
+        run: pip install -r scripts/genesis/requirements.txt
+
+      - name: Test the genesis archive's honesty rules
+        run: python3 scripts/genesis/tests/run_tests.py
