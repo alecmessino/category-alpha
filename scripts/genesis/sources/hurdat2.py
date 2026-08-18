@@ -260,6 +260,16 @@ detectable (storm_id == atcf_id means "not yet joined"). `build_archive` re-poin
 storm_id through storms.atcf_id and records a Gap for any landfall it cannot join.
 A consumer reading these rows directly must do the same join or accept an ATCF key.
 
+THAT JOIN LOSES SIX OFFICIAL LANDFALLS, MEASURED. 104 of the 107 landfalling storms
+match an IBTrACS storm 1:1 by ATCF id. The three that do not are the Central-America
+crossers of TRAP 4 -- EP222016 OTTO, EP042022 BONNIE, EP182022 JULIA -- which IBTrACS
+files under their ATLANTIC ids (AL162016, AL022022, AL132022) because it reconciles the
+whole system into one storm. Their 6 'L' records (Nicaragua, Colombia, El Salvador)
+therefore have no EP-file counterpart to join to and are dropped by the ATCF-keyed join,
+with a Gap recorded. Recovering them needs the Atlantic IBTrACS basin loaded, not a
+change here: this module reports what NHC published, and NHC published them under EP
+numbers.
+
 -----------------------------------------------------------------------------------
 CROSS-CHECK POLICY
 -----------------------------------------------------------------------------------
@@ -282,6 +292,58 @@ POINT COUNTS ALWAYS DIFFER AND THAT IS STRUCTURAL, NOT AN ERROR. IBTrACS publish
 count difference is still returned, because it is the number a reader needs to know
 before comparing anything per-point between the two, but it is reported under its own
 field name so it can be filtered out in one predicate.
+
+-----------------------------------------------------------------------------------
+WHAT THE CROSS-CHECK ACTUALLY FOUND, RUN ON THE SHIPPED FILES
+-----------------------------------------------------------------------------------
+1,262 HURDAT2 storms against the 1,712 storms of ibtracs.EP.csv; 1,251 ATCF ids match.
+`crosscheck()` returned 1,655 rows:
+
+    value_mismatch      1,215      of which 1,184 differ ONLY in point count
+    only_in_ibtracs       393      351 WP ids, 21 AL, 18 EP, 3 CP -- see scoping note
+    ambiguous_atcf_id      35
+    only_in_hurdat         11
+    ibtracs_no_atcf_id      1      covering 33 IBTrACS storms with a blank USA_ATCF_ID
+
+    peak_vmax_kt differs        6 storms
+    genesis_utc differs        26 storms (3 h to 42 h apart; 17 of them within 6 h)
+    season differs              0 storms
+
+SIX WIND DISAGREEMENTS, AND NOT ONE OF THEM IS THE TWO AGENCIES CONTRADICTING EACH
+OTHER ABOUT THE SAME OCEAN. Four are SCOPE: IBTrACS's lifetime maximum runs over the
+whole reconciled track while the NE Pacific HURDAT2 file stops at the basin edge.
+
+    EP071986 GEORGETTE  hurdat 35 kt / ibtracs 65 kt   ibtracs track: 52 EP + 67 WP fixes
+    EP112010 ELEVEN     hurdat 30 kt / ibtracs 60 kt   13 EP + 40 NA (it became HERMINE)
+    CP051997 PAKA       hurdat 160 kt / ibtracs 158 kt 68 EP + 127 WP
+    CP011957 DELLA      hurdat 110 kt / ibtracs 120 kt
+    CP022002 ELE        hurdat 110 kt / ibtracs 115 kt
+    CP041997 (unnamed)  hurdat 30 kt / ibtracs 35 kt
+
+PAKA also shows the averaging-period trap `ibtracs` documents: 158 kt is not a multiple
+of 5 because it is a converted non-US-agency wind, and it is a 10-minute wind sitting
+beside CPHC's 1-minute 160. THE CROSS-CHECK DOES NOT CONVERT AND DOES NOT PICK. It says
+they differ, which is the true statement; anything sharper would be manufactured.
+
+The remaining three (DELLA, ELE, unnamed 1997) are genuine best-track differences in the
+Central Pacific, 5-10 kt, on storms both agencies tracked in full. Those are the real
+uncertainty in a Hawaii intensity climatology, and they are 3 storms out of 1,251.
+
+SCOPING NOTE -- `only_in_ibtracs` IS ABOUT THE CALLER'S BASIN FILTER, NOT ABOUT NHC.
+The IBTrACS "EP" file contains WP and NA storms (a third of its rows), so handing
+`crosscheck()` every storm in it reports 393 ids the NE Pacific HURDAT2 file never
+claimed to contain. Scoping the IBTrACS side to EP-genesis storms drops that to 41 and
+leaves the other buckets untouched. Scope the two sides to the same population before
+reading `only_in_ibtracs` as a HURDAT2 omission.
+
+AMBIGUOUS IDS ARE AN IBTrACS PROPERTY, AND THEY MATTER BEYOND THIS FUNCTION. 35 ATCF
+ids map to TWO IBTrACS storms each, all in early seasons: EP011969 is both 1969156N11263
+(unnamed) and 1969183N13269 AVA; EP011976 is both ANNETTE and an unnamed 5-fix track.
+ATCF ids were not a unique key before the modern numbering, so any
+`{s['atcf_id']: s['storm_id']}` dictionary built over IBTrACS silently keeps whichever
+storm was iterated last. None of the 107 landfalling storms is among those 35 (measured),
+so today's landfall join is unaffected -- but the collision is real and this is the
+function that can see it, which is why it is returned rather than resolved.
 
 PURE PARSER -- no network, no clock at import time, no I/O outside the path handed in.
 """
@@ -560,9 +622,11 @@ def _finish(header: dict, points: list[dict], lineno: int | None) -> dict:
     claimed = header.pop("claimed_lines", None)
     if claimed is not None and claimed != len(points):
         raise ValueError(
-            "hurdat2: %s header claims %d data lines, %d parsed (near line %s). "
+            "hurdat2: %s header claims %d data lines, %d parsed (%s). "
             "The parse desynchronised; refusing to emit a track that may belong to "
-            "another storm." % (header["atcf_id"], claimed, len(points), lineno))
+            "another storm."
+            % (header["atcf_id"], claimed, len(points),
+               "near line %d" % lineno if lineno else "at end of file"))
     header["points"] = points
     return header
 
@@ -578,7 +642,9 @@ def genesis_fix(storm: dict) -> dict | None:
     compares two answers to the same question. HURDAT2 has no 'G' record to read this
     off (TRAP 2), and the file's own non-tropical codes (LO 3,407 / DB 332 / EX 165 /
     SS 9 / SD 8 / WV 5 rows) are exactly the pre- and post-tropical phases that must not
-    be mistaken for genesis.
+    be mistaken for genesis. Measured: 0 of the 1,262 storms in the NE Pacific file lack
+    a tropical fix, so None is a defence against other basins and future issues rather
+    than a case this file exercises.
     """
     for p in storm.get("points") or ():
         if (p.get("status") or "") in TROPICAL_STATUS:

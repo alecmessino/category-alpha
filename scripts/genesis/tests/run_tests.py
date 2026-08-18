@@ -208,6 +208,55 @@ def test_analog_rules():
     eq("far-away query matches nothing", res5.n_cases, 0)
 
 
+def test_env_unknown_is_not_a_match():
+    """An unknown environment must never rank as a perfect environmental match.
+
+    Seeds 12 storms of which 6 have an environment record and 6 have none. Under an
+    env_vector, the 6 without one cannot be established as similar to anything, so they must
+    not out-rank the ones that were actually measured.
+    """
+    base = Path(tempfile.mkdtemp())
+    prov = dict(source_key="t", processing_version=PROCESSING_VERSION,
+                ingested_utc="2026-01-01T00:00:00Z")
+    storms, genesis, env = [], [], []
+    for i in range(12):
+        sid = f"E{i:02d}"
+        gt = datetime(1990 + i, 9, 1, tzinfo=UTC)
+        storms.append(dict(storm_id=sid, atcf_id=f"EP{i:02d}", basin="EP", season=1990 + i,
+                           name=sid, genesis_utc=gt, genesis_lat=12.0, genesis_lon=-140.0,
+                           max_vmax_kt=70.0, provisional=False, **prov))
+        genesis.append(dict(storm_id=sid, atcf_id=f"EP{i:02d}", basin="EP", season=1990 + i,
+                            genesis_utc=gt, genesis_lat=12.0, genesis_lon=-140.0,
+                            peak_vmax_kt=70.0, pregenesis_source="none", **prov))
+        if i < 6:      # only half have an environment
+            env.append(dict(storm_id=sid, iso_time=gt, atcf_id=f"EP{i:02d}", lat=12.0,
+                            lon=-140.0, env_source="ships_dev", shear_kt=5.0 + i,
+                            rh_mid_pct=60.0, sst_c=28.0, lead_hours=0.0, **prov))
+    store.write_table("storms", storms, base)
+    store.write_table("genesis_events", genesis, base)
+    store.write_table("environment", env, base)
+
+    plain = get_analogs(lat=12.0, lon=-140.0, radius_km=300, min_sample=1, archive_dir=base)
+    eq("env: without an env_vector every positional analog is kept", plain.n_cases, 12)
+    eq("env: and none are excluded", plain.env_unmatched_excluded, 0)
+
+    cond = get_analogs(lat=12.0, lon=-140.0, radius_km=300, min_sample=1, archive_dir=base,
+                       env_vector={"shear_kt": 5.0, "rh_mid_pct": 60.0, "sst_c": 28.0})
+    eq("env: cases with no environment are excluded from an env-conditioned query",
+       cond.n_cases, 6)
+    eq("env: and the exclusion is counted", cond.env_unmatched_excluded, 6)
+    check("env: every surviving case actually compared a field",
+          all(c.env_fields_compared > 0 for c in cond.cases))
+    check("env: the exclusion is reported as a gap",
+          any("EXCLUDED" in g for g in cond.gaps), str(cond.gaps))
+
+    keep = get_analogs(lat=12.0, lon=-140.0, radius_km=300, min_sample=1, archive_dir=base,
+                       env_vector={"shear_kt": 5.0}, env_require_match=False)
+    eq("env: the old behaviour is available explicitly", keep.n_cases, 12)
+    check("env: and it says the similarity is UNKNOWN rather than established",
+          any("UNKNOWN" in g for g in keep.gaps), str(keep.gaps))
+
+
 def test_subbasin_semantics():
     """The Iniki trap: a Hawaii question must not be filtered on the GENESIS subbasin.
 
@@ -351,7 +400,7 @@ def test_gtwo_reader():
 
 def main() -> int:
     for fn in (test_categories, test_geometry, test_genesis_rules, test_analog_rules,
-               test_subbasin_semantics, test_scoring_rules, test_contract_resolution,
+               test_subbasin_semantics, test_env_unknown_is_not_a_match, test_scoring_rules, test_contract_resolution,
                test_store_and_schema, test_gtwo_reader):
         print(f"\n{fn.__name__}")
         fn()

@@ -222,6 +222,7 @@ class RateResult:
 class AnalogResult:
     query: dict
     n_cases: int
+    env_unmatched_excluded: int
     effective_sample_size: float
     sufficient: bool
     min_sample: int
@@ -317,6 +318,7 @@ def get_analogs(
     genesis_subbasins: list[str] | None = None,
     exclude_storm_ids: set | None = None,
     include_provisional: bool = False,
+    env_require_match: bool = True,
     max_cases: int | None = None,
     track_density_deg: float = 2.0,
 ) -> AnalogResult:
@@ -451,6 +453,38 @@ def get_analogs(
                           for k, v in ENV_FIELDS.items()} if env_by_storm.get(sid) else {}),
         ))
 
+    # AN UNKNOWN ENVIRONMENT IS NOT A PERFECT MATCH.
+    #
+    # A case with no archived environment near its genesis has env_fields_compared == 0. Left
+    # at weight 1.0 it does not merely survive an environment-conditioned query -- it WINS it,
+    # ranking above every case whose environment was actually measured and found similar, and
+    # then dominating the weighted rate. Measured here before the fix: a deliberately hostile
+    # env_vector returned the four highest-weighted analogs all with fields=0, i.e. the answer
+    # to "which storms formed in an environment like this one" was four storms whose
+    # environment is unknown. That is the exact failure this archive exists to refuse.
+    #
+    # So when an env_vector is supplied, cases that cannot be compared are EXCLUDED and
+    # counted, and the count is reported as a gap. Pass env_require_match=False to keep the
+    # older behaviour deliberately, in which case they are kept at a neutral weight and the
+    # gap says so.
+    env_unmatched = 0
+    if env_vector:
+        unmatched = [c for c in cases if c.env_fields_compared == 0]
+        env_unmatched = len(unmatched)
+        if env_unmatched:
+            if env_require_match:
+                cases = [c for c in cases if c.env_fields_compared > 0]
+                gaps.append(
+                    f"{env_unmatched} of {env_unmatched + len(cases)} positional analogs have "
+                    "no archived environment within 12h of genesis and were EXCLUDED from this "
+                    "environment-conditioned query (SHIPS begins 1982 and ends 2023). Pass "
+                    "env_require_match=False to keep them at a neutral weight instead.")
+            else:
+                gaps.append(
+                    f"{env_unmatched} analogs have no archived environment and are kept at a "
+                    "neutral weight (env_require_match=False): their similarity to the supplied "
+                    "env_vector is UNKNOWN, not established.")
+
     cases.sort(key=lambda c: -c.weight)
     if max_cases:
         cases = cases[:max_cases]
@@ -568,6 +602,7 @@ def get_analogs(
                "genesis_subbasins": genesis_subbasins,
                "include_provisional": include_provisional},
         n_cases=n_cases,
+        env_unmatched_excluded=env_unmatched,
         effective_sample_size=ess,
         sufficient=n_cases >= min_sample,
         min_sample=min_sample,
