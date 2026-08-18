@@ -72,6 +72,8 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
 
     storms: list[dict] = []
     points: list[dict] = []
+    seen_storms: set = set()
+    seen_points: set = set()
 
     # ---- 1. IBTrACS ------------------------------------------------------------------
     ibtracs = _mod("genesis.sources.ibtracs")
@@ -92,8 +94,20 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
             got = _try(f"ibtracs.{b}", m, _load,
                        impact=f"basin {b} absent from storms and track_points")
             if got:
-                storms.extend(got[0])
-                points.extend(got[1])
+                # DE-DUPLICATE ACROSS BASIN FILES. IBTrACS per-basin files are not disjoint:
+                # a storm is included in every basin it ever entered, so a dateline crosser
+                # appears in both the EP and WP files in full. Concatenating them would
+                # double-count that storm in every rate the archive publishes -- silently,
+                # because nothing about the output would look wrong.
+                for row in got[0]:
+                    if row["storm_id"] not in seen_storms:
+                        seen_storms.add(row["storm_id"])
+                        storms.append(row)
+                for row in got[1]:
+                    k = (row["storm_id"], row["iso_time"])
+                    if k not in seen_points:
+                        seen_points.add(k)
+                        points.append(row)
 
     # ---- 2. derivation ---------------------------------------------------------------
     if points:
