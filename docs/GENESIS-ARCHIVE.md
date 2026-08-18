@@ -703,8 +703,10 @@ statement of the problem, not a solution to it.
 
 ## The daily pipeline
 
-`.github/workflows/genesis-archive.yml` runs four times a day, shortly after NHC's 06/12/18/00Z
-outlook issuances. It:
+`.github/workflows/genesis-archive.yml` runs four times a day, on `cron: "20 5,11,17,23 * * *"`,
+which targets the 05/11/17/23Z block the live graphical outlook is actually transmitted in — see
+**Measured timing** below, which corrects an earlier claim in this file that the target was
+06/12/18/00Z. It:
 
 1. pulls the graphical outlook (positions + probabilities) and the text outlook (narrative)
 2. appends every area to `daily_disturbances` — **append-only**: every issuance is a row, even
@@ -718,8 +720,49 @@ outlook issuances. It:
    board describes the disturbances this run just observed
 7. re-snapshots the archive
 
-The gate suite (`scripts/genesis/tests/run_tests.py`, 149 checks) runs **before** any data
+The gate suite (`scripts/genesis/tests/run_tests.py`, 162 checks) runs **before** any data
 commit, so a parser that has started inventing data cannot write a row.
+
+### Measured timing, and a correction
+
+**A previous version of this file, and the comment in the workflow, said the cron fires "shortly
+after NHC's 06/12/18/00Z outlook issuances". That is wrong about the hours, and the error made
+the cron look 40 minutes early when it is not.** The archive's own `issuance_utc` column settles
+it, which is the point of carrying that column.
+
+There are two populations in `daily_disturbances.issuance_utc` and they must not be pooled:
+
+| population | what stamps it | issuance times seen |
+|---|---|---|
+| backfill (`backfill_two.py`) | the archived **text** product's nominal hour | exactly 00/06/12/18Z |
+| live daily ingest | the **graphical** product's own transmission stamp, carried in `source_key` as `gtwo:YYYYMMDDHHMM` | 23:31Z, 05:21Z, 11:42Z |
+
+The live graphical outlook lands in the 05/11/17/23Z block, drifting by tens of minutes — the
+three consecutive issuances observed so far were 5 h 50 m and 6 h 21 m apart, not a fixed 6 h.
+So `20 5,11,17,23` is aimed at the right hours. **Retargeting it to `20 0,6,12,18` — the "fix"
+that the wrong-hours reading appeared to call for — would make every run roughly 5 h 50 m stale
+instead of minutes.**
+
+What has actually been measured, from the first scheduled fire (run `32133281007`, 2026-08-18):
+
+| quantity | value | n |
+|---|---|---|
+| scheduler lag, this workflow | nominal 11:20Z → started 11:45:06Z = **25 min 06 s** | 1 |
+| scheduler lag band, sibling `refresh-data.yml` | 9–43 min | 30 |
+| ingest staleness, scheduled run | issued 11:42Z, fetched 11:45Z = **3.3 min** | 1 |
+| ingest staleness, off-cadence manual run | issued 05:21Z, fetched 05:23Z = **2.6 min** | 1 |
+| ingest staleness, a run deliberately off-block | issued 23:31Z, fetched 04:29Z = **4 h 58 m** | 1 |
+
+**The margin is thin and it is not yet characterised.** The run catches a fresh outlook only
+because the scheduler lag exceeds that cycle's issuance offset. On 2026-08-18 the 11:42Z issuance
+sat 22 minutes past the 11:20 cron, and the observed 25-minute lag cleared it by 3 minutes — but
+a 9-minute lag, well inside the measured band, would have fired at 11:29 and picked up the 05:21Z
+outlook, 6 h 08 m stale. The offset varies per cycle (+1 min at 05:21, +22 min at 11:42, +11 min
+at 23:31), so both terms drift.
+
+That is a question for accumulated observations, not for a same-day edit: one scheduled fire is
+n=1. The cron is deliberately unchanged pending more samples, and the column that answers it is
+already being written on every row.
 
 ## The terminal panel
 
@@ -819,7 +862,7 @@ scripts/genesis/
   retrieval/analogs.py get_analogs()
   backtest/            contracts, scoring, zero-peek harness
   tests/
-    run_tests.py       the gate: 149 checks, runs before any data commit
+    run_tests.py       the gate: 162 checks, runs before any data commit
     validate_archive.py  a report, not a gate - official data is allowed to look wrong
 docs/
   GENESIS-ARCHIVE.md   this file
