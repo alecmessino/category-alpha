@@ -68,6 +68,18 @@ jobs:
       - name: Regenerate the terminal's Analog Prior payload
         run: python3 scripts/genesis/cli.py emit
 
+      # The Storm Atlas reads the archive directly in the browser, so it needs the archive as
+      # column packs rather than as Parquet. Rebuilt here, after the ingest, for the same
+      # reason the panel payload is.
+      #
+      # Each file is rewritten only when its CONTENT changes -- the pack carries a hash of the
+      # tables it was built from instead of a build timestamp, so an unchanged archive produces
+      # byte-identical output. That matters at this cadence: this job runs four times a day,
+      # and a timestamp in the header would put a fresh megabyte of track binary into git on
+      # every run for no change at all.
+      - name: Rebuild the Storm Atlas packs
+        run: python3 scripts/genesis/cli.py atlas-pack
+
       # Reports rather than gates: official best-track data legitimately contains values
       # that look wrong, and refusing to commit because NOAA published something surprising
       # would make the archive less faithful. The findings land in the job log where a human
@@ -80,7 +92,7 @@ jobs:
         run: |
           git config user.name  "genesis-archive-bot"
           git config user.email "genesis-archive-bot@users.noreply.github.com"
-          git add data/genesis-archive docs/data/analogs.json
+          git add data/genesis-archive docs/data/analogs.json docs/storm-atlas/data
           if git diff --cached --quiet; then
             echo "no archive change"
             exit 0

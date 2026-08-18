@@ -416,6 +416,16 @@ function MillibarTerminalApp() {
         </div>
       )}
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>
+        {/* The historical surface. A LINK, not a panel: the Storm Atlas is a separate document
+            with its own runtime, so this board loads none of its 1.9 MB of archive and none of
+            its bundle. The trailing slash matters — there is no 404 fallback, and Pages serves
+            a directory only when it is asked for one. */}
+        <a href="storm-atlas/" title="Storm Atlas — the historical record, queried"
+          style={{ color: "var(--text-2)", textDecoration: "none", letterSpacing: ".6px",
+                   border: "1px solid var(--border-strong)", borderRadius: 5, padding: "2px 7px" }}>
+          STORM ATLAS ›
+        </a>
+        <span style={{ opacity: .4 }}>·</span>
         <span title={MT._generatedAt || ""} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: staleMin == null ? "var(--warn)" : staleMin <= 25 ? "var(--pos)" : staleMin <= 75 ? "var(--warn)" : "var(--neg)" }} />
           {MT._generatedAt ? "updated " + (fmtAgo(MT._generatedAt) || "—") : "awaiting refresh"}
