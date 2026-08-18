@@ -207,6 +207,25 @@ function AXEntry({ e, dense }) {
   const tte = e.time_to_event || {};
   const th = AXth(dense), td = AXtd(dense);
 
+  /* Rule 4. `unscoreable` is counted over the WHOLE archive rather than over the matched
+     cases (contract_event_counts in retrieval/analogs.py), so an entry that matched nothing
+     still carries it — and an empty pool must not swallow the one statement saying no skill
+     number for these contracts exists. Rendered under the landfall table when there is one,
+     and under the no-analogs state when there is not. */
+  const unscBlock = Object.keys(unsc).length > 0 ? (
+    <div style={{ marginTop: 6, padding: "8px 10px", border: "1px solid var(--neg)", borderRadius: 7 }}>
+      {Object.keys(unsc).sort().map((key) => (
+        <div key={key} style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--text-2)", marginBottom: 4 }}>
+          <span style={{ color: "var(--neg)", fontWeight: 800 }}>{key.replace(":", " · ")} — {unsc[key].status}</span>
+          <span> {unsc[key].reason}</span>
+        </div>
+      ))}
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--text-2)" }}>
+        {AXclaim("analogs.scoring").short || AXclaim("analogs.scoring").text}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <section style={{ border: "1px solid var(--border-strong)", borderLeft: "3px solid " + (live ? "var(--accent)" : "var(--warn)"),
       borderRadius: "var(--radius-md)", background: "var(--surface-card)", padding: dense ? "10px 12px" : "12px 14px", marginBottom: 12, minWidth: 0 }}>
@@ -308,6 +327,7 @@ function AXEntry({ e, dense }) {
           Nothing in the archive formed within {AXnum(q.radius_km, 0)} km of {pos.text || "this position"} in {AXmonths(q.season_months)}
           {" "}from season {q.min_pool_season == null ? "—" : q.min_pool_season} on. No rate is published for any outcome, and none is
           shown here: an empty pool is a result, not a zero.
+          {unscBlock}
         </div>
       ) : (
         <React.Fragment>
@@ -375,6 +395,8 @@ function AXEntry({ e, dense }) {
               </tbody>
             </table>
           </div>
+          {unscBlock}
+
           {/* transit times */}
           {Object.keys(tte).length > 0 && (
             <React.Fragment>
@@ -457,24 +479,6 @@ function AXEntry({ e, dense }) {
             </React.Fragment>
           )}
         </React.Fragment>
-      )}
-
-      {/* Rule 4, outside the pool guard. `unscoreable` is counted over the WHOLE archive,
-          not over the matched cases, so an entry that matched nothing still carries it —
-          dropping it there would delete the one statement that says no skill number for
-          these contracts exists. */}
-      {Object.keys(unsc).length > 0 && (
-        <div style={{ marginTop: 6, padding: "8px 10px", border: "1px solid var(--neg)", borderRadius: 7 }}>
-          {Object.keys(unsc).sort().map((key) => (
-            <div key={key} style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--text-2)", marginBottom: 4 }}>
-              <span style={{ color: "var(--neg)", fontWeight: 800 }}>{key.replace(":", " · ")} — {unsc[key].status}</span>
-              <span> {unsc[key].reason}</span>
-            </div>
-          ))}
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--text-2)" }}>
-            {AXclaim("analogs.scoring").short || AXclaim("analogs.scoring").text}
-          </div>
-        </div>
       )}
 
       {/* what the archive says it could not do for this entry */}

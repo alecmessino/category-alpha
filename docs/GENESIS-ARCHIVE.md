@@ -24,6 +24,9 @@ python3 scripts/genesis/cli.py build --basins EP --ships-basins EP,CP   # build 
 python3 scripts/genesis/cli.py summary                                  # row counts
 python3 scripts/genesis/cli.py gaps                                     # what is missing, and why
 python3 scripts/genesis/cli.py daily                                    # ingest today's outlook
+python3 scripts/genesis/cli.py live --list                              # systems SHIPS is running on
+python3 scripts/genesis/cli.py live --atcf CP012026                     # one system, conditioned on its environment
+python3 scripts/genesis/cli.py emit                                     # regenerate the terminal payload
 python3 scripts/genesis/cli.py backtest --basins EP --min-season 1971   # zero-peek replay
 ```
 
@@ -50,9 +53,14 @@ ANALOGS  12.0N 140.0W  r=500 km  months=[8, 9, 10]
     reached cat5     0/24     0.0%  [0-14%]
   landfalls:
     hawaii       any   0/24   0.0% [0-14%]        >=64kt   0 0.0% [0-14%]
+      ! hawaii >=64kt: BASE RATE ONLY -- unscoreable (2 event(s) archive-wide, 10 needed). No skill number exists for this.
   time to ts: n=17  median 18 h  p25 6  p75 24
   time to cat1: n=8  median 66 h  p25 45  p75 82
   time to cat3: n=2  median 123 h  p25 98  p75 148
+  CONDITIONING: these are GENESIS-CONDITIONED rates -- they assume a tropical cyclone forms.
+    To combine with a formation probability (e.g. NHC's outlook chance), multiply:
+      P(reaches X) = P(forms) x P(reaches X | forms).  Landfall does NOT decompose that way
+      and is counted jointly here, never as a product of two marginals.
 ```
 
 **The answer is zero, with an interval.** Of the 24 disturbances that formed within 500 km of
@@ -678,10 +686,81 @@ outlook issuances. It:
    issuances; the rule that fired is recorded per row in `source_key`
 4. resolves an area to `developed` when an active storm appears near it, or `dissipated` after
    5 days unmentioned
-5. re-snapshots the archive
+5. captures the operational SHIPS environment for every active system (see **Live conditioning**)
+6. regenerates `docs/data/analogs.json`, the terminal's payload, *after* the ingest, so the
+   board describes the disturbances this run just observed
+7. re-snapshots the archive
 
-The gate suite (`scripts/genesis/tests/run_tests.py`, 95 checks) runs **before** any data
+The gate suite (`scripts/genesis/tests/run_tests.py`, 149 checks) runs **before** any data
 commit, so a parser that has started inventing data cannot write a row.
+
+## The terminal panel
+
+`scripts/genesis/emit_panel.py` writes `docs/data/analogs.json`; `docs/app/analogs.jsx` renders
+it as **Analog prior**, the first section of the board's Models tab. The panel is a renderer
+and nothing else: every number on it is a field of the payload, and the payload is a call to
+`get_analogs`. Nothing is recomputed in the browser, so there is no second implementation of
+any rate to drift from this one.
+
+### What each entry carries
+
+One entry per live system and per open outlook area:
+
+| field | what it is |
+|---|---|
+| `position` / `current_position` | the position matched on, and — for a tracked storm — the current position that was **not** queried |
+| `n_cases`, `effective_sample_size`, `min_sample` | matched storms, Kish ESS, and the gate |
+| `intensity`, `landfall`, `time_to_event` | per-threshold counts, rates, Wilson intervals, weighted rates, transit-time percentiles |
+| `unscoreable` | per contract: the reason the archive will not produce a skill number |
+| `environment` | the live vector, its source, and the product-mismatch caveat |
+| `formation` | NHC's own published 48-hour and 7-day chance, as published |
+| `gaps` | what this particular query could not answer |
+
+### Four rules the panel is built to keep
+
+1. **No bare percentage.** Every rate is rendered as `count / denominator`, the percent, and
+   its 95% Wilson interval **in the same row**. The weighted rate sits in that same row, with a
+   footnote saying the archive publishes no interval for it and the interval to read is the
+   unweighted one.
+2. **A refused rate prints the refusal.** Where `rate` is null the row keeps its counts and
+   spans the remaining columns with `RATE REFUSED` and the archive's own reason — never `0.0%`.
+3. **An unscoreable contract prints `BASE RATE ONLY`.** No skill number for Hawaii hurricane
+   landfall appears on the panel, because none exists anywhere in this repository to display.
+4. **The conditioning note is reproduced verbatim**, and every entry says which position was
+   matched. An empty pool renders as `NO ANALOGS — 0 STORMS MATCHED`, not as a zero rate.
+
+The claim registry (`docs/app/claims.js`, owner `genesis`) owns the wording of all four, so a
+capability written as a string literal inside the component fails `scripts/audit-claims.mjs`.
+
+### Verification
+
+The rules above are asserted against a rendered DOM rather than read out of the source, because
+a rule that only lives in source is a rule nobody enforced.
+
+```bash
+npm i --no-save playwright && npx playwright install chromium
+node scripts/check-panel-dom.mjs
+```
+
+It serves `docs/` to a real Chromium **twice**: once against the committed payload, and once
+against `scripts/fixtures/analogs-edge.json`, which carries a refused rate, a zero-analog pool
+and a null environment. The second run is not optional — the live payload frequently contains
+none of those (as of writing all three of its entries clear `min_sample`), so a check that only
+ever sees live data leaves every refusal path unexercised and reports green. Each run asserts
+the counts, the intervals, the refusal cells, the `BASE RATE ONLY` badge, the verbatim
+conditioning note, that the `BASE RATE ONLY` statement survives inside a **zero-analog** entry,
+and that the section's collapsed summary matches the payload it is summarising. Any page error
+fails it.
+
+It is **not** in `.github/workflows/checks.yml`. That job's header promises it is entirely
+offline; this one needs a browser binary it would have to download. Run it by hand after
+touching `docs/app/analogs.jsx`, `docs/app/claims.js` or `scripts/genesis/emit_panel.py`.
+
+The check has been made to fail on purpose: deleting the interval from the rate row turns both
+runs red on `a Wilson interval`, which is the only evidence that it is testing the screen and
+not itself.
+
+---
 
 ---
 
@@ -691,12 +770,15 @@ commit, so a parser that has started inventing data cannot write a row.
 scripts/genesis/
   provenance.py        fetch + sha256 + Manifest + Gap; gaps are first-class output
   schema.py            the six pyarrow schemas, thresholds, category_for()
-  store.py             Parquet + DuckDB views + dated snapshot manifests
+  store.py             Parquet + DuckDB views + per-run snapshot manifests
   geo.py               coastline polygons, point-in-polygon, crossing detection
-  cli.py               build / analogs / backtest / daily / summary / gaps
+  live.py              live query: which position, which environment, and which it used
+  emit_panel.py        get_analogs -> docs/data/analogs.json, the terminal's payload
+  cli.py               build / analogs / backtest / live / daily / emit / summary / gaps
   sources/
     ibtracs.py         IBTrACS v4 -> storms + track_points
-    ships_dev.py       SHIPS developmental -> environment
+    ships_dev.py       SHIPS developmental -> environment (the archive's history)
+    ships_rt.py        SHIPS operational -> environment (today, for live conditioning)
     hurdat2.py         HURDAT2 -> official 'L' landfalls + IBTrACS cross-check
     two_archive.py     NHC Tropical Weather Outlook text -> pre-genesis
     gtwo.py            NHC graphical outlook -> disturbance POSITIONS
@@ -706,8 +788,16 @@ scripts/genesis/
     build_archive.py   the orchestrator; every stage failure becomes a recorded gap
     genesis_events.py  stage transitions and time-to-event
     daily.py           the daily ingest
+    backfill_two.py    the archived outlook backfill, one-to-one thread resolution
   retrieval/analogs.py get_analogs()
   backtest/            contracts, scoring, zero-peek harness
-  tests/run_tests.py   the gate
+  tests/
+    run_tests.py       the gate: 149 checks, runs before any data commit
+    validate_archive.py  a report, not a gate - official data is allowed to look wrong
+docs/
+  GENESIS-ARCHIVE.md   this file
+  data/analogs.json    the emitted payload the board reads same-origin
+  app/analogs.jsx      the Analog prior panel
+  app/claims.js        the claim registry that owns its wording (owner `genesis`)
 data/genesis-archive/  the tables, MANIFEST.json, snapshots/, coastlines/
 ```
