@@ -117,6 +117,22 @@ The landfall question does **not** decompose that way — see
 Note also that several of these analogs reached Cat 3+ and none reached Hawaii: systems forming
 at that longitude tend to track west, south of the islands.
 
+### The one way to hold this wrong
+
+`get_analogs` matches on **where a storm formed**, not where it is now. Querying an active
+storm's current position returns nothing useful and can return nothing at all — Tropical Storm
+Lala at 20.4°N 164.3°W on 2026-08-17 matches **0 analogs** in a 400 km radius, because almost
+nothing *forms* that far north and west; storms arrive there.
+
+```
+  matched 0 storms   effective sample 0.0   BELOW MIN SAMPLE -- rates refused
+```
+
+That is the correct answer to the question actually asked, and it is the wrong question. For a
+storm already underway, query the position where it **formed**; for an outlook area, query the
+area's own position, which is what the graphical product publishes. The CLI exits non-zero when
+a query matches nothing, so a script cannot mistake an empty result for a confident zero.
+
 In Python:
 
 ```python
