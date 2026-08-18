@@ -28,6 +28,16 @@ from dataclasses import dataclass, asdict
 MIN_STORMS_FOR_SCORE = 10
 MIN_STORMS_FOR_RELIABILITY = 30
 
+# A RARE CONTRACT NEEDS EVENTS, NOT JUST STORMS.
+# The storm gate above asks "did enough storms get a forecast"; it says nothing about whether
+# the thing being forecast ever happened. Measured on this archive: the Hawaii any-landfall
+# contract had 847 forecast storms and SIX events, and reported a tidy-looking skill of -3.3%
+# that is entirely noise. The Hawaii hurricane-landfall contract had ONE event in 1,039
+# replays, and the model refused to forecast that one because its analog pool was below
+# min_sample -- leaving ZERO scoreable events and a Brier score of 0.0000 that means only
+# "predict never, be right every time".
+MIN_EVENTS_FOR_SKILL = 10
+
 
 @dataclass
 class Prediction:
@@ -115,11 +125,28 @@ def score_contract(preds: list[Prediction], *, min_storms: int = MIN_STORMS_FOR_
 
     model_pairs = [(p.p, p.outcome) for p in usable]
     clim_pairs = [(p.p_climatology, p.outcome) for p in usable if p.p_climatology is not None]
-    result["base_rate"] = sum(1 for _, o in model_pairs if o) / len(model_pairs)
+    n_events = sum(1 for _, o in model_pairs if o)
+    result["n_events"] = n_events
+    result["base_rate"] = n_events / len(model_pairs)
     result["brier"] = brier(model_pairs)
     result["brier_climatology"] = brier(clim_pairs) if clim_pairs else None
-    result["skill_vs_climatology"] = skill(result["brier"], result["brier_climatology"])
     result["scored"] = True
+
+    # A SKILL SCORE ON A CONTRACT WHOSE EVENT NEVER HAPPENED IS NOT A SKILL SCORE.
+    # With zero positives both Brier scores collapse toward zero and their ratio explodes:
+    # the Hawaii hurricane-landfall contract printed "skill -2988.3%" off two numbers that
+    # were each 0.0000 to four places. That reads as a catastrophic result and actually means
+    # the event did not occur in the sample. The counts are still published -- "0 of 847" is
+    # the useful fact -- but the ratio is refused.
+    if n_events < MIN_EVENTS_FOR_SKILL:
+        result["skill_vs_climatology"] = None
+        result["skill_refused_reason"] = (
+            f"{n_events} event(s) in this sample of {len(model_pairs)} forecasts over "
+            f"{n_storms} storms, below the {MIN_EVENTS_FOR_SKILL} required. A Brier ratio over "
+            "a handful of events is noise, and over zero events it only rewards predicting "
+            "'never'. Counts are published; the ratio is refused.")
+    else:
+        result["skill_vs_climatology"] = skill(result["brier"], result["brier_climatology"])
     if n_storms >= MIN_STORMS_FOR_RELIABILITY:
         result["reliability"] = reliability(model_pairs)
     else:

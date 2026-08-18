@@ -196,11 +196,29 @@ def run_genesis_backtest(
         "n_storms_skipped_burn_in": skipped_burn_in,
         "contracts": {c.key: c.question for c in contracts},
         "scores": scores,
-        "predictions": {k: [p.as_dict() for p in v] for k, v in preds.items()},
     }
     if out_path:
-        Path(out_path).parent.mkdir(parents=True, exist_ok=True)
-        Path(out_path).write_text(json.dumps(report, indent=2, sort_keys=True, default=str) + "\n")
+        # THE LEDGER GOES TO PARQUET, NOT INTO THE JSON.
+        # Every prediction is worth keeping -- a skill number nobody can audit is a rumour --
+        # but 10,390 of them inline is a 3.35 MB JSON blob, and re-running the back-test would
+        # add a fresh copy of it to git history each time. The scores stay in the JSON where a
+        # human reads them; the ledger goes beside the other tables in the format the rest of
+        # the archive already uses, where it costs about a tenth as much and is queryable.
+        out_path = Path(out_path)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        ledger = [p.as_dict() for v in preds.values() for p in v]
+        ledger_path = out_path.with_name(out_path.stem + "-ledger.parquet")
+        try:
+            import pyarrow as pa
+            import pyarrow.parquet as pq
+            cols = ["storm_id", "contract", "made_utc", "p", "p_climatology", "outcome",
+                    "n_analogs", "ess", "refused_reason"]
+            tbl = pa.table({c: [r.get(c) for r in ledger] for c in cols})
+            pq.write_table(tbl, ledger_path, compression="zstd")
+            report["ledger"] = {"path": ledger_path.name, "rows": len(ledger)}
+        except Exception as exc:                                # noqa: BLE001
+            report["ledger"] = {"error": f"{type(exc).__name__}: {exc}", "rows": len(ledger)}
+        out_path.write_text(json.dumps(report, indent=2, sort_keys=True, default=str) + "\n")
     return report
 
 

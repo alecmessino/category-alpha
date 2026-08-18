@@ -421,6 +421,47 @@ already tells you: 89% of East Pacific depressions reach 34 kt, so there is very
 to predict. Discrimination is real but modest. Storms whose analog pool fell below
 `min_sample` were **refused**, not answered from a handful of cases.
 
+### Landfall contracts, and the one that cannot be scored at all
+
+```
+  landfall_mexico_any          storms  847  base 0.169  Brier 0.1158  clim 0.1413  skill +18.0%
+  landfall_mexico_hurricane    storms  847  base 0.067  Brier 0.0600  clim 0.0633  skill  +5.2%
+  landfall_hawaii_any          storms  847  events 6    NO SKILL SCORE -- below the 10 required
+  landfall_hawaii_hurricane    storms  847  events 0    NO SKILL SCORE -- below the 10 required
+  landfall_conus_any           storms  847  events 1    NO SKILL SCORE -- below the 10 required
+```
+
+**Mexico landfall is where the analog method is strongest** — +18.0% against a zero-peek
+climatology, on 143 scoreable events. Genesis position genuinely tells you whether an East
+Pacific storm ends up on the Mexican coast.
+
+**The Hawaii hurricane-landfall contract cannot be scored, and that is the most important
+result here.** In 1,039 replayed storms there is exactly **one** Hawaii hurricane landfall —
+Iniki — and the model *refused to forecast it*, because Iniki's analog pool held only 8 storms,
+below `min_sample`. So the contract has **zero scoreable events**. Its Brier score is 0.0000,
+which sounds excellent and means only "predict never, and be right every time".
+
+That drove a gate this harness now enforces: a skill ratio requires **at least 10 events**, not
+merely 10 storms. Before it, the Hawaii any-landfall contract reported a tidy `-3.3%` off six
+events, and the hurricane contract reported `-2988%` off a ratio between two numbers that were
+both 0.0000 to four places.
+
+So, plainly: **this archive can give you an empirical Hawaii landfall base rate, and it cannot
+give you a validated Hawaii landfall model.** The modern record contains one event. Any product
+quoting a calibrated Hawaii hurricane-landfall probability is extrapolating beyond what the
+record can support, and should say so.
+
+| contract | events | refused by min_sample | scoreable |
+|---|---|---|---|
+| reaches TS | 895 | 138 | 757 |
+| reaches Cat 1 | 486 | 59 | 427 |
+| reaches Cat 3 | 240 | 26 | 214 |
+| reaches Cat 4 | 159 | 11 | 148 |
+| Mexico landfall (any) | 161 | 18 | **143** |
+| Mexico landfall (≥64 kt) | 61 | 4 | **57** |
+| Hawaii landfall (any) | 8 | 2 | 6 |
+| **Hawaii landfall (≥64 kt)** | **1** | **1** | **0** |
+
 ### `min_pool_season`, and why the default record is not the best record
 
 The first run of this back-test showed the Cat 3 contract **systematically underconfident in

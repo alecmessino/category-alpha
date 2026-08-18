@@ -387,6 +387,28 @@ def test_scoring_rules():
     check("scoring: scores once the sample is real", s3["scored"])
     check("scoring: reliability appears at >=30 storms", s3["reliability"] is not None)
 
+    # A RARE CONTRACT NEEDS EVENTS, NOT JUST STORMS. 847 forecasts and 6 events is noise;
+    # 847 forecasts and 0 events only rewards predicting "never".
+    rare = [Prediction(storm_id=f"r{i}", contract="landfall", made_utc="t", p=0.01,
+                       p_climatology=0.01, outcome=(i < 3)) for i in range(200)]
+    s_rare = score_contract(rare)
+    check("scoring: a 200-storm sample with 3 events publishes counts", s_rare["scored"])
+    eq("scoring: ...but refuses the skill ratio", s_rare["skill_vs_climatology"], None)
+    check("scoring: and says why", "below the" in (s_rare.get("skill_refused_reason") or ""))
+    eq("scoring: the event count is published", s_rare["n_events"], 3)
+
+    never = [Prediction(storm_id=f"n{i}", contract="landfall", made_utc="t", p=0.0,
+                        p_climatology=0.0, outcome=False) for i in range(200)]
+    s_never = score_contract(never)
+    eq("scoring: an event that never happened yields no skill score",
+       s_never["skill_vs_climatology"], None)
+    eq("scoring: ...and a Brier of 0 is not reported as success", s_never["n_events"], 0)
+
+    enough = [Prediction(storm_id=f"e{i}", contract="landfall", made_utc="t", p=0.1,
+                         p_climatology=0.08, outcome=(i < 15)) for i in range(200)]
+    check("scoring: 15 events clears the event gate",
+          score_contract(enough)["skill_vs_climatology"] is not None)
+
     # RULE 4: an unresolvable outcome is excluded, not counted as a miss.
     mixed = [Prediction(storm_id=f"s{i}", contract="c", made_utc="t", p=0.3,
                         p_climatology=0.2, outcome=(True if i < 12 else None))

@@ -92,6 +92,10 @@ def cmd_backtest(args) -> int:
             print(f"  {key:<28s} NOT SCORED -- {s['refused_reason']}")
             continue
         sk = s["skill_vs_climatology"]
+        if sk is None and s.get("skill_refused_reason"):
+            print(f"  {key:<28s} storms {s['n_storms']:4d}  events {s.get('n_events', 0):4d}  "
+                  f"NO SKILL SCORE -- {s['skill_refused_reason'].split('.')[0]}")
+            continue
         print(f"  {key:<28s} storms {s['n_storms']:4d}  base {s['base_rate']:.3f}  "
               f"Brier {s['brier']:.4f}  clim {s['brier_climatology'] if s['brier_climatology'] is None else format(s['brier_climatology'],'.4f')}  "
               f"skill {'n/a' if sk is None else format(sk, '+.1%')}")
