@@ -319,6 +319,7 @@ def get_analogs(
     exclude_storm_ids: set | None = None,
     include_provisional: bool = False,
     env_require_match: bool = True,
+    min_pool_season: int | None = None,
     max_cases: int | None = None,
     track_density_deg: float = 2.0,
 ) -> AnalogResult:
@@ -356,6 +357,9 @@ def get_analogs(
         if months and gt.month not in months:
             continue
         st = storms.get(sid, {})
+        season = g.get("season") or st.get("season")
+        if min_pool_season and season and season < min_pool_season:
+            continue
         if basins and st.get("basin") not in basins:
             continue
         if genesis_subbasins and st.get("subbasin") not in genesis_subbasins:
@@ -485,6 +489,28 @@ def get_analogs(
                     "neutral weight (env_require_match=False): their similarity to the supplied "
                     "env_vector is UNKNOWN, not established.")
 
+    # THE PRE-SATELLITE INTENSITY BIAS, MEASURED ON THIS ARCHIVE.
+    #
+    # East Pacific storms reaching Cat 3 by decade: 1950s 5.2%, 1960s 1.7%, then 1970s 20.3%,
+    # 1980s 22.5%, 1990s 29.7%. The step between the 1960s and the 1970s is not weather. The
+    # East Pacific is remote, has never been routinely flown by reconnaissance, and before
+    # geostationary satellites and the Dvorak technique its intensities were estimated from
+    # ship reports -- so major hurricanes there were simply not seen. An analog pool that
+    # reaches into those seasons drags every intensity rate DOWNWARD, and it does so
+    # invisibly. It is the measured cause of the systematic Cat 3 underconfidence in the
+    # back-test's reliability diagram (predicted 0.344, observed 0.473 in the 0.3-0.4 bin).
+    #
+    # The archive does not silently truncate the record -- those storms happened and their
+    # positions are sound. It says so, every time, and offers min_pool_season to cut it.
+    early = [c for c in cases if c.season and c.season < 1971]
+    if early and not min_pool_season:
+        gaps.append(
+            f"{len(early)} of {len(cases)} analogs are from before 1971, when East Pacific "
+            "intensities were estimated without geostationary satellites or Dvorak analysis "
+            "and major hurricanes were under-observed (measured: 1.7% Cat 3 in the 1960s vs "
+            "20-30% from the 1970s on). Intensity rates above are therefore biased LOW. Pass "
+            "min_pool_season=1971 to restrict the pool to the reliably-observed era.")
+
     cases.sort(key=lambda c: -c.weight)
     if max_cases:
         cases = cases[:max_cases]
@@ -600,7 +626,8 @@ def get_analogs(
                "as_of": as_of_dt.isoformat() if as_of_dt else None,
                "basins": basins, "subbasins": subbasins,
                "genesis_subbasins": genesis_subbasins,
-               "include_provisional": include_provisional},
+               "include_provisional": include_provisional,
+               "min_pool_season": min_pool_season},
         n_cases=n_cases,
         env_unmatched_excluded=env_unmatched,
         effective_sample_size=ess,

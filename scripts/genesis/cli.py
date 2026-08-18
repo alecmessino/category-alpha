@@ -52,6 +52,7 @@ def cmd_analogs(args) -> int:
         lat=args.lat, lon=args.lon, radius_km=args.radius,
         season_months=[int(m) for m in args.months.split(",")] if args.months else None,
         env_vector=env, min_sample=args.min_sample,
+        min_pool_season=args.min_pool_season,
         archive_dir=_archive(args), as_of=args.as_of,
         basins=args.basins.split(",") if args.basins else None,
         subbasins=args.subbasins.split(",") if args.subbasins else None,
@@ -78,6 +79,7 @@ def cmd_backtest(args) -> int:
         subbasins=args.subbasins.split(",") if args.subbasins else None,
         regions=args.regions.split(",") if args.regions else None,
         min_season=args.min_season, max_season=args.max_season,
+        min_pool_season=args.min_pool_season,
         out_path=Path(args.out) if args.out else None,
     )
     print(f"mode: {out['mode']}  replayed {out['n_storms_replayed']} storms "
@@ -153,6 +155,7 @@ def main(argv=None) -> int:
     a.add_argument("--months", help="e.g. 8,9,10")
     a.add_argument("--env", help='JSON, e.g. {"shear_kt":10,"sst_c":28}')
     a.add_argument("--min-sample", type=int, default=10)
+    a.add_argument("--min-pool-season", type=int)
     a.add_argument("--as-of", help="zero-peek cut-off, ISO 8601")
     a.add_argument("--basins")
     a.add_argument("--subbasins")
@@ -167,6 +170,8 @@ def main(argv=None) -> int:
     t.add_argument("--subbasins")
     t.add_argument("--regions", help="e.g. hawaii,conus")
     t.add_argument("--min-season", type=int)
+    t.add_argument("--min-pool-season", type=int,
+                   help="restrict the ANALOG POOL to this season onward (1971 = post-Dvorak)")
     t.add_argument("--max-season", type=int)
     t.add_argument("--out")
     t.set_defaults(fn=cmd_backtest)

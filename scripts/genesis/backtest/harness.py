@@ -76,6 +76,7 @@ def run_genesis_backtest(
     regions: list[str] | None = None,
     min_season: int | None = None,
     max_season: int | None = None,
+    min_pool_season: int | None = None,
     burn_in_storms: int = 50,
     out_path: Path | None = None,
 ) -> dict:
@@ -129,7 +130,7 @@ def run_genesis_backtest(
             lat=g["genesis_lat"], lon=g["genesis_lon"], radius_km=radius_km,
             season_months=_month_window(gt.month), min_sample=min_sample,
             archive_dir=base, as_of=gt, exclude_storm_ids={g["storm_id"]},
-            basins=basins, subbasins=subbasins,
+            basins=basins, subbasins=subbasins, min_pool_season=min_pool_season,
         )
         lf = landfalls.get(g["storm_id"], [])
         for c in contracts:
@@ -158,6 +159,7 @@ def run_genesis_backtest(
             "basins": basins, "subbasins": subbasins, "regions": regions,
             "min_season": min_season, "max_season": max_season,
             "burn_in_storms": burn_in_storms,
+            "min_pool_season": min_pool_season,
         },
         "n_storms_replayed": len(ordered) - skipped_burn_in,
         "n_storms_skipped_burn_in": skipped_burn_in,

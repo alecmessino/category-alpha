@@ -257,21 +257,52 @@ storm being predicted, which `as_of` alone does not do at t₀. The reference fo
 climatology **also** restricted to storms already past — a reference the forecaster could not
 have had is not a reference.
 
-East Pacific, seasons 1971+, 911 scored storms:
+```bash
+python3 scripts/genesis/cli.py backtest --basins EP --min-season 1971 --min-pool-season 1971
+```
+
+East Pacific, seasons 1971+, **847 scored storms**:
 
 | contract | base rate | Brier | climatology | skill |
 |---|---|---|---|---|
-| reaches TS (34 kt) | 0.878 | 0.1077 | 0.1083 | **+0.5%** |
-| reaches Cat 1 (64 kt) | 0.492 | 0.2212 | 0.2505 | **+11.7%** |
-| reaches Cat 3 (96 kt) | 0.244 | 0.1722 | 0.1851 | **+7.0%** |
-| reaches Cat 4 (113 kt) | 0.167 | 0.1359 | 0.1402 | **+3.1%** |
+| reaches TS (34 kt) | 0.894 | 0.0929 | 0.0973 | **+4.5%** |
+| reaches Cat 1 (64 kt) | 0.504 | 0.2220 | 0.2501 | **+11.2%** |
+| reaches Cat 3 (96 kt) | 0.253 | 0.1704 | 0.1900 | **+10.3%** |
+| reaches Cat 4 (113 kt) | 0.175 | 0.1381 | 0.1461 | **+5.5%** |
 
 **Read this honestly.** Genesis location and season carry real information about eventual
-hurricane intensity (+11.7%) and almost none about whether a depression reaches TS strength
-(+0.5%) — which the base rates already tell you: 87.8% of East Pacific depressions reach 34 kt,
-so there is very little there to predict. Discrimination is real but modest: mean forecast
-0.529 when a hurricane happened vs 0.426 when it did not. 128 storms were **refused** because
-their analog pool was below `min_sample`, rather than being answered from a handful of cases.
+intensity, and much less about whether a depression reaches TS strength — which the base rate
+already tells you: 89% of East Pacific depressions reach 34 kt, so there is very little there
+to predict. Discrimination is real but modest. Storms whose analog pool fell below
+`min_sample` were **refused**, not answered from a handful of cases.
+
+### `min_pool_season`, and why the default record is not the best record
+
+The first run of this back-test showed the Cat 3 contract **systematically underconfident in
+every populated bin** — predicted 0.344 where 0.473 was observed, and in the same direction
+throughout. That is a signature, not noise, and the archive itself explains it. East Pacific
+storms reaching Cat 3, by decade:
+
+| 1950s | 1960s | 1970s | 1980s | 1990s | 2010s |
+|---|---|---|---|---|---|
+| 5.2% | **1.7%** | 20.3% | 22.5% | 29.7% | 27.9% |
+
+The step between the 1960s and the 1970s is not weather. The East Pacific is remote, has never
+been routinely flown by reconnaissance, and before geostationary satellites and the Dvorak
+technique its intensities were estimated from ship reports — so major hurricanes there were
+largely **not seen**. An analog pool reaching into those seasons drags every intensity rate
+downward, invisibly.
+
+Restricting the pool with `min_pool_season=1971` fixed both the calibration and the skill:
+
+| | Cat 3 skill | Cat 3 weighted mean \|calibration error\| |
+|---|---|---|
+| pool = whole record | +7.0% | 0.078 |
+| pool = 1971+ | **+10.3%** | **0.031** |
+
+The archive does **not** silently truncate the record — those storms happened and their
+positions are sound. Instead `get_analogs` emits a gap whenever the pool reaches before 1971,
+naming the bias and its direction, and `min_pool_season` is there to cut it.
 
 This is a *base rate*, not a forecast. It knows nothing about the current atmosphere beyond
 what the environment vector supplies, and it should be beaten by any competent operational
