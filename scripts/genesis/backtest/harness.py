@@ -54,16 +54,28 @@ def _month_window(month: int, half: int = SEASON_HALF_WIDTH) -> list[int]:
     return sorted({((month - 1 + d) % 12) + 1 for d in range(-half, half + 1)})
 
 
-def _climatology(storms_before: list[dict], contract_key: str, thresholds: dict) -> float | None:
-    """Unconditional base rate among storms that had already occurred. None when too thin."""
+def _climatology(storms_before: list[dict], contract_key: str, thresholds: dict,
+                 landfall_hits: dict | None = None) -> float | None:
+    """Unconditional base rate among storms that had already occurred. None when too thin.
+
+    Covers BOTH contract families. An intensity contract compares against the share of prior
+    storms that reached the threshold; a landfall contract against the share that made that
+    landfall. Without the second, every landfall contract reported `skill n/a` -- a Brier score
+    with nothing to compare it to, which for a rare event looks impressive and means nothing.
+    """
+    if len(storms_before) < 10:
+        return None
     thr = thresholds.get(contract_key)
-    if thr is None:
-        return None
-    known = [s for s in storms_before
-             if s.get("max_vmax_kt") is not None and s["max_vmax_kt"] == s["max_vmax_kt"]]
-    if len(known) < 10:
-        return None
-    return sum(1 for s in known if s["max_vmax_kt"] >= thr) / len(known)
+    if thr is not None:
+        known = [s for s in storms_before
+                 if s.get("max_vmax_kt") is not None and s["max_vmax_kt"] == s["max_vmax_kt"]]
+        if len(known) < 10:
+            return None
+        return sum(1 for s in known if s["max_vmax_kt"] >= thr) / len(known)
+    if landfall_hits is not None and contract_key in landfall_hits:
+        hits = landfall_hits[contract_key]
+        return sum(1 for s in storms_before if s["storm_id"] in hits) / len(storms_before)
+    return None
 
 
 def run_genesis_backtest(
@@ -94,6 +106,17 @@ def run_genesis_backtest(
         landfalls.setdefault(r["storm_id"], []).append(r)
 
     contracts = standard_contracts(regions or [])
+    # storm_id sets per landfall contract, so the climatology reference can be computed
+    # incrementally over storms already past without re-scanning the table each step.
+    landfall_hits: dict = {}
+    for region in (regions or []):
+        clean = {r["storm_id"] for r in read_table("landfalls", base).to_pylist()
+                 if r.get("region") == region and not r.get("suspect_relocation")}
+        hur = {r["storm_id"] for r in read_table("landfalls", base).to_pylist()
+               if r.get("region") == region and not r.get("suspect_relocation")
+               and r.get("hurricane_at_landfall")}
+        landfall_hits[f"landfall_{region}_any"] = clean
+        landfall_hits[f"landfall_{region}_hurricane"] = hur
     thresholds = {"reaches_ts_34kt": 34, "reaches_cat1_64kt": 64,
                   "reaches_cat3_96kt": 96, "reaches_cat4_113kt": 113}
 
@@ -131,13 +154,21 @@ def run_genesis_backtest(
             season_months=_month_window(gt.month), min_sample=min_sample,
             archive_dir=base, as_of=gt, exclude_storm_ids={g["storm_id"]},
             basins=basins, subbasins=subbasins, min_pool_season=min_pool_season,
+            # WITHOUT THIS, A LANDFALL CONTRACT IS ONLY SCORED WHERE IT ALREADY HAPPENED.
+            # get_analogs reports a region only when some matched analog hit it, so omitting
+            # `regions` meant the Hawaii contract produced a prediction for 215 of 847 storms
+            # -- precisely the 215 whose pool already contained a Hawaii landfall. Scoring a
+            # rare-event contract only on the subset where the event is over-represented is
+            # how a back-test flatters itself. Naming the regions makes the model answer 0.0
+            # where no analog reached them, which is a forecast and belongs in the score.
+            regions=regions,
         )
         lf = landfalls.get(g["storm_id"], [])
         for c in contracts:
             p = c.predict(res)
             preds[c.key].append(Prediction(
                 storm_id=g["storm_id"], contract=c.key, made_utc=gt.isoformat(),
-                p=p, p_climatology=_climatology(prior, c.key, thresholds),
+                p=p, p_climatology=_climatology(prior, c.key, thresholds, landfall_hits),
                 outcome=c.resolve(st, g, lf),
                 n_analogs=res.n_cases, ess=res.effective_sample_size,
                 refused_reason=None if p is not None else "analog pool below min_sample",
