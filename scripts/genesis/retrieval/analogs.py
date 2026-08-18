@@ -65,6 +65,7 @@ from ..store import read_table
 # to_pylist() on 100k track points is itself expensive enough to dominate a back-test, so the
 # row-dict view is cached beside the Arrow table, invalidated by the same identity.
 _ROWS_CACHE: dict = {}
+_ENTERED_CACHE: dict = {}
 
 
 def _rows(name: str, base):
@@ -106,6 +107,31 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 def _wrap180(lon: float) -> float:
     return ((float(lon) + 180.0) % 360.0) - 180.0
+
+
+def _storms_entering(subbasins: list[str], base) -> set:
+    """Storms that ENTERED any of these subbasins at any point in their life.
+
+    THE TRAP THIS EXISTS TO CLOSE. `storms.subbasin` is the subbasin the storm was in AT
+    GENESIS. Filtering Hawaii work on it is wrong in the worst possible way -- quietly, and in
+    the direction of a smaller answer. Measured on this archive: 116 storms have a CP genesis,
+    but 664 have at least one CP track point. Among the 548 it would discard is INIKI (1992),
+    which formed at 134W in the East Pacific and went on to be the most destructive hurricane
+    ever to strike Hawaii. A Hawaii base rate computed from CP-genesis storms alone would omit
+    the storm every Hawaii question is really about.
+
+    So `subbasins=` means "was ever here", which is what a landfall question actually asks.
+    `genesis_subbasins=` is available for the strict genesis-basin question, and is named so it
+    cannot be reached for by accident.
+    """
+    key = (tuple(sorted(subbasins)), str(base))
+    hit = _ENTERED_CACHE.get(key)
+    if hit is not None:
+        return hit
+    want = set(subbasins)
+    out = {tp["storm_id"] for tp in _rows("track_points", base) if tp.get("subbasin") in want}
+    _ENTERED_CACHE[key] = out
+    return out
 
 
 def format_position(lat: float, lon: float) -> str:
@@ -288,6 +314,7 @@ def get_analogs(
     as_of: datetime | str | None = None,
     basins: list[str] | None = None,
     subbasins: list[str] | None = None,
+    genesis_subbasins: list[str] | None = None,
     exclude_storm_ids: set | None = None,
     include_provisional: bool = False,
     max_cases: int | None = None,
@@ -329,7 +356,9 @@ def get_analogs(
         st = storms.get(sid, {})
         if basins and st.get("basin") not in basins:
             continue
-        if subbasins and st.get("subbasin") not in subbasins:
+        if genesis_subbasins and st.get("subbasin") not in genesis_subbasins:
+            continue
+        if subbasins and sid not in _storms_entering(subbasins, base):
             continue
         if st.get("provisional") and not include_provisional:
             continue
@@ -536,6 +565,7 @@ def get_analogs(
                "season_months": season_months, "env_vector": env_vector,
                "as_of": as_of_dt.isoformat() if as_of_dt else None,
                "basins": basins, "subbasins": subbasins,
+               "genesis_subbasins": genesis_subbasins,
                "include_provisional": include_provisional},
         n_cases=n_cases,
         effective_sample_size=ess,

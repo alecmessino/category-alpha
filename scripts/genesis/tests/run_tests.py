@@ -208,6 +208,51 @@ def test_analog_rules():
     eq("far-away query matches nothing", res5.n_cases, 0)
 
 
+def test_subbasin_semantics():
+    """The Iniki trap: a Hawaii question must not be filtered on the GENESIS subbasin.
+
+    Seeds two storms -- one that forms in CP, and one that forms outside CP and tracks into it,
+    which is exactly Iniki's shape (formed 134W in the East Pacific, devastated Kauai).
+    """
+    base = Path(tempfile.mkdtemp())
+    prov = dict(source_key="t", processing_version=PROCESSING_VERSION,
+                ingested_utc="2026-01-01T00:00:00Z")
+    gt = datetime(1992, 9, 5, tzinfo=UTC)
+    storms = [
+        dict(storm_id="CPGEN", atcf_id="CP011992", basin="EP", subbasin="CP", name="HOMEGROWN",
+             season=1992, genesis_utc=gt, genesis_lat=12.0, genesis_lon=-150.0,
+             max_vmax_kt=90.0, provisional=False, **prov),
+        # forms OUTSIDE CP, enters it later -- Iniki's shape
+        dict(storm_id="INIKISH", atcf_id="EP111992", basin="EP", subbasin=None, name="INIKISH",
+             season=1992, genesis_utc=gt, genesis_lat=12.0, genesis_lon=-150.2,
+             max_vmax_kt=125.0, provisional=False, **prov),
+    ]
+    points = []
+    for sid, subs in (("CPGEN", ["CP", "CP"]), ("INIKISH", [None, "CP"])):
+        for i, sub in enumerate(subs):
+            points.append(dict(storm_id=sid, iso_time=gt + timedelta(hours=6 * i),
+                               lat=12.0 + i, lon=-150.0 - i, vmax_kt=90.0, stage="HU",
+                               nature="TS", basin="EP", subbasin=sub, quality="observed", **prov))
+    genesis = [dict(storm_id=s["storm_id"], atcf_id=s["atcf_id"], basin="EP", season=1992,
+                    genesis_utc=gt, genesis_lat=s["genesis_lat"], genesis_lon=s["genesis_lon"],
+                    peak_vmax_kt=s["max_vmax_kt"], pregenesis_source="none", **prov)
+               for s in storms]
+    store.write_table("storms", storms, base)
+    store.write_table("track_points", points, base)
+    store.write_table("genesis_events", genesis, base)
+
+    ever = get_analogs(lat=12.0, lon=-150.0, radius_km=500, min_sample=1,
+                       archive_dir=base, subbasins=["CP"])
+    eq("subbasin: default filter means EVER ENTERED, so the Iniki-shaped storm is kept",
+       {c.storm_id for c in ever.cases}, {"CPGEN", "INIKISH"})
+
+    strict = get_analogs(lat=12.0, lon=-150.0, radius_km=500, min_sample=1,
+                         archive_dir=base, genesis_subbasins=["CP"])
+    eq("subbasin: the strict genesis filter is available and does exclude it",
+       {c.storm_id for c in strict.cases}, {"CPGEN"})
+    check("subbasin: the two filters genuinely differ", ever.n_cases > strict.n_cases)
+
+
 def test_scoring_rules():
     eq("brier: perfect forecasts score 0", brier([(1.0, True), (0.0, False)]), 0.0)
     eq("brier: 0.5 everywhere scores 0.25", brier([(0.5, True), (0.5, False)]), 0.25)
@@ -306,8 +351,8 @@ def test_gtwo_reader():
 
 def main() -> int:
     for fn in (test_categories, test_geometry, test_genesis_rules, test_analog_rules,
-               test_scoring_rules, test_contract_resolution, test_store_and_schema,
-               test_gtwo_reader):
+               test_subbasin_semantics, test_scoring_rules, test_contract_resolution,
+               test_store_and_schema, test_gtwo_reader):
         print(f"\n{fn.__name__}")
         fn()
     print(f"\n{RUN - len(FAILS)}/{RUN} checks passed")
