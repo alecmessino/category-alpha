@@ -128,18 +128,22 @@ IFLAG is a 15-character string with ONE CHARACTER PER SOURCE DATASET, not a sing
     'OOOO___________'   3,579      '_OO____________'   2,184   (213 distinct strings)
 
 Reading only IFLAG[0] therefore misclassifies every row whose first source is absent:
-9,144 rows have IFLAG[0] == '_' while carrying real 'O' or 'P' flags further along the
-string. The rule used here is "did ANY source contribute an original observation at this
-time" -- 'O' anywhere in IFLAG. Measured:
+9,144 rows have IFLAG[0] == '_', and 4,468 of those carry a real report ('O' or 'V')
+further along the string. The rule used here is "did ANY source PUBLISH a value at this
+time" -- 'O' or 'V' anywhere in IFLAG (see IFLAG_REPORTED for why 'V' counts and 'I' does
+not; it was checked against the raw HURDAT2 files, not assumed). Measured over all 99,951
+rows of ibtracs.EP.csv:
 
                       synoptic hour   off-synoptic
-    'O' somewhere        50,596            928      -> observed
-    only P/I/V           158            48,269      -> interpolated
-    no flag at all         7               0        -> see below
+    'O' or 'V' present   50,595            999      -> observed
+    only P / I              148         48,202      -> interpolated
+    no flag at all            6              1      -> see below
 
-Note the 928 and the 158: the flag is NOT a restatement of the clock, so classifying by
-hour instead of by IFLAG would silently mislabel 1,086 rows. `synoptic` is carried as its
-own column precisely so the two facts stay separable.
+Note the 999 and the 148: the flag is NOT a restatement of the clock, so classifying by
+hour instead of by IFLAG would silently mislabel 1,147 rows. `synoptic` is carried as its
+own column precisely so the two facts stay separable. The 999 off-synoptic reports are
+mostly the very rows a landfall table needs -- HURDAT2 publishes its landfall fix at the
+real time (16:30, 09:30, 19:15), never rounded to a synoptic hour.
 
 THE 7 UNFLAGGED ROWS. Seven rows carry '_______________' -- no source claims them as
 either observed or interpolated, yet they have positions. Neither label is true. Since
@@ -147,9 +151,11 @@ either observed or interpolated, yet they have positions. Neither label is true.
 they are conservatively demoted to 'interpolated': under-claiming excludes them from a
 `quality == 'observed'` query, which is the safe direction when provenance is absent.
 The raw string survives in `iter_points()['iflag']` so the demotion is always reversible.
-They are (SID, ISO_TIME): 1960164N29134 1960-06-11 15:00, 1968213N16218 1968-07-31 00:00,
-1968214N22219 1968-08-01 00:00, 1969152N13268 1969-05-31 12:00, 1969222N19253
-1969-08-09 12:00, 1969277N21253 1969-10-04 00:00, 1989287N11259 1989-10-14 06:00.
+They are (SID, ISO_TIME): 1960164N29134 1960-06-11 15:00 (a spur-split track, so it is
+dropped before it reaches the tables and only 6 of the 7 are ever emitted),
+1968213N16218 1968-07-31 00:00, 1968214N22219 1968-08-01 00:00, 1969152N13268
+1969-05-31 12:00, 1969222N19253 1969-08-09 12:00, 1969277N21253 1969-10-04 00:00,
+1989287N11259 1989-10-14 06:00.
 
 SYNOPTIC ALSO MEANS MINUTE ZERO. 37 rows carry non-zero minutes (12:30, 06:15, 18:45...).
 A 12:30 fix is not a synoptic fix, so `synoptic` tests the minute as well as the hour.
@@ -238,12 +244,17 @@ they disagree, so the order of resolution is fixed and documented:
   3. otherwise not tropical -- do not guess.
 
 Step 2 is load-bearing: 17,082 rows have NATURE 'TS' with USA_STATUS blank, and dropping
-them would delete genesis for most pre-satellite storms. Two codes fall through BOTH sets
-and are treated as not-tropical rather than guessed: NATURE 'MX' (4,066 rows -- "mixture",
-i.e. the agencies disagreed about the nature) and USA_STATUS 'XX' (189 rows, unknown).
+them would delete genesis for most pre-satellite storms. Two codes are in neither
+schema set: NATURE 'MX' (4,066 rows -- "mixture", i.e. the agencies disagreed about the
+nature) resolves to not-tropical, because NATURE is the last word in the chain. USA_STATUS
+'XX' (189 rows, unknown) is NOT a verdict either way, so it falls through to step 2 like
+any other unrecognised status; 170 of those 189 rows have NATURE 'TS' and are therefore
+tropical. Measured: treating 'XX' as not-tropical instead moves the genesis fix of ZERO
+storms, so the two readings are indistinguishable in this file.
 
-13 of 1,717 storms have no tropical point under this rule -- eleven 1982 storms whose
-NATURE is 'NR' throughout, plus 1960 MAMIE (a spur, ET throughout) and one more. They
+13 of 1,717 storms have no tropical point under this rule -- seven of them in 1982 (NATURE
+'NR' throughout), the other six one apiece in 1960 (MAMIE, a spur, ET throughout), 1993,
+1994, 1996, 1997 and 2019. Two of the 13 are spurs, so 11 reach the tables. They
 KEEP their storm row with genesis_utc/lat/lon NULL. Dropping them would understate the
 1982 season; inventing a genesis for them would be worse than dropping them.
 
@@ -332,8 +343,29 @@ SUBBASIN_MISSING = "MM"
 # marked `named=True` would corrupt any named-storm count.
 UNNAMED_TOKENS = frozenset({"UNNAMED", "NOT_NAMED", "NOT NAMED", "NONAME", "NO-NAME", ""})
 
-# IFLAG characters that assert a real observation from some source at this time.
-IFLAG_OBSERVED = "O"
+# IFLAG characters that assert a REAL PUBLISHED value from some source at this time.
+#
+# 'O' is the obvious one. 'V' is not, and getting it wrong is expensive: 'V' marks a value
+# the agency published at a NON-SYNOPTIC time -- in practice HURDAT2's special records,
+# which carry a record identifier in USA_RECORD ('L' landfall, 'I' peak intensity,
+# 'S' status change, 'T' track). Verified against the raw agency files, not assumed:
+# all 64 V-only rows of ibtracs.EP.csv whose USA_AGENCY is hurdat_epa/hurdat_atl match a
+# record in .genesis-cache/hurdat2.{nepac,atl}.txt EXACTLY on position, wind AND pressure.
+# e.g. IBTrACS 2002295N11261 2002-10-25 16:30 21.7N 105.4W 120 kt 950 mb  ==
+#      HURDAT2  20021025, 1630, L, HU, 21.7N, 105.4W, 120, 950   (Kenna's Mexican landfall)
+# Their USA_RECORD distribution is L 51 / I 6 / S 3 / T 3 / blank 7, whereas all 48,357
+# rows flagged only 'P' have USA_RECORD blank -- interpolations never carry one.
+#
+# Treating 'V' as interpolated therefore threw away PUBLISHED LANDFALL FIXES: 51 of the
+# 161 'L' records in ibtracs.EP.csv and 277 of the 1,177 in ibtracs.NA.csv (23.5%). A
+# landfall table built off `quality == 'observed'` would have silently dropped a quarter
+# of the real landfall fixes and interpolated replacements for them.
+#
+# 'I' is deliberately NOT in this set. Its 6 rows in the EP file match HURDAT2 exactly on
+# position and wind but NOT on pressure (HURDAT2 publishes -999 where IBTrACS carries a
+# value), i.e. the intensity really was filled in. 'interpolated' under-claims those rows,
+# which is the safe direction.
+IFLAG_REPORTED = frozenset({"O", "V"})
 
 QUALITY_OBSERVED = "observed"
 QUALITY_INTERPOLATED = "interpolated"
@@ -419,11 +451,13 @@ def is_provisional(track_type: str | None) -> bool:
 def quality_for(iflag: str | None, track_type: str | None) -> str:
     """Classify one fix as observed / interpolated / provisional. See TRAP 5 and 6.
 
-    'O' ANYWHERE in the 15-character IFLAG means some source reported this time for real.
-    Testing only IFLAG[0] would misread the 9,144 rows whose first source is absent.
+    'O' or 'V' ANYWHERE in the 15-character IFLAG means some source PUBLISHED this time
+    for real ('V' = published at a non-synoptic time; see IFLAG_REPORTED for the proof
+    against hurdat2.*.txt). Testing only IFLAG[0] would misread the 4,468 rows whose first
+    source is absent while a later source reports.
     """
     flag = iflag or ""
-    if IFLAG_OBSERVED in flag:
+    if any(ch in IFLAG_REPORTED for ch in flag):
         # An observation on a not-yet-post-analysed track is still going to be revised.
         return QUALITY_PROVISIONAL if is_provisional(track_type) else QUALITY_OBSERVED
     # No source claims an original value here. That covers flagged interpolation (P/I/V)

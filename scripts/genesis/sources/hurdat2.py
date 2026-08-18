@@ -198,18 +198,43 @@ instead of being resolved by this parser. (The 34 kt boundary is clean: TS+HU = 
 -----------------------------------------------------------------------------------
 MISSING VALUES, AND WHICH COLUMNS ACTUALLY USE THEM
 -----------------------------------------------------------------------------------
--999 is the only missing marker; there is no blank, no 'NA', no -99. Measured:
+-999 is the only missing marker IN THE NE PACIFIC FILE; there is no blank and no 'NA'.
+Measured on hurdat2.nepac.txt:
 
     max wind      0 missing of 32,026   (range 10 .. 185 kt -- never absent HERE)
     min pressure  12,794 missing        (range 872 .. 1021 mb on the rest)
     34 kt radii   19,744 rows all-missing; first non-missing season 2004
     RMW           29,526 missing;        first non-missing season 2021 (range 5..180)
 
+-999 IS NOT THE ONLY SENTINEL HURDAT2 USES, AND THE PROOF IS IN THE SAME CACHE
+DIRECTORY. `.genesis-cache/hurdat2.atl.txt` (2,004 storms, 55,605 data lines, seasons
+1851-2025 -- the file `build_archive._lf()` reads immediately after this one) carries
+-99 in the MAX WIND column on 57 rows across 54 storms, seasons 1971-1987, all of them
+inland tropical-depression fixes whose wind was never determined, e.g.
+
+    AL021971  19710708, 1200,  , TD, 30.5N,  96.0W, -99, -999, ...
+
+Measured over both shipped files, columns 7..21: the complete set of negative values is
+{-999: everywhere, -99: 57 rows, max-wind column only}. Nothing else is negative, and
+no physical column here (wind, pressure, radii, RMW) can legitimately be negative.
+
+An earlier version of this module filtered only -999, so those 57 fixes came out of
+`iter_storms()` as vmax_kt = -99: a missing marker presented as an observation, and one
+that `schema.category_for()` happily buckets as 'td'. Two defences now:
+
+    * -99 joins -999 in MISSING_SENTINELS, so `parse_missing_int()` returns None for it.
+    * `_nonneg_int()` -- used for every physical column in `_parse_data_line()` -- turns
+      ANY remaining negative into None. A future issue that invents a third sentinel
+      (-9, -1, ...) then loses that value rather than publishing it as a measurement.
+      Latitude and longitude do NOT go through it; they are signed on purpose.
+
 "never absent HERE" is not "never absent". Other HURDAT2 basins and future issues can
 carry -999 winds, so `vmax_kt` is parsed through the same sentinel filter as everything
 else and can come back None. A landfall row with vmax None gets category None and
 hurricane_at_landfall/ts_at_landfall None -- NOT False. "No wind was published for this
 landfall" and "this landfall was below hurricane force" are different statements.
+Measured: 0 of the 139 NE Pacific and 0 of the 1,175 Atlantic 'L' rows carry -99, so
+this fix changes no landfall row today; it changes 57 track fixes.
 
 -----------------------------------------------------------------------------------
 THE TWELVE RADII COLUMNS -- LAYOUT PROVEN FROM THE BYTES, QUADRANT ORDER NOT
@@ -365,8 +390,16 @@ from genesis.schema import THRESHOLDS_KT, TROPICAL_STATUS, category_for
 # constants -- every one of them measured above, none of them guessed
 # --------------------------------------------------------------------------------------
 
-# HURDAT2's only missing marker. Applies to every numeric column.
+# HURDAT2's principal missing marker. Applies to every numeric column.
 MISSING = -999
+
+# The OTHER one. -99 appears in the max-wind column of 57 rows / 54 storms / seasons
+# 1971-1987 of .genesis-cache/hurdat2.atl.txt (0 rows of the NE Pacific file), always on
+# an inland TD fix whose wind was never determined. It is a sentinel, not a wind, and
+# emitting it as an observation is the single worst thing this parser could do.
+MISSING_ALT = -99
+
+MISSING_SENTINELS = frozenset({MISSING, MISSING_ALT})
 
 # A header line starts with the ATCF id. Anchored on the id, never on field count.
 HEADER_RE = re.compile(r"^[A-Z]{2}\d{6},")
@@ -403,15 +436,28 @@ RADII_KEYS = (
 # 26.7 kt, the 99.9th percentile over all 31,000 fix pairs is 33.3 kt, and the 12 pairs
 # above 40 kt are all high-latitude extratropical acceleration (CP072015 OHO at 81.5 kt,
 # 37N -> 45N in six hours), none of them adjacent to a landfall. So this guard fires ZERO
-# times on today's file. It is kept because NHC re-issues the file and a re-analysis that
-# moves a landfall position without moving its time would otherwise pass silently.
+# times on the NE PACIFIC file. It is kept because NHC re-issues the file and a re-analysis
+# that moves a landfall position without moving its time would otherwise pass silently.
+#
+# IT DOES NOT FIRE ZERO TIMES ON THE ATLANTIC FILE, WHICH `build_archive` READS THROUGH
+# THIS SAME FUNCTION. Measured on hurdat2.atl.txt: 13 of 1,175 'L' rows exceed 40 kt, and
+# every one of them is a REAL landfall by a genuinely fast-moving storm at high latitude --
+# AL061938 (the Long Island Express, 42.0 kt), AL061954 CAROL 44.2, AL081954 EDNA 40.3 x2,
+# AL051960 DONNA 40.4/42.6, AL161969 GERDA 42.9, AL082002 GUSTAV 49.3, AL142011 MARIA 48.8,
+# AL122021 LARRY 44.6, plus AL061869, AL101869 and AL061961. So `suspect_relocation` is a
+# FALSE POSITIVE on 1.1% of Atlantic landfalls: read it as "check this pair", never as
+# "this position is wrong". The threshold is deliberately left where the NE Pacific
+# measurement put it -- a relocation artefact lives in exactly this speed band too, and
+# raising the bar to silence 13 true positives would blind the guard to the thing it is
+# for. The published lat/lon/time are emitted unchanged either way; only the flag differs.
 SUSPECT_SPEED_KT = 40.0
 
 EARTH_RADIUS_KM = 6371.0088
 KM_PER_NM = 1.852
 
 __all__ = [
-    "MISSING", "RECORD_LANDFALL", "DETECTION_L_RECORD", "REGION_UNATTRIBUTED",
+    "MISSING", "MISSING_ALT", "MISSING_SENTINELS",
+    "RECORD_LANDFALL", "DETECTION_L_RECORD", "REGION_UNATTRIBUTED",
     "RADII_KEYS", "SUSPECT_SPEED_KT",
     "is_header_line", "parse_lat", "parse_lon", "parse_missing_int", "parse_fix_time",
     "iter_storms", "genesis_fix", "peak_vmax_kt", "landfall_rows", "crosscheck",
@@ -433,12 +479,17 @@ def is_header_line(line: str) -> bool:
 
 
 def parse_missing_int(token: str | None) -> int | None:
-    """Integer field, or None when the file says -999.
+    """Integer field, or None when the file says -999 or -99.
 
-    Returns None -- not 0, not -999 -- so that a missing value can never be summed,
-    averaged or compared as though it were a measurement. Empty/blank is also None:
-    it does not occur in this file (0 of 32,026 numeric fields) but a truncated future
-    issue would produce it and 0 would be a silently plausible wrong answer.
+    Returns None -- not 0, not -999, not -99 -- so that a missing value can never be
+    summed, averaged or compared as though it were a measurement. Empty/blank is also
+    None: it does not occur in either shipped file (0 of 32,026 NE Pacific and 0 of
+    55,605 Atlantic numeric fields) but a truncated future issue would produce it and 0
+    would be a silently plausible wrong answer.
+
+    BOTH sentinels are filtered. -999 is the one the NE Pacific file uses; -99 occurs on
+    57 max-wind fields of hurdat2.atl.txt, which `build_archive` reads through this same
+    parser. See the module docstring's MISSING VALUES section for the measurement.
     """
     if token is None:
         return None
@@ -452,7 +503,24 @@ def parse_missing_int(token: str | None) -> int | None:
             v = int(float(t))
         except ValueError:
             return None
-    return None if v == MISSING else v
+    return None if v in MISSING_SENTINELS else v
+
+
+def _nonneg_int(token: str | None) -> int | None:
+    """`parse_missing_int` for a column that cannot physically be negative.
+
+    Wind, pressure, wind radii and RMW are all non-negative quantities, so a negative
+    survivor of the sentinel filter is a sentinel this module has not met yet, not a
+    measurement. It becomes None -- the same answer as -999 -- because "the file did not
+    say" is the honest reading, and because a negative wind would otherwise flow into
+    `schema.category_for()` (which buckets -99 as 'td') and into every threshold count
+    in the archive.
+
+    Latitude and longitude deliberately do NOT use this: they are signed by hemisphere
+    and a negative there is the whole point.
+    """
+    v = parse_missing_int(token)
+    return None if (v is not None and v < 0) else v
 
 
 def parse_lat(token: str | None) -> float | None:
@@ -553,7 +621,7 @@ def _parse_header_line(line: str) -> dict:
 
 def _parse_data_line(line: str) -> dict:
     fields = [f.strip() for f in line.split(",")]
-    radii_raw = [parse_missing_int(_field(fields, i))
+    radii_raw = [_nonneg_int(_field(fields, i))
                  for i in range(IDX_RADII_START, IDX_RADII_END)]
     return {
         "iso_time": parse_fix_time(_field(fields, IDX_DATE) or "",
@@ -564,10 +632,10 @@ def _parse_data_line(line: str) -> dict:
         "status": _text(_field(fields, IDX_STATUS)),
         "lat": parse_lat(_field(fields, IDX_LAT)),
         "lon": parse_lon(_field(fields, IDX_LON)),
-        "vmax_kt": parse_missing_int(_field(fields, IDX_VMAX)),
-        "mslp_mb": parse_missing_int(_field(fields, IDX_MSLP)),
+        "vmax_kt": _nonneg_int(_field(fields, IDX_VMAX)),
+        "mslp_mb": _nonneg_int(_field(fields, IDX_MSLP)),
         "radii": dict(zip(RADII_KEYS, radii_raw)),
-        "rmw_nm": parse_missing_int(_field(fields, IDX_RMW)),
+        "rmw_nm": _nonneg_int(_field(fields, IDX_RMW)),
     }
 
 

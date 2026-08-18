@@ -222,6 +222,40 @@ def run_genesis_backtest(
     return report
 
 
+def _stability_note(analog_first, nhc_first, analog_obs, nhc_obs) -> dict:
+    """Compare the two sampling schemes and say plainly when they disagree.
+
+    THE POINT OF THIS FUNCTION. The same question scored two defensible ways -- one forecast per
+    disturbance, or every observation -- gave answers of OPPOSITE SIGN on this archive
+    (+26.8% and -3.1%). Either the effect is smaller than the choice of sampling scheme, or the
+    outcome labels are noisy, or both. Publishing whichever number flattered the archive would
+    have been trivial and wrong, so the disagreement is reported as the result.
+
+    The outcome labels depend on a linkage NHC does not publish (see backfill_two: a thread is
+    matched to a best-track genesis within 600 km and -6..+96 h). Any error there lands on BOTH
+    estimates, which is why the analog-vs-NHC comparison on identical rows is more trustworthy
+    than either estimate's skill against a constant -- and why the latter must not be read as a
+    verdict on NHC's forecasts.
+    """
+    a = (analog_first or {}).get("skill_vs_climatology")
+    b = (analog_obs or {}).get("skill_vs_climatology")
+    agree = (a is not None and b is not None and (a > 0) == (b > 0))
+    return {
+        "thread_level_skill_vs_nhc": a,
+        "observation_level_skill_vs_nhc": b,
+        "schemes_agree_in_sign": agree,
+        "verdict": (
+            "STABLE: both sampling schemes agree in sign" if agree else
+            "NOT STABLE -- the two defensible sampling schemes disagree in SIGN, so this "
+            "archive makes NO claim to beat NHC's published formation probability. The effect "
+            "is smaller than the choice of scheme."),
+        "caveat": (
+            "Outcome labels come from an unpublished linkage heuristic, so neither estimate's "
+            "skill against a constant is a verdict on NHC -- only the like-for-like comparison "
+            "on identical rows is, and it is the one that is unstable."),
+    }
+
+
 def run_disturbance_backtest(
     *,
     archive_dir: Path | None = None,
@@ -313,12 +347,51 @@ def run_disturbance_backtest(
         history.append({**r, "_key": key, "_outcome": outcome})
 
     analog = score_contract(preds)
-    # score NHC's published number on the SAME rows, so the two are comparable
+
+    # NHC's number scored over EVERY observation -- what an operator actually has.
+    base_rate_all = (sum(1 for p in preds if p.outcome) / len(preds)) if preds else None
     nhc_preds = [Prediction(storm_id=p.storm_id, contract="develops_within_7d",
-                            made_utc=p.made_utc, p=p.p_climatology, p_climatology=None,
-                            outcome=p.outcome)
+                            made_utc=p.made_utc, p=p.p_climatology,
+                            p_climatology=base_rate_all, outcome=p.outcome)
                  for p in preds]
     nhc = score_contract(nhc_preds)
+
+    # AND over the SAME rows the analog could answer, because otherwise the two Brier scores
+    # are computed on different samples and their ratio is not a comparison at all. The analog
+    # refuses where its prior pool is thin, and the rows it refuses are not a random subset --
+    # they are the early-season and sparsely-observed ones. Comparing 5,273 forecasts against
+    # 9,810 different forecasts would have reported a "skill" that is mostly a change of sample.
+    matched = [p for p in preds if p.p is not None and p.p_climatology is not None]
+    nhc_matched = score_contract(
+        [Prediction(storm_id=p.storm_id, contract="develops_within_7d", made_utc=p.made_utc,
+                    p=p.p_climatology, p_climatology=None, outcome=p.outcome) for p in matched])
+    analog_matched = score_contract(
+        [Prediction(storm_id=p.storm_id, contract="develops_within_7d", made_utc=p.made_utc,
+                    p=p.p, p_climatology=p.p_climatology, outcome=p.outcome) for p in matched])
+
+    # ---- thread-level scoring: ONE forecast per disturbance -------------------------
+    #
+    # WHY THIS EXISTS BESIDE THE OBSERVATION-LEVEL SCORE. An area NHC watches for ten days
+    # produces ~40 observations that share one outcome and nearly the same probability. Scoring
+    # all of them makes long-lived, high-probability areas dominate, and it inflates the
+    # reference base rate from the 23% of THREADS that develop to the 37% of OBSERVATIONS whose
+    # thread develops. Against that inflated constant, NHC's own published probability appears
+    # to have no skill (-1.0%), which is an artefact of the sampling and not a finding about
+    # NHC. One forecast per thread -- its FIRST appearance in the outlook, the moment an
+    # operator first sees the area -- is the cleaner object, and it is the one to quote.
+    first_by_thread: dict = {}
+    for p_ in preds:
+        first_by_thread.setdefault(p_.storm_id, p_)      # preds are in time order
+    firsts = list(first_by_thread.values())
+    base_first = (sum(1 for p_ in firsts if p_.outcome) / len(firsts)) if firsts else None
+    nhc_first = score_contract(
+        [Prediction(storm_id=p_.storm_id, contract="develops_within_7d", made_utc=p_.made_utc,
+                    p=p_.p_climatology, p_climatology=base_first, outcome=p_.outcome)
+         for p_ in firsts])
+    analog_first = score_contract(
+        [Prediction(storm_id=p_.storm_id, contract="develops_within_7d", made_utc=p_.made_utc,
+                    p=p_.p, p_climatology=p_.p_climatology, outcome=p_.outcome)
+         for p_ in firsts])
 
     threads = {(r.get("basin"), r.get("disturbance_key")) for r in rows}
     developed = sum(1 for k in threads if k in genesis_at)
@@ -337,12 +410,29 @@ def run_disturbance_backtest(
         "n_observations_without_analog_pool": skipped_thin,
         "analog": analog,
         "nhc_published": nhc,
-        "skill_analog_vs_nhc": (
-            skill(analog.get("brier"), nhc.get("brier"))
-            if analog.get("brier") is not None and nhc.get("brier") is not None else None),
-        "note": ("p_climatology in the analog block IS the NHC published probability, so "
-                 "'skill_vs_climatology' there answers: does this archive add anything to the "
-                 "number NHC already published on the same page?"),
+        "first_sighting": {
+            "n_threads": len(firsts),
+            "base_rate": base_first,
+            "nhc": nhc_first,
+            "analog": analog_first,
+            "note": ("one forecast per disturbance, at its first appearance in the outlook -- "
+                     "the statistically clean object, since observations within one thread are "
+                     "not independent"),
+        },
+        "like_for_like": {
+            "n_forecasts": len(matched),
+            "nhc_brier": nhc_matched.get("brier"),
+            "analog_brier": analog_matched.get("brier"),
+            "skill_analog_vs_nhc": analog_matched.get("skill_vs_climatology"),
+            "note": "both scored on the SAME forecasts -- the only fair comparison",
+        },
+        "stability": _stability_note(analog_first, nhc_first, analog_matched, nhc_matched),
+        "note": ("p_climatology in the analog block IS the NHC published probability, so its "
+                 "skill_vs_climatology answers the question that matters: does this archive add "
+                 "anything to the number NHC already prints on the same page? The top-level "
+                 "nhc_published block is scored against the unconditional base rate instead, "
+                 "and over ALL observations, so its Brier is NOT comparable to the analog's -- "
+                 "use like_for_like."),
     }
     if out_path:
         Path(out_path).parent.mkdir(parents=True, exist_ok=True)

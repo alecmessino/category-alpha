@@ -117,9 +117,13 @@ def cmd_backtest(args) -> int:
                   f"  Brier {b['brier']:.4f}")
         else:
             print(f"    {label:<28s} NOT SCORED -- {b.get('refused_reason')}")
-    sk = d.get("skill_analog_vs_nhc")
-    print(f"    analog skill vs NHC's own number: "
-          f"{'n/a' if sk is None else format(sk, '+.1%')}")
+    st = d.get("stability") or {}
+    a, b = st.get("thread_level_skill_vs_nhc"), st.get("observation_level_skill_vs_nhc")
+    print(f"    analog skill vs NHC, per disturbance : "
+          f"{'n/a' if a is None else format(a, '+.1%')}")
+    print(f"    analog skill vs NHC, per observation : "
+          f"{'n/a' if b is None else format(b, '+.1%')}")
+    print(f"    {st.get('verdict', '')}")
     return 0
 
 

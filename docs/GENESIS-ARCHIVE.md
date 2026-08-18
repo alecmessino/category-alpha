@@ -472,6 +472,39 @@ record can support, and should say so.
 | Hawaii landfall (any) | 8 | 2 | 6 |
 | **Hawaii landfall (≥64 kt)** | **1** | **1** | **0** |
 
+### The disturbance contract: does an outlook area develop?
+
+This is the question the best-track archive structurally cannot ask, and the one the
+back-filled disturbance log exists for. **367 outlook threads from 7,188 archived issuances
+(2022-12 → 2026-08), 85 of which developed — a measured 23.1% development rate.** The benchmark
+is not climatology, it is **NHC's own published 7-day formation chance**, which is printed on
+the same page as the disturbance.
+
+```
+  368 outlook threads, 85 developed (23.1%), 9811 observations
+  analog skill vs NHC, per disturbance : +26.8%
+  analog skill vs NHC, per observation :  -3.1%
+  NOT STABLE -- the two defensible sampling schemes disagree in SIGN
+```
+
+**Two defensible ways to score it give answers of opposite sign, so the archive claims
+nothing.** Scoring one forecast per disturbance (its first appearance in the outlook — the
+statistically clean object, since observations within one thread share an outcome) the analog
+rate beats NHC by 26.8% on 170 shared forecasts. Scoring every observation, it *loses* by 3.1%
+on 5,273. When the effect is smaller than the choice of sampling scheme, there is no effect to
+report yet, and picking the flattering number would have been trivial and wrong.
+
+Two further cautions, both structural:
+
+- **The outcome labels rest on a heuristic NHC does not publish.** A thread counts as
+  "developed" when a best-track genesis falls within 600 km and −6…+96 h of it. Errors there
+  land on both estimates equally, which is why only the like-for-like comparison is meaningful —
+  and it is the unstable one.
+- **Do not read this as a verdict on NHC.** Scored against a constant, NHC's published
+  probability comes out at −37.6% per-disturbance, which says the resolution heuristic is
+  under-detecting developments, not that NHC's forecasts are poor. The harness prints that
+  caveat next to the number.
+
 ### `min_pool_season`, and why the default record is not the best record
 
 The first run of this back-test showed the Cat 3 contract **systematically underconfident in

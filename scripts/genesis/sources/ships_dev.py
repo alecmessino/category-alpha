@@ -188,14 +188,25 @@ _ENV_LABELS = frozenset({
 # --- primitives -------------------------------------------------------------------------
 
 
-def _label_of(line: str) -> str | None:
+def _label_of(line: str, lineno: int) -> str | None:
     """The row's predictor name: the first whitespace-delimited token of the label field.
 
-    Returns None for a line with no label field at all, which is how a truncated final line
-    or a stray blank line is dropped instead of being mistaken for a predictor.
+    Returns None ONLY for a line that is entirely blank. A line that carries bytes but whose
+    label field (col 155+) is empty is a TRUNCATED line, and it is fatal rather than skipped:
+    silently dropping it turns a mangled download into a record that is missing a predictor,
+    which environment_rows would then emit as a null (or, for shear/SST, as a substituted
+    column) with nothing anywhere saying a row was lost. Verified safe against the cached
+    files: 0 content-bearing unlabelled lines and 0 blank lines in all of ships.CP.txt
+    (138,444 lines), ships.EP.txt (2,435,002) and ships.AL.txt (1,991,592), each exactly
+    139 lines per record.
     """
     field = line[LABEL_COL:]
     if not field or not field.strip():
+        if line.strip():
+            raise ShipsFormatError(
+                "line %d: %d bytes of data with no label field at column %d -- the line is "
+                "truncated; refusing to drop it silently: %r"
+                % (lineno, len(line.rstrip("\n")), LABEL_COL, line[:60]))
         return None
     return field.split(None, 1)[0]
 
@@ -318,10 +329,20 @@ def _iter_raw(path: Path | str, want: frozenset[str] | None) -> Iterator[dict]:
     preds: dict[str, list[float | None]] = {}
     with open(path, "r", encoding="ascii", errors="replace") as fh:
         for lineno, line in enumerate(fh, 1):
-            label = _label_of(line)
+            label = _label_of(line, lineno)
             if label is None:
                 continue
             if label == "HEAD":
+                if head is not None:
+                    # A HEAD while a record is still open means the open record never got its
+                    # LAST line. Overwriting `head` here would DISCARD that record with no
+                    # error and no count -- the archive would simply be short by one storm
+                    # case and nothing would say so. Verified not to fire on the cached files
+                    # (HEAD count == LAST count == records: 996 / 17,518 / 14,328).
+                    raise ShipsFormatError(
+                        "line %d: HEAD for a new record while %s %s is still open (no LAST "
+                        "line); refusing to drop the open record silently"
+                        % (lineno, head["atcf_id"], head["iso_time"]))
                 head = _parse_head(line, lineno)
                 times = None
                 preds = {}
@@ -398,12 +419,19 @@ def environment_rows(
     still emitted with storm_id=None: an environment record that no track row claims is a
     finding about the join, and dropping it would hide the finding.
 
-    NOTE FOR THE WRITER -- schema.ENVIRONMENT declares storm_id nullable=False. Those rows go
-    into a pyarrow Table fine (from_pylist does not enforce nullability) and then fail at
-    write time with "ArrowInvalid: Column 'storm_id' is declared non-nullable but contains
-    nulls", verified against pyarrow.parquet.write_table. That failure is the intended alarm:
-    count the unjoined rows, record a Gap naming them, and either resolve the join or exclude
-    them deliberately. Do not "fix" it by inventing an id or by relaxing the schema.
+    NOTE FOR THE WRITER -- THERE IS NO WRITE-TIME ALARM FOR A NULL storm_id, SO THE BUILD
+    MUST COUNT THEM ITSELF. schema.ENVIRONMENT declares storm_id nullable=True ("NULLABLE on
+    purpose", schema.py), and pyarrow.parquet.write_table accepts an all-null storm_id column
+    without complaint (measured: 996 CP rows written clean). What DOES bite is store.py, whose
+    natural key for the environment table is ("storm_id", "iso_time", "env_source",
+    "lead_hours") -- atcf_id is NOT in it. Every unjoined row collapses onto every other
+    unjoined row that shares a synoptic hour, and store.py REPLACES on key collision. Measured
+    with storm_id=None on every row (i.e. calling this function without storm_id_for):
+    32,842 rows reduce to 19,617 distinct keys, so 13,225 rows (40.3%) would be silently
+    dropped on append -- 41/996 CP, 4,182/17,518 EP, 3,679/14,328 AL even within a single
+    basin, because several storms are active at the same hour. So: pass a real storm_id_for,
+    count the Nones it returns, record a Gap naming them, and exclude those rows deliberately
+    rather than letting the store swallow them. Do not "fix" it by inventing an id.
 
     SUBSTITUTIONS ARE NEVER SILENT. shear_kt prefers SHDC (vortex removed, 0-500 km) and
     falls back to SHRD; sst_c prefers the Reynolds analysis RSST and falls back to CSST,
@@ -573,6 +601,24 @@ def known_gaps(source_key: str) -> list[Gap]:
                  "say so in env_source ('ships_dev+csst')."),
             impact=("Rows marked ships_dev+csst carry a normal SST for the location and date, "
                     "not an observed one. Exclude them from any anomaly analysis."),
+        ),
+        Gap(
+            key=source_key,
+            what="SHIPS is keyed by ATCF id, and an unjoined row (storm_id NULL) is not "
+                 "protected by anything downstream",
+            why=("Every row this source emits is identified by its ATCF id; the archive's "
+                 "environment table is keyed on storm_id. schema.ENVIRONMENT declares "
+                 "storm_id nullable=True and parquet writes an all-null column without "
+                 "error, so nothing fails when the join misses. store.py's natural key for "
+                 "the table is (storm_id, iso_time, env_source, lead_hours) and does NOT "
+                 "include atcf_id, and a key collision REPLACES the older row. Measured on "
+                 "the cached files with storm_id=None everywhere: 32,842 rows collapse to "
+                 "19,617 distinct keys, i.e. 13,225 rows (40.3%) would disappear on append "
+                 "(41/996 CP, 4,182/17,518 EP, 3,679/14,328 AL even within one basin, "
+                 "because several storms are active in the same synoptic hour)."),
+            impact=("A build that does not resolve every ATCF id to a storm_id loses rows "
+                    "silently rather than loudly. Count the Nones returned by storm_id_for "
+                    "and exclude or resolve them before writing."),
         ),
         Gap(
             key=source_key,

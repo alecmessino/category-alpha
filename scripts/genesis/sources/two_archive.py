@@ -285,7 +285,11 @@ _VALUE = (r"(near\s+0\s+percent"
           r"|\d+\s+to\s+\d+\s+percent"
           r"|\d+\s+percent)")
 
-_HORIZON = r"(\d+\s+hours?|\d+\s+days?)"
+# The trailing \b is load-bearing. Without it the optional "s" can be given back by
+# backtracking -- "5 days...20 percent" was read as horizon "5 day" + category slot "s",
+# which turned a published 20% five-day forecast into an unrecognised value and a NULL
+# probability (TWOAT.202206122311). The boundary forbids that split.
+_HORIZON = r"(\d+\s+hours?|\d+\s+days?)\b"
 
 # NHC's separator is a literal "..." but the count varies and a wrap can put a space in it.
 _SEP = r"[.\s]*"
@@ -301,8 +305,19 @@ _SEP = r"[.\s]*"
 # issuance while its two siblings parsed normally. The slot therefore accepts any single
 # word and `_statements` decides what it means -- see the "near" branch there. Nothing is
 # repaired into a number: that reading still yields a NULL probability.
+# TWO MORE THINGS MEASURED IN THE BYTES, both of which silently emptied a probability
+# column before they were handled:
+#   1. The keyword is mistyped by the forecaster. "*Formation CHANGE through 48
+#      hours...low...10 percent." (TWOAT.201410080500, TWOAT.202207101157,
+#      TWOAT.202207110524, TWOEP.202201201720) and "*Formation chance THOUGH 48
+#      hours..." (TWOAT.201509011738). Six published values in the sampled corpus.
+#      The keyword therefore tolerates exactly those two slips and nothing else.
+#   2. The category slot is sometimes simply absent: "* Formation chance through 5
+#      days...20 percent." (TWOAT.202206122311). The slot is optional; the value is
+#      still read as published, and `label` is None because none was printed.
 _RE_BULLET = re.compile(
-    r"formation\s+chance\s+through\s+" + _HORIZON + _SEP + r"([a-z]+)" + _SEP + _VALUE,
+    r"formation\s+chan[cg]e\s+thr?ough\s+" + _HORIZON + _SEP
+    + r"(?:([a-z]+)" + _SEP + r")?" + _VALUE,
     re.I)
 
 # ERA 1/2/3 prose layout. The lead-in varies ("THERE IS A", "THIS SYSTEM HAS A", "...AND A")
@@ -312,8 +327,17 @@ _RE_BULLET = re.compile(
 # statements rather than one straddling both. Observed bridges include "of this system
 # becoming a tropical cyclone during", "of becoming a subtropical or tropical cyclone
 # during", and "of this system becoming a tropical cyclone in".
+# THE WORD "CHANCE" IS SOMETIMES MISSING. TWOAT.201209071145 published
+#     "...THIS SYSTEM HAS A LOW...20 PERCENT...OF BECOMING A TROPICAL CYCLONE DURING
+#      THE NEXT 48 HOURS."
+# Requiring the word dropped that whole block, so the issuance emitted no areas at all
+# and was filed as `quiet` -- the archive asserting NHC saw nothing on a day NHC
+# published a 20% Gulf of Mexico disturbance. It is made optional: the rest of the
+# anchor (category word, adjacent value phrase, an explicit "the next <horizon>") is
+# specific enough on its own, and nothing is repaired into a number.
 _RE_PROSE = re.compile(
-    _LABEL + r"\s+chance" + _SEP + _VALUE + r".{0,140}?(?:during|in|over|through|within)"
+    _LABEL + r"(?:\s+chance)?" + _SEP + _VALUE
+    + r".{0,140}?(?:during|in|over|through|within)"
     r"\s+the\s+next\s+" + _HORIZON,
     re.I)
 
@@ -355,6 +379,18 @@ _RE_LATLON = re.compile(
 # NHC's invest designators. Restricted to the four real ocean prefixes so that a
 # parenthetical like "(Remnants of Emily)" or "(AL)" cannot be mistaken for one.
 _RE_INVEST = re.compile(r"\b((?:AL|EP|CP|WP)\d{2})\b")
+
+# NHC also prints the SAME designator in ATCF's short form, number first and the basin
+# as a single letter: "South of the Gulf of Tehuantepec (96E)",
+# "Well Southwest of the Baja California Peninsula (90E)". Left unrecognised, the same
+# disturbance keyed as `ttl:` on the issuance that wrote "(90E)" and `inv:` on the one
+# that wrote "(EP90)", splitting one history in two, and `invest_id` was NULL where NHC
+# had published an identifier. It is matched only as a complete parenthetical so an
+# ordinary number in a title cannot be mistaken for one, and the letter is mapped to
+# the long prefix by ATCF's published basin letters -- L/E/C/W are the same four
+# basins as AL/EP/CP/WP. That is a renaming of one published id, not a new fact.
+_RE_INVEST_ALT = re.compile(r"\((\d{2})([LECW])\)")
+_ALT_BASIN_PREFIX = {"L": "AL", "E": "EP", "C": "CP", "W": "WP"}
 
 # ---------------------------------------------------------------------------
 # header parsing
@@ -461,7 +497,9 @@ def _statements(block_norm: str) -> list[dict]:
         for m in rx.finditer(block_norm):
             if kind == "bullet":
                 horizon, label, value = m.group(1), m.group(2), m.group(3)
-                if label.lower() not in ("low", "medium", "high"):
+                if label is None:
+                    pass                      # no category printed; see _RE_BULLET
+                elif label.lower() not in ("low", "medium", "high"):
                     # "48 hours...near...0 percent": the word in the category slot belongs
                     # to the value phrase. Re-read the two slots as the one phrase NHC
                     # meant, which is a bottom-of-scale LABEL and therefore still a NULL
@@ -895,7 +933,12 @@ def parse_outlook(text: str, *, url: str | None = None) -> dict:
             # (2009 season opener) -- and flagging those trains the reader to ignore the
             # flag, which is worse than not having it. Every non-area block is in
             # `unparsed_blocks` regardless, so nothing is hidden.
-            if _RE_PERCENT.search(block_norm) and re.search(r"\bchance\b", block_norm, re.I):
+            # "chance" alone was not enough: the one block in the sampled corpus that
+            # was a real disturbance and did not parse (TWOAT.201209071145) is exactly
+            # the one that omitted the word. The second cue is the product's formation
+            # phrase, which the announcement blocks above do not use.
+            if _RE_PERCENT.search(block_norm) and re.search(
+                    r"\bchance\b|becoming a (?:sub)?tropical cyclone", block_norm, re.I):
                 out["unmatched_probability_phrases"].append(block_norm)
             continue
 
@@ -966,6 +1009,10 @@ def _area(seg_text: str, stmts: list[dict], title: str | None,
         mi = _RE_INVEST.search(title)
         if mi:
             invest = mi.group(1).upper()
+        else:
+            ma = _RE_INVEST_ALT.search(title)
+            if ma:
+                invest = _ALT_BASIN_PREFIX[ma.group(2).upper()] + ma.group(1)
 
     lat = lon = None
     mll = _RE_LATLON.search(seg_text)
