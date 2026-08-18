@@ -302,6 +302,58 @@ def test_subbasin_semantics():
     check("subbasin: the two filters genuinely differ", ever.n_cases > strict.n_cases)
 
 
+def test_zero_is_an_answer():
+    """A region the caller asked about must be reported even when nothing hit it."""
+    base = Path(tempfile.mkdtemp())
+    _seed_archive(base, n=20, hurricanes=10)
+    # the seeded archive puts 4 landfalls in hawaii; add a region nothing reaches
+    res = get_analogs(lat=12.0, lon=-140.0, radius_km=500, min_sample=5,
+                      archive_dir=base, regions=["hawaii", "conus"])
+    check("regions: a hit region is reported", "hawaii" in res.landfall)
+    eq("regions: an unhit region requested by the caller is still reported with 0",
+       res.landfall.get("conus", {}).get("any", {}).get("count"), None
+       if "conus" not in res.landfall else 0)
+    check("regions: asking for a region absent from the table is reported as a gap",
+          any("absent from the landfalls table" in g for g in
+              get_analogs(lat=12.0, lon=-140.0, radius_km=500, min_sample=5,
+                          archive_dir=base, regions=["antarctica"]).gaps))
+    # a zero rate must carry an interval, not be silent
+    r = res.landfall["hawaii"]["hurricane"]
+    check("regions: a reported rate carries a Wilson interval", r["ci95"] is not None)
+
+
+def test_min_pool_season():
+    """The analog pool can be restricted, and the un-restricted case warns about the bias."""
+    base = Path(tempfile.mkdtemp())
+    _seed_archive(base, n=24, hurricanes=12)     # seasons 2000..2023
+    early = Path(tempfile.mkdtemp())
+    prov = dict(source_key="t", processing_version=PROCESSING_VERSION,
+                ingested_utc="2026-01-01T00:00:00Z")
+    storms, genesis = [], []
+    for i in range(20):
+        sid = f"O{i:02d}"
+        season = 1950 + i                        # all pre-1971
+        gt = datetime(season, 9, 1, tzinfo=UTC)
+        storms.append(dict(storm_id=sid, atcf_id=f"EP{i:02d}", basin="EP", season=season,
+                           name=sid, genesis_utc=gt, genesis_lat=12.0, genesis_lon=-140.0,
+                           max_vmax_kt=40.0, provisional=False, **prov))
+        genesis.append(dict(storm_id=sid, atcf_id=f"EP{i:02d}", basin="EP", season=season,
+                            genesis_utc=gt, genesis_lat=12.0, genesis_lon=-140.0,
+                            peak_vmax_kt=40.0, pregenesis_source="none", **prov))
+    store.write_table("storms", storms, early)
+    store.write_table("genesis_events", genesis, early)
+
+    unres = get_analogs(lat=12.0, lon=-140.0, radius_km=300, min_sample=1, archive_dir=early)
+    eq("min_pool_season: unrestricted keeps the pre-satellite storms", unres.n_cases, 20)
+    check("min_pool_season: and warns that intensity rates are biased LOW",
+          any("biased LOW" in g for g in unres.gaps), str(unres.gaps))
+
+    res = get_analogs(lat=12.0, lon=-140.0, radius_km=300, min_sample=1,
+                      archive_dir=early, min_pool_season=1971)
+    eq("min_pool_season: restricting the pool drops them", res.n_cases, 0)
+    check("min_pool_season: and then does not warn", not any("biased LOW" in g for g in res.gaps))
+
+
 def test_scoring_rules():
     eq("brier: perfect forecasts score 0", brier([(1.0, True), (0.0, False)]), 0.0)
     eq("brier: 0.5 everywhere scores 0.25", brier([(0.5, True), (0.5, False)]), 0.25)
@@ -400,7 +452,8 @@ def test_gtwo_reader():
 
 def main() -> int:
     for fn in (test_categories, test_geometry, test_genesis_rules, test_analog_rules,
-               test_subbasin_semantics, test_env_unknown_is_not_a_match, test_scoring_rules, test_contract_resolution,
+               test_subbasin_semantics, test_env_unknown_is_not_a_match, test_zero_is_an_answer,
+               test_min_pool_season, test_scoring_rules, test_contract_resolution,
                test_store_and_schema, test_gtwo_reader):
         print(f"\n{fn.__name__}")
         fn()
