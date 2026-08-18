@@ -221,6 +221,35 @@ the `detection` column on every landfall row says which produced it (`hurdat2_L_
 `segment_crossing`). Any Hawaii rate computed from `L` records alone would be wrong by an order
 of magnitude while looking authoritative.
 
+### 4b. What the polygon detector finds, and how far to trust the coastline
+
+Run over the 213 archived storms with any fix in the Hawaii box, the crossing detector returns
+**19 crossings**, and the ones at hurricane strength are exactly the two in the historical
+record:
+
+| season | storm | island | intensity | detection |
+|---|---|---|---|---|
+| 1959 | DOT | Kauai | 75 kt | bracketing_fix |
+| 1992 | **INIKI** | Kauai | **112 kt** | segment_crossing |
+| 2014 | ISELLE | Island of Hawaii | 50 kt | bracketing_fix |
+| 2016 | DARBY | Island of Hawaii | 35 kt | bracketing_fix |
+| 2018 | OLIVIA | Maui, Lanai | 39 kt | segment_crossing |
+| 2021 | LINDA | Molokai | 32 kt | segment_crossing |
+
+Dot and Iniki are the only two hurricane landfalls in Hawaii's recorded history, and Iniki is
+the one HURDAT2 does not flag. `bracketing_fix` means a published fix was itself over land;
+`segment_crossing` means the intensity was interpolated between two fixes and the row is
+derived.
+
+**The coastline is simplified, and the erosion is measurable.** The polygons are Natural Earth
+10m; walking inland from Miami, a point registers as CONUS only about **5 km** from the
+shoreline, and the same is true of Hawaii's south shores. For centre-crossing detection that
+rarely matters — a storm that traverses an island crosses the eroded polygon too, which is why
+every landfall above was found — but a **grazing** landfall within ~5 km of the shore can be
+missed. `closest_approach_km` is returned on every crossing so a near-miss is visible rather
+than silently absent, and Hawaii's polygons carry only 651 vertices across 14 islands, so
+per-island geometry is coarse.
+
 ### 5. A 6-hourly track cannot tell a traverse from a centre relocation
 
 Documented from a real incident on this project in `docs/PLAN-TRACK-MODEL.md`: seven of nine

@@ -39,10 +39,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from ..provenance import ARCHIVE_DIR, PROCESSING_VERSION, _now
-from ..retrieval.analogs import get_analogs, _as_dt
+from ..retrieval.analogs import get_analogs, haversine_km, _as_dt
 from ..store import read_table
 from .contracts import standard_contracts
-from .scoring import Prediction, score_contract
+from .scoring import Prediction, score_contract, skill
 
 # A +/- 1 month window around the genesis month. Wider than an exact month because a month
 # boundary is an artefact of the calendar, not of the atmosphere, and an exact-month filter
@@ -173,34 +173,131 @@ def run_genesis_backtest(
     return report
 
 
-def run_disturbance_backtest(*, archive_dir: Path | None = None, **kw) -> dict:
-    """Score 'does this TWO area become a named storm' from the append-only disturbance log.
+def run_disturbance_backtest(
+    *,
+    archive_dir: Path | None = None,
+    radius_km: float = 750.0,
+    horizon_hours: float = 168.0,
+    min_prior: int = 20,
+    out_path: Path | None = None,
+    verbose: bool = True,
+) -> dict:
+    """Score 'does this outlook area become a tropical cyclone within 7 days'.
 
-    Refuses cleanly while the log is too thin to answer, rather than returning a number built on
-    a handful of rows. The disturbance log is populated forward by the daily pipeline and
-    backward by the TWO text archive back-fill.
+    THIS IS THE QUESTION THE BEST-TRACK ARCHIVE CANNOT ASK. Failures have no best-track row, so
+    only the disturbance log carries the denominator. It is scored here against the one
+    benchmark that matters: **NHC's own published formation probability**, which is on the same
+    page as the disturbance and is what any operator already has.
+
+    Two estimates per observation, both strictly zero-peek:
+
+      p_nhc     the published 7-day formation chance, read off that issuance
+      p_analog  the development rate of OTHER threads observed STRICTLY BEFORE this instant,
+                within `radius_km` and a +/-1 month window -- the archive's own base rate
+
+    OUTCOME matches the horizon NHC's number is about: developed, AND genesis within
+    `horizon_hours` of this observation. A thread that developed eleven days later did not
+    develop within seven, and scoring it as a hit would flatter every forecast in the file.
+
+    THE SAMPLE UNIT IS THE THREAD, NOT THE OBSERVATION. One area observed four times a day for
+    a week is 28 rows and one disturbance; the gate in scoring.py counts distinct threads.
     """
     base = archive_dir or ARCHIVE_DIR
-    rows = read_table("daily_disturbances", base).to_pylist()
-    resolved = [r for r in rows if r.get("outcome") in ("developed", "dissipated")]
-    keys = {(r.get("basin"), r.get("disturbance_key")) for r in resolved}
-    if len(keys) < 10:
-        return {
-            "mode": "disturbance_conditioned",
-            "scored": False,
-            "n_disturbance_rows": len(rows),
-            "n_resolved_disturbances": len(keys),
-            "refused_reason": (
-                f"{len(keys)} resolved disturbances < 10 required -- NOT YET SCORED. "
-                "Populate daily_disturbances from the NHC TWO archive back-fill."),
-        }
-    developed = sum(1 for k in keys
-                    if any(r.get("outcome") == "developed" for r in resolved
-                           if (r.get("basin"), r.get("disturbance_key")) == k))
-    return {
+    say = print if verbose else (lambda *a, **k: None)
+    rows = [r for r in read_table("daily_disturbances", base).to_pylist()
+            if r.get("lat") is not None and r.get("observed_utc") is not None]
+    if not rows:
+        return {"mode": "disturbance_conditioned", "scored": False,
+                "refused_reason": "daily_disturbances is empty -- run the back-fill"}
+
+    for r in rows:
+        t = r["observed_utc"]
+        r["_t"] = t if getattr(t, "tzinfo", None) else t.replace(tzinfo=timezone.utc)
+    rows.sort(key=lambda r: r["_t"])
+
+    # per-thread outcome: when (if ever) did it become a cyclone?
+    genesis_at: dict = {}
+    for r in rows:
+        key = (r.get("basin"), r.get("disturbance_key"))
+        if r.get("outcome") == "developed" and r.get("outcome_utc") is not None:
+            g = r["outcome_utc"]
+            genesis_at[key] = g if getattr(g, "tzinfo", None) else g.replace(tzinfo=timezone.utc)
+
+    preds: list[Prediction] = []
+    history: list[dict] = []          # observations already past, for the analog base rate
+    skipped_thin = 0
+
+    for r in rows:
+        key = (r.get("basin"), r.get("disturbance_key"))
+        t = r["_t"]
+        g = genesis_at.get(key)
+        outcome = bool(g is not None
+                       and 0 <= (g - t).total_seconds() / 3600.0 <= horizon_hours)
+
+        # ---- the archive's own base rate, from strictly earlier observations --------
+        prior = [h for h in history
+                 if h["_key"] != key
+                 and abs(((h["_t"].month - t.month + 6) % 12) - 6) <= 1
+                 and haversine_km(r["lat"], r["lon"], h["lat"], h["lon"]) <= radius_km]
+        p_analog = None
+        if len(prior) >= min_prior:
+            # de-duplicate to one vote per prior THREAD, else a long-lived area votes 28 times
+            per_thread: dict = {}
+            for h in prior:
+                per_thread.setdefault(h["_key"], []).append(h["_outcome"])
+            votes = [any(v) for v in per_thread.values()]
+            if len(votes) >= 5:
+                p_analog = sum(1 for v in votes if v) / len(votes)
+        if p_analog is None:
+            skipped_thin += 1
+
+        pn = r.get("prob_7d_pct")
+        p_nhc = (float(pn) / 100.0) if pn is not None and pn == pn else None
+
+        preds.append(Prediction(
+            storm_id=f"{key[0]}|{key[1]}",     # THE SAMPLE UNIT: the thread
+            contract="develops_within_7d", made_utc=t.isoformat(),
+            p=p_analog, p_climatology=p_nhc, outcome=outcome,
+            n_analogs=len(prior),
+            refused_reason=None if p_analog is not None else "prior pool too thin",
+        ))
+        history.append({**r, "_key": key, "_outcome": outcome})
+
+    analog = score_contract(preds)
+    # score NHC's published number on the SAME rows, so the two are comparable
+    nhc_preds = [Prediction(storm_id=p.storm_id, contract="develops_within_7d",
+                            made_utc=p.made_utc, p=p.p_climatology, p_climatology=None,
+                            outcome=p.outcome)
+                 for p in preds]
+    nhc = score_contract(nhc_preds)
+
+    threads = {(r.get("basin"), r.get("disturbance_key")) for r in rows}
+    developed = sum(1 for k in threads if k in genesis_at)
+    report = {
         "mode": "disturbance_conditioned",
-        "scored": True,
-        "n_resolved_disturbances": len(keys),
-        "observed_development_rate": developed / len(keys),
-        "note": "base rate only; per-area analog scoring requires positions on TWO areas",
+        "question": f"does an NHC outlook area become a tropical cyclone within "
+                    f"{horizon_hours:.0f} h",
+        "built_utc": _now(),
+        "processing_version": PROCESSING_VERSION,
+        "settings": {"radius_km": radius_km, "horizon_hours": horizon_hours,
+                     "min_prior": min_prior},
+        "n_observations": len(rows),
+        "n_threads": len(threads),
+        "n_threads_developed": developed,
+        "observed_development_rate": developed / len(threads) if threads else None,
+        "n_observations_without_analog_pool": skipped_thin,
+        "analog": analog,
+        "nhc_published": nhc,
+        "skill_analog_vs_nhc": (
+            skill(analog.get("brier"), nhc.get("brier"))
+            if analog.get("brier") is not None and nhc.get("brier") is not None else None),
+        "note": ("p_climatology in the analog block IS the NHC published probability, so "
+                 "'skill_vs_climatology' there answers: does this archive add anything to the "
+                 "number NHC already published on the same page?"),
     }
+    if out_path:
+        Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(out_path).write_text(json.dumps(report, indent=2, sort_keys=True, default=str) + "\n")
+    say(f"  threads {len(threads)}, developed {developed} "
+        f"({100 * developed / max(1, len(threads)):.1f}%)")
+    return report

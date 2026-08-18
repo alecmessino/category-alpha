@@ -1,0 +1,101 @@
+{
+  "built_utc": "2026-08-18T00:29:58Z",
+  "processing_version": "1.0.0",
+  "regions": {
+    "hawaii": {
+      "path": "/home/user/category-alpha/data/genesis-archive/coastlines/hawaii.geojson",
+      "bytes": 17801,
+      "polygons": 14,
+      "vertices": 651
+    },
+    "conus": {
+      "path": "/home/user/category-alpha/data/genesis-archive/coastlines/conus.geojson",
+      "bytes": 665724,
+      "polygons": 206,
+      "vertices": 33304
+    },
+    "mexico": {
+      "path": "/home/user/category-alpha/data/genesis-archive/coastlines/mexico.geojson",
+      "bytes": 430533,
+      "polygons": 87,
+      "vertices": 21428
+    },
+    "central_america": {
+      "path": "/home/user/category-alpha/data/genesis-archive/coastlines/central_america.geojson",
+      "bytes": 124363,
+      "polygons": 45,
+      "vertices": 6266
+    },
+    "caribbean": {
+      "path": "/home/user/category-alpha/data/genesis-archive/coastlines/caribbean.geojson",
+      "bytes": 173942,
+      "polygons": 159,
+      "vertices": 7822
+    }
+  },
+  "sources": [
+    {
+      "key": "ne_10m_admin_1_states_provinces.json",
+      "url": "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/10m/cultural/ne_10m_admin_1_states_provinces.json",
+      "sha256": "a0056a85ab6f065fe57fbe1df3723f1bdfbc28a0eca193b315b7491fba2287e8",
+      "bytes": 63251601,
+      "downloaded_utc": "2026-08-18T00:14:55Z",
+      "licence": "Public domain. Natural Earth: 'All versions of Natural Earth raster + vector map data found on this website are in the public domain. You may use the maps in any manner, including modifying the content and design, electronic dissemination, and offset printing.'",
+      "licence_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "note": "Natural Earth 10m admin-1 states/provinces, via the martynafford GeoJSON conversion of the official shapefiles. Supplies US state and Mexican state coastlines with names."
+    },
+    {
+      "key": "ne_10m_admin_0_map_units.json",
+      "url": "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/10m/cultural/ne_10m_admin_0_map_units.json",
+      "sha256": "1f1aa9386edab4031687aa205125f6be2a3b910ff29632fbbcf76dd71c46f8b4",
+      "bytes": 24878664,
+      "downloaded_utc": "2026-08-18T00:19:11Z",
+      "licence": "Public domain. Natural Earth: 'All versions of Natural Earth raster + vector map data found on this website are in the public domain. You may use the maps in any manner, including modifying the content and design, electronic dissemination, and offset printing.'",
+      "licence_url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "note": "Natural Earth 10m admin-0 MAP UNITS, not admin_0_countries. The countries layer folds Guadeloupe and Martinique into a single 'France' feature with SUBREGION='Western Europe', which would have silently dropped two real Caribbean hurricane targets. Map units split them out."
+    },
+    {
+      "key": "gnis.DomesticNames_HI_Text.zip",
+      "url": "https://prd-tnm.s3.amazonaws.com/StagedProducts/GeographicNames/DomesticNames/DomesticNames_HI_Text.zip",
+      "sha256": "b6a3ef7caf6c5c264979f8b94d741e2adbdc7e39eccc3c171e0c9dc9e62e5d74",
+      "bytes": 276526,
+      "downloaded_utc": "2026-08-18T00:13:01Z",
+      "licence": "Public domain. A work of the United States Geological Survey / U.S. Board on Geographic Names; U.S. Government works are not subject to copyright.",
+      "licence_url": "https://www.usgs.gov/faqs/what-are-terms-uselicensing-map-services-and-data-national-map",
+      "note": "USGS GNIS Domestic Names, Hawaii. The only source in this build that publishes the individual island names."
+    }
+  ],
+  "rejected_sources": [
+    {
+      "key": "ne_10m_land.json",
+      "url": "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/10m/physical/ne_10m_land.json",
+      "why": "Natural Earth 10m land. Inspected and rejected as the geometry source: it carries no name fields (featurecla/min_zoom/scalerank only). Retained as the fidelity control -- its Hawaii rings match the admin_1 rings used here to 1.1e-13 deg."
+    }
+  ],
+  "gaps": [
+    {
+      "key": "coastlines.hawaii.island_names",
+      "what": "5 of 14 Hawaii polygons carry no island name",
+      "why": "Natural Earth's Hawaii feature is unnamed per polygon, and the USGS GNIS join leaves these Northwestern Hawaiian Islands either with no Island-class point inside the polygon or with more than one (Kure Atoll / Green Island share a polygon). No name was invented for them.",
+      "impact": "A landfall on one of these uninhabited NWHI polygons is published with region='hawaii' and sub_region=NULL. All eight MAIN Hawaiian islands -- the ones the use case asks about -- are named.",
+      "url": "https://prd-tnm.s3.amazonaws.com/StagedProducts/GeographicNames/DomesticNames/DomesticNames_HI_Text.zip",
+      "attempted_utc": "2026-08-18T00:30:02Z"
+    },
+    {
+      "key": "coastlines.mexico.unnamed_unit",
+      "what": "1 Mexican polygon(s) carry no state name",
+      "why": "Natural Earth admin_1 publishes one Mexican unit with name=null (adm1_code 'MEX+99?', iso_3166_2 'MX-X01~', area_sqkm 0) covering Arrecife Alacranes off Yucatan. The source assigns it to no state and this build does not assign one either.",
+      "impact": "A landfall on that reef is published with region='mexico' and sub_region=NULL rather than a guessed state.",
+      "url": "https://raw.githubusercontent.com/martynafford/natural-earth-geojson/master/10m/cultural/ne_10m_admin_1_states_provinces.json",
+      "attempted_utc": "2026-08-18T00:30:02Z"
+    },
+    {
+      "key": "coastlines.land_union_edge",
+      "what": "the land union stops at the edge of the five loaded regions",
+      "why": "Crossings are transitions of the union of all loaded polygons, so an overland entry from a landmass that is NOT loaded (Canada -> Montana, Colombia -> Panama) has no preceding land state and reads as a coastline crossing. Great Lakes shorelines have the same shape of problem: Natural Earth state polygons end at the lake shore, so the lakes are water.",
+      "impact": "Possible false landfall rows for a track that reaches the US from Canada overland or re-enters from a Great Lake. Neither is reachable in the EP/CP basins this archive was built for. HURDAT2's 'L' records remain primary.",
+      "url": "",
+      "attempted_utc": "2026-08-18T00:30:02Z"
+    }
+  ]
+}

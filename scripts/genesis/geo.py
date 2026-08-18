@@ -303,6 +303,13 @@ def _inside(poly, px, py):
     The `(y > py) != (y1 > py)` half-open comparison is what stops a vertex that lies
     exactly on the ray from being counted twice, which is the classic way this algorithm
     reports a point on a coastline as being on both sides of it.
+
+    WHAT "INSIDE" IS WORTH NEAR A SHORE. Natural Earth 10m generalises the coastline to a
+    few hundred metres to a kilometre or so. Measured during this build: at 25.7617 N the
+    Florida polygon's east edge sits at 80.1961 W, so Miami city hall (80.1918 W) reports
+    OUTSIDE by 430 m. That is the source's coastline, not an error here, and it is why the
+    landfall test is built on transitions of a leg rather than on the land status of a
+    single waterfront point.
     """
     px = np.atleast_1d(px)
     py = np.atleast_1d(py)
@@ -704,16 +711,24 @@ def crossings(track_points, regions, *, max_implied_speed_kt: float = 40.0) -> l
             mlat, mlon = _gc_interp(a["lat"], a["lon"], b["lat"], b["lon"], [fm])
             mid_states.append(_poly_at(float(mlat[0]), float(mlon[0])))
 
+        # ONE EVENT PER LANDMASS PER LEG. A leg can enter the same polygon more than once
+        # -- the Louisiana chenier plain is marsh, bay, marsh, and a track going ashore
+        # there re-enters the state polygon two or three times in six hours. Those are not
+        # separate landfalls; only the first entry is. Keyed on polygon identity, so a leg
+        # that crosses a barrier island AND then the mainland still reports both, because
+        # they are genuinely different landmasses.
         entries = []
+        seen = set()
         prev = poly_a
         for k, cur in enumerate(mid_states):
-            if prev is None and cur is not None:
+            if prev is None and cur is not None and id(cur) not in seen:
                 entries.append((bounds[k], cur))
+                seen.add(id(cur))
             prev = cur
         # Safety net: B is ashore but no boundary hit was recorded (a leg that ends within
         # a hair of the coastline can do this). Report it at the published fix rather than
         # losing a landfall to a rounding decision.
-        if prev is None and poly_b is not None and not any(e[1] is poly_b for e in entries):
+        if prev is None and poly_b is not None and id(poly_b) not in seen:
             entries.append((1.0, poly_b))
 
         if not entries:
@@ -1114,8 +1129,14 @@ def _selfcheck() -> int:
           ("hawaii", "Island of Hawaii"))
     check("Lihue, Kauai (21.9811,-159.3711)", point_region(21.9811, -159.3711, regions),
           ("hawaii", "Kauai"))
-    check("Miami (25.7617,-80.1918)", point_region(25.7617, -80.1918, regions),
+    # Orlando, not Miami. Measured here: Natural Earth 10m puts Florida's east edge at
+    # 80.1961 W on Miami's latitude, so the city-hall coordinate (80.1918 W) is 430 m
+    # OUTSIDE the polygon. A waterfront point does not test a coastline dataset, it tests
+    # its generalisation.
+    check("Orlando (28.5383,-81.3792)", point_region(28.5383, -81.3792, regions),
           ("conus", "Florida"))
+    check("Miami city hall is 430 m outside NE's 10m Florida",
+          point_region(25.7617, -80.1918, regions), None)
     check("Cabo San Lucas (22.8909,-109.9124)", point_region(22.8909, -109.9124, regions),
           ("mexico", "Baja California Sur"))
     check("San Juan PR (18.4655,-66.1057)", point_region(18.4655, -66.1057, regions),
@@ -1147,7 +1168,10 @@ def _selfcheck() -> int:
         check("closest published fix is on the island", ev[0]["closest_approach_km"], 0.0)
 
     print("\n3. the same 10 kt storm on a 6-hourly track (leg spans the whole island)")
-    t_6h = track(-158.60, 1.0766, 6, 5)
+    # 10 kt for 6 h = 111.1 km = 1.0766 deg here; Kauai is only 0.494 deg wide, so the leg
+    # jumps clean over it and no published fix ever lands ashore. Same physical storm as
+    # test 2, sampled six-hourly -- which is all a best track gives you.
+    t_6h = track(-158.90, 1.0766, 6, 5)
     ev6 = crossings(t_6h, regions)
     for e in ev6:
         print("   %s %s %s  implied=%.1f kt suspect=%s closest=%.1f km" % (
@@ -1208,7 +1232,7 @@ def _selfcheck() -> int:
               for i, (la, lo) in enumerate([(29.76, -95.37), (32.78, -96.80), (35.47, -97.52)])]
     check("no crossings once ashore", len(crossings(t_land, regions)), 0)
 
-    print("\n8. a real Gulf landfall: offshore -> ashore in Louisiana")
+    print("\n8. a Gulf approach: chenier-plain shoreline, then a fix inland in Louisiana")
     t_gulf = [{"iso_time": base + timedelta(hours=6 * i), "lat": la, "lon": lo,
                "vmax_kt": v, "mslp_mb": p, "stage": "HU"}
               for i, (la, lo, v, p) in enumerate([
@@ -1219,11 +1243,20 @@ def _selfcheck() -> int:
         print("   %s %s %s  vmax=%s implied=%.1f kt suspect=%s closest=%.1f km" % (
             e["region"], e["sub_region"], e["detection"], e["vmax_kt"],
             e["implied_speed_kt"], e["suspect_relocation"], e["closest_approach_km"]))
-    check("one crossing", len(evg), 1)
-    if evg:
-        check("region", evg[0]["region"], "conus")
-        check("sub_region", evg[0]["sub_region"], "Louisiana")
-        check("detection", evg[0]["detection"], "bracketing_fix")
+    # TWO events, and both are real. The coast at 29.6 N 92.1 W is chenier ridge and marsh
+    # with open water behind it, so the storm crosses a shoreline, is back over water at
+    # the next published fix (0.9 km offshore -- a hit, not an artefact), and is inland at
+    # the one after. Collapsing these into "one landfall" is the caller's judgement to
+    # make; inventing it here would throw away the fact that there were two shorelines.
+    check("two crossings", len(evg), 2)
+    if len(evg) == 2:
+        check("first is the shoreline, from a fix 0.9 km offshore",
+              (evg[0]["region"], evg[0]["detection"], round(evg[0]["closest_approach_km"], 1)),
+              ("conus", "segment_crossing", 0.9))
+        check("second is a published fix inland",
+              (evg[1]["region"], evg[1]["sub_region"], evg[1]["detection"]),
+              ("conus", "Louisiana", "bracketing_fix"))
+        check("inland fix keeps its own published wind", evg[1]["vmax_kt"], 70.0)
 
     print("\n%s  (%d failure%s)" % ("ALL CHECKS PASSED" if not fails else "CHECKS FAILED",
                                     fails, "" if fails == 1 else "s"))
