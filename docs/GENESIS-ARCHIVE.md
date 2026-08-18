@@ -111,7 +111,7 @@ otherwise "time to hurricane" would be dated up to three hours early off a wind 
 | **SHIPS developmental** (CIRA) | environment | AL/EP/CP, **1982–2023**. EP 17,518 + CP 996 records |
 | **HURDAT2** (NHC) | official landfalls, cross-check | NE Pacific 1949–2025 (filename auto-discovered) |
 | **NHC TWO text archive** | pre-genesis | **TWOEP/TWOAT 2003+**, **Central Pacific (HFOCP) 2019+** |
-| **NHC GTWO shapefile** | disturbance *positions* | **current issuance only** — no historical archive |
+| **NHC GTWO shapefile** | disturbance *positions* | live, plus an archive: 5,821 NHC issuances from 2023-05-15, 1,367 CPHC from 2022-12 |
 | **NHC CurrentStorms.json** | live resolution | current |
 | **NCEP/NCAR R1** (NOAA PSL, OPeNDAP) | environment where SHIPS is silent | 1948–present, 2.5°, 4×daily |
 | **Natural Earth 10m land** | coastline polygons | public domain |
@@ -165,14 +165,42 @@ Outlook, and that archive reaches back only:
 - **East Pacific / Atlantic: 2003**
 - **Central Pacific: 2019** (`archive/text/HFOCP/`; `TWOCP/` holds 2013 alone)
 
-Worse, the **text carries no coordinates** ("well to the east-southeast of the Hawaiian
-Islands"). Positions come only from the **graphical** outlook shapefile, which is published
-**for the current issuance only** — there is no historical archive of it. So every back-filled
-disturbance has `lat`/`lon` NULL. Prose is never geocoded; that would be inventing data.
+and the **text carries no coordinates** ("well to the east-southeast of the Hawaiian Islands").
+Prose is never geocoded — that would be inventing data.
 
-Consequence: `run_disturbance_backtest` **refuses to score** until the forward-collected log is
-large enough. It reports `NOT YET SCORED`, which is the honest state of a question this archive
-cannot yet answer.
+Positions come from the **graphical** outlook, which *is* archived:
+
+```
+https://www.nhc.noaa.gov/gis/gtwo/archive/YYYYMMDDHHMM_gtwo.zip                   (NHC)
+https://www.nhc.noaa.gov/gis/gtwo/archive/CPHC/gtwo_cphc_shapefiles_YYYY....zip   (CPHC)
+```
+
+Measured coverage: **5,821 NHC issuances from 2023-05-15** and **1,367 CPHC from 2022-12**. So
+the positional pre-genesis record is about **three and a half seasons** deep — thin, but real,
+and it grows with every daily run. `cli.py` back-fills it:
+
+```bash
+python3 -c "from genesis.build.backfill_two import backfill; backfill(since='2023')"
+```
+
+**Resolution is a stated heuristic, not a published fact.** NHC does not publish "outlook area 2
+became Hurricane Greg". Threads and best-track genesis events are matched **one-to-one**,
+greedily by distance, using each thread's observation *nearest in time* to the genesis, within
+600 km and −6…+96 h. Every matched row records the distance that fired it, and the rule is
+returned with the result.
+
+Getting this right took three corrections, each found by checking the 2026 season against the
+storms that actually formed, and **each one biased the development rate downward** — the worst
+direction for a table whose entire purpose is an honest denominator:
+
+| bug | symptom | fix |
+|---|---|---|
+| threads went stale after 5 days | one thread spanned 1,644 km and 15 days, swallowing EP04's precursor *and* an unrelated successor | 36 h (NHC issues 4×/day) |
+| matched only a thread's **last** observation | the thread that became EP04 ran 11 days from 20% → 100% and sat 93 km from genesis at the genesis hour, yet resolved "dissipated" | match the observation nearest in time; split the thread at the genesis it produced |
+| threads claimed genesis events many-to-one | 11 "developed" threads for 8 distinct storms | one-to-one greedy assignment |
+
+Verified end to end on 2026: **9 storms formed, 9 matched, 0 duplicated, 0 missed** — 41
+threads, 9 developed, a measured **22.0%** development rate.
 
 ### 4. Official landfall flags are close to useless for Hawaii — measured
 

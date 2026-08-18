@@ -1,16 +1,16 @@
 {
-  "built_utc": "2026-08-17T23:57:57Z",
+  "built_utc": "2026-08-18T00:29:24Z",
   "gaps": [
     {
-      "attempted_utc": "2026-08-17T23:57:55Z",
+      "attempted_utc": "2026-08-18T00:29:21Z",
       "impact": "those environment rows have storm_id NULL and cannot be analog-matched",
       "key": "ships_join",
       "url": "",
       "what": "SHIPS records with no IBTrACS storm",
-      "why": "151 SHIPS records carry an ATCF id absent from the loaded IBTrACS basins (a basin not loaded, or a storm IBTrACS did not adopt)"
+      "why": "167 SHIPS records carry an ATCF id absent from the loaded IBTrACS basins (a basin not loaded, or a storm IBTrACS did not adopt)"
     },
     {
-      "attempted_utc": "2026-08-17T23:57:55Z",
+      "attempted_utc": "2026-08-18T00:29:21Z",
       "impact": "environment.gpi is NULL for every row",
       "key": "gpi",
       "url": "",
@@ -22,7 +22,7 @@
   "sources": [
     {
       "bytes": 46539726,
-      "downloaded_utc": "2026-08-17T23:57:47Z",
+      "downloaded_utc": "2026-08-18T00:29:06Z",
       "key": "ibtracs.EP.csv",
       "last_modified": null,
       "note": "IBTrACS v04r01 basin file EP (cache hit)",
@@ -31,8 +31,18 @@
       "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.EP.list.v04r01.csv"
     },
     {
+      "bytes": 57120823,
+      "downloaded_utc": "2026-08-18T00:06:49Z",
+      "key": "ibtracs.NA.csv",
+      "last_modified": null,
+      "note": "IBTrACS v04r01 basin file NA (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "1b67895f53fdfd78742bd90a585f871b5d735638aed17b6b8e91ec0befb3fff7",
+      "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.NA.list.v04r01.csv"
+    },
+    {
       "bytes": 438633202,
-      "downloaded_utc": "2026-08-17T23:57:51Z",
+      "downloaded_utc": "2026-08-18T00:29:13Z",
       "key": "ships.EP.txt",
       "last_modified": null,
       "note": "SHIPS developmental data EP 1982-2023 (cache hit)",
@@ -42,52 +52,66 @@
     },
     {
       "bytes": 24938844,
-      "downloaded_utc": "2026-08-17T23:57:55Z",
+      "downloaded_utc": "2026-08-18T00:29:17Z",
       "key": "ships.CP.txt",
       "last_modified": null,
       "note": "SHIPS developmental data CP 1982-2023 (cache hit)",
       "processing_version": "1.0.0",
       "sha256": "443822caa9c2fb00540eb51a32ee85f9512cc43cb39c0fed374c0b228f30fe31",
       "url": "https://rammb-data.cira.colostate.edu/ships/data/CP/lsdiagc_1982_2023_sat_ts_7day.txt"
+    },
+    {
+      "bytes": 358758792,
+      "downloaded_utc": "2026-08-18T00:29:18Z",
+      "key": "ships.AL.txt",
+      "last_modified": null,
+      "note": "SHIPS developmental data AL 1982-2023 (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "3fef6609f633f55f5f95114b88d69dd0b6f76f35264a6ce833de128ed99847c7",
+      "url": "https://rammb-data.cira.colostate.edu/ships/data/AL/lsdiaga_1982_2023_sat_ts_7day.txt"
     }
   ],
-  "started_utc": "2026-08-17T23:57:47Z",
+  "started_utc": "2026-08-18T00:29:06Z",
   "tables": {
     "environment": {
       "note": "SHIPS developmental data; ERA5 unavailable -- see gaps",
       "path": "environment.parquet",
       "processing_version": "1.0.0",
-      "rows": 18514,
+      "rows": 32842,
       "sources": [
         "ships.EP.txt",
-        "ships.CP.txt"
+        "ships.CP.txt",
+        "ships.AL.txt"
       ]
     },
     "genesis_events": {
       "note": "derived: first tropical point + first threshold crossings",
       "path": "genesis_events.parquet",
       "processing_version": "1.0.0",
-      "rows": 1712,
+      "rows": 3959,
       "sources": [
-        "ibtracs.EP.csv"
+        "ibtracs.EP.csv",
+        "ibtracs.NA.csv"
       ]
     },
     "storms": {
       "note": "",
       "path": "storms.parquet",
       "processing_version": "1.0.0",
-      "rows": 1712,
+      "rows": 3959,
       "sources": [
-        "ibtracs.EP.csv"
+        "ibtracs.EP.csv",
+        "ibtracs.NA.csv"
       ]
     },
     "track_points": {
       "note": "",
       "path": "track_points.parquet",
       "processing_version": "1.0.0",
-      "rows": 99747,
+      "rows": 224153,
       "sources": [
-        "ibtracs.EP.csv"
+        "ibtracs.EP.csv",
+        "ibtracs.NA.csv"
       ]
     }
   }

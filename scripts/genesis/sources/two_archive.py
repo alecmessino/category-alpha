@@ -559,10 +559,15 @@ def _basin_of(text: str) -> str | None:
     m = _RE_WMO.search(head)
     if m and m.group(1).upper() in WMO_BASIN:
         return WMO_BASIN[m.group(1).upper()]
+    # Last resort: the product's own domain statement. Order matters -- since 2025-06-01 the
+    # eastern Pacific outlook says "eastern AND CENTRAL North Pacific", so a naive test for
+    # "central north pacific" would file every modern TWOEP as a Honolulu product.
     low = _norm(text).lower()
     if "north atlantic" in low:
         return "atlantic"
-    if "central north pacific" in low and "eastern" not in low.split("central north pacific")[0][-60:]:
+    if "eastern" in low and "pacific" in low:
+        return "epac"
+    if "central north pacific" in low:
         return "cpac"
     if "pacific" in low:
         return "epac"
@@ -674,8 +679,13 @@ def list_issuances(basin: str, year: int) -> list[dict]:
     try:
         path, _rec = fetch(_index_key(product, int(year)), url,
                            note=f"NHC {product} {year} per-issuance text archive listing")
-    except Exception:
-        return []
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return []          # the archive genuinely has no such year -- see coverage_gap
+        raise
+    # Any other failure -- DNS, timeout, 5xx -- is re-raised on purpose. Returning [] for a
+    # network outage would tell the live pipeline that NHC published nothing today, which is
+    # a fabricated fact about the world dressed up as an empty result.
     html = path.read_text(errors="replace")
     out: list[dict] = []
     seen = set()
@@ -723,8 +733,10 @@ def index_source_record(basin: str, year: int) -> SourceRecord | None:
     url = f"{ARCHIVE_BASE}/{product}/{int(year)}/"
     try:
         _path, rec = fetch(_index_key(product, int(year)), url)
-    except Exception:
-        return None
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            return None
+        raise
     return rec
 
 
