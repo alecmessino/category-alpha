@@ -42,18 +42,27 @@ The scan that produced them walked https://www.nhc.noaa.gov/archive/text/{TWOAT,
          BECOMING A TROPICAL CYCLONE DURING THE NEXT 48 HOURS."  Values are 10-percent
          increments plus the special phrase "NEAR 0 PERCENT".
 
-  ERA 3  2013 .. 2022              FIVE-DAY probability added beside the 48-hour one; the
-         layout moves from prose to bullets during 2014:
+  ERA 3  2013-08-01 .. 2023-05     FIVE-DAY probability added beside the 48-hour one, in
+         BOTH basins on the same day (TWOEP.201308011131, TWOAT.201308011749). The product
+         announced it in advance and called it experimental in its own words: "FIVE-DAY
+         FORMATION PROBABILITIES ARE EXPERIMENTAL IN 2013". The layout moves from prose to
+         bullets during 2014:
             "* Formation chance through 48 hours...low...20 percent"
             "* Formation chance through 5 days...medium...40 percent"
-         2013 labels its five-day numbers EXPERIMENTAL in the product itself; they are
-         parsed and carried, and the caller can filter on the issuance date.
          Mixed case replaces ALL CAPS during 2015. A trailing period on the bullet appears
          and disappears; both are handled.
 
-  ERA 4  2023 ..                   SEVEN-DAY replaces five-day: "through 7 days". Areas
-         acquire a title line ("South of Mexico:", "Central Tropical Atlantic (AL92):") and
-         an "Active Systems:" block that is NOT an area.
+  ERA 3b 2022-05-22 ..             AREAS ACQUIRE TITLES: "North Central Gulf of Mexico:",
+         "East-Central Pacific well offshore of Southwestern Mexico:", and an "Active
+         Systems:" block that is NOT an area. This is a SEPARATE boundary from the seven-day
+         one and it is the boundary that matters for `disturbance_key`: measured across 553
+         sampled 2021 issuances, not one carried a titled area; the first is
+         TWOAT.202205222311 (2022-05-22 23:11Z), TWOEP.202205231133 the next morning.
+
+  ERA 4  2023-05-15 ..             SEVEN-DAY replaces five-day: "through 7 days", first in
+         the season-opening quiet sentence (TWOAT.202305151124). Invest designators start
+         appearing inside the titles -- "Central Tropical Atlantic (AL92)" -- first observed
+         TWOEP.202307091138 (EP93); zero in 547 sampled 2022 issuances.
 
 THE TRAP THAT FOLLOWS FROM THIS: `prob_7d_pct` is a column whose HORIZON CHANGED. A 40% in
 2015 is a five-day forecast; a 40% in 2024 is a seven-day forecast. `horizon_days` on every
@@ -208,10 +217,10 @@ ARCHIVE_COVERAGE = {
     "cpac": (2013, 2013),
 }
 
-# The three era boundaries this parser was built against, as UTC instants, each taken from
-# the first real file exhibiting the change. They are constants so a query can date-filter
-# on them instead of re-deriving them, and so a future re-scan that disagrees is a visible
-# diff rather than a silent behaviour change.
+# The era boundaries this parser was built against, as UTC instants, each taken from the
+# first real file exhibiting the change. They are constants so a query can date-filter on
+# them instead of re-deriving them, and so a future re-scan that disagrees is a visible diff
+# rather than a silent behaviour change.
 #
 # NOTE ON WHAT "FIRST OBSERVED" MEANS: an outlook only shows a probability when there is a
 # disturbance to attach one to, so these are upper bounds on the day NHC changed the
@@ -227,6 +236,14 @@ FIRST_FIVE_DAY_UTC = datetime(2013, 8, 1, 11, 31, tzinfo=timezone.utc)       # T
 # not expected during the next 7 days" sentence -- which is published whether or not a
 # disturbance exists, so this one is the change date, not an upper bound on it.
 FIRST_SEVEN_DAY_UTC = datetime(2023, 5, 15, 11, 24, tzinfo=timezone.utc)     # TWOAT.202305151124
+# When areas started carrying a published title, which is what makes a `ttl:` disturbance
+# key possible at all. Before this instant every archived area falls back to the unstable
+# per-issuance key, and no amount of parsing changes that -- the identifier is not in the
+# product. Zero titled areas in 553 sampled 2021 issuances; first is TWOAT.202205222311.
+FIRST_TITLED_AREA_UTC = datetime(2022, 5, 22, 23, 11, tzinfo=timezone.utc)   # TWOAT.202205222311
+# When invest designators started appearing inside those titles. Zero in 547 sampled 2022
+# issuances. This is the earliest an `inv:` key can exist.
+FIRST_INVEST_IN_TITLE_UTC = datetime(2023, 7, 9, 11, 38, tzinfo=timezone.utc)  # TWOEP.202307091138
 
 # From this issuance the eastern Pacific outlook covers the central Pacific as well.
 # Established by binary search on the coverage line across TWOEP 2025.

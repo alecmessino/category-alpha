@@ -124,12 +124,18 @@ def _storms_entering(subbasins: list[str], base) -> set:
     `genesis_subbasins=` is available for the strict genesis-basin question, and is named so it
     cannot be reached for by accident.
     """
-    key = (tuple(sorted(subbasins)), str(base))
+    # Keyed on the track_points ROWS OBJECT, not just the arguments: a rebuild inside one
+    # process (the daily job does exactly that -- build, then query) would otherwise be served
+    # a membership set computed from the previous archive. A stale cache that returns the right
+    # SHAPE of answer from the wrong data is the kind of bug that never surfaces as an error.
+    rows = _rows("track_points", base)
+    key = (tuple(sorted(subbasins)), str(base), id(rows))
     hit = _ENTERED_CACHE.get(key)
     if hit is not None:
         return hit
     want = set(subbasins)
-    out = {tp["storm_id"] for tp in _rows("track_points", base) if tp.get("subbasin") in want}
+    out = {tp["storm_id"] for tp in rows if tp.get("subbasin") in want}
+    _ENTERED_CACHE.clear()          # single-entry: the archive rarely changes mid-process
     _ENTERED_CACHE[key] = out
     return out
 
