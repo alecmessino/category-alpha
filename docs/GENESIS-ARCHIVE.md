@@ -112,7 +112,7 @@ multiplication because they are sequential conditionals, not independent events:
     P(reaches Cat 1) = P(forms) × P(reaches Cat 1 | forms) ≈ 0.50 × 0.16 ≈ 8%
 
 The landfall question does **not** decompose that way — see
-[the joint-probability note](#5-a-6-hourly-track-cannot-tell-a-traverse-from-a-centre-relocation)
+[the joint-probability note](#6-a-6-hourly-track-cannot-tell-a-traverse-from-a-centre-relocation)
 — which is why the archive counts storms that did both rather than multiplying two marginals.
 Note also that several of these analogs reached Cat 3+ and none reached Hawaii: systems forming
 at that longitude tend to track west, south of the islands.
@@ -293,7 +293,7 @@ the `detection` column on every landfall row says which produced it (`hurdat2_L_
 `segment_crossing`). Any Hawaii rate computed from `L` records alone would be wrong by an order
 of magnitude while looking authoritative.
 
-### 4b. What the polygon detector finds, and how far to trust the coastline
+### 5. What the polygon detector finds, and how far to trust the coastline
 
 Run over the 213 archived storms with any fix in the Hawaii box, the crossing detector returns
 **19 crossings**, and the ones at hurricane strength are exactly the two in the historical
@@ -338,7 +338,7 @@ missed. `closest_approach_km` is returned on every crossing so a near-miss is vi
 than silently absent, and Hawaii's polygons carry only 651 vertices across 14 islands, so
 per-island geometry is coarse.
 
-### 5. A 6-hourly track cannot tell a traverse from a centre relocation
+### 6. A 6-hourly track cannot tell a traverse from a centre relocation
 
 Documented from a real incident on this project in `docs/PLAN-TRACK-MODEL.md`: seven of nine
 "landfall" ensemble members in one cycle crossed an island only because a straight line between
@@ -347,7 +347,7 @@ that dissipates east of an island and reforms west of it is **not** a landfall. 
 therefore carries `implied_speed_kt` and `suspect_relocation`, and suspect crossings are
 excluded from rates but **kept in the table** so the exclusion is auditable.
 
-### 6. Basin and subbasin mean less than they look like
+### 7. Basin and subbasin mean less than they look like
 
 - The IBTrACS "EP" file is not EP-pure: it contains every storm with *any* point in EP,
   including **341 storms whose genesis was in the West Pacific** (dateline crossers) and 18 in
@@ -358,7 +358,7 @@ excluded from rates but **kept in the table** so the exclusion is auditable.
   `get_analogs(subbasins=["CP"])` therefore means **"was ever here"**; the strict question is
   `genesis_subbasins=`, named so it cannot be reached for by accident.
 
-### 7. Known SHIPS mapping caveats
+### 8. Known SHIPS mapping caveats
 
 - `ohc_kj_cm2` is SHIPS **COHC**, which the official predictor file defines as a
   *climatological* ocean heat content. The analysed field is `NOHC`.
@@ -369,7 +369,7 @@ excluded from rates but **kept in the table** so the exclusion is auditable.
 - 167 of 32,842 SHIPS records (0.5%) carry an ATCF id IBTrACS never adopted. They are kept with
   `storm_id` NULL so the gap is countable; they never match an analog query.
 
-### 8. Provisional data
+### 9. Provisional data
 
 2025–2026 seasons are `US-PROVISIONAL`/`PROVISIONAL` in IBTrACS — not yet post-analysed, and
 their intensities will change. They are excluded from analog pools by default
