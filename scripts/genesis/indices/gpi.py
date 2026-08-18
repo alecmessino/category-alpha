@@ -157,6 +157,22 @@ REFUSED = "none"
 #: unknown scaling as far as this module is concerned, and gets None, not a guess.
 VORT_SCALING_CONFIRMED_SOURCES = frozenset({"ships_dev"})
 
+#: env_source prefixes whose vorticity DECADE is supported by measurement rather than by the
+#: publisher's documentation. This is a weaker warrant than the set above and is kept separate
+#: so it can never be mistaken for it.
+#:
+#: 'ships_rt' is NHC's operational SHIPS. That product publishes units in the row label for
+#: shear, SST, potential intensity, 200 mb T, RH and heat content -- but NOT for '850 MB ENV
+#: VOR'. The developmental decade was adopted after comparing 37 live tau=0 rows against the
+#: archive's 32,842 developmental rows: the labelled control fields agree (SST 28.2 vs 27.9
+#: median, RH 59 vs 60), and the two unlabelled fields share the developmental decade and
+#: range, with 200 MB DIV showing an identical upper bound of 233. That establishes the
+#: DECADE. It does not establish identical calibration, and every value computed from such a
+#: row says so in its method string.
+VORT_SCALING_INFERRED_SOURCES = frozenset({"ships_rt"})
+INFERRED_NOTE = ("vorticity decade INFERRED from distribution against ships_dev, not read from "
+                 "a published unit; decade evidenced, calibration not")
+
 #: See "SOUTHERN HEMISPHERE" in the module docstring. Flip only with a citation in hand.
 REFUSE_SOUTHERN_HEMISPHERE_SHIPS = True
 
@@ -429,7 +445,8 @@ def gpi_for_environment_row(row) -> tuple[float | None, str]:
     env_source = field("env_source")
     # 'ships_dev+csst' -> 'ships_dev'; a None env_source stays unconfirmed.
     src = (env_source or "").split("+", 1)[0]
-    confirmed = src in VORT_SCALING_CONFIRMED_SOURCES
+    inferred = src in VORT_SCALING_INFERRED_SOURCES
+    confirmed = src in VORT_SCALING_CONFIRMED_SOURCES or inferred
 
     lat = _finite(field("lat"))
     if confirmed and REFUSE_SOUTHERN_HEMISPHERE_SHIPS and lat is not None and lat < 0.0:
@@ -452,6 +469,10 @@ def gpi_for_environment_row(row) -> tuple[float | None, str]:
         rh_layer=ARCHIVE_RH_LAYER,
         vort_scaling_confirmed=confirmed,
     )
+    if confirmed and inferred and value is not None:
+        # A value computed on the weaker warrant must SAY so in the same column that carries
+        # the method, so a query can separate documented from inferred without a join.
+        method += f"; {INFERRED_NOTE} (env_source={env_source!r})"
     if not confirmed:
         # gpi() owns the refusal; this only names the source that could not be vouched for.
         method += f" (env_source={env_source!r}; verified sources: "

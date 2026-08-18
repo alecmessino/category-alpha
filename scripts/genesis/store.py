@@ -36,7 +36,10 @@ from .schema import ALL_TABLES
 TABLE_KEYS = {
     "storms": ("storm_id",),
     "track_points": ("storm_id", "iso_time"),
-    "environment": ("storm_id", "iso_time", "env_source", "lead_hours"),
+    # atcf_id is IN THE KEY because live rows have no storm_id yet. Two invests sharing a
+    # synoptic hour would otherwise collide on (None, iso_time, 'ships_rt', 0.0) and one would
+    # silently replace the other -- losing an environment vector rather than storing it.
+    "environment": ("storm_id", "atcf_id", "iso_time", "env_source", "lead_hours"),
     "genesis_events": ("storm_id",),
     "landfalls": ("storm_id", "landfall_utc", "region", "detection"),
     # Deliberately keyed on the OBSERVATION, not the disturbance: two issuances about the

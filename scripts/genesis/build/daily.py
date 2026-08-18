@@ -221,6 +221,44 @@ def run_daily(*, archive_dir=None, link_km: float = LINK_KM,
     if updates:
         append("daily_disturbances", updates, base)
 
+    # ---- 6. live environment: operational SHIPS for every active system ---------------
+    #
+    # APPEND-ONLY AND ACCUMULATING. ftp.nhc.noaa.gov/atcf/stext/ holds only the current
+    # season, so these rows exist going forward and can never be back-filled. Capturing them
+    # on every run is the only way the archive ever gets a live-era environment record.
+    env_added = env_systems = 0
+    try:
+        from ..sources import ships_rt
+        pairs = ships_rt.fetch_latest()
+        by_atcf = {}
+        for s_ in read_table("storms", base).to_pylist():
+            if s_.get("atcf_id"):
+                by_atcf[s_["atcf_id"]] = s_["storm_id"]
+        rows_env = []
+        for run, text in pairs:
+            got = ships_rt.environment_rows(
+                text, source_key=f"ships_rt:{run['filename']}",
+                storm_id=by_atcf.get(run["atcf_id"]), url=run["url"])
+            rows_env.extend(got)
+            if got:
+                env_systems += 1
+        if rows_env:
+            # GPI where the inputs allow it; the module refuses on its own terms.
+            try:
+                from ..indices import gpi as _gpi
+                for r in rows_env:
+                    r["gpi"], r["gpi_method"] = _gpi.gpi_for_environment_row(r)
+            except Exception:
+                pass
+            _p2, env_added, _r2 = append("environment", rows_env, base)
+        say(f"  live SHIPS: {env_systems} systems, {env_added} new environment rows")
+    except Exception as exc:                                   # noqa: BLE001
+        gaps.append(Gap(key="ships_rt", what="operational SHIPS unreachable",
+                        why=f"{type(exc).__name__}: {exc}",
+                        url="https://ftp.nhc.noaa.gov/atcf/stext/",
+                        impact="no live environment captured this run; env_vector "
+                               "conditioning on active systems is unavailable").as_dict())
+
     snap = snapshot(base)
     out = {
         "ran_utc": observed_utc.isoformat(),
@@ -228,6 +266,8 @@ def run_daily(*, archive_dir=None, link_km: float = LINK_KM,
         "rows_added": added,
         "resolved_developed": resolved,
         "marked_dissipated": dissipated,
+        "live_env_systems": env_systems,
+        "live_env_rows_added": env_added,
         "snapshot": str(snap),
         "gaps": gaps,
         "note": ("positions come from the graphical outlook; prose locations are never "

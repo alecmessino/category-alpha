@@ -345,6 +345,47 @@ def test_unscoreable_is_stated():
           "does NOT decompose" in text)
 
 
+def test_live_ships_rt():
+    """Operational SHIPS: units are in the labels, and LONG(DEG W) must be negated."""
+    from genesis.sources import ships_rt
+    fixture = Path(__file__).with_name("fixture_ships_rt.txt")
+    if not fixture.exists():
+        check("ships_rt: fixture present", False, "fixture_ships_rt.txt missing")
+        return
+    text = fixture.read_text()
+    p = ships_rt.parse(text)
+    eq("ships_rt: header ATCF id", p["header"]["atcf_id"], "CP012026")
+    check("ships_rt: times parsed", p["times"][:3] == [0, 6, 12], str(p["times"][:3]))
+
+    rows = ships_rt.environment_rows(text, source_key="t")
+    eq("ships_rt: one row at tau=0 by default", len(rows), 1)
+    r = rows[0]
+    # THE HAWAII-KILLING TRAP: the product prints degrees WEST as a positive number.
+    check("ships_rt: Central Pacific longitude is NEGATIVE", r["lon"] < 0, str(r["lon"]))
+    eq("ships_rt: longitude magnitude preserved", round(abs(r["lon"]), 1), 165.0)
+    # units come from the row label, so no divisor -- a /10 here would read 0.9 kt
+    eq("ships_rt: shear is knots, not knots*10", r["shear_kt"], 9.0)
+    eq("ships_rt: SST is degrees C, not C*10", r["sst_c"], 27.8)
+    eq("ships_rt: potential intensity in knots", r["pot_intensity_kt"], 142.0)
+    # the unlabelled row IS scaled, to the archive's decade
+    check("ships_rt: vorticity scaled to the archive decade",
+          abs(r["vort850_1e5"] - 0.57) < 1e-9, str(r["vort850_1e5"]))
+    eq("ships_rt: env_source distinguishes live from historical", r["env_source"], "ships_rt")
+
+    # missing markers must never become numbers
+    eq("ships_rt: 'xx.x' is missing, not a number", ships_rt._num("xx.x"), None)
+    eq("ships_rt: 'xxx.x' is missing", ships_rt._num("xxx.x"), None)
+    eq("ships_rt: 'N/A' is missing", ships_rt._num("N/A"), None)
+    eq("ships_rt: 'LOST' is missing", ships_rt._num("LOST"), None)
+
+    # GPI on a live row is permitted but must declare the weaker warrant
+    from genesis.indices import gpi as G
+    val, method = G.gpi_for_environment_row(r)
+    check("ships_rt: GPI computes on a live row", val is not None)
+    check("ships_rt: and its method says the decade was INFERRED",
+          "INFERRED" in (method or ""), (method or "")[-120:])
+
+
 def test_subbasin_semantics():
     """The Iniki trap: a Hawaii question must not be filtered on the GENESIS subbasin.
 
@@ -566,6 +607,7 @@ def main() -> int:
                test_effective_sample_warning,
                test_empty_result_is_explicit,
                test_unscoreable_is_stated,
+               test_live_ships_rt,
                test_min_pool_season, test_scoring_rules, test_contract_resolution,
                test_store_and_schema, test_gtwo_reader):
         print(f"\n{fn.__name__}")

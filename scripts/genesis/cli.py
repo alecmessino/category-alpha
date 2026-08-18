@@ -135,6 +135,31 @@ def cmd_backtest(args) -> int:
     return 0
 
 
+def cmd_live(args) -> int:
+    """Analog query for an active ATCF system, conditioned on its operational SHIPS run."""
+    from genesis.live import analogs_for_live_system, describe_live
+    from genesis.sources import ships_rt
+    if args.list:
+        runs = ships_rt.list_runs()
+        latest = {}
+        for r in runs:
+            latest[r["atcf_id"]] = r
+        print(f"{len(runs)} SHIPS runs published, {len(latest)} systems:")
+        for aid, r in sorted(latest.items()):
+            print(f"   {aid}  newest {r['iso_time']:%Y-%m-%d %H:%M}Z"
+                  f"{'  [INVEST/genesis-series]' if r['is_invest'] else ''}")
+        return 0
+    if not args.atcf:
+        print("give --atcf ID (e.g. CP012026, EP9626) or --list", file=sys.stderr)
+        return 2
+    res, ctx = analogs_for_live_system(
+        args.atcf, radius_km=args.radius, min_sample=args.min_sample,
+        archive_dir=_archive(args), use_environment=not args.no_environment,
+        regions=args.regions.split(",") if args.regions else None)
+    print(describe_live(res, ctx))
+    return 0 if (res is not None and res.n_cases) else 1
+
+
 def cmd_daily(args) -> int:
     from genesis.build.daily import run_daily
     out = run_daily(archive_dir=_archive(args))
@@ -211,6 +236,17 @@ def main(argv=None) -> int:
     t.add_argument("--max-season", type=int)
     t.add_argument("--out")
     t.set_defaults(fn=cmd_backtest)
+
+    lv = sub.add_parser("live", help="analog query for an active system, conditioned on its "
+                                     "operational SHIPS run")
+    lv.add_argument("--atcf", help="ATCF id, e.g. CP012026 or EP9626")
+    lv.add_argument("--list", action="store_true", help="list systems with a published run")
+    lv.add_argument("--radius", type=float, default=500.0)
+    lv.add_argument("--min-sample", type=int, default=10)
+    lv.add_argument("--regions")
+    lv.add_argument("--no-environment", action="store_true",
+                    help="position and season only; do not condition on the live SHIPS vector")
+    lv.set_defaults(fn=cmd_live)
 
     d = sub.add_parser("daily", help="ingest today's NHC outlook and follow open disturbances")
     d.set_defaults(fn=cmd_daily)
