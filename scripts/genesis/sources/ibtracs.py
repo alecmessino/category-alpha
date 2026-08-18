@@ -480,17 +480,45 @@ def is_tropical(usa_status: str | None, nature: str | None) -> bool:
     return nat in TROPICAL_STATUS
 
 
+# Agencies whose "sustained wind" is a 10-MINUTE mean, not the 1-minute mean the
+# Saffir-Simpson scale is defined on. IBTrACS reports each agency's own published value; it
+# does not harmonise the averaging period, and there is no published per-fix conversion.
+TEN_MINUTE_AGENCIES = frozenset({
+    "tokyo", "newdelhi", "reunion", "bom", "nadi", "wellington",
+})
+
+
 def vmax_for(point: dict) -> tuple[float | None, str | None]:
-    """(knots, 'wmo'|'usa'|None) for one normalised point. WMO preferred, never averaged.
+    """(knots, 'wmo'|'usa'|None) for one normalised point. Never averaged, never converted.
+
+    WMO IS PREFERRED, EXCEPT WHERE ITS AVERAGING PERIOD IS WRONG FOR THE SCALE.
+    schema.category_for implements Saffir-Simpson, which is DEFINED on a 1-minute sustained
+    wind. Several WMO agencies publish a 10-minute mean instead, which is systematically lower
+    -- measured on this archive, mean(WMO - USA) = -9.9 kt over the 6,212 East Pacific rows
+    where a JMA WMO wind and a US wind both exist. Bucketing that into Saffir-Simpson is an
+    averaging-period error even though no value was invented: 79 storms get a different
+    lifetime peak, 16 a different max_category, and 8 flip reached_cat3 (BART 1999 reads cat2
+    at 90 kt on the JMA wind and cat5 at 140 kt on the US one).
+
+    The remedy is SOURCE SELECTION, not conversion. The 0.88 factor often quoted is a WMO rule
+    of thumb, not a published per-fix value, and applying it would fabricate numbers. So where
+    the WMO agency reports a 10-minute mean and a US 1-minute value exists, the US value is
+    used and the choice is reported as 'usa'. Where no US value exists the WMO value is still
+    published -- with 'wmo_10min' as its source, so the caller can see what it is holding
+    rather than silently receiving a different quantity.
 
     Returned as a pair because TRACK_POINTS has no column for the wind's provenance and
-    emitting one would break the pyarrow cast. Read the JMA 10-minute warning in the
-    module docstring before trusting a 'wmo' value on a tokyo-agency fix.
+    emitting one would break the pyarrow cast.
     """
-    if point.get("wmo_wind") is not None:
-        return point["wmo_wind"], "wmo"
-    if point.get("usa_wind") is not None:
-        return point["usa_wind"], "usa"
+    wmo = point.get("wmo_wind")
+    usa = point.get("usa_wind")
+    ten_min = str(point.get("wmo_agency") or "").strip().lower() in TEN_MINUTE_AGENCIES
+    if wmo is not None and not ten_min:
+        return wmo, "wmo"
+    if usa is not None:
+        return usa, "usa"
+    if wmo is not None:
+        return wmo, "wmo_10min"
     return None, None
 
 
@@ -576,6 +604,9 @@ def iter_points(path, *, basins=None, include_spurs=False) -> Iterator[dict]:
                 "lon": signed_lon(_num(get(row, "LON"))),
                 "wmo_wind": _num(get(row, "WMO_WIND")),
                 "wmo_pres": _num(get(row, "WMO_PRES")),
+                # Needed to know the WMO wind's AVERAGING PERIOD -- see vmax_for. Without it
+                # a 10-minute JMA wind and a 1-minute US wind are indistinguishable downstream.
+                "wmo_agency": _text(get(row, "WMO_AGENCY")),
                 "usa_wind": _num(get(row, "USA_WIND")),
                 "usa_pres": _num(get(row, "USA_PRES")),
                 "usa_status": _text(get(row, "USA_STATUS")),

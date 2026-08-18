@@ -540,6 +540,23 @@ prior when nothing else is available.
 
 ---
 
+## What independent verification found
+
+Every source parser was written against the real bytes, then handed to a separate reviewer told
+to break it against those same bytes. That pass found defects the author's own testing did not,
+and all of them were the quiet kind — wrong values, not crashes:
+
+| module | defect | why it mattered |
+|---|---|---|
+| `ibtracs` | `IFLAG='V'` rows were labelled **interpolated** | `V` marks a value an agency published at a *non-synoptic* time — in practice HURDAT2's special records. All 64 V-only EP rows match HURDAT2 exactly on position, wind **and** pressure (Kenna's Mexican landfall among them), while all 48,357 P-only rows carry a blank record identifier. **51 of 161 published EP landfall fixes (32%) and 277 of 1,177 in the Atlantic (24%) were mislabelled** — a build filtering on `quality=='observed'` would have dropped a quarter of the real landfall fixes and substituted interpolations for them. |
+| `ibtracs` | JMA **10-minute** winds bucketed by a 1-minute scale | Saffir-Simpson is *defined* on a 1-minute sustained wind. Mean(WMO−USA) = −9.9 kt over 6,212 rows where both exist. 79 storms had a different lifetime peak, 16 a different category, 8 flipped `reached_cat3` — BART 1999 read cat2 at 90 kt on the JMA wind and cat5 at 140 kt on the US one. Fixed by **source selection**, not conversion: where the WMO agency reports a 10-minute mean and a US value exists, the US value is used. The 0.88 factor often quoted is a rule of thumb, not a published per-fix value, and applying it would fabricate numbers. |
+| `hurdat2` | `-99` emitted as an observed wind | The NE Pacific file uses only `-999`; **the Atlantic file also uses `-99`, on 57 fixes across 54 storms (1971–1987)** — and `category_for(-99)` returns `'td'`, laundering a sentinel into a Saffir-Simpson category. Found only because the archive had grown to read both files through one parser. |
+| `ships_dev` | 4 defects, 3 fixed in file | Core science held: all 32,842 records were joined to HURDAT2 on `(atcf_id, iso_time)` and **32,842 matched**, with zero position mismatches in CP and AL. All 12 unit scalings re-extracted from the official PDF and confirmed verbatim. |
+
+The point of recording this is not that the code is now correct — it is that **each of these
+would have produced a plausible number rather than an error**, which is the only failure mode
+that matters in an archive whose entire value is that its numbers are trustworthy.
+
 ## The daily pipeline
 
 `.github/workflows/genesis-archive.yml` runs four times a day, shortly after NHC's 06/12/18/00Z

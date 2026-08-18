@@ -160,7 +160,7 @@ a query can never silently mix a stable key with an unstable one:
                                 log and must not be counted as distinct disturbances. This
                                 is the honest form of "the source does not say". Measured:
                                 every area in TWOEP 2020 and TWOCP 2013 lands here (39 rows
-                                -> 39 keys over 2020-08-20..25; 46 -> 46 over 2013-08-10..16).
+                                -> 39 keys over 2020-08-20..25; 59 -> 59 over 2013-08-10..16).
 
 WHY INVEST BEATS TITLE, WHEN BOTH ARE IMPERFECT. Anchoring on the title keeps a run whole
 across the moment NHC opens an invest; anchoring on the invest splits it there. Measured on
@@ -274,6 +274,15 @@ _LABEL = r"(low|medium|high)"
 #   "near 0 percent"        bottom of scale, every era from 2010
 #   "near zero percent"     CPHC's spelling of the same thing (TWOCP.201307301738)
 #   "near 10 percent"       a hedged point value (TWOAT.201307022344) -- still not a point
+#   "near 100 percent"     THE TOP OF THE SCALE, and the mirror image of "near 0
+#                          percent": 39 statements in the sampled corpus, on systems
+#                          about to be upgraded. It resolves to a NULL probability with
+#                          qualifier "near" for exactly the reason the bottom of the
+#                          scale does -- NHC printed the phrase INSTEAD of a number --
+#                          and it is called out here because the loss is not obvious:
+#                          the rows that go NULL are the highest-confidence ones in the
+#                          table, so a query that drops NULLs silently drops the
+#                          disturbances most likely to have developed.
 #   "less than 30 percent"  2009 category boundary
 #   "30 to 50 percent"      2009 category boundary
 #   "greater than 50 percent" 2009 category boundary
@@ -361,8 +370,19 @@ _RE_PROSE_INVERTED = re.compile(
 # would attribute to NHC a 48-hour forecast it did not make. The statement is carried in
 # `statements_unassigned`. This pattern is tried last: when the horizon form also matches at
 # the same offset, the horizon form wins.
+# The trailing "of"/"that" is optional because the product has published this statement
+# TRUNCATED: TWOCP.201308111746 ends "...DURING THE NEXT 48 HOURS...AND A LOW
+# CHANCE...10 PERCENT." -- a second published value with no horizon and no verb after
+# it. Without this it matched nothing, the block still became an area on the strength
+# of its first statement, and the second value vanished from the output entirely,
+# which is the one thing `unmatched_probability_phrases` cannot catch (it only sees
+# blocks that produced NO area at all). It lands in `statements_unassigned`.
+# The word "chance" stays REQUIRED here. Dropping it would make the 2009 season
+# opener's own definition of the categories -- "LOW...LESS THAN 30 PERCENT...
+# MEDIUM...30 TO 50 PERCENT..." -- parse as three statements and turn NHC's
+# announcement about the product into a tropical disturbance.
 _RE_PROSE_NO_HORIZON = re.compile(
-    _LABEL + r"\s+chance" + _SEP + _VALUE + _SEP + r"(?:of|that)\b", re.I)
+    _LABEL + r"\s+chance" + _SEP + _VALUE + r"(?:" + _SEP + r"(?:of|that)\b)?", re.I)
 
 # Any "percent" the two patterns above did not consume is reported, not swallowed. This is
 # the instrument that found "30 TO 50 PERCENT" (2009 category bounds) and "LESS THAN 30
