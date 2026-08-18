@@ -148,6 +148,17 @@ res.effective_sample_size              # Kish ESS after weighting
 | `landfalls` | one row per crossing | region, sub-region, time, intensity at landfall, how it was detected |
 | `daily_disturbances` | append-only | every NHC outlook area observed, and its eventual fate |
 
+As built for Atlantic + East/Central Pacific:
+
+| table | rows |
+|---|---|
+| `storms` | 3,959 |
+| `track_points` | 224,153 |
+| `environment` | 32,842 |
+| `genesis_events` | 3,959 |
+| `landfalls` | 4,544 |
+| `daily_disturbances` | grows daily; back-filled from 2023 |
+
 Every row carries `source_key`, `processing_version` and `ingested_utc`. `MANIFEST.json`
 records the URL, SHA-256, byte count and download date of every source file, plus every gap.
 `snapshots/YYYY-MM-DD.json` pins the SHA-256 and row count of each table on that date — a
@@ -168,8 +179,8 @@ otherwise "time to hurricane" would be dated up to three hours early off a wind 
 
 | source | used for | coverage actually verified |
 |---|---|---|
-| **IBTrACS v04r01** (NCEI) | storms, track_points | EP basin file: 1,712 storms / 99,747 points, seasons **1876–2026** |
-| **SHIPS developmental** (CIRA) | environment | AL/EP/CP, **1982–2023**. EP 17,518 + CP 996 records |
+| **IBTrACS v04r01** (NCEI) | storms, track_points | EP + NA basin files: **3,959 storms / 224,153 points**, seasons 1851–2026. Per-basin files are not disjoint (24 storms cross Central America) and are de-duplicated on build. |
+| **SHIPS developmental** (CIRA) | environment | AL/EP/CP **1982–2023**: EP 17,518 + AL 14,328 + CP 996 = **32,842 records** |
 | **HURDAT2** (NHC) | official landfalls, cross-check | NE Pacific 1949–2025 (filename auto-discovered) |
 | **NHC TWO text archive** | pre-genesis | **TWOEP/TWOAT 2003+**, **Central Pacific (HFOCP) 2019+** |
 | **NHC GTWO shapefile** | disturbance *positions* | live, plus an archive: 5,821 NHC issuances from 2023-05-15, 1,367 CPHC from 2022-12 |
@@ -339,7 +350,7 @@ excluded from rates but **kept in the table** so the exclusion is auditable.
   pressure (`PENV`/`PENC`).
 - SHIPS switches input model from CFSR reanalysis (1982–2000) to operational GFS (2001+)
   mid-record, and **no column flags the discontinuity**.
-- 151 of 18,514 SHIPS records (0.8%) carry an ATCF id IBTrACS never adopted. They are kept with
+- 167 of 32,842 SHIPS records (0.5%) carry an ATCF id IBTrACS never adopted. They are kept with
   `storm_id` NULL so the gap is countable; they never match an analog query.
 
 ### 8. Provisional data
