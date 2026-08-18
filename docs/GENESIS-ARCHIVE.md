@@ -498,10 +498,13 @@ the same page as the disturbance.
 
 ```
   368 outlook threads, 85 developed (23.1%), 9811 observations
-  analog skill vs NHC, per disturbance : +26.8%
-  analog skill vs NHC, per observation :  -3.1%
-  NOT STABLE -- the two defensible sampling schemes disagree in SIGN
+  NO SKILL CLAIM -- the per-disturbance and per-observation sampling schemes
+  disagree in SIGN, so the effect is smaller than the choice of scheme.
 ```
+
+**No skill number is printed for this contract.** The two values exist in the JSON for
+diagnosis and are deliberately kept off every human-facing surface until the schemes agree —
+showing either one would present a choice of methodology as a result.
 
 **Two defensible ways to score it give answers of opposite sign, so the archive claims
 nothing.** Scoring one forecast per disturbance (its first appearance in the outlook — the

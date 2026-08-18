@@ -109,6 +109,38 @@ def _wrap180(lon: float) -> float:
     return ((float(lon) + 180.0) % 360.0) - 180.0
 
 
+# A contract needs this many DISTINCT STORMS carrying the outcome, ARCHIVE-WIDE, before any
+# skill claim about it is possible. Same constant the back-test gates on, restated here so the
+# retrieval layer can refuse a claim the harness would also refuse -- the two must never
+# disagree about what is measurable.
+MIN_EVENTS_FOR_SKILL = 10
+
+
+def contract_event_counts(base) -> dict:
+    """Distinct storms per landfall contract across the WHOLE archive, for scoreability.
+
+    THIS IS NOT THE MATCHED SAMPLE. Whether a contract can ever carry a skill number is a
+    property of the record, not of one query: the Hawaii hurricane-landfall contract has ONE
+    event in the modern archive (Iniki), so no query, however framed, can produce a validated
+    probability for it. Counting archive-wide is what lets a single query say so.
+    """
+    key = ("_contract_events", str(base))
+    hit = _ENTERED_CACHE.get(key)
+    if hit is not None:
+        return hit
+    counts: dict = {}
+    for r in _rows("landfalls", base):
+        region = r.get("region")
+        if not region or r.get("suspect_relocation"):
+            continue
+        counts.setdefault(f"{region}:any", set()).add(r["storm_id"])
+        if r.get("hurricane_at_landfall"):
+            counts.setdefault(f"{region}:hurricane", set()).add(r["storm_id"])
+    out = {k: len(v) for k, v in counts.items()}
+    _ENTERED_CACHE[key] = out
+    return out
+
+
 def _storms_entering(subbasins: list[str], base) -> set:
     """Storms that ENTERED any of these subbasins at any point in their life.
 
@@ -229,6 +261,7 @@ class AnalogResult:
     query: dict
     n_cases: int
     env_unmatched_excluded: int
+    unscoreable: dict
     effective_sample_size: float
     sufficient: bool
     min_sample: int
@@ -248,9 +281,31 @@ class AnalogResult:
     def describe(self) -> str:
         """One-screen human summary -- what the CLI and the README print."""
         q = self.query
+        head = (f"ANALOGS  {format_position(q['lat'], q['lon'])}  r={q['radius_km']:.0f} km"
+                f"  months={q.get('season_months') or 'all'}")
+
+        # AN EMPTY RESULT MUST NOT BE PRINTED AS A TABLE OF ZEROES.
+        # Rendering "reached cat1 0/0" and "hawaii any 0/0" for a query that matched nothing
+        # invites the one misreading this whole module exists to prevent: taking "0" for a
+        # measured rate when there is no sample at all. It is also the shape produced by the
+        # commonest user error -- querying an ACTIVE storm's current position, which matches
+        # nothing because storms arrive at those positions rather than forming there.
+        if self.n_cases == 0:
+            return "\n".join([
+                head,
+                "  NO ANALOGS -- 0 storms matched. There is no sample, so there are no rates.",
+                "",
+                "  MATCHING IS ON GENESIS LOCATION ONLY: where a storm FORMED, not where it is",
+                "  now. An active storm's current position will usually match nothing. Query the",
+                "  position where the storm formed, or -- for an outlook area -- the area's own",
+                "  position from the graphical product.",
+                "",
+                "  Widen --radius or --months only if that is a question you actually mean to ask;",
+                "  a wider circle answers a different question, it does not find a missing sample.",
+            ] + [f"  GAP: {g}" for g in self.gaps])
+
         out = [
-            f"ANALOGS  {format_position(q['lat'], q['lon'])}  r={q['radius_km']:.0f} km"
-            f"  months={q.get('season_months') or 'all'}",
+            head,
             f"  matched {self.n_cases} storms   effective sample {self.effective_sample_size:.1f}"
             f"   {'SUFFICIENT' if self.sufficient else 'BELOW MIN SAMPLE -- rates refused'}",
         ]
@@ -278,12 +333,26 @@ class AnalogResult:
                 out.append(f"    {region:<12s} any {r['any']['count']:3d}/{r['any']['n_storms']:<4d}"
                            f" {_fmt(r['any']):<18s}  >=64kt {r['hurricane']['count']:3d}"
                            f" {_fmt(r['hurricane'])}")
+                for kind in ("any", "hurricane"):
+                    u = self.unscoreable.get(f"{region}:{kind}")
+                    if u:
+                        label = ">=64kt" if kind == "hurricane" else "any"
+                        out.append(f"      ! {region} {label}: {u['status']} "
+                                   f"({u['archive_events']} event(s) archive-wide, "
+                                   f"{u['required']} needed). No skill number exists for this.")
         for k, v in self.time_to_event.items():
             if v and v.get("n"):
                 out.append(f"  time to {k}: n={v['n']}  median {v['median']:.0f} h"
                            f"  p25 {v['p25']:.0f}  p75 {v['p75']:.0f}")
         for g in self.gaps:
             out.append(f"  GAP: {g}")
+        out.append("  CONDITIONING: these are GENESIS-CONDITIONED rates -- they assume a "
+                   "tropical cyclone forms.")
+        out.append("    To combine with a formation probability (e.g. NHC's outlook chance), "
+                   "multiply:")
+        out.append("      P(reaches X) = P(forms) x P(reaches X | forms).  Landfall does NOT "
+                   "decompose that way")
+        out.append("      and is counted jointly here, never as a product of two marginals.")
         return "\n".join(out)
 
 
@@ -585,6 +654,24 @@ def get_analogs(
     if unknown_asked:
         gaps.append(f"regions requested but absent from the landfalls table: {unknown_asked}")
     report_regions = sorted(hit_regions | (asked & known))
+
+    # Which of the reported contracts can NEVER carry a skill number, from the record itself.
+    archive_events = contract_event_counts(base)
+    unscoreable = {}
+    for region in report_regions:
+        for kind in ("any", "hurricane"):
+            n = archive_events.get(f"{region}:{kind}", 0)
+            if n < MIN_EVENTS_FOR_SKILL:
+                unscoreable[f"{region}:{kind}"] = {
+                    "archive_events": n,
+                    "required": MIN_EVENTS_FOR_SKILL,
+                    "status": "BASE RATE ONLY -- unscoreable",
+                    "reason": (f"only {n} storm(s) in the entire archive carry this outcome, "
+                               f"below the {MIN_EVENTS_FOR_SKILL} distinct events any skill "
+                               "score requires. A base rate can be quoted with its interval; "
+                               "a calibrated or skill-scored probability cannot, and this "
+                               "archive will not produce one."),
+                }
     landfall = {}
     for region in report_regions:
         any_n = hur_n = 0
@@ -672,6 +759,7 @@ def get_analogs(
                "min_pool_season": min_pool_season},
         n_cases=n_cases,
         env_unmatched_excluded=env_unmatched,
+        unscoreable=unscoreable,
         effective_sample_size=ess,
         sufficient=n_cases >= min_sample,
         min_sample=min_sample,

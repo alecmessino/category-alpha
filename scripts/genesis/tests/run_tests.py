@@ -288,6 +288,63 @@ def test_effective_sample_warning():
     check("ESS warning: the raw gate still reports sufficient", res.sufficient)
 
 
+def test_empty_result_is_explicit():
+    """A query that matches nothing must say so, not print a table of zeroes.
+
+    This is the shape produced by the commonest user error -- querying an ACTIVE storm's
+    current position -- and "0/0" read as a rate is exactly the misreading the archive exists
+    to prevent.
+    """
+    base = Path(tempfile.mkdtemp())
+    _seed_archive(base, n=12, hurricanes=6)
+    res = get_analogs(lat=60.0, lon=-30.0, radius_km=200, min_sample=10, archive_dir=base,
+                      regions=["hawaii"])
+    eq("empty: nothing matches a far-away query", res.n_cases, 0)
+    text = res.describe()
+    check("empty: says NO ANALOGS", "NO ANALOGS" in text, text[:120])
+    check("empty: states that matching is on genesis location only",
+          "GENESIS LOCATION ONLY" in text, text[:200])
+    check("empty: does NOT print a zero rate table",
+          "reached cat1" not in text and "hawaii" not in text.lower().split("genesis")[0],
+          text[:200])
+    check("empty: is not marked sufficient", not res.sufficient)
+
+
+def test_unscoreable_is_stated():
+    """A contract the record cannot support must be marked BASE RATE ONLY, from the data."""
+    base = Path(tempfile.mkdtemp())
+    # 20 storms; 12 reach hawaii, but only 2 of them at hurricane strength
+    _seed_archive(base, n=20, hurricanes=20)
+    prov = dict(source_key="t", processing_version=PROCESSING_VERSION,
+                ingested_utc="2026-01-01T00:00:00Z")
+    lf = []
+    for i in range(12):
+        gt = datetime(2000 + i, 8, 10, tzinfo=UTC)
+        lf.append(dict(storm_id=f"T{i:03d}", atcf_id=f"EP{i:02d}", season=2000 + i,
+                       region="hawaii", sub_region="Kauai",
+                       landfall_utc=gt + timedelta(hours=72), lat=21.9, lon=-159.5,
+                       vmax_kt=(90.0 if i < 2 else 45.0), hurricane_at_landfall=i < 2,
+                       ts_at_landfall=True, detection="hurdat2_L_record",
+                       suspect_relocation=False, **prov))
+    store.write_table("landfalls", lf, base)
+
+    res = get_analogs(lat=12.0, lon=-140.0, radius_km=500, min_sample=5,
+                      archive_dir=base, regions=["hawaii"])
+    eq("unscoreable: the >=64kt contract has 2 archive-wide events",
+       res.unscoreable.get("hawaii:hurricane", {}).get("archive_events"), 2)
+    check("unscoreable: and is marked BASE RATE ONLY",
+          "BASE RATE ONLY" in (res.unscoreable.get("hawaii:hurricane", {}).get("status") or ""))
+    check("unscoreable: the 'any' contract has enough events and is NOT marked",
+          "hawaii:any" not in res.unscoreable, str(res.unscoreable.keys()))
+    text = res.describe()
+    check("unscoreable: describe() says no skill number exists",
+          "No skill number exists" in text, text[-400:])
+    check("describe(): carries the genesis-conditioning note",
+          "GENESIS-CONDITIONED" in text)
+    check("describe(): says landfall does not decompose into a product",
+          "does NOT decompose" in text)
+
+
 def test_subbasin_semantics():
     """The Iniki trap: a Hawaii question must not be filtered on the GENESIS subbasin.
 
@@ -507,6 +564,8 @@ def main() -> int:
     for fn in (test_categories, test_geometry, test_genesis_rules, test_analog_rules,
                test_subbasin_semantics, test_env_unknown_is_not_a_match, test_zero_is_an_answer,
                test_effective_sample_warning,
+               test_empty_result_is_explicit,
+               test_unscoreable_is_stated,
                test_min_pool_season, test_scoring_rules, test_contract_resolution,
                test_store_and_schema, test_gtwo_reader):
         print(f"\n{fn.__name__}")

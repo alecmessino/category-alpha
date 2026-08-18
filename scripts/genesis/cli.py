@@ -62,7 +62,7 @@ def cmd_analogs(args) -> int:
         print(json.dumps(res.as_dict(), indent=2, default=str))
     else:
         print(res.describe())
-        if args.cases:
+        if args.cases and res.n_cases:
             print("\n  closest analogs:")
             for c in res.cases[:args.cases]:
                 print(f"    {c.season} {(c.name or '?'):<12s} {c.atcf_id or '':<9s}"
@@ -118,11 +118,19 @@ def cmd_backtest(args) -> int:
         else:
             print(f"    {label:<28s} NOT SCORED -- {b.get('refused_reason')}")
     st = d.get("stability") or {}
-    a, b = st.get("thread_level_skill_vs_nhc"), st.get("observation_level_skill_vs_nhc")
-    print(f"    analog skill vs NHC, per disturbance : "
-          f"{'n/a' if a is None else format(a, '+.1%')}")
-    print(f"    analog skill vs NHC, per observation : "
-          f"{'n/a' if b is None else format(b, '+.1%')}")
+    # NO SKILL NUMBER IS PRINTED UNLESS THE TWO SAMPLING SCHEMES AGREE IN SIGN.
+    # They currently do not (+26.8% per disturbance, -3.1% per observation), so surfacing
+    # either would be presenting a choice of methodology as a result. The values stay in the
+    # JSON for diagnosis; they do not reach a human-facing surface.
+    if st.get("schemes_agree_in_sign"):
+        a = st.get("thread_level_skill_vs_nhc")
+        b = st.get("observation_level_skill_vs_nhc")
+        print(f"    analog skill vs NHC, per disturbance : {format(a, '+.1%')}")
+        print(f"    analog skill vs NHC, per observation : {format(b, '+.1%')}")
+    else:
+        print("    NO SKILL CLAIM -- the per-disturbance and per-observation sampling schemes")
+        print("    disagree in SIGN, so the effect is smaller than the choice of scheme. The")
+        print("    two values are in the JSON for diagnosis and are deliberately not shown here.")
     print(f"    {st.get('verdict', '')}")
     return 0
 
