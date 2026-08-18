@@ -32,9 +32,12 @@ four times a day. ERA5 is 0.25 degree, hourly. Three consequences, none of them 
     side at the equator; the radius of maximum wind of a hurricane is 20-60 km. Nothing in
     this table describes the storm. It describes the synoptic environment the storm sits
     in, smeared over a cell far larger than the storm.
-  * The nearest-neighbour sample can be up to 1.25 degrees (~140 km) from the position
-    asked for. lat/lon in the returned row is WHERE THE ENVIRONMENT WAS ASKED FOR, not
-    where it was sampled; two track points 200 km apart can return byte-identical values.
+  * The nearest-neighbour sample can be up to 1.25 degrees off in EACH axis, so up to
+    1.77 degrees (~196 km near the equator, less toward the poles because the meridians
+    converge) from the position asked for -- not the ~140 km that 1.25 degrees of latitude
+    alone would suggest. lat/lon in the returned row is WHERE THE ENVIRONMENT WAS ASKED
+    FOR, not where it was sampled; two track points 200 km apart can return byte-identical
+    values.
   * The finite-difference vorticity and divergence below are centred differences over TWO
     cells, i.e. a ~550 km baseline. They are environmental (monsoon trough / ITCZ) vorticity
     at synoptic scale. A SHIPS Z850 is a 0-1000 km storm-relative average with the vortex
@@ -61,7 +64,10 @@ response before the parser was written, and re-checked after):
   * GRID. lat[73] = 90.0 down to -90.0 in steps of -2.5 (DESCENDING -- index 0 is the north
     pole). lon[144] = 0.0 to 357.5 ascending, i.e. degrees EAST, so a signed -180..180
     longitude must be taken modulo 360 before it is used as an index. 140 W -> 220.0 ->
-    index 88.
+    index 88. The longitude axis is a CIRCLE and the nearest-cell search must treat it as
+    one: lon[143] is 357.5 and lon[0] is 0.0, so 359.0 E is 1.0 degree from index 0 and 1.5
+    from index 143. A straight-line search picks 143 and samples a cell 2.4 degrees away.
+    _lon_index() uses grid_index(..., period=360.0); latitude is a line and must not.
   * LEVELS ARE NOT THE SAME FOR EVERY VARIABLE. This is the trap the assignment flagged
     and it is real:
         uwnd, vwnd, air, hgt   level[17] = 1000 925 850 700 600 500 400 300 250 200 150
@@ -282,7 +288,7 @@ def _bump_hits(impact: str) -> str:
 
 # --- pure helpers ------------------------------------------------------------------------
 
-def grid_index(coord_values, target) -> int:
+def grid_index(coord_values, target, *, period: float | None = None) -> int:
     """Index of the coordinate value nearest `target`. NEAREST ONLY -- never interpolates.
 
     Ties go to the LOWER index deterministically (min() keeps the first minimum), so the
@@ -291,20 +297,92 @@ def grid_index(coord_values, target) -> int:
     halfway between two 2.5-degree cells, which on this grid is every point at x.25 or
     x.75 degrees.
 
+    `period` names a CIRCULAR axis (period=360.0 for longitude). Without it the distance is
+    computed on a line, which is wrong at the seam of a circular coordinate: lon[143] is
+    357.5 and lon[0] is 0.0, so a target of 359.0 is 1.0 degree from index 0 and 1.5 degrees
+    from index 143, and a line metric picks 143. Latitude is NOT circular (index -1 is not
+    88.5 S) and must be left with period=None.
+
     Raises ValueError on an empty coordinate array -- there is no nearest cell to a grid
-    that does not exist, and returning 0 would silently read the north pole.
+    that does not exist, and returning 0 would silently read the north pole. Raises
+    ValueError on a non-finite target: NaN compares false against everything, so the loop
+    below would fall through to index 0 and hand back the north pole / the prime meridian
+    for a coordinate that does not exist.
     """
     values = list(coord_values)
     if not values:
         raise ValueError("grid_index: empty coordinate array")
     t = float(target)
+    if t != t or math.isinf(t):
+        raise ValueError("grid_index: non-finite target %r" % (target,))
+
+    def _dist(v: float) -> float:
+        d = abs(v - t)
+        if period is None:
+            return d
+        p = float(period)
+        d %= p
+        return min(d, p - d)
+
     best = 0
-    best_d = abs(float(values[0]) - t)
+    best_d = _dist(float(values[0]))
     for i in range(1, len(values)):
-        d = abs(float(values[i]) - t)
+        d = _dist(float(values[i]))
         if d < best_d:
             best, best_d = i, d
     return best
+
+
+def _lon_index(lon: float) -> int:
+    """Nearest longitude cell ON THE CIRCLE. See grid_index(period=...)."""
+    return grid_index(GRID_LONS, float(lon) % 360.0, period=360.0)
+
+
+def _lat_index(lat: float) -> int:
+    """Nearest latitude cell. Latitude is a line, not a circle; the poles are its ends."""
+    return grid_index(GRID_LATS, lat)
+
+
+def _usable_position(lat, lon) -> bool:
+    """True only if (lat, lon) names a real place on this grid.
+
+    A NaN or an out-of-range latitude must NOT be snapped. NaN compares false against
+    everything, so a naive nearest-neighbour scan falls through to index 0 and returns the
+    NORTH POLE at 0 E -- a fully populated, entirely plausible-looking environment row for a
+    coordinate that does not exist. Latitude outside [-90, 90] would likewise be clamped to
+    a pole while the row still advertised the impossible latitude it was asked for. Both are
+    refused here and recorded, because a manufactured row is worse than a missing one.
+    Longitude is circular, so any finite longitude is legitimate.
+    """
+    try:
+        flat, flon = float(lat), float(lon)
+    except (TypeError, ValueError):
+        _record_gap(
+            "bad_position_type",
+            what="an environment lookup was given a non-numeric position",
+            why="lat/lon must be numbers; a string or None cannot name a grid cell.",
+            impact="Those lookups returned NULL and no cell was sampled.")
+        return False
+    if flat != flat or flon != flon or math.isinf(flat) or math.isinf(flon):
+        _record_gap(
+            "nonfinite_position",
+            what="an environment lookup was given a non-finite lat or lon",
+            why=("NaN/inf cannot be snapped to a grid cell. A nearest-neighbour scan would "
+                 "silently return index 0 -- the north pole at 0 E -- and the row would "
+                 "carry a full set of real-looking numbers for a position that does not "
+                 "exist."),
+            impact="Those rows have NULL reanalysis fields; no cell was substituted.")
+        return False
+    if not -90.0 <= flat <= 90.0:
+        _record_gap(
+            "lat_out_of_range",
+            what="an environment lookup was given a latitude outside [-90, 90]",
+            why=("The grid ends at the poles. Snapping such a request to 90 N or 90 S would "
+                 "publish a polar environment under a latitude the earth does not have "
+                 "(first refused: %.4f)." % flat),
+            impact="Those rows have NULL reanalysis fields.")
+        return False
+    return True
 
 
 def _signed_lon(lon_east: float) -> float:
@@ -446,7 +524,7 @@ def _cache_key(var: _Var, year: int, tidx: int, level_hpa: float | None,
         var.stem, year, tidx, lev, y0, y1, x0, x1)
 
 
-def _http(key: str, url: str, timeout: int) -> str:
+def _http(key: str, url: str, timeout: int, *, force: bool = False) -> str:
     """Fetch one window through provenance.fetch, or read it from the cache.
 
     provenance.fetch already retries transport failures with exponential backoff and does
@@ -454,6 +532,11 @@ def _http(key: str, url: str, timeout: int) -> str:
     verdicts, not weather. retries is held to 3 rather than the default 4 so one dead
     window costs at most ~3*timeout, and MAX_CONSECUTIVE_FAILURES stops the build paying
     that price more than a handful of times.
+
+    `force` re-reads from the server even when the key is cached. It is used ONLY for the
+    .dds of a year that is still growing (see _coverage). provenance.fetch writes through a
+    .part file, so a forced read that fails leaves the cached copy intact and the caller can
+    fall back to it.
     """
     path = CACHE_DIR / key
     cached = path.exists()
@@ -473,7 +556,8 @@ def _http(key: str, url: str, timeout: int) -> str:
         (CACHE_DIR / "ncep_r1").mkdir(parents=True, exist_ok=True)
     # Always through provenance.fetch, cache hit included: it is the only thing that
     # computes the sha256 that MANIFEST.json needs, and on a hit it does no network I/O.
-    got, rec = fetch(key, url, note="ncep_r1 OPeNDAP window", timeout=timeout, retries=3)
+    got, rec = fetch(key, url, note="ncep_r1 OPeNDAP window", timeout=timeout, retries=3,
+                     force=force and not _offline())
     _SOURCES[key] = rec
     text = got.read_text(errors="replace")
     if text.lstrip().startswith("Error {"):
@@ -494,19 +578,47 @@ def _coverage(var: _Var, year: int, timeout: int) -> int | None:
     when this was written uwnd.2026.nc held 304 analyses, i.e. through 2026-03-17 18Z. A
     build that runs in August of that year must be told that plainly, once, with the date
     the record ends -- not discover it 40,000 times.
+
+    THE .dds OF A GROWING YEAR IS NOT CACHEABLE. A finished year's .dds never changes, so
+    reading it off disk forever is free and reproducible. The CURRENT year's file is
+    appended to every few days, and a cached .dds turns that growth into a silent drop:
+    every analysis after the cached end is refused LOCALLY, so the server is never asked,
+    no error is ever seen, and the gap this module publishes states a false end date as if
+    it had been read from the server just now. So for the current year and any later one the
+    stale copy is discarded once per process and re-read from the live server. Under
+    GENESIS_OFFLINE the cached copy is all there is, and it is used -- but the bound it
+    produces is then explicitly a cached bound, and that is what the gap says.
     """
     memo = (var.stem, year)
     if memo in _COVERAGE:
         return _COVERAGE[memo]
     url = "%s.dds" % _dataset_url(var, year)
     key = "ncep_r1/%s.%d.dds" % (var.stem, year)
+    growing = year >= _dt.datetime.now(_dt.timezone.utc).year and not _offline()
     try:
-        text = _http(key, url, timeout)
+        text = _http(key, url, timeout, force=growing)
     except urllib.error.HTTPError as exc:
         if exc.code == 404:
             _COVERAGE[memo] = None
             return None
         raise _WindowError("HTTP %s reading %s" % (exc.code, url)) from exc
+    except Exception:
+        if not (growing and (CACHE_DIR / key).exists()):
+            raise
+        # The forced re-read failed but a cached .dds survives. Use it and SAY SO -- the end
+        # date it implies may already be behind the server.
+        text = _http(key, url, timeout)
+        _record_gap(
+            "stale_coverage_%d" % year,
+            what="the coverage bound for the %d files came from a cached .dds, not the "
+                 "live server" % year,
+            why=("%d is the current year or later, so its NCEP R1 files are still being "
+                 "appended to. The .dds could not be re-read this run, so the end-of-record "
+                 "date used to refuse out-of-range times is the one cached earlier." % year),
+            impact=("Analyses the server has published SINCE that cached .dds are refused "
+                    "locally and appear as NULL rows. Re-run with the server reachable to "
+                    "pick them up."),
+            url=url)
     m = re.search(r"time\s*=\s*(\d+)", text)
     if not m:
         raise _WindowError("no time dimension in %s" % url)
@@ -739,9 +851,11 @@ def fetch_point(variable: str, when: _dt.datetime, lat: float, lon: float,
             impact=("Those rows have NULL reanalysis fields. Ask on a synoptic hour "
                     "(first refused: %s)." % when_utc.isoformat()))
         return None
+    if not _usable_position(lat, lon):
+        return None
 
-    ilat = grid_index(GRID_LATS, lat)
-    ilon = grid_index(GRID_LONS, float(lon) % 360.0)
+    ilat = _lat_index(lat)
+    ilon = _lon_index(lon)
     try:
         cells = _tile(variable, when_utc, level_hpa, ilat, ilon, timeout)
     except _WindowError as exc:
@@ -911,9 +1025,12 @@ def environment_at(lat: float, lon: float, when: _dt.datetime, *, source_key: st
             impact=("Those rows have NULL reanalysis fields. Ask on a synoptic hour "
                     "(first refused: %s)." % when_utc.isoformat()))
         return row
+    if not _usable_position(lat, lon):
+        _record_missing_field_reasons()
+        return row
 
-    ilat = grid_index(GRID_LATS, lat)
-    ilon = grid_index(GRID_LONS, float(lon) % 360.0)
+    ilat = _lat_index(lat)
+    ilon = _lon_index(lon)
 
     def tile(var: str, level: float | None):
         try:
@@ -941,6 +1058,12 @@ def environment_at(lat: float, lon: float, when: _dt.datetime, *, source_key: st
             du, dv = cu200 - cu850, cv200 - cv850
             row["shear_kt"] = math.hypot(du, dv) * MS_TO_KT
             row["shear_dir_deg"] = math.degrees(math.atan2(du, dv)) % 360.0
+
+    # u200_kt is a SINGLE-LEVEL reading and must not be gated on the 850 hPa windows the
+    # shear needs. Publishing NULL for a value the server did return -- because an unrelated
+    # window failed -- is a silent drop, not caution.
+    if u200:
+        cu200 = u200.get(here)
         if cu200 is not None:
             row["u200_kt"] = cu200 * MS_TO_KT
 
@@ -1105,22 +1228,31 @@ def gaps() -> list[Gap]:
             key=ENV_SOURCE,
             what="these columns are NOT drop-in replacements for the ships_dev columns of "
                  "the same name, and the difference was MEASURED, not assumed",
-            why=("30 SHIPS CP developmental records at tau=0 were run through "
-                 "environment_at() at the same lat, lon and time and compared column by "
-                 "column: shear_kt median 11.6 kt (SHIPS) vs 16.6 kt (ncep_r1), median "
-                 "difference +3.1 kt, Pearson r=0.74. vort850_1e5 median 0.34 vs 2.55 "
-                 "(1e-5 s^-1), r=0.35. rh_mid_pct median 55.0 vs 57.5 percent, median "
-                 "difference -4.0, PEARSON r = -0.00 -- similar distributions and NO "
-                 "point-by-point relationship at all, which is what you get when a "
-                 "700-500 hPa layer average over a 200-800 km storm-relative annulus is "
-                 "set beside a single 600 hPa level in one 2.5 degree cell."),
-            impact=("Pooling env_source='ships_dev' and env_source='ncep_r1' rows in one "
-                    "humidity comparison is comparing two unrelated numbers; for shear and "
-                    "vorticity it is comparing related numbers with a scale offset. Match "
-                    "ncep_r1 rows against ncep_r1 rows. n=30, so these are magnitudes, not "
-                    "a calibration -- and no correction factor is published here, because "
-                    "fitting one from 30 points and applying it to the archive would be "
-                    "manufacturing agreement that the sources do not have."),
+            why=("150 SHIPS CP developmental records at tau=0, drawn at random from the "
+                 "996 in the cached file, were run through environment_at() at the same "
+                 "lat, lon and time and compared column by column. Every difference below "
+                 "is stated in ONE direction, ncep_r1 minus ships_dev, as a median of the "
+                 "paired differences (which is not the difference of the two medians). "
+                 "shear_kt: SHIPS median 11.7 kt, ncep_r1 15.0 kt, median difference "
+                 "+4.4 kt, Pearson r=+0.66. vort850_1e5: 0.40 vs 2.07, +1.64, r=+0.49. "
+                 "rh_mid_pct: 55.5 vs 49.5 percent, -8.0, r=+0.16. u200_kt: -2.0 vs -2.1, "
+                 "+0.2, r=+0.88 -- the one column where the two sources nearly agree, "
+                 "because U200 is a plain gridded single-level wind in both. t200_c: "
+                 "-53.4 vs -51.8, +1.6, r=+0.66. tpw_mm: 59.8 vs 46.2, -11.9, r=+0.39, the "
+                 "SHIPS column being a 0-200 km storm-centred average and this one a single "
+                 "2.5 degree cell. div200_1e7: 36.5 vs 53.7, +18.8, r=+0.47. Humidity is "
+                 "the weakest link of the set and the reason is structural: a 700-500 hPa "
+                 "layer average over a 200-800 km storm-relative annulus is not a single "
+                 "600 hPa level in one 2.5 degree cell."),
+            impact=("Match ncep_r1 rows against ncep_r1 rows. Pooling env_source across a "
+                    "humidity comparison pools two columns that share only about 3 percent "
+                    "of their variance (r=+0.16); for shear, vorticity, divergence and "
+                    "temperature it pools related numbers carrying a scale offset; only "
+                    "u200_kt is close to interchangeable. These are magnitudes from n=150, "
+                    "not a calibration: at n=30 the humidity correlation alone ranges from "
+                    "-0.40 to +0.61 across random subsets, which is why no correction "
+                    "factor is published here -- fitting one and applying it to the archive "
+                    "would be manufacturing agreement the sources do not have."),
         ),
         Gap(
             key=ENV_SOURCE,
@@ -1148,8 +1280,8 @@ def _demo() -> None:
     row = environment_at(lat, lon, when, source_key="ncep_r1.2020")
     elapsed = _time.time() - t0
 
-    ilat = grid_index(GRID_LATS, lat)
-    ilon = grid_index(GRID_LONS, lon % 360.0)
+    ilat = _lat_index(lat)
+    ilon = _lon_index(lon)
     print("request  : lat %.2f lon %.2f (%s)  %s" % (lat, lon, _signed_lon(lon), when))
     print("sampled  : lat %.1f lon %.1f (= %.1f) -> lat idx %d, lon idx %d, time idx %d"
           % (GRID_LATS[ilat], GRID_LONS[ilon], _signed_lon(GRID_LONS[ilon]),

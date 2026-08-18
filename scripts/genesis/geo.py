@@ -305,7 +305,12 @@ def _inside(poly, px, py):
     interior holes alike -- and taking the parity of the total crossing count is already
     correct for holes: a point inside a lake crosses the outer ring once and the lake ring
     once, an even number, so it reports outside. There is no separate hole branch to get
-    wrong. (Natural Earth's admin polygons do carry holes -- enclaves and inland water.)
+    wrong. Natural Earth's admin layers do publish holes -- 95 of the 8,525 polygons in
+    ne_10m_admin_1_states_provinces and 13 of the 4,269 in ne_10m_admin_0_map_units have
+    more than one ring -- but MEASURED ON THE COMMITTED FILES, none of the 511 polygons
+    this archive loads has any: 511 polygons, 511 rings. So the hole branch is correct and
+    is also, today, dead code. Do not delete it on that evidence: it goes live the moment
+    a region is added whose source polygon carries an enclave.
 
     The `(y > py) != (y1 > py)` half-open comparison is what stops a vertex that lies
     exactly on the ray from being counted twice, which is the classic way this algorithm
@@ -596,6 +601,35 @@ def _num(value):
     return None if f != f else f
 
 
+def _out_lon(lon):
+    """Publish a longitude in the archive's signed -180..180 frame.
+
+    WHY THIS EXISTS. Every calculation in this module is longitude-convention agnostic:
+    `distance_km`, `_poly_xy` and the candidate bounding-box test all difference through
+    `_wrap180`, so a track handed to `crossings` in continuous 0..360 east longitude --
+    which is exactly what IBTrACS publishes (3,786 rows across 375 storms in
+    .genesis-cache/ibtracs.EP.csv carry LON > 180; John 1994 starts at LON 266.9, i.e.
+    93.1 W) and what many ATCF a-decks and foreign best tracks publish -- lands on the
+    same polygons and yields the same crossings. But the OUTPUT was not agnostic: a
+    `segment_crossing` position comes out of `_gc_interp`, which is always signed, while a
+    `bracketing_fix` position is the published fix echoed verbatim. Feed such a track in
+    and the same result list carried lon = -159.5 on one row and lon = +204.6 on the next
+    -- two conventions in one column, and +204.6 is not a longitude schema.LANDFALLS or
+    tests/validate_archive.py (which bounds landfalls.lon to [-180, 180]) will accept.
+
+    A value already inside [-180, 180] is returned BIT-IDENTICAL -- `((lon+180) % 360)-180`
+    is not the identity in floating point (-155.4 comes back as -155.40000000000001), and
+    a `bracketing_fix` position must stay the source's own published number to the last
+    bit. Only an out-of-range value is wrapped. Same rule, deliberately, as
+    `genesis.sources.ibtracs.signed_lon`.
+    """
+    if lon is None:
+        return None
+    if -180.0 <= lon <= 180.0:
+        return lon
+    return ((lon + 180.0) % 360.0) - 180.0
+
+
 def _lerp(a, b, f):
     """Linear interpolation that propagates absence instead of filling it.
 
@@ -612,12 +646,25 @@ def crossings(track_points, regions, *, max_implied_speed_kt: float = 40.0) -> l
     """Every coastline crossing along an ordered track.
 
     `track_points` is an ordered list of dicts with keys iso_time, lat, lon, vmax_kt,
-    mslp_mb, stage. iso_time may be a datetime or an ISO-8601 string; `stage` is read but
-    not returned (the caller already holds the track and can look it up).
+    mslp_mb. iso_time may be a datetime or an ISO-8601 string.
 
-    Returns one dict per crossing:
+    Returns one dict per crossing, and these eleven keys are the whole of it:
         region, sub_region, iso_time (aware UTC datetime), lat, lon, vmax_kt, mslp_mb,
         detection, implied_speed_kt, suspect_relocation, closest_approach_km
+
+    `stage` IS NOT READ AND IS NOT RETURNED. Saying so explicitly because
+    schema.LANDFALLS has a `stage` column and the obvious way to fill it -- lifting
+    c.get("stage") off one of these dicts -- silently yields None on every row, which is
+    how a NOT-published-here becomes an all-NULL column in the archive. A caller that
+    wants `stage` (and `category`, which is likewise not returned) must take it from the
+    track it already holds: for `detection='bracketing_fix'` the event is the published
+    fix at `iso_time`, so that fix's own stage is the answer; for `segment_crossing` the
+    event is between two published fixes and there is no published stage at that instant
+    -- use the bracketing fixes' common value if they agree and NULL if they do not,
+    which is the same no-invention rule `_lerp` applies to wind and pressure.
+
+    LONGITUDE IS PUBLISHED SIGNED, -180..180, ON EVERY ROW regardless of the convention
+    the track arrived in -- see `_out_lon`. Latitude and every distance are unaffected.
 
     A CROSSING IS A TRANSITION OF THE LAND UNION, NOT OF ONE POLYGON. The test is whether
     the path went from being inside NO loaded polygon to being inside SOME loaded polygon.
@@ -787,7 +834,7 @@ def crossings(track_points, regions, *, max_implied_speed_kt: float = 40.0) -> l
                 "sub_region": poly["name"],
                 "iso_time": ev_t,
                 "lat": ev_lat,
-                "lon": ev_lon,
+                "lon": _out_lon(ev_lon),
                 "vmax_kt": ev_v,
                 "mslp_mb": ev_p,
                 "detection": detection,
@@ -1278,6 +1325,46 @@ def _selfcheck() -> int:
               (evg[1]["region"], evg[1]["sub_region"], evg[1]["detection"]),
               ("conus", "Louisiana", "bracketing_fix"))
         check("inland fix keeps its own published wind", evg[1]["vmax_kt"], 70.0)
+
+    print("\n9. the same track in 0..360 east longitude, as IBTrACS publishes it")
+    # IBTrACS keeps each track's longitude CONTINUOUS rather than folded to -180..180:
+    # 3,786 rows over 375 storms in .genesis-cache/ibtracs.EP.csv carry LON > 180 (John
+    # 1994 opens at 266.9 = 93.1 W). genesis.sources.ibtracs.signed_lon folds them before
+    # they reach here, but this module is a public entry point and the docstring invites
+    # a-deck and foreign best tracks, which are not folded by anybody. The geometry is
+    # convention-agnostic; the published position must not be. Both detections are
+    # exercised because they take different code paths to a longitude.
+    # Hilo, 19.7297 N 155.09 W: a slow 2-hourly traverse puts a fix ashore on the Big
+    # Island (bracketing_fix); a 6-hourly leg jumps it (segment_crossing).
+    t_sig = [{"iso_time": base + timedelta(hours=2 * i), "lat": 19.60,
+              "lon": -154.60 - 0.3589 * i, "vmax_kt": 70.0, "mslp_mb": 980.0}
+             for i in range(8)]
+    t_360 = [dict(p, lon=p["lon"] + 360.0) for p in t_sig]
+    ev_s = crossings(t_sig, regions)
+    ev_3 = crossings(t_360, regions)
+    check("same crossing count either way", (len(ev_s), len(ev_3) == len(ev_s)),
+          (len(ev_s), True))
+    check("...and it is a real one", len(ev_s) >= 1, True)
+    if ev_s and len(ev_s) == len(ev_3):
+        # NOT bit-identical, and it cannot be: the caller's own `lon + 360` already
+        # perturbed the value before this module saw it (-154.9589 + 360 - 360 is
+        # -154.95889999999997). Agreement to 1e-9 deg is 0.1 mm. What IS bit-exact is the
+        # in-range case below, which is the one that matters -- a track that arrives
+        # already signed is republished untouched.
+        check("0..360 in -> same signed position (<1e-9 deg)",
+              all(abs(a["lon"] - b["lon"]) < 1e-9 for a, b in zip(ev_3, ev_s)), True)
+        check("every published longitude is in -180..180",
+              all(-180.0 <= e["lon"] <= 180.0 for e in ev_s + ev_3), True)
+        check("detections match", [e["detection"] for e in ev_3],
+              [e["detection"] for e in ev_s])
+    # A signed longitude must come back BIT-IDENTICAL: -155.4 through the wrap arithmetic
+    # is -155.40000000000001, and a bracketing_fix row is meant to be the source's own
+    # published number to the last bit.
+    check("in-range longitude is untouched", _out_lon(-155.4), -155.4)
+    check("...and identical to the literal", _out_lon(-155.4) == -155.4, True)
+    check("204.6 -> -155.4", round(_out_lon(204.6), 10), -155.4)
+    check("-180 and 180 are both left alone",
+          (_out_lon(-180.0), _out_lon(180.0)), (-180.0, 180.0))
 
     print("\n%s  (%d failure%s)" % ("ALL CHECKS PASSED" if not fails else "CHECKS FAILED",
                                     fails, "" if fails == 1 else "s"))

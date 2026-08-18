@@ -74,14 +74,17 @@ zero humidity: 549 of the 559 EP zeros sit below 24 deg C SST and only 2 above 2
 of those on rows whose SST is climatological (env_source 'ships_dev+csst'). That is the
 signature of the PI equation's own cold-water cutoff, though note the predictor document does
 not state a cutoff, so "VMPI = 0 means the ocean cannot support a storm" is inference from the
-values, not a quoted definition. None means something different and stronger: the archive does
-not know. Returning 0.0 for an unknown would put a "genesis impossible" claim into the archive
-that no source ever made, so every path here returns None with a reason instead, and the reason
-travels in the method string.
+values, not a quoted definition -- and the inference is not a clean threshold either: measured
+over ships.AL.txt, 71 tau=0 rows have SST below 20 deg C and a NON-zero VMPI (down to SST
+13.9 deg C with VMPI 13 kt), so do not read "VMPI = 0" as "SST < 20" or the reverse. None
+means something different and stronger: the archive does not know. Returning 0.0 for an
+unknown would put a "genesis impossible" claim into the archive that no source ever made, so
+every path here returns None with a reason instead, and the reason travels in the method
+string.
 
 WHAT THE OUTPUT LOOKS LIKE ON REAL BYTES, so a scaling regression is obvious. Running
 gpi_for_environment_row over every tau=0 row of the cached SHIPS files (all inputs present, 0
-refusals): CP 996 rows, median 3.74, max 33.8; EP 17,518 rows, median 4.94, max 92.9; AL
+refusals): CP 996 rows, median 3.72, max 33.8; EP 17,518 rows, median 4.94, max 92.9; AL
 14,328 rows, median 4.86, max 107.1. An order-of-magnitude departure from those medians means
 a unit conversion moved, not that the weather changed.
 
@@ -95,8 +98,9 @@ SOUTHERN HEMISPHERE IS REFUSED FOR SHIPS ROWS. The predictor document quoted abo
 Z850 as "850 hPa vorticity" with no hemisphere convention. Operational SHIPS-family products
 for southern basins are frequently sign-flipped so that positive means cyclonic; if that is
 so and we add a negative f to a positive-cyclonic value, |eta| comes out ~200x too small at
-15S. The cached files are AL/EP/CP only -- verified: LAT over every raw record in
-ships.EP.txt and ships.AL.txt spans 7.1N to 51.9N, no southern row exists -- so nothing is
+15S. The cached files are AL/EP/CP only -- verified over the LAT row of every raw record in
+ALL THREE cached files (32,842 records, 0 negative values): ships.EP.txt spans 7.1N-43.1N,
+ships.AL.txt 7.2N-51.9N and ships.CP.txt 2.6N-39.1N, so no southern row exists -- nothing is
 lost today, and REFUSE_SOUTHERN_HEMISPHERE_SHIPS below is the one place to flip once
 somebody verifies the convention against a published document.
 
@@ -163,8 +167,31 @@ REFUSE_SOUTHERN_HEMISPHERE_SHIPS = True
 # VMPI 0-193 kt (EP) and 0-183 kt (AL), so nothing real is excluded here.
 RH_MIN_PCT, RH_MAX_PCT = 0.0, 100.0
 
+# EVERY input needs a ceiling, not just the humidity, and the reason is arithmetic. A SHIPS
+# missing-value token that escapes a parser arrives here as 9999 (or -999) in the source's own
+# units, and only the humidity one is self-evidently absurd. Measured, with the value a leaked
+# 9999 would have produced through gpi_for_environment_row():
+#
+#   vort850_1e5 = 9999   -> eta 0.09999 s^-1     -> GPI    610,621   (looks like a super-index)
+#   vort850_1e5 = -999   -> eta -0.00999 s^-1    -> GPI     19,195
+#   pot_intensity_kt=9999-> V_pot 5144 m/s       -> GPI  1,440,210
+#   shear_kt = 9999      -> V_shear 5144 m/s     -> GPI    4.5e-05   (looks like "no genesis")
+#
+# The near-zero one is the dangerous one: it is indistinguishable from the real, published
+# GPI = 0 of a cold-water row. So the bounds below are ceilings with large but finite headroom
+# over anything the physical world produces, sized from the cached files (tau=0, 32,842 rows):
+# max |Z850| 3.67e-5 s^-1, max VMPI 193 kt = 99.3 m/s, max SHDC 84.4 kt = 43.4 m/s. Every real
+# row clears them by two orders of magnitude in the vorticity and by a factor of 1.5-3 in the
+# other two, and every sentinel form seen in this family of files is caught.
+VORT_ABS_MAX_S1 = 5.0e-3   # 136x the largest cached |Z850|; a 0-1000 km average is never this
+PI_MAX_MS = 150.0          # 292 kt; well above the ~100 m/s ceiling of Emanuel's own PI
+SHEAR_MAX_MS = 150.0       # 292 kt of 850-200 hPa shear does not occur in the atmosphere
+
 
 # --- small helpers -------------------------------------------------------------------------
+
+#: Type names that mean "this is a flag, not a measurement". See _finite().
+_BOOL_TYPE_NAMES = frozenset({"bool", "bool_", "bool8"})
 
 
 def _finite(value) -> float | None:
@@ -175,8 +202,17 @@ def _finite(value) -> float | None:
     computed value in most query engines -- it would read as "we computed something" when we
     did not. bool is rejected explicitly because `True` would otherwise become 1.0 and a
     stray flag would be published as a humidity.
+
+    THE BOOLEAN TEST IS ON THE TYPE NAME, NOT ONLY isinstance. numpy's boolean is NOT a
+    subclass of bool (and in numpy 2.x it is not a numbers.Real either), so
+    `isinstance(x, bool)` lets numpy.bool_(True) straight through to float() -> 1.0.
+    Measured with numpy 2.4.6 installed in this environment: a numpy True arriving as
+    rh_mid_pct produced a humidity of 1 % and a GPI of 1.26e-05 -- a fabricated near-zero
+    that reads exactly like a real cold-water GPI. Any type whose name is bool is refused,
+    which covers Python bool, numpy.bool_ (type name 'bool' in numpy 2, 'bool_' in numpy 1)
+    and the same pattern in the other array libraries, without importing any of them.
     """
-    if value is None or isinstance(value, bool):
+    if value is None or isinstance(value, bool) or type(value).__name__ in _BOOL_TYPE_NAMES:
         return None
     try:
         v = float(value)
@@ -326,8 +362,22 @@ def gpi(*, vort850_s1, rh_pct, pot_intensity_ms, shear_ms, lat_deg,
     if shear < 0.0:
         return None, (f"{REFUSED}; shear magnitude {shear} m/s is negative -- a magnitude cannot be, "
                       f"so this is a shear component or a sentinel, not |V_shear|")
+    if shear > SHEAR_MAX_MS:
+        return None, (f"{REFUSED}; shear magnitude {shear} m/s exceeds {SHEAR_MAX_MS} m/s -- not a "
+                      f"deep-layer shear (largest cached SHDC is 43.4 m/s), so this is a unit error "
+                      f"or a missing-value sentinel that survived parsing; a value this large would "
+                      f"drive GPI to ~0, which is indistinguishable from a real cold-water zero")
     if vpot < 0.0:
         return None, f"{REFUSED}; potential intensity {vpot} m/s is negative, which is non-physical"
+    if vpot > PI_MAX_MS:
+        return None, (f"{REFUSED}; potential intensity {vpot} m/s exceeds {PI_MAX_MS} m/s -- above "
+                      f"anything the Emanuel PI produces (largest cached VMPI is 99.3 m/s), so this "
+                      f"is a unit error or a missing-value sentinel that survived parsing")
+    if abs(zeta) > VORT_ABS_MAX_S1:
+        return None, (f"{REFUSED}; 850 hPa relative vorticity {zeta} s^-1 exceeds "
+                      f"{VORT_ABS_MAX_S1} s^-1 in magnitude -- not a 0-1000 km area average "
+                      f"(largest cached |Z850| is 3.67e-05 s^-1), so this is a unit error or a "
+                      f"missing-value sentinel that survived parsing")
 
     # 4. The index itself, one factor per line, in the order the paper writes them.
     eta = absolute_vorticity(zeta, lat)          # relative + f, s^-1; f added explicitly there
@@ -526,6 +576,50 @@ if __name__ == "__main__":
     # K. Southern hemisphere SHIPS row: refused while the sign convention is undocumented.
     v, m = gpi_for_environment_row(dict(real_cp01, lat=-11.0))
     show("K southern hemisphere SHIPS row", v, m, None)
+
+    # L-N. A missing-value token that escaped the parser reaches the row entry point in the
+    #      SOURCE's units. Before the ceilings existed these produced, respectively, 1,440,210,
+    #      610,621 and 4.5e-05 -- two of them look like a record-breaking environment and the
+    #      third is indistinguishable from a real published cold-water GPI of 0. All three must
+    #      be None, and the reason must name the field.
+    v, m = gpi_for_environment_row(dict(real_cp01, pot_intensity_kt=9999.0))
+    show("L VMPI sentinel 9999 kt", v, m, None)
+    if "potential intensity" not in m:
+        failures.append("L: refusal does not name the potential intensity")
+
+    v, m = gpi_for_environment_row(dict(real_cp01, vort850_1e5=9999.0))
+    show("M Z850 sentinel 9999", v, m, None)
+    if "vorticity" not in m:
+        failures.append("M: refusal does not name the vorticity")
+
+    v, m = gpi_for_environment_row(dict(real_cp01, shear_kt=9999.0))
+    show("N shear sentinel 9999 kt", v, m, None)
+    if "shear" not in m:
+        failures.append("N: refusal does not name the shear")
+
+    # O. The other sentinel form in this family of files, -999, in the one column whose sign
+    #    is legitimately negative -- so only the MAGNITUDE ceiling can catch it.
+    v, m = gpi_for_environment_row(dict(real_cp01, vort850_1e5=-999.0))
+    show("O Z850 sentinel -999", v, m, None)
+
+    # Q. A numpy-style boolean must not become a humidity of 1 %. numpy is not imported here
+    #    (this module has no dependencies), so the stand-ins below reproduce exactly what
+    #    _finite() sees: a type named 'bool' (numpy 2) or 'bool_' (numpy 1) that is not a
+    #    subclass of Python bool but does convert through float() to 1.0.
+    class bool_:                      # numpy 1.x spelling
+        def __float__(self): return 1.0
+
+    np2_bool = type("bool", (), {"__float__": lambda self: 1.0})   # numpy 2.x spelling
+    v, m = gpi_for_environment_row(dict(real_cp01, rh_mid_pct=bool_()))
+    show("Q numpy-1 style bool as humidity", v, m, None)
+    v, m = gpi_for_environment_row(dict(real_cp01, rh_mid_pct=np2_bool()))
+    show("Q2 numpy-2 style bool as humidity", v, m, None)
+
+    # P. The ceilings must not touch the largest values the cached files really contain:
+    #    |Z850| 3.67e-5 s^-1 (AL), VMPI 193 kt (EP), SHDC 84.4 kt (EP), all in one row.
+    v, m = gpi_for_environment_row(dict(real_cp01, vort850_1e5=3.67, pot_intensity_kt=193.0,
+                                        shear_kt=84.4))
+    show("P cached extremes still compute", v, m, 3.601239873)
 
     # --- component checks -----------------------------------------------------------------
 

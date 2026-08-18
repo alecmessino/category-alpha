@@ -26,6 +26,7 @@ import traceback
 from pathlib import Path
 
 from ..provenance import ARCHIVE_DIR, Gap, Manifest, PROCESSING_VERSION, fetch, _now
+from ..schema import category_for
 from ..store import append, snapshot, summary, write_table
 from .genesis_events import build_genesis_events, summarise_storms
 
@@ -269,8 +270,10 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
         if geo is not None and regions and points:
             def _cross():
                 by_storm: dict = {}
+                stage_at: dict = {}
                 for p in points:
                     by_storm.setdefault(p["storm_id"], []).append(p)
+                    stage_at[(p["storm_id"], p["iso_time"])] = p.get("stage")
                 have = {(r["storm_id"], r.get("region")) for r in landfalls}
                 out = []
                 now = _now()
@@ -289,7 +292,18 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
                             "landfall_utc": c.get("iso_time"), "lat": c.get("lat"),
                             "lon": c.get("lon"), "vmax_kt": c.get("vmax_kt"),
                             "mslp_mb": c.get("mslp_mb"),
-                            "category": None, "stage": c.get("stage"),
+                            # `category` is a pure function of a wind already on the row, so
+                            # deriving it invents nothing -- and the HURDAT2 path fills it, so
+                            # leaving it NULL here made the same column mean two things.
+                            "category": category_for(c.get("vmax_kt")),
+                            # `stage` is NOT returned by geo.crossings -- c.get("stage") read a
+                            # key that never existed and silently produced NULL on every row.
+                            # For a bracketing_fix the crossing IS a published fix, so its
+                            # stage is looked up from the track by exact timestamp. For a
+                            # segment_crossing there is no published stage at that instant and
+                            # it stays NULL rather than being carried over from a neighbour.
+                            "stage": (stage_at.get((sid, c.get("iso_time")))
+                                      if c.get("detection") == "bracketing_fix" else None),
                             "hurricane_at_landfall": (None if c.get("vmax_kt") is None
                                                       else c["vmax_kt"] >= 64),
                             "ts_at_landfall": (None if c.get("vmax_kt") is None
