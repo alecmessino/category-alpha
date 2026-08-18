@@ -99,8 +99,9 @@ export function Atlas() {
     setPlaying(false);
   }, []);
 
-  // Handle for the interaction checks, alongside __ATLAS_MAP. Nothing in the app reads it.
+  // Handles for the interaction checks, alongside __ATLAS_MAP. Nothing in the app reads them.
   React.useEffect(() => { globalThis.__ATLAS_SELECT = selectStorm; }, [selectStorm]);
+  React.useEffect(() => { globalThis.__ATLAS_SET_CURSOR = setCursorMs; }, []);
 
   const onProbe = React.useCallback((lat, lon) => {
     setSelected(null);
