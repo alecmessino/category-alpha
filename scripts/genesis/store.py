@@ -145,9 +145,16 @@ def connect(base: Path | None = None):
 
 
 def snapshot(base: Path | None = None, *, stamp: str | None = None) -> Path:
-    """Write a dated snapshot manifest pinning the exact bytes of every table."""
+    """Write a snapshot manifest pinning the exact bytes of every table.
+
+    ONE PER RUN, NOT ONE PER DAY. The stamp carries the hour and minute because the daily job
+    fires four times a day and each run appends genuinely new rows -- a date-only stamp meant
+    the fourth run silently overwrote the pin of the first three, so three quarters of the
+    day's provenance was lost. A snapshot is a few hundred bytes; the history it buys is the
+    ability to say which exact bytes any past answer was computed from.
+    """
     base = base or ARCHIVE_DIR
-    stamp = stamp or today()
+    stamp = stamp or _now().replace(":", "").replace("-", "")[:13]  # YYYYMMDDTHHMM
     entry = {
         "snapshot": stamp,
         "written_utc": _now(),

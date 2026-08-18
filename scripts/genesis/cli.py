@@ -167,6 +167,23 @@ def cmd_daily(args) -> int:
     return 0
 
 
+def cmd_emit(args) -> int:
+    """Regenerate the terminal's Analog Prior payload (docs/data/analogs.json)."""
+    from genesis.emit_panel import build_payload, write
+    p = build_payload(archive_dir=_archive(args), radius_km=args.radius,
+                      min_sample=args.min_sample,
+                      regions=args.regions.split(",") if args.regions else
+                      ("hawaii", "mexico", "conus"))
+    path = write(p, Path(args.out) if args.out else None)
+    live = sum(1 for e in p["entries"] if e["kind"] == "live_system")
+    outlook = sum(1 for e in p["entries"] if e["kind"] == "outlook_area")
+    print(f"wrote {path} ({path.stat().st_size:,} B) -- {live} live system(s), "
+          f"{outlook} outlook area(s)")
+    for n in p["notes"]:
+        print(f"  note: {n}")
+    return 0
+
+
 def cmd_summary(args) -> int:
     base = _archive(args)
     print(json.dumps(summary(base), indent=2))
@@ -250,6 +267,13 @@ def main(argv=None) -> int:
 
     d = sub.add_parser("daily", help="ingest today's NHC outlook and follow open disturbances")
     d.set_defaults(fn=cmd_daily)
+
+    em = sub.add_parser("emit", help="regenerate the terminal's Analog Prior payload")
+    em.add_argument("--radius", type=float, default=500.0)
+    em.add_argument("--min-sample", type=int, default=10)
+    em.add_argument("--regions")
+    em.add_argument("--out")
+    em.set_defaults(fn=cmd_emit)
 
     s = sub.add_parser("summary", help="row counts and manifest header")
     s.set_defaults(fn=cmd_summary)

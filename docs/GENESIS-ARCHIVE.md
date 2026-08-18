@@ -579,6 +579,83 @@ The point of recording this is not that the code is now correct — it is that *
 would have produced a plausible number rather than an error**, which is the only failure mode
 that matters in an archive whose entire value is that its numbers are trustworthy.
 
+## Live conditioning
+
+Everything above is historical. The environment table stops in 2023 (SHIPS developmental) and
+the reanalysis fallback stops 2026-03-17, so until now nothing could supply an `env_vector` for
+a system that exists **today**. NHC's operational SHIPS closes that, and the decisive property
+is its coverage: it runs per ATCF system, and that **includes invests**.
+
+Measured on the live directory (`ftp.nhc.noaa.gov/atcf/stext/`): **390 runs across 37 systems,
+177 of them 90–99 invests or 80–89 genesis candidates**. A disturbance therefore acquires an
+environment vector at roughly the moment NHC starts numbering it.
+
+```bash
+python3 scripts/genesis/cli.py live --list              # systems with a published run
+python3 scripts/genesis/cli.py live --atcf CP012026 --regions hawaii
+```
+
+```
+LIVE ANALOGS  CP012026  SHIPS run 2026-08-18 00:00Z
+  position used: 14.9N 145.0W  (genesis)
+  current position 20.3N 165.0W is NOT queried -- matching is on genesis location
+  env_vector: shear_kt=9, rh_mid_pct=41, sst_c=27.8, pot_intensity_kt=142, ohc_kj_cm2=25, ...
+  CAVEAT: the env_vector is OPERATIONAL SHIPS; the pool it matches is DEVELOPMENTAL SHIPS.
+```
+
+### It is a different product from the pool it matches
+
+The live vector is **operational** SHIPS; the archive's environment is **developmental** SHIPS.
+The operational product publishes its units in the row label (`SHEAR (KT)`, `SST (C)`,
+`POT. INT. (KT)`) — so applying the developmental divisors would be wrong by a factor of ten on
+shear and SST — but it publishes **no unit** for `850 MB ENV VOR` or `200 MB DIV`.
+
+Rather than assume the developmental decade, it was measured: 37 live tau=0 rows against the
+archive's 32,842 developmental rows.
+
+| field | live median | archive median | |
+|---|---|---|---|
+| `sst_c` | 28.2 | 27.9 | control — unit published in the label |
+| `rh_mid_pct` | 59 | 60 | control |
+| `shear_kt` | 16.0 | 12.5 | control |
+| `850 MB ENV VOR` (raw) | range [−102, 116] | range [−180, 367] | **no published unit** |
+| `200 MB DIV` (raw) | range [−44, **233**] | range [−141, **233**] | **no published unit** |
+
+The controls agree and both unlabelled fields share the developmental decade and range — the
+200 mb divergence upper bound is identical at 233. **That establishes the decade. It does not
+establish identical calibration**, and 37 rows from one synoptic hour never could.
+
+So `gpi.py` gained a second, deliberately weaker tier. `VORT_SCALING_CONFIRMED_SOURCES` still
+means "verified against the publisher's own documentation" and still contains only `ships_dev`;
+`VORT_SCALING_INFERRED_SOURCES` contains `ships_rt`, and every GPI computed from such a row
+carries this in its own `gpi_method` column:
+
+```
+vorticity decade INFERRED from distribution against ships_dev, not read from a published
+unit; decade evidenced, calibration not (env_source='ships_rt')
+```
+
+Filter on `env_source` before comparing the two quantitatively. A quantile-mapping layer between
+the products would make them safely mixable and **does not exist yet** — this is an honest
+statement of the problem, not a solution to it.
+
+### Which position a live query uses
+
+`get_analogs` matches on **genesis** location, so `live.py` does not guess:
+
+- a system already in the best track → its **archived genesis position**, and the panel says the
+  current position was not queried
+- an invest with no track yet → its **current position**, which for a disturbance is the right
+  one, because that is where a system like it forms
+
+### Three limits, stated
+
+| limit | consequence |
+|---|---|
+| `stext` holds only the current season | live environment accumulates **forward** from the day the daily job starts; it can never be back-filled |
+| SHIPS runs per ATCF system | an outlook area with no number yet has **no** vector. Position-and-season conditioning still works |
+| operational ≠ developmental | decade evidenced, calibration not. Never pool `env_source` values |
+
 ## The daily pipeline
 
 `.github/workflows/genesis-archive.yml` runs four times a day, shortly after NHC's 06/12/18/00Z

@@ -57,6 +57,12 @@ jobs:
           python3 scripts/genesis/cli.py build --basins EP --ships-basins EP,CP
           python3 scripts/genesis/cli.py gaps
 
+      # The terminal reads this file same-origin; regenerating it here is what keeps the
+      # board's Analog Prior panel in step with the archive it describes. It is written
+      # AFTER the ingest so it reflects the disturbances this run just observed.
+      - name: Regenerate the terminal's Analog Prior payload
+        run: python3 scripts/genesis/cli.py emit
+
       # Reports rather than gates: official best-track data legitimately contains values
       # that look wrong, and refusing to commit because NOAA published something surprising
       # would make the archive less faithful. The findings land in the job log where a human
@@ -69,7 +75,7 @@ jobs:
         run: |
           git config user.name  "genesis-archive-bot"
           git config user.email "genesis-archive-bot@users.noreply.github.com"
-          git add data/genesis-archive
+          git add data/genesis-archive docs/data/analogs.json
           if git diff --cached --quiet; then
             echo "no archive change"
             exit 0
