@@ -78,9 +78,9 @@ python3 scripts/genesis/cli.py analogs --lat 16 --lon -134 --radius 900 \
 That single ≥64 kt case is **Iniki**, and the ~142 h median transit is the real travel time from
 the East Pacific genesis belt to the islands.
 
-Brackets are Wilson 95% intervals. Note how wide they are: 26 storms is a real sample for
-"does it become a hurricane" and a thin one for anything rarer. That is the point of printing
-them — see [Refusals](#refusals-are-a-feature).
+Brackets throughout are Wilson 95% intervals, and their width is the point: 24 storms is a
+real sample for "does it become a hurricane" and a thin one for anything rarer — see
+[Refusals](#refusals-are-a-feature).
 
 ### Using it on a live disturbance
 
@@ -169,7 +169,7 @@ instead of duplicating the archive.
 
 IBTrACS publishes 3-hourly positions between the 6-hourly observations, and the off-synoptic
 ones are **interpolated by IBTrACS**, carrying a wind value held over from the observation.
-Measured here: **50,807 observed vs 48,326 interpolated** points. They are all stored, and
+Measured here: **113,925 observed vs 109,562 interpolated** points. They are all stored, and
 marked, and **an interpolated point is never allowed to establish a threshold crossing** —
 otherwise "time to hurricane" would be dated up to three hours early off a wind nobody measured.
 
