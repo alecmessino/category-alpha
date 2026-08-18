@@ -212,6 +212,7 @@ DIV_HPA = 200.0
 # --- module state: caches, provenance, gaps ---------------------------------------------
 
 _TILE_MEMO: dict[tuple, dict] = {}          # in-process memo, so one build re-reads nothing
+_COVERAGE: dict[tuple[str, int], int | None] = {}   # (stem, year) -> number of analyses
 _SOURCES: dict[str, SourceRecord] = {}      # every window fetched, for MANIFEST.json
 _DYNAMIC_GAPS: dict[str, Gap] = {}          # deduped by a stable id, not by message
 _STATE = {"consecutive_failures": 0, "breaker_open": False}
@@ -241,6 +242,31 @@ def _record_gap(gap_id: str, what: str, why: str, impact: str, url: str = "") ->
 
 
 _HITS_RE = re.compile(r"\[hits: (\d+)\]$")
+
+# Distinct causes must not be merged into one gap. Deduping a whole build's failures under
+# 'window for uwnd at 850 hPa could not be read' would let 'the 1900 file does not exist'
+# and 'that time is past the end of the 2026 file' share one entry, and only the first
+# reason would ever be published -- absence reported imprecisely is barely better than
+# absence not reported.
+_CAUSES = (
+    ("does not exist on the server", "missing_year"),
+    ("is outside that record", "past_end"),
+    ("is not published at", "unpublished_level"),
+    ("has no levels", "unpublished_level"),
+    ("GENESIS_OFFLINE", "offline"),
+    ("breaker open", "breaker"),
+    ("unregistered variable", "unknown_variable"),
+    ("HTTP ", "http_status"),
+    ("DAP Error", "dap_error"),
+    ("returned", "grid_mismatch"),
+)
+
+
+def _cause_tag(message: str) -> str:
+    for needle, tag in _CAUSES:
+        if needle in message:
+            return tag
+    return "transport"
 
 
 def _bump_hits(impact: str) -> str:
@@ -451,6 +477,39 @@ def _http(key: str, url: str, timeout: int) -> str:
     return text
 
 
+def _coverage(var: _Var, year: int, timeout: int) -> int | None:
+    """How many 6-hourly analyses the year file actually publishes, or None if there is no
+    such file. Read from the .dds, which is a few hundred bytes and is itself cached.
+
+    WHY THIS EXISTS, AND THE BUG IT FIXES. Without it, asking for a time past the end of the
+    published record produces HTTP 400 'Bad Projection Request: stop >= size' -- one round
+    trip per variable per point, forever, and (before this check) enough consecutive
+    failures to trip the outage breaker and NULL out the rest of a build over what is
+    really a coverage boundary, not an outage. The current year is short by construction:
+    when this was written uwnd.2026.nc held 304 analyses, i.e. through 2026-03-17 18Z. A
+    build that runs in August of that year must be told that plainly, once, with the date
+    the record ends -- not discover it 40,000 times.
+    """
+    memo = (var.stem, year)
+    if memo in _COVERAGE:
+        return _COVERAGE[memo]
+    url = "%s.dds" % _dataset_url(var, year)
+    key = "ncep_r1/%s.%d.dds" % (var.stem, year)
+    try:
+        text = _http(key, url, timeout)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            _COVERAGE[memo] = None
+            return None
+        raise _WindowError("HTTP %s reading %s" % (exc.code, url)) from exc
+    m = re.search(r"time\s*=\s*(\d+)", text)
+    if not m:
+        raise _WindowError("no time dimension in %s" % url)
+    n = int(m.group(1))
+    _COVERAGE[memo] = n
+    return n
+
+
 def _load_window(var: _Var, when: _dt.datetime, level_hpa: float | None,
                  y0: int, y1: int, x0: int, x1: int, timeout: int) -> dict:
     """One request. Returns {(lat_idx, lon_idx): value|None} for the requested window.
@@ -463,6 +522,21 @@ def _load_window(var: _Var, when: _dt.datetime, level_hpa: float | None,
     """
     year = when.year
     tidx = _time_index(when)
+
+    # Refuse out-of-coverage times LOCALLY, with the date the record actually ends, rather
+    # than letting the server say 'stop >= size' once per variable per point.
+    steps = _coverage(var, year, timeout)
+    if steps is None:
+        raise _WindowError("%s does not exist on the server (no such year)"
+                           % _dataset_url(var, year))
+    if not 0 <= tidx < steps:
+        last = (_dt.datetime(year, 1, 1, tzinfo=_dt.timezone.utc)
+                + _dt.timedelta(hours=ANALYSIS_STEP_HOURS * (steps - 1)))
+        raise _WindowError(
+            "%s publishes %d analyses, ending %s; %s is outside that record"
+            % (_dataset_url(var, year), steps, last.strftime("%Y-%m-%d %HZ"),
+               when.strftime("%Y-%m-%d %HZ")))
+
     level_idx = None
     if level_hpa is not None:
         if var.levels is None:
@@ -582,7 +656,11 @@ def _tile(var_name: str, when: _dt.datetime, level_hpa: float | None,
         for x0, x1 in _lon_runs(lon_first, lon_count):
             cells.update(_load_window(var, when, level_hpa, y0, y1, x0, x1, timeout))
     except urllib.error.HTTPError as exc:
-        _fail()
+        # A 4xx is an ANSWER -- 'that level does not exist', 'that year does not exist' --
+        # and it will be identical next time, so it must not count toward the outage
+        # breaker. A 5xx is the server failing, which is what the breaker is for.
+        if exc.code >= 500:
+            _fail()
         msg = "HTTP %s from %s" % (exc.code, _dataset_url(var, when.year))
         _TILE_MEMO[memo_key] = {"error": msg}
         raise _WindowError(msg) from exc
@@ -661,7 +739,7 @@ def fetch_point(variable: str, when: _dt.datetime, lat: float, lon: float,
     try:
         cells = _tile(variable, when_utc, level_hpa, ilat, ilon, timeout)
     except _WindowError as exc:
-        _record_gap("window_%s_%s" % (variable, level_hpa),
+        _record_gap("window_%s_%s_%s" % (variable, level_hpa, _cause_tag(str(exc))),
                     what="reanalysis window for %s%s could not be read"
                          % (variable, "" if level_hpa is None else " at %g hPa" % level_hpa),
                     why=str(exc),
@@ -836,7 +914,7 @@ def environment_at(lat: float, lon: float, when: _dt.datetime, *, source_key: st
             return _tile(var, when_utc, level, ilat, ilon, 120)
         except _WindowError as exc:
             _record_gap(
-                "window_%s_%s" % (var, level),
+                "window_%s_%s_%s" % (var, level, _cause_tag(str(exc))),
                 what="reanalysis window for %s%s could not be read"
                      % (var, "" if level is None else " at %g hPa" % level),
                 why=str(exc),
@@ -950,9 +1028,9 @@ def sources() -> list[SourceRecord]:
 
     Additive to the four functions the assignment names: without it a build cannot record
     where these numbers came from, and an unrecorded source is exactly what provenance.py
-    exists to forbid. Windows read from a pre-existing cache carry an empty sha256 -- the
-    file is on disk under .genesis-cache/ncep_r1/ and can be hashed by the build; claiming
-    a hash we did not compute on this run would be a fabricated field.
+    exists to forbid. Every entry carries the sha256 of the exact bytes the values were
+    read from, cache hits included, so a re-run can prove the server has not silently
+    re-issued the window.
     """
     return sorted(_SOURCES.values(), key=lambda r: r.key)
 

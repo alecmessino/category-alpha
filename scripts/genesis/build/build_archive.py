@@ -157,6 +157,27 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
                          "IBTrACS basins (a basin not loaded, or a storm IBTrACS did not adopt)"),
                     impact="those environment rows have storm_id NULL and cannot be analog-matched"))
 
+    # The ERA5 gap belongs in the manifest whether or not any reanalysis row is extracted:
+    # the spec asked for ERA5, the archive does not have it, and a reader must be told that
+    # from the archive's own record rather than from a document beside it.
+    rean = _mod("genesis.sources.reanalysis")
+    if rean is not None and hasattr(rean, "gaps"):
+        try:
+            for g in rean.gaps():
+                m.add_gap(g)
+        except Exception as exc:                                # noqa: BLE001
+            m.add_gap(Gap(key="reanalysis_gaps", what="could not read reanalysis gap list",
+                          why=f"{type(exc).__name__}: {exc}",
+                          impact="the ERA5 substitution is undocumented in this manifest"))
+    else:
+        m.add_gap(Gap(
+            key="era5", what="ERA5 along-track extracts are not in this archive",
+            why=("ERA5 is unreachable from this environment: the Copernicus CDS API requires "
+                 "an API key that is not provisioned, and the AWS era5-pds mirror returns "
+                 "HTTP 403. genesis.sources.reanalysis is also not importable."),
+            impact=("environment rows come from SHIPS developmental data (1982-2023, AL/EP/CP); "
+                    "there is no reanalysis fallback for pre-genesis or post-2023 fields")))
+
     # ---- 4. GPI ----------------------------------------------------------------------
     gpi_mod = _mod("genesis.indices.gpi")
     if gpi_mod is None:
@@ -207,23 +228,34 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
                           impact="no official 'L'-record landfalls"))
         else:
             def _lf():
-                key = "hurdat2.nepac.txt"
-                path, rec = fetch(key, _discover_hurdat2("nepac"),
-                                  note="HURDAT2 NE Pacific best track")
-                m.add_source(rec)
-                rows = hurdat.landfall_rows(path, source_key=key, region_for=region_for)
-                say(f"  HURDAT2 landfalls: {len(rows)}")
-                return rows
+                # BOTH basins. The Atlantic file carries 1,175 official 'L' records against the
+                # NE Pacific's 139, so fetching only the Pacific one -- as this did at first --
+                # silently drops nine tenths of NHC's own landfall designations while the table
+                # still looks populated.
+                out = []
+                for which, key in (("nepac", "hurdat2.nepac.txt"), ("atl", "hurdat2.atl.txt")):
+                    path, rec = fetch(key, _discover_hurdat2(which),
+                                      note=f"HURDAT2 {which} best track")
+                    m.add_source(rec)
+                    part = hurdat.landfall_rows(path, source_key=key, region_for=region_for)
+                    say(f"  HURDAT2 {which} landfalls: {len(part)}")
+                    out.extend(part)
+                return out
             got = _try("hurdat2.landfalls", m, _lf,
                        impact="landfalls table lacks official NHC 'L' records")
             if got:
                 # Map ATCF ids onto IBTrACS storm ids so landfalls join the rest of the archive.
                 by_atcf = {s["atcf_id"]: s["storm_id"] for s in storms if s.get("atcf_id")}
+                known = {s["storm_id"] for s in storms}
                 kept = 0
                 for r in got:
+                    # The parser pre-populates storm_id with its own identifier, so testing
+                    # "is storm_id set" let unmapped rows through carrying an id that resolves
+                    # to nothing. Six such rows reached the table and the validator caught them
+                    # as a referential break. The join is authoritative: clear it, then set it.
                     sid = by_atcf.get(r.get("atcf_id"))
-                    if sid:
-                        r["storm_id"] = sid
+                    r["storm_id"] = sid if (sid in known) else None
+                    if r["storm_id"]:
                         kept += 1
                 landfalls.extend([r for r in got if r.get("storm_id")])
                 if kept < len(got):

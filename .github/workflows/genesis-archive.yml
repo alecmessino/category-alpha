@@ -57,6 +57,14 @@ jobs:
           python3 scripts/genesis/cli.py build --basins EP --ships-basins EP,CP
           python3 scripts/genesis/cli.py gaps
 
+      # Reports rather than gates: official best-track data legitimately contains values
+      # that look wrong, and refusing to commit because NOAA published something surprising
+      # would make the archive less faithful. The findings land in the job log where a human
+      # sees them. It DID earn its keep - it caught six landfall rows whose storm_id resolved
+      # to nothing after a join change.
+      - name: Validate the built archive (report)
+        run: python3 scripts/genesis/tests/validate_archive.py
+
       - name: Commit the archive
         run: |
           git config user.name  "genesis-archive-bot"
