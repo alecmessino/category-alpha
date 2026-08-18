@@ -451,8 +451,9 @@ def _http(key: str, url: str, timeout: int) -> str:
 
     provenance.fetch already retries transport failures with exponential backoff and does
     NOT retry a 4xx, which is the right policy here: 'stop >= size' and 'No such file' are
-    verdicts, not weather. retries is held to 3 so one dead window costs at most ~3*timeout
-    rather than the default 4 attempts, and the breaker above stops the second one.
+    verdicts, not weather. retries is held to 3 rather than the default 4 so one dead
+    window costs at most ~3*timeout, and MAX_CONSECUTIVE_FAILURES stops the build paying
+    that price more than a handful of times.
     """
     path = CACHE_DIR / key
     cached = path.exists()
@@ -589,7 +590,7 @@ def _load_window(var: _Var, when: _dt.datetime, level_hpa: float | None,
                            % (x0, x1, got_lon, lon_expect))
 
     ny, nx = len(lat_expect), len(lon_expect)
-    if data["values"] and len(data["values"]) != ny * nx:
+    if len(data["values"]) != ny * nx:
         raise _WindowError("data array has %d values, expected %d"
                            % (len(data["values"]), ny * nx))
 

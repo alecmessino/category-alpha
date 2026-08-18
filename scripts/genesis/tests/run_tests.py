@@ -257,6 +257,37 @@ def test_env_unknown_is_not_a_match():
           any("UNKNOWN" in g for g in keep.gaps), str(keep.gaps))
 
 
+def test_effective_sample_warning():
+    """n >= min_sample but ESS < min_sample must be said out loud."""
+    base = Path(tempfile.mkdtemp())
+    prov = dict(source_key="t", processing_version=PROCESSING_VERSION,
+                ingested_utc="2026-01-01T00:00:00Z")
+    storms, genesis = [], []
+    # one storm right on the query point, nine out near the radius edge: the Gaussian distance
+    # kernel (scale = radius/2) then puts most of the weight on the single close one, so the
+    # effective sample collapses while the raw count still clears the gate.
+    for i in range(10):
+        sid = f"W{i:02d}"
+        gt = datetime(1990 + i, 9, 1, tzinfo=UTC)
+        lat = 12.0 if i == 0 else 12.0 + 4.4
+        storms.append(dict(storm_id=sid, atcf_id=f"EP{i:02d}", basin="EP", season=1990 + i,
+                           name=sid, genesis_utc=gt, genesis_lat=lat, genesis_lon=-140.0,
+                           max_vmax_kt=70.0, provisional=False, **prov))
+        genesis.append(dict(storm_id=sid, atcf_id=f"EP{i:02d}", basin="EP", season=1990 + i,
+                            genesis_utc=gt, genesis_lat=lat, genesis_lon=-140.0,
+                            peak_vmax_kt=70.0, pregenesis_source="none", **prov))
+    store.write_table("storms", storms, base)
+    store.write_table("genesis_events", genesis, base)
+
+    res = get_analogs(lat=12.0, lon=-140.0, radius_km=500, min_sample=10, archive_dir=base)
+    eq("ESS warning: all 10 storms match on distance", res.n_cases, 10)
+    check("ESS warning: the effective sample really is much smaller",
+          res.effective_sample_size < 10, f"ess={res.effective_sample_size:.2f}")
+    check("ESS warning: and the result says so",
+          any("effective sample size" in g for g in res.gaps), str(res.gaps))
+    check("ESS warning: the raw gate still reports sufficient", res.sufficient)
+
+
 def test_subbasin_semantics():
     """The Iniki trap: a Hawaii question must not be filtered on the GENESIS subbasin.
 
@@ -475,6 +506,7 @@ def test_gtwo_reader():
 def main() -> int:
     for fn in (test_categories, test_geometry, test_genesis_rules, test_analog_rules,
                test_subbasin_semantics, test_env_unknown_is_not_a_match, test_zero_is_an_answer,
+               test_effective_sample_warning,
                test_min_pool_season, test_scoring_rules, test_contract_resolution,
                test_store_and_schema, test_gtwo_reader):
         print(f"\n{fn.__name__}")

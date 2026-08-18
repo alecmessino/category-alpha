@@ -647,6 +647,21 @@ def get_analogs(
             density[key] = density.get(key, 0) + 1
 
     n_cases = len(cases)
+
+    # THE GATE COUNTS STORMS; THE WEIGHTING CAN STILL CONCENTRATE ON A HANDFUL.
+    # min_sample is applied to the raw count so that a flattering ESS can never unlock a rate.
+    # But the reverse case is just as misleading and was silent: a query conditioned on an
+    # unusual environment can match 31 storms and put almost all the weight on two of them
+    # (measured: n=31, ESS=2.4, weighted hurricane rate 0.528 against a plain rate of 0.290).
+    # The rate is real arithmetic over the pool, but it is effectively two storms, and the
+    # reader has to be told.
+    if wsum > 0 and ess < min_sample <= n_cases:
+        gaps.append(
+            f"effective sample size is {ess:.1f} from {n_cases} matched storms -- the weighting "
+            f"has concentrated on a few analogs, so the WEIGHTED rates rest on fewer effective "
+            f"cases than the {min_sample} the gate requires. The unweighted `rate` is over all "
+            f"{n_cases}.")
+
     return AnalogResult(
         query={"lat": lat, "lon": lon, "radius_km": radius_km,
                "season_months": season_months, "env_vector": env_vector,
