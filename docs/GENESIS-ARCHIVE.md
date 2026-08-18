@@ -1,0 +1,327 @@
+# Tropical cyclone genesis-to-intensity analog archive
+
+A reproducible, versioned archive of every tropical cyclone from its first best-track fix to
+its last, with the environment it formed in, so that a **live NHC area of interest can be
+matched to the historical cases most like it** and turned into empirical probabilities:
+
+- becoming a named storm
+- reaching any intensity threshold (TS, Cat 1, Cat 2, Cat 3+)
+- making landfall (Hawaii islands, CONUS, Mexico) while still ≥ 64 kt
+- how long each of those took
+
+Research only. Every number traces to an official file, a download date and a processing
+version. **Nothing is interpolated, imputed or invented** — where a source is silent the
+archive returns `NULL` and records a gap.
+
+---
+
+## Quick start
+
+```bash
+pip install -r scripts/genesis/requirements.txt
+
+python3 scripts/genesis/cli.py build --basins EP --ships-basins EP,CP   # build from source
+python3 scripts/genesis/cli.py summary                                  # row counts
+python3 scripts/genesis/cli.py gaps                                     # what is missing, and why
+python3 scripts/genesis/cli.py daily                                    # ingest today's outlook
+python3 scripts/genesis/cli.py backtest --basins EP --min-season 1971   # zero-peek replay
+```
+
+### The headline query
+
+> *Disturbances that formed within 500 km of 12°N 140°W in August–October — what fraction later
+> made Hawaii landfall as a hurricane?*
+
+```bash
+python3 scripts/genesis/cli.py analogs --lat 12 --lon -140 --radius 500 --months 8,9,10
+```
+
+```
+ANALOGS  12.0N 140.0W  r=500 km  months=[8, 9, 10]
+  matched 26 storms   effective sample 19.5   SUFFICIENT
+  intensity outcomes:
+    reached td      26/26   100.0%  [87-100%]
+    reached ts      19/26    73.1%  [54-86%]
+    reached cat1     9/26    34.6%  [19-54%]
+    reached cat2     3/26    11.5%  [4-29%]
+    reached cat3     3/26    11.5%  [4-29%]
+    reached cat4     3/26    11.5%  [4-29%]
+    reached cat5     0/26     0.0%  [0-13%]
+  time to ts: n=19  median 12 h  p25 6  p75 24
+  time to cat1: n=9  median 60 h  p25 36  p75 78
+  time to cat3: n=3  median 72 h  p25 45  p75 123
+```
+
+Brackets are Wilson 95% intervals. Note how wide they are: 26 storms is a real sample for
+"does it become a hurricane" and a thin one for anything rarer. That is the point of printing
+them — see [Refusals](#refusals-are-a-feature).
+
+In Python:
+
+```python
+from genesis.retrieval.analogs import get_analogs
+
+res = get_analogs(lat=12.0, lon=-140.0, radius_km=500,
+                  season_months=[8, 9, 10],
+                  env_vector={"shear_kt": 10, "sst_c": 28, "rh_mid_pct": 60},
+                  min_sample=10)
+print(res.describe())
+res.intensity["cat1"]["rate"]          # None if the sample is too thin -- never a guess
+res.landfall["hawaii"]["hurricane"]    # count, rate, Wilson interval
+res.effective_sample_size              # Kish ESS after weighting
+```
+
+---
+
+## The six tables
+
+`data/genesis-archive/*.parquet`, queryable directly or through DuckDB views
+(`genesis.store.connect()`).
+
+| table | grain | what it is |
+|---|---|---|
+| `storms` | one row per storm | id, basin, name, season, genesis time/place, lifetime peak |
+| `track_points` | every fix | time, position, intensity, stage, and a **`quality`** column |
+| `environment` | fix-aligned | shear, mid-level RH, 850 vorticity, potential intensity, SST, OHC, GPI |
+| `genesis_events` | one row per storm | first fix, first *tropical* fix, every threshold crossing, time-to-event |
+| `landfalls` | one row per crossing | region, sub-region, time, intensity at landfall, how it was detected |
+| `daily_disturbances` | append-only | every NHC outlook area observed, and its eventual fate |
+
+Every row carries `source_key`, `processing_version` and `ingested_utc`. `MANIFEST.json`
+records the URL, SHA-256, byte count and download date of every source file, plus every gap.
+`snapshots/YYYY-MM-DD.json` pins the SHA-256 and row count of each table on that date — a
+dated snapshot is a *manifest*, not a copy, so version history costs a few hundred bytes a day
+instead of duplicating the archive.
+
+### `quality`, the column that keeps the archive honest
+
+IBTrACS publishes 3-hourly positions between the 6-hourly observations, and the off-synoptic
+ones are **interpolated by IBTrACS**, carrying a wind value held over from the observation.
+Measured here: **50,807 observed vs 48,326 interpolated** points. They are all stored, and
+marked, and **an interpolated point is never allowed to establish a threshold crossing** —
+otherwise "time to hurricane" would be dated up to three hours early off a wind nobody measured.
+
+---
+
+## Data sources, and exactly how far each one reaches
+
+| source | used for | coverage actually verified |
+|---|---|---|
+| **IBTrACS v04r01** (NCEI) | storms, track_points | EP basin file: 1,712 storms / 99,747 points, seasons **1876–2026** |
+| **SHIPS developmental** (CIRA) | environment | AL/EP/CP, **1982–2023**. EP 17,518 + CP 996 records |
+| **HURDAT2** (NHC) | official landfalls, cross-check | NE Pacific 1949–2025 (filename auto-discovered) |
+| **NHC TWO text archive** | pre-genesis | **TWOEP/TWOAT 2003+**, **Central Pacific (HFOCP) 2019+** |
+| **NHC GTWO shapefile** | disturbance *positions* | **current issuance only** — no historical archive |
+| **NHC CurrentStorms.json** | live resolution | current |
+| **NCEP/NCAR R1** (NOAA PSL, OPeNDAP) | environment where SHIPS is silent | 1948–present, 2.5°, 4×daily |
+| **Natural Earth 10m land** | coastline polygons | public domain |
+
+---
+
+## Gaps
+
+Reported rather than filled. `python3 scripts/genesis/cli.py gaps` prints the machine-recorded
+version; this is the narrative one.
+
+### 1. ERA5 is not available in this environment
+
+The spec asked for ERA5 along-track extracts. It is **unreachable here**, verified two ways:
+the Copernicus CDS API requires an API key that is not provisioned, and the AWS `era5-pds`
+mirror returns **HTTP 403**.
+
+**What is used instead, and what it costs.** The environment table is built from the **SHIPS
+developmental data**, which is the better source for this purpose anyway — it is the
+operational standard, already quality-controlled, storm-relative, and it carries exactly the
+fields the analog query conditions on (`SHDC` deep-layer shear, `RHMD` mid-level RH, `Z850`
+vorticity, `VMPI` potential intensity, `RSST` SST, `COHC` heat content). Where SHIPS is silent,
+**NCEP/NCAR Reanalysis 1** is used via OPeNDAP subsetting. NCEP R1 is **2.5° and 4×daily**
+against ERA5's 0.25° and hourly: a TC core is unresolved at 2.5° and the "environment" is a
+much coarser average. Rows carry `env_source` so the two can never be confused.
+
+### 2. Environment coverage is a function of the SHIPS era
+
+Fraction of genesis events with a SHIPS environment record within 12 h of genesis:
+
+| decade | coverage | |
+|---|---|---|
+| 1876–1979 | **0%** | SHIPS begins in 1982 |
+| 1980s | 65.0% | |
+| 1990s | 72.0% | |
+| 2000s | 79.6% | |
+| 2010s | 85.0% | |
+| 2020s | **49.7%** | the developmental file **ends in 2023** |
+
+Overall **47.8%** (813 of 1,701). So `env_vector` matching is a modern-era instrument. A query
+that supplies one is answered from the subset that has it, and the per-case
+`env_fields_compared` count says how much was actually compared.
+
+### 3. Pre-genesis coverage is thin, and thinnest exactly where Hawaii needs it
+
+The best-track archive contains only the disturbances that **succeeded**. A wave that never
+became a depression has no row, so a development rate computed from best tracks alone is
+computed over survivors and is meaningless. The failures live only in the NHC Tropical Weather
+Outlook, and that archive reaches back only:
+
+- **East Pacific / Atlantic: 2003**
+- **Central Pacific: 2019** (`archive/text/HFOCP/`; `TWOCP/` holds 2013 alone)
+
+Worse, the **text carries no coordinates** ("well to the east-southeast of the Hawaiian
+Islands"). Positions come only from the **graphical** outlook shapefile, which is published
+**for the current issuance only** — there is no historical archive of it. So every back-filled
+disturbance has `lat`/`lon` NULL. Prose is never geocoded; that would be inventing data.
+
+Consequence: `run_disturbance_backtest` **refuses to score** until the forward-collected log is
+large enough. It reports `NOT YET SCORED`, which is the honest state of a question this archive
+cannot yet answer.
+
+### 4. Official landfall flags are close to useless for Hawaii — measured
+
+HURDAT2 marks landfall points with an `L` record identifier, which would be far better evidence
+than any polygon test. In the NE Pacific file there are **139 `L` records**. Inside the Hawaii
+box (18–23°N, 161–154°W) there is exactly **one**: Iselle (2014), at 50 kt.
+
+**Iniki is not flagged.** The most destructive hurricane ever to strike Hawaii passed over
+Kauai on 1992-09-12 at 21.5°N 159.8°W carrying **115 kt**, and its record identifier is blank:
+
+```
+19920912, 0000,  , HU, 21.5N, 159.8W, 115      <- over Kauai, NOT flagged 'L'
+19920912, 0600,  , HU, 23.7N, 159.4W, 100
+```
+
+So for Hawaii the **polygon-crossing geometry is the primary detector, not the fallback**, and
+the `detection` column on every landfall row says which produced it (`hurdat2_L_record` vs
+`segment_crossing`). Any Hawaii rate computed from `L` records alone would be wrong by an order
+of magnitude while looking authoritative.
+
+### 5. A 6-hourly track cannot tell a traverse from a centre relocation
+
+Documented from a real incident on this project in `docs/PLAN-TRACK-MODEL.md`: seven of nine
+"landfall" ensemble members in one cycle crossed an island only because a straight line between
+6-hourly points cut it, at implied speeds of 15–19 kt against a storm moving 7–8 kt. A centre
+that dissipates east of an island and reforms west of it is **not** a landfall. Every crossing
+therefore carries `implied_speed_kt` and `suspect_relocation`, and suspect crossings are
+excluded from rates but **kept in the table** so the exclusion is auditable.
+
+### 6. Basin and subbasin mean less than they look like
+
+- The IBTrACS "EP" file is not EP-pure: it contains every storm with *any* point in EP,
+  including **341 storms whose genesis was in the West Pacific** (dateline crossers) and 18 in
+  the North Atlantic. Storm basin is taken from the **genesis** fix.
+- **`storms.subbasin` is the subbasin at genesis**, and using it for Hawaii work undercounts by
+  83%: **116** storms have a CP genesis but **664** have at least one CP track point. Iniki
+  formed at 134°W — East Pacific — so it is *not* a "CP storm" at storm level.
+  `get_analogs(subbasins=["CP"])` therefore means **"was ever here"**; the strict question is
+  `genesis_subbasins=`, named so it cannot be reached for by accident.
+
+### 7. Known SHIPS mapping caveats
+
+- `ohc_kj_cm2` is SHIPS **COHC**, which the official predictor file defines as a
+  *climatological* ocean heat content. The analysed field is `NOHC`.
+- `mslp_env_mb` is SHIPS **MSLP**, the storm's own central pressure, not an environmental
+  pressure (`PENV`/`PENC`).
+- SHIPS switches input model from CFSR reanalysis (1982–2000) to operational GFS (2001+)
+  mid-record, and **no column flags the discontinuity**.
+- 151 of 18,514 SHIPS records (0.8%) carry an ATCF id IBTrACS never adopted. They are kept with
+  `storm_id` NULL so the gap is countable; they never match an analog query.
+
+### 8. Provisional data
+
+2025–2026 seasons are `US-PROVISIONAL`/`PROVISIONAL` in IBTrACS — not yet post-analysed, and
+their intensities will change. They are excluded from analog pools by default
+(`include_provisional=False`) and flagged in `storms.provisional`.
+
+---
+
+## Refusals are a feature
+
+Four rules, each present because the alternative is a plausible wrong number.
+
+1. **A rate is refused below `min_sample`.** Counts are always returned; a *rate* only when
+   enough distinct storms support it. Three analogs of which two became hurricanes is not
+   "67%", it is three storms.
+2. **The sample is storms, not fixes.** A storm contributing 60 six-hourly fixes is one
+   observation. The back-test gate counts distinct resolved storms (10 to score, 30 for a
+   reliability curve) — 400 forecasts over 3 storms is refused, and there is a test for it.
+3. **Effective sample size is published beside every rate.** Kish ESS = (Σw)²/Σw². The gate is
+   applied to the raw storm count, never to the flattering ESS.
+4. **An absent outcome is not a zero.** A storm whose intensity was never recorded did not fail
+   to become a hurricane — it is unknown, excluded from the denominator and counted separately.
+
+---
+
+## Back-test: does any of this carry information?
+
+Zero-peek replay from each storm's genesis moment. Two gates, not one: `as_of` drops every
+storm whose genesis was at or after the moment simulated, and `exclude_storm_ids` drops the
+storm being predicted, which `as_of` alone does not do at t₀. The reference forecast is a
+climatology **also** restricted to storms already past — a reference the forecaster could not
+have had is not a reference.
+
+East Pacific, seasons 1971+, 911 scored storms:
+
+| contract | base rate | Brier | climatology | skill |
+|---|---|---|---|---|
+| reaches TS (34 kt) | 0.878 | 0.1077 | 0.1083 | **+0.5%** |
+| reaches Cat 1 (64 kt) | 0.492 | 0.2212 | 0.2505 | **+11.7%** |
+| reaches Cat 3 (96 kt) | 0.244 | 0.1722 | 0.1851 | **+7.0%** |
+| reaches Cat 4 (113 kt) | 0.167 | 0.1359 | 0.1402 | **+3.1%** |
+
+**Read this honestly.** Genesis location and season carry real information about eventual
+hurricane intensity (+11.7%) and almost none about whether a depression reaches TS strength
+(+0.5%) — which the base rates already tell you: 87.8% of East Pacific depressions reach 34 kt,
+so there is very little there to predict. Discrimination is real but modest: mean forecast
+0.529 when a hurricane happened vs 0.426 when it did not. 128 storms were **refused** because
+their analog pool was below `min_sample`, rather than being answered from a handful of cases.
+
+This is a *base rate*, not a forecast. It knows nothing about the current atmosphere beyond
+what the environment vector supplies, and it should be beaten by any competent operational
+model. Its value is as the reference an operational estimate has to beat, and as the empirical
+prior when nothing else is available.
+
+---
+
+## The daily pipeline
+
+`.github/workflows/genesis-archive.yml` runs four times a day, shortly after NHC's 06/12/18/00Z
+outlook issuances. It:
+
+1. pulls the graphical outlook (positions + probabilities) and the text outlook (narrative)
+2. appends every area to `daily_disturbances` — **append-only**: every issuance is a row, even
+   a repeat, because the log's job is to record what was knowable *when*
+3. threads areas across issuances **by position**, because NHC renumbers them between
+   issuances; the rule that fired is recorded per row in `source_key`
+4. resolves an area to `developed` when an active storm appears near it, or `dissipated` after
+   5 days unmentioned
+5. re-snapshots the archive
+
+The gate suite (`scripts/genesis/tests/run_tests.py`, 95 checks) runs **before** any data
+commit, so a parser that has started inventing data cannot write a row.
+
+---
+
+## Layout
+
+```
+scripts/genesis/
+  provenance.py        fetch + sha256 + Manifest + Gap; gaps are first-class output
+  schema.py            the six pyarrow schemas, thresholds, category_for()
+  store.py             Parquet + DuckDB views + dated snapshot manifests
+  geo.py               coastline polygons, point-in-polygon, crossing detection
+  cli.py               build / analogs / backtest / daily / summary / gaps
+  sources/
+    ibtracs.py         IBTrACS v4 -> storms + track_points
+    ships_dev.py       SHIPS developmental -> environment
+    hurdat2.py         HURDAT2 -> official 'L' landfalls + IBTrACS cross-check
+    two_archive.py     NHC Tropical Weather Outlook text -> pre-genesis
+    gtwo.py            NHC graphical outlook -> disturbance POSITIONS
+    reanalysis.py      NCEP/NCAR R1 via OPeNDAP (the ERA5 substitute)
+  indices/gpi.py       Emanuel-Nolan genesis potential index
+  build/
+    build_archive.py   the orchestrator; every stage failure becomes a recorded gap
+    genesis_events.py  stage transitions and time-to-event
+    daily.py           the daily ingest
+  retrieval/analogs.py get_analogs()
+  backtest/            contracts, scoring, zero-peek harness
+  tests/run_tests.py   the gate
+data/genesis-archive/  the tables, MANIFEST.json, snapshots/, coastlines/
+```
