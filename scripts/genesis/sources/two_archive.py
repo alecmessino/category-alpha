@@ -447,10 +447,12 @@ def _horizon_hours(horizon_text: str) -> float | None:
 def _statements(block_norm: str) -> list[dict]:
     """Every formation-probability statement in one normalised block, in document order.
 
-    Both grammars are run and the results merged on character offset, because the eras
-    overlap: a 2014 issuance can carry a bulleted 48-hour line and a prose five-day
-    sentence in the same product. Overlapping matches from the two patterns are de-duped by
-    keeping the earlier start.
+    ALL FOUR grammars are run over the same block and the results merged on character
+    offset, because the eras overlap inside a single issuance: 2014 issuances carry a
+    bulleted 48-hour line and a prose five-day sentence in the same product. Overlapping
+    matches are de-duped by keeping the earlier start, which is also what makes the
+    horizon-bearing patterns beat the horizon-less ones when both fire at the same offset --
+    they are ordered so the more specific reading wins.
     """
     found: list[dict] = []
     for rx, kind in ((_RE_BULLET, "bullet"), (_RE_PROSE, "prose"),
@@ -1089,9 +1091,16 @@ if __name__ == "__main__":
         print(f"   basin={o['basin']} issued={o['issuance_utc']} status={o['parse_status']} "
               f"special={o['is_special']} areas={len(o['areas'])}")
         for a in o["areas"]:
+            hz = f"{a['horizon_days']}d" if a["horizon_days"] else "-"
             print(f"   [{a['index']}] invest={a['invest_id']} title={a['title']!r} "
                   f"48h={a['prob_48h_pct']}/{a['prob_48h_label']}/{a['prob_48h_text']!r} "
                   f"long={a['prob_7d_pct']}/{a['prob_7d_label']}/{a['prob_7d_text']!r} "
-                  f"horizon={a['horizon_days']}d lat/lon={a['lat']},{a['lon']}")
+                  f"horizon={hz} lat/lon={a['lat']},{a['lon']}")
+            # Printed loudly: an area whose probability columns are empty because the
+            # product stated a chance without a forecast window is NOT a parse failure, and
+            # the only way to tell the two apart from the outside is to show this.
+            for s in a["statements_unassigned"]:
+                print(f"        unassigned (no horizon published): "
+                      f"{s['value_text']!r} [{s['qualifier']}] via {s['kind']}")
         if o["unmatched_probability_phrases"]:
             print("   UNMATCHED PERCENT:", json.dumps(o["unmatched_probability_phrases"])[:400])

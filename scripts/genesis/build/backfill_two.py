@@ -104,11 +104,19 @@ def backfill(*, archive_dir=None, since: str | None = None, until: str | None = 
     # because the back-fill walks the whole history in one ordered pass.
     threads: dict = {}          # (basin, key) -> last row
     rows: list[dict] = []
+    sources: list = []
     failed = 0
 
     for n, iss in enumerate(issuances, 1):
         try:
-            areas = read_areas(_get(iss["url"]))
+            # Through provenance.fetch, not a bare GET, for two reasons that both matter:
+            # every outlook that contributes a row gets its sha256 and download date recorded
+            # like any other source in this archive, AND the fetch is cached, which turns a
+            # ~50-minute non-resumable walk over 7,188 issuances into a resumable one.
+            path, rec = fetch(f"gtwo/{iss['agency']}.{iss['stamp']}.zip", iss["url"],
+                              note=f"archived graphical outlook {iss['stamp']}", timeout=90)
+            sources.append(rec)
+            areas = read_areas(path.read_bytes())
         except Exception:
             failed += 1
             continue
@@ -261,6 +269,7 @@ def backfill(*, archive_dir=None, since: str | None = None, until: str | None = 
         f"{resolved} threads developed, {dissipated} did not")
     return {
         "issuances": len(issuances), "rows": len(rows), "added": added,
+        "sources_recorded": len(sources),
         "threads_developed": resolved, "threads_dissipated": dissipated,
         "fetch_failures": failed, "gaps": gaps,
         "resolution_rule": (f"threads and best-track genesis events are matched ONE-TO-ONE, "
