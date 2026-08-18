@@ -54,6 +54,63 @@ def _try(name: str, manifest: Manifest, fn, *, impact: str):
         return None
 
 
+def _crossing_class(c: dict, pts: list) -> dict:
+    """Saffir-Simpson class and the two threshold booleans for one coastline crossing.
+
+    WHY THIS IS NOT `category_for(c["vmax_kt"])`. On a `bracketing_fix` the crossing IS a
+    published fix and its wind is NOAA's, so the class is a pure function of official data and
+    deriving it invents nothing. On a `segment_crossing` the crossing falls BETWEEN two
+    published fixes and `geo.crossings` linearly interpolates the wind to get there. Reading a
+    discrete class off that interpolated number turns a smooth guess into a categorical
+    assertion the published record never makes -- and the assertion flips at a threshold.
+
+    Measured over the archive as built: 1,013 of 3,379 landfall rows are segment crossings; on
+    **79** of them the bracketing fixes fall in different Saffir-Simpson categories, and on
+    **21** they straddle 64 kt, which is to say the interpolation would be DECIDING whether the
+    row counts as a hurricane landfall. Doreen (1977, Mexico) interpolates to 63.3 kt between
+    published fixes of 65 and 58; Isis (1998) to 63.7 between 65 and 63. Those are coin flips
+    resolved by arithmetic, and the archive's rates are built on exactly this boolean.
+
+    The rule is therefore the one `geo.crossings` already documents for `stage`: take the
+    bracketing fixes' common answer when they agree, and NULL when they do not. A NULL here is
+    an UNKNOWN outcome, which `get_analogs` already handles correctly -- it leaves the
+    denominator and is counted on its own rather than scored as a negative.
+
+    The most consequential row this changes is INIKI (1992), Hawaii's costliest hurricane:
+    HURDAT2 does not flag it 'L' at all, and the crossing interpolates to 112.0 kt between
+    published fixes of 115 kt (Cat 4) and 108 kt (Cat 3) -- one knot below the Cat 4 line. Its
+    `category` becomes NULL. Its `hurricane_at_landfall` stays True, because both bracketing
+    fixes agree it was a hurricane; only the CLASS was ever in doubt. The wind itself stays on
+    the row, flagged by `detection`, because a clearly-labelled interpolation is useful and a
+    class silently derived from one is not.
+    """
+    v = c.get("vmax_kt")
+    if c.get("detection") == "bracketing_fix":
+        return {"category": category_for(v),
+                "hurricane": None if v is None else v >= 64,
+                "ts": None if v is None else v >= 34}
+
+    t = c.get("iso_time")
+    a = b = None
+    for i in range(len(pts) - 1):
+        if pts[i]["iso_time"] <= t <= pts[i + 1]["iso_time"]:
+            a, b = pts[i], pts[i + 1]
+            break
+    if a is None:
+        # No bracketing pair means nothing published constrains the class. Say nothing.
+        return {"category": None, "hurricane": None, "ts": None}
+
+    va, vb = a.get("vmax_kt"), b.get("vmax_kt")
+    if va is None or vb is None:
+        return {"category": None, "hurricane": None, "ts": None}
+    ca, cb = category_for(va), category_for(vb)
+    return {
+        "category": ca if ca == cb else None,
+        "hurricane": (va >= 64) if (va >= 64) == (vb >= 64) else None,
+        "ts": (va >= 34) if (va >= 34) == (vb >= 34) else None,
+    }
+
+
 def _mod(path: str):
     """Import a source module, returning None if it has not been written yet."""
     try:
@@ -282,6 +339,7 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
                     for c in geo.crossings(pts, regions):
                         if (sid, c.get("region")) in have:
                             continue          # NHC already flagged this one officially
+                        cls = _crossing_class(c, pts)
                         out.append({
                             "storm_id": sid,
                             "atcf_id": next((s.get("atcf_id") for s in storms
@@ -292,10 +350,13 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
                             "landfall_utc": c.get("iso_time"), "lat": c.get("lat"),
                             "lon": c.get("lon"), "vmax_kt": c.get("vmax_kt"),
                             "mslp_mb": c.get("mslp_mb"),
-                            # `category` is a pure function of a wind already on the row, so
-                            # deriving it invents nothing -- and the HURDAT2 path fills it, so
-                            # leaving it NULL here made the same column mean two things.
-                            "category": category_for(c.get("vmax_kt")),
+                            # `category` and the two threshold booleans come from
+                            # _crossing_class, NOT from the interpolated wind on the row. See
+                            # that function: on a segment crossing the wind is interpolated, so
+                            # a class read off it is an assertion the published record does not
+                            # make -- and 21 of these rows have bracketing fixes that straddle
+                            # 64 kt, where the interpolation would be DECIDING the contract.
+                            "category": cls["category"],
                             # `stage` is NOT returned by geo.crossings -- c.get("stage") read a
                             # key that never existed and silently produced NULL on every row.
                             # For a bracketing_fix the crossing IS a published fix, so its
@@ -304,10 +365,8 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
                             # it stays NULL rather than being carried over from a neighbour.
                             "stage": (stage_at.get((sid, c.get("iso_time")))
                                       if c.get("detection") == "bracketing_fix" else None),
-                            "hurricane_at_landfall": (None if c.get("vmax_kt") is None
-                                                      else c["vmax_kt"] >= 64),
-                            "ts_at_landfall": (None if c.get("vmax_kt") is None
-                                               else c["vmax_kt"] >= 34),
+                            "hurricane_at_landfall": cls["hurricane"],
+                            "ts_at_landfall": cls["ts"],
                             "detection": c.get("detection"),
                             "implied_speed_kt": c.get("implied_speed_kt"),
                             "suspect_relocation": c.get("suspect_relocation"),

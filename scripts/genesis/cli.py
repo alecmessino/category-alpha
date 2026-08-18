@@ -219,8 +219,14 @@ def main(argv=None) -> int:
     sub = ap.add_subparsers(dest="cmd", required=True)
 
     b = sub.add_parser("build", help="build the archive from official sources")
-    b.add_argument("--basins", default="EP", help="IBTrACS basin files, comma separated")
-    b.add_argument("--ships-basins", default="EP,CP")
+    # THE DEFAULTS REPRODUCE THE COMMITTED ARCHIVE, and that is the whole reason they are
+    # these values. `build` overwrites the tables in place, so a default that loads fewer
+    # sources than the archive was built from silently REPLACES it with a smaller one --
+    # EP alone gives 1,712 storms instead of 3,959 and drops every Atlantic landfall, while
+    # exiting 0. Narrowing is still available by passing the flags; it just is not the thing
+    # that happens when you type the command in the README.
+    b.add_argument("--basins", default="EP,NA", help="IBTrACS basin files, comma separated")
+    b.add_argument("--ships-basins", default="EP,CP,AL")
     b.add_argument("--no-environment", action="store_true")
     b.add_argument("--no-landfalls", action="store_true")
     b.set_defaults(fn=cmd_build)

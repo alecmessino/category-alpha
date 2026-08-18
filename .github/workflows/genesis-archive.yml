@@ -54,7 +54,12 @@ jobs:
       - name: Full rebuild from official sources
         if: ${{ inputs.rebuild }}
         run: |
-          python3 scripts/genesis/cli.py build --basins EP --ships-basins EP,CP
+          # BOTH IBTrACS BASINS AND ALL THREE SHIPS FILES. --basins EP alone rebuilds a
+          # DIFFERENT, SMALLER archive than the one committed here -- 1,712 storms instead of
+          # 3,959, five sources instead of seven, and every Atlantic landfall gone -- while
+          # exiting 0 and looking like a successful refresh. The rebuild flag has to reproduce
+          # what is in the repository or it is a destructive operation wearing a rebuild's name.
+          python3 scripts/genesis/cli.py build --basins EP,NA --ships-basins EP,CP,AL
           python3 scripts/genesis/cli.py gaps
 
       # The terminal reads this file same-origin; regenerating it here is what keeps the

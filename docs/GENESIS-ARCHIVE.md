@@ -20,14 +20,14 @@ archive returns `NULL` and records a gap.
 ```bash
 pip install -r scripts/genesis/requirements.txt
 
-python3 scripts/genesis/cli.py build --basins EP --ships-basins EP,CP   # build from source
+python3 scripts/genesis/cli.py build --basins EP,NA --ships-basins EP,CP,AL   # build from source
 python3 scripts/genesis/cli.py summary                                  # row counts
 python3 scripts/genesis/cli.py gaps                                     # what is missing, and why
 python3 scripts/genesis/cli.py daily                                    # ingest today's outlook
 python3 scripts/genesis/cli.py live --list                              # systems SHIPS is running on
 python3 scripts/genesis/cli.py live --atcf CP012026                     # one system, conditioned on its environment
 python3 scripts/genesis/cli.py emit                                     # regenerate the terminal payload
-python3 scripts/genesis/cli.py backtest --basins EP --min-season 1971   # zero-peek replay
+python3 scripts/genesis/cli.py backtest --basins EP --min-season 1971       # zero-peek replay
 ```
 
 ### The headline query
@@ -336,7 +336,7 @@ record:
 | season | storm | island | intensity | detection |
 |---|---|---|---|---|
 | 1959 | DOT | Kauai | 75 kt | bracketing_fix |
-| 1992 | **INIKI** | Kauai | **112 kt** | segment_crossing |
+| 1992 | **INIKI** | Kauai | **112 kt** (class withheld, see below) | segment_crossing |
 | 2014 | ISELLE | Island of Hawaii | 50 kt | bracketing_fix |
 | 2016 | DARBY | Island of Hawaii | 35 kt | bracketing_fix |
 | 2018 | OLIVIA | Maui, Lanai | 39 kt | segment_crossing |
@@ -346,6 +346,28 @@ Dot and Iniki are the only two hurricane landfalls in Hawaii's recorded history,
 the one HURDAT2 does not flag. `bracketing_fix` means a published fix was itself over land;
 `segment_crossing` means the intensity was interpolated between two fixes and the row is
 derived.
+
+#### A segment crossing publishes no Saffir-Simpson class
+
+The interpolated wind stays on the row, clearly labelled by `detection`. The **class** derived
+from it does not, unless the two published fixes either side agree on it.
+
+Iniki is why. Its crossing interpolates to **112.0 kt** between published fixes of 115 kt
+(Cat 4) and 108 kt (Cat 3) — one knot below the Cat 4 line, on Hawaii's costliest hurricane.
+Reading `cat3` off that number would be a categorical claim NOAA never published, decided by
+arithmetic, on the single most consequential row in this archive. So `landfalls.category` is
+NULL there. `hurricane_at_landfall` stays **True**, because both bracketing fixes agree it was
+a hurricane — only the class was ever in doubt.
+
+The same rule applies to the two threshold booleans, and there it changes counts. Measured over
+the archive: of 1,013 segment crossings, **75** had a category the bracketing fixes disagreed
+on, and **21** had a `hurricane_at_landfall` decided by the interpolation — the fixes straddled
+64 kt. Doreen (1977, Mexico) interpolated to 63.3 kt between published 65 and 58; Isis (1998)
+to 63.7 between 65 and 63. Those 21 are now NULL, which `get_analogs` already treats correctly:
+an unknown outcome leaves the denominator and is counted on its own rather than scored as a no.
+
+None of the published back-test scores moved: the withdrawn flags fall outside the EP 1971+
+scored set, and Hawaii's two hurricane landfalls are both intact.
 
 **Attribution tolerates the erosion; containment alone did not.** A landfall is *on* the coast
 by definition, so requiring the point to fall strictly inside a simplified polygon discards
@@ -447,17 +469,18 @@ climatology **also** restricted to storms already past — a reference the forec
 have had is not a reference.
 
 ```bash
-python3 scripts/genesis/cli.py backtest --basins EP --min-season 1971 --min-pool-season 1971
+python3 scripts/genesis/cli.py backtest --basins EP --min-season 1971 --min-pool-season 1971 \
+        --regions mexico,hawaii,conus
 ```
 
 East Pacific, seasons 1971+, **847 scored storms**:
 
 | contract | base rate | Brier | climatology | skill |
 |---|---|---|---|---|
-| reaches TS (34 kt) | 0.894 | 0.0929 | 0.0973 | **+4.5%** |
+| reaches TS (34 kt) | 0.894 | 0.0929 | 0.0974 | **+4.6%** |
 | reaches Cat 1 (64 kt) | 0.504 | 0.2220 | 0.2501 | **+11.2%** |
 | reaches Cat 3 (96 kt) | 0.253 | 0.1704 | 0.1900 | **+10.3%** |
-| reaches Cat 4 (113 kt) | 0.175 | 0.1381 | 0.1461 | **+5.5%** |
+| reaches Cat 4 (113 kt) | 0.176 | 0.1387 | 0.1470 | **+5.6%** |
 
 **Read this honestly.** Genesis location and season carry real information about eventual
 intensity, and much less about whether a depression reaches TS strength — which the base rate
@@ -467,12 +490,16 @@ to predict. Discrimination is real but modest. Storms whose analog pool fell bel
 
 ### Landfall contracts, and the one that cannot be scored at all
 
+Landfall contracts are only scored when `--regions` names the coasts to score, because the
+region set decides which contracts exist:
+
 ```
-  landfall_mexico_any          storms  847  base 0.169  Brier 0.1158  clim 0.1413  skill +18.0%
   landfall_mexico_hurricane    storms  847  base 0.067  Brier 0.0600  clim 0.0633  skill  +5.2%
-  landfall_hawaii_any          storms  847  events 6    NO SKILL SCORE -- below the 10 required
-  landfall_hawaii_hurricane    storms  847  events 0    NO SKILL SCORE -- below the 10 required
-  landfall_conus_any           storms  847  events 1    NO SKILL SCORE -- below the 10 required
+  landfall_mexico_any          storms  847  base 0.169  Brier 0.1158  clim 0.1413  skill +18.0%
+  landfall_hawaii_hurricane    storms  847  events    0  NO SKILL SCORE -- below the 10 required
+  landfall_hawaii_any          storms  847  events    6  NO SKILL SCORE -- below the 10 required
+  landfall_conus_hurricane     storms  847  events    0  NO SKILL SCORE -- below the 10 required
+  landfall_conus_any           storms  847  events    1  NO SKILL SCORE -- below the 10 required
 ```
 
 **Mexico landfall is where the analog method is strongest** — +18.0% against a zero-peek

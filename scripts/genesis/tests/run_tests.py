@@ -601,6 +601,66 @@ def test_gtwo_reader():
     check("gtwo: read_areas is importable", callable(read_areas))
 
 
+def test_crossing_class_never_interpolates_a_class():
+    """Property 1, on the row that most invites breaking it.
+
+    A polygon crossing between two published fixes has an INTERPOLATED wind. Reading a
+    Saffir-Simpson class or a >=64 kt boolean off that wind turns arithmetic into a categorical
+    claim NOAA never published, and it flips at the threshold. The rule is the bracketing
+    fixes' common answer, or NULL.
+    """
+    from genesis.build.build_archive import _crossing_class
+    from datetime import datetime as DT
+
+    def pt(h, v):
+        return {"iso_time": DT(1992, 9, 12, h, tzinfo=UTC), "vmax_kt": v}
+
+    # A published fix over land: its own wind is official, so the class is official too.
+    pts = [pt(0, 115.0), pt(3, 108.0)]
+    got = _crossing_class({"detection": "bracketing_fix", "vmax_kt": 115.0,
+                           "iso_time": DT(1992, 9, 12, 0, tzinfo=UTC)}, pts)
+    eq("crossing: a published fix keeps its published class", got["category"], "cat4")
+    eq("crossing: a published fix keeps its hurricane flag", got["hurricane"], True)
+
+    # INIKI. 112.0 kt interpolated between 115 (cat4) and 108 (cat3) -- one knot under the
+    # Cat 4 line. The categories disagree, so no class is published.
+    iniki = {"detection": "segment_crossing", "vmax_kt": 112.03,
+             "iso_time": DT(1992, 9, 12, 1, 16, tzinfo=UTC)}
+    got = _crossing_class(iniki, pts)
+    eq("crossing: disagreeing bracket publishes no category", got["category"], None)
+    # ... but both fixes agree it was a hurricane, so that much IS published.
+    eq("crossing: agreeing bracket keeps the hurricane flag", got["hurricane"], True)
+    eq("crossing: agreeing bracket keeps the ts flag", got["ts"], True)
+
+    # DOREEN 1977: 63.3 kt interpolated between 65 and 58. The interpolation would be DECIDING
+    # a hurricane landfall by 0.7 kt.
+    pts2 = [pt(0, 65.0), pt(6, 58.0)]
+    got = _crossing_class({"detection": "segment_crossing", "vmax_kt": 63.3,
+                           "iso_time": DT(1992, 9, 12, 1, tzinfo=UTC)}, pts2)
+    eq("crossing: a bracket straddling 64 kt publishes no hurricane flag", got["hurricane"], None)
+    eq("crossing: the same bracket still agrees on >=34 kt", got["ts"], True)
+    eq("crossing: a straddling bracket publishes no category", got["category"], None)
+
+    # Agreement below both thresholds is still an answer -- NULL means unknown, not "no".
+    pts3 = [pt(0, 25.0), pt(6, 30.0)]
+    got = _crossing_class({"detection": "segment_crossing", "vmax_kt": 27.0,
+                           "iso_time": DT(1992, 9, 12, 1, tzinfo=UTC)}, pts3)
+    eq("crossing: agreement on 'not a hurricane' is published as False", got["hurricane"], False)
+    eq("crossing: agreement on 'not a TS' is published as False", got["ts"], False)
+    eq("crossing: agreement on 'td' publishes the class", got["category"], "td")
+
+    # A missing wind on either side constrains nothing.
+    pts4 = [pt(0, None), pt(6, 90.0)]
+    got = _crossing_class({"detection": "segment_crossing", "vmax_kt": 80.0,
+                           "iso_time": DT(1992, 9, 12, 1, tzinfo=UTC)}, pts4)
+    eq("crossing: an unpublished bracketing wind publishes nothing", got["hurricane"], None)
+
+    # A crossing time no pair brackets constrains nothing either.
+    got = _crossing_class({"detection": "segment_crossing", "vmax_kt": 80.0,
+                           "iso_time": DT(1999, 1, 1, tzinfo=UTC)}, pts)
+    eq("crossing: an unbracketed time publishes nothing", got["category"], None)
+
+
 def main() -> int:
     for fn in (test_categories, test_geometry, test_genesis_rules, test_analog_rules,
                test_subbasin_semantics, test_env_unknown_is_not_a_match, test_zero_is_an_answer,
@@ -608,6 +668,7 @@ def main() -> int:
                test_empty_result_is_explicit,
                test_unscoreable_is_stated,
                test_live_ships_rt,
+               test_crossing_class_never_interpolates_a_class,
                test_min_pool_season, test_scoring_rules, test_contract_resolution,
                test_store_and_schema, test_gtwo_reader):
         print(f"\n{fn.__name__}")
