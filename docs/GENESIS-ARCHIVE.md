@@ -355,6 +355,16 @@ right: Charley and Ivan and Jeanne (2004), Dennis/Katrina/Rita/Wilma (2005), Har
 (2017), Michael at 140 kt (2018), Laura and Zeta (2020), Ida (2021), Ian (2022), Idalia (2023),
 Helene and Milton (2024) — right storms, right states, right intensities.
 
+**A higher-resolution source exists and is not yet used.** Natural Earth's *physical* land layer
+is no better than the admin-1 layer already in use — measured, both give the same 8 polygons and
+605 vertices over Hawaii. GSHHG (Wessel & Smith), the standard shoreline for this work, **is**
+reachable from the maintainer's mirror at `soest.hawaii.edu/pwessel/gshhg/gshhg-shp-2.3.7.zip`
+(149 MB; the NOAA NGDC path now 404s). Its full-resolution level-1 layer would replace the
+~5 km erosion below with something far finer, clipped to the Hawaii box and committed at a
+fraction of the download size. It is deliberately **not** done: it changes no current result —
+the detector already finds every historical Hawaii landfall, including the one HURDAT2 misses —
+and the Hawaii contract is unscoreable for want of events, not for want of coastline precision.
+
 **The coastline is simplified, and the erosion is measurable.** The polygons are Natural Earth
 10m; walking inland from Miami, a point registers as CONUS only about **5 km** from the
 shoreline, and the same is true of Hawaii's south shores. For centre-crossing detection that
