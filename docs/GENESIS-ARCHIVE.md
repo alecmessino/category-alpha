@@ -82,6 +82,41 @@ Brackets are Wilson 95% intervals. Note how wide they are: 26 storms is a real s
 "does it become a hurricane" and a thin one for anything rarer. That is the point of printing
 them — see [Refusals](#refusals-are-a-feature).
 
+### Using it on a live disturbance
+
+On 2026-08-17 23:30Z the NHC outlook carried an area at **12.0°N 143.7°W** (the graphical
+product's centroid) with a **50% 7-day formation chance**, forecast to drift west into the
+Central Pacific. What the archive says about disturbances like it:
+
+```bash
+python3 scripts/genesis/cli.py analogs --lat 12.0 --lon -143.7 --radius 500 \
+        --months 7,8,9 --min-pool-season 1971 --regions hawaii
+```
+
+```
+  matched 25 storms   effective sample 19.2   SUFFICIENT
+    reached ts      13/25    52.0%  [33-70%]
+    reached cat1     4/25    16.0%  [6-35%]
+    reached cat3     3/25    12.0%  [4-30%]
+  landfalls:
+    hawaii       any   0/25   0.0% [0-13%]        >=64kt   0 0.0% [0-13%]
+  time to ts: n=13  median 18 h    time to cat1: n=4  median 63 h
+  closest analogs: KEONI 1993 (115 kt), KELI 2025 (45 kt), IONA 2025 (115 kt),
+                   ULEKI 1988 (110 kt), WILA 1988 (35 kt)
+```
+
+**Read the conditioning carefully.** These are *genesis-conditioned* rates — they assume a
+tropical cyclone forms. NHC's 50% is the probability it forms at all. The two compose by
+multiplication because they are sequential conditionals, not independent events:
+
+    P(reaches Cat 1) = P(forms) × P(reaches Cat 1 | forms) ≈ 0.50 × 0.16 ≈ 8%
+
+The landfall question does **not** decompose that way — see
+[the joint-probability note](#5-a-6-hourly-track-cannot-tell-a-traverse-from-a-centre-relocation)
+— which is why the archive counts storms that did both rather than multiplying two marginals.
+Note also that several of these analogs reached Cat 3+ and none reached Hawaii: systems forming
+at that longitude tend to track west, south of the islands.
+
 In Python:
 
 ```python
