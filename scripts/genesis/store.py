@@ -72,11 +72,33 @@ def write_table(name: str, rows: list[dict], base: Path | None = None) -> Path:
     return path
 
 
+# Read cache, keyed on (path, mtime, size). The back-test replays ~1700 storms and each replay
+# calls get_analogs, which touches four tables; without this the harness re-reads ~100k track
+# points per storm and takes hours. Keying on mtime AND size means a rebuilt table invalidates
+# itself -- a cache that could serve a stale table after a write would be worse than no cache,
+# because it would silently score the model against data that is no longer the archive.
+_READ_CACHE: dict = {}
+_CACHE_MAX = 8
+
+
 def read_table(name: str, base: Path | None = None) -> pa.Table:
     path = table_path(name, base)
     if not path.exists():
         return ALL_TABLES[name].empty_table()
-    return pq.read_table(path, schema=ALL_TABLES[name])
+    st = path.stat()
+    key = (str(path), st.st_mtime_ns, st.st_size)
+    hit = _READ_CACHE.get(name)
+    if hit and hit[0] == key:
+        return hit[1]
+    tbl = pq.read_table(path, schema=ALL_TABLES[name])
+    if len(_READ_CACHE) >= _CACHE_MAX:
+        _READ_CACHE.clear()
+    _READ_CACHE[name] = (key, tbl)
+    return tbl
+
+
+def clear_cache() -> None:
+    _READ_CACHE.clear()
 
 
 def append(name: str, rows: list[dict], base: Path | None = None) -> tuple[Path, int, int]:

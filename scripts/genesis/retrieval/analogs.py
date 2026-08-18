@@ -62,6 +62,21 @@ from ..provenance import ARCHIVE_DIR
 from ..schema import THRESHOLDS_KT
 from ..store import read_table
 
+# to_pylist() on 100k track points is itself expensive enough to dominate a back-test, so the
+# row-dict view is cached beside the Arrow table, invalidated by the same identity.
+_ROWS_CACHE: dict = {}
+
+
+def _rows(name: str, base):
+    tbl = read_table(name, base)
+    key = (name, str(base), id(tbl))
+    hit = _ROWS_CACHE.get(name)
+    if hit and hit[0] == key:
+        return hit[1]
+    rows = tbl.to_pylist()
+    _ROWS_CACHE[name] = (key, rows)
+    return rows
+
 EARTH_R_KM = 6371.0088
 
 # The environment fields an env_vector may key on, mapped to the archive column.
@@ -91,6 +106,18 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 
 def _wrap180(lon: float) -> float:
     return ((float(lon) + 180.0) % 360.0) - 180.0
+
+
+def format_position(lat: float, lon: float) -> str:
+    """Human-readable position with hemisphere letters.
+
+    Signed degrees are correct for arithmetic and wrong for reading: a Central Pacific
+    disturbance printed as "-140.0E" invites exactly the sign confusion this archive spends
+    so much effort avoiding, so every human-facing surface prints hemispheres.
+    """
+    ns = "N" if lat >= 0 else "S"
+    ew = "E" if _wrap180(lon) >= 0 else "W"
+    return f"{abs(lat):.1f}{ns} {abs(_wrap180(lon)):.1f}{ew}"
 
 
 def _pct(values: list[float], q: float) -> float | None:
@@ -189,7 +216,7 @@ class AnalogResult:
         """One-screen human summary -- what the CLI and the README print."""
         q = self.query
         out = [
-            f"ANALOGS  {q['lat']:.1f}N {q['lon']:.1f}E  r={q['radius_km']:.0f} km"
+            f"ANALOGS  {format_position(q['lat'], q['lon'])}  r={q['radius_km']:.0f} km"
             f"  months={q.get('season_months') or 'all'}",
             f"  matched {self.n_cases} storms   effective sample {self.effective_sample_size:.1f}"
             f"   {'SUFFICIENT' if self.sufficient else 'BELOW MIN SAMPLE -- rates refused'}",
@@ -276,8 +303,8 @@ def get_analogs(
     base = archive_dir or ARCHIVE_DIR
     gaps: list[str] = []
 
-    genesis = read_table("genesis_events", base).to_pylist()
-    storms = {s["storm_id"]: s for s in read_table("storms", base).to_pylist()}
+    genesis = _rows("genesis_events", base)
+    storms = {s["storm_id"]: s for s in _rows("storms", base)}
     if not genesis:
         gaps.append("genesis_events table is empty -- the archive has not been built")
 
@@ -318,7 +345,7 @@ def get_analogs(
         unknown = sorted(set(env_vector) - set(ENV_FIELDS))
         if unknown:
             gaps.append(f"env_vector keys ignored (not in archive): {unknown}")
-        env_rows = read_table("environment", base).to_pylist()
+        env_rows = _rows("environment", base)
         if not env_rows:
             gaps.append("environment table is empty -- env_vector could not be applied")
         # The environment AT GENESIS: the row nearest the genesis time for that storm.
@@ -405,7 +432,7 @@ def get_analogs(
     ess = (wsum * wsum / wsq) if wsq > 0 else 0.0
 
     # ---- 4. landfalls for the matched storms -----------------------------------------
-    lf_rows = [r for r in read_table("landfalls", base).to_pylist() if r.get("storm_id") in ids]
+    lf_rows = [r for r in _rows("landfalls", base) if r.get("storm_id") in ids]
     if not lf_rows and ids:
         gaps.append("no landfall rows for the matched storms -- check the landfalls table")
     by_storm: dict = {}
@@ -488,7 +515,7 @@ def get_analogs(
     if ids:
         step = track_density_deg
         seen_cell_storm = set()
-        for tp in read_table("track_points", base).to_pylist():
+        for tp in _rows("track_points", base):
             sid = tp.get("storm_id")
             if sid not in ids:
                 continue

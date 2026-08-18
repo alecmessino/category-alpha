@@ -107,7 +107,11 @@ TRACK_POINTS = pa.schema([
 # a query can filter without reading the manifest.
 
 ENVIRONMENT = pa.schema([
-    pa.field("storm_id", pa.string(), nullable=False),
+    # NULLABLE on purpose. SHIPS is keyed by ATCF id and a small number of its records carry an
+    # id that IBTrACS never adopted (measured: 151 of 18,514 for EP+CP, 0.8%). Dropping those
+    # rows would make the join look perfect; keeping them with a NULL storm_id makes the gap
+    # countable, which is the whole point. They simply never match an analog query.
+    pa.field("storm_id", pa.string(), nullable=True),
     pa.field("iso_time", pa.timestamp("s", tz="UTC"), nullable=False),
     pa.field("atcf_id", pa.string()),
     pa.field("lat", pa.float64()),

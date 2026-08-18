@@ -1,0 +1,94 @@
+{
+  "built_utc": "2026-08-17T23:57:57Z",
+  "gaps": [
+    {
+      "attempted_utc": "2026-08-17T23:57:55Z",
+      "impact": "those environment rows have storm_id NULL and cannot be analog-matched",
+      "key": "ships_join",
+      "url": "",
+      "what": "SHIPS records with no IBTrACS storm",
+      "why": "151 SHIPS records carry an ATCF id absent from the loaded IBTrACS basins (a basin not loaded, or a storm IBTrACS did not adopt)"
+    },
+    {
+      "attempted_utc": "2026-08-17T23:57:55Z",
+      "impact": "environment.gpi is NULL for every row",
+      "key": "gpi",
+      "url": "",
+      "what": "GPI module missing",
+      "why": "genesis.indices.gpi not importable"
+    }
+  ],
+  "processing_version": "1.0.0",
+  "sources": [
+    {
+      "bytes": 46539726,
+      "downloaded_utc": "2026-08-17T23:57:47Z",
+      "key": "ibtracs.EP.csv",
+      "last_modified": null,
+      "note": "IBTrACS v04r01 basin file EP (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "2e9467ba4a4f12a86ecdcc3174c247903bd87a4e60dfc9ad550d3a7e0c066520",
+      "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.EP.list.v04r01.csv"
+    },
+    {
+      "bytes": 438633202,
+      "downloaded_utc": "2026-08-17T23:57:51Z",
+      "key": "ships.EP.txt",
+      "last_modified": null,
+      "note": "SHIPS developmental data EP 1982-2023 (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "d71cc4eb8641c5f5cf3e7b3774075c64d258ed7d9b10c367867bc0379e374d3d",
+      "url": "https://rammb-data.cira.colostate.edu/ships/data/EP/lsdiage_1982_2023_sat_ts_7day.txt"
+    },
+    {
+      "bytes": 24938844,
+      "downloaded_utc": "2026-08-17T23:57:55Z",
+      "key": "ships.CP.txt",
+      "last_modified": null,
+      "note": "SHIPS developmental data CP 1982-2023 (cache hit)",
+      "processing_version": "1.0.0",
+      "sha256": "443822caa9c2fb00540eb51a32ee85f9512cc43cb39c0fed374c0b228f30fe31",
+      "url": "https://rammb-data.cira.colostate.edu/ships/data/CP/lsdiagc_1982_2023_sat_ts_7day.txt"
+    }
+  ],
+  "started_utc": "2026-08-17T23:57:47Z",
+  "tables": {
+    "environment": {
+      "note": "SHIPS developmental data; ERA5 unavailable -- see gaps",
+      "path": "environment.parquet",
+      "processing_version": "1.0.0",
+      "rows": 18514,
+      "sources": [
+        "ships.EP.txt",
+        "ships.CP.txt"
+      ]
+    },
+    "genesis_events": {
+      "note": "derived: first tropical point + first threshold crossings",
+      "path": "genesis_events.parquet",
+      "processing_version": "1.0.0",
+      "rows": 1712,
+      "sources": [
+        "ibtracs.EP.csv"
+      ]
+    },
+    "storms": {
+      "note": "",
+      "path": "storms.parquet",
+      "processing_version": "1.0.0",
+      "rows": 1712,
+      "sources": [
+        "ibtracs.EP.csv"
+      ]
+    },
+    "track_points": {
+      "note": "",
+      "path": "track_points.parquet",
+      "processing_version": "1.0.0",
+      "rows": 99747,
+      "sources": [
+        "ibtracs.EP.csv"
+      ]
+    }
+  }
+}
