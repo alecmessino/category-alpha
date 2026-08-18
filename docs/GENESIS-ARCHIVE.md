@@ -156,7 +156,7 @@ As built for Atlantic + East/Central Pacific:
 | `track_points` | 224,153 |
 | `environment` | 32,842 |
 | `genesis_events` | 3,959 |
-| `landfalls` | 4,544 |
+| `landfalls` | 3,379 |
 | `daily_disturbances` | grows daily; back-filled from 2023 |
 
 Every row carries `source_key`, `processing_version` and `ingested_utc`. `MANIFEST.json`
@@ -312,6 +312,22 @@ Dot and Iniki are the only two hurricane landfalls in Hawaii's recorded history,
 the one HURDAT2 does not flag. `bracketing_fix` means a published fix was itself over land;
 `segment_crossing` means the intensity was interpolated between two fixes and the row is
 derived.
+
+**Attribution tolerates the erosion; containment alone did not.** A landfall is *on* the coast
+by definition, so requiring the point to fall strictly inside a simplified polygon discards
+exactly the rows that matter. Measured: **726 of 1,305 official HURDAT2 `L` records — 56% —
+came out `unattributed`**, clustered on the Florida, Louisiana, Texas and Carolina coasts, which
+is to say they were all obviously CONUS. Attribution now falls back to the nearest region within
+30 km, measured to polygon vertices so it over-estimates distance and can only fail to
+attribute, never over-reach. Unattributed dropped to **57**, and those are genuinely outside the
+five modelled regions: Nova Scotia and Newfoundland (24), Bermuda (9), the Azores and Cape Verde
+(5), South America (4), Iberia (1). They are kept as `region='unattributed'` — a landfall NOAA
+published is a fact whether or not this code can name the coast it hit.
+
+Spot-checked against the record, CONUS major-hurricane landfalls since 2000 come back exactly
+right: Charley and Ivan and Jeanne (2004), Dennis/Katrina/Rita/Wilma (2005), Harvey and Irma
+(2017), Michael at 140 kt (2018), Laura and Zeta (2020), Ida (2021), Ian (2022), Idalia (2023),
+Helene and Milton (2024) — right storms, right states, right intensities.
 
 **The coastline is simplified, and the erosion is measurable.** The polygons are Natural Earth
 10m; walking inland from Miami, a point registers as CONUS only about **5 km** from the

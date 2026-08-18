@@ -195,8 +195,7 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
             regions = _try("coastlines", m, _regions,
                            impact="landfalls cannot be attributed to a region")
             if regions is not None:
-                def region_for(lat, lon, _r=regions):
-                    return geo.point_region(lat, lon, _r)
+                region_for = make_region_attributor(geo, regions)
         else:
             m.add_gap(Gap(key="geo", what="coastline geometry missing",
                           why="genesis.geo not importable",
@@ -307,6 +306,52 @@ def build(*, basins: tuple = ("EP",), archive_dir: Path | None = None,
     say(f"  manifest + snapshot {snap.name}")
     return {"summary": summary(base), "gaps": [g.as_dict() for g in m.gaps],
             "snapshot": str(snap)}
+
+
+def make_region_attributor(geo, regions, *, tol_km: float = 30.0):
+    """Build the callable that attributes a landfall point to a region.
+
+    WHY STRICT CONTAINMENT IS THE WRONG TEST HERE. A landfall is ON the coast by definition,
+    and the Natural Earth 10m polygons are eroded by roughly 5 km (measured by walking inland
+    from Miami: a point registers as CONUS only ~5 km from the shoreline). Requiring the point
+    to be strictly inside therefore discards exactly the rows that matter. Measured before this
+    existed: 726 of 1,305 official HURDAT2 'L' records -- 56% -- came out 'unattributed', and
+    they clustered on the Florida, Louisiana, Texas and Carolina coasts, which is to say they
+    were all obviously CONUS.
+
+    So: exact containment first, and failing that the nearest region within `tol_km`. Distance
+    is measured to polygon VERTICES, which over-estimates the true distance to the polygon
+    edge, so the test is conservative -- it can only fail to attribute, never over-reach. A
+    point that matches nothing stays unattributed rather than being assigned to whatever is
+    least far away: a landfall NOAA published is a fact whether or not this code can name the
+    coast it hit.
+    """
+    # Flatten once: (region, sub_region, [(lat, lon), ...]) so the nearest-vertex scan is
+    # a plain loop rather than a re-walk of the GeoJSON per point.
+    flat = []
+    for region, entries in regions.items():
+        for name, rings in entries:
+            pts = [(y, x) for ring in rings for (x, y) in ring]
+            if pts:
+                flat.append((region, name, pts))
+
+    def attribute(lat, lon):
+        hit = geo.point_region(lat, lon, regions)
+        if hit:
+            return hit
+        best = None
+        bestd = tol_km
+        for region, name, pts in flat:
+            # cheap bounding reject before the per-vertex distance
+            if not any(abs(y - lat) <= 1.0 and abs(x - lon) <= 1.0 for y, x in pts[::16]):
+                continue
+            for y, x in pts:
+                d = geo.distance_km(lat, lon, y, x)
+                if d < bestd:
+                    best, bestd = (region, name), d
+        return best
+
+    return attribute
 
 
 def _discover_hurdat2(which: str) -> str:
