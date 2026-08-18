@@ -1,10 +1,10 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-18T13:06:55.457Z",
+  "ranAt": "2026-08-18T13:16:39.886Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "7d2b5652eecf61f1fff038cfd80b1528a80bfc98",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32140413328",
+  "sha": "035b9aa131e595558298884988c067cb6ea71399",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32141358308",
   "ok": false,
   "passed": 34,
   "total": 46,
@@ -58,7 +58,7 @@
       "detail": "The above error occurred in the <MT_Evidence> component:\n\n    at MT_Evidence (<anonymous>:453:23)\n    at div\n    at div\n    at MT_Section (<anonymous>:392:21)\n    at main\n    at div\n    at MillibarTer"
     }
   ],
-  "thirdPartyFailures": 12,
+  "thirdPartyFailures": 28,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -78,7 +78,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-18T12:55:47.730Z · 11m old"
+      "detail": "2026-08-18T13:09:44.271Z · 7m old"
     },
     {
       "check": "renders: Situation",
@@ -138,7 +138,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "6 ranked of 7 candidates · 116/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "6 ranked of 12 candidates · 116/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -193,12 +193,12 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 4m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=LOW lag=229m raw=88%"
+      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=LOW lag=250m raw=88%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -213,7 +213,7 @@
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: past the 180-min line — Lala 229m · 1 row(s), 1 held, 0 TAKE · forced: 1 anchored row(s) pushed past it → 1 HOLD, 0 SUSPECT, 0 ACTIONABLE · 3 stale-crossing row(s) in the register"
+      "detail": "live: past the 180-min line — Lala 250m · 1 row(s), 1 held, 0 TAKE · forced: 1 anchored row(s) pushed past it → 1 HOLD, 0 SUSPECT, 0 ACTIONABLE · 3 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
@@ -233,12 +233,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "61 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "59 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "61 tile(s) served on reload · 61 in cache"
+      "detail": "59 tile(s) served on reload · 59 in cache"
     },
     {
       "check": "all markets carried",
