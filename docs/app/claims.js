@@ -792,6 +792,156 @@
     "A correction arrives as a new row at a higher revision. Nothing is edited in place.",
   ]);
 
+
+  /* ---- Analog Prior — the genesis-to-intensity archive ----------------------
+     A separable product (scripts/genesis/, Python + Parquet) with its own daily job and
+     its own payload, docs/data/analogs.json. It is not part of the ten-minute snapshot,
+     so every statement about it is a function of THAT file rather than of MT._feeds —
+     the same shape as wind.field, which reads its own committed product.
+
+     The archive refuses to publish what it cannot support, and these claims are what
+     the panel says about those refusals. They are written here, once, so the panel can
+     never describe a refusal the payload did not actually make. */
+  const analogsPayload = () => (window.__MT_ANALOGS || null);
+
+  define("analogs.archive", "genesis", () => {
+    const a = analogsPayload();
+    if (!a) {
+      const st = window.__MT_ANALOGS_STATE;
+      if (st === "loading") return { text: "reading the genesis analog archive payload", tier: "C", ok: false };
+      return {
+        text: "no genesis analog archive payload in this deployment"
+            + (window.__MT_ANALOGS_ERR ? " (" + window.__MT_ANALOGS_ERR + ")" : "")
+            + " — no analog prior is published, and none is estimated in its absence",
+        tier: "C", ok: false,
+      };
+    }
+    const t = (a.archive && a.archive.tables) || {};
+    const n = (k) => t[k] == null ? "?" : t[k];
+    return {
+      text: "genesis-to-intensity archive, snapshot " + ((a.archive && a.archive.snapshot) || "—")
+          + " · " + n("storms") + " storms · " + n("genesis_events") + " genesis events · "
+          + n("track_points") + " track points · " + n("landfalls") + " landfalls · "
+          + n("environment") + " environment rows · " + n("daily_disturbances") + " archived outlook rows"
+          + " · processing " + (a.processing_version || "—"),
+      tier: "A", ok: true,
+    };
+  });
+
+  /* The one sentence that stops a reader multiplying a landfall rate by a formation
+     chance. It is the archive's own, and it is passed through unaltered — this claim
+     exists to give it an owner, not to rephrase it. */
+  define("analogs.conditioning", "genesis", () => {
+    const a = analogsPayload();
+    if (!a || !a.conditioning_note) {
+      return { text: "the archive published no conditioning note with this payload — do not compose these rates with anything until it does", ok: false };
+    }
+    return { text: a.conditioning_note, ok: true };
+  });
+
+  /* Matching is on where a storm FORMED. Querying an active storm's current position
+     returns few analogs or none — storms arrive there rather than form there — and that
+     has already been read the wrong way once. */
+  define("analogs.matching", "genesis", () => {
+    const a = analogsPayload();
+    const e = (a && a.entries) || [];
+    if (!e.length) return { text: "no system or outlook area was matched this cycle", ok: false };
+    const gen = e.filter((x) => x.position && x.position.which === "genesis").length;
+    return {
+      text: "Matched on the archived GENESIS position: this system's CURRENT position was NOT queried."
+          + " Matching is on where a storm formed, and a query at where one is now returns few analogs"
+          + " or none, because systems arrive at those latitudes rather than form there. Both positions"
+          + " are shown so the difference is visible. " + gen + " of " + e.length + " entr"
+          + (e.length === 1 ? "y" : "ies") + " on this panel were matched that way; the rest are outlook"
+          + " areas with no track yet, for which the area's own position is the genesis position.",
+      ok: true,
+    };
+  });
+
+  /* Kish ESS, and the rule that the gate is never applied to it. */
+  define("analogs.sample", "genesis", () => {
+    const a = analogsPayload();
+    const e = (a && a.entries) || [];
+    const thin = e.filter((x) => x.effective_sample_size != null && x.min_sample != null
+                                 && x.effective_sample_size < x.min_sample);
+    return {
+      text: "The effective sample size is published beside every matched-storm count, and the sample gate is"
+          + " applied to the raw count of distinct storms, never to the flattering effective one. Where the"
+          + " effective sample has fallen below that same gate, the weighting has concentrated on a few"
+          + " analogs: the weighted column then rests on fewer effective cases than the gate requires, while"
+          + " the unweighted rate beside it still runs over every matched storm."
+          + (thin.length
+              ? " Marked this cycle: " + thin.map((x) => x.label + " — " + x.effective_sample_size.toFixed(1)
+                  + " effective of " + x.n_cases + " matched, gate " + x.min_sample).join("; ") + "."
+              : " No entry is in that state this cycle."),
+      ok: thin.length === 0,
+    };
+  });
+
+  /* BASE RATE ONLY. The modern record holds one Hawaii hurricane landfall, so that
+     contract has a base rate and cannot have a validated model — and no skill number for
+     it exists anywhere in this repository for a panel to display. */
+  define("analogs.scoring", "genesis", () => {
+    const a = analogsPayload();
+    const rows = [];
+    ((a && a.entries) || []).forEach((x) => Object.keys(x.unscoreable || {}).forEach((k) => {
+      if (rows.indexOf(k) < 0) rows.push(k);
+    }));
+    return {
+      text: "BASE RATE ONLY marks a contract the archive holds too few events of to support a calibrated or"
+          + " skill-scored probability. It publishes the empirical base rate with its interval and refuses to"
+          + " produce a skill number, so no such number exists for these contracts anywhere in this repository"
+          + (rows.length ? ": " + rows.sort().map((k) => k.replace(":", " ")).join(", ") : "") + ".",
+      ok: rows.length === 0,
+    };
+  });
+
+  /* Whether anything was conditioned on a live environment, and the product mismatch
+     that the archive itself flags on every entry that was. */
+  define("analogs.environment", "genesis", () => {
+    const a = analogsPayload();
+    const all = (a && a.entries) || [];
+    const withEnv = all.filter((x) => x.environment && x.environment.vector);
+    if (!withEnv.length) {
+      return {
+        text: "No entry carries a live environment vector this cycle, so every match on this panel is"
+            + " conditioned on genesis position and season alone — which is the archive's position-and-season"
+            + " query, complete on its own terms rather than a degraded one.",
+        ok: true,
+      };
+    }
+    return {
+      text: withEnv.length + " of " + all.length + " entries were conditioned on a live environment vector ("
+          + (withEnv[0].environment.source || "live product") + "), matched against the archive's own"
+          + " environment table. The two are different products, and the archive's caveat about them is"
+          + " carried beside each vector rather than summarised away here.",
+      ok: true,
+    };
+  });
+
+  define("panel.analogs", "genesis", () => {
+    const a = analogsPayload();
+    if (!a) return { text: "genesis analog archive payload not read this cycle", tier: "C", ok: false };
+    const t = (a.archive && a.archive.tables) || {};
+    return {
+      text: "genesis analog archive · " + (t.storms == null ? "?" : t.storms) + " storms, "
+          + (t.landfalls == null ? "?" : t.landfalls) + " landfalls, snapshot "
+          + ((a.archive && a.archive.snapshot) || "—") + " · empirical base rates, not a skill forecast",
+      tier: "A", ok: true,
+    };
+  });
+
+  note("note.analogs", "genesis", "What the analog prior is, and what it refuses", () => [
+    "Every number on the panel is a field of the archive's own payload. Nothing is interpolated here.",
+    "Counts are always published; a rate only above the sample gate. Below it the archive refuses, and the panel prints the refusal it gave.",
+    "An outcome never recorded for a matched storm is unknown, not a failure — it leaves the denominator and is counted on its own.",
+    claim("analogs.matching").text,
+    claim("analogs.sample").text,
+    claim("analogs.scoring").text,
+    claim("analogs.environment").text,
+    claim("analogs.conditioning").text,
+  ]);
+
   function claim(id, ctx) {
     const c = REG[id];
     if (!c) return { id, owner: "none", text: "UNREGISTERED CLAIM (" + id + ")", ok: false };
