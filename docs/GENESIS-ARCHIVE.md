@@ -185,7 +185,7 @@ otherwise "time to hurricane" would be dated up to three hours early off a wind 
 | **NHC TWO text archive** | pre-genesis | **TWOEP/TWOAT 2003+**, **Central Pacific (HFOCP) 2019+** |
 | **NHC GTWO shapefile** | disturbance *positions* | live, plus an archive: 5,821 NHC issuances from 2023-05-15, 1,367 CPHC from 2022-12 |
 | **NHC CurrentStorms.json** | live resolution | current |
-| **NCEP/NCAR R1** (NOAA PSL, OPeNDAP) | environment where SHIPS is silent | 1948–present, 2.5°, 4×daily |
+| **NCEP/NCAR R1** (NOAA PSL, OPeNDAP) | environment where SHIPS is silent | 1948 → **2026-03-17 18Z**, 2.5°, 4×daily |
 | **Natural Earth 10m land** | coastline polygons | public domain |
 
 ---
@@ -209,6 +209,16 @@ vorticity, `VMPI` potential intensity, `RSST` SST, `COHC` heat content). Where S
 **NCEP/NCAR Reanalysis 1** is used via OPeNDAP subsetting. NCEP R1 is **2.5° and 4×daily**
 against ERA5's 0.25° and hourly: a TC core is unresolved at 2.5° and the "environment" is a
 much coarser average. Rows carry `env_source` so the two can never be confused.
+
+**And the substitute does not reach the present either.** The NCEP R1 files were checked
+year by year: 1948 has 1,464 timesteps, 2023 and 2025 have 1,460, and **2026 has 304 — it ends
+at 2026-03-17 18Z**. Every variable reports the same 304, so a row is complete for all fields or
+absent for all. That means the reanalysis fallback covers the 2024–2025 hole left by SHIPS but
+**not the current season**: for a live disturbance there is no gridded environment in this
+archive at all, only what SHIPS publishes operationally once a storm exists.
+
+One trap worth recording because it is a factor of 100: NCEP R1 publishes `slp` in **Pascals**
+(raw ≈ 101050), not millibars.
 
 ### 2. Environment coverage is a function of the SHIPS era
 
