@@ -161,7 +161,9 @@ function MT_Section({ label, tier, defaultOpen, summary, children }) {
 
 /* ---- Evidence Matrix ---- */
 function MT_Evidence({ stormId, frame, selection, onSelect, dense }) {
-  const S = MT.storms[stormId];
+  // null, not undefined, when nothing is selected -- the same guard main.jsx:449 and
+  // LayerToggles already use. The readers handle it; see data-loader.js.
+  const S = stormId ? MT.storms[stormId] || null : null;
   const pad = dense ? "4px 8px" : "7px 9px";
   return (
     <P pad={false} title="Evidence Matrix" right={<BG tone="live" dot>{MT.evidence.length} SIGNALS</BG>}

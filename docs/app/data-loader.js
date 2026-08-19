@@ -159,7 +159,21 @@
       });
     });
 
-    // ---- evidence (built from what the feeds actually delivered) ----
+    /* ---- evidence (built from what the feeds actually delivered) ----
+     *
+     * EVERY READER MUST SURVIVE A NULL STORM. These rows are BUILT from the primary storm but
+     * READ against whichever storm is selected, and the board deliberately boots with none
+     * selected (main.jsx: "Boot to the OVERVIEW, not to storm #1"). A reader that dereferences
+     * `S` unconditionally therefore throws on first paint the moment the feed carries a storm --
+     * which is precisely what happened: `S.full_cls` on an undefined storm took out the Evidence
+     * Matrix and, with it, the map, the tab bar and four unrelated panels for a day.
+     *
+     * So the storm-dependent readers return the terminal's own "no value" mark rather than
+     * throwing. They are null-safe HERE, at the definition, rather than at each of the three
+     * places that call `e.read(S, f)` -- this is the only spot that knows whether a given reader
+     * needs a storm at all. The SST and ENSO readers ignore `S` entirely and keep rendering, so
+     * blanking the whole table on a null storm would hide readings that are perfectly available.
+     */
     const primary = (latest.storms || [])[0];
     const evidence = [];
     if (primary) {
@@ -170,13 +184,13 @@
         tier: nhc.ok ? "A" : "C", latency: nhc.latencyMs != null ? Math.round(nhc.latencyMs) + "ms" : "live",
         ver: primary.advNum ? "adv-" + primary.advNum : "adv", prov: nhc.ok ? "live" : "nofeed", weight: 0.32,
         hash: fnv("adv" + primary.id + (primary.advNum || "")),
-        read: (S, f) => S.full_cls + " · " + Math.round(S.wind(f)) + " kt",
+        read: (S, f) => (S ? S.full_cls + " · " + Math.round(S.wind(f)) + " kt" : "—"),
       });
       evidence.push({
         id: "ev-pres", kind: "recon_fix", label: "Min central pressure", source: nhc.source || "NHC",
         tier: nhc.ok ? "A" : "C", latency: "live", ver: primary.advNum ? "adv-" + primary.advNum : "adv",
         prov: nhc.ok ? "live" : "nofeed", weight: 0.24, hash: fnv("pres" + primary.id),
-        read: (S, f) => Math.round(S.pressure(f)) + " mb",
+        read: (S, f) => (S ? Math.round(S.pressure(f)) + " mb" : "—"),
       });
       if (isNum(latest.sstAnomalyC)) {
         evidence.push({
@@ -190,7 +204,7 @@
         evidence.push({
           id: "ev-market", kind: "market_snapshot", label: "Prediction-market price", source: mkt.source ? mkt.source[0].toUpperCase() + mkt.source.slice(1) : "Market",
           tier: "C", latency: "live", ver: "mkt", prov: mkt.ok ? "live" : "nofeed", weight: 0.0, hash: fnv("mkt" + primary.id),
-          read: (S, f) => { const c = contracts.find((x) => x.storm === S.id); return c ? Math.round(c.priceAt(f) * 100) + "¢" : "—"; },
+          read: (S, f) => { if (!S) return "—"; const c = contracts.find((x) => x.storm === S.id); return c ? Math.round(c.priceAt(f) * 100) + "¢" : "—"; },
         });
       }
     }

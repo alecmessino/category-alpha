@@ -165,9 +165,91 @@ async function run(label, payloadPath, kind) {
   return errors.length + missing;
 }
 
+/* THE BOARD BOOTS WITH NO STORM SELECTED, AND MUST SURVIVE IT.
+ *
+ * main.jsx boots to the overview on purpose -- "Boot to the OVERVIEW, not to storm #1" -- so
+ * `storm` is null until someone picks one. Every panel that takes a stormId therefore has to
+ * render that state, and the Evidence Matrix did not: it looked up `MT.storms[null]` and handed
+ * the undefined result to readers that dereference it. React unmounted the subtree, which on a
+ * live board meant the Evidence Matrix, the map, the tab bar and four unrelated panels all
+ * disappeared together. It shipped, and stayed broken for a day, because no offline check can
+ * see a render and the only thing that could was verify-live -- which runs AFTER deploy.
+ *
+ * The condition is specific: it needs a storm IN THE FEED (so the evidence array is built) and
+ * NO storm selected (so the readers get nothing). That is the default state of a fresh load
+ * whenever the basin is active, i.e. the single most common way anyone sees this page.
+ */
+async function runOverviewBoot() {
+  const server = await serve(null);
+  const port = server.address().port;
+  const browser = await chromium.launch(LAUNCH);
+  const page = await browser.newPage({ viewport: { width: 2560, height: 1600 } });
+  const errors = [];
+  page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
+  page.on("console", (m) => {
+    const t = m.text();
+    if (m.type() === "error" && !/ERR_FAILED|ERR_ABORTED|net::/.test(t)) errors.push("console: " + t.slice(0, 200));
+  });
+  await page.route("**/*", (r) => r.request().url().startsWith(`http://127.0.0.1:${port}`) ? r.continue() : r.abort());
+  await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "load", timeout: 60000 });
+  await page.waitForTimeout(1500);
+
+  console.log("\n=== overview boot: a storm in the feed, none selected ===");
+  let bad = 0;
+
+  // The precondition. Without a storm in the feed the evidence array is empty, every reader is
+  // unreachable, and a green result here would mean nothing at all -- so say so rather than pass.
+  const feed = await page.evaluate(() => ({
+    storms: Object.keys((window.MT && window.MT.storms) || {}).length,
+    evidence: ((window.MT && window.MT.evidence) || []).length,
+  }));
+  console.log(`        feed: ${feed.storms} storm(s) · ${feed.evidence} evidence row(s)`);
+  if (!feed.evidence) {
+    console.log("  ..    no evidence rows in this payload - the storm-dependent readers were not exercised");
+  }
+
+  // Reach the panel: it lives in the Models tab, inside a "Verify" section that starts closed.
+  try { await page.getByText(/^Models$/).first().click({ timeout: 15000 }); }
+  catch (e) { errors.push("could not reach the Models tab: " + e.message.slice(0, 90)); }
+  await page.waitForTimeout(500);
+  try { await page.getByText(/^Verify$/).first().click({ timeout: 10000 }); }
+  catch (e) { errors.push("could not open the Verify section: " + e.message.slice(0, 90)); }
+  await page.waitForTimeout(1500);
+
+  const selected = await page.evaluate(() => document.body.innerText);
+  const rendered = /Evidence Matrix/i.test(selected);
+  console.log(`  ${rendered ? "yes" : "NO "}  the Evidence Matrix renders with no storm selected`);
+  if (!rendered) bad++;
+
+  /* It must render the ROWS too, not just its own header -- a table that threw inside its body
+     and got replaced by a boundary would still match the title. */
+  const rows = await page.evaluate(() => {
+    const t = [...document.querySelectorAll("table")].find((x) => /NHC Public Advisory|ENSO phase/i.test(x.innerText));
+    return t ? t.querySelectorAll("tbody tr").length : 0;
+  });
+  console.log(`  ${rows > 0 ? "yes" : "NO "}  its rows render (${rows} row(s))`);
+  if (feed.evidence && rows !== feed.evidence) {
+    console.log(`        expected ${feed.evidence} row(s) from the payload`);
+    bad++;
+  }
+
+  /* Readers that need a storm show the terminal's own no-value mark. Readers that do not --
+     ENSO, SST -- must still show a real reading, so a blanket em dash would be its own bug. */
+  const ensoRead = /(El Ni|La Ni|Neutral|ENSO)/i.test(selected);
+  console.log(`  ${ensoRead ? "yes" : "NO "}  the storm-independent readings still show a value`);
+  if (!ensoRead) bad++;
+
+  await browser.close();
+  server.close();
+  console.log(`page errors: ${errors.length}`);
+  errors.slice(0, 8).forEach((e) => console.log("   " + e));
+  return errors.length + bad;
+}
+
 // The committed payload is not required to contain an empty pool; the fixture is required to
 // contain everything.
-let bad = await run("committed payload", null, "live");
+let bad = await runOverviewBoot();
+bad += await run("committed payload", null, "live");
 bad += await run("edge fixture (refused rates, empty pool, null environment)", EDGE, "fixture");
 
 if (bad) { console.log(`\n[panel-dom] ${bad} failure(s)`); process.exit(1); }

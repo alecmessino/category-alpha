@@ -6,7 +6,7 @@ const { Badge: BGd } = window.CategoryAlphaDesignSystem_a835cf || {};
 function MT_Provenance({ evidenceId, stormId, frame, onClose }) {
   const e = MT.evidence.find((x) => x.id === evidenceId);
   const open = !!e;
-  const S = MT.storms[stormId];
+  const S = stormId ? MT.storms[stormId] || null : null;
   const chain = ["Observation", "Evidence", "Feature", "Confidence", "Decision"];
   return (
     <>
