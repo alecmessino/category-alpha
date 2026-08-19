@@ -111,11 +111,17 @@ export const AtlasLayer = L.Layer.extend({
     padding: 0.25,
     pane: "overlayPane",
     zIndexOffset: 0,
+    /* Keep what has already been drawn instead of clearing every frame. Off for every layer
+       that paints a complete picture each time; on for the replay, which reveals the archive
+       one interval at a time and would otherwise show only the handful of storms active at
+       this instant -- mean concurrency over the whole record is under one. See _paint. */
+    accumulate: false,
   },
 
   initialize(options) {
     L.setOptions(this, options);
     this._dirty = true;
+    this._fullRepaint = true;
   },
 
   onAdd(map) {
@@ -154,6 +160,13 @@ export const AtlasLayer = L.Layer.extend({
     return this;
   },
 
+  /** Throw away the accumulated picture and rebuild it on the next paint. Needed whenever the
+   *  history changes rather than grows: a new filter, or a cursor that moved backwards. */
+  invalidate() {
+    this._fullRepaint = true;
+    return this;
+  },
+
   /** Repaint immediately, outside the frame queue -- for a replay tick that must not lag. */
   redrawNow() {
     if (!this._map) return this;
@@ -171,6 +184,12 @@ export const AtlasLayer = L.Layer.extend({
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     const c = this._canvas;
+    /* ASSIGNING width OR height DESTROYS THE BACKING STORE -- that is the specified behaviour of
+       a canvas, not an implementation detail, and it happens even when the value is unchanged.
+       So an accumulating layer loses everything it has drawn on every moveend, zoomend and
+       resize, and skipping the clearRect below would not save it. The flag tells _paint that
+       the next frame has to rebuild the picture from scratch rather than add to it. */
+    this._fullRepaint = true;
     c.width = Math.round(dims.x * dpr);
     c.height = Math.round(dims.y * dpr);
     c.style.width = dims.x + "px";
@@ -213,8 +232,14 @@ export const AtlasLayer = L.Layer.extend({
     const ctx = this._ctx;
     if (!ctx) return;
     this._dirty = false;
+    /* A normal layer paints the whole picture every frame, so it always clears first. An
+       accumulating one clears only when it owes a full rebuild -- on the first paint, and
+       whenever _reset has just thrown the pixels away. `full` is passed through so the subclass
+       knows whether it is redrawing history or only adding the newest slice. */
+    const full = !this.options.accumulate || this._fullRepaint;
+    this._fullRepaint = false;
     ctx.setTransform(this._dpr, 0, 0, this._dpr, 0, 0);
-    ctx.clearRect(0, 0, this._size.x, this._size.y);
+    if (full) ctx.clearRect(0, 0, this._size.x, this._size.y);
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     this.draw(ctx, {
@@ -224,6 +249,7 @@ export const AtlasLayer = L.Layer.extend({
       width: this._size.x,
       height: this._size.y,
       zoom: this._map.getZoom(),
+      full,
     });
   },
 

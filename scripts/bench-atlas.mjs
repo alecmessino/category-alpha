@@ -35,6 +35,11 @@ const BUDGET = {
   queryMs: 16,                // one frame: a click on the ocean answers inside one
   hitTestMs: 2,               // pointer feedback that lags reads as a broken map
   shellPaintMs: 700,          // the scale line and map frame, with the font CDN discounted
+  densityMs: 16,              // archive-wide pathway grid: one frame, so a filter change is live
+  genesisDensityMs: 4,        // 3,959 genesis points; anything slower means it is doing too much
+  replayTickMs: 8,            // the incremental tick, 20/s -- past this the head visibly stutters
+  replayRepaintMs: 200,       // rebuilding the whole revealed prefix after a pan or a zoom
+  timelineBuildMs: 60,        // sorting and merging 3,885 spans on every filter change
 };
 
 let chromium;
@@ -229,7 +234,44 @@ console.log("\n[3] the work the Atlas actually does");
       ? time(60, (i) => globalThis.__ATLAS_HIT(map, { x: 200 + (i % 40) * 12, y: 150 + (i % 30) * 9 }))
       : null;
 
+    /* Phase 2. The density grids run over the WHOLE filtered archive now that they are no longer
+       tied to a probe, and the replay tick runs twenty times a second while the map is playing --
+       both are on the interactive path, so both are gated. */
+    const A = globalThis.__ATLAS || {};
+    const rows = filterStorms ? filterStorms(archive, {}).rows : null;
+    const cases = rows ? Array.from(rows, (r) => ({ row: r })) : null;
+    const densityMs = A.pathwayDensity && cases
+      ? time(6, () => A.pathwayDensity(archive, cases, 2.0)) : null;
+    const genesisDensityMs = A.genesisDensity && rows
+      ? time(8, () => A.genesisDensity(archive, rows, 2.0)) : null;
+
+    const T = globalThis.__ATLAS_TIMELINE || {};
+    const timelineBuildMs = T.buildTimeline && rows
+      ? time(6, () => T.buildTimeline(archive, rows)) : null;
+
+    /* The replay's two paths, measured separately because they cost different things: a tick
+       inks only the segments that appeared since the last one, while a repaint rebuilds every
+       storm revealed so far -- which is what a pan or a zoom forces. */
+    let replayTickMs = null;
+    let replayRepaintMs = null;
+    const replay = globalThis.__ATLAS_REPLAY;
+    if (replay && T.buildTimeline && T.advance && rows) {
+      const tl = T.buildTimeline(archive, rows);
+      replay.setTimeline(tl);
+      // Wind to the middle of the record so a tick has a realistic amount of live track.
+      const mid = T.fromActive(tl, tl.activeMin * 0.6);
+      replay.setCursor(mid);
+      let c = mid;
+      replayTickMs = time(40, () => {
+        c = T.advance(tl, c, 6 * 60, { skipQuiet: true }).cursor;
+        replay.setCursor(c);
+      });
+      replayRepaintMs = time(5, () => { replay.invalidate(); replay.redrawNow(); });
+      replay.setTimeline(null);
+    }
+
     return { decodeAndIndex, filterMs, queryMs, drawMs, hitMs,
+             densityMs, genesisDensityMs, timelineBuildMs, replayTickMs, replayRepaintMs,
              storms: archive.nStorms, points: archive.nPoints };
   });
 
@@ -238,6 +280,11 @@ console.log("\n[3] the work the Atlas actually does");
   gate("analog query (the click on the ocean)", m.queryMs, BUDGET.queryMs, "ms");
   if (m.hitMs !== null) gate("pointer hit-test", m.hitMs, BUDGET.hitTestMs, "ms");
   if (m.decodeAndIndex) gate("re-project 224k points", m.decodeAndIndex, BUDGET.decodeAndIndexMs, "ms");
+  if (m.densityMs !== null) gate("pathway density, whole archive", m.densityMs, BUDGET.densityMs, "ms");
+  if (m.genesisDensityMs !== null) gate("genesis density, whole archive", m.genesisDensityMs, BUDGET.genesisDensityMs, "ms");
+  if (m.timelineBuildMs !== null) gate("build the replay clock", m.timelineBuildMs, BUDGET.timelineBuildMs, "ms");
+  if (m.replayTickMs !== null) gate("replay tick (incremental)", m.replayTickMs, BUDGET.replayTickMs, "ms");
+  if (m.replayRepaintMs !== null) gate("replay repaint to cursor (after a pan)", m.replayRepaintMs, BUDGET.replayRepaintMs, "ms");
   if (errors.length) { failures++; console.log("  FAIL  page errors: " + errors.join(" | ")); }
   else console.log("  ok    no page errors");
   await ctx.close();

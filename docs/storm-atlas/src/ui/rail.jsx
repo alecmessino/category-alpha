@@ -9,14 +9,15 @@
 import React from "react";
 import { INTENSITY_FILTERS, LANDFALL_FILTERS } from "../engine/query.js";
 import { CATEGORY_COLOR } from "../render/palette.js";
-import { Chip, Head, MONO, Row } from "./kit.jsx";
+import { Chip, Head, MONO, Row, claimText } from "./kit.jsx";
 
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August",
   "September", "October", "November", "December"];
 
 export function Rail({ archive, filters, setFilters, result, layers, setLayers, bounds,
-  onReset }) {
+  onReset, mode, setMode, showPathway, setShowPathway, showGenesisDensity,
+  setShowGenesisDensity, timeline }) {
   const total = archive.manifest.counts.storms;
   const f = filters;
 
@@ -159,6 +160,30 @@ export function Rail({ archive, filters, setFilters, result, layers, setLayers, 
           </Chip>
         ))}
       </div>
+
+      <Head>VIEW</Head>
+      <div style={{ display: "flex", gap: 4, marginBottom: "var(--sp-4)" }}>
+        <Chip active={mode === "explore"} onClick={() => setMode("explore")}>EXPLORE</Chip>
+        <Chip active={mode === "replay"} onClick={() => setMode("replay")}>REPLAY</Chip>
+      </div>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+        lineHeight: "var(--lh-body)", marginBottom: "var(--sp-5)" }}>
+        {mode === "replay"
+          ? (timeline && timeline.n
+            ? `${timeline.n.toLocaleString()} storms unfold in order · the clock skips stretches `
+              + "with none active, and says so"
+            : "no storms in this filter")
+          : "the record as a finished map"}
+      </div>
+
+      <Head>DENSITY SURFACES</Head>
+      {/* The notes are the registered claims themselves, not a paraphrase of them. A surface
+          that can be turned on from here has to carry the same statement it carries in the
+          probe panel, and prose written twice drifts. */}
+      <Toggle label="PATHWAY FREQUENCY" on={!!showPathway}
+        onChange={(v) => setShowPathway(v)} note={claimText("atlas.pathway")} />
+      <Toggle label="GENESIS COUNT" on={!!showGenesisDensity}
+        onChange={(v) => setShowGenesisDensity(v)} note={claimText("atlas.genesis_density")} />
 
       <Head>LAYERS</Head>
       <Toggle label="COLOUR BY INTENSITY" on={layers.colorBy === "intensity"}

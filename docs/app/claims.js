@@ -996,9 +996,26 @@
     ok: false,
   }));
   define("atlas.pathway", "none", () => ({
-    text: "Historical pathway frequency counts the distinct storms of a matched pool that "
-        + "passed through each cell. It is not a forecast cone, it carries no probability, "
+    text: "Historical pathway frequency counts the distinct storms that passed through each "
+        + "cell — the matched pool when a point has been probed, otherwise the storms the "
+        + "current filter selects. It is not a forecast cone, it carries no probability, "
         + "and it says nothing about a storm that has not formed.",
+    ok: true,
+  }));
+  define("atlas.genesis_density", "none", () => ({
+    text: "Genesis count shades each cell by how many storms of the current filter formed in "
+        + "it. It is a count, not a rate: filtering to Cat 3 and above shows where the storms "
+        + "that became majors formed, which is not the probability that a storm forming there "
+        + "becomes one. Storms with no genesis point in the archive are absent rather than "
+        + "placed at an assumed position.",
+    ok: true,
+  }));
+  define("atlas.replay", "none", () => ({
+    text: "Replay reveals every storm the filter selects, once, in the order it happened, over "
+        + "its whole observed span. The cursor is a real UTC instant and only moves forward. "
+        + "Stretches where no selected storm is active are skipped and each jump is reported "
+        + "on the transport; nothing else about the record's order or content is altered. "
+        + "Speeds are stated in archive days per second rather than as a multiplier.",
     ok: true,
   }));
   define("atlas.environment", "none", () => ({

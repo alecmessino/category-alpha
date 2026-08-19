@@ -17,6 +17,7 @@
  */
 
 import { AtlasLayer, worldOffsets } from "./atlas-layer.js";
+import { fixAt } from "../engine/timeline.js";
 import {
   CATEGORY_COLOR, CATEGORY_ORDER, GENESIS_INK, LANDFALL_INK, SELECTION_INK, UNKNOWN_INK,
   categoryIndexRaw,
@@ -73,14 +74,10 @@ export const SelectionLayer = AtlasLayer.extend({
     const a = this._a;
     if (!a || this._row === undefined || this._row < 0 || this._replayMs === null) return null;
     const [start, end] = a.trackRange(this._row);
-    const t = a.ptT;
-    const cursorMin = this._replayMs / 60000;
-    let k = start;
-    while (k + 1 < end && t[k + 1] <= cursorMin) k++;
-    const frac = k + 1 < end && t[k + 1] > t[k]
-      ? Math.min(1, Math.max(0, (cursorMin - t[k]) / (t[k + 1] - t[k])))
-      : 0;
-    return { index: k, next: k + 1 < end ? k + 1 : null, frac, start, end };
+    /* Shared with the archive-wide replay so the two can never disagree about which fix is in
+       force at an instant -- one storm and 3,885 storms are the same question here. */
+    const at = fixAt(a.ptT, start, end, this._replayMs / 60000);
+    return { index: at.index, next: at.next, frac: at.frac, start, end };
   },
 
   draw(ctx, view) {
