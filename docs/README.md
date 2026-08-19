@@ -345,8 +345,9 @@ the Atlas transliterates `scripts/genesis/retrieval/analogs.py` into JavaScript,
 field: exact for every count, every gap string and every matched storm; a declared 1e-9
 tolerance only for the weights, which pass through `exp` and `asin` where CPython's libm and
 V8's are free to differ in the last bit. The measured worst case is 1.4e-15. A `METHODOLOGY_VERSION`
-constant is declared by both and asserted equal, so a methodology change is a versioned event
-rather than a silent divergence.
+constant makes a methodology change a versioned event rather than a silent one — precisely: the
+browser reads it from the pack header rather than declaring it, so the version check is a
+staleness gate on the committed pack, and the vectors are what prove the two surfaces agree.
 
 **It publishes counts, not rates.** Phase 1 ports the matching half of the analog query — the
 pool, its effective sample size, its gaps, its pathway density. The conditioned probabilities,

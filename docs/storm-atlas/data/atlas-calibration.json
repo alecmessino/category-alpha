@@ -1,6 +1,10 @@
 {
  "audit_summary": {
   "by_verdict": {
+   "agreed_refused": [
+    "landfall_conus_any",
+    "landfall_hawaii_any"
+   ],
    "agreed_scoreable": [
     "landfall_mexico_any",
     "landfall_mexico_hurricane",
@@ -9,22 +13,24 @@
     "reaches_cat4_113kt",
     "reaches_ts_34kt"
    ],
-   "gate_missed": [
-    "landfall_conus_any",
-    "landfall_hawaii_any"
-   ],
-   "gate_passed_but_degenerate": [
-    "landfall_conus_hurricane"
-   ],
    "refused_and_degenerate": [
+    "landfall_conus_hurricane",
     "landfall_hawaii_hurricane"
    ]
   },
+  "corrected": [
+   "landfall_conus_any",
+   "landfall_conus_hurricane",
+   "landfall_hawaii_any"
+  ],
   "max_replay_events_without_skill": 6,
   "min_replay_events_with_skill": 57,
   "n_beat_climatology": 6,
+  "n_caught": 4,
+  "n_caught_archive_wide": 1,
   "n_contracts": 10,
-  "n_gate_missed": 2,
+  "n_gate_missed": 0,
+  "n_not_scoring": 4,
   "n_scored": 8
  },
  "cannot_answer": "P(a disturbance develops at all) -- failures are absent from the best-track archive; use run_disturbance_backtest with the TWO archive for that",
@@ -64,11 +70,17 @@
    "scope_audit": {
     "archive_events": 699,
     "beat_climatology": false,
-    "note": "THE GATE AND THE EVIDENCE DISAGREE. Enough storms carry this outcome archive-wide for the gate to allow a skill claim, but in the population this backtest replayed the method did not beat climatology. The gate counts events across the whole record; the skill that matters is skill within the population a query can actually draw from.",
-    "refused_by_gate": false,
+    "corrected": true,
+    "note": "The gate refuses a skill claim here and the replay confirms none was available.",
+    "note_archive_wide": "THE GATE AND THE EVIDENCE DISAGREE. Enough storms carry this outcome archive-wide for the gate to allow a skill claim, but in the population this backtest replayed the method did not beat climatology. The gate counts events across the whole record; the skill that matters is skill within the population a query can actually draw from.",
+    "refused_by_archive_wide_gate": false,
+    "refused_by_gate": true,
     "replay_events": 1,
     "required": 10,
-    "verdict": "gate_missed"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 2,
+    "verdict": "agreed_refused",
+    "verdict_archive_wide": "gate_missed"
    },
    "skill": -0.1721204115017354
   },
@@ -98,11 +110,17 @@
    "scope_audit": {
     "archive_events": 292,
     "beat_climatology": null,
-    "note": "The gate allows a skill claim, but no storm in the replayed population carried this outcome at all, so nothing was scored. An unmeasured contract is not a calibrated one.",
-    "refused_by_gate": false,
+    "corrected": true,
+    "note": "The gate refuses a skill claim and the replay had no events to score either. Both agree there is nothing here.",
+    "note_archive_wide": "The gate allows a skill claim, but no storm in the replayed population carried this outcome at all, so nothing was scored. An unmeasured contract is not a calibrated one.",
+    "refused_by_archive_wide_gate": false,
+    "refused_by_gate": true,
     "replay_events": 0,
     "required": 10,
-    "verdict": "gate_passed_but_degenerate"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 0,
+    "verdict": "refused_and_degenerate",
+    "verdict_archive_wide": "gate_passed_but_degenerate"
    },
    "skill": null
   },
@@ -140,11 +158,17 @@
    "scope_audit": {
     "archive_events": 11,
     "beat_climatology": false,
-    "note": "THE GATE AND THE EVIDENCE DISAGREE. Enough storms carry this outcome archive-wide for the gate to allow a skill claim, but in the population this backtest replayed the method did not beat climatology. The gate counts events across the whole record; the skill that matters is skill within the population a query can actually draw from.",
-    "refused_by_gate": false,
+    "corrected": true,
+    "note": "The gate refuses a skill claim here and the replay confirms none was available.",
+    "note_archive_wide": "THE GATE AND THE EVIDENCE DISAGREE. Enough storms carry this outcome archive-wide for the gate to allow a skill claim, but in the population this backtest replayed the method did not beat climatology. The gate counts events across the whole record; the skill that matters is skill within the population a query can actually draw from.",
+    "refused_by_archive_wide_gate": false,
+    "refused_by_gate": true,
     "replay_events": 6,
     "required": 10,
-    "verdict": "gate_missed"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 8,
+    "verdict": "agreed_refused",
+    "verdict_archive_wide": "gate_missed"
    },
    "skill": -0.033007844938437225
   },
@@ -182,11 +206,17 @@
    "scope_audit": {
     "archive_events": 2,
     "beat_climatology": null,
+    "corrected": false,
     "note": "The gate refuses a skill claim and the replay had no events to score either. Both agree there is nothing here.",
+    "note_archive_wide": "The gate refuses a skill claim and the replay had no events to score either. Both agree there is nothing here.",
+    "refused_by_archive_wide_gate": true,
     "refused_by_gate": true,
     "replay_events": 0,
     "required": 10,
-    "verdict": "refused_and_degenerate"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 1,
+    "verdict": "refused_and_degenerate",
+    "verdict_archive_wide": "refused_and_degenerate"
    },
    "skill": null
   },
@@ -272,11 +302,17 @@
    "scope_audit": {
     "archive_events": 467,
     "beat_climatology": true,
+    "corrected": false,
     "note": "The gate allows a skill claim here and the replay earned one.",
+    "note_archive_wide": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_archive_wide_gate": false,
     "refused_by_gate": false,
     "replay_events": 143,
     "required": 10,
-    "verdict": "agreed_scoreable"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 173,
+    "verdict": "agreed_scoreable",
+    "verdict_archive_wide": "agreed_scoreable"
    },
    "skill": 0.17999961354951477
   },
@@ -322,11 +358,17 @@
    "scope_audit": {
     "archive_events": 147,
     "beat_climatology": true,
+    "corrected": false,
     "note": "The gate allows a skill claim here and the replay earned one.",
+    "note_archive_wide": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_archive_wide_gate": false,
     "refused_by_gate": false,
     "replay_events": 57,
     "required": 10,
-    "verdict": "agreed_scoreable"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 62,
+    "verdict": "agreed_scoreable",
+    "verdict_archive_wide": "agreed_scoreable"
    },
    "skill": 0.052402142335814084
   },
@@ -420,11 +462,17 @@
    "scope_audit": {
     "archive_events": 1855,
     "beat_climatology": true,
+    "corrected": false,
     "note": "The gate allows a skill claim here and the replay earned one.",
+    "note_archive_wide": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_archive_wide_gate": false,
     "refused_by_gate": false,
     "replay_events": 427,
     "required": 10,
-    "verdict": "agreed_scoreable"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 518,
+    "verdict": "agreed_scoreable",
+    "verdict_archive_wide": "agreed_scoreable"
    },
    "skill": 0.11245791367383551
   },
@@ -502,11 +550,17 @@
    "scope_audit": {
     "archive_events": 775,
     "beat_climatology": true,
+    "corrected": false,
     "note": "The gate allows a skill claim here and the replay earned one.",
+    "note_archive_wide": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_archive_wide_gate": false,
     "refused_by_gate": false,
     "replay_events": 214,
     "required": 10,
-    "verdict": "agreed_scoreable"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 256,
+    "verdict": "agreed_scoreable",
+    "verdict_archive_wide": "agreed_scoreable"
    },
    "skill": 0.10311938621582784
   },
@@ -568,11 +622,17 @@
    "scope_audit": {
     "archive_events": 473,
     "beat_climatology": true,
+    "corrected": false,
     "note": "The gate allows a skill claim here and the replay earned one.",
+    "note_archive_wide": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_archive_wide_gate": false,
     "refused_by_gate": false,
     "replay_events": 149,
     "required": 10,
-    "verdict": "agreed_scoreable"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 170,
+    "verdict": "agreed_scoreable",
+    "verdict_archive_wide": "agreed_scoreable"
    },
    "skill": 0.05634648089836469
   },
@@ -658,11 +718,17 @@
    "scope_audit": {
     "archive_events": 3278,
     "beat_climatology": true,
+    "corrected": false,
     "note": "The gate allows a skill claim here and the replay earned one.",
+    "note_archive_wide": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_archive_wide_gate": false,
     "refused_by_gate": false,
     "replay_events": 757,
     "required": 10,
-    "verdict": "agreed_scoreable"
+    "scope": "in the EP basin since 1971",
+    "scope_events": 941,
+    "verdict": "agreed_scoreable",
+    "verdict_archive_wide": "agreed_scoreable"
    },
    "skill": 0.0456869869859704
   }
@@ -680,7 +746,7 @@
   "backtest_built_utc": "2026-08-18T01:37:05Z",
   "backtest_processing_version": "1.0.0",
   "backtest_sha256": "f946ec9773f5fa586deaaa8e508fefe856fdd3e6cbf9450d8082688db3e766b6",
-  "methodology_version": "1.0.0",
+  "methodology_version": "1.1.0",
   "processing_version": "1.0.0",
   "source": "data/genesis-archive/backtest.json"
  },

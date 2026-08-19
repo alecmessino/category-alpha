@@ -883,9 +883,12 @@
     };
   });
 
-  /* BASE RATE ONLY. The modern record holds one Hawaii hurricane landfall, so that
-     contract has a base rate and cannot have a validated model — and no skill number for
-     it exists anywhere in this repository for a panel to display. */
+  /* BASE RATE ONLY and OUT OF SCOPE. Methodology 1.1.0 split these, because they had been
+     conflated and only one of them was true: the archive holds two Hawaii hurricane landfalls
+     and no query can validate that contract, but it holds 699 CONUS landfalls and an east
+     Pacific query simply cannot reach them. The first is a limit of the record; the second is a
+     limit of the question. Neither produces a skill number, and no such number exists anywhere
+     in this repository for a panel to display. */
   define("analogs.scoring", "genesis", () => {
     const a = analogsPayload();
     const rows = [];
@@ -893,10 +896,13 @@
       if (rows.indexOf(k) < 0) rows.push(k);
     }));
     return {
-      short: "BASE RATE ONLY: too few events in the archive for a calibrated or skill-scored probability, so it"
-           + " publishes the base rate with its interval and produces no skill number for these contracts at all.",
-      text: "BASE RATE ONLY marks a contract the archive holds too few events of to support a calibrated or"
-          + " skill-scored probability. It publishes the empirical base rate with its interval and refuses to"
+      short: "BASE RATE ONLY and OUT OF SCOPE: too few events to support a calibrated or skill-scored"
+           + " probability — of the record, or of the population this query draws from — so it publishes the"
+           + " base rate with its interval and produces no skill number for these contracts at all.",
+      text: "A contract is refused when fewer than the required distinct storms carry the outcome. BASE RATE"
+          + " ONLY means the whole archive holds too few, and no cohort changes that. OUT OF SCOPE means the"
+          + " events exist but not in the population this query draws from — its basins and era — and says"
+          + " where they are instead. Both publish the empirical base rate with its interval and refuse to"
           + " produce a skill number, so no such number exists for these contracts anywhere in this repository"
           + (rows.length ? ": " + rows.sort().map((k) => k.replace(":", " ")).join(", ") : "") + ".",
       ok: rows.length === 0,

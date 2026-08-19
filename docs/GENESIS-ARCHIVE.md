@@ -789,9 +789,13 @@ relative tolerance only where a value passes through `exp`, `sin`, `cos` or `asi
 and V8 are free to round differently in the last bit. The measured worst case is printed on every
 run rather than assumed, and stands at 1.4e-15.
 
-`METHODOLOGY_VERSION` is declared by both surfaces and asserted equal, so a methodology change is
-a versioned event rather than a silent divergence. That constant — not the absence of a second
-implementation — is what makes the second surface safe.
+`METHODOLOGY_VERSION` makes a methodology change a versioned event rather than a silent
+divergence. Stated precisely, because the earlier wording here overstated it: the browser does
+not declare the constant, it reads the value the packer baked into the core pack header, so the
+version check compares a committed pack against a freshly emitted expectation — a staleness gate
+that catches a forgotten `atlas-pack`. What actually proves the two surfaces agree is the 42
+vectors, answered by both and compared field by field. The constant makes the change visible;
+the vectors make it safe.
 
 ### What each entry carries
 

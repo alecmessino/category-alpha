@@ -13,13 +13,16 @@
  *       values measured from this archive. If a rebuild moves them, this fails and they get
  *       re-measured -- it does not get loosened.
  *
- *   [3] THE SCOPE AUDIT FINDS THE HOLE. This is the reason the ledger is worth shipping. The
- *       Atlas refuses a contract when fewer than 10 distinct storms carry it ARCHIVE-WIDE. The
- *       backtest replays EAST PACIFIC storms. CONUS landfall has 699 events archive-wide and
- *       one in the replayed population, so the gate allows a skill claim and the method then
- *       scores WORSE than climatology. Three of the four contracts that earned no skill pass
- *       the gate; one is caught. The audit must find exactly that, and the surface must print
- *       it -- a ledger that only published the flattering half would be marketing.
+ *   [3] THE SCOPE AUDIT KEEPS BOTH GATES ON THE RECORD. This is the reason the ledger is worth
+ *       shipping, and the reason it stays worth shipping after the defect it found was fixed.
+ *       Until methodology 1.1.0 a contract was refused below 10 distinct storms ARCHIVE-WIDE;
+ *       the backtest replays EAST PACIFIC storms; CONUS landfall carries 699 archive-wide and
+ *       two in that population, so the gate allowed a skill claim and the method scored WORSE
+ *       than climatology. It caught one of the four contracts that earned no skill.
+ *       1.1.0 counts in scope and catches four of four. Both verdicts stay on every contract,
+ *       and this gate asserts the MOVE -- 1 of 4 to 4 of 4 -- because a ledger that stopped
+ *       reporting the defect the moment it closed would have no record of ever having caught
+ *       anything, and the next reader cannot tell that apart from one that never looks.
  *
  * Run: node scripts/test-atlas-calibration.mjs
  */
@@ -145,45 +148,83 @@ head("[4] the clean fact: skill tracks the events the query could actually draw 
     "the summary the surface leads with is computed from the same rows");
 }
 
-head("[5] the hole: the refusal gate counts the wrong population");
+head("[5] the hole the ledger found, and the correction that closed it");
 {
-  /* THE REASON THIS SURFACE IS WORTH SHIPPING. The gate asks "does the whole record carry ten
+  /* THE REASON THIS SURFACE IS WORTH SHIPPING. The gate asked "does the whole record carry ten
      of these events" when the question that matters is "does the population this query draws
      from carry them". For an east-Pacific query about a US mainland landfall those are 699 and
-     1. The gate passes it; the method has negative skill. */
+     two. It passed; the method has negative skill. Methodology 1.1.0 counts in scope. */
   const conus = byKey.get("landfall_conus_any");
   ok(conus.scope_audit.archive_events === 699,
     "CONUS landfall has 699 events archive-wide", conus.scope_audit.archive_events);
+  ok(conus.scope_audit.scope_events === 2,
+    "and two in the east Pacific since 1971, the population the backtest replayed",
+    conus.scope_audit.scope_events);
   ok(conus.scope_audit.replay_events === 1,
-    "and one in the population the backtest replayed", conus.scope_audit.replay_events);
-  ok(conus.scope_audit.refused_by_gate === false,
-    "so the archive-wide gate does NOT refuse it");
+    "which produced one scored event", conus.scope_audit.replay_events);
   ok(conus.scope_audit.beat_climatology === false, "and it does not beat climatology");
-  ok(conus.scope_audit.verdict === "gate_missed", "the audit calls that a missed gate",
-    conus.scope_audit.verdict);
-  ok(/THE GATE AND THE EVIDENCE DISAGREE/.test(conus.scope_audit.note),
-    "and says so in the row itself, not in a footnote");
 
+  /* BOTH VERDICTS, on every contract, permanently. */
+  ok(conus.scope_audit.refused_by_archive_wide_gate === false,
+    "the archive-wide gate did NOT refuse it");
+  ok(conus.scope_audit.verdict_archive_wide === "gate_missed",
+    "which the ledger still records as a missed gate",
+    conus.scope_audit.verdict_archive_wide);
+  ok(/THE GATE AND THE EVIDENCE DISAGREE/.test(conus.scope_audit.note_archive_wide),
+    "with the old note kept verbatim beside the new one");
+  ok(conus.scope_audit.refused_by_gate === true, "the scoped gate DOES refuse it");
+  ok(conus.scope_audit.verdict === "agreed_refused",
+    "and the gate now agrees with the evidence", conus.scope_audit.verdict);
+  ok(conus.scope_audit.corrected === true, "so the row is marked corrected");
+  ok(conus.scope_audit.scope === "in the EP basin since 1971",
+    "and names the population it counted over", conus.scope_audit.scope);
+
+  /* THE OTHER DIRECTION. Hawaii landfall cleared the archive-wide threshold by a single event
+     -- 11 against 10 -- on Pacific storms. The scoped count is 8. */
+  const hawaii = byKey.get("landfall_hawaii_any");
+  ok(hawaii.scope_audit.archive_events === 11 && hawaii.scope_audit.scope_events === 8,
+    "Hawaii landfall: 11 archive-wide, 8 in scope",
+    `${hawaii.scope_audit.archive_events} / ${hawaii.scope_audit.scope_events}`);
+  ok(hawaii.scope_audit.corrected === true, "also corrected by the change");
+
+  /* IRREDUCIBLE STAYS IRREDUCIBLE. Two events archive-wide: no scope helps, and the refusal
+     that says so must not have moved. */
   const hawaiiHur = byKey.get("landfall_hawaii_hurricane");
-  ok(hawaiiHur.scope_audit.archive_events === 2 && hawaiiHur.scope_audit.refused_by_gate === true,
-    "Hawaii hurricane landfall has 2 events archive-wide and IS refused",
-    `${hawaiiHur.scope_audit.archive_events} events`);
-  ok(hawaiiHur.scope_audit.verdict === "refused_and_degenerate",
-    "the one contract where the gate and the evidence agree there is nothing",
-    hawaiiHur.scope_audit.verdict);
+  ok(hawaiiHur.scope_audit.archive_events === 2,
+    "Hawaii hurricane landfall has 2 events archive-wide",
+    hawaiiHur.scope_audit.archive_events);
+  ok(hawaiiHur.scope_audit.refused_by_gate === true
+    && hawaiiHur.scope_audit.refused_by_archive_wide_gate === true,
+    "refused by both gates");
+  ok(hawaiiHur.scope_audit.corrected === false,
+    "and NOT corrected -- it was right before and it is right now");
 
-  /* The honest tally, asserted so a future rebuild cannot quietly improve it. */
+  /* THE TALLY, asserted as a MOVE so neither number can drift unnoticed. */
   const notScoring = cal.contracts.filter((c) => c.scope_audit.beat_climatology !== true);
   const caught = notScoring.filter((c) => c.scope_audit.refused_by_gate);
+  const caughtBefore = notScoring.filter((c) => c.scope_audit.refused_by_archive_wide_gate);
   ok(notScoring.length === 4, "four contracts earned no skill claim", notScoring.length);
-  ok(caught.length === 1,
-    "and the archive-wide gate catches exactly one of them",
-    `${caught.length} caught: ${caught.map((c) => c.key).join(",")}`);
-  ok(cal.audit_summary.n_gate_missed === 2,
-    "two are missed outright; the third scored nothing at all to be missed on",
+  ok(caughtBefore.length === 1,
+    "the archive-wide gate caught exactly one of them",
+    caughtBefore.map((c) => c.key).join(","));
+  ok(caught.length === 4,
+    "the scoped gate catches all four",
+    caught.map((c) => c.key).join(","));
+  ok(cal.audit_summary.n_gate_missed === 0, "no contract is missed any more",
     cal.audit_summary.n_gate_missed);
-  ok(byKey.get("landfall_conus_hurricane").scope_audit.verdict === "gate_passed_but_degenerate",
-    "that third is named rather than folded in with the failures");
+  ok(cal.audit_summary.n_caught === 4 && cal.audit_summary.n_caught_archive_wide === 1,
+    "and the summary carries both numbers, not just the flattering one",
+    `${cal.audit_summary.n_caught} / ${cal.audit_summary.n_caught_archive_wide}`);
+  ok(cal.audit_summary.corrected.length === 3,
+    "three contracts moved", cal.audit_summary.corrected.join(","));
+
+  /* NOT ONE SKILLED CONTRACT WAS REFUSED BY THE CHANGE. A gate that tightened until it refused
+     everything would score perfectly on the tally above and be useless. */
+  const skilled = cal.contracts.filter((c) => c.scope_audit.beat_climatology === true);
+  ok(skilled.length === 6, "six contracts beat climatology", skilled.length);
+  ok(skilled.every((c) => !c.scope_audit.refused_by_gate),
+    "and the scoped gate refuses none of them",
+    skilled.filter((c) => c.scope_audit.refused_by_gate).map((c) => c.key).join(","));
 }
 
 head("[5b] a contract the replay never tested publishes no score");

@@ -66,6 +66,10 @@ from ..store import read_table
 # row-dict view is cached beside the Arrow table, invalidated by the same identity.
 _ROWS_CACHE: dict = {}
 _ENTERED_CACHE: dict = {}
+# Its OWN dict, deliberately. _ENTERED_CACHE is cleared wholesale by _storms_entering on every
+# miss, so a scoped count co-tenanted there would be evicted by an unrelated subbasin query --
+# and the scope belongs in the key, or the first scope's answer is served to every later one.
+_CONTRACT_EVENT_CACHE: dict = {}
 
 
 def _rows(name: str, base):
@@ -109,35 +113,98 @@ def _wrap180(lon: float) -> float:
     return ((float(lon) + 180.0) % 360.0) - 180.0
 
 
-# A contract needs this many DISTINCT STORMS carrying the outcome, ARCHIVE-WIDE, before any
-# skill claim about it is possible. Same constant the back-test gates on, restated here so the
-# retrieval layer can refuse a claim the harness would also refuse -- the two must never
-# disagree about what is measurable.
+# A contract needs this many DISTINCT STORMS carrying the outcome, IN THE POPULATION THE QUERY
+# CAN DRAW FROM, before any skill claim about it is possible. Same constant the back-test gates
+# on, restated here so the retrieval layer can refuse a claim the harness would also refuse --
+# the two must never disagree about what is measurable.
+#
+# METHODOLOGY 1.1.0 CHANGED THE POPULATION, NOT THE THRESHOLD. Until then this counted
+# archive-wide, and the calibration ledger caught what that costs: CONUS landfall carries 699
+# events in the record, almost all of them Atlantic, and six in the entire east Pacific. An east
+# Pacific query therefore passed the gate on the strength of storms it could never draw, and the
+# back-test then scored it at -0.172 against climatology. Of the four contracts that earned no
+# skill claim in that replay, the archive-wide gate caught one.
+#
+# NOTE FOR THE NEXT PERSON: backtest/scoring.py carries an independent literal of the same name
+# and value. It is NOT imported from here, and it gates the harness rather than the retrieval
+# layer, so the two can drift. Changing one is not changing both.
 MIN_EVENTS_FOR_SKILL = 10
 
 
-def contract_event_counts(base) -> dict:
-    """Distinct storms per landfall contract across the WHOLE archive, for scoreability.
+def scope_phrase(basins=None, min_season=None, max_season=None) -> str:
+    """How the counted population is named on screen.
 
-    THIS IS NOT THE MATCHED SAMPLE. Whether a contract can ever carry a skill number is a
-    property of the record, not of one query: the Hawaii hurricane-landfall contract has ONE
-    event in the modern archive (Iniki), so no query, however framed, can produce a validated
-    probability for it. Counting archive-wide is what lets a single query say so.
+    Transliterated word for word in docs/storm-atlas/src/engine/analogs.js. The refusal `reason`
+    built from it is compared VERBATIM across the two surfaces by test-atlas-parity.mjs, so a
+    difference of one comma here fails the build -- which is the intended tripwire.
     """
-    key = ("_contract_events", str(base))
-    hit = _ENTERED_CACHE.get(key)
+    where = f"in the {', '.join(sorted(basins))} basin" if basins else "in the archive"
+    if basins and len(basins) > 1:
+        where += "s"
+    if min_season is not None and max_season is not None:
+        return f"{where} between {min_season} and {max_season}"
+    if min_season is not None:
+        return f"{where} since {min_season}"
+    if max_season is not None:
+        return f"{where} up to {max_season}"
+    return "in the entire archive" if not basins else where
+
+
+def contract_event_counts(base, *, basins=None, min_season=None, max_season=None) -> dict:
+    """Distinct storms per landfall contract, over the population a query can draw from.
+
+    THIS IS NOT THE MATCHED SAMPLE, and the distinction is the whole point. Whether a contract
+    can carry a skill number is a property of the RECORD; whether enough of the matched storms
+    have a known outcome is a property of the SAMPLE, and `min_sample` governs that. Counting
+    over the record is what lets a query with three matches still say "and no query could
+    answer this".
+
+    WHICH RECORD, THOUGH. Counting the WHOLE archive was the bug: an east Pacific query asking
+    about a US mainland landfall passed the gate on 699 Atlantic events and six Pacific ones.
+    The population a query can draw from is bounded by BASIN and by ERA, so those bound the
+    count. Months, radius and subbasin are deliberately NOT scope -- they narrow WITHIN a
+    drawable population, which is the matched sample again, and folding them in here would
+    collapse the two gates into one.
+
+    `basins=None` means every basin, which is the archive-wide behaviour and what an
+    unconditioned query still gets. The season bounds are the query's DECLARED floor and
+    ceiling, never the span its matches happen to occupy -- a twelve-storm cohort spanning
+    1994-2019 must not scope the record to those 26 years.
+    """
+    scope = (tuple(sorted(basins)) if basins else None, min_season, max_season)
+    key = ("_contract_events", str(base), scope)
+    hit = _CONTRACT_EVENT_CACHE.get(key)
     if hit is not None:
         return hit
+
+    # The landfalls table carries no basin (schema.ENVIRONMENT/LANDFALL), so basin and season
+    # come through the storms table. Built once per call rather than per row.
+    want = set(basins) if basins else None
+    in_scope = None
+    if want is not None or min_season is not None or max_season is not None:
+        in_scope = set()
+        for st in _rows("storms", base):
+            if want is not None and st.get("basin") not in want:
+                continue
+            season = st.get("season")
+            if min_season is not None and (season is None or season < min_season):
+                continue
+            if max_season is not None and (season is None or season > max_season):
+                continue
+            in_scope.add(st["storm_id"])
+
     counts: dict = {}
     for r in _rows("landfalls", base):
         region = r.get("region")
         if not region or r.get("suspect_relocation"):
             continue
+        if in_scope is not None and r["storm_id"] not in in_scope:
+            continue
         counts.setdefault(f"{region}:any", set()).add(r["storm_id"])
         if r.get("hurricane_at_landfall"):
             counts.setdefault(f"{region}:hurricane", set()).add(r["storm_id"])
     out = {k: len(v) for k, v in counts.items()}
-    _ENTERED_CACHE[key] = out
+    _CONTRACT_EVENT_CACHE[key] = out
     return out
 
 
@@ -655,22 +722,66 @@ def get_analogs(
         gaps.append(f"regions requested but absent from the landfalls table: {unknown_asked}")
     report_regions = sorted(hit_regions | (asked & known))
 
-    # Which of the reported contracts can NEVER carry a skill number, from the record itself.
+    # Which of the reported contracts can NEVER carry a skill number -- and whether that is a
+    # limit of the RECORD or a limit of the POPULATION THIS QUERY ASKED ABOUT. Those are two
+    # different statements and until methodology 1.1.0 they were conflated.
+    #
+    # THE SCOPE IS THE BASINS THE MATCHES OCCUPY AND THE ERA THE CALLER DECLARED. Basins are
+    # derived because the commonest query names none and is basin-bound by geography anyway: a
+    # 500 km circle at 12.0N 105.0W holds only east Pacific storms whether or not anyone said
+    # so. The era is declared, never derived -- scoping the record to the span the matches
+    # happen to occupy would let a twelve-storm cohort refuse almost everything.
+    #
+    # AN EMPTY POOL FALLS BACK TO THE DECLARED BASINS, THEN TO THE WHOLE ARCHIVE. A query that
+    # matched nothing still publishes its refusals -- the count was never a property of the
+    # match -- and deriving a scope from no storms would silently drop them. The fallback is the
+    # conservative direction: archive-wide counts are always >= scoped ones, so it refuses
+    # fewer contracts, never more.
+    matched_basins = sorted({c.basin for c in cases if c.basin})
+    scope_basins = matched_basins or (sorted(basins) if basins else None)
+    scope_events = contract_event_counts(
+        base, basins=scope_basins, min_season=min_pool_season)
     archive_events = contract_event_counts(base)
+    where = scope_phrase(scope_basins, min_pool_season, None)
+
     unscoreable = {}
     for region in report_regions:
         for kind in ("any", "hurricane"):
-            n = archive_events.get(f"{region}:{kind}", 0)
-            if n < MIN_EVENTS_FOR_SKILL:
+            n = scope_events.get(f"{region}:{kind}", 0)
+            if n >= MIN_EVENTS_FOR_SKILL:
+                continue
+            total = archive_events.get(f"{region}:{kind}", 0)
+            # IRREDUCIBLE: no population in this archive carries enough. The reader can do
+            # nothing about it and the surface must not pretend otherwise.
+            if total < MIN_EVENTS_FOR_SKILL:
                 unscoreable[f"{region}:{kind}"] = {
-                    "archive_events": n,
+                    "archive_events": total,
+                    "scope_events": n,
+                    "scope": where,
                     "required": MIN_EVENTS_FOR_SKILL,
                     "status": "BASE RATE ONLY -- unscoreable",
-                    "reason": (f"only {n} storm(s) in the entire archive carry this outcome, "
+                    "reason": (f"only {total} storm(s) in the entire archive carry this outcome, "
                                f"below the {MIN_EVENTS_FOR_SKILL} distinct events any skill "
                                "score requires. A base rate can be quoted with its interval; "
                                "a calibrated or skill-scored probability cannot, and this "
                                "archive will not produce one."),
+                }
+            # OUT OF SCOPE: the events exist, somewhere this query cannot reach. Resolvable, and
+            # the refusal says where they are rather than leaving the reader to guess.
+            else:
+                unscoreable[f"{region}:{kind}"] = {
+                    "archive_events": total,
+                    "scope_events": n,
+                    "scope": where,
+                    "required": MIN_EVENTS_FOR_SKILL,
+                    "status": "OUT OF SCOPE -- unscoreable here",
+                    "reason": (f"only {n} storm(s) {where} carry this outcome, below the "
+                               f"{MIN_EVENTS_FOR_SKILL} distinct events any skill score "
+                               f"requires. The archive holds {total} in total, outside the "
+                               "population this query draws from. Widen the basin or the era "
+                               "and this contract becomes scoreable; a skill number over a "
+                               "population that does not carry the events would be borrowed "
+                               "from one that does."),
                 }
     landfall = {}
     for region in report_regions:

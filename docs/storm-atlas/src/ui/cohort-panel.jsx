@@ -21,7 +21,7 @@ import React from "react";
 import { CATEGORY_COLOR, CATEGORY_ORDER } from "../render/palette.js";
 import { formatPosition } from "../engine/geo.js";
 import { Chip, Gap, Head, MONO, Num, OverDenom, Row, Txt, claimText } from "./kit.jsx";
-import { ConditionedGroup, OutcomeCard, RateLine } from "./outcome-card.jsx";
+import { ConditionedGroup, OutcomeCard, RateLine, countsOf, refusalKindOf } from "./outcome-card.jsx";
 import { intensityContractKey, landfallContractKey } from "../engine/calibration.js";
 import { Refusal } from "./refusal.jsx";
 import { EnvLens } from "./env-lens.jsx";
@@ -162,9 +162,9 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
                     const u = r.unscoreable[`${region}:${kind}`];
                     if (!u) return null;
                     return (
-                      <Refusal key={kind} kind="BASE_RATE_ONLY" compact
+                      <Refusal key={kind} kind={refusalKindOf(u)} compact
                         subject={`${region.replace(/_/g, " ")} · ${kind === "hurricane" ? "≥64 kt" : "any"}`}
-                        counts={`${u.archive_events} archive-wide · ${u.required} needed`}
+                        counts={countsOf(u)}
                         detail={u.reason}
                         onEvidence={onEvidence
                           ? () => onEvidence(landfallContractKey(region, kind)) : undefined} />

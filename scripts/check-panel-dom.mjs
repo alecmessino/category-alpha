@@ -156,11 +156,19 @@ const PROBES = [
      that matched NOTHING still carries it — and the no-analogs state is exactly where the
      temptation to render nothing is strongest. This locks the statement to that state rather
      than to the page: it must appear within the empty entry, not merely somewhere below it. */
+  /* The irreducible refusal, pinned on the fixture where it is guaranteed. An entry that
+     matched NOTHING still carries it, because the count was never a property of the match --
+     and 1.1.0's scope falls back to the whole archive exactly so that stays true. */
   ["BASE RATE ONLY survives an empty pool", (t) => {
     const i = t.search(/no analogs|0 storms matched/i);
     return i >= 0 && /BASE RATE ONLY/i.test(t.slice(i, i + 1600));
   }, "fixture"],
-  ["a BASE RATE ONLY badge",        /BASE RATE ONLY/i,                                             "always"],
+  /* EITHER BADGE, on the live payload. Methodology 1.1.0 split the refusal: BASE RATE ONLY is
+     now only a limit of the RECORD, and a contract the query merely cannot reach is OUT OF
+     SCOPE. The committed payload predates the split and carries the first; the next daily
+     emit will carry both. The property under test is that a refused contract is BADGED, not
+     which of the two it earned -- the fixture probe below pins the irreducible one. */
+  ["a refusal badge",               /BASE RATE ONLY|OUT OF SCOPE/i,                                "always"],
   ["genesis-vs-current statement",  /genesis/i,                                                    "always"],
 ];
 

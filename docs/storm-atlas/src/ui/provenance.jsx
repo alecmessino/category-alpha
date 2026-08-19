@@ -43,9 +43,10 @@ export function ProvenanceDrawer({ archive, open, onClose, frame }) {
         <Head>VERSIONS</Head>
         <Row k="methodology" v={<Txt value={m.methodology_version} />}
           title="Which definitions turn rows into a published number: the refusal gates, the
-                 analog weighting, the interval, the effective sample size. The browser declares
-                 the same constant as the archive, and scripts/test-atlas-parity.mjs fails the
-                 build if they disagree." />
+                 analog weighting, the interval, the effective sample size. The browser reads
+                 this from the pack the archive built rather than declaring its own, and
+                 scripts/test-atlas-parity.mjs answers 42 vectors with both surfaces and
+                 compares them field by field." />
         <Row k="processing" v={<Txt value={m.processing_version} />}
           title="Which code turned source bytes into archive rows." />
         <Row k="pack format" v={<Txt value={String(m.pack_format)} />} />

@@ -14,9 +14,18 @@
  *
  *   RATE REFUSED    the sample is below the archive's gate. Counts still publish.   RESOLVABLE
  *   CONDITIONED ON  this variable defined the cohort -- the fifth rule.             RESOLVABLE
+ *   OUT OF SCOPE    the events exist, somewhere this query cannot reach.            RESOLVABLE
  *   NOT EVALUABLE   no environment record near genesis for these storms.            PARTLY
  *   BASE RATE ONLY  the WHOLE archive holds too few events for any skill claim.     IRREDUCIBLE
  *   -- UNKNOWN      the outcome was never recorded. Out of the denominator, counted. IRREDUCIBLE
+ *
+ * OUT OF SCOPE ARRIVED WITH METHODOLOGY 1.1.0 AND IT SPLIT BASE RATE ONLY IN TWO. The gate used
+ * to count events across the whole archive, so every refusal it produced claimed to be a limit
+ * of the record. Measured, exactly one contract is: hawaii:hurricane, at two events. The rest
+ * were limits of the POPULATION THE QUERY ASKED ABOUT -- a Florida cohort was being told its
+ * Hawaii landfall rate was 0.0% [0.0-3.2%] on the strength of eleven Pacific storms it could
+ * never contain. Those are now OUT OF SCOPE, they are resolvable, and they say where the events
+ * actually are. BASE RATE ONLY keeps its sentence, which is once again true.
  *
  * Each carries a distinct mark, a distinct colour role and distinct wording, so which refusal
  * fired is legible without reading the sentence. check-atlas-dom asserts all five reach the
@@ -48,6 +57,16 @@ export const REFUSALS = {
        circularity in full; a second paragraph restating it turns the card into a lecture and
        buries the one thing this line is for -- whether the reader can act. */
     remedy: "Remove that condition and it becomes an outcome again.",
+  },
+  OUT_OF_SCOPE: {
+    kind: "OUT_OF_SCOPE",
+    title: "OUT OF SCOPE",
+    mark: "⇱",
+    tone: "var(--warn)",
+    resolvable: "yes",
+    remedy: "The events exist in this archive, outside the population you asked about. Widen the "
+          + "basin or the era and this contract becomes scoreable — a skill number over a "
+          + "population that does not carry the events would be borrowed from one that does.",
   },
   NOT_EVALUABLE: {
     kind: "NOT_EVALUABLE",

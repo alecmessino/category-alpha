@@ -38,10 +38,16 @@ PROCESSING_VERSION = "1.0.0"
 #
 # It exists because the methodology now has MORE THAN ONE EXECUTION SURFACE. The archive's
 # Python is authoritative; the Storm Atlas ships a transliteration of it that runs in a
-# browser. That is only safe while the two are provably the same thing, so both declare this
-# constant and scripts/test-atlas-parity.mjs fails when they disagree. A methodology change
-# then becomes a visible, versioned event rather than a silent divergence -- which is the
-# whole reason a second surface was allowed to exist at all.
+# browser. That is only safe while the two are provably the same thing.
+#
+# WHAT ACTUALLY ENFORCES THAT, STATED PRECISELY, BECAUSE THE OLD WORDING HERE OVERSTATED IT.
+# The browser does not DECLARE this constant -- it reads the value the packer baked into the
+# core pack header (docs/storm-atlas/src/engine/analogs.js). So the version check in
+# test-atlas-parity.mjs [1] compares a committed pack against a freshly emitted expectation:
+# it is a staleness gate that catches a forgotten `atlas-pack`, not a cross-language check.
+# The real proof that the two surfaces agree is [2] -- 42 vectors answered by both and compared
+# field by field, `unscoreable` reason strings included, verbatim. This constant's job is to
+# make a methodology change a visible, versioned EVENT; the vectors are what make it a safe one.
 #
 # WHY PHASE 3.1 DID NOT BUMP THIS, THOUGH IT LOOKED LIKE IT SHOULD.
 # That phase ported the conditioned rates, the Wilson intervals, the ESS and the time-to-event
@@ -59,7 +65,32 @@ PROCESSING_VERSION = "1.0.0"
 # cohort layer starts declaring it, that IS a methodology event -- and the answer then is to add
 # the rule to this Python too and bump both together, because "one methodology, several
 # execution surfaces" stops being true the moment a rule lives in only one of them.
-METHODOLOGY_VERSION = "1.0.0"
+#
+# 1.1.0 -- THE REFUSAL GATE STOPPED COUNTING A POPULATION NO QUERY COULD REACH.
+# The first bump this constant has ever taken, and it moves a published refusal on both
+# surfaces, which is exactly what it is for.
+#
+# A landfall contract is refused as BASE RATE ONLY below MIN_EVENTS_FOR_SKILL distinct storms
+# carrying the outcome. That count was taken ARCHIVE-WIDE. The calibration ledger, built to
+# audit the refusals, caught what that costs: CONUS landfall carries 699 events in the record,
+# almost all Atlantic and six east Pacific, so an east Pacific query passed the gate on storms
+# it could never draw -- and the back-test scored the method at -0.172 against climatology
+# there. Of the four contracts that earned no skill claim in that replay, the archive-wide gate
+# caught one. It failed in the other direction too: a Florida cohort was publishing a Hawaii
+# landfall rate of 0.0% [0.0-3.2%] as a scoreable contract, on eleven Pacific storms it could
+# never contain.
+#
+# The count is now taken over the population the query can draw from -- the basins its matches
+# occupy and the era it declared. Months, radius and subbasin are deliberately not scope: they
+# narrow WITHIN a drawable population, which is the matched sample, and `min_sample` already
+# governs that. An unconditioned query scopes to every basin over the whole record and its
+# counts do not move, so this only ever tightens a refusal, never loosens one.
+#
+# It also split the refusal in two, and that is the reader-facing half of the change. Measured,
+# exactly ONE contract in this archive is irreducible -- hawaii:hurricane, two events. BASE RATE
+# ONLY now means only that, and its sentence ("no cohort you can build changes that") is true
+# again. Everything else became OUT OF SCOPE: resolvable, and it says where the events are.
+METHODOLOGY_VERSION = "1.1.0"
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ARCHIVE_DIR = REPO_ROOT / "data" / "genesis-archive"

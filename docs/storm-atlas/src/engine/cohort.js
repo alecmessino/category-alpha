@@ -415,12 +415,31 @@ export function cohortResult(archive, spec, { regions = ALL_REGIONS } = {}) {
     });
   }
 
+  /* THE SCOPE THE REFUSAL GATE COUNTS OVER -- the population this cohort could draw from,
+     which is not the same as the cohort itself.
+     Derived from the cohort WITHOUT its outcome-side conditions: "storms that reached Cat 3"
+     narrows which storms are in hand, not which storms the question could ever have reached,
+     and scoping the record by an outcome would be the fifth rule's hazard wearing a different
+     hat. Basins are derived because a location-only query names none and is basin-bound by
+     geography anyway; the era is the one the reader declared. Empty falls back to declared,
+     then to the whole archive -- see analogs.py, which derives it identically. */
+  const drawable = filterStorms(archive, toFilters(withoutCondition(
+    withoutCondition(s, "intensity"), "landfall")));
+  const drawnBasins = new Set();
+  for (let i = 0; i < drawable.rows.length; i++) {
+    const b = S.str("basin", drawable.rows[i]);
+    if (b) drawnBasins.add(b);
+  }
+  const scopeBasins = drawnBasins.size ? [...drawnBasins].sort()
+    : (s.basins ? [...s.basins].sort() : null);
+
   const scored = scoreCases(archive, cases, {
     minSample: MIN_SAMPLE,
     regions,
     conditionedOn: conditionedOn(s),
     wsum: cases.length,           // uniform weights: the sum IS the count
     gaps,
+    scope: { basins: scopeBasins, minSeason: s.seasonFrom, maxSeason: s.seasonTo },
   });
 
   /* THE PRE-SATELLITE INTENSITY BIAS -- the same warning getAnalogs emits (analogs.js), and the

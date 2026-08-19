@@ -194,6 +194,11 @@ await clickLatLng(14.6, -113.9);
     /out of every denominator above/.test(t));
   ok("an unscoreable contract is badged", /BASE RATE ONLY/.test(t));
   ok("and says how many events the archive holds", /\d+ archive-wide · \d+ needed/.test(t));
+  /* METHODOLOGY 1.1.0. A refusal now says WHICH population it counted over, because "too few in
+     the archive" and "too few where you are looking" are different statements and only one of
+     them used to be printed. */
+  ok("a refusal names the population it counted over",
+    /in the (EP|NA|WP)[^·]*basin/.test(t) || /in the entire archive/.test(t));
   ok("pathway frequency is labelled as frequency", /HISTORICAL PATHWAY FREQUENCY/.test(t));
   ok("and disclaimed as not a forecast", /THIS IS NOT A FORECAST/.test(t));
   ok("and denies being a cone", /not a forecast cone/.test(t));
@@ -401,6 +406,63 @@ console.log("\n[4d] the comparison answers four questions and overstates none of
     (t2.match(/the same cohort without[^\n]{0,60}/) || [""])[0]);
 }
 
+console.log("\n[4g] the refusal says WHICH population it counted, and can be acted on");
+{
+  /* METHODOLOGY 1.1.0 SPLIT THE REFUSAL IN TWO, and the split is the reader-facing half of the
+     change. BASE RATE ONLY now means only what it says -- the whole archive cannot support the
+     contract, and no cohort helps. Everything else is OUT OF SCOPE: the events exist, this
+     query cannot reach them, and the refusal says where they are.
+
+     The Florida click is the case that proves it. A cohort of Atlantic storms was being told
+     its Hawaii landfall rate was 0.0% [0.0-3.2%] as a scoreable contract, on the strength of
+     eleven Pacific storms it could never contain. */
+  await page.evaluate(() => { history.replaceState(null, "", "?v=1&w=25,-80,500"); });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
+    { timeout: 90000 });
+  await page.waitForTimeout(900);
+  let t = await text();
+
+  ok("an Atlantic cohort refuses the Hawaii contract", /OUT OF SCOPE/.test(t));
+  ok("and says the events exist somewhere else", /archive-wide/.test(t));
+  ok("and names where this query was counted", /in the NA basin/.test(t));
+  ok("and it is RESOLVABLE, unlike a limit of the record",
+    /YOU CAN CHANGE THIS/.test(t) && /Widen the basin or the era/.test(t));
+
+  const kinds = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-refusal]")].map((e) => e.getAttribute("data-refusal")));
+  ok("OUT OF SCOPE is its own state, not a relabelled BASE RATE ONLY",
+    kinds.includes("OUT_OF_SCOPE"), kinds.join(","));
+
+  /* THE IRREDUCIBLE ONE MUST SURVIVE THE SPLIT. Hawaii hurricane landfall has two events in the
+     whole archive; no cohort changes that, and the sentence saying so must still be true. */
+  ok("BASE RATE ONLY still reaches the screen for a genuine limit of the record",
+    kinds.includes("BASE_RATE_ONLY"));
+  ok("and still refuses to offer a remedy",
+    /A LIMIT OF THE RECORD/.test(t) && /No cohort you can build changes that/.test(t));
+
+  /* A SHARED LINK MADE UNDER THE OLD METHODOLOGY SAYS SO. */
+  await page.evaluate(() => { history.replaceState(null, "", "?v=1&w=25,-80,500&m=1.0.0"); });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
+    { timeout: 90000 });
+  await page.waitForTimeout(800);
+  t = await text();
+  ok("a link made under an older methodology is told so",
+    await page.evaluate(() => !!document.querySelector("[data-methodology-moved]")));
+  ok("naming both versions", /methodology 1\.0\.0/.test(t) && /now publishes under 1\.1\.0/.test(t));
+  ok("and saying what actually changed for them",
+    /some contracts that published a rate under 1\.0\.0 now refuse as OUT OF SCOPE/.test(t));
+
+  await page.evaluate(() => { history.replaceState(null, "", location.pathname); });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
+    { timeout: 90000 });
+  await page.waitForTimeout(700);
+  ok("and a link at the current methodology is not nagged",
+    await page.evaluate(() => !document.querySelector("[data-methodology-moved]")));
+}
+
 console.log("\n[4e] the environment is a lens, and it costs nothing to refuse");
 {
   /* 2022-2023: the one boundary where the DEFINITION of sst_c changes underneath a cohort. */
@@ -496,19 +558,31 @@ console.log("\n[4f] the calibration ledger — reachable, and it publishes its o
   ok("and the methodology and archive stamp", /methodology version/i.test(t)
     && /backtest sha256/i.test(t));
 
-  /* THE HALF THAT DOES NOT FLATTER. */
+  /* THE HALF THAT DOES NOT FLATTER — AND THE RECORD THAT IT ONCE DID.
+     Methodology 1.1.0 closed the hole this ledger found, so `GATE MISSED IT` is no longer a
+     live verdict. The finding must not leave with the defect: every contract carries both
+     verdicts, and the three the correction moved say so on their face. A ledger that stopped
+     reporting what it caught the moment it was fixed would have no record of ever having
+     caught anything. */
   ok("the contracts with no skill are on the same page as the ones with skill",
-    /GATE MISSED IT/.test(t));
+    /WAS MISSED → NOW REFUSED/.test(t));
   ok("the divider marking where skill stops is drawn from the data",
     await page.evaluate(() => !!document.querySelector("[data-skill-divider]")));
-  ok("and it says how few of them the refusal gate catches",
-    /BELOW THIS LINE NO CONTRACT BEAT CLIMATOLOGY/.test(t));
-  ok("the gate's disagreement with the evidence is stated in full",
+  ok("and it says how many the gate catches, and how many it used to",
+    /BELOW THIS LINE NO CONTRACT BEAT CLIMATOLOGY/.test(t)
+    && /the archive-wide gate refused 1/.test(t));
+  ok("the old gate's disagreement with the evidence is still stated in full",
     /THE GATE AND THE EVIDENCE DISAGREE/.test(t));
-  ok("and names the reason — the gate counts the wrong population",
+  ok("and still names the reason — it counted the wrong population",
     /counts events across the whole record/i.test(t));
+  ok("the corrected rows carry what the archive-wide gate said",
+    await page.evaluate(() => document.querySelectorAll("[data-corrected]").length) === 3);
   ok("a contract the replay never tested publishes no skill score, and says so",
-    /NEVER SCORED/.test(t) && /An unmeasured contract is not a calibrated one/.test(t));
+    /An unmeasured contract is not a calibrated one/.test(t));
+  ok("both counts are on every row — in scope and archive-wide",
+    /IN SCOPE/.test(t) && /ARCHIVE-WIDE/.test(t));
+  ok("the headline states the move rather than only its destination",
+    /was 1 of 4/.test(t));
 
   /* WHAT THE BACKTEST CANNOT ANSWER -- the sentence that stops a reader carrying these numbers
      over to the question it never asked. */

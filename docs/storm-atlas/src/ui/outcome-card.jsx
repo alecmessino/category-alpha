@@ -49,8 +49,8 @@ export function OutcomeCard({ cell, label, tone, of, unscoreable, note, subject,
     return (
       <div style={CARD}>
         <CardHead label={label} tone={c} />
-        <Refusal kind="BASE_RATE_ONLY" subject={subject}
-          counts={`${unscoreable.archive_events} archive-wide · ${unscoreable.required} needed`}
+        <Refusal kind={refusalKindOf(unscoreable)} subject={subject}
+          counts={countsOf(unscoreable)}
           detail={unscoreable.reason} onEvidence={onEvidence} />
       </div>
     );
@@ -114,6 +114,25 @@ export function OutcomeCard({ cell, label, tone, of, unscoreable, note, subject,
       {cell.n_unknown > 0 ? <UnknownNote n={cell.n_unknown} /> : null}
     </div>
   );
+}
+
+/* WHICH REFUSAL THE ENGINE PRODUCED. The status string is the engine's, not the surface's --
+   picking the card by re-deriving the condition here would be a second implementation of the
+   gate, and the two would drift. */
+export function refusalKindOf(u) {
+  return u && /^OUT OF SCOPE/.test(u.status || "") ? "OUT_OF_SCOPE" : "BASE_RATE_ONLY";
+}
+
+/* BOTH COUNTS, because their difference IS the finding: 0 in scope against 11 archive-wide says
+   "your population cannot reach these", which is a different statement from "they do not
+   exist". Before 1.1.0 only the second number was shown, and it was the wrong one. */
+export function countsOf(u) {
+  if (!u) return undefined;
+  if (u.scope_events === undefined || u.scope_events === u.archive_events) {
+    return `${u.archive_events} archive-wide · ${u.required} needed`;
+  }
+  return `${u.scope_events} ${u.scope} · ${u.archive_events} archive-wide · `
+    + `${u.required} needed`;
 }
 
 const CARD = {

@@ -91,6 +91,12 @@ export function Atlas() {
     () => new URLSearchParams(location.search).get("contract") || null);
   const [cal, setCal] = React.useState(null);
   const [calError, setCalError] = React.useState(null);
+  /* THE METHODOLOGY A SHARED LINK WAS MADE UNDER. A cohort URL carries `v`, which versions the
+     SPEC SHAPE, and until 1.1.0 nothing carried the methodology at all -- so a bump silently
+     re-answered every link anyone had shared, with different refusals and no notice. A change
+     no reader can detect is a silent one from their side, whatever the commit log says. */
+  const [urlMethodology] = React.useState(
+    () => new URLSearchParams(location.search).get("m"));
   const [layers, setLayers] = React.useState({
     colorBy: "uniform", genesis: true, landfalls: true,
   });
@@ -223,10 +229,14 @@ export function Atlas() {
     const p = new URLSearchParams(toQuery(cohort));
     if (surface !== "tactical") p.set("view", surface);
     if (ledgerAnchor) p.set("contract", ledgerAnchor);
+    /* Stamped ALONGSIDE the cohort, never inside toQuery: the methodology is not part of a
+       cohort's identity, and folding it in would make two identical cohorts built under
+       different versions stop comparing equal. */
+    if (archive) p.set("m", archive.manifest.methodology_version);
     const q = p.toString();
     const next = q ? `?${q}` : location.pathname;
     if (location.search.replace(/^\?/, "") !== q) history.replaceState(null, "", next);
-  }, [cohort, surface, ledgerAnchor]);
+  }, [cohort, surface, ledgerAnchor, archive]);
 
   /* The ledger's 16 KB is fetched only when the ledger is opened. Nothing on the tactical
      surface needs it, and a reader who never asks the question should not pay for the answer. */
@@ -326,6 +336,7 @@ export function Atlas() {
 
       <div className="atlas-rail" style={{ overflowY: "auto",
         borderRight: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
+        <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
         <CohortBuilder archive={archive} cohort={cohort}
           setCohort={(f) => setCohort(normalise(f))}
           result={result} preview={preview}
@@ -396,6 +407,39 @@ export function Atlas() {
             onClose={() => setProvOpen(false)} frame={view ? view.frame : null} />
         ) : null}
       </React.Suspense>
+    </div>
+  );
+}
+
+/* WHAT CHANGED UNDER A LINK SOMEONE ALREADY HAD.
+ *
+ * Shown only when a URL carries a methodology version other than this build's. It does not
+ * refuse to answer -- the cohort is the same cohort and the counts are the same counts -- it
+ * says which definitions moved, because the one thing a reader of a shared scenario cannot do
+ * is notice that the refusals were recomputed. 1.1.0 is named specifically: it is the only bump
+ * so far and the only one whose effect a reader would see. */
+function MethodologyMoved({ was, now }) {
+  if (!was || !now || was === now) return null;
+  return (
+    <div data-methodology-moved style={{
+      margin: "var(--sp-5) var(--sp-6) 0",
+      border: "1px solid var(--border-strong)",
+      borderLeft: "var(--bw-signal) solid var(--warn)",
+      borderRadius: "var(--radius-sm)", padding: "var(--sp-3) var(--sp-4)",
+      background: "color-mix(in srgb, var(--warn) 6%, transparent)",
+    }}>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", fontWeight: 800,
+        color: "var(--warn)", letterSpacing: ".5px" }}>
+        THE METHODOLOGY MOVED SINCE THIS LINK WAS MADE
+      </div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 3 }}>
+        This link was made under methodology {was}; the archive now publishes under {now}. The
+        cohort is unchanged and so are its counts — what may differ is which contracts are
+        refused. 1.1.0 stopped counting the refusal gate over the whole archive and started
+        counting it over the population a query can actually draw from, so some contracts that
+        published a rate under {was} now refuse as OUT OF SCOPE.
+      </div>
     </div>
   );
 }

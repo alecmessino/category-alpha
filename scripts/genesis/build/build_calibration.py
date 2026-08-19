@@ -49,7 +49,7 @@ from pathlib import Path
 
 from ..provenance import (ARCHIVE_DIR, METHODOLOGY_VERSION, PROCESSING_VERSION, REPO_ROOT,
                           sha256_file, today)
-from ..retrieval.analogs import MIN_EVENTS_FOR_SKILL, contract_event_counts
+from ..retrieval.analogs import MIN_EVENTS_FOR_SKILL, contract_event_counts, scope_phrase
 from ..schema import THRESHOLDS_KT
 from ..store import read_table
 
@@ -66,7 +66,7 @@ INTENSITY_CONTRACT = {
 }
 
 
-def _archive_intensity_counts(base: Path) -> dict:
+def _archive_intensity_counts(base: Path, *, basins=None, min_season=None) -> dict:
     """Distinct storms reaching each threshold ARCHIVE-WIDE.
 
     The same population the landfall gate counts over, computed the same way, so the two halves
@@ -74,8 +74,16 @@ def _archive_intensity_counts(base: Path) -> dict:
     numerator nor the denominator -- rule 4, and the reason this is not just `>= threshold`.
     """
     out = {k: 0 for k in THRESHOLDS_KT if k != "td"}
-    col = read_table("storms", base).column("max_vmax_kt").to_pylist()
-    for v in col:
+    tbl = read_table("storms", base)
+    col = tbl.column("max_vmax_kt").to_pylist()
+    bas = tbl.column("basin").to_pylist()
+    sea = tbl.column("season").to_pylist()
+    want = set(basins) if basins else None
+    for i, v in enumerate(col):
+        if want is not None and bas[i] not in want:
+            continue
+        if min_season is not None and (sea[i] is None or sea[i] < min_season):
+            continue
         if v is None or v != v:          # NaN-safe: unknown is not a failure
             continue
         for key, kt in THRESHOLDS_KT.items():
@@ -107,39 +115,55 @@ def _skill(brier, clim, replay_events) -> float | None:
     return 1.0 - (brier / clim)
 
 
-def _scope_audit(contract: str, score: dict, archive_events: int) -> dict:
-    """Does the archive-wide refusal gate agree with what the replay measured?
+def _verdict(refused: bool, degenerate: bool, has_skill) -> str:
+    """One gate's verdict, from the three axes that decide it."""
+    if degenerate:
+        return "refused_and_degenerate" if refused else "gate_passed_but_degenerate"
+    if has_skill:
+        return "refused_despite_skill" if refused else "agreed_scoreable"
+    return "agreed_refused" if refused else "gate_missed"
 
-    Four verdicts, and the one that matters is `gate_missed`: the contract passed the gate and
-    then failed to beat climatology, because the events the gate counted were in a population
-    the query could not reach.
+
+def _scope_audit(contract: str, score: dict, archive_events: int, scope_events: int,
+                 scope_where: str) -> dict:
+    """Does the refusal gate agree with what the replay measured -- and did it used to?
+
+    BOTH GATES ARE AUDITED, DELIBERATELY AND PERMANENTLY. Methodology 1.1.0 moved the count from
+    the whole archive to the population a query can draw from, which closed the hole this audit
+    was built to find. Reporting only the new verdict would erase the finding along with the
+    defect, and a ledger that quietly stops showing the thing it caught is a ledger nobody
+    should trust the next time it says everything is fine. So each contract carries what the
+    archive-wide gate did, what the scoped gate does, and the difference between them.
     """
     replay_events = score.get("n_events")
     brier = score.get("brier")
     clim = score.get("brier_climatology")
     skill = _skill(brier, clim, replay_events)
-    refused = archive_events < MIN_EVENTS_FOR_SKILL
+    refused = scope_events < MIN_EVENTS_FOR_SKILL
+    refused_before = archive_events < MIN_EVENTS_FOR_SKILL
     # "No skill" means it did not beat climatology. A degenerate contract -- zero events in the
     # replay -- has no meaningful Brier at all and is called out separately rather than being
     # folded in as a failure.
     degenerate = not replay_events
     has_skill = None if degenerate or skill is None else skill > 0
 
-    if degenerate:
-        verdict = "refused_and_degenerate" if refused else "gate_passed_but_degenerate"
-    elif has_skill:
-        verdict = "refused_despite_skill" if refused else "agreed_scoreable"
-    else:
-        verdict = "agreed_refused" if refused else "gate_missed"
+    verdict = _verdict(refused, degenerate, has_skill)
+    was = _verdict(refused_before, degenerate, has_skill)
 
     return {
         "archive_events": archive_events,
+        "scope_events": scope_events,
+        "scope": scope_where,
         "replay_events": replay_events,
         "required": MIN_EVENTS_FOR_SKILL,
         "refused_by_gate": refused,
+        "refused_by_archive_wide_gate": refused_before,
         "beat_climatology": has_skill,
         "verdict": verdict,
+        "verdict_archive_wide": was,
+        "corrected": was != verdict,
         "note": _AUDIT_NOTE[verdict],
+        "note_archive_wide": _AUDIT_NOTE[was],
     }
 
 
@@ -171,8 +195,18 @@ def build(archive_dir: Path | None = None, out_dir: Path | None = None) -> dict:
             "projects an existing result and will not invent one.")
 
     bt = json.loads(src.read_text())
+    # BOTH POPULATIONS, because the ledger now audits both gates. The scoped counts use the
+    # backtest's OWN settings -- the basins and era it replayed -- so the audit compares like
+    # with like: the events a query in that population could draw on, against the events that
+    # population actually produced.
+    settings = bt["settings"]
+    scope_basins = sorted(settings.get("basins") or []) or None
+    scope_min = settings.get("min_season")
     lf_events = contract_event_counts(base)
+    lf_scope = contract_event_counts(base, basins=scope_basins, min_season=scope_min)
     intensity_events = _archive_intensity_counts(base)
+    intensity_scope = _archive_intensity_counts(base, basins=scope_basins, min_season=scope_min)
+    scope_where = scope_phrase(scope_basins, scope_min, None)
 
     contracts = []
     for key, definition in sorted(bt["contracts"].items()):
@@ -180,12 +214,14 @@ def build(archive_dir: Path | None = None, out_dir: Path | None = None) -> dict:
 
         if key in INTENSITY_CONTRACT:
             archive_events = intensity_events.get(INTENSITY_CONTRACT[key], 0)
+            scope_events = intensity_scope.get(INTENSITY_CONTRACT[key], 0)
             kind = "intensity"
         else:
             # landfall_<region>_<any|hurricane> -> "<region>:<kind>"
             body = key[len("landfall_"):]
             region, _, lf_kind = body.rpartition("_")
             archive_events = lf_events.get(f"{region}:{lf_kind}", 0)
+            scope_events = lf_scope.get(f"{region}:{lf_kind}", 0)
             kind = "landfall"
 
         brier = score.get("brier")
@@ -208,7 +244,7 @@ def build(archive_dir: Path | None = None, out_dir: Path | None = None) -> dict:
             # Bins with no forecasts are dropped: an empty bin is not a calibration point and
             # drawing it as one puts a mark on a curve where nothing was measured.
             "reliability": [b for b in score.get("reliability", []) if b.get("n")],
-            "scope_audit": _scope_audit(key, score, archive_events),
+            "scope_audit": _scope_audit(key, score, archive_events, scope_events, scope_where),
         })
 
     payload = {
@@ -268,6 +304,18 @@ def _summarise(contracts: list[dict]) -> dict:
             (c["n_events"] for c in without), default=None) if not without else max(
             c["n_events"] for c in without),
         "n_gate_missed": len(by.get("gate_missed", [])),
+        # THE CORRECTION, counted. The archive-wide gate caught one of the four contracts that
+        # earned no skill claim; the scoped gate catches them all. Published as a pair so the
+        # surface can show the move rather than only its destination.
+        "n_caught": len([c for c in contracts
+                         if c["scope_audit"]["beat_climatology"] is not True
+                         and c["scope_audit"]["refused_by_gate"]]),
+        "n_caught_archive_wide": len([c for c in contracts
+                                      if c["scope_audit"]["beat_climatology"] is not True
+                                      and c["scope_audit"]["refused_by_archive_wide_gate"]]),
+        "n_not_scoring": len([c for c in contracts
+                              if c["scope_audit"]["beat_climatology"] is not True]),
+        "corrected": sorted(c["key"] for c in contracts if c["scope_audit"]["corrected"]),
     }
 
 

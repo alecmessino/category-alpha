@@ -379,11 +379,21 @@ function AXEntry({ e, dense }) {
                         <td style={{ ...td, color: "var(--text-2)" }}>{AX_CONTRACT[contract] || contract}</td>
                         <AXRateCells r={r} dense={dense} span={4} />
                         <td style={{ ...td, whiteSpace: "normal" }}>
+                          {/* THE BADGE IS THE ENGINE'S VERDICT, NOT A CONSTANT. Methodology
+                              1.1.0 split the refusal: BASE RATE ONLY means the whole archive
+                              cannot support the contract, OUT OF SCOPE means the events exist
+                              somewhere this query cannot reach. Printing the first label over
+                              the second would tell a reader the record is empty when it holds
+                              699 of them. */}
                           {u ? (
                             <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                              <AXBadge tone="neg">BASE RATE ONLY</AXBadge>
+                              <AXBadge tone={/^OUT OF SCOPE/.test(u.status || "") ? "warn" : "neg"}>
+                                {/^OUT OF SCOPE/.test(u.status || "") ? "OUT OF SCOPE" : "BASE RATE ONLY"}
+                              </AXBadge>
                               <span style={{ color: "var(--text-2)", fontSize: 10 }}>
-                                {u.archive_events} archived event{u.archive_events === 1 ? "" : "s"} · {u.required} required
+                                {u.scope_events !== undefined && u.scope_events !== u.archive_events
+                                  ? <>{u.scope_events} {u.scope} · {u.archive_events} archive-wide · {u.required} required</>
+                                  : <>{u.archive_events} archived event{u.archive_events === 1 ? "" : "s"} · {u.required} required</>}
                               </span>
                             </span>
                           ) : null}

@@ -15,13 +15,16 @@
  * claim about the record. The ledger is the evidence for or against that claim, and putting
  * them in one place is what turns a refusal from a policy into a finding.
  *
- * AND IT DOES NOT FLATTER. The join immediately shows that the refusal gate counts the wrong
- * population: it asks whether the WHOLE ARCHIVE carries ten events, when what decides skill is
- * whether the population a query can draw from carries them. Of the four contracts that earned
- * no skill claim, the gate catches one. Two it passes outright, and one it passes on a contract
- * the replay never scored at all. `scope_audit` on every contract carries that verdict, and the
- * surface prints it. Fixing the gate would change what both surfaces refuse and is a
- * METHODOLOGY_VERSION decision, not something a display module should do quietly.
+ * AND IT DID NOT FLATTER. The join showed that the refusal gate counted the wrong population:
+ * it asked whether the WHOLE ARCHIVE carried ten events, when what decides skill is whether the
+ * population a query can draw from carries them. Of the four contracts that earned no skill
+ * claim, the archive-wide gate caught one.
+ *
+ * METHODOLOGY 1.1.0 CLOSED IT, AND THE LEDGER STILL SHOWS IT. The gate now counts in scope and
+ * catches four of four. Both verdicts stay on every contract -- `verdict_archive_wide` beside
+ * `verdict` -- because a ledger that stopped reporting the defect the moment it was fixed would
+ * be a ledger with no record of ever having caught anything, and the next reader has no way to
+ * tell that apart from one that never looks.
  */
 
 import { THRESHOLDS_KT } from "./stats.js";
@@ -49,6 +52,13 @@ export const VERDICT = {
   gate_missed: {
     label: "GATE MISSED IT", tone: "neg",
     short: "the gate allows a skill claim the evidence does not support",
+  },
+  /* Not a verdict the emitter produces -- a rendering state for a contract whose two verdicts
+     disagree, i.e. one the correction moved. Kept out of the emitter deliberately: it is a fact
+     about the pair, not about either gate. */
+  corrected: {
+    label: "WAS MISSED → NOW REFUSED", tone: "pos",
+    short: "the archive-wide gate allowed this; the scoped gate refuses it",
   },
   gate_passed_but_degenerate: {
     label: "NEVER SCORED", tone: "warn",
@@ -172,22 +182,28 @@ export function byEvidence(cal) {
 /**
  * The one-line summary the surface leads with, built from the ledger's own audit.
  *
- * Deliberately states BOTH halves. The clean half -- skill tracks the replayed event count with
- * no contract in between -- is the finding. The other half is that the gate protecting readers
- * from the second group catches one of four, and a summary that omitted it would be the
- * marketing version of this page.
+ * Deliberately states BOTH halves and BOTH gates. The clean half -- skill tracks the replayed
+ * event count with no contract in between -- is the finding. The other half is what the gate
+ * did about it: one of four under archive-wide counting, four of four under scoped. A summary
+ * that showed only the second number would be the marketing version of this page.
  */
 export function headline(cal) {
   const a = cal.audit_summary;
-  const notScoring = cal.contracts.filter((c) => c.scope_audit.beat_climatology !== true);
-  const caught = notScoring.filter((c) => c.scope_audit.refused_by_gate);
   return {
     beat: a.n_beat_climatology,
     scored: a.n_scored,
     minWith: a.min_replay_events_with_skill,
     maxWithout: a.max_replay_events_without_skill,
-    notScoring: notScoring.length,
-    caught: caught.length,
+    notScoring: a.n_not_scoring,
+    caught: a.n_caught,
+    caughtBefore: a.n_caught_archive_wide,
+    corrected: a.corrected || [],
     missed: a.n_gate_missed,
   };
+}
+
+/** Which state a contract row should render as: the correction, or its own verdict. */
+export function stateOf(contract) {
+  const a = contract.scope_audit;
+  return a && a.corrected ? "corrected" : (a ? a.verdict : null);
 }

@@ -33,7 +33,7 @@
  */
 
 import React from "react";
-import { VERDICT, byEvidence, headline, unscoredNote } from "../engine/calibration.js";
+import { VERDICT, byEvidence, headline, stateOf, unscoredNote } from "../engine/calibration.js";
 import { Head, MONO, Row } from "./kit.jsx";
 
 const TONE = { pos: "var(--pos)", warn: "var(--warn)", neg: "var(--neg)" };
@@ -150,10 +150,13 @@ export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor }) {
                   the two — the separation is a gap, not a trend line." />
           <Card tone={h.caught < h.notScoring ? "neg" : "pos"}
             stat={`${h.caught} of ${h.notScoring}`}
-            label="NO-SKILL CONTRACTS THE REFUSAL GATE CATCHES"
-            note="The gate counts events ACROSS THE WHOLE ARCHIVE. The skill that matters is
-                  skill within the population a query can draw from. Where those differ, the
-                  gate passes a contract the evidence does not support." />
+            label={`NO-SKILL CONTRACTS THE GATE CATCHES · was ${h.caughtBefore} of ${h.notScoring}`}
+            note={`The gate used to count events across the whole archive, and caught `
+              + `${h.caughtBefore} of ${h.notScoring}. Methodology 1.1.0 counts them within the `
+              + `population a query can draw from instead; it now catches ${h.caught}. `
+              + `${h.corrected.length} contract(s) moved, and both verdicts stay on every row `
+              + "below — a ledger that stopped showing the defect it caught would have no "
+              + "record of ever having caught anything."} />
         </div>
 
         {/* ---- THE TABLE ----------------------------------------------------------------- */}
@@ -166,8 +169,8 @@ export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor }) {
             ...MONO, fontSize: "var(--fs-mono-xs)" }}>
             <thead>
               <tr>
-                {["CONTRACT", "EVENTS IN REPLAY", "ARCHIVE-WIDE", "BRIER", "CLIMATOLOGY",
-                  "SKILL", "", "GATE"].map((c, i) => (
+                {["CONTRACT", "EVENTS IN REPLAY", "IN SCOPE", "ARCHIVE-WIDE", "BRIER",
+                  "CLIMATOLOGY", "SKILL", "", "GATE"].map((c, i) => (
                   <th key={c + i} style={{
                     textAlign: i === 0 ? "left" : "right", padding: "6px 10px",
                     color: "var(--text-2)", fontWeight: 500, letterSpacing: "var(--track-label)",
@@ -187,14 +190,14 @@ export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor }) {
                   <React.Fragment key={c.key}>
                     {flip ? (
                       <tr data-skill-divider>
-                        <td colSpan={8} style={{
+                        <td colSpan={9} style={{
                           padding: "8px 10px", color: "var(--neg)",
                           borderTop: "1px dashed var(--neg)",
                           borderBottom: "1px dashed var(--neg)",
                           letterSpacing: ".5px",
                         }}>
-                          ↓ BELOW THIS LINE NO CONTRACT BEAT CLIMATOLOGY — and the archive-wide
-                          gate refuses only {h.caught} of them
+                          ↓ BELOW THIS LINE NO CONTRACT BEAT CLIMATOLOGY — the scoped gate
+                          refuses {h.caught} of them, the archive-wide gate refused {h.caughtBefore}
                         </td>
                       </tr>
                     ) : null}
@@ -273,7 +276,7 @@ function Card({ stat, label, note, tone }) {
 
 function ContractRow({ c, highlight }) {
   const a = c.scope_audit;
-  const v = VERDICT[a.verdict] || { label: a.verdict, tone: "warn" };
+  const v = VERDICT[stateOf(c)] || { label: a.verdict, tone: "warn" };
   const cell = { padding: "6px 10px", textAlign: "right", whiteSpace: "nowrap",
     borderTop: "1px solid var(--border-dim)" };
   return (
@@ -282,6 +285,9 @@ function ContractRow({ c, highlight }) {
       <td style={{ ...cell, textAlign: "left", color: "var(--text-1)" }}>{c.key}</td>
       <td style={{ ...cell, color: a.beat_climatology === true ? "var(--text-1)" : "var(--warn)" }}>
         {c.n_events === null || c.n_events === undefined ? "—" : c.n_events.toLocaleString()}
+      </td>
+      <td style={{ ...cell, color: a.refused_by_gate ? "var(--warn)" : "var(--text-2)" }}>
+        {a.scope_events === undefined ? "—" : a.scope_events.toLocaleString()}
       </td>
       <td style={{ ...cell, color: "var(--text-2)" }}>{a.archive_events.toLocaleString()}</td>
       <td style={{ ...cell, color: "var(--text-2)" }}>{fmt(c.brier)}</td>
@@ -321,7 +327,7 @@ function SkillBar({ skill }) {
 
 function ContractCard({ c, highlight, onClearAnchor }) {
   const a = c.scope_audit;
-  const v = VERDICT[a.verdict] || { label: a.verdict, tone: "warn", short: "" };
+  const v = VERDICT[stateOf(c)] || { label: a.verdict, tone: "warn", short: "" };
   return (
     <div data-contract={c.key} style={{
       border: highlight ? "1px solid var(--accent)" : "1px solid var(--border-dim)",
@@ -353,9 +359,14 @@ function ContractCard({ c, highlight, onClearAnchor }) {
           <Line k="climatology" v={fmt(c.brier_climatology)} />
           <Line k="skill" v={c.skill === null ? "—"
             : `${c.skill > 0 ? "+" : ""}${c.skill.toFixed(3)}`} tone={skillTone(c.skill)} />
+          <Line k={`events ${a.scope || "in scope"}`}
+            v={`${num(a.scope_events)} / ${a.required} needed`}
+            tone={a.refused_by_gate ? "var(--warn)" : undefined} />
           <Line k="archive-wide events" v={`${num(a.archive_events)} / ${a.required} needed`} />
           <Line k="refused by the gate" v={a.refused_by_gate ? "YES" : "no"}
             tone={a.refused_by_gate ? "var(--warn)" : undefined} />
+          <Line k="under the archive-wide gate" v={a.refused_by_archive_wide_gate ? "refused" : "allowed"}
+            tone={a.corrected ? "var(--neg)" : undefined} />
         </div>
       </div>
 
@@ -364,6 +375,19 @@ function ContractCard({ c, highlight, onClearAnchor }) {
         marginTop: "var(--sp-3)", color: TONE[v.tone] }}>
         {a.note}
       </div>
+
+      {/* WHAT THE OLD GATE SAID, kept on the contracts the correction moved. This is the
+          record of the defect, and it stays on the live surface rather than in an appendix:
+          the ledger caught this, and a reader is entitled to see that it did. */}
+      {a.corrected ? (
+        <div data-corrected style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
+          lineHeight: "var(--lh-body)", marginTop: "var(--sp-3)",
+          borderTop: "1px dashed var(--border-strong)", paddingTop: "var(--sp-3)",
+          color: "var(--text-2)" }}>
+          <strong style={{ color: "var(--neg)" }}>UNDER THE ARCHIVE-WIDE GATE:</strong>{" "}
+          {a.note_archive_wide}
+        </div>
+      ) : null}
 
       {highlight ? (
         <button type="button" onClick={onClearAnchor} style={{ ...BTN, marginTop: "var(--sp-3)" }}>

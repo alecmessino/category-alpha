@@ -311,8 +311,15 @@ export function getAnalogs(archive, opts = {}) {
      scoreCases so that a cohort assembled any other way is scored by the SAME code. wsum is
      passed rather than recomputed: it must be summed in case order (analogs.py:601) and a float
      sum computed elsewhere is a different float. */
+  /* THE SCOPE, derived the same way analogs.py derives it: the basins the matches actually
+     occupy, falling back to the declared basins and then to the whole archive when nothing
+     matched. An empty pool still publishes its refusals -- the count was never a property of
+     the match -- so it must not derive a scope from no storms. */
+  const matchedBasins = [...new Set(cases.map((c) => c.basin).filter(Boolean))].sort();
+  const scopeBasins = matchedBasins.length ? matchedBasins : (basins ? [...basins].sort() : null);
   const scored = scoreCases(A, cases, {
     minSample, regions, conditionedOn, wsum, gaps,
+    scope: { basins: scopeBasins, minSeason: minPoolSeason ?? null, maxSeason: null },
   });
   const { intensity, landfall, time_to_event: timeToEvent, unscoreable } = scored;
 
@@ -458,26 +465,88 @@ function fmt1(x) {
   return (x < 0 || Object.is(x, -0)) ? "-" + s : s;
 }
 
-/* Distinct storms per landfall contract across the WHOLE archive, for scoreability.
-   THIS IS NOT THE MATCHED SAMPLE -- whether a contract can ever carry a skill number is a
-   property of the record, not of one query. Cached: it is a full scan of the landfall table and
-   the answer does not change while the page is open. */
+/**
+ * How the counted population is named on screen.
+ *
+ * Transliterated word for word from `scope_phrase` in analogs.py. The refusal `reason` built
+ * from it is compared VERBATIM across the two surfaces by test-atlas-parity.mjs, so a
+ * difference of one comma here fails the build -- which is the intended tripwire.
+ */
+export function scopePhrase(basins, minSeason, maxSeason) {
+  let where = basins && basins.length
+    ? `in the ${[...basins].sort().join(", ")} basin` : "in the archive";
+  if (basins && basins.length > 1) where += "s";
+  if (minSeason !== null && minSeason !== undefined
+    && maxSeason !== null && maxSeason !== undefined) {
+    return `${where} between ${minSeason} and ${maxSeason}`;
+  }
+  if (minSeason !== null && minSeason !== undefined) return `${where} since ${minSeason}`;
+  if (maxSeason !== null && maxSeason !== undefined) return `${where} up to ${maxSeason}`;
+  return basins && basins.length ? where : "in the entire archive";
+}
+
+/* Distinct storms per landfall contract, over the population a query can draw from.
+   THIS IS NOT THE MATCHED SAMPLE -- whether a contract can carry a skill number is a property of
+   the RECORD; whether enough matched storms have a known outcome is a property of the SAMPLE,
+   and min_sample governs that.
+
+   WHICH RECORD, THOUGH. Counting the WHOLE archive was the bug methodology 1.1.0 fixed: an east
+   Pacific query asking about a US mainland landfall passed the gate on 699 Atlantic events and
+   six Pacific ones. Basin and era bound the population a query can draw from, so they bound the
+   count; months, radius and subbasin deliberately do not, because they narrow WITHIN a drawable
+   population and that is the matched sample again.
+
+   Cached per scope. The old cache keyed on the archive alone, which would now serve the first
+   scope's answer to every later one -- the shape would be right and the numbers wrong. */
 const _eventCounts = new WeakMap();
-function archiveEventCounts(A) {
-  const hit = _eventCounts.get(A);
+
+export function scopeKeyOf(scope) {
+  if (!scope) return "*";
+  const b = scope.basins && scope.basins.length ? [...scope.basins].sort().join(",") : "*";
+  return `${b}|${scope.minSeason ?? "*"}|${scope.maxSeason ?? "*"}`;
+}
+
+function archiveEventCounts(A, scope = null) {
+  let per = _eventCounts.get(A);
+  if (!per) { per = new Map(); _eventCounts.set(A, per); }
+  const key = scopeKeyOf(scope);
+  const hit = per.get(key);
   if (hit) return hit;
+
+  const S = A.storms;
+  const want = scope && scope.basins && scope.basins.length ? new Set(scope.basins) : null;
+  const lo = scope && scope.minSeason !== null && scope.minSeason !== undefined
+    ? scope.minSeason : null;
+  const hi = scope && scope.maxSeason !== null && scope.maxSeason !== undefined
+    ? scope.maxSeason : null;
+
+  /* The landfalls table carries no basin, so basin and era come through the storms table.
+     Built once per scope rather than per row. */
+  let inScope = null;
+  if (want || lo !== null || hi !== null) {
+    inScope = new Set();
+    for (let i = 0; i < A.nStorms; i++) {
+      if (want && !want.has(S.str("basin", i))) continue;
+      const season = S.num("season", i);
+      if (lo !== null && (season === null || season < lo)) continue;
+      if (hi !== null && (season === null || season > hi)) continue;
+      inScope.add(S.str("storm_id", i));
+    }
+  }
+
   const L = A.landfalls;
   const sets = new Map();
   for (let k = 0; k < L.rows; k++) {
     const region = L.str("region", k);
     if (!region || L.bool("suspect_relocation", k) === true) continue;
     const sid = A.storms.str("storm_id", L.raw("storm_row")[k]);
+    if (inScope && !inScope.has(sid)) continue;
     add(sets, `${region}:any`, sid);
     if (L.bool("hurricane_at_landfall", k) === true) add(sets, `${region}:hurricane`, sid);
   }
   const out = {};
   for (const [k, v] of sets) out[k] = v.size;
-  _eventCounts.set(A, out);
+  per.set(key, out);
   return out;
 }
 
@@ -532,6 +601,12 @@ function landfallView(l) {
  */
 export function scoreCases(A, cases, {
   minSample = 10, regions = null, conditionedOn = null, wsum = 0, gaps = [],
+  /* THE POPULATION THIS QUERY CAN DRAW FROM: {basins, minSeason, maxSeason}, or null for the
+     whole archive. It decides what the BASE RATE ONLY gate counts over, and nothing else.
+     scoreCases is the one seam both surfaces score through, so it is the one place the scope
+     has to arrive -- and until methodology 1.1.0 it arrived nowhere, which is exactly how the
+     gate came to count a population no query could reach. */
+  scope = null,
 } = {}) {
   const circular = circularOutcomes(conditionedOn);
   const becamePeak = conditionedOn && conditionedOn.minPeak
@@ -656,23 +731,50 @@ export function scoreCases(A, cases, {
     timeToEvent[`landfall_${region}`] = timeDistribution(hrs);
   }
 
-  // Which of these contracts can NEVER carry a skill number, from the record itself. This is a
-  // property of the archive, not of one query: the Hawaii hurricane-landfall contract has one
-  // event in the modern record, so no query, however framed, can produce a validated
-  // probability for it.
+  /* Which of these contracts can NEVER carry a skill number -- and whether that is a limit of
+     the RECORD or a limit of the POPULATION THIS QUERY ASKED ABOUT. Two different statements,
+     conflated until methodology 1.1.0, and the difference is what a reader can act on.
+
+     Hawaii hurricane landfall has two events in the whole archive: irreducible, and no cohort
+     helps. CONUS landfall has 699, six of them east Pacific: an east Pacific query cannot reach
+     them, but a different query can, and saying so is strictly more useful than silence. */
+  const scoped = archiveEventCounts(A, scope);
+  const global = archiveEventCounts(A, null);
+  const where = scopePhrase(
+    scope && scope.basins, scope && scope.minSeason, scope && scope.maxSeason);
+
   const unscoreable = {};
   for (const region of reportRegions) {
     for (const kind of ["any", "hurricane"]) {
-      const n = archiveEventCounts(A)[`${region}:${kind}`] || 0;
-      if (n < MIN_EVENTS_FOR_SKILL) {
+      const n = scoped[`${region}:${kind}`] || 0;
+      if (n >= MIN_EVENTS_FOR_SKILL) continue;
+      const total = global[`${region}:${kind}`] || 0;
+      if (total < MIN_EVENTS_FOR_SKILL) {
+        // IRREDUCIBLE: no population in this archive carries enough.
         unscoreable[`${region}:${kind}`] = {
-          archive_events: n,
+          archive_events: total,
+          scope_events: n,
+          scope: where,
           required: MIN_EVENTS_FOR_SKILL,
           status: "BASE RATE ONLY -- unscoreable",
-          reason: `only ${n} storm(s) in the entire archive carry this outcome, below the ` +
+          reason: `only ${total} storm(s) in the entire archive carry this outcome, below the ` +
             `${MIN_EVENTS_FOR_SKILL} distinct events any skill score requires. A base rate can ` +
             "be quoted with its interval; a calibrated or skill-scored probability cannot, and " +
             "this archive will not produce one.",
+        };
+      } else {
+        // OUT OF SCOPE: the events exist, somewhere this query cannot reach.
+        unscoreable[`${region}:${kind}`] = {
+          archive_events: total,
+          scope_events: n,
+          scope: where,
+          required: MIN_EVENTS_FOR_SKILL,
+          status: "OUT OF SCOPE -- unscoreable here",
+          reason: `only ${n} storm(s) ${where} carry this outcome, below the ` +
+            `${MIN_EVENTS_FOR_SKILL} distinct events any skill score requires. The archive ` +
+            `holds ${total} in total, outside the population this query draws from. Widen the ` +
+            "basin or the era and this contract becomes scoreable; a skill number over a " +
+            "population that does not carry the events would be borrowed from one that does.",
         };
       }
     }
