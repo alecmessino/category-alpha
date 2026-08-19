@@ -27,6 +27,7 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { HERMETIC, serviceWorkerEscape } from "./lib/browser-harness.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
@@ -176,7 +177,7 @@ async function run(label, payloadPath, kind) {
   const server = await serve(payloadPath);
   const port = server.address().port;
   const browser = await chromium.launch(LAUNCH);
-  const page = await browser.newPage({ viewport: { width: 2560, height: 1600 } });
+  const page = await browser.newPage({ viewport: { width: 2560, height: 1600 }, ...HERMETIC });
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
   page.on("console", (m) => {
@@ -197,6 +198,13 @@ async function run(label, payloadPath, kind) {
   try { await page.waitForFunction(() => window.__MT_ANALOGS_STATE && window.__MT_ANALOGS_STATE !== "loading", { timeout: 40000 }); }
   catch { errors.push("the panel's payload fetch never resolved"); }
   await page.waitForTimeout(2000);
+
+  /* THE ISOLATION HELD. page.route cannot see service-worker fetches, so blocking the worker
+     is the only thing standing between this check and the open internet. Asserted, not
+     assumed: it was assumed once, and the escape stayed invisible until a runner with
+     egress this container does not have ran it. See lib/browser-harness.mjs. */
+  const escaped = await serviceWorkerEscape(page);
+  if (escaped) errors.push("isolation: " + escaped);
 
   const text = await page.evaluate(() => document.body.innerText);
   // The collapsed summary is a separate render path: MT_Section shows `summary` only when
@@ -254,7 +262,7 @@ async function runOverviewBoot() {
   const server = await serve(null);
   const port = server.address().port;
   const browser = await chromium.launch(LAUNCH);
-  const page = await browser.newPage({ viewport: { width: 2560, height: 1600 } });
+  const page = await browser.newPage({ viewport: { width: 2560, height: 1600 }, ...HERMETIC });
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
   page.on("console", (m) => {
@@ -264,6 +272,13 @@ async function runOverviewBoot() {
   await page.route("**/*", (r) => r.request().url().startsWith(`http://127.0.0.1:${port}`) ? r.continue() : r.abort());
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(1500);
+
+  /* THE ISOLATION HELD. page.route cannot see service-worker fetches, so blocking the worker
+     is the only thing standing between this check and the open internet. Asserted, not
+     assumed: it was assumed once, and the escape stayed invisible until a runner with
+     egress this container does not have ran it. See lib/browser-harness.mjs. */
+  const escaped = await serviceWorkerEscape(page);
+  if (escaped) errors.push("isolation: " + escaped);
 
   console.log("\n=== overview boot: a storm in the feed, none selected ===");
   let bad = 0;

@@ -23,6 +23,7 @@ import { createServer } from "node:http";
 import { readFile, readdir } from "node:fs/promises";
 import { extname, join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { HERMETIC, serviceWorkerEscape } from "./lib/browser-harness.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
@@ -114,7 +115,7 @@ const ok = (label, cond, detail = "") => {
 
 const exe = await findChromium();
 const browser = await chromium.launch(exe ? { executablePath: exe } : {});
-const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, ...HERMETIC });
 for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**", "**basemaps.cartocdn.com**"]) {
   await ctx.route(h, (r) => r.abort());
 }
@@ -813,6 +814,12 @@ console.log("\n[9] the page did not complain");
 ok("no page or console errors", errors.length === 0, errors.join("\n        "));
 ok("and every resource it asked for existed", MISSING.length === 0,
   `${MISSING.length} 404(s): ${[...new Set(MISSING)].slice(0, 10).join(", ")}`);
+/* And that MISSING is a complete account of what left the machine. It is only complete
+   while no service worker is running: page.route never sees a worker's fetches, and this
+   route is green today only because docs/storm-atlas/index.html registers none. Pinning it
+   here keeps that a fact rather than a coincidence. See lib/browser-harness.mjs. */
+const escaped = await serviceWorkerEscape(page);
+ok("and nothing escaped the harness's isolation", escaped === null, escaped || "");
 
 await browser.close();
 server.close();

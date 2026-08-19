@@ -21,6 +21,7 @@ import { createServer } from "node:http";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { extname, join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { HERMETIC, serviceWorkerEscape } from "./lib/browser-harness.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
@@ -183,7 +184,7 @@ const DOC_ASSETS = [
 
 const cold = {};
 for (const [label, path] of [["terminal", "/"], ["atlas", "/storm-atlas/"]]) {
-  const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+  const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, ...HERMETIC });
   for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**",
                    "**basemaps.cartocdn.com**", "**gibs.earthdata.nasa.gov**"]) {
     await ctx.route(h, (r) => r.abort());
@@ -213,6 +214,12 @@ for (const [label, path] of [["terminal", "/"], ["atlas", "/storm-atlas/"]]) {
     };
   }, DOC_ASSETS);
   cold[label] = m;
+  /* AFTER the measurement, so it costs the budgets nothing. The terminal iteration is the
+     one that matters: docs/index.html registers a tile-cache worker whose fetches
+     ctx.route above cannot intercept, so without HERMETIC this benchmark would be timing
+     a page that is quietly talking to two CDNs. See lib/browser-harness.mjs. */
+  const escaped = await serviceWorkerEscape(page);
+  if (escaped) { failures++; console.log(`  FAIL  ${label} isolation: ${escaped}`); }
   console.log(`        ${label.padEnd(9)} ${(m.bytes / 1e6).toFixed(2)} MB over ${m.requests} ` +
     `requests · referenced assets received at ${m.lastOurAsset} ms · ` +
     `execution-gated assets at ${m.lastDeferred} ms · font CDN stalled ${m.fontBlockMs} ms`);
@@ -232,7 +239,7 @@ console.log("        decision can be made on a number rather than a hunch.");
 /* ---- 3. in-page work ------------------------------------------------------------------ */
 console.log("\n[3] the work the Atlas actually does");
 {
-  const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+  const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, ...HERMETIC });
   for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**", "**basemaps.cartocdn.com**"]) {
     await ctx.route(h, (r) => r.abort());
   }
