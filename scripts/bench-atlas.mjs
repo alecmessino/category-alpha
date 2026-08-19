@@ -40,6 +40,14 @@ const BUDGET = {
   replayTickMs: 8,            // the incremental tick, 20/s -- past this the head visibly stutters
   replayRepaintMs: 200,       // rebuilding the whole revealed prefix after a pan or a zoom
   timelineBuildMs: 60,        // sorting and merging 3,885 spans on every filter change
+  /* Phase 3. Adding or removing a condition recomputes both of these, and the whole premise of
+     the what-if layer is that it happens instantly rather than behind a "run query" button. The
+     unconditioned whole-archive cohort is the slow end -- reset, and first load -- so it gets a
+     budget of its own rather than being averaged away with the cohorts a reader actually
+     builds. */
+  cohortMs: 16,               // scoring a built cohort: one frame, so a chip click is live
+  cohortWideMs: 90,           // the same over all 3,885 storms: reset and first paint only
+  previewMs: 16,              // every chip's live count: five filter passes and five scans
 };
 
 let chromium;
@@ -270,8 +278,27 @@ console.log("\n[3] the work the Atlas actually does");
       replay.setTimeline(null);
     }
 
+    /* Phase 3. The cohort path is what a chip click costs now: cohortResult decides membership
+       AND outcomes, and previewCounts puts a live number on every control. Measured on a built
+       cohort (what a reader interacts with) and on the unconditioned archive (reset, first
+       paint) separately, because they are an order of magnitude apart and averaging them would
+       hide both. */
+    const C = globalThis.__ATLAS_COHORT || {};
+    const built = C.normalise
+      ? C.normalise({ where: { lat: 12, lon: -105, radiusKm: 800 }, seasonFrom: 1971 })
+      : null;
+    const wide = C.normalise ? C.normalise({}) : null;
+    const cohortMs = C.cohortResult && built
+      ? time(8, (i) => C.cohortResult(archive,
+        { ...built, where: { ...built.where, radiusKm: 600 + (i % 4) * 100 } })) : null;
+    const cohortWideMs = C.cohortResult && wide ? time(4, () => C.cohortResult(archive, wide)) : null;
+    const previewMs = C.previewCounts && built
+      ? time(8, (i) => C.previewCounts(archive,
+        { ...built, months: [(i % 12) + 1] })) : null;
+
     return { decodeAndIndex, filterMs, queryMs, drawMs, hitMs,
              densityMs, genesisDensityMs, timelineBuildMs, replayTickMs, replayRepaintMs,
+             cohortMs, cohortWideMs, previewMs,
              storms: archive.nStorms, points: archive.nPoints };
   });
 
@@ -285,6 +312,9 @@ console.log("\n[3] the work the Atlas actually does");
   if (m.timelineBuildMs !== null) gate("build the replay clock", m.timelineBuildMs, BUDGET.timelineBuildMs, "ms");
   if (m.replayTickMs !== null) gate("replay tick (incremental)", m.replayTickMs, BUDGET.replayTickMs, "ms");
   if (m.replayRepaintMs !== null) gate("replay repaint to cursor (after a pan)", m.replayRepaintMs, BUDGET.replayRepaintMs, "ms");
+  if (m.cohortMs !== null) gate("score a built cohort (a chip click)", m.cohortMs, BUDGET.cohortMs, "ms");
+  if (m.previewMs !== null) gate("every chip's live count", m.previewMs, BUDGET.previewMs, "ms");
+  if (m.cohortWideMs !== null) gate("score the whole archive (reset, first paint)", m.cohortWideMs, BUDGET.cohortWideMs, "ms");
   if (errors.length) { failures++; console.log("  FAIL  page errors: " + errors.join(" | ")); }
   else console.log("  ok    no page errors");
   await ctx.close();

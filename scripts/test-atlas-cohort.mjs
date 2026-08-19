@@ -24,10 +24,18 @@ import {
   COHORT_V, EMPTY_COHORT, cohortResult, conditionedOn, conditionsOf, normalise, parentOf,
   parseQuery, sameCohort, sentenceOf, toFilters, toQuery,
 } from "../docs/storm-atlas/src/engine/cohort.js";
+import { previewCounts } from "../docs/storm-atlas/src/engine/preview.js";
 import { ROOT } from "./lib/atlas-verify.mjs";
 
 let failed = 0;
 let checks = 0;
+
+/** How many storms the basis population loses to the landfall condition currently set. */
+function countWithout(archive, spec) {
+  const withLf = cohortResult(archive, spec).n_cases;
+  const withoutLf = cohortResult(archive, { ...spec, landfall: null }).n_cases;
+  return withoutLf - withLf;
+}
 function ok(cond, label, detail) {
   checks++;
   if (cond) { console.log("  ok    " + label); return true; }
@@ -248,6 +256,103 @@ head("[10] a cohort nobody can answer");
   ok(none.n_cases === 0, "an empty cohort is empty");
   ok(none.intensity.cat1.rate === null, "no rate is invented from it");
   ok(none.intensity.cat1.n_storms === 0, "the denominator is honestly zero");
+}
+
+head("[11] the builder's chip counts are the archive's own counts");
+{
+  /* THE CLAIM THIS PINS. Every chip in the builder carries a live count, and for an
+     OUTCOME-SIDE chip that count is asserted -- in preview.js and on the screen -- to be the
+     same number the outcome card above it publishes. That equality is the whole reason the
+     fifth rule reads as a consequence rather than as an obstruction: the reader clicks CAT 3+
+     showing 145, and the cohort then refuses to report 145/145 back as a finding.
+     If the two ever drift, the builder is quietly promising a cohort the engine will not
+     deliver, so it is asserted here rather than trusted. */
+  for (const spec of [
+    { where: { lat: 12, lon: -105, radiusKm: 800 }, seasonFrom: 1971 },
+    { months: [8, 9], seasonFrom: 1990 },
+    { basins: ["EP"], landfall: "mexico" },
+    {},
+  ]) {
+    const pv = previewCounts(archive, spec);
+    const r = cohortResult(archive, spec);
+    const tag = JSON.stringify(spec).slice(0, 46);
+
+    for (const k of spec.intensity ? [] : ["ts", "cat1", "cat3", "cat4", "cat5"]) {
+      const cell = r.intensity[k];
+      if (!cell || cell.status) continue;   // a conditioned-on row publishes no comparable count
+      ok(pv.intensity[k] === cell.count,
+        `${tag} · the ${k.toUpperCase()} chip counts what the card counts`,
+        `chip ${pv.intensity[k]} vs card ${cell.count}`);
+    }
+    ok(pv.intensityUnknown === r.intensity.ts.n_unknown,
+      `${tag} · and the unknowns are the same unknowns`,
+      `${pv.intensityUnknown} vs ${r.intensity.ts.n_unknown}`);
+
+    /* Only while the dimension is unconditioned. With a landfall condition set the two count
+       over different populations on purpose -- asserted as a DIFFERENCE in the block below. */
+    for (const region of spec.landfall ? [] : Object.keys(r.landfall)) {
+      const cell = r.landfall[region].any;
+      if (!cell || cell.status) continue;
+      ok(pv.landfall[region] === cell.count,
+        `${tag} · the ${region} chip counts what the card counts`,
+        `chip ${pv.landfall[region]} vs card ${cell.count}`);
+    }
+    ok(pv.intensity.all === r.n_cases,
+      `${tag} · the ALL chip is this cohort, because its intensity is unconditioned`);
+  }
+
+  /* WHERE THE EQUALITY STOPS, asserted rather than assumed -- this is the case the first draft
+     of the check above got wrong. Once a dimension carries a condition, its chips count over the
+     population WITHOUT that condition ("switch to this") while the cards count within the cohort
+     ("also did this"). Two right numbers for two different questions, and the builder prints a
+     basis line exactly when they diverge. Pinned here so a future change cannot quietly make one
+     of them mean the other. */
+  {
+    const spec = { basins: ["EP"], landfall: "mexico" };
+    const pv = previewCounts(archive, spec);
+    const r = cohortResult(archive, spec);
+    ok(pv.basisOf.landfall > r.n_cases,
+      "with a landfall condition set, its chips are counted over a larger basis",
+      `basis ${pv.basisOf.landfall} vs cohort ${r.n_cases}`);
+    ok(pv.landfall.central_america !== r.landfall.central_america.any.count,
+      "so the chip and the card legitimately differ",
+      `chip ${pv.landfall.central_america} vs card ${r.landfall.central_america.any.count}`);
+    ok(pv.landfall.mexico === pv.basisOf.landfall - countWithout(archive, spec),
+      "and the applied chip's own count is the cohort it would produce", "see below");
+
+    /* THE INTENSITY AXIS BEHAVES DIFFERENTLY FROM THE LANDFALL AXIS, and the difference is worth
+       pinning because it is the reason the two look inconsistent on screen and are not.
+       Intensity chips are NESTED thresholds: every Cat 4 storm is also a Cat 3+ storm, so with
+       CAT 3+ applied, the CAT 4 chip and the CAT 4 card count the same storms even though they
+       are taken over different populations. Landfall regions do not nest -- a Mexico landfaller
+       need not have hit Central America -- so there the two genuinely differ.
+       What DOES diverge on the intensity axis is the ALL chip, which shows the basis; that is
+       what the builder's basis line is there to explain. */
+    const is = { seasonFrom: 1971, intensity: "cat3" };
+    const ipv = previewCounts(archive, is);
+    const ir = cohortResult(archive, is);
+    ok(ir.intensity.cat3.status === "CONDITIONED ON -- NOT AN OUTCOME",
+      "the conditioned row refuses to be an outcome");
+    ok(ir.intensity.cat1.status === "CONDITIONED ON -- NOT AN OUTCOME",
+      "and so does every threshold below it — the fifth rule reaches downward");
+    ok(ipv.intensity.cat4 === ir.intensity.cat4.count,
+      "a threshold ABOVE the condition counts the same either way, because thresholds nest",
+      `chip ${ipv.intensity.cat4} vs card ${ir.intensity.cat4.count}`);
+    ok(ipv.intensity.all > ir.n_cases,
+      "while the ALL chip shows the basis, which is exactly what the basis line explains",
+      `chip ${ipv.intensity.all} vs cohort ${ir.n_cases}`);
+  }
+
+  /* Counted over the population that satisfies every OTHER condition, which is what makes a
+     month count stay still while months are toggled. A preview counted against the current
+     cohort would report zero for every unselected month. */
+  const aug = previewCounts(archive, { months: [8] });
+  const augSep = previewCounts(archive, { months: [8, 9] });
+  ok(aug.months[9] === augSep.months[9] && aug.months[9] > 0,
+    "a month's count does not move when a different month is toggled",
+    `${aug.months[9]} vs ${augSep.months[9]}`);
+  ok(aug.basisOf.months === augSep.basisOf.months,
+    "because both are counted over the same basis population");
 }
 
 console.log(failed

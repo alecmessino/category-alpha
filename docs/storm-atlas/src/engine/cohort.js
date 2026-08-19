@@ -25,6 +25,7 @@
  */
 
 import { INTENSITY_FILTERS, LANDFALL_FILTERS, filterStorms } from "./query.js";
+import { haversineKm } from "./geo.js";
 import { scoreCases } from "./analogs.js";
 
 /** The spec version. Bumped when the SHAPE changes, so an old URL is detected rather than
@@ -228,15 +229,27 @@ export function parentOf(spec, key) {
   const s = normalise(spec);
   const cs = conditionsOf(s);
   if (!cs.length) return null;
-  const drop = key || cs[cs.length - 1].key;
-  const out = { ...s };
-  if (drop === "where") out.where = null;
-  else if (drop === "season") { out.seasonFrom = null; out.seasonTo = null; }
-  else if (drop === "intensity") out.intensity = "all";
-  else if (drop === "landfall") out.landfall = null;
-  else if (drop === "namedOnly") out.namedOnly = false;
-  else if (drop === "includeProvisional") out.includeProvisional = false;
-  else out[drop] = null;
+  return withoutCondition(s, key || cs[cs.length - 1].key);
+}
+
+/**
+ * The spec with one condition dimension cleared, whether or not it was set.
+ *
+ * Separate from `parentOf` because two callers need it for different reasons and they must not
+ * disagree about what "without the season condition" means: `parentOf` uses it to build a
+ * baseline, and the builder's chip previews use it to count against the population that
+ * satisfies every OTHER condition -- which is the only count that stays still while a reader
+ * toggles months on and off.
+ */
+export function withoutCondition(spec, key) {
+  const out = { ...normalise(spec) };
+  if (key === "where") out.where = null;
+  else if (key === "season") { out.seasonFrom = null; out.seasonTo = null; }
+  else if (key === "intensity") out.intensity = "all";
+  else if (key === "landfall") out.landfall = null;
+  else if (key === "namedOnly") out.namedOnly = false;
+  else if (key === "includeProvisional") out.includeProvisional = false;
+  else out[key] = null;
   return normalise(out);
 }
 
@@ -354,6 +367,12 @@ export function cohortResult(archive, spec, { regions = ALL_REGIONS } = {}) {
     const row = filtered.rows[i];
     const gt = G.num("genesis_t", row);
     cases.push({
+      /* Distance from the query point, when there is one. Carried for DISPLAY and ordering
+         only -- it is deliberately not a weight here; see the note above. Null without a
+         location condition, because "how far from where" would have no answer. */
+      distance_km: s.where
+        ? haversineKm(s.where.lat, s.where.lon, archive.genesisLat[row], archive.genesisLon[row])
+        : null,
       row,
       storm_id: S.str("storm_id", row),
       name: S.str("name", row),

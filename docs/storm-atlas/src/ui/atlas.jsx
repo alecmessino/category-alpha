@@ -21,10 +21,11 @@ import {
 } from "../engine/cohort.js";
 import { activeAt, advance, buildTimeline, fromActive, toActive } from "../engine/timeline.js";
 import { projectWorld } from "../render/atlas-layer.js";
+import { previewCounts } from "../engine/preview.js";
 import { AtlasMap } from "./map.jsx";
-import { Rail } from "./rail.jsx";
+import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
-import { ProbePanel } from "./probe-panel.jsx";
+import { CohortPanel } from "./cohort-panel.jsx";
 import { Transport } from "./transport.jsx";
 import { ArchiveTransport } from "./archive-transport.jsx";
 import { MONO, claimText } from "./kit.jsx";
@@ -82,6 +83,7 @@ export function Atlas() {
       setArchive(a);
       globalThis.__ATLAS = { archive: a, world: w, getAnalogs, pathwayDensity, genesisDensity };
       globalThis.__ATLAS_QUERY = { filterStorms, seasonRange, genesisBounds };
+      globalThis.__ATLAS_COHORT = { cohortResult, previewCounts, normalise, parentOf, toQuery };
       globalThis.__ATLAS_TIMELINE = { buildTimeline, advance, activeAt, fromActive, toActive };
       globalThis.__ATLAS_PROJECT = projectWorld;
     }).catch((e) => { if (!cancelled) setError(e); });
@@ -107,6 +109,13 @@ export function Atlas() {
     const p = parentOf(cohort, "where");
     return p ? cohortResult(archive, p) : null;
   }, [archive, cohort]);
+
+  /* What each chip would cost, computed once per cohort -- five filter passes and five scans.
+     Measured: 2.9 ms on a 65-storm cohort, 3.9 ms on 539, 6.9 ms over the whole archive. That
+     is what makes a live count on every control affordable rather than aspirational. */
+  const preview = React.useMemo(
+    () => (archive ? previewCounts(archive, cohort) : null), [archive, cohort]);
+  const sentence = React.useMemo(() => sentenceOf(cohort), [cohort]);
 
   const contextRows = context ? context.rows : (result ? result.rows : null);
   const emphasis = context ? result.rows : null;
@@ -197,18 +206,14 @@ export function Atlas() {
 
       <div className="atlas-rail" style={{ overflowY: "auto",
         borderRight: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
-        {/* The rail still renders the controls, but it now writes to the cohort rather than to
-            a filter object of its own. 3.3 replaces it with the condition stack; keeping the
-            surface unchanged here is what makes the migration provable before it is
-            irreversible. */}
-        <Rail archive={archive} filters={cohort} setFilters={(f) => setCohort(normalise(f))}
-          result={result}
+        <CohortBuilder archive={archive} cohort={cohort}
+          setCohort={(f) => setCohort(normalise(f))}
+          result={result} preview={preview}
           layers={layers} setLayers={setLayers} bounds={bounds}
           mode={mode} setMode={setMode}
           showPathway={showPathway} setShowPathway={setShowPathway}
           showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
-          timeline={timeline} sentence={sentenceOf(cohort)}
-          conditions={conditionsOf(cohort)}
+          timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
           onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
       </div>
 
@@ -236,15 +241,15 @@ export function Atlas() {
         {storm ? (
           <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
             onReplay={() => setPlaying((v) => !v)} replaying={playing} />
-        ) : cohort.where ? (
-          <ProbePanel probe={cohort.where} result={result} peak={peakOf(pathway)}
-            context={context} pathway={pathway}
-            onRadius={(km) => setCohort((c) => normalise({ ...c, where: { ...c.where, radiusKm: km } }))}
-            onClose={() => setCohort((c) => normalise({ ...c, where: null }))}
-            onSelectStorm={selectStorm}
-            pathwayOn={showPathway} onShowPathway={setShowPathway} />
         ) : mode === "replay" ? (
           <ReplayNote timeline={timeline} result={result} />
+        ) : conditionsOf(cohort).length ? (
+          /* THE ANSWER IS PUBLISHED FOR ANY COHORT, not only for one with a location. Before
+             3.3 this panel answered a click on open water and nothing else, so narrowing to
+             "Cat 3+, since 1971, Aug-Sep" produced a map and no statistics at all. */
+          <CohortPanel spec={cohort} result={result} sentence={sentence}
+            peak={peakOf(pathway)} pathway={pathway} onSelectStorm={selectStorm}
+            pathwayOn={showPathway} onShowPathway={setShowPathway} />
         ) : (
           <Introduction archive={archive} />
         )}

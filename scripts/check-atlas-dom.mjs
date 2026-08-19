@@ -115,7 +115,9 @@ console.log("\n[1] the archive's scale, from the pack that was actually loaded")
 }
 
 console.log("\n[2] an intensity filter reports what it could NOT judge");
-await page.getByText("CAT 3+", { exact: true }).click();
+/* Chips carry live counts in their labels now, so they are addressed by their stable hook
+   rather than by visible text -- a text match would break when the archive grows by a storm. */
+await page.click('[data-chip="intensity-cat3"]');
 await page.waitForTimeout(500);
 {
   const t = await text();
@@ -125,14 +127,15 @@ await page.waitForTimeout(500);
   ok("and they are not called failures",
     /neither included nor counted as failing/.test(t));
 }
-await page.getByText("ALL STORMS", { exact: true }).click();
+await page.click('[data-chip="intensity-all"]');
 await page.waitForTimeout(500);
 
 console.log("\n[3] an ocean point where nothing formed");
 await clickLatLng(25.8, -119.9);
 {
   const t = await text();
-  ok("the empty pool is named, not tabulated as zeroes", /NO ANALOGS — 0 STORMS MATCHED/.test(t));
+  ok("the empty pool is named, not tabulated as zeroes",
+    /NO STORMS MATCHED THIS COHORT/.test(t));
   ok("it says there are no rates because there is no sample",
     /no sample here, so there are no rates/i.test(t));
   ok("it explains that matching is on genesis, not on passage",
@@ -150,14 +153,25 @@ await clickLatLng(14.6, -113.9);
   ok("the rate ladder declares its own shape", /count · rate · 95% Wilson/.test(t));
   ok("storms with no recorded intensity leave the denominator",
     /out of every denominator above/.test(t));
-  ok("an unscoreable contract is badged", /BASE RATE ONLY -- unscoreable/.test(t));
-  ok("and says how many events the archive holds", /event\(s\) archive-wide, \d+ needed/.test(t));
+  ok("an unscoreable contract is badged", /BASE RATE ONLY/.test(t));
+  ok("and says how many events the archive holds", /\d+ archive-wide · \d+ needed/.test(t));
   ok("pathway frequency is labelled as frequency", /HISTORICAL PATHWAY FREQUENCY/.test(t));
   ok("and disclaimed as not a forecast", /THIS IS NOT A FORECAST/.test(t));
   ok("and denies being a cone", /not a forecast cone/.test(t));
   ok("a Wilson interval accompanies the rates",
     /\[\s*\d+\s*[-–—]\s*\d+%\s*\]/.test(t));
-  ok("the weighted rate is shown beside the unweighted one", /weighted \d+(\.\d+)?%/.test(t));
+  /* THE WEIGHTED RATE CHANGED MEANING IN 3.2, SO THE CHECK CHANGED WITH IT -- and got harder.
+     The probe was a distance-weighted analog pool and published a weighted rate beside the
+     unweighted one. A COHORT spends distance as a hard membership condition instead, so
+     weighting by it again would count the same variable twice; every member counts once and the
+     weighted rate is identical to the unweighted one by construction. Printing the same number
+     twice under two names would be the dishonest option, and so would dropping it in silence.
+     The surface must therefore STATE the decision -- which is a stricter thing to satisfy than
+     rendering a number. */
+  ok("the surface says every member counts once", /Every storm here counts once/.test(t));
+  ok("and why distance is not also used as a weight",
+    /Distance is already a condition of membership/.test(t)
+    && /count the same variable twice/.test(t));
   ok("the conditioning the rates assume is stated",
     /GENESIS-CONDITIONED|assume a tropical cyclone forms/i.test(t));
   ok("and that landfall does not decompose as a product",
@@ -184,6 +198,102 @@ await clickLatLng(14.6, -113.9);
     !pcts.length || /\[\s*\d+\s*[-–—]\s*\d+%\s*\]/.test(computed));
   ok("the archive's own measured percentages survive verbatim in its gaps",
     /1\.7% Cat 3 in the 1960s/.test(t));
+}
+
+console.log("\n[4b] the five refusals — reachable, distinct, and honest about the remedy");
+{
+  /* THE CREDIBILITY SURFACE. Five different reasons the archive declines to answer, and the
+     distinction that matters is not why but WHETHER THE READER CAN DO ANYTHING. Three dissolve
+     if the question changes; two are limits of the record and no cohort can move them. An
+     interface that offers a remedy for the second kind is lying more comfortably than one that
+     refuses, so the check is not "a refusal appeared" -- it is that all five are on screen, no
+     two say the same thing, and the irreducible ones do not pretend to be fixable. */
+  const seen = async () => page.evaluate(() =>
+    [...document.querySelectorAll("[data-refusal]")].map((e) => ({
+      kind: e.getAttribute("data-refusal"),
+      text: (e.innerText || "").replace(/\s+/g, " ").trim(),
+    })));
+
+  // A dense cohort is already selected from [4]: it carries UNKNOWN and BASE RATE ONLY.
+  let states = new Map((await seen()).map((r) => [r.kind, r.text]));
+  const t0 = await text();
+  ok("— UNKNOWN reaches the screen", states.has("UNKNOWN"));
+  ok("BASE RATE ONLY reaches the screen", states.has("BASE_RATE_ONLY"));
+  ok("NOT EVALUABLE reaches the screen", states.has("NOT_EVALUABLE"));
+  ok("and NOT EVALUABLE states the measured coverage, not a round number",
+    /\d[\d,]* of [\d,]+ storms/.test(states.get("NOT_EVALUABLE") || ""),
+    (states.get("NOT_EVALUABLE") || "").slice(0, 140));
+  ok("the two irreducible states say so in as many words",
+    /A LIMIT OF THE RECORD/.test(states.get("UNKNOWN") || "")
+    && /A LIMIT OF THE RECORD/.test(states.get("BASE_RATE_ONLY") || ""));
+  ok("and neither of them offers the reader a remedy",
+    !/YOU CAN CHANGE THIS/.test(states.get("UNKNOWN") || "")
+    && !/YOU CAN CHANGE THIS/.test(states.get("BASE_RATE_ONLY") || ""));
+  ok("while NOT EVALUABLE is honest that it is only partly in the reader's hands",
+    /PARTLY IN YOUR HANDS/.test(states.get("NOT_EVALUABLE") || ""));
+  void t0;
+
+  /* CONDITIONED ON -- the fifth rule. Conditioning the cohort on an outcome must make that
+     outcome refuse to be reported back as a finding. */
+  await page.click('[data-chip="intensity-cat3"]');
+  await page.waitForTimeout(700);
+  states = new Map((await seen()).map((r) => [r.kind, r.text]));
+  const t1 = await text();
+  ok("CONDITIONED ON fires when the cohort is defined by an outcome",
+    states.has("CONDITIONED_ON"), t1.slice(0, 200));
+  ok("and it names the way out — remove that condition",
+    /Remove that condition/.test(states.get("CONDITIONED_ON") || ""));
+  ok("the outcome zone declares its own consequence on the chip stack",
+    /stops being an outcome/.test(t1));
+  ok("and the zone is named as a different question",
+    /GIVEN THAT IT ALSO/.test(t1));
+
+  /* RATE REFUSED -- the sample gate. A cohort small enough to refuse still publishes counts. */
+  await page.click('[data-chip="radius-250"]').catch(() => {});
+  await page.waitForTimeout(700);
+  const t2 = await text();
+  states = new Map((await seen()).map((r) => [r.kind, r.text]));
+  const refusedSomewhere = states.has("RATE_REFUSED") || /RATE REFUSED/.test(t2);
+  ok("RATE REFUSED reaches the screen on a small cohort", refusedSomewhere,
+    `n on screen: ${(t2.match(/BELOW SAMPLE[^\n]*/) || ["-"])[0]}`);
+  if (states.has("RATE_REFUSED")) {
+    ok("and it says a wider cohort would carry one",
+      /wider cohort/.test(states.get("RATE_REFUSED") || ""));
+  }
+  ok("a refused rate never prints as 0.0%", !/\b0\.0%/.test(t2.split("GAPS THE ARCHIVE")[0]));
+
+  /* NO TWO REFUSALS MAY READ THE SAME. If two states rendered identical prose the reader would
+     have five badges and one meaning, which is the failure this whole surface exists to avoid. */
+  const all = await seen();
+  const byKind = new Map();
+  for (const r of all) if (!byKind.has(r.kind)) byKind.set(r.kind, r.text);
+  const texts = [...byKind.values()];
+  ok("no two refusal states render the same text",
+    new Set(texts).size === texts.length, texts.map((x) => x.slice(0, 40)).join(" | "));
+  ok("at least four distinct refusals are reachable in one session",
+    byKind.size >= 4, [...byKind.keys()].join(","));
+
+  await page.click('[data-chip="intensity-all"]');
+  await page.click('[data-chip="radius-800"]').catch(() => {});
+  await page.waitForTimeout(700);
+}
+
+console.log("\n[4c] the builder reads as a question, not as a schema");
+{
+  const t = await text();
+  ok("the cohort is stated as a sentence", /what happened next\?/i.test(t));
+  ok("the lifecycle order is on screen",
+    /1 · GENESIS/.test(t) && /2 · ENVIRONMENT/.test(t) && /3 · PEAK INTENSITY/.test(t)
+    && /4 · LANDFALL/.test(t));
+  ok("the given zone is named", /GIVEN — at or before genesis/.test(t));
+  ok("applied conditions show what they cost", /−[\d,]+ excluded/.test(t));
+  const chips = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-chip]")].map((e) => e.getAttribute("data-chip")));
+  ok("every Phase 1/2 filter survives as a first-class condition",
+    ["intensity-all", "intensity-cat3", "intensity-cat5", "landfall-mexico", "landfall-any",
+     "basin-all", "season-1971+", "mode-replay", "radius-500"]
+      .every((k) => chips.includes(k)),
+    chips.join(","));
 }
 
 console.log("\n[5] Iniki 1992 — the storm the archive's landfall methodology exists for");
@@ -249,7 +359,7 @@ console.log("\n[8] the replay reveals the record without lying about time");
 await page.keyboard.press("Escape");
 await page.waitForTimeout(300);
 {
-  await page.getByText("REPLAY", { exact: true }).click();
+  await page.click('[data-chip="mode-replay"]');
   await page.waitForTimeout(700);
   const t = await text();
   ok("the transport shows a real UTC date, not a frame index",
@@ -328,8 +438,16 @@ console.log("\n[8b] accumulated ink survives a pan, a zoom and a resize");
 
 console.log("\n[8c] the density surfaces say what they count");
 {
-  await page.getByText("EXPLORE", { exact: true }).click();
+  await page.click('[data-chip="mode-explore"]');
   await page.waitForTimeout(400);
+  /* The layer and density toggles sit under a disclosure now. The query is the product; how the
+     cohort is DRAWN is a preference, and putting it behind one triangle is what keeps the
+     builder from reading as a control panel. Opened here so the checks can still reach it. */
+  await page.evaluate(() => {
+    const d = document.querySelector("details[data-drawn]");
+    if (d) d.open = true;
+  });
+  await page.waitForTimeout(200);
   await page.getByText("PATHWAY FREQUENCY", { exact: true }).click();
   await page.waitForTimeout(900);
   let t = await text();

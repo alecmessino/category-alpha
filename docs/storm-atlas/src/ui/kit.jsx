@@ -98,7 +98,7 @@ export function Head({ children, right }) {
   );
 }
 
-export function Chip({ children, active, tone, onClick, title, disabled }) {
+export function Chip({ children, active, tone, onClick, title, disabled, chipKey }) {
   const c = tone || "var(--accent)";
   return (
     <button
@@ -106,6 +106,10 @@ export function Chip({ children, active, tone, onClick, title, disabled }) {
       onClick={onClick}
       title={title}
       disabled={disabled}
+      /* A stable hook for the checks. Chips carry live counts in their label now, so matching
+         them by visible text would break the moment the archive grows by one storm. */
+      data-chip={chipKey}
+      aria-pressed={active ? "true" : "false"}
       style={{
         ...MONO,
         fontSize: "var(--fs-mono-xs)",
@@ -133,27 +137,10 @@ export function OverDenom({ n, of, tone }) {
   );
 }
 
-/** What the Atlas says instead of a statistic it has not proven at parity with the archive. */
-export function Unscoreable({ state, compact }) {
-  return (
-    <div style={{
-      border: "1px solid var(--border-strong)",
-      borderLeft: "var(--bw-signal) solid var(--warn)",
-      borderRadius: "var(--radius-sm)",
-      padding: compact ? "var(--sp-3)" : "var(--sp-5)",
-      background: "color-mix(in srgb, var(--warn) 6%, transparent)",
-    }}>
-      <div style={{
-        ...MONO, fontSize: "var(--fs-mono-xs)", fontWeight: 800, color: "var(--warn)",
-        letterSpacing: ".5px", marginBottom: 4,
-      }}>{state.status}</div>
-      <div style={{
-        fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)", color: "var(--text-2)",
-        lineHeight: "var(--lh-body)",
-      }}>{state.reason}</div>
-    </div>
-  );
-}
+/* `Unscoreable` lived here and is gone: ui/refusal.jsx generalises it into the five states, so
+   every refusal now comes from one definition instead of one component knowing about one of
+   them. Left as a note rather than as a re-export, because a shim would let a caller keep
+   rendering a refusal that cannot say whether the reader can do anything about it. */
 
 /** A gap the archive recorded. Shown verbatim -- rewording one would change what it says. */
 export function Gap({ text }) {
