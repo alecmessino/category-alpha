@@ -219,6 +219,18 @@ export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor }) {
         {/* ---- PROVENANCE ----------------------------------------------------------------- */}
         <Head>PROVENANCE</Head>
         <Row k="backtest built" v={<span style={MONO}>{cal.provenance.backtest_built_utc}</span>} />
+        {/* The two dates side by side. The backtest is an expensive replay on its own cadence
+            and the archive appends four times a day, so a calibration is always measured on a
+            record at least slightly older than the one being queried. Saying how much older is
+            cheap; letting a reader assume they are the same date is not. */}
+        <Row k="archive as of" v={<span style={MONO}>
+          {cal.provenance.archive_as_of}
+          {agedDays(cal) !== null ? (
+            <span style={{ color: agedDays(cal) > 90 ? "var(--warn)" : "var(--text-2)" }}>
+              {" "}· {agedDays(cal)} day{agedDays(cal) === 1 ? "" : "s"} after the backtest
+            </span>
+          ) : null}
+        </span>} />
         <Row k="backtest sha256" v={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)" }}>
           {cal.provenance.backtest_sha256}</span>} />
         <Row k="methodology version"
@@ -407,6 +419,14 @@ function Line({ k, v, tone }) {
       <span style={{ color: tone || "var(--text-1)" }}>{v}</span>
     </div>
   );
+}
+
+/** How far the archive has moved since the backtest was run. Null when either date is absent. */
+function agedDays(cal) {
+  const a = Date.parse(cal.provenance.backtest_built_utc);
+  const b = Date.parse(`${cal.provenance.archive_as_of}T00:00:00Z`);
+  if (Number.isNaN(a) || Number.isNaN(b)) return null;
+  return Math.max(0, Math.round((b - a) / 86400000));
 }
 
 function skillTone(s) {

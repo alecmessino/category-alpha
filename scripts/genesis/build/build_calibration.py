@@ -48,7 +48,7 @@ import json
 from pathlib import Path
 
 from ..provenance import (ARCHIVE_DIR, METHODOLOGY_VERSION, PROCESSING_VERSION, REPO_ROOT,
-                          sha256_file)
+                          sha256_file, today)
 from ..retrieval.analogs import MIN_EVENTS_FOR_SKILL, contract_event_counts
 from ..schema import THRESHOLDS_KT
 from ..store import read_table
@@ -225,6 +225,13 @@ def build(archive_dir: Path | None = None, out_dir: Path | None = None) -> dict:
         "contracts": contracts,
         "provenance": {
             "backtest_built_utc": bt["built_utc"],
+            # THE LEDGER AGES AND THE ARCHIVE DOES NOT WAIT FOR IT. The backtest is an
+            # expensive replay run on its own cadence; the archive appends four times a day.
+            # The two dates are published side by side rather than one being presented as
+            # current: a calibration measured on a record that has since grown is still the
+            # best evidence available, but a reader is entitled to see how far apart they are
+            # before leaning on it.
+            "archive_as_of": today(),
             "backtest_processing_version": bt["processing_version"],
             "backtest_sha256": sha256_file(src),
             "methodology_version": METHODOLOGY_VERSION,
