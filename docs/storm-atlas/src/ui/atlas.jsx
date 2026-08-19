@@ -14,7 +14,11 @@
 import React from "react";
 import { loadArchive } from "../engine/archive.js";
 import { genesisDensity, getAnalogs, pathwayDensity } from "../engine/analogs.js";
-import { DEFAULT_FILTERS, filterStorms, genesisBounds, seasonRange } from "../engine/query.js";
+import { filterStorms, genesisBounds, seasonRange } from "../engine/query.js";
+import {
+  EMPTY_COHORT, cohortResult, conditionsOf, normalise, parentOf, parseQuery, sameCohort,
+  sentenceOf, toQuery,
+} from "../engine/cohort.js";
 import { activeAt, advance, buildTimeline, fromActive, toActive } from "../engine/timeline.js";
 import { projectWorld } from "../render/atlas-layer.js";
 import { AtlasMap } from "./map.jsx";
@@ -41,12 +45,15 @@ export function Atlas() {
   const [error, setError] = React.useState(null);
   const [world, setWorld] = React.useState(null);
 
-  const [filters, setFilters] = React.useState(DEFAULT_FILTERS);
+  /* THE SINGLE SOURCE OF TRUTH. One object decides which storms are drawn, which are counted,
+     what the outcome cards say, what the URL carries and what a saved scenario is. The rail
+     writes to it; nothing else holds query state. */
+  const [cohort, setCohort] = React.useState(() => parseQuery(location.search).spec);
+  const [urlVersion] = React.useState(() => parseQuery(location.search).versionMismatch);
   const [layers, setLayers] = React.useState({
     colorBy: "uniform", genesis: true, landfalls: true,
   });
   const [selected, setSelected] = React.useState(null);
-  const [probe, setProbe] = React.useState(null);
   /* Off by default. The individual trajectories are the hero -- the density surface is the
      same storms counted, and stacking both means neither reads. Turning it on dims the tracks
      so the surface can be seen. */
@@ -83,23 +90,26 @@ export function Atlas() {
 
   const bounds = React.useMemo(() => (archive ? seasonRange(archive) : [1851, 2026]), [archive]);
   const home = React.useMemo(() => (archive ? genesisBounds(archive) : null), [archive]);
+  /* ONE COHORT, ONE ANSWER. Membership and outcomes come from the same object now: the storms
+     drawn on the map ARE the storms in every denominator. Until 3.2 these were two calls -- one
+     deciding what was drawn, another deciding what was scored -- and keeping them from
+     disagreeing was the shell's job rather than the engine's. */
   const result = React.useMemo(
-    () => (archive ? filterStorms(archive, filters) : null), [archive, filters]);
+    () => (archive ? cohortResult(archive, cohort) : null), [archive, cohort]);
 
-  const analog = React.useMemo(() => {
-    if (!archive || !probe) return null;
-    return getAnalogs(archive, {
-      lat: probe.lat, lon: probe.lon, radiusKm: probe.radiusKm,
-      seasonMonths: filters.months, minPoolSeason: filters.seasonFrom,
-      basins: filters.basins, includeProvisional: filters.includeProvisional,
-      regions: ["hawaii", "mexico", "conus"],
-    });
-  }, [archive, probe, filters.months, filters.seasonFrom, filters.basins,
-      filters.includeProvisional]);
+  /* THE POPULATION STAYS VISIBLE AS CONTEXT, and the context is exactly the PARENT cohort --
+     this cohort with its location condition dropped. Comparing against the whole archive would
+     be the wrong reference (it would include storms excluded for reasons that have nothing to do
+     with where they formed), and it is also the object 3.4's baseline needs, so it is computed
+     the same way here rather than approximated. */
+  const context = React.useMemo(() => {
+    if (!archive || !cohort.where) return null;
+    const p = parentOf(cohort, "where");
+    return p ? cohortResult(archive, p) : null;
+  }, [archive, cohort]);
 
-  /* The pool the probe matched, as storm rows -- what the map lifts out of the population. */
-  const emphasis = React.useMemo(
-    () => (analog ? analog.cases.map((c) => c.row) : null), [analog]);
+  const contextRows = context ? context.rows : (result ? result.rows : null);
+  const emphasis = context ? result.rows : null;
 
   /* THE DENSITY SURFACES ARE NOT TIED TO A PROBE. With a probe they show the matched pool --
      where those storms went. Without one they show the current filter over the whole archive,
@@ -107,14 +117,13 @@ export function Atlas() {
      one of those is a filter that already exists. Measured at 7.9 ms for all 3,885 storms. */
   const pathway = React.useMemo(() => {
     if (!archive || !result || !showPathway) return null;
-    if (analog) return analog.track_density;
     return pathwayDensity(archive, result.rows, 2.0);
-  }, [archive, result, showPathway, analog]);
+  }, [archive, result, showPathway]);
 
   const genesisGrid = React.useMemo(() => {
     if (!archive || !result || !showGenesisDensity) return null;
-    return genesisDensity(archive, emphasis && emphasis.length ? emphasis : result.rows, 2.0);
-  }, [archive, result, showGenesisDensity, emphasis]);
+    return genesisDensity(archive, result.rows, 2.0);
+  }, [archive, result, showGenesisDensity]);
 
   /* The replay clock, built from whatever the filter currently selects. Rebuilt on a filter
      change on purpose: a run is over a population, and changing the population is a new run. */
@@ -127,9 +136,19 @@ export function Atlas() {
     setReplayCursorMin(timeline && timeline.n ? timeline.firstT : null);
   }, [mode, timeline]);
 
+  /* THE COHORT IS THE ADDRESS BAR. A scenario is a URL in this architecture -- shareable,
+     bookmarkable and diffable with no server at all -- so the spec is written back on every
+     change. replaceState rather than pushState: building a query is one continuous act, and
+     filling the back button with twelve half-formed cohorts would make Back useless for
+     leaving the page. */
+  React.useEffect(() => {
+    const q = toQuery(cohort);
+    const next = q ? `?${q}` : location.pathname;
+    if (location.search.replace(/^\?/, "") !== q) history.replaceState(null, "", next);
+  }, [cohort]);
+
   const selectStorm = React.useCallback((row) => {
     setSelected(row);
-    setProbe(null);
     setCursorMs(null);
     setPlaying(false);
   }, []);
@@ -138,16 +157,23 @@ export function Atlas() {
   React.useEffect(() => { globalThis.__ATLAS_SELECT = selectStorm; }, [selectStorm]);
   React.useEffect(() => { globalThis.__ATLAS_SET_CURSOR = setCursorMs; }, []);
 
+  /* Clicking the ocean sets the cohort's LOCATION CONDITION -- it does not open a separate
+     probe with its own query. That separation was the two-surface problem in miniature. */
   const onProbe = React.useCallback((lat, lon) => {
     setSelected(null);
     setPlaying(false);
-    setProbe((p) => ({ lat, lon, radiusKm: p ? p.radiusKm : DEFAULT_RADIUS_KM }));
+    setCohort((c) => normalise({
+      ...c, where: { lat, lon, radiusKm: c.where ? c.where.radiusKm : DEFAULT_RADIUS_KM },
+    }));
   }, []);
 
   React.useEffect(() => {
     const onKey = (e) => {
       if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
-      if (e.key === "Escape") { setProvOpen(false); setSelected(null); setProbe(null); }
+      if (e.key === "Escape") {
+        setProvOpen(false); setSelected(null);
+        setCohort((c) => normalise({ ...c, where: null }));
+      }
       if (e.key === "p" || e.key === "P") setProvOpen((v) => !v);
       if (e.key === " " && (selected !== null || mode === "replay")) {
         e.preventDefault(); setPlaying((v) => !v);
@@ -171,20 +197,26 @@ export function Atlas() {
 
       <div className="atlas-rail" style={{ overflowY: "auto",
         borderRight: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
-        <Rail archive={archive} filters={filters} setFilters={setFilters} result={result}
+        {/* The rail still renders the controls, but it now writes to the cohort rather than to
+            a filter object of its own. 3.3 replaces it with the condition stack; keeping the
+            surface unchanged here is what makes the migration provable before it is
+            irreversible. */}
+        <Rail archive={archive} filters={cohort} setFilters={(f) => setCohort(normalise(f))}
+          result={result}
           layers={layers} setLayers={setLayers} bounds={bounds}
           mode={mode} setMode={setMode}
           showPathway={showPathway} setShowPathway={setShowPathway}
           showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
-          timeline={timeline}
-          onReset={() => { setFilters(DEFAULT_FILTERS); setSelected(null); setProbe(null); }} />
+          timeline={timeline} sentence={sentenceOf(cohort)}
+          conditions={conditionsOf(cohort)}
+          onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
       </div>
 
       <div className="atlas-stage" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
         <AtlasMap
-          archive={archive} world={world} rows={result.rows} emphasis={emphasis}
+          archive={archive} world={world} rows={contextRows} emphasis={emphasis}
           selected={selected} home={home}
-          onSelect={selectStorm} onProbe={onProbe} probe={probe}
+          onSelect={selectStorm} onProbe={onProbe} probe={cohort.where}
           replayMs={selected !== null && cursorMs !== null ? cursorMs : undefined}
           colorBy={layers.colorBy} dimPopulation={selected !== null}
           softenEmphasis={showPathway}
@@ -194,8 +226,8 @@ export function Atlas() {
           mode={mode} timeline={timeline} replayCursorMin={replayCursorMin}
           pathwayStep={2.0} onViewChange={setView}
         />
-        {mode === "explore" && !probe && selected === null ? <Invitation /> : null}
-        <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!probe}
+        {mode === "explore" && !cohort.where && selected === null ? <Invitation /> : null}
+        <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
           showGenesisDensity={showGenesisDensity} />
       </div>
 
@@ -204,10 +236,12 @@ export function Atlas() {
         {storm ? (
           <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
             onReplay={() => setPlaying((v) => !v)} replaying={playing} />
-        ) : probe ? (
-          <ProbePanel probe={probe} result={analog} peak={analog ? peakOf(analog) : 0}
-            onRadius={(km) => setProbe((p) => ({ ...p, radiusKm: km }))}
-            onClose={() => setProbe(null)} onSelectStorm={selectStorm}
+        ) : cohort.where ? (
+          <ProbePanel probe={cohort.where} result={result} peak={peakOf(pathway)}
+            context={context} pathway={pathway}
+            onRadius={(km) => setCohort((c) => normalise({ ...c, where: { ...c.where, radiusKm: km } }))}
+            onClose={() => setCohort((c) => normalise({ ...c, where: null }))}
+            onSelectStorm={selectStorm}
             pathwayOn={showPathway} onShowPathway={setShowPathway} />
         ) : mode === "replay" ? (
           <ReplayNote timeline={timeline} result={result} />
@@ -507,8 +541,10 @@ function BootError({ error }) {
   );
 }
 
-function peakOf(analog) {
+/** Busiest cell in a density grid. The grid is now computed by the shell rather than carried
+ *  inside an analog result, so this takes the Map directly. */
+function peakOf(grid) {
   let peak = 0;
-  for (const v of analog.track_density.values()) if (v > peak) peak = v;
+  if (grid) for (const v of grid.values()) if (v > peak) peak = v;
   return peak;
 }

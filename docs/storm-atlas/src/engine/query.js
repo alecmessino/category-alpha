@@ -12,6 +12,7 @@
  */
 
 import { THRESHOLDS_KT } from "./stats.js";
+import { haversineKm } from "./geo.js";
 
 export const INTENSITY_FILTERS = [
   { key: "all", label: "ALL STORMS", threshold: null },
@@ -32,6 +33,14 @@ export const LANDFALL_FILTERS = [
 ];
 
 export const DEFAULT_FILTERS = Object.freeze({
+  /* Proximity to GENESIS -- where the storm formed, never where it passed.
+   *
+   * This is the one filter the rail never had, and its absence is why the Atlas had two query
+   * surfaces: a probe could ask "what formed within 500 km of here" but the drawn population
+   * could not, so the map and the statistics were answering different questions. With it, one
+   * cohort spec drives both. Null keeps every storm, which is what makes the migration from
+   * the old filter path provable rather than merely likely. */
+  where: null, // { lat, lon, radiusKm }
   seasonFrom: null,
   seasonTo: null,
   months: null, // null = every month
@@ -61,8 +70,8 @@ export function filterStorms(archive, filters = {}) {
   const rows = new Uint32Array(a.nStorms);
   let kept = 0;
   let undecidable = 0;
-  const excluded = { season: 0, month: 0, basin: 0, subbasin: 0, intensity: 0, landfall: 0,
-                     provisional: 0, unnamed: 0, noGenesis: 0 };
+  const excluded = { distance: 0, season: 0, month: 0, basin: 0, subbasin: 0, intensity: 0,
+                     landfall: 0, provisional: 0, unnamed: 0, noGenesis: 0 };
 
   const lfRegionCol = a.landfalls.col("region");
   const lfRegionCodes = a.landfalls.raw("region");
@@ -81,6 +90,12 @@ export function filterStorms(archive, filters = {}) {
       // counted, rather than being drawn from a position the archive does not have.
       excluded.noGenesis++;
       continue;
+    }
+    /* Distance is tested here -- after genesis is known to exist, before anything else -- so
+       the exclusion counts read in the order a reader builds the question: where first. */
+    if (f.where) {
+      const d = haversineKm(f.where.lat, f.where.lon, a.genesisLat[i], a.genesisLon[i]);
+      if (!(d <= f.where.radiusKm)) { excluded.distance++; continue; }
     }
     if (monthSet) {
       const m = new Date(gt * 60000).getUTCMonth() + 1;

@@ -203,6 +203,7 @@ export function Rail({ archive, filters, setFilters, result, layers, setLayers, 
 }
 
 const EXCLUSION_LABEL = {
+  distance: "formed outside the search radius",
   season: "outside the season range",
   month: "genesis in an excluded month",
   basin: "outside the basin filter",

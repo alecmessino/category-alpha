@@ -30,7 +30,7 @@ const CAT_LABEL = { td: "TROPICAL DEPRESSION", ts: "TROPICAL STORM", cat1: "CATE
 const RADII = [250, 500, 800, 1200];
 
 export function ProbePanel({ probe, result, onRadius, onClose, onSelectStorm, onShowPathway,
-  pathwayOn, peak }) {
+  pathwayOn, peak, pathway, context }) {
   if (!probe || !result) return null;
   const r = result;
   const n = r.n_cases;
@@ -173,8 +173,8 @@ export function ProbePanel({ probe, result, onRadius, onClose, onSelectStorm, on
           }>HISTORICAL PATHWAY FREQUENCY</Head>
           <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
             lineHeight: "var(--lh-body)" }}>
-            {r.track_density.size.toLocaleString()} two-degree cells, each counting the distinct
-            storms of this pool that passed through it
+            {(pathway ? pathway.size : 0).toLocaleString()} two-degree cells, each counting the
+            distinct storms of this cohort that passed through it
             {peak ? <> · busiest cell carries {peak}</> : null}.
             <div style={{ color: "var(--warn)", marginTop: 4 }}>
               THIS IS NOT A FORECAST. {claimText("atlas.pathway")}
