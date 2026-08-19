@@ -68,15 +68,32 @@ async function findChromium() {
 
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json",
   ".css": "text/css", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".gz": "application/gzip" };
+/* BROWSER HOUSEKEEPING IS NOT A MISSING ASSET, and the exemptions are named individually so
+   this can never drift into "ignore 404s". Which of these Chromium asks for depends on the
+   BUILD: this container's chromium-1194 requests neither, while the build a CI runner installs
+   requests both, and the console message for a same-origin 404 carries no path -- so the same
+   gate goes green here and reports N identical unactionable failures there. Sibling of the
+   list in check-panel-dom.mjs, which is where that difference first surfaced. */
+const BROWSER_PROBES = [/^\/favicon\.ico$/, /^\/\.well-known\//];
+const isBrowserProbe = (p) => BROWSER_PROBES.some((re) => re.test(p));
+
+/** Same-origin paths the server could not find. A failure should name the file. */
+const MISSING = [];
+
 const server = await new Promise((r) => {
   const s = createServer(async (req, res) => {
+    let p = "/";
     try {
-      let p = decodeURIComponent(req.url.split("?")[0]);
+      p = decodeURIComponent(req.url.split("?")[0]);
       if (p.endsWith("/")) p += "index.html";
       const b = await readFile(join(DOCS, p));
       res.writeHead(200, { "content-type": TYPES[extname(p)] || "application/octet-stream" });
       res.end(b);
-    } catch { res.writeHead(404); res.end("not found"); }
+    } catch {
+      if (!isBrowserProbe(p)) MISSING.push(p);
+      res.writeHead(404);
+      res.end("not found");
+    }
   });
   s.listen(0, () => r(s));
 });
@@ -95,6 +112,13 @@ const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 } }
 for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**", "**basemaps.cartocdn.com**"]) {
   await ctx.route(h, (r) => r.abort());
 }
+/* Aborted rather than served: an abort registers as ERR_ABORTED, which the console filter
+   already drops as a request this harness itself blocked. */
+await ctx.route("**/*", (r) => {
+  const u = r.request().url();
+  if (!u.startsWith(`http://127.0.0.1:${port}`)) return r.continue();
+  return isBrowserProbe(new URL(u).pathname) ? r.abort() : r.continue();
+});
 const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
@@ -714,6 +738,8 @@ console.log("\n[8c] the density surfaces say what they count");
 
 console.log("\n[9] the page did not complain");
 ok("no page or console errors", errors.length === 0, errors.join("\n        "));
+ok("and every resource it asked for existed", MISSING.length === 0,
+  `${MISSING.length} 404(s): ${[...new Set(MISSING)].slice(0, 10).join(", ")}`);
 
 await browser.close();
 server.close();

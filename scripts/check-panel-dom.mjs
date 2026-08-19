@@ -82,6 +82,32 @@ const TYPES = { ".html": "text/html", ".js": "text/javascript", ".jsx": "text/ba
   ".json": "application/json", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml",
   ".woff2": "font/woff2", ".woff": "font/woff", ".ico": "image/x-icon" };
 
+/* Every same-origin path the server could not find, in request order. Reported beside the
+   console errors so a failure names the file rather than describing the symptom. */
+const MISSING = [];
+
+/* BROWSER HOUSEKEEPING IS NOT A MISSING ASSET, and the list is explicit so it cannot quietly
+   grow into "ignore 404s".
+ *
+ * Chromium asks for these on its own initiative, and WHICH ones it asks for depends on the
+ * build: this container's chromium-1194 requests neither, while the build `npx playwright
+ * install` puts on a CI runner requests both. That difference turned the first CI run of this
+ * gate into 43 failures whose console message -- "Failed to load resource: the server responded
+ * with a status of 404 ()" -- named no path at all.
+ *
+ *   /favicon.ico                                  requested for the tab icon whenever a page
+ *                                                 declares only an SVG icon, as this one does.
+ *   /.well-known/appspecific/com.chrome.devtools  the automation probe Chrome 136+ makes on
+ *                                                 every navigation under DevTools protocol.
+ *
+ * Neither is requested by this application, so neither can mask an application defect. Any
+ * OTHER 404 remains fatal and is now reported with its path. */
+const BROWSER_PROBES = [
+  /^\/favicon\.ico$/,
+  /^\/\.well-known\//,
+];
+const isBrowserProbe = (p) => BROWSER_PROBES.some((re) => re.test(p));
+
 /* Serve docs/ , optionally substituting the payload the panel fetches. */
 function serve(payloadPath) {
   const server = createServer(async (req, res) => {
@@ -92,7 +118,16 @@ function serve(payloadPath) {
       const b = await readFile(file);
       res.writeHead(200, { "content-type": TYPES[extname(p)] || "application/octet-stream" });
       res.end(b);
-    } catch { res.writeHead(404); res.end("not found"); }
+    } catch {
+      /* NAME WHAT WAS MISSING. Chromium's console message for a same-origin 404 is "Failed to
+         load resource: the server responded with a status of 404 ()" with no URL in it, so a
+         run that fails on missing files reports N identical unactionable lines. Recording the
+         path here is the difference between "43 failures" and "43 requests for
+         /data/frames/....json". */
+      if (!isBrowserProbe(p)) MISSING.push(p);
+      res.writeHead(404);
+      res.end("not found");
+    }
   });
   return new Promise((r) => server.listen(0, () => r(server)));
 }
@@ -137,7 +172,13 @@ async function run(label, payloadPath, kind) {
   });
   // The board polls its own snapshot every 60s, so the network is never idle and `networkidle`
   // never settles; and it pulls map tiles from hosts a DOM check neither needs nor wants.
-  await page.route("**/*", (r) => r.request().url().startsWith(`http://127.0.0.1:${port}`) ? r.continue() : r.abort());
+  /* Same as the overview run below: browser-initiated probes are aborted rather than served, so
+     they never register as a 404 the application caused. */
+  await page.route("**/*", (r) => {
+    const u = r.request().url();
+    if (!u.startsWith(`http://127.0.0.1:${port}`)) return r.abort();
+    return isBrowserProbe(new URL(u).pathname) ? r.abort() : r.continue();
+  });
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "load", timeout: 60000 });
   // ORDER MATTERS. The panel lives in the Models tab, and MT_Section renders no children while
   // it is closed, so nothing calls the payload fetch until the tab is selected -- waiting for
@@ -168,6 +209,12 @@ async function run(label, payloadPath, kind) {
   console.log(`\n=== ${label} ===`);
   console.log(`page errors: ${errors.length}`);
   errors.slice(0, 8).forEach((e) => console.log("   " + e));
+  if (MISSING.length) {
+    const uniq = [...new Set(MISSING)];
+    console.log(`   ${MISSING.length} request(s) 404ed, ${uniq.length} distinct path(s):`);
+    uniq.slice(0, 12).forEach((m) => console.log("     404 " + m));
+    MISSING.length = 0;
+  }
   let missing = 0;
   for (const [name, re, when] of PROBES) {
     const hit = typeof re === "function" ? re(text) : re.test(text);
@@ -206,7 +253,14 @@ async function runOverviewBoot() {
     const t = m.text();
     if (m.type() === "error" && !/ERR_FAILED|ERR_ABORTED|net::/.test(t)) errors.push("console: " + t.slice(0, 200));
   });
-  await page.route("**/*", (r) => r.request().url().startsWith(`http://127.0.0.1:${port}`) ? r.continue() : r.abort());
+  /* The probes are refused at the route layer rather than served, so they never reach the
+     server and never produce a console 404 -- an abort registers as ERR_ABORTED, which the
+     filter above already drops as a request this harness itself blocked. */
+  await page.route("**/*", (r) => {
+    const u = r.request().url();
+    if (!u.startsWith(`http://127.0.0.1:${port}`)) return r.abort();
+    return isBrowserProbe(new URL(u).pathname) ? r.abort() : r.continue();
+  });
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(1500);
 
@@ -259,6 +313,12 @@ async function runOverviewBoot() {
   server.close();
   console.log(`page errors: ${errors.length}`);
   errors.slice(0, 8).forEach((e) => console.log("   " + e));
+  if (MISSING.length) {
+    const uniq = [...new Set(MISSING)];
+    console.log(`   ${MISSING.length} request(s) 404ed, ${uniq.length} distinct path(s):`);
+    uniq.slice(0, 12).forEach((m) => console.log("     404 " + m));
+    MISSING.length = 0;
+  }
   return errors.length + bad;
 }
 
