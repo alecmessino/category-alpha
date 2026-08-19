@@ -11,13 +11,20 @@
  *
  * Run: node scripts/check-jsx.mjs
  */
-import { readdirSync } from "node:fs";
+import { readdirSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
-const APP = resolve(dirname(fileURLToPath(import.meta.url)), "../docs/app");
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+/* Every directory that ships JSX. The Storm Atlas is here for the same reason docs/app is:
+   its sources are transformed by a build rather than by the browser, but an unbalanced brace
+   still costs a blank page at a permanent URL, and nothing else between an editor and that URL
+   parses them. scripts/test-atlas-build.mjs then proves the committed bundle IS these sources
+   compiled -- this proves the sources compile at all. */
+const ROOTS = ["docs/app", "docs/storm-atlas/src"].map((d) => join(ROOT, d));
 
 let babel, preset;
 try {
@@ -31,17 +38,34 @@ try {
   process.exit(2);
 }
 
-const files = readdirSync(APP).filter((f) => f.endsWith(".jsx")).sort();
-if (!files.length) { console.error("[jsx] no .jsx modules found in docs/app — did the layout move?"); process.exit(2); }
+function walk(dir) {
+  const out = [];
+  for (const name of readdirSync(dir).sort()) {
+    const full = join(dir, name);
+    if (statSync(full).isDirectory()) out.push(...walk(full));
+    else if (name.endsWith(".jsx")) out.push(full);
+  }
+  return out;
+}
+
+const files = ROOTS.flatMap((d) => {
+  const found = walk(d);
+  if (!found.length) {
+    console.error(`[jsx] no .jsx modules found in ${d.replace(ROOT + "/", "")} — did the layout move?`);
+    process.exit(2);
+  }
+  return found;
+});
 
 let bad = 0;
 for (const f of files) {
+  const label = f.replace(ROOT + "/", "");
   try {
-    babel.transformFileSync(join(APP, f), { presets: [preset], babelrc: false, configFile: false });
-    console.log("  ok    " + f);
+    babel.transformFileSync(f, { presets: [preset], babelrc: false, configFile: false });
+    console.log("  ok    " + label);
   } catch (e) {
     bad++;
-    console.log("  FAIL  " + f + "\n        " + String(e.message).split("\n").slice(0, 3).join("\n        "));
+    console.log("  FAIL  " + label + "\n        " + String(e.message).split("\n").slice(0, 3).join("\n        "));
   }
 }
 console.log(bad ? `\n${bad} module(s) will not parse in the browser\n` : `\n${files.length} JSX modules parse\n`);

@@ -1,0 +1,84 @@
+/* HISTORICAL PATHWAY FREQUENCY -- where storms that formed here have actually gone.
+ *
+ * THIS IS NOT A FORECAST AND MUST NOT LOOK LIKE ONE. It is a count: for each two-degree cell,
+ * how many storms of the matched pool passed through it. The visual grammar is deliberately
+ * cellular rather than smooth, because a smoothed envelope around a set of historical tracks
+ * is visually indistinguishable from a forecast cone, and a reader who has seen a cone will
+ * read one here. Squares do not lie that way.
+ *
+ * EACH STORM IS COUNTED ONCE PER CELL. Counting fixes instead would let a slow-moving storm
+ * outvote a fast one and turn a pathway map into a speed map -- the archive's own
+ * `track_density` makes the same choice, and this layer renders exactly what it returns.
+ *
+ * ONE HUE, VARYING ALPHA. A rainbow ramp implies thresholds the count does not have.
+ */
+
+import { AtlasLayer } from "./atlas-layer.js";
+
+const DEG = Math.PI / 180;
+const MAX_LAT = 85.0511287798;
+
+export const PathwayLayer = AtlasLayer.extend({
+  options: {
+    padding: 0.25,
+    pane: "overlayPane",
+    zIndexOffset: 1,
+    stepDeg: 2.0,
+    hue: "56, 189, 248", // --cyan-400, as rgb components
+    maxAlpha: 0.62,
+  },
+
+  /** density: Map of "lat,lon" (cell south-west corner) -> distinct storms through that cell */
+  setDensity(density, stepDeg) {
+    this._density = density;
+    if (stepDeg) this.options.stepDeg = stepDeg;
+    this._peak = 0;
+    if (density) for (const v of density.values()) if (v > this._peak) this._peak = v;
+    this.redraw();
+    return this;
+  },
+
+  peak() {
+    return this._peak || 0;
+  },
+
+  draw(ctx, view) {
+    const d = this._density;
+    if (!d || !d.size) return;
+    const { scale, ox, oy, width, height } = view;
+    const step = this.options.stepDeg;
+    const peak = this._peak || 1;
+
+    for (const [key, n] of d) {
+      const c = key.indexOf(",");
+      const lat0 = Number(key.slice(0, c));
+      const lon0 = Number(key.slice(c + 1));
+      const a = world(lat0 + step, lon0); // north-west corner
+      const b = world(lat0, lon0 + step); // south-east corner
+      const x0 = a.wx * scale - ox;
+      const y0 = a.wy * scale - oy;
+      const x1 = b.wx * scale - ox;
+      const y1 = b.wy * scale - oy;
+      if (x1 < 0 || y1 < 0 || x0 > width || y0 > height) continue;
+      /* sqrt rather than linear: a linear ramp makes every cell below the peak look empty,
+         and the interesting structure in a pathway map is in the long tail, not at the mode. */
+      /* sqrt rather than linear, and a floor: a linear ramp makes every cell below the peak
+         look empty, and the interesting structure in a pathway map is in the long tail. The
+         floor keeps a cell that one storm passed through visible as one storm rather than as
+         nothing. */
+      const alpha = Math.max(0.06, this.options.maxAlpha * Math.sqrt(n / peak));
+      ctx.fillStyle = `rgba(${this.options.hue}, ${alpha.toFixed(4)})`;
+      ctx.fillRect(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
+    }
+  },
+});
+
+function world(lat, lon) {
+  let la = lat;
+  if (la > MAX_LAT) la = MAX_LAT;
+  else if (la < -MAX_LAT) la = -MAX_LAT;
+  return {
+    wx: (lon + 180) / 360,
+    wy: 0.5 - Math.log(Math.tan(Math.PI / 4 + (la * DEG) / 2)) / (2 * Math.PI),
+  };
+}

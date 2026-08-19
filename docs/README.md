@@ -317,8 +317,50 @@ docs/
   vendor/               react, react-dom, babel, leaflet (self-hosted)
   app/                  data-loader.js, compute.js, map.jsx, panels.jsx, drawer.jsx, console.jsx, main.jsx, tweaks-panel.jsx
   data/                 latest.json + frames.json  (written by the workflow)
+  storm-atlas/          THE HISTORICAL SURFACE — a second entry document, not a panel
+    index.html          its own page: no data-loader, no compute, no babel
+    src/                ESM + JSX sources (engine / render / ui)
+    dist/               esbuild output, committed and byte-verified against src/
+    data/               the archive as column packs (written by the archive workflow)
 scripts/fetch-data.mjs  server-side real-data fetch/normalize
 ```
+
+## The Storm Atlas
+
+A second surface, at `/storm-atlas/`, over the historical archive rather than the live feeds.
+It answers one question — *given where and when a storm formed, what did storms like it
+historically do* — by putting 3,959 trajectories and 224,153 observed positions on a map and
+letting a click on the ocean query them.
+
+**It is a separate document, and that is the whole isolation story.** The terminal loads none of
+it: not the 1.4 MB of archive, not the bundle, not a byte. There is no router, no lazy panel and
+no shared runtime to inherit — just a link. Measured: the terminal fetches 4.70 MB over 16
+requests with the Atlas in the repo, exactly as it did without.
+
+**One methodology, two execution surfaces.** The rule that made the Analog Prior panel
+trustworthy — *nothing is recomputed in the browser* — cannot hold literally here, because a
+click anywhere on the ocean at any radius is not a question a precomputed payload can answer. So
+the Atlas transliterates `scripts/genesis/retrieval/analogs.py` into JavaScript, and
+`scripts/test-atlas-parity.mjs` answers 42 query vectors with both and compares them field by
+field: exact for every count, every gap string and every matched storm; a declared 1e-9
+tolerance only for the weights, which pass through `exp` and `asin` where CPython's libm and
+V8's are free to differ in the last bit. The measured worst case is 1.4e-15. A `METHODOLOGY_VERSION`
+constant is declared by both and asserted equal, so a methodology change is a versioned event
+rather than a silent divergence.
+
+**It publishes counts, not rates.** Phase 1 ports the matching half of the analog query — the
+pool, its effective sample size, its gaps, its pathway density. The conditioned probabilities,
+their Wilson intervals and the skill numbers are not ported yet, and where one would appear the
+Atlas renders `UNSCOREABLE — REQUIRES CANONICAL COMPUTATION` rather than a division it could
+obviously do. No percentage is rendered anywhere in this build except inside the archive's own
+verbatim gap prose, and `scripts/check-atlas-dom.mjs` asserts exactly that against the rendered
+DOM.
+
+Three gates run in `checks.yml`: the bundle is rebuilt and byte-compared against its source,
+every packed column is digested from the Parquet and reproduced from the pack, and the browser's
+answers are checked against the archive's own. Two more need a browser and are run by hand:
+`scripts/bench-atlas.mjs` (every performance budget, stated) and `scripts/check-atlas-dom.mjs`
+(the honesty surface, on screen).
 
 ## One-time deployment
 

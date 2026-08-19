@@ -28,6 +28,22 @@ from pathlib import Path
 # Every row in every table carries this, so a mixed-version archive is detectable.
 PROCESSING_VERSION = "1.0.0"
 
+# THE STATISTICAL METHODOLOGY, VERSIONED SEPARATELY FROM THE PARSERS.
+#
+# PROCESSING_VERSION answers "which code turned bytes into rows". This answers a different
+# question: "which definitions turned rows into a published rate" -- the refusal gates, the
+# analog weighting, the interval, the effective sample size. The two move independently: a
+# parser fix that corrects one storm's wind does not change the methodology, and a change to
+# min_sample changes every rate without touching a parser.
+#
+# It exists because the methodology now has MORE THAN ONE EXECUTION SURFACE. The archive's
+# Python is authoritative; the Storm Atlas ships a transliteration of it that runs in a
+# browser. That is only safe while the two are provably the same thing, so both declare this
+# constant and scripts/test-atlas-parity.mjs fails when they disagree. A methodology change
+# then becomes a visible, versioned event rather than a silent divergence -- which is the
+# whole reason a second surface was allowed to exist at all.
+METHODOLOGY_VERSION = "1.0.0"
+
 REPO_ROOT = Path(__file__).resolve().parents[2]
 ARCHIVE_DIR = REPO_ROOT / "data" / "genesis-archive"
 # Raw downloads are NOT committed: IBTrACS + SHIPS alone are ~1 GB. The manifest

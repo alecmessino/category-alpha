@@ -1,0 +1,243 @@
+#!/usr/bin/env node
+/* Does the Storm Atlas's honesty surface reach the SCREEN?
+ *
+ * Every other Atlas check asserts something about a value: the pack matches the archive, the
+ * browser's engine matches the Python. This one asserts something about the pixels -- that the
+ * denominators, the refusals, the withheld class, the derived flags and the gaps actually
+ * render, in text a reader can see. A rule that only lives in source is a rule nobody enforced,
+ * and this surface's entire job is to not undo the archive's refusal discipline on the way to a
+ * pixel. It is the same argument as scripts/check-panel-dom.mjs, applied to the second surface.
+ *
+ * IT DRIVES THE UI INTO EACH STATE RATHER THAN SUBSTITUTING A FIXTURE. check-panel-dom.mjs has
+ * to swap in an edge-case payload because the live one rarely contains a refusal. The Atlas
+ * holds the whole archive, so every honest state is reachable from the real data by clicking:
+ * an ocean point where nothing forms, a storm whose intensity was never recorded, a landfall
+ * whose class the archive withheld. Exercising the real paths is strictly stronger than
+ * exercising a fixture that resembles them.
+ *
+ * NOT IN CI, for the same reason check-panel-dom.mjs is not: it needs a browser binary.
+ *   npm i --no-save playwright && npx playwright install chromium
+ *   node scripts/check-atlas-dom.mjs
+ */
+import { createServer } from "node:http";
+import { readFile, readdir } from "node:fs/promises";
+import { extname, join, resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const DOCS = join(ROOT, "docs");
+
+let chromium;
+try { ({ chromium } = await import("playwright")); }
+catch {
+  console.log("[atlas-dom] playwright is not installed - SKIPPED, not passed.");
+  console.log("            npm i --no-save playwright && npx playwright install chromium");
+  process.exit(0);
+}
+
+async function findChromium() {
+  if (process.env.ATLAS_DOM_CHROMIUM) return process.env.ATLAS_DOM_CHROMIUM;
+  const base = process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (!base) return null;
+  const { access } = await import("node:fs/promises");
+  let dirs = [];
+  try { dirs = (await readdir(base)).filter((d) => d.startsWith("chromium-")).sort(); }
+  catch { return null; }
+  for (const d of dirs.reverse()) {
+    const exe = join(base, d, "chrome-linux", "chrome");
+    try { await access(exe); return exe; } catch { /* next */ }
+  }
+  return null;
+}
+
+const TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json",
+  ".css": "text/css", ".svg": "image/svg+xml", ".woff2": "font/woff2", ".gz": "application/gzip" };
+const server = await new Promise((r) => {
+  const s = createServer(async (req, res) => {
+    try {
+      let p = decodeURIComponent(req.url.split("?")[0]);
+      if (p.endsWith("/")) p += "index.html";
+      const b = await readFile(join(DOCS, p));
+      res.writeHead(200, { "content-type": TYPES[extname(p)] || "application/octet-stream" });
+      res.end(b);
+    } catch { res.writeHead(404); res.end("not found"); }
+  });
+  s.listen(0, () => r(s));
+});
+const port = server.address().port;
+
+let failures = 0;
+const ok = (label, cond, detail = "") => {
+  if (cond) { console.log("  ok    " + label); return; }
+  failures++;
+  console.log("  FAIL  " + label + (detail ? "\n        " + detail : ""));
+};
+
+const exe = await findChromium();
+const browser = await chromium.launch(exe ? { executablePath: exe } : {});
+const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**", "**basemaps.cartocdn.com**"]) {
+  await ctx.route(h, (r) => r.abort());
+}
+const page = await ctx.newPage();
+const errors = [];
+page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
+page.on("console", (m) => {
+  if (m.type() === "error" && !/net::|ERR_/.test(m.text())) errors.push("console: " + m.text().slice(0, 200));
+});
+
+await page.goto(`http://127.0.0.1:${port}/storm-atlas/`, { waitUntil: "domcontentloaded" });
+await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive, { timeout: 90000 });
+await page.waitForTimeout(700);
+
+const text = () => page.evaluate(() => document.body.innerText);
+const clickLatLng = async (lat, lng) => {
+  const p = await page.evaluate(({ lat, lng }) => {
+    const m = globalThis.__ATLAS_MAP;
+    const c = m.latLngToContainerPoint([lat, lng]);
+    const r = m.getContainer().getBoundingClientRect();
+    return { x: r.left + c.x, y: r.top + c.y };
+  }, { lat, lng });
+  await page.mouse.click(p.x, p.y);
+  await page.waitForTimeout(600);
+};
+const selectRow = (row) => page.evaluate((r) => globalThis.__ATLAS_SELECT(r), row);
+
+console.log("\n[1] the archive's scale, from the pack that was actually loaded");
+{
+  const t = await text();
+  const m = await page.evaluate(() => globalThis.__ATLAS.archive.manifest.counts);
+  for (const [k, n] of Object.entries(m)) {
+    ok(`${k} count on screen (${n.toLocaleString()})`, t.includes(n.toLocaleString()));
+  }
+  ok("the surface names itself", /STORM ATLAS/.test(t));
+  ok("it says what it is not", /not a forecast|not a weather map/i.test(t));
+}
+
+console.log("\n[2] an intensity filter reports what it could NOT judge");
+await page.getByText("CAT 3+", { exact: true }).click();
+await page.waitForTimeout(500);
+{
+  const t = await text();
+  ok("the undecidable storms are counted, not silently dropped",
+    /could not be judged by this intensity filter/.test(t));
+  ok("and the reason is stated", /records no wind for them/.test(t));
+  ok("and they are not called failures",
+    /neither included nor counted as failing/.test(t));
+}
+await page.getByText("ALL STORMS", { exact: true }).click();
+await page.waitForTimeout(500);
+
+console.log("\n[3] an ocean point where nothing formed");
+await clickLatLng(25.8, -119.9);
+{
+  const t = await text();
+  ok("the empty pool is named, not tabulated as zeroes", /NO ANALOGS — 0 STORMS MATCHED/.test(t));
+  ok("it says there are no rates because there is no sample",
+    /no sample here, so there are no rates/i.test(t));
+  ok("it explains that matching is on genesis, not on passage",
+    /GENESIS LOCATION ONLY/.test(t));
+  ok("no zero percentage is rendered anywhere on an empty pool", !/\b0(\.0)?%/.test(t));
+}
+
+console.log("\n[4] a dense pool: counts with denominators, and every refusal");
+await clickLatLng(14.6, -113.9);
+{
+  const t = await text();
+  ok("a count over a denominator", /\d+\s*\/\s*\d+/.test(t));
+  ok("the effective sample size is published", /EFFECTIVE SAMPLE SIZE/.test(t));
+  ok("the sample gate states its own threshold", /SUFFICIENT · \d+ ≥ \d+|BELOW SAMPLE/.test(t));
+  ok("counts are labelled as counts, not rates", /counts, not rates/.test(t));
+  ok("storms with no recorded intensity leave the denominator",
+    /out of every denominator above/.test(t));
+  ok("an unscoreable contract is badged", /BASE RATE ONLY -- unscoreable/.test(t));
+  ok("and says how many events the archive holds", /event\(s\) archive-wide, \d+ needed/.test(t));
+  ok("pathway frequency is labelled as frequency", /HISTORICAL PATHWAY FREQUENCY/.test(t));
+  ok("and disclaimed as not a forecast", /THIS IS NOT A FORECAST/.test(t));
+  ok("and denies being a cone", /not a forecast cone/.test(t));
+  ok("the conditioned rates are refused, not approximated",
+    /UNSCOREABLE -- REQUIRES CANONICAL COMPUTATION/.test(t));
+  ok("the refusal says who can answer", /archive can answer this/.test(t));
+  ok("the pre-1971 observing bias is surfaced verbatim",
+    /before 1971, when East Pacific intensities were estimated/.test(t));
+  /* Phase 1 publishes no conditioned rate, so no percentage this surface COMPUTED may reach the
+     screen. It cannot be satisfied by wording -- either a percent sign is rendered or it is not.
+     The archive's own gap prose is excluded, and deliberately: those strings quote measured
+     figures ("1.7% Cat 3 in the 1960s vs 20-30% from the 1970s on") and are reproduced verbatim
+     because rewording a finding is how a finding stops being one. What is asserted here is that
+     no percentage appears among the STATISTICS -- everything above the gap section. */
+  const computed = t.split("GAPS THE ARCHIVE RECORDED")[0];
+  ok("no percentage among the statistics — this build publishes counts", !/\d%/.test(computed),
+    (computed.match(/.{0,50}\d%.{0,50}/) || [""])[0]);
+  ok("the archive's own measured percentages survive verbatim in its gaps",
+    /1\.7% Cat 3 in the 1960s/.test(t));
+}
+
+console.log("\n[5] Iniki 1992 — the storm the archive's landfall methodology exists for");
+{
+  const row = await page.evaluate(() => {
+    const a = globalThis.__ATLAS.archive;
+    for (let i = 0; i < a.nStorms; i++) if (a.storms.str("name", i) === "INIKI") return i;
+    return -1;
+  });
+  ok("Iniki is in the archive", row >= 0);
+  await selectRow(row);
+  await page.waitForTimeout(500);
+  const t = await text();
+  ok("its Hawaii landfall is shown", /KAUAI|Kauai/i.test(t) && /hawaii/i.test(t));
+  ok("the Saffir-Simpson class is WITHHELD, not interpolated", /WITHHELD/.test(t));
+  ok("the crossing is flagged as derived", /DERIVED/.test(t));
+  ok("the detection method is named", /segment_crossing/.test(t));
+  ok("observed and interpolated fixes are counted separately",
+    /OBSERVED FIXES/.test(t) && /INTERPOLATED FIXES/.test(t));
+  ok("the derived crossings are marked as derived", /·d/.test(t));
+}
+
+console.log("\n[6] a storm whose intensity was never recorded");
+{
+  const row = await page.evaluate(() => {
+    const a = globalThis.__ATLAS.archive;
+    for (let i = 0; i < a.nStorms; i++) {
+      if (a.storms.num("max_vmax_kt", i) === null && a.storms.num("track_points", i) > 6) return i;
+    }
+    return -1;
+  });
+  ok("the archive holds such storms", row >= 0);
+  if (row >= 0) {
+    await selectRow(row);
+    await page.waitForTimeout(500);
+    const t = await text();
+    ok("its peak is not rendered as a number", /NO INTENSITY RECORDED/.test(t));
+    ok("and an em-dash stands in for the missing value", /—/.test(t));
+    ok("its unreached thresholds are dashes, not zeroes",
+      !/CATEGORY 1 · 64 KT\s*0\s*h/.test(t));
+  }
+}
+
+console.log("\n[7] provenance is one keystroke away and carries the archive's own findings");
+await page.keyboard.press("Escape");
+await page.waitForTimeout(200);
+await page.keyboard.press("p");
+await page.waitForTimeout(700);
+{
+  const t = await text();
+  ok("the methodology version is shown", /methodology/i.test(t));
+  ok("the archive stamp is shown", /archive stamp/i.test(t));
+  ok("the coordinate quantisation is declared", /track geometry/i.test(t));
+  ok("with the deviation it actually introduced", /worst deviation/i.test(t));
+  ok("columns the archive holds empty are named", /NULL on every row/.test(t));
+  ok("what the pack leaves out is named", /NOT IN THIS PACK/.test(t));
+  ok("the archive's own gaps are carried through", /GAPS RECORDED BY THE ARCHIVE/.test(t));
+  ok("including the ERA5 refusal", /era5/i.test(t));
+  ok("interpolated fixes are counted in provenance too", /interpolated fixes/i.test(t));
+}
+
+console.log("\n[8] the page did not complain");
+ok("no page or console errors", errors.length === 0, errors.join("\n        "));
+
+await browser.close();
+server.close();
+console.log(failures
+  ? `\n${failures} honesty probe(s) failed — something the archive knows is not reaching the screen\n`
+  : "\nthe honesty surface reaches the screen\n");
+process.exit(failures ? 1 : 0);

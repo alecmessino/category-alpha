@@ -184,6 +184,62 @@ def cmd_emit(args) -> int:
     return 0
 
 
+def cmd_atlas_pack(args) -> int:
+    """Pack the archive into the binary the Storm Atlas reads (docs/storm-atlas/data/).
+
+    Emits three gzipped column packs and a manifest. Each file is rewritten only when its
+    content changes, so a daily run that appends a handful of environment rows does not put a
+    fresh megabyte of track binary into git.
+    """
+    from genesis.build.build_atlas_pack import build as build_pack
+    r = build_pack(base=_archive(args), out_dir=Path(args.out) if args.out else None)
+    for name, f in r["files"].items():
+        mark = "written" if name in r["changed"] else "unchanged"
+        print(f"  {name:28s} {f['bytes']:>9,} B gz  ({f['raw_bytes']:>9,} B raw)  {mark}")
+    print(f"  total {r['total_gz_bytes']:,} B gzipped")
+    print("  " + "  ".join(f"{k} {v:,}" for k, v in sorted(r["counts"].items())))
+    if not r["changed"]:
+        print("  archive unchanged since the last pack -- nothing to commit")
+    return 0
+
+
+def cmd_atlas_verify(args) -> int:
+    """Emit what the browser must reproduce: pack digests and canonical analog vectors.
+
+    Neither output is committed. Both are functions of an archive that is rebuilt four times a
+    day, so a committed copy would churn and would test whatever the archive looked like when
+    someone last regenerated it. scripts/test-atlas-pack.mjs and scripts/test-atlas-parity.mjs
+    call this and then check the browser's answers against it.
+    """
+    from genesis.build.build_atlas_pack import expectations
+    from genesis.build.emit_atlas_parity import build as build_vectors
+    # Anchored to the repository, not to the shell's cwd: this command is run from the repo
+    # root by the JS tests and from scripts/ by hand, and a relative default would put the
+    # output in two different places depending on which.
+    from genesis.provenance import REPO_ROOT
+    out = Path(args.out)
+    if not out.is_absolute():
+        out = REPO_ROOT / out
+    out.mkdir(parents=True, exist_ok=True)
+    base = _archive(args)
+
+    if args.what in ("pack", "all"):
+        e = expectations(base)
+        (out / "atlas-pack-expect.json").write_text(json.dumps(e, indent=1, sort_keys=True) + "\n")
+        n = sum(len(v) for v in e["columns"].values())
+        print(f"  atlas-pack-expect.json   {n} column digests over {len(e['columns'])} tables")
+
+    if args.what in ("parity", "all"):
+        v = build_vectors(base)
+        (out / "atlas-parity.json").write_text(json.dumps(v, indent=1, sort_keys=True) + "\n")
+        cases = sum(x["expect"]["n_cases"] for x in v["vectors"])
+        empty = sum(1 for x in v["vectors"] if x["expect"]["n_cases"] == 0)
+        thin = sum(1 for x in v["vectors"] if not x["expect"]["sufficient"])
+        print(f"  atlas-parity.json        {len(v['vectors'])} vectors, {cases} matched cases "
+              f"({empty} empty pool(s), {thin} below the sample gate)")
+    return 0
+
+
 def cmd_summary(args) -> int:
     base = _archive(args)
     print(json.dumps(summary(base), indent=2))
@@ -280,6 +336,16 @@ def main(argv=None) -> int:
     em.add_argument("--regions")
     em.add_argument("--out")
     em.set_defaults(fn=cmd_emit)
+
+    ap_ = sub.add_parser("atlas-pack", help="pack the archive for the Storm Atlas browser route")
+    ap_.add_argument("--out", help="output directory (default docs/storm-atlas/data)")
+    ap_.set_defaults(fn=cmd_atlas_pack)
+
+    av = sub.add_parser("atlas-verify",
+                        help="emit pack digests and canonical analog vectors for the JS tests")
+    av.add_argument("--out", default=".atlas-build", help="output directory (gitignored)")
+    av.add_argument("--what", default="all", choices=["all", "pack", "parity"])
+    av.set_defaults(fn=cmd_atlas_verify)
 
     s = sub.add_parser("summary", help="row counts and manifest header")
     s.set_defaults(fn=cmd_summary)

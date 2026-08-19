@@ -66,9 +66,17 @@ jobs:
       # nothing parses them between an editor and the permanent URL. An unbalanced brace
       # does not fail anything; it renders a blank page while the pipeline underneath
       # keeps committing healthy data.
+      # Both surfaces' JSX. The terminal's is transformed in the browser and the Storm Atlas's
+      # is compiled by esbuild, but neither is parsed anywhere between an editor and the
+      # permanent URL, and an unbalanced brace in either renders a blank page while the
+      # pipeline underneath keeps committing healthy data.
+      #
+      # ONE npm INSTALL FOR EVERY DEV DEPENDENCY, deliberately. There is no package.json in
+      # this repo, so a second `npm i --no-save` PRUNES what the first one installed -- the
+      # esbuild the Atlas gate needs would vanish when the next step installed something else.
       - name: Check JSX parses
         run: |
-          npm i --silent --no-fund --no-audit --no-save @babel/core @babel/preset-react
+          npm i --silent --no-fund --no-audit --no-save @babel/core @babel/preset-react esbuild@0.25.10 react@18.3.1 react-dom@18.3.1
           node scripts/check-jsx.mjs
 
       # The estimators, in the order they were built. Each checks its arithmetic against a
@@ -165,3 +173,34 @@ jobs:
 
       - name: Test the genesis archive's honesty rules
         run: python3 scripts/genesis/tests/run_tests.py
+
+      # ------------------------------------------------------------------------------------
+      # STORM ATLAS. Three gates, and they run HERE rather than with the other Node suites
+      # because two of them need the archive's Python: the browser's answers are checked
+      # against the archive's own, generated on the spot from the committed Parquet. Still
+      # entirely offline -- no network, no secrets.
+
+      # dist/ is committed so the permanent URL depends on no toolchain at read time. That is
+      # only safe while dist/ is provably what src/ compiles to, which this rebuilds and
+      # byte-compares. It catches a hand-edited bundle and a source change nobody rebuilt.
+      - name: Verify the Atlas bundle is exactly what its source compiles to
+        run: node scripts/test-atlas-build.mjs
+
+      # The Atlas reads a binary built from the Parquet, and between the two sit an encoder, a
+      # re-ordering and five sentinel schemes. This digests every packed column FROM THE
+      # ARCHIVE and reproduces those digests FROM THE PACK, through the same accessors the
+      # browser uses. A wind of 0 where the archive recorded none does not throw and does not
+      # look wrong.
+      - name: Verify the Atlas pack still says what the archive says
+        run: node scripts/test-atlas-pack.mjs
+
+      # THE ONE THAT MATTERS. The Atlas ships a transliteration of retrieval/analogs.py so a
+      # click anywhere on the ocean can be answered without a server. That is only safe while
+      # the two provably agree: 42 query vectors -- empty pools, pools below the sample gate,
+      # both sides of the antimeridian, the zero-peek cutoff, the environment exclusion, the
+      # subbasin distinction that keeps Iniki in a Hawaii query -- are answered by the Python
+      # and then by the browser, and compared field by field. Exact where exact is possible;
+      # a declared tolerance only where the platform's libm makes it unavoidable, and the
+      # measured deviation is printed rather than assumed.
+      - name: Verify the browser computes what the archive computes
+        run: node scripts/test-atlas-parity.mjs

@@ -38,7 +38,16 @@ const RULES = [
   { re: /\b(ASCAT|SFMR)\b/,                                 why: "scatterometer and SFMR winds are intermittent — name them only through a claim backed by this cycle's pass" },
   { re: /\brecon\s+(fix|pass|coverage)\b/i,                 why: "an aircraft fix exists only when one is flying — assert it through a claim backed by the poll result, never as a literal" },
   { re: /\b200\s*OK\b/,                                     why: "HTTP status must come from the actual response, never a literal" },
-  { re: /\bsha-?256\b/i,                                    why: "hashes are FNV-1a 32-bit; naming a different algorithm misstates the digest" },
+  /* Scoped, because the premise is scoped. The TERMINAL's evidence hashes are FNV-1a 32-bit,
+     so a component naming SHA-256 there misstates what the code computes -- which is what this
+     rule caught, twice, and why it exists. The genesis archive is a different codebase whose
+     table hashes ARE SHA-256 (scripts/genesis/provenance.py:sha256_file, and every entry in
+     data/genesis-archive/MANIFEST.json). Banning the word on the Storm Atlas would force it to
+     describe a real digest by a wrong name, which is the opposite of the rule's purpose. The
+     exemption is by path and is narrow: no other rule is scoped, and this one still applies
+     everywhere the FNV-1a premise holds. */
+  { re: /\bsha-?256\b/i,                                    why: "the terminal's hashes are FNV-1a 32-bit; naming a different algorithm misstates the digest",
+    exceptIn: ["docs/storm-atlas/"] },
   { re: /latency\s*=\s*["']live["']/,                       why: "liveness must be derived from snapshot age, not asserted" },
   { re: /version\s*=\s*["']\d+\.\d+\.\d+["']/,              why: "there is no versioned pipeline; cite the snapshot instead" },
   { re: /\b(canonical\.fix|evidence_quality|verify_stack)\s*(\(\)|\.py)/, why: "names a module that does not exist in this repo" },
@@ -55,7 +64,19 @@ async function walk(dir) {
   return out;
 }
 
-const files = (await walk(APP)).concat([resolve(ROOT, "docs/index.html")]);
+/* Every surface that renders a claim.
+ *
+ * docs/app is the terminal. docs/storm-atlas/src is the Storm Atlas -- its SOURCES, not its
+ * committed bundle: dist/ is generated, scripts/test-atlas-build.mjs proves it is exactly
+ * these files compiled, and auditing minified output would only report the same findings twice
+ * in a form nobody can act on. The two entry documents are added by name because neither lives
+ * inside a scanned directory. */
+const files = [
+  ...(await walk(APP)),
+  ...(await walk(resolve(ROOT, "docs/storm-atlas/src"))),
+  resolve(ROOT, "docs/index.html"),
+  resolve(ROOT, "docs/storm-atlas/index.html"),
+];
 const findings = [];
 
 for (const f of files) {
@@ -70,6 +91,8 @@ for (const f of files) {
     if (opens > closes) inBlock = true; else if (closes > opens) inBlock = false;
     if (wasInBlock || /^\s*(\/\/|\*|\/\*)/.test(line)) return;
     for (const r of RULES) {
+      // A rule whose premise does not hold in this directory does not apply to it.
+      if (r.exceptIn && r.exceptIn.some((d) => f.includes(d))) continue;
       const m = r.re.exec(line);
       if (m) findings.push({ file: relative(ROOT, f), line: i + 1, match: m[0], why: r.why, text: line.trim().slice(0, 120) });
     }

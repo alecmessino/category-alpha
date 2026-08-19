@@ -975,5 +975,51 @@
     };
   }
 
+  /* ------------------------------------------------------------------------------------
+     STORM ATLAS. A second surface, at docs/storm-atlas/, over the historical archive rather
+     than the live feeds. Its capability statements are registered HERE for the same reason
+     every other one is: components read claims, they never write them, and a sentence about
+     what a surface can answer is exactly the kind that drifts when it lives inside a
+     component. These take no feed state -- the Atlas reads a committed pack, not a poll --
+     so they are constants, and the archive's own numbers reach the screen from the pack's
+     manifest rather than from here.  */
+  define("atlas.subject", "none", () => ({
+    text: "The historical record, queried. Not a forecast, not a live feed, and not a weather "
+        + "map: every line is a storm that happened, and every number is a count of them.",
+    ok: true,
+  }));
+  define("atlas.rates", "none", () => ({
+    text: "This surface publishes counts, not conditioned rates. The probabilities, their "
+        + "Wilson intervals and the skill numbers are computed by the archive's Python and "
+        + "have not yet been ported to the browser at proven parity; until they are, the "
+        + "Atlas declines rather than approximating them.",
+    ok: false,
+  }));
+  define("atlas.pathway", "none", () => ({
+    text: "Historical pathway frequency counts the distinct storms of a matched pool that "
+        + "passed through each cell. It is not a forecast cone, it carries no probability, "
+        + "and it says nothing about a storm that has not formed.",
+    ok: true,
+  }));
+  define("atlas.environment", "none", () => ({
+    text: "Environmental variables are held by the archive and are not drawn by this build. "
+        + "Whether a record exists within twelve hours of a storm's genesis is reported; "
+        + "SHIPS begins in 1982 and its developmental file ends in 2023, so most of the "
+        + "record has none.",
+    ok: false,
+  }));
+  define("atlas.geometry", "none", () => ({
+    text: "Track positions are drawn at the archive's own published precision. Genesis, "
+        + "threshold-crossing and landfall coordinates -- the ones distances are computed "
+        + "from -- are carried at full precision and are not quantised.",
+    ok: true,
+  }));
+  define("atlas.selection", "none", () => ({
+    text: "Genesis points are the click targets for a storm, and only where one is clearly "
+        + "nearer than the next. Where they are packed together a click asks what formed "
+        + "there instead, because picking one of forty co-located storms would be arbitrary.",
+    ok: true,
+  }));
+
   window.MTC = { claim, footer, freshness, snapshotAgeMin, registered: () => Object.keys(REG) };
 })();
