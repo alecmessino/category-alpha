@@ -54,6 +54,18 @@ export const ReplayLayer = AtlasLayer.extend({
     return this;
   },
 
+  /** Restyling repaints history, not just the next slice: ink already on the canvas was drawn
+   *  in the old colours and cannot be recoloured in place. */
+  setStyle(patch) {
+    let changed = false;
+    for (const k of Object.keys(patch)) if (this.options[k] !== patch[k]) changed = true;
+    if (!changed) return this;
+    Object.assign(this.options, patch);
+    this.invalidate();
+    this.redraw();
+    return this;
+  },
+
   /** A new timeline means a different history; everything drawn so far is wrong. */
   setTimeline(tl) {
     this._tl = tl;

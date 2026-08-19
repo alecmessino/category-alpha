@@ -232,7 +232,122 @@ await page.waitForTimeout(700);
   ok("interpolated fixes are counted in provenance too", /interpolated fixes/i.test(t));
 }
 
-console.log("\n[8] the page did not complain");
+console.log("\n[8] the replay reveals the record without lying about time");
+await page.keyboard.press("Escape");
+await page.waitForTimeout(300);
+{
+  await page.getByText("REPLAY", { exact: true }).click();
+  await page.waitForTimeout(700);
+  const t = await text();
+  ok("the transport shows a real UTC date, not a frame index",
+    /\d{4}-\d{2}-\d{2}|\d{1,2}\s+\w{3}\s+\d{4}/.test(t), t.slice(0, 160));
+  ok("speed is stated in archive time, not as a bare multiplier", /d\/s/.test(t));
+  ok("it says how many storms are active now", /ACTIVE NOW/.test(t));
+  ok("and how much of the record has been revealed", /REVEALED/.test(t));
+  ok("the skip is declared before it happens", /skips/i.test(t));
+
+  /* Play until the clock has jumped at least once. The notice is transient by design, so this
+     watches for it rather than sampling once and hoping. */
+  const cursorOf = () => page.evaluate(() => {
+    const r = globalThis.__ATLAS_REPLAY;
+    return r ? r.cursor() : null;
+  });
+  const start = await cursorOf();
+  await page.keyboard.press(" ");
+  let sawSkip = false;
+  let backwards = false;
+  let prev = start;
+  for (let i = 0; i < 40 && !sawSkip; i++) {
+    await page.waitForTimeout(150);
+    const now = await cursorOf();
+    if (now !== null && prev !== null && now < prev) backwards = true;
+    prev = now;
+    if (/SKIPPED\s+[\d,]+\s+(DAYS?|HOURS?)\s+·\s+NO STORM ACTIVE/i.test(await text())) sawSkip = true;
+  }
+  await page.keyboard.press(" ");
+  await page.waitForTimeout(200);
+  const end = await cursorOf();
+  ok("the cursor advanced", end !== null && start !== null && end > start, `${start} -> ${end}`);
+  ok("and never ran backwards across a skip", !backwards);
+  ok("a jump is announced on screen when it happens", sawSkip,
+    "no SKIPPED … NO STORM ACTIVE notice appeared in six seconds of play");
+  ok("storms have been revealed", /REVEALED[\s\S]{0,40}[1-9]/.test(await text()));
+}
+
+console.log("\n[8b] accumulated ink survives a pan, a zoom and a resize");
+{
+  /* THE FAILURE THIS EXISTS FOR. Assigning canvas.width or canvas.height throws the backing
+     store away -- specified behaviour, and it fires on every moveend, zoomend and resize. An
+     accumulating layer that merely skipped its clearRect would therefore lose the whole run on
+     the first drag, and no text probe could see it: the DOM is identical either way. So this
+     counts actual painted pixels. */
+  const inkOf = () => page.evaluate(() => {
+    const l = globalThis.__ATLAS_REPLAY;
+    if (!l || !l._canvas) return -1;
+    const c = l._canvas;
+    const g = c.getContext("2d");
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    let n = 0;
+    for (let i = 3; i < d.length; i += 4 * 37) if (d[i] > 8) n++;   // sample the alpha channel
+    return n;
+  });
+  const before = await inkOf();
+  ok("the replay canvas has ink on it", before > 0, `sampled ${before} painted pixels`);
+
+  await page.evaluate(() => globalThis.__ATLAS_MAP.panBy([140, 90], { animate: false }));
+  await page.waitForTimeout(900);
+  const afterPan = await inkOf();
+  ok("it survives a pan", afterPan > before * 0.4, `${before} -> ${afterPan}`);
+
+  await page.evaluate(() => globalThis.__ATLAS_MAP.setZoom(globalThis.__ATLAS_MAP.getZoom() - 1,
+    { animate: false }));
+  await page.waitForTimeout(900);
+  const afterZoom = await inkOf();
+  ok("it survives a zoom", afterZoom > before * 0.4, `${before} -> ${afterZoom}`);
+
+  await page.setViewportSize({ width: 1600, height: 950 });
+  await page.waitForTimeout(900);
+  const afterResize = await inkOf();
+  ok("it survives a resize", afterResize > before * 0.3, `${before} -> ${afterResize}`);
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.waitForTimeout(500);
+}
+
+console.log("\n[8c] the density surfaces say what they count");
+{
+  await page.getByText("EXPLORE", { exact: true }).click();
+  await page.waitForTimeout(400);
+  await page.getByText("PATHWAY FREQUENCY", { exact: true }).click();
+  await page.waitForTimeout(900);
+  let t = await text();
+  ok("the pathway surface names itself", /HISTORICAL PATHWAY FREQUENCY/i.test(t));
+  ok("and denies being a forecast", /not a forecast/i.test(t));
+  await page.getByText("GENESIS COUNT", { exact: true }).click();
+  await page.waitForTimeout(900);
+  t = await text();
+  ok("the genesis surface names itself a count", /GENESIS COUNT/i.test(t));
+  ok("and says a count is not a rate", /not (a|the) rate|a count, not/i.test(t));
+  /* Naming a surface is not the same as drawing one. The archive-wide pathway grid holds 2,934
+     cells and the genesis grid 869, so a peak of zero means the layer is a caption over an
+     empty canvas -- which is precisely how a density surface fails quietly. */
+  const peaks = await page.evaluate(() => {
+    const q = globalThis.__ATLAS_QUERY;
+    const A = globalThis.__ATLAS;
+    if (!q || !A) return null;
+    const rows = q.filterStorms(A.archive, {}).rows;
+    const path = A.pathwayDensity ? A.pathwayDensity(A.archive, rows, 2.0) : null;
+    const gen = A.genesisDensity ? A.genesisDensity(A.archive, rows, 2.0) : null;
+    const peak = (m) => { let p = 0; if (m) for (const v of m.values()) if (v > p) p = v; return p; };
+    return { pathCells: path ? path.size : 0, genCells: gen ? gen.size : 0,
+      pathPeak: peak(path), genPeak: peak(gen) };
+  });
+  ok("the pathway grid actually holds cells", peaks && peaks.pathCells > 0 && peaks.pathPeak > 0,
+    JSON.stringify(peaks));
+  ok("the genesis grid actually holds cells", peaks && peaks.genCells > 0 && peaks.genPeak > 0,
+    JSON.stringify(peaks));
+}
+
+console.log("\n[9] the page did not complain");
 ok("no page or console errors", errors.length === 0, errors.join("\n        "));
 
 await browser.close();

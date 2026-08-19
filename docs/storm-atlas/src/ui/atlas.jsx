@@ -13,14 +13,16 @@
 
 import React from "react";
 import { loadArchive } from "../engine/archive.js";
-import { getAnalogs } from "../engine/analogs.js";
+import { genesisDensity, getAnalogs, pathwayDensity } from "../engine/analogs.js";
 import { DEFAULT_FILTERS, filterStorms, genesisBounds, seasonRange } from "../engine/query.js";
+import { activeAt, advance, buildTimeline, fromActive, toActive } from "../engine/timeline.js";
 import { projectWorld } from "../render/atlas-layer.js";
 import { AtlasMap } from "./map.jsx";
 import { Rail } from "./rail.jsx";
 import { StormPanel } from "./storm-panel.jsx";
 import { ProbePanel } from "./probe-panel.jsx";
 import { Transport } from "./transport.jsx";
+import { ArchiveTransport } from "./archive-transport.jsx";
 import { MONO, claimText } from "./kit.jsx";
 
 /* Split out of the entry chunk. The drawer is reached by a button or the P key, never on the
@@ -49,8 +51,14 @@ export function Atlas() {
      same storms counted, and stacking both means neither reads. Turning it on dims the tracks
      so the surface can be seen. */
   const [showPathway, setShowPathway] = React.useState(false);
+  const [showGenesisDensity, setShowGenesisDensity] = React.useState(false);
   const [playing, setPlaying] = React.useState(false);
   const [cursorMs, setCursorMs] = React.useState(null);
+  /* "explore" is the map as a finished record; "replay" unfolds it in time. The filters drive
+     both unchanged, which is what makes "watch only the majors" or "watch only the storms that
+     hit Mexico" come for free rather than needing their own controls. */
+  const [mode, setMode] = React.useState("explore");
+  const [replayCursorMin, setReplayCursorMin] = React.useState(null);
   const [provOpen, setProvOpen] = React.useState(false);
   const [view, setView] = React.useState(null);
 
@@ -65,8 +73,9 @@ export function Atlas() {
       const w = projectWorld(a);
       setWorld(w);
       setArchive(a);
-      globalThis.__ATLAS = { archive: a, world: w, getAnalogs };
+      globalThis.__ATLAS = { archive: a, world: w, getAnalogs, pathwayDensity, genesisDensity };
       globalThis.__ATLAS_QUERY = { filterStorms, seasonRange, genesisBounds };
+      globalThis.__ATLAS_TIMELINE = { buildTimeline, advance, activeAt, fromActive, toActive };
       globalThis.__ATLAS_PROJECT = projectWorld;
     }).catch((e) => { if (!cancelled) setError(e); });
     return () => { cancelled = true; };
@@ -92,6 +101,32 @@ export function Atlas() {
   const emphasis = React.useMemo(
     () => (analog ? analog.cases.map((c) => c.row) : null), [analog]);
 
+  /* THE DENSITY SURFACES ARE NOT TIED TO A PROBE. With a probe they show the matched pool --
+     where those storms went. Without one they show the current filter over the whole archive,
+     which is what makes "all storms · TS+ · Cat 3+ · Mexico · CONUS · Hawaii" reachable: every
+     one of those is a filter that already exists. Measured at 7.9 ms for all 3,885 storms. */
+  const pathway = React.useMemo(() => {
+    if (!archive || !result || !showPathway) return null;
+    if (analog) return analog.track_density;
+    return pathwayDensity(archive, result.rows, 2.0);
+  }, [archive, result, showPathway, analog]);
+
+  const genesisGrid = React.useMemo(() => {
+    if (!archive || !result || !showGenesisDensity) return null;
+    return genesisDensity(archive, emphasis && emphasis.length ? emphasis : result.rows, 2.0);
+  }, [archive, result, showGenesisDensity, emphasis]);
+
+  /* The replay clock, built from whatever the filter currently selects. Rebuilt on a filter
+     change on purpose: a run is over a population, and changing the population is a new run. */
+  const timeline = React.useMemo(
+    () => (archive && result && mode === "replay" ? buildTimeline(archive, result.rows) : null),
+    [archive, result, mode]);
+
+  React.useEffect(() => {
+    if (mode !== "replay") { setPlaying(false); return; }
+    setReplayCursorMin(timeline && timeline.n ? timeline.firstT : null);
+  }, [mode, timeline]);
+
   const selectStorm = React.useCallback((row) => {
     setSelected(row);
     setProbe(null);
@@ -114,11 +149,13 @@ export function Atlas() {
       if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
       if (e.key === "Escape") { setProvOpen(false); setSelected(null); setProbe(null); }
       if (e.key === "p" || e.key === "P") setProvOpen((v) => !v);
-      if (e.key === " " && selected !== null) { e.preventDefault(); setPlaying((v) => !v); }
+      if (e.key === " " && (selected !== null || mode === "replay")) {
+        e.preventDefault(); setPlaying((v) => !v);
+      }
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [selected]);
+  }, [selected, mode]);
 
   if (error) return <BootError error={error} />;
   if (!archive || !world || !result) return <Boot manifest={manifest} />;
@@ -136,6 +173,10 @@ export function Atlas() {
         borderRight: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
         <Rail archive={archive} filters={filters} setFilters={setFilters} result={result}
           layers={layers} setLayers={setLayers} bounds={bounds}
+          mode={mode} setMode={setMode}
+          showPathway={showPathway} setShowPathway={setShowPathway}
+          showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
+          timeline={timeline}
           onReset={() => { setFilters(DEFAULT_FILTERS); setSelected(null); setProbe(null); }} />
       </div>
 
@@ -147,11 +188,15 @@ export function Atlas() {
           replayMs={selected !== null && cursorMs !== null ? cursorMs : undefined}
           colorBy={layers.colorBy} dimPopulation={selected !== null}
           softenEmphasis={showPathway}
-          showPathway={showPathway && !!analog} pathway={analog ? analog.track_density : null}
+          showGenesis={layers.genesis} showLandfalls={layers.landfalls}
+          showPathway={showPathway} pathway={pathway}
+          showGenesisDensity={showGenesisDensity} genesisDensity={genesisGrid}
+          mode={mode} timeline={timeline} replayCursorMin={replayCursorMin}
           pathwayStep={2.0} onViewChange={setView}
         />
-        {!probe && selected === null ? <Invitation /> : null}
-        <Legend colorBy={layers.colorBy} />
+        {mode === "explore" && !probe && selected === null ? <Invitation /> : null}
+        <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!probe}
+          showGenesisDensity={showGenesisDensity} />
       </div>
 
       <div className="atlas-panel" style={{ overflowY: "auto",
@@ -164,13 +209,18 @@ export function Atlas() {
             onRadius={(km) => setProbe((p) => ({ ...p, radiusKm: km }))}
             onClose={() => setProbe(null)} onSelectStorm={selectStorm}
             pathwayOn={showPathway} onShowPathway={setShowPathway} />
+        ) : mode === "replay" ? (
+          <ReplayNote timeline={timeline} result={result} />
         ) : (
           <Introduction archive={archive} />
         )}
       </div>
 
       <div className="atlas-transport">
-        {selected !== null ? (
+        {mode === "replay" ? (
+          <ArchiveTransport timeline={timeline} cursorMin={replayCursorMin}
+            setCursorMin={setReplayCursorMin} playing={playing} setPlaying={setPlaying} />
+        ) : selected !== null ? (
           <Transport archive={archive} row={selected} playing={playing} setPlaying={setPlaying}
             cursorMs={cursorMs} setCursorMs={setCursorMs} />
         ) : null}
@@ -263,26 +313,55 @@ CLICK ANY OCEAN POINT — what formed there, and where it went · CLICK A GENESI
   );
 }
 
-function Legend({ colorBy }) {
-  if (colorBy !== "intensity") return null;
+/* Every density surface on screen has to name what its shading COUNTS. A coloured grid over a
+   map is read as a probability unless it says otherwise, and neither of these is one. */
+function Legend({ colorBy, showPathway, showGenesisDensity, probe }) {
   const items = [["ts", "TS"], ["cat1", "1"], ["cat2", "2"], ["cat3", "3"], ["cat4", "4"],
     ["cat5", "5"]];
+  const surfaces = [];
+  if (showPathway) {
+    surfaces.push(["56, 189, 248", "HISTORICAL PATHWAY FREQUENCY",
+      probe ? "storms of the matched pool through each 2° cell — not a forecast"
+        : "storms of the current filter through each 2° cell — not a forecast"]);
+  }
+  if (showGenesisDensity) {
+    surfaces.push(["167, 139, 250", "GENESIS COUNT",
+      "storms that formed in each 2° cell — a count, not a rate"]);
+  }
+  if (colorBy !== "intensity" && !surfaces.length) return null;
   return (
     <div style={{
       position: "absolute", right: 12, bottom: 14, zIndex: 450, pointerEvents: "none",
       background: "rgba(7,12,22,.82)", border: "1px solid var(--border-strong)",
       borderRadius: "var(--radius-sm)", padding: "6px 9px", display: "flex",
-      gap: "var(--sp-4)", alignItems: "center",
+      flexDirection: "column", gap: 5, alignItems: "flex-start", maxWidth: 340,
     }}>
-      {items.map(([k, label]) => (
-        <span key={k} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <span style={{ width: 12, height: 2,
-            background: `var(--atlas-${k}, ${CAT_HEX[k]})` }} />
-          <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)" }}>
-            {label}
+      {surfaces.map(([hue, title, note]) => (
+        <div key={title} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ display: "flex", flex: "none" }}>
+            {[0.18, 0.38, 0.62].map((a) => (
+              <span key={a} style={{ width: 9, height: 9, background: `rgba(${hue}, ${a})` }} />
+            ))}
           </span>
-        </span>
+          <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-1)",
+            letterSpacing: "var(--track-label)" }}>{title}
+            <span style={{ color: "var(--text-2)", letterSpacing: 0 }}> · {note}</span>
+          </span>
+        </div>
       ))}
+      {colorBy === "intensity" ? (
+        <div style={{ display: "flex", gap: "var(--sp-4)", alignItems: "center" }}>
+          {items.map(([k, label]) => (
+            <span key={k} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 12, height: 2,
+                background: `var(--atlas-${k}, ${CAT_HEX[k]})` }} />
+              <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)" }}>
+                {label}
+              </span>
+            </span>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -322,6 +401,69 @@ function Introduction({ archive }) {
       </div>
     </div>
   );
+}
+
+/* What the run is doing, and what it is doing to time. The skip is a real distortion of pace and
+   the reader is told about it before it happens, not only when it flashes past on the transport. */
+function ReplayNote({ timeline, result }) {
+  const tl = timeline;
+  const quiet = tl && tl.spanMin ? (tl.spanMin - tl.activeMin) / tl.spanMin : null;
+  return (
+    <div style={{ padding: "var(--sp-6)" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-body)",
+        color: "var(--text-1)", lineHeight: "var(--lh-body)" }}>
+        The record, in the order it happened.
+      </div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: "var(--sp-5)" }}>
+        {!tl || !tl.n ? (
+          <p style={{ margin: 0 }}>
+            The current filter selects no storms, so there is nothing to replay.
+          </p>
+        ) : (
+          <>
+            <p style={{ margin: "0 0 var(--sp-5)" }}>
+              <strong style={{ color: "var(--text-1)" }}>{tl.n.toLocaleString()} storms</strong>{" "}
+              between {fmtYear(tl.firstT)} and {fmtYear(tl.lastT)}. Tracks stay on the map as they
+              are revealed, so what builds up is the shape of the whole record rather than one
+              storm at a time.
+            </p>
+            {/* Stated as years rather than as a percentage, deliberately: this build renders no
+                percentage it computed itself, and "43.5 of 174.5 years" is the more concrete
+                statement anyway. */}
+            <p style={{ margin: "0 0 var(--sp-5)" }}>
+              <strong style={{ color: "var(--warn)" }}>The clock skips quiet stretches.</strong>{" "}
+              {quiet !== null
+                ? <>Only {yearsOf(tl.activeMin)} of those {yearsOf(tl.spanMin)} calendar years
+                    have a storm anywhere on the map</>
+                : <>Much of the span has no storm active</>} — the rest is off-season, repeated.
+              Those gaps are jumped and every jump is announced on the transport. Nothing else is
+              changed: every storm appears, once, in order, over its whole observed span.
+            </p>
+            {result && result.excluded && result.excluded.noGenesis ? (
+              <p style={{ margin: "0 0 var(--sp-5)" }}>
+                {result.excluded.noGenesis} storms are not in this run: the archive holds no
+                genesis point for them, so the filter cannot place them.
+              </p>
+            ) : null}
+            <p style={{ margin: "0 0 var(--sp-5)" }}>
+              The filters on the left drive the run. Narrow to Cat 3+ and only the majors unfold;
+              narrow to a landfall region and only the storms that reached it do.
+            </p>
+            <p style={{ margin: 0, color: "var(--text-2)" }}>{claimText("atlas.replay")}</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function fmtYear(min) {
+  return new Date(min * 60000).getUTCFullYear();
+}
+
+function yearsOf(minutes) {
+  return (minutes / 525600).toFixed(1);
 }
 
 function Boot({ manifest }) {

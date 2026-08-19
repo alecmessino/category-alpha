@@ -204,3 +204,11 @@ jobs:
       # measured deviation is printed rather than assumed.
       - name: Verify the browser computes what the archive computes
         run: node scripts/test-atlas-parity.mjs
+
+      # The replay skips stretches of the record where no selected storm is active, which is a
+      # real distortion of pace and therefore has to be provably harmless: a linear run and a
+      # skipping run over all 3,885 storms must reveal the SAME storms in the SAME order. The
+      # first draft of that harness caught this build losing 11 storms -- the ones consisting of
+      # a single fix, which no sampled clock can be relied on to land on.
+      - name: Verify the replay clock skips dead air and nothing else
+        run: node scripts/test-atlas-timeline.mjs

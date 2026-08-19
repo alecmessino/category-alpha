@@ -15,6 +15,7 @@ import React from "react";
 import { PopulationLayer } from "../render/population-layer.js";
 import { SelectionLayer } from "../render/selection-layer.js";
 import { PathwayLayer } from "../render/pathway-layer.js";
+import { ReplayHeadsLayer, ReplayLayer } from "../render/replay-layer.js";
 import { hitGenesis } from "../render/hit-test.js";
 import { MONO } from "./kit.jsx";
 
@@ -25,11 +26,13 @@ const L = globalThis.L;
    centre someone once typed. */
 const FALLBACK_CENTER = [21, -78];
 const FALLBACK_ZOOM = 3;
+const EMPTY_ROWS = new Uint32Array(0);
 
 export function AtlasMap({
   archive, world, rows, emphasis, selected, onSelect, onProbe, probe, replayMs, home,
   colorBy, showPathway, pathway, pathwayStep, dimPopulation, softenEmphasis, onViewChange,
-  onHover,
+  onHover, showGenesis = true, showLandfalls = true,
+  showGenesisDensity, genesisDensity, mode = "explore", timeline, replayCursorMin,
 }) {
   const el = React.useRef(null);
   const map = React.useRef(null);
@@ -59,9 +62,17 @@ export function AtlasMap({
     m.attributionControl.addAttribution("IBTrACS · HURDAT2");
 
     const pathwayLayer = new PathwayLayer().addTo(m);
+    /* A SECOND INSTANCE, not a second class. PathwayLayer already renders a Map of
+       "lat,lon" -> count; it owns one density and one peak, so two grids on screen at once
+       need two of it. Violet rather than the pathway's cyan: the two surfaces answer different
+       questions -- where storms WENT and where they FORMED -- and a shared hue would invite
+       reading one for the other. */
+    const genesisLayer = new PathwayLayer({ hue: "167, 139, 250", zIndexOffset: 1 }).addTo(m);
     const population = new PopulationLayer().addTo(m);
+    const replay = new ReplayLayer().addTo(m);
     const selection = new SelectionLayer().addTo(m);
-    layers.current = { pathwayLayer, population, selection };
+    const replayHeads = new ReplayHeadsLayer().addTo(m);
+    layers.current = { pathwayLayer, genesisLayer, population, replay, selection, replayHeads };
 
     m.on("moveend zoomend", () => {
       if (cb.current.onViewChange) cb.current.onViewChange(readView(m, population));
@@ -102,6 +113,8 @@ export function AtlasMap({
        terminal's map exposes window.__MT_MAP. Nothing in the app reads these. */
     globalThis.__ATLAS_MAP = m;
     globalThis.__ATLAS_POPULATION = population;
+    globalThis.__ATLAS_REPLAY = replay;
+    globalThis.__ATLAS_REPLAY_HEADS = replayHeads;
     globalThis.__ATLAS_HIT = (map_, pt) => hitGenesis(archiveRef.current, map_, pt,
       { rows: rowSetRef.current });
     setReady(true);
@@ -126,18 +139,25 @@ export function AtlasMap({
     if (!ready) return;
     layers.current.population.setArchive(archive, world);
     layers.current.selection.setArchive(archive, world);
+    layers.current.replay.setArchive(archive, world);
+    layers.current.replayHeads.setArchive(archive, world);
   }, [ready, archive, world]);
 
   React.useEffect(() => {
     if (!ready) return;
     rowSetRef.current = rows ? new Set(rows) : null;
-    layers.current.population.setSelection(rows);
-  }, [ready, rows]);
+    /* In replay the static population is withheld on purpose: revealing it over time is the
+       whole point, and drawing the finished mat underneath would give away the ending. */
+    layers.current.population.setSelection(mode === "replay" ? EMPTY_ROWS : rows);
+  }, [ready, rows, mode]);
 
   React.useEffect(() => {
     if (!ready) return;
-    layers.current.population.setStyle({ colorBy, dimmed: dimPopulation, softenEmphasis });
-  }, [ready, colorBy, dimPopulation, softenEmphasis]);
+    layers.current.population.setStyle({
+      colorBy, dimmed: dimPopulation, softenEmphasis, showGenesis, showLandfalls,
+    });
+    layers.current.replay.setStyle({ colorBy, showMarks: showGenesis || showLandfalls });
+  }, [ready, colorBy, dimPopulation, softenEmphasis, showGenesis, showLandfalls]);
 
   React.useEffect(() => {
     if (!ready) return;
@@ -158,6 +178,27 @@ export function AtlasMap({
     if (!ready) return;
     layers.current.pathwayLayer.setDensity(showPathway ? pathway : null, pathwayStep);
   }, [ready, showPathway, pathway, pathwayStep]);
+
+  React.useEffect(() => {
+    if (!ready) return;
+    layers.current.genesisLayer.setDensity(showGenesisDensity ? genesisDensity : null, pathwayStep);
+  }, [ready, showGenesisDensity, genesisDensity, pathwayStep]);
+
+  /* The replay. Both layers are mounted for the life of the map and simply hold no timeline
+     outside replay mode -- adding and removing canvases on a mode switch would throw away the
+     accumulated picture every time, which is exactly what this layer exists not to do. */
+  React.useEffect(() => {
+    if (!ready) return;
+    const tl = mode === "replay" ? timeline : null;
+    layers.current.replay.setTimeline(tl);
+    layers.current.replayHeads.setTimeline(tl);
+  }, [ready, mode, timeline]);
+
+  React.useEffect(() => {
+    if (!ready || mode !== "replay" || replayCursorMin === null || replayCursorMin === undefined) return;
+    layers.current.replay.setCursor(replayCursorMin);
+    layers.current.replayHeads.setCursor(replayCursorMin);
+  }, [ready, mode, replayCursorMin]);
 
   /* The probe ring: where the reader asked the archive's question. Drawn as a plain circle of
      the query's own radius so the sample is visibly a circle on the map rather than an
