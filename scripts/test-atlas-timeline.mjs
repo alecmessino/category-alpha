@@ -19,7 +19,7 @@ import {
   activeAt, advance, buildTimeline, fromActive, intervalAt, quietFraction, revealedThrough,
   toActive,
 } from "../docs/storm-atlas/src/engine/timeline.js";
-import { ensureVerification, ROOT } from "./lib/atlas-verify.mjs";
+import { ROOT } from "./lib/atlas-verify.mjs";
 
 let failed = 0;
 let checks = 0;
@@ -161,7 +161,16 @@ head("[1] the shapes a real archive may not hand us");
 
 head("[2] the whole archive, played twice");
 
-ensureVerification("timeline", "atlas-parity.json");
+/* Reads the committed pack directly, and deliberately asks Python for nothing.
+ *
+ * These are invariants of the CLOCK -- ordering, coverage, monotonicity -- not comparisons
+ * against the archive's own answers, so there is no fixture to generate and no authority to
+ * defer to. Whether the pack still matches the archive is test-atlas-pack's job.
+ *
+ * An earlier draft called ensureVerification("timeline", ...) for a fixture it never read. That
+ * spawns `atlas-verify --what timeline`, which is not a valid choice -- but only when the cached
+ * artefact is STALE, so it sat green through CI and every local run and would first have fired
+ * on the next data refresh. Caught by merging a moved archive. */
 const archive = await openArchive(join(ROOT, "docs/storm-atlas/data"));
 const result = filterStorms(archive, {});
 const tl = buildTimeline(archive, result.rows);
