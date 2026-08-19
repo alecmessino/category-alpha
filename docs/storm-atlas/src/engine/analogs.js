@@ -449,29 +449,81 @@ export function pathwayDensity(archive, cases, step = 2.0) {
   const density = new Map();
   if (!cases.length) return density;
   const { ptLat, ptLon } = archive;
-  /* Dedupe on a NUMERIC cell id per storm rather than on a "cell|storm_id" string. Same
-     counts -- the returned keys are still the archive's own "lat,lon" strings, because the
-     parity test compares them against the Python's dict -- but building one string per track
-     point instead of two per point is most of this function's cost, and this runs on every
-     click. */
-  const seen = new Set();
-  const cellIndex = new Map();
-  for (const c of cases) {
-    const [a, b] = archive.trackRange(c.row);
+  const g = cellGrid(step);
+  /* A DENSE COUNT PLUS A PER-CELL STAMP, rather than a Set of "cell|storm" marks.
+     The dedupe question -- "has THIS storm already been counted in THIS cell?" -- is answered
+     by writing the storm's ordinal into the cell and comparing, which is one array read and one
+     compare per track point instead of a hash insert. Over the whole archive that is 224,153
+     points, and this runs on every click and every filter change.
+     The returned keys are unchanged: still the archive's own "lat,lon" strings in Python's
+     float formatting, because the parity harness compares them against Python's dict. */
+  const counts = new Int32Array(g.cells);
+  const stamp = new Int32Array(g.cells).fill(-1);
+  for (let ci = 0; ci < cases.length; ci++) {
+    const c = cases[ci];
+    const row = typeof c === "object" ? c.row : c;
+    const [a, b] = archive.trackRange(row);
     for (let k = a; k < b; k++) {
-      const cy = Math.floor(ptLat[k] / 100 / step);
-      const cx = Math.floor(wrap180(ptLon[k] / 100) / step);
-      // A single integer identifying the cell; 4096 columns is far more than 360/step.
-      const cell = (cy + 1024) * 4096 + (cx + 1024);
-      const mark = cell * 65536 + c.row;
-      if (seen.has(mark)) continue;
-      seen.add(mark);
-      if (!cellIndex.has(cell)) cellIndex.set(cell, `${fmt1(cy * step)},${fmt1(cx * step)}`);
-      const key = cellIndex.get(cell);
-      density.set(key, (density.get(key) || 0) + 1);
+      const cell = cellOf(g, ptLat[k] / 100, wrap180(ptLon[k] / 100), step);
+      if (stamp[cell] === ci) continue;
+      stamp[cell] = ci;
+      counts[cell]++;
     }
   }
+  emitCells(density, counts, g, step);
   return density;
+}
+
+/**
+ * Where the storms in this population FORMED: genesis points per cell, a plain count.
+ *
+ * Deliberately a count and not a proportion. The brief asks to see genesis by intensity
+ * outcome, and that is applied as a FILTER -- pass the rows that reached Cat 3 and the surface
+ * shows where those storms formed. Shading each cell by the fraction of its storms that reached
+ * Cat 3 would be a conditioned rate wearing a colour ramp, and this build does not publish
+ * rates; it would also divide by cell counts of one or two over most of the map.
+ *
+ * @param rows storm rows (a Uint32Array from filterStorms, or any array of indexes)
+ */
+export function genesisDensity(archive, rows, step = 2.0) {
+  const density = new Map();
+  if (!rows.length) return density;
+  const lat = archive.genesisLat;
+  const lon = archive.genesisLon;
+  const g = cellGrid(step);
+  const counts = new Int32Array(g.cells);
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const la = lat[row];
+    // 54 storms have no genesis point. They are absent from this surface rather than being
+    // placed at a coordinate nobody recorded.
+    if (Number.isNaN(la)) continue;
+    counts[cellOf(g, la, wrap180(lon[row]), step)]++;
+  }
+  emitCells(density, counts, g, step);
+  return density;
+}
+
+/* One cell convention, shared by both surfaces so the two grids line up exactly on screen.
+   Sized with a margin so a fix at a pole or hard on the antimeridian cannot land out of range. */
+function cellGrid(step) {
+  const rows = Math.ceil(180 / step) + 2;
+  const cols = Math.ceil(360 / step) + 2;
+  return { rows, cols, cells: rows * cols, oy: Math.ceil(90 / step) + 1, ox: Math.ceil(180 / step) + 1 };
+}
+function cellOf(g, lat, lon180, step) {
+  const cy = Math.floor(lat / step) + g.oy;
+  const cx = Math.floor(lon180 / step) + g.ox;
+  return cy * g.cols + cx;
+}
+function emitCells(density, counts, g, step) {
+  for (let cell = 0; cell < counts.length; cell++) {
+    const n = counts[cell];
+    if (!n) continue;
+    const cy = ((cell / g.cols) | 0) - g.oy;
+    const cx = (cell % g.cols) - g.ox;
+    density.set(`${fmt1(cy * step)},${fmt1(cx * step)}`, n);
+  }
 }
 
 /** Python's f"{x:.1f}" -- which prints negative zero as "-0.0" where JS toFixed prints "0.0". */
