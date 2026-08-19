@@ -22,6 +22,7 @@ import { CATEGORY_COLOR, CATEGORY_ORDER } from "../render/palette.js";
 import { formatPosition } from "../engine/geo.js";
 import { Chip, Gap, Head, MONO, Num, OverDenom, Row, Txt, claimText } from "./kit.jsx";
 import { ConditionedGroup, OutcomeCard, RateLine } from "./outcome-card.jsx";
+import { intensityContractKey, landfallContractKey } from "../engine/calibration.js";
 import { Refusal } from "./refusal.jsx";
 import { EnvLens } from "./env-lens.jsx";
 
@@ -30,7 +31,7 @@ const CAT_LABEL = { td: "TROPICAL DEPRESSION", ts: "TROPICAL STORM", cat1: "CATE
 
 export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathway, pathwayOn,
   peak, pathway, comparison, onBaseline, conditions, archive, envCoverage, envLens,
-  envLoading, onLoadEnv }) {
+  envLoading, onLoadEnv, onEvidence }) {
   if (!result) return null;
   const r = result;
   const n = r.n_cases;
@@ -117,6 +118,8 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
             <OutcomeCard key={cat} cell={r.intensity[cat]} label={CAT_LABEL[cat]}
               tone={CATEGORY_COLOR[cat]} subject={CAT_LABEL[cat]}
               of="storms whose peak intensity the archive recorded"
+              onEvidence={onEvidence
+                ? () => onEvidence(intensityContractKey(cat)) : undefined}
               delta={comparison ? comparison.intensity[cat] : null}
               baselineCell={comparison ? comparison.baseline.intensity[cat] : null}
               baselineName={comparison ? baselineNameOf(comparison) : null} />
@@ -125,6 +128,18 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
           {Object.keys(r.landfall).length ? (
             <>
               <Head>WHERE THEY LANDED</Head>
+              {/* The denominator note, when the cohort was selected on landfall itself. Not a
+                  refusal -- these rates are real -- but the words "43.8% made landfall in
+                  Mexico" mean something different here than they did one condition ago, and
+                  the difference is a factor of three. */}
+              {r.landfall_note ? (
+                <div data-landfall-note style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
+                  color: "var(--warn)", lineHeight: "var(--lh-body)",
+                  borderLeft: "var(--bw-signal) solid var(--warn)",
+                  paddingLeft: "var(--sp-3)", marginBottom: "var(--sp-3)" }}>
+                  {r.landfall_note}
+                </div>
+              ) : null}
               {/* ORDERED BY EVIDENCE, NOT BY ALPHABET. Alphabetical order buried the one region
                   these storms actually reached under four regions they did not, and a reader
                   scanning a panel reads the top of a list. The empty regions still appear, with
@@ -150,7 +165,9 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
                       <Refusal key={kind} kind="BASE_RATE_ONLY" compact
                         subject={`${region.replace(/_/g, " ")} · ${kind === "hurricane" ? "≥64 kt" : "any"}`}
                         counts={`${u.archive_events} archive-wide · ${u.required} needed`}
-                        detail={u.reason} />
+                        detail={u.reason}
+                        onEvidence={onEvidence
+                          ? () => onEvidence(landfallContractKey(region, kind)) : undefined} />
                     );
                   })}
                 </div>

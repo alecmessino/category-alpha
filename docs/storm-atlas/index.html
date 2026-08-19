@@ -61,6 +61,19 @@ input[type=range]{height:16px}
 .atlas-shell>.atlas-stage{grid-column:2;grid-row:2}
 .atlas-shell>.atlas-panel{grid-column:3;grid-row:2}
 .atlas-shell>.atlas-transport{grid-column:1 / -1;grid-row:3}
+
+/* THE CALIBRATION SURFACE IS A SHELL VARIANT, not a fourth child rule.
+   Written as a variant because the two media queries below cap row 2 -- at 760px it is
+   minmax(280px,46vh) -- and a full-width reading surface squeezed into 46vh of viewport would
+   be a page nobody scrolls. In this mode the rail, stage and panel are not rendered at all, so
+   the variant needs no edits inside either media block: it simply redefines the grid it is
+   laid into. */
+.atlas-shell[data-view="calibration"]{
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto minmax(0,1fr);
+}
+.atlas-shell>.atlas-calibration{grid-column:1 / -1;grid-row:2;min-width:0;min-height:0}
+
 @media (max-width:1180px){
   .atlas-shell{grid-template-columns:clamp(220px,26vw,300px) minmax(0,1fr);
                grid-template-rows:auto minmax(320px,1fr) minmax(0,auto) auto}

@@ -197,8 +197,32 @@ head("[7] conditionedOn — the fifth rule fires from the spec");
   ok(conditionedOn({}) === null, "an unconditioned cohort declares nothing");
   ok(conditionedOn({ intensity: "cat3" }).minPeak === "cat3", "an intensity condition declares itself");
   ok(conditionedOn({ landfall: "mexico" }).landfallRegion === "mexico", "so does a landfall one");
-  ok(conditionedOn({ landfall: "any" }) === null,
-    "`any landfall` names no region, so it conditions no single contract");
+  /* "ANY LANDFALL" IS THE THIRD CASE. It names no region, so it makes no single contract
+     circular -- but it does select the denominator on the outcome family, and the engine has to
+     declare that or the builder's chip and the engine disagree about what the cohort did.
+     Before this was fixed the chip promised "every landfall contract stops being an outcome"
+     while the engine declared nothing and published every rate. */
+  ok(conditionedOn({ landfall: "any" }).landfallAny === true,
+    "`any landfall` declares itself as a selection, not as a conditioning on one region");
+  ok(conditionedOn({ landfall: "any" }).landfallRegion === undefined,
+    "and names no region, so no single contract is made circular");
+  {
+    const sel = cohortResult(archive, { landfall: "any", seasonFrom: 1971 });
+    const all = cohortResult(archive, { seasonFrom: 1971 });
+    ok(sel.landfall.mexico.any.rate !== null && sel.landfall.mexico.any.status === undefined,
+      "the regional rates still publish — over-refusing them would discard a real answer");
+    ok(!!sel.landfall_note, "but the denominator note travels with them");
+    ok(/share of the \d+ storms that came ashore/.test(sel.landfall_note),
+      "and states what the denominator has become", sel.landfall_note);
+    ok(all.landfall_note === null,
+      "while an unselected cohort carries no such note");
+    /* The size of the effect is why the note exists rather than a footnote: the same words mean
+       12.5% one condition ago and 43.8% now. */
+    ok(sel.landfall.mexico.any.rate > 3 * all.landfall.mexico.any.rate,
+      "the selection effect is large enough that silence about it would mislead",
+      `${(100 * all.landfall.mexico.any.rate).toFixed(1)}% -> ` +
+      `${(100 * sel.landfall.mexico.any.rate).toFixed(1)}%`);
+  }
 }
 
 head("[8] one cohort, one answer — membership and outcomes from the same object");

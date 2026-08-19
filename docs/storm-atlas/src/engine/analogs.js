@@ -616,6 +616,20 @@ export function scoreCases(A, cases, {
     };
   }
 
+  /* THE DENOMINATOR NOTE. A cohort conditioned on "made landfall anywhere" makes no single
+     contract circular -- regions do not partition, so no cell is 100% by construction and
+     refusing them would be over-refusing a real answer. What it does do is change what every
+     landfall denominator MEANS: the storms that never came ashore have been removed from it, so
+     each regional rate is now a share of the landfalling population rather than of the cohort a
+     reader thinks they built. That is a selection effect, not a tautology, and it gets a
+     statement rather than a refusal -- attached here so it travels with the numbers. */
+  const landfallNote = conditionedOn && conditionedOn.landfallAny
+    ? `This cohort was defined by making landfall SOMEWHERE, so every rate below is a share of ` +
+      `the ${cases.length} storms that came ashore — not of all storms. Regions do not ` +
+      "partition (a storm can appear in several), so no single rate is circular, but each is " +
+      "higher than the same contract over an unselected cohort would be."
+    : null;
+
   /* ---- 7. time-to-event distributions (analogs.py:693) ------------------------------
    *
    * NEVER SUPPRESSED BY THE FIFTH RULE. If a cohort is conditioned on reaching Cat 3 then the
@@ -663,5 +677,6 @@ export function scoreCases(A, cases, {
       }
     }
   }
-  return { intensity, landfall, time_to_event: timeToEvent, unscoreable, reportRegions };
+  return { intensity, landfall, time_to_event: timeToEvent, unscoreable, reportRegions,
+           landfall_note: landfallNote };
 }

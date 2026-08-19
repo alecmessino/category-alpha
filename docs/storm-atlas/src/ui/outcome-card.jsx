@@ -37,7 +37,7 @@ const CIRCULAR = "CONDITIONED ON -- NOT AN OUTCOME";
  * @param {string} [props.subject]  what the refusal is about, when the label alone is not enough
  */
 export function OutcomeCard({ cell, label, tone, of, unscoreable, note, subject, delta,
-  baselineCell, baselineName }) {
+  baselineCell, baselineName, onEvidence }) {
   if (!cell && !unscoreable) return null;
   const c = tone || "var(--accent)";
 
@@ -51,7 +51,7 @@ export function OutcomeCard({ cell, label, tone, of, unscoreable, note, subject,
         <CardHead label={label} tone={c} />
         <Refusal kind="BASE_RATE_ONLY" subject={subject}
           counts={`${unscoreable.archive_events} archive-wide · ${unscoreable.required} needed`}
-          detail={unscoreable.reason} />
+          detail={unscoreable.reason} onEvidence={onEvidence} />
       </div>
     );
   }
@@ -73,7 +73,7 @@ export function OutcomeCard({ cell, label, tone, of, unscoreable, note, subject,
         <CardHead label={label} tone={c}
           right={<OverDenom n={cell.count} of={cell.n_storms} />} />
         <Refusal kind="RATE_REFUSED" subject={subject} detail={cell.refused_reason}
-          counts={`${cell.count} of ${cell.n_storms}`} />
+          counts={`${cell.count} of ${cell.n_storms}`} onEvidence={onEvidence} />
         {cell.n_unknown > 0 ? <UnknownNote n={cell.n_unknown} /> : null}
       </div>
     );

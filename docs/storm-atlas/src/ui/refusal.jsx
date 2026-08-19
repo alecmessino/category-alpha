@@ -88,7 +88,7 @@ export const REFUSALS = {
  * @param {string} [props.subject]   what was refused, e.g. "CATEGORY 3" or "mexico · >=64 kt"
  * @param {node}   [props.counts]    what the archive DOES publish here -- a refusal is not a blank
  */
-export function Refusal({ kind, detail, subject, counts, compact }) {
+export function Refusal({ kind, detail, subject, counts, compact, onEvidence }) {
   const r = REFUSALS[kind];
   if (!r) return null;
   const hard = r.resolvable === "no";
@@ -127,6 +127,21 @@ export function Refusal({ kind, detail, subject, counts, compact }) {
           color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 4, paddingLeft: 24 }}>
           {detail}
         </div>
+      ) : null}
+
+      {/* THE REFUSAL CARRIES ITS OWN EVIDENCE. A refusal is a claim about the record -- "too few
+          events exist for a skill claim here" -- and a reader is entitled to check it. This
+          links straight to that contract's row in the calibration ledger, where the archive's
+          own backtest says whether the refusal was right. It is the difference between a
+          policy and a finding, and it is also where the reader discovers that the gate misses
+          three of the four contracts it should be catching. */}
+      {onEvidence ? (
+        <button type="button" onClick={onEvidence} data-evidence-link style={{
+          ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
+          border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
+          color: "var(--text-link)", cursor: "pointer", padding: "3px 7px",
+          marginTop: 6, marginLeft: 24,
+        }}>SEE THE EVIDENCE →</button>
       ) : null}
 
       {/* The line that separates a refusal a reader can act on from one nobody can. */}

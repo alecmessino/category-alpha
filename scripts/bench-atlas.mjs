@@ -50,9 +50,25 @@ const BUDGET = {
   previewMs: 16,              // every chip's live count: five filter passes and five scans
 };
 
+/* THE GUARD THAT STOPS A VACUOUS PASS.
+ *
+ * A skip prints "SKIPPED, not passed" and exits 0, which is right on a developer's machine and
+ * catastrophic in CI: a workflow step that runs this without a browser installed goes green
+ * forever while testing nothing, and the gate that catches the failures the static checks
+ * cannot would be the gate nobody notices died. `--require-browser` turns the skip into an
+ * exit 2. CI passes it; a laptop without playwright does not have to. */
+const REQUIRE_BROWSER = process.argv.includes("--require-browser")
+  || process.env.ATLAS_REQUIRE_BROWSER === "1";
+
 let chromium;
 try { ({ chromium } = await import("playwright")); }
 catch {
+  if (REQUIRE_BROWSER) {
+    console.error("[bench] playwright is REQUIRED here and is not installed.");
+    console.error("        this gate was asked to run and could not, which is a failure,");
+    console.error("        not a skip. install it or drop --require-browser.");
+    process.exit(2);
+  }
   console.log("[bench] playwright is not installed - SKIPPED, not passed.");
   console.log("        npm i --no-save playwright && npx playwright install chromium");
   process.exit(0);
@@ -92,13 +108,35 @@ function serve() {
 
 let failures = 0;
 const results = [];
+/* WALL-CLOCK BUDGETS ARE MACHINE-DEPENDENT, AND THE SCALING IS DECLARED RATHER THAN HIDDEN.
+ *
+ * Every millisecond budget here was measured on the development container. A shared CI runner
+ * is a different and much noisier machine, so running these unchanged would either fail on
+ * neighbour noise or -- the worse outcome -- get quietly loosened until it caught nothing.
+ *
+ * `--ci` multiplies the TIME budgets by a stated factor and prints that it did, so a green CI
+ * run can never be mistaken for a green local run. It catches what matters: a 10x regression
+ * from a bad render loop trips a 3x budget, while a 40% difference between two machines does
+ * not. BYTE budgets are not scaled -- a megabyte is a megabyte on any runner, and the transfer
+ * sizes are the numbers a reader actually pays. */
+const CI = process.argv.includes("--ci") || process.env.ATLAS_BENCH_CI === "1";
+const TIME_SCALE = CI ? 3 : 1;
+
 function gate(label, value, budget, unit, lowerIsBetter = true) {
-  const ok = lowerIsBetter ? value <= budget : value >= budget;
+  const effective = unit === "ms" ? budget * TIME_SCALE : budget;
+  const ok = lowerIsBetter ? value <= effective : value >= effective;
   if (!ok) failures++;
-  results.push({ label, value, budget, unit, ok });
+  results.push({ label, value, budget: effective, unit, ok });
   const v = typeof value === "number" ? value.toFixed(value < 10 ? 2 : 0) : value;
+  const note = effective !== budget ? ` (${budget} x${TIME_SCALE})` : "";
   console.log(`  ${ok ? "ok  " : "FAIL"}  ${label.padEnd(46)} ${String(v).padStart(8)} ${unit}` +
-    `   budget ${budget} ${unit}`);
+    `   budget ${effective} ${unit}${note}`);
+}
+
+if (CI) {
+  console.log(`\n[bench] CI mode: time budgets scaled x${TIME_SCALE} for a shared runner.`);
+  console.log("        Byte budgets are NOT scaled. A green run here is not a green run on the");
+  console.log("        machine the budgets were measured on -- it is a regression check.");
 }
 
 const server = await serve();

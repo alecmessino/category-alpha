@@ -32,9 +32,25 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
 const EDGE = join(ROOT, "scripts/fixtures/analogs-edge.json");
 
+/* THE GUARD THAT STOPS A VACUOUS PASS.
+ *
+ * A skip prints "SKIPPED, not passed" and exits 0, which is right on a developer's machine and
+ * catastrophic in CI: a workflow step that runs this without a browser installed goes green
+ * forever while testing nothing, and the gate that catches the failures the static checks
+ * cannot would be the gate nobody notices died. `--require-browser` turns the skip into an
+ * exit 2. CI passes it; a laptop without playwright does not have to. */
+const REQUIRE_BROWSER = process.argv.includes("--require-browser")
+  || process.env.ATLAS_REQUIRE_BROWSER === "1";
+
 let chromium;
 try { ({ chromium } = await import("playwright")); }
 catch {
+  if (REQUIRE_BROWSER) {
+    console.error("[panel-dom] playwright is REQUIRED here and is not installed.");
+    console.error("            this gate was asked to run and could not, which is a failure,");
+    console.error("            not a skip. install it or drop --require-browser.");
+    process.exit(2);
+  }
   console.log("[panel-dom] playwright is not installed - SKIPPED, not passed.");
   console.log("            npm i --no-save playwright && npx playwright install chromium");
   process.exit(0);

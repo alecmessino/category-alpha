@@ -24,6 +24,7 @@ import { projectWorld } from "../render/atlas-layer.js";
 import { previewCounts } from "../engine/preview.js";
 import { changedKeyOf, compareResults } from "../engine/compare.js";
 import { envAtGenesis, envCoverage } from "../engine/env.js";
+import { loadCalibration } from "../engine/calibration.js";
 import { AtlasMap } from "./map.jsx";
 import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
@@ -38,6 +39,12 @@ import { MONO, claimText } from "./kit.jsx";
    a chunk fetch there would cost more than the bytes save. */
 const ProvenanceDrawer = React.lazy(() =>
   import("./provenance.jsx").then((m) => ({ default: m.ProvenanceDrawer })));
+
+/* The ledger is a whole second surface and most visits never open it, so it is split out too.
+   Its own root element carries the grid class: React.Suspense emits no DOM node, so whatever
+   the lazy component renders IS the grid child. */
+const CalibrationLedger = React.lazy(() =>
+  import("./calibration.jsx").then((m) => ({ default: m.CalibrationLedger })));
 
 const DATA_BASE = "data";
 const DEFAULT_RADIUS_KM = 500;
@@ -70,6 +77,20 @@ export function Atlas() {
     });
   }, []);
   const [urlVersion] = React.useState(() => parseQuery(location.search).versionMismatch);
+  /* WHICH SURFACE. Read from the URL on mount so the calibration ledger is addressable -- the
+     terminal home links straight to it and every refusal deep-links to its own contract row.
+     Named `surface` and not `view`: `view` below is the map viewport, and reusing the word
+     would make this diff read as a rename of something unrelated.
+     The tactical surface stays the default. The DOM and bench harnesses load a bare
+     /storm-atlas/ and immediately reach for __ATLAS_MAP, which only exists while the map is
+     mounted, so a calibration default would break both. */
+  const [surface, setSurface] = React.useState(
+    () => (new URLSearchParams(location.search).get("view") === "calibration"
+      ? "calibration" : "tactical"));
+  const [ledgerAnchor, setLedgerAnchor] = React.useState(
+    () => new URLSearchParams(location.search).get("contract") || null);
+  const [cal, setCal] = React.useState(null);
+  const [calError, setCalError] = React.useState(null);
   const [layers, setLayers] = React.useState({
     colorBy: "uniform", genesis: true, landfalls: true,
   });
@@ -195,10 +216,35 @@ export function Atlas() {
      filling the back button with twelve half-formed cohorts would make Back useless for
      leaving the page. */
   React.useEffect(() => {
-    const q = toQuery(cohort);
+    /* MERGED, NOT REPLACED. toQuery builds a fresh URLSearchParams from the spec alone, so
+       writing it straight back would silently drop ?view= and ?contract= on the next chip
+       click -- a deep link into the ledger that survives exactly until the reader touches
+       anything. The cohort still owns every key it knows about; the surface owns the rest. */
+    const p = new URLSearchParams(toQuery(cohort));
+    if (surface !== "tactical") p.set("view", surface);
+    if (ledgerAnchor) p.set("contract", ledgerAnchor);
+    const q = p.toString();
     const next = q ? `?${q}` : location.pathname;
     if (location.search.replace(/^\?/, "") !== q) history.replaceState(null, "", next);
-  }, [cohort]);
+  }, [cohort, surface, ledgerAnchor]);
+
+  /* The ledger's 16 KB is fetched only when the ledger is opened. Nothing on the tactical
+     surface needs it, and a reader who never asks the question should not pay for the answer. */
+  React.useEffect(() => {
+    if (surface !== "calibration" || cal || calError) return;
+    let cancelled = false;
+    loadCalibration(DATA_BASE)
+      .then((c) => { if (!cancelled) setCal(c); })
+      .catch((e) => { if (!cancelled) setCalError(e); });
+    return () => { cancelled = true; };
+  }, [surface, cal, calError]);
+
+  /* A refusal on the tactical surface asks for its evidence. */
+  const openLedger = React.useCallback((contractKey) => {
+    setLedgerAnchor(contractKey || null);
+    setSurface("calibration");
+    setSelected(null);
+  }, []);
 
   const selectStorm = React.useCallback((row) => {
     setSelected(row);
@@ -241,12 +287,42 @@ export function Atlas() {
 
   const storm = selected === null ? null : archive.storm(selected);
 
+  /* THE LEDGER IS A SURFACE, NOT A PANEL. It replaces the rail, stage and panel rather than
+     opening beside them, because a page that answers "is any of this any good" while the thing
+     being judged is still on screen invites the reader to skim it. The header stays: the
+     archive's scale and the provenance key belong on both surfaces. */
+  if (surface === "calibration") {
+    return (
+      <div data-surface="calibration" data-view="calibration" className="atlas-shell" style={{
+        position: "fixed", inset: 0,
+        background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
+      }}>
+        <Header manifest={archive.manifest} onProvenance={() => setProvOpen(true)} />
+        <React.Suspense fallback={<LedgerBoot />}>
+          {calError ? <LedgerError error={calError} onBack={() => setSurface("tactical")} />
+            : cal ? (
+              <CalibrationLedger cal={cal} anchor={ledgerAnchor}
+                onBack={() => { setSurface("tactical"); setLedgerAnchor(null); }}
+                onClearAnchor={() => setLedgerAnchor(null)} />
+            ) : <LedgerBoot />}
+        </React.Suspense>
+        <React.Suspense fallback={null}>
+          {provOpen ? (
+            <ProvenanceDrawer archive={archive} open={provOpen}
+              onClose={() => setProvOpen(false)} frame={null} />
+          ) : null}
+        </React.Suspense>
+      </div>
+    );
+  }
+
   return (
-    <div data-surface="tactical" className="atlas-shell" style={{
+    <div data-surface="tactical" data-view="tactical" className="atlas-shell" style={{
       position: "fixed", inset: 0,
       background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
     }}>
-      <Header manifest={archive.manifest} onProvenance={() => setProvOpen(true)} />
+      <Header manifest={archive.manifest} onProvenance={() => setProvOpen(true)}
+        onLedger={() => openLedger(null)} />
 
       <div className="atlas-rail" style={{ overflowY: "auto",
         borderRight: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
@@ -298,7 +374,7 @@ export function Atlas() {
             comparison={comparison} conditions={conditionsOf(cohort)}
             onBaseline={setBaselinePin}
             archive={archive} envCoverage={envCov} envLens={envLens}
-            envLoading={envLoading} onLoadEnv={loadEnv} />
+            envLoading={envLoading} onLoadEnv={loadEnv} onEvidence={openLedger} />
         ) : (
           <Introduction archive={archive} />
         )}
@@ -320,6 +396,42 @@ export function Atlas() {
             onClose={() => setProvOpen(false)} frame={view ? view.frame : null} />
         ) : null}
       </React.Suspense>
+    </div>
+  );
+}
+
+function LedgerBoot() {
+  return (
+    <div className="atlas-calibration" style={{ display: "flex", alignItems: "center",
+      justifyContent: "center", color: "var(--text-2)", ...MONO,
+      fontSize: "var(--fs-mono-sm)" }}>
+      reading the calibration ledger…
+    </div>
+  );
+}
+
+/* A ledger that will not load says so and offers the way back. It does NOT fall through to an
+   empty page: a calibration surface that renders nothing reads exactly like a calibration
+   surface with nothing to report. */
+function LedgerError({ error, onBack }) {
+  return (
+    <div className="atlas-calibration" style={{ display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", gap: "var(--sp-4)",
+      padding: "var(--sp-8)", textAlign: "center" }}>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-md)", color: "var(--neg)",
+        letterSpacing: "var(--track-label)" }}>[ THE LEDGER COULD NOT BE READ ]</div>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+        maxWidth: "60ch", lineHeight: "var(--lh-body)" }}>
+        {String(error && error.message ? error.message : error)}
+        <br /><br />
+        No calibration figures are shown rather than stale ones. The scores this page reports
+        are the archive's; without the file there is nothing to report.
+      </div>
+      <button type="button" onClick={onBack} style={{
+        ...MONO, fontSize: "var(--fs-mono-xs)", padding: "5px 10px", background: "transparent",
+        border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
+        color: "var(--text-2)", cursor: "pointer",
+      }}>← BACK TO THE MAP</button>
     </div>
   );
 }
@@ -351,7 +463,7 @@ function ScaleLine({ manifest, dim }) {
   );
 }
 
-function Header({ manifest, onProvenance }) {
+function Header({ manifest, onProvenance, onLedger }) {
   return (
     <header style={{
       gridColumn: "1 / -1", gridRow: "1", display: "flex", alignItems: "center",
@@ -372,12 +484,26 @@ function Header({ manifest, onProvenance }) {
         }}>STORM ATLAS</span>
         <ScaleLine manifest={manifest} />
       </div>
-      <button type="button" onClick={onProvenance} title="provenance (P)" style={{
-        ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
-        border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
-        color: "var(--text-2)", cursor: "pointer", padding: "4px 8px", flex: "none",
-        letterSpacing: "var(--track-label)",
-      }}>PROVENANCE</button>
+      <div style={{ display: "flex", gap: "var(--sp-3)", flex: "none" }}>
+        {/* NOT BEHIND A TOGGLE. The ledger is how a reader checks whether anything else on this
+            site is worth believing, so it sits in the masthead beside provenance rather than
+            inside a panel someone has to know to open. */}
+        {onLedger ? (
+          <button type="button" onClick={onLedger} data-open-ledger
+            title="how well calibrated is this? the archive's own backtest" style={{
+              ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
+              border: "1px solid var(--accent)", borderRadius: "var(--radius-sm)",
+              color: "var(--accent)", cursor: "pointer", padding: "4px 8px",
+              letterSpacing: "var(--track-label)",
+            }}>CALIBRATION</button>
+        ) : null}
+        <button type="button" onClick={onProvenance} title="provenance (P)" style={{
+          ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
+          border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
+          color: "var(--text-2)", cursor: "pointer", padding: "4px 8px",
+          letterSpacing: "var(--track-label)",
+        }}>PROVENANCE</button>
+      </div>
     </header>
   );
 }

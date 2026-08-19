@@ -425,6 +425,17 @@ function MillibarTerminalApp() {
                    border: "1px solid var(--border-strong)", borderRadius: 5, padding: "2px 7px" }}>
           STORM ATLAS ›
         </a>
+        {/* THE LEDGER, FROM THE FRONT DOOR. The archive's own backtest -- 1,039 storms replayed
+            zero-peek, Brier against climatology, reliability curves -- is how a reader checks
+            whether anything either surface says is worth believing, so it gets its own entrance
+            rather than being three clicks inside the Atlas. Still just an anchor: this board
+            loads none of the ledger's bytes and none of the Atlas's runtime. */}
+        <a href="storm-atlas/?view=calibration" data-calibration-link
+          title="Calibration ledger — how well the archive's own method scored against climatology"
+          style={{ color: "var(--accent)", textDecoration: "none", letterSpacing: ".6px",
+                   border: "1px solid var(--accent)", borderRadius: 5, padding: "2px 7px" }}>
+          CALIBRATION ›
+        </a>
         <span style={{ opacity: .4 }}>·</span>
         <span title={MT._generatedAt || ""} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: staleMin == null ? "var(--warn)" : staleMin <= 25 ? "var(--pos)" : staleMin <= 75 ? "var(--warn)" : "var(--neg)" }} />

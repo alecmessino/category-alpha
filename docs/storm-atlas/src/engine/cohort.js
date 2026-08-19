@@ -141,6 +141,27 @@ export function conditionedOn(spec) {
   const out = {};
   if (s.intensity && s.intensity !== "all") out.minPeak = s.intensity;
   if (s.landfall && s.landfall !== "any") out.landfallRegion = s.landfall;
+
+  /* "ANY LANDFALL" IS A THIRD CASE, AND IT USED TO FALL BETWEEN THE OTHER TWO.
+   *
+   * It names no region, so it makes no single contract circular: the regions do not partition
+   * -- a Mexico landfaller need not have reached CONUS, and across a cohort the regional rates
+   * sum to more than one -- so no cell is 100% by construction and refusing them all would be
+   * over-refusing a real answer.
+   *
+   * But it is not nothing either. Every non-landfalling storm has been removed from the
+   * denominator, so "43.8% made landfall in Mexico" has silently become "43.8% OF THE STORMS
+   * THAT CAME ASHORE SOMEWHERE made landfall in Mexico" -- a different and much larger number
+   * than the same words meant one condition ago. Declaring it lets scoreCases attach that
+   * statement to the landfall block, where it travels with the numbers instead of living in a
+   * chip the reader has already scrolled past.
+   *
+   * Until now the builder's chip promised "every landfall contract stops being an outcome of
+   * this cohort" while the engine declared nothing at all and published every rate. The engine
+   * was right about the rates and the chip was right that something changed; this is the
+   * statement they were both reaching for. */
+  if (s.landfall === "any") out.landfallAny = true;
+
   return Object.keys(out).length ? out : null;
 }
 
@@ -201,7 +222,9 @@ export function conditionsOf(spec) {
       s.landfall === "any" ? "that made landfall anywhere"
         : `that made landfall in ${s.landfall.replace(/_/g, " ")}`, {
         costs: s.landfall === "any"
-          ? "every landfall contract stops being an outcome of this cohort"
+          ? "every landfall rate below becomes a share of the storms that came ashore " +
+            "SOMEWHERE, not of all storms — the denominator changes meaning, though no single " +
+            "region's rate becomes circular"
           : `the ${s.landfall.replace(/_/g, " ")} landfall rate stops being an outcome of ` +
             "this cohort; its hurricane-intensity rate is still one",
       });

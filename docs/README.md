@@ -356,11 +356,21 @@ obviously do. No percentage is rendered anywhere in this build except inside the
 verbatim gap prose, and `scripts/check-atlas-dom.mjs` asserts exactly that against the rendered
 DOM.
 
-Three gates run in `checks.yml`: the bundle is rebuilt and byte-compared against its source,
-every packed column is digested from the Parquet and reproduced from the pack, and the browser's
-answers are checked against the archive's own. Two more need a browser and are run by hand:
-`scripts/bench-atlas.mjs` (every performance budget, stated) and `scripts/check-atlas-dom.mjs`
-(the honesty surface, on screen).
+Every gate runs in `checks.yml`, browser gates included. The bundle is rebuilt and
+byte-compared against its source; every packed column is digested from the Parquet and
+reproduced from the pack; the browser's answers are checked against the archive's own; the
+calibration ledger is rebuilt from the backtest and byte-compared. Then Chromium is installed
+and three more run against a real DOM: `check-atlas-dom.mjs` (the honesty surface, on screen),
+`check-panel-dom.mjs` (the terminal's refusals, on screen) and `bench-atlas.mjs` (every
+performance budget, stated).
+
+Those three used to be run by hand, and between them they caught the two worst regressions of
+the last phase — a crash that took the live board from 46 honesty probes to 34, and a silently
+dropped pre-1971 observing-bias warning that every set-comparison test passed straight through.
+They take `--require-browser`, which turns their "playwright is not installed — SKIPPED" path
+into an exit 2: without it a CI step would go green forever while testing nothing. `bench-atlas`
+also takes `--ci`, which scales the wall-clock budgets ×3 for a shared runner and prints that it
+did; byte budgets are never scaled.
 
 ## One-time deployment
 

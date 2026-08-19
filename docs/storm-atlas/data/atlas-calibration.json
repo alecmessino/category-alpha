@@ -1,0 +1,705 @@
+{
+ "audit_summary": {
+  "by_verdict": {
+   "agreed_scoreable": [
+    "landfall_mexico_any",
+    "landfall_mexico_hurricane",
+    "reaches_cat1_64kt",
+    "reaches_cat3_96kt",
+    "reaches_cat4_113kt",
+    "reaches_ts_34kt"
+   ],
+   "gate_missed": [
+    "landfall_conus_any",
+    "landfall_hawaii_any"
+   ],
+   "gate_passed_but_degenerate": [
+    "landfall_conus_hurricane"
+   ],
+   "refused_and_degenerate": [
+    "landfall_hawaii_hurricane"
+   ]
+  },
+  "max_replay_events_without_skill": 6,
+  "min_replay_events_with_skill": 57,
+  "n_beat_climatology": 6,
+  "n_contracts": 10,
+  "n_gate_missed": 2,
+  "n_scored": 8
+ },
+ "cannot_answer": "P(a disturbance develops at all) -- failures are absent from the best-track archive; use run_disturbance_backtest with the TWO archive for that",
+ "conditions_on": "a tropical cyclone already existed at the moment simulated",
+ "contracts": [
+  {
+   "base_rate": 0.0011806375442739079,
+   "brier": 0.0013962266333819272,
+   "brier_climatology": 0.0011911972692234445,
+   "definition": "makes landfall in conus",
+   "key": "landfall_conus_any",
+   "kind": "landfall",
+   "n_events": 1,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 0,
+     "hi": 0.1,
+     "lo": 0.0,
+     "n": 844,
+     "observed": 0.001184834123222749,
+     "predicted": 0.004342222847921802
+    },
+    {
+     "bin": 1,
+     "hi": 0.2,
+     "lo": 0.1,
+     "n": 3,
+     "observed": 0.0,
+     "predicted": 0.117265416708515
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 699,
+    "beat_climatology": false,
+    "note": "THE GATE AND THE EVIDENCE DISAGREE. Enough storms carry this outcome archive-wide for the gate to allow a skill claim, but in the population this backtest replayed the method did not beat climatology. The gate counts events across the whole record; the skill that matters is skill within the population a query can actually draw from.",
+    "refused_by_gate": false,
+    "replay_events": 1,
+    "required": 10,
+    "verdict": "gate_missed"
+   },
+   "skill": -0.1721204115017354
+  },
+  {
+   "base_rate": 0.0,
+   "brier": 0.0,
+   "brier_climatology": 0.0,
+   "definition": "makes landfall in conus while >= 64 kt",
+   "key": "landfall_conus_hurricane",
+   "kind": "landfall",
+   "n_events": 0,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 0,
+     "hi": 0.1,
+     "lo": 0.0,
+     "n": 847,
+     "observed": 0.0,
+     "predicted": 0.0
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 292,
+    "beat_climatology": null,
+    "note": "The gate allows a skill claim, but no storm in the replayed population carried this outcome at all, so nothing was scored. An unmeasured contract is not a calibrated one.",
+    "refused_by_gate": false,
+    "replay_events": 0,
+    "required": 10,
+    "verdict": "gate_passed_but_degenerate"
+   },
+   "skill": null
+  },
+  {
+   "base_rate": 0.0070838252656434475,
+   "brier": 0.007279736517722997,
+   "brier_climatology": 0.007047126073042395,
+   "definition": "makes landfall in hawaii",
+   "key": "landfall_hawaii_any",
+   "kind": "landfall",
+   "n_events": 6,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 0,
+     "hi": 0.1,
+     "lo": 0.0,
+     "n": 845,
+     "observed": 0.007100591715976331,
+     "predicted": 0.0046403872869641245
+    },
+    {
+     "bin": 1,
+     "hi": 0.2,
+     "lo": 0.1,
+     "n": 2,
+     "observed": 0.0,
+     "predicted": 0.12450448157104632
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 11,
+    "beat_climatology": false,
+    "note": "THE GATE AND THE EVIDENCE DISAGREE. Enough storms carry this outcome archive-wide for the gate to allow a skill claim, but in the population this backtest replayed the method did not beat climatology. The gate counts events across the whole record; the skill that matters is skill within the population a query can actually draw from.",
+    "refused_by_gate": false,
+    "replay_events": 6,
+    "required": 10,
+    "verdict": "gate_missed"
+   },
+   "skill": -0.033007844938437225
+  },
+  {
+   "base_rate": 0.0,
+   "brier": 4.470422713171523e-05,
+   "brier_climatology": 1.447523993472729e-06,
+   "definition": "makes landfall in hawaii while >= 64 kt",
+   "key": "landfall_hawaii_hurricane",
+   "kind": "landfall",
+   "n_events": 0,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 0,
+     "hi": 0.1,
+     "lo": 0.0,
+     "n": 846,
+     "observed": 0.0,
+     "predicted": 0.0005522778559287146
+    },
+    {
+     "bin": 1,
+     "hi": 0.2,
+     "lo": 0.1,
+     "n": 1,
+     "observed": 0.0,
+     "predicted": 0.1063838961268775
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 2,
+    "beat_climatology": null,
+    "note": "The gate refuses a skill claim and the replay had no events to score either. Both agree there is nothing here.",
+    "refused_by_gate": true,
+    "replay_events": 0,
+    "required": 10,
+    "verdict": "refused_and_degenerate"
+   },
+   "skill": null
+  },
+  {
+   "base_rate": 0.16883116883116883,
+   "brier": 0.11583740792544095,
+   "brier_climatology": 0.14126506504083905,
+   "definition": "makes landfall in mexico",
+   "key": "landfall_mexico_any",
+   "kind": "landfall",
+   "n_events": 143,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 0,
+     "hi": 0.1,
+     "lo": 0.0,
+     "n": 379,
+     "observed": 0.026385224274406333,
+     "predicted": 0.03114746947160916
+    },
+    {
+     "bin": 1,
+     "hi": 0.2,
+     "lo": 0.1,
+     "n": 177,
+     "observed": 0.12994350282485875,
+     "predicted": 0.14711486617495692
+    },
+    {
+     "bin": 2,
+     "hi": 0.3,
+     "lo": 0.2,
+     "n": 164,
+     "observed": 0.3231707317073171,
+     "predicted": 0.24479281212243975
+    },
+    {
+     "bin": 3,
+     "hi": 0.4,
+     "lo": 0.3,
+     "n": 83,
+     "observed": 0.43373493975903615,
+     "predicted": 0.34921330283112845
+    },
+    {
+     "bin": 4,
+     "hi": 0.5,
+     "lo": 0.4,
+     "n": 28,
+     "observed": 0.4642857142857143,
+     "predicted": 0.436345126113712
+    },
+    {
+     "bin": 5,
+     "hi": 0.6,
+     "lo": 0.5,
+     "n": 10,
+     "observed": 0.7,
+     "predicted": 0.5289201909494659
+    },
+    {
+     "bin": 6,
+     "hi": 0.7,
+     "lo": 0.6,
+     "n": 4,
+     "observed": 0.25,
+     "predicted": 0.645982225918957
+    },
+    {
+     "bin": 7,
+     "hi": 0.8,
+     "lo": 0.7,
+     "n": 2,
+     "observed": 0.0,
+     "predicted": 0.7593929185952208
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 467,
+    "beat_climatology": true,
+    "note": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_gate": false,
+    "replay_events": 143,
+    "required": 10,
+    "verdict": "agreed_scoreable"
+   },
+   "skill": 0.17999961354951477
+  },
+  {
+   "base_rate": 0.06729634002361275,
+   "brier": 0.059954736120263814,
+   "brier_climatology": 0.06327023181336787,
+   "definition": "makes landfall in mexico while >= 64 kt",
+   "key": "landfall_mexico_hurricane",
+   "kind": "landfall",
+   "n_events": 57,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 0,
+     "hi": 0.1,
+     "lo": 0.0,
+     "n": 690,
+     "observed": 0.0463768115942029,
+     "predicted": 0.02707345673130374
+    },
+    {
+     "bin": 1,
+     "hi": 0.2,
+     "lo": 0.1,
+     "n": 147,
+     "observed": 0.1564625850340136,
+     "predicted": 0.13869647087835904
+    },
+    {
+     "bin": 2,
+     "hi": 0.3,
+     "lo": 0.2,
+     "n": 10,
+     "observed": 0.2,
+     "predicted": 0.24807997444720953
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 147,
+    "beat_climatology": true,
+    "note": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_gate": false,
+    "replay_events": 57,
+    "required": 10,
+    "verdict": "agreed_scoreable"
+   },
+   "skill": 0.052402142335814084
+  },
+  {
+   "base_rate": 0.5041322314049587,
+   "brier": 0.22198091792287933,
+   "brier_climatology": 0.25010748373830144,
+   "definition": "reaches >= 64 kt (cat1)",
+   "key": "reaches_cat1_64kt",
+   "kind": "intensity",
+   "n_events": 427,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 0,
+     "hi": 0.1,
+     "lo": 0.0,
+     "n": 7,
+     "observed": 0.2857142857142857,
+     "predicted": 0.03436743961830417
+    },
+    {
+     "bin": 1,
+     "hi": 0.2,
+     "lo": 0.1,
+     "n": 26,
+     "observed": 0.23076923076923078,
+     "predicted": 0.1592504418623597
+    },
+    {
+     "bin": 2,
+     "hi": 0.3,
+     "lo": 0.2,
+     "n": 79,
+     "observed": 0.22784810126582278,
+     "predicted": 0.2570106230811176
+    },
+    {
+     "bin": 3,
+     "hi": 0.4,
+     "lo": 0.3,
+     "n": 128,
+     "observed": 0.3125,
+     "predicted": 0.3456169095266224
+    },
+    {
+     "bin": 4,
+     "hi": 0.5,
+     "lo": 0.4,
+     "n": 127,
+     "observed": 0.4251968503937008,
+     "predicted": 0.44807964946966583
+    },
+    {
+     "bin": 5,
+     "hi": 0.6,
+     "lo": 0.5,
+     "n": 174,
+     "observed": 0.5632183908045977,
+     "predicted": 0.5539464624992091
+    },
+    {
+     "bin": 6,
+     "hi": 0.7,
+     "lo": 0.6,
+     "n": 180,
+     "observed": 0.6444444444444445,
+     "predicted": 0.6419887320124179
+    },
+    {
+     "bin": 7,
+     "hi": 0.8,
+     "lo": 0.7,
+     "n": 97,
+     "observed": 0.7525773195876289,
+     "predicted": 0.7499227192524129
+    },
+    {
+     "bin": 8,
+     "hi": 0.9,
+     "lo": 0.8,
+     "n": 29,
+     "observed": 0.6896551724137931,
+     "predicted": 0.8324155057263682
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 1855,
+    "beat_climatology": true,
+    "note": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_gate": false,
+    "replay_events": 427,
+    "required": 10,
+    "verdict": "agreed_scoreable"
+   },
+   "skill": 0.11245791367383551
+  },
+  {
+   "base_rate": 0.2526564344746163,
+   "brier": 0.17037496661580362,
+   "brier_climatology": 0.18996393053580163,
+   "definition": "reaches >= 96 kt (cat3)",
+   "key": "reaches_cat3_96kt",
+   "kind": "intensity",
+   "n_events": 214,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 0,
+     "hi": 0.1,
+     "lo": 0.0,
+     "n": 183,
+     "observed": 0.07103825136612021,
+     "predicted": 0.05347753755386692
+    },
+    {
+     "bin": 1,
+     "hi": 0.2,
+     "lo": 0.1,
+     "n": 223,
+     "observed": 0.17488789237668162,
+     "predicted": 0.14970522722837595
+    },
+    {
+     "bin": 2,
+     "hi": 0.3,
+     "lo": 0.2,
+     "n": 169,
+     "observed": 0.2781065088757396,
+     "predicted": 0.24824679532646654
+    },
+    {
+     "bin": 3,
+     "hi": 0.4,
+     "lo": 0.3,
+     "n": 137,
+     "observed": 0.35766423357664234,
+     "predicted": 0.34868895312142595
+    },
+    {
+     "bin": 4,
+     "hi": 0.5,
+     "lo": 0.4,
+     "n": 100,
+     "observed": 0.51,
+     "predicted": 0.4434679695243281
+    },
+    {
+     "bin": 5,
+     "hi": 0.6,
+     "lo": 0.5,
+     "n": 31,
+     "observed": 0.45161290322580644,
+     "predicted": 0.5353085991792265
+    },
+    {
+     "bin": 6,
+     "hi": 0.7,
+     "lo": 0.6,
+     "n": 4,
+     "observed": 0.25,
+     "predicted": 0.6102195450899884
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 775,
+    "beat_climatology": true,
+    "note": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_gate": false,
+    "replay_events": 214,
+    "required": 10,
+    "verdict": "agreed_scoreable"
+   },
+   "skill": 0.10311938621582784
+  },
+  {
+   "base_rate": 0.17591499409681227,
+   "brier": 0.13868753381397983,
+   "brier_climatology": 0.14696870303203163,
+   "definition": "reaches >= 113 kt (cat4)",
+   "key": "reaches_cat4_113kt",
+   "kind": "intensity",
+   "n_events": 149,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 0,
+     "hi": 0.1,
+     "lo": 0.0,
+     "n": 354,
+     "observed": 0.08192090395480225,
+     "predicted": 0.0485194031768419
+    },
+    {
+     "bin": 1,
+     "hi": 0.2,
+     "lo": 0.1,
+     "n": 286,
+     "observed": 0.1888111888111888,
+     "predicted": 0.1464990681155311
+    },
+    {
+     "bin": 2,
+     "hi": 0.3,
+     "lo": 0.2,
+     "n": 162,
+     "observed": 0.3271604938271605,
+     "predicted": 0.24414458844378978
+    },
+    {
+     "bin": 3,
+     "hi": 0.4,
+     "lo": 0.3,
+     "n": 43,
+     "observed": 0.3023255813953488,
+     "predicted": 0.33187130137180476
+    },
+    {
+     "bin": 4,
+     "hi": 0.5,
+     "lo": 0.4,
+     "n": 2,
+     "observed": 0.0,
+     "predicted": 0.4182575430616055
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 473,
+    "beat_climatology": true,
+    "note": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_gate": false,
+    "replay_events": 149,
+    "required": 10,
+    "verdict": "agreed_scoreable"
+   },
+   "skill": 0.05634648089836469
+  },
+  {
+   "base_rate": 0.8937426210153483,
+   "brier": 0.09290415170107541,
+   "brier_climatology": 0.09735186509471773,
+   "definition": "reaches >= 34 kt (ts)",
+   "key": "reaches_ts_34kt",
+   "kind": "intensity",
+   "n_events": 757,
+   "n_forecasts": 847,
+   "n_refused": 192,
+   "n_storms": 847,
+   "n_unresolved": 0,
+   "refused_reason": null,
+   "reliability": [
+    {
+     "bin": 1,
+     "hi": 0.2,
+     "lo": 0.1,
+     "n": 1,
+     "observed": 1.0,
+     "predicted": 0.1891418770133731
+    },
+    {
+     "bin": 3,
+     "hi": 0.4,
+     "lo": 0.3,
+     "n": 3,
+     "observed": 1.0,
+     "predicted": 0.36694258626332904
+    },
+    {
+     "bin": 4,
+     "hi": 0.5,
+     "lo": 0.4,
+     "n": 7,
+     "observed": 0.5714285714285714,
+     "predicted": 0.471900125593065
+    },
+    {
+     "bin": 5,
+     "hi": 0.6,
+     "lo": 0.5,
+     "n": 16,
+     "observed": 0.5625,
+     "predicted": 0.557784870238863
+    },
+    {
+     "bin": 6,
+     "hi": 0.7,
+     "lo": 0.6,
+     "n": 53,
+     "observed": 0.7735849056603774,
+     "predicted": 0.6659989879932333
+    },
+    {
+     "bin": 7,
+     "hi": 0.8,
+     "lo": 0.7,
+     "n": 71,
+     "observed": 0.8169014084507042,
+     "predicted": 0.7611455688628438
+    },
+    {
+     "bin": 8,
+     "hi": 0.9,
+     "lo": 0.8,
+     "n": 223,
+     "observed": 0.874439461883408,
+     "predicted": 0.8565851426504629
+    },
+    {
+     "bin": 9,
+     "hi": 1.0,
+     "lo": 0.9,
+     "n": 473,
+     "observed": 0.9429175475687104,
+     "predicted": 0.9488795715131033
+    }
+   ],
+   "scope_audit": {
+    "archive_events": 3278,
+    "beat_climatology": true,
+    "note": "The gate allows a skill claim here and the replay earned one.",
+    "refused_by_gate": false,
+    "replay_events": 757,
+    "required": 10,
+    "verdict": "agreed_scoreable"
+   },
+   "skill": 0.0456869869859704
+  }
+ ],
+ "ledger": {
+  "path": "backtest-ledger.parquet",
+  "rows": 10390
+ },
+ "min_events_for_skill": 10,
+ "mode": "genesis_conditioned",
+ "n_storms_replayed": 1039,
+ "n_storms_skipped_burn_in": 50,
+ "provenance": {
+  "backtest_built_utc": "2026-08-18T01:37:05Z",
+  "backtest_processing_version": "1.0.0",
+  "backtest_sha256": "f946ec9773f5fa586deaaa8e508fefe856fdd3e6cbf9450d8082688db3e766b6",
+  "methodology_version": "1.0.0",
+  "processing_version": "1.0.0",
+  "source": "data/genesis-archive/backtest.json"
+ },
+ "schema": "atlas-calibration/1",
+ "settings": {
+  "basins": [
+   "EP"
+  ],
+  "burn_in_storms": 50,
+  "max_season": null,
+  "min_pool_season": 1971,
+  "min_sample": 10,
+  "min_season": 1971,
+  "radius_km": 500.0,
+  "regions": [
+   "hawaii",
+   "conus",
+   "mexico"
+  ],
+  "season_window_months": 3,
+  "subbasins": null
+ }
+}

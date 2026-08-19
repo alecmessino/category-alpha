@@ -27,9 +27,25 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
 
+/* THE GUARD THAT STOPS A VACUOUS PASS.
+ *
+ * A skip prints "SKIPPED, not passed" and exits 0, which is right on a developer's machine and
+ * catastrophic in CI: a workflow step that runs this without a browser installed goes green
+ * forever while testing nothing, and the gate that catches the failures the static checks
+ * cannot would be the gate nobody notices died. `--require-browser` turns the skip into an
+ * exit 2. CI passes it; a laptop without playwright does not have to. */
+const REQUIRE_BROWSER = process.argv.includes("--require-browser")
+  || process.env.ATLAS_REQUIRE_BROWSER === "1";
+
 let chromium;
 try { ({ chromium } = await import("playwright")); }
 catch {
+  if (REQUIRE_BROWSER) {
+    console.error("[atlas-dom] playwright is REQUIRED here and is not installed.");
+    console.error("            this gate was asked to run and could not, which is a failure,");
+    console.error("            not a skip. install it or drop --require-browser.");
+    process.exit(2);
+  }
   console.log("[atlas-dom] playwright is not installed - SKIPPED, not passed.");
   console.log("            npm i --no-save playwright && npx playwright install chromium");
   process.exit(0);
@@ -403,6 +419,109 @@ console.log("\n[4e] the environment is a lens, and it costs nothing to refuse");
   ok("no environmental CONDITION is offered", /No environmental CONDITION is offered/.test(t));
   ok("and the reason is coverage, not caution",
     /would answer a 40-year question while looking like a 175-year one/.test(t));
+
+  await page.evaluate(() => { history.replaceState(null, "", location.pathname); });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
+    { timeout: 90000 });
+  await page.waitForTimeout(700);
+}
+
+console.log("\n[4f] the calibration ledger — reachable, and it publishes its own failures");
+{
+  /* THE LEDGER IS THE WARRANT FOR EVERYTHING ELSE ON THE SITE, so the checks are about whether
+     a reader can REACH it and whether what they find there includes the parts that do not
+     flatter the method. A calibration page that only published its wins would be marketing
+     with a table in it. */
+  await page.evaluate(() => { history.replaceState(null, "", location.pathname); });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
+    { timeout: 90000 });
+  await page.waitForTimeout(700);
+
+  ok("the ledger is in the masthead, not behind a toggle",
+    await page.evaluate(() => !!document.querySelector("[data-open-ledger]")));
+
+  await page.click("[data-open-ledger]");
+  await page.waitForFunction(() => document.querySelectorAll("[data-contract]").length > 0,
+    { timeout: 30000 });
+  await page.waitForTimeout(400);
+
+  ok("opening it makes it a surface, not a panel over the map",
+    await page.evaluate(() => {
+      const shell = document.querySelector(".atlas-shell");
+      return shell.getAttribute("data-view") === "calibration"
+        && !document.querySelector(".atlas-rail") && !document.querySelector(".atlas-stage");
+    }));
+  ok("and it is addressable — the URL carries the surface",
+    await page.evaluate(() => location.search.includes("view=calibration")));
+
+  let t = await text();
+  ok("every contract the harness scored is on screen",
+    await page.evaluate(() => document.querySelectorAll("[data-contract]").length) === 10);
+
+  // The eight things a contract row has to carry.
+  ok("contract definitions are shown", /makes landfall in mexico/.test(t));
+  ok("event counts over their denominator", /events \/ forecasts/.test(t));
+  ok("the empirical base rate", /empirical base rate/.test(t));
+  ok("the climatological benchmark", /climatology/i.test(t));
+  ok("Brier and skill", /Brier/.test(t) && /skill/i.test(t));
+  ok("a reliability curve per contract",
+    await page.evaluate(() =>
+      [...document.querySelectorAll("[data-contract] svg")].length >= 8));
+  ok("a calibration status per contract", /CALIBRATED/.test(t));
+  ok("and the methodology and archive stamp", /methodology version/i.test(t)
+    && /backtest sha256/i.test(t));
+
+  /* THE HALF THAT DOES NOT FLATTER. */
+  ok("the contracts with no skill are on the same page as the ones with skill",
+    /GATE MISSED IT/.test(t));
+  ok("the divider marking where skill stops is drawn from the data",
+    await page.evaluate(() => !!document.querySelector("[data-skill-divider]")));
+  ok("and it says how few of them the refusal gate catches",
+    /BELOW THIS LINE NO CONTRACT BEAT CLIMATOLOGY/.test(t));
+  ok("the gate's disagreement with the evidence is stated in full",
+    /THE GATE AND THE EVIDENCE DISAGREE/.test(t));
+  ok("and names the reason — the gate counts the wrong population",
+    /counts events across the whole record/i.test(t));
+  ok("a contract the replay never tested publishes no skill score, and says so",
+    /NEVER SCORED/.test(t) && /An unmeasured contract is not a calibrated one/.test(t));
+
+  /* WHAT THE BACKTEST CANNOT ANSWER -- the sentence that stops a reader carrying these numbers
+     over to the question it never asked. */
+  ok("what the backtest cannot answer is on the page",
+    /WHAT THIS CANNOT ANSWER/.test(t) && /failures are absent from the best-track archive/.test(t));
+  ok("and what it conditions on", /a tropical cyclone already existed/.test(t));
+
+  ok("nothing on the page is computed in the browser, and it says so",
+    /Nothing on this page is computed in the browser/.test(t));
+
+  // Back to the map, then in again from a refusal.
+  await page.click("[data-back-to-map]");
+  await page.waitForTimeout(600);
+  ok("the way back exists", await page.evaluate(() => !!document.querySelector(".atlas-stage")));
+
+  await clickLatLng(14.6, -113.9);
+  const evidence = await page.evaluate(() =>
+    document.querySelectorAll("[data-evidence-link]").length);
+  ok("a refusal on the map carries a link to its own evidence", evidence > 0, `${evidence} links`);
+  await page.click("[data-evidence-link]");
+  await page.waitForFunction(() => document.querySelectorAll("[data-contract]").length > 0,
+    { timeout: 30000 });
+  await page.waitForTimeout(500);
+  t = await text();
+  ok("following it lands on the ledger",
+    await page.evaluate(() => location.search.includes("view=calibration")));
+  /* Either the contract exists and is anchored, or it was never scored and the page says so.
+     A dead anchor would let a reader read silence as approval. */
+  const anchored = await page.evaluate(() =>
+    new URLSearchParams(location.search).get("contract"));
+  const landed = await page.evaluate((k) =>
+    !!document.querySelector(`[data-contract="${k}"]`), anchored);
+  ok("carrying the contract that was refused", !!anchored, String(anchored));
+  ok("and either shows that contract or says it was never scored",
+    landed || /NOT SCORED BY THIS BACKTEST/.test(t),
+    `${anchored} present=${landed}`);
 
   await page.evaluate(() => { history.replaceState(null, "", location.pathname); });
   await page.reload({ waitUntil: "domcontentloaded" });
