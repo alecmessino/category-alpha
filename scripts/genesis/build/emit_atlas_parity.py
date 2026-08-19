@@ -198,22 +198,21 @@ def build(archive_dir: Path | None = None) -> dict:
             "kwargs": _kwargs_json(kw),
             "expect": {
                 "n_cases": r.n_cases,
-                # Only the counting half. The rate, the weighted rate and the interval are not
-                # compared because the browser does not compute them -- it returns
-                # UNSCOREABLE -- REQUIRES CANONICAL COMPUTATION instead. What IS compared is
-                # every numerator, every denominator and every unknown, because the archive
-                # publishes those unconditionally and so does the Atlas.
-                "intensity_counts": {
-                    k: {"count": v["count"], "n_storms": v["n_storms"],
-                        "n_unknown": v["n_unknown"]}
-                    for k, v in r.intensity.items()
-                },
-                "landfall_counts": {
-                    region: {kind: {"count": cell["count"], "n_storms": cell["n_storms"],
-                                    "n_unknown": cell["n_unknown"]}
-                             for kind, cell in by_kind.items()}
-                    for region, by_kind in r.landfall.items()
-                },
+                # THE WHOLE RATE OBJECT, not just its counting half.
+                #
+                # Until Phase 3.1 only count/n_storms/n_unknown were emitted, because the
+                # browser refused to compute a rate it had not proven. It computes them now, so
+                # every field travels: the rate itself, the WEIGHTED rate, the Wilson bounds and
+                # the refusal reason. The reason string is compared verbatim -- a refusal whose
+                # wording drifted between the two surfaces would be a second methodology
+                # announcing itself in prose rather than in numbers.
+                "intensity": {k: dict(v) for k, v in r.intensity.items()},
+                "landfall": {region: {kind: dict(cell) for kind, cell in by_kind.items()}
+                             for region, by_kind in r.landfall.items()},
+                # n and five quantiles per outcome, in hours. The landfall series counts one
+                # value per LANDFALL rather than per storm, so a storm that came ashore in a
+                # region twice contributes both transits.
+                "time_to_event": {k: dict(v) for k, v in r.time_to_event.items()},
                 "unscoreable": r.unscoreable,
                 "env_unmatched_excluded": r.env_unmatched_excluded,
                 "effective_sample_size": r.effective_sample_size,

@@ -455,8 +455,13 @@ function AXEntry({ e, dense }) {
                   <tbody>
                     {e.cases.map((c) => {
                       const L = AX_LADDER.filter((x) => x.k === c.max_category)[0];
+                      /* Keyed on storm_id, the ARCHIVE'S OWN key, which is never null. atcf_id
+                         is null for pre-ATCF-era storms, and two of those in one pool gave two
+                         React children the key `null` -- which React warns "may cause children
+                         to be duplicated and/or omitted", i.e. a row showing the wrong storm.
+                         The fallbacks cover a payload emitted before storm_id was carried. */
                       return (
-                        <tr key={c.atcf_id}>
+                      <tr key={c.storm_id || c.atcf_id || `${c.season}:${c.name}`}>
                           <td style={{ ...td, fontWeight: 700 }}>{c.season}</td>
                           <td style={{ ...td, color: "var(--text-1)" }}>{c.name}</td>
                           <td style={{ ...td, color: "var(--text-2)" }}>{c.atcf_id}</td>

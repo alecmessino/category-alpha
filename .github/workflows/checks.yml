@@ -212,3 +212,12 @@ jobs:
       # a single fix, which no sampled clock can be relied on to land on.
       - name: Verify the replay clock skips dead air and nothing else
         run: node scripts/test-atlas-timeline.mjs
+
+      # The fifth rule is NOT in the archive's Python -- it is a guard the browser adds for a
+      # hazard that only exists once one cohort spec drives both the map and the statistics:
+      # a variable used to define a cohort cannot be reported as an outcome of it. Two things
+      # must hold at once, and the second is the dangerous one: the rule must fire, AND it must
+      # be perfectly additive, because a guard that quietly perturbed a canonical result would
+      # be a second methodology introduced through the back door.
+      - name: Verify a cohort cannot report itself as its own outcome
+        run: node scripts/test-atlas-rates.mjs

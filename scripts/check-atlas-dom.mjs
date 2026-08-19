@@ -147,7 +147,7 @@ await clickLatLng(14.6, -113.9);
   ok("a count over a denominator", /\d+\s*\/\s*\d+/.test(t));
   ok("the effective sample size is published", /EFFECTIVE SAMPLE SIZE/.test(t));
   ok("the sample gate states its own threshold", /SUFFICIENT · \d+ ≥ \d+|BELOW SAMPLE/.test(t));
-  ok("counts are labelled as counts, not rates", /counts, not rates/.test(t));
+  ok("the rate ladder declares its own shape", /count · rate · 95% Wilson/.test(t));
   ok("storms with no recorded intensity leave the denominator",
     /out of every denominator above/.test(t));
   ok("an unscoreable contract is badged", /BASE RATE ONLY -- unscoreable/.test(t));
@@ -155,20 +155,33 @@ await clickLatLng(14.6, -113.9);
   ok("pathway frequency is labelled as frequency", /HISTORICAL PATHWAY FREQUENCY/.test(t));
   ok("and disclaimed as not a forecast", /THIS IS NOT A FORECAST/.test(t));
   ok("and denies being a cone", /not a forecast cone/.test(t));
-  ok("the conditioned rates are refused, not approximated",
-    /UNSCOREABLE -- REQUIRES CANONICAL COMPUTATION/.test(t));
-  ok("the refusal says who can answer", /archive can answer this/.test(t));
+  ok("a Wilson interval accompanies the rates",
+    /\[\s*\d+\s*[-–—]\s*\d+%\s*\]/.test(t));
+  ok("the weighted rate is shown beside the unweighted one", /weighted \d+(\.\d+)?%/.test(t));
+  ok("the conditioning the rates assume is stated",
+    /GENESIS-CONDITIONED|assume a tropical cyclone forms/i.test(t));
+  ok("and that landfall does not decompose as a product",
+    /Landfall does NOT decompose/i.test(t));
   ok("the pre-1971 observing bias is surfaced verbatim",
     /before 1971, when East Pacific intensities were estimated/.test(t));
-  /* Phase 1 publishes no conditioned rate, so no percentage this surface COMPUTED may reach the
-     screen. It cannot be satisfied by wording -- either a percent sign is rendered or it is not.
-     The archive's own gap prose is excluded, and deliberately: those strings quote measured
+  /* THE RULE CHANGED SHAPE IN PHASE 3.1, AND GOT STRICTER RATHER THAN LOOSER.
+     Phase 1 published no conditioned rate, so the probe was "no percentage at all" -- easy to
+     satisfy by saying nothing. The rates are ported and proven now, so percentages legitimately
+     appear, and the rule becomes the archive's own first panel rule: NO BARE PERCENTAGE. Every
+     percent must be accompanied, in the same region of the screen, by the count over the
+     denominator it came from AND by a Wilson interval. That is harder to satisfy than silence,
+     and it is the property that actually matters: a reader must never be handed a probability
+     stripped of the evidence it rests on.
+     The archive's own gap prose is excluded, deliberately -- those strings quote measured
      figures ("1.7% Cat 3 in the 1960s vs 20-30% from the 1970s on") and are reproduced verbatim
-     because rewording a finding is how a finding stops being one. What is asserted here is that
-     no percentage appears among the STATISTICS -- everything above the gap section. */
+     because rewording a finding is how a finding stops being one. */
   const computed = t.split("GAPS THE ARCHIVE RECORDED")[0];
-  ok("no percentage among the statistics — this build publishes counts", !/\d%/.test(computed),
-    (computed.match(/.{0,50}\d%.{0,50}/) || [""])[0]);
+  const pcts = computed.match(/\d+(\.\d+)?%/g) || [];
+  ok("the surface publishes rates now", pcts.length > 0);
+  ok("every percentage sits with a count over a denominator",
+    !pcts.length || /\d+\s*\/\s*\d+/.test(computed));
+  ok("and none appears without an interval beside it",
+    !pcts.length || /\[\s*\d+\s*[-–—]\s*\d+%\s*\]/.test(computed));
   ok("the archive's own measured percentages survive verbatim in its gaps",
     /1\.7% Cat 3 in the 1960s/.test(t));
 }

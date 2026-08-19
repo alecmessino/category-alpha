@@ -42,6 +42,23 @@ PROCESSING_VERSION = "1.0.0"
 # constant and scripts/test-atlas-parity.mjs fails when they disagree. A methodology change
 # then becomes a visible, versioned event rather than a silent divergence -- which is the
 # whole reason a second surface was allowed to exist at all.
+#
+# WHY PHASE 3.1 DID NOT BUMP THIS, THOUGH IT LOOKED LIKE IT SHOULD.
+# That phase ported the conditioned rates, the Wilson intervals, the ESS and the time-to-event
+# distributions into the browser -- a large change to what the Atlas PUBLISHES, and none at all
+# to what this constant versions. The refusal gates, the weighting, the interval and the
+# effective sample size are the same definitions they were; the browser simply stopped
+# declining to evaluate them. Both surfaces still declare 1.0.0 and the parity harness still
+# proves they agree, which is precisely the invariant this constant protects. Bumping it would
+# have announced a definition change that did not happen, and a version that moves for reasons
+# other than its stated one stops being evidence of anything.
+#
+# The browser did gain one rule the Python does not have -- a variable used to define a cohort
+# may not be reported as an outcome of it (docs/storm-atlas/src/engine/rates.js). It is inert:
+# it fires only when a caller declares what it conditioned on, and no caller does yet. When the
+# cohort layer starts declaring it, that IS a methodology event -- and the answer then is to add
+# the rule to this Python too and bump both together, because "one methodology, several
+# execution surfaces" stops being true the moment a rule lives in only one of them.
 METHODOLOGY_VERSION = "1.0.0"
 
 REPO_ROOT = Path(__file__).resolve().parents[2]

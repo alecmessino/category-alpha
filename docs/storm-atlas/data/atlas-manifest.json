@@ -18,6 +18,31 @@
   "genesis_events.two_first_mention_utc": "NULL on every row",
   "genesis_events.two_lead_hours": "NULL on every row"
  },
+ "env_coverage": {
+  "by_source": {
+   "ships_dev": {
+    "first_utc": "1982-05-20 00:00:00+00:00",
+    "last_utc": "2022-11-11 12:00:00+00:00",
+    "rows": 32003,
+    "storms": 1408
+   },
+   "ships_dev+csst": {
+    "first_utc": "2023-01-16 12:00:00+00:00",
+    "last_utc": "2023-11-26 12:00:00+00:00",
+    "rows": 839,
+    "storms": 41
+   },
+   "ships_rt": {
+    "first_utc": "2026-03-11 18:00:00+00:00",
+    "last_utc": "2026-08-19 00:00:00+00:00",
+    "rows": 41,
+    "storms": 12
+   }
+  },
+  "note": "Sources are reported separately and must not be pooled: ships_dev+csst carries a CLIMATOLOGICAL sea-surface temperature where ships_dev carries an observed one. No storm in this archive draws on more than one source, but a matched pool can contain storms from several.",
+  "storms_any_source": 1461,
+  "storms_total": 3959
+ },
  "env_genesis_window_hours": 12.0,
  "files": {
   "atlas-core-v1.bin.gz": {

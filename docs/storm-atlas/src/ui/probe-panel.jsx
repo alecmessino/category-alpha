@@ -5,18 +5,24 @@
  * publishes unconditionally: the pool, the effective sample size, the counts, and every gap the
  * archive recorded about them.
  *
- * WHAT IT DOES NOT PUBLISH, AND SAYS SO. No probability, no Wilson interval, no skill number.
- * Those are conditioned rates, and this build has not yet proven its port of them against the
- * archive. Publishing them anyway -- as a division the browser could obviously do -- is exactly
- * the drift the parity gate exists to prevent, so the panel shows the refusal instead. A
- * numerator over a denominator is not a rate; it is the evidence a rate would be computed from,
- * and the archive returns it whether or not the sample earns a rate.
+ * WHAT IT PUBLISHES, AND UNDER WHICH RULES. As of Phase 3.1 the conditioned rates are ported
+ * and proven at parity, so they appear -- under the same four rules the terminal's Analog Prior
+ * panel keeps, because two surfaces of one archive must not disagree about how a rate is shown:
+ *
+ *   1. NO BARE PERCENTAGE. Every rate renders as count / denominator, the percent, and its 95%
+ *      Wilson interval in the same row. A reader who wants only the percent has to ignore the
+ *      evidence beside it; they are never given the percent alone.
+ *   2. A REFUSED RATE PRINTS THE REFUSAL, with the archive's own reason -- never 0.0%.
+ *   3. AN UNSCOREABLE CONTRACT PRINTS `BASE RATE ONLY`. No skill number for it exists anywhere
+ *      in this repository to display.
+ *   4. THE CONDITIONING NOTE IS REPRODUCED, because a genesis-conditioned rate that does not
+ *      say so is a different claim from the one the archive made.
  */
 
 import React from "react";
 import { CATEGORY_COLOR, CATEGORY_ORDER } from "../render/palette.js";
 import { formatPosition } from "../engine/geo.js";
-import { Chip, Gap, Head, MONO, Num, OverDenom, Row, Txt, Unscoreable, claimText } from "./kit.jsx";
+import { Chip, Gap, Head, MONO, Num, OverDenom, Row, Txt, claimText } from "./kit.jsx";
 
 const CAT_LABEL = { td: "TROPICAL DEPRESSION", ts: "TROPICAL STORM", cat1: "CATEGORY 1",
   cat2: "CATEGORY 2", cat3: "CATEGORY 3", cat4: "CATEGORY 4", cat5: "CATEGORY 5" };
@@ -88,48 +94,50 @@ export function ProbePanel({ probe, result, onRadius, onClose, onSelectStorm, on
           <Row k="median genesis" v={<Txt value={medianPosition(r.cases)} />} />
 
           <Head right={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
-            color: "var(--text-2)" }}>counts, not rates</span>}>WHAT THEY BECAME</Head>
+            color: "var(--text-2)" }}>count · rate · 95% Wilson</span>}>WHAT THEY BECAME</Head>
           <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
             lineHeight: "var(--lh-body)", marginBottom: "var(--sp-3)" }}>
             Distinct storms reaching each threshold, over the storms whose intensity the archive
             actually recorded.
           </div>
           {CATEGORY_ORDER.filter((c) => c !== "td").map((cat) => {
-            const cell = r.intensity_counts[cat];
+            const cell = r.intensity[cat];
             if (!cell) return null;
             return (
-              <div key={cat} style={{ display: "flex", alignItems: "center",
-                gap: "var(--sp-3)", padding: "2px 0" }}>
-                <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
-                  color: CATEGORY_COLOR[cat], width: 128, flex: "none" }}>
-                  {CAT_LABEL[cat]}
-                </span>
-                <div style={{ flex: 1, height: 4, background: "var(--surface-sunken)",
-                  borderRadius: 2, overflow: "hidden" }}>
-                  <div style={{
-                    width: cell.n_storms ? `${(100 * cell.count) / cell.n_storms}%` : 0,
-                    height: "100%", background: CATEGORY_COLOR[cat], opacity: 0.65,
-                  }} />
+              <div key={cat} style={{ padding: "3px 0" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "var(--sp-3)" }}>
+                  <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
+                    color: CATEGORY_COLOR[cat], width: 128, flex: "none" }}>
+                    {CAT_LABEL[cat]}
+                  </span>
+                  <div style={{ flex: 1, height: 4, background: "var(--surface-sunken)",
+                    borderRadius: 2, overflow: "hidden" }}>
+                    <div style={{
+                      width: cell.n_storms ? `${(100 * cell.count) / cell.n_storms}%` : 0,
+                      height: "100%", background: CATEGORY_COLOR[cat], opacity: 0.65,
+                    }} />
+                  </div>
+                  <span style={{ width: 62, textAlign: "right", flex: "none" }}>
+                    <OverDenom n={cell.count} of={cell.n_storms} />
+                  </span>
                 </div>
-                <span style={{ width: 62, textAlign: "right", flex: "none" }}>
-                  <OverDenom n={cell.count} of={cell.n_storms} />
-                </span>
+                <RateLine cell={cell} />
               </div>
             );
           })}
-          {r.intensity_counts.ts && r.intensity_counts.ts.n_unknown > 0 ? (
+          {r.intensity.ts && r.intensity.ts.n_unknown > 0 ? (
             <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--warn)",
               marginTop: "var(--sp-3)", lineHeight: "var(--lh-body)" }}>
-              {r.intensity_counts.ts.n_unknown} storm(s) are out of every denominator above —
+              {r.intensity.ts.n_unknown} storm(s) are out of every denominator above —
               the archive records no intensity for them. An unknown outcome is not a failure to
               reach a threshold.
             </div>
           ) : null}
 
-          {Object.keys(r.landfall_counts).length ? (
+          {Object.keys(r.landfall).length ? (
             <>
               <Head>WHERE THEY LANDED</Head>
-              {Object.entries(r.landfall_counts).sort().map(([region, kinds]) => (
+              {Object.entries(r.landfall).sort().map(([region, kinds]) => (
                 <div key={region}>
                   <Row k={region.replace(/_/g, " ")} v={
                     <span>
@@ -137,6 +145,10 @@ export function ProbePanel({ probe, result, onRadius, onClose, onSelectStorm, on
                       <span style={{ color: "var(--text-2)" }}> · ≥64 kt </span>
                       <OverDenom n={kinds.hurricane.count} of={kinds.hurricane.n_storms} />
                     </span>} />
+                  <div style={{ paddingLeft: "var(--sp-4)" }}>
+                    <RateLine cell={kinds.any} label="any" />
+                    <RateLine cell={kinds.hurricane} label="≥64 kt" />
+                  </div>
                   {["any", "hurricane"].map((kind) => {
                     const u = r.unscoreable[`${region}:${kind}`];
                     if (!u) return null;
@@ -169,8 +181,32 @@ export function ProbePanel({ probe, result, onRadius, onClose, onSelectStorm, on
             </div>
           </div>
 
-          <Head>CONDITIONED RATES</Head>
-          <Unscoreable state={r.rates} />
+          {hasTimes(r.time_to_event) ? (
+            <>
+              <Head right={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
+                color: "var(--text-2)" }}>hours from genesis</span>}>HOW LONG IT TOOK</Head>
+              {Object.entries(r.time_to_event).map(([key, d]) => {
+                if (!d || !d.n) return null;
+                return (
+                  <Row key={key} k={key.replace("landfall_", "landfall · ").replace(/_/g, " ")}
+                    v={<span style={{ ...MONO }}>
+                      {Math.round(d.median)} h
+                      <span style={{ color: "var(--text-2)" }}>
+                        {" "}· p25 {Math.round(d.p25)} · p75 {Math.round(d.p75)} · n {d.n}
+                      </span>
+                    </span>} />
+                );
+              })}
+            </>
+          ) : null}
+
+          {/* RULE 4: the conditioning note travels with the numbers rather than being written
+              into the page, so it cannot drift away from what it qualifies. */}
+          <Head>WHAT THESE RATES ASSUME</Head>
+          <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+            lineHeight: "var(--lh-body)" }}>
+            {claimText("atlas.rates")}
+          </div>
 
           {r.gaps.length ? (
             <>
@@ -259,4 +295,62 @@ function medianPosition(cases) {
   const mid = (a) => (a.length % 2 ? a[(a.length - 1) / 2]
     : (a[a.length / 2 - 1] + a[a.length / 2]) / 2);
   return formatPosition(mid(lat), mid(lon));
+}
+
+/* One rate, under the archive's first panel rule: NEVER A BARE PERCENTAGE.
+ *
+ * The percent only ever appears beside the interval that qualifies it, and the weighted rate
+ * only ever appears with the note that the archive publishes no interval for it. Three states,
+ * and the two that are not a rate are the ones that matter most:
+ *
+ *   - REFUSED by the sample gate -> the archive's own reason, verbatim. Never 0.0%.
+ *   - CONDITIONED ON -> the fifth rule fired: this variable defined the cohort, so a rate here
+ *     would be 100% because of how the question was asked. The count still shows; the rate
+ *     cannot exist.
+ */
+function RateLine({ cell, label }) {
+  if (!cell) return null;
+  const pre = label
+    ? <span style={{ color: "var(--text-2)" }}>{label} · </span>
+    : null;
+
+  if (cell.status === "CONDITIONED ON -- NOT AN OUTCOME") {
+    return (
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--warn)",
+        lineHeight: "var(--lh-body)", paddingLeft: 132 - (label ? 132 : 0) }}>
+        {pre}<strong>CONDITIONED ON</strong> — not an outcome of this cohort
+      </div>
+    );
+  }
+  if (cell.rate === null) {
+    return (
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--neg)",
+        lineHeight: "var(--lh-body)" }}>
+        {pre}<strong>RATE REFUSED</strong>
+        <span style={{ color: "var(--text-2)" }}> — {cell.refused_reason}</span>
+      </div>
+    );
+  }
+  const ci = cell.ci95;
+  return (
+    <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+      lineHeight: "var(--lh-body)" }}>
+      {pre}
+      <span style={{ color: "var(--text-1)" }}>{(100 * cell.rate).toFixed(1)}%</span>
+      {ci ? <> [{(100 * ci[0]).toFixed(0)}–{(100 * ci[1]).toFixed(0)}%]</> : null}
+      {cell.weighted_rate !== null ? (
+        <span title="Distance- and environment-weighted. The archive publishes no interval for
+          the weighted rate; the interval to read is the unweighted one beside it.">
+          {" "}· weighted {(100 * cell.weighted_rate).toFixed(1)}%
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+/** Does any time-to-event series carry a usable sample? An all-empty block is not worth a head. */
+function hasTimes(tte) {
+  if (!tte) return false;
+  for (const d of Object.values(tte)) if (d && d.n) return true;
+  return false;
 }

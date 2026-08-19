@@ -42,6 +42,11 @@ const FLOAT_TOLERANCE = 1e-9;
    named here is compared exactly. */
 const TOLERANCE_FIELDS = new Set([
   "distance_km", "weight", "weight_distance", "weight_env", "effective_sample_size",
+  // The only rate field a transcendental reaches: weighted_rate is a ratio of sums of weights,
+  // and a weight is exp(). The plain `rate` is an integer division, and the Wilson bounds are
+  // +, -, *, / and sqrt over integers -- all exactly specified by IEEE-754 -- so both of those
+  // are compared EXACTLY. Widening the tolerance to cover them would hide a real divergence.
+  "weighted_rate",
 ]);
 
 let failures = 0;
@@ -152,6 +157,28 @@ function compareCase(vecLabel, i, got, want) {
   if (!ordered) fail(`${at} landfalls are in chronological order`, "they are not");
 }
 
+/* One rate cell: counts, the rate, the weighted rate, the Wilson bounds, the refusal.
+ *
+ * `rate` is an integer division and the Wilson bounds are +, -, *, / and sqrt over integers --
+ * every one of those exactly specified by IEEE-754 -- so they are compared EXACTLY. Only
+ * `weighted_rate` is a ratio of sums of exp()-derived weights and gets the tolerance. */
+function compareRate(at, got, want, vecLabel) {
+  if (!got) { fail(at, "the browser produced no cell here at all"); return; }
+  for (const f of ["count", "n_storms", "n_unknown", "rate", "refused_reason"]) {
+    exact(`${at}.${f}`, got[f], want[f]);
+  }
+  near(`${at}.weighted_rate`, got.weighted_rate, want.weighted_rate, vecLabel);
+  checks++;
+  const gc = got.ci95;
+  const wc = want.ci95;
+  if (gc === null || wc === null) {
+    exact(`${at}.ci95`, gc === null ? null : "present", wc === null ? null : "present");
+  } else {
+    exact(`${at}.ci95[0]`, gc[0], wc[0]);
+    exact(`${at}.ci95[1]`, gc[1], wc[1]);
+  }
+}
+
 /* kwargs come out of the Python emitter in the Python's own naming. */
 function toOpts(kw) {
   const map = {
@@ -207,22 +234,27 @@ for (const v of vectors.vectors) {
     exact(`${v.label} · gap[${i}]`, got.gaps[i], want.gaps[i]);
   }
 
-  /* The counting half of the archive's outcome tables. The browser publishes numerators,
-     denominators and unknowns; it publishes no rate. Both are checked here -- the counts for
-     agreement, and the refusal for presence. */
-  for (const [cat, cell] of Object.entries(want.intensity_counts)) {
-    const g = got.intensity_counts[cat] || {};
-    exact(`${v.label} · intensity[${cat}].count`, g.count, cell.count);
-    exact(`${v.label} · intensity[${cat}].n_storms`, g.n_storms, cell.n_storms);
-    exact(`${v.label} · intensity[${cat}].n_unknown`, g.n_unknown, cell.n_unknown);
+  /* THE WHOLE RATE OBJECT. Phase 1 compared only counts because the browser published only
+     counts; it publishes rates now, so every field is compared -- including the refusal reason,
+     verbatim, because the surface prints it and a reworded refusal is a second methodology
+     speaking in prose. */
+  for (const [cat, cell] of Object.entries(want.intensity)) {
+    compareRate(`${v.label} · intensity[${cat}]`, got.intensity[cat], cell, v.label);
   }
   exact(`${v.label} · reported region count`,
-    Object.keys(got.landfall_counts).length, Object.keys(want.landfall_counts).length);
-  for (const [region, kinds] of Object.entries(want.landfall_counts)) {
+    Object.keys(got.landfall).length, Object.keys(want.landfall).length);
+  for (const [region, kinds] of Object.entries(want.landfall)) {
     for (const [kind, cell] of Object.entries(kinds)) {
-      const g = (got.landfall_counts[region] || {})[kind] || {};
-      exact(`${v.label} · landfall[${region}].${kind}.count`, g.count, cell.count);
-      exact(`${v.label} · landfall[${region}].${kind}.n_storms`, g.n_storms, cell.n_storms);
+      compareRate(`${v.label} · landfall[${region}].${kind}`,
+        (got.landfall[region] || {})[kind], cell, v.label);
+    }
+  }
+  exact(`${v.label} · time-to-event series count`,
+    Object.keys(got.time_to_event).length, Object.keys(want.time_to_event).length);
+  for (const [key, d] of Object.entries(want.time_to_event)) {
+    const g = got.time_to_event[key] || {};
+    for (const f of ["n", "p10", "p25", "median", "p75", "p90"]) {
+      exact(`${v.label} · time_to_event[${key}].${f}`, g[f], d[f]);
     }
   }
   exact(`${v.label} · unscoreable contract count`,
@@ -232,11 +264,6 @@ for (const v of vectors.vectors) {
     exact(`${v.label} · unscoreable[${key}].archive_events`, g.archive_events, u.archive_events);
     exact(`${v.label} · unscoreable[${key}].status`, g.status, u.status);
     exact(`${v.label} · unscoreable[${key}].reason`, g.reason, u.reason);
-  }
-  checks++;
-  if (!got.rates || !/UNSCOREABLE/.test(got.rates.status)) {
-    fail(`${v.label} · the browser declines to publish a conditioned rate`,
-      "it returned something instead of the refusal");
   }
 
   exact(`${v.label} · case count`, got.cases.length, want.cases.length);

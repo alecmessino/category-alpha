@@ -104,6 +104,39 @@ export function ProvenanceDrawer({ archive, open, onClose, frame }) {
           </>
         ) : null}
 
+        {/* ENVIRONMENTAL COVERAGE, PER SOURCE AND NEVER SUMMED.
+            This is what decides whether an environment-conditioned question can be asked at
+            all, so it is stated before anyone asks one -- and it comes from the manifest, which
+            arrives first, rather than from the megabyte env block, which is lazy. */}
+        {m.env_coverage ? (
+          <>
+            <Head right={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
+              color: "var(--text-2)" }}>
+              {m.env_coverage.storms_any_source.toLocaleString()} of{" "}
+              {m.env_coverage.storms_total.toLocaleString()} storms
+            </span>}>ENVIRONMENTAL COVERAGE</Head>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+              color: "var(--text-2)", lineHeight: "var(--lh-body)", marginBottom: "var(--sp-3)" }}>
+              {m.env_coverage.note}
+            </div>
+            {Object.entries(m.env_coverage.by_source).map(([src, v]) => (
+              <Row key={src} k={src} v={
+                <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)" }}>
+                  {v.storms.toLocaleString()} storms
+                  <span style={{ color: "var(--text-2)" }}>
+                    {" "}· {String(v.first_utc).slice(0, 10)} → {String(v.last_utc).slice(0, 10)}
+                  </span>
+                </span>} />
+            ))}
+            <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--warn)",
+              lineHeight: "var(--lh-body)", marginTop: "var(--sp-3)" }}>
+              THE SOURCES ARE SEQUENTIAL ERAS, NOT ALTERNATIVES. They do not overlap in time, so
+              a cohort spanning an era boundary mixes them — and one of them substitutes a
+              climatological sea-surface temperature for an observed one.
+            </div>
+          </>
+        ) : null}
+
         <Head>COLUMNS THE ARCHIVE HOLDS EMPTY</Head>
         <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
           color: "var(--text-2)", lineHeight: "var(--lh-body)", marginBottom: "var(--sp-3)" }}>

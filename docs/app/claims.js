@@ -989,11 +989,22 @@
     ok: true,
   }));
   define("atlas.rates", "none", () => ({
-    text: "This surface publishes counts, not conditioned rates. The probabilities, their "
-        + "Wilson intervals and the skill numbers are computed by the archive's Python and "
-        + "have not yet been ported to the browser at proven parity; until they are, the "
-        + "Atlas declines rather than approximating them.",
-    ok: false,
+    text: "These are GENESIS-CONDITIONED rates: they assume a tropical cyclone forms. To "
+        + "combine with a formation probability, multiply — P(reaches X) = P(forms) × "
+        + "P(reaches X | forms). Landfall does NOT decompose that way and is counted jointly "
+        + "here, never as a product of two marginals. Every rate is computed in the browser by "
+        + "a transliteration of the archive's own Python, compared field by field against it "
+        + "on every build; a rate the sample cannot support is refused rather than shown.",
+    ok: true,
+  }));
+  define("atlas.conditioning", "none", () => ({
+    text: "A variable used to define a cohort is not reported as an outcome of it. Narrow to "
+        + "storms that reached Category 3 and the Category 3 row shows its count and then "
+        + "declines to give a rate, because that rate would be 100% by construction rather "
+        + "than by evidence. Thresholds above the condition are still real outcomes and are "
+        + "still reported, and time-to-event is never suppressed — when those storms got there "
+        + "remains a genuine distribution.",
+    ok: true,
   }));
   define("atlas.pathway", "none", () => ({
     text: "Historical pathway frequency counts the distinct storms that passed through each "
