@@ -5,13 +5,16 @@
  * it has no code path that turns an absent value into a number. That is not defensive
  * programming, it is the product: this archive's whole claim is that it distinguishes "we
  * measured nothing" from "we measured nothing there".
+ *
+ * THE SECOND RULE, ADDED WITH THE REFUSAL GRAMMAR: a refusal is set the way a journal sets a
+ * caveat -- a marginal rule and a mark -- never as an alert box, a tint or a coloured
+ * background. A refusal is part of the argument, not an error in it, and colouring it as a
+ * warning is how a reader learns to skip the one thing this surface most wants read. The mark,
+ * the status wording and the key gloss are declared together in the claim registry, so a panel
+ * cannot print a status the Epistemic Key does not define.
  */
 
 import React from "react";
-
-const DS = globalThis.CategoryAlphaDesignSystem_a835cf || {};
-export const { Panel, Badge, StatTile, EmptyState, ProvenanceFooter, StatusDot, SectionHeader,
-  Button } = DS;
 
 /* The claim registry, shared with the terminal and loaded by index.html. Capability prose --
    what this surface can and cannot answer -- is authored there and only there; components read
@@ -24,6 +27,18 @@ export function claimText(id) {
   return MTC.claim(id).text;
 }
 
+/** The mark, status and key gloss for one refusal kind, from the registry that owns them. */
+export function refusal(kind) {
+  if (!MTC || !MTC.refusal) {
+    return { mark: kind, status: "REFUSAL REGISTRY UNAVAILABLE", gloss: "" };
+  }
+  return MTC.refusal(kind);
+}
+
+export function refusalKinds() {
+  return MTC && MTC.refusals ? MTC.refusals() : [];
+}
+
 export const MONO = {
   fontFamily: "var(--font-mono)",
   fontVariantNumeric: "tabular-nums",
@@ -34,7 +49,7 @@ export const MONO = {
 export function Num({ value, unit, digits = 0, absent = "not recorded in the archive", tone }) {
   if (value === null || value === undefined || Number.isNaN(value)) {
     return (
-      <span title={absent} style={{ ...MONO, color: "var(--text-2)", cursor: "help" }}>—</span>
+      <span title={absent} style={{ ...MONO, color: "var(--t3)", cursor: "help" }}>—</span>
     );
   }
   // -0.0 appears throughout the archive's float columns; it is zero and should read as zero.
@@ -42,7 +57,7 @@ export function Num({ value, unit, digits = 0, absent = "not recorded in the arc
   return (
     <span style={{ ...MONO, color: tone || "inherit" }}>
       {digits ? v.toFixed(digits) : Math.round(v).toLocaleString()}
-      {unit ? <small style={{ color: "var(--text-2)", marginLeft: 2 }}>{unit}</small> : null}
+      {unit ? <small style={{ color: "var(--t4)", marginLeft: 3 }}>{unit}</small> : null}
     </span>
   );
 }
@@ -51,125 +66,244 @@ export function Num({ value, unit, digits = 0, absent = "not recorded in the arc
 export function Txt({ value, absent = "not recorded in the archive", tone, transform }) {
   if (value === null || value === undefined || value === "") {
     return (
-      <span title={absent} style={{ ...MONO, color: "var(--text-2)", cursor: "help" }}>—</span>
+      <span title={absent} style={{ ...MONO, color: "var(--t3)", cursor: "help" }}>—</span>
     );
   }
   const s = transform === "upper" ? String(value).toUpperCase() : String(value);
   return <span style={{ ...MONO, color: tone || "inherit" }}>{s}</span>;
 }
 
-/** The label/value row the terminal uses everywhere. */
-export function Row({ k, v, tone, title, dim }) {
-  return (
-    <div
-      title={title}
-      style={{
-        display: "flex", alignItems: "baseline", justifyContent: "space-between",
-        gap: "var(--sp-4)", padding: "3px 0", minWidth: 0,
-        opacity: dim ? 0.6 : 1,
-      }}
-    >
-      <span style={{
-        ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-        letterSpacing: "var(--track-label)", textTransform: "uppercase", whiteSpace: "nowrap",
-      }}>{k}</span>
-      <span style={{
-        ...MONO, fontSize: "var(--fs-mono-sm)", color: tone || "var(--text-1)",
-        textAlign: "right", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis",
-      }}>{v}</span>
-    </div>
-  );
-}
-
-/** A section label with the design system's left rule. */
-export function Head({ children, right }) {
-  return (
-    <div style={{
-      display: "flex", alignItems: "center", justifyContent: "space-between",
-      borderLeft: "var(--bw-accent) solid var(--accent)", paddingLeft: "var(--sp-3)",
-      margin: "var(--sp-6) 0 var(--sp-3)", gap: "var(--sp-3)",
-    }}>
-      <span style={{
-        fontFamily: "var(--font-sans)", fontSize: "var(--fs-label)", fontWeight: "var(--fw-bold)",
-        letterSpacing: "var(--track-caps)", textTransform: "uppercase", color: "var(--text-1)",
-      }}>{children}</span>
-      {right}
-    </div>
-  );
-}
-
-export function Chip({ children, active, tone, onClick, title, disabled }) {
-  const c = tone || "var(--accent)";
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={title}
-      disabled={disabled}
-      style={{
-        ...MONO,
-        fontSize: "var(--fs-mono-xs)",
-        letterSpacing: "var(--track-label)",
-        padding: "4px 7px",
-        borderRadius: "var(--radius-sm)",
-        border: "1px solid " + (active ? c : "var(--border-strong)"),
-        background: active ? `color-mix(in srgb, ${c} 16%, transparent)` : "transparent",
-        color: active ? c : "var(--text-2)",
-        cursor: disabled ? "not-allowed" : "pointer",
-        opacity: disabled ? 0.4 : 1,
-        transition: "border-color var(--ease-ui), color var(--ease-ui), background var(--ease-ui)",
-        whiteSpace: "nowrap",
-      }}
-    >{children}</button>
-  );
-}
-
 /** A count with its denominator -- the shape the archive's own panels use. */
 export function OverDenom({ n, of, tone }) {
   return (
-    <span style={{ ...MONO, color: tone || "var(--text-1)" }}>
-      {n.toLocaleString()}<span style={{ color: "var(--text-2)" }}> / {of.toLocaleString()}</span>
+    <span style={{ ...MONO, color: tone || "inherit" }}>
+      {n.toLocaleString()}<span style={{ color: "var(--t4)" }}> / {of.toLocaleString()}</span>
     </span>
   );
 }
 
-/** What the Atlas says instead of a statistic it has not proven at parity with the archive. */
-export function Unscoreable({ state, compact }) {
+/* The mark for a value the Atlas DERIVED by replaying the archive's own rule, rather than read
+   from a column the archive publishes. Set as a superscript so it annotates the number without
+   competing with it. The glyph is the archive's own `·d`, not a typographic substitute: it is
+   the string this repo already uses for the distinction and the string its DOM gate looks
+   for. */
+export function Drv({ title = "derived by replaying the archive's own rule — not an archive column" }) {
+  return <sup className="at-drv" title={title}>·d</sup>;
+}
+
+/* A label, a leader and a right-aligned figure.
+ *
+ * The label ellipsizes and the value does not, on purpose and in that order: a number that has
+ * lost its last digit looks exactly like a smaller number, while a truncated label is still
+ * recognisably the label. The leader dots are what let the eye cross a wide rail without the
+ * two ends drifting apart. */
+export function Row({ k, v, tone, title, dim }) {
   return (
-    <div style={{
-      border: "1px solid var(--border-strong)",
-      borderLeft: "var(--bw-signal) solid var(--warn)",
-      borderRadius: "var(--radius-sm)",
-      padding: compact ? "var(--sp-3)" : "var(--sp-5)",
-      background: "color-mix(in srgb, var(--warn) 6%, transparent)",
-    }}>
-      <div style={{
-        ...MONO, fontSize: "var(--fs-mono-xs)", fontWeight: 800, color: "var(--warn)",
-        letterSpacing: ".5px", marginBottom: 4,
-      }}>{state.status}</div>
-      <div style={{
-        fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)", color: "var(--text-2)",
-        lineHeight: "var(--lh-body)",
-      }}>{state.reason}</div>
+    <div className={dim ? "at-row at-dim" : "at-row"} title={title}>
+      <span className="at-k">{k}</span>
+      <i className="at-dots" />
+      <span className="at-v" style={tone ? { color: tone } : undefined}>{v}</span>
     </div>
   );
 }
 
-/** A gap the archive recorded. Shown verbatim -- rewording one would change what it says. */
-export function Gap({ text }) {
+/** A numbered section head: number, label, and an annotation that gives way before the label. */
+export function Head({ n, children, right }) {
   return (
-    <div style={{
-      display: "flex", gap: "var(--sp-3)", padding: "var(--sp-3) 0",
-      borderTop: "1px solid var(--border-dim)",
-    }}>
-      <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--warn)", flex: "none" }}>
-        GAP
-      </span>
-      <span style={{
-        fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)", color: "var(--text-2)",
-        lineHeight: "var(--lh-body)",
-      }}>{text}</span>
+    <div className="at-sechd">
+      <span className="at-n">{n || ""}</span>
+      <h3>{children}</h3>
+      {right ? <span className="at-r">{right}</span> : null}
     </div>
+  );
+}
+
+/** The double rule that opens a movement rather than a section. */
+export function GroupRule() {
+  return <div className="at-grouprule" />;
+}
+
+/** The headline figure. Its consequence comes from the caption under it, not from its size. */
+export function Figure({ value, denom, tone }) {
+  return (
+    <div className="at-figure">
+      <span className="at-big" style={tone ? { color: tone } : undefined}>{value}</span>
+      {denom ? <span className="at-den">{denom}</span> : null}
+    </div>
+  );
+}
+
+export function Capt({ children }) {
+  return <div className="at-capt">{children}</div>;
+}
+
+/** A measure, not a meter: one fill and one tick at the same place, so the eye can read a
+ *  proportion without the bar implying a target. */
+export function Bar({ pct, tone }) {
+  const w = Math.max(0, Math.min(100, pct));
+  return (
+    <div className="at-bar">
+      <i style={{ width: `${w.toFixed(2)}%`, background: tone || "var(--accent)" }} />
+      <u style={{ left: `${w.toFixed(2)}%`, background: tone || "var(--accent)" }} />
+    </div>
+  );
+}
+
+export function Note({ children, style }) {
+  return <div className="at-note" style={style}>{children}</div>;
+}
+
+export function Prose({ children, style }) {
+  return <div className="at-prose" style={style}>{children}</div>;
+}
+
+export function Lede({ children, style }) {
+  return <div className="at-lede" style={style}>{children}</div>;
+}
+
+export function Chip({ children, active, tone, onClick, title, disabled, style }) {
+  return (
+    <button
+      type="button"
+      className="at-chip"
+      aria-pressed={!!active}
+      onClick={onClick}
+      title={title}
+      disabled={disabled}
+      style={active && tone
+        ? { color: tone, borderColor: tone, background: `${tone}14`, ...style }
+        : style}
+    >{children}</button>
+  );
+}
+
+/** A square that fills. Not a pill that slides: nothing here is a preference. */
+export function Toggle({ label, on, onChange, note, title }) {
+  return (
+    <div>
+      <button type="button" className="at-tg" aria-pressed={!!on} title={title}
+        onClick={() => onChange(!on)}>
+        <i className="at-box" />
+        <span className="at-lb">{label}</span>
+      </button>
+      {note ? <div className="at-tgnote">{note}</div> : null}
+    </div>
+  );
+}
+
+/** A text button: a rule under a word. RESET, CLEAR, PROVENANCE, COPY. */
+export function TextButton({ children, onClick, title, style, id }) {
+  return (
+    <button type="button" className="at-hbtn" onClick={onClick} title={title} style={style}
+      id={id}>{children}</button>
+  );
+}
+
+/* THE COHORT SPEC. The question the panel is answering, as one citable line.
+ *
+ * Every segment is a restatement of state already on screen -- the filters in the rail, the
+ * probe on the map, the storm selected, and two stamps out of the pack's own manifest. It
+ * computes nothing, asserts no threshold the rail has not already applied, and adds no claim.
+ * That is the whole discipline: a citation, not a heading, and certainly not a finding.
+ */
+export function CohortSpec({ text }) {
+  const [copied, setCopied] = React.useState(false);
+  React.useEffect(() => {
+    if (!copied) return undefined;
+    const t = setTimeout(() => setCopied(false), 1400);
+    return () => clearTimeout(t);
+  }, [copied]);
+  const copy = () => {
+    const done = () => setCopied(true);
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, done);
+    else done();
+  };
+  return (
+    <div className="at-spec">
+      <code>{text}</code>
+      <TextButton onClick={copy} title="copy the cohort spec">{copied ? "Copied" : "Copy"}</TextButton>
+    </div>
+  );
+}
+
+/** The panel's masthead: kicker, title, optional location line, and the Cohort Spec. */
+export function Masthead({ kicker, right, title, titleClass, loc, spec, children }) {
+  return (
+    <div className="at-masthead">
+      <div className="at-kicker">
+        <span>{kicker}</span>
+        {right ? <span className="at-x">{right}</span> : null}
+      </div>
+      <h2 className={titleClass ? `at-${titleClass}` : undefined}>{title}</h2>
+      {loc ? <div className="at-loc">{loc}</div> : null}
+      {children}
+      {spec ? <CohortSpec text={spec} /> : null}
+    </div>
+  );
+}
+
+/* ---- the refusal grammar ---------------------------------------------------------------
+ *
+ * `kind` selects the mark and, by default, the wording. `status` overrides the wording only
+ * where the archive itself qualifies it -- the engine's own string for a refusal it computed,
+ * or one of the two documented qualifications. There is deliberately no path that invents a
+ * status: an unregistered kind throws in the registry rather than rendering something the key
+ * cannot explain.
+ */
+
+export function Mark({ kind }) {
+  return <span className={`at-mk at-${kind}`} aria-hidden="true">{kind === "unk" ? "—" : ""}</span>;
+}
+
+export function Refusal({ kind, status, children }) {
+  const r = refusal(kind);
+  return (
+    <div className="at-ref">
+      <Mark kind={r.mark} />
+      <div>
+        <div className="at-st">{status || r.status}</div>
+        <div className="at-why">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/* A gap the archive recorded about itself. NOT a refusal, and marked outside the five on
+   purpose: a refusal is this surface declining to answer, a gap is the archive telling you
+   what it never had. Shown verbatim -- rewording one would change what it says. */
+export function Gap({ text, label = "GAP" }) {
+  return (
+    <div className="at-ref">
+      <span className="at-mk at-gapmark" aria-hidden="true" />
+      <div>
+        <div className="at-st" style={{ color: "var(--t2)" }}>{label}</div>
+        <div className="at-why">{text}</div>
+      </div>
+    </div>
+  );
+}
+
+/* THE EPISTEMIC KEY. Generated from the registry, rendered ONCE by the panel shell rather than
+   by each state, so the five marks are defined in exactly one place on screen and cannot
+   disagree with themselves between panels. */
+export function EpistemicKey() {
+  const rows = refusalKinds();
+  return (
+    <>
+      <GroupRule />
+      <Head n="—" right={`${rows.length} marks`}>EPISTEMIC KEY</Head>
+      {rows.map((r) => (
+        <div className="at-keyrow" key={r.mark}>
+          <Mark kind={r.mark} />
+          <span className="at-nm">{r.status}</span>
+          <span className="at-ds">{r.gloss}</span>
+        </div>
+      ))}
+      <Note style={{ marginTop: 9 }}>
+        Values with no mark are archive columns. A superscript <b>d</b> marks a value derived by
+        replaying the archive's own rule rather than read from one.
+      </Note>
+    </>
   );
 }
 

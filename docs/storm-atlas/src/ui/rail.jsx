@@ -4,12 +4,21 @@
  * population from 3,959 to a few hundred, and a reader is entitled to know how much of that
  * drop was storms that did not reach Cat 3 and how much was storms whose intensity nobody
  * recorded. The archive knows the difference; so does this rail.
+ *
+ * THE SPINE AT THE TOP IS A DERIVED VIEW, NOT A CONTROL. The archive is interrogated in six
+ * stages and the query in force constrains some of them and lets the rest through whole. That
+ * is already true of the filters below it; the spine only says it out loud, so a reader can see
+ * at a glance which parts of the question they have actually asked. It adds no state, computes
+ * nothing, and every value it prints is a filter that is visible further down or a count out of
+ * the pack's own manifest.
  */
 
 import React from "react";
 import { INTENSITY_FILTERS, LANDFALL_FILTERS } from "../engine/query.js";
 import { CATEGORY_COLOR } from "../render/palette.js";
-import { Chip, Head, MONO, Row, claimText } from "./kit.jsx";
+import {
+  Bar, Capt, Chip, Figure, GroupRule, Head, Note, Row, TextButton, Toggle, claimText,
+} from "./kit.jsx";
 
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August",
@@ -17,8 +26,9 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
 
 export function Rail({ archive, filters, setFilters, result, layers, setLayers, bounds,
   onReset, mode, setMode, showPathway, setShowPathway, showGenesisDensity,
-  setShowGenesisDensity, timeline }) {
+  setShowGenesisDensity, timeline, probe }) {
   const total = archive.manifest.counts.storms;
+  const q = archive.manifest.quality;
   const f = filters;
 
   const set = (patch) => setFilters({ ...f, ...patch });
@@ -32,41 +42,77 @@ export function Rail({ archive, filters, setFilters, result, layers, setLayers, 
     .filter(([, n]) => n > 0)
     .sort((a, b) => b[1] - a[1]);
 
-  return (
-    <div style={{ padding: "var(--sp-5) var(--sp-6) var(--sp-8)" }}>
-      <Head right={<button type="button" onClick={onReset} style={{
-        ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
-        border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
-        color: "var(--text-2)", cursor: "pointer", padding: "2px 6px",
-      }}>RESET</button>}>ON THE MAP</Head>
+  const threshold = (INTENSITY_FILTERS.find((x) => x.key === f.intensity) || {}).threshold;
+  const landfallLabel = (LANDFALL_FILTERS.find((x) => x.key === f.landfall) || {}).label;
 
-      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-3)" }}>
-        <span style={{ ...MONO, fontSize: "var(--fs-stat)", fontWeight: 800,
-          color: "var(--text-1)", lineHeight: 1 }}>
-          {result.kept.toLocaleString()}
-        </span>
-        <span style={{ ...MONO, fontSize: "var(--fs-mono-sm)", color: "var(--text-2)" }}>
-          of {total.toLocaleString()} storms
-        </span>
+  /* Six stages, each either narrowed by the query in force or passing the whole archive
+     through. `here` marks the one stage this surface has no control for -- the archive holds
+     environment and the engine can weight on it, but nothing in this rail sets that vector. */
+  const stages = [
+    ["GENESIS",
+      f.months || f.basins || f.subbasinsEntered || probe ? "CONSTRAINED" : "OPEN",
+      probe ? `WITHIN ${probe.radiusKm} KM`
+        : f.months ? `${f.months.length} MONTH${f.months.length > 1 ? "S" : ""}`
+          : f.basins ? f.basins.join("/")
+            : f.subbasinsEntered ? `ENTERED ${f.subbasinsEntered.join("/")}` : "ALL BASINS"],
+    ["ENVIRONMENT", "HERE",
+      `${q.storms_with_env_at_genesis.toLocaleString()} OF ${total.toLocaleString()} CARRY A RECORD`],
+    ["TRAJECTORY", showPathway ? "CONSTRAINED" : "OPEN",
+      showPathway ? "PATHWAY SURFACE ON" : "NOT QUERIED"],
+    ["INTENSIFICATION", f.intensity !== "all" ? "CONSTRAINED" : "OPEN",
+      threshold === null || threshold === undefined ? "NO THRESHOLD" : `PEAK ≥ ${threshold} KT`],
+    ["LANDFALL", f.landfall ? "CONSTRAINED" : "OPEN", landfallLabel || "NO FILTER"],
+    ["OUTCOME", probe ? "CONSTRAINED" : "OPEN", probe ? "COUNTS RETURNED" : "AWAITING A QUERY"],
+  ];
+
+  const pct = total ? (100 * result.kept) / total : 0;
+  const seasonLabel = f.seasonFrom === null && f.seasonTo === null
+    ? "ALL" : `${f.seasonFrom === null ? bounds[0] : f.seasonFrom}–${f.seasonTo === null ? bounds[1] : f.seasonTo}`;
+
+  return (
+    <div className="at-pad">
+      <Head n="00" right={<TextButton onClick={onReset}>Reset</TextButton>}>Query</Head>
+      <Note>
+        The archive is interrogated in six stages. A stage is <b>constrained</b> when the current
+        query narrows it, <b>open</b> when the whole archive passes through.
+      </Note>
+      <div className="at-spine">
+        {stages.map(([nm, st]) => (
+          <div key={nm} className={"at-stage-row" + (st === "CONSTRAINED" ? " at-on"
+            : st === "HERE" ? " at-na" : "")}>
+            <i className="at-tick" />
+            <span className="at-nm">{nm}</span>
+            <span className="at-st">{st === "HERE" ? "NO CONTROL HERE" : st}</span>
+          </div>
+        ))}
       </div>
+      <Note style={{ marginTop: 7 }}>
+        {stages.filter((s) => s[1] !== "OPEN").map((s) => (
+          <div key={s[0]}>{s[0]} · <b>{s[2]}</b></div>
+        ))}
+      </Note>
+
+      <GroupRule />
+      <Head n="01" right="on the map">Cohort</Head>
+      <Figure value={result.kept.toLocaleString()}
+        denom={`of ${total.toLocaleString()} storms`} />
+      <Bar pct={pct} />
+      <Capt>What the filters left on the map</Capt>
 
       {result.undecidable > 0 ? (
-        <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--warn)",
-          marginTop: "var(--sp-3)", lineHeight: "var(--lh-body)",
-          borderLeft: "var(--bw-signal) solid var(--warn)", paddingLeft: "var(--sp-3)" }}>
-          {result.undecidable.toLocaleString()} storm(s) could not be judged by this intensity
-          filter — the archive records no wind for them. They are neither included nor counted
-          as failing it.
-        </div>
+        <Note style={{ marginTop: 8 }}>
+          <b style={{ color: "var(--flag)" }}>
+            {result.undecidable.toLocaleString()} storm(s) could not be judged by this intensity
+            filter
+          </b> — the archive records no wind for them. They are neither included nor counted as
+          failing it.
+        </Note>
       ) : null}
 
       {droppedByFilter.length ? (
-        <details style={{ marginTop: "var(--sp-3)" }}>
-          <summary style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-            cursor: "pointer", listStyle: "none" }}>
-            ▸ what the filters removed
-          </summary>
-          <div style={{ paddingTop: "var(--sp-2)" }}>
+        <details className="at-excl">
+          <summary>▸ what the filters removed</summary>
+          <div style={{ paddingTop: 4 }}>
             {droppedByFilter.map(([k, n]) => (
               <Row key={k} k={EXCLUSION_LABEL[k] || k} v={n.toLocaleString()} dim />
             ))}
@@ -74,15 +120,15 @@ export function Rail({ archive, filters, setFilters, result, layers, setLayers, 
         </details>
       ) : null}
 
-      <Head>SEASONS</Head>
-      <div style={{ display: "flex", gap: "var(--sp-3)", alignItems: "center" }}>
+      <GroupRule />
+      <Head n="02" right={seasonLabel}>Seasons</Head>
+      <div className="at-years">
         <YearBox label="from" value={f.seasonFrom} bounds={bounds}
           onChange={(v) => set({ seasonFrom: v })} />
-        <span style={{ color: "var(--text-2)" }}>–</span>
         <YearBox label="to" value={f.seasonTo} bounds={bounds}
           onChange={(v) => set({ seasonTo: v })} />
       </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: "var(--sp-3)" }}>
+      <div className="at-chips" style={{ marginTop: 6 }}>
         {[[null, null, "ALL"], [1971, null, "1971+"], [1990, null, "1990+"],
           [2000, null, "2000+"], [1851, 1970, "PRE-1971"]].map(([a, b, label]) => (
           <Chip key={label} active={f.seasonFrom === a && f.seasonTo === b}
@@ -95,35 +141,23 @@ export function Rail({ archive, filters, setFilters, result, layers, setLayers, 
         ))}
       </div>
 
-      <Head>GENESIS MONTH</Head>
-      <div style={{ display: "flex", gap: 3 }}>
-        {MONTHS.map((m, i) => {
-          const on = !f.months || f.months.includes(i + 1);
-          return (
-            <button key={i} type="button" title={MONTH_NAMES[i]}
-              onClick={() => toggleMonth(i + 1)}
-              style={{
-                ...MONO, flex: 1, fontSize: "var(--fs-mono-xs)", padding: "5px 0",
-                border: "1px solid " + (f.months && f.months.includes(i + 1)
-                  ? "var(--accent)" : "var(--border-dim)"),
-                background: f.months && f.months.includes(i + 1)
-                  ? "color-mix(in srgb, var(--accent) 16%, transparent)" : "transparent",
-                color: on ? "var(--text-1)" : "var(--text-2)",
-                borderRadius: "var(--radius-sm)", cursor: "pointer",
-              }}>{m}</button>
-          );
-        })}
+      <Head n="03" right={f.months ? `${f.months.length} selected` : "all 12"}>Genesis month</Head>
+      <div className="at-months">
+        {MONTHS.map((m, i) => (
+          <button key={i} type="button" title={MONTH_NAMES[i]}
+            aria-pressed={!!(f.months && f.months.includes(i + 1))}
+            aria-label={MONTH_NAMES[i]}
+            onClick={() => toggleMonth(i + 1)}>{m}</button>
+        ))}
       </div>
-      {f.months ? (
-        <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-          marginTop: 4 }}>
-          filtering on the month of GENESIS, not of landfall ·{" "}
-          <button type="button" onClick={() => set({ months: null })} style={linkBtn}>clear</button>
-        </div>
-      ) : null}
+      <Note style={{ marginTop: 5 }}>
+        on the month of <b>genesis</b>, not of landfall
+        {f.months ? <> · <TextButton onClick={() => set({ months: null })}
+          style={{ fontSize: 8.5 }}>clear</TextButton></> : null}
+      </Note>
 
-      <Head>BASIN</Head>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+      <Head n="04" right={f.basins ? f.basins.join(" ") : "all"}>Basin</Head>
+      <div className="at-chips">
         <Chip active={!f.basins} onClick={() => set({ basins: null })}>ALL</Chip>
         {(archive.storms.col("basin").dictionary || []).map((b) => (
           <Chip key={b} active={!!f.basins && f.basins.includes(b)}
@@ -140,8 +174,9 @@ export function Rail({ archive, filters, setFilters, result, layers, setLayers, 
         </Chip>
       </div>
 
-      <Head>PEAK INTENSITY</Head>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+      <Head n="05" right={threshold === null || threshold === undefined
+        ? "no threshold" : `≥ ${threshold} kt`}>Peak intensity</Head>
+      <div className="at-chips">
         {INTENSITY_FILTERS.map((x) => (
           <Chip key={x.key} active={f.intensity === x.key} onClick={() => set({ intensity: x.key })}
             tone={x.key === "all" ? undefined : CATEGORY_COLOR[x.key === "ts" ? "ts" : x.key]}>
@@ -150,8 +185,8 @@ export function Rail({ archive, filters, setFilters, result, layers, setLayers, 
         ))}
       </div>
 
-      <Head>LANDFALL</Head>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+      <Head n="06" right={f.landfall ? "1 region" : "none"}>Landfall</Head>
+      <div className="at-chips">
         <Chip active={f.landfall === null} onClick={() => set({ landfall: null })}>NO FILTER</Chip>
         {LANDFALL_FILTERS.map((x) => (
           <Chip key={x.key} active={f.landfall === x.key}
@@ -160,23 +195,27 @@ export function Rail({ archive, filters, setFilters, result, layers, setLayers, 
           </Chip>
         ))}
       </div>
+      <Note style={{ marginTop: 6 }}>
+        coastline crossings are detected geometrically against the archive's own
+        <b> Natural Earth 10m</b> rings — the same geometry the plate draws at full contrast.
+      </Note>
 
-      <Head>VIEW</Head>
-      <div style={{ display: "flex", gap: 4, marginBottom: "var(--sp-4)" }}>
+      <GroupRule />
+      <Head n="07" right={mode}>View</Head>
+      <div className="at-chips">
         <Chip active={mode === "explore"} onClick={() => setMode("explore")}>EXPLORE</Chip>
         <Chip active={mode === "replay"} onClick={() => setMode("replay")}>REPLAY</Chip>
       </div>
-      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-        lineHeight: "var(--lh-body)", marginBottom: "var(--sp-5)" }}>
+      <Note style={{ marginTop: 6 }}>
         {mode === "replay"
           ? (timeline && timeline.n
             ? `${timeline.n.toLocaleString()} storms unfold in order · the clock skips stretches `
               + "with none active, and says so"
             : "no storms in this filter")
           : "the record as a finished map"}
-      </div>
+      </Note>
 
-      <Head>DENSITY SURFACES</Head>
+      <Head n="08">Density surfaces</Head>
       {/* The notes are the registered claims themselves, not a paraphrase of them. A surface
           that can be turned on from here has to carry the same statement it carries in the
           probe panel, and prose written twice drifts. */}
@@ -185,7 +224,7 @@ export function Rail({ archive, filters, setFilters, result, layers, setLayers, 
       <Toggle label="GENESIS COUNT" on={!!showGenesisDensity}
         onChange={(v) => setShowGenesisDensity(v)} note={claimText("atlas.genesis_density")} />
 
-      <Head>LAYERS</Head>
+      <Head n="09">Layers</Head>
       <Toggle label="COLOUR BY INTENSITY" on={layers.colorBy === "intensity"}
         onChange={(v) => setLayers({ ...layers, colorBy: v ? "intensity" : "uniform" })}
         note="Each segment takes the Saffir-Simpson class of the fix it leaves. Fixes with no
@@ -214,62 +253,18 @@ const EXCLUSION_LABEL = {
   noGenesis: "no genesis point in the archive",
 };
 
-const linkBtn = {
-  background: "transparent", border: 0, padding: 0, color: "var(--text-link)",
-  cursor: "pointer", font: "inherit", textDecoration: "underline",
-};
-
 function YearBox({ label, value, bounds, onChange }) {
   return (
-    <label style={{ flex: 1, minWidth: 0 }}>
-      <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-        display: "block", marginBottom: 2 }}>{label}</span>
+    <label>
+      <span>{label}</span>
       <input type="number" min={bounds[0]} max={bounds[1]}
         value={value === null ? "" : value}
+        aria-label={`season ${label}`}
         placeholder={String(label === "from" ? bounds[0] : bounds[1])}
         onChange={(e) => {
           const v = e.target.value === "" ? null : Number(e.target.value);
           onChange(v === null || Number.isNaN(v) ? null : v);
-        }}
-        style={{
-          ...MONO, width: "100%", fontSize: "var(--fs-mono-sm)", padding: "5px 7px",
-          background: "var(--surface-sunken)", color: "var(--text-1)",
-          border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
         }} />
     </label>
-  );
-}
-
-function Toggle({ label, on, onChange, note }) {
-  return (
-    <div style={{ padding: "var(--sp-2) 0" }}>
-      <button type="button" onClick={() => onChange(!on)} style={{
-        display: "flex", alignItems: "center", gap: "var(--sp-3)", width: "100%",
-        background: "transparent", border: 0, padding: 0, cursor: "pointer", textAlign: "left",
-      }}>
-        <span style={{
-          width: 26, height: 14, borderRadius: 999, flex: "none",
-          border: "1px solid " + (on ? "var(--accent)" : "var(--border-strong)"),
-          background: on ? "color-mix(in srgb, var(--accent) 24%, transparent)" : "transparent",
-          position: "relative", transition: "all var(--ease-ui)",
-        }}>
-          <span style={{
-            position: "absolute", top: 2, left: on ? 13 : 2, width: 8, height: 8,
-            borderRadius: 999, background: on ? "var(--accent)" : "var(--border-strong)",
-            transition: "left var(--ease-ui)",
-          }} />
-        </span>
-        <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
-          letterSpacing: "var(--track-label)", color: on ? "var(--text-1)" : "var(--text-2)" }}>
-          {label}
-        </span>
-      </button>
-      {note ? (
-        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
-          color: "var(--text-2)", lineHeight: "var(--lh-body)", paddingLeft: 34, marginTop: 2 }}>
-          {note}
-        </div>
-      ) : null}
-    </div>
   );
 }

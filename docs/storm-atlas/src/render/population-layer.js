@@ -19,8 +19,8 @@
 
 import { AtlasLayer, worldOffsets } from "./atlas-layer.js";
 import {
-  CATEGORY_COLOR, CATEGORY_ORDER, GENESIS_INK, LANDFALL_INK, POPULATION_INK, UNKNOWN_INK,
-  categoryIndexRaw,
+  CATEGORY_COLOR, CATEGORY_ORDER, EMPHASIS_INK, GENESIS_INK, GENESIS_LIFTED_INK, LANDFALL_INK,
+  MAJOR_FROM, MAJOR_WEIGHT, POPULATION_INK, UNKNOWN_INK, categoryIndexRaw,
 } from "./palette.js";
 
 /* Stride by zoom. At basin zoom a 6-hourly track is far denser than the screen can resolve, so
@@ -37,10 +37,19 @@ export const PopulationLayer = AtlasLayer.extend({
   options: {
     padding: 0.25,
     pane: "overlayPane",
-    // How much of the ink one track carries. Tuned so ~50 overlapping tracks saturate: the
-    // shape of the population reads before any individual line does.
-    trackAlpha: 0.16,
-    trackWidth: 1.0,
+    /* How much of the ink one track carries, in each of the three standings a track can have.
+       AT REST the population is the subject and reads from accumulated overlap. WHILE A QUERY
+       IS ACTIVE it is context and drops almost out of sight -- but it is never removed, because
+       the comparison against the whole record IS the analysis and a pool of 194 shown alone
+       says nothing about whether 194 is many or few. LIFTED is the pool the query matched. */
+    trackAlpha: 0.34,
+    queryAlpha: 0.085,
+    liftedAlpha: 0.9,
+    /* When the density surface is on, the lifted pool steps back so the surface it is being
+       compared against can be seen through it. */
+    liftedSoftAlpha: 0.55,
+    trackWidth: 0.85,
+    liftedWidth: 1.3,
     showGenesis: true,
     showLandfalls: true,
     colorBy: "uniform", // "uniform" | "intensity"
@@ -95,30 +104,34 @@ export const PopulationLayer = AtlasLayer.extend({
     const { scale, ox, oy, width, height } = view;
     const stride = strideForZoom(view.zoom);
     const emph = this._emph;
-    const base = this.options.dimmed ? this.options.trackAlpha * 0.45 : this.options.trackAlpha;
+    const o = this.options;
+    /* A query is active whenever something has been asked of the map -- a probe that lifted a
+       pool, or a storm selected out of it. Either way the population becomes context. */
+    const querying = !!emph || o.dimmed;
+    const base = querying ? o.queryAlpha : o.trackAlpha;
 
-    ctx.lineWidth = this.options.trackWidth;
+    ctx.lineWidth = o.trackWidth;
     let segments = 0;
 
     /* Two passes when a pool is emphasised: the rest of the record first, pushed well back, then
        the pool over it at full weight. Same geometry, different standing. */
     const passes = emph
-      ? [{ rows: rows.filter((i) => !emph.has(i)), alpha: base * 0.3,
-           width: this.options.trackWidth },
+      ? [{ rows: rows.filter((i) => !emph.has(i)), alpha: base, width: o.trackWidth,
+           ink: POPULATION_INK },
          { rows: rows.filter((i) => emph.has(i)),
-           alpha: Math.min(1, base * (this.options.softenEmphasis ? 1.1 : 3.2)),
-           width: this.options.trackWidth + 0.3 }]
-      : [{ rows, alpha: base, width: this.options.trackWidth }];
+           alpha: o.softenEmphasis ? o.liftedSoftAlpha : o.liftedAlpha,
+           width: o.liftedWidth, ink: EMPHASIS_INK }]
+      : [{ rows, alpha: base, width: o.trackWidth, ink: POPULATION_INK }];
 
     for (const pass of passes) {
       if (!pass.rows.length) continue;
       ctx.globalAlpha = pass.alpha;
       ctx.lineWidth = pass.width;
-      if (this.options.colorBy === "intensity") {
+      if (o.colorBy === "intensity") {
         segments += this._drawByCategory(ctx, pass.rows, wx, wy, scale, ox, oy, width, height,
-          stride);
+          stride, pass.width);
       } else {
-        ctx.strokeStyle = POPULATION_INK;
+        ctx.strokeStyle = pass.ink;
         ctx.beginPath();
         segments += this._tracePaths(ctx, pass.rows, wx, wy, scale, ox, oy, width, height,
           stride, -1);
@@ -142,15 +155,19 @@ export const PopulationLayer = AtlasLayer.extend({
 
   /* One path per category, seven strokes for the whole archive. A segment takes the category of
      the fix it starts from; a fix with no recorded wind is drawn in UNKNOWN_INK, which is
-     outside the ramp on purpose. */
-  _drawByCategory(ctx, rows, wx, wy, scale, ox, oy, w, h, stride) {
+     outside the ramp on purpose.
+     The major classes are stroked slightly heavier, so cat2 and cat3 stay separable at a
+     hairline and in monochrome rather than relying on hue alone. */
+  _drawByCategory(ctx, rows, wx, wy, scale, ox, oy, w, h, stride, baseWidth) {
     let total = 0;
     for (let cat = -1; cat < 7; cat++) {
       ctx.strokeStyle = cat < 0 ? UNKNOWN_INK : CATEGORY_COLOR[CATEGORY_ORDER[cat]];
+      ctx.lineWidth = cat >= MAJOR_FROM ? baseWidth * MAJOR_WEIGHT : baseWidth;
       ctx.beginPath();
       total += this._tracePaths(ctx, rows, wx, wy, scale, ox, oy, w, h, stride, cat);
       ctx.stroke();
     }
+    ctx.lineWidth = baseWidth;
     return total;
   },
 
@@ -222,10 +239,10 @@ export const PopulationLayer = AtlasLayer.extend({
     const g = a.genesis;
     const lat = g.raw("genesis_lat");
     const lon = g.raw("genesis_lon");
-    const rad = view.zoom >= 5 ? 2.4 : 1.7;
+    const rad = view.zoom >= 5 ? 1.9 : 1.25;
     const emph = this._emph;
     ctx.fillStyle = GENESIS_INK;
-    ctx.globalAlpha = emph ? 0.18 : (this.options.dimmed ? 0.35 : 0.75);
+    ctx.globalAlpha = emph || this.options.dimmed ? 0.24 : 0.46;
     ctx.beginPath();
     for (let r = 0; r < rows.length; r++) {
       const i = rows[r];
@@ -242,6 +259,7 @@ export const PopulationLayer = AtlasLayer.extend({
     ctx.fill();
     if (emph) {
       ctx.globalAlpha = 0.95;
+      ctx.fillStyle = GENESIS_LIFTED_INK;
       ctx.beginPath();
       for (let r = 0; r < rows.length; r++) {
         const i = rows[r];
@@ -252,8 +270,8 @@ export const PopulationLayer = AtlasLayer.extend({
         const x = p.wx * scale - ox;
         const y = p.wy * scale - oy;
         if (x < -4 || y < -4 || x > width + 4 || y > height + 4) continue;
-        ctx.moveTo(x + rad + 0.6, y);
-        ctx.arc(x, y, rad + 0.6, 0, TAU);
+        ctx.moveTo(x + rad + 0.85, y);
+        ctx.arc(x, y, rad + 0.85, 0, TAU);
       }
       ctx.fill();
     }
@@ -267,24 +285,39 @@ export const PopulationLayer = AtlasLayer.extend({
     const lat = L.raw("lat");
     const lon = L.raw("lon");
     const suspect = L.raw("suspect_relocation");
-    ctx.globalAlpha = this.options.dimmed ? 0.4 : 0.9;
-    ctx.fillStyle = LANDFALL_INK;
-    const half = view.zoom >= 5 ? 2.2 : 1.6;
-    for (let r = 0; r < rows.length; r++) {
-      const i = rows[r];
-      const s = a.lfOffset[i];
-      const n = a.lfCount[i];
-      for (let k = s; k < s + n; k++) {
-        // A crossing the archive flags as a probable relocation artefact is excluded from every
-        // rate it publishes; drawing it as an ordinary landfall would put it back.
-        if (suspect[k] === 2) continue;
-        const p = worldOf(lat[k], lon[k]);
-        const x = p.wx * scale - ox;
-        const y = p.wy * scale - oy;
-        if (x < -4 || y < -4 || x > width + 4 || y > height + 4) continue;
-        ctx.fillRect(x - half, y - half, half * 2, half * 2);
+    const emph = this._emph;
+    /* A CROSS, NOT A BLOCK. At basin zoom a filled square reads as a very short track segment
+       where landfalls cluster along the Gulf; a cross is unmistakably a mark on the map rather
+       than a piece of the line it sits on. */
+    const half = view.zoom >= 5 ? 2.8 : 2.3;
+    ctx.save();
+    ctx.strokeStyle = LANDFALL_INK;
+    ctx.lineWidth = 1;
+    for (const pass of emph ? [false, true] : [false]) {
+      ctx.globalAlpha = pass ? 0.95 : (emph || this.options.dimmed ? 0.32 : 0.6);
+      ctx.beginPath();
+      for (let r = 0; r < rows.length; r++) {
+        const i = rows[r];
+        if (emph && emph.has(i) !== pass) continue;
+        const s = a.lfOffset[i];
+        const n = a.lfCount[i];
+        for (let k = s; k < s + n; k++) {
+          // A crossing the archive flags as a probable relocation artefact is excluded from
+          // every rate it publishes; drawing it as an ordinary landfall would put it back.
+          if (suspect[k] === 2) continue;
+          const p = worldOf(lat[k], lon[k]);
+          const x = p.wx * scale - ox;
+          const y = p.wy * scale - oy;
+          if (x < -4 || y < -4 || x > width + 4 || y > height + 4) continue;
+          ctx.moveTo(x - half, y);
+          ctx.lineTo(x + half, y);
+          ctx.moveTo(x, y - half);
+          ctx.lineTo(x, y + half);
+        }
       }
+      ctx.stroke();
     }
+    ctx.restore();
     ctx.globalAlpha = 1;
   },
 });

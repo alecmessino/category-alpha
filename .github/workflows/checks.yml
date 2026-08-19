@@ -205,6 +205,23 @@ jobs:
       - name: Verify the browser computes what the archive computes
         run: node scripts/test-atlas-parity.mjs
 
+      # The plate draws its authoritative coastline from the archive's OWN landfall geometry, so
+      # the line a reader sees is the line every landfall row was decided against. That holds only
+      # while the packed copy IS that geometry: this decodes it through the browser's accessor and
+      # compares EVERY vertex of EVERY ring against the GeoJSON, as a number. A simplified,
+      # decimated or re-rounded coast fails here rather than shipping a map that quietly disagrees
+      # with the claims drawn on top of it.
+      - name: Verify the plate's coastline is the archive's coastline
+        run: node scripts/test-atlas-coastlines.mjs
+
+      # A refusal is printed as a status line and explained once, in a key at the foot of every
+      # panel. That only works while the two are the same sentence -- and the wording is authored
+      # in the claim registry while the code that DECIDES to refuse carries its own copy, because
+      # it also runs in Node where no registry exists. Two copies of a string is a drift waiting to
+      # happen; this is what makes it safe.
+      - name: Verify the Epistemic Key says what the engine says
+        run: node scripts/test-atlas-refusals.mjs
+
       # The replay skips stretches of the record where no selected storm is active, which is a
       # real distortion of pace and therefore has to be provably harmless: a linear run and a
       # skipping run over all 3,885 storms must reveal the SAME storms in the SAME order. The

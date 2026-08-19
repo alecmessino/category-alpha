@@ -1038,5 +1038,61 @@
     ok: true,
   }));
 
-  window.MTC = { claim, footer, freshness, snapshotAgeMin, registered: () => Object.keys(REG) };
+  /* ------------------------------------------------------------------------------------
+     THE REFUSAL REGISTRY. One object declares the MARK, the STATUS WORDING and the KEY GLOSS
+     together, so a panel cannot print a status the Epistemic Key does not define and the key
+     cannot drift from what panels print. It lives here for exactly the reason every claim
+     does: this is the one file where wording is authored.
+
+     THE STATUS STRINGS ARE THE ENGINE'S, NOT THIS FILE'S OPINION. Three of the five are
+     produced by code -- `UNSCOREABLE_REQUIRES_CANONICAL` and the archive-scarcity refusal in
+     docs/storm-atlas/src/engine/analogs.js, and the withheld Saffir-Simpson class the archive
+     itself publishes -- and are reproduced verbatim. scripts/test-atlas-refusals.mjs compares
+     them against the engine and fails when they diverge, which is the only thing that makes a
+     second copy of a string safe. The design handoff proposed shorter wording for some of
+     these; production's strings win, because they are what the archive says.
+
+     The two documented overrides are qualifications of a registry entry, never new statuses:
+     `NO ANALOGS — 0 STORMS MATCHED` qualifies `unk`, and the region/kind suffix qualifies
+     `base`. */
+  var REFUSALS = {
+    refused: {
+      mark: "refused",
+      status: "UNSCOREABLE -- REQUIRES CANONICAL COMPUTATION",
+      gloss: "A rate the archive can compute and this build has not proven at parity with it. "
+           + "Withheld, not zero.",
+    },
+    cond: {
+      mark: "cond",
+      status: "CONDITIONED ON",
+      gloss: "An answer that holds only under a stated conditioning set. The set is printed "
+           + "with it.",
+    },
+    base: {
+      mark: "base",
+      status: "BASE RATE ONLY -- unscoreable",
+      gloss: "Too few events of this kind exist archive-wide to score a probability, so the "
+           + "population base rate is all that is honest. The counts above are the evidence, "
+           + "not the answer.",
+    },
+    unk: {
+      mark: "unk",
+      status: "— UNKNOWN",
+      gloss: "The archive holds no value. Never rendered as zero, never as blank.",
+    },
+    notev: {
+      mark: "notev",
+      status: "WITHHELD",
+      gloss: "A value the archive could have interpolated and refused to. The bracketing fixes "
+           + "disagreed, so no class is published rather than a plausible one.",
+    },
+  };
+  function refusal(kind) {
+    var r = REFUSALS[kind];
+    if (!r) throw new Error("unregistered refusal: " + kind);
+    return r;
+  }
+
+  window.MTC = { claim, footer, freshness, snapshotAgeMin, registered: () => Object.keys(REG),
+                 refusal, refusals: () => Object.keys(REFUSALS).map(refusal) };
 })();

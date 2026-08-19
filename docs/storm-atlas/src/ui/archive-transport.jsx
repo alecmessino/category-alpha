@@ -16,11 +16,16 @@
  * median storm lasts about six days, so at 5 d/s it crosses the screen in a second and at
  * 120 d/s it is a flash -- which is the right choice when the subject is the mat rather than
  * the storm.
+ *
+ * REDUCED MOTION HALVES THE FRAMES, NOT THE RUN. Half the tick rate and twice the step covers
+ * exactly the same archive time at the same stated d/s, with fewer moving frames. Nothing
+ * autoplays in either mode.
  */
 
 import React from "react";
 import { activeAt, advance, fromActive, toActive } from "../engine/timeline.js";
-import { MONO, fmtUTC } from "./kit.jsx";
+import { fmtUTC } from "./kit.jsx";
+import { prefersReducedMotion } from "./transport.jsx";
 
 /* Archive days per wall-clock second. The whole record holds 15,878 storm-active days, so the
    fastest preset runs it in about two minutes and the slowest in nearly an hour. */
@@ -40,7 +45,10 @@ export function ArchiveTransport({ timeline, cursorMin, setCursorMin, playing, s
 
   React.useEffect(() => {
     if (!playing || !tl || !tl.n) return undefined;
-    const perTick = (speed * DAY_MIN * TICK_MS) / 1000;
+    const coarse = prefersReducedMotion() ? 2 : 1;
+    /* The archive time per tick scales with the tick interval, so the stated d/s is exactly
+       what runs in either mode. */
+    const perTick = (speed * DAY_MIN * TICK_MS * coarse) / 1000;
     const iv = setInterval(() => {
       setCursorMin((c) => {
         const from = c === null ? tl.firstT : c;
@@ -52,7 +60,7 @@ export function ArchiveTransport({ timeline, cursorMin, setCursorMin, playing, s
         if (r.done) setPlaying(false);
         return r.cursor;
       });
-    }, TICK_MS);
+    }, TICK_MS * coarse);
     return () => clearInterval(iv);
   }, [playing, speed, tl, skipQuiet, setCursorMin, setPlaying]);
 
@@ -64,7 +72,13 @@ export function ArchiveTransport({ timeline, cursorMin, setCursorMin, playing, s
     return () => clearTimeout(t);
   }, [flash]);
 
-  if (!tl || !tl.n) return null;
+  if (!tl || !tl.n) {
+    return (
+      <div className="at-transport">
+        <div className="at-hint"><span>NO STORMS IN THIS FILTER</span></div>
+      </div>
+    );
+  }
   const cursor = cursorMin === null ? tl.firstT : cursorMin;
   const active = activeAt(tl, cursor);
   const atEnd = cursor >= tl.lastT;
@@ -77,75 +91,61 @@ export function ArchiveTransport({ timeline, cursorMin, setCursorMin, playing, s
   };
 
   return (
-    <div style={{
-      display: "flex", alignItems: "center", gap: "var(--sp-5)",
-      padding: "var(--sp-4) var(--sp-6)", borderTop: "1px solid var(--border-dim)",
-      background: "var(--surface-card)", minHeight: 56, flexWrap: "wrap",
-    }}>
-      <button type="button" onClick={() => {
-        if (atEnd) { setCursorMin(tl.firstT); setSkipped(0); }
-        setPlaying(!playing);
-      }} style={{
-        ...MONO, fontSize: "var(--fs-mono-md)", width: 34, height: 28,
-        border: "1px solid " + (playing ? "var(--accent)" : "var(--border-strong)"),
-        background: playing ? "color-mix(in srgb, var(--accent) 14%, transparent)" : "transparent",
-        color: playing ? "var(--accent)" : "var(--text-1)", borderRadius: "var(--radius-sm)",
-        cursor: "pointer", flex: "none",
-      }} title={playing ? "pause" : atEnd ? "replay from the start of the record" : "play"}>
+    <div className="at-transport">
+      <button type="button" className={playing ? "at-tbtn at-on" : "at-tbtn"}
+        aria-label={playing ? "pause" : atEnd ? "replay from the start of the record" : "play"}
+        title={playing ? "pause" : atEnd ? "replay from the start of the record" : "play"}
+        onClick={() => {
+          if (atEnd) { setCursorMin(tl.firstT); setSkipped(0); }
+          setPlaying(!playing);
+        }}>
         {playing ? "❚❚" : atEnd ? "↻" : "▶"}
       </button>
 
-      <div style={{ display: "flex", gap: 3, flex: "none" }}>
+      <div className="at-speeds">
         {SPEEDS.map((s) => (
-          <button key={s} type="button" onClick={() => setSpeed(s)}
-            title={`${s} archive days per second`} style={{
-              ...MONO, fontSize: "var(--fs-mono-xs)", padding: "3px 6px",
-              border: "1px solid " + (speed === s ? "var(--accent)" : "var(--border-dim)"),
-              background: "transparent", color: speed === s ? "var(--accent)" : "var(--text-2)",
-              borderRadius: "var(--radius-sm)", cursor: "pointer",
-            }}>{s} d/s</button>
+          <button key={s} type="button" className={speed === s ? "at-on" : undefined}
+            aria-label={`${s} archive days per second`} aria-pressed={speed === s}
+            title={`${s} archive days per second`}
+            onClick={() => setSpeed(s)}>{s} d/s</button>
         ))}
       </div>
 
-      <div style={{ display: "flex", gap: 3, flex: "none" }}>
-        <Step onClick={() => jump(-10)} title="back ten years">« 10y</Step>
-        <Step onClick={() => jump(10)} title="forward ten years">10y »</Step>
+      <div className="at-speeds">
+        <button type="button" aria-label="back ten years" title="back ten years"
+          onClick={() => jump(-10)}>« 10y</button>
+        <button type="button" aria-label="forward ten years" title="forward ten years"
+          onClick={() => jump(10)}>10y »</button>
       </div>
 
       {/* The scrub runs in ACTIVE time, so the bar is uniformly dense in storms rather than in
           calendar years -- dragging through the 1860s would otherwise cross a decade of empty
           ocean in a few pixels while a busy modern season occupied the same width. */}
-      <div style={{ flex: 1, minWidth: 220, position: "relative" }}>
+      <div className="at-scrub">
         <input type="range" min={0} max={Math.round(tl.activeMin)} step={DAY_MIN}
           value={Math.round(activeMin)}
           onChange={(e) => { setPlaying(false); setCursorMin(fromActive(tl, Number(e.target.value))); }}
-          aria-label="position in the archive"
-          style={{ width: "100%", accentColor: "var(--accent)" }} />
-        <div style={{ display: "flex", justifyContent: "space-between", ...MONO,
-          fontSize: "var(--fs-mono-xs)", color: "var(--text-2)", marginTop: -2 }}>
+          aria-label="position in the archive" />
+        <div className="at-ends">
           <span>{fmtUTC(tl.firstT * 60000, { time: false })}</span>
-          <span style={{ color: "var(--text-2)" }}>storm-active time</span>
+          <span>STORM-ACTIVE TIME</span>
           <span>{fmtUTC(tl.lastT * 60000, { time: false })}</span>
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "var(--sp-6)", flex: "none", alignItems: "baseline" }}>
-        <Readout label="UTC" value={fmtUTC(cursor * 60000)} />
-        <Readout label="ACTIVE NOW" value={`${active.length} storm${active.length === 1 ? "" : "s"}`} />
-        <Readout label="REVEALED" value={`${revealedLabel(tl, cursor)} / ${tl.n.toLocaleString()}`} />
+      <div className="at-readouts">
+        <Readout label="ARCHIVE CLOCK" value={fmtUTC(cursor * 60000)} />
+        <Readout label="REVEALED"
+          value={<span>{revealedLabel(tl, cursor)}<small style={{ color: "var(--t4)" }}>
+            {" "}/ {tl.n.toLocaleString()}</small></span>} />
+        <Readout label="ACTIVE NOW" tone={active.length ? undefined : "var(--flag)"}
+          value={`${active.length} storm${active.length === 1 ? "" : "s"}`} />
         <Readout label="QUIET TIME SKIPPED"
           value={skipped > 0 ? `${Math.round(skipped / DAY_MIN).toLocaleString()} d` : "0 d"} />
       </div>
 
       {flash !== null ? (
-        <div style={{
-          ...MONO, fontSize: "var(--fs-mono-xs)", letterSpacing: "var(--track-label)",
-          color: "var(--warn)", border: "1px solid var(--warn)",
-          background: "color-mix(in srgb, var(--warn) 12%, transparent)",
-          borderRadius: "var(--radius-sm)", padding: "3px 8px", flex: "none", whiteSpace: "nowrap",
-        }}>
-          SKIPPED {fmtGap(flash)} · NO STORM ACTIVE
-        </div>
+        <div className="at-skip">SKIPPED {fmtGap(flash)} · NO STORM ACTIVE</div>
       ) : null}
     </div>
   );
@@ -175,23 +175,11 @@ function revealedLabel(tl, cursor) {
   return (last + 1).toLocaleString();
 }
 
-function Step({ onClick, title, children }) {
+function Readout({ label, value, tone }) {
   return (
-    <button type="button" onClick={onClick} title={title} style={{
-      ...MONO, fontSize: "var(--fs-mono-xs)", padding: "3px 6px",
-      border: "1px solid var(--border-dim)", background: "transparent",
-      color: "var(--text-2)", borderRadius: "var(--radius-sm)", cursor: "pointer",
-    }}>{children}</button>
-  );
-}
-
-function Readout({ label, value }) {
-  return (
-    <div style={{ minWidth: 0 }}>
-      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-        letterSpacing: "var(--track-label)" }}>{label}</div>
-      <div style={{ ...MONO, fontSize: "var(--fs-mono-md)", color: "var(--text-1)",
-        whiteSpace: "nowrap" }}>{value}</div>
+    <div className="at-ro">
+      <span className="at-k">{label}</span>
+      <span className="at-v" style={tone ? { color: tone } : undefined}>{value}</span>
     </div>
   );
 }
