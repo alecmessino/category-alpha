@@ -296,6 +296,57 @@ console.log("\n[4c] the builder reads as a question, not as a schema");
     chips.join(","));
 }
 
+console.log("\n[4d] the comparison answers four questions and overstates none of them");
+{
+  /* A cohort with two conditions, so a hold-out exists. The four questions a reader must not
+     have to work for: WHAT changed, BY HOW MUCH, RELATIVE TO WHAT, and WHETHER THE EVIDENCE
+     DISTINGUISHES IT -- and the fourth is the one a tool is tempted to overstate. */
+  await page.evaluate(() => { history.replaceState(null, "", "?v=1&w=12,-105,800&s0=1971"); });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
+    { timeout: 90000 });
+  await page.waitForTimeout(900);
+  await page.getByTitle(/^August/).click();
+  await page.waitForTimeout(300);
+  await page.getByTitle(/^September/).click();
+  await page.waitForTimeout(900);
+
+  const t = await text();
+  ok("the baseline is named on screen", /COMPARED WITH/.test(t));
+  ok("and says which condition is held out", /the same cohort without/.test(t));
+  ok("with its own denominator and effective sample",
+    /\d[\d,]* storms · effective sample \d/.test(t));
+  ok("the delta is in percentage points, with a direction",
+    /[+−-]\d+\.\d points (higher|lower|identical)/.test(t));
+  ok("each card names the baseline it is measured against", /baseline \d+\.\d%/.test(t));
+
+  /* THE HONESTY CONSTRAINT. Overlapping intervals are a weak heuristic and this build runs no
+     hypothesis test, so only two statements are permitted and the vocabulary of a test must
+     not appear anywhere a reader can see it. */
+  ok("the verdict is stated as what the samples can distinguish",
+    /these samples (do not )?separate the two rates/.test(t));
+  ok("the words of a hypothesis test appear nowhere on screen",
+    !/\bsignifican(t|ce)\b|\bp-value\b|\bnull hypothesis\b/i.test(t),
+    (t.match(/.{0,60}signifian?c.{0,60}/i) || [""])[0]);
+
+  /* THE CAVEAT MOST TOOLS OMIT: the baseline CONTAINS the cohort, so these are not two
+     independent estimates and the interval comparison is weaker than it looks. */
+  ok("the two populations' relationship is published",
+    /are also in the baseline/.test(t));
+  ok("and it says they are not independent estimates",
+    /not independent estimates/.test(t));
+  ok("and refuses to be read as a test", /never as a test/.test(t));
+
+  // The what-if control: any applied condition can be the one held out.
+  ok("the reader can hold out a different condition", /HOLD OUT/.test(t));
+  await page.click('[data-chip="baseline-where"]');
+  await page.waitForTimeout(900);
+  const t2 = await text();
+  ok("and doing so changes what the comparison is against",
+    /the same cohort without within \d+ km/.test(t2),
+    (t2.match(/the same cohort without[^\n]{0,60}/) || [""])[0]);
+}
+
 console.log("\n[5] Iniki 1992 — the storm the archive's landfall methodology exists for");
 {
   const row = await page.evaluate(() => {

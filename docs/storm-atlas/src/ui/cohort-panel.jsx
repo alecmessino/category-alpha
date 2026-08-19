@@ -20,7 +20,7 @@
 import React from "react";
 import { CATEGORY_COLOR, CATEGORY_ORDER } from "../render/palette.js";
 import { formatPosition } from "../engine/geo.js";
-import { Gap, Head, MONO, Num, OverDenom, Row, Txt, claimText } from "./kit.jsx";
+import { Chip, Gap, Head, MONO, Num, OverDenom, Row, Txt, claimText } from "./kit.jsx";
 import { ConditionedGroup, OutcomeCard, RateLine } from "./outcome-card.jsx";
 import { Refusal } from "./refusal.jsx";
 
@@ -28,7 +28,7 @@ const CAT_LABEL = { td: "TROPICAL DEPRESSION", ts: "TROPICAL STORM", cat1: "CATE
   cat2: "CATEGORY 2", cat3: "CATEGORY 3", cat4: "CATEGORY 4", cat5: "CATEGORY 5" };
 
 export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathway, pathwayOn,
-  peak, pathway }) {
+  peak, pathway, comparison, onBaseline, conditions }) {
   if (!result) return null;
   const r = result;
   const n = r.n_cases;
@@ -95,6 +95,10 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
           <Row k="seasons in cohort" v={<Txt value={seasonSpan(r.cases)} />} />
           <Row k="median genesis" v={<Txt value={medianPosition(r.cases)} />} />
 
+          {comparison ? (
+            <Baseline c={comparison} conditions={conditions} onBaseline={onBaseline} />
+          ) : null}
+
           <Head right={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
             color: "var(--text-2)" }}>count · rate · 95% Wilson</span>}>WHAT THEY BECAME</Head>
           <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
@@ -110,7 +114,10 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
           {CATEGORY_ORDER.filter((c) => c !== "td" && !isCircular(r.intensity[c])).map((cat) => (
             <OutcomeCard key={cat} cell={r.intensity[cat]} label={CAT_LABEL[cat]}
               tone={CATEGORY_COLOR[cat]} subject={CAT_LABEL[cat]}
-              of="storms whose peak intensity the archive recorded" />
+              of="storms whose peak intensity the archive recorded"
+              delta={comparison ? comparison.intensity[cat] : null}
+              baselineCell={comparison ? comparison.baseline.intensity[cat] : null}
+              baselineName={comparison ? baselineNameOf(comparison) : null} />
           ))}
 
           {Object.keys(r.landfall).length ? (
@@ -268,6 +275,67 @@ function NoCohort({ spec, gaps }) {
       {gaps.map((g, i) => <Gap key={i} text={g} />)}
     </div>
   );
+}
+
+/* WHAT IS BEING COMPARED, NAMED BEFORE ANY DELTA IS READ.
+ *
+ * Three of the four questions a comparison has to answer live here rather than on the cards:
+ * what changed, relative to what, and how the two populations are related. Only "by how much"
+ * is per-contract. Putting the baseline above the cards means a reader cannot scroll into a
+ * "+5.1 points" without having passed the sentence saying what those points are relative to.
+ *
+ * The relation note is the part most tools omit: a parent CONTAINS its child, so the same
+ * storms are on both sides and the two rates are not independent estimates. It is computed
+ * (engine/compare.js `relate`) rather than assumed, because one baseline -- dropping the
+ * provisional-seasons switch -- is a subset rather than a superset. */
+function Baseline({ c, conditions, onBaseline }) {
+  const b = c.baseline;
+  return (
+    <div data-baseline style={{ border: "1px solid var(--border-dim)",
+      borderLeft: "var(--bw-signal) solid var(--text-2)", borderRadius: "var(--radius-sm)",
+      padding: "var(--sp-4) var(--sp-5)", marginTop: "var(--sp-5)",
+      background: "var(--surface-sunken)" }}>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+        letterSpacing: ".5px" }}>COMPARED WITH</div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-body)",
+        color: "var(--text-1)", lineHeight: "var(--lh-tight)", marginTop: 3 }}>
+        the same cohort {c.changed
+          ? <>without <strong>{c.changed.sentence}</strong></>
+          : "with no conditions"}
+      </div>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+        marginTop: 4 }}>
+        {b.n_cases.toLocaleString()} storms · effective sample {b.effective_sample_size.toFixed(1)}
+        {" · "}{b.sufficient ? "SUFFICIENT" : `BELOW SAMPLE · ${b.n_cases} < ${b.min_sample}`}
+      </div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+        color: "var(--warn)", lineHeight: "var(--lh-body)", marginTop: "var(--sp-3)" }}>
+        {c.relation.note}
+      </div>
+
+      {/* THE WHAT-IF CONTROL. Any applied condition can be the one held out, so "what if I had
+          not restricted the season" is one click rather than a re-entry -- and the cards
+          immediately answer it. */}
+      {conditions && conditions.length > 1 ? (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: "var(--sp-3)",
+          alignItems: "center" }}>
+          <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)" }}>
+            HOLD OUT
+          </span>
+          {conditions.map((cond) => (
+            <Chip key={cond.key} chipKey={`baseline-${cond.key}`}
+              active={c.changed && c.changed.key === cond.key}
+              onClick={() => onBaseline(cond.key)}>{cond.label}</Chip>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/** How the baseline is named on each card -- short, because it repeats on every one. */
+function baselineNameOf(c) {
+  return c.changed ? `without ${c.changed.sentence}` : "the whole archive";
 }
 
 const CIRCULAR = "CONDITIONED ON -- NOT AN OUTCOME";

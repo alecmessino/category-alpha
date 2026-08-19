@@ -22,6 +22,7 @@ import {
 import { activeAt, advance, buildTimeline, fromActive, toActive } from "../engine/timeline.js";
 import { projectWorld } from "../render/atlas-layer.js";
 import { previewCounts } from "../engine/preview.js";
+import { changedKeyOf, compareResults } from "../engine/compare.js";
 import { AtlasMap } from "./map.jsx";
 import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
@@ -49,7 +50,24 @@ export function Atlas() {
   /* THE SINGLE SOURCE OF TRUTH. One object decides which storms are drawn, which are counted,
      what the outcome cards say, what the URL carries and what a saved scenario is. The rail
      writes to it; nothing else holds query state. */
-  const [cohort, setCohort] = React.useState(() => parseQuery(location.search).spec);
+  const [cohort, setCohortState] = React.useState(() => parseQuery(location.search).spec);
+  /* WHAT THE READER LAST CHANGED, which is what the comparison is against by default.
+     A fixed position in the lifecycle order would be the wrong default: a reader who narrows to
+     Aug-Sep wants to see what the months did, not what the season floor did, and "last in
+     lifecycle order" happens to be the season. Tracked here because only the shell knows which
+     click produced the current cohort. `baselinePin` overrides it when the reader picks a
+     different condition to hold out -- which is the what-if control. */
+  const [lastChanged, setLastChanged] = React.useState(null);
+  const [baselinePin, setBaselinePin] = React.useState(null);
+
+  const setCohort = React.useCallback((next) => {
+    setCohortState((prev) => {
+      const n = typeof next === "function" ? next(prev) : next;
+      const k = changedKeyOf(n, prev);
+      if (k) { setLastChanged(k); setBaselinePin(null); }
+      return n;
+    });
+  }, []);
   const [urlVersion] = React.useState(() => parseQuery(location.search).versionMismatch);
   const [layers, setLayers] = React.useState({
     colorBy: "uniform", genesis: true, landfalls: true,
@@ -99,16 +117,20 @@ export function Atlas() {
   const result = React.useMemo(
     () => (archive ? cohortResult(archive, cohort) : null), [archive, cohort]);
 
-  /* THE POPULATION STAYS VISIBLE AS CONTEXT, and the context is exactly the PARENT cohort --
-     this cohort with its location condition dropped. Comparing against the whole archive would
-     be the wrong reference (it would include storms excluded for reasons that have nothing to do
-     with where they formed), and it is also the object 3.4's baseline needs, so it is computed
-     the same way here rather than approximated. */
-  const context = React.useMemo(() => {
-    if (!archive || !cohort.where) return null;
-    const p = parentOf(cohort, "where");
-    return p ? cohortResult(archive, p) : null;
-  }, [archive, cohort]);
+  /* THE BASELINE IS ONE OBJECT, USED TWICE. It is the population drawn behind the cohort on the
+     map AND the reference every delta is measured against -- and those must be the same thing,
+     or the picture and the numbers are answering different questions, which is the exact failure
+     3.2 existed to end. The condition it holds out is the one the reader pinned, else the one
+     they last changed, else the last in lifecycle order. */
+  const baselineKey = baselinePin || lastChanged;
+  const baselineSpec = React.useMemo(
+    () => parentOf(cohort, baselineKey || undefined), [cohort, baselineKey]);
+  const context = React.useMemo(
+    () => (archive && baselineSpec ? cohortResult(archive, baselineSpec) : null),
+    [archive, baselineSpec]);
+
+  const comparison = React.useMemo(
+    () => (result && context ? compareResults(result, context) : null), [result, context]);
 
   /* What each chip would cost, computed once per cohort -- five filter passes and five scans.
      Measured: 2.9 ms on a 65-storm cohort, 3.9 ms on 539, 6.9 ms over the whole archive. That
@@ -249,7 +271,9 @@ export function Atlas() {
              "Cat 3+, since 1971, Aug-Sep" produced a map and no statistics at all. */
           <CohortPanel spec={cohort} result={result} sentence={sentence}
             peak={peakOf(pathway)} pathway={pathway} onSelectStorm={selectStorm}
-            pathwayOn={showPathway} onShowPathway={setShowPathway} />
+            pathwayOn={showPathway} onShowPathway={setShowPathway}
+            comparison={comparison} conditions={conditionsOf(cohort)}
+            onBaseline={setBaselinePin} />
         ) : (
           <Introduction archive={archive} />
         )}

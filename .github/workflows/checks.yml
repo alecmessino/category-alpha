@@ -221,3 +221,23 @@ jobs:
       # be a second methodology introduced through the back door.
       - name: Verify a cohort cannot report itself as its own outcome
         run: node scripts/test-atlas-rates.mjs
+
+      # The cohort spec is the only query surface: one object decides what is drawn AND what is
+      # scored. The dangerous part was never the new code, it was the REPLACEMENT -- a rewrite
+      # that silently dropped one filter would look completely healthy, because nothing on
+      # screen says "provisional seasons are no longer being excluded"; the population just
+      # quietly grows and every rate shifts. So the gate is an equivalence proof: for every
+      # filter and a matrix of combinations, the spec path selects the identical storm set as
+      # the legacy path -- plus the URL round-trip, and the archive's own warnings surviving
+      # the migration, which is the half the first draft of this test forgot.
+      - name: Verify one cohort spec gives one answer
+        run: node scripts/test-atlas-cohort.mjs
+
+      # Comparing two Wilson intervals for overlap is a WEAK heuristic, not a hypothesis test,
+      # and this repository runs none. The danger is the vocabulary: "significant" would borrow
+      # an authority the method does not have, and a reader cannot tell from a rendered page
+      # which of the two a number came from. So the words of a test are banned from the sources
+      # and from the shipped bundle, the two permitted statements are pinned, and the measured
+      # figures behind the worked example are asserted rather than described.
+      - name: Verify the comparison says only what the intervals support
+        run: node scripts/test-atlas-compare.mjs

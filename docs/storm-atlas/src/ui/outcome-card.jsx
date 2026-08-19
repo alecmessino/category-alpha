@@ -22,6 +22,7 @@
 import React from "react";
 import { MONO, OverDenom } from "./kit.jsx";
 import { REFUSALS, Refusal } from "./refusal.jsx";
+import { NO_COMPARISON } from "../engine/compare.js";
 
 const CIRCULAR = "CONDITIONED ON -- NOT AN OUTCOME";
 
@@ -35,7 +36,8 @@ const CIRCULAR = "CONDITIONED ON -- NOT AN OUTCOME";
  * @param {object} [props.unscoreable] the archive's BASE RATE ONLY verdict for this contract
  * @param {string} [props.subject]  what the refusal is about, when the label alone is not enough
  */
-export function OutcomeCard({ cell, label, tone, of, unscoreable, note, subject }) {
+export function OutcomeCard({ cell, label, tone, of, unscoreable, note, subject, delta,
+  baselineCell, baselineName }) {
   if (!cell && !unscoreable) return null;
   const c = tone || "var(--accent)";
 
@@ -82,6 +84,15 @@ export function OutcomeCard({ cell, label, tone, of, unscoreable, note, subject 
     <div style={CARD}>
       <CardHead label={label} tone={c} right={<OverDenom n={cell.count} of={cell.n_storms} />} />
       <IntervalBar rate={cell.rate} ci={ci} tone={c} />
+      {/* THE BASELINE ON THE SAME AXIS, IMMEDIATELY BELOW. Adjacency is the comparison: whether
+          the two bands overlap is a thing the eye settles in one glance, and the digits under
+          them are the confirmation rather than the finding. Separating the two bars with a
+          paragraph would turn a picture back into arithmetic. */}
+      {baselineCell && baselineCell.ci95 ? (
+        <div style={{ marginTop: 2 }}>
+          <IntervalBar rate={baselineCell.rate} ci={baselineCell.ci95} tone="var(--text-2)" thin />
+        </div>
+      ) : null}
       <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-3)", marginTop: 5 }}>
         <span style={{ ...MONO, fontSize: "var(--fs-mono-lg)", fontWeight: 800, color: c,
           lineHeight: 1 }}>
@@ -99,6 +110,7 @@ export function OutcomeCard({ cell, label, tone, of, unscoreable, note, subject 
         {of || "storms whose outcome the archive recorded"}
         {note ? <> · {note}</> : null}
       </div>
+      {delta ? <Delta d={delta} baselineCell={baselineCell} baselineName={baselineName} /> : null}
       {cell.n_unknown > 0 ? <UnknownNote n={cell.n_unknown} /> : null}
     </div>
   );
@@ -126,13 +138,13 @@ function CardHead({ label, tone, right }) {
 /* The rate as a filled length, the interval as the band it sits inside. The band is the point:
    two cohorts with the same percent and different sample sizes are two different findings, and
    this is where that becomes visible without arithmetic. */
-function IntervalBar({ rate, ci, tone }) {
+function IntervalBar({ rate, ci, tone, thin }) {
   const pct = (x) => `${Math.max(0, Math.min(100, 100 * x))}%`;
   /* BOTH BOUNDS HAVE TO BE VISIBLE. Drawn as band-then-fill, the lower bound disappears under
      the fill and the bar reads as "67% and it might be more", which is half the statement. The
      edge marks are drawn last, over everything, so the interval reads as the span it is. */
   return (
-    <div style={{ position: "relative", height: 10, marginTop: 7,
+    <div style={{ position: "relative", height: thin ? 6 : 10, marginTop: thin ? 0 : 7,
       background: "var(--surface-app)", borderRadius: 2, overflow: "hidden" }}>
       {ci ? (
         <div title={`95% Wilson interval ${(100 * ci[0]).toFixed(1)}–${(100 * ci[1]).toFixed(1)}%`}
@@ -151,6 +163,61 @@ function IntervalBar({ rate, ci, tone }) {
     </div>
   );
 }
+
+/* THE SAME AXIS, TWICE. This is the whole comparison, and it is a picture before it is a
+ * sentence: the baseline's interval is drawn directly beneath the cohort's, on the same 0-100%
+ * scale, so whether the two bands overlap is seen rather than computed. The digits underneath
+ * confirm what the eye already has.
+ *
+ * The words are constrained -- see engine/compare.js. Overlapping intervals are a weak
+ * heuristic, not a test, so this renders only the two permitted statements and never the
+ * vocabulary of a test that is not being run. */
+function Delta({ d, baselineCell, baselineName }) {
+  if (!d) return null;
+
+  if (d.verdict === NO_COMPARISON) {
+    return (
+      <div style={DELTA_BOX}>
+        <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)" }}>
+          NO COMPARISON — {d.why}
+        </span>
+      </div>
+    );
+  }
+
+  const sign = d.deltaPp > 0 ? "+" : d.deltaPp < 0 ? "−" : "±";
+  const dirTone = d.overlap ? "var(--text-2)"
+    : d.deltaPp > 0 ? "var(--pos)" : "var(--neg)";
+
+  return (
+    <div style={DELTA_BOX}>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+        lineHeight: "var(--lh-body)" }}>
+        baseline {(100 * d.baseRate).toFixed(1)}%
+        {baselineCell && baselineCell.ci95
+          ? ` [${(100 * baselineCell.ci95[0]).toFixed(1)}–${(100 * baselineCell.ci95[1]).toFixed(1)}%]`
+          : null}
+        {baselineName ? <> · {baselineName}</> : null}
+      </div>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-sm)", marginTop: 3, color: dirTone }}>
+        {sign}{Math.abs(d.deltaPp).toFixed(1)} points {d.direction}
+      </div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+        lineHeight: "var(--lh-body)", marginTop: 2,
+        color: d.overlap ? "var(--warn)" : "var(--text-1)" }}>
+        {d.overlap
+          ? "The intervals overlap — these samples do not separate the two rates."
+          : "The intervals do not overlap — these samples separate the two rates."}
+      </div>
+    </div>
+  );
+}
+
+const DELTA_BOX = {
+  borderTop: "1px solid var(--border-dim)",
+  marginTop: "var(--sp-3)",
+  paddingTop: "var(--sp-3)",
+};
 
 /* SAID ONCE, NOT ONCE PER ROW.
  *
