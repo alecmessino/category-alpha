@@ -1,20 +1,15 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-19T07:06:12.314Z",
+  "ranAt": "2026-08-19T13:07:32.864Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "a98e3bd0bf8cad97016334a6ccd8240d60776eab",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32226050313",
-  "ok": false,
-  "passed": 45,
+  "sha": "14d8d35e5ea33bd68f38409dd69b6af89966508f",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32256258122",
+  "ok": true,
+  "passed": 46,
   "total": 46,
-  "failures": [
-    {
-      "check": "no console errors from our code",
-      "detail": "Warning: Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or o"
-    }
-  ],
-  "thirdPartyFailures": 62,
+  "failures": [],
+  "thirdPartyFailures": 8,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -34,7 +29,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-19T06:36:31.777Z · 30m old"
+      "detail": "2026-08-19T13:05:55.588Z · 2m old"
     },
     {
       "check": "renders: Situation",
@@ -94,12 +89,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "5 ranked of 13 candidates · 116/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "8 ranked of 16 candidates · 116/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 1 displayed-only · unverifiable=0"
+      "detail": "0 executable · 2 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -109,7 +104,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "44/60 tile(s) rendered · 16 hole(s) · 0 still loading"
+      "detail": "60/60 tile(s) rendered · 0 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -124,7 +119,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 1.9 screens tall (2661px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 754px · ▾ 698px · BANKROLL 660px"
+      "detail": "3 tabs · Situation is 1.9 screens tall (2709px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 801px · BANKROLL 707px · ▾ 698px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -144,17 +139,17 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": true,
-      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 3 advisory change(s) · 0 moved P · 2 pinned at the clamp · 3 register row(s) · situation P=99% at adv #27A"
+      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 3 advisory change(s) · 0 moved P · 2 pinned at the clamp · 3 register row(s) · situation P=99% at adv #28A"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "0/1 frame(s) carry a consensus peak against 0 in the snapshot · 0 carry its cycle · frame is 3m behind the snapshot (current — full coverage required) · 1 deck(s) carried no forecasting aids yet · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 0m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=LOW lag=52m raw=99%"
+      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=93m raw=99%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -164,7 +159,7 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "0 guidance cycle(s) turned over → 0 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 0 SHIPS · 1 pass · strip arrivals=0 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
+      "detail": "1 guidance cycle(s) turned over → 1 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 0 SHIPS · 0 pass · strip arrivals=1"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
@@ -179,7 +174,7 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-08-19T00:00:00Z"
+      "detail": "cycle 2026-08-19T06:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
@@ -189,12 +184,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "50 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "61 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "50 tile(s) served on reload · 50 in cache"
+      "detail": "61 tile(s) served on reload · 61 in cache"
     },
     {
       "check": "all markets carried",
@@ -243,8 +238,8 @@
     },
     {
       "check": "no console errors from our code",
-      "pass": false,
-      "detail": "Warning: Encountered two children with the same key, `%s`. Keys should be unique so that components maintain their identity across updates. Non-unique keys may cause children to be duplicated and/or o"
+      "pass": true,
+      "detail": "none"
     }
   ]
 }
