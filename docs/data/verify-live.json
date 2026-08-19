@@ -1,64 +1,15 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-19T03:18:02.967Z",
+  "ranAt": "2026-08-19T04:20:34.026Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "9d7f827425d92ae81f30eb76ddb85c37b3021749",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32211384089",
-  "ok": false,
-  "passed": 34,
+  "sha": "67390c8741044168841a52a21b68bd3ab091316a",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32215340939",
+  "ok": true,
+  "passed": 46,
   "total": 46,
-  "failures": [
-    {
-      "check": "renders: Term structure",
-      "detail": ""
-    },
-    {
-      "check": "renders: Posterior stack",
-      "detail": ""
-    },
-    {
-      "check": "renders: Evidence Matrix",
-      "detail": ""
-    },
-    {
-      "check": "renders: Signal Register",
-      "detail": ""
-    },
-    {
-      "check": "renders: Observability",
-      "detail": ""
-    },
-    {
-      "check": "the map is a centrepiece, not a thumbnail",
-      "detail": "map nullpx"
-    },
-    {
-      "check": "and it is the first thing under the header",
-      "detail": "map starts nullpx down the page"
-    },
-    {
-      "check": "three tabs, so no single view is a wall",
-      "detail": "0 tabs · Situation is 1 screens tall (1400px / 1400px)"
-    },
-    {
-      "check": "the official-advisory console reaches the page",
-      "detail": "1 storm(s) · console=false · forecast=1 · P=1 · watches=1 · discussion=1"
-    },
-    {
-      "check": "the '?' drawers still carry the caveats",
-      "detail": "5 drawer(s) opened · MISSING: omitted rather than invented"
-    },
-    {
-      "check": "no page errors",
-      "detail": "Cannot read properties of undefined (reading 'full_cls') | Cannot read properties of undefined (reading 'full_cls') | Cannot read properties of undefined (reading 'full_cls')"
-    },
-    {
-      "check": "no console errors from our code",
-      "detail": "The above error occurred in the <MT_Evidence> component:\n\n    at MT_Evidence (<anonymous>:453:23)\n    at div\n    at div\n    at MT_Section (<anonymous>:392:21)\n    at main\n    at div\n    at MillibarTer"
-    }
-  ],
-  "thirdPartyFailures": 14,
+  "failures": [],
+  "thirdPartyFailures": 42,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -78,7 +29,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-19T03:13:55.349Z · 4m old"
+      "detail": "2026-08-19T03:58:55.760Z · 22m old"
     },
     {
       "check": "renders: Situation",
@@ -97,22 +48,22 @@
     },
     {
       "check": "renders: Term structure",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Posterior stack",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Evidence Matrix",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
       "check": "renders: Signal Register",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
@@ -122,7 +73,7 @@
     },
     {
       "check": "renders: Observability",
-      "pass": false,
+      "pass": true,
       "detail": ""
     },
     {
@@ -138,7 +89,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "6 ranked of 10 candidates · 116/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "5 ranked of 13 candidates · 116/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -148,32 +99,32 @@
     {
       "check": "no horizontal overflow and no jittering digits",
       "pass": true,
-      "detail": "bodyOverflow=0px tabularNums=true grids=0 overflowing=0"
+      "detail": "bodyOverflow=0px tabularNums=true grids=2 overflowing=0"
     },
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "0/0 tile(s) rendered · 0 hole(s) · 0 still loading"
+      "detail": "47/60 tile(s) rendered · 13 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
-      "pass": false,
-      "detail": "map nullpx"
+      "pass": true,
+      "detail": "map 576px"
     },
     {
       "check": "and it is the first thing under the header",
-      "pass": false,
-      "detail": "map starts nullpx down the page"
+      "pass": true,
+      "detail": "map starts 141px down the page"
     },
     {
       "check": "three tabs, so no single view is a wall",
-      "pass": false,
-      "detail": "0 tabs · Situation is 1 screens tall (1400px / 1400px)"
+      "pass": true,
+      "detail": "3 tabs · Situation is 1.9 screens tall (2661px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 754px · ▾ 698px · BANKROLL 660px"
     },
     {
       "check": "the official-advisory console reaches the page",
-      "pass": false,
-      "detail": "1 storm(s) · console=false · forecast=1 · P=1 · watches=1 · discussion=1"
+      "pass": true,
+      "detail": "1 storm(s) · console=true · forecast=1 · P=1 · watches=1 · discussion=1"
     },
     {
       "check": "no watch area is truncated at a line wrap",
@@ -193,12 +144,12 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 0m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 3m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=21m raw=99%"
+      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=62m raw=99%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -208,7 +159,7 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "1 guidance cycle(s) turned over → 1 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 0 SHIPS · 1 pass · strip arrivals=1"
+      "detail": "0 guidance cycle(s) turned over → 0 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 0 SHIPS · 1 pass · strip arrivals=1 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
@@ -227,18 +178,18 @@
     },
     {
       "check": "the '?' drawers still carry the caveats",
-      "pass": false,
-      "detail": "5 drawer(s) opened · MISSING: omitted rather than invented"
+      "pass": true,
+      "detail": "10 drawer(s) opened · all load-bearing caveats present"
     },
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "61 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "57 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "61 tile(s) served on reload · 61 in cache"
+      "detail": "57 tile(s) served on reload · 57 in cache"
     },
     {
       "check": "all markets carried",
@@ -282,13 +233,13 @@
     },
     {
       "check": "no page errors",
-      "pass": false,
-      "detail": "Cannot read properties of undefined (reading 'full_cls') | Cannot read properties of undefined (reading 'full_cls') | Cannot read properties of undefined (reading 'full_cls')"
+      "pass": true,
+      "detail": "none"
     },
     {
       "check": "no console errors from our code",
-      "pass": false,
-      "detail": "The above error occurred in the <MT_Evidence> component:\n\n    at MT_Evidence (<anonymous>:453:23)\n    at div\n    at div\n    at MT_Section (<anonymous>:392:21)\n    at main\n    at div\n    at MillibarTer"
+      "pass": true,
+      "detail": "none"
     }
   ]
 }
