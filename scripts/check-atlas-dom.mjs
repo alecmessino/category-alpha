@@ -213,36 +213,52 @@ console.log("\n[4b] the five refusals — reachable, distinct, and honest about 
       kind: e.getAttribute("data-refusal"),
       text: (e.innerText || "").replace(/\s+/g, " ").trim(),
     })));
+  /* Kind -> EVERY rendering of it, not one. A refusal legitimately appears more than once on a
+     page -- the builder states what cannot be evaluated while the panel states it again beside
+     the distributions -- and the first draft of this check collapsed them into a Map keyed by
+     kind, which silently kept the LAST one and then asserted the first one's wording. */
+  const byKind = async () => {
+    const m = new Map();
+    for (const r of await seen()) {
+      if (!m.has(r.kind)) m.set(r.kind, []);
+      m.get(r.kind).push(r.text);
+    }
+    return m;
+  };
+  const anyOf = (m, kind, re) => (m.get(kind) || []).some((t) => re.test(t));
+  const allOf = (m, kind, re) => (m.get(kind) || []).every((t) => re.test(t));
 
   // A dense cohort is already selected from [4]: it carries UNKNOWN and BASE RATE ONLY.
-  let states = new Map((await seen()).map((r) => [r.kind, r.text]));
-  const t0 = await text();
+  let states = await byKind();
   ok("— UNKNOWN reaches the screen", states.has("UNKNOWN"));
   ok("BASE RATE ONLY reaches the screen", states.has("BASE_RATE_ONLY"));
   ok("NOT EVALUABLE reaches the screen", states.has("NOT_EVALUABLE"));
-  ok("and NOT EVALUABLE states the measured coverage, not a round number",
-    /\d[\d,]* of [\d,]+ storms/.test(states.get("NOT_EVALUABLE") || ""),
-    (states.get("NOT_EVALUABLE") || "").slice(0, 140));
+  /* THIS COHORT'S coverage, not the archive's. "1,461 of 3,959 archive-wide" is a fact about
+     the pack; "70 of your 194 storms cannot be evaluated" is a fact about the question being
+     asked, and only the second moves as the reader builds. Every rendering of the refusal must
+     carry a per-cohort count; the archive-wide figure appears only inside the explanation. */
+  ok("and every NOT EVALUABLE states a count for THIS cohort",
+    allOf(states, "NOT_EVALUABLE", /\b\d[\d,]* of [\d,]+\b/),
+    (states.get("NOT_EVALUABLE") || []).map((t) => t.slice(0, 60)).join(" || "));
   ok("the two irreducible states say so in as many words",
-    /A LIMIT OF THE RECORD/.test(states.get("UNKNOWN") || "")
-    && /A LIMIT OF THE RECORD/.test(states.get("BASE_RATE_ONLY") || ""));
+    allOf(states, "UNKNOWN", /A LIMIT OF THE RECORD/)
+    && allOf(states, "BASE_RATE_ONLY", /A LIMIT OF THE RECORD/));
   ok("and neither of them offers the reader a remedy",
-    !/YOU CAN CHANGE THIS/.test(states.get("UNKNOWN") || "")
-    && !/YOU CAN CHANGE THIS/.test(states.get("BASE_RATE_ONLY") || ""));
+    !anyOf(states, "UNKNOWN", /YOU CAN CHANGE THIS/)
+    && !anyOf(states, "BASE_RATE_ONLY", /YOU CAN CHANGE THIS/));
   ok("while NOT EVALUABLE is honest that it is only partly in the reader's hands",
-    /PARTLY IN YOUR HANDS/.test(states.get("NOT_EVALUABLE") || ""));
-  void t0;
+    allOf(states, "NOT_EVALUABLE", /PARTLY IN YOUR HANDS/));
 
   /* CONDITIONED ON -- the fifth rule. Conditioning the cohort on an outcome must make that
      outcome refuse to be reported back as a finding. */
   await page.click('[data-chip="intensity-cat3"]');
   await page.waitForTimeout(700);
-  states = new Map((await seen()).map((r) => [r.kind, r.text]));
+  states = await byKind();
   const t1 = await text();
   ok("CONDITIONED ON fires when the cohort is defined by an outcome",
     states.has("CONDITIONED_ON"), t1.slice(0, 200));
-  ok("and it names the way out — remove that condition",
-    /Remove that condition/.test(states.get("CONDITIONED_ON") || ""));
+  ok("and every rendering of it names the way out — remove that condition",
+    allOf(states, "CONDITIONED_ON", /Remove that condition/));
   ok("the outcome zone declares its own consequence on the chip stack",
     /stops being an outcome/.test(t1));
   ok("and the zone is named as a different question",
@@ -252,26 +268,25 @@ console.log("\n[4b] the five refusals — reachable, distinct, and honest about 
   await page.click('[data-chip="radius-250"]').catch(() => {});
   await page.waitForTimeout(700);
   const t2 = await text();
-  states = new Map((await seen()).map((r) => [r.kind, r.text]));
+  states = await byKind();
   const refusedSomewhere = states.has("RATE_REFUSED") || /RATE REFUSED/.test(t2);
   ok("RATE REFUSED reaches the screen on a small cohort", refusedSomewhere,
     `n on screen: ${(t2.match(/BELOW SAMPLE[^\n]*/) || ["-"])[0]}`);
   if (states.has("RATE_REFUSED")) {
-    ok("and it says a wider cohort would carry one",
-      /wider cohort/.test(states.get("RATE_REFUSED") || ""));
+    ok("and every one of them says a wider cohort would carry a rate",
+      allOf(states, "RATE_REFUSED", /wider cohort/),
+      (states.get("RATE_REFUSED") || []).map((t) => t.slice(0, 60)).join(" || "));
   }
   ok("a refused rate never prints as 0.0%", !/\b0\.0%/.test(t2.split("GAPS THE ARCHIVE")[0]));
 
   /* NO TWO REFUSALS MAY READ THE SAME. If two states rendered identical prose the reader would
      have five badges and one meaning, which is the failure this whole surface exists to avoid. */
-  const all = await seen();
-  const byKind = new Map();
-  for (const r of all) if (!byKind.has(r.kind)) byKind.set(r.kind, r.text);
-  const texts = [...byKind.values()];
+  const kinds = await byKind();
+  const texts = [...kinds.values()].map((v) => v[0]);
   ok("no two refusal states render the same text",
     new Set(texts).size === texts.length, texts.map((x) => x.slice(0, 40)).join(" | "));
   ok("at least four distinct refusals are reachable in one session",
-    byKind.size >= 4, [...byKind.keys()].join(","));
+    kinds.size >= 4, [...kinds.keys()].join(","));
 
   await page.click('[data-chip="intensity-all"]');
   await page.click('[data-chip="radius-800"]').catch(() => {});
@@ -345,6 +360,55 @@ console.log("\n[4d] the comparison answers four questions and overstates none of
   ok("and doing so changes what the comparison is against",
     /the same cohort without within \d+ km/.test(t2),
     (t2.match(/the same cohort without[^\n]{0,60}/) || [""])[0]);
+}
+
+console.log("\n[4e] the environment is a lens, and it costs nothing to refuse");
+{
+  /* 2022-2023: the one boundary where the DEFINITION of sst_c changes underneath a cohort. */
+  await page.evaluate(() => { history.replaceState(null, "", "?v=1&s0=2022&s1=2023"); });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
+    { timeout: 90000 });
+  await page.waitForTimeout(900);
+
+  /* THE REFUSAL IS FREE. Coverage comes from the core pack, so the surface can say what it
+     cannot evaluate before a single byte of the 991 KB environment block has been fetched. */
+  const loadedEarly = await page.evaluate(() => !!globalThis.__ATLAS.archive.env);
+  ok("the environment block is NOT fetched to state coverage", loadedEarly === false);
+  let t = await text();
+  ok("coverage is stated per cohort, not archive-wide",
+    /\d+ \/ \d+ storms/.test(t) && /EVALUABLE AT GENESIS/i.test(t));
+  ok("and the storms it cannot reach are named as unmeasured, not calm",
+    /is not calm, it is unmeasured/.test(t));
+  ok("the download says what it weighs", /\d\.\d\d MB, fetched once/.test(t));
+
+  await page.click("[data-env-load]");
+  await page.waitForTimeout(3500);
+  const loadedAfter = await page.evaluate(() => !!globalThis.__ATLAS.archive.env);
+  ok("asking for the distributions fetches the block", loadedAfter === true);
+
+  t = await text();
+  const sources = await page.evaluate(() =>
+    [...document.querySelectorAll("[data-env-source]")].map((e) => e.getAttribute("data-env-source")));
+  ok("the sources are rendered SEPARATELY, one block each",
+    sources.length === 2 && sources[0] === "ships_dev" && sources[1] === "ships_dev+csst",
+    sources.join(","));
+  ok("the boundary crossing is announced", /CROSSES A SOURCE BOUNDARY/.test(t));
+  ok("and the climatological substitution is named",
+    /CLIMATOLOGICAL sea-surface temperature/.test(t));
+  ok("and the operation it invites is forbidden in words",
+    /must not be averaged or differenced/.test(t));
+  ok("the archive's own non-pooling note is reproduced", /must not be pooled/.test(t));
+  ok("every environmental quantile carries its own n", /· n \d+/.test(t));
+  ok("no environmental CONDITION is offered", /No environmental CONDITION is offered/.test(t));
+  ok("and the reason is coverage, not caution",
+    /would answer a 40-year question while looking like a 175-year one/.test(t));
+
+  await page.evaluate(() => { history.replaceState(null, "", location.pathname); });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
+    { timeout: 90000 });
+  await page.waitForTimeout(700);
 }
 
 console.log("\n[5] Iniki 1992 — the storm the archive's landfall methodology exists for");

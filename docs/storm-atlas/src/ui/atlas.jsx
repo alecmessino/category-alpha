@@ -23,6 +23,7 @@ import { activeAt, advance, buildTimeline, fromActive, toActive } from "../engin
 import { projectWorld } from "../render/atlas-layer.js";
 import { previewCounts } from "../engine/preview.js";
 import { changedKeyOf, compareResults } from "../engine/compare.js";
+import { envAtGenesis, envCoverage } from "../engine/env.js";
 import { AtlasMap } from "./map.jsx";
 import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
@@ -132,6 +133,27 @@ export function Atlas() {
   const comparison = React.useMemo(
     () => (result && context ? compareResults(result, context) : null), [result, context]);
 
+  /* THE ENVIRONMENT LENS. Coverage is answered from the core pack -- `env_at_genesis_row` is a
+     core index -- so how many of this cohort can be evaluated at all, and the NOT EVALUABLE
+     refusal that follows, cost nothing and are honest on first paint. The 991 KB environment
+     block is fetched only when a reader asks to see the distributions, and `envEpoch` exists
+     so the lens recomputes once it lands: the archive object is mutated in place by
+     loadEnvironment, which React has no way to notice. */
+  const [envLoading, setEnvLoading] = React.useState(false);
+  const [envEpoch, setEnvEpoch] = React.useState(0);
+  const envCov = React.useMemo(
+    () => (archive && result ? envCoverage(archive, result.rows) : null), [archive, result]);
+  const envLens = React.useMemo(
+    () => (archive && result && envEpoch ? envAtGenesis(archive, result.rows) : null),
+    [archive, result, envEpoch]);
+  const loadEnv = React.useCallback(() => {
+    if (!archive || archive.env) { setEnvEpoch((n) => n + 1); return; }
+    setEnvLoading(true);
+    archive.loadEnvironment(`${DATA_BASE}/atlas-env-v1.bin.gz`)
+      .then(() => { setEnvEpoch((n) => n + 1); })
+      .finally(() => setEnvLoading(false));
+  }, [archive]);
+
   /* What each chip would cost, computed once per cohort -- five filter passes and five scans.
      Measured: 2.9 ms on a 65-storm cohort, 3.9 ms on 539, 6.9 ms over the whole archive. That
      is what makes a live count on every control affordable rather than aspirational. */
@@ -236,6 +258,7 @@ export function Atlas() {
           showPathway={showPathway} setShowPathway={setShowPathway}
           showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
           timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
+          envCoverage={envCov}
           onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
       </div>
 
@@ -273,7 +296,9 @@ export function Atlas() {
             peak={peakOf(pathway)} pathway={pathway} onSelectStorm={selectStorm}
             pathwayOn={showPathway} onShowPathway={setShowPathway}
             comparison={comparison} conditions={conditionsOf(cohort)}
-            onBaseline={setBaselinePin} />
+            onBaseline={setBaselinePin}
+            archive={archive} envCoverage={envCov} envLens={envLens}
+            envLoading={envLoading} onLoadEnv={loadEnv} />
         ) : (
           <Introduction archive={archive} />
         )}

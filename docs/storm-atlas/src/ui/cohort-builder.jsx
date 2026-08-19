@@ -50,7 +50,7 @@ const ENV_FALLBACK = { storms_any_source: null, storms_total: null };
 export function CohortBuilder({
   archive, cohort, setCohort, result, preview, sentence, conditions,
   layers, setLayers, bounds, onReset, mode, setMode,
-  showPathway, setShowPathway, showGenesisDensity, setShowGenesisDensity, timeline,
+  showPathway, setShowPathway, showGenesisDensity, setShowGenesisDensity, timeline, envCoverage,
 }) {
   const total = archive.manifest.counts.storms;
   const s = cohort;
@@ -284,20 +284,36 @@ export function CohortBuilder({
       {preview ? <Basis n={preview.basisOf.subbasinsEntered} cohort={result.kept}
         what="the subbasin" /> : null}
 
-      {/* ---- ENVIRONMENT ----------------------------------------------------------------- */}
+      {/* ---- ENVIRONMENT -----------------------------------------------------------------
+           The slot exists because the lifecycle order would otherwise be a lie: a storm meets
+           its environment between forming and intensifying, and a builder that skipped from
+           GENESIS to PEAK INTENSITY would be claiming the archive has nothing to say there. It
+           has a great deal to say; what it does not have is enough coverage to CONDITION on,
+           and the difference is stated here rather than hidden behind a missing section.
+
+           The count is this cohort's, not the archive's. "1,461 of 3,959 archive-wide" is a
+           fact about the pack; "9 of your 81 storms cannot be evaluated" is a fact about the
+           question the reader is actually asking, and only the second changes as they build. */}
       <Head>2 · ENVIRONMENT</Head>
       <Refusal kind="NOT_EVALUABLE"
         subject="shear · SST · OHC"
-        counts={env.storms_any_source !== null
-          ? `${env.storms_any_source.toLocaleString()} of ${env.storms_total.toLocaleString()} storms`
-          : undefined}
-        detail={"Conditioning on the environment is not offered yet, and the reason is the "
-          + "coverage: the environment record reaches under half this archive and none of it "
-          + "before 1982. An environmental filter over that would silently convert a 175-year "
-          + "archive into a 40-year one and call the result a stronger analog. The sources are "
-          + "also sequential eras rather than alternatives, and one of them substitutes a "
-          + "climatological sea-surface temperature for an observed one, so they cannot be "
-          + "pooled to make the coverage look better than it is."} />
+        counts={envCoverage
+          ? `${envCoverage.evaluable.toLocaleString()} of ${envCoverage.n.toLocaleString()} evaluable`
+          : env.storms_any_source !== null
+            ? `${env.storms_any_source.toLocaleString()} of ${env.storms_total.toLocaleString()} storms`
+            : undefined}
+        detail={"No environmental CONDITION is offered, and the reason is the coverage: the "
+          + "environment record reaches under half this archive"
+          + (env.storms_any_source !== null
+            ? ` (${env.storms_any_source.toLocaleString()} of `
+              + `${env.storms_total.toLocaleString()} storms)`
+            : "")
+          + " and none of it before 1982. An environmental filter over that would silently "
+          + "convert a 175-year archive into a 40-year one and call the result a stronger "
+          + "analog. The sources are also sequential eras rather than alternatives, and one of "
+          + "them substitutes a climatological sea-surface temperature for an observed one, so "
+          + "they cannot be pooled to make the coverage look better than it is. What the "
+          + "archive DOES hold for this cohort is on the right, as a lens."} />
 
       {/* ---- THE OUTCOME ZONE ------------------------------------------------------------ */}
       <div style={{ marginTop: "var(--sp-6)", borderTop: "1px dashed var(--warn)",

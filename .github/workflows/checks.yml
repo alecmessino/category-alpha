@@ -241,3 +241,13 @@ jobs:
       # figures behind the worked example are asserted rather than described.
       - name: Verify the comparison says only what the intervals support
         run: node scripts/test-atlas-compare.mjs
+
+      # The environment is exposed as a LENS and not as a filter, because the coverage decides
+      # the scope: under half this archive carries any environment and none of it predates 1982.
+      # The three sources are sequential ERAS, and one substitutes a CLIMATOLOGICAL sea-surface
+      # temperature for an observed one -- so a cohort spanning 2022 into 2023 crosses a
+      # boundary where the definition of sst_c changes underneath it. This asserts there is no
+      # pooled statistic anywhere in the returned object to render by accident, that the
+      # boundary is announced, and that stating coverage costs none of the 991 KB block.
+      - name: Verify the environment is never pooled across its source eras
+        run: node scripts/test-atlas-env.mjs

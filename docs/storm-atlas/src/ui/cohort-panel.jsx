@@ -23,12 +23,14 @@ import { formatPosition } from "../engine/geo.js";
 import { Chip, Gap, Head, MONO, Num, OverDenom, Row, Txt, claimText } from "./kit.jsx";
 import { ConditionedGroup, OutcomeCard, RateLine } from "./outcome-card.jsx";
 import { Refusal } from "./refusal.jsx";
+import { EnvLens } from "./env-lens.jsx";
 
 const CAT_LABEL = { td: "TROPICAL DEPRESSION", ts: "TROPICAL STORM", cat1: "CATEGORY 1",
   cat2: "CATEGORY 2", cat3: "CATEGORY 3", cat4: "CATEGORY 4", cat5: "CATEGORY 5" };
 
 export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathway, pathwayOn,
-  peak, pathway, comparison, onBaseline, conditions }) {
+  peak, pathway, comparison, onBaseline, conditions, archive, envCoverage, envLens,
+  envLoading, onLoadEnv }) {
   if (!result) return null;
   const r = result;
   const n = r.n_cases;
@@ -191,6 +193,11 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
                 );
               })}
             </>
+          ) : null}
+
+          {archive && envCoverage ? (
+            <EnvLens archive={archive} coverage={envCoverage} lens={envLens}
+              loading={envLoading} onLoad={onLoadEnv} />
           ) : null}
 
           {/* RULE 4: the conditioning note travels with the numbers rather than being written
