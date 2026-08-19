@@ -124,7 +124,13 @@ function serve(payloadPath) {
          run that fails on missing files reports N identical unactionable lines. Recording the
          path here is the difference between "43 failures" and "43 requests for
          /data/frames/....json". */
-      if (!isBrowserProbe(p)) MISSING.push(p);
+      /* ANSWERED, NOT REFUSED. Aborting these at the route layer did not work: the DevTools
+         probe is issued by the BROWSER, outside the page's frame tree, so page.route never
+         sees it -- it reached the server, 404ed, and Chromium logged a console error carrying
+         no URL. Answering 204 here ends it at the only place that sees the request. The file
+         is still tried first, so adding a real /favicon.ico later just serves it. */
+      if (isBrowserProbe(p)) { res.writeHead(204); res.end(); return; }
+      MISSING.push(p);
       res.writeHead(404);
       res.end("not found");
     }
@@ -172,13 +178,7 @@ async function run(label, payloadPath, kind) {
   });
   // The board polls its own snapshot every 60s, so the network is never idle and `networkidle`
   // never settles; and it pulls map tiles from hosts a DOM check neither needs nor wants.
-  /* Same as the overview run below: browser-initiated probes are aborted rather than served, so
-     they never register as a 404 the application caused. */
-  await page.route("**/*", (r) => {
-    const u = r.request().url();
-    if (!u.startsWith(`http://127.0.0.1:${port}`)) return r.abort();
-    return isBrowserProbe(new URL(u).pathname) ? r.abort() : r.continue();
-  });
+  await page.route("**/*", (r) => r.request().url().startsWith(`http://127.0.0.1:${port}`) ? r.continue() : r.abort());
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "load", timeout: 60000 });
   // ORDER MATTERS. The panel lives in the Models tab, and MT_Section renders no children while
   // it is closed, so nothing calls the payload fetch until the tab is selected -- waiting for
@@ -253,14 +253,7 @@ async function runOverviewBoot() {
     const t = m.text();
     if (m.type() === "error" && !/ERR_FAILED|ERR_ABORTED|net::/.test(t)) errors.push("console: " + t.slice(0, 200));
   });
-  /* The probes are refused at the route layer rather than served, so they never reach the
-     server and never produce a console 404 -- an abort registers as ERR_ABORTED, which the
-     filter above already drops as a request this harness itself blocked. */
-  await page.route("**/*", (r) => {
-    const u = r.request().url();
-    if (!u.startsWith(`http://127.0.0.1:${port}`)) return r.abort();
-    return isBrowserProbe(new URL(u).pathname) ? r.abort() : r.continue();
-  });
+  await page.route("**/*", (r) => r.request().url().startsWith(`http://127.0.0.1:${port}`) ? r.continue() : r.abort());
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(1500);
 

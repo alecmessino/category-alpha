@@ -90,7 +90,13 @@ const server = await new Promise((r) => {
       res.writeHead(200, { "content-type": TYPES[extname(p)] || "application/octet-stream" });
       res.end(b);
     } catch {
-      if (!isBrowserProbe(p)) MISSING.push(p);
+      /* ANSWERED, NOT REFUSED. Aborting these at the route layer did not work: the DevTools
+         probe is issued by the BROWSER, outside the page's frame tree, so page.route never
+         sees it -- it reached the server, 404ed, and Chromium logged a console error carrying
+         no URL. Answering 204 here ends it at the only place that sees the request. The file
+         is still tried first, so adding a real /favicon.ico later just serves it. */
+      if (isBrowserProbe(p)) { res.writeHead(204); res.end(); return; }
+      MISSING.push(p);
       res.writeHead(404);
       res.end("not found");
     }
@@ -112,13 +118,6 @@ const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 } }
 for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**", "**basemaps.cartocdn.com**"]) {
   await ctx.route(h, (r) => r.abort());
 }
-/* Aborted rather than served: an abort registers as ERR_ABORTED, which the console filter
-   already drops as a request this harness itself blocked. */
-await ctx.route("**/*", (r) => {
-  const u = r.request().url();
-  if (!u.startsWith(`http://127.0.0.1:${port}`)) return r.continue();
-  return isBrowserProbe(new URL(u).pathname) ? r.abort() : r.continue();
-});
 const page = await ctx.newPage();
 const errors = [];
 page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
