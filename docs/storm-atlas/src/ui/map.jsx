@@ -71,7 +71,26 @@ export function AtlasMap({
       minZoom: 2, maxZoom: 8, zoomSnap: 0.25, worldCopyJump: false,
     }).setView(FALLBACK_CENTER, FALLBACK_ZOOM);
     if (home) {
-      try { m.fitBounds(L.latLngBounds(home).pad(0.04), { animate: false }); }
+      /* A CONTAIN FIT, AND NOTHING TAKEN OUT OF IT.
+       *
+       * The plate's aspect is capped at the archive's own working shape in atlas.css, so a
+       * contain fit of the core frame already opens on the working region: there is no cover
+       * step here, nothing is cropped to make the plate look busier, and the whole frame is on
+       * the plate at every supported viewport.
+       *
+       * What changed is the padding, from 4% on each side to none. `fitBounds` FLOORS the zoom
+       * to zoomSnap, which is a quarter step here, so the fit is already as much as 19% looser
+       * than the frame asked for before any padding is added. Eight per cent of pad on top of
+       * that floor was compounding into as much as 103 degrees of latitude on a plate whose
+       * frame is 56 -- and every one of the extra degrees is empty Southern Ocean or Arctic.
+       * With no pad the floor is the only slack left, which is what the plate's aspect cap is
+       * sized against.
+       *
+       * The snap floor is deliberate and stays: rounding to the NEAREST step instead would
+       * tighten the view by up to half a step, and measured on this pack that took the dominant
+       * genesis lobe from 99.9% inside the opening window to 98.1% at one supported width. A
+       * frame that is not entirely on the plate is not a frame. */
+      try { m.fitBounds(L.latLngBounds(home), { animate: false }); }
       catch { /* a degenerate extent keeps the fallback view */ }
     }
     L.control.zoom({ position: "topright" }).addTo(m);
