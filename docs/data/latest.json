@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-20T06:03:02.906Z",
+  "generatedAt": "2026-08-20T06:06:48.762Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 200,
+      "latencyMs": 195,
       "count": 1,
       "note": "1 active",
       "raw": "{\"id\":\"cp012026\",\"binNumber\":\"CP2\",\"name\":\"Lala\",\"classification\":\"HU\",\"intensity\":\"100\",\"pressure\":\"959\",\"latitude\":\"23.2N\",\"longitude\":\"171.7W\",\"latitudeNumeric\":23.2,\"longitudeNumeric\":-171.7,\"movementDir\":315,\"movementSpeed\":10,\"lastUpdate\":\"2026-08-20T06:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"031a\",\"issuance\":\"2026-08-20T06:00:00.000Z\",\"fileUpdateTime\":\"2026-08-20T05:37:37.988Z\",\"url\":\"https://www.nhc.noaa.gov/text/HFOTCPCP2.shtml\"},\"forecastAdvisory\":{\"advNum\":\"031\",\"issuance\":\"2026-08-20",
-      "forecast": "Lala: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · Hurricane Warning · forecast undefined guidance · advisory 26m old",
-      "advisoryLagMin": 26
+      "forecast": "Lala: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · Hurricane Warning · forecast undefined guidance · advisory 30m old",
+      "advisoryLagMin": 30
     },
     "markets": {
       "ok": true,
@@ -49,7 +49,7 @@
           "samples": [
             "When will the next hurricane form? | Before Sep 15, | px=0.860",
             "When will the next hurricane form? | Before Sep 1,  | px=0.295",
-            "When will the next hurricane form? | Before Oct 15, | px=0.675",
+            "When will the next hurricane form? | Before Oct 15, | px=0.680",
             "When will the next hurricane form? | Before Oct 1,  | px=0.885",
             "When will the next hurricane form? | Before Nov 15, | px=0.900",
             "When will the next hurricane form? | Before Nov 1,  | px=0.605"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 3,
       "note": "3 area(s) under watch · 0 Atlantic",
-      "latencyMs": 110,
+      "latencyMs": 60,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -280,7 +280,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 19,
+      "latencyMs": 7,
       "source": "NHC graphical TWO",
       "count": 3,
       "note": "3 of 3 area(s) with geometry"
@@ -290,7 +290,7 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 468,
+      "latencyMs": 253,
       "count": 1,
       "note": "1/1 storm decks read · CP012026: a-deck cycle 2026082000 · 34 techs · consensus 3 member(s) peak 100 kt · b-deck 41 records · f-deck 295 fixes",
       "attempts": [
@@ -307,7 +307,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 213,
+      "latencyMs": 75,
       "count": 2,
       "note": "2 vortex data message(s): AL022026 11:36Z, CP012026 05:56Z",
       "attempts": [
@@ -342,7 +342,7 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 19,
+      "latencyMs": 18,
       "count": 1,
       "note": "1/1 storms · CP012026: 2026-08-20T00:00Z · shear 19 kt · OHC 19 · MPI 145 kt · 8 RI thresholds",
       "attempts": [
@@ -456,11 +456,11 @@
         "already": true,
         "basis": "already carried at 100 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 26,
+      "advisoryLagMin": 30,
       "discussion": {
         "forecaster": "Adams/Pasch",
         "issuedZ": "2026-08-20T02:42:00.000Z",
-        "lagMin": 201,
+        "lagMin": 205,
         "guidance": {
           "intensity": {
             "position": "above",
@@ -2273,12 +2273,12 @@
         "initSource": "satellite intensity analysis",
         "tauKt": 0,
         "reconDeltaKt": null,
-        "reconAgeMin": 7206,
+        "reconAgeMin": 7210,
         "reconUsed": false,
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 363,
+        "consensusAgeMin": 367,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
@@ -2316,11 +2316,11 @@
             "label": "Aircraft reconnaissance",
             "p": null,
             "unavailable": true,
-            "basis": "recon fix present but not applied: the fix is 7206 min old, past the 180-min line"
+            "basis": "recon fix present but not applied: the fix is 7210 min old, past the 180-min line"
           }
         ],
         "notes": [
-          "recon fix not applied: the fix is 7206 min old, past the 180-min line"
+          "recon fix not applied: the fix is 7210 min old, past the 180-min line"
         ],
         "used": {
           "official": true,
@@ -2334,7 +2334,7 @@
       "evidenceQuality": {
         "tier": "MEDIUM",
         "reasons": [
-          "ATCF consensus 363 min old, no aircraft in the storm"
+          "ATCF consensus 367 min old, no aircraft in the storm"
         ]
       }
     }
@@ -2351,7 +2351,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lala is 100 kt now · combined 2 intensity estimates at 100 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 100 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 26 min old when fetched",
+      "modelBasis": "Lala is 100 kt now · combined 2 intensity estimates at 100 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 100 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 30 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -2386,12 +2386,12 @@
           "label": "Aircraft reconnaissance",
           "p": null,
           "unavailable": true,
-          "basis": "recon fix present but not applied: the fix is 7206 min old, past the 180-min line"
+          "basis": "recon fix present but not applied: the fix is 7210 min old, past the 180-min line"
         }
       ],
       "modelLow": 0.99,
       "modelHigh": 0.99,
-      "modelLagMin": 26,
+      "modelLagMin": 30,
       "modelMaxLagMin": 360,
       "modelGuidance": "above",
       "modelRawP": null,
@@ -2400,9 +2400,9 @@
       "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 100,
-        "conAgeMin": 363,
+        "conAgeMin": 367,
         "spreadKt": 0,
-        "reconAgeMin": 7206,
+        "reconAgeMin": 7210,
         "reconDeltaKt": null,
         "ascatUsed": false,
         "riFloorP": null,
@@ -10544,17 +10544,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.28,
-      "yesAsk": 0.31,
+      "yesBid": 0.27,
+      "yesAsk": 0.32,
       "closeTime": "2026-09-01T03:59:00Z",
-      "liquidity": 0,
-      "spread": 0.02999999999999997,
+      "liquidity": 1,
+      "spread": 0.04999999999999999,
       "volume": 1590.59,
       "volume24h": 125.42,
       "openInterest": 1047.05,
       "depth": {
-        "bidSize": 1,
-        "askSize": 1,
+        "bidSize": 0.35,
+        "askSize": 3.17,
         "notional": 1
       },
       "proxy": false,
@@ -11083,7 +11083,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.675,
+      "market": 0.68,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -11104,16 +11104,16 @@
       "horizon": "storm",
       "strike": null,
       "yesBid": 0.43,
-      "yesAsk": 0.92,
+      "yesAsk": 0.93,
       "closeTime": "2026-10-15T03:59:00Z",
-      "liquidity": 0,
-      "spread": 0.49000000000000005,
+      "liquidity": 47,
+      "spread": 0.5,
       "volume": 155.18,
       "volume24h": 0,
       "openInterest": 155,
       "depth": {
         "bidSize": 4.92,
-        "askSize": 0.08,
+        "askSize": 50,
         "notional": 1
       },
       "proxy": false,
@@ -11189,17 +11189,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.84,
-      "yesAsk": 0.96,
+      "yesBid": 0.83,
+      "yesAsk": 0.97,
       "closeTime": "2026-11-15T04:59:00Z",
-      "liquidity": 5,
-      "spread": 0.12,
+      "liquidity": 1,
+      "spread": 0.14,
       "volume": 136.18,
       "volume24h": 0,
       "openInterest": 131.18,
       "depth": {
         "bidSize": 5,
-        "askSize": 5,
+        "askSize": 1.18,
         "notional": 1
       },
       "proxy": false,
