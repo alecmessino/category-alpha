@@ -204,3 +204,29 @@ as a result rather than as a surprise. The report states the count and names the
 
 Nothing else changes: the contract set, the settings, the classification rule and the criterion
 all stand as registered.
+
+## Amendment 2 — intensity contracts get a secondary table
+
+Also made before any expanded replay was run. No result exists in the commit that adds it.
+
+Amendment 1 said the gate covers landfall contracts only. That is true of the **live refusal** a
+reader sees — `unscoreable` in `retrieval/analogs.py` iterates regions — but it understates the
+rule's reach by one family. `build/build_calibration.py` already applies the *same*
+event-sufficiency rule to **intensity** contracts, via `_archive_intensity_counts`, and publishes
+both verdicts for them in the ledger that ships today.
+
+So three tiers are reported, using only rules that already exist:
+
+| tier | contracts | gate verdict |
+|---|---|---|
+| **primary** | 20 landfall | the live refusal, both gates — the pre-registered criterion applies here |
+| **secondary** | 12 intensity | the same rule the published ledger already applies, both gates — reported beside the primary, not pooled into it |
+| **uncovered** | 18 time-to-event | none exists in either surface |
+
+The criterion in §6 is unchanged and is judged on the **primary** table alone, exactly as
+amended. The secondary table is reported because it is evidence about the same rule at no extra
+cost, and pooling it into the criterion after the fact would be moving the target.
+
+No timing-count rule is invented for the third tier. Inventing a gate in order to pass a test of
+that gate is the failure mode this whole document exists to prevent — so the 18 stay uncovered,
+and any of them the replay cannot score is reported as the coverage hole Amendment 1 registered.
