@@ -36,10 +36,17 @@ import React from "react";
 import { MONO } from "./kit.jsx";
 
 /* One definition per state. The UI reads this; it never writes its own copy of a refusal, for
-   the same reason the gaps are reproduced verbatim -- prose written twice drifts. */
+   the same reason the gaps are reproduced verbatim -- prose written twice drifts.
+ *
+ * `claim` names this state's row in the terminal's Epistemic Key (docs/app/claims.js). The two
+ * surfaces necessarily hold two vocabularies -- the key is a reader-facing glossary shared with
+ * a terminal that knows nothing about cohorts -- but the CORRESPONDENCE is data, declared here
+ * once, so scripts/test-atlas-refusals.mjs can prove every state the Atlas can print has a row
+ * a reader can look it up in, and that no row describes a state nothing prints. */
 export const REFUSALS = {
   RATE_REFUSED: {
     kind: "RATE_REFUSED",
+    claim: "refused",
     title: "RATE REFUSED",
     mark: "⊘",
     tone: "var(--neg)",
@@ -49,6 +56,7 @@ export const REFUSALS = {
   },
   CONDITIONED_ON: {
     kind: "CONDITIONED_ON",
+    claim: "cond",
     title: "CONDITIONED ON",
     mark: "↺",
     tone: "var(--warn)",
@@ -60,6 +68,7 @@ export const REFUSALS = {
   },
   OUT_OF_SCOPE: {
     kind: "OUT_OF_SCOPE",
+    claim: "oos",
     title: "OUT OF SCOPE",
     mark: "⇱",
     tone: "var(--warn)",
@@ -70,6 +79,7 @@ export const REFUSALS = {
   },
   NOT_EVALUABLE: {
     kind: "NOT_EVALUABLE",
+    claim: "notev",
     title: "NOT EVALUABLE",
     mark: "⌁",
     tone: "var(--text-2)",
@@ -79,6 +89,7 @@ export const REFUSALS = {
   },
   BASE_RATE_ONLY: {
     kind: "BASE_RATE_ONLY",
+    claim: "base",
     title: "BASE RATE ONLY",
     mark: "▤",
     tone: "var(--text-2)",
@@ -89,6 +100,7 @@ export const REFUSALS = {
   },
   UNKNOWN: {
     kind: "UNKNOWN",
+    claim: "unk",
     title: "— UNKNOWN",
     mark: "—",
     tone: "var(--text-2)",

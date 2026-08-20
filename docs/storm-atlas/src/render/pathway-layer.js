@@ -24,8 +24,13 @@ export const PathwayLayer = AtlasLayer.extend({
     pane: "overlayPane",
     zIndexOffset: 1,
     stepDeg: 2.0,
-    hue: "56, 189, 248", // --cyan-400, as rgb components
-    maxAlpha: 0.62,
+    hue: "79, 195, 247", // the Atlas accent, as rgb components
+    /* alpha = floor + span * (n / peak) ^ gamma. The floor keeps a cell that one storm passed
+       through visible as one storm rather than as nothing; the gamma opens out the long tail,
+       where the interesting structure of a pathway map actually is. */
+    alphaFloor: 0.11,
+    alphaSpan: 0.46,
+    alphaGamma: 0.55,
   },
 
   /** density: Map of "lat,lon" (cell south-west corner) -> distinct storms through that cell */
@@ -60,13 +65,8 @@ export const PathwayLayer = AtlasLayer.extend({
       const x1 = b.wx * scale - ox;
       const y1 = b.wy * scale - oy;
       if (x1 < 0 || y1 < 0 || x0 > width || y0 > height) continue;
-      /* sqrt rather than linear: a linear ramp makes every cell below the peak look empty,
-         and the interesting structure in a pathway map is in the long tail, not at the mode. */
-      /* sqrt rather than linear, and a floor: a linear ramp makes every cell below the peak
-         look empty, and the interesting structure in a pathway map is in the long tail. The
-         floor keeps a cell that one storm passed through visible as one storm rather than as
-         nothing. */
-      const alpha = Math.max(0.06, this.options.maxAlpha * Math.sqrt(n / peak));
+      const o = this.options;
+      const alpha = o.alphaFloor + o.alphaSpan * Math.pow(n / peak, o.alphaGamma);
       ctx.fillStyle = `rgba(${this.options.hue}, ${alpha.toFixed(4)})`;
       ctx.fillRect(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
     }

@@ -1,0 +1,694 @@
+/* STORM ATLAS — the surface's own ink, and nothing else's.
+ *
+ * SCOPED, DELIBERATELY. Every token override and every class below sits inside `[data-atlas]`,
+ * which only this surface sets. The Millibar terminal shares docs/styles.css with the Atlas and
+ * must keep its own radii, its own accents and its own type scale; a refinement to one surface
+ * that silently restyles the other is not a refinement, it is a regression with a nice
+ * screenshot. So docs/tokens/* is untouched and the divergence lives here, in one file, where
+ * it can be read as a list of deliberate differences.
+ *
+ * THE ONE TONAL DECISION EVERYTHING ELSE RESTS ON: the map plate is the DARKEST plane and the
+ * chrome around it is lighter. That inversion is what makes the map read as a canvas set into
+ * an instrument rather than as the page background it happens to fill. Move one of the three
+ * planes and all three have to move — the ladder carries the reading, not the absolute values.
+ *
+ * Classes are prefixed `at-`. The design-system bundle injects its own stylesheet into the same
+ * document and short names collide; a prefix makes the boundary structural.
+ */
+
+/* Erode at 400 and 500. The repo self-hosts Erode 700 for the terminal's wordmark; the Atlas
+   sets one editorial lede per panel state and the drawer's heading, which are book and medium
+   weights. Declared here rather than in docs/tokens/fonts.css so the terminal's font manifest
+   does not grow two faces it never renders. */
+@font-face{font-family:'Erode';font-style:normal;font-weight:400;font-display:swap;
+  src:url('../assets/fonts/erode-400.woff2') format('woff2')}
+@font-face{font-family:'Erode';font-style:normal;font-weight:500;font-display:swap;
+  src:url('../assets/fonts/erode-500.woff2') format('woff2')}
+
+/* ─── tokens ──────────────────────────────────────────────────────────────────────────── */
+
+[data-atlas]{
+  /* the three planes, plus the sunken one inputs sit in */
+  --chrome-hi:#18212f;   /* header, transport, plate caption bands — lightest */
+  --chrome:#131b27;      /* rail, panel */
+  --sunken:#0e151f;      /* year inputs */
+  --stage:#0d131d;       /* the plate — darkest, one step off black */
+
+  --rule:#222d3c; --rule-2:#2e3a4a; --rule-3:#405064; --rule-4:#56687d;
+  --t1:#eaf0f7; --t2:#a2b2c6; --t3:#7d8fa5; --t4:#63758b;
+
+  /* A 45° hatch, reused by the refused mark. Declared once so the mark and the key cannot
+     drift apart. */
+  --hatch:repeating-linear-gradient(45deg,#3a4a60 0 1.5px,transparent 1.5px 5px);
+
+  /* The design-system aliases every component already reads, remapped for this surface. This
+     is what lets the panels adopt the ladder without every inline style being rewritten. */
+  --surface-app:var(--chrome);
+  --surface-card:var(--chrome);
+  --surface-sunken:var(--sunken);
+  --border-dim:var(--rule);
+  --border-strong:var(--rule-2);
+  --text-1:var(--t1);
+  --text-2:var(--t3);
+  --accent:#4fc3f7;
+  --accent-bright:#4fc3f7;
+  --accent-2:#2b6f92;
+  --border-accent:var(--accent);
+  --text-link:var(--accent);
+  --pos:#3ddc97;
+  --neg:#ef5350;
+  /* `--warn` is the archive's own epistemic flag on this surface and nothing else's. */
+  --warn:#f0b429;
+  --flag:#f0b429;
+  --special:#9b7bf0;
+
+  /* Radius 0 everywhere. The terminal keeps 6/8/12 px; a research plate has square corners. */
+  --radius-sm:0; --radius-md:0; --radius-lg:0; --radius-pill:0;
+
+  /* Colour, border and background only, and one duration. No easing curve, because an easing
+     curve is a gesture and nothing on this surface is gesturing. */
+  --ease-ui:.1s linear;
+  --ease-cam:.1s linear;
+  --dur-drawer:0s;
+  --dur-veil:0s;
+
+  --shadow-card:none;
+  --shadow-cmd:none;
+
+  /* The three-zone header lock: the brand is exactly the rail's width and the status block
+     exactly the panel's, so the chrome lines up with the columns underneath it. One pair of
+     variables drives both, which is what keeps them locked through every breakpoint. */
+  --at-rail:312px;
+  --at-panel:424px;
+}
+
+/* ─── page ────────────────────────────────────────────────────────────────────────────── */
+
+[data-atlas]{background:var(--chrome);color:var(--t1)}
+[data-atlas] *{box-sizing:border-box}
+[data-atlas] button{font:inherit}
+[data-atlas] ::-webkit-scrollbar-thumb{background:#2b3746;border-radius:0}
+[data-atlas] ::-webkit-scrollbar-thumb:hover{background:#3b4a5e}
+
+/* Keyboard focus is visible on every control, not only the ones that happened to be links. */
+[data-atlas] :focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+[data-atlas] .at-chip:focus-visible,[data-atlas] .at-months button:focus-visible,
+[data-atlas] .at-tg:focus-visible,[data-atlas] .at-tbtn:focus-visible,
+[data-atlas] .at-speeds button:focus-visible,[data-atlas] .at-pool button:focus-visible,
+[data-atlas] .at-years input:focus-visible,[data-atlas] .at-hbtn:focus-visible,
+[data-atlas] .leaflet-control-zoom a:focus-visible{outline:1px solid var(--accent);outline-offset:1px}
+
+/* Nothing on this surface animates for effect, so there is nothing to keep when a reader has
+   asked for less of it. The replay clock is the one continuous motion and it is always started
+   by an explicit act; under this preference it steps coarser rather than stopping (see
+   archive-transport.jsx), so the same run is watched in fewer moving frames. */
+@media (prefers-reduced-motion:reduce){
+  [data-atlas] *{transition:none!important;animation:none!important}
+}
+
+/* ─── shell ───────────────────────────────────────────────────────────────────────────── */
+
+/* Fixed to the viewport, because the map IS the page and a page that scrolls under a map is a
+   different product. The three rows are chrome / instrument / transport. */
+[data-atlas].atlas-shell{
+  position:fixed;inset:0;
+  display:grid;
+  grid-template-columns:var(--at-rail) minmax(0,1fr) var(--at-panel);
+  grid-template-rows:58px minmax(0,1fr) auto;
+  background:var(--chrome);
+}
+/* A grid item's default min-height is `auto`, which means CONTENT, which means a stage holding
+   a map that wants to be as tall as its own content escapes the row it was given. All three
+   columns get an explicit floor of zero so the row height wins. */
+[data-atlas] .atlas-rail,[data-atlas] .atlas-stage,[data-atlas] .atlas-panel{
+  min-width:0;min-height:0;
+}
+[data-atlas] .atlas-rail{grid-column:1;grid-row:2;border-right:1px solid var(--rule-2);background:var(--chrome)}
+[data-atlas] .atlas-stage{grid-column:2;grid-row:2}
+[data-atlas] .atlas-panel{grid-column:3;grid-row:2;border-left:1px solid var(--rule-2);background:var(--chrome)}
+[data-atlas] .atlas-transport{grid-column:1/-1;grid-row:3}
+[data-atlas] .atlas-rail,[data-atlas] .atlas-panel{overflow-x:hidden}
+
+/* THE CALIBRATION SURFACE IS A SHELL VARIANT, not a fourth child rule.
+   Written as a variant because the media queries below cap row 2 -- at 760px it is
+   minmax(280px,46vh) -- and a full-width reading surface squeezed into 46vh of viewport would
+   be a page nobody scrolls. In this mode the rail, stage and panel are not rendered at all, so
+   the variant needs no edits inside either media block: it simply redefines the grid it is
+   laid into. */
+[data-atlas].atlas-shell[data-view="calibration"]{
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto minmax(0,1fr);
+}
+[data-atlas] .atlas-calibration{grid-column:1/-1;grid-row:2;min-width:0;min-height:0;overflow-y:auto}
+
+/* ─── header ──────────────────────────────────────────────────────────────────────────── */
+
+[data-atlas] .at-header{
+  grid-column:1/-1;grid-row:1;display:flex;align-items:stretch;min-width:0;
+  border-bottom:1px solid var(--rule-2);background:var(--chrome-hi);
+}
+[data-atlas] .at-brand{
+  display:flex;flex-direction:column;justify-content:center;gap:4px;flex:none;
+  padding:0 16px 0 20px;width:var(--at-rail);border-right:1px solid var(--rule-2);min-width:0;
+}
+[data-atlas] .at-brand h1{
+  margin:0;font-family:var(--font-sans);font-size:14px;font-weight:700;letter-spacing:3px;
+  line-height:1;text-transform:uppercase;color:#f6fafe;white-space:nowrap;
+}
+[data-atlas] .at-brand .at-sub{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:1.1px;color:var(--t4);
+  text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+[data-atlas] .at-brand a{color:inherit;text-decoration:none}
+[data-atlas] .at-brand a:hover{color:var(--accent)}
+
+/* The archive ledger. It degrades by dropping whole figures, never by clipping one mid-word:
+   a truncated count is a wrong count, and an absent one is only an absent one. */
+[data-atlas] .at-ledger{display:flex;align-items:stretch;flex:1 1 auto;min-width:0;overflow:hidden}
+[data-atlas] .at-fig{
+  display:flex;flex-direction:column;justify-content:center;gap:3px;flex:none;
+  padding:0 17px;border-right:1px solid var(--rule);white-space:nowrap;
+}
+[data-atlas] .at-fig b{
+  font-family:var(--font-mono);font-size:14px;font-weight:600;color:#f2f7fd;line-height:1;
+}
+[data-atlas] .at-fig span{font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t4)}
+[data-atlas] .at-sys{
+  display:flex;align-items:center;justify-content:flex-end;gap:16px;flex:0 1 auto;
+  width:var(--at-panel);min-width:0;padding:0 18px;border-left:1px solid var(--rule-2);
+}
+[data-atlas] .at-sys .at-stack{
+  display:flex;flex-direction:column;gap:4px;text-align:right;min-width:0;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.8px;color:var(--t4);line-height:1.3;
+}
+[data-atlas] .at-sys .at-stack div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-atlas] .at-sys .at-stack em{font-style:normal;color:var(--t2)}
+
+/* The text button. A rule under a word, not a pill: this surface has no buttons that look
+   like buttons except the transport's. */
+[data-atlas] .at-hbtn{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.2px;color:var(--t2);
+  background:none;border:0;border-bottom:1px solid var(--rule-3);padding:0 0 2px;
+  text-transform:uppercase;flex:none;cursor:pointer;
+  transition:color .1s linear,border-color .1s linear;
+}
+[data-atlas] .at-hbtn:hover{color:#fff;border-bottom-color:var(--accent)}
+
+/* ─── editorial furniture ─────────────────────────────────────────────────────────────── */
+
+[data-atlas] .at-pad{padding:0 18px 34px 20px}
+
+[data-atlas] .at-sechd{
+  display:flex;align-items:baseline;gap:9px;flex-wrap:nowrap;
+  margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--rule-2);
+}
+[data-atlas] .at-sechd .at-n{
+  font-family:var(--font-mono);font-size:9px;color:var(--t4);letter-spacing:.5px;flex:none;width:16px;
+}
+[data-atlas] .at-sechd h3{
+  margin:0;font-family:var(--font-sans);font-size:10px;font-weight:700;letter-spacing:1.7px;
+  text-transform:uppercase;color:#e3ebf5;white-space:nowrap;flex:none;
+}
+/* the section label is never abbreviated; its right-hand annotation is what gives way */
+[data-atlas] .at-sechd .at-r{
+  margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.7px;color:var(--t3);
+  text-align:right;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* the double rule opens a movement, not a section */
+[data-atlas] .at-grouprule{
+  height:4px;border-top:1px solid var(--rule-2);border-bottom:1px solid var(--rule-2);margin:30px 0 0;
+}
+[data-atlas] .at-grouprule + .at-sechd{margin-top:14px}
+
+[data-atlas] .at-note{
+  font-family:var(--font-mono);font-size:10px;line-height:1.65;color:var(--t3);letter-spacing:.15px;
+}
+[data-atlas] .at-note b{color:var(--t2);font-weight:400}
+[data-atlas] .at-prose{font-family:var(--font-sans);font-size:12px;line-height:1.62;color:var(--t2)}
+[data-atlas] .at-prose strong{color:var(--t1);font-weight:500}
+[data-atlas] .at-lede{
+  font-family:var(--font-display);font-weight:400;font-size:16px;line-height:1.42;color:#f1f6fc;
+  letter-spacing:.1px;
+}
+
+/* One leader, one right-aligned figure. The label ellipsizes and the value never does: a
+   number that has lost its last digit looks exactly like a smaller number. */
+[data-atlas] .at-row{display:flex;align-items:baseline;gap:10px;padding:4px 0;min-width:0}
+[data-atlas] .at-row .at-k{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.85px;text-transform:uppercase;
+  color:var(--t3);white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;
+}
+[data-atlas] .at-row .at-dots{
+  flex:1;height:1px;min-width:10px;transform:translateY(-3px);
+  background:linear-gradient(90deg,#2c3948 55%,transparent 0) 0 0/4px 1px repeat-x;
+}
+[data-atlas] .at-row .at-v{
+  font-family:var(--font-mono);font-size:11px;color:var(--t1);text-align:right;white-space:nowrap;
+  letter-spacing:.1px;flex:none;
+}
+[data-atlas] .at-row.at-dim .at-k,[data-atlas] .at-row.at-dim .at-v{color:var(--t4)}
+[data-atlas] .at-row .at-v small{font-size:9px;color:var(--t4);margin-left:3px}
+[data-atlas] .at-grp{border-top:1px solid var(--rule);margin-top:10px;padding-top:8px}
+
+/* A value the Atlas derived by replaying the archive's own rule, rather than an archive
+   column. Kept as a superscript so it annotates the number without competing with it. */
+[data-atlas] sup.at-drv{
+  font-family:var(--font-mono);font-size:7.5px;color:var(--t4);margin-left:2px;
+  vertical-align:super;letter-spacing:0;
+}
+
+/* The headline figure takes its consequence from the caption under it, not from size alone. */
+[data-atlas] .at-figure{display:flex;align-items:flex-end;gap:11px;margin:14px 0 0;min-width:0}
+[data-atlas] .at-figure .at-big{
+  font-family:var(--font-mono);font-size:36px;font-weight:600;line-height:.82;letter-spacing:-1.2px;
+  color:#fbfdff;flex:none;
+}
+[data-atlas] .at-figure .at-den{
+  font-family:var(--font-mono);font-size:11px;color:var(--t2);padding-bottom:3px;line-height:1.4;
+}
+[data-atlas] .at-capt{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--t4);
+  border-top:1px solid var(--rule);margin-top:11px;padding-top:6px;
+}
+[data-atlas] .at-bar{height:2px;background:#243040;margin:11px 0 0;position:relative;overflow:hidden}
+[data-atlas] .at-bar i{position:absolute;inset:0 auto 0 0;background:var(--accent);opacity:.7}
+[data-atlas] .at-bar u{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--accent)}
+
+/* ─── controls ────────────────────────────────────────────────────────────────────────── */
+
+[data-atlas] .at-chips{display:flex;flex-wrap:wrap;gap:4px}
+[data-atlas] .at-chip{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.8px;text-transform:uppercase;
+  padding:5px 8px;border:1px solid var(--rule-2);color:var(--t2);background:transparent;
+  border-radius:0;cursor:pointer;white-space:nowrap;
+  transition:color .1s linear,border-color .1s linear,background-color .1s linear;
+}
+[data-atlas] .at-chip:hover{border-color:var(--rule-4);color:#fff}
+[data-atlas] .at-chip[aria-pressed=true]{border-color:var(--accent-2);color:#e4f4ff;background:#152e3d}
+[data-atlas] .at-chip[disabled]{opacity:.4;cursor:not-allowed}
+
+/* Twelve contiguous cells sharing their borders — a strip, not twelve buttons. */
+[data-atlas] .at-months{display:flex;border:1px solid var(--rule-2);border-right:0}
+[data-atlas] .at-months button{
+  flex:1;font-family:var(--font-mono);font-size:9.5px;padding:7px 0;color:var(--t3);
+  background:transparent;border:0;border-right:1px solid var(--rule-2);border-radius:0;cursor:pointer;
+  transition:background-color .1s linear,color .1s linear;
+}
+[data-atlas] .at-months button:hover{color:#fff;background:#1a2331}
+[data-atlas] .at-months button[aria-pressed=true]{color:#e4f4ff;background:#173241}
+
+[data-atlas] .at-years{display:flex;align-items:flex-end;gap:9px}
+[data-atlas] .at-years label{flex:1;min-width:0;display:block}
+[data-atlas] .at-years span{
+  display:block;font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t4);
+  margin-bottom:4px;text-transform:uppercase;
+}
+[data-atlas] .at-years input{
+  width:100%;font-family:var(--font-mono);font-size:11px;padding:6px 8px;background:var(--sunken);
+  color:var(--t1);border:1px solid var(--rule-2);border-radius:0;
+}
+[data-atlas] .at-years input:focus{outline:0;border-color:var(--accent-2)}
+
+/* A square that fills, not a pill that slides. Nothing here is a preference switch. */
+[data-atlas] .at-tg{
+  display:flex;align-items:flex-start;gap:10px;padding:6px 0;width:100%;text-align:left;
+  background:none;border:0;cursor:pointer;
+}
+[data-atlas] .at-tg .at-box{
+  width:12px;height:12px;border:1px solid var(--rule-3);flex:none;margin-top:1px;position:relative;
+  transition:border-color .1s linear;
+}
+[data-atlas] .at-tg[aria-pressed=true] .at-box{border-color:var(--accent)}
+[data-atlas] .at-tg[aria-pressed=true] .at-box::after{content:"";position:absolute;inset:2px;background:var(--accent)}
+[data-atlas] .at-tg .at-lb{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--t3);transition:color .1s linear;
+}
+[data-atlas] .at-tg[aria-pressed=true] .at-lb{color:var(--t1)}
+[data-atlas] .at-tg:hover .at-lb{color:#fff}
+[data-atlas] .at-tgnote{
+  font-family:var(--font-sans);font-size:11px;line-height:1.55;color:var(--t3);
+  padding:0 0 6px 22px;margin-top:-1px;
+}
+
+/* The query spine: six stages, each narrowed by the query in force or passing the whole
+   archive through. A derived view of the filters below it — never a control. */
+[data-atlas] .at-spine{margin-top:12px;border-top:1px solid var(--rule)}
+[data-atlas] .at-stage-row{
+  display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid var(--rule);min-width:0;
+}
+[data-atlas] .at-stage-row .at-tick{
+  width:6px;height:6px;border:1px solid var(--rule-3);flex:none;margin-left:2px;
+}
+[data-atlas] .at-stage-row.at-on .at-tick{background:var(--accent);border-color:var(--accent)}
+[data-atlas] .at-stage-row.at-na .at-tick{background:var(--hatch);border-color:var(--rule-3)}
+[data-atlas] .at-stage-row .at-nm{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.3px;text-transform:uppercase;
+  color:var(--t3);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+[data-atlas] .at-stage-row.at-on .at-nm{color:var(--t1)}
+[data-atlas] .at-stage-row .at-st{
+  margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.7px;color:var(--t4);
+  text-align:right;flex:none;
+}
+[data-atlas] .at-stage-row.at-on .at-st{color:#9edcfa}
+[data-atlas] .at-stage-row.at-na .at-st{color:var(--flag)}
+
+[data-atlas] details.at-excl{margin-top:11px}
+[data-atlas] details.at-excl summary{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.9px;color:var(--t3);cursor:pointer;
+  list-style:none;text-transform:uppercase;
+}
+[data-atlas] details.at-excl summary::-webkit-details-marker{display:none}
+[data-atlas] details.at-excl summary:hover,[data-atlas] details.at-excl[open] summary{color:var(--t1)}
+
+/* ─── the plate ───────────────────────────────────────────────────────────────────────── */
+
+/* The map is framed as a figure in a journal: a caption band above and below, as SIBLINGS of
+   the map rather than as overlays, so neither can ever sit on top of the geography. */
+[data-atlas] .atlas-stage{
+  display:grid;grid-template-rows:28px minmax(0,1fr) 26px;background:var(--chrome);
+}
+[data-atlas] .at-platehead,[data-atlas] .at-platefoot{
+  display:flex;align-items:center;gap:16px;padding:0 14px;min-width:0;
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t4);
+  text-transform:uppercase;white-space:nowrap;overflow:hidden;
+}
+[data-atlas] .at-platehead > span,[data-atlas] .at-platefoot > span{
+  min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;
+}
+[data-atlas] .at-platehead{border-bottom:1px solid var(--rule-2);background:var(--chrome-hi)}
+[data-atlas] .at-platefoot{border-top:1px solid var(--rule-2);background:var(--chrome-hi)}
+[data-atlas] .at-platehead em,[data-atlas] .at-platefoot em{font-style:normal;color:var(--t2)}
+[data-atlas] .at-platehead .at-r,[data-atlas] .at-platefoot .at-r{margin-left:auto;text-align:right;flex:none}
+[data-atlas] .at-plate{position:relative;min-width:0;min-height:0;overflow:hidden;background:var(--stage)}
+[data-atlas] .at-scalebar{display:flex;align-items:center;gap:7px;flex:none}
+[data-atlas] .at-scalebar i{
+  height:5px;display:block;
+  border-left:1px solid var(--rule-4);border-right:1px solid var(--rule-4);
+  border-bottom:1px solid var(--rule-4);
+}
+[data-atlas] .at-scalebar em{font-style:normal;color:var(--t2)}
+
+/* the tick frame, ruled on the plate's own edges */
+[data-atlas] .at-frame{position:absolute;inset:0;pointer-events:none;z-index:460}
+
+[data-atlas] .leaflet-container{background:var(--stage);border-radius:0}
+[data-atlas] .leaflet-tile-pane{background-color:var(--stage);background-image:none}
+[data-atlas] .leaflet-control-zoom{border:1px solid var(--rule-2);border-radius:0}
+[data-atlas] .leaflet-control-zoom a{
+  width:26px;height:24px;line-height:24px;border-radius:0!important;
+  font:400 12px/24px var(--font-mono)!important;
+  background:rgba(19,27,39,.92)!important;color:var(--t2)!important;
+  border-color:var(--rule-2)!important;
+}
+[data-atlas] .leaflet-control-zoom a:hover{background:#1d2836!important;color:#fff!important}
+[data-atlas] .leaflet-control-attribution{
+  background:rgba(13,19,29,.82)!important;color:var(--t4)!important;
+  font-family:var(--font-mono);font-size:8.5px;border-radius:0;
+}
+[data-atlas] .leaflet-control-attribution a{color:var(--t3)!important}
+
+[data-atlas] .at-legend{
+  position:absolute;right:12px;bottom:12px;max-width:376px;z-index:450;pointer-events:none;
+  display:flex;flex-direction:column;gap:6px;
+  background:rgba(15,21,31,.94);border:1px solid var(--rule-2);padding:8px 10px;
+}
+[data-atlas] .at-legend .at-lrow{
+  display:flex;gap:8px;align-items:center;font-family:var(--font-mono);font-size:9.5px;
+  letter-spacing:.7px;color:var(--t2);
+}
+[data-atlas] .at-legend .at-lrow .at-d{color:var(--t3);letter-spacing:0;text-transform:none}
+[data-atlas] .at-legend .at-sw{display:flex;flex:none}
+[data-atlas] .at-legend .at-sw i{width:9px;height:9px;display:block}
+[data-atlas] .at-invite{
+  position:absolute;left:50%;bottom:14px;transform:translateX(-50%);text-align:center;z-index:450;
+  pointer-events:none;font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.1px;
+  color:var(--t2);text-transform:uppercase;background:rgba(14,20,30,.9);padding:6px 14px;
+  border-top:1px solid var(--rule-3);max-width:calc(100% - 24px);
+}
+[data-atlas] .at-invite em{font-style:normal;color:#fff}
+/* Clamped on BOTH axes against the plate, so a chip near an edge can never end up under a
+   caption band or off the side. */
+[data-atlas] .at-hover{
+  position:absolute;z-index:500;pointer-events:none;font-family:var(--font-mono);font-size:9.5px;
+  background:rgba(17,24,35,.97);border:1px solid var(--rule-3);padding:5px 8px;white-space:nowrap;
+  letter-spacing:.4px;color:var(--t1);
+}
+[data-atlas] .at-hover span{color:var(--t3)}
+
+/* ─── panel ───────────────────────────────────────────────────────────────────────────── */
+
+[data-atlas] .at-masthead{
+  padding:16px 18px 14px 20px;border-bottom:1px solid var(--rule-2);background:var(--chrome);
+}
+[data-atlas] .at-masthead .at-kicker{
+  display:flex;align-items:baseline;gap:9px;font-family:var(--font-mono);font-size:9px;
+  letter-spacing:1.3px;color:var(--t4);text-transform:uppercase;
+}
+[data-atlas] .at-masthead .at-kicker .at-x{margin-left:auto;flex:none}
+[data-atlas] .at-masthead h2{
+  margin:9px 0 0;font-family:var(--font-sans);font-size:17px;font-weight:700;letter-spacing:.1px;
+  line-height:1.18;color:#f8fbff;text-transform:uppercase;text-wrap:pretty;
+}
+[data-atlas] .at-masthead h2.at-storm{font-size:22px;letter-spacing:-.2px;
+  overflow:hidden;text-overflow:ellipsis}
+[data-atlas] .at-masthead .at-loc{
+  font-family:var(--font-mono);font-size:11px;color:#9edcfa;margin-top:7px;letter-spacing:.3px;
+  line-height:1.45;
+}
+[data-atlas] .at-masthead .at-loc span{color:var(--t3)}
+
+/* THE COHORT SPEC. The question as one citable line, derived entirely from state already on
+   screen: no new claim, no new threshold, nothing computed that is not published above it. */
+[data-atlas] .at-spec{
+  display:flex;align-items:flex-start;gap:10px;margin-top:13px;padding-top:10px;
+  border-top:1px solid var(--rule);
+}
+[data-atlas] .at-spec code{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.5px;line-height:1.6;color:var(--t3);
+  text-transform:uppercase;flex:1;min-width:0;overflow-wrap:break-word;
+}
+[data-atlas] .at-spec code b{color:var(--t2);font-weight:400}
+[data-atlas] .at-spec button{flex:none;align-self:flex-start}
+
+/* counts over denominators, with the numerators aligned on one column */
+[data-atlas] .at-itable{
+  display:grid;grid-template-columns:112px minmax(40px,1fr) 78px;align-items:center;gap:0 10px;
+}
+[data-atlas] .at-itable .at-lab{font-family:var(--font-mono);font-size:9px;letter-spacing:.7px;padding:4px 0}
+[data-atlas] .at-itable .at-meas{height:3px;background:#243040;position:relative}
+[data-atlas] .at-itable .at-meas i{position:absolute;inset:0 auto 0 0;opacity:.7}
+[data-atlas] .at-itable .at-meas u{position:absolute;top:-2px;bottom:-2px;width:1px}
+[data-atlas] .at-itable .at-val{
+  display:grid;grid-template-columns:1fr 8px 1fr;font-family:var(--font-mono);font-size:10.5px;
+  color:var(--t1);
+}
+[data-atlas] .at-itable .at-val b{font-weight:400;text-align:right}
+[data-atlas] .at-itable .at-val s{text-decoration:none;color:var(--t4);text-align:center}
+[data-atlas] .at-itable .at-val u{text-decoration:none;color:var(--t3);text-align:left;padding-left:1px}
+
+/* REFUSAL GRAMMAR — a marginal rule, the way a journal sets a caveat. Never an alert box,
+   never a tint, never a coloured background: a refusal is part of the argument, not an error
+   in it, and colouring it as a warning is how a reader learns to skip past it. */
+[data-atlas] .at-ref{
+  display:grid;grid-template-columns:auto 1fr;gap:10px;padding:2px 0 2px 11px;margin:11px 0;
+  border-left:1px solid var(--rule-3);
+}
+/* NOT uppercased in CSS. The status line is the engine's own string, printed verbatim --
+   `BASE RATE ONLY -- unscoreable` is what analogs.js wrote, and a text-transform would quietly
+   publish a string the archive never produced. */
+[data-atlas] .at-ref .at-st{
+  font-family:var(--font-sans);font-size:10px;font-weight:700;letter-spacing:1.5px;
+  color:#e8eff7;
+}
+[data-atlas] .at-ref .at-why{
+  font-family:var(--font-sans);font-size:11px;line-height:1.6;color:var(--t3);margin-top:5px;
+  text-wrap:pretty;
+}
+[data-atlas] .at-ref .at-why b{color:var(--t2);font-weight:500}
+[data-atlas] .at-mk{width:14px;height:14px;display:block;border:1px solid var(--rule-3);margin-top:1px;flex:none}
+[data-atlas] .at-mk.at-refused{background:var(--hatch)}
+[data-atlas] .at-mk.at-notev{
+  background:linear-gradient(to bottom right,transparent calc(50% - .6px),var(--rule-4) 50%,
+    transparent calc(50% + .6px));
+}
+[data-atlas] .at-mk.at-cond{border:0;border-left:2px solid var(--accent-2);width:7px;height:14px}
+[data-atlas] .at-mk.at-base{border:0;width:14px;height:14px;position:relative}
+[data-atlas] .at-mk.at-base::after{
+  content:"";position:absolute;left:1px;right:1px;bottom:4px;border-bottom:1px dotted var(--t3);
+}
+[data-atlas] .at-mk.at-unk{
+  border:0;width:14px;height:14px;font-family:var(--font-mono);font-size:12px;color:var(--t3);
+  text-align:center;line-height:14px;
+}
+/* A gap the archive recorded is not a refusal. It gets a neutral mark, deliberately outside
+   the five, so the key stays a key. */
+[data-atlas] .at-mk.at-gapmark{border:0;width:6px;height:6px;background:var(--rule-4);margin:5px 4px 0}
+
+[data-atlas] .at-keyrow{
+  display:grid;grid-template-columns:16px 116px 1fr;gap:9px;align-items:start;padding:7px 0;
+  border-top:1px solid var(--rule);
+}
+/* Same rule as the status line it defines: printed as the engine wrote it. */
+[data-atlas] .at-keyrow .at-nm{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.9px;color:var(--t2);
+  line-height:1.5;overflow-wrap:break-word;
+}
+[data-atlas] .at-keyrow .at-ds{font-family:var(--font-sans);font-size:11px;line-height:1.5;color:var(--t3);text-wrap:pretty}
+
+[data-atlas] .at-pool{max-height:252px;overflow-y:auto}
+[data-atlas] .at-pool button{
+  display:grid;grid-template-columns:1fr 38px 48px 52px;gap:9px;width:100%;text-align:left;
+  padding:4.5px 0;border:0;border-top:1px solid var(--rule);background:transparent;cursor:pointer;
+  font-family:var(--font-mono);font-size:9.5px;align-items:baseline;letter-spacing:.3px;
+}
+[data-atlas] .at-pool button:hover{background:#1a2331}
+[data-atlas] .at-pool .at-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)}
+[data-atlas] .at-pool .at-se,[data-atlas] .at-pool .at-km{color:var(--t3);text-align:right}
+[data-atlas] .at-pool .at-ct{text-align:right}
+
+/* ─── transport ───────────────────────────────────────────────────────────────────────── */
+
+[data-atlas] .atlas-transport{grid-column:1/-1}
+[data-atlas] .at-transport{
+  display:flex;align-items:center;gap:18px;padding:0 18px 0 20px;min-height:56px;
+  border-top:1px solid var(--rule-2);background:var(--chrome-hi);
+}
+[data-atlas] .at-tbtn{
+  width:32px;height:27px;border:1px solid var(--rule-2);background:transparent;border-radius:0;
+  font-family:var(--font-mono);font-size:10.5px;color:var(--t1);flex:none;cursor:pointer;
+  transition:border-color .1s linear,background-color .1s linear,color .1s linear;
+}
+[data-atlas] .at-tbtn:hover{border-color:var(--rule-4);background:#1b2533}
+[data-atlas] .at-tbtn.at-on{border-color:var(--accent);color:var(--accent);background:#152e3d}
+[data-atlas] .at-tbtn.at-wide{width:auto;padding:0 10px;font-size:9px;letter-spacing:.8px}
+[data-atlas] .at-speeds{display:flex;border:1px solid var(--rule-2);flex:none}
+[data-atlas] .at-speeds button{
+  font-family:var(--font-mono);font-size:9.5px;padding:5px 8px;color:var(--t3);background:transparent;
+  border:0;border-right:1px solid var(--rule-2);border-radius:0;cursor:pointer;
+  transition:color .1s linear,background-color .1s linear;
+}
+[data-atlas] .at-speeds button:hover{color:#fff}
+[data-atlas] .at-speeds button:last-child{border-right:0}
+[data-atlas] .at-speeds button.at-on{color:var(--accent);background:#152e3d}
+[data-atlas] .at-scrub{flex:1;min-width:90px}
+[data-atlas] .at-scrub input{
+  width:100%;-webkit-appearance:none;appearance:none;height:14px;background:transparent;
+  cursor:pointer;accent-color:#4fc3f7;
+}
+[data-atlas] .at-scrub input::-webkit-slider-runnable-track{height:2px;background:#2e3a4a;border-radius:0}
+[data-atlas] .at-scrub input::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;width:3px;height:14px;border:0;border-radius:0;
+  box-shadow:none;background:var(--accent);margin-top:-6px;
+}
+[data-atlas] .at-scrub input::-moz-range-track{height:2px;background:#2e3a4a}
+[data-atlas] .at-scrub input::-moz-range-thumb{width:3px;height:14px;border:0;border-radius:0;background:var(--accent)}
+[data-atlas] .at-scrub .at-ends{
+  display:flex;justify-content:space-between;gap:12px;font-family:var(--font-mono);font-size:8.5px;
+  letter-spacing:.8px;color:var(--t4);margin-top:-2px;
+}
+[data-atlas] .at-scrub .at-ends span{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+[data-atlas] .at-readouts{display:flex;flex:none;border-left:1px solid var(--rule)}
+[data-atlas] .at-ro{
+  padding:0 14px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:4px;
+  white-space:nowrap;
+}
+[data-atlas] .at-ro:last-child{border-right:0;padding-right:0}
+[data-atlas] .at-ro .at-k{
+  font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t4);text-transform:uppercase;
+}
+[data-atlas] .at-ro .at-v{font-family:var(--font-mono);font-size:12.5px;color:var(--t1);letter-spacing:.1px}
+[data-atlas] .at-hint{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t4);
+  text-transform:uppercase;display:flex;gap:22px;width:100%;min-width:0;overflow:hidden;
+}
+[data-atlas] .at-hint span{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+[data-atlas] .at-hint em{font-style:normal;color:var(--t2)}
+[data-atlas] .at-hint .at-r{margin-left:auto;flex:none}
+/* the skip announcement: the archive's own flag, and the only coloured thing on the transport */
+[data-atlas] .at-skip{
+  font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:var(--flag);flex:none;
+  white-space:nowrap;border-left:1px solid var(--rule-3);padding-left:10px;
+}
+
+/* ─── provenance drawer ───────────────────────────────────────────────────────────────── */
+
+[data-atlas] .at-drawer{
+  position:fixed;top:0;right:0;bottom:0;width:560px;max-width:94vw;background:#151d29;
+  border-left:1px solid var(--rule-2);z-index:1200;overflow-y:auto;
+}
+[data-atlas] .at-drawer .at-dh{
+  display:flex;align-items:baseline;gap:10px;padding:18px 22px 14px;
+  border-bottom:1px solid var(--rule-2);position:sticky;top:0;background:#151d29;z-index:2;
+}
+[data-atlas] .at-drawer .at-dh h2{
+  margin:0;font-family:var(--font-display);font-weight:500;font-size:21px;letter-spacing:.2px;
+  color:#f4f8fd;
+}
+[data-atlas] .at-drawer .at-body{padding:0 22px 44px}
+[data-atlas] .at-veil{position:fixed;inset:0;background:rgba(2,4,9,.62);z-index:1199}
+[data-atlas] .at-srcs{display:flex;flex-wrap:wrap;gap:4px;margin-top:9px}
+[data-atlas] .at-srcs i{
+  font-family:var(--font-mono);font-size:9.5px;font-style:normal;color:var(--t2);
+  border:1px solid var(--rule-2);padding:4px 7px;letter-spacing:.3px;
+}
+
+/* ─── responsive degradation, workstation first ───────────────────────────────────────── */
+
+/* The rule that produced all of these: caption bands and ledgers give up whole items, never
+   half a word. A survivor ellipsizes; a casualty leaves. */
+@media (max-width:1560px){
+  [data-atlas]{--at-rail:296px;--at-panel:400px}
+  [data-atlas] .at-fig{padding:0 13px}
+  [data-atlas] .at-fig:nth-child(n+6){display:none}
+  [data-atlas] .at-platehead,[data-atlas] .at-platefoot{gap:13px}
+}
+@media (max-width:1400px){
+  [data-atlas]{--at-rail:286px;--at-panel:382px}
+  [data-atlas] .at-fig:nth-child(n+5){display:none}
+  [data-atlas] .at-plate-title,[data-atlas] .at-plate-model{display:none}
+}
+@media (max-width:1240px){
+  [data-atlas] .at-fig:nth-child(n+4){display:none}
+  [data-atlas] .at-sys .at-stack div:last-child{display:none}
+}
+@media (max-width:1180px){
+  [data-atlas] .at-plate-proj{display:none}
+}
+@media (max-width:1040px){
+  [data-atlas] .at-fig:nth-child(n+3){display:none}
+  [data-atlas] .at-sys .at-stack{display:none}
+  [data-atlas] .at-platehead .at-r{display:none}
+}
+
+/* Below the workstation the columns are dropped one at a time rather than squeezed: the map IS
+   the page, and a map wedged between two rails at 1000 px is not one. This ladder is
+   production's and is unchanged — only the ink on it is new. */
+@media (max-width:1180px){
+  [data-atlas].atlas-shell{
+    grid-template-columns:clamp(220px,26vw,286px) minmax(0,1fr);
+    grid-template-rows:58px minmax(320px,1fr) minmax(0,auto) auto;
+  }
+  [data-atlas] .atlas-panel{
+    grid-column:1 / -1;grid-row:3;border-left:0;border-top:1px solid var(--rule-2);max-height:46vh;
+  }
+  [data-atlas] .atlas-transport{grid-row:4}
+  [data-atlas] .at-brand{width:clamp(220px,26vw,286px)}
+  [data-atlas] .at-sys{width:auto;flex:0 1 auto}
+}
+@media (max-width:760px){
+  [data-atlas].atlas-shell{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-rows:58px minmax(280px,46vh) minmax(0,auto) minmax(0,auto) auto;
+  }
+  [data-atlas] .atlas-stage{grid-column:1;grid-row:2}
+  [data-atlas] .atlas-panel{grid-column:1;grid-row:3;max-height:none}
+  [data-atlas] .atlas-rail{grid-column:1;grid-row:4;border-right:0;border-top:1px solid var(--rule-2)}
+  [data-atlas] .atlas-transport{grid-row:5}
+  [data-atlas] .at-brand{width:auto;flex:1 1 auto;border-right:0}
+  [data-atlas] .at-ledger{display:none}
+  [data-atlas] .at-transport{flex-wrap:wrap;padding:8px 14px}
+  [data-atlas] .at-readouts{border-left:0}
+  [data-atlas] .at-ro:first-child{padding-left:0}
+}

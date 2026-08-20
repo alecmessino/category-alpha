@@ -13,27 +13,44 @@
 
 import { THRESHOLDS_KT } from "../engine/stats.js";
 
+/* Cat 3 was pulled toward orange and Cat 2 toward a cooler yellow so that the two stay
+   separable at a 1 px stroke and in monochrome -- the pair that decides "major hurricane" is
+   the one pair a reader must never misread, and amber-against-amber failed that at basin
+   zoom. The major classes also carry MAJOR_WEIGHT extra stroke, so the distinction survives
+   colour blindness and a printed page as well as a screen. */
 export const CATEGORY_COLOR = {
-  td: "#94a3b8",    // --ink-400   below tropical-storm force
-  ts: "#7fb2e6",    // --blue-300
-  cat1: "#38bdf8",  // --cyan-400
-  cat2: "#fbbf24",  // --amber-400
-  cat3: "#f59e0b",  // --amber-500  major hurricane begins here
-  cat4: "#ef4444",  // --red-500
-  cat5: "#8b5cf6",  // --violet-500
+  td: "#9aabbf",    // below tropical-storm force
+  ts: "#8cbdea",
+  cat1: "#4fc3f7",
+  cat2: "#f2c14e",
+  cat3: "#ee7a1f",  // major hurricane begins here
+  cat4: "#ef5350",
+  cat5: "#9b7bf0",
 };
 
 export const CATEGORY_ORDER = ["td", "ts", "cat1", "cat2", "cat3", "cat4", "cat5"];
 
+/** Extra stroke on the major-hurricane classes, so cat2 and cat3 stay apart at 1 px. */
+export const MAJOR_WEIGHT = 1.35;
+
+/** The first index in CATEGORY_ORDER that is a major hurricane. */
+export const MAJOR_FROM = 4;
+
 /** The colour of the population when it is context rather than subject. */
-export const POPULATION_INK = "#5b7799";
+export const POPULATION_INK = "#7a9cbb";
 
-/** Wind that was never recorded. Not a category, and never drawn as one. */
-export const UNKNOWN_INK = "#3d4d63";
+/** The pool a query lifted out of the population. */
+export const EMPHASIS_INK = "#cfe6fa";
 
-export const SELECTION_INK = "#e6edf6";
-export const LANDFALL_INK = "#ef4444";
-export const GENESIS_INK = "#38bdf8";
+/** Wind that was never recorded. Not a category, and deliberately outside the ramp. */
+export const UNKNOWN_INK = "#6a7c92";
+
+export const SELECTION_INK = "#ffffff";
+export const LANDFALL_INK = "#f46966";
+export const GENESIS_INK = "#65cdfa";
+export const GENESIS_LIFTED_INK = "#9fdfff";
+/** Hollow, stroke only -- see replay-layer.js. */
+export const REPLAY_HEAD_INK = "rgba(224,238,250,.92)";
 
 /**
  * Category index for a wind in knots, or -1 when no wind was recorded.

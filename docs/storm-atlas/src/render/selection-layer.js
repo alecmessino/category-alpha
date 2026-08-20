@@ -32,7 +32,12 @@ export const SelectionLayer = AtlasLayer.extend({
     padding: 0.25,
     pane: "overlayPane",
     zIndexOffset: 2,
-    width: 2.2,
+    /* The design's two weights for a selected storm: the whole track at 2.0, and the portion
+       the replay cursor has already traversed at 2.8. Because this layer reveals progressively
+       -- nothing beyond the cursor is drawn at all -- the heavier weight is simply what is on
+       screen during a replay, and the lighter one is the finished track at rest. */
+    width: 2.0,
+    traversedWidth: 2.8,
   },
 
   setArchive(archive, world) {
@@ -108,7 +113,7 @@ export const SelectionLayer = AtlasLayer.extend({
 
     /* Four passes so that dash pattern and colour never fight: pre-genesis, then observed and
        interpolated segments of the storm proper. */
-    ctx.lineWidth = this.options.width;
+    ctx.lineWidth = rs ? this.options.traversedWidth : this.options.width;
 
     // 1. pre-genesis, dimmed and dashed
     if (hasGenesis) {
@@ -167,17 +172,21 @@ export const SelectionLayer = AtlasLayer.extend({
         hx += (X(rs.next) - hx) * rs.frac;
         hy += (Y(rs.next) - hy) * rs.frac;
       }
+      /* FILLED, and that is the whole distinction. The archive-wide replay draws its heads
+         HOLLOW (replay-layer.js) so that when both are on screen the reader can tell the storm
+         they chose from the storms the clock happens to be passing through. Fill one of them and
+         the two become the same mark. */
       const cat = categoryIndexRaw(vmax[rs.index]);
       ctx.save();
       ctx.strokeStyle = cat < 0 ? UNKNOWN_INK : CATEGORY_COLOR[CATEGORY_ORDER[cat]];
-      ctx.fillStyle = "#04060c";
-      ctx.lineWidth = 2;
+      ctx.fillStyle = "#0d131d";
+      ctx.lineWidth = 1.6;
       ctx.beginPath();
-      ctx.arc(hx, hy, 5.5, 0, TAU);
+      ctx.arc(hx, hy, 5, 0, TAU);
       ctx.fill();
       ctx.stroke();
       ctx.beginPath();
-      ctx.arc(hx, hy, 1.6, 0, TAU);
+      ctx.arc(hx, hy, 1.8, 0, TAU);
       ctx.fillStyle = ctx.strokeStyle;
       ctx.fill();
       ctx.restore();
@@ -261,9 +270,10 @@ export const SelectionLayer = AtlasLayer.extend({
 
 function drawMark(ctx, m) {
   ctx.save();
-  ctx.lineWidth = 1.6;
+  ctx.lineWidth = 1.4;
   ctx.strokeStyle = m.color;
-  ctx.fillStyle = "#04060c";
+  // The plate's own background, so a hollow mark reads as a hole rather than as a dark dot.
+  ctx.fillStyle = "#0d131d";
   if (m.kind === "landfall") {
     const s = 4.2;
     ctx.beginPath();

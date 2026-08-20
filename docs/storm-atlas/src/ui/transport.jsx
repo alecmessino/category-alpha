@@ -9,6 +9,11 @@
  * The clock is the storm's own. Elapsed time is real hours between real timestamps, never a
  * frame index times a nominal step -- the terminal learned that when a 4-frame scrub turned out
  * to be hours rather than an hour.
+ *
+ * REDUCED MOTION HALVES THE FRAMES, NOT THE RUN. Where a reader has asked for less movement the
+ * clock ticks half as often and steps twice as far: the same storm over the same hours, watched
+ * in fewer moving frames rather than in a shorter or a different replay. Nothing autoplays in
+ * either mode; the transport only ever runs because someone pressed it.
  */
 
 import React from "react";
@@ -18,6 +23,12 @@ import { formatPosition } from "../engine/geo.js";
 import { MONO, Num, Txt, fmtUTC } from "./kit.jsx";
 
 const SPEEDS = [1, 2, 4, 8];
+
+/** Whether the reader has asked for less movement. Read at tick time, not cached at import:
+ *  the preference can change while the page is open. */
+export function prefersReducedMotion() {
+  try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; }
+}
 
 export function Transport({ archive, row, playing, setPlaying, cursorMs, setCursorMs }) {
   const [speed, setSpeed] = React.useState(2);
@@ -36,14 +47,15 @@ export function Transport({ archive, row, playing, setPlaying, cursorMs, setCurs
      wraps silently restarts the storm, which reads as a live feed rather than a replay. */
   React.useEffect(() => {
     if (!playing || row === null || t0 === null) return undefined;
-    const stepMs = 3 * 3600 * 1000; // three archive hours per tick
+    const coarse = prefersReducedMotion() ? 2 : 1;
+    const stepMs = 3 * 3600 * 1000 * coarse; // three archive hours per tick, six when coarse
     const iv = setInterval(() => {
       setCursorMs((c) => {
         const next = (c === null ? t0 : c) + stepMs;
         if (next >= t1) { setPlaying(false); return t1; }
         return next;
       });
-    }, Math.round(320 / speed));
+    }, Math.round((320 * coarse) / speed));
     return () => clearInterval(iv);
   }, [playing, speed, row, t0, t1]);
 
@@ -65,48 +77,34 @@ export function Transport({ archive, row, playing, setPlaying, cursorMs, setCurs
   const atEnd = cursor >= t1;
 
   return (
-    <div style={{
-      display: "flex", alignItems: "center", gap: "var(--sp-5)",
-      padding: "var(--sp-4) var(--sp-6)", borderTop: "1px solid var(--border-dim)",
-      background: "var(--surface-card)", minHeight: 56,
-    }}>
-      <button type="button" onClick={() => {
-        if (atEnd) setCursorMs(t0);
-        setPlaying(!playing);
-      }} style={{
-        ...MONO, fontSize: "var(--fs-mono-md)", width: 34, height: 28,
-        border: "1px solid " + (playing ? "var(--accent)" : "var(--border-strong)"),
-        background: playing ? "color-mix(in srgb, var(--accent) 14%, transparent)" : "transparent",
-        color: playing ? "var(--accent)" : "var(--text-1)", borderRadius: "var(--radius-sm)",
-        cursor: "pointer", flex: "none",
-      }} title={playing ? "pause" : atEnd ? "replay from genesis" : "play"}>
+    <div className="at-transport">
+      <button type="button" className={playing ? "at-tbtn at-on" : "at-tbtn"}
+        aria-label={playing ? "pause" : atEnd ? "replay from genesis" : "play"}
+        title={playing ? "pause" : atEnd ? "replay from genesis" : "play"}
+        onClick={() => { if (atEnd) setCursorMs(t0); setPlaying(!playing); }}>
         {playing ? "❚❚" : atEnd ? "↻" : "▶"}
       </button>
 
-      <div style={{ display: "flex", gap: 3, flex: "none" }}>
+      <div className="at-speeds">
         {SPEEDS.map((s) => (
-          <button key={s} type="button" onClick={() => setSpeed(s)} style={{
-            ...MONO, fontSize: "var(--fs-mono-xs)", padding: "3px 6px",
-            border: "1px solid " + (speed === s ? "var(--accent)" : "var(--border-dim)"),
-            background: "transparent", color: speed === s ? "var(--accent)" : "var(--text-2)",
-            borderRadius: "var(--radius-sm)", cursor: "pointer",
-          }}>{s}×</button>
+          <button key={s} type="button" className={speed === s ? "at-on" : undefined}
+            aria-label={`${s} times speed`} aria-pressed={speed === s}
+            onClick={() => setSpeed(s)}>{s}×</button>
         ))}
       </div>
 
-      <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+      <div className="at-scrub">
         <input type="range" min={t0} max={t1} step={3600000} value={cursor}
           onChange={(e) => { setPlaying(false); setCursorMs(Number(e.target.value)); }}
-          aria-label="replay position"
-          style={{ width: "100%", accentColor: "var(--accent)" }} />
-        <div style={{ display: "flex", justifyContent: "space-between", ...MONO,
-          fontSize: "var(--fs-mono-xs)", color: "var(--text-2)", marginTop: -2 }}>
+          aria-label="replay position along the track" />
+        <div className="at-ends">
           <span>{fmtUTC(t0, { time: false })}</span>
+          <span>FIX {k - range[0] + 1} / {range[1] - range[0]}</span>
           <span>{fmtUTC(t1, { time: false })}</span>
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "var(--sp-6)", flex: "none", alignItems: "baseline" }}>
+      <div className="at-readouts">
         <Readout label="UTC" value={<Txt value={fmtUTC(a.ptT[k] * 60000)} />} />
         <Readout label={preGenesis ? "BEFORE GENESIS" : "SINCE GENESIS"}
           value={hoursSinceGenesis === null
@@ -124,7 +122,7 @@ export function Transport({ archive, row, playing, setPlaying, cursorMs, setCurs
             </span> : null}
           </span>} />
         <Readout label="FIX" value={
-          <span style={{ ...MONO, color: quality === "observed" ? "var(--pos)" : "var(--warn)" }}>
+          <span style={{ ...MONO, color: quality === "observed" ? "var(--pos)" : "var(--flag)" }}>
             {String(quality || "—").toUpperCase()}
           </span>} />
       </div>
@@ -134,11 +132,9 @@ export function Transport({ archive, row, playing, setPlaying, cursorMs, setCurs
 
 function Readout({ label, value }) {
   return (
-    <div style={{ minWidth: 0 }}>
-      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-        letterSpacing: "var(--track-label)" }}>{label}</div>
-      <div style={{ ...MONO, fontSize: "var(--fs-mono-md)", color: "var(--text-1)",
-        whiteSpace: "nowrap" }}>{value}</div>
+    <div className="at-ro">
+      <span className="at-k">{label}</span>
+      <span className="at-v">{value}</span>
     </div>
   );
 }

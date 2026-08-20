@@ -26,8 +26,8 @@
 import { AtlasLayer, worldOffsets } from "./atlas-layer.js";
 import { activeAt, fixAt, revealedThrough } from "../engine/timeline.js";
 import {
-  CATEGORY_COLOR, CATEGORY_ORDER, GENESIS_INK, LANDFALL_INK, POPULATION_INK, UNKNOWN_INK,
-  categoryIndexRaw,
+  CATEGORY_COLOR, CATEGORY_ORDER, GENESIS_INK, LANDFALL_INK, POPULATION_INK, REPLAY_HEAD_INK,
+  UNKNOWN_INK, categoryIndexRaw,
 } from "./palette.js";
 
 const TAU = Math.PI * 2;
@@ -216,7 +216,7 @@ export const ReplayLayer = AtlasLayer.extend({
               ctx.fillStyle = GENESIS_INK;
               ctx.globalAlpha = 0.85;
               ctx.beginPath();
-              ctx.arc(x, y, view.zoom >= 5 ? 2.4 : 1.7, 0, TAU);
+              ctx.arc(x, y, view.zoom >= 5 ? 1.9 : 1.25, 0, TAU);
               ctx.fill();
             }
             this._markDone[p] |= 1;
@@ -236,10 +236,18 @@ export const ReplayLayer = AtlasLayer.extend({
           const x = q.wx * scale - ox;
           const y = q.wy * scale - oy;
           if (x < -4 || y < -4 || x > width + 4 || y > height + 4) continue;
-          ctx.fillStyle = LANDFALL_INK;
-          ctx.globalAlpha = 0.9;
-          const half = view.zoom >= 5 ? 2.2 : 1.6;
-          ctx.fillRect(x - half, y - half, half * 2, half * 2);
+          // The same cross the population layer draws, so a landfall is one mark on this
+          // surface rather than two that happen to mean the same thing.
+          ctx.strokeStyle = LANDFALL_INK;
+          ctx.lineWidth = 1;
+          ctx.globalAlpha = 0.6;
+          const half = view.zoom >= 5 ? 2.8 : 2.3;
+          ctx.beginPath();
+          ctx.moveTo(x - half, y);
+          ctx.lineTo(x + half, y);
+          ctx.moveTo(x, y - half);
+          ctx.lineTo(x, y + half);
+          ctx.stroke();
         }
         if (allDrawn && tl.end[p] <= cursor) this._markDone[p] |= 2;
       }
@@ -256,7 +264,13 @@ export const ReplayHeadsLayer = AtlasLayer.extend({
     pane: "overlayPane",
     zIndexOffset: 3,
     accumulate: false,     // a head is a thing at an instant, not a thing that happened
-    width: 1.9,
+    width: 1.6,
+    /* HOLLOW, DELIBERATELY. The selected storm's cursor is a FILLED disc; these are rings. When
+       a storm is selected during a run both are on screen at once, and if the two marks looked
+       alike the reader would read "the storm I chose" wherever the clock happened to be. The
+       distinction is the mark, not the colour, so it survives at a glance and in monochrome. */
+    headRadius: 2.6,
+    headWidth: 1.1,
   },
 
   setArchive(archive, world) {
@@ -325,16 +339,13 @@ export const ReplayHeadsLayer = AtlasLayer.extend({
       ctx.lineTo(hx, hy);
       ctx.stroke();
 
-      ctx.fillStyle = "#04060c";
-      ctx.lineWidth = 1.8;
+      // The head itself: stroke only, no fill, no centre dot.
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = REPLAY_HEAD_INK;
+      ctx.lineWidth = this.options.headWidth;
       ctx.beginPath();
-      ctx.arc(hx, hy, 4.2, 0, TAU);
-      ctx.fill();
+      ctx.arc(hx, hy, this.options.headRadius, 0, TAU);
       ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(hx, hy, 1.4, 0, TAU);
-      ctx.fillStyle = ink;
-      ctx.fill();
       ctx.restore();
     }
   },

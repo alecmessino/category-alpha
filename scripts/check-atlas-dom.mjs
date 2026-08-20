@@ -245,7 +245,7 @@ await clickLatLng(14.6, -113.9);
     /1\.7% Cat 3 in the 1960s/.test(t));
 }
 
-console.log("\n[4b] the five refusals — reachable, distinct, and honest about the remedy");
+console.log("\n[4b] the six refusals — reachable, distinct, and honest about the remedy");
 {
   /* THE CREDIBILITY SURFACE. Five different reasons the archive declines to answer, and the
      distinction that matters is not why but WHETHER THE READER CAN DO ANYTHING. Three dissolve
@@ -685,6 +685,14 @@ await page.waitForTimeout(700);
   ok("the archive's own gaps are carried through", /GAPS RECORDED BY THE ARCHIVE/.test(t));
   ok("including the ERA5 refusal", /era5/i.test(t));
   ok("interpolated fixes are counted in provenance too", /interpolated fixes/i.test(t));
+  /* THE COASTLINE IS THE GEOMETRY THE LANDFALL RULE TESTS AGAINST, so the drawer says whether
+     the plate is drawing that line or a contextual substitute. Pinned here because the layer
+     is fetched after the pack and fails soft: a page that quietly lost it looks identical to
+     one that has it, and the difference is whether a reader checking a landfall is looking at
+     the coast the crossing was detected on. */
+  ok("the plate says whose coastline it is drawing", /archive-owned/.test(t),
+    "the drawer reports the coastline as not loaded — the fetch failed or `coast` never reached it");
+  ok("and counts the vertices it tested against", /land-union boundary edges/i.test(t));
 }
 
 console.log("\n[8] the replay reveals the record without lying about time");
@@ -735,7 +743,17 @@ console.log("\n[8b] accumulated ink survives a pan, a zoom and a resize");
      store away -- specified behaviour, and it fires on every moveend, zoomend and resize. An
      accumulating layer that merely skipped its clearRect would therefore lose the whole run on
      the first drag, and no text probe could see it: the DOM is identical either way. So this
-     counts actual painted pixels. */
+     counts actual painted pixels.
+
+     EVERY PIXEL, NOT EVERY THIRTY-SEVENTH. This used to sample the alpha channel with a stride,
+     which is cheaper and was fine while the check happened to run with a lot of ink on screen.
+     It is not fine here: the loop above stops as soon as the first skip notice appears, which
+     is often two storms into 1851, and two short tracks at the minimum zoom paint a couple of
+     hundred pixels on a canvas of two and a half million. At that density a stride of 37 turns
+     the measurement into a Poisson draw with a mean near six -- and a run that preserved every
+     pixel of its history could report 9 before and 2 after purely by where the samples landed.
+     A gate whose verdict is noise is not a gate. Counting the whole alpha channel costs a few
+     milliseconds, asserts exactly the same property, and gives the same answer every time. */
   const inkOf = () => page.evaluate(() => {
     const l = globalThis.__ATLAS_REPLAY;
     if (!l || !l._canvas) return -1;
@@ -743,11 +761,11 @@ console.log("\n[8b] accumulated ink survives a pan, a zoom and a resize");
     const g = c.getContext("2d");
     const d = g.getImageData(0, 0, c.width, c.height).data;
     let n = 0;
-    for (let i = 3; i < d.length; i += 4 * 37) if (d[i] > 8) n++;   // sample the alpha channel
+    for (let i = 3; i < d.length; i += 4) if (d[i] > 8) n++;
     return n;
   });
   const before = await inkOf();
-  ok("the replay canvas has ink on it", before > 0, `sampled ${before} painted pixels`);
+  ok("the replay canvas has ink on it", before > 0, `${before} painted pixels`);
 
   await page.evaluate(() => globalThis.__ATLAS_MAP.panBy([140, 90], { animate: false }));
   await page.waitForTimeout(900);

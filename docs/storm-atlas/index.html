@@ -12,19 +12,20 @@
 <link rel="preload" href="data/atlas-manifest.json" as="fetch" crossorigin>
 <link rel="preload" href="data/atlas-core-v1.bin.gz" as="fetch" crossorigin>
 <link rel="preload" href="data/atlas-tracks-v1.bin.gz" as="fetch" crossorigin>
+<link rel="stylesheet" href="atlas.css">
 <style>
 html,body{margin:0;height:100%}
-body{background:var(--slate-925);color:#e6edf6;font-family:var(--font-sans);overflow:hidden}
+body{background:var(--stage,#0d131d);color:#eaf0f7;font-family:var(--font-sans);overflow:hidden}
 *{box-sizing:border-box}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:5px}
+::-webkit-scrollbar-thumb{background:#2b3746}
 /* Tabular figures everywhere. Without them the replay clock and every metric shift by a
    fraction of a pixel on each tick, which reads as the whole rail vibrating. */
-body{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+body{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;-webkit-font-smoothing:antialiased}
 /* Leaflet containment, inlined. The stylesheet above is vendored, but if it ever fails to
    load, absolutely-positioned tiles spill out of the map and across the layout. These are the
    minimum rules that keep the map inside its box regardless. */
-.leaflet-container{overflow:hidden;position:relative;-webkit-tap-highlight-color:transparent;background:var(--slate-950);font-family:var(--font-sans)}
+.leaflet-container{overflow:hidden;position:relative;-webkit-tap-highlight-color:transparent;background:#0d131d;font-family:var(--font-sans)}
 .leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,
 .leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0}
 .leaflet-container img.leaflet-tile{max-width:none!important;max-height:none!important;width:256px;height:256px;border:0}
@@ -36,60 +37,12 @@ body{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 .leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}
 .leaflet-right .leaflet-control{float:right;margin-right:10px}
 .leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}
-.leaflet-control-zoom a{display:block;width:26px;height:26px;line-height:26px;text-align:center;text-decoration:none;font:700 16px/26px var(--font-sans);background:rgba(9,15,26,.9)!important;color:#9fb2ca!important;border-color:#1a2740!important}
-.leaflet-control-zoom a:hover{background:#132743!important;color:#fff!important}
-.leaflet-control-attribution{background:rgba(4,6,12,.7)!important;color:#61789b!important;font-family:var(--font-mono);font-size:9px}
-.leaflet-control-attribution a{color:#7fb2e6!important}
-/* An unpainted tile reads as a skeleton rather than as empty ocean. Tiles paint over it
-   opaquely, so this shows only where there is nothing yet. */
-.leaflet-tile-pane{background-color:#04060c;background-image:linear-gradient(rgba(120,160,220,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(120,160,220,.05) 1px,transparent 1px);background-size:64px 64px}
-.atlas-boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;color:#61789b;letter-spacing:.5px}
+.leaflet-control-zoom a{display:block;width:26px;height:24px;line-height:24px;text-align:center;text-decoration:none}
+/* An unpainted tile used to read as a skeleton grid. It no longer does: the plate's own
+   background IS the ocean, and a graticule is drawn over it from the archive's projection
+   rather than faked with a repeating gradient that lines up with nothing. */
+.atlas-boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;color:#7d8fa5;letter-spacing:.5px}
 input[type=range]{height:16px}
-/* THE LAYOUT, AND HOW IT GIVES UP.
-   Three columns is the design target -- a 27-32" analyst workstation, the same target the
-   terminal states. Narrower than that the map, which IS the page, gets squeezed toward zero
-   between two fixed rails, so the columns are dropped one at a time instead: first the
-   analytical column moves below the map, then the filter rail does. On a phone the map keeps a
-   real height and everything else stacks under it. That is a floor, not a design target, but a
-   floor should still hold. */
-.atlas-shell{
-  display:grid;
-  grid-template-columns:clamp(240px,19vw,310px) minmax(0,1fr) clamp(300px,24vw,400px);
-  grid-template-rows:auto minmax(0,1fr) auto;
-}
-.atlas-shell>.atlas-rail{grid-column:1;grid-row:2}
-.atlas-shell>.atlas-stage{grid-column:2;grid-row:2}
-.atlas-shell>.atlas-panel{grid-column:3;grid-row:2}
-.atlas-shell>.atlas-transport{grid-column:1 / -1;grid-row:3}
-
-/* THE CALIBRATION SURFACE IS A SHELL VARIANT, not a fourth child rule.
-   Written as a variant because the two media queries below cap row 2 -- at 760px it is
-   minmax(280px,46vh) -- and a full-width reading surface squeezed into 46vh of viewport would
-   be a page nobody scrolls. In this mode the rail, stage and panel are not rendered at all, so
-   the variant needs no edits inside either media block: it simply redefines the grid it is
-   laid into. */
-.atlas-shell[data-view="calibration"]{
-  grid-template-columns:minmax(0,1fr);
-  grid-template-rows:auto minmax(0,1fr);
-}
-.atlas-shell>.atlas-calibration{grid-column:1 / -1;grid-row:2;min-width:0;min-height:0}
-
-@media (max-width:1180px){
-  .atlas-shell{grid-template-columns:clamp(220px,26vw,300px) minmax(0,1fr);
-               grid-template-rows:auto minmax(320px,1fr) minmax(0,auto) auto}
-  .atlas-shell>.atlas-panel{grid-column:1 / -1;grid-row:3;border-left:0;
-                            border-top:1px solid var(--border-dim);max-height:46vh}
-  .atlas-shell>.atlas-transport{grid-row:4}
-}
-@media (max-width:760px){
-  .atlas-shell{grid-template-columns:minmax(0,1fr);
-               grid-template-rows:auto minmax(280px,46vh) minmax(0,auto) minmax(0,auto) auto}
-  .atlas-shell>.atlas-stage{grid-column:1;grid-row:2}
-  .atlas-shell>.atlas-panel{grid-column:1;grid-row:3;max-height:none}
-  .atlas-shell>.atlas-rail{grid-column:1;grid-row:4;border-right:0;
-                           border-top:1px solid var(--border-dim)}
-  .atlas-shell>.atlas-transport{grid-row:5}
-}
 </style>
 <!-- Vendored and shared with the terminal, so a visitor arriving from it pays nothing here.
      NOT vendor/babel.js: this surface ships a precompiled bundle, so there is no in-browser

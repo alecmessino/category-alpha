@@ -13,6 +13,7 @@
 
 import React from "react";
 import { loadArchive } from "../engine/archive.js";
+import { fetchCoastlines } from "../engine/coastlines.js";
 import { genesisDensity, getAnalogs, pathwayDensity } from "../engine/analogs.js";
 import { filterStorms, genesisBounds, seasonRange } from "../engine/query.js";
 import {
@@ -31,7 +32,7 @@ import { StormPanel } from "./storm-panel.jsx";
 import { CohortPanel } from "./cohort-panel.jsx";
 import { Transport } from "./transport.jsx";
 import { ArchiveTransport } from "./archive-transport.jsx";
-import { MONO, claimText } from "./kit.jsx";
+import { MONO, TextButton, claimText } from "./kit.jsx";
 
 /* Split out of the entry chunk. The drawer is reached by a button or the P key, never on the
    path to a first paint or a first click, so its bytes should not be in the file that has to
@@ -54,6 +55,7 @@ export function Atlas() {
   const [manifest, setManifest] = React.useState(null);
   const [error, setError] = React.useState(null);
   const [world, setWorld] = React.useState(null);
+  const [coast, setCoast] = React.useState(null);
 
   /* THE SINGLE SOURCE OF TRUTH. One object decides which storms are drawn, which are counted,
      what the outcome cards say, what the URL carries and what a saved scenario is. The rail
@@ -132,6 +134,20 @@ export function Atlas() {
       globalThis.__ATLAS_COHORT = { cohortResult, previewCounts, normalise, parentOf, toQuery };
       globalThis.__ATLAS_TIMELINE = { buildTimeline, advance, activeAt, fromActive, toActive };
       globalThis.__ATLAS_PROJECT = projectWorld;
+      /* THE COASTLINE COMES AFTER THE TRACKS, DELIBERATELY. It is the geometry the landfall
+         rule tests against and it is the plate's authoritative line, but it is 226 KB and the
+         map is legible without it. Requesting it here rather than in parallel with the pack
+         keeps the critical path exactly what it was. Nothing is substituted while it is in
+         flight: the contextual tier draws, and the modelled regions arrive when they arrive. */
+      fetchCoastlines(`${DATA_BASE}/atlas-coastlines-v1.bin.gz`).then((c) => {
+        if (cancelled) return;
+        setCoast(c);
+        globalThis.__ATLAS_COASTLINES = c;
+      }).catch((e) => {
+        /* A missing coastline is not a missing archive. The plate keeps its contextual tier
+           and says so in the foot band rather than claiming a contrast it does not have. */
+        if (!cancelled) setCoast({ failed: String(e && e.message ? e.message : e) });
+      });
     }).catch((e) => { if (!cancelled) setError(e); });
     return () => { cancelled = true; };
   }, []);
@@ -303,11 +319,11 @@ export function Atlas() {
      archive's scale and the provenance key belong on both surfaces. */
   if (surface === "calibration") {
     return (
-      <div data-surface="calibration" data-view="calibration" className="atlas-shell" style={{
+      <div data-surface="calibration" data-view="calibration" data-atlas className="atlas-shell" style={{
         position: "fixed", inset: 0,
         background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
       }}>
-        <Header manifest={archive.manifest} onProvenance={() => setProvOpen(true)} />
+        <Header archive={archive} onProvenance={() => setProvOpen(true)} />
         <React.Suspense fallback={<LedgerBoot />}>
           {calError ? <LedgerError error={calError} onBack={() => setSurface("tactical")} />
             : cal ? (
@@ -318,7 +334,7 @@ export function Atlas() {
         </React.Suspense>
         <React.Suspense fallback={null}>
           {provOpen ? (
-            <ProvenanceDrawer archive={archive} open={provOpen}
+            <ProvenanceDrawer archive={archive} coast={coast} open={provOpen}
               onClose={() => setProvOpen(false)} frame={null} />
           ) : null}
         </React.Suspense>
@@ -327,11 +343,11 @@ export function Atlas() {
   }
 
   return (
-    <div data-surface="tactical" data-view="tactical" className="atlas-shell" style={{
+    <div data-surface="tactical" data-view="tactical" data-atlas className="atlas-shell" style={{
       position: "fixed", inset: 0,
       background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
     }}>
-      <Header manifest={archive.manifest} onProvenance={() => setProvOpen(true)}
+      <Header archive={archive} onProvenance={() => setProvOpen(true)}
         onLedger={() => openLedger(null)} />
 
       <div className="atlas-rail" style={{ overflowY: "auto",
@@ -351,7 +367,7 @@ export function Atlas() {
 
       <div className="atlas-stage" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
         <AtlasMap
-          archive={archive} world={world} rows={contextRows} emphasis={emphasis}
+          archive={archive} world={world} coast={coast} rows={contextRows} emphasis={emphasis}
           selected={selected} home={home}
           onSelect={selectStorm} onProbe={onProbe} probe={cohort.where}
           replayMs={selected !== null && cursorMs !== null ? cursorMs : undefined}
@@ -362,10 +378,13 @@ export function Atlas() {
           showGenesisDensity={showGenesisDensity} genesisDensity={genesisGrid}
           mode={mode} timeline={timeline} replayCursorMin={replayCursorMin}
           pathwayStep={2.0} onViewChange={setView}
-        />
-        {mode === "explore" && !cohort.where && selected === null ? <Invitation /> : null}
-        <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
-          showGenesisDensity={showGenesisDensity} />
+          kept={result.kept} lifted={emphasis ? emphasis.length : 0}
+          selectedCount={selected === null ? 0 : 1}
+        >
+          {mode === "explore" && !cohort.where && selected === null ? <Invitation /> : null}
+          <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
+            showGenesisDensity={showGenesisDensity} />
+        </AtlasMap>
       </div>
 
       <div className="atlas-panel" style={{ overflowY: "auto",
@@ -403,7 +422,7 @@ export function Atlas() {
 
       <React.Suspense fallback={null}>
         {provOpen ? (
-          <ProvenanceDrawer archive={archive} open={provOpen}
+          <ProvenanceDrawer archive={archive} coast={coast} open={provOpen}
             onClose={() => setProvOpen(false)} frame={view ? view.frame : null} />
         ) : null}
       </React.Suspense>
@@ -507,46 +526,32 @@ function ScaleLine({ manifest, dim }) {
   );
 }
 
-function Header({ manifest, onProvenance, onLedger }) {
+function Header({ archive, onProvenance, onLedger }) {
+  const m = archive.manifest;
+  const p = m.provenance || {};
   return (
-    <header style={{
-      gridColumn: "1 / -1", gridRow: "1", display: "flex", alignItems: "center",
-      justifyContent: "space-between", gap: "var(--sp-4) var(--sp-6)", flexWrap: "wrap",
-      padding: "var(--sp-4) var(--sp-6)", borderBottom: "1px solid var(--border-dim)",
-      background: "var(--surface-card)",
-    }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-4) var(--sp-6)",
-        minWidth: 0, flexWrap: "wrap", flex: "1 1 auto" }}>
-        <a href="../" title="back to Millibar Terminal" style={{
-          ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-          textDecoration: "none", flex: "none",
-        }}>‹ MILLIBAR</a>
-        <span style={{
-          fontFamily: "var(--font-sans)", fontSize: "var(--fs-title)",
-          fontWeight: "var(--fw-black)", letterSpacing: "var(--track-caps)",
-          textTransform: "uppercase", color: "var(--text-1)", flex: "none",
-        }}>STORM ATLAS</span>
-        <ScaleLine manifest={manifest} />
+    <header className="at-header">
+      <div className="at-brand">
+        <h1>Storm Atlas</h1>
+        <div className="at-sub">
+          <a href="../" title="back to Millibar Terminal">‹ Millibar</a>
+          {" · genesis-to-intensity archive"}
+        </div>
       </div>
-      <div style={{ display: "flex", gap: "var(--sp-3)", flex: "none" }}>
+      <ScaleLine manifest={m} />
+      <div className="at-sys">
+        <div className="at-stack">
+          <div>METHODOLOGY <em>{m.methodology_version}</em> · PACK <em>{p.archive_stamp}</em></div>
+          <div>BUILT <em>{(p.archive_built_utc || "").replace("T", " ").replace(/:\d\dZ?$/, "Z")}</em></div>
+        </div>
         {/* NOT BEHIND A TOGGLE. The ledger is how a reader checks whether anything else on this
             site is worth believing, so it sits in the masthead beside provenance rather than
             inside a panel someone has to know to open. */}
         {onLedger ? (
-          <button type="button" onClick={onLedger} data-open-ledger
-            title="how well calibrated is this? the archive's own backtest" style={{
-              ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
-              border: "1px solid var(--accent)", borderRadius: "var(--radius-sm)",
-              color: "var(--accent)", cursor: "pointer", padding: "4px 8px",
-              letterSpacing: "var(--track-label)",
-            }}>CALIBRATION</button>
+          <TextButton onClick={onLedger} hook="data-open-ledger"
+            title="how well calibrated is this? the archive's own backtest">Calibration</TextButton>
         ) : null}
-        <button type="button" onClick={onProvenance} title="provenance (P)" style={{
-          ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
-          border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
-          color: "var(--text-2)", cursor: "pointer", padding: "4px 8px",
-          letterSpacing: "var(--track-label)",
-        }}>PROVENANCE</button>
+        <TextButton onClick={onProvenance} title="provenance (P)">Provenance</TextButton>
       </div>
     </header>
   );
@@ -726,7 +731,7 @@ function yearsOf(minutes) {
 
 function Boot({ manifest }) {
   return (
-    <div data-surface="tactical" style={{
+    <div data-surface="tactical" data-atlas style={{
       position: "fixed", inset: 0, background: "var(--surface-app)", color: "var(--text-1)",
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       gap: "var(--sp-7)", padding: "var(--sp-8)",
@@ -745,7 +750,7 @@ function Boot({ manifest }) {
 
 function BootError({ error }) {
   return (
-    <div data-surface="tactical" style={{
+    <div data-surface="tactical" data-atlas style={{
       position: "fixed", inset: 0, background: "var(--surface-app)", color: "var(--text-1)",
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
       gap: "var(--sp-5)", padding: "var(--sp-8)", textAlign: "center",
