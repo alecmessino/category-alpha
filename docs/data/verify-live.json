@@ -1,15 +1,20 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-20T01:50:36.892Z",
+  "ranAt": "2026-08-20T13:09:52.893Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "6b90418c4866a016e885c1e17e281b3a4850bb68",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32322415998",
-  "ok": true,
-  "passed": 46,
+  "sha": "4a7820f3a0f657e0913cf36ca602b04ca621d069",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32372640780",
+  "ok": false,
+  "passed": 45,
   "total": 46,
-  "failures": [],
-  "thirdPartyFailures": 32,
+  "failures": [
+    {
+      "check": "every consensus in the snapshot reaches the newest frame",
+      "detail": "0/1 frame(s) carry a consensus peak against 1 in the snapshot · 0 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+    }
+  ],
+  "thirdPartyFailures": 28,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -29,7 +34,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-20T01:24:53.212Z · 26m old"
+      "detail": "2026-08-20T12:58:26.935Z · 11m old"
     },
     {
       "check": "renders: Situation",
@@ -84,12 +89,12 @@
     {
       "check": "genesis watch matches the outlook feed",
       "pass": true,
-      "detail": "2 area(s) · block=true"
+      "detail": "3 area(s) · block=true"
     },
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "6 ranked of 18 candidates · 116/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "6 ranked of 15 candidates · 116/152 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -104,7 +109,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "51/60 tile(s) rendered · 9 hole(s) · 0 still loading"
+      "detail": "53/60 tile(s) rendered · 7 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -119,7 +124,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 1.9 screens tall (2723px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 815px · BANKROLL 721px · ▾ 698px"
+      "detail": "3 tabs · Situation is 2 screens tall (2738px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 830px · BANKROLL 736px · ▾ 698px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -139,17 +144,17 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": true,
-      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 3 advisory change(s) · 0 moved P · 2 pinned at the clamp · 3 register row(s) · situation P=99% at adv #30A"
+      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 3 advisory change(s) · 0 moved P · 2 pinned at the clamp · 3 register row(s) · situation P=99% at adv #32A"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
-      "pass": true,
-      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 14m behind the snapshot (lagging — wiring asserted, coverage is the CI gate's job) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "pass": false,
+      "detail": "0/1 frame(s) carry a consensus peak against 1 in the snapshot · 0 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=92m raw=99%"
+      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=LOW lag=62m raw=99%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -159,7 +164,7 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "1 guidance cycle(s) turned over → 1 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 0 SHIPS · 0 pass · strip arrivals=0"
+      "detail": "0 guidance cycle(s) turned over → 1 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 0 SHIPS · 2 pass · strip arrivals=2 (nothing turned over in the retained window yet — wiring asserted, behaviour not yet exercised)"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
@@ -174,7 +179,7 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-08-19T18:00:00Z"
+      "detail": "cycle 2026-08-20T06:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",

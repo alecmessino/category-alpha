@@ -153,7 +153,7 @@ export function Atlas() {
   }, []);
 
   const bounds = React.useMemo(() => (archive ? seasonRange(archive) : [1851, 2026]), [archive]);
-  const home = React.useMemo(() => (archive ? genesisBounds(archive) : null), [archive]);
+  const home = React.useMemo(() => (archive ? coreFrame(archive) : null), [archive]);
   /* ONE COHORT, ONE ANSWER. Membership and outcomes come from the same object now: the storms
      drawn on the map ARE the storms in every denominator. Until 3.2 these were two calls -- one
      deciding what was drawn, another deciding what was scored -- and keeping them from
@@ -430,6 +430,96 @@ export function Atlas() {
   );
 }
 
+/* THE OPENING VIEW.
+ *
+ * WHY NOT THE ARCHIVE'S FULL EXTENT. `genesisBounds` returns the min/max of every genesis
+ * coordinate, and this archive holds 343 storms with a West Pacific genesis -- IBTrACS keeps
+ * dateline crossers in the loaded basin files -- so its longitude range runs -179.8 to +180.0.
+ * That is 359.8 degrees, and fitting it opened the plate on the entire planet at the minimum
+ * zoom: measured, latitude -88.5 to +89.4 on a 1920x1742 workstation, Antarctica and the Arctic
+ * both on screen and 13.7% of the plate carrying any track ink. The reader met a dark void with
+ * a band in it.
+ *
+ * WHAT THIS FRAMES INSTEAD. The archive's own mass, in three measured steps and nothing else:
+ *
+ *   1. THE DOMINANT LOBE. Longitude is bimodal here -- a North Atlantic / East Pacific lobe and
+ *      a West Pacific tail of 343 storms, with 128 degrees of empty longitude between them:
+ *      from 14W to 114E this archive holds not one genesis. The lobe is taken as every genesis
+ *      within LOBE_DEG of the archive's MEDIAN genesis longitude, measured the short way round.
+ *      Measured on this pack: 3,588 of 3,905 storms, 91.9%, which is precisely the North
+ *      Atlantic plus East Pacific the plate is titled for.
+ *   2. ITS CORE LONGITUDE, at the 1st and 99th percentile of that lobe. Percentiles rather than
+ *      extremes because one storm at 179.8W should not widen the opening view by 15 degrees.
+ *   3. ITS LATITUDE BAND, from the TRACK POINTS of those storms rather than their genesis --
+ *      the plate draws whole trajectories, and a storm that forms at 12N and recurves to 50N
+ *      occupies all of that. The floor is the genesis floor, because nothing forms below it.
+ *
+ * WHAT IT COMES OUT AS, on this pack: 1.9N to 58.0N, 166.3W to 17.4W. That is 148.9 degrees of
+ * longitude against 56.1 of latitude -- in Web Mercator a band 2.14 times wider than it is tall,
+ * which is the number the plate's aspect cap in atlas.css is derived from. The two have to be
+ * read together: this decides WHAT the plate opens on, and the cap decides what SHAPE it opens
+ * on, and a fit is only honest when both are right.
+ *
+ * NOTHING HERE IS A CLAIM. It is a camera position, derived from coordinates the pack already
+ * holds, and it changes only where the map opens: pan, zoom and every filter behave exactly as
+ * before, and the West Pacific is one drag away. The percentiles are stated here rather than
+ * tuned by eye so the framing moves with the archive if the archive moves.
+ */
+const LOBE_DEG = 110;      // half-width of the dominant-lobe window, in degrees of longitude
+const CORE_Q = 0.01;       // the lobe's core longitude, at q1..q99
+const TRACK_Q = 0.005;     // the band's north edge, at q99.5 of the lobe's track latitudes
+
+export function coreFrame(archive) {
+  const glat = archive.genesisLat;
+  const glon = archive.genesisLon;
+
+  const lons = [];
+  for (let i = 0; i < archive.nStorms; i++) {
+    if (!Number.isNaN(glat[i])) lons.push(glon[i]);
+  }
+  if (!lons.length) return genesisBounds(archive);
+  const median = quantile(lons.slice().sort(asc), 0.5);
+
+  /* Short-way separation, so a lobe that straddles the antimeridian is still one lobe. */
+  const near = (lon) => {
+    const d = Math.abs(lon - median) % 360;
+    return (d > 180 ? 360 - d : d) <= LOBE_DEG;
+  };
+
+  const lobeLon = [];
+  const rows = [];
+  for (let i = 0; i < archive.nStorms; i++) {
+    if (Number.isNaN(glat[i]) || !near(glon[i])) continue;
+    lobeLon.push(glon[i]);
+    rows.push(i);
+  }
+  if (lobeLon.length < 2) return genesisBounds(archive);
+  lobeLon.sort(asc);
+
+  /* The latitude the plate has to hold is the one the TRACKS reach, not the one they start at.
+     Sampled every third fix: the band is a framing decision, not a measurement anyone cites. */
+  const lat = [];
+  let floor = Infinity;
+  for (const i of rows) {
+    if (glat[i] < floor) floor = glat[i];
+    const [s, e] = archive.trackRange(i);
+    for (let k = s; k < e; k += 3) lat.push(archive.ptLat[k] / 100);
+  }
+  if (!lat.length) return genesisBounds(archive);
+  lat.sort(asc);
+
+  const south = Math.min(floor, quantile(lat, TRACK_Q));
+  const north = quantile(lat, 1 - TRACK_Q);
+  return [[south, quantile(lobeLon, CORE_Q)], [north, quantile(lobeLon, 1 - CORE_Q)]];
+}
+
+function asc(a, b) { return a - b; }
+
+function quantile(sorted, p) {
+  const i = Math.round(p * (sorted.length - 1));
+  return sorted[Math.max(0, Math.min(sorted.length - 1, i))];
+}
+
 /* WHAT CHANGED UNDER A LINK SOMEONE ALREADY HAD.
  *
  * Shown only when a URL carries a methodology version other than this build's. It does not
@@ -533,7 +623,9 @@ function Header({ archive, onProvenance, onLedger }) {
     <header className="at-header">
       <div className="at-brand">
         <h1>Storm Atlas</h1>
-        <div className="at-sub">
+        {/* The tagline ellipsises before the rail's floor does, so the whole of it is carried
+            as the element's own title as well as its text. */}
+        <div className="at-sub" title="Millibar · genesis-to-intensity archive">
           <a href="../" title="back to Millibar Terminal">‹ Millibar</a>
           {" · genesis-to-intensity archive"}
         </div>
@@ -541,8 +633,12 @@ function Header({ archive, onProvenance, onLedger }) {
       <ScaleLine manifest={m} />
       <div className="at-sys">
         <div className="at-stack">
-          <div>METHODOLOGY <em>{m.methodology_version}</em> · PACK <em>{p.archive_stamp}</em></div>
-          <div>BUILT <em>{(p.archive_built_utc || "").replace("T", " ").replace(/:\d\dZ?$/, "Z")}</em></div>
+          <div title={`METHODOLOGY ${m.methodology_version} · PACK ${p.archive_stamp}`}>
+            METHODOLOGY <em>{m.methodology_version}</em> · PACK <em>{p.archive_stamp}</em>
+          </div>
+          <div title={`BUILT ${p.archive_built_utc || ""}`}>
+            BUILT <em>{(p.archive_built_utc || "").replace("T", " ").replace(/:\d\dZ?$/, "Z")}</em>
+          </div>
         </div>
         {/* NOT BEHIND A TOGGLE. The ledger is how a reader checks whether anything else on this
             site is worth believing, so it sits in the masthead beside provenance rather than

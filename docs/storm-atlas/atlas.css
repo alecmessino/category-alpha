@@ -77,9 +77,86 @@
 
   /* The three-zone header lock: the brand is exactly the rail's width and the status block
      exactly the panel's, so the chrome lines up with the columns underneath it. One pair of
-     variables drives both, which is what keeps them locked through every breakpoint. */
-  --at-rail:312px;
-  --at-panel:424px;
+     variables drives both, which is what keeps them locked through every breakpoint.
+
+     FLUID, NOT STEPPED. These were fixed at 312/424 with breakpoints stepping them down, which
+     meant every pixel a narrower viewport lost came out of the PLATE: measured on the archive,
+     the plate held 61.7% of the width at 1920 but 54.0% at 1600 and 51.7% at 1440, where the
+     instrument stops reading as a map with chrome around it and starts reading as two dense
+     rails with a map wedged between them. Tying both columns to the viewport shares the loss,
+     so the plate keeps 60-64% of the width from 1920 down to the collapse.
+
+     THE FLOORS ARE MEASURED, NOT GUESSED, and they are set by TYPE rather than by boxes. Both
+     columns hold their grids well below these widths -- the rail's twelve-cell month strip and
+     the panel's 112/1fr/78 count table both survive to 240 -- but their labels do not, and a
+     narrower column than this starts ellipsising the things a reader steers by. Measured at
+     1440, ellipsised items in each column against its width:
+
+       rail    240: 4, incl. the ENVIRONMENT stage row        260: 2   296: 1
+       panel   300: 2, incl. LANDFALLS WITH A WITHHELD CLASS  312: 1   400: 0
+
+     260 and 312 are where the last stage row and the last ledger key come back whole. What
+     still ellipsises at those widths is two long explanatory keys inside disclosure sections,
+     which ellipsised on the fixed 296/400 columns too. */
+  --at-rail:clamp(260px,15.5vw,300px);
+  --at-panel:clamp(312px,20.5vw,400px);
+
+  /* THE VERTICAL RHYTHM, DECLARED ONCE, because the instrument's cap below is computed from it.
+     Each of these four is both a grid track and a term in --at-frame; two copies of the same
+     number in a stylesheet is a drift waiting to happen, and here the drift would silently
+     mis-size the plate. The header is 54 rather than 58 and the transport 52 rather than 56:
+     the brand block is 30px of type and the transport's tallest readout 26px, so both were
+     carrying more air than they needed while the plate -- the only element whose job is to be
+     large -- was short. */
+  --at-head:54px;
+  --at-band-top:26px;
+  --at-band-bot:24px;
+  --at-transport-h:52px;
+
+  /* THE PLATE'S MINIMUM HEALTHY ASPECT, AND THE CAP THAT HOLDS IT.
+   *
+   * The archive is a horizontal population. Its core frame -- the dominant genesis lobe, see
+   * coreFrame() in src/ui/atlas.jsx -- spans 148.9 degrees of longitude against 56.1 of
+   * latitude, which in Web Mercator is a band 2.14 times wider than it is tall. A plate
+   * narrower than that in aspect cannot be filled by it: a CONTAIN fit binds on width and the
+   * leftover height opens as ocean the archive has no storms in.
+   *
+   * So the number below is derived, not chosen, in two steps.
+   *
+   * FIRST, THE WORKING REGION. Ask what the widest acceptable opening view is -- 20S to 68N,
+   * the tropical/subtropical band either side of the archive's own with room for the recurving
+   * tails -- and project it: mercY(-20) - mercY(68) = 0.3174 of the world against the frame's
+   * 148.9/360 = 0.4136 of it. 0.4136 / 0.3174 = 1.303. At that aspect an EXACT contain fit of
+   * the core frame opens on exactly that window and no more.
+   *
+   * SECOND, THE ZOOM SNAP, which is the part a static ratio misses. Leaflet floors the fitted
+   * zoom to zoomSnap -- a quarter step here, and it must stay a quarter step -- so the view
+   * that actually opens is between 1.00 and 1.19 times the exact fit, depending on nothing but
+   * where the plate's width happens to fall between two steps. A cap derived from the exact fit
+   * is therefore a cap on the BEST case: measured, it opened at 88 degrees of latitude on one
+   * workstation width and 101 on another. Sizing the plate for the MEDIAN landing instead --
+   * half a snap step, 2^0.125 = 1.0905 -- puts the whole lottery around the working region
+   * rather than starting at it: 1.303 x 1.0905 = 1.421, and measured across every supported
+   * viewport the opening view then runs 82 to 93 degrees of latitude, south 16S to 24S, north
+   * 66N to 69N. That is the range this number exists to produce.
+   *
+   * --at-frame is the whole instrument at that aspect: the fixed chrome plus a plate no taller
+   * than its own width allows. The shell pads to it rather than stretching past it, so a taller
+   * workstation gets the same instrument with its own chrome above and below it, and NEVER more
+   * geography. Where a viewport is shorter than the cap the padding is zero and the plate takes
+   * every pixel of height there is. */
+  --at-plate-ar:1.421;
+  --at-plate-w:calc(100vw - var(--at-rail) - var(--at-panel));
+  --at-chrome-h:calc(var(--at-head) + var(--at-band-top) + var(--at-band-bot)
+                     + var(--at-transport-h));
+  --at-frame:calc(var(--at-chrome-h) + var(--at-plate-w) / var(--at-plate-ar));
+
+  /* THE PLATE'S OWN MARGIN. The graticule is ruled on the plate's edges and its longitude
+     labels sit in the bottom 16px of it -- measured, an 11px line five pixels up. Everything
+     the plate floats over that band rather than on it: the attribution first, the density
+     legend above that, and the invitation moved to the head of the plate entirely, because
+     three things anchored to one bottom-right corner is not a stack, it is a collision. */
+  --at-plate-gutter:16px;
 }
 
 /* ─── page ────────────────────────────────────────────────────────────────────────────── */
@@ -109,12 +186,20 @@
 /* ─── shell ───────────────────────────────────────────────────────────────────────────── */
 
 /* Fixed to the viewport, because the map IS the page and a page that scrolls under a map is a
-   different product. The three rows are chrome / instrument / transport. */
+   different product. The three rows are chrome / instrument / transport.
+
+   THE PADDING IS THE CAP. The shell still covers the whole viewport and still paints it, but
+   its CONTENT box is capped at --at-frame and centred, so the surplus on a tall workstation
+   becomes the shell's own chrome above and below the instrument rather than more plate. It is
+   one declaration and it degrades to nothing: on a viewport shorter than the cap the max() is
+   0 and the grid is exactly what it was. All three columns end at the same baseline, both
+   vertical rules run the instrument's full height, and no column is left holding a gap. */
 [data-atlas].atlas-shell{
   position:fixed;inset:0;
+  padding-block:max(0px,calc((100vh - var(--at-frame)) / 2));
   display:grid;
   grid-template-columns:var(--at-rail) minmax(0,1fr) var(--at-panel);
-  grid-template-rows:58px minmax(0,1fr) auto;
+  grid-template-rows:var(--at-head) minmax(0,1fr) auto;
   background:var(--chrome);
 }
 /* A grid item's default min-height is `auto`, which means CONTENT, which means a stage holding
@@ -127,7 +212,13 @@
 [data-atlas] .atlas-stage{grid-column:2;grid-row:2}
 [data-atlas] .atlas-panel{grid-column:3;grid-row:2;border-left:1px solid var(--rule-2);background:var(--chrome)}
 [data-atlas] .atlas-transport{grid-column:1/-1;grid-row:3}
-[data-atlas] .atlas-rail,[data-atlas] .atlas-panel{overflow-x:hidden}
+/* Each column scrolls on its own and nothing chains out of it: a wheel that runs off the end
+   of the rail must not move the page under the map. The gutter is reserved whether or not the
+   column is currently overflowing, so a state change that adds a section cannot shift the
+   column's text sideways by the width of a scrollbar. */
+[data-atlas] .atlas-rail,[data-atlas] .atlas-panel{
+  overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;
+}
 
 /* THE CALIBRATION SURFACE IS A SHELL VARIANT, not a fourth child rule.
    Written as a variant because the media queries below cap row 2 -- at 760px it is
@@ -366,8 +457,17 @@
 
 /* The map is framed as a figure in a journal: a caption band above and below, as SIBLINGS of
    the map rather than as overlays, so neither can ever sit on top of the geography. */
+/* THE CAPTION BANDS SIZE AGAINST THE PLATE, NOT THE WINDOW. What fits in the plate head and
+   foot is a function of how wide the PLATE is, and that is not a function of the viewport: at
+   1181 the third column leaves a 641px plate and the head cannot hold its title, while one pixel
+   narrower the two-column arrangement leaves 894 and it fits comfortably again. Viewport media
+   queries cannot express that -- they dropped captions that fitted and kept captions that did
+   not -- so the stage is an inline-size container and the bands query it directly. */
 [data-atlas] .atlas-stage{
-  display:grid;grid-template-rows:28px minmax(0,1fr) 26px;background:var(--chrome);
+  display:grid;
+  grid-template-rows:var(--at-band-top) minmax(0,1fr) var(--at-band-bot);
+  background:var(--chrome);
+  container:plate / inline-size;
 }
 [data-atlas] .at-platehead,[data-atlas] .at-platefoot{
   display:flex;align-items:center;gap:16px;padding:0 14px;min-width:0;
@@ -406,11 +506,13 @@
 [data-atlas] .leaflet-control-attribution{
   background:rgba(13,19,29,.82)!important;color:var(--t4)!important;
   font-family:var(--font-mono);font-size:8.5px;border-radius:0;
+  margin-bottom:calc(var(--at-plate-gutter) + 5px)!important;
 }
 [data-atlas] .leaflet-control-attribution a{color:var(--t3)!important}
 
 [data-atlas] .at-legend{
-  position:absolute;right:12px;bottom:12px;max-width:376px;z-index:450;pointer-events:none;
+  position:absolute;right:12px;bottom:calc(var(--at-plate-gutter) + 22px);
+  max-width:376px;z-index:450;pointer-events:none;
   display:flex;flex-direction:column;gap:6px;
   background:rgba(15,21,31,.94);border:1px solid var(--rule-2);padding:8px 10px;
 }
@@ -421,11 +523,18 @@
 [data-atlas] .at-legend .at-lrow .at-d{color:var(--t3);letter-spacing:0;text-transform:none}
 [data-atlas] .at-legend .at-sw{display:flex;flex:none}
 [data-atlas] .at-legend .at-sw i{width:9px;height:9px;display:block}
+/* At the HEAD of the plate, not the foot. The foot is where the graticule prints its longitude
+   labels, where Leaflet prints the attribution and where the density legend sits, and this
+   ribbon was landing on all three: measured at 1920, its box overlapped the attribution's and
+   occluded 120W through 60W. The head of the plate is empty at rest -- it is the top of the
+   Atlantic, above the band -- and the rule mirrors to the edge facing the map so the ribbon
+   still reads as hanging off the frame. The gutter each side keeps it clear of the zoom
+   control at every supported plate width. */
 [data-atlas] .at-invite{
-  position:absolute;left:50%;bottom:14px;transform:translateX(-50%);text-align:center;z-index:450;
+  position:absolute;left:50%;top:14px;transform:translateX(-50%);text-align:center;z-index:450;
   pointer-events:none;font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.1px;
   color:var(--t2);text-transform:uppercase;background:rgba(14,20,30,.9);padding:6px 14px;
-  border-top:1px solid var(--rule-3);max-width:calc(100% - 24px);
+  border-bottom:1px solid var(--rule-3);max-width:calc(100% - 96px);
 }
 [data-atlas] .at-invite em{font-style:normal;color:#fff}
 /* Clamped on BOTH axes against the plate, so a chip near an edge can never end up under a
@@ -552,7 +661,8 @@
 
 [data-atlas] .atlas-transport{grid-column:1/-1}
 [data-atlas] .at-transport{
-  display:flex;align-items:center;gap:18px;padding:0 18px 0 20px;min-height:56px;
+  display:flex;align-items:center;gap:18px;padding:0 18px 0 20px;
+  min-height:var(--at-transport-h);
   border-top:1px solid var(--rule-2);background:var(--chrome-hi);
 }
 [data-atlas] .at-tbtn{
@@ -637,50 +747,100 @@
 /* ─── responsive degradation, workstation first ───────────────────────────────────────── */
 
 /* The rule that produced all of these: caption bands and ledgers give up whole items, never
-   half a word. A survivor ellipsizes; a casualty leaves. */
+   half a word. A survivor ellipsizes; a casualty leaves. The columns are fluid now, so these
+   carry only what still has to give up a whole item. */
 @media (max-width:1560px){
-  [data-atlas]{--at-rail:296px;--at-panel:400px}
   [data-atlas] .at-fig{padding:0 13px}
   [data-atlas] .at-fig:nth-child(n+6){display:none}
   [data-atlas] .at-platehead,[data-atlas] .at-platefoot{gap:13px}
 }
 @media (max-width:1400px){
-  [data-atlas]{--at-rail:286px;--at-panel:382px}
   [data-atlas] .at-fig:nth-child(n+5){display:none}
-  [data-atlas] .at-plate-title,[data-atlas] .at-plate-model{display:none}
 }
 @media (max-width:1240px){
   [data-atlas] .at-fig:nth-child(n+4){display:none}
   [data-atlas] .at-sys .at-stack div:last-child{display:none}
 }
-@media (max-width:1180px){
+/* THE PLATE'S OWN LADDER, measured against the plate rather than the window, and ordered by
+   what each caption is worth rather than by how long it is. Measured demand, at rest:
+
+     foot, all four   scale bar 149-166 + projection 230 + coastline 370 + coordinates 65,
+                      three gaps and 28px of padding -- 898px of plate at the worst scale bar
+     foot, no proj    655px
+     foot, neither    272px
+     head, all three  plate title + tracks drawn + mode -- fits to 696, clips at 666
+
+   So the PROJECTION caption goes first, at 910, even though the coastline caption is the longer
+   of the two: the graticule it describes is drawn and labelled on the plate either way, while
+   the coastline caption is the one epistemic statement on the band -- which geometry is
+   authoritative and which is context. It survives to 680. Below that only the scale bar and the
+   live coordinates remain, and both are unconditional. Each casualty is recoverable where it
+   goes: the coastline statement is section 05 of the provenance drawer, the plate's framing is
+   the Cohort Spec's basin line.
+
+   A survivor still ellipsises rather than overflowing -- a reader who zooms in far enough to
+   quadruple the scale bar while hovering a coordinate can still push a caption past its space,
+   and an ellipsis is the right answer to that, not a fourth breakpoint. */
+@container plate (max-width:910px){
   [data-atlas] .at-plate-proj{display:none}
 }
+@container plate (max-width:680px){
+  [data-atlas] .at-plate-model{display:none}
+}
+@container plate (max-width:690px){
+  [data-atlas] .at-plate-title{display:none}
+}
+
 @media (max-width:1040px){
   [data-atlas] .at-fig:nth-child(n+3){display:none}
   [data-atlas] .at-sys .at-stack{display:none}
-  [data-atlas] .at-platehead .at-r{display:none}
 }
 
 /* Below the workstation the columns are dropped one at a time rather than squeezed: the map IS
-   the page, and a map wedged between two rails at 1000 px is not one. This ladder is
-   production's and is unchanged — only the ink on it is new. */
+   the page, and a map wedged between two rails at 1000 px is not one.
+
+   WHERE THE THIRD COLUMN STOPS PAYING FOR ITSELF, RE-DERIVED. The cap above took the plate's
+   SHAPE out of this decision -- it is 1.303 in either arrangement now, where before the third
+   column at 1240 left a 572x632 portrait plate and the collapse was the only thing that could
+   rescue it. What is left is a question of area and of where the evidence sits, and it was
+   measured rather than argued: at 1240 three columns give a 700x537 plate against two columns'
+   954x340, at 1180 a 640x492 against an 894x340, and at 1100 a 560x430 against an 814x340.
+   Three columns are ahead on drawn map until about 1150, and they also keep the query, the
+   plate and the evidence in one glance instead of stacking two of them. So the boundary stays
+   exactly where production put it, at 1180, on the near side of that crossing. It is stated
+   here because it was re-derived, not because it moved.
+
+   When it does collapse the PANEL gives up the height, not the map: at 46vh the plate was left
+   266px of map on an 800px viewport, which is a caption band with a sliver under it. The cap
+   still applies here -- the panel row is a term in the chrome rather than an exception to it. */
 @media (max-width:1180px){
+  [data-atlas]{
+    --at-side:clamp(220px,26vw,286px);
+    --at-panel-row:38vh;
+    --at-plate-w:calc(100vw - var(--at-side));
+    --at-chrome-h:calc(var(--at-head) + var(--at-band-top) + var(--at-band-bot)
+                       + var(--at-transport-h) + var(--at-panel-row));
+  }
   [data-atlas].atlas-shell{
-    grid-template-columns:clamp(220px,26vw,286px) minmax(0,1fr);
-    grid-template-rows:58px minmax(320px,1fr) minmax(0,auto) auto;
+    grid-template-columns:var(--at-side) minmax(0,1fr);
+    grid-template-rows:var(--at-head) minmax(320px,1fr) minmax(0,auto) auto;
   }
   [data-atlas] .atlas-panel{
-    grid-column:1 / -1;grid-row:3;border-left:0;border-top:1px solid var(--rule-2);max-height:46vh;
+    grid-column:1 / -1;grid-row:3;border-left:0;border-top:1px solid var(--rule-2);
+    max-height:var(--at-panel-row);
   }
   [data-atlas] .atlas-transport{grid-row:4}
-  [data-atlas] .at-brand{width:clamp(220px,26vw,286px)}
+  [data-atlas] .at-brand{width:var(--at-side)}
   [data-atlas] .at-sys{width:auto;flex:0 1 auto}
 }
+/* One column, and the stage row is already a definite fraction of the viewport, so there is no
+   surplus for the cap to take and it is switched off rather than left to compute against a
+   layout it was not derived for. */
 @media (max-width:760px){
   [data-atlas].atlas-shell{
+    padding-block:0;
     grid-template-columns:minmax(0,1fr);
-    grid-template-rows:58px minmax(280px,46vh) minmax(0,auto) minmax(0,auto) auto;
+    grid-template-rows:var(--at-head) minmax(280px,46vh) minmax(0,auto) minmax(0,auto) auto;
   }
   [data-atlas] .atlas-stage{grid-column:1;grid-row:2}
   [data-atlas] .atlas-panel{grid-column:1;grid-row:3;max-height:none}
