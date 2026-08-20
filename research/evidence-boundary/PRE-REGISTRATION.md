@@ -170,3 +170,37 @@ measurement, not new reporting machinery.
 
 *Registered ahead of measurement. The commit that adds this file contains no results, and the
 branch history is the evidence of order.*
+
+---
+
+## Amendment 1 — the gate's coverage, registered before measuring
+
+Made while writing the runner, **before any expanded replay was run**. No result existed at the
+time of this amendment and none exists in the commit that adds it.
+
+**What was found.** The scope-aware evidence gate in `retrieval/analogs.py` builds `unscoreable`
+by iterating `report_regions × {any, hurricane}`. It therefore covers **landfall contracts only**.
+Intensity and time-to-event contracts carry no event-sufficiency verdict: they are governed by
+`min_sample` on the matched sample, which is the other gate, testing a different thing.
+
+Section 6 above says the primary metric is the 2×2 of gate verdict × replay class. A reader would
+reasonably have assumed all 50 contracts enter that table. They cannot. Registering the
+correction here rather than explaining it after the numbers are in.
+
+**The primary contingency is therefore computed over the 20 landfall contracts** — 5 regions ×
+{any, hurricane} × {NA, EP} — which is where the gate operates, and is still twice the population
+the 1.1.0 result rests on. The criterion (sensitivity ≥ 0.90, specificity ≥ 0.95, both gates
+reported) is unchanged and applies to that table.
+
+**The other 30 contracts are not dropped.** They are reported in full, with every field in §7, and
+they carry a second question that matters more than a larger denominator would have:
+
+> **Does any contract the gate cannot see come back `UNSUPPORTED`?**
+
+An intensity or time-to-event contract the replay could not score is a historically unsupported
+question that the evidence boundary has no verdict on — a **coverage hole**, distinct from a
+misclassification. It is registered here as a named, reportable outcome so that finding it counts
+as a result rather than as a surprise. The report states the count and names the contracts.
+
+Nothing else changes: the contract set, the settings, the classification rule and the criterion
+all stand as registered.
