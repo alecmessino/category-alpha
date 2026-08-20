@@ -1,9 +1,9 @@
 {
  "archive": {
-  "snapshot": "20260820T1750",
+  "snapshot": "20260820T2344",
   "tables": {
-   "daily_disturbances": 9843,
-   "environment": 32896,
+   "daily_disturbances": 9845,
+   "environment": 32898,
    "genesis_events": 3959,
    "landfalls": 3379,
    "storms": 3959,
@@ -23,7 +23,7 @@
      "name": "UNNAMED",
      "peak_vmax_kt": 30.0,
      "season": 1994,
-     "weight": 0.5496331782967517
+     "weight": 0.5222803539980215
     },
     {
      "atcf_id": "CP011996",
@@ -34,29 +34,7 @@
      "name": "UNNAMED",
      "peak_vmax_kt": 30.0,
      "season": 1996,
-     "weight": 0.3443919725627366
-    },
-    {
-     "atcf_id": "CP021982",
-     "distance_km": 276.4316572662138,
-     "env_fields_compared": 6,
-     "landfalls": [],
-     "max_category": "ts",
-     "name": "EMA",
-     "peak_vmax_kt": 40.0,
-     "season": 1982,
-     "weight": 0.2594514469062754
-    },
-    {
-     "atcf_id": "CP012001",
-     "distance_km": 305.84018918146376,
-     "env_fields_compared": 6,
-     "landfalls": [],
-     "max_category": "td",
-     "name": "UNNAMED",
-     "peak_vmax_kt": 30.0,
-     "season": 2001,
-     "weight": 0.21683242621102192
+     "weight": 0.39706745825638273
     },
     {
      "atcf_id": "CP011988",
@@ -67,18 +45,29 @@
      "name": "ULEKI",
      "peak_vmax_kt": 110.0,
      "season": 1988,
-     "weight": 0.20788071875424308
+     "weight": 0.2518895560270368
     },
     {
-     "atcf_id": "CP021988",
-     "distance_km": 441.9078046644291,
+     "atcf_id": "CP012001",
+     "distance_km": 305.84018918146376,
+     "env_fields_compared": 6,
+     "landfalls": [],
+     "max_category": "td",
+     "name": "UNNAMED",
+     "peak_vmax_kt": 30.0,
+     "season": 2001,
+     "weight": 0.24982800620266757
+    },
+    {
+     "atcf_id": "CP021982",
+     "distance_km": 276.4316572662138,
      "env_fields_compared": 6,
      "landfalls": [],
      "max_category": "ts",
-     "name": "WILA",
-     "peak_vmax_kt": 35.0,
-     "season": 1988,
-     "weight": 0.16206307178793908
+     "name": "EMA",
+     "peak_vmax_kt": 40.0,
+     "season": 1982,
+     "weight": 0.2426016211368534
     },
     {
      "atcf_id": "CP011993",
@@ -89,7 +78,7 @@
      "name": "KEONI",
      "peak_vmax_kt": 115.0,
      "season": 1993,
-     "weight": 0.15848306763811795
+     "weight": 0.19343225729600325
     },
     {
      "atcf_id": "CP011998",
@@ -100,35 +89,46 @@
      "name": "UNNAMED",
      "peak_vmax_kt": 30.0,
      "season": 1998,
-     "weight": 0.15491266609433454
+     "weight": 0.1877271287544482
+    },
+    {
+     "atcf_id": "CP021988",
+     "distance_km": 441.9078046644291,
+     "env_fields_compared": 6,
+     "landfalls": [],
+     "max_category": "ts",
+     "name": "WILA",
+     "peak_vmax_kt": 35.0,
+     "season": 1988,
+     "weight": 0.1589030464490846
     }
    ],
    "current_position": {
-    "lat": 23.8,
-    "lon": -172.0,
-    "text": "23.8N 172.0W"
+    "lat": 24.6,
+    "lon": -172.3,
+    "text": "24.6N 172.3W"
    },
-   "effective_sample_size": 7.0891215179851335,
+   "effective_sample_size": 7.512402272529638,
    "env_unmatched_excluded": 6,
    "environment": {
     "caveat": "the env_vector is OPERATIONAL SHIPS; the pool it matches is DEVELOPMENTAL SHIPS. Their decade agrees by measurement, identical calibration does not.",
     "is_invest": false,
-    "run_utc": "2026-08-20T12:00:00Z",
+    "run_utc": "2026-08-20T18:00:00Z",
     "source": "ships_rt",
-    "url": "https://ftp.nhc.noaa.gov/atcf/stext/26082012CP0126_ships.txt",
+    "url": "https://ftp.nhc.noaa.gov/atcf/stext/26082018CP0126_ships.txt",
     "vector": {
-     "ohc_kj_cm2": 13.0,
-     "pot_intensity_kt": 140.0,
-     "rh_mid_pct": 45.0,
-     "shear_kt": 22.0,
-     "sst_c": 27.7,
-     "vort850_1e5": 0.23
+     "ohc_kj_cm2": 17.0,
+     "pot_intensity_kt": 141.0,
+     "rh_mid_pct": 46.0,
+     "shear_kt": 21.0,
+     "sst_c": 27.8,
+     "vort850_1e5": 0.18
     }
    },
    "formation": null,
    "gaps": [
     "6 of 16 positional analogs have no archived environment within 12h of genesis and were EXCLUDED from this environment-conditioned query (SHIPS begins 1982 and ends 2023). Pass env_require_match=False to keep them at a neutral weight instead.",
-    "effective sample size is 7.1 from 10 matched storms -- the weighting has concentrated on a few analogs, so the WEIGHTED rates rest on fewer effective cases than the 10 the gate requires. The unweighted `rate` is over all 10."
+    "effective sample size is 7.5 from 10 matched storms -- the weighting has concentrated on a few analogs, so the WEIGHTED rates rest on fewer effective cases than the 10 the gate requires. The unweighted `rate` is over all 10."
    ],
    "id": "CP012026",
    "intensity": {
@@ -142,7 +142,7 @@
      "n_unknown": 0,
      "rate": 0.2,
      "refused_reason": null,
-     "weighted_rate": 0.1688183908702934
+     "weighted_rate": 0.19043570085395467
     },
     "cat2": {
      "ci95": [
@@ -154,7 +154,7 @@
      "n_unknown": 0,
      "rate": 0.2,
      "refused_reason": null,
-     "weighted_rate": 0.1688183908702934
+     "weighted_rate": 0.19043570085395467
     },
     "cat3": {
      "ci95": [
@@ -166,7 +166,7 @@
      "n_unknown": 0,
      "rate": 0.2,
      "refused_reason": null,
-     "weighted_rate": 0.1688183908702934
+     "weighted_rate": 0.19043570085395467
     },
     "cat4": {
      "ci95": [
@@ -178,7 +178,7 @@
      "n_unknown": 0,
      "rate": 0.1,
      "refused_reason": null,
-     "weighted_rate": 0.07302811427492334
+     "weighted_rate": 0.08271862366464731
     },
     "cat5": {
      "ci95": [
@@ -214,7 +214,7 @@
      "n_unknown": 0,
      "rate": 0.5,
      "refused_reason": null,
-     "weighted_rate": 0.4103178192170873
+     "weighted_rate": 0.4138920074325853
     }
    },
    "is_invest": false,
@@ -312,12 +312,12 @@
     "as_of": null,
     "basins": null,
     "env_vector": {
-     "ohc_kj_cm2": 13.0,
-     "pot_intensity_kt": 140.0,
-     "rh_mid_pct": 45.0,
-     "shear_kt": 22.0,
-     "sst_c": 27.7,
-     "vort850_1e5": 0.23
+     "ohc_kj_cm2": 17.0,
+     "pot_intensity_kt": 141.0,
+     "rh_mid_pct": 46.0,
+     "shear_kt": 21.0,
+     "sst_c": 27.8,
+     "vort850_1e5": 0.18
     },
     "genesis_subbasins": null,
     "include_provisional": false,
@@ -400,177 +400,177 @@
   {
    "cases": [
     {
-     "atcf_id": "CP011998",
-     "distance_km": 159.0457048872236,
-     "env_fields_compared": 6,
-     "landfalls": [],
-     "max_category": "td",
-     "name": "UNNAMED",
-     "peak_vmax_kt": 30.0,
-     "season": 1998,
-     "weight": 0.18642567276202804
-    },
-    {
-     "atcf_id": "CP012014",
-     "distance_km": 251.5803978863727,
-     "env_fields_compared": 6,
-     "landfalls": [],
-     "max_category": "ts",
-     "name": "WALI",
-     "peak_vmax_kt": 40.0,
-     "season": 2014,
-     "weight": 0.17377294400735635
-    },
-    {
-     "atcf_id": "EP122019",
-     "distance_km": 345.91597263971624,
-     "env_fields_compared": 6,
-     "landfalls": [],
-     "max_category": "ts",
-     "name": "AKONI",
-     "peak_vmax_kt": 35.0,
-     "season": 2019,
-     "weight": 0.1554334873047327
-    },
-    {
-     "atcf_id": "EP151986",
-     "distance_km": 425.7238232788826,
-     "env_fields_compared": 6,
-     "landfalls": [],
-     "max_category": "cat1",
-     "name": "ORLENE",
-     "peak_vmax_kt": 70.0,
-     "season": 1986,
-     "weight": 0.12857148512010588
-    },
-    {
      "atcf_id": "CP011988",
-     "distance_km": 266.9371509069162,
+     "distance_km": 174.2162050357594,
      "env_fields_compared": 6,
      "landfalls": [],
      "max_category": "cat3",
      "name": "ULEKI",
      "peak_vmax_kt": 110.0,
      "season": 1988,
-     "weight": 0.12487083118240205
+     "weight": 0.18264609762891923
+    },
+    {
+     "atcf_id": "CP011998",
+     "distance_km": 148.8309734543051,
+     "env_fields_compared": 6,
+     "landfalls": [],
+     "max_category": "td",
+     "name": "UNNAMED",
+     "peak_vmax_kt": 30.0,
+     "season": 1998,
+     "weight": 0.17625937389520624
     },
     {
      "atcf_id": "CP011993",
-     "distance_km": 158.68780240116496,
+     "distance_km": 68.89811919586913,
      "env_fields_compared": 6,
      "landfalls": [],
      "max_category": "cat4",
      "name": "KEONI",
      "peak_vmax_kt": 115.0,
      "season": 1993,
-     "weight": 0.11044754907343274
+     "weight": 0.1676047564598453
+    },
+    {
+     "atcf_id": "CP012014",
+     "distance_km": 326.05375466574895,
+     "env_fields_compared": 6,
+     "landfalls": [],
+     "max_category": "ts",
+     "name": "WALI",
+     "peak_vmax_kt": 40.0,
+     "season": 2014,
+     "weight": 0.13593121003099012
+    },
+    {
+     "atcf_id": "CP012001",
+     "distance_km": 360.9931293116991,
+     "env_fields_compared": 6,
+     "landfalls": [],
+     "max_category": "td",
+     "name": "UNNAMED",
+     "peak_vmax_kt": 30.0,
+     "season": 2001,
+     "weight": 0.11721784735671988
+    },
+    {
+     "atcf_id": "EP122019",
+     "distance_km": 391.9246773372337,
+     "env_fields_compared": 6,
+     "landfalls": [],
+     "max_category": "ts",
+     "name": "AKONI",
+     "peak_vmax_kt": 35.0,
+     "season": 2019,
+     "weight": 0.1098306721937681
     },
     {
      "atcf_id": "CP011996",
-     "distance_km": 193.3100652816008,
+     "distance_km": 100.66150443065948,
      "env_fields_compared": 6,
      "landfalls": [],
      "max_category": "td",
      "name": "UNNAMED",
      "peak_vmax_kt": 30.0,
      "season": 1996,
-     "weight": 0.08175235228231945
+     "weight": 0.09902132977275926
     },
     {
-     "atcf_id": "CP012002",
-     "distance_km": 376.55796041867353,
+     "atcf_id": "CP022001",
+     "distance_km": 289.3131471999814,
      "env_fields_compared": 6,
      "landfalls": [],
      "max_category": "ts",
-     "name": "ALIKA",
-     "peak_vmax_kt": 55.0,
-     "season": 2002,
-     "weight": 0.07965726403170692
+     "name": "UNNAMED",
+     "peak_vmax_kt": 35.0,
+     "season": 2001,
+     "weight": 0.07938919595425789
     }
    ],
    "current_position": {
-    "lat": 11.7,
-    "lon": -142.6,
-    "text": "11.7N 142.6W"
+    "lat": 12.3,
+    "lon": -143.4,
+    "text": "12.3N 143.4W"
    },
-   "effective_sample_size": 12.065544884304408,
-   "env_unmatched_excluded": 10,
+   "effective_sample_size": 10.511012625873331,
+   "env_unmatched_excluded": 11,
    "environment": {
     "caveat": "the env_vector is OPERATIONAL SHIPS; the pool it matches is DEVELOPMENTAL SHIPS. Their decade agrees by measurement, identical calibration does not.",
     "is_invest": false,
-    "run_utc": "2026-08-20T12:00:00Z",
+    "run_utc": "2026-08-20T18:00:00Z",
     "source": "ships_rt",
-    "url": "https://ftp.nhc.noaa.gov/atcf/stext/26082012CP0226_ships.txt",
+    "url": "https://ftp.nhc.noaa.gov/atcf/stext/26082018CP0226_ships.txt",
     "vector": {
-     "ohc_kj_cm2": 12.0,
-     "pot_intensity_kt": 163.0,
-     "rh_mid_pct": 70.0,
-     "shear_kt": 10.0,
-     "sst_c": 29.7,
-     "vort850_1e5": 0.44
+     "ohc_kj_cm2": 21.0,
+     "pot_intensity_kt": 161.0,
+     "rh_mid_pct": 66.0,
+     "shear_kt": 3.0,
+     "sst_c": 29.6,
+     "vort850_1e5": 0.55
     }
    },
    "formation": null,
    "gaps": [
-    "10 of 27 positional analogs have no archived environment within 12h of genesis and were EXCLUDED from this environment-conditioned query (SHIPS begins 1982 and ends 2023). Pass env_require_match=False to keep them at a neutral weight instead."
+    "11 of 27 positional analogs have no archived environment within 12h of genesis and were EXCLUDED from this environment-conditioned query (SHIPS begins 1982 and ends 2023). Pass env_require_match=False to keep them at a neutral weight instead."
    ],
    "id": "CP022026",
    "intensity": {
     "cat1": {
      "ci95": [
-      0.0955488907167594,
-      0.47262245889171595
+      0.06591478773586765,
+      0.4300935986845823
      ],
-     "count": 4,
-     "n_storms": 17,
+     "count": 3,
+     "n_storms": 16,
      "n_unknown": 0,
-     "rate": 0.23529411764705882,
+     "rate": 0.1875,
      "refused_reason": null,
-     "weighted_rate": 0.3046529155860344
+     "weighted_rate": 0.30061074986566566
     },
     "cat2": {
      "ci95": [
-      0.03287908001292092,
-      0.3433684249770991
+      0.034976749337057134,
+      0.3602333143674828
      ],
      "count": 2,
-     "n_storms": 17,
+     "n_storms": 16,
      "n_unknown": 0,
-     "rate": 0.11764705882352941,
+     "rate": 0.125,
      "refused_reason": null,
-     "weighted_rate": 0.1643507883953794
+     "weighted_rate": 0.2687132267422284
     },
     "cat3": {
      "ci95": [
-      0.03287908001292092,
-      0.3433684249770991
+      0.034976749337057134,
+      0.3602333143674828
      ],
      "count": 2,
-     "n_storms": 17,
+     "n_storms": 16,
      "n_unknown": 0,
-     "rate": 0.11764705882352941,
+     "rate": 0.125,
      "refused_reason": null,
-     "weighted_rate": 0.1643507883953794
+     "weighted_rate": 0.2687132267422284
     },
     "cat4": {
      "ci95": [
-      0.01046013064516424,
-      0.269825452035628
+      0.01111905730833121,
+      0.2832926836802987
      ],
      "count": 1,
-     "n_storms": 17,
+     "n_storms": 16,
      "n_unknown": 0,
-     "rate": 0.058823529411764705,
+     "rate": 0.0625,
      "refused_reason": null,
-     "weighted_rate": 0.07713864827227382
+     "weighted_rate": 0.12858673833313888
     },
     "cat5": {
      "ci95": [
       0.0,
-      0.18432366037156456
+      0.19361341827271994
      ],
      "count": 0,
-     "n_storms": 17,
+     "n_storms": 16,
      "n_unknown": 0,
      "rate": 0.0,
      "refused_reason": null,
@@ -578,11 +578,11 @@
     },
     "td": {
      "ci95": [
-      0.8156763396284354,
+      0.8063865817272802,
       1.0
      ],
-     "count": 17,
-     "n_storms": 17,
+     "count": 16,
+     "n_storms": 16,
      "n_unknown": 0,
      "rate": 1.0,
      "refused_reason": null,
@@ -590,15 +590,15 @@
     },
     "ts": {
      "ci95": [
-      0.5273775411082839,
-      0.9044511092832406
+      0.4440393186673406,
+      0.8583556494803894
      ],
-     "count": 13,
-     "n_storms": 17,
+     "count": 11,
+     "n_storms": 16,
      "n_unknown": 0,
-     "rate": 0.7647058823529411,
+     "rate": 0.6875,
      "refused_reason": null,
-     "weighted_rate": 0.775405671312642
+     "weighted_rate": 0.6720727650751069
     }
    },
    "is_invest": false,
@@ -609,10 +609,10 @@
      "any": {
       "ci95": [
        0.0,
-       0.18432366037156456
+       0.19361341827271994
       ],
       "count": 0,
-      "n_storms": 17,
+      "n_storms": 16,
       "n_unknown": 0,
       "rate": 0.0,
       "refused_reason": null,
@@ -621,10 +621,10 @@
      "hurricane": {
       "ci95": [
        0.0,
-       0.18432366037156456
+       0.19361341827271994
       ],
       "count": 0,
-      "n_storms": 17,
+      "n_storms": 16,
       "n_unknown": 0,
       "rate": 0.0,
       "refused_reason": null,
@@ -635,10 +635,10 @@
      "any": {
       "ci95": [
        0.0,
-       0.18432366037156456
+       0.19361341827271994
       ],
       "count": 0,
-      "n_storms": 17,
+      "n_storms": 16,
       "n_unknown": 0,
       "rate": 0.0,
       "refused_reason": null,
@@ -647,10 +647,10 @@
      "hurricane": {
       "ci95": [
        0.0,
-       0.18432366037156456
+       0.19361341827271994
       ],
       "count": 0,
-      "n_storms": 17,
+      "n_storms": 16,
       "n_unknown": 0,
       "rate": 0.0,
       "refused_reason": null,
@@ -661,10 +661,10 @@
      "any": {
       "ci95": [
        0.0,
-       0.18432366037156456
+       0.19361341827271994
       ],
       "count": 0,
-      "n_storms": 17,
+      "n_storms": 16,
       "n_unknown": 0,
       "rate": 0.0,
       "refused_reason": null,
@@ -673,10 +673,10 @@
      "hurricane": {
       "ci95": [
        0.0,
-       0.18432366037156456
+       0.19361341827271994
       ],
       "count": 0,
-      "n_storms": 17,
+      "n_storms": 16,
       "n_unknown": 0,
       "rate": 0.0,
       "refused_reason": null,
@@ -685,28 +685,28 @@
     }
    },
    "min_sample": 10,
-   "n_cases": 17,
+   "n_cases": 16,
    "position": {
-    "lat": 11.7,
-    "lon": -142.6,
-    "text": "11.7N 142.6W",
+    "lat": 12.3,
+    "lon": -143.4,
+    "text": "12.3N 143.4W",
     "which": "current"
    },
    "query": {
     "as_of": null,
     "basins": null,
     "env_vector": {
-     "ohc_kj_cm2": 12.0,
-     "pot_intensity_kt": 163.0,
-     "rh_mid_pct": 70.0,
-     "shear_kt": 10.0,
-     "sst_c": 29.7,
-     "vort850_1e5": 0.44
+     "ohc_kj_cm2": 21.0,
+     "pot_intensity_kt": 161.0,
+     "rh_mid_pct": 66.0,
+     "shear_kt": 3.0,
+     "sst_c": 29.6,
+     "vort850_1e5": 0.55
     },
     "genesis_subbasins": null,
     "include_provisional": false,
-    "lat": 11.7,
-    "lon": -142.6,
+    "lat": 12.3,
+    "lon": -143.4,
     "min_pool_season": 1971,
     "radius_km": 500.0,
     "regions": [
@@ -724,12 +724,12 @@
    "sufficient": true,
    "time_to_event": {
     "cat1": {
-     "median": 51.0,
-     "n": 4,
-     "p10": 31.2,
-     "p25": 42.0,
-     "p75": 75.0,
-     "p90": 112.80000000000001
+     "median": 54.0,
+     "n": 3,
+     "p10": 49.2,
+     "p25": 51.0,
+     "p75": 96.0,
+     "p90": 121.2
     },
     "cat3": {
      "median": 123.0,
@@ -764,12 +764,12 @@
      "p90": null
     },
     "ts": {
-     "median": 12.0,
-     "n": 13,
-     "p10": 1.200000000000001,
+     "median": 18.0,
+     "n": 11,
+     "p10": 0.0,
      "p25": 6.0,
-     "p75": 24.0,
-     "p90": 78.00000000000003
+     "p75": 27.0,
+     "p90": 90.0
     }
    },
    "unscoreable": {
@@ -1262,10 +1262,10 @@
    "env_unmatched_excluded": 0,
    "environment": null,
    "formation": {
-    "observed_utc": "2026-08-20T17:50:14Z",
-    "prob_48h_pct": 20.0,
+    "observed_utc": "2026-08-20T23:44:16Z",
+    "prob_48h_pct": 40.0,
     "prob_7d_label": "Medium",
-    "prob_7d_pct": 40.0
+    "prob_7d_pct": 60.0
    },
    "gaps": [],
    "id": "epac-202608180100-12.6_-107.9",
@@ -1535,8 +1535,8 @@
    "env_unmatched_excluded": 0,
    "environment": null,
    "formation": {
-    "observed_utc": "2026-08-20T17:50:14Z",
-    "prob_48h_pct": 0.0,
+    "observed_utc": "2026-08-20T23:44:16Z",
+    "prob_48h_pct": 20.0,
     "prob_7d_label": "Low",
     "prob_7d_pct": 20.0
    },
@@ -1674,9 +1674,9 @@
    "min_sample": 10,
    "n_cases": 0,
    "position": {
-    "lat": 41.1583872467907,
-    "lon": -15.119081803872932,
-    "text": "41.2N 15.1W",
+    "lat": 41.601596548685265,
+    "lon": -16.581445928032558,
+    "text": "41.6N 16.6W",
     "which": "current"
    },
    "query": {
@@ -1685,8 +1685,8 @@
     "env_vector": null,
     "genesis_subbasins": null,
     "include_provisional": false,
-    "lat": 41.1583872467907,
-    "lon": -15.119081803872932,
+    "lat": 41.601596548685265,
+    "lon": -16.581445928032558,
     "min_pool_season": 1971,
     "radius_km": 500.0,
     "regions": [
@@ -1762,7 +1762,7 @@
    }
   }
  ],
- "generated_utc": "2026-08-20T17:50:30Z",
+ "generated_utc": "2026-08-20T23:44:38Z",
  "notes": [],
  "processing_version": "1.0.0",
  "settings": {
