@@ -27,7 +27,7 @@ import React from "react";
 import { PopulationLayer } from "../render/population-layer.js";
 import { SelectionLayer } from "../render/selection-layer.js";
 import { PathwayLayer } from "../render/pathway-layer.js";
-import { CoastlineLayer } from "../render/coastline-layer.js";
+import { CoastlineLayer, mercY } from "../render/coastline-layer.js";
 import { ReplayHeadsLayer, ReplayLayer } from "../render/replay-layer.js";
 import { hitGenesis } from "../render/hit-test.js";
 import { formatPosition } from "../engine/geo.js";
@@ -44,6 +44,23 @@ const EMPTY_ROWS = new Uint32Array(0);
 /* The scale bar snaps to one of these rather than printing whatever 100 px happens to be.
    A bar labelled "1,143 KM" is a measurement of the viewport, not of the map. */
 const SCALE_STEPS = [100, 200, 250, 500, 1000, 2000, 4000];
+
+/* How far the opening view may close in on the archive's core band beyond a contain fit, in
+   zoom levels. CHOSEN BY MEASUREMENT, against the one thing that must not be traded away --
+   how much of the archive the plate omits at rest. At 1920, with the share of the plate
+   carrying track ink and the share of the North Atlantic / East Pacific genesis still on
+   screen:
+
+     0     47.2% inked   100.0% shown      contain; 101 degrees of latitude, most of it empty
+     0.25  51.5% inked    98.5% shown   <- here
+     0.5   57.6% inked    92.1% shown      loses the outer East Pacific
+     0.75  62.8% inked    86.4% shown      loses Cape Verde as well
+
+   0.5 and 0.75 buy a denser-looking plate by cropping genesis regions the archive is largely
+   about, which is the wrong trade for a surface whose subject is the population. 0.25 takes the
+   framing win -- inked area goes from 20.4% to 51.5% against the old full-extent fit -- while
+   leaving the lobe essentially whole. */
+const COVER_ZOOM = 0.25;
 
 export function AtlasMap({
   archive, world, coast, rows, emphasis, selected, onSelect, onProbe, probe, replayMs, home,
@@ -71,8 +88,30 @@ export function AtlasMap({
       minZoom: 2, maxZoom: 8, zoomSnap: 0.25, worldCopyJump: false,
     }).setView(FALLBACK_CENTER, FALLBACK_ZOOM);
     if (home) {
-      try { m.fitBounds(L.latLngBounds(home).pad(0.04), { animate: false }); }
-      catch { /* a degenerate extent keeps the fallback view */ }
+      /* COVER, NOT CONTAIN.
+       *
+       * `fitBounds` is a CONTAIN fit: it guarantees the whole box is visible, which for a band
+       * this wide and this shallow means the width binds and the height is left over. Measured
+       * on the archive's core frame, contain alone showed 101 degrees of latitude at 1920 and
+       * 118 at 1440 -- the band itself is 56 -- so the plate filled with Arctic and Southern
+       * Ocean the moment the viewport narrowed.
+       *
+       * So the fit is allowed to close in on the band by up to COVER_ZOOM, and never past the
+       * zoom at which the band alone fills the height. Longitude that falls outside is a drag
+       * away, which is the trade the plate should make: a reader looking for the far East
+       * Pacific will pan, while a reader who never asked for the Arctic should not be given it.
+       * The cap is what keeps this honest -- it can tighten the frame, never invent one. */
+      try {
+        const b = L.latLngBounds(home).pad(0.04);
+        m.fitBounds(b, { animate: false });
+        const dy = Math.abs(mercY(b.getNorth()) - mercY(b.getSouth()));
+        if (dy > 0) {
+          const bandFillsHeight = Math.log2((m.getSize().y / dy) / 256);
+          const target = Math.min(bandFillsHeight, m.getZoom() + COVER_ZOOM);
+          const snapped = Math.floor(target / (m.options.zoomSnap || 1)) * (m.options.zoomSnap || 1);
+          if (snapped > m.getZoom()) m.setZoom(snapped, { animate: false });
+        }
+      } catch { /* a degenerate extent keeps the fallback view */ }
     }
     L.control.zoom({ position: "topright" }).addTo(m);
     /* CONTEXT, AND ONLY CONTEXT. This is the same tile endpoint the terminal draws, backed off

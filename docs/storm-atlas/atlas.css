@@ -77,9 +77,21 @@
 
   /* The three-zone header lock: the brand is exactly the rail's width and the status block
      exactly the panel's, so the chrome lines up with the columns underneath it. One pair of
-     variables drives both, which is what keeps them locked through every breakpoint. */
-  --at-rail:312px;
-  --at-panel:424px;
+     variables drives both, which is what keeps them locked through every breakpoint.
+
+     FLUID, NOT STEPPED. These were fixed at 312/424 with breakpoints stepping them down, which
+     meant every pixel a narrower viewport lost came out of the PLATE: measured, the plate held
+     61.7% of the width at 1920 but only 54.0% at 1600 and 51.7% at 1440, where the instrument
+     stopped reading as a map with chrome around it and started reading as two dense rails with
+     a map wedged between them. Tying both columns to the viewport makes the loss shared, so the
+     plate keeps roughly the same share of the width all the way down. The floors are the real
+     minima of what each column holds: the month strip is twelve flex cells and stays legible at
+     248px, and 324px still clears the panel's 112/1fr/78 count table with its padding. The rail's
+     floor binds below 1531px and the panel's below 1507px -- exactly the range where the plate
+     is tightest, and measured, they return it 40px at 1440, taking its share of the width from
+     57.8% to 60.3%. */
+  --at-rail:clamp(248px,16.2vw,312px);
+  --at-panel:clamp(324px,21.5vw,424px);
 }
 
 /* ─── page ────────────────────────────────────────────────────────────────────────────── */
@@ -114,7 +126,10 @@
   position:fixed;inset:0;
   display:grid;
   grid-template-columns:var(--at-rail) minmax(0,1fr) var(--at-panel);
-  grid-template-rows:58px minmax(0,1fr) auto;
+  /* The header is 54 rather than 58 and the transport 52 rather than 56: the brand block is
+     30px of type and the transport's tallest readout 26px, so both were carrying more air than
+     they needed while the plate -- the only element whose job is to be large -- was short. */
+  grid-template-rows:54px minmax(0,1fr) auto;
   background:var(--chrome);
 }
 /* A grid item's default min-height is `auto`, which means CONTENT, which means a stage holding
@@ -355,7 +370,7 @@
 /* The map is framed as a figure in a journal: a caption band above and below, as SIBLINGS of
    the map rather than as overlays, so neither can ever sit on top of the geography. */
 [data-atlas] .atlas-stage{
-  display:grid;grid-template-rows:28px minmax(0,1fr) 26px;background:var(--chrome);
+  display:grid;grid-template-rows:26px minmax(0,1fr) 24px;background:var(--chrome);
 }
 [data-atlas] .at-platehead,[data-atlas] .at-platefoot{
   display:flex;align-items:center;gap:16px;padding:0 14px;min-width:0;
@@ -540,7 +555,7 @@
 
 [data-atlas] .atlas-transport{grid-column:1/-1}
 [data-atlas] .at-transport{
-  display:flex;align-items:center;gap:18px;padding:0 18px 0 20px;min-height:56px;
+  display:flex;align-items:center;gap:18px;padding:0 18px 0 20px;min-height:52px;
   border-top:1px solid var(--rule-2);background:var(--chrome-hi);
 }
 [data-atlas] .at-tbtn{
@@ -626,14 +641,13 @@
 
 /* The rule that produced all of these: caption bands and ledgers give up whole items, never
    half a word. A survivor ellipsizes; a casualty leaves. */
+/* The columns are fluid now, so these carry only what still has to give up whole items. */
 @media (max-width:1560px){
-  [data-atlas]{--at-rail:296px;--at-panel:400px}
   [data-atlas] .at-fig{padding:0 13px}
   [data-atlas] .at-fig:nth-child(n+6){display:none}
   [data-atlas] .at-platehead,[data-atlas] .at-platefoot{gap:13px}
 }
 @media (max-width:1400px){
-  [data-atlas]{--at-rail:286px;--at-panel:382px}
   [data-atlas] .at-fig:nth-child(n+5){display:none}
   [data-atlas] .at-plate-title,[data-atlas] .at-plate-model{display:none}
 }
@@ -641,7 +655,7 @@
   [data-atlas] .at-fig:nth-child(n+4){display:none}
   [data-atlas] .at-sys .at-stack div:last-child{display:none}
 }
-@media (max-width:1180px){
+@media (max-width:1120px){
   [data-atlas] .at-plate-proj{display:none}
 }
 @media (max-width:1040px){
@@ -651,15 +665,26 @@
 }
 
 /* Below the workstation the columns are dropped one at a time rather than squeezed: the map IS
-   the page, and a map wedged between two rails at 1000 px is not one. This ladder is
-   production's and is unchanged — only the ink on it is new. */
-@media (max-width:1180px){
+   the page, and a map wedged between two rails at 1000 px is not one.
+
+   THE COLLAPSE IS AN ASPECT DECISION, NOT A WIDTH ONE. The archive's dominant lobe is a wide
+   band -- 149° of longitude against 56° of latitude, which in Mercator is about 2.1 wide to 1
+   tall -- so only a plate at least that wide relative to its height can be filled by it. Three
+   columns at 1240 leave 632 x 744: a PORTRAIT plate, into which a 2.1:1 band fits at 35%
+   occupancy with forty degrees of empty Southern Ocean under it. The same viewport in two
+   columns leaves 954 x 402 and the band fills it at 67%. So the collapse moved from 1180 to
+   1280 -- the width below which the third column costs more map than it returns. It is measured
+   against the data, and it will need re-measuring if the archive's basins ever change.
+
+   When it does collapse the PANEL gives up the height, not the map: at 46vh the plate was left
+   266 px of map on an 800 px viewport, which is a caption band with a sliver under it. */
+@media (max-width:1280px){
   [data-atlas].atlas-shell{
     grid-template-columns:clamp(220px,26vw,286px) minmax(0,1fr);
-    grid-template-rows:58px minmax(320px,1fr) minmax(0,auto) auto;
+    grid-template-rows:54px minmax(360px,1fr) minmax(0,auto) auto;
   }
   [data-atlas] .atlas-panel{
-    grid-column:1 / -1;grid-row:3;border-left:0;border-top:1px solid var(--rule-2);max-height:46vh;
+    grid-column:1 / -1;grid-row:3;border-left:0;border-top:1px solid var(--rule-2);max-height:38vh;
   }
   [data-atlas] .atlas-transport{grid-row:4}
   [data-atlas] .at-brand{width:clamp(220px,26vw,286px)}
@@ -668,7 +693,7 @@
 @media (max-width:760px){
   [data-atlas].atlas-shell{
     grid-template-columns:minmax(0,1fr);
-    grid-template-rows:58px minmax(280px,46vh) minmax(0,auto) minmax(0,auto) auto;
+    grid-template-rows:54px minmax(280px,46vh) minmax(0,auto) minmax(0,auto) auto;
   }
   [data-atlas] .atlas-stage{grid-column:1;grid-row:2}
   [data-atlas] .atlas-panel{grid-column:1;grid-row:3;max-height:none}

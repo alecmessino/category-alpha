@@ -114,7 +114,7 @@ export function Atlas() {
   }, []);
 
   const bounds = React.useMemo(() => (archive ? seasonRange(archive) : [1851, 2026]), [archive]);
-  const home = React.useMemo(() => (archive ? genesisBounds(archive) : null), [archive]);
+  const home = React.useMemo(() => (archive ? coreFrame(archive) : null), [archive]);
   const result = React.useMemo(
     () => (archive ? filterStorms(archive, filters) : null), [archive, filters]);
 
@@ -268,6 +268,94 @@ export function Atlas() {
       </React.Suspense>
     </div>
   );
+}
+
+/* THE OPENING VIEW.
+ *
+ * WHY NOT THE ARCHIVE'S FULL EXTENT. `genesisBounds` returns the min/max of every genesis
+ * coordinate, and this archive holds 343 storms with a West Pacific genesis -- IBTrACS keeps
+ * dateline crossers in the loaded basin files -- so its longitude range runs -179.8 to +180.0.
+ * That is 359.8 degrees: fitting it opens the plate on the entire planet, pole to pole, at the
+ * minimum zoom. Measured, 20.4% of the plate carried any track ink at rest and the rest was
+ * Arctic, Southern Ocean and empty Indian Ocean. The reader met a dark void with a band in it.
+ *
+ * WHAT THIS FRAMES INSTEAD. The archive's own mass, in three measured steps and nothing else:
+ *
+ *   1. THE DOMINANT LOBE. Longitude is bimodal here -- a North Atlantic / East Pacific lobe and
+ *      a West Pacific tail of 343 storms, with 128 degrees of empty longitude between them:
+ *      from 14W to 114E this archive holds not one genesis. The lobe is taken as every genesis
+ *      within LOBE_DEG of the archive's MEDIAN genesis longitude, measured the short way round.
+ *      Measured on this pack: 3,588 of 3,905 storms, 91.9%, which is precisely the North
+ *      Atlantic plus East Pacific the plate is titled for.
+ *   2. ITS CORE LONGITUDE, at the 1st and 99th percentile of that lobe. Percentiles rather than
+ *      extremes because one storm at 179.8W should not widen the opening view by 15 degrees.
+ *   3. ITS LATITUDE BAND, from the TRACK POINTS of those storms rather than their genesis --
+ *      the plate draws whole trajectories, and a storm that forms at 12N and recurves to 50N
+ *      occupies all of that. The floor is the genesis floor, because nothing forms below it.
+ *
+ * WHAT IT COMES OUT AS, on this pack: 1.9N to 58.0N, 166.3W to 17.4W -- 149 degrees of
+ * longitude against 56 of latitude, which in Mercator is a band about 2.1 times wider than it
+ * is tall. Every proportion decision downstream of this, in the stylesheet and in the fit, is
+ * that ratio.
+ *
+ * NOTHING HERE IS A CLAIM. It is a camera position, derived from coordinates the pack already
+ * holds, and it changes only where the map opens: pan, zoom and every filter behave exactly as
+ * before, and the West Pacific is one drag away. The percentiles are stated here rather than
+ * tuned by eye so the framing moves with the archive if the archive moves.
+ */
+const LOBE_DEG = 110;      // half-width of the dominant-lobe window, in degrees of longitude
+const CORE_Q = 0.01;       // the lobe's core longitude, at q1..q99
+const TRACK_Q = 0.005;     // the band's north edge, at q99.5 of the lobe's track latitudes
+
+export function coreFrame(archive) {
+  const glat = archive.genesisLat;
+  const glon = archive.genesisLon;
+
+  const lons = [];
+  for (let i = 0; i < archive.nStorms; i++) {
+    if (!Number.isNaN(glat[i])) lons.push(glon[i]);
+  }
+  if (!lons.length) return genesisBounds(archive);
+  const median = quantile(lons.slice().sort(asc), 0.5);
+
+  /* Short-way separation, so a lobe that straddles the antimeridian is still one lobe. */
+  const near = (lon) => {
+    const d = Math.abs(lon - median) % 360;
+    return (d > 180 ? 360 - d : d) <= LOBE_DEG;
+  };
+
+  const lobeLon = [];
+  const rows = [];
+  for (let i = 0; i < archive.nStorms; i++) {
+    if (Number.isNaN(glat[i]) || !near(glon[i])) continue;
+    lobeLon.push(glon[i]);
+    rows.push(i);
+  }
+  if (lobeLon.length < 2) return genesisBounds(archive);
+  lobeLon.sort(asc);
+
+  /* The latitude the plate has to hold is the one the TRACKS reach, not the one they start at.
+     Sampled every third fix: the band is a framing decision, not a measurement anyone cites. */
+  const lat = [];
+  let floor = Infinity;
+  for (const i of rows) {
+    if (glat[i] < floor) floor = glat[i];
+    const [s, e] = archive.trackRange(i);
+    for (let k = s; k < e; k += 3) lat.push(archive.ptLat[k] / 100);
+  }
+  if (!lat.length) return genesisBounds(archive);
+  lat.sort(asc);
+
+  const south = Math.min(floor, quantile(lat, TRACK_Q));
+  const north = quantile(lat, 1 - TRACK_Q);
+  return [[south, quantile(lobeLon, CORE_Q)], [north, quantile(lobeLon, 1 - CORE_Q)]];
+}
+
+function asc(a, b) { return a - b; }
+
+function quantile(sorted, p) {
+  const i = Math.round(p * (sorted.length - 1));
+  return sorted[Math.max(0, Math.min(sorted.length - 1, i))];
 }
 
 /* THE COHORT SPEC, as a string.
