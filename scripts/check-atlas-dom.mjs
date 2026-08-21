@@ -234,13 +234,30 @@ await clickLatLng(14.6, -113.9);
      The archive's own gap prose is excluded, deliberately -- those strings quote measured
      figures ("1.7% Cat 3 in the 1960s vs 20-30% from the 1970s on") and are reproduced verbatim
      because rewording a finding is how a finding stops being one. */
-  const computed = t.split("GAPS THE ARCHIVE RECORDED")[0];
+  /* THE REGION, BY IDENTITY RATHER THAN BY POSITION.
+     This used to be `t.split("GAPS THE ARCHIVE RECORDED")[0]` -- everything before a heading --
+     which quietly made the rule depend on the gaps being the LAST thing on the page. They are
+     not any more: the archive's gaps now close the answer block, directly under the rates they
+     qualify, because a warning that the intensity rates are biased LOW is worthless nine hundred
+     lines below them. Excluding the gap prose by its own DOM hook exempts exactly the text that
+     needs exempting -- the archive's verbatim quoted figures -- and nothing else, wherever the
+     block sits. Strictly tighter than the split it replaces, which exempted the entire back half
+     of the panel. */
+  const computed = await page.evaluate(() => {
+    const clone = document.body.cloneNode(true);
+    for (const el of clone.querySelectorAll("[data-archive-gaps]")) el.remove();
+    return clone.innerText;
+  });
   const pcts = computed.match(/\d+(\.\d+)?%/g) || [];
   ok("the surface publishes rates now", pcts.length > 0);
   ok("every percentage sits with a count over a denominator",
     !pcts.length || /\d+\s*\/\s*\d+/.test(computed));
+  /* Decimals accepted. The compact outcome ladder prints the interval to a tenth --
+     `[6.5-15.1%]` -- where the six cards it replaced printed `[7-15%]` in their landfall lines,
+     and the old pattern would have been satisfied by those lines alone while the intensity
+     rates it is actually about went unchecked. Same shape, same rule, one more digit. */
   ok("and none appears without an interval beside it",
-    !pcts.length || /\[\s*\d+\s*[-–—]\s*\d+%\s*\]/.test(computed));
+    !pcts.length || /\[\s*\d+(\.\d+)?\s*[-–—]\s*\d+(\.\d+)?%\s*\]/.test(computed));
   ok("the archive's own measured percentages survive verbatim in its gaps",
     /1\.7% Cat 3 in the 1960s/.test(t));
 }
@@ -322,7 +339,32 @@ console.log("\n[4b] the six refusals — reachable, distinct, and honest about t
       allOf(states, "RATE_REFUSED", /wider cohort/),
       (states.get("RATE_REFUSED") || []).map((t) => t.slice(0, 60)).join(" || "));
   }
-  ok("a refused rate never prints as 0.0%", !/\b0\.0%/.test(t2.split("GAPS THE ARCHIVE")[0]));
+  /* A REFUSED RATE NEVER PRINTS AS 0.0% -- ASSERTED ON THE ROWS THAT REFUSE, NOT ON THE PAGE.
+   *
+   * This used to scan the whole panel for the string `0.0%`, which worked only while a zero
+   * could not legitimately appear anywhere: it cannot distinguish a refusal rendered as a zero
+   * from a MEASURED zero, and "0 of 190 reached Category 5, 95% Wilson [0.0-2.0%]" is a real
+   * finding this archive should publish -- the interval beside it is what makes it one. A rule
+   * that forbids the digits rather than the claim would eventually be satisfied by suppressing
+   * a true zero, which is the same failure in the other direction.
+   *
+   * So the property is checked where it lives: for every outcome row that REFUSES, the row
+   * carries no percentage at all. The refusal occupies the rate column and there is nothing for
+   * a reader to mistake for a rate. */
+  const refusedRows = await page.evaluate(() => {
+    const titles = /⊘ RATE REFUSED|↺ CONDITIONED ON|▤ BASE RATE ONLY|⇱ OUT OF SCOPE/;
+    return [...document.querySelectorAll("[data-outcome]")]
+      .map((el) => ({ label: el.getAttribute("data-outcome"),
+        text: (el.innerText || "").replace(/\s+/g, " ") }))
+      .filter((r) => titles.test(r.text));
+  });
+  const leaked = refusedRows.filter((r) => /\d+\.\d%/.test(r.text));
+  ok("a refused rate never prints as a percentage where its number would have been",
+    leaked.length === 0,
+    leaked.map((r) => `${r.label}: ${r.text.slice(0, 70)}`).join(" | "));
+  ok("and the refusal occupies the rate column on every row that has one",
+    refusedRows.length > 0 || !/RATE REFUSED|CONDITIONED ON/.test(t2),
+    `${refusedRows.length} refusing rows`);
 
   /* NO TWO REFUSALS MAY READ THE SAME. If two states rendered identical prose the reader would
      have five badges and one meaning, which is the failure this whole surface exists to avoid. */
@@ -342,9 +384,31 @@ console.log("\n[4c] the builder reads as a question, not as a schema");
 {
   const t = await text();
   ok("the cohort is stated as a sentence", /what happened next\?/i.test(t));
-  ok("the lifecycle order is on screen",
-    /1 · GENESIS/.test(t) && /2 · ENVIRONMENT/.test(t) && /3 · PEAK INTENSITY/.test(t)
-    && /4 · LANDFALL/.test(t));
+  /* THE RESEARCH CHAIN, RENUMBERED -- AND THIS ASSERTION MOVED WITH IT DELIBERATELY.
+   *
+   * It used to pin `1 · GENESIS / 2 · ENVIRONMENT / 3 · PEAK INTENSITY / 4 · LANDFALL`, which
+   * was the rail as first built. Two of those numbers were wrong about what the rail is for:
+   *
+   *   - ENVIRONMENT held a numbered step and offers NO CONTROL. The numbers count the steps of
+   *     a query, and a hundred words of standing methodology is not one of them. It is still on
+   *     screen, still carrying its refusal and its per-cohort count -- asserted just below --
+   *     but it is no longer a step.
+   *   - PEAK INTENSITY and LANDFALL were numbered as two steps when they are one KIND of step:
+   *     both are outcome-side, both change the question in the same way, and separating them
+   *     numerically implied a lifecycle relationship between them that does not exist.
+   *
+   * The order asserted here is the one the storm actually walks and the reader actually builds:
+   * where it began, where it went, what it became, and what the RECORD covers. The check is
+   * strictly stronger than the one it replaces -- it pins four headings AND the order they
+   * appear in, where the old one pinned four headings in any order. */
+  const chain = ["1 · GENESIS", "2 · TRAJECTORY", "3 · OUTCOME-SIDE CONDITIONS",
+    "4 · SCOPE OF THE RECORD"];
+  const at = chain.map((h) => t.indexOf(h));
+  ok("the research chain is on screen, in order",
+    at.every((i) => i >= 0) && at.every((v, i) => i === 0 || v > at[i - 1]),
+    chain.map((h, i) => `${h}@${at[i]}`).join(" "));
+  ok("and the environment still states its refusal, though it is no longer a step",
+    /ENVIRONMENT — NO CONDITION OFFERED/.test(t) && /NOT EVALUABLE/.test(t));
   ok("the given zone is named", /GIVEN — at or before genesis/.test(t));
   ok("applied conditions show what they cost", /−[\d,]+ excluded/.test(t));
   const chips = await page.evaluate(() =>
@@ -399,12 +463,21 @@ console.log("\n[4d] the comparison answers four questions and overstates none of
 
   // The what-if control: any applied condition can be the one held out.
   ok("the reader can hold out a different condition", /HOLD OUT/.test(t));
+  const heldOut = (x) => (x.match(/the same cohort without[^\n]{0,60}/) || [""])[0];
+  const before = heldOut(t);
   await page.click('[data-chip="baseline-where"]');
   await page.waitForTimeout(900);
   const t2 = await text();
+  /* WHAT IS HELD OUT IS NAMED AS A NOUN, NOT AS THE CONDITION'S OWN CLAUSE.
+     This used to assert `the same cohort without within 500 km` -- which passed, and which is
+     not a sentence. Joining a condition's relative clause after "without" produced "the same
+     cohort without that reached CAT 3+" on the block and again on every outcome card below it.
+     engine/cohort-language.js gives every condition a noun phrase for exactly this position, so
+     the assertion now pins the grammar as well as the behaviour: the baseline must NAME a
+     condition, and holding out a different one must actually change what is named. */
   ok("and doing so changes what the comparison is against",
-    /the same cohort without within \d+ km/.test(t2),
-    (t2.match(/the same cohort without[^\n]{0,60}/) || [""])[0]);
+    /the same cohort without the [a-z-]+ (condition|scope)\b/.test(t2) && heldOut(t2) !== before,
+    `${before || "(none)"} -> ${heldOut(t2) || "(none)"}`);
 }
 
 console.log("\n[4g] the refusal says WHICH population it counted, and can be acted on");

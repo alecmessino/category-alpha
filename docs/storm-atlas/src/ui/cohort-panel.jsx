@@ -20,8 +20,9 @@
 import React from "react";
 import { CATEGORY_COLOR, CATEGORY_ORDER } from "../render/palette.js";
 import { formatPosition } from "../engine/geo.js";
-import { Chip, Gap, Head, MONO, Num, OverDenom, Row, Txt, claimText } from "./kit.jsx";
-import { ConditionedGroup, OutcomeCard, RateLine, countsOf, refusalKindOf } from "./outcome-card.jsx";
+import { Chip, Gap, GroupRule, Head, MONO, Num, OverDenom, Row, Txt, claimText } from "./kit.jsx";
+import { baselineName, baselineSentence } from "../engine/cohort-language.js";
+import { OutcomeLadder, RateLine, countsOf, refusalKindOf } from "./outcome-card.jsx";
 import { intensityContractKey, landfallContractKey } from "../engine/calibration.js";
 import { Refusal } from "./refusal.jsx";
 import { EnvLens } from "./env-lens.jsx";
@@ -108,22 +109,61 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
             lineHeight: "var(--lh-body)", marginBottom: "var(--sp-2)" }}>
             Distinct storms reaching each threshold, over the storms whose intensity the archive
             actually recorded. The pale band on each bar is the 95% interval — its width is the
-            sample speaking.
+            sample speaking; the fainter bar beneath it is the baseline, on the same axis.
           </div>
-          {/* The circular rows are grouped and explained once; everything the cohort did NOT
-              define gets its own card. Splitting them this way is what keeps the fifth rule
-              legible when it fires on four contracts at once. */}
-          <ConditionedGroup rows={circularRows(r)} reason={circularReason(r)} />
-          {CATEGORY_ORDER.filter((c) => c !== "td" && !isCircular(r.intensity[c])).map((cat) => (
-            <OutcomeCard key={cat} cell={r.intensity[cat]} label={CAT_LABEL[cat]}
-              tone={CATEGORY_COLOR[cat]} subject={CAT_LABEL[cat]}
-              of="storms whose peak intensity the archive recorded"
-              onEvidence={onEvidence
-                ? () => onEvidence(intensityContractKey(cat)) : undefined}
-              delta={comparison ? comparison.intensity[cat] : null}
-              baselineCell={comparison ? comparison.baseline.intensity[cat] : null}
-              baselineName={comparison ? baselineNameOf(comparison) : null} />
-          ))}
+          {/* ONE LADDER, NOT SIX CARDS -- and the circular rows stay IN it rather than being
+              lifted into a group of their own. TS -> Cat 1 -> Cat 3 -> Cat 4 -> Cat 5 is a
+              sequence, and a refused rung is part of the sequence: pulling the conditioned rows
+              out left a reader scanning a ladder with holes in it and a separate box explaining
+              the holes. The refusal now sits in the rate column, where the number would have
+              been, and the reason -- which is one reason shared by every circular row -- is
+              still stated exactly once, underneath. */}
+          <OutcomeLadder
+            rows={CATEGORY_ORDER.filter((c) => c !== "td").map((cat) => ({
+              key: cat,
+              label: CAT_LABEL[cat],
+              tone: CATEGORY_COLOR[cat],
+              cell: r.intensity[cat],
+              subject: CAT_LABEL[cat],
+              of: "storms whose peak intensity the archive recorded",
+              delta: comparison ? comparison.intensity[cat] : null,
+              baselineCell: comparison ? comparison.baseline.intensity[cat] : null,
+              onEvidence: onEvidence ? () => onEvidence(intensityContractKey(cat)) : undefined,
+            }))}
+            baselineName={comparison ? baselineNameOf(comparison) : null}
+            unknown={unknownOf(r)}
+            conditionedReason={circularReason(r)} />
+
+          {/* THE QUALIFICATION, INSIDE THE ANSWER.
+              These sat at the very bottom of the panel, below everything. On a probed
+              east-Pacific cohort the archive's own gap reads "Intensity rates above are
+              therefore biased LOW" -- and it rendered some nine hundred lines beneath the rates
+              it was talking about, under the storm list. A reader who stopped early, which is
+              what a reader does, took six confident percentages and never reached the sentence
+              saying they are wrong in a known direction.
+              DIRECTLY UNDER THE LADDER RATHER THAN ABOVE IT, and that is not a compromise: the
+              archive's own sentence says "rates ABOVE", so this is the position that keeps its
+              words true. Moving the block above the ladder would have made the engine's text
+              wrong about the page, and rewording a measured finding to suit a layout is how a
+              finding stops being one.
+              `data-archive-gaps` lets the DOM gate exclude the archive's own quoted percentages
+              -- "1.7% Cat 3 in the 1960s" -- from the no-bare-percentage rule by IDENTITY
+              rather than by where the block happens to sit. */}
+          {r.gaps.length ? (
+            <div data-archive-gaps>
+              <Head right={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
+                color: "var(--warn)" }}>these qualify the rates above</span>}>
+                GAPS THE ARCHIVE RECORDED
+              </Head>
+              {r.gaps.map((g, i) => <Gap key={i} text={g} />)}
+            </div>
+          ) : null}
+
+          {/* ---- B · DETAIL -------------------------------------------------------------
+              Everything below is still on the page and still complete. What changed is that it
+              no longer competes with the answer for a first reading: a reader who stops here
+              has the cohort, the gaps that qualify it, the baseline and every principal rate. */}
+          <GroupRule />
 
           {Object.keys(r.landfall).length ? (
             <>
@@ -183,11 +223,28 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
               padding: "2px 6px",
             }}>{pathwayOn ? "SHOWN" : "SHOW"}</button>
           }>HISTORICAL PATHWAY FREQUENCY</Head>
+          {/* NOT COMPUTED IS NOT ZERO, AND THIS PRINTED THE SECOND FOR THE FIRST.
+              The density grid is only built when the surface is switched on, so with it off
+              `pathway` is null -- and the line read "0 two-degree cells, each counting the
+              distinct storms of this cohort that passed through it", beside a button still
+              offering to SHOW it. An empirical zero here would be a real and surprising finding
+              about the cohort; the actual state is that nobody has counted. The whole archive
+              distinguishes an absent measurement from a measured absence, and this is that rule
+              applied to the surface's own arithmetic. */}
           <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
             lineHeight: "var(--lh-body)" }}>
-            {(pathway ? pathway.size : 0).toLocaleString()} two-degree cells, each counting the
-            distinct storms of this cohort that passed through it
-            {peak ? <> · busiest cell carries {peak}</> : null}.
+            {pathway ? (
+              <>
+                {pathway.size.toLocaleString()} two-degree cells, each counting the distinct
+                storms of this cohort that passed through it
+                {peak ? <> · busiest cell carries {peak}</> : null}.
+              </>
+            ) : (
+              <span data-pathway-uncomputed>
+                Not computed — the surface is off, so no cell has been counted. Switch it on to
+                count the two-degree cells this cohort passed through.
+              </span>
+            )}
             <div style={{ color: "var(--warn)", marginTop: 4 }}>
               THIS IS NOT A FORECAST. {claimText("atlas.pathway")}
             </div>
@@ -224,13 +281,6 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
             lineHeight: "var(--lh-body)" }}>
             {claimText("atlas.rates")}
           </div>
-
-          {r.gaps.length ? (
-            <>
-              <Head>GAPS THE ARCHIVE RECORDED</Head>
-              {r.gaps.map((g, i) => <Gap key={i} text={g} />)}
-            </>
-          ) : null}
 
           <Head right={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
             color: "var(--text-2)" }}>{spec.where ? "by distance" : "by season"}</span>}>
@@ -296,7 +346,7 @@ function NoCohort({ spec, gaps }) {
           </>
         ) : null}
       </div>
-      {gaps.map((g, i) => <Gap key={i} text={g} />)}
+      <div data-archive-gaps>{gaps.map((g, i) => <Gap key={i} text={g} />)}</div>
     </div>
   );
 }
@@ -323,9 +373,9 @@ function Baseline({ c, conditions, onBaseline }) {
         letterSpacing: ".5px" }}>COMPARED WITH</div>
       <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-body)",
         color: "var(--text-1)", lineHeight: "var(--lh-tight)", marginTop: 3 }}>
-        the same cohort {c.changed
-          ? <>without <strong>{c.changed.sentence}</strong></>
-          : "with no conditions"}
+        {c.changed
+          ? <>the same cohort without <strong>{c.changed.noun}</strong></>
+          : baselineSentence(null)}
       </div>
       <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
         marginTop: 4 }}>
@@ -359,7 +409,7 @@ function Baseline({ c, conditions, onBaseline }) {
 
 /** How the baseline is named on each card -- short, because it repeats on every one. */
 function baselineNameOf(c) {
-  return c.changed ? `without ${c.changed.sentence}` : "the whole archive";
+  return baselineName(c.changed);
 }
 
 const CIRCULAR = "CONDITIONED ON -- NOT AN OUTCOME";
@@ -368,9 +418,21 @@ function isCircular(cell) {
   return !!cell && cell.status === CIRCULAR;
 }
 
-function circularRows(r) {
-  return CATEGORY_ORDER.filter((c) => c !== "td" && isCircular(r.intensity[c]))
-    .map((cat) => ({ label: CAT_LABEL[cat], tone: CATEGORY_COLOR[cat], cell: r.intensity[cat] }));
+/* THE UNKNOWNS ARE ONE SET, NOT SIX.
+ *
+ * Every intensity contract is scored over the same denominator -- the storms whose peak the
+ * archive recorded -- so the storms outside it are the SAME storms on every rung. The card
+ * rendered `cell.n_unknown` per contract, which meant the identical four-line refusal appeared
+ * six times running: measured on one panel, "Nobody recorded this outcome" six times over. Taken
+ * across the ladder here so it can be stated once, and taken as a MAXIMUM rather than a first
+ * value so a contract that somehow carried more could not be quietly under-reported. */
+function unknownOf(r) {
+  let n = 0;
+  for (const c of CATEGORY_ORDER) {
+    const cell = r.intensity[c];
+    if (cell && cell.n_unknown > n) n = cell.n_unknown;
+  }
+  return n;
 }
 
 /** The engine's own explanation, taken from the first circular row -- they all share it. */

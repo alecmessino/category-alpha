@@ -135,6 +135,165 @@ export function countsOf(u) {
     + `${u.required} needed`;
 }
 
+/* ---- THE LADDER ---------------------------------------------------------------------------
+ *
+ * One row per contract, on one axis, under the SAME four panel rules the card keeps. See
+ * atlas.css for why six cards became six rows; what follows is what each row has to carry.
+ *
+ * THE REFUSAL OCCUPIES THE RATE COLUMN. That is the whole ordering argument of this pass in one
+ * detail: when the archive will not give a number, the place the number would have been is
+ * where the reader is already looking, and putting `RATE REFUSED` anywhere else makes the
+ * absence of the result look like the absence of a row. The engine's own reason still renders
+ * in full beneath the row -- shortened refusal prose would be a different refusal.
+ *
+ * `data-refusal` IS NOT PUT ON THE RATE SLOT. The DOM gate asserts that EVERY element carrying
+ * that attribute names the way out ("Remove that condition", "a wider cohort would carry a
+ * rate"), which a two-word status slot cannot. The slot is a plain span; the attribute stays on
+ * the block that actually explains, which is also the only place it was ever true.
+ */
+export function OutcomeLadder({ rows, baselineName, unknown, onEvidence, conditionedReason }) {
+  if (!rows || !rows.length) return null;
+  const anySep = rows.some((r) => r.delta && r.delta.overlap !== null);
+  return (
+    <>
+      <div className="at-ladder" data-outcome-ladder>
+        {rows.map((r) => (
+          <LadderRow key={r.key} {...r} baselineName={baselineName}
+            onEvidence={r.onEvidence || onEvidence} />
+        ))}
+      </div>
+
+      {/* THE TWO PERMITTED STATEMENTS, SPELLED OUT ONCE. Each row carries a mark rather than a
+          sentence, because a sentence per row is the repetition this ladder exists to end -- but
+          a mark whose meaning is not written down is a badge, so both readings are given here in
+          the exact words engine/compare.js permits and no others. */}
+      {anySep ? (
+        <div className="at-lkey">
+          <span className="at-sep at-on" /> the intervals do not overlap — these samples separate
+          the two rates. <span className="at-sep" /> the intervals overlap — these samples do not
+          separate the two rates. Neither is a test.
+        </div>
+      ) : null}
+
+      {/* SAID ONCE, NOT ONCE PER ROW -- the same discipline ConditionedGroup established. */}
+      {conditionedReason ? (
+        <div data-refusal="CONDITIONED_ON" style={{ fontFamily: "var(--font-sans)",
+          fontSize: "var(--fs-caption)", color: "var(--text-2)", lineHeight: "var(--lh-body)",
+          marginTop: "var(--sp-3)" }}>
+          {conditionedReason}
+          {/* The engine's reason ends with the instruction, so this line carries only the
+              classification -- see REFUSALS.CONDITIONED_ON.remedyShort. What a reader needs
+              here that the reason does not give them is which KIND of refusal this is: one
+              they can act on, or a limit of the record. */}
+          <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-link)",
+            marginTop: 5 }}>
+            <strong>YOU CAN CHANGE THIS.</strong>
+            {REFUSALS.CONDITIONED_ON.remedyShort
+              ? ` ${REFUSALS.CONDITIONED_ON.remedyShort}` : null}
+          </div>
+        </div>
+      ) : null}
+
+      {/* AND THE UNKNOWNS ONCE, BECAUSE THERE IS ONE SET OF THEM. Every intensity contract on
+          this ladder shares a denominator, so the storms outside it are the same storms in every
+          row -- printing the identical four-line refusal under all six said the same thing six
+          times and made the ladder unreadable to say it. */}
+      {unknown > 0 ? <UnknownNote n={unknown} /> : null}
+    </>
+  );
+}
+
+function LadderRow({ label, tone, cell, unscoreable, subject, delta, baselineCell, baselineName,
+  onEvidence, of }) {
+  const c = tone || "var(--accent)";
+  const refused = !!unscoreable || (cell && (cell.status === CIRCULAR || cell.rate === null));
+  const kind = unscoreable ? refusalKindOf(unscoreable)
+    : cell && cell.status === CIRCULAR ? "CONDITIONED_ON"
+      : cell && cell.rate === null ? "RATE_REFUSED" : null;
+  const r = kind ? REFUSALS[kind] : null;
+
+  return (
+    <div className="at-lrow" data-outcome={label}>
+      <div className="at-lhd">
+        <span className="at-lname" style={{ color: c }}>{label}</span>
+        {cell ? (
+          <span className="at-lct"><OverDenom n={cell.count} of={cell.n_storms} /></span>
+        ) : null}
+        {refused ? (
+          <span className="at-lref" style={{ color: r ? r.tone : "var(--text-2)" }}>
+            {r ? `${r.mark} ${r.title}` : "—"}
+          </span>
+        ) : (
+          <span className="at-lrate" style={{ color: c }}>
+            {(100 * cell.rate).toFixed(1)}%
+          </span>
+        )}
+      </div>
+
+      {/* THE TWO BANDS, ON ONE AXIS. Adjacency is the comparison: whether they overlap is
+          settled by the eye in a glance, and the digits underneath confirm it. */}
+      {!refused && cell.ci95 ? (
+        <div className="at-lbars">
+          <Meas rate={cell.rate} ci={cell.ci95} tone={c} />
+          {baselineCell && baselineCell.ci95
+            ? <Meas rate={baselineCell.rate} ci={baselineCell.ci95} tone="var(--t4)" />
+            : null}
+        </div>
+      ) : null}
+
+      {!refused ? (
+        <div className="at-lft">
+          {cell.ci95 ? (
+            <span>95% Wilson <em>[{(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%]</em></span>
+          ) : null}
+          {delta && delta.baseRate !== null ? (
+            <>
+              <span>baseline <em>{(100 * delta.baseRate).toFixed(1)}%</em></span>
+              <span style={{ color: delta.overlap ? "var(--t3)"
+                : delta.deltaPp > 0 ? "var(--pos)" : "var(--neg)" }}>
+                {delta.deltaPp > 0 ? "+" : delta.deltaPp < 0 ? "−" : "±"}
+                {Math.abs(delta.deltaPp).toFixed(1)} points {delta.direction}
+                {delta.overlap === null ? null
+                  : <span className={delta.overlap ? "at-sep" : "at-sep at-on"} />}
+              </span>
+            </>
+          ) : delta && delta.why ? (
+            <span>no comparison — {delta.why}</span>
+          ) : null}
+          <span>{cell.count.toLocaleString()} of {cell.n_storms.toLocaleString()}{" "}
+            {of || "storms whose outcome the archive recorded"}</span>
+        </div>
+      ) : null}
+
+      {/* The engine's own words, verbatim, for the contracts that refuse. A circular row's
+          reason is shared by every circular row and is stated once under the ladder instead. */}
+      {unscoreable ? (
+        <Refusal kind={refusalKindOf(unscoreable)} subject={subject}
+          counts={countsOf(unscoreable)} detail={unscoreable.reason} onEvidence={onEvidence} />
+      ) : cell && cell.status !== CIRCULAR && cell.rate === null ? (
+        <Refusal kind="RATE_REFUSED" subject={subject} detail={cell.refused_reason}
+          counts={`${cell.count} of ${cell.n_storms}`} onEvidence={onEvidence} />
+      ) : null}
+    </div>
+  );
+}
+
+/** One measure: the rate as a length, the interval as the band it sits inside, both bounds
+ *  marked. Same construction as IntervalBar, at ladder scale. */
+function Meas({ rate, ci, tone }) {
+  const pct = (x) => `${Math.max(0, Math.min(100, 100 * x))}%`;
+  return (
+    <div className="at-lmeas"
+      title={ci ? `95% Wilson interval ${(100 * ci[0]).toFixed(1)}–${(100 * ci[1]).toFixed(1)}%`
+        : undefined}>
+      {ci ? <b style={{ left: pct(ci[0]), width: pct(ci[1] - ci[0]),
+        background: `color-mix(in srgb, ${tone} 26%, transparent)` }} /> : null}
+      <i style={{ width: pct(rate), background: `color-mix(in srgb, ${tone} 55%, transparent)` }} />
+      {ci ? [ci[0], ci[1]].map((b, i) => <u key={i} style={{ left: pct(b) }} />) : null}
+    </div>
+  );
+}
+
 const CARD = {
   border: "1px solid var(--border-dim)",
   borderRadius: "var(--radius-sm)",

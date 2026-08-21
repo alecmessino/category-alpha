@@ -113,6 +113,7 @@ export function CohortBuilder({
             SUFFICIENT · {result.n_cases} ≥ {result.min_sample}</span>
         : <span style={{ ...MONO, color: "var(--neg)" }}>
             BELOW SAMPLE · {result.n_cases} &lt; {result.min_sample}</span>} />
+      <SilentExclusions excluded={result.excluded} total={total} kept={result.kept} />
 
       {result.undecidable > 0 ? (
         <Refusal kind="UNKNOWN" compact
@@ -255,7 +256,16 @@ export function CohortBuilder({
       {preview ? <Basis n={preview.basisOf.basins} cohort={result.kept}
         what="the basin" /> : null}
 
-      <SubLabel>TRAJECTORY — EVER ENTERED</SubLabel>
+      {/* ---- TRAJECTORY ------------------------------------------------------------------
+           ITS OWN STEP, BECAUSE IT IS ITS OWN QUESTION. "Ever entered" is the one condition here
+           that is NOT knowable at genesis -- it is a fact about where a storm went, decided over
+           its whole life -- and it sat under the heading `1 · GENESIS` as though it were a
+           property of where the storm started. That is precisely the conflation the two zones
+           exist to prevent, made by the layout rather than by the engine. It stays in the GIVEN
+           zone, which is right: it is antecedent to every outcome below and it defines no
+           outcome, so it makes nothing circular. */}
+      <Head>2 · TRAJECTORY</Head>
+      <SubLabel>EVER ENTERED</SubLabel>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {/* Only the subbasins the PACK actually records. A cohort count of zero is an answer --
             none of these storms went there -- but a code the archive never sets for any storm
@@ -274,12 +284,20 @@ export function CohortBuilder({
           ))}
       </div>
       {preview && emptyBits(archive, preview).length ? (
-        <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-          marginTop: 4, lineHeight: "var(--lh-body)" }}>
-          {emptyBits(archive, preview).join(", ")} are not offered: IBTrACS records them as
-          BASINS and leaves the subbasin field empty, so the archive sets that bit for no storm
-          at all. Use the basin condition above for those.
-        </div>
+        /* Which codes are missing is worth stating unprompted -- a reader looking for EP here
+           should not conclude the control is broken. WHY they are missing is a fact about
+           IBTrACS that does not change, so it sits behind the summary. */
+        <details style={{ marginTop: 4 }}>
+          <summary style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+            cursor: "pointer", lineHeight: "var(--lh-body)" }}>
+            ▸ {emptyBits(archive, preview).join(", ")} are not offered here
+          </summary>
+          <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+            marginTop: 3, lineHeight: "var(--lh-body)" }}>
+            IBTrACS records them as BASINS and leaves the subbasin field empty, so the archive
+            sets that bit for no storm at all. Use the basin condition above for those.
+          </div>
+        </details>
       ) : null}
       {preview ? <Basis n={preview.basisOf.subbasinsEntered} cohort={result.kept}
         what="the subbasin" /> : null}
@@ -294,8 +312,17 @@ export function CohortBuilder({
            The count is this cohort's, not the archive's. "1,461 of 3,959 archive-wide" is a
            fact about the pack; "9 of your 81 storms cannot be evaluated" is a fact about the
            question the reader is actually asking, and only the second changes as they build. */}
-      <Head>2 · ENVIRONMENT</Head>
+      {/* NO LONGER A NUMBERED STEP, BECAUSE IT OFFERS NO CONTROL.
+          It held slot 2 of a four-step research chain and contained not one thing a reader could
+          click -- a hundred words of standing methodology between the trajectory conditions and
+          the outcome conditions, permanently expanded, that an analyst building a cohort had to
+          scroll past every time. The lifecycle argument for the slot was sound and the numbering
+          was what made it wrong: the numbers count the steps of a QUERY, and this is not one.
+          The refusal itself stays on screen, with its per-cohort count and its remedy; the essay
+          behind it is one click away. */}
+      <Head>ENVIRONMENT — NO CONDITION OFFERED</Head>
       <Refusal kind="NOT_EVALUABLE"
+        detailSummary="▸ WHY THE ARCHIVE OFFERS NO ENVIRONMENTAL CONDITION"
         subject="shear · SST · OHC"
         counts={envCoverage
           ? `${envCoverage.evaluable.toLocaleString()} of ${envCoverage.n.toLocaleString()} evaluable`
@@ -322,16 +349,31 @@ export function CohortBuilder({
           letterSpacing: ".5px", fontWeight: 800 }}>
           GIVEN THAT IT ALSO — OUTCOME-SIDE CONDITIONS
         </div>
+        {/* THE DISTINCTION STAYS VISIBLE; THE ELABORATION DOES NOT.
+            The sentence that names the two questions is the whole point of the zone and is
+            always on screen. The paragraph explaining WHY conditioning is not free is standing
+            methodology -- true of every cohort, unchanged by anything the reader does -- and a
+            reader building their fourth cohort has read it three times. */}
         <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
           color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 3 }}>
           Below this line you stop asking <em>what happens to storms that begin like this</em> and
-          start asking <em>what did the storms that ended up like this have in common</em>. Both
-          are real questions. Each chip says what it takes off the table, because a variable that
-          defines a cohort cannot also be reported as an outcome of it.
+          start asking <em>what did the storms that ended up like this have in common</em>.
         </div>
+        <details style={{ marginTop: 3 }}>
+          <summary style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+            cursor: "pointer", letterSpacing: "var(--track-label)" }}>
+            ▸ WHY EACH OF THESE COSTS SOMETHING
+          </summary>
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+            color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 3 }}>
+            Both are real questions. Each chip says what it takes off the table, because a
+            variable that defines a cohort cannot also be reported as an outcome of it.
+          </div>
+        </details>
       </div>
 
-      <Head>3 · PEAK INTENSITY</Head>
+      <Head>3 · OUTCOME-SIDE CONDITIONS</Head>
+      <SubLabel>PEAK INTENSITY</SubLabel>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         {INTENSITY_FILTERS.map((x) => (
           <Chip key={x.key} chipKey={`intensity-${x.key}`} active={s.intensity === x.key}
@@ -354,7 +396,7 @@ export function CohortBuilder({
         </div>
       ) : null}
 
-      <Head>4 · LANDFALL</Head>
+      <SubLabel>LANDFALL</SubLabel>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
         <Chip chipKey="landfall-none" active={s.landfall === null}
           onClick={() => set({ landfall: null })}>NO FILTER</Chip>
@@ -374,15 +416,28 @@ export function CohortBuilder({
         what="the landfall region" /> : null}
 
       {/* ---- SCOPE ----------------------------------------------------------------------- */}
-      <Head>SCOPE OF THE RECORD</Head>
+      <Head>4 · SCOPE OF THE RECORD</Head>
       <Toggle label="NAMED STORMS ONLY" on={s.namedOnly}
         onChange={(v) => set({ namedOnly: v })}
         note="A property of the record rather than of the storm, so it is neither a genesis
               condition nor an outcome. Unnamed systems are mostly early-record and weak." />
+      {/* NAMED FROM THE FLAG, NOT FROM A PAIR OF YEARS.
+          This note used to read "2025 and 2026 have not been post-analysed", which is a
+          SEASON-level claim the pack does not make: `provisional` is a per-STORM quality flag,
+          and on this pack 8 of the 41 storms in 2025 carry it while the other 33 are in the
+          default cohort. Naming the seasons told a reader that a season they can see storms
+          from had been excluded. The count is the archive's own and moves with it. */}
       <Toggle label="PROVISIONAL SEASONS" on={s.includeProvisional}
         onChange={(v) => set({ includeProvisional: v })}
-        note="2025 and 2026 have not been post-analysed. The archive excludes them from analog
-              pools by default and so does this." />
+        note={<>
+          The archive flags a storm provisional while its season has not been post-analysed, and
+          excludes those from analog pools by default — so does this. The flag is per storm
+          rather than per season: a recent season can be partly post-analysed and partly not.
+          {!s.includeProvisional && result.excluded.provisional
+            ? <> Currently excluding <strong style={{ color: "var(--text-1)" }}>
+                {result.excluded.provisional.toLocaleString()}</strong> storm(s).</>
+            : null}
+        </>} />
 
       {/* ---- HOW IT IS DRAWN ------------------------------------------------------------- */}
       <details data-drawn style={{ marginTop: "var(--sp-6)" }}>
@@ -429,8 +484,12 @@ function ConditionChip({ c, cost, outcome, onDrop }) {
         <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: tone, flex: "none" }}>
           {outcome ? "↺" : "●"} {c.label}
         </span>
+        {/* THE VALUE, NOT THE CLAUSE. The chip already carries its label, so repeating the
+            condition's relative clause beside it printed "IN  in Jan" and, when the months list
+            carried a value with no name, "IN  in , Jan". `value` is the bare thing the reader
+            chose -- "August or September" -- which is what a removable chip is for. */}
         <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-1)",
-          flex: 1, minWidth: 0 }}>{c.sentence}</span>
+          flex: 1, minWidth: 0 }}>{c.value || c.sentence}</span>
         <button type="button" onClick={onDrop} title="remove this condition" style={{
           ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent", border: 0,
           color: "var(--text-2)", cursor: "pointer", flex: "none", padding: 0,
@@ -454,6 +513,44 @@ function ConditionChip({ c, cost, outcome, onDrop }) {
           ↳ {c.costs}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+/* THE STORMS NOBODY EXCLUDED ON PURPOSE.
+ *
+ * With no conditions at all the question reads "Every storm in the archive" and the count reads
+ * 3,885 of 3,959. Seventy-four storms are missing and, until this line, nothing on the screen
+ * said which or why: 54 carry no genesis point, so no genesis-shaped question can place them,
+ * and 20 sit in seasons the archive has not post-analysed, which the cohort excludes by DEFAULT
+ * -- so it is not among the conditions listed above, because the reader never set it.
+ *
+ * Both are honest exclusions and neither was hidden deliberately; they were simply the
+ * difference between two numbers printed next to each other, which is exactly the shape of gap
+ * this surface exists to close. Every other exclusion on the screen names the condition that
+ * caused it. These two name themselves.
+ *
+ * Rendered whenever they are non-zero, not only on the empty cohort: a reader who narrows to
+ * one basin is still owed the reason their count does not reconcile with the archive's. */
+function SilentExclusions({ excluded, total, kept }) {
+  if (!excluded) return null;
+  const noGenesis = excluded.noGenesis || 0;
+  const provisional = excluded.provisional || 0;
+  if (!noGenesis && !provisional) return null;
+  const parts = [];
+  if (noGenesis) {
+    parts.push(`${noGenesis.toLocaleString()} storm${noGenesis === 1 ? "" : "s"} the archive `
+      + "holds no genesis point for, which a genesis-matched cohort cannot place");
+  }
+  if (provisional) {
+    parts.push(`${provisional.toLocaleString()} in seasons not yet post-analysed, excluded by `
+      + "default — switch PROVISIONAL SEASONS on below to include them");
+  }
+  return (
+    <div data-silent-exclusions style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
+      color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 3 }}>
+      {(total - kept).toLocaleString()} of the archive&rsquo;s {total.toLocaleString()} are outside
+      this cohort before any condition you set: {parts.join("; ")}.
     </div>
   );
 }

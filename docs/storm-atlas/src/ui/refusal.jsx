@@ -65,6 +65,11 @@ export const REFUSALS = {
        circularity in full; a second paragraph restating it turns the card into a lecture and
        buries the one thing this line is for -- whether the reader can act. */
     remedy: "Remove that condition and it becomes an outcome again.",
+    /* Empty on purpose, not missing. The engine's reason for a circular contract ends with
+       "Remove that condition to make this an outcome again", so the line beneath it has nothing
+       left to add except the one thing the reason does NOT say: which of the two kinds of
+       refusal this is. An empty string renders the classification alone. */
+    remedyShort: "",
   },
   OUT_OF_SCOPE: {
     kind: "OUT_OF_SCOPE",
@@ -76,6 +81,17 @@ export const REFUSALS = {
     remedy: "The events exist in this archive, outside the population you asked about. Widen the "
           + "basin or the era and this contract becomes scoreable — a skill number over a "
           + "population that does not carry the events would be borrowed from one that does.",
+    /* THE SAME SENTENCE, TWICE, SIX TIMES OVER. The engine writes its own reason for this
+       refusal and that reason ALREADY ENDS with the widening instruction -- so a card carrying
+       both printed "Widen the basin or the era and this contract becomes scoreable; a skill
+       number over a population that does not carry the events would be borrowed from one that
+       does" and then said it again, in the next paragraph, with an em-dash instead of a
+       semicolon. Measured on one rendered panel: twelve occurrences of that clause across six
+       refusals. `remedyShort` is what the line says when the engine has already said the rest;
+       `remedy` still stands alone where there is no engine reason, which is the compact form in
+       a list. Neither is a paraphrase of the other -- the short one is the long one's first
+       sentence, and the part that is dropped is the part already on screen. */
+    remedyShort: "The events exist in this archive, outside the population you asked about.",
   },
   NOT_EVALUABLE: {
     kind: "NOT_EVALUABLE",
@@ -84,8 +100,34 @@ export const REFUSALS = {
     mark: "⌁",
     tone: "var(--text-2)",
     resolvable: "partly",
-    remedy: "The environment record does not reach these storms. Dropping the environmental "
-          + "condition restores the cohort; it cannot restore the observations.",
+    /* TWO REMEDIES, BECAUSE THERE ARE TWO STATES AND ONLY ONE OF THEM IS REACHABLE TODAY.
+     *
+     * This refusal used to carry a single sentence -- "Dropping the environmental condition
+     * restores the cohort" -- and printed it directly beneath the builder's own statement that
+     * NO ENVIRONMENTAL CONDITION IS OFFERED. Twice per page, the surface told the reader to
+     * remove a control that does not exist. That is worse than an unhelpful remedy: a reader
+     * who believes they set a condition they never set does not trust the count either.
+     *
+     * The distinction the two sentences draw is the one that decides what a reader can DO, and
+     * it is the same distinction the brief names:
+     *
+     *   recordLimit   the observations do not exist for these storms. Nothing in the query put
+     *                 them outside the record and nothing in the query brings them back; what a
+     *                 reader CAN do is ask a question the record reaches.
+     *   queryCaused   a condition the reader set is what removed the evidence, so dropping it
+     *                 restores the cohort -- and still cannot restore the observations.
+     *
+     * `remedy` is the record-limit case because that is the only one this build can reach: the
+     * environment is a LENS and not a filter, so no environmental condition can be active. The
+     * second sentence is kept rather than deleted because it becomes the true one the day a
+     * condition is offered, and a remedy written fresh at that point would be a remedy nobody
+     * had checked against this table. `remedyWhen` in the component selects between them; the
+     * surface never writes either. */
+    remedy: "No environmental condition is active, so there is nothing to drop. These storms sit "
+          + "outside the environment record's era and coverage — a cohort inside it can be "
+          + "evaluated, and the observations themselves cannot be recovered.",
+    remedyQueryCaused: "Dropping the environmental condition restores the cohort; it cannot "
+          + "restore the observations.",
   },
   BASE_RATE_ONLY: {
     kind: "BASE_RATE_ONLY",
@@ -118,11 +160,24 @@ export const REFUSALS = {
  * @param {string} [props.detail]    the archive's own reason, reproduced rather than paraphrased
  * @param {string} [props.subject]   what was refused, e.g. "CATEGORY 3" or "mexico · >=64 kt"
  * @param {node}   [props.counts]    what the archive DOES publish here -- a refusal is not a blank
+ * @param {string} [props.cause]     "record" (default) or "query" -- WHICH of the refusal's
+ *   remedies is true of this rendering. A refusal that names a condition the reader has not set
+ *   is a refusal that sends them looking for a control that is not there, so the state picks the
+ *   sentence and the call site never writes one.
  */
-export function Refusal({ kind, detail, subject, counts, compact, onEvidence }) {
+export function Refusal({ kind, detail, subject, counts, compact, onEvidence, cause = "record",
+  detailSummary }) {
   const r = REFUSALS[kind];
   if (!r) return null;
   const hard = r.resolvable === "no";
+  /* WHICH REMEDY, AND HOW MUCH OF IT.
+     `cause` picks between two DIFFERENT remedies -- record limit or query-caused. `remedyShort`
+     picks how much of the chosen one to print: when the engine has supplied its own reason, the
+     parts of the remedy that reason already contains are not repeated. Both decisions are made
+     from state here so that every sentence is still authored in exactly one place. */
+  const full = cause === "query" && r.remedyQueryCaused ? r.remedyQueryCaused : r.remedy;
+  const remedy = detail && r.remedyShort !== undefined && cause !== "query"
+    ? r.remedyShort : full;
 
   return (
     <div
@@ -153,11 +208,29 @@ export function Refusal({ kind, detail, subject, counts, compact, onEvidence }) 
         ) : null}
       </div>
 
+      {/* THE REASON, AND WHERE IT SITS.
+          By default the archive's own explanation is open, because a refusal a reader cannot
+          interrogate is a refusal they have to take on trust. `detailSummary` makes it a
+          disclosure instead, for the one place the explanation is a hundred words of standing
+          methodology rather than a fact about this cohort -- and even there the status, the
+          subject, the counts and the remedy stay on screen, so what is hidden is the argument
+          and never the refusal. */}
       {detail ? (
-        <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
-          color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 4, paddingLeft: 24 }}>
-          {detail}
-        </div>
+        detailSummary ? (
+          <details style={{ marginTop: 4, paddingLeft: 24 }}>
+            <summary style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+              cursor: "pointer", letterSpacing: "var(--track-label)" }}>{detailSummary}</summary>
+            <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+              color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 4 }}>
+              {detail}
+            </div>
+          </details>
+        ) : (
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+            color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 4, paddingLeft: 24 }}>
+            {detail}
+          </div>
+        )
       ) : null}
 
       {/* THE REFUSAL CARRIES ITS OWN EVIDENCE. A refusal is a claim about the record -- "too few
@@ -186,7 +259,7 @@ export function Refusal({ kind, detail, subject, counts, compact, onEvidence }) 
         ) : (
           <>
             <strong>{r.resolvable === "partly" ? "PARTLY IN YOUR HANDS." : "YOU CAN CHANGE THIS."}</strong>{" "}
-            {r.remedy}
+            {remedy}
           </>
         )}
       </div>
