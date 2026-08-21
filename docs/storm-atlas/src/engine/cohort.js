@@ -25,7 +25,7 @@
  */
 
 import { INTENSITY_FILTERS, LANDFALL_FILTERS, filterStorms } from "./query.js";
-import { cohortQuestion, languageOf } from "./cohort-language.js";
+import { cohortQuestion, intensityName, languageOf, regionLabel } from "./cohort-language.js";
 import { haversineKm } from "./geo.js";
 import { scoreCases } from "./analogs.js";
 
@@ -233,9 +233,12 @@ export function conditionsOf(spec) {
      it takes off the table. */
   if (s.intensity && s.intensity !== "all") {
     const f = INTENSITY_FILTERS.find((x) => x.key === s.intensity);
+    /* THE CONTRACT'S NAME, NOT ITS COLUMN KEY. This read "every intensity row at or below cat5
+       stops being an outcome", printing a storage key in a sentence about what the reader just
+       chose -- and the chip directly above it says "Category 5". */
     add("intensity", "outcome", "REACHED", `that reached ${f ? f.label : s.intensity}`, {
-      costs: `every intensity row at or below ${s.intensity} stops being an outcome ` +
-             "of this cohort and reports its count only",
+      costs: `every intensity row at or below ${intensityName(s.intensity)} stops being an ` +
+             "outcome of this cohort and reports its count only",
     });
   }
   if (s.landfall) {
@@ -246,7 +249,8 @@ export function conditionsOf(spec) {
           ? "every landfall rate below becomes a share of the storms that came ashore " +
             "SOMEWHERE, not of all storms — the denominator changes meaning, though no single " +
             "region's rate becomes circular"
-          : `the ${s.landfall.replace(/_/g, " ")} landfall rate stops being an outcome of ` +
+          /* Same region, same spelling as the chip above it and the row in the panel. */
+          : `the ${regionLabel(s.landfall)} landfall rate stops being an outcome of ` +
             "this cohort; its hurricane-intensity rate is still one",
       });
   }
