@@ -1,0 +1,2467 @@
+{
+  "built_utc": "2026-08-20T07:17:56Z",
+  "cannot_answer": "P(a disturbance develops at all) -- failures are absent from the best-track archive; use run_disturbance_backtest with the TWO archive for that",
+  "conditions_on": "a tropical cyclone already existed at the moment simulated",
+  "contracts": {
+    "landfall_caribbean_any": "makes landfall in caribbean",
+    "landfall_caribbean_hurricane": "makes landfall in caribbean while >= 64 kt",
+    "landfall_central_america_any": "makes landfall in central_america",
+    "landfall_central_america_hurricane": "makes landfall in central_america while >= 64 kt",
+    "landfall_conus_any": "makes landfall in conus",
+    "landfall_conus_hurricane": "makes landfall in conus while >= 64 kt",
+    "landfall_hawaii_any": "makes landfall in hawaii",
+    "landfall_hawaii_hurricane": "makes landfall in hawaii while >= 64 kt",
+    "landfall_mexico_any": "makes landfall in mexico",
+    "landfall_mexico_hurricane": "makes landfall in mexico while >= 64 kt",
+    "reaches_cat1_64kt": "reaches >= 64 kt (cat1)",
+    "reaches_cat1_within_24h": "reaches >= 64 kt (cat1) within 24 h of genesis",
+    "reaches_cat1_within_48h": "reaches >= 64 kt (cat1) within 48 h of genesis",
+    "reaches_cat1_within_96h": "reaches >= 64 kt (cat1) within 96 h of genesis",
+    "reaches_cat2_83kt": "reaches >= 83 kt (cat2)",
+    "reaches_cat3_96kt": "reaches >= 96 kt (cat3)",
+    "reaches_cat3_within_24h": "reaches >= 96 kt (cat3) within 24 h of genesis",
+    "reaches_cat3_within_48h": "reaches >= 96 kt (cat3) within 48 h of genesis",
+    "reaches_cat3_within_96h": "reaches >= 96 kt (cat3) within 96 h of genesis",
+    "reaches_cat4_113kt": "reaches >= 113 kt (cat4)",
+    "reaches_cat5_137kt": "reaches >= 137 kt (cat5)",
+    "reaches_ts_34kt": "reaches >= 34 kt (ts)",
+    "reaches_ts_within_24h": "reaches >= 34 kt (ts) within 24 h of genesis",
+    "reaches_ts_within_48h": "reaches >= 34 kt (ts) within 48 h of genesis",
+    "reaches_ts_within_96h": "reaches >= 34 kt (ts) within 96 h of genesis"
+  },
+  "ledger": {
+    "path": "backtest-NA-ledger.parquet",
+    "rows": 21050
+  },
+  "mode": "genesis_conditioned",
+  "n_storms_replayed": 842,
+  "n_storms_skipped_burn_in": 50,
+  "processing_version": "1.0.0",
+  "scores": {
+    "landfall_caribbean_any": {
+      "base_rate": 0.16844349680170576,
+      "brier": 0.10843503978495259,
+      "brier_climatology": 0.13969010427763479,
+      "contract": "landfall_caribbean_any",
+      "n_events": 79,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 237,
+          "observed": 0.0379746835443038,
+          "predicted": 0.01851590789071843
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 62,
+          "observed": 0.06451612903225806,
+          "predicted": 0.14660438664158276
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 55,
+          "observed": 0.2545454545454545,
+          "predicted": 0.2541973043981536
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 52,
+          "observed": 0.34615384615384615,
+          "predicted": 0.34333160719508293
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 34,
+          "observed": 0.5588235294117647,
+          "predicted": 0.45202609022088486
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 19,
+          "observed": 0.47368421052631576,
+          "predicted": 0.5510536200075208
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 6,
+          "observed": 0.5,
+          "predicted": 0.6473804814724837
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 4,
+          "observed": 0.75,
+          "predicted": 0.7661266868389455
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": 0.22374573098293782
+    },
+    "landfall_caribbean_hurricane": {
+      "base_rate": 0.06823027718550106,
+      "brier": 0.06169975925668556,
+      "brier_climatology": 0.06445119613652919,
+      "contract": "landfall_caribbean_hurricane",
+      "n_events": 32,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 385,
+          "observed": 0.04935064935064935,
+          "predicted": 0.01714362916952057
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 68,
+          "observed": 0.14705882352941177,
+          "predicted": 0.1379762661598277
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 14,
+          "observed": 0.14285714285714285,
+          "predicted": 0.23634058028703323
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 2,
+          "observed": 0.5,
+          "predicted": 0.31153566829349433
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": 0.04269023764919999
+    },
+    "landfall_central_america_any": {
+      "base_rate": 0.06183368869936034,
+      "brier": 0.03786338171992959,
+      "brier_climatology": 0.05814264328607832,
+      "contract": "landfall_central_america_any",
+      "n_events": 29,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 389,
+          "observed": 0.012853470437017995,
+          "predicted": 0.007894512506871251
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 28,
+          "observed": 0.03571428571428571,
+          "predicted": 0.14654393183560313
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 16,
+          "observed": 0.3125,
+          "predicted": 0.25265690940732466
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 15,
+          "observed": 0.26666666666666666,
+          "predicted": 0.3373683507994747
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 5,
+          "observed": 0.8,
+          "predicted": 0.45435189381876384
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 8,
+          "observed": 0.5,
+          "predicted": 0.5441727044341921
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 2,
+          "observed": 0.5,
+          "predicted": 0.673245633982791
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 5,
+          "observed": 0.8,
+          "predicted": 0.7381047751500857
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 1,
+          "observed": 1.0,
+          "predicted": 0.8414516623095971
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": 0.3487846513336005
+    },
+    "landfall_central_america_hurricane": {
+      "base_rate": 0.019189765458422176,
+      "brier": 0.01694401235178431,
+      "brier_climatology": 0.018816067866047552,
+      "contract": "landfall_central_america_hurricane",
+      "n_events": 9,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 447,
+          "observed": 0.008948545861297539,
+          "predicted": 0.0037012791713241394
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 15,
+          "observed": 0.26666666666666666,
+          "predicted": 0.15376629789372412
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 6,
+          "observed": 0.16666666666666666,
+          "predicted": 0.24675710343210092
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.31756802110060156
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_refused_reason": "9 event(s) in this sample of 469 forecasts over 469 storms, below the 10 required. A Brier ratio over a handful of events is noise, and over zero events it only rewards predicting 'never'. Counts are published; the ratio is refused.",
+      "skill_vs_climatology": null
+    },
+    "landfall_conus_any": {
+      "base_rate": 0.2899786780383795,
+      "brier": 0.14639907493215049,
+      "brier_climatology": 0.20780342719803513,
+      "contract": "landfall_conus_any",
+      "n_events": 136,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 118,
+          "observed": 0.11016949152542373,
+          "predicted": 0.04512516841778202
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 111,
+          "observed": 0.11711711711711711,
+          "predicted": 0.14801990915841748
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 75,
+          "observed": 0.2,
+          "predicted": 0.24530726162265973
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 53,
+          "observed": 0.3018867924528302,
+          "predicted": 0.33920708991462
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 26,
+          "observed": 0.5384615384615384,
+          "predicted": 0.4485077611805396
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 15,
+          "observed": 0.5333333333333333,
+          "predicted": 0.5530624908281496
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 24,
+          "observed": 0.7916666666666666,
+          "predicted": 0.664571051042497
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 33,
+          "observed": 0.7575757575757576,
+          "predicted": 0.7476554654044302
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 11,
+          "observed": 0.9090909090909091,
+          "predicted": 0.8300945441448665
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 3,
+          "observed": 1.0,
+          "predicted": 0.9409418738769042
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": 0.29549249063812
+    },
+    "landfall_conus_hurricane": {
+      "base_rate": 0.11373390557939914,
+      "brier": 0.10624098635606954,
+      "brier_climatology": 0.10253054031696489,
+      "contract": "landfall_conus_hurricane",
+      "n_events": 53,
+      "n_forecasts": 466,
+      "n_refused": 373,
+      "n_storms": 466,
+      "n_unresolved": 3,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 272,
+          "observed": 0.125,
+          "predicted": 0.03973807583295627
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 151,
+          "observed": 0.08609271523178808,
+          "predicted": 0.14174336199228552
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 37,
+          "observed": 0.13513513513513514,
+          "predicted": 0.23079053884123224
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 5,
+          "observed": 0.2,
+          "predicted": 0.3196658475489861
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.522807627174168
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.03618869097572408
+    },
+    "landfall_hawaii_any": {
+      "base_rate": 0.0,
+      "brier": 0.0,
+      "brier_climatology": 0.0,
+      "contract": "landfall_hawaii_any",
+      "n_events": 0,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 469,
+          "observed": 0.0,
+          "predicted": 0.0
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_refused_reason": "0 event(s) in this sample of 469 forecasts over 469 storms, below the 10 required. A Brier ratio over a handful of events is noise, and over zero events it only rewards predicting 'never'. Counts are published; the ratio is refused.",
+      "skill_vs_climatology": null
+    },
+    "landfall_hawaii_hurricane": {
+      "base_rate": 0.0,
+      "brier": 0.0,
+      "brier_climatology": 0.0,
+      "contract": "landfall_hawaii_hurricane",
+      "n_events": 0,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 469,
+          "observed": 0.0,
+          "predicted": 0.0
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_refused_reason": "0 event(s) in this sample of 469 forecasts over 469 storms, below the 10 required. A Brier ratio over a handful of events is noise, and over zero events it only rewards predicting 'never'. Counts are published; the ratio is refused.",
+      "skill_vs_climatology": null
+    },
+    "landfall_mexico_any": {
+      "base_rate": 0.1257995735607676,
+      "brier": 0.07612742051865473,
+      "brier_climatology": 0.1104245749010954,
+      "contract": "landfall_mexico_any",
+      "n_events": 59,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 319,
+          "observed": 0.034482758620689655,
+          "predicted": 0.018563688580654016
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 45,
+          "observed": 0.022222222222222223,
+          "predicted": 0.13550873213608178
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 22,
+          "observed": 0.13636363636363635,
+          "predicted": 0.23996135056858334
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 20,
+          "observed": 0.45,
+          "predicted": 0.3530884466462811
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 14,
+          "observed": 0.35714285714285715,
+          "predicted": 0.4547539115860723
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 18,
+          "observed": 0.5,
+          "predicted": 0.5485903319653652
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 21,
+          "observed": 0.7619047619047619,
+          "predicted": 0.6503668423539041
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 9,
+          "observed": 0.4444444444444444,
+          "predicted": 0.7313241834948752
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 1,
+          "observed": 1.0,
+          "predicted": 0.87212413780125
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": 0.31059349255507473
+    },
+    "landfall_mexico_hurricane": {
+      "base_rate": 0.04051172707889126,
+      "brier": 0.04024180403333222,
+      "brier_climatology": 0.0390740358028305,
+      "contract": "landfall_mexico_hurricane",
+      "n_events": 19,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 424,
+          "observed": 0.0330188679245283,
+          "predicted": 0.01879094623592712
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 39,
+          "observed": 0.10256410256410256,
+          "predicted": 0.13673550828484687
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.22110991078598052
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 2,
+          "observed": 0.5,
+          "predicted": 0.35046769055021254
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 3,
+          "observed": 0.0,
+          "predicted": 0.43461475948900957
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.029886040858291052
+    },
+    "reaches_cat1_64kt": {
+      "base_rate": 0.44776119402985076,
+      "brier": 0.24328398417584451,
+      "brier_climatology": 0.25223066909139275,
+      "contract": "reaches_cat1_64kt",
+      "n_events": 210,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 22,
+          "observed": 0.18181818181818182,
+          "predicted": 0.05593648714787052
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 56,
+          "observed": 0.32142857142857145,
+          "predicted": 0.1543145851430652
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 90,
+          "observed": 0.3,
+          "predicted": 0.24782258849410574
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 80,
+          "observed": 0.4625,
+          "predicted": 0.3535025106391775
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 93,
+          "observed": 0.5591397849462365,
+          "predicted": 0.4516193942565805
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 86,
+          "observed": 0.5697674418604651,
+          "predicted": 0.5470443954058475
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 34,
+          "observed": 0.5882352941176471,
+          "predicted": 0.6394134895282042
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 8,
+          "observed": 0.375,
+          "predicted": 0.7415816112932042
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": 0.0354702500999452
+    },
+    "reaches_cat1_within_24h": {
+      "base_rate": 0.036069651741293535,
+      "brier": 0.040314604443034786,
+      "brier_climatology": 0.03484491254668083,
+      "contract": "reaches_cat1_within_24h",
+      "n_events": 29,
+      "n_forecasts": 804,
+      "n_refused": 38,
+      "n_storms": 804,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 729,
+          "observed": 0.02880658436213992,
+          "predicted": 0.005908266693671726
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 35,
+          "observed": 0.05714285714285714,
+          "predicted": 0.14801985119584543
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 14,
+          "observed": 0.14285714285714285,
+          "predicted": 0.24970210820581148
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 9,
+          "observed": 0.2222222222222222,
+          "predicted": 0.350300730340195
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 4,
+          "observed": 0.0,
+          "predicted": 0.45381864952965456
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 4,
+          "observed": 0.0,
+          "predicted": 0.5696362463192224
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 4,
+          "observed": 0.0,
+          "predicted": 0.6459137167561478
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.7284388316123117
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 4,
+          "observed": 0.5,
+          "predicted": 1.0
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.1569724673300974
+    },
+    "reaches_cat1_within_48h": {
+      "base_rate": 0.19154228855721392,
+      "brier": 0.16715383373104,
+      "brier_climatology": 0.1566462748328793,
+      "contract": "reaches_cat1_within_48h",
+      "n_events": 154,
+      "n_forecasts": 804,
+      "n_refused": 38,
+      "n_storms": 804,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 353,
+          "observed": 0.1501416430594901,
+          "predicted": 0.025096179003074266
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 221,
+          "observed": 0.18552036199095023,
+          "predicted": 0.14679906354085195
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 127,
+          "observed": 0.25196850393700787,
+          "predicted": 0.24736250173739643
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 47,
+          "observed": 0.2765957446808511,
+          "predicted": 0.34205573785971827
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 22,
+          "observed": 0.13636363636363635,
+          "predicted": 0.4415551421647122
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 12,
+          "observed": 0.25,
+          "predicted": 0.540845143542876
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 10,
+          "observed": 0.3,
+          "predicted": 0.6388660993750759
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 3,
+          "observed": 0.3333333333333333,
+          "predicted": 0.725539790257101
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 2,
+          "observed": 0.5,
+          "predicted": 0.8467758227426994
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 7,
+          "observed": 0.5714285714285714,
+          "predicted": 1.0
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.06707825583066618
+    },
+    "reaches_cat1_within_96h": {
+      "base_rate": 0.34950248756218905,
+      "brier": 0.24934036139366494,
+      "brier_climatology": 0.2306395112203403,
+      "contract": "reaches_cat1_within_96h",
+      "n_events": 281,
+      "n_forecasts": 804,
+      "n_refused": 38,
+      "n_storms": 804,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 162,
+          "observed": 0.25925925925925924,
+          "predicted": 0.019796111982950417
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 125,
+          "observed": 0.296,
+          "predicted": 0.15670780902695686
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 158,
+          "observed": 0.2974683544303797,
+          "predicted": 0.25166206310097566
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 138,
+          "observed": 0.391304347826087,
+          "predicted": 0.3483078534579514
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 91,
+          "observed": 0.45054945054945056,
+          "predicted": 0.44534281636436934
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 51,
+          "observed": 0.5490196078431373,
+          "predicted": 0.5400815364426084
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 36,
+          "observed": 0.3333333333333333,
+          "predicted": 0.6452837309690603
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 16,
+          "observed": 0.5625,
+          "predicted": 0.7411351345657671
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 6,
+          "observed": 0.5,
+          "predicted": 0.8458605219331213
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 21,
+          "observed": 0.38095238095238093,
+          "predicted": 1.0
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.08108259540776985
+    },
+    "reaches_cat2_83kt": {
+      "base_rate": 0.29850746268656714,
+      "brier": 0.20581963663193442,
+      "brier_climatology": 0.21694794458615252,
+      "contract": "reaches_cat2_83kt",
+      "n_events": 140,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 148,
+          "observed": 0.1554054054054054,
+          "predicted": 0.03918097629223635
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 68,
+          "observed": 0.25,
+          "predicted": 0.1447260541061681
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 68,
+          "observed": 0.36764705882352944,
+          "predicted": 0.2560138861750976
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 91,
+          "observed": 0.38461538461538464,
+          "predicted": 0.34439192997418766
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 77,
+          "observed": 0.42857142857142855,
+          "predicted": 0.4428216231544279
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 13,
+          "observed": 0.5384615384615384,
+          "predicted": 0.5390554847514797
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 3,
+          "observed": 0.0,
+          "predicted": 0.6275152556150115
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.7066823058582461
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": 0.051294830082148635
+    },
+    "reaches_cat3_96kt": {
+      "base_rate": 0.2260127931769723,
+      "brier": 0.16683731712609867,
+      "brier_climatology": 0.18277848712800504,
+      "contract": "reaches_cat3_96kt",
+      "n_events": 106,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 186,
+          "observed": 0.0913978494623656,
+          "predicted": 0.02932330334657507
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 90,
+          "observed": 0.25555555555555554,
+          "predicted": 0.15212225379180658
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 84,
+          "observed": 0.32142857142857145,
+          "predicted": 0.24783972070910756
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 84,
+          "observed": 0.35714285714285715,
+          "predicted": 0.34638067453777943
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 19,
+          "observed": 0.42105263157894735,
+          "predicted": 0.43774871058526993
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 5,
+          "observed": 0.2,
+          "predicted": 0.5303729628251486
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.60976753855017
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": 0.08721578919045492
+    },
+    "reaches_cat3_within_24h": {
+      "base_rate": 0.0,
+      "brier": 0.0,
+      "brier_climatology": 0.0,
+      "contract": "reaches_cat3_within_24h",
+      "n_events": 0,
+      "n_forecasts": 804,
+      "n_refused": 38,
+      "n_storms": 804,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 804,
+          "observed": 0.0,
+          "predicted": 0.0
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_refused_reason": "0 event(s) in this sample of 804 forecasts over 804 storms, below the 10 required. A Brier ratio over a handful of events is noise, and over zero events it only rewards predicting 'never'. Counts are published; the ratio is refused.",
+      "skill_vs_climatology": null
+    },
+    "reaches_cat3_within_48h": {
+      "base_rate": 0.009950248756218905,
+      "brier": 0.010097591067087764,
+      "brier_climatology": 0.009873949026296937,
+      "contract": "reaches_cat3_within_48h",
+      "n_events": 8,
+      "n_forecasts": 804,
+      "n_refused": 38,
+      "n_storms": 804,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 799,
+          "observed": 0.010012515644555695,
+          "predicted": 0.0015675957025553535
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 4,
+          "observed": 0.0,
+          "predicted": 0.1377754904399063
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.27256586887604
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_refused_reason": "8 event(s) in this sample of 804 forecasts over 804 storms, below the 10 required. A Brier ratio over a handful of events is noise, and over zero events it only rewards predicting 'never'. Counts are published; the ratio is refused.",
+      "skill_vs_climatology": null
+    },
+    "reaches_cat3_within_96h": {
+      "base_rate": 0.10199004975124377,
+      "brier": 0.09633124358899206,
+      "brier_climatology": 0.092384500233599,
+      "contract": "reaches_cat3_within_96h",
+      "n_events": 82,
+      "n_forecasts": 804,
+      "n_refused": 38,
+      "n_storms": 804,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 545,
+          "observed": 0.06605504587155964,
+          "predicted": 0.017470879932000805
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 158,
+          "observed": 0.189873417721519,
+          "predicted": 0.1449167678995824
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 64,
+          "observed": 0.15625,
+          "predicted": 0.2345490395899329
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 20,
+          "observed": 0.25,
+          "predicted": 0.34076730647909204
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 7,
+          "observed": 0.0,
+          "predicted": 0.4396710742295037
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 4,
+          "observed": 0.0,
+          "predicted": 0.5371299179365714
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.6899061939539027
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 2,
+          "observed": 0.0,
+          "predicted": 0.7298817215751612
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.8387622888427985
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 2,
+          "observed": 0.5,
+          "predicted": 1.0
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.04272083894390866
+    },
+    "reaches_cat4_113kt": {
+      "base_rate": 0.14712153518123666,
+      "brier": 0.12562818617620894,
+      "brier_climatology": 0.12966837525782107,
+      "contract": "reaches_cat4_113kt",
+      "n_events": 69,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 260,
+          "observed": 0.1076923076923077,
+          "predicted": 0.028128265433370787
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 119,
+          "observed": 0.15966386554621848,
+          "predicted": 0.14448301130314364
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 64,
+          "observed": 0.25,
+          "predicted": 0.24511471384014577
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 24,
+          "observed": 0.20833333333333334,
+          "predicted": 0.3373477674492144
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 1,
+          "observed": 1.0,
+          "predicted": 0.42634872966340936
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.5051379886752537
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": 0.031157859991528203
+    },
+    "reaches_cat5_137kt": {
+      "base_rate": 0.04904051172707889,
+      "brier": 0.048682055797733964,
+      "brier_climatology": 0.047266823310707216,
+      "contract": "reaches_cat5_137kt",
+      "n_events": 23,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 425,
+          "observed": 0.047058823529411764,
+          "predicted": 0.018248676513241316
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 38,
+          "observed": 0.05263157894736842,
+          "predicted": 0.13161513004443828
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 5,
+          "observed": 0.2,
+          "predicted": 0.24542192695575826
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 1,
+          "observed": 0.0,
+          "predicted": 0.312141941994532
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 0,
+          "observed": null,
+          "predicted": null
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.029941349722695687
+    },
+    "reaches_ts_34kt": {
+      "base_rate": 0.8592750533049041,
+      "brier": 0.1739653190793664,
+      "brier_climatology": 0.15195741415952063,
+      "contract": "reaches_ts_34kt",
+      "n_events": 403,
+      "n_forecasts": 469,
+      "n_refused": 373,
+      "n_storms": 469,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 2,
+          "observed": 0.5,
+          "predicted": 0.07512501459481816
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 3,
+          "observed": 1.0,
+          "predicted": 0.13669926181111894
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 15,
+          "observed": 0.6,
+          "predicted": 0.24573224304746596
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 20,
+          "observed": 0.75,
+          "predicted": 0.352824380993537
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 43,
+          "observed": 0.8837209302325582,
+          "predicted": 0.4588306375878137
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 64,
+          "observed": 0.78125,
+          "predicted": 0.5598434308831746
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 118,
+          "observed": 0.864406779661017,
+          "predicted": 0.6560414060989129
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 111,
+          "observed": 0.9009009009009009,
+          "predicted": 0.7500787869604775
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 74,
+          "observed": 0.9054054054054054,
+          "predicted": 0.8433474814679888
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 19,
+          "observed": 0.9473684210526315,
+          "predicted": 0.9456680252486764
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.14482942501734408
+    },
+    "reaches_ts_within_24h": {
+      "base_rate": 0.6368159203980099,
+      "brier": 0.27865871949862897,
+      "brier_climatology": 0.2529867403179798,
+      "contract": "reaches_ts_within_24h",
+      "n_events": 512,
+      "n_forecasts": 804,
+      "n_refused": 38,
+      "n_storms": 804,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 118,
+          "observed": 0.3474576271186441,
+          "predicted": 0.010792343276666777
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 63,
+          "observed": 0.4603174603174603,
+          "predicted": 0.15189653950231358
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 90,
+          "observed": 0.6,
+          "predicted": 0.25606306049628763
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 131,
+          "observed": 0.6106870229007634,
+          "predicted": 0.352714244582467
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 117,
+          "observed": 0.7692307692307693,
+          "predicted": 0.4503260658075977
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 126,
+          "observed": 0.6984126984126984,
+          "predicted": 0.5450218304407434
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 69,
+          "observed": 0.8260869565217391,
+          "predicted": 0.6464679513036234
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 22,
+          "observed": 0.7272727272727273,
+          "predicted": 0.7481336133206002
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 27,
+          "observed": 0.9629629629629629,
+          "predicted": 0.8442040612082401
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 41,
+          "observed": 0.7560975609756098,
+          "predicted": 0.9907385193577791
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.10147559175782095
+    },
+    "reaches_ts_within_48h": {
+      "base_rate": 0.753731343283582,
+      "brier": 0.2368514645420239,
+      "brier_climatology": 0.2018628417654978,
+      "contract": "reaches_ts_within_48h",
+      "n_events": 606,
+      "n_forecasts": 804,
+      "n_refused": 38,
+      "n_storms": 804,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 48,
+          "observed": 0.5,
+          "predicted": 0.010580895608276913
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 24,
+          "observed": 0.5416666666666666,
+          "predicted": 0.16584523775104476
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 41,
+          "observed": 0.6341463414634146,
+          "predicted": 0.2573603389120947
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 68,
+          "observed": 0.6764705882352942,
+          "predicted": 0.35035824542804866
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 90,
+          "observed": 0.7444444444444445,
+          "predicted": 0.4572575113750938
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 151,
+          "observed": 0.7748344370860927,
+          "predicted": 0.554296433506406
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 158,
+          "observed": 0.7911392405063291,
+          "predicted": 0.6472631868479387
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 104,
+          "observed": 0.8557692307692307,
+          "predicted": 0.7404221982696367
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 56,
+          "observed": 0.8571428571428571,
+          "predicted": 0.8447565924253917
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 64,
+          "observed": 0.796875,
+          "predicted": 0.983463214630244
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.17332869422878772
+    },
+    "reaches_ts_within_96h": {
+      "base_rate": 0.7860696517412935,
+      "brier": 0.21962106005197185,
+      "brier_climatology": 0.18212922369908582,
+      "contract": "reaches_ts_within_96h",
+      "n_events": 632,
+      "n_forecasts": 804,
+      "n_refused": 38,
+      "n_storms": 804,
+      "n_unresolved": 0,
+      "refused_reason": null,
+      "reliability": [
+        {
+          "bin": 0,
+          "hi": 0.1,
+          "lo": 0.0,
+          "n": 42,
+          "observed": 0.5238095238095238,
+          "predicted": 0.015018876662203159
+        },
+        {
+          "bin": 1,
+          "hi": 0.2,
+          "lo": 0.1,
+          "n": 20,
+          "observed": 0.55,
+          "predicted": 0.1597253737236212
+        },
+        {
+          "bin": 2,
+          "hi": 0.3,
+          "lo": 0.2,
+          "n": 33,
+          "observed": 0.5454545454545454,
+          "predicted": 0.25282316066860755
+        },
+        {
+          "bin": 3,
+          "hi": 0.4,
+          "lo": 0.3,
+          "n": 55,
+          "observed": 0.7636363636363637,
+          "predicted": 0.3519440302607769
+        },
+        {
+          "bin": 4,
+          "hi": 0.5,
+          "lo": 0.4,
+          "n": 83,
+          "observed": 0.7590361445783133,
+          "predicted": 0.45445181397343093
+        },
+        {
+          "bin": 5,
+          "hi": 0.6,
+          "lo": 0.5,
+          "n": 108,
+          "observed": 0.7777777777777778,
+          "predicted": 0.5558097941342947
+        },
+        {
+          "bin": 6,
+          "hi": 0.7,
+          "lo": 0.6,
+          "n": 164,
+          "observed": 0.8292682926829268,
+          "predicted": 0.6515956060180722
+        },
+        {
+          "bin": 7,
+          "hi": 0.8,
+          "lo": 0.7,
+          "n": 127,
+          "observed": 0.8740157480314961,
+          "predicted": 0.7464799153229345
+        },
+        {
+          "bin": 8,
+          "hi": 0.9,
+          "lo": 0.8,
+          "n": 89,
+          "observed": 0.8764044943820225,
+          "predicted": 0.839298916217481
+        },
+        {
+          "bin": 9,
+          "hi": 1.0,
+          "lo": 0.9,
+          "n": 83,
+          "observed": 0.8072289156626506,
+          "predicted": 0.979916769154009
+        }
+      ],
+      "scored": true,
+      "skill_vs_climatology": -0.20585294106798635
+    }
+  },
+  "settings": {
+    "basins": [
+      "NA"
+    ],
+    "burn_in_storms": 50,
+    "max_season": null,
+    "min_pool_season": 1971,
+    "min_sample": 10,
+    "min_season": 1971,
+    "radius_km": 500.0,
+    "regions": [
+      "conus",
+      "caribbean",
+      "mexico",
+      "central_america",
+      "hawaii"
+    ],
+    "season_window_months": 3,
+    "subbasins": null
+  }
+}

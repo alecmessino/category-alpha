@@ -91,8 +91,16 @@ def _entry_from_result(res, *, kind, ident, label, position_used, position,
         "unscoreable": res.unscoreable,
         "time_to_event": res.time_to_event,
         "gaps": res.gaps,
+        # storm_id travels because it is the ARCHIVE'S OWN KEY and is never null. atcf_id is
+        # null for pre-ATCF-era storms -- the panel keyed its case rows on it, so a pool
+        # containing two such storms rendered two React children with the key `null`, and React
+        # is explicit that non-unique keys "may cause children to be duplicated and/or
+        # omitted". On a table of analog cases that means a row showing the wrong storm, on a
+        # board whose entire claim is traceability. Identity comes from the archive, not from a
+        # field the archive is allowed to leave empty.
         "cases": [
-            {"season": c.season, "name": c.name, "atcf_id": c.atcf_id,
+            {"storm_id": c.storm_id,
+             "season": c.season, "name": c.name, "atcf_id": c.atcf_id,
              "distance_km": c.distance_km, "peak_vmax_kt": c.peak_vmax_kt,
              "max_category": c.max_category, "weight": c.weight,
              "env_fields_compared": c.env_fields_compared,

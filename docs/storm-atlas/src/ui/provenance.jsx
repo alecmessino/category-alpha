@@ -14,7 +14,7 @@
  */
 
 import React from "react";
-import { Gap, Head, Note, Row, TextButton, Txt } from "./kit.jsx";
+import { Gap, Head, MONO, Note, Row, TextButton, Txt } from "./kit.jsx";
 
 export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
   const m = archive.manifest;
@@ -35,9 +35,10 @@ export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
           <Head n="01">Versions</Head>
           <Row k="methodology" v={<Txt value={m.methodology_version} />}
             title="Which definitions turn rows into a published number: the refusal gates, the
-                   analog weighting, the interval, the effective sample size. The browser declares
-                   the same constant as the archive, and scripts/test-atlas-parity.mjs fails the
-                   build if they disagree." />
+                   analog weighting, the interval, the effective sample size. The browser reads
+                   this from the pack the archive built rather than declaring its own, and
+                   scripts/test-atlas-parity.mjs answers 42 vectors with both surfaces and
+                   compares them field by field." />
           <Row k="processing" v={<Txt value={m.processing_version} />}
             title="Which code turned source bytes into archive rows." />
           <Row k="pack format" v={<Txt value={String(m.pack_format)} />} />
@@ -64,7 +65,34 @@ export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
             title="Segment crossings whose bracketing fixes disagreed about the Saffir-Simpson
                    class. The archive publishes none rather than interpolating one." />
 
-          <Head n="03">Sources</Head>
+          {/* ENVIRONMENTAL COVERAGE, PER SOURCE AND NEVER SUMMED.
+              This is what decides whether an environment-conditioned question can be asked at
+              all, so it is stated before anyone asks one -- and it comes from the manifest,
+              which arrives first, rather than from the megabyte env block, which is lazy. */}
+          {m.env_coverage ? (
+            <>
+              <Head n="03" right={`${m.env_coverage.storms_any_source.toLocaleString()} of ${m.env_coverage.storms_total.toLocaleString()} storms`}>
+                Environmental coverage
+              </Head>
+              <Note>{m.env_coverage.note}</Note>
+              {Object.entries(m.env_coverage.by_source).map(([src, v]) => (
+                <Row key={src} k={src} v={
+                  <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)" }}>
+                    {v.storms.toLocaleString()} storms
+                    <span style={{ color: "var(--t3)" }}>
+                      {" "}· {String(v.first_utc).slice(0, 10)} → {String(v.last_utc).slice(0, 10)}
+                    </span>
+                  </span>} />
+              ))}
+              <Note style={{ color: "var(--flag)" }}>
+                THE SOURCES ARE SEQUENTIAL ERAS, NOT ALTERNATIVES. They do not overlap in time,
+                so a cohort spanning an era boundary mixes them — and one of them substitutes a
+                climatological sea-surface temperature for an observed one.
+              </Note>
+            </>
+          ) : null}
+
+          <Head n="04">Sources</Head>
           <Note>
             The official files the archive was built from. Their own hashes are recorded in the
             archive's manifest; what this pack vouches for directly is the sha256 of each table
@@ -79,7 +107,7 @@ export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
             ))}
           </div>
 
-          <Head n="04">What this surface chose</Head>
+          <Head n="05">What this surface chose</Head>
           <Row k="track geometry" v={<Txt value={`${m.track_geometry.quantised_to_deg}°`} />}
             title={m.track_geometry.note} />
           <Row k="worst deviation"
@@ -101,7 +129,7 @@ export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
               geometry the landfall rule tests against, drawn so the line a reader sees is the
               line the claim was made against. What it cost and what it did not cost -- no
               vertex removed, none moved -- belongs on the record beside everything else. */}
-          <Head n="05" right={c ? "archive-owned" : "not loaded"}>The coastline on the plate</Head>
+          <Head n="06" right={c ? "archive-owned" : "not loaded"}>The coastline on the plate</Head>
           {c ? (
             <>
               <Note style={{ marginBottom: 6 }}>{c.note}</Note>
@@ -140,19 +168,19 @@ export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
             </Note>
           )}
 
-          <Head n="06">Columns the archive holds empty</Head>
+          <Head n="07">Columns the archive holds empty</Head>
           <Note style={{ marginBottom: 6 }}>{m.empty_in_archive._note}</Note>
           {Object.entries(m.empty_in_archive).filter(([k]) => k !== "_note").map(([k, v]) => (
             <Row key={k} k={k} v={<Txt value={v} />} dim />
           ))}
 
-          <Head n="07">Not in this pack</Head>
+          <Head n="08">Not in this pack</Head>
           <Note style={{ marginBottom: 6 }}>{m.not_packed._note}</Note>
           {Object.entries(m.not_packed).filter(([k]) => k !== "_note").map(([k, v]) => (
             <Row key={k} k={k} v={<Txt value={Array.isArray(v) ? v.join(", ") : v} />} dim />
           ))}
 
-          <Head n="08">Gaps recorded by the archive</Head>
+          <Head n="09">Gaps recorded by the archive</Head>
           {(p.gaps || []).map((g, i) => (
             <div key={i} className="at-grp">
               <Gap label={g.key} text={

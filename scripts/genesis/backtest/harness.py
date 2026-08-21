@@ -34,6 +34,8 @@ record. A reference the forecaster could not have had is not a reference.
 
 from __future__ import annotations
 
+import re
+
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -41,6 +43,7 @@ from pathlib import Path
 from ..provenance import ARCHIVE_DIR, PROCESSING_VERSION, _now
 from ..retrieval.analogs import get_analogs, haversine_km, _as_dt
 from ..store import read_table
+from ..schema import THRESHOLDS_KT
 from .contracts import standard_contracts
 from .scoring import Prediction, score_contract, skill
 
@@ -55,7 +58,8 @@ def _month_window(month: int, half: int = SEASON_HALF_WIDTH) -> list[int]:
 
 
 def _climatology(storms_before: list[dict], contract_key: str, thresholds: dict,
-                 landfall_hits: dict | None = None) -> float | None:
+                 landfall_hits: dict | None = None,
+                 hit_denoms: dict | None = None) -> float | None:
     """Unconditional base rate among storms that had already occurred. None when too thin.
 
     Covers BOTH contract families. An intensity contract compares against the share of prior
@@ -74,7 +78,20 @@ def _climatology(storms_before: list[dict], contract_key: str, thresholds: dict,
         return sum(1 for s in known if s["max_vmax_kt"] >= thr) / len(known)
     if landfall_hits is not None and contract_key in landfall_hits:
         hits = landfall_hits[contract_key]
-        return sum(1 for s in storms_before if s["storm_id"] in hits) / len(storms_before)
+        # THE DENOMINATOR IS EVERY PRIOR STORM unless the contract says otherwise. For a landfall
+        # that is right: a storm with a full track and no crossing genuinely did not cross. For a
+        # TIME-TO-EVENT contract it is not, because a storm that reached the threshold at an
+        # unrecorded hour is unknown rather than late, and rule 4 keeps unknown out of the
+        # denominator. Measured on this archive: 31 NA and 1 EP storm since 1971 reached tropical
+        # storm strength with no hour recorded. Counting them as misses would depress the
+        # reference the model is scored against, which flatters the model.
+        denom = storms_before
+        if hit_denoms is not None and contract_key in hit_denoms:
+            keep = hit_denoms[contract_key]
+            denom = [s for s in storms_before if s["storm_id"] in keep]
+        if len(denom) < 10:
+            return None
+        return sum(1 for s in denom if s["storm_id"] in hits) / len(denom)
     return None
 
 
@@ -91,6 +108,7 @@ def run_genesis_backtest(
     min_pool_season: int | None = None,
     burn_in_storms: int = 50,
     out_path: Path | None = None,
+    contracts: list | None = None,
 ) -> dict:
     """Replay every storm from its genesis moment and score the analog answer.
 
@@ -105,7 +123,9 @@ def run_genesis_backtest(
     for r in read_table("landfalls", base).to_pylist():
         landfalls.setdefault(r["storm_id"], []).append(r)
 
-    contracts = standard_contracts(regions or [])
+    # `contracts` is how the evidence-boundary research runs a wider set without widening what
+    # the daily job scores. Omitted, this is exactly what it has always been.
+    contracts = contracts or standard_contracts(regions or [])
     # storm_id sets per landfall contract, so the climatology reference can be computed
     # incrementally over storms already past without re-scanning the table each step.
     landfall_hits: dict = {}
@@ -119,6 +139,36 @@ def run_genesis_backtest(
         landfall_hits[f"landfall_{region}_hurricane"] = hur
     thresholds = {"reaches_ts_34kt": 34, "reaches_cat1_64kt": 64,
                   "reaches_cat3_96kt": 96, "reaches_cat4_113kt": 113}
+    # Any further threshold contract in the list gets its own reference. Written as an addition
+    # so the four above -- and therefore the published run -- are bit-for-bit what they were.
+    for c in contracts:
+        m = re.fullmatch(r"reaches_(\w+?)_(\d+)kt", c.key)
+        if m and c.key not in thresholds:
+            thresholds[c.key] = int(m.group(2))
+
+    # TIME-TO-EVENT REFERENCES, same shape as the landfall ones: the share of prior storms that
+    # reached the event inside the horizon, over the prior storms whose answer is KNOWN.
+    hit_denoms: dict = {}
+    genesis_by_id = {g["storm_id"]: g for g in genesis}
+    for c in contracts:
+        m = re.fullmatch(r"reaches_(\w+)_within_(\d+)h", c.key)
+        if not m:
+            continue
+        event, hours = m.group(1), int(m.group(2))
+        thr = THRESHOLDS_KT[event]
+        hit, known = set(), set()
+        for sid, st in storms.items():
+            h = (genesis_by_id.get(sid) or {}).get(f"hours_to_{event}")
+            if h is not None and h == h:
+                known.add(sid)
+                if h <= hours:
+                    hit.add(sid)
+                continue
+            pk = st.get("max_vmax_kt")
+            if pk is not None and pk == pk and pk < thr:
+                known.add(sid)          # never reached it at all: a resolved no
+        landfall_hits[c.key] = hit
+        hit_denoms[c.key] = known
 
     # Order by genesis so "storms before now" is a prefix, and climatology can be computed
     # incrementally without ever looking forward.
@@ -168,7 +218,7 @@ def run_genesis_backtest(
             p = c.predict(res)
             preds[c.key].append(Prediction(
                 storm_id=g["storm_id"], contract=c.key, made_utc=gt.isoformat(),
-                p=p, p_climatology=_climatology(prior, c.key, thresholds, landfall_hits),
+                p=p, p_climatology=_climatology(prior, c.key, thresholds, landfall_hits, hit_denoms),
                 outcome=c.resolve(st, g, lf),
                 n_analogs=res.n_cases, ess=res.effective_sample_size,
                 refused_reason=None if p is not None else "analog pool below min_sample",

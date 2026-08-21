@@ -769,8 +769,33 @@ already being written on every row.
 `scripts/genesis/emit_panel.py` writes `docs/data/analogs.json`; `docs/app/analogs.jsx` renders
 it as **Analog prior**, the first section of the board's Models tab. The panel is a renderer
 and nothing else: every number on it is a field of the payload, and the payload is a call to
-`get_analogs`. Nothing is recomputed in the browser, so there is no second implementation of
-any rate to drift from this one.
+`get_analogs`. Nothing is recomputed **for this panel**, so there is no second implementation of
+any rate behind it.
+
+### One methodology, several execution surfaces
+
+That rule once read "nothing is recomputed in the browser", full stop. The Storm Atlas cannot
+honour it literally — a click anywhere on the ocean, at any radius, over any month range, is not
+a question a precomputed payload can answer — so it honours the rule's *purpose* instead:
+
+> There is still exactly **one** methodology. `retrieval/analogs.py` defines it. It now has more
+> than one execution surface, and every surface must be **provably** the same thing.
+
+The Atlas ships a transliteration of that module, and `scripts/test-atlas-parity.mjs` answers 42
+query vectors with both surfaces and compares them field by field — every count, every rate, both
+Wilson bounds, the weighted rate, every time-to-event percentile, every gap string and every
+refusal reason verbatim. Exact wherever the arithmetic is exactly specified; a declared 1e-9
+relative tolerance only where a value passes through `exp`, `sin`, `cos` or `asin`, which CPython
+and V8 are free to round differently in the last bit. The measured worst case is printed on every
+run rather than assumed, and stands at 1.4e-15.
+
+`METHODOLOGY_VERSION` makes a methodology change a versioned event rather than a silent
+divergence. Stated precisely, because the earlier wording here overstated it: the browser does
+not declare the constant, it reads the value the packer baked into the core pack header, so the
+version check compares a committed pack against a freshly emitted expectation — a staleness gate
+that catches a forgotten `atlas-pack`. What actually proves the two surfaces agree is the 42
+vectors, answered by both and compared field by field. The constant makes the change visible;
+the vectors make it safe.
 
 ### What each entry carries
 

@@ -345,8 +345,9 @@ the Atlas transliterates `scripts/genesis/retrieval/analogs.py` into JavaScript,
 field: exact for every count, every gap string and every matched storm; a declared 1e-9
 tolerance only for the weights, which pass through `exp` and `asin` where CPython's libm and
 V8's are free to differ in the last bit. The measured worst case is 1.4e-15. A `METHODOLOGY_VERSION`
-constant is declared by both and asserted equal, so a methodology change is a versioned event
-rather than a silent divergence.
+constant makes a methodology change a versioned event rather than a silent one — precisely: the
+browser reads it from the pack header rather than declaring it, so the version check is a
+staleness gate on the committed pack, and the vectors are what prove the two surfaces agree.
 
 **It publishes counts, not rates.** Phase 1 ports the matching half of the analog query — the
 pool, its effective sample size, its gaps, its pathway density. The conditioned probabilities,
@@ -356,11 +357,21 @@ obviously do. No percentage is rendered anywhere in this build except inside the
 verbatim gap prose, and `scripts/check-atlas-dom.mjs` asserts exactly that against the rendered
 DOM.
 
-Three gates run in `checks.yml`: the bundle is rebuilt and byte-compared against its source,
-every packed column is digested from the Parquet and reproduced from the pack, and the browser's
-answers are checked against the archive's own. Two more need a browser and are run by hand:
-`scripts/bench-atlas.mjs` (every performance budget, stated) and `scripts/check-atlas-dom.mjs`
-(the honesty surface, on screen).
+Every gate runs in `checks.yml`, browser gates included. The bundle is rebuilt and
+byte-compared against its source; every packed column is digested from the Parquet and
+reproduced from the pack; the browser's answers are checked against the archive's own; the
+calibration ledger is rebuilt from the backtest and byte-compared. Then Chromium is installed
+and three more run against a real DOM: `check-atlas-dom.mjs` (the honesty surface, on screen),
+`check-panel-dom.mjs` (the terminal's refusals, on screen) and `bench-atlas.mjs` (every
+performance budget, stated).
+
+Those three used to be run by hand, and between them they caught the two worst regressions of
+the last phase — a crash that took the live board from 46 honesty probes to 34, and a silently
+dropped pre-1971 observing-bias warning that every set-comparison test passed straight through.
+They take `--require-browser`, which turns their "playwright is not installed — SKIPPED" path
+into an exit 2: without it a CI step would go green forever while testing nothing. `bench-atlas`
+also takes `--ci`, which scales the wall-clock budgets ×3 for a shared runner and prints that it
+did; byte budgets are never scaled.
 
 ## One-time deployment
 

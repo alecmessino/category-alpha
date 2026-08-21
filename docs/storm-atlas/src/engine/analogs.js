@@ -6,16 +6,16 @@
  * scripts/test-atlas-parity.mjs runs both against the same query matrix and fails the build
  * when they disagree, which is the only thing that makes a second execution surface safe.
  *
- * WHAT PHASE 1 PORTS, AND WHAT IT REFUSES.
- * Ported: the spatial / seasonal / temporal filter, the environment similarity weighting, the
- * distance weighting, the effective sample size, the gaps, and the historical pathway density.
- * That is everything needed to answer "which storms formed here, and where did they go".
+ * WHAT IS PORTED. All of it, as of Phase 3.1: the spatial / seasonal / temporal filter, the
+ * environment similarity weighting, the distance weighting, the effective sample size, the
+ * gaps, the historical pathway density -- and the conditioned rates, their Wilson intervals,
+ * the weighted rates, the refusal branches and the time-to-event distributions. The rate half
+ * lives in ./rates.js.
  *
- * NOT ported: the intensity rates, the landfall rates and the time-to-event distributions --
- * every number that is a conditioned RATE. Those are Phase 3, and until they are ported and
- * proven at parity the Atlas returns UNSCOREABLE_REQUIRES_CANONICAL rather than a number it
- * computed a cheaper way. An approximate browser statistic is not a smaller version of the
- * archive's answer; it is a different answer wearing its clothes.
+ * Phase 1 returned UNSCOREABLE_REQUIRES_CANONICAL wherever a rate belonged, because an
+ * approximate browser statistic is not a smaller version of the archive's answer; it is a
+ * different answer wearing its clothes. That box is closed by proving the port at parity, not
+ * by lowering the bar.
  *
  * THE FOUR RULES, restated from the Python because they constrain this file too:
  *   1. Rates are refused below min_sample. Counts are always returned.
@@ -23,10 +23,14 @@
  *   3. Effective sample size is published beside every rate, and the gate is applied to the
  *      RAW distinct-storm count, never to the flattering ESS.
  *   4. An absent outcome is not a zero.
+ * AND A FIFTH, THIS BUILD'S OWN: a variable used to define the cohort cannot be reported as an
+ * outcome of it. Enforced in rates.js -- `conditionedOn` below is how a caller declares what it
+ * narrowed on, and the circular rows then refuse instead of returning a tautological 100%.
  */
 
 import { haversineKm, wrap180 } from "./geo.js";
 import { CATEGORIES, MIN_EVENTS_FOR_SKILL, THRESHOLDS_KT, kishEss } from "./stats.js";
+import { circularOutcomes, circularRefusal, rateResult, timeDistribution } from "./rates.js";
 
 /** The environment fields an envVector may key on, mapped to the archive column.
  *  Mirrors ENV_FIELDS in analogs.py:84 -- seven keys, and anything else is reported as a gap. */
@@ -42,16 +46,6 @@ export const ENV_FIELDS = {
 
 /** The window inside which an environment record counts as "the environment at genesis". */
 const ENV_WINDOW_S = 12 * 3600;
-
-/** What the Atlas returns instead of a statistic it has not yet proven at parity. */
-export const UNSCOREABLE_REQUIRES_CANONICAL = Object.freeze({
-  status: "UNSCOREABLE -- REQUIRES CANONICAL COMPUTATION",
-  reason:
-    "This surface publishes only what the browser can compute at proven parity with the " +
-    "archive's own methodology. The conditioned rates -- P(reaches a threshold), P(landfall " +
-    "by region), the time-to-event distributions and their Wilson intervals -- have not been " +
-    "ported yet. The archive can answer this; this build declines to approximate it.",
-});
 
 const MS_PER_MIN = 60000;
 
@@ -90,6 +84,10 @@ export function getAnalogs(archive, opts = {}) {
     regions = null,
     maxCases = null,
     trackDensityDeg = 2.0,
+    /* What the CALLER narrowed the cohort on, so the engine can refuse to report those same
+       variables as outcomes. Absent by default, which is what every parity vector uses -- with
+       no conditioning declared this function is byte-for-byte the Python. See rates.js. */
+    conditionedOn = null,
   } = opts;
 
   const gaps = [];
@@ -303,100 +301,33 @@ export function getAnalogs(archive, opts = {}) {
   const ids = new Set(cases.map((c) => c.storm_id));
   const weights = cases.map((c) => c.weight);
   const ess = kishEss(weights);
+  /* Summed here, in case order, because that is where analogs.py:601 sums it -- and a float
+     sum is order-dependent, so "the same total computed later" is not the same total. It is the
+     weighted DENOMINATOR for every landfall contract below. */
+  let wsum = 0;
+  for (const w of weights) wsum += w;
 
-  // ---- 4. landfalls for the matched storms ------------------------------------------
-  if (!A.landfalls.rows) {
-    gaps.push("the landfalls table is empty -- landfall rates cannot be computed");
-  }
-  for (const c of cases) c.landfalls = A.stormLandfalls(c.row).map(landfallView);
-
-  const known = regionsPresent(A);
-  if (regions) {
-    const unknownAsked = regions.filter((r) => !known.has(r)).sort();
-    if (unknownAsked.length) {
-      gaps.push("regions requested but absent from the landfalls table: " +
-        `[${unknownAsked.map((u) => `'${u}'`).join(", ")}]`);
-    }
-  }
-
-  // ---- 5. counts, and only counts ---------------------------------------------------
-  //
-  // The archive's first rule is that COUNTS ARE ALWAYS RETURNED and a RATE is returned only
-  // when enough distinct storms support it. This ports the counting half of that -- the
-  // numerator, the denominator, and the storms the outcome could not be determined for -- and
-  // stops there. No division, no interval, no weighted rate: those are the conditioned
-  // statistics this build has not proven at parity, and `rates` says so.
-  //
-  // Rule 4 is what makes the denominator worth having: a storm whose intensity was never
-  // recorded leaves the denominator and is counted in n_unknown. It is not a storm that failed
-  // to reach hurricane strength.
-  const intensityCounts = {};
-  for (const cat of CATEGORIES) {
-    const thr = THRESHOLDS_KT[cat];
-    let count = 0;
-    let known = 0;
-    let unknown = 0;
-    for (const c of cases) {
-      const v = c.peak_vmax_kt;
-      if (v === null || v === undefined || Number.isNaN(v)) { unknown++; continue; }
-      known++;
-      if (v >= thr) count++;
-    }
-    intensityCounts[cat] = { count, n_storms: known, n_unknown: unknown };
-  }
-
-  // Regions reported are the ones the matched storms actually hit, plus any the caller named
-  // that the archive knows about -- so a named region reports an explicit zero rather than
-  // silence. analogs.py:650.
-  const hitRegions = new Set();
-  for (const c of cases) for (const l of c.landfalls) if (l.region) hitRegions.add(l.region);
-  const asked = new Set(regions || []);
-  const reportRegions = [...new Set([...hitRegions, ...[...asked].filter((r) => known.has(r))])]
-    .sort();
-  const landfallCounts = {};
-  for (const region of reportRegions) {
-    let any = 0;
-    let hur = 0;
-    for (const c of cases) {
-      const hits = c.landfalls.filter((l) => l.region === region && !l.suspect_relocation);
-      if (hits.length) any++;
-      if (hits.some((h) => h.hurricane)) hur++;
-    }
-    landfallCounts[region] = {
-      any: { count: any, n_storms: cases.length, n_unknown: 0 },
-      hurricane: { count: hur, n_storms: cases.length, n_unknown: 0 },
-    };
-  }
-
-  // Which of these contracts can NEVER carry a skill number, from the record itself. This is a
-  // property of the archive, not of one query: the Hawaii hurricane-landfall contract has one
-  // event in the modern record, so no query, however framed, can produce a validated
-  // probability for it.
-  const unscoreable = {};
-  for (const region of reportRegions) {
-    for (const kind of ["any", "hurricane"]) {
-      const n = archiveEventCounts(A)[`${region}:${kind}`] || 0;
-      if (n < MIN_EVENTS_FOR_SKILL) {
-        unscoreable[`${region}:${kind}`] = {
-          archive_events: n,
-          required: MIN_EVENTS_FOR_SKILL,
-          status: "BASE RATE ONLY -- unscoreable",
-          reason: `only ${n} storm(s) in the entire archive carry this outcome, below the ` +
-            `${MIN_EVENTS_FOR_SKILL} distinct events any skill score requires. A base rate can ` +
-            "be quoted with its interval; a calibrated or skill-scored probability cannot, and " +
-            "this archive will not produce one.",
-        };
-      }
-    }
-  }
+  /* Landfalls, outcomes, transit times and the unscoreable contracts -- all of it delegated to
+     scoreCases so that a cohort assembled any other way is scored by the SAME code. wsum is
+     passed rather than recomputed: it must be summed in case order (analogs.py:601) and a float
+     sum computed elsewhere is a different float. */
+  /* THE SCOPE, derived the same way analogs.py derives it: the basins the matches actually
+     occupy, falling back to the declared basins and then to the whole archive when nothing
+     matched. An empty pool still publishes its refusals -- the count was never a property of
+     the match -- so it must not derive a scope from no storms. */
+  const matchedBasins = [...new Set(cases.map((c) => c.basin).filter(Boolean))].sort();
+  const scopeBasins = matchedBasins.length ? matchedBasins : (basins ? [...basins].sort() : null);
+  const scored = scoreCases(A, cases, {
+    minSample, regions, conditionedOn, wsum, gaps,
+    scope: { basins: scopeBasins, minSeason: minPoolSeason ?? null, maxSeason: null },
+  });
+  const { intensity, landfall, time_to_event: timeToEvent, unscoreable } = scored;
 
   // ---- 6. historical pathway density ------------------------------------------------
   const trackDensity = pathwayDensity(A, cases, trackDensityDeg);
 
   // THE GATE COUNTS STORMS; THE WEIGHTING CAN STILL CONCENTRATE ON A HANDFUL.
   const nCases = cases.length;
-  let wsum = 0;
-  for (const w of weights) wsum += w;
   if (wsum > 0 && ess < minSample && minSample <= nCases) {
     gaps.push(
       `effective sample size is ${fmt1(ess)} from ${nCases} matched storms -- the weighting ` +
@@ -416,8 +347,9 @@ export function getAnalogs(archive, opts = {}) {
     },
     n_cases: nCases,
     env_unmatched_excluded: envUnmatched,
-    intensity_counts: intensityCounts,
-    landfall_counts: landfallCounts,
+    intensity,
+    landfall,
+    time_to_event: timeToEvent,
     unscoreable,
     effective_sample_size: ess,
     sufficient: nCases >= minSample,
@@ -425,8 +357,9 @@ export function getAnalogs(archive, opts = {}) {
     cases,
     track_density: trackDensity,
     gaps,
-    // Everything a conditioned rate would answer, and the reason this build will not.
-    rates: UNSCOREABLE_REQUIRES_CANONICAL,
+    /* What the cohort was narrowed on, echoed back so a reader can see which rows refuse and
+       why without inferring it from the refusal text. Null when nothing was declared. */
+    conditioned_on: conditionedOn,
     provenance: {
       methodology_version: A.core.header.methodology_version,
       processing_version: A.core.header.processing_version,
@@ -532,26 +465,88 @@ function fmt1(x) {
   return (x < 0 || Object.is(x, -0)) ? "-" + s : s;
 }
 
-/* Distinct storms per landfall contract across the WHOLE archive, for scoreability.
-   THIS IS NOT THE MATCHED SAMPLE -- whether a contract can ever carry a skill number is a
-   property of the record, not of one query. Cached: it is a full scan of the landfall table and
-   the answer does not change while the page is open. */
+/**
+ * How the counted population is named on screen.
+ *
+ * Transliterated word for word from `scope_phrase` in analogs.py. The refusal `reason` built
+ * from it is compared VERBATIM across the two surfaces by test-atlas-parity.mjs, so a
+ * difference of one comma here fails the build -- which is the intended tripwire.
+ */
+export function scopePhrase(basins, minSeason, maxSeason) {
+  let where = basins && basins.length
+    ? `in the ${[...basins].sort().join(", ")} basin` : "in the archive";
+  if (basins && basins.length > 1) where += "s";
+  if (minSeason !== null && minSeason !== undefined
+    && maxSeason !== null && maxSeason !== undefined) {
+    return `${where} between ${minSeason} and ${maxSeason}`;
+  }
+  if (minSeason !== null && minSeason !== undefined) return `${where} since ${minSeason}`;
+  if (maxSeason !== null && maxSeason !== undefined) return `${where} up to ${maxSeason}`;
+  return basins && basins.length ? where : "in the entire archive";
+}
+
+/* Distinct storms per landfall contract, over the population a query can draw from.
+   THIS IS NOT THE MATCHED SAMPLE -- whether a contract can carry a skill number is a property of
+   the RECORD; whether enough matched storms have a known outcome is a property of the SAMPLE,
+   and min_sample governs that.
+
+   WHICH RECORD, THOUGH. Counting the WHOLE archive was the bug methodology 1.1.0 fixed: an east
+   Pacific query asking about a US mainland landfall passed the gate on 699 Atlantic events and
+   six Pacific ones. Basin and era bound the population a query can draw from, so they bound the
+   count; months, radius and subbasin deliberately do not, because they narrow WITHIN a drawable
+   population and that is the matched sample again.
+
+   Cached per scope. The old cache keyed on the archive alone, which would now serve the first
+   scope's answer to every later one -- the shape would be right and the numbers wrong. */
 const _eventCounts = new WeakMap();
-function archiveEventCounts(A) {
-  const hit = _eventCounts.get(A);
+
+export function scopeKeyOf(scope) {
+  if (!scope) return "*";
+  const b = scope.basins && scope.basins.length ? [...scope.basins].sort().join(",") : "*";
+  return `${b}|${scope.minSeason ?? "*"}|${scope.maxSeason ?? "*"}`;
+}
+
+function archiveEventCounts(A, scope = null) {
+  let per = _eventCounts.get(A);
+  if (!per) { per = new Map(); _eventCounts.set(A, per); }
+  const key = scopeKeyOf(scope);
+  const hit = per.get(key);
   if (hit) return hit;
+
+  const S = A.storms;
+  const want = scope && scope.basins && scope.basins.length ? new Set(scope.basins) : null;
+  const lo = scope && scope.minSeason !== null && scope.minSeason !== undefined
+    ? scope.minSeason : null;
+  const hi = scope && scope.maxSeason !== null && scope.maxSeason !== undefined
+    ? scope.maxSeason : null;
+
+  /* The landfalls table carries no basin, so basin and era come through the storms table.
+     Built once per scope rather than per row. */
+  let inScope = null;
+  if (want || lo !== null || hi !== null) {
+    inScope = new Set();
+    for (let i = 0; i < A.nStorms; i++) {
+      if (want && !want.has(S.str("basin", i))) continue;
+      const season = S.num("season", i);
+      if (lo !== null && (season === null || season < lo)) continue;
+      if (hi !== null && (season === null || season > hi)) continue;
+      inScope.add(S.str("storm_id", i));
+    }
+  }
+
   const L = A.landfalls;
   const sets = new Map();
   for (let k = 0; k < L.rows; k++) {
     const region = L.str("region", k);
     if (!region || L.bool("suspect_relocation", k) === true) continue;
     const sid = A.storms.str("storm_id", L.raw("storm_row")[k]);
+    if (inScope && !inScope.has(sid)) continue;
     add(sets, `${region}:any`, sid);
     if (L.bool("hurricane_at_landfall", k) === true) add(sets, `${region}:hurricane`, sid);
   }
   const out = {};
   for (const [k, v] of sets) out[k] = v.size;
-  _eventCounts.set(A, out);
+  per.set(key, out);
   return out;
 }
 
@@ -585,4 +580,205 @@ function landfallView(l) {
     detection: l.detection,
     suspect_relocation: l.suspect_relocation === true,
   };
+}
+
+/**
+ * Score a set of cases: landfalls, intensity outcomes, transit times, unscoreable contracts.
+ *
+ * EXTRACTED SO THAT A COHORT ASSEMBLED ANY OTHER WAY IS SCORED BY THE SAME CODE.
+ * getAnalogs builds its cases by distance from a genesis point; the cohort layer builds them
+ * from a filter with no spatial term at all. Both must produce outcomes the same way or the
+ * Atlas has two answers again -- which is the whole thing this phase exists to end. The parity
+ * harness proves this extraction moved nothing: getAnalogs' output is unchanged by it.
+ *
+ * @param A            the loaded Archive
+ * @param cases        case objects; each needs {row, storm_id, weight, peak_vmax_kt,
+ *                     hours_to_ts, hours_to_cat1, hours_to_cat3, genesis_utc}. `landfalls` is
+ *                     populated here.
+ * @param wsum         sum of case weights, summed IN CASE ORDER by the caller. Not recomputed
+ *                     here: a float sum is order-dependent, so the caller owns the order.
+ * @param gaps         appended to, not replaced.
+ */
+export function scoreCases(A, cases, {
+  minSample = 10, regions = null, conditionedOn = null, wsum = 0, gaps = [],
+  /* THE POPULATION THIS QUERY CAN DRAW FROM: {basins, minSeason, maxSeason}, or null for the
+     whole archive. It decides what the BASE RATE ONLY gate counts over, and nothing else.
+     scoreCases is the one seam both surfaces score through, so it is the one place the scope
+     has to arrive -- and until methodology 1.1.0 it arrived nowhere, which is exactly how the
+     gate came to count a population no query could reach. */
+  scope = null,
+} = {}) {
+  const circular = circularOutcomes(conditionedOn);
+  const becamePeak = conditionedOn && conditionedOn.minPeak
+    ? `a peak intensity of ${conditionedOn.minPeak} or above` : null;
+  // ---- 4. landfalls for the matched storms ------------------------------------------
+  if (!A.landfalls.rows) {
+    gaps.push("the landfalls table is empty -- landfall rates cannot be computed");
+  }
+  for (const c of cases) c.landfalls = A.stormLandfalls(c.row).map(landfallView);
+
+  const knownRegions = regionsPresent(A);
+  if (regions) {
+    const unknownAsked = regions.filter((r) => !knownRegions.has(r)).sort();
+    if (unknownAsked.length) {
+      gaps.push("regions requested but absent from the landfalls table: " +
+        `[${unknownAsked.map((u) => `'${u}'`).join(", ")}]`);
+    }
+  }
+
+  // ---- 5. intensity outcomes --------------------------------------------------------
+  //
+  // analogs.py:624. Rule 4 is what makes the denominator worth having: a storm whose intensity
+  // was never recorded leaves the denominator and is counted in n_unknown. It is not a storm
+  // that failed to reach hurricane strength.
+  //
+  // The weighted sums accumulate INSIDE this loop, in case order, exactly where the Python
+  // accumulates them. Summing them anywhere else would give a different float.
+  const intensity = {};
+  for (const cat of CATEGORIES) {
+    const thr = THRESHOLDS_KT[cat];
+    let count = 0;
+    let known = 0;
+    let unknown = 0;
+    let wnum = 0;
+    let wden = 0;
+    for (const c of cases) {
+      const v = c.peak_vmax_kt;
+      if (v === null || v === undefined || Number.isNaN(v)) { unknown++; continue; }
+      known++;
+      wden += c.weight;
+      if (v >= thr) { count++; wnum += c.weight; }
+    }
+    intensity[cat] = circular.intensity.has(cat)
+      ? circularRefusal(count, known, unknown, becamePeak)
+      : rateResult(count, known, unknown, minSample, wnum, wden);
+  }
+
+  // Regions reported are the ones the matched storms actually hit, plus any the caller named
+  // that the archive knows about -- so a named region reports an explicit zero rather than
+  // silence. analogs.py:650.
+  const hitRegions = new Set();
+  for (const c of cases) for (const l of c.landfalls) if (l.region) hitRegions.add(l.region);
+  const asked = new Set(regions || []);
+  const reportRegions = [...new Set([...hitRegions, ...[...asked].filter((r) => knownRegions.has(r))])]
+    .sort();
+  /* analogs.py:675. The denominator is EVERY matched case, not just the ones that came ashore,
+     and the weighted denominator is wsum for the same reason: the question is "what fraction of
+     the storms that formed here reached this coast", so a storm that went out to sea is a
+     measured no, not a missing value. Hence n_unknown = 0 -- there is nothing unknown about it. */
+  const landfall = {};
+  for (const region of reportRegions) {
+    let any = 0;
+    let hur = 0;
+    let wAny = 0;
+    let wHur = 0;
+    for (const c of cases) {
+      const hits = c.landfalls.filter((l) => l.region === region && !l.suspect_relocation);
+      if (hits.length) { any++; wAny += c.weight; }
+      if (hits.some((h) => h.hurricane)) { hur++; wHur += c.weight; }
+    }
+    const because = conditionedOn && conditionedOn.landfallRegion === region
+      ? `a landfall in ${region}` +
+        (conditionedOn.landfallHurricaneOnly ? " at hurricane intensity" : "")
+      : null;
+    landfall[region] = {
+      any: circular.landfall.has(`${region}:any`)
+        ? circularRefusal(any, cases.length, 0, because)
+        : rateResult(any, cases.length, 0, minSample, wAny, wsum),
+      hurricane: circular.landfall.has(`${region}:hurricane`)
+        ? circularRefusal(hur, cases.length, 0, because)
+        : rateResult(hur, cases.length, 0, minSample, wHur, wsum),
+    };
+  }
+
+  /* THE DENOMINATOR NOTE. A cohort conditioned on "made landfall anywhere" makes no single
+     contract circular -- regions do not partition, so no cell is 100% by construction and
+     refusing them would be over-refusing a real answer. What it does do is change what every
+     landfall denominator MEANS: the storms that never came ashore have been removed from it, so
+     each regional rate is now a share of the landfalling population rather than of the cohort a
+     reader thinks they built. That is a selection effect, not a tautology, and it gets a
+     statement rather than a refusal -- attached here so it travels with the numbers. */
+  const landfallNote = conditionedOn && conditionedOn.landfallAny
+    ? `This cohort was defined by making landfall SOMEWHERE, so every rate below is a share of ` +
+      `the ${cases.length} storms that came ashore — not of all storms. Regions do not ` +
+      "partition (a storm can appear in several), so no single rate is circular, but each is " +
+      "higher than the same contract over an unselected cohort would be."
+    : null;
+
+  /* ---- 7. time-to-event distributions (analogs.py:693) ------------------------------
+   *
+   * NEVER SUPPRESSED BY THE FIFTH RULE. If a cohort is conditioned on reaching Cat 3 then the
+   * RATE is a tautology, but WHEN those storms reached it is a real distribution and usually
+   * the most useful thing such a cohort has to say. Only rates go circular; timings do not.
+   *
+   * The landfall series appends one value PER LANDFALL, not per storm -- a storm that came
+   * ashore in a region twice contributes both transits, which is what the Python does. */
+  const timeToEvent = {
+    ts: timeDistribution(cases.map((c) => c.hours_to_ts)),
+    cat1: timeDistribution(cases.map((c) => c.hours_to_cat1)),
+    cat3: timeDistribution(cases.map((c) => c.hours_to_cat3)),
+  };
+  for (const region of reportRegions) {
+    const hrs = [];
+    for (const c of cases) {
+      const gt = Date.parse(c.genesis_utc);
+      for (const l of c.landfalls) {
+        if (l.region !== region || l.suspect_relocation) continue;
+        const lt = l.landfall_utc === null ? NaN : Date.parse(l.landfall_utc);
+        if (Number.isFinite(gt) && Number.isFinite(lt)) hrs.push((lt - gt) / 3600000);
+      }
+    }
+    timeToEvent[`landfall_${region}`] = timeDistribution(hrs);
+  }
+
+  /* Which of these contracts can NEVER carry a skill number -- and whether that is a limit of
+     the RECORD or a limit of the POPULATION THIS QUERY ASKED ABOUT. Two different statements,
+     conflated until methodology 1.1.0, and the difference is what a reader can act on.
+
+     Hawaii hurricane landfall has two events in the whole archive: irreducible, and no cohort
+     helps. CONUS landfall has 699, six of them east Pacific: an east Pacific query cannot reach
+     them, but a different query can, and saying so is strictly more useful than silence. */
+  const scoped = archiveEventCounts(A, scope);
+  const global = archiveEventCounts(A, null);
+  const where = scopePhrase(
+    scope && scope.basins, scope && scope.minSeason, scope && scope.maxSeason);
+
+  const unscoreable = {};
+  for (const region of reportRegions) {
+    for (const kind of ["any", "hurricane"]) {
+      const n = scoped[`${region}:${kind}`] || 0;
+      if (n >= MIN_EVENTS_FOR_SKILL) continue;
+      const total = global[`${region}:${kind}`] || 0;
+      if (total < MIN_EVENTS_FOR_SKILL) {
+        // IRREDUCIBLE: no population in this archive carries enough.
+        unscoreable[`${region}:${kind}`] = {
+          archive_events: total,
+          scope_events: n,
+          scope: where,
+          required: MIN_EVENTS_FOR_SKILL,
+          status: "BASE RATE ONLY -- unscoreable",
+          reason: `only ${total} storm(s) in the entire archive carry this outcome, below the ` +
+            `${MIN_EVENTS_FOR_SKILL} distinct events any skill score requires. A base rate can ` +
+            "be quoted with its interval; a calibrated or skill-scored probability cannot, and " +
+            "this archive will not produce one.",
+        };
+      } else {
+        // OUT OF SCOPE: the events exist, somewhere this query cannot reach.
+        unscoreable[`${region}:${kind}`] = {
+          archive_events: total,
+          scope_events: n,
+          scope: where,
+          required: MIN_EVENTS_FOR_SKILL,
+          status: "OUT OF SCOPE -- unscoreable here",
+          reason: `only ${n} storm(s) ${where} carry this outcome, below the ` +
+            `${MIN_EVENTS_FOR_SKILL} distinct events any skill score requires. The archive ` +
+            `holds ${total} in total, outside the population this query draws from. Widen the ` +
+            "basin or the era and this contract becomes scoreable; a skill number over a " +
+            "population that does not carry the events would be borrowed from one that does.",
+        };
+      }
+    }
+  }
+  return { intensity, landfall, time_to_event: timeToEvent, unscoreable, reportRegions,
+           landfall_note: landfallNote };
 }

@@ -72,6 +72,27 @@ def cmd_analogs(args) -> int:
     return 0 if res.n_cases else 1
 
 
+def cmd_evidence_boundary(args) -> int:
+    """Research only. Writes under research/, touches no published artifact."""
+    from genesis.build.build_evidence_boundary import build
+    out = build(archive_dir=_archive(args))
+    c = out["criterion"]
+    sa = out["primary_landfall"]["scope_aware"]
+    aw = out["primary_landfall"]["archive_wide"]
+    print(f"  {out['n_contracts']} contracts over {', '.join(out['basins'])}")
+    for name, t in (("scope-aware ", sa), ("archive-wide", aw)):
+        se = "n/a" if t["sensitivity"] is None else f"{t['sensitivity']:.2f}"
+        sp = "n/a" if t["specificity"] is None else f"{t['specificity']:.2f}"
+        print(f"  landfall {name}  sensitivity {se}  specificity {sp}"
+              f"   ({t['refused_unsupported']}/{t['n_unsupported']} unsupported refused, "
+              f"{t['allowed_learnable']}/{t['n_learnable']} learnable allowed)")
+    print(f"  criterion (>={c['sensitivity_min']:.2f} / >={c['specificity_min']:.2f}): "
+          f"{'MET' if c['met'] else 'NOT MET'}")
+    u = out["uncovered_timing"]
+    print(f"  uncovered time-to-event: {u['n_unsupported']} of {u['n']} unsupported")
+    return 0
+
+
 def cmd_backtest(args) -> int:
     from genesis.backtest.harness import run_genesis_backtest, run_disturbance_backtest
     out = run_genesis_backtest(
@@ -203,6 +224,30 @@ def cmd_atlas_pack(args) -> int:
     return 0
 
 
+def cmd_atlas_calibration(args) -> int:
+    """Project the genesis-conditioned backtest into the Atlas's calibration ledger.
+
+    This does NOT run the backtest -- it reads the one the archive already scored and reshapes
+    it for the browser, adding the scope audit that compares each contract's archive-wide event
+    count (the population the refusal gate counts) against the events actually observed in the
+    replayed population (the population a query can draw from). Where those disagree, the gate
+    is passing a contract the evidence does not support, and the ledger says so.
+    """
+    from genesis.build.build_calibration import build as build_cal
+    r = build_cal(archive_dir=_archive(args), out_dir=Path(args.out) if args.out else None)
+    a = r["audit"]
+    print(f"  {r['path']}  ({r['bytes']:,} B, {r['contracts']} contracts)")
+    print(f"  {a['n_beat_climatology']} of {a['n_scored']} scored contracts beat climatology")
+    print(f"  fewest replay events WITH skill: {a['min_replay_events_with_skill']}  ·  "
+          f"most WITHOUT: {a['max_replay_events_without_skill']}")
+    if a["n_gate_missed"]:
+        print(f"  {a['n_gate_missed']} contract(s) passed the archive-wide gate and did NOT "
+              "beat climatology:")
+        for k in a["by_verdict"].get("gate_missed", []):
+            print(f"      {k}")
+    return 0
+
+
 def cmd_atlas_verify(args) -> int:
     """Emit what the browser must reproduce: pack digests and canonical analog vectors.
 
@@ -316,6 +361,11 @@ def main(argv=None) -> int:
     t.add_argument("--out")
     t.set_defaults(fn=cmd_backtest)
 
+    eb = sub.add_parser("evidence-boundary",
+                        help="research: does the refusal gate generalise past ten contracts?")
+    eb.add_argument("--archive")
+    eb.set_defaults(fn=cmd_evidence_boundary)
+
     lv = sub.add_parser("live", help="analog query for an active system, conditioned on its "
                                      "operational SHIPS run")
     lv.add_argument("--atcf", help="ATCF id, e.g. CP012026 or EP9626")
@@ -340,6 +390,11 @@ def main(argv=None) -> int:
     ap_ = sub.add_parser("atlas-pack", help="pack the archive for the Storm Atlas browser route")
     ap_.add_argument("--out", help="output directory (default docs/storm-atlas/data)")
     ap_.set_defaults(fn=cmd_atlas_pack)
+
+    ac = sub.add_parser("atlas-calibration",
+                        help="project the backtest into the Atlas's calibration ledger")
+    ac.add_argument("--out", help="output directory (default docs/storm-atlas/data)")
+    ac.set_defaults(fn=cmd_atlas_calibration)
 
     av = sub.add_parser("atlas-verify",
                         help="emit pack digests and canonical analog vectors for the JS tests")

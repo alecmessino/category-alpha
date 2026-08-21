@@ -102,12 +102,20 @@
   --at-panel:clamp(312px,20.5vw,400px);
 
   /* THE VERTICAL RHYTHM, DECLARED ONCE, because the instrument's cap below is computed from it.
-     Each of these four is both a grid track and a term in --at-frame; two copies of the same
-     number in a stylesheet is a drift waiting to happen, and here the drift would silently
+     Each of the first three is both a grid track and a term in --at-frame; two copies of the
+     same number in a stylesheet is a drift waiting to happen, and here the drift would silently
      mis-size the plate. The header is 54 rather than 58 and the transport 52 rather than 56:
      the brand block is 30px of type and the transport's tallest readout 26px, so both were
      carrying more air than they needed while the plate -- the only element whose job is to be
-     large -- was short. */
+     large -- was short.
+
+     THE TRANSPORT IS THE ONE THAT IS NOT IN THE CAP, and that is deliberate. This surface has
+     no resting transport: the row is 0px until a storm is selected or the replay clock is
+     running. Counting it anyway reserved 52px that was not there, and the plate came out 917px
+     against the 865 its aspect asks for -- 1.34 rather than 1.421. The cap is sized for the
+     RESTING state, so chrome that appears later comes out of the plate and only ever makes it
+     wider, which is the safe direction: a transport can shorten the plate but can never make
+     it portrait. */
   --at-head:54px;
   --at-band-top:26px;
   --at-band-bot:24px;
@@ -147,8 +155,7 @@
    * every pixel of height there is. */
   --at-plate-ar:1.421;
   --at-plate-w:calc(100vw - var(--at-rail) - var(--at-panel));
-  --at-chrome-h:calc(var(--at-head) + var(--at-band-top) + var(--at-band-bot)
-                     + var(--at-transport-h));
+  --at-chrome-h:calc(var(--at-head) + var(--at-band-top) + var(--at-band-bot));
   --at-frame:calc(var(--at-chrome-h) + var(--at-plate-w) / var(--at-plate-ar));
 
   /* THE PLATE'S OWN MARGIN. The graticule is ruled on the plate's edges and its longitude
@@ -219,6 +226,18 @@
 [data-atlas] .atlas-rail,[data-atlas] .atlas-panel{
   overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;
 }
+
+/* THE CALIBRATION SURFACE IS A SHELL VARIANT, not a fourth child rule.
+   Written as a variant because the media queries below cap row 2 -- at 760px it is
+   minmax(280px,46vh) -- and a full-width reading surface squeezed into 46vh of viewport would
+   be a page nobody scrolls. In this mode the rail, stage and panel are not rendered at all, so
+   the variant needs no edits inside either media block: it simply redefines the grid it is
+   laid into. */
+[data-atlas].atlas-shell[data-view="calibration"]{
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto minmax(0,1fr);
+}
+[data-atlas] .atlas-calibration{grid-column:1/-1;grid-row:2;min-width:0;min-height:0;overflow-y:auto}
 
 /* ─── header ──────────────────────────────────────────────────────────────────────────── */
 
@@ -807,7 +826,7 @@
     --at-panel-row:38vh;
     --at-plate-w:calc(100vw - var(--at-side));
     --at-chrome-h:calc(var(--at-head) + var(--at-band-top) + var(--at-band-bot)
-                       + var(--at-transport-h) + var(--at-panel-row));
+                       + var(--at-panel-row));
   }
   [data-atlas].atlas-shell{
     grid-template-columns:var(--at-side) minmax(0,1fr);

@@ -21,7 +21,6 @@
 import { readFile } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { UNSCOREABLE_REQUIRES_CANONICAL } from "../docs/storm-atlas/src/engine/analogs.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CLAIMS = join(ROOT, "docs/app/claims.js");
@@ -46,12 +45,12 @@ const marks = [...block.slice(0, block.indexOf("\n  };")).matchAll(
 
 console.log("\n[1] the registry is well formed");
 {
-  ok("five marks are declared", marks.length === 5, `found ${marks.length}`);
+  ok("six marks are declared", marks.length === 6, `found ${marks.length}`);
   ok("every key names its own mark", marks.every((m) => m.key === m.mark),
     marks.filter((m) => m.key !== m.mark).map((m) => m.key).join(", "));
   ok("every mark carries a status", marks.every((m) => m.status.length > 2));
   const glosses = [...block.matchAll(/gloss:/g)].length;
-  ok("every mark carries a gloss for the key", glosses >= 5, `${glosses} glosses`);
+  ok("every mark carries a gloss for the key", glosses >= 6, `${glosses} glosses`);
   const uniq = new Set(marks.map((m) => m.status));
   ok("no two marks share a status", uniq.size === marks.length,
     "a shared status makes the key ambiguous about which mark a panel meant");
@@ -60,21 +59,25 @@ console.log("\n[1] the registry is well formed");
 console.log("\n[2] the statuses are the engine's, verbatim");
 {
   const byKey = Object.fromEntries(marks.map((m) => [m.key, m.status]));
-  ok("`refused` is exactly what analogs.js returns for a rate it will not compute",
-    byKey.refused === UNSCOREABLE_REQUIRES_CANONICAL.status,
-    `registry ${JSON.stringify(byKey.refused)} vs engine ` +
-    JSON.stringify(UNSCOREABLE_REQUIRES_CANONICAL.status));
-
-  /* The archive-scarcity refusal is built per region and kind inside getAnalogs, so its status
-     is matched against the source literal rather than by running a query. */
   const analogs = await readFile(ANALOGS, "utf8");
-  const m = /status: "((?:[^"\\]|\\.)*)",\n\s*reason: `only \$\{n\} storm\(s\)/.exec(analogs);
-  ok("analogs.js still publishes an archive-scarcity status", !!m,
-    "the literal moved; this gate can no longer see it");
-  if (m) {
-    ok("`base` is exactly that status", byKey.base === m[1],
-      `registry ${JSON.stringify(byKey.base)} vs engine ${JSON.stringify(m[1])}`);
+
+  /* THE TWO REFUSALS METHODOLOGY 1.1.0 SPLIT. Before it there was one, and its sentence -- "no
+     cohort you can build changes that" -- was false for eleven of the twelve contracts the
+     archive holds. `base` is now only the irreducible case, counted ARCHIVE-WIDE; `oos` is the
+     resolvable one, counted over the population the query can actually reach. Both are built
+     inside getAnalogs per region and kind, so both are matched against the source literal
+     rather than by running a query. A key that documented only one of them would leave a
+     reader looking at a status with no row to look it up in -- which is what this file is
+     for. */
+  for (const [key, want] of [["base", "BASE RATE ONLY -- unscoreable"],
+                             ["oos", "OUT OF SCOPE -- unscoreable here"]]) {
+    const seen = analogs.includes(`status: "${want}"`);
+    ok(`analogs.js still publishes the \`${key}\` status`, seen,
+      "the literal moved; this gate can no longer see it");
+    ok(`\`${key}\` is exactly that status`, byKey[key] === want,
+      `registry ${JSON.stringify(byKey[key])} vs engine ${JSON.stringify(want)}`);
   }
+
   /* `notev` is the archive's withheld Saffir-Simpson class. The archive publishes the absence,
      the pack carries it as a null category, and the storm panel is where it surfaces. */
   ok("`notev` is the archive's withheld-class wording", byKey.notev === "WITHHELD");
@@ -83,28 +86,49 @@ console.log("\n[2] the statuses are the engine's, verbatim");
 
 console.log("\n[3] the panels use no mark the key does not define");
 {
+  /* The Atlas defines its states once, in ui/refusal.jsx, and each declares the Epistemic Key
+     row it corresponds to. Reading that file rather than re-listing the states here keeps this
+     gate from becoming the third copy of the thing it exists to stop drifting. */
+  const src = await readFile(join(UI, "refusal.jsx"), "utf8");
+  const states = [...src.matchAll(/\n    kind: "(\w+)",\n\s*claim: "(\w+)",\n\s*title: "([^"]+)"/g)]
+    .map((m) => ({ kind: m[1], claim: m[2], title: m[3] }));
+  ok("refusal.jsx declares six states", states.length === 6, `found ${states.length}`);
+
   const declared = new Set(marks.map((m) => m.mark));
+  ok("every Atlas state has a row in the Epistemic Key",
+    states.every((st) => declared.has(st.claim)),
+    states.filter((st) => !declared.has(st.claim)).map((st) => st.kind).join(", ") +
+    " — a reader would meet this status with nowhere to look it up");
+
+  /* Every panel that can print a refusal, named explicitly. A glob would quietly stop covering
+     a panel the day someone renamed one, which is the failure this is meant to catch. */
+  const PANELS = ["cohort-panel.jsx", "cohort-builder.jsx", "outcome-card.jsx", "env-lens.jsx",
+                  "calibration.jsx", "storm-panel.jsx", "atlas.jsx", "kit.jsx"];
+  const byKind = new Map(states.map((st) => [st.kind, st]));
   const seen = new Set();
   const bad = [];
-  for (const f of ["probe-panel.jsx", "storm-panel.jsx", "atlas.jsx", "kit.jsx", "rail.jsx"]) {
-    const text = await readFile(join(UI, f), "utf8");
+  for (const f of PANELS) {
+    let text;
+    try { text = await readFile(join(UI, f), "utf8"); }
+    catch { bad.push(`${f}: named by this gate and not on disk`); continue; }
     /* The whole opening tag, because a call site may carry a React key or a status override
        before the kind -- matching only the first attribute would silently miss a mark. */
     for (const tag of text.matchAll(/<Refusal\b([^>]*)>/g)) {
-      const k = /\bkind="(\w+)"/.exec(tag[1]);
+      const k = /\bkind=\{?["'{]?([A-Za-z_.]+)/.exec(tag[1]);
       if (!k) { bad.push(`${f}: <Refusal> with no kind`); continue; }
-      seen.add(k[1]);
-      if (!declared.has(k[1])) bad.push(`${f}: ${k[1]}`);
+      const kind = k[1].replace(/^REFUSALS\./, "");
+      /* A computed kind (refusalKindOf(u), a variable) cannot be resolved statically. It is
+         still covered: the value can only come from REFUSALS, and check-atlas-dom.mjs drives
+         the real states onto a real screen. */
+      if (/^[A-Z_]+$/.test(kind)) {
+        seen.add(kind);
+        if (!byKind.has(kind)) bad.push(`${f}: ${kind}`);
+      }
     }
   }
-  ok("every rendered mark is declared", bad.length === 0, bad.join(", "));
+  ok("every rendered state is one refusal.jsx defines", bad.length === 0, bad.join(", "));
   ok("the surface actually uses more than one", seen.size >= 3,
     `only ${[...seen].join(", ")} reach a panel`);
-  /* A key row for a mark nothing can print is furniture. Each of the five has to be reachable
-     from real archive data, which is what check-atlas-dom.mjs then exercises on the screen. */
-  const unreachable = [...declared].filter((d) => !seen.has(d));
-  ok("no key row describes a mark no panel can print", unreachable.length === 0,
-    unreachable.join(", "));
 }
 
 console.log(failures

@@ -27,14 +27,31 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { extname, join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { HERMETIC, serviceWorkerEscape } from "./lib/browser-harness.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
 const EDGE = join(ROOT, "scripts/fixtures/analogs-edge.json");
 
+/* THE GUARD THAT STOPS A VACUOUS PASS.
+ *
+ * A skip prints "SKIPPED, not passed" and exits 0, which is right on a developer's machine and
+ * catastrophic in CI: a workflow step that runs this without a browser installed goes green
+ * forever while testing nothing, and the gate that catches the failures the static checks
+ * cannot would be the gate nobody notices died. `--require-browser` turns the skip into an
+ * exit 2. CI passes it; a laptop without playwright does not have to. */
+const REQUIRE_BROWSER = process.argv.includes("--require-browser")
+  || process.env.ATLAS_REQUIRE_BROWSER === "1";
+
 let chromium;
 try { ({ chromium } = await import("playwright")); }
 catch {
+  if (REQUIRE_BROWSER) {
+    console.error("[panel-dom] playwright is REQUIRED here and is not installed.");
+    console.error("            this gate was asked to run and could not, which is a failure,");
+    console.error("            not a skip. install it or drop --require-browser.");
+    process.exit(2);
+  }
   console.log("[panel-dom] playwright is not installed - SKIPPED, not passed.");
   console.log("            npm i --no-save playwright && npx playwright install chromium");
   process.exit(0);
@@ -66,6 +83,32 @@ const TYPES = { ".html": "text/html", ".js": "text/javascript", ".jsx": "text/ba
   ".json": "application/json", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml",
   ".woff2": "font/woff2", ".woff": "font/woff", ".ico": "image/x-icon" };
 
+/* Every same-origin path the server could not find, in request order. Reported beside the
+   console errors so a failure names the file rather than describing the symptom. */
+const MISSING = [];
+
+/* BROWSER HOUSEKEEPING IS NOT A MISSING ASSET, and the list is explicit so it cannot quietly
+   grow into "ignore 404s".
+ *
+ * Chromium asks for these on its own initiative, and WHICH ones it asks for depends on the
+ * build: this container's chromium-1194 requests neither, while the build `npx playwright
+ * install` puts on a CI runner requests both. That difference turned the first CI run of this
+ * gate into 43 failures whose console message -- "Failed to load resource: the server responded
+ * with a status of 404 ()" -- named no path at all.
+ *
+ *   /favicon.ico                                  requested for the tab icon whenever a page
+ *                                                 declares only an SVG icon, as this one does.
+ *   /.well-known/appspecific/com.chrome.devtools  the automation probe Chrome 136+ makes on
+ *                                                 every navigation under DevTools protocol.
+ *
+ * Neither is requested by this application, so neither can mask an application defect. Any
+ * OTHER 404 remains fatal and is now reported with its path. */
+const BROWSER_PROBES = [
+  /^\/favicon\.ico$/,
+  /^\/\.well-known\//,
+];
+const isBrowserProbe = (p) => BROWSER_PROBES.some((re) => re.test(p));
+
 /* Serve docs/ , optionally substituting the payload the panel fetches. */
 function serve(payloadPath) {
   const server = createServer(async (req, res) => {
@@ -76,7 +119,22 @@ function serve(payloadPath) {
       const b = await readFile(file);
       res.writeHead(200, { "content-type": TYPES[extname(p)] || "application/octet-stream" });
       res.end(b);
-    } catch { res.writeHead(404); res.end("not found"); }
+    } catch {
+      /* NAME WHAT WAS MISSING. Chromium's console message for a same-origin 404 is "Failed to
+         load resource: the server responded with a status of 404 ()" with no URL in it, so a
+         run that fails on missing files reports N identical unactionable lines. Recording the
+         path here is the difference between "43 failures" and "43 requests for
+         /data/frames/....json". */
+      /* ANSWERED, NOT REFUSED. Aborting these at the route layer did not work: the DevTools
+         probe is issued by the BROWSER, outside the page's frame tree, so page.route never
+         sees it -- it reached the server, 404ed, and Chromium logged a console error carrying
+         no URL. Answering 204 here ends it at the only place that sees the request. The file
+         is still tried first, so adding a real /favicon.ico later just serves it. */
+      if (isBrowserProbe(p)) { res.writeHead(204); res.end(); return; }
+      MISSING.push(p);
+      res.writeHead(404);
+      res.end("not found");
+    }
   });
   return new Promise((r) => server.listen(0, () => r(server)));
 }
@@ -99,11 +157,19 @@ const PROBES = [
      that matched NOTHING still carries it — and the no-analogs state is exactly where the
      temptation to render nothing is strongest. This locks the statement to that state rather
      than to the page: it must appear within the empty entry, not merely somewhere below it. */
+  /* The irreducible refusal, pinned on the fixture where it is guaranteed. An entry that
+     matched NOTHING still carries it, because the count was never a property of the match --
+     and 1.1.0's scope falls back to the whole archive exactly so that stays true. */
   ["BASE RATE ONLY survives an empty pool", (t) => {
     const i = t.search(/no analogs|0 storms matched/i);
     return i >= 0 && /BASE RATE ONLY/i.test(t.slice(i, i + 1600));
   }, "fixture"],
-  ["a BASE RATE ONLY badge",        /BASE RATE ONLY/i,                                             "always"],
+  /* EITHER BADGE, on the live payload. Methodology 1.1.0 split the refusal: BASE RATE ONLY is
+     now only a limit of the RECORD, and a contract the query merely cannot reach is OUT OF
+     SCOPE. The committed payload predates the split and carries the first; the next daily
+     emit will carry both. The property under test is that a refused contract is BADGED, not
+     which of the two it earned -- the fixture probe below pins the irreducible one. */
+  ["a refusal badge",               /BASE RATE ONLY|OUT OF SCOPE/i,                                "always"],
   ["genesis-vs-current statement",  /genesis/i,                                                    "always"],
 ];
 
@@ -111,7 +177,7 @@ async function run(label, payloadPath, kind) {
   const server = await serve(payloadPath);
   const port = server.address().port;
   const browser = await chromium.launch(LAUNCH);
-  const page = await browser.newPage({ viewport: { width: 2560, height: 1600 } });
+  const page = await browser.newPage({ viewport: { width: 2560, height: 1600 }, ...HERMETIC });
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
   page.on("console", (m) => {
@@ -133,6 +199,13 @@ async function run(label, payloadPath, kind) {
   catch { errors.push("the panel's payload fetch never resolved"); }
   await page.waitForTimeout(2000);
 
+  /* THE ISOLATION HELD. page.route cannot see service-worker fetches, so blocking the worker
+     is the only thing standing between this check and the open internet. Asserted, not
+     assumed: it was assumed once, and the escape stayed invisible until a runner with
+     egress this container does not have ran it. See lib/browser-harness.mjs. */
+  const escaped = await serviceWorkerEscape(page);
+  if (escaped) errors.push("isolation: " + escaped);
+
   const text = await page.evaluate(() => document.body.innerText);
   // The collapsed summary is a separate render path: MT_Section shows `summary` only when
   // closed, and the parent reads it from a payload that lands after mount.
@@ -152,6 +225,12 @@ async function run(label, payloadPath, kind) {
   console.log(`\n=== ${label} ===`);
   console.log(`page errors: ${errors.length}`);
   errors.slice(0, 8).forEach((e) => console.log("   " + e));
+  if (MISSING.length) {
+    const uniq = [...new Set(MISSING)];
+    console.log(`   ${MISSING.length} request(s) 404ed, ${uniq.length} distinct path(s):`);
+    uniq.slice(0, 12).forEach((m) => console.log("     404 " + m));
+    MISSING.length = 0;
+  }
   let missing = 0;
   for (const [name, re, when] of PROBES) {
     const hit = typeof re === "function" ? re(text) : re.test(text);
@@ -183,7 +262,7 @@ async function runOverviewBoot() {
   const server = await serve(null);
   const port = server.address().port;
   const browser = await chromium.launch(LAUNCH);
-  const page = await browser.newPage({ viewport: { width: 2560, height: 1600 } });
+  const page = await browser.newPage({ viewport: { width: 2560, height: 1600 }, ...HERMETIC });
   const errors = [];
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
   page.on("console", (m) => {
@@ -193,6 +272,13 @@ async function runOverviewBoot() {
   await page.route("**/*", (r) => r.request().url().startsWith(`http://127.0.0.1:${port}`) ? r.continue() : r.abort());
   await page.goto(`http://127.0.0.1:${port}/`, { waitUntil: "load", timeout: 60000 });
   await page.waitForTimeout(1500);
+
+  /* THE ISOLATION HELD. page.route cannot see service-worker fetches, so blocking the worker
+     is the only thing standing between this check and the open internet. Asserted, not
+     assumed: it was assumed once, and the escape stayed invisible until a runner with
+     egress this container does not have ran it. See lib/browser-harness.mjs. */
+  const escaped = await serviceWorkerEscape(page);
+  if (escaped) errors.push("isolation: " + escaped);
 
   console.log("\n=== overview boot: a storm in the feed, none selected ===");
   let bad = 0;
@@ -243,6 +329,12 @@ async function runOverviewBoot() {
   server.close();
   console.log(`page errors: ${errors.length}`);
   errors.slice(0, 8).forEach((e) => console.log("   " + e));
+  if (MISSING.length) {
+    const uniq = [...new Set(MISSING)];
+    console.log(`   ${MISSING.length} request(s) 404ed, ${uniq.length} distinct path(s):`);
+    uniq.slice(0, 12).forEach((m) => console.log("     404 " + m));
+    MISSING.length = 0;
+  }
   return errors.length + bad;
 }
 

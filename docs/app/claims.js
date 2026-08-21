@@ -883,9 +883,12 @@
     };
   });
 
-  /* BASE RATE ONLY. The modern record holds one Hawaii hurricane landfall, so that
-     contract has a base rate and cannot have a validated model — and no skill number for
-     it exists anywhere in this repository for a panel to display. */
+  /* BASE RATE ONLY and OUT OF SCOPE. Methodology 1.1.0 split these, because they had been
+     conflated and only one of them was true: the archive holds two Hawaii hurricane landfalls
+     and no query can validate that contract, but it holds 699 CONUS landfalls and an east
+     Pacific query simply cannot reach them. The first is a limit of the record; the second is a
+     limit of the question. Neither produces a skill number, and no such number exists anywhere
+     in this repository for a panel to display. */
   define("analogs.scoring", "genesis", () => {
     const a = analogsPayload();
     const rows = [];
@@ -893,10 +896,13 @@
       if (rows.indexOf(k) < 0) rows.push(k);
     }));
     return {
-      short: "BASE RATE ONLY: too few events in the archive for a calibrated or skill-scored probability, so it"
-           + " publishes the base rate with its interval and produces no skill number for these contracts at all.",
-      text: "BASE RATE ONLY marks a contract the archive holds too few events of to support a calibrated or"
-          + " skill-scored probability. It publishes the empirical base rate with its interval and refuses to"
+      short: "BASE RATE ONLY and OUT OF SCOPE: too few events to support a calibrated or skill-scored"
+           + " probability — of the record, or of the population this query draws from — so it publishes the"
+           + " base rate with its interval and produces no skill number for these contracts at all.",
+      text: "A contract is refused when fewer than the required distinct storms carry the outcome. BASE RATE"
+          + " ONLY means the whole archive holds too few, and no cohort changes that. OUT OF SCOPE means the"
+          + " events exist but not in the population this query draws from — its basins and era — and says"
+          + " where they are instead. Both publish the empirical base rate with its interval and refuse to"
           + " produce a skill number, so no such number exists for these contracts anywhere in this repository"
           + (rows.length ? ": " + rows.sort().map((k) => k.replace(":", " ")).join(", ") : "") + ".",
       ok: rows.length === 0,
@@ -989,11 +995,22 @@
     ok: true,
   }));
   define("atlas.rates", "none", () => ({
-    text: "This surface publishes counts, not conditioned rates. The probabilities, their "
-        + "Wilson intervals and the skill numbers are computed by the archive's Python and "
-        + "have not yet been ported to the browser at proven parity; until they are, the "
-        + "Atlas declines rather than approximating them.",
-    ok: false,
+    text: "These are GENESIS-CONDITIONED rates: they assume a tropical cyclone forms. To "
+        + "combine with a formation probability, multiply — P(reaches X) = P(forms) × "
+        + "P(reaches X | forms). Landfall does NOT decompose that way and is counted jointly "
+        + "here, never as a product of two marginals. Every rate is computed in the browser by "
+        + "a transliteration of the archive's own Python, compared field by field against it "
+        + "on every build; a rate the sample cannot support is refused rather than shown.",
+    ok: true,
+  }));
+  define("atlas.conditioning", "none", () => ({
+    text: "A variable used to define a cohort is not reported as an outcome of it. Narrow to "
+        + "storms that reached Category 3 and the Category 3 row shows its count and then "
+        + "declines to give a rate, because that rate would be 100% by construction rather "
+        + "than by evidence. Thresholds above the condition are still real outcomes and are "
+        + "still reported, and time-to-event is never suppressed — when those storms got there "
+        + "remains a genuine distribution.",
+    ok: true,
   }));
   define("atlas.pathway", "none", () => ({
     text: "Historical pathway frequency counts the distinct storms that passed through each "
@@ -1074,6 +1091,13 @@
       gloss: "Too few events of this kind exist archive-wide to score a probability, so the "
            + "population base rate is all that is honest. The counts above are the evidence, "
            + "not the answer.",
+    },
+    oos: {
+      mark: "oos",
+      status: "OUT OF SCOPE -- unscoreable here",
+      gloss: "The events exist in this archive, outside the population the query asked about. "
+           + "Widening the basin or the era makes the contract scoreable; the record is not "
+           + "empty, the reachable part of it is.",
     },
     unk: {
       mark: "unk",

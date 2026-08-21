@@ -9,37 +9,30 @@
  *      map, not in a dialog.
  *
  * The map is the page. Everything else explains what is on it.
- *
- * THE CHROME IS LOCKED TO THE COLUMNS. The header is three zones whose widths are the rail's,
- * the map's and the panel's, so the instrument reads as one frame rather than as a bar sitting
- * on top of three panes. One pair of CSS variables drives both, which is what keeps the lock
- * through every breakpoint.
- *
- * TWO THINGS ARE RENDERED ONCE, BY THIS SHELL, RATHER THAN BY EACH STATE: the Cohort Spec that
- * states which population is being described, and the Epistemic Key that defines the five
- * marks. Both are properties of the surface, not of a panel, and a copy per state is a copy
- * that drifts.
  */
 
 import React from "react";
 import { loadArchive } from "../engine/archive.js";
 import { fetchCoastlines } from "../engine/coastlines.js";
 import { genesisDensity, getAnalogs, pathwayDensity } from "../engine/analogs.js";
+import { filterStorms, genesisBounds, seasonRange } from "../engine/query.js";
 import {
-  DEFAULT_FILTERS, INTENSITY_FILTERS, LANDFALL_FILTERS, filterStorms, genesisBounds, seasonRange,
-} from "../engine/query.js";
+  EMPTY_COHORT, cohortResult, conditionsOf, normalise, parentOf, parseQuery, sameCohort,
+  sentenceOf, toQuery,
+} from "../engine/cohort.js";
 import { activeAt, advance, buildTimeline, fromActive, toActive } from "../engine/timeline.js";
-import { formatPosition } from "../engine/geo.js";
 import { projectWorld } from "../render/atlas-layer.js";
+import { previewCounts } from "../engine/preview.js";
+import { changedKeyOf, compareResults } from "../engine/compare.js";
+import { envAtGenesis, envCoverage } from "../engine/env.js";
+import { loadCalibration } from "../engine/calibration.js";
 import { AtlasMap } from "./map.jsx";
-import { Rail } from "./rail.jsx";
+import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
-import { ProbePanel } from "./probe-panel.jsx";
+import { CohortPanel } from "./cohort-panel.jsx";
 import { Transport } from "./transport.jsx";
 import { ArchiveTransport } from "./archive-transport.jsx";
-import {
-  Drv, EpistemicKey, Head, Lede, MONO, Masthead, Note, Prose, Refusal, Row, TextButton, claimText,
-} from "./kit.jsx";
+import { MONO, TextButton, claimText } from "./kit.jsx";
 
 /* Split out of the entry chunk. The drawer is reached by a button or the P key, never on the
    path to a first paint or a first click, so its bytes should not be in the file that has to
@@ -48,9 +41,14 @@ import {
 const ProvenanceDrawer = React.lazy(() =>
   import("./provenance.jsx").then((m) => ({ default: m.ProvenanceDrawer })));
 
+/* The ledger is a whole second surface and most visits never open it, so it is split out too.
+   Its own root element carries the grid class: React.Suspense emits no DOM node, so whatever
+   the lazy component renders IS the grid child. */
+const CalibrationLedger = React.lazy(() =>
+  import("./calibration.jsx").then((m) => ({ default: m.CalibrationLedger })));
+
 const DATA_BASE = "data";
 const DEFAULT_RADIUS_KM = 500;
-const MONTH_INITIALS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 
 export function Atlas() {
   const [archive, setArchive] = React.useState(null);
@@ -59,12 +57,52 @@ export function Atlas() {
   const [world, setWorld] = React.useState(null);
   const [coast, setCoast] = React.useState(null);
 
-  const [filters, setFilters] = React.useState(DEFAULT_FILTERS);
+  /* THE SINGLE SOURCE OF TRUTH. One object decides which storms are drawn, which are counted,
+     what the outcome cards say, what the URL carries and what a saved scenario is. The rail
+     writes to it; nothing else holds query state. */
+  const [cohort, setCohortState] = React.useState(() => parseQuery(location.search).spec);
+  /* WHAT THE READER LAST CHANGED, which is what the comparison is against by default.
+     A fixed position in the lifecycle order would be the wrong default: a reader who narrows to
+     Aug-Sep wants to see what the months did, not what the season floor did, and "last in
+     lifecycle order" happens to be the season. Tracked here because only the shell knows which
+     click produced the current cohort. `baselinePin` overrides it when the reader picks a
+     different condition to hold out -- which is the what-if control. */
+  const [lastChanged, setLastChanged] = React.useState(null);
+  const [baselinePin, setBaselinePin] = React.useState(null);
+
+  const setCohort = React.useCallback((next) => {
+    setCohortState((prev) => {
+      const n = typeof next === "function" ? next(prev) : next;
+      const k = changedKeyOf(n, prev);
+      if (k) { setLastChanged(k); setBaselinePin(null); }
+      return n;
+    });
+  }, []);
+  const [urlVersion] = React.useState(() => parseQuery(location.search).versionMismatch);
+  /* WHICH SURFACE. Read from the URL on mount so the calibration ledger is addressable -- the
+     terminal home links straight to it and every refusal deep-links to its own contract row.
+     Named `surface` and not `view`: `view` below is the map viewport, and reusing the word
+     would make this diff read as a rename of something unrelated.
+     The tactical surface stays the default. The DOM and bench harnesses load a bare
+     /storm-atlas/ and immediately reach for __ATLAS_MAP, which only exists while the map is
+     mounted, so a calibration default would break both. */
+  const [surface, setSurface] = React.useState(
+    () => (new URLSearchParams(location.search).get("view") === "calibration"
+      ? "calibration" : "tactical"));
+  const [ledgerAnchor, setLedgerAnchor] = React.useState(
+    () => new URLSearchParams(location.search).get("contract") || null);
+  const [cal, setCal] = React.useState(null);
+  const [calError, setCalError] = React.useState(null);
+  /* THE METHODOLOGY A SHARED LINK WAS MADE UNDER. A cohort URL carries `v`, which versions the
+     SPEC SHAPE, and until 1.1.0 nothing carried the methodology at all -- so a bump silently
+     re-answered every link anyone had shared, with different refusals and no notice. A change
+     no reader can detect is a silent one from their side, whatever the commit log says. */
+  const [urlMethodology] = React.useState(
+    () => new URLSearchParams(location.search).get("m"));
   const [layers, setLayers] = React.useState({
     colorBy: "uniform", genesis: true, landfalls: true,
   });
   const [selected, setSelected] = React.useState(null);
-  const [probe, setProbe] = React.useState(null);
   /* Off by default. The individual trajectories are the hero -- the density surface is the
      same storms counted, and stacking both means neither reads. Turning it on dims the tracks
      so the surface can be seen. */
@@ -93,6 +131,7 @@ export function Atlas() {
       setArchive(a);
       globalThis.__ATLAS = { archive: a, world: w, getAnalogs, pathwayDensity, genesisDensity };
       globalThis.__ATLAS_QUERY = { filterStorms, seasonRange, genesisBounds };
+      globalThis.__ATLAS_COHORT = { cohortResult, previewCounts, normalise, parentOf, toQuery };
       globalThis.__ATLAS_TIMELINE = { buildTimeline, advance, activeAt, fromActive, toActive };
       globalThis.__ATLAS_PROJECT = projectWorld;
       /* THE COASTLINE COMES AFTER THE TRACKS, DELIBERATELY. It is the geometry the landfall
@@ -115,23 +154,58 @@ export function Atlas() {
 
   const bounds = React.useMemo(() => (archive ? seasonRange(archive) : [1851, 2026]), [archive]);
   const home = React.useMemo(() => (archive ? coreFrame(archive) : null), [archive]);
+  /* ONE COHORT, ONE ANSWER. Membership and outcomes come from the same object now: the storms
+     drawn on the map ARE the storms in every denominator. Until 3.2 these were two calls -- one
+     deciding what was drawn, another deciding what was scored -- and keeping them from
+     disagreeing was the shell's job rather than the engine's. */
   const result = React.useMemo(
-    () => (archive ? filterStorms(archive, filters) : null), [archive, filters]);
+    () => (archive ? cohortResult(archive, cohort) : null), [archive, cohort]);
 
-  const analog = React.useMemo(() => {
-    if (!archive || !probe) return null;
-    return getAnalogs(archive, {
-      lat: probe.lat, lon: probe.lon, radiusKm: probe.radiusKm,
-      seasonMonths: filters.months, minPoolSeason: filters.seasonFrom,
-      basins: filters.basins, includeProvisional: filters.includeProvisional,
-      regions: ["hawaii", "mexico", "conus"],
-    });
-  }, [archive, probe, filters.months, filters.seasonFrom, filters.basins,
-      filters.includeProvisional]);
+  /* THE BASELINE IS ONE OBJECT, USED TWICE. It is the population drawn behind the cohort on the
+     map AND the reference every delta is measured against -- and those must be the same thing,
+     or the picture and the numbers are answering different questions, which is the exact failure
+     3.2 existed to end. The condition it holds out is the one the reader pinned, else the one
+     they last changed, else the last in lifecycle order. */
+  const baselineKey = baselinePin || lastChanged;
+  const baselineSpec = React.useMemo(
+    () => parentOf(cohort, baselineKey || undefined), [cohort, baselineKey]);
+  const context = React.useMemo(
+    () => (archive && baselineSpec ? cohortResult(archive, baselineSpec) : null),
+    [archive, baselineSpec]);
 
-  /* The pool the probe matched, as storm rows -- what the map lifts out of the population. */
-  const emphasis = React.useMemo(
-    () => (analog ? analog.cases.map((c) => c.row) : null), [analog]);
+  const comparison = React.useMemo(
+    () => (result && context ? compareResults(result, context) : null), [result, context]);
+
+  /* THE ENVIRONMENT LENS. Coverage is answered from the core pack -- `env_at_genesis_row` is a
+     core index -- so how many of this cohort can be evaluated at all, and the NOT EVALUABLE
+     refusal that follows, cost nothing and are honest on first paint. The 991 KB environment
+     block is fetched only when a reader asks to see the distributions, and `envEpoch` exists
+     so the lens recomputes once it lands: the archive object is mutated in place by
+     loadEnvironment, which React has no way to notice. */
+  const [envLoading, setEnvLoading] = React.useState(false);
+  const [envEpoch, setEnvEpoch] = React.useState(0);
+  const envCov = React.useMemo(
+    () => (archive && result ? envCoverage(archive, result.rows) : null), [archive, result]);
+  const envLens = React.useMemo(
+    () => (archive && result && envEpoch ? envAtGenesis(archive, result.rows) : null),
+    [archive, result, envEpoch]);
+  const loadEnv = React.useCallback(() => {
+    if (!archive || archive.env) { setEnvEpoch((n) => n + 1); return; }
+    setEnvLoading(true);
+    archive.loadEnvironment(`${DATA_BASE}/atlas-env-v1.bin.gz`)
+      .then(() => { setEnvEpoch((n) => n + 1); })
+      .finally(() => setEnvLoading(false));
+  }, [archive]);
+
+  /* What each chip would cost, computed once per cohort -- five filter passes and five scans.
+     Measured: 2.9 ms on a 65-storm cohort, 3.9 ms on 539, 6.9 ms over the whole archive. That
+     is what makes a live count on every control affordable rather than aspirational. */
+  const preview = React.useMemo(
+    () => (archive ? previewCounts(archive, cohort) : null), [archive, cohort]);
+  const sentence = React.useMemo(() => sentenceOf(cohort), [cohort]);
+
+  const contextRows = context ? context.rows : (result ? result.rows : null);
+  const emphasis = context ? result.rows : null;
 
   /* THE DENSITY SURFACES ARE NOT TIED TO A PROBE. With a probe they show the matched pool --
      where those storms went. Without one they show the current filter over the whole archive,
@@ -139,14 +213,13 @@ export function Atlas() {
      one of those is a filter that already exists. Measured at 7.9 ms for all 3,885 storms. */
   const pathway = React.useMemo(() => {
     if (!archive || !result || !showPathway) return null;
-    if (analog) return analog.track_density;
     return pathwayDensity(archive, result.rows, 2.0);
-  }, [archive, result, showPathway, analog]);
+  }, [archive, result, showPathway]);
 
   const genesisGrid = React.useMemo(() => {
     if (!archive || !result || !showGenesisDensity) return null;
-    return genesisDensity(archive, emphasis && emphasis.length ? emphasis : result.rows, 2.0);
-  }, [archive, result, showGenesisDensity, emphasis]);
+    return genesisDensity(archive, result.rows, 2.0);
+  }, [archive, result, showGenesisDensity]);
 
   /* The replay clock, built from whatever the filter currently selects. Rebuilt on a filter
      change on purpose: a run is over a population, and changing the population is a new run. */
@@ -159,9 +232,48 @@ export function Atlas() {
     setReplayCursorMin(timeline && timeline.n ? timeline.firstT : null);
   }, [mode, timeline]);
 
+  /* THE COHORT IS THE ADDRESS BAR. A scenario is a URL in this architecture -- shareable,
+     bookmarkable and diffable with no server at all -- so the spec is written back on every
+     change. replaceState rather than pushState: building a query is one continuous act, and
+     filling the back button with twelve half-formed cohorts would make Back useless for
+     leaving the page. */
+  React.useEffect(() => {
+    /* MERGED, NOT REPLACED. toQuery builds a fresh URLSearchParams from the spec alone, so
+       writing it straight back would silently drop ?view= and ?contract= on the next chip
+       click -- a deep link into the ledger that survives exactly until the reader touches
+       anything. The cohort still owns every key it knows about; the surface owns the rest. */
+    const p = new URLSearchParams(toQuery(cohort));
+    if (surface !== "tactical") p.set("view", surface);
+    if (ledgerAnchor) p.set("contract", ledgerAnchor);
+    /* Stamped ALONGSIDE the cohort, never inside toQuery: the methodology is not part of a
+       cohort's identity, and folding it in would make two identical cohorts built under
+       different versions stop comparing equal. */
+    if (archive) p.set("m", archive.manifest.methodology_version);
+    const q = p.toString();
+    const next = q ? `?${q}` : location.pathname;
+    if (location.search.replace(/^\?/, "") !== q) history.replaceState(null, "", next);
+  }, [cohort, surface, ledgerAnchor, archive]);
+
+  /* The ledger's 16 KB is fetched only when the ledger is opened. Nothing on the tactical
+     surface needs it, and a reader who never asks the question should not pay for the answer. */
+  React.useEffect(() => {
+    if (surface !== "calibration" || cal || calError) return;
+    let cancelled = false;
+    loadCalibration(DATA_BASE)
+      .then((c) => { if (!cancelled) setCal(c); })
+      .catch((e) => { if (!cancelled) setCalError(e); });
+    return () => { cancelled = true; };
+  }, [surface, cal, calError]);
+
+  /* A refusal on the tactical surface asks for its evidence. */
+  const openLedger = React.useCallback((contractKey) => {
+    setLedgerAnchor(contractKey || null);
+    setSurface("calibration");
+    setSelected(null);
+  }, []);
+
   const selectStorm = React.useCallback((row) => {
     setSelected(row);
-    setProbe(null);
     setCursorMs(null);
     setPlaying(false);
   }, []);
@@ -170,16 +282,23 @@ export function Atlas() {
   React.useEffect(() => { globalThis.__ATLAS_SELECT = selectStorm; }, [selectStorm]);
   React.useEffect(() => { globalThis.__ATLAS_SET_CURSOR = setCursorMs; }, []);
 
+  /* Clicking the ocean sets the cohort's LOCATION CONDITION -- it does not open a separate
+     probe with its own query. That separation was the two-surface problem in miniature. */
   const onProbe = React.useCallback((lat, lon) => {
     setSelected(null);
     setPlaying(false);
-    setProbe((p) => ({ lat, lon, radiusKm: p ? p.radiusKm : DEFAULT_RADIUS_KM }));
+    setCohort((c) => normalise({
+      ...c, where: { lat, lon, radiusKm: c.where ? c.where.radiusKm : DEFAULT_RADIUS_KM },
+    }));
   }, []);
 
   React.useEffect(() => {
     const onKey = (e) => {
       if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
-      if (e.key === "Escape") { setProvOpen(false); setSelected(null); setProbe(null); }
+      if (e.key === "Escape") {
+        setProvOpen(false); setSelected(null);
+        setCohort((c) => normalise({ ...c, where: null }));
+      }
       if (e.key === "p" || e.key === "P") setProvOpen((v) => !v);
       if (e.key === " " && (selected !== null || mode === "replay")) {
         e.preventDefault(); setPlaying((v) => !v);
@@ -193,27 +312,64 @@ export function Atlas() {
   if (!archive || !world || !result) return <Boot manifest={manifest} />;
 
   const storm = selected === null ? null : archive.storm(selected);
-  const spec = cohortSpec({ archive, filters, probe, storm, bounds });
+
+  /* THE LEDGER IS A SURFACE, NOT A PANEL. It replaces the rail, stage and panel rather than
+     opening beside them, because a page that answers "is any of this any good" while the thing
+     being judged is still on screen invites the reader to skim it. The header stays: the
+     archive's scale and the provenance key belong on both surfaces. */
+  if (surface === "calibration") {
+    return (
+      <div data-surface="calibration" data-view="calibration" data-atlas className="atlas-shell" style={{
+        position: "fixed", inset: 0,
+        background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
+      }}>
+        <Header archive={archive} onProvenance={() => setProvOpen(true)} />
+        <React.Suspense fallback={<LedgerBoot />}>
+          {calError ? <LedgerError error={calError} onBack={() => setSurface("tactical")} />
+            : cal ? (
+              <CalibrationLedger cal={cal} anchor={ledgerAnchor}
+                onBack={() => { setSurface("tactical"); setLedgerAnchor(null); }}
+                onClearAnchor={() => setLedgerAnchor(null)} />
+            ) : <LedgerBoot />}
+        </React.Suspense>
+        <React.Suspense fallback={null}>
+          {provOpen ? (
+            <ProvenanceDrawer archive={archive} coast={coast} open={provOpen}
+              onClose={() => setProvOpen(false)} frame={null} />
+          ) : null}
+        </React.Suspense>
+      </div>
+    );
+  }
 
   return (
-    <div data-surface="tactical" data-atlas className="atlas-shell">
-      <Header archive={archive} onProvenance={() => setProvOpen(true)} />
+    <div data-surface="tactical" data-view="tactical" data-atlas className="atlas-shell" style={{
+      position: "fixed", inset: 0,
+      background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
+    }}>
+      <Header archive={archive} onProvenance={() => setProvOpen(true)}
+        onLedger={() => openLedger(null)} />
 
-      <div className="atlas-rail" style={{ overflowY: "auto" }}>
-        <Rail archive={archive} filters={filters} setFilters={setFilters} result={result}
+      <div className="atlas-rail" style={{ overflowY: "auto",
+        borderRight: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
+        <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
+        <CohortBuilder archive={archive} cohort={cohort}
+          setCohort={(f) => setCohort(normalise(f))}
+          result={result} preview={preview}
           layers={layers} setLayers={setLayers} bounds={bounds}
           mode={mode} setMode={setMode}
           showPathway={showPathway} setShowPathway={setShowPathway}
           showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
-          timeline={timeline} probe={probe}
-          onReset={() => { setFilters(DEFAULT_FILTERS); setSelected(null); setProbe(null); }} />
+          timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
+          envCoverage={envCov}
+          onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
       </div>
 
-      <div className="atlas-stage">
+      <div className="atlas-stage" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
         <AtlasMap
-          archive={archive} world={world} coast={coast} rows={result.rows} emphasis={emphasis}
+          archive={archive} world={world} coast={coast} rows={contextRows} emphasis={emphasis}
           selected={selected} home={home}
-          onSelect={selectStorm} onProbe={onProbe} probe={probe}
+          onSelect={selectStorm} onProbe={onProbe} probe={cohort.where}
           replayMs={selected !== null && cursorMs !== null ? cursorMs : undefined}
           colorBy={layers.colorBy} dimPopulation={selected !== null}
           softenEmphasis={showPathway}
@@ -225,29 +381,33 @@ export function Atlas() {
           kept={result.kept} lifted={emphasis ? emphasis.length : 0}
           selectedCount={selected === null ? 0 : 1}
         >
-          {mode === "explore" && !probe && selected === null ? <Invitation /> : null}
-          <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!probe}
+          {mode === "explore" && !cohort.where && selected === null ? <Invitation /> : null}
+          <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
             showGenesisDensity={showGenesisDensity} />
         </AtlasMap>
       </div>
 
-      <div className="atlas-panel" style={{ overflowY: "auto" }}>
+      <div className="atlas-panel" style={{ overflowY: "auto",
+        borderLeft: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
         {storm ? (
-          <StormPanel storm={storm} archive={archive} spec={spec}
-            onClose={() => setSelected(null)}
+          <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
             onReplay={() => setPlaying((v) => !v)} replaying={playing} />
-        ) : probe ? (
-          <ProbePanel probe={probe} result={analog} peak={analog ? peakOf(analog) : 0} spec={spec}
-            onRadius={(km) => setProbe((p) => ({ ...p, radiusKm: km }))}
-            onClose={() => setProbe(null)} onSelectStorm={selectStorm}
-            pathwayOn={showPathway} onShowPathway={setShowPathway} />
         ) : mode === "replay" ? (
-          <ReplayNote timeline={timeline} result={result} spec={spec} />
+          <ReplayNote timeline={timeline} result={result} />
+        ) : conditionsOf(cohort).length ? (
+          /* THE ANSWER IS PUBLISHED FOR ANY COHORT, not only for one with a location. Before
+             3.3 this panel answered a click on open water and nothing else, so narrowing to
+             "Cat 3+, since 1971, Aug-Sep" produced a map and no statistics at all. */
+          <CohortPanel spec={cohort} result={result} sentence={sentence}
+            peak={peakOf(pathway)} pathway={pathway} onSelectStorm={selectStorm}
+            pathwayOn={showPathway} onShowPathway={setShowPathway}
+            comparison={comparison} conditions={conditionsOf(cohort)}
+            onBaseline={setBaselinePin}
+            archive={archive} envCoverage={envCov} envLens={envLens}
+            envLoading={envLoading} onLoadEnv={loadEnv} onEvidence={openLedger} />
         ) : (
-          <Introduction archive={archive} result={result} spec={spec} />
+          <Introduction archive={archive} />
         )}
-        {/* Once, by the shell. Not per state. */}
-        <div className="at-pad" style={{ paddingTop: 0 }}><EpistemicKey /></div>
       </div>
 
       <div className="atlas-transport">
@@ -257,7 +417,7 @@ export function Atlas() {
         ) : selected !== null ? (
           <Transport archive={archive} row={selected} playing={playing} setPlaying={setPlaying}
             cursorMs={cursorMs} setCursorMs={setCursorMs} />
-        ) : <KeyboardHint />}
+        ) : null}
       </div>
 
       <React.Suspense fallback={null}>
@@ -360,55 +520,78 @@ function quantile(sorted, p) {
   return sorted[Math.max(0, Math.min(sorted.length - 1, i))];
 }
 
-/* THE COHORT SPEC, as a string.
+/* WHAT CHANGED UNDER A LINK SOMEONE ALREADY HAD.
  *
- * Derived entirely from state already on screen. Every segment restates a control the reader
- * can see: the season boxes, the month strip, the basin chips, the intensity threshold the rail
- * already applied, the probe's own radius, the storm they selected -- then the two stamps the
- * pack carries about itself. Nothing here computes anything, and nothing here is a claim the
- * panel above it has not already made.
- */
-export function cohortSpec({ archive, filters, probe, storm, bounds }) {
-  const m = archive.manifest;
-  const f = filters;
-  const out = [];
+ * Shown only when a URL carries a methodology version other than this build's. It does not
+ * refuse to answer -- the cohort is the same cohort and the counts are the same counts -- it
+ * says which definitions moved, because the one thing a reader of a shared scenario cannot do
+ * is notice that the refusals were recomputed. 1.1.0 is named specifically: it is the only bump
+ * so far and the only one whose effect a reader would see. */
+function MethodologyMoved({ was, now }) {
+  if (!was || !now || was === now) return null;
+  return (
+    <div data-methodology-moved style={{
+      margin: "var(--sp-5) var(--sp-6) 0",
+      border: "1px solid var(--border-strong)",
+      borderLeft: "var(--bw-signal) solid var(--warn)",
+      borderRadius: "var(--radius-sm)", padding: "var(--sp-3) var(--sp-4)",
+      background: "color-mix(in srgb, var(--warn) 6%, transparent)",
+    }}>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", fontWeight: 800,
+        color: "var(--warn)", letterSpacing: ".5px" }}>
+        THE METHODOLOGY MOVED SINCE THIS LINK WAS MADE
+      </div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 3 }}>
+        This link was made under methodology {was}; the archive now publishes under {now}. The
+        cohort is unchanged and so are its counts — what may differ is which contracts are
+        refused. 1.1.0 stopped counting the refusal gate over the whole archive and started
+        counting it over the population a query can actually draw from, so some contracts that
+        published a rate under {was} now refuse as OUT OF SCOPE.
+      </div>
+    </div>
+  );
+}
 
-  const allBasins = archive.storms.col("basin").dictionary || [];
-  const basins = f.basins && f.basins.length ? f.basins : allBasins;
-  out.push(`BASIN ${basins.join("+")}`
-    + (f.subbasinsEntered ? ` ∩ ENTERED ${f.subbasinsEntered.join("+")}` : "")
-    + (f.namedOnly ? " ∩ NAMED" : ""));
+function LedgerBoot() {
+  return (
+    <div className="atlas-calibration" style={{ display: "flex", alignItems: "center",
+      justifyContent: "center", color: "var(--text-2)", ...MONO,
+      fontSize: "var(--fs-mono-sm)" }}>
+      reading the calibration ledger…
+    </div>
+  );
+}
 
-  out.push(`SEASONS ${f.seasonFrom === null ? bounds[0] : f.seasonFrom}`
-    + `–${f.seasonTo === null ? bounds[1] : f.seasonTo}`
-    + (f.includeProvisional ? " +PROVISIONAL" : ""));
-
-  out.push("GENESIS MONTHS "
-    + (f.months && f.months.length
-      ? f.months.map((mo) => MONTH_INITIALS[mo - 1]).join("")
-      : "ALL"));
-
-  const threshold = (INTENSITY_FILTERS.find((x) => x.key === f.intensity) || {}).threshold;
-  out.push(`PEAK ${threshold === null || threshold === undefined ? "UNFILTERED" : `≥${threshold} KT`}`);
-
-  const lf = LANDFALL_FILTERS.find((x) => x.key === f.landfall);
-  out.push(`LANDFALL ${lf ? lf.label : "UNFILTERED"}`);
-
-  if (probe) {
-    out.push(`GENESIS WITHIN ${probe.radiusKm} KM OF ${formatPosition(probe.lat, probe.lon)}`);
-  }
-  if (storm) out.push(`STORM ${storm.atcf_id || storm.storm_id}`);
-
-  out.push(`METHODOLOGY ${m.methodology_version}`);
-  out.push(`PACK ${m.provenance.archive_stamp}`);
-  return out.join(" · ");
+/* A ledger that will not load says so and offers the way back. It does NOT fall through to an
+   empty page: a calibration surface that renders nothing reads exactly like a calibration
+   surface with nothing to report. */
+function LedgerError({ error, onBack }) {
+  return (
+    <div className="atlas-calibration" style={{ display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center", gap: "var(--sp-4)",
+      padding: "var(--sp-8)", textAlign: "center" }}>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-md)", color: "var(--neg)",
+        letterSpacing: "var(--track-label)" }}>[ THE LEDGER COULD NOT BE READ ]</div>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+        maxWidth: "60ch", lineHeight: "var(--lh-body)" }}>
+        {String(error && error.message ? error.message : error)}
+        <br /><br />
+        No calibration figures are shown rather than stale ones. The scores this page reports
+        are the archive's; without the file there is nothing to report.
+      </div>
+      <button type="button" onClick={onBack} style={{
+        ...MONO, fontSize: "var(--fs-mono-xs)", padding: "5px 10px", background: "transparent",
+        border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
+        color: "var(--text-2)", cursor: "pointer",
+      }}>← BACK TO THE MAP</button>
+    </div>
+  );
 }
 
 /* The archive's scale, on screen before anything is interactive. Counts come from the pack that
    was actually loaded -- not from a constant, and not from MANIFEST.json, which is stale for
-   two of these tables.
-   It degrades by dropping whole figures rather than by clipping one: a count missing its last
-   digit is a wrong count, while an absent count is only an absent one. */
+   two of these tables. */
 function ScaleLine({ manifest, dim }) {
   if (!manifest) return null;
   const c = manifest.counts;
@@ -420,18 +603,20 @@ function ScaleLine({ manifest, dim }) {
     [c.environment, "ENVIRONMENT OBS"],
   ];
   return (
-    <div className="at-ledger" style={dim ? { opacity: 0.75, flex: "none" } : undefined}>
+    <div style={{ display: "flex", gap: "var(--sp-6)", flexWrap: "wrap",
+      opacity: dim ? 0.75 : 1 }}>
       {items.map(([n, label]) => (
-        <div className="at-fig" key={label}>
-          <b>{n.toLocaleString()}</b>
-          <span>{label}</span>
-        </div>
+        <span key={label} style={{ ...MONO, fontSize: "var(--fs-mono-sm)", whiteSpace: "nowrap" }}>
+          <span style={{ color: "var(--text-1)", fontWeight: 700 }}>{n.toLocaleString()}</span>
+          <span style={{ color: "var(--text-2)", marginLeft: 5,
+            letterSpacing: "var(--track-label)" }}>{label}</span>
+        </span>
       ))}
     </div>
   );
 }
 
-function Header({ archive, onProvenance }) {
+function Header({ archive, onProvenance, onLedger }) {
   const m = archive.manifest;
   const p = m.provenance || {};
   return (
@@ -455,6 +640,13 @@ function Header({ archive, onProvenance }) {
             BUILT <em>{(p.archive_built_utc || "").replace("T", " ").replace(/:\d\dZ?$/, "Z")}</em>
           </div>
         </div>
+        {/* NOT BEHIND A TOGGLE. The ledger is how a reader checks whether anything else on this
+            site is worth believing, so it sits in the masthead beside provenance rather than
+            inside a panel someone has to know to open. */}
+        {onLedger ? (
+          <TextButton onClick={onLedger} hook="data-open-ledger"
+            title="how well calibrated is this? the archive's own backtest">Calibration</TextButton>
+        ) : null}
         <TextButton onClick={onProvenance} title="provenance (P)">Provenance</TextButton>
       </div>
     </header>
@@ -464,24 +656,17 @@ function Header({ archive, onProvenance }) {
 /* The one instruction the surface gives, placed where the gesture happens. */
 function Invitation() {
   return (
-    <div className="at-invite">
-      <em>Click any ocean point</em> — what formed there, and where it went &nbsp;·&nbsp;{" "}
-      <em>Click a genesis point</em> for one storm
-    </div>
-  );
-}
-
-/* The transport's resting state. It also carries the live cursor position, so the readout
-   survives the plate foot band's narrow-width degradation rather than disappearing with it. */
-function KeyboardHint() {
-  return (
-    <div className="at-transport">
-      <div className="at-hint">
-        <span><em>CLICK OCEAN</em> ASK WHAT FORMED THERE</span>
-        <span><em>CLICK GENESIS POINT</em> FOLLOW ONE STORM</span>
-        <span><em>P</em> PROVENANCE</span>
-        <span><em>ESC</em> CLEAR</span>
-        <span className="at-r"><em id="at-coords2">—</em></span>
+    <div style={{
+      position: "absolute", left: "50%", bottom: 26, transform: "translateX(-50%)",
+      pointerEvents: "none", zIndex: 450, textAlign: "center",
+    }}>
+      <div style={{
+        ...MONO, fontSize: "var(--fs-mono-sm)", color: "var(--text-1)",
+        background: "rgba(7,12,22,.82)", border: "1px solid var(--border-strong)",
+        borderRadius: "var(--radius-sm)", padding: "7px 14px",
+        letterSpacing: "var(--track-label)",
+      }}>
+CLICK ANY OCEAN POINT — what formed there, and where it went · CLICK A GENESIS POINT for one storm
       </div>
     </div>
   );
@@ -494,154 +679,141 @@ function Legend({ colorBy, showPathway, showGenesisDensity, probe }) {
     ["cat5", "5"]];
   const surfaces = [];
   if (showPathway) {
-    surfaces.push(["79, 195, 247", "HISTORICAL PATHWAY FREQUENCY",
+    surfaces.push(["56, 189, 248", "HISTORICAL PATHWAY FREQUENCY",
       probe ? "storms of the matched pool through each 2° cell — not a forecast"
         : "storms of the current filter through each 2° cell — not a forecast"]);
   }
   if (showGenesisDensity) {
-    surfaces.push(["155, 123, 240", "GENESIS COUNT",
+    surfaces.push(["167, 139, 250", "GENESIS COUNT",
       "storms that formed in each 2° cell — a count, not a rate"]);
   }
   if (colorBy !== "intensity" && !surfaces.length) return null;
   return (
-    <div className="at-legend">
+    <div style={{
+      position: "absolute", right: 12, bottom: 14, zIndex: 450, pointerEvents: "none",
+      background: "rgba(7,12,22,.82)", border: "1px solid var(--border-strong)",
+      borderRadius: "var(--radius-sm)", padding: "6px 9px", display: "flex",
+      flexDirection: "column", gap: 5, alignItems: "flex-start", maxWidth: 340,
+    }}>
       {surfaces.map(([hue, title, note]) => (
-        <div className="at-lrow" key={title}>
-          <span className="at-sw">
-            {[0.16, 0.36, 0.6].map((a) => (
-              <i key={a} style={{ background: `rgba(${hue}, ${a})` }} />
+        <div key={title} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ display: "flex", flex: "none" }}>
+            {[0.18, 0.38, 0.62].map((a) => (
+              <span key={a} style={{ width: 9, height: 9, background: `rgba(${hue}, ${a})` }} />
             ))}
           </span>
-          <span>{title}<span className="at-d"> · {note}</span></span>
+          <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-1)",
+            letterSpacing: "var(--track-label)" }}>{title}
+            <span style={{ color: "var(--text-2)", letterSpacing: 0 }}> · {note}</span>
+          </span>
         </div>
       ))}
       {colorBy === "intensity" ? (
-        <div className="at-lrow">
+        <div style={{ display: "flex", gap: "var(--sp-4)", alignItems: "center" }}>
           {items.map(([k, label]) => (
-            <span key={k} style={{ display: "flex", alignItems: "center", gap: 3 }}>
-              <i style={{ width: 10, height: 2, display: "block", background: CAT_HEX[k] }} />
-              {label}
+            <span key={k} style={{ display: "flex", alignItems: "center", gap: 4 }}>
+              <span style={{ width: 12, height: 2,
+                background: `var(--atlas-${k}, ${CAT_HEX[k]})` }} />
+              <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)" }}>
+                {label}
+              </span>
             </span>
           ))}
-          <span style={{ display: "flex", alignItems: "center", gap: 3 }}>
-            <i style={{ width: 10, height: 2, display: "block", background: "#6a7c92" }} />
-            <span className="at-d">no wind recorded</span>
-          </span>
         </div>
       ) : null}
     </div>
   );
 }
 
-const CAT_HEX = { ts: "#8cbdea", cat1: "#4fc3f7", cat2: "#f2c14e", cat3: "#ee7a1f",
-  cat4: "#ef5350", cat5: "#9b7bf0" };
+const CAT_HEX = { ts: "#7fb2e6", cat1: "#38bdf8", cat2: "#fbbf24", cat3: "#f59e0b",
+  cat4: "#ef4444", cat5: "#8b5cf6" };
 
-function Introduction({ archive, result, spec }) {
+function Introduction({ archive }) {
   const m = archive.manifest;
-  const q = m.quality;
   return (
-    <>
-      <Masthead kicker="The archive at rest" right={`${result.kept.toLocaleString()} SHOWN`}
-        title="Every line on this map is a storm that happened" spec={spec} />
-      <div className="at-pad">
-        <Lede style={{ marginTop: 14 }}>
-          The subject is a historical population, not a forecast. You interrogate it by asking
-          where a storm formed — and the map answers with trajectories.
-        </Lede>
-        <Prose style={{ marginTop: 12 }}>
-          <strong>Click any point on the ocean</strong> to ask what formed near there and where it
-          went. <strong>Click a genesis point</strong> — one of the cyan dots — to follow that
-          storm from its first fix to its last.
-        </Prose>
-        <Prose style={{ marginTop: 10 }}>
-          Tracks themselves are not click targets. At this zoom forty of them lie under any given
-          pixel, so a click on one would select a storm essentially at random. The genesis points
-          are discrete, and so is the choice.
-        </Prose>
-
-        <Head n="01">What the archive holds</Head>
-        <Row k="storms" v={m.counts.storms.toLocaleString()} />
-        <Row k="with a genesis point" v={q.storms_with_genesis.toLocaleString()}
-          title="54 storms have no genesis point at all. They are excluded from a genesis-keyed
-                 view and counted, rather than drawn from a position the archive does not have." />
-        <Row k="observed fixes" v={q.track_points.observed.toLocaleString()} />
-        <Row k="interpolated fixes" v={q.track_points.interpolated.toLocaleString()}
-          title="Interpolated by IBTrACS, not by this archive. An interpolated point may never
-                 establish a threshold crossing." />
-        <Row k="landfalls" v={m.counts.landfalls.toLocaleString()} />
-        <Row k="landfalls with a withheld class" v={q.landfall_category_withheld.toLocaleString()}
-          title="Segment crossings whose bracketing fixes disagreed about the Saffir-Simpson
-                 class. The archive publishes none rather than interpolating one." />
-        <Note style={{ marginTop: 10 }}>{claimText("atlas.subject")}</Note>
-
-        <Head n="02" right="±12 h of genesis">Environment</Head>
-        <Row k="storms with a record near genesis"
-          v={`${q.storms_with_env_at_genesis.toLocaleString()} / ${m.counts.storms.toLocaleString()}`} />
-        <Refusal kind="cond">{claimText("atlas.environment")}</Refusal>
-
-        <Note style={{ marginTop: 12 }}>
-          Where the archive cannot answer, it says so. That is the point.
-        </Note>
+    <div style={{ padding: "var(--sp-6)" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-body)",
+        color: "var(--text-1)", lineHeight: "var(--lh-body)" }}>
+        Every line on this map is a storm that happened.
       </div>
-    </>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: "var(--sp-5)" }}>
+        <p style={{ margin: "0 0 var(--sp-5)" }}>
+          <strong style={{ color: "var(--text-1)" }}>Click any point on the ocean</strong> to ask
+          what formed near there and where it went.{" "}
+          <strong style={{ color: "var(--text-1)" }}>Click a genesis point</strong> — one of the
+          cyan dots — to follow that storm from its first fix to its last.
+        </p>
+        <p style={{ margin: "0 0 var(--sp-5)" }}>
+          Tracks themselves are not click targets. At this zoom forty of them lie under any
+          given pixel, so a click on one would select a storm essentially at random. The genesis
+          points are discrete, and so is the choice.
+        </p>
+        <p style={{ margin: "0 0 var(--sp-5)" }}>
+          {claimText("atlas.subject")} {m.counts.storms.toLocaleString()} storms and{" "}
+          {m.counts.track_points.toLocaleString()} observed positions, with every threshold
+          crossing, every coastline crossing and every gap the archive recorded about itself.
+        </p>
+        <p style={{ margin: 0 }}>
+          Where the archive cannot answer, it says so. That is the point.
+        </p>
+      </div>
+    </div>
   );
 }
 
 /* What the run is doing, and what it is doing to time. The skip is a real distortion of pace and
    the reader is told about it before it happens, not only when it flashes past on the transport. */
-function ReplayNote({ timeline, result, spec }) {
+function ReplayNote({ timeline, result }) {
   const tl = timeline;
+  const quiet = tl && tl.spanMin ? (tl.spanMin - tl.activeMin) / tl.spanMin : null;
   return (
-    <>
-      <Masthead kicker="Replay"
-        right={tl && tl.n ? `${tl.n.toLocaleString()} TRACKS` : "NO TRACKS"}
-        title="The record, in the order it happened" spec={spec} />
-      <div className="at-pad">
+    <div style={{ padding: "var(--sp-6)" }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-body)",
+        color: "var(--text-1)", lineHeight: "var(--lh-body)" }}>
+        The record, in the order it happened.
+      </div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: "var(--sp-5)" }}>
         {!tl || !tl.n ? (
-          <Lede style={{ marginTop: 14 }}>
+          <p style={{ margin: 0 }}>
             The current filter selects no storms, so there is nothing to replay.
-          </Lede>
+          </p>
         ) : (
           <>
-            <Lede style={{ marginTop: 14 }}>
-              {tl.n.toLocaleString()} storms between {fmtYear(tl.firstT)} and {fmtYear(tl.lastT)}.
-            </Lede>
-            <Prose style={{ marginTop: 10 }}>
-              Tracks stay on the map as they are revealed, so what builds up is the shape of the
-              whole record rather than one storm at a time.
-            </Prose>
-
-            <Head n="01" right="honest pace">What the clock does</Head>
+            <p style={{ margin: "0 0 var(--sp-5)" }}>
+              <strong style={{ color: "var(--text-1)" }}>{tl.n.toLocaleString()} storms</strong>{" "}
+              between {fmtYear(tl.firstT)} and {fmtYear(tl.lastT)}. Tracks stay on the map as they
+              are revealed, so what builds up is the shape of the whole record rather than one
+              storm at a time.
+            </p>
             {/* Stated as years rather than as a percentage, deliberately: this build renders no
                 percentage it computed itself, and "43.5 of 174.5 years" is the more concrete
                 statement anyway. */}
-            <Row k="calendar span" v={<span>{yearsOf(tl.spanMin)} <small>years</small></span>} />
-            <Row k="with a storm active"
-              v={<span>{yearsOf(tl.activeMin)} <small>years</small><Drv /></span>} />
-            <Note style={{ marginTop: 8 }}>
-              <b style={{ color: "var(--flag)" }}>The clock skips quiet stretches.</b> The rest is
-              off-season, repeated. Those gaps are jumped and every jump is announced on the
-              transport. Nothing else is changed: every storm appears, once, in order, over its
-              whole observed span.
-            </Note>
+            <p style={{ margin: "0 0 var(--sp-5)" }}>
+              <strong style={{ color: "var(--warn)" }}>The clock skips quiet stretches.</strong>{" "}
+              {quiet !== null
+                ? <>Only {yearsOf(tl.activeMin)} of those {yearsOf(tl.spanMin)} calendar years
+                    have a storm anywhere on the map</>
+                : <>Much of the span has no storm active</>} — the rest is off-season, repeated.
+              Those gaps are jumped and every jump is announced on the transport. Nothing else is
+              changed: every storm appears, once, in order, over its whole observed span.
+            </p>
             {result && result.excluded && result.excluded.noGenesis ? (
-              <Note style={{ marginTop: 8 }}>
+              <p style={{ margin: "0 0 var(--sp-5)" }}>
                 {result.excluded.noGenesis} storms are not in this run: the archive holds no
                 genesis point for them, so the filter cannot place them.
-              </Note>
+              </p>
             ) : null}
-
-            <Head n="02">The filters drive the run</Head>
-            <Prose>
-              Narrow to Cat 3+ and only the majors unfold; narrow to a landfall region and only
-              the storms that reached it do. A run is over a population, and changing the
-              population is a new run.
-            </Prose>
-            <Note style={{ marginTop: 10 }}>{claimText("atlas.replay")}</Note>
+            <p style={{ margin: "0 0 var(--sp-5)" }}>
+              The filters on the left drive the run. Narrow to Cat 3+ and only the majors unfold;
+              narrow to a landfall region and only the storms that reached it do.
+            </p>
+            <p style={{ margin: 0, color: "var(--text-2)" }}>{claimText("atlas.replay")}</p>
           </>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -656,14 +828,16 @@ function yearsOf(minutes) {
 function Boot({ manifest }) {
   return (
     <div data-surface="tactical" data-atlas style={{
-      position: "fixed", inset: 0, background: "var(--stage)", color: "var(--t1)",
+      position: "fixed", inset: 0, background: "var(--surface-app)", color: "var(--text-1)",
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      gap: 18, padding: 24,
+      gap: "var(--sp-7)", padding: "var(--sp-8)",
     }}>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: 14, fontWeight: 700,
-        letterSpacing: "3px", textTransform: "uppercase" }}>STORM ATLAS</div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-title)",
+        fontWeight: "var(--fw-black)", letterSpacing: "var(--track-caps)",
+        textTransform: "uppercase" }}>STORM ATLAS</div>
       {manifest ? <ScaleLine manifest={manifest} dim /> : null}
-      <div style={{ ...MONO, fontSize: 9.5, color: "var(--t3)", letterSpacing: "1px" }}>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+        letterSpacing: "var(--track-label)" }}>
         {manifest ? "[ READING THE HISTORICAL ARCHIVE… ]" : "[ OPENING THE ARCHIVE… ]"}
       </div>
     </div>
@@ -673,18 +847,18 @@ function Boot({ manifest }) {
 function BootError({ error }) {
   return (
     <div data-surface="tactical" data-atlas style={{
-      position: "fixed", inset: 0, background: "var(--stage)", color: "var(--t1)",
+      position: "fixed", inset: 0, background: "var(--surface-app)", color: "var(--text-1)",
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      gap: 11, padding: 24, textAlign: "center",
+      gap: "var(--sp-5)", padding: "var(--sp-8)", textAlign: "center",
     }}>
-      <div style={{ ...MONO, fontSize: 11, color: "var(--neg)", letterSpacing: "1px" }}>
-        [ THE ARCHIVE COULD NOT BE READ ]
-      </div>
-      <div style={{ ...MONO, fontSize: 10, color: "var(--t3)", maxWidth: 520, lineHeight: 1.65 }}>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-md)", color: "var(--neg)",
+        letterSpacing: "var(--track-label)" }}>[ THE ARCHIVE COULD NOT BE READ ]</div>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+        maxWidth: 520, lineHeight: "var(--lh-body)" }}>
         {String(error && error.message ? error.message : error)}
       </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: 12, color: "var(--t3)",
-        maxWidth: 520, lineHeight: 1.62 }}>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+        color: "var(--text-2)", maxWidth: 520, lineHeight: "var(--lh-body)" }}>
         Nothing is shown rather than something approximate. The Storm Atlas has no fallback
         dataset, because a map drawn from anything but the archive would not be this archive.
       </div>
@@ -692,8 +866,10 @@ function BootError({ error }) {
   );
 }
 
-function peakOf(analog) {
+/** Busiest cell in a density grid. The grid is now computed by the shell rather than carried
+ *  inside an analog result, so this takes the Map directly. */
+function peakOf(grid) {
   let peak = 0;
-  for (const v of analog.track_density.values()) if (v > peak) peak = v;
+  if (grid) for (const v of grid.values()) if (v > peak) peak = v;
   return peak;
 }

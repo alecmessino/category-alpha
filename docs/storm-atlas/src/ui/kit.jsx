@@ -82,6 +82,10 @@ export function OverDenom({ n, of, tone }) {
   );
 }
 
+/* `Unscoreable` lived here and is gone: ui/refusal.jsx generalises it into the six states, so
+   every refusal now comes from one definition instead of one component knowing about one of
+   them. Left as a note rather than as a re-export, because a shim would let a caller keep
+   rendering a refusal that cannot say whether the reader can do anything about it. */
 /* The mark for a value the Atlas DERIVED by replaying the archive's own rule, rather than read
    from a column the archive publishes. Set as a superscript so it annotates the number without
    competing with it. The glyph is the archive's own `·d`, not a typographic substitute: it is
@@ -161,11 +165,16 @@ export function Lede({ children, style }) {
   return <div className="at-lede" style={style}>{children}</div>;
 }
 
-export function Chip({ children, active, tone, onClick, title, disabled, style }) {
+/* `chipKey` stamps a stable `data-chip` hook. The DOM gate used to select a chip by its
+   visible text, which broke the moment 3.3 put live counts inside the labels -- the selector
+   was matching the wording of the thing it was checking. The hook is the identity; the label
+   is free to change. */
+export function Chip({ children, active, tone, onClick, title, disabled, style, chipKey }) {
   return (
     <button
       type="button"
       className="at-chip"
+      data-chip={chipKey}
       aria-pressed={!!active}
       onClick={onClick}
       title={title}
@@ -192,10 +201,13 @@ export function Toggle({ label, on, onChange, note, title }) {
 }
 
 /** A text button: a rule under a word. RESET, CLEAR, PROVENANCE, COPY. */
-export function TextButton({ children, onClick, title, style, id }) {
+/* `hook` stamps a stable `data-*` attribute, for the same reason Chip takes `chipKey`: a gate
+   that selects a control by its visible label is a gate that breaks when the label is
+   rewritten, and the label is the thing most likely to be rewritten. */
+export function TextButton({ children, onClick, title, style, id, hook }) {
   return (
     <button type="button" className="at-hbtn" onClick={onClick} title={title} style={style}
-      id={id}>{children}</button>
+      id={id} {...(hook ? { [hook]: "" } : {})}>{children}</button>
   );
 }
 

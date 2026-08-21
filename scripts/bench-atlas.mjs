@@ -21,6 +21,7 @@ import { createServer } from "node:http";
 import { readFile, readdir, stat } from "node:fs/promises";
 import { extname, join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { HERMETIC, serviceWorkerEscape } from "./lib/browser-harness.mjs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const DOCS = join(ROOT, "docs");
@@ -40,11 +41,35 @@ const BUDGET = {
   replayTickMs: 8,            // the incremental tick, 20/s -- past this the head visibly stutters
   replayRepaintMs: 200,       // rebuilding the whole revealed prefix after a pan or a zoom
   timelineBuildMs: 60,        // sorting and merging 3,885 spans on every filter change
+  /* Phase 3. Adding or removing a condition recomputes both of these, and the whole premise of
+     the what-if layer is that it happens instantly rather than behind a "run query" button. The
+     unconditioned whole-archive cohort is the slow end -- reset, and first load -- so it gets a
+     budget of its own rather than being averaged away with the cohorts a reader actually
+     builds. */
+  cohortMs: 16,               // scoring a built cohort: one frame, so a chip click is live
+  cohortWideMs: 90,           // the same over all 3,885 storms: reset and first paint only
+  previewMs: 16,              // every chip's live count: five filter passes and five scans
 };
+
+/* THE GUARD THAT STOPS A VACUOUS PASS.
+ *
+ * A skip prints "SKIPPED, not passed" and exits 0, which is right on a developer's machine and
+ * catastrophic in CI: a workflow step that runs this without a browser installed goes green
+ * forever while testing nothing, and the gate that catches the failures the static checks
+ * cannot would be the gate nobody notices died. `--require-browser` turns the skip into an
+ * exit 2. CI passes it; a laptop without playwright does not have to. */
+const REQUIRE_BROWSER = process.argv.includes("--require-browser")
+  || process.env.ATLAS_REQUIRE_BROWSER === "1";
 
 let chromium;
 try { ({ chromium } = await import("playwright")); }
 catch {
+  if (REQUIRE_BROWSER) {
+    console.error("[bench] playwright is REQUIRED here and is not installed.");
+    console.error("        this gate was asked to run and could not, which is a failure,");
+    console.error("        not a skip. install it or drop --require-browser.");
+    process.exit(2);
+  }
   console.log("[bench] playwright is not installed - SKIPPED, not passed.");
   console.log("        npm i --no-save playwright && npx playwright install chromium");
   process.exit(0);
@@ -84,13 +109,35 @@ function serve() {
 
 let failures = 0;
 const results = [];
+/* WALL-CLOCK BUDGETS ARE MACHINE-DEPENDENT, AND THE SCALING IS DECLARED RATHER THAN HIDDEN.
+ *
+ * Every millisecond budget here was measured on the development container. A shared CI runner
+ * is a different and much noisier machine, so running these unchanged would either fail on
+ * neighbour noise or -- the worse outcome -- get quietly loosened until it caught nothing.
+ *
+ * `--ci` multiplies the TIME budgets by a stated factor and prints that it did, so a green CI
+ * run can never be mistaken for a green local run. It catches what matters: a 10x regression
+ * from a bad render loop trips a 3x budget, while a 40% difference between two machines does
+ * not. BYTE budgets are not scaled -- a megabyte is a megabyte on any runner, and the transfer
+ * sizes are the numbers a reader actually pays. */
+const CI = process.argv.includes("--ci") || process.env.ATLAS_BENCH_CI === "1";
+const TIME_SCALE = CI ? 3 : 1;
+
 function gate(label, value, budget, unit, lowerIsBetter = true) {
-  const ok = lowerIsBetter ? value <= budget : value >= budget;
+  const effective = unit === "ms" ? budget * TIME_SCALE : budget;
+  const ok = lowerIsBetter ? value <= effective : value >= effective;
   if (!ok) failures++;
-  results.push({ label, value, budget, unit, ok });
+  results.push({ label, value, budget: effective, unit, ok });
   const v = typeof value === "number" ? value.toFixed(value < 10 ? 2 : 0) : value;
+  const note = effective !== budget ? ` (${budget} x${TIME_SCALE})` : "";
   console.log(`  ${ok ? "ok  " : "FAIL"}  ${label.padEnd(46)} ${String(v).padStart(8)} ${unit}` +
-    `   budget ${budget} ${unit}`);
+    `   budget ${effective} ${unit}${note}`);
+}
+
+if (CI) {
+  console.log(`\n[bench] CI mode: time budgets scaled x${TIME_SCALE} for a shared runner.`);
+  console.log("        Byte budgets are NOT scaled. A green run here is not a green run on the");
+  console.log("        machine the budgets were measured on -- it is a regression check.");
 }
 
 const server = await serve();
@@ -137,7 +184,7 @@ const DOC_ASSETS = [
 
 const cold = {};
 for (const [label, path] of [["terminal", "/"], ["atlas", "/storm-atlas/"]]) {
-  const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+  const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, ...HERMETIC });
   for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**",
                    "**basemaps.cartocdn.com**", "**gibs.earthdata.nasa.gov**"]) {
     await ctx.route(h, (r) => r.abort());
@@ -167,6 +214,12 @@ for (const [label, path] of [["terminal", "/"], ["atlas", "/storm-atlas/"]]) {
     };
   }, DOC_ASSETS);
   cold[label] = m;
+  /* AFTER the measurement, so it costs the budgets nothing. The terminal iteration is the
+     one that matters: docs/index.html registers a tile-cache worker whose fetches
+     ctx.route above cannot intercept, so without HERMETIC this benchmark would be timing
+     a page that is quietly talking to two CDNs. See lib/browser-harness.mjs. */
+  const escaped = await serviceWorkerEscape(page);
+  if (escaped) { failures++; console.log(`  FAIL  ${label} isolation: ${escaped}`); }
   console.log(`        ${label.padEnd(9)} ${(m.bytes / 1e6).toFixed(2)} MB over ${m.requests} ` +
     `requests · referenced assets received at ${m.lastOurAsset} ms · ` +
     `execution-gated assets at ${m.lastDeferred} ms · font CDN stalled ${m.fontBlockMs} ms`);
@@ -186,7 +239,7 @@ console.log("        decision can be made on a number rather than a hunch.");
 /* ---- 3. in-page work ------------------------------------------------------------------ */
 console.log("\n[3] the work the Atlas actually does");
 {
-  const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 } });
+  const ctx = await browser.newContext({ viewport: { width: 1920, height: 1080 }, ...HERMETIC });
   for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**", "**basemaps.cartocdn.com**"]) {
     await ctx.route(h, (r) => r.abort());
   }
@@ -270,8 +323,27 @@ console.log("\n[3] the work the Atlas actually does");
       replay.setTimeline(null);
     }
 
+    /* Phase 3. The cohort path is what a chip click costs now: cohortResult decides membership
+       AND outcomes, and previewCounts puts a live number on every control. Measured on a built
+       cohort (what a reader interacts with) and on the unconditioned archive (reset, first
+       paint) separately, because they are an order of magnitude apart and averaging them would
+       hide both. */
+    const C = globalThis.__ATLAS_COHORT || {};
+    const built = C.normalise
+      ? C.normalise({ where: { lat: 12, lon: -105, radiusKm: 800 }, seasonFrom: 1971 })
+      : null;
+    const wide = C.normalise ? C.normalise({}) : null;
+    const cohortMs = C.cohortResult && built
+      ? time(8, (i) => C.cohortResult(archive,
+        { ...built, where: { ...built.where, radiusKm: 600 + (i % 4) * 100 } })) : null;
+    const cohortWideMs = C.cohortResult && wide ? time(4, () => C.cohortResult(archive, wide)) : null;
+    const previewMs = C.previewCounts && built
+      ? time(8, (i) => C.previewCounts(archive,
+        { ...built, months: [(i % 12) + 1] })) : null;
+
     return { decodeAndIndex, filterMs, queryMs, drawMs, hitMs,
              densityMs, genesisDensityMs, timelineBuildMs, replayTickMs, replayRepaintMs,
+             cohortMs, cohortWideMs, previewMs,
              storms: archive.nStorms, points: archive.nPoints };
   });
 
@@ -285,6 +357,9 @@ console.log("\n[3] the work the Atlas actually does");
   if (m.timelineBuildMs !== null) gate("build the replay clock", m.timelineBuildMs, BUDGET.timelineBuildMs, "ms");
   if (m.replayTickMs !== null) gate("replay tick (incremental)", m.replayTickMs, BUDGET.replayTickMs, "ms");
   if (m.replayRepaintMs !== null) gate("replay repaint to cursor (after a pan)", m.replayRepaintMs, BUDGET.replayRepaintMs, "ms");
+  if (m.cohortMs !== null) gate("score a built cohort (a chip click)", m.cohortMs, BUDGET.cohortMs, "ms");
+  if (m.previewMs !== null) gate("every chip's live count", m.previewMs, BUDGET.previewMs, "ms");
+  if (m.cohortWideMs !== null) gate("score the whole archive (reset, first paint)", m.cohortWideMs, BUDGET.cohortWideMs, "ms");
   if (errors.length) { failures++; console.log("  FAIL  page errors: " + errors.join(" | ")); }
   else console.log("  ok    no page errors");
   await ctx.close();

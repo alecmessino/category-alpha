@@ -18,25 +18,50 @@
   "genesis_events.two_first_mention_utc": "NULL on every row",
   "genesis_events.two_lead_hours": "NULL on every row"
  },
+ "env_coverage": {
+  "by_source": {
+   "ships_dev": {
+    "first_utc": "1982-05-20 00:00:00+00:00",
+    "last_utc": "2022-11-11 12:00:00+00:00",
+    "rows": 32003,
+    "storms": 1408
+   },
+   "ships_dev+csst": {
+    "first_utc": "2023-01-16 12:00:00+00:00",
+    "last_utc": "2023-11-26 12:00:00+00:00",
+    "rows": 839,
+    "storms": 41
+   },
+   "ships_rt": {
+    "first_utc": "2026-03-11 18:00:00+00:00",
+    "last_utc": "2026-08-20 18:00:00+00:00",
+    "rows": 56,
+    "storms": 12
+   }
+  },
+  "note": "Sources are reported separately and must not be pooled: ships_dev+csst carries a CLIMATOLOGICAL sea-surface temperature where ships_dev carries an observed one. No storm in this archive draws on more than one source, but a matched pool can contain storms from several.",
+  "storms_any_source": 1461,
+  "storms_total": 3959
+ },
  "env_genesis_window_hours": 12.0,
  "files": {
   "atlas-core-v1.bin.gz": {
-   "bytes": 431049,
+   "bytes": 431042,
    "raw_bytes": 1523000,
-   "sha256": "f5998e24daa5f94dc379c0525ebc73592650ddbbbe815280e0bec2afde0ccba7"
+   "sha256": "2bb263d3bff938fce6924a19d6bd8f8c98f5c584241ed4c81a12e11b0f2efae8"
   },
   "atlas-env-v1.bin.gz": {
-   "bytes": 991629,
+   "bytes": 991631,
    "raw_bytes": 5193698,
-   "sha256": "22d8f96a76cc5bc7fecf38c27f56d3fba28adc19e852accc71096f218e282b06"
+   "sha256": "4dfc6570827805b85af1eefa217c954218db4c831e58deeb42198a836427501a"
   },
   "atlas-tracks-v1.bin.gz": {
-   "bytes": 971810,
+   "bytes": 971812,
    "raw_bytes": 4067542,
-   "sha256": "9d17359504b1ab4cf68c4258147c1dee1b0a84c7f53f201eef8bd9ab4c7078a5"
+   "sha256": "4eb486799747b8a8e57b8143b5f3cc9a47bba53a31b74e7b41ab0209bcc42eb2"
   }
  },
- "methodology_version": "1.0.0",
+ "methodology_version": "1.1.0",
  "not_packed": {
   "_note": "Absent from the pack, present in the archive. Nothing here was dropped because it was inconvenient; each is unread by any surface this pack serves.",
   "daily_disturbances": "whole table -- pre-genesis evidence is a later phase",

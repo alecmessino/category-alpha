@@ -379,11 +379,21 @@ function AXEntry({ e, dense }) {
                         <td style={{ ...td, color: "var(--text-2)" }}>{AX_CONTRACT[contract] || contract}</td>
                         <AXRateCells r={r} dense={dense} span={4} />
                         <td style={{ ...td, whiteSpace: "normal" }}>
+                          {/* THE BADGE IS THE ENGINE'S VERDICT, NOT A CONSTANT. Methodology
+                              1.1.0 split the refusal: BASE RATE ONLY means the whole archive
+                              cannot support the contract, OUT OF SCOPE means the events exist
+                              somewhere this query cannot reach. Printing the first label over
+                              the second would tell a reader the record is empty when it holds
+                              699 of them. */}
                           {u ? (
                             <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                              <AXBadge tone="neg">BASE RATE ONLY</AXBadge>
+                              <AXBadge tone={/^OUT OF SCOPE/.test(u.status || "") ? "warn" : "neg"}>
+                                {/^OUT OF SCOPE/.test(u.status || "") ? "OUT OF SCOPE" : "BASE RATE ONLY"}
+                              </AXBadge>
                               <span style={{ color: "var(--text-2)", fontSize: 10 }}>
-                                {u.archive_events} archived event{u.archive_events === 1 ? "" : "s"} · {u.required} required
+                                {u.scope_events !== undefined && u.scope_events !== u.archive_events
+                                  ? <>{u.scope_events} {u.scope} · {u.archive_events} archive-wide · {u.required} required</>
+                                  : <>{u.archive_events} archived event{u.archive_events === 1 ? "" : "s"} · {u.required} required</>}
                               </span>
                             </span>
                           ) : null}
@@ -455,8 +465,13 @@ function AXEntry({ e, dense }) {
                   <tbody>
                     {e.cases.map((c) => {
                       const L = AX_LADDER.filter((x) => x.k === c.max_category)[0];
+                      /* Keyed on storm_id, the ARCHIVE'S OWN key, which is never null. atcf_id
+                         is null for pre-ATCF-era storms, and two of those in one pool gave two
+                         React children the key `null` -- which React warns "may cause children
+                         to be duplicated and/or omitted", i.e. a row showing the wrong storm.
+                         The fallbacks cover a payload emitted before storm_id was carried. */
                       return (
-                        <tr key={c.atcf_id}>
+                      <tr key={c.storm_id || c.atcf_id || `${c.season}:${c.name}`}>
                           <td style={{ ...td, fontWeight: 700 }}>{c.season}</td>
                           <td style={{ ...td, color: "var(--text-1)" }}>{c.name}</td>
                           <td style={{ ...td, color: "var(--text-2)" }}>{c.atcf_id}</td>

@@ -813,6 +813,21 @@ def _emit(out: Path, written: dict, storms, g, ordered, lf, env_sorted, tp_cnt, 
         "thresholds_kt": dict(THRESHOLDS_KT),
         "subbasin_bits": SUBBASIN_BITS,
         "env_genesis_window_hours": ENV_GENESIS_WINDOW_H,
+        # ENVIRONMENTAL COVERAGE, IN THE MANIFEST RATHER THAN IN THE ENV PACK.
+        #
+        # The environment block is nearly a megabyte and is loaded lazily, so a surface that
+        # wanted to say "this condition can only be evaluated on a third of the record" would
+        # have had to download the whole thing to find out. The manifest is a few kilobytes and
+        # arrives first, so the coverage travels there and the caveat can be shown BEFORE the
+        # reader commits to an environment-conditioned question.
+        #
+        # Broken out PER SOURCE and never summed into one number, because the sources are not
+        # interchangeable: `ships_dev+csst` carries a CLIMATOLOGICAL sea-surface temperature
+        # where `ships_dev` carries an observed one. Measured on this archive, no storm draws
+        # on more than one source -- the partition is clean per storm -- but a matched POOL can
+        # still mix them, and a reader standardising shear across such a pool is entitled to
+        # know that some of its SSTs are climatology.
+        "env_coverage": _env_coverage(env_sorted, storms),
     }
     out.mkdir(parents=True, exist_ok=True)
     mpath = out / "atlas-manifest.json"
@@ -938,6 +953,50 @@ class _Fnv:
 
     def boolean(self, v: bool):
         self.feed(b"\x03" + (b"\x01" if v else b"\x00"))
+
+
+def _env_coverage(env: list, storms: list) -> dict:
+    """Per-source environmental coverage, for the manifest.
+
+    Reports how much of the record each environment source can speak for, so a surface can say
+    what an environment condition would cost BEFORE the reader commits to one. Kept per source
+    and deliberately not summed: the sources are not interchangeable.
+
+    `storms_any` is the union across sources and is the only figure that answers "can this
+    archive be asked an environmental question at all" -- measured here at roughly a third of
+    the record, none of it before 1982, which is a fact about SHIPS rather than about weather.
+    """
+    total = len(storms)
+    by_source: dict = {}
+    seen_any: set = set()
+    for r in env:
+        src = r.get("env_source") or "unknown"
+        sid = r.get("storm_id")
+        b = by_source.setdefault(src, {"rows": 0, "storms": set(), "first": None, "last": None})
+        b["rows"] += 1
+        if sid:
+            b["storms"].add(sid)
+            seen_any.add(sid)
+        t = r.get("iso_time")
+        if t is not None:
+            ts = str(t)
+            if b["first"] is None or ts < b["first"]:
+                b["first"] = ts
+            if b["last"] is None or ts > b["last"]:
+                b["last"] = ts
+    return {
+        "storms_total": total,
+        "storms_any_source": len(seen_any),
+        "by_source": {
+            k: {"rows": v["rows"], "storms": len(v["storms"]),
+                "first_utc": v["first"], "last_utc": v["last"]}
+            for k, v in sorted(by_source.items())
+        },
+        "note": ("Sources are reported separately and must not be pooled: ships_dev+csst "
+                 "carries a CLIMATOLOGICAL sea-surface temperature where ships_dev carries an "
+                 "observed one. No storm in this archive draws on more than one source, but a "
+                 "matched pool can contain storms from several."),
+    }
 
 
 def _digest(values, kind: str, quantise: int | None = None) -> dict:

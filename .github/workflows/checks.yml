@@ -76,7 +76,7 @@ jobs:
       # esbuild the Atlas gate needs would vanish when the next step installed something else.
       - name: Check JSX parses
         run: |
-          npm i --silent --no-fund --no-audit --no-save @babel/core @babel/preset-react esbuild@0.25.10 react@18.3.1 react-dom@18.3.1
+          npm i --silent --no-fund --no-audit --no-save @babel/core @babel/preset-react esbuild@0.25.10 react@18.3.1 react-dom@18.3.1 playwright@1.49.1
           node scripts/check-jsx.mjs
 
       # The estimators, in the order they were built. Each checks its arithmetic against a
@@ -229,3 +229,80 @@ jobs:
       # a single fix, which no sampled clock can be relied on to land on.
       - name: Verify the replay clock skips dead air and nothing else
         run: node scripts/test-atlas-timeline.mjs
+
+      # The fifth rule is NOT in the archive's Python -- it is a guard the browser adds for a
+      # hazard that only exists once one cohort spec drives both the map and the statistics:
+      # a variable used to define a cohort cannot be reported as an outcome of it. Two things
+      # must hold at once, and the second is the dangerous one: the rule must fire, AND it must
+      # be perfectly additive, because a guard that quietly perturbed a canonical result would
+      # be a second methodology introduced through the back door.
+      - name: Verify a cohort cannot report itself as its own outcome
+        run: node scripts/test-atlas-rates.mjs
+
+      # The cohort spec is the only query surface: one object decides what is drawn AND what is
+      # scored. The dangerous part was never the new code, it was the REPLACEMENT -- a rewrite
+      # that silently dropped one filter would look completely healthy, because nothing on
+      # screen says "provisional seasons are no longer being excluded"; the population just
+      # quietly grows and every rate shifts. So the gate is an equivalence proof: for every
+      # filter and a matrix of combinations, the spec path selects the identical storm set as
+      # the legacy path -- plus the URL round-trip, and the archive's own warnings surviving
+      # the migration, which is the half the first draft of this test forgot.
+      - name: Verify one cohort spec gives one answer
+        run: node scripts/test-atlas-cohort.mjs
+
+      # Comparing two Wilson intervals for overlap is a WEAK heuristic, not a hypothesis test,
+      # and this repository runs none. The danger is the vocabulary: "significant" would borrow
+      # an authority the method does not have, and a reader cannot tell from a rendered page
+      # which of the two a number came from. So the words of a test are banned from the sources
+      # and from the shipped bundle, the two permitted statements are pinned, and the measured
+      # figures behind the worked example are asserted rather than described.
+      - name: Verify the comparison says only what the intervals support
+        run: node scripts/test-atlas-compare.mjs
+
+      # The environment is exposed as a LENS and not as a filter, because the coverage decides
+      # the scope: under half this archive carries any environment and none of it predates 1982.
+      # The three sources are sequential ERAS, and one substitutes a CLIMATOLOGICAL sea-surface
+      # temperature for an observed one -- so a cohort spanning 2022 into 2023 crosses a
+      # boundary where the definition of sst_c changes underneath it. This asserts there is no
+      # pooled statistic anywhere in the returned object to render by accident, that the
+      # boundary is announced, and that stating coverage costs none of the 991 KB block.
+      - name: Verify the environment is never pooled across its source eras
+        run: node scripts/test-atlas-env.mjs
+
+      # The calibration ledger is the archive's own backtest -- 1,039 storms replayed zero-peek
+      # -- projected for the browser. The file is NOT trusted because it is committed: this
+      # rebuilds it from data/genesis-archive/backtest.json and compares byte for byte, the same
+      # contract the pack keeps. It also pins the scope audit, which is the reason the ledger is
+      # worth shipping: the refusal gate counts events ARCHIVE-WIDE, the skill that matters is
+      # skill within the population a query can draw from, and of the four contracts that earned
+      # no skill claim the gate catches one.
+      - name: Verify the calibration ledger is the archive's own, failures included
+        run: node scripts/test-atlas-calibration.mjs
+
+      # ---- THE BROWSER GATES -------------------------------------------------------------
+      #
+      # These ran by hand until now, and between them they caught the two worst regressions of
+      # the last phase: a crash that took the live board from 46 honesty probes to 34, and a
+      # silently dropped pre-1971 observing-bias warning that every set-comparison test passed
+      # straight through. A gate that only catches what the static checks miss is exactly the
+      # gate that must not be optional.
+      #
+      # --require-browser is not decoration. All three scripts print "SKIPPED, not passed" and
+      # exit 0 when playwright is absent, which is right on a laptop and catastrophic here: the
+      # step would go green forever while testing nothing. The flag turns that skip into an
+      # exit 2. Chromium is installed once and used by all three.
+      - name: Install Chromium for the browser gates
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify the honesty surface reaches the screen
+        run: node scripts/check-atlas-dom.mjs --require-browser
+
+      - name: Verify the terminal's panels refuse on screen, not just in the engine
+        run: node scripts/check-panel-dom.mjs --require-browser
+
+      # --ci scales the WALL-CLOCK budgets x3 and says so in its output; byte budgets are not
+      # scaled. The budgets were measured on a development container and a shared runner is a
+      # noisier machine, so the choice is between a declared multiplier and a gate that gets
+      # quietly loosened until it catches nothing. A 10x regression still trips a 3x budget.
+      - name: Verify the Atlas still meets its performance budgets
+        run: node scripts/bench-atlas.mjs --ci --require-browser

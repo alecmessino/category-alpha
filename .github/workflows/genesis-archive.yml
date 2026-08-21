@@ -80,6 +80,16 @@ jobs:
       - name: Rebuild the Storm Atlas packs
         run: python3 scripts/genesis/cli.py atlas-pack
 
+      # The calibration ledger has to be rebuilt on the same cadence, and the reason is the
+      # scope audit rather than the scores. The BACKTEST is not re-run here -- that is a
+      # separate, expensive replay -- but the audit compares each contract's archive-wide event
+      # count against what the replay observed, and the archive-wide half moves every time this
+      # job appends a storm. Leaving it out would let the shipped file drift from the archive
+      # it describes, and test-atlas-calibration.mjs rebuilds and byte-compares, so the drift
+      # would surface as a red PR check on somebody else's unrelated change.
+      - name: Rebuild the calibration ledger's scope audit
+        run: python3 scripts/genesis/cli.py atlas-calibration
+
       # Reports rather than gates: official best-track data legitimately contains values
       # that look wrong, and refusing to commit because NOAA published something surprising
       # would make the archive less faithful. The findings land in the job log where a human
