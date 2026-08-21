@@ -230,6 +230,35 @@ export function AtlasMap({
     layers.current.population.setEmphasis(emphasis);
   }, [ready, emphasis]);
 
+  /* WHAT THE LAYER ACTUALLY DREW, REPORTED AFTER IT DREW IT.
+   *
+   * `onViewChange` fired from exactly two places: `moveend zoomend resize`, and once at init --
+   * which is BEFORE the rows exist. So the provenance drawer's section 05, the one headed WHAT
+   * THIS SURFACE CHOSE, rendered the init snapshot for the whole session unless the reader
+   * happened to pan: "LINE DECIMATION none · DRAWN THIS FRAME 0 storms · 0 segments", on a
+   * screen whose plate head said 3,885 TRACKS DRAWN and whose layer had in fact drawn 67,781
+   * segments at stride 3, decimated. A surface that exists to disclose its own simplifications
+   * was reporting that it had made none.
+   *
+   * TWO FRAMES, DELIBERATELY. `redraw()` coalesces into one requestAnimationFrame and paints
+   * there; reading the stats in the same frame is a race with it. The second frame is after the
+   * paint, whatever order the callbacks were queued in. This reads no state and changes no
+   * drawing -- it only reports. */
+  React.useEffect(() => {
+    if (!ready) return undefined;
+    let a = 0;
+    let b = 0;
+    a = requestAnimationFrame(() => {
+      b = requestAnimationFrame(() => {
+        if (map.current && cb.current.onViewChange) {
+          cb.current.onViewChange(readView(map.current, layers.current.population));
+        }
+      });
+    });
+    return () => { cancelAnimationFrame(a); cancelAnimationFrame(b); };
+  }, [ready, rows, emphasis, colorBy, dimPopulation, softenEmphasis, showGenesis, showLandfalls,
+    mode]);
+
   React.useEffect(() => {
     if (!ready) return;
     layers.current.selection.setStorm(selected === null ? -1 : selected);
@@ -301,9 +330,16 @@ export function AtlasMap({
             that the map and the panel are answering the same question. `kept` is now the row
             count the plate was given and `lifted` is the cohort inside it, so the second figure
             reconciles with the cohort in both rails and the first reconciles with the ink. */}
+        {/* IN REPLAY, NOTHING IS DRAWN YET. The static population is withheld on purpose while
+            the clock runs -- revealing it over time is the whole point -- so "3,885 TRACKS
+            DRAWN" sat over an empty plate at the start of every run, contradicting the picture
+            and the transport beneath it, which correctly reads REVEALED 1 / 3,885. The same
+            number is true of the run as a POPULATION, which is what it names here instead; how
+            much of it has been revealed is the transport's to say, and it does. */}
         <span>
-          <em>{kept.toLocaleString()}</em> TRACKS DRAWN
-          {lifted ? <> · <em>{lifted.toLocaleString()}</em> LIFTED BY THE QUERY</> : null}
+          <em>{kept.toLocaleString()}</em> {mode === "replay" ? "IN THIS RUN" : "TRACKS DRAWN"}
+          {lifted && mode !== "replay"
+            ? <> · <em>{lifted.toLocaleString()}</em> LIFTED BY THE QUERY</> : null}
           {selectedCount ? <> · <em>{selectedCount}</em> SELECTED</> : null}
         </span>
         <span className="at-r">

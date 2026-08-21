@@ -341,9 +341,18 @@ export function Atlas() {
   React.useEffect(() => {
     const onKey = (e) => {
       if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+      /* ESCAPE DISMISSES ONE THING, AND NEVER THE QUERY.
+       *
+       * All three of these fired unconditionally, so the key the provenance drawer advertises
+       * as its own close key ALSO deleted the reader's genesis-location condition -- and the
+       * URL is written with replaceState, so Back could not bring it back. An analyst closing a
+       * drawer lost the probe they had spent the session building, with no undo and no notice.
+       * Dismissal is now most-recent-first with an early return at each step, and the cohort is
+       * not in the chain at all: a condition is removed by its own ✕ or by RESET, both of which
+       * are visible, deliberate and next to the thing they remove. */
       if (e.key === "Escape") {
-        setProvOpen(false); setSelected(null);
-        setCohort((c) => normalise({ ...c, where: null }));
+        if (provOpen) { setProvOpen(false); return; }
+        if (selected !== null) { setSelected(null); return; }
       }
       if (e.key === "p" || e.key === "P") setProvOpen((v) => !v);
       if (e.key === " " && (selected !== null || mode === "replay")) {
@@ -352,7 +361,7 @@ export function Atlas() {
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [selected, mode]);
+  }, [selected, mode, provOpen]);
 
   if (error) return <BootError error={error} />;
   if (!archive || !world || !result) return <Boot manifest={manifest} />;
@@ -462,11 +471,20 @@ export function Atlas() {
             onReplay={() => setPlaying((v) => !v)} replaying={playing} />
         ) : mode === "replay" ? (
           <ReplayNote timeline={timeline} result={result} />
-        ) : conditionsOf(cohort).length ? (
-          /* THE ANSWER IS PUBLISHED FOR ANY COHORT, not only for one with a location. Before
-             3.3 this panel answered a click on open water and nothing else, so narrowing to
-             "Cat 3+, since 1971, Aug-Sep" produced a map and no statistics at all. */
+        ) : (
+          /* THE ANSWER IS PUBLISHED FOR ANY COHORT -- INCLUDING THE ONE WITH NO CONDITIONS.
+             Before 3.3 this panel answered a click on open water and nothing else, so narrowing
+             to "Cat 3+, since 1971, Aug-Sep" produced a map and no statistics at all. That was
+             fixed by gating on `conditionsOf(cohort).length`, which left one cohort still
+             unanswerable: the whole archive. And that is the one every other panel SUBTRACTS
+             FROM -- "the same cohort without the location condition · 3,885 storms" is quoted
+             on every comparison on the surface, and a reader who wanted to see what those 3,885
+             storms actually did could not, because asking for them by removing every condition
+             replaced the answer with the introduction.
+             The introduction is not lost; it is the lede above the answer, which is where an
+             unqueried surface should put an invitation anyway. */
           <CohortPanel spec={cohort} result={result} sentence={sentence}
+            intro={conditionsOf(cohort).length ? null : <Introduction archive={archive} />}
             citation={citation} citationUrl={scenarioURL()}
             peak={peakOf(pathway)} pathway={pathway} onSelectStorm={selectStorm}
             pathwayOn={showPathway} onShowPathway={setShowPathway}
@@ -474,8 +492,6 @@ export function Atlas() {
             onBaseline={setBaselinePin}
             archive={archive} envCoverage={envCov} envLens={envLens}
             envLoading={envLoading} onLoadEnv={loadEnv} onEvidence={openLedger} />
-        ) : (
-          <Introduction archive={archive} />
         )}
       </div>
 
@@ -671,14 +687,20 @@ function ScaleLine({ manifest, dim }) {
     [c.landfalls, "LANDFALLS"],
     [c.environment, "ENVIRONMENT OBS"],
   ];
+  /* THE LADDER FOR THIS STRIP IS ALREADY WRITTEN, AND NOTHING WAS MATCHING IT.
+     atlas.css declares `.at-ledger` and `.at-fig` with a measured degradation ladder -- drop the
+     fifth figure at 1560, the fourth at 1400, the third at 1240, the rest at 1040 -- under the
+     rule that a caption band gives up whole items rather than half a word. This element carried
+     no classes at all, so none of it applied and the strip wrapped to a second line inside a
+     54px header instead. Using the classes switches on the behaviour the stylesheet was written
+     and commented for. The `dim` boot variant keeps its inline opacity: it is a state of this
+     component, not of the band. */
   return (
-    <div style={{ display: "flex", gap: "var(--sp-6)", flexWrap: "wrap",
-      opacity: dim ? 0.75 : 1 }}>
+    <div className="at-ledger" style={dim ? { opacity: 0.75 } : undefined}>
       {items.map(([n, label]) => (
-        <span key={label} style={{ ...MONO, fontSize: "var(--fs-mono-sm)", whiteSpace: "nowrap" }}>
-          <span style={{ color: "var(--text-1)", fontWeight: 700 }}>{n.toLocaleString()}</span>
-          <span style={{ color: "var(--text-2)", marginLeft: 5,
-            letterSpacing: "var(--track-label)" }}>{label}</span>
+        <span className="at-fig" key={label}>
+          <b>{n.toLocaleString()}</b>
+          <span>{label}</span>
         </span>
       ))}
     </div>

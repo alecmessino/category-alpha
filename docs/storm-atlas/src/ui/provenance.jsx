@@ -14,7 +14,14 @@
  */
 
 import React from "react";
-import { Gap, Head, MONO, Note, Row, TextButton, Txt } from "./kit.jsx";
+import { EpistemicKey, Gap, Head, MONO, Note, Row, TextButton, Txt } from "./kit.jsx";
+
+/** English ordinals, for the small integers this drawer prints. */
+function ordinal(n) {
+  const rem100 = n % 100;
+  if (rem100 >= 11 && rem100 <= 13) return `${n}th`;
+  return `${n}${["th", "st", "nd", "rd"][n % 10] || "th"}`;
+}
 
 export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
   const m = archive.manifest;
@@ -117,7 +124,9 @@ export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
           {frame ? (
             <>
               <Row k="line decimation"
-                v={<Txt value={frame.stride > 1 ? `every ${frame.stride}th fix` : "none"} />}
+                /* `${n}th` is wrong for 2 and 3, which are the only strides this layer picks:
+                   it printed "every 3th fix" on the default view. */
+                v={<Txt value={frame.stride > 1 ? `every ${ordinal(frame.stride)} fix` : "none"} />}
                 title="Applies to the drawn LINE only. Marks and hit-testing always use full
                        resolution." />
               <Row k="drawn this frame"
@@ -191,6 +200,18 @@ export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
               } />
             </div>
           ))}
+
+          {/* THE MARKS HAD NO KEY ANYWHERE ON THIS SURFACE.
+              `⊘ ↺ ⇱ ⌁ —` and the derived superscript carry the whole refusal grammar, and
+              `EpistemicKey` -- which glosses every one of them from the same registry the
+              components read -- was exported, styled (`.at-keyrow` in atlas.css) and imported by
+              nothing: the word EPISTEMIC appeared in no rendered state at any width. A notation
+              with no legend is a notation the reader has to reverse-engineer from context, on
+              the one part of the product whose job is to be unambiguous.
+              It goes in the drawer rather than on the panels: a key is a reference, wanted once
+              and then not again, and printing it beside every refusal is what the terminal's own
+              key exists to avoid. */}
+          <EpistemicKey />
         </div>
       </aside>
     </>

@@ -85,6 +85,22 @@ export function subbasinName(code) { return SUBBASIN_NAME[code] || code; }
 export function regionName(key) {
   return REGION_NAME[key] || String(key || "").replace(/_/g, " ");
 }
+
+/* THE SAME REGION, SPELLED ONE WAY WHEREVER IT IS A LABEL.
+ *
+ * `regionName` is for PROSE -- "made landfall in the continental United States" -- and it is
+ * the wrong string for a table row, where the column is 96px wide and the reader is scanning.
+ * Before this pair existed the panel printed the raw storage key (`hawaii`), the applied chip
+ * printed the filter's own label (`HAWAII`) and the sentence printed the prose name, so one
+ * region appeared three ways on one screen. Prose takes `regionName`; every label takes this. */
+const REGION_LABEL = {
+  mexico: "Mexico", conus: "CONUS", hawaii: "Hawaii", caribbean: "Caribbean",
+  central_america: "Central America", unattributed: "Unattributed",
+};
+export function regionLabel(key) {
+  return REGION_LABEL[key]
+    || String(key || "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
 export function intensityName(key) { return INTENSITY_NAME[key] || key; }
 
 /**

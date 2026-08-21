@@ -69,11 +69,31 @@ export function countsOf(u) {
 export function OutcomeLadder({ rows, baselineName, unknown, onEvidence, conditionedReason }) {
   if (!rows || !rows.length) return null;
   const anySep = rows.some((r) => r.delta && r.delta.overlap !== null);
+
+  /* THE SAMPLE GATE IS ONE FACT ABOUT THE COHORT, NOT ONE PER RUNG.
+   *
+   * `refused_reason` is written from `n_known` -- the storms whose intensity the archive
+   * recorded -- which does not vary by threshold, so every refused rung carries the SAME
+   * sentence by construction. Rendered per row it produced, on a one-storm cohort: `RATE
+   * REFUSED` 22 times, `1 storms with a known outcome < min_sample=10` six times, and the
+   * remedy six times, for a single fact the reader had already read at the top of the panel.
+   * Hoisted here, on the same argument as the UNKNOWN note and the conditioned reason above.
+   *
+   * COLLECTED RATHER THAN ASSUMED. If two rungs ever DID refuse for different reasons, hoisting
+   * would publish one of them under both -- so the reasons are gathered and the hoist only
+   * happens when there is exactly one. Otherwise each row keeps its own, which is the state
+   * this code was in before. */
+  const refusedReasons = [...new Set(rows
+    .filter((r) => !r.unscoreable && r.cell && r.cell.status !== CIRCULAR
+      && r.cell.rate === null && r.cell.refused_reason)
+    .map((r) => r.cell.refused_reason))];
+  const sharedRefusal = refusedReasons.length === 1 ? refusedReasons[0] : null;
   return (
     <>
       <div className="at-ladder" data-outcome-ladder>
         {rows.map((r) => (
           <LadderRow key={r.key} {...r} baselineName={baselineName}
+            sharedRefusal={sharedRefusal}
             onEvidence={r.onEvidence || onEvidence} />
         ))}
       </div>
@@ -93,7 +113,14 @@ export function OutcomeLadder({ rows, baselineName, unknown, onEvidence, conditi
         </div>
       ) : null}
 
-      {/* SAID ONCE, NOT ONCE PER ROW -- the same discipline ConditionedGroup established. */}
+      {/* THE SAMPLE GATE'S REFUSAL, ONCE, with the archive's own reason verbatim and the remedy
+          that says the reader can act on it. Which CONTRACTS it fired on is on the rungs above,
+          in the column where their rates would have been. */}
+      {sharedRefusal ? (
+        <Refusal kind="RATE_REFUSED" detail={sharedRefusal} />
+      ) : null}
+
+      {/* SAID ONCE, NOT ONCE PER ROW -- the same discipline the conditioned group established. */}
       {conditionedReason ? (
         <div data-refusal="CONDITIONED_ON" style={{ fontFamily: "var(--font-sans)",
           fontSize: "var(--fs-caption)", color: "var(--text-2)", lineHeight: "var(--lh-body)",
@@ -122,7 +149,7 @@ export function OutcomeLadder({ rows, baselineName, unknown, onEvidence, conditi
 }
 
 function LadderRow({ label, tone, cell, unscoreable, subject, delta, baselineCell, baselineName,
-  onEvidence, of }) {
+  onEvidence, of, sharedRefusal }) {
   const c = tone || "var(--accent)";
   const refused = !!unscoreable || (cell && (cell.status === CIRCULAR || cell.rate === null));
   const kind = unscoreable ? refusalKindOf(unscoreable)
@@ -189,13 +216,33 @@ function LadderRow({ label, tone, cell, unscoreable, subject, delta, baselineCel
       ) : null}
 
       {/* The engine's own words, verbatim, for the contracts that refuse. A circular row's
-          reason is shared by every circular row and is stated once under the ladder instead. */}
+          reason is shared by every circular row and is stated once under the ladder instead.
+          NO SUBJECT AND NO REPEATED DENOMINATOR. The row's own head carries the contract's name
+          and its count over its denominator two lines above, so passing them again printed
+          "CATEGORY 5 · 0 / 190" and then "CATEGORY 5 ... 0 of 190" directly beneath it. The one
+          count that is NOT already on the row stays: an unscoreable contract's `countsOf` is
+          events in scope against events archive-wide against events needed, which is a
+          different statement from the cohort's own numerator and the finding this refusal
+          exists to make. */}
       {unscoreable ? (
-        <Refusal kind={refusalKindOf(unscoreable)} subject={subject}
+        <Refusal kind={refusalKindOf(unscoreable)}
           counts={countsOf(unscoreable)} detail={unscoreable.reason} onEvidence={onEvidence} />
       ) : cell && cell.status !== CIRCULAR && cell.rate === null ? (
-        <Refusal kind="RATE_REFUSED" subject={subject} detail={cell.refused_reason}
-          counts={`${cell.count} of ${cell.n_storms}`} onEvidence={onEvidence} />
+        /* The reason is hoisted when every rung shares it; what stays on the row is the one
+           thing that is per-contract -- the evidence for THIS contract's refusal. */
+        sharedRefusal === cell.refused_reason ? (
+          onEvidence ? (
+            <div className="at-lft">
+              <button type="button" onClick={onEvidence} data-evidence-link style={{
+                ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
+                border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
+                color: "var(--text-link)", cursor: "pointer", padding: "1px 5px",
+              }}>SEE THE EVIDENCE →</button>
+            </div>
+          ) : null
+        ) : (
+          <Refusal kind="RATE_REFUSED" detail={cell.refused_reason} onEvidence={onEvidence} />
+        )
       ) : null}
     </div>
   );
@@ -246,7 +293,7 @@ function UnknownNote({ n }) {
    section. A list of ten badges where only the first says what the reader can do about it is a
    list where nine refusals read as verdicts. Repetition is the cost of the rule; the prose still
    comes from REFUSALS, so there is exactly one place it is written. */
-export function RateLine({ cell, label, delta, onEvidence }) {
+export function RateLine({ cell, label, delta, onEvidence, sharedRefusal }) {
   if (!cell) return null;
   const pre = label ? <span style={{ color: "var(--text-2)" }}>{label} · </span> : null;
 
@@ -262,6 +309,28 @@ export function RateLine({ cell, label, delta, onEvidence }) {
   }
   if (cell.rate === null) {
     const r = REFUSALS.RATE_REFUSED;
+    /* WHEN THE WHOLE SECTION REFUSES FOR ONE REASON, THE REASON IS THE SECTION'S.
+       Below the sample gate every landfall contract refuses on the same sentence -- six regions
+       times two kinds is twelve lines of it, plus twelve copies of the remedy, for one fact
+       about the cohort. Hoisted, this line keeps the two things that ARE per contract: that it
+       refused, and where its evidence is. No `data-refusal` on the hoisted form: the DOM gate
+       requires every element carrying that attribute to name the way out, which a two-word
+       status cannot, and the hoisted block is where the way out is now stated. */
+    if (sharedRefusal && sharedRefusal === cell.refused_reason) {
+      return (
+        <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--neg)",
+          lineHeight: "var(--lh-body)" }}>
+          {pre}<strong>{r.mark} {r.title}</strong>
+          {onEvidence ? (
+            <button type="button" onClick={onEvidence} data-evidence-link style={{
+              ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
+              border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
+              color: "var(--text-link)", cursor: "pointer", padding: "0 5px", marginLeft: 6,
+            }}>SEE THE EVIDENCE →</button>
+          ) : null}
+        </div>
+      );
+    }
     return (
       <div data-refusal="RATE_REFUSED" style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
         color: "var(--neg)", lineHeight: "var(--lh-body)" }}>
