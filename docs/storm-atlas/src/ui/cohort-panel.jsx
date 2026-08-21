@@ -23,7 +23,7 @@ import { formatPosition } from "../engine/geo.js";
 import {
   Chip, CohortSpec, Gap, GroupRule, Head, MONO, Num, OverDenom, Row, Txt, claimText,
 } from "./kit.jsx";
-import { baselineName, baselineSentence } from "../engine/cohort-language.js";
+import { baselineName, baselineSentence, regionLabel } from "../engine/cohort-language.js";
 import { OutcomeLadder, RateLine, countsOf, refusalKindOf } from "./outcome-card.jsx";
 import { intensityContractKey, landfallContractKey } from "../engine/calibration.js";
 import { Refusal } from "./refusal.jsx";
@@ -34,7 +34,7 @@ const CAT_LABEL = { td: "TROPICAL DEPRESSION", ts: "TROPICAL STORM", cat1: "CATE
 
 export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathway, pathwayOn,
   peak, pathway, comparison, onBaseline, conditions, archive, envCoverage, envLens,
-  envLoading, onLoadEnv, onEvidence, citation, citationUrl }) {
+  envLoading, onLoadEnv, onEvidence, citation, citationUrl, intro }) {
   if (!result) return null;
   const r = result;
   const n = r.n_cases;
@@ -57,6 +57,10 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
           {formatPosition(spec.where.lat, spec.where.lon)} · {spec.where.radiusKm} km
         </div>
       ) : null}
+
+      {/* The invitation, when nothing has been asked yet. Above the answer rather than instead
+          of it -- see the note at its call site in atlas.jsx. */}
+      {intro ? <div data-cohort-intro>{intro}</div> : null}
 
       {n === 0 ? <NoCohort spec={spec} gaps={r.gaps} /> : (
         <>
@@ -209,6 +213,11 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
           {Object.keys(r.landfall).length ? (
             <>
               <Head>WHERE THEY LANDED</Head>
+              {/* One reason for the whole section, when there is one -- see RateLine. Below the
+                  sample gate that is every contract here, twelve lines of the same sentence. */}
+              {landfallRefusal(r) ? (
+                <Refusal kind="RATE_REFUSED" detail={landfallRefusal(r)} />
+              ) : null}
               {/* The denominator note, when the cohort was selected on landfall itself. Not a
                   refusal -- these rates are real -- but the words "43.8% made landfall in
                   Mexico" mean something different here than they did one condition ago, and
@@ -229,7 +238,7 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
                 .sort((a, b) => b[1].any.count - a[1].any.count || a[0].localeCompare(b[0]))
                 .map(([region, kinds]) => (
                 <div key={region} style={{ marginBottom: "var(--sp-3)" }}>
-                  <Row k={region.replace(/_/g, " ")} v={
+                  <Row k={regionLabel(region)} v={
                     <span>
                       <OverDenom n={kinds.any.count} of={kinds.any.n_storms} />
                       <span style={{ color: "var(--text-2)" }}> · ≥64 kt </span>
@@ -242,11 +251,11 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
                       bare rates. Same two permitted statements, same mark, same prohibition on
                       the vocabulary of a test. */}
                   <div style={{ paddingLeft: "var(--sp-4)" }}>
-                    <RateLine cell={kinds.any} label="any"
+                    <RateLine cell={kinds.any} label="any" sharedRefusal={landfallRefusal(r)}
                       delta={comparison ? comparison.landfall[region].any : null}
                       onEvidence={onEvidence
                         ? () => onEvidence(landfallContractKey(region, "any")) : undefined} />
-                    <RateLine cell={kinds.hurricane} label="≥64 kt"
+                    <RateLine cell={kinds.hurricane} label="≥64 kt" sharedRefusal={landfallRefusal(r)}
                       delta={comparison ? comparison.landfall[region].hurricane : null}
                       onEvidence={onEvidence
                         ? () => onEvidence(landfallContractKey(region, "hurricane")) : undefined} />
@@ -256,7 +265,7 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
                     if (!u) return null;
                     return (
                       <Refusal key={kind} kind={refusalKindOf(u)} compact
-                        subject={`${region.replace(/_/g, " ")} · ${kind === "hurricane" ? "≥64 kt" : "any"}`}
+                        subject={`${regionLabel(region)} · ${kind === "hurricane" ? "≥64 kt" : "any"}`}
                         counts={countsOf(u)}
                         detail={u.reason}
                         onEvidence={onEvidence
@@ -449,6 +458,20 @@ function Baseline({ c, conditions, onBaseline }) {
         {b.n_cases.toLocaleString()} storms · effective sample {b.effective_sample_size.toFixed(1)}
         {" · "}{b.sufficient ? "SUFFICIENT" : `BELOW SAMPLE · ${b.n_cases} < ${b.min_sample}`}
       </div>
+      {/* THE NOTE POINTS AT "THE INTERVAL COMPARISON BELOW", AND SOMETIMES THERE IS NONE.
+          engine/compare.js writes that sentence for every relation, correctly -- it is the
+          honesty statement that keeps a nested comparison from being read as a test. But
+          compareResults returns an object even when every contract short-circuits to NO
+          COMPARISON, so on a below-gate cohort the block promised a comparison over a ladder in
+          which every rung is refused. The engine's words are unchanged; what is added is the
+          state they were written without. */}
+      {!hasAnyComparison(c) ? (
+        <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--neg)",
+          lineHeight: "var(--lh-body)", marginTop: "var(--sp-3)" }}>
+          ⊘ NO CONTRACT IN THIS COHORT HAS A RATE TO COMPARE — every one of them is refused
+          below, so there is no delta on this page. The baseline&rsquo;s own figures stand.
+        </div>
+      ) : null}
       <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
         color: "var(--warn)", lineHeight: "var(--lh-body)", marginTop: "var(--sp-3)" }}>
         {c.relation.note}
@@ -474,6 +497,17 @@ function Baseline({ c, conditions, onBaseline }) {
   );
 }
 
+/** Did any contract actually produce a delta? A comparison object exists whenever two cohorts
+ *  do; a comparison a reader can read needs at least one contract where both sides published a
+ *  rate. */
+function hasAnyComparison(c) {
+  for (const d of Object.values(c.intensity || {})) if (d && d.deltaPp !== null) return true;
+  for (const r of Object.values(c.landfall || {})) {
+    for (const d of [r.any, r.hurricane]) if (d && d.deltaPp !== null) return true;
+  }
+  return false;
+}
+
 /** How the baseline is named on each card -- short, because it repeats on every one. */
 function baselineNameOf(c) {
   return baselineName(c.changed);
@@ -493,6 +527,21 @@ function isCircular(cell) {
  * six times running: measured on one panel, "Nobody recorded this outcome" six times over. Taken
  * across the ladder here so it can be stated once, and taken as a MAXIMUM rather than a first
  * value so a contract that somehow carried more could not be quietly under-reported. */
+/* The one reason every landfall contract refused, when they all refused for the same one.
+   Collected rather than assumed, for the same reason the ladder collects its own: two contracts
+   refusing differently must not have one of the two reasons published under both. */
+function landfallRefusal(r) {
+  const reasons = new Set();
+  for (const kinds of Object.values(r.landfall || {})) {
+    for (const cell of [kinds.any, kinds.hurricane]) {
+      if (cell && !cell.status && cell.rate === null && cell.refused_reason) {
+        reasons.add(cell.refused_reason);
+      }
+    }
+  }
+  return reasons.size === 1 ? [...reasons][0] : null;
+}
+
 function unknownOf(r) {
   let n = 0;
   for (const c of CATEGORY_ORDER) {

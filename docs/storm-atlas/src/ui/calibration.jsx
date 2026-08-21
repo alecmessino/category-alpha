@@ -40,6 +40,7 @@ const TONE = { pos: "var(--pos)", warn: "var(--warn)", neg: "var(--neg)" };
 
 export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor, cohortBasins }) {
   const h = headline(cal);
+  const rows = byEvidence(cal);
   /* Which basins the reader's cohort actually draws from, when they arrived from one, minus the
      ones this replay covered. Derived rather than assumed: a reader whose cohort is EP-only sees
      no mismatch line, and should not. */
@@ -49,7 +50,14 @@ export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor, cohortBa
     const outside = cohortBasins.filter((b) => !covered.has(b));
     return outside.length ? outside.join(", ") : null;
   }, [cohortBasins, cal]);
-  const rows = byEvidence(cal);
+  /* Contracts the replay could not score: no events in the replayed population, so no Brier and
+     no comparison. `beat_climatology` is null for exactly these, which is why the ledger counts
+     them rather than being told how many there are.
+     DECLARED AFTER `rows`, which is not a style point: reading it above the declaration is a
+     temporal dead zone, the whole ledger threw on mount, and the surface rendered nothing at
+     all. check-atlas-dom caught it -- the static checks did not and could not. */
+  const neverScored = rows.filter((c) => c.scope_audit
+    && c.scope_audit.beat_climatology === null).length;
   const ref = React.useRef(null);
   /* A reader can arrive here from a refusal on a contract the backtest never scored -- Cat 5,
      or a landfall region outside the three the replay covered. A dead anchor would leave them
@@ -251,8 +259,22 @@ export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor, cohortBa
                           borderBottom: "1px dashed var(--neg)",
                           letterSpacing: ".5px",
                         }}>
+                          {/* AND TWO OF THEM WERE NEVER TESTED, which "no contract beat
+                              climatology" quietly denies. A contract with no events in the
+                              replayed population has no Brier score to lose with -- its skill
+                              column already prints an em-dash -- and grouping it under a line
+                              that reads as a result turns "we could not measure this" into "we
+                              measured this and it failed". Counted from the data (a null
+                              beat_climatology) rather than typed, so it moves with a rebuild. */}
                           ↓ BELOW THIS LINE NO CONTRACT BEAT CLIMATOLOGY — the scoped gate
                           refuses {h.caught} of them, the archive-wide gate refused {h.caughtBefore}
+                          {neverScored ? (
+                            <div style={{ color: "var(--text-2)", letterSpacing: 0, marginTop: 3 }}>
+                              {neverScored} of them carried no events in the replayed population
+                              and were never scored at all — they did not lose to climatology,
+                              they were not measured against it.
+                            </div>
+                          ) : null}
                         </td>
                       </tr>
                     ) : null}
