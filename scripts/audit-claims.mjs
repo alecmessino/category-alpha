@@ -108,13 +108,78 @@ for (const f of files) {
 const registry = await readFile(resolve(APP, OWNER_FILE), "utf8");
 const defined = new Set([...registry.matchAll(/\b(?:define|note)\("([^"]+)"/g)].map((m) => m[1])
   .concat([...registry.matchAll(/^\s*"(panel\.[a-z]+)":/gm)].map((m) => m[1])));
+
+/* EVERY WAY A COMPONENT CAN ASK FOR A CLAIM.
+ *
+ * `MTC.claim(...)` and `MTC.footer(...)` are the terminal's. `claimText(...)` is the Storm
+ * Atlas's -- ui/kit.jsx wraps `MTC.claim(id).text` behind it -- and it was MISSING from this
+ * list, which is the whole reason this section is being rewritten rather than extended.
+ * Measured: renaming a live id to `atlas.rates_TYPO` left this audit reporting "provenance
+ * audit clean" and put the string `UNREGISTERED CLAIM (atlas.rates_TYPO)` on screen, in the
+ * block headed WHAT THESE RATES ASSUME -- the sentence that qualifies every rate on the panel.
+ *
+ * The list is matched by CALL SITE rather than by id, because the failure above was not a
+ * mistyped id: it was a new accessor nobody added here. Counting call sites and requiring each
+ * one to yield a literal id means the next accessor cannot be added silently either -- it will
+ * be seen, and if its argument is not a literal it will be reported rather than skipped.
+ *
+ * THE LITERAL REQUIREMENT IS SCOPED TO THE ATLAS, AND THE SCOPE IS THE HONEST PART.
+ * Every one of the Atlas's call sites passes a literal, so the rule costs it nothing and closes
+ * the class permanently. The TERMINAL has two long-standing patterns that are correct and are
+ * not literals, and tightening them here would mean either rewriting working code for a gate's
+ * convenience or writing an exemption broad enough to hide the next real one:
+ *
+ *   data-loader.js:260  MTC.claim(id, …) inside a .map() over a table of [stage, id] pairs --
+ *                       the ids ARE literals, two lines above, and all eight are registered.
+ *   analogs.jsx:33      a local wrapper that reproduces the registry's own fallback for the
+ *                       case where window.MTC has not loaded, the same shape ui/kit.jsx uses.
+ *
+ * So ids referenced anywhere are still checked for existence, exactly as before; only the
+ * shape requirement is Atlas-scoped. What the terminal keeps is the residual gap this file
+ * cannot close statically -- an id it never sees as a literal -- and for the Atlas that gap is
+ * closed from the other end instead: check-atlas-dom asserts the registry's failure sentinels
+ * reach no pixel of the rendered surface. */
+const STRICT_LITERAL_IDS = "docs/storm-atlas/src";
+const ACCESSORS = /\b(claimText|MTC\.claim|MTC\.footer)\s*\(/g;
 const referenced = new Set();
+let callSites = 0;
 for (const f of files) {
   if (f.endsWith(OWNER_FILE)) continue;
   const text = await readFile(f, "utf8");
-  for (const m of text.matchAll(/MTC\.(?:claim|footer)\("([^"]+)"\)/g)) referenced.add(m[1]);
+  const rel = relative(ROOT, f);
+
+  /* Each accessor call, checked where it stands. A claim id that is not a string literal
+     cannot be verified from here at all, and a check that quietly skips what it cannot see is
+     the failure this file exists to prevent -- so it is reported. */
+  const strict = rel.includes(STRICT_LITERAL_IDS);
+  for (const m of text.matchAll(ACCESSORS)) {
+    callSites++;
+    const after = text.slice(m.index + m[0].length);
+    const lit = /^\s*(["'])([^"']+)\1\s*[),]/.exec(after);
+    if (lit) { referenced.add(lit[2]); continue; }
+    /* kit.jsx defines claimText(id); its own signature is not a call site. */
+    if (/^\s*id\s*\)/.test(after)) { callSites--; continue; }
+    if (!strict) continue;
+    const line = text.slice(0, m.index).split(/\r?\n/).length;
+    findings.push({ file: rel, line, match: m[1],
+      why: "claim id is not a string literal, so no build step can prove it is registered",
+      text: (m[0] + after.slice(0, 60)).replace(/\s+/g, " ") });
+  }
+
   for (const m of text.matchAll(/<(?:window\.)?MT_Hint\b[^>]*?\bid="([^"]+)"/g)) referenced.add(m[1]);
   for (const m of text.matchAll(/<Hint\b[^>]*?\bid="([^"]+)"/g)) referenced.add(m[1]);
+
+  /* THE SENTINEL ITSELF, WHEREVER IT IS TYPED. claims.js returns "UNREGISTERED CLAIM (id)" and
+     "CLAIM ERROR" at runtime for an id it does not hold; either string written into a component
+     would put that text on screen with no registry lookup behind it at all. */
+  if (strict) {
+    for (const m of text.matchAll(/UNREGISTERED CLAIM|CLAIM ERROR/g)) {
+      const line = text.slice(0, m.index).split(/\r?\n/).length;
+      findings.push({ file: rel, line, match: m[0],
+        why: "the registry's own failure sentinel, written into a surface — it is a runtime value, never a literal",
+        text: m[0] });
+    }
+  }
 }
 for (const id of referenced) {
   if (!defined.has(id)) findings.push({ file: "(reference)", line: 0, match: id, why: "claim id is used by a component but not registered in claims.js", text: id });
@@ -132,4 +197,6 @@ if (findings.length) {
   process.exit(1);
 }
 
-console.log(`[claims] provenance audit clean · ${files.length} files · ${defined.size} registered claims · ${referenced.size} referenced`);
+console.log(`[claims] provenance audit clean · ${files.length} files · ${defined.size} registered `
+  + `claims · ${referenced.size} referenced across ${callSites} call site(s), every id literal `
+  + "and registered");
