@@ -586,6 +586,12 @@
   text-transform:uppercase;flex:1;min-width:0;overflow-wrap:break-word;
 }
 [data-atlas] .at-spec code b{color:var(--t2);font-weight:400}
+/* The URL half of a citation. Never uppercased -- the query carries case-sensitive values and a
+   citation that cannot be pasted back is not a citation. */
+[data-atlas] .at-spec code.at-url{
+  display:block;text-transform:none;color:var(--t4);margin-top:4px;letter-spacing:0;
+  word-break:break-all;
+}
 [data-atlas] .at-spec button{flex:none;align-self:flex-start}
 
 /* counts over denominators, with the numerators aligned on one column */
@@ -870,6 +876,14 @@
 }
 @container plate (max-width:690px){
   [data-atlas] .at-plate-title{display:none}
+}
+/* THE LIVE FIGURE OUTLIVES THE CONSTANTS. The head band carried a plate title, the drawn/lifted
+   counts and a mode caption, and the counts -- the only thing on the band that changes with the
+   query, and the number a reader uses to check that the map and the panel are describing the
+   same cohort -- were the part that clipped, while two fixed strings survived intact. The mode
+   is also stated on the rail's own EXPLORE / REPLAY control, so it is the recoverable one. */
+@container plate (max-width:780px){
+  [data-atlas] .at-platehead .at-r{display:none}
 }
 
 @media (max-width:1040px){

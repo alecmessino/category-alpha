@@ -537,20 +537,28 @@ function SilentExclusions({ excluded, total, kept }) {
   const noGenesis = excluded.noGenesis || 0;
   const provisional = excluded.provisional || 0;
   if (!noGenesis && !provisional) return null;
+  /* THE LEAD NUMBER IS THE SUM OF THESE TWO, NOT total - kept.
+     It was total - kept, which is right on the empty cohort -- where the two happen to be the
+     only exclusions -- and badly wrong everywhere else: a cohort narrowed to nothing reported
+     "3,959 of the archive's 3,959 are outside this cohort before any condition you set", which
+     credits the reader's own conditions to the defaults. The line is about the exclusions the
+     reader did NOT ask for, so it counts those and nothing else. */
   const parts = [];
-  if (noGenesis) {
-    parts.push(`${noGenesis.toLocaleString()} storm${noGenesis === 1 ? "" : "s"} the archive `
-      + "holds no genesis point for, which a genesis-matched cohort cannot place");
-  }
   if (provisional) {
     parts.push(`${provisional.toLocaleString()} in seasons not yet post-analysed, excluded by `
       + "default — switch PROVISIONAL SEASONS on below to include them");
   }
+  if (noGenesis) {
+    parts.push(`${noGenesis.toLocaleString()} the archive holds no genesis point for, which a `
+      + "genesis-matched cohort cannot place");
+  }
+  const n = provisional + noGenesis;
   return (
     <div data-silent-exclusions style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
       color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 3 }}>
-      {(total - kept).toLocaleString()} of the archive&rsquo;s {total.toLocaleString()} are outside
-      this cohort before any condition you set: {parts.join("; ")}.
+      {n.toLocaleString()} storm{n === 1 ? "" : "s"} of the archive&rsquo;s{" "}
+      {total.toLocaleString()} are outside this cohort for reasons you did not set:{" "}
+      {parts.join("; ")}.
     </div>
   );
 }

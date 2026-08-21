@@ -218,22 +218,36 @@ export function TextButton({ children, onClick, title, style, id, hook }) {
  * computes nothing, asserts no threshold the rail has not already applied, and adds no claim.
  * That is the whole discipline: a citation, not a heading, and certainly not a finding.
  */
-export function CohortSpec({ text }) {
+export function CohortSpec({ text, url }) {
   const [copied, setCopied] = React.useState(false);
   React.useEffect(() => {
     if (!copied) return undefined;
     const t = setTimeout(() => setCopied(false), 1400);
     return () => clearTimeout(t);
   }, [copied]);
+  /* WHAT IS COPIED IS WHAT IS SHOWN. Both lines go to the clipboard in the order they are read,
+     so the analyst at the other end receives the same two things this element displays: the
+     question in words, stamped with the definitions it was answered under, and the URL that
+     reproduces it exactly. A citation whose visible half and copied half differ is not one. */
+  const payload = url ? `${text}\n${url}` : text;
   const copy = () => {
     const done = () => setCopied(true);
-    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, done);
+    if (navigator.clipboard) navigator.clipboard.writeText(payload).then(done, done);
     else done();
   };
   return (
-    <div className="at-spec">
-      <code>{text}</code>
-      <TextButton onClick={copy} title="copy the cohort spec">{copied ? "Copied" : "Copy"}</TextButton>
+    <div className="at-spec" data-cohort-spec>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <code>{text}</code>
+        {/* NOT UPPERCASED, and that is load-bearing rather than typographic: `.at-spec code`
+            transforms to caps, and a cohort URL carries case-sensitive values -- `i=cat3`
+            pasted back as `I=CAT3` selects a different cohort, or none. A citation that cannot
+            be pasted is not a citation. */}
+        {url ? <code className="at-url">{url}</code> : null}
+      </div>
+      <TextButton onClick={copy} hook="data-copy-spec" title="copy the question, its stamps and its URL">
+        {copied ? "Copied" : "Copy"}
+      </TextButton>
     </div>
   );
 }

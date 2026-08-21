@@ -38,10 +38,20 @@ export function Transport({ archive, row, playing, setPlaying, cursorMs, setCurs
   const t0 = range ? a.ptT[range[0]] * 60000 : null;
   const t1 = range ? a.ptT[range[1] - 1] * 60000 : null;
 
-  React.useEffect(() => {
-    if (row === null || cursorMs !== null) return;
-    setCursorMs(t0);
-  }, [row]);
+  /* SELECTING A STORM IS NOT STARTING A REPLAY, and parking the cursor here made it one.
+   *
+   * This used to set the cursor to t0 the moment a storm was selected. The shell passes that
+   * cursor to the selection layer as `replayMs`, and the layer reveals the track only as far as
+   * the instant it is given -- so clicking a genesis point drew ONE DOT. The panel beside it
+   * said "One storm, whole life" and listed a 71-fix track and an 8.8-day lifetime, and the map
+   * showed the first fix. The reader's next move, reasonably, is to conclude the map is broken.
+   *
+   * A null cursor means "no instant is selected", which the layer already renders as the whole
+   * observed track -- the finished record, which is what EXPLORE means everywhere else on this
+   * surface. The transport then reads at the LAST fix, because that is where a finished record
+   * stands, and pressing play rewinds to the first: `atEnd` is already true in that state, so
+   * the existing restart branch does exactly the right thing with no new state. */
+  React.useEffect(() => {}, [row]);
 
   /* setInterval rather than rAF, and it HALTS at the end rather than wrapping. A transport that
      wraps silently restarts the storm, which reads as a live feed rather than a replay. */
@@ -62,7 +72,8 @@ export function Transport({ archive, row, playing, setPlaying, cursorMs, setCurs
   if (row === null || !range) return null;
 
   // The fix in force: the last one at or before the cursor. Nothing is interpolated here.
-  const cursor = cursorMs === null ? t0 : cursorMs;
+  // With no cursor the whole track is drawn, so the transport stands at its last fix.
+  const cursor = cursorMs === null ? t1 : cursorMs;
   let k = range[0];
   while (k + 1 < range[1] && a.ptT[k + 1] * 60000 <= cursor) k++;
 
