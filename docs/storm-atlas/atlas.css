@@ -604,6 +604,70 @@
 [data-atlas] .at-itable .at-val s{text-decoration:none;color:var(--t4);text-align:center}
 [data-atlas] .at-itable .at-val u{text-decoration:none;color:var(--t3);text-align:left;padding-left:1px}
 
+/* ─── THE OUTCOME LADDER ──────────────────────────────────────────────────────────────────
+ *
+ * WHY A LADDER AND NOT SIX CARDS. Every intensity contract used to get a card of its own: a
+ * bar, a 20px percentage, a Wilson line, a sentence of prose, a three-line delta box and a
+ * four-line UNKNOWN refusal -- about 150px each, six of them, and the identical refusal prose
+ * repeated six times running. Measured on one rendered panel: "Nobody recorded this outcome"
+ * six times, "A LIMIT OF THE RECORD" seven, "Widen the basin or the era" twelve. A reader who
+ * wants to know whether this cohort intensifies more than its baseline had to read five
+ * independent mini-panels and hold five numbers in their head to compare them.
+ *
+ * The ladder is the same information on one axis. TS -> Cat 1 -> Cat 3 -> Cat 4 -> Cat 5 is a
+ * SEQUENCE, and a sequence read down aligned columns is one glance rather than five readings.
+ *
+ * WHAT SURVIVES INTACT, because none of it is decoration:
+ *   - the drawn Wilson band, which is the width of what is not known;
+ *   - the baseline's band on the SAME axis, directly beneath, so overlap is seen not computed;
+ *   - the count over its denominator on every row -- the archive's first panel rule is that a
+ *     percent never appears without the evidence it rests on, and compression is not an excuse;
+ *   - the refusal, IN THE RATE COLUMN, where the number would have been.
+ *
+ * The rows are three short lines rather than a wide table because the panel is 312-400px: a
+ * seven-column table at that width is a table with three unreadable columns. */
+[data-atlas] .at-ladder{margin-top:8px}
+[data-atlas] .at-lrow{padding:8px 0;border-top:1px solid var(--rule)}
+[data-atlas] .at-lrow:first-child{border-top:0}
+[data-atlas] .at-lhd{display:flex;align-items:baseline;gap:8px;min-width:0}
+[data-atlas] .at-lhd .at-lname{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:.8px;flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+[data-atlas] .at-lhd .at-lct{font-family:var(--font-mono);font-size:10px;color:var(--t3);flex:none}
+[data-atlas] .at-lhd .at-lrate{
+  font-family:var(--font-mono);font-size:13.5px;flex:none;text-align:right;letter-spacing:.2px;
+}
+/* A refusal sits in the same slot the rate would have taken, at the size a status reads at
+   rather than the size a number does: the absence of the number is the result, and inflating
+   it to 13.5px would make an unanswered contract shout louder than an answered one. */
+[data-atlas] .at-lhd .at-lref{
+  font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:1.1px;flex:none;
+  text-align:right;
+}
+[data-atlas] .at-lbars{margin-top:6px}
+[data-atlas] .at-lmeas{position:relative;height:6px;background:#1b2430;overflow:hidden}
+[data-atlas] .at-lmeas + .at-lmeas{margin-top:2px;height:4px}
+[data-atlas] .at-lmeas i{position:absolute;top:0;bottom:0;left:0}      /* the rate, as a length */
+[data-atlas] .at-lmeas b{position:absolute;top:0;bottom:0}             /* the interval, as a band */
+[data-atlas] .at-lmeas u{position:absolute;top:1px;bottom:1px;width:1px;background:var(--t1);opacity:.75}
+[data-atlas] .at-lft{
+  font-family:var(--font-mono);font-size:9.5px;color:var(--t3);margin-top:5px;
+  display:flex;flex-wrap:wrap;gap:0 9px;line-height:1.5;
+}
+[data-atlas] .at-lft em{font-style:normal;color:var(--t2)}
+/* Filled = the intervals do not overlap. Hollow = they do. Both meanings are spelled out once
+   under the ladder; the mark is what makes the column scannable, never the whole statement. */
+[data-atlas] .at-sep{
+  display:inline-block;width:6px;height:6px;border:1px solid var(--t3);
+  transform:translateY(-1px);margin-left:1px;
+}
+[data-atlas] .at-sep.at-on{background:var(--t2);border-color:var(--t2)}
+[data-atlas] .at-lkey{
+  font-family:var(--font-mono);font-size:9.5px;color:var(--t3);line-height:1.6;
+  margin-top:9px;padding-top:8px;border-top:1px solid var(--rule);
+}
+
 /* REFUSAL GRAMMAR — a marginal rule, the way a journal sets a caveat. Never an alert box,
    never a tint, never a coloured background: a refusal is part of the argument, not an error
    in it, and colouring it as a warning is how a reader learns to skip past it. */
@@ -716,6 +780,15 @@
   font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t4);text-transform:uppercase;
 }
 [data-atlas] .at-ro .at-v{font-family:var(--font-mono);font-size:12.5px;color:var(--t1);letter-spacing:.1px}
+/* The working-state instruction, at caption weight in the foot band. It gives way before the
+   scale bar and the coordinates, which are unconditional, and before the coastline statement,
+   which is the band's one epistemic claim -- an instruction is the most recoverable thing here,
+   since the gesture is still available whether or not the words are. */
+[data-atlas] .at-plate-hint{
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t4);
+  white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;
+}
+
 [data-atlas] .at-hint{
   font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t4);
   text-transform:uppercase;display:flex;gap:22px;width:100%;min-width:0;overflow:hidden;
@@ -790,6 +863,7 @@
    and an ellipsis is the right answer to that, not a fourth breakpoint. */
 @container plate (max-width:910px){
   [data-atlas] .at-plate-proj{display:none}
+  [data-atlas] .at-plate-hint{display:none}
 }
 @container plate (max-width:680px){
   [data-atlas] .at-plate-model{display:none}

@@ -50,7 +50,7 @@ export function AtlasMap({
   colorBy, showPathway, pathway, pathwayStep, dimPopulation, softenEmphasis, onViewChange,
   onHover, showGenesis = true, showLandfalls = true,
   showGenesisDensity, genesisDensity, mode = "explore", timeline, replayCursorMin,
-  kept = 0, lifted = 0, selectedCount = 0, children,
+  kept = 0, lifted = 0, selectedCount = 0, hint, children,
 }) {
   const el = React.useRef(null);
   const plate = React.useRef(null);
@@ -293,6 +293,14 @@ export function AtlasMap({
     <>
       <div className="at-platehead">
         <span className="at-plate-title">PLATE · NORTH ATLANTIC + EAST PACIFIC</span>
+        {/* WHAT IS ACTUALLY ON THE PLATE.
+            `kept` was the COHORT count and `lifted` was the cohort count again, while the layer
+            underneath was handed the BASELINE's rows -- so a 192-storm probe reported
+            "192 TRACKS DRAWN · 192 LIFTED BY THE QUERY" with 3,885 tracks visibly on screen.
+            Two numbers, both wrong, and neither of them the one a reader would use to check
+            that the map and the panel are answering the same question. `kept` is now the row
+            count the plate was given and `lifted` is the cohort inside it, so the second figure
+            reconciles with the cohort in both rails and the first reconciles with the ink. */}
         <span>
           <em>{kept.toLocaleString()}</em> TRACKS DRAWN
           {lifted ? <> · <em>{lifted.toLocaleString()}</em> LIFTED BY THE QUERY</> : null}
@@ -319,6 +327,11 @@ export function AtlasMap({
             ? "COASTLINE AT FULL CONTRAST · THE FIVE MODELLED LANDFALL REGIONS"
             : "CONTEXTUAL COASTLINE ONLY · THE ARCHIVE'S RINGS HAVE NOT LOADED"}
         </span>
+        {/* The gesture, restated compactly once the reader is working. The full-size invitation
+            over the plate is right on an unqueried map and wrong the moment there is data under
+            it; this is where it goes instead -- in the caption band, at caption weight, beside
+            the scale and the projection, where it competes with nothing. */}
+        {hint ? <span className="at-plate-hint">{hint}</span> : null}
         <span className="at-r"><em id="at-coords">—</em></span>
       </div>
     </>

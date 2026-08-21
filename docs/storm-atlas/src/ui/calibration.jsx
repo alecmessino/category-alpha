@@ -38,8 +38,17 @@ import { Head, MONO, Row } from "./kit.jsx";
 
 const TONE = { pos: "var(--pos)", warn: "var(--warn)", neg: "var(--neg)" };
 
-export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor }) {
+export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor, cohortBasins }) {
   const h = headline(cal);
+  /* Which basins the reader's cohort actually draws from, when they arrived from one, minus the
+     ones this replay covered. Derived rather than assumed: a reader whose cohort is EP-only sees
+     no mismatch line, and should not. */
+  const scopeMismatch = React.useMemo(() => {
+    if (!cohortBasins || !cohortBasins.length) return null;
+    const covered = new Set(cal.settings.basins);
+    const outside = cohortBasins.filter((b) => !covered.has(b));
+    return outside.length ? outside.join(", ") : null;
+  }, [cohortBasins, cal]);
   const rows = byEvidence(cal);
   const ref = React.useRef(null);
   /* A reader can arrive here from a refusal on a contract the backtest never scored -- Cat 5,
@@ -76,6 +85,51 @@ export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor }) {
           <button type="button" onClick={onBack} data-back-to-map style={BTN}>
             ← BACK TO THE MAP
           </button>
+        </div>
+
+        {/* THE POPULATION THIS LEDGER COVERS, BEFORE ANY NUMBER IN IT IS READ.
+         *
+         * Every figure on this page comes from ONE replay over ONE population: the east Pacific,
+         * 1971 onwards. `cal.settings` said so in a Row halfway down, under a heading, and
+         * nowhere else -- while the headline read "6 of 8 SCORED CONTRACTS BEAT CLIMATOLOGY"
+         * with no basin attached and every row carried a bare CALIBRATED badge. A reader
+         * arriving from a refusal on a North Atlantic cohort, which is exactly how most readers
+         * arrive, met an unqualified performance claim about a basin their query cannot reach.
+         *
+         * BASIN GENERALITY IS AN OPEN RESEARCH QUESTION AND THIS PAGE DOES NOT ANSWER IT. That
+         * is not a caveat to be phrased gently: the backtest was never run outside EP, so the
+         * honest statement is that nothing here is evidence about NA either way. Saying so costs
+         * one line and is the difference between a ledger and an advertisement. */}
+        <div data-ledger-scope style={{
+          border: "1px solid var(--border-strong)",
+          borderLeft: "var(--bw-signal) solid var(--accent)",
+          borderRadius: "var(--radius-sm)", padding: "var(--sp-4) var(--sp-5)",
+          background: "var(--surface-sunken)", marginTop: "var(--sp-5)",
+        }}>
+          <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", fontWeight: 800,
+            color: "var(--accent)", letterSpacing: ".5px" }}>
+            EVERY FIGURE HERE IS FROM ONE POPULATION
+          </div>
+          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+            color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 4 }}>
+            This backtest replayed <strong style={{ color: "var(--text-1)" }}>
+            {cal.settings.basins.join(", ")}</strong> storms from{" "}
+            <strong style={{ color: "var(--text-1)" }}>{cal.settings.min_season}</strong> onwards
+            — {cal.n_storms_replayed.toLocaleString()} of them. Every Brier score, every
+            climatological benchmark and every CALIBRATED verdict below is a statement about that
+            population and about no other. The archive holds other basins; this replay did not
+            score them, so it is not evidence that the method performs the same way there, and it
+            is not evidence that it performs differently either. Whether skill carries across
+            basins is an open question this ledger does not answer.
+          </div>
+          {scopeMismatch ? (
+            <div data-scope-mismatch style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
+              color: "var(--warn)", lineHeight: "var(--lh-body)", marginTop: 6 }}>
+              ⇱ THE COHORT YOU CAME FROM DRAWS ON {scopeMismatch} — which this replay did not
+              score. Read the rows below as evidence about {cal.settings.basins.join(", ")}, not
+              about your cohort.
+            </div>
+          ) : null}
         </div>
 
         {unscored ? (
@@ -139,7 +193,8 @@ export function CalibrationLedger({ cal, anchor, onBack, onClearAnchor }) {
         <div data-headline style={{ display: "grid", gap: "var(--sp-4)",
           gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))" }}>
           <Card tone="pos" stat={`${h.beat} of ${h.scored}`}
-            label="SCORED CONTRACTS BEAT CLIMATOLOGY"
+            label={`SCORED CONTRACTS BEAT CLIMATOLOGY · ${cal.settings.basins.join(", ")} `
+              + `${cal.settings.min_season}+ ONLY`}
             note="Brier against the archive's own climatological base rate, over a zero-peek
                   replay. Two of the ten contracts had no events in the replayed population and
                   could not be scored at all." />

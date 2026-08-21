@@ -247,7 +247,12 @@ export function Atlas() {
     if (ledgerAnchor) p.set("contract", ledgerAnchor);
     /* Stamped ALONGSIDE the cohort, never inside toQuery: the methodology is not part of a
        cohort's identity, and folding it in would make two identical cohorts built under
-       different versions stop comparing equal. */
+       different versions stop comparing equal.
+       `m` IS A SURFACE KEY AND THE COHORT MAY NOT USE IT. It did: months were also `m`, and
+       because this line writes last it deleted the reader's month selection from every link
+       and re-read the version back as a January condition on the way in. The cohort's months
+       are `mo` now, the reservation is declared in engine/cohort.js as RESERVED_QUERY_KEYS,
+       and test-atlas-cohort.mjs fails if a cohort key ever takes one of these back. */
     if (archive) p.set("m", archive.manifest.methodology_version);
     const q = p.toString();
     const next = q ? `?${q}` : location.pathname;
@@ -264,6 +269,22 @@ export function Atlas() {
       .catch((e) => { if (!cancelled) setCalError(e); });
     return () => { cancelled = true; };
   }, [surface, cal, calError]);
+
+  /* WHICH BASINS THE READER'S COHORT ACTUALLY DRAWS ON, for the ledger to compare against the
+     one it replayed. Computed from the cohort's own rows rather than from the basin CONDITION,
+     because most cohorts set none: a click at 14.7N 113.9W names no basin and is east-Pacific by
+     geography, and a ledger that only noticed a declared basin would stay silent for exactly the
+     readers who most need the comparison. Only computed while the ledger is open -- it is a
+     string read per storm and nothing on the tactical surface asks the question. */
+  const cohortBasins = React.useMemo(() => {
+    if (!archive || !result || surface !== "calibration") return null;
+    const set = new Set();
+    for (const row of result.rows) {
+      const b = archive.storms.str("basin", row);
+      if (b) set.add(b);
+    }
+    return [...set].sort();
+  }, [archive, result, surface]);
 
   /* A refusal on the tactical surface asks for its evidence. */
   const openLedger = React.useCallback((contractKey) => {
@@ -327,7 +348,7 @@ export function Atlas() {
         <React.Suspense fallback={<LedgerBoot />}>
           {calError ? <LedgerError error={calError} onBack={() => setSurface("tactical")} />
             : cal ? (
-              <CalibrationLedger cal={cal} anchor={ledgerAnchor}
+              <CalibrationLedger cal={cal} anchor={ledgerAnchor} cohortBasins={cohortBasins}
                 onBack={() => { setSurface("tactical"); setLedgerAnchor(null); }}
                 onClearAnchor={() => setLedgerAnchor(null)} />
             ) : <LedgerBoot />}
@@ -378,10 +399,25 @@ export function Atlas() {
           showGenesisDensity={showGenesisDensity} genesisDensity={genesisGrid}
           mode={mode} timeline={timeline} replayCursorMin={replayCursorMin}
           pathwayStep={2.0} onViewChange={setView}
-          kept={result.kept} lifted={emphasis ? emphasis.length : 0}
+          kept={contextRows ? contextRows.length : result.kept}
+          lifted={emphasis ? emphasis.length : 0}
           selectedCount={selected === null ? 0 : 1}
+          hint={mode === "explore" && conditionsOf(cohort).length && selected === null
+            ? (cohort.where ? "CLICK OPEN WATER TO MOVE THE PROBE · CLICK A GENESIS POINT FOR ONE STORM"
+              : "CLICK OPEN WATER TO ADD A GENESIS-LOCATION CONDITION")
+            : undefined}
         >
-          {mode === "explore" && !cohort.where && selected === null ? <Invitation /> : null}
+          {/* THE INVITATION IS FOR AN UNQUERIED MAP, AND ONLY FOR ONE.
+              It was gated on `!cohort.where` alone, so an analyst who built a cohort entirely
+              from chips -- Cat 3+, since 1971, August and September -- kept a full-size banner
+              reading "CLICK ANY OCEAN POINT" parked over their own data for as long as they
+              worked. The condition is now "has this reader asked anything at all": with no
+              conditions the plate is a blank invitation and the banner is the only instruction
+              on the surface; with any condition it becomes the compact line in the caption
+              band. No tutorial, no dismissal to remember, and nothing that has to be earned --
+              the two states are just the two things that are true. */}
+          {mode === "explore" && !conditionsOf(cohort).length && selected === null
+            ? <Invitation /> : null}
           <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
             showGenesisDensity={showGenesisDensity} />
         </AtlasMap>

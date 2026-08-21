@@ -204,6 +204,13 @@ export function describeChange(spec, baseSpec, key) {
     key: k,
     label: c.label,
     sentence: c.sentence,
+    /* The NOUN, not the clause. The surface says "the same cohort without X", and X has to be a
+       noun phrase there -- "without the intensity condition", never "without that reached
+       CAT 3+", which is what joining the condition's own relative clause produced on the
+       baseline block and again on every outcome card. engine/cohort-language.js owns both
+       forms; this carries the one the comparison needs. */
+    noun: c.noun,
+    value: c.value,
     zone: c.zone,
     direction: mine && !theirs ? "added" : !mine && theirs ? "removed" : "changed",
   };

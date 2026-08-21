@@ -22,7 +22,7 @@ import { openArchive } from "../docs/storm-atlas/src/engine/node-io.js";
 import { DEFAULT_FILTERS, filterStorms } from "../docs/storm-atlas/src/engine/query.js";
 import {
   COHORT_V, EMPTY_COHORT, cohortResult, conditionedOn, conditionsOf, normalise, parentOf,
-  parseQuery, sameCohort, sentenceOf, toFilters, toQuery,
+  RESERVED_QUERY_KEYS, parseQuery, sameCohort, sentenceOf, toFilters, toQuery,
 } from "../docs/storm-atlas/src/engine/cohort.js";
 import { previewCounts } from "../docs/storm-atlas/src/engine/preview.js";
 import { ROOT } from "./lib/atlas-verify.mjs";
@@ -152,6 +152,48 @@ for (const spec of URL_CASES) {
   ok(versionMismatch === 99,
     "a URL from a different spec version reports the mismatch rather than silently re-scoring");
   ok(parseQuery(toQuery({})).versionMismatch === null, "and a current one does not");
+}
+
+/* THE COLLISION THAT MADE THIS SECTION NECESSARY.
+ *
+ * The cohort is not the only thing written to the query string: ui/atlas.jsx also stamps the
+ * METHODOLOGY VERSION, the surface and the ledger anchor onto it. Months owned `m` and so did
+ * the methodology, and because the surface writes last the cohort lost. What that cost was not
+ * cosmetic:
+ *
+ *   - every shared link had its month selection deleted, so the cohort on screen and the cohort
+ *     at the far end of the link were DIFFERENT POPULATIONS with different rates;
+ *   - re-opening one parsed "1.1.0" back as months [1, 1, 0] -> [0, 1], applying a January
+ *     condition nobody asked for and printing it as `in , Jan`, because there is no month 0.
+ *
+ * Neither failure raised anything. The surface rendered a confident, wrong answer to a question
+ * the reader had not asked, which is the one outcome this repository is built to prevent. So the
+ * reservation is a GATE rather than a comment: a future key added to K cannot quietly take `m`,
+ * `view` or `contract` back, and the domain check below means no value outside 1-12 can reach a
+ * month-name lookup even if some other path invents one. */
+{
+  const reserved = new Set(RESERVED_QUERY_KEYS);
+  const keys = [...new URLSearchParams(toQuery({
+    where: { lat: 12, lon: -105, radiusKm: 500 }, seasonFrom: 1971, seasonTo: 2020,
+    months: [8, 9], basins: ["EP"], subbasinsEntered: ["CP"], intensity: "cat3",
+    landfall: "mexico", includeProvisional: true, namedOnly: true,
+  })).keys()];
+  const clash = keys.filter((k) => reserved.has(k));
+  ok(clash.length === 0,
+    "no cohort key collides with a key the surface owns on the same query string",
+    `collided on ${clash.join(", ")}`);
+  ok(keys.length > 8, "and the fully-loaded spec really does write every key", keys.join(","));
+
+  /* The exact failure, asserted from both ends. */
+  const stamped = new URLSearchParams(toQuery({ months: [8, 9] }));
+  stamped.set("m", "1.1.0");
+  ok(JSON.stringify(parseQuery(stamped.toString()).spec.months) === "[8,9]",
+    "a methodology stamp does not overwrite the months a reader chose");
+  ok(parseQuery("v=1&m=1.1.0").spec.months === null,
+    "and a methodology stamp is never read back as a month condition");
+  ok(normalise({ months: [0, 1, 13, 8, null, NaN] }).months.join() === "1,8",
+    "a month outside 1-12 never reaches the spec, so it can never print as an empty noun",
+    JSON.stringify(normalise({ months: [0, 1, 13, 8, null, NaN] }).months));
 }
 
 head("[5] conditions carry their zone, their sentence and their cost");

@@ -25,6 +25,7 @@
  */
 
 import { INTENSITY_FILTERS, LANDFALL_FILTERS, filterStorms } from "./query.js";
+import { cohortQuestion, languageOf } from "./cohort-language.js";
 import { haversineKm } from "./geo.js";
 import { scoreCases } from "./analogs.js";
 
@@ -65,9 +66,19 @@ export function normalise(spec) {
     s.where = Number.isFinite(lat) && Number.isFinite(lon) && radiusKm > 0
       ? { lat, lon, radiusKm } : null;
   }
-  // Sorted and de-duplicated so [9,8] and [8,9] are one cohort. An empty list means "no
-  // condition", never "match nothing" -- the latter is a state a reader cannot get out of.
-  s.months = tidyList(s.months, (a, b) => a - b);
+  /* Sorted and de-duplicated so [9,8] and [8,9] are one cohort. An empty list means "no
+     condition", never "match nothing" -- the latter is a state a reader cannot get out of.
+     FILTERED TO THE DOCUMENTED DOMAIN FIRST, which is not defensive programming here: a month
+     outside 1-12 has no name, and every surface that renders one indexes a name table with it.
+     The `m` collision above put a 0 in this list and the question read "Storms in , Jan" --
+     an empty noun in the sentence, the chip and the baseline at once. A value the spec cannot
+     mean is dropped at the boundary rather than carried to the place it prints as nothing. */
+  s.months = tidyList(
+    Array.isArray(s.months)
+      ? s.months.filter((m) => Number.isInteger(m) && m >= 1 && m <= 12)
+      : s.months,
+    (a, b) => a - b,
+  );
   s.basins = tidyList(s.basins);
   s.subbasinsEntered = tidyList(s.subbasinsEntered);
 
@@ -177,8 +188,18 @@ export function conditionedOn(spec) {
 export function conditionsOf(spec) {
   const s = normalise(spec);
   const out = [];
+  /* THE GRAMMAR TRAVELS WITH THE CONDITION.
+   *
+   * `sentence` is a clause written to stand alone, and five call sites used to comma-join those
+   * clauses into a description of the cohort -- which produced "Storms formed in the NA, that
+   * reached CAT 5, that made landfall in hawaii" and "the same cohort without that reached
+   * CAT 3+". engine/cohort-language.js publishes the GRAMMATICAL PARTS instead, so an assembler
+   * can build a sentence rather than a concatenation, and every condition carries a `value` a
+   * chip can print and a `noun` the comparison can hold out. Merged by KEY rather than by index
+   * so the two orderings cannot silently drift apart. */
+  const lang = new Map(languageOf(s).map((l) => [l.key, l]));
   const add = (key, zone, label, sentence, extra) =>
-    out.push({ key, zone, label, sentence, ...extra });
+    out.push({ key, zone, label, sentence, ...(lang.get(key) || {}), ...extra });
 
   if (s.where) {
     add("where", "given", "FORMED NEAR",
@@ -234,11 +255,16 @@ export function conditionsOf(spec) {
 
 const MONTH = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-/** The whole question, as one sentence. What the builder reads back to the reader. */
+/**
+ * The whole question, as one sentence. What the builder reads back to the reader.
+ *
+ * Composed by engine/cohort-language.js from the conditions' grammatical parts, NOT by joining
+ * their standalone clauses -- see that file for the sentences the join produced. The conditions
+ * are passed through rather than re-derived so the sentence and the chip stack are provably the
+ * same list.
+ */
 export function sentenceOf(spec) {
-  const cs = conditionsOf(spec);
-  if (!cs.length) return "Every storm in the archive — what happened next?";
-  return `Storms ${cs.map((c) => c.sentence).join(", ")} — what happened next?`;
+  return cohortQuestion(normalise(spec), conditionsOf(spec));
 }
 
 /**
@@ -283,11 +309,32 @@ export function withoutCondition(spec, key) {
  * because the string is meant to be pasted into a message.
  */
 
+/* `m` IS NOT AVAILABLE HERE, AND THE REASON IS A BUG THIS TABLE CAUSED.
+ *
+ * ui/atlas.jsx stamps the METHODOLOGY VERSION onto the same query string, as `m`, so that a
+ * shared scenario records the definitions it was answered under. Months owned `m` first, and the
+ * two collided on one URLSearchParams object with the methodology written last:
+ *
+ *   1. every link a reader copied had their month selection SILENTLY DELETED -- the cohort on
+ *      screen and the cohort at the other end of the link were different populations;
+ *   2. re-opening such a link parsed the version back as a month list -- "1.1.0" split to
+ *      [1, 1, 0] -- so the surface applied a January condition nobody asked for and reported a
+ *      dangling `in , Jan`, because MONTH[0 - 1] is undefined and Array.join prints that empty.
+ *
+ * A cohort key and a surface key cannot share a namespace, and the cohort is the one that moves:
+ * every URL the shipped build ever produced carries `m` as the METHODOLOGY, so leaving that key
+ * where it is keeps those links reading correctly, while `mo` is new and collides with nothing.
+ * There is deliberately no legacy fallback that reads months out of `m` -- "1.2" is a valid
+ * version AND a valid month pair, and a rule that guesses between them would reintroduce exactly
+ * the ambiguity this rename exists to end. */
 const K = {
-  where: "w", seasonFrom: "s0", seasonTo: "s1", months: "m", basins: "b",
+  where: "w", seasonFrom: "s0", seasonTo: "s1", months: "mo", basins: "b",
   subbasinsEntered: "e", intensity: "i", landfall: "l",
   includeProvisional: "p", namedOnly: "n",
 };
+
+/** Keys this surface owns on the same query string, which no cohort key may take. */
+export const RESERVED_QUERY_KEYS = Object.freeze(["m", "view", "contract"]);
 
 export function toQuery(spec) {
   const s = normalise(spec);
