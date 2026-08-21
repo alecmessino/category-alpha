@@ -48,6 +48,14 @@ export const PopulationLayer = AtlasLayer.extend({
     /* When the density surface is on, the lifted pool steps back so the surface it is being
        compared against can be seen through it. */
     liftedSoftAlpha: 0.55,
+    /* AND A FOURTH STANDING, which the three above did not cover and the surface needed.
+       Selecting a storm makes the POPULATION context -- `dimmed` does that -- but the lifted
+       pool ignored it and kept drawing at 0.9. So clicking a genesis point inside a 192-storm
+       probe left 192 near-white tracks at full weight for one selected storm to compete with,
+       and the reader could not tell which line they had asked about. The pool is still visible,
+       because "which of these did I pick" is the question and hiding the rest would answer a
+       different one -- it simply stops out-inking the thing it is context for. */
+    liftedDimAlpha: 0.2,
     trackWidth: 0.85,
     liftedWidth: 1.3,
     showGenesis: true,
@@ -119,7 +127,8 @@ export const PopulationLayer = AtlasLayer.extend({
       ? [{ rows: rows.filter((i) => !emph.has(i)), alpha: base, width: o.trackWidth,
            ink: POPULATION_INK },
          { rows: rows.filter((i) => emph.has(i)),
-           alpha: o.softenEmphasis ? o.liftedSoftAlpha : o.liftedAlpha,
+           alpha: o.dimmed ? o.liftedDimAlpha
+             : o.softenEmphasis ? o.liftedSoftAlpha : o.liftedAlpha,
            width: o.liftedWidth, ink: EMPHASIS_INK }]
       : [{ rows, alpha: base, width: o.trackWidth, ink: POPULATION_INK }];
 

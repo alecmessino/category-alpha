@@ -270,6 +270,31 @@ export function Atlas() {
     return () => { cancelled = true; };
   }, [surface, cal, calError]);
 
+  /* THE CITATION. Priority A of the brief, and the thing the `m` collision had quietly broken:
+     an analyst could not send another analyst the exact empirical question, because the link
+     they copied described a different cohort from the one on their screen.
+     Built from the SAME parameters the address bar is written from, in one place, rather than
+     read back out of location.href -- that effect runs after this render, so reading the bar
+     here would cite the previous cohort by one paint on every change. The methodology version
+     and the pack stamp travel WITH it: a cohort is only reproducible against the definitions
+     and the data it was answered under, and both move. */
+  const scenarioURL = React.useCallback(() => {
+    const p = new URLSearchParams(toQuery(cohort));
+    if (surface !== "tactical") p.set("view", surface);
+    if (ledgerAnchor) p.set("contract", ledgerAnchor);
+    if (archive) p.set("m", archive.manifest.methodology_version);
+    const q = p.toString();
+    return `${location.origin}${location.pathname}${q ? `?${q}` : ""}`;
+  }, [cohort, surface, ledgerAnchor, archive]);
+
+  const citation = React.useMemo(() => {
+    if (!archive || !result) return null;
+    const m = archive.manifest;
+    return `STORM ATLAS · ${sentenceOf(cohort).replace(/ — what happened next\?$/, "")} · `
+      + `${result.kept.toLocaleString()} of ${m.counts.storms.toLocaleString()} storms · `
+      + `METHODOLOGY ${m.methodology_version} · PACK ${(m.provenance || {}).archive_stamp}`;
+  }, [archive, result, cohort]);
+
   /* WHICH BASINS THE READER'S COHORT ACTUALLY DRAWS ON, for the ledger to compare against the
      one it replayed. Computed from the cohort's own rows rather than from the basin CONDITION,
      because most cohorts set none: a click at 14.7N 113.9W names no basin and is east-Pacific by
@@ -435,6 +460,7 @@ export function Atlas() {
              3.3 this panel answered a click on open water and nothing else, so narrowing to
              "Cat 3+, since 1971, Aug-Sep" produced a map and no statistics at all. */
           <CohortPanel spec={cohort} result={result} sentence={sentence}
+            citation={citation} citationUrl={scenarioURL()}
             peak={peakOf(pathway)} pathway={pathway} onSelectStorm={selectStorm}
             pathwayOn={showPathway} onShowPathway={setShowPathway}
             comparison={comparison} conditions={conditionsOf(cohort)}

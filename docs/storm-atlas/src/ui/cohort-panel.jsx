@@ -20,7 +20,9 @@
 import React from "react";
 import { CATEGORY_COLOR, CATEGORY_ORDER } from "../render/palette.js";
 import { formatPosition } from "../engine/geo.js";
-import { Chip, Gap, GroupRule, Head, MONO, Num, OverDenom, Row, Txt, claimText } from "./kit.jsx";
+import {
+  Chip, CohortSpec, Gap, GroupRule, Head, MONO, Num, OverDenom, Row, Txt, claimText,
+} from "./kit.jsx";
 import { baselineName, baselineSentence } from "../engine/cohort-language.js";
 import { OutcomeLadder, RateLine, countsOf, refusalKindOf } from "./outcome-card.jsx";
 import { intensityContractKey, landfallContractKey } from "../engine/calibration.js";
@@ -32,7 +34,7 @@ const CAT_LABEL = { td: "TROPICAL DEPRESSION", ts: "TROPICAL STORM", cat1: "CATE
 
 export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathway, pathwayOn,
   peak, pathway, comparison, onBaseline, conditions, archive, envCoverage, envLens,
-  envLoading, onLoadEnv, onEvidence }) {
+  envLoading, onLoadEnv, onEvidence, citation, citationUrl }) {
   if (!result) return null;
   const r = result;
   const n = r.n_cases;
@@ -58,12 +60,25 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
 
       {n === 0 ? <NoCohort spec={spec} gaps={r.gaps} /> : (
         <>
+          {/* THE GATE ON THE SAME LINE AS THE COUNT IT GATES.
+              The rail already prints "192 of 3,959 storms" and its own SAMPLE GATE row, and this
+              panel printed the count, the effective sample and the gate again as three separate
+              rows in the same typography about 1,250px to the right. The count and the gate are
+              one fact -- how much evidence is there, and is it enough -- so they read as one
+              line; the effective sample keeps its own row because it carries a statement neither
+              of the others makes. */}
           <Head>THE COHORT</Head>
-          <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-3)" }}>
+          <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-3)",
+            flexWrap: "wrap" }}>
             <span style={{ ...MONO, fontSize: "var(--fs-stat)", fontWeight: 800,
               color: "var(--text-1)", lineHeight: 1 }}>{n}</span>
             <span style={{ ...MONO, fontSize: "var(--fs-mono-sm)", color: "var(--text-2)" }}>
               storms
+            </span>
+            <span style={{ ...MONO, fontSize: "var(--fs-mono-sm)",
+              color: r.sufficient ? "var(--pos)" : "var(--neg)" }}>
+              {r.sufficient ? `SUFFICIENT · ${n} ≥ ${r.min_sample}`
+                : `BELOW SAMPLE · ${n} < ${r.min_sample}`}
             </span>
           </div>
           <Row k="effective sample size"
@@ -72,12 +87,6 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
                    and no storm here is standing in for another. A distance-weighted analog pool
                    does not have that property. The sample gate is applied to the RAW count."
             v={<Num value={r.effective_sample_size} digits={1} />} />
-          <Row k="sample gate" v={
-            r.sufficient
-              ? <span style={{ ...MONO, color: "var(--pos)" }}>
-                  SUFFICIENT · {n} ≥ {r.min_sample}</span>
-              : <span style={{ ...MONO, color: "var(--neg)" }}>
-                  BELOW SAMPLE · {n} &lt; {r.min_sample}</span>} />
           {/* WHY NO WEIGHTED RATE HERE, said rather than silently omitted.
               The archive's analog query weights each case by a Gaussian in distance from the
               query point, and the browser computes that identically -- the parity harness
@@ -87,6 +96,14 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
               filter-defined pool. So every member counts once, the weighted rate equals the
               unweighted one, and this surface says so instead of printing the same number
               twice under two names. */}
+          {/* NOT BEHIND A DISCLOSURE, AND THE ATTEMPT IS WORTH RECORDING.
+              This was collapsed to buy the outcome ladder a hundred pixels, and check-atlas-dom
+              failed it -- correctly. Rule 4 of the panel rules is that the conditioning note
+              travels WITH the numbers, and a note a reader has to ask for does not travel with
+              anything. "The weighted rate equals the unweighted rate here" is a statement about
+              how the rate on screen was computed, not standing methodology a reader can be
+              assumed to carry, and the gate exists precisely to stop a layout pass from trading
+              it away. The pixels were found elsewhere; this stays visible. */}
           {spec.where ? (
             <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
               lineHeight: "var(--lh-body)", marginTop: 3 }}>
@@ -96,8 +113,6 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
               unweighted rate, and is not printed twice under two names.
             </div>
           ) : null}
-          <Row k="seasons in cohort" v={<Txt value={seasonSpan(r.cases)} />} />
-          <Row k="median genesis" v={<Txt value={medianPosition(r.cases)} />} />
 
           {comparison ? (
             <Baseline c={comparison} conditions={conditions} onBaseline={onBaseline} />
@@ -105,11 +120,13 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
 
           <Head right={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
             color: "var(--text-2)" }}>count · rate · 95% Wilson</span>}>WHAT THEY BECAME</Head>
+          {/* The denominator, above. What the MARKS mean travels with the marks, in the ladder's
+              own key at its foot -- a legend printed before the thing it describes is read
+              twice: once uncomprehendingly and once on the way back up. */}
           <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
             lineHeight: "var(--lh-body)", marginBottom: "var(--sp-2)" }}>
             Distinct storms reaching each threshold, over the storms whose intensity the archive
-            actually recorded. The pale band on each bar is the 95% interval — its width is the
-            sample speaking; the fainter bar beneath it is the baseline, on the same axis.
+            actually recorded.
           </div>
           {/* ONE LADDER, NOT SIX CARDS -- and the circular rows stay IN it rather than being
               lifted into a group of their own. TS -> Cat 1 -> Cat 3 -> Cat 4 -> Cat 5 is a
@@ -159,11 +176,35 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
             </div>
           ) : null}
 
+          {/* THE QUESTION, AS ONE CITABLE LINE -- CLOSING THE ANSWER RATHER THAN OPENING IT.
+              `CohortSpec` and its stylesheet block have existed unused since the panel was
+              written; nothing ever supplied the text, which is why Priority A read as a missing
+              feature when it was really a disconnected wire. It computes nothing and asserts
+              nothing the rail has not already applied -- it is a citation, and its whole point
+              is that the analyst it is sent to opens the identical cohort.
+              It sits at the FOOT of the answer because that is the only place it does not cost
+              anything: five lines of stamps above THE COHORT pushed the cohort size, the sample
+              gate and the first outcome rate down the panel at 1280, and the answer is what has
+              to be readable without scrolling. A reader cites a result after reading it. */}
+          {citation ? (
+            <>
+              <Head right={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
+                color: "var(--text-2)" }}>question · stamps · URL</span>}>CITE THIS COHORT</Head>
+              <CohortSpec text={citation} url={citationUrl} />
+            </>
+          ) : null}
+
           {/* ---- B · DETAIL -------------------------------------------------------------
               Everything below is still on the page and still complete. What changed is that it
               no longer competes with the answer for a first reading: a reader who stops here
               has the cohort, the gaps that qualify it, the baseline and every principal rate. */}
           <GroupRule />
+
+          {/* WHAT THIS COHORT IS, as opposed to what happened to it. Both are worth knowing and
+              neither is the answer: they described the population above the rates, where they
+              cost the rates their place on the first screen. */}
+          <Row k="seasons in cohort" v={<Txt value={seasonSpan(r.cases)} />} />
+          <Row k="median genesis" v={<Txt value={medianPosition(r.cases)} />} />
 
           {Object.keys(r.landfall).length ? (
             <>
@@ -194,9 +235,21 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
                       <span style={{ color: "var(--text-2)" }}> · ≥64 kt </span>
                       <OverDenom n={kinds.hurricane.count} of={kinds.hurricane.n_storms} />
                     </span>} />
+                  {/* THE COMPARISON THE ENGINE ALREADY COMPUTED. compareResults returns a
+                      delta for every landfall contract and this panel threw all of them away --
+                      so on a landfall-conditioned cohort, where "what changed when I added this
+                      condition" IS the question, the only section that could answer it showed
+                      bare rates. Same two permitted statements, same mark, same prohibition on
+                      the vocabulary of a test. */}
                   <div style={{ paddingLeft: "var(--sp-4)" }}>
-                    <RateLine cell={kinds.any} label="any" />
-                    <RateLine cell={kinds.hurricane} label="≥64 kt" />
+                    <RateLine cell={kinds.any} label="any"
+                      delta={comparison ? comparison.landfall[region].any : null}
+                      onEvidence={onEvidence
+                        ? () => onEvidence(landfallContractKey(region, "any")) : undefined} />
+                    <RateLine cell={kinds.hurricane} label="≥64 kt"
+                      delta={comparison ? comparison.landfall[region].hurricane : null}
+                      onEvidence={onEvidence
+                        ? () => onEvidence(landfallContractKey(region, "hurricane")) : undefined} />
                   </div>
                   {["any", "hurricane"].map((kind) => {
                     const u = r.unscoreable[`${region}:${kind}`];
@@ -332,8 +385,10 @@ function NoCohort({ spec, gaps }) {
       <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
         color: "var(--text-2)", lineHeight: "var(--lh-body)" }}>
         There is no sample here, so there are no rates. Every condition you set is listed on the
-        left with what it removed; the one that emptied the cohort is the one with the largest
-        cost beside it.
+        left with what it removed — but those counts are taken in the order the filters run, and
+        a storm rejected by two conditions is counted only against the first. The largest number
+        is therefore not necessarily the condition that emptied the cohort. Remove them one at a
+        time to find out which one did.
         {spec.where ? (
           <>
             <br /><br />
