@@ -1,0 +1,142 @@
+{
+  "audit_utc": "2026-08-21T23:30:00Z",
+  "scope": "External research-workbench audit of the Felt and GIS Cloud connectors. Research only; no production change.",
+  "connectors": {
+    "felt": {
+      "authenticated": true,
+      "workspace": "Alec",
+      "tools_advertised": 44,
+      "tools_invocable": 1,
+      "invocable": ["help_center"],
+      "gate": "Felt AI isn't enabled for the \"Alec\" workspace, so creating and analyzing maps through Felt's MCP server isn't available. Felt AI is available on Felt's Enterprise plans.",
+      "gate_kind": "plan_entitlement",
+      "verified_refusals": ["who_am_i", "list_maps", "browse_felt_library"],
+      "workstream_status": "NOT EXECUTED"
+    },
+    "gis_cloud": {
+      "authenticated": true,
+      "user_id": "309107",
+      "tools_advertised": 55,
+      "tools_invocable": 55,
+      "feature_count_limit": 10000,
+      "storage_raster_limit_bytes": 104857600,
+      "external_db_connections": 0,
+      "basemaps": ["osm", "bing", "bing_sat", "bing_hyb", "maps_for_free_relief"],
+      "spatial_sql": "PostGIS st_* allowlist over PostgreSQL, storage SRID 4326, geometry column wkb_geometry, pk ogc_fid",
+      "wms_wmts_wfs_tms": "platform supports; CONNECTOR DOES NOT — Map Editor only",
+      "url_ingestion": false,
+      "workstream_status": "EXECUTED"
+    }
+  },
+  "artefact": {
+    "map_id": 3244729,
+    "editor_url": "https://editor.giscloud.com/map/3244729",
+    "layers": {
+      "ca_coast": {"id": 7841745, "rows": 14, "content": "hawaii.geojson verbatim, full precision, 651 vertices"},
+      "ca_landfalls": {"id": 7841746, "rows": 19, "content": "every Hawaii landfall in the archive"},
+      "ca_genesis_band": {"id": 7841747, "rows": 34, "content": "genesis points 0-650 km of 12.0N 143.7W, months 7-9, season >= 1971"},
+      "ca_tracks": {"id": 7841748, "rows": 27, "content": "26 Two-C cohort tracks + Iniki 1992 reference"}
+    },
+    "bookmarks": [8267, 8268]
+  },
+  "findings": [
+    {
+      "id": "A1",
+      "claim": "Atlas Hawaii landfall-region attribution is independently confirmed by PostGIS; zero substantive discrepancies.",
+      "method": "LEFT JOIN ca_landfalls to ca_coast ON ST_Intersects; then INNER JOIN on isl_name = atlas_sub_region measuring ST_Distance(::geography).",
+      "result": {
+        "n": 19,
+        "st_intersects_agree": 13,
+        "st_intersects_null": 6,
+        "max_distance_to_named_island_m": 0.0473908481022321,
+        "all_polygons_st_isvalid": true
+      },
+      "interpretation": "The 6 NULLs are boundary-coincidence artefacts: segment_crossing positions ARE the coastline intercept and lie on the ring. Not errors.",
+      "warning": "A naive ST_Intersects reimplementation of the landfall rule silently drops 6/19 Hawaii landfalls (32%), including Iniki 1992 — the only modern Hawaii hurricane landfall.",
+      "atlas_change_recommended": false
+    },
+    {
+      "id": "A2",
+      "claim": "Spherical haversine (Atlas, R=6371.0088) vs WGS84 ellipsoid (PostGIS geography) differ by -1.80 km to +0.69 km at 0-650 km; no cohort membership flips.",
+      "boundary_case": {
+        "storm": "ALIKA 2002 (CP012002)",
+        "atlas_haversine_km": 500.345021,
+        "wgs84_geodesic_km": 500.843667333432,
+        "cut_km": 500,
+        "in_cohort_atlas": false,
+        "in_cohort_wgs84": false
+      },
+      "interpretation": "Documented definitional sensitivity, not a discrepancy. Sign is bearing-dependent, not monotonic.",
+      "atlas_change_recommended": false
+    },
+    {
+      "id": "A3",
+      "claim": "PostGIS geography and the Atlas's unwrapped-longitude representation are mutually incompatible at the antimeridian.",
+      "tests": {
+        "geog_length_m_179.9E_to_179.9W": 20929.4154750208,
+        "planar_geometry_length_deg_same": 359.8,
+        "planar_line_intersects_mid_atlantic_box": true,
+        "geog_from_unwrapped_LINESTRING_179.9_180.1": "ERROR: Coordinate values are out of range [-180 -90, 180 90] for GEOGRAPHY type"
+      },
+      "rules": [
+        "Use ::geography, never planar geometry, for any track/region predicate.",
+        "Wrap into [-180,180] before casting; geography rejects unwrapped input.",
+        "The Atlas's unwrapping is load-bearing and does a job geography cannot do."
+      ],
+      "atlas_change_recommended": false
+    },
+    {
+      "id": "C1",
+      "claim": "Two-C cohort closest-approach distribution to the eight named Hawaiian islands.",
+      "query_point": {"lat": 12.0, "lon": -143.7},
+      "cohort_rule": "genesis <= 500 km, months 7-9, season >= 1971",
+      "result": {
+        "n_storms": 26,
+        "min_km": 67.1,
+        "mean_km": 766.1,
+        "max_km": 1395.1,
+        "n_within_250km": 3,
+        "n_within_500km": 6,
+        "n_landfall": 0,
+        "closest": [
+          {"name": "LALA", "season": 2026, "peak_cat": "cat1", "km": 67.1},
+          {"name": "UNNAMED", "season": 1994, "peak_cat": "td", "km": 177.7},
+          {"name": "ULEKI", "season": 1988, "peak_cat": "cat3", "km": 249.2}
+        ],
+        "reference_not_in_cohort": {"name": "INIKI", "season": 1992, "km": 0}
+      },
+      "status": "historical counts and distances only; NOT a forecast and does not decompose into one"
+    },
+    {
+      "id": "P1",
+      "claim": "48.7% of Atlas track points are interpolated and are drawn identically to observed fixes.",
+      "counts": {"observed": 114316, "interpolated": 109171, "provisional": 666, "total": 224153},
+      "note": "archive.ptQuality / qObserved / qInterpolated / qProvisional are already decoded client-side (engine/archive.js:54-58) and unused by the renderer.",
+      "recommendation": "B1"
+    },
+    {
+      "id": "P2",
+      "claim": "30% of landfall marks are derived by straight-line segment crossing and are drawn identically to authoritative NHC L-records.",
+      "counts": {"hurdat2_L_record": 1305, "bracketing_fix": 1061, "segment_crossing": 1013},
+      "hawaii": {"hurdat2_L_record": 1, "bracketing_fix": 8, "segment_crossing": 10},
+      "closest_approach_km_over_45": 10,
+      "closest_approach_km_30_to_45": 36,
+      "iniki_closest_approach_km": 41.030954,
+      "note": "geo.py's own text treats ~45 km as the credibility limit for a segment_crossing. Iniki sits 4 km inside it.",
+      "recommendation": "B3"
+    },
+    {
+      "id": "P3",
+      "claim": "744 of 3959 storms carry a pre-genesis track portion drawn identically to the post-genesis track.",
+      "pre_genesis_hours": {"median": 30, "p90": 78, "max": 252},
+      "recommendation": "B4"
+    }
+  ],
+  "not_done": [
+    "Entire Felt workstream — connector refuses (plan entitlement).",
+    "CONUS, Mexico, Caribbean and Central America polygon validation — throughput limit (no URL ingestion in the GIS Cloud connector).",
+    "Broad NA+EP archive, dense-season cohort, refused cohort and wider Hawaii cohort extracts.",
+    "Any exposure-layer evaluation against real data — none available on this account.",
+    "Any imagery display — neither connector can carry WMS/WMTS programmatically."
+  ]
+}
