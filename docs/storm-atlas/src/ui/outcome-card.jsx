@@ -175,8 +175,7 @@ function LadderRow({ label, tone, cell, unscoreable, subject, delta, baselineCel
                   only thing worth encoding beyond them is whether the samples separate, which is
                   what the mark does. */}
               <span style={{ color: delta.overlap ? "var(--t4)" : "var(--t2)" }}>
-                {delta.deltaPp > 0 ? "+" : delta.deltaPp < 0 ? "−" : "±"}
-                {Math.abs(delta.deltaPp).toFixed(1)} points {delta.direction}
+                <DeltaFigure d={delta} /> {delta.direction}
                 {delta.overlap === null ? null
                   : <span className={delta.overlap ? "at-sep" : "at-sep at-on"} />}
               </span>
@@ -202,8 +201,23 @@ function LadderRow({ label, tone, cell, unscoreable, subject, delta, baselineCel
   );
 }
 
+/* THE SIGN AND THE MAGNITUDE MUST AGREE, and at one decimal place they did not.
+ *
+ * A delta of -0.04 points printed as "−0.0 points lower": a minus sign in front of a zero, and
+ * a direction word for a difference the rounded figure says does not exist. The reverse case
+ * printed "±0.0 points identical" only when the difference was EXACTLY zero, so the two states
+ * a reader could not tell apart were "identical" and "not identical but too small to show".
+ *
+ * Below a twentieth of a point the figure states the BOUND rather than a rounded value, which
+ * is true, keeps the direction word honest, and cannot be read as a sign attached to a zero. */
+function DeltaFigure({ d, unit = "points" }) {
+  const mag = Math.abs(d.deltaPp);
+  if (mag < 0.05) return <>&lt;0.1 {unit}</>;
+  return <>{d.deltaPp > 0 ? "+" : "−"}{mag.toFixed(1)} {unit}</>;
+}
+
 /** One measure: the rate as a length, the interval as the band it sits inside, both bounds
- *  marked. Same construction as IntervalBar, at ladder scale. */
+ *  marked. Same construction as the card's bar, at ladder scale. */
 function Meas({ rate, ci, tone }) {
   const pct = (x) => `${Math.max(0, Math.min(100, 100 * x))}%`;
   return (
@@ -284,8 +298,7 @@ export function RateLine({ cell, label, delta, onEvidence }) {
         <>
           {" · baseline "}{(100 * delta.baseRate).toFixed(1)}%
           <span style={{ color: delta.overlap ? "var(--t4)" : "var(--t2)" }}>
-            {" "}{delta.deltaPp > 0 ? "+" : delta.deltaPp < 0 ? "−" : "±"}
-            {Math.abs(delta.deltaPp).toFixed(1)} pp
+            {" "}<DeltaFigure d={delta} unit="pp" />
             {delta.overlap === null ? null
               : <span className={delta.overlap ? "at-sep" : "at-sep at-on"} />}
           </span>

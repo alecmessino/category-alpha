@@ -192,19 +192,26 @@ export function Refusal({ kind, detail, subject, counts, compact, onEvidence, ca
         marginTop: "var(--sp-3)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-3)" }}>
+      {/* WRAPS AS WHOLE ITEMS. In a 260px rail the three parts of this line -- the status, what
+          it is about, and what the archive DOES publish -- were breaking mid-phrase against each
+          other, so "NOT EVALUABLE · shear · SST · OHC · 123 of 192 evaluable" interleaved into
+          two unreadable columns. Each part now keeps itself whole and moves to the next line
+          instead; the counts still push right when there is room for them. */}
+      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-3)",
+        flexWrap: "wrap" }}>
         <span aria-hidden="true" style={{ ...MONO, fontSize: "var(--fs-mono-sm)", color: r.tone,
           flex: "none", width: 12, textAlign: "center" }}>{r.mark}</span>
         <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", fontWeight: 800, color: r.tone,
-          letterSpacing: ".5px" }}>{r.title}</span>
+          letterSpacing: ".5px", flex: "none" }}>{r.title}</span>
         {subject ? (
-          <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)" }}>
+          <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+            flex: "0 1 auto", minWidth: 0 }}>
             {subject}
           </span>
         ) : null}
         {counts ? (
           <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-1)",
-            marginLeft: "auto" }}>{counts}</span>
+            marginLeft: "auto", flex: "none" }}>{counts}</span>
         ) : null}
       </div>
 

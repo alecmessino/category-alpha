@@ -115,14 +115,6 @@ export function CohortBuilder({
             BELOW SAMPLE · {result.n_cases} &lt; {result.min_sample}</span>} />
       <SilentExclusions excluded={result.excluded} total={total} kept={result.kept} />
 
-      {result.undecidable > 0 ? (
-        <Refusal kind="UNKNOWN" compact
-          counts={`${result.undecidable.toLocaleString()} storm(s)`}
-          detail={`${result.undecidable.toLocaleString()} storm(s) could not be judged by this `
-            + "intensity filter — the archive records no wind for them. They are neither "
-            + "included nor counted as failing it."} />
-      ) : null}
-
       {/* The mode switch stays at the top rather than under the disclosure below: replaying the
           record is a way of reading the cohort, not a drawing preference, and burying it would
           hide the archive's own clock behind a triangle. */}
@@ -388,11 +380,31 @@ export function CohortBuilder({
       </div>
       {preview ? <Basis n={preview.basisOf.intensity} cohort={result.kept}
         what="the peak intensity" /> : null}
+
+      {/* MOVED FROM THE TOP OF THE RAIL TO THE CONTROL THAT CAUSES IT.
+          This refusal sat inside THE QUESTION block, above the mode switch and above the
+          condition stack, where it pushed the reader's own conditions down the rail to explain
+          a consequence of a control they had not reached yet -- and the same count was already
+          stated on the intensity chip's own cost line, and again in the panel's gaps. It is the
+          same refusal, in the one place a reader can act on it. Wording untouched. */}
+      {result.undecidable > 0 ? (
+        <Refusal kind="UNKNOWN" compact
+          counts={`${result.undecidable.toLocaleString()} storm(s)`}
+          detail={`${result.undecidable.toLocaleString()} storm(s) could not be judged by this `
+            + "intensity filter — the archive records no wind for them. They are neither "
+            + "included nor counted as failing it."} />
+      ) : null}
       {preview && preview.intensityUnknown > 0 ? (
         <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--warn)", marginTop: 4,
           lineHeight: "var(--lh-body)" }}>
+          {/* "IN NONE OF THE COUNTS ABOVE" WAS FALSE. The ALL STORMS chip counts the whole
+              basis population, these storms included; it is the THRESHOLD chips they are absent
+              from, because a threshold cannot be tested against a wind nobody recorded. Saying
+              they were in no count at all made the ALL chip look like it disagreed with its own
+              components by exactly this number. */}
           {preview.intensityUnknown.toLocaleString()} storm(s) here have no recorded wind at all.
-          They are in none of the counts above and they are not failures.
+          They are counted under ALL STORMS and in none of the thresholds beside it, and they
+          are not failures of any of them.
         </div>
       ) : null}
 

@@ -307,16 +307,28 @@ export function CohortPanel({ spec, result, sentence, onSelectStorm, onShowPathw
             <>
               <Head right={<span style={{ ...MONO, fontSize: "var(--fs-mono-xs)",
                 color: "var(--text-2)" }}>hours from genesis</span>}>HOW LONG IT TOOK</Head>
+              {/* THE SPREAD ON ITS OWN LINE, because `.at-row` gives the value `flex:none` and
+                  the label absorbs every pixel of loss. With the median, p25, p75 and n all in
+                  the value, a 312px panel left "LANDFALL · CENTRAL AMERICA" as two or three
+                  glyphs and an ellipsis -- the reader could see a number and not what it was
+                  of. The median keeps the row; the quantiles that qualify it sit under it, in
+                  the same shape the ladder uses. */}
               {Object.entries(r.time_to_event).map(([key, d]) => {
                 if (!d || !d.n) return null;
                 return (
-                  <Row key={key} k={key.replace("landfall_", "landfall · ").replace(/_/g, " ")}
-                    v={<span style={{ ...MONO }}>
-                      {Math.round(d.median)} h
-                      <span style={{ color: "var(--text-2)" }}>
-                        {" "}· p25 {Math.round(d.p25)} · p75 {Math.round(d.p75)} · n {d.n}
-                      </span>
-                    </span>} />
+                  <div key={key}>
+                    <Row k={key.replace("landfall_", "landfall · ").replace(/_/g, " ")}
+                      v={<span style={{ ...MONO }}>{Math.round(d.median)} h</span>} />
+                    <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
+                      lineHeight: "var(--lh-body)", marginTop: -2 }}>
+                      p25 {Math.round(d.p25)} · p75 {Math.round(d.p75)} · n {d.n}
+                      {d.n < r.min_sample ? (
+                        <span style={{ color: "var(--warn)" }}>
+                          {" "}· below the sample gate — a spread, not a finding
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
                 );
               })}
             </>
