@@ -427,9 +427,16 @@ export function Atlas() {
           kept={contextRows ? contextRows.length : result.kept}
           lifted={emphasis ? emphasis.length : 0}
           selectedCount={selected === null ? 0 : 1}
+          /* ONE CLAUSE, NOT TWO. The foot band's measured budget -- scale bar, projection,
+             coastline, coordinates -- was derived before this line existed, and a 68-character
+             hint pushed the COASTLINE statement out at 1920. That statement is the band's one
+             epistemic claim (which geometry is authoritative); an instruction is the most
+             recoverable thing on the band, because the gesture works whether or not the words
+             are there. So the hint is short, and it is also the first casualty in the container
+             ladder -- see atlas.css. */
           hint={mode === "explore" && conditionsOf(cohort).length && selected === null
-            ? (cohort.where ? "CLICK OPEN WATER TO MOVE THE PROBE · CLICK A GENESIS POINT FOR ONE STORM"
-              : "CLICK OPEN WATER TO ADD A GENESIS-LOCATION CONDITION")
+            ? (cohort.where ? "CLICK OPEN WATER TO MOVE THE PROBE"
+              : "CLICK OPEN WATER TO ADD A LOCATION CONDITION")
             : undefined}
         >
           {/* THE INVITATION IS FOR AN UNQUERIED MAP, AND ONLY FOR ONE.
@@ -750,35 +757,32 @@ function Legend({ colorBy, showPathway, showGenesisDensity, probe }) {
       "storms that formed in each 2° cell — a count, not a rate"]);
   }
   if (colorBy !== "intensity" && !surfaces.length) return null;
+  /* THE STYLESHEET ALREADY HAD THIS, AND IT WAS UNREACHABLE.
+     atlas.css declares `.at-legend` with `.at-lrow`, `.at-sw` and `.at-d` -- including
+     `bottom: calc(var(--at-plate-gutter) + 22px)`, a value chosen to clear Leaflet's
+     attribution, with a comment recording the overlap that produced it. The component matched
+     none of it: it was inline-styled at `bottom: 14`, which is exactly the overlap the rule was
+     written to end, and the rule sat dead beside it. Using the class is both the fix and one
+     less place the legend's appearance is decided. */
   return (
-    <div style={{
-      position: "absolute", right: 12, bottom: 14, zIndex: 450, pointerEvents: "none",
-      background: "rgba(7,12,22,.82)", border: "1px solid var(--border-strong)",
-      borderRadius: "var(--radius-sm)", padding: "6px 9px", display: "flex",
-      flexDirection: "column", gap: 5, alignItems: "flex-start", maxWidth: 340,
-    }}>
+    <div className="at-legend">
       {surfaces.map(([hue, title, note]) => (
-        <div key={title} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <span style={{ display: "flex", flex: "none" }}>
+        <div className="at-lrow" key={title}>
+          <span className="at-sw">
             {[0.18, 0.38, 0.62].map((a) => (
-              <span key={a} style={{ width: 9, height: 9, background: `rgba(${hue}, ${a})` }} />
+              <i key={a} style={{ background: `rgba(${hue}, ${a})` }} />
             ))}
           </span>
-          <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-1)",
-            letterSpacing: "var(--track-label)" }}>{title}
-            <span style={{ color: "var(--text-2)", letterSpacing: 0 }}> · {note}</span>
-          </span>
+          <span>{title}<span className="at-d"> · {note}</span></span>
         </div>
       ))}
       {colorBy === "intensity" ? (
-        <div style={{ display: "flex", gap: "var(--sp-4)", alignItems: "center" }}>
+        <div className="at-lrow" style={{ gap: "var(--sp-4)" }}>
           {items.map(([k, label]) => (
             <span key={k} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={{ width: 12, height: 2,
+              <span style={{ width: 12, height: 2, flex: "none",
                 background: `var(--atlas-${k}, ${CAT_HEX[k]})` }} />
-              <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)" }}>
-                {label}
-              </span>
+              {label}
             </span>
           ))}
         </div>

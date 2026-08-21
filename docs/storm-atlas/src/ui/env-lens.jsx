@@ -27,7 +27,11 @@ import { Refusal } from "./refusal.jsx";
 const ENV_FILE = "atlas-env-v1.bin.gz";
 
 export function EnvLens({ archive, coverage, lens, loading, onLoad, dataBase }) {
-  if (!coverage) return null;
+  /* NOTHING TO BE A LENS ON. With an empty cohort every figure here is 0 of 0, and the refusal
+     read "NOT EVALUABLE — 0 of 0" beside "0 / 0 storms evaluable", which states a coverage
+     problem where the real state is that no storm was selected. The empty cohort already has
+     its own message; this section has nothing to add to it. */
+  if (!coverage || !coverage.n) return null;
   const bytes = (archive.manifest.files[ENV_FILE] || {}).bytes || null;
 
   return (
@@ -106,9 +110,8 @@ export function EnvLens({ archive, coverage, lens, loading, onLoad, dataBase }) 
 
       <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
         marginTop: "var(--sp-4)", lineHeight: "var(--lh-body)" }}>
-        No environmental CONDITION is offered. Over {coverage.n === 0 ? "this" : "this"} record
-        an environmental filter would answer a 40-year question while looking like a 175-year
-        one. The condition arrives when the coverage supports it, not when the interface would
+        No environmental CONDITION is offered. Over this record an environmental filter would
+        answer a 40-year question while looking like a 175-year one. The condition arrives when the coverage supports it, not when the interface would
         look richer for having it.
       </div>
     </>
