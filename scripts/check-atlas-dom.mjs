@@ -130,7 +130,32 @@ await page.goto(`http://127.0.0.1:${port}/storm-atlas/`, { waitUntil: "domconten
 await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive, { timeout: 90000 });
 await page.waitForTimeout(700);
 
-const text = () => page.evaluate(() => document.body.innerText);
+/* THE REGISTRY'S FAILURE SENTINELS, WATCHED ACROSS EVERY STATE THIS HARNESS VISITS.
+ *
+ * docs/app/claims.js answers an id it does not hold with "UNREGISTERED CLAIM (<id>)", and an id
+ * whose function throws with "CLAIM ERROR". Both are rendered exactly where the capability
+ * statement would have been -- so a mistyped id does not blank the sentence, it REPLACES it,
+ * and the reader sees a placeholder in the position of a claim about what the surface can do.
+ *
+ * Measured, before this existed: renaming one live id to `atlas.rates_TYPO` put
+ * "UNREGISTERED CLAIM (atlas.rates_TYPO)" into the block headed WHAT THESE RATES ASSUME -- the
+ * sentence qualifying every rate on the panel -- and audit-claims.mjs reported "provenance
+ * audit clean", because its accessor list predated the Atlas's `claimText` wrapper.
+ *
+ * That gap is closed statically now, but a static check can only see the shapes it knows. This
+ * is the other end of the same guarantee and it needs to know nothing: every state this file
+ * drives is scanned as it is read, so a sentinel that reaches any pixel of any of them fails
+ * here regardless of how the id got there. */
+const SENTINEL = /UNREGISTERED CLAIM \([^)]*\)|CLAIM ERROR/;
+let sentinelSeen = null;
+const text = async () => {
+  const t = await page.evaluate(() => document.body.innerText);
+  if (!sentinelSeen) {
+    const m = SENTINEL.exec(t);
+    if (m) sentinelSeen = m[0];
+  }
+  return t;
+};
 const clickLatLng = async (lat, lng) => {
   const p = await page.evaluate(({ lat, lng }) => {
     const m = globalThis.__ATLAS_MAP;
@@ -902,6 +927,8 @@ console.log("\n[8c] the density surfaces say what they count");
 }
 
 console.log("\n[9] the page did not complain");
+ok("no claim rendered as a registry failure, in any state visited above",
+  sentinelSeen === null, sentinelSeen || "");
 ok("no page or console errors", errors.length === 0, errors.join("\n        "));
 ok("and every resource it asked for existed", MISSING.length === 0,
   `${MISSING.length} 404(s): ${[...new Set(MISSING)].slice(0, 10).join(", ")}`);

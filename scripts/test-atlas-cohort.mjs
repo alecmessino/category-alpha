@@ -196,6 +196,81 @@ for (const spec of URL_CASES) {
     JSON.stringify(normalise({ months: [0, 1, 13, 8, null, NaN] }).months));
 }
 
+/* THE MIGRATION, PROVED RATHER THAN ASSERTED.
+ *
+ * `m` used to mean months and now means the methodology stamp, so the question a reader of this
+ * file will ask is the one this block answers: can any URL still in existence -- written by any
+ * build, or by hand -- put a month condition on a cohort through the old key?
+ *
+ * It cannot, and the reason is structural rather than defensive: `m` is not in K, so parseQuery
+ * never reads it for anything. There is deliberately no compatibility path that tries to tell a
+ * version from a month list, because "1.2" is a valid reading of both and a rule that guessed
+ * would reintroduce exactly the ambiguity the rename exists to end.
+ *
+ * WHAT A LEGACY `m` MONTH-LIST DOES INSTEAD: nothing. The condition is DROPPED, not
+ * reinterpreted -- the cohort comes out wider than the link's author meant, visibly, with the
+ * month strip empty and the question saying so, rather than silently narrowed to a month
+ * nobody chose. Of the two ways to be wrong that is the recoverable one. And no shipped build
+ * ever produced such a URL: the surface has always written the methodology into `m` last, which
+ * is what destroyed the months in the first place. */
+head("[4b] the m -> mo migration cannot recreate a phantom month");
+{
+  const LEGACY = [
+    "1.1.0", "1.0.0", "2.0", "1.2", "8.9", "1", "12", "0", "13", "1.1.0-rc1", "",
+    "1.2.3.4", "0.0.0", "3.3", "6.7.8", "not-a-version", "1,2", "1.13", "%2E", "..",
+  ];
+  let leaked = null;
+  for (const v of LEGACY) {
+    const q = new URLSearchParams({ v: "1", m: v });
+    const back = parseQuery(q.toString()).spec;
+    if (back.months !== null) { leaked = `m=${v} -> ${JSON.stringify(back.months)}`; break; }
+    /* And it does not leak into any other dimension either. */
+    if (back.basins || back.subbasinsEntered || back.where
+        || back.seasonFrom !== null || back.seasonTo !== null) {
+      leaked = `m=${v} -> ${JSON.stringify(back)}`; break;
+    }
+  }
+  ok(leaked === null,
+    `no legacy m= value becomes a condition (${LEGACY.length} values, versions and month lists)`,
+    leaked || "");
+
+  /* The same sweep with a REAL month condition alongside it: the new key wins and the old one
+     is inert, which is the case every shared link written from here on actually is. */
+  let clobbered = null;
+  for (const v of LEGACY) {
+    const q = new URLSearchParams(toQuery({ months: [8, 9] }));
+    q.set("m", v);
+    const back = parseQuery(q.toString()).spec;
+    if (JSON.stringify(back.months) !== "[8,9]") {
+      clobbered = `m=${v} -> ${JSON.stringify(back.months)}`; break;
+    }
+  }
+  ok(clobbered === null,
+    "and a real month condition survives every one of them intact", clobbered || "");
+
+  /* parseQuery reads the cohort's own keys and nothing else. Stated as a property so a future
+     key added to K without being added here is caught by the count rather than by a reader. */
+  const K_KEYS = ["w", "s0", "s1", "mo", "b", "e", "i", "l", "p", "n"];
+  const written = [...new URLSearchParams(toQuery({
+    where: { lat: 1, lon: 2, radiusKm: 3 }, seasonFrom: 1971, seasonTo: 2020, months: [8],
+    basins: ["EP"], subbasinsEntered: ["CP"], intensity: "cat3", landfall: "mexico",
+    includeProvisional: true, namedOnly: true,
+  })).keys()].filter((k) => k !== "v");
+  ok(written.length === K_KEYS.length && written.every((k) => K_KEYS.includes(k)),
+    "the cohort writes exactly its ten declared keys, and `m` is not one of them",
+    written.join(","));
+
+  /* The end-to-end shape: what the surface writes, read back, is the cohort it wrote. */
+  const spec = normalise({ where: { lat: 14.7, lon: -113.9, radiusKm: 500 }, months: [8, 9],
+    seasonFrom: 1971, basins: ["EP"], intensity: "cat3" });
+  const url = new URLSearchParams(toQuery(spec));
+  url.set("m", "1.1.0");
+  url.set("view", "calibration");
+  url.set("contract", "reaches_cat3_96kt");
+  ok(sameCohort(parseQuery(url.toString()).spec, spec),
+    "a fully-stamped URL round-trips to the identical cohort", url.toString());
+}
+
 head("[5] conditions carry their zone, their sentence and their cost");
 {
   const spec = { where: { lat: 12, lon: -105, radiusKm: 500 }, months: [8, 9],
