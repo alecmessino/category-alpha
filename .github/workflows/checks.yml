@@ -163,6 +163,24 @@ jobs:
       - name: Audit claim provenance
         run: node scripts/audit-claims.mjs
 
+      # THE INK RULE. Two independent drafts of this surface applied HAIRLINE inks to TEXT --
+      # published Wilson intervals, slot dashes and every graticule label, at 2.13-3.94:1. It is
+      # not a typo but a category of mistake: an ink picked because it sat well beside a rule,
+      # then reused for a sentence. So the constraint is enforced rather than reviewed.
+      #
+      # --self-test IS NOT DECORATION. The rule's value is entirely in its firing, and a detector
+      # that silently stopped matching would leave this step green forever while checking nothing.
+      # The flag seeds six real violations -- in both CSS and JSX, including one through
+      # -webkit-text-fill-color and one via a token name that does not exist yet -- and requires
+      # each to be caught, then seeds five LEGITIMATE uses (a hairline as a border, a mark as a
+      # background, a rule token's own definition) and requires silence on all five. A guard that
+      # flagged those would be switched off within a week, which is the same as not having one.
+      #
+      # It also pins the light shell's evidence-bar ramp, which is a DERIVED presentation table
+      # and not the cartography: the plate's palette.js is authoritative and untouched.
+      - name: Verify no rule, hairline or mark ink carries text
+        run: node scripts/check-atlas-adherence.mjs --self-test
+
       # THE COVERAGE GATE, applied to the snapshot the change is asking to merge. On main
       # it runs against a snapshot the job has just fetched; here it runs against the
       # committed one, which answers a different and equally useful question: does the

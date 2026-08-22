@@ -201,7 +201,7 @@ function LadderRow({ label, tone, cell, unscoreable, subject, delta, baselineCel
                   record of what happened. The sign and the word already carry the direction; the
                   only thing worth encoding beyond them is whether the samples separate, which is
                   what the mark does. */}
-              <span style={{ color: delta.overlap ? "var(--t4)" : "var(--t2)" }}>
+              <span style={{ color: delta.overlap ? "var(--t3)" : "var(--t2)" }}>
                 <DeltaFigure d={delta} /> {delta.direction}
                 {delta.overlap === null ? null
                   : <span className={delta.overlap ? "at-sep" : "at-sep at-on"} />}
@@ -366,7 +366,7 @@ export function RateLine({ cell, label, delta, onEvidence, sharedRefusal }) {
       {delta && delta.baseRate !== null ? (
         <>
           {" · baseline "}{(100 * delta.baseRate).toFixed(1)}%
-          <span style={{ color: delta.overlap ? "var(--t4)" : "var(--t2)" }}>
+          <span style={{ color: delta.overlap ? "var(--t3)" : "var(--t2)" }}>
             {" "}<DeltaFigure d={delta} unit="pp" />
             {delta.overlap === null ? null
               : <span className={delta.overlap ? "at-sep" : "at-sep at-on"} />}

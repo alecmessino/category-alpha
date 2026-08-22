@@ -136,7 +136,7 @@ export function ArchiveTransport({ timeline, cursorMin, setCursorMin, playing, s
       <div className="at-readouts">
         <Readout label="ARCHIVE CLOCK" value={fmtUTC(cursor * 60000)} />
         <Readout label="REVEALED"
-          value={<span>{revealedLabel(tl, cursor)}<small style={{ color: "var(--t4)" }}>
+          value={<span>{revealedLabel(tl, cursor)}<small style={{ color: "var(--t3)" }}>
             {" "}/ {tl.n.toLocaleString()}</small></span>} />
         <Readout label="ACTIVE NOW" tone={active.length ? undefined : "var(--flag)"}
           value={`${active.length} storm${active.length === 1 ? "" : "s"}`} />
