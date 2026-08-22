@@ -35,11 +35,23 @@ on:
   # run costs the gate. The failure modes are not comparable and should not be traded off
   # against each other.
   #
-  # main is excluded because the refresh job already runs these same suites there before
-  # it fetches anything.
+  # main is excluded from `push` because the refresh job already runs these same suites there
+  # before it fetches anything -- WHICH IS TRUE OF THE TERMINAL'S SUITES AND WAS NEVER TRUE OF
+  # THE ATLAS'S. refresh-data.yml runs test-calibration.mjs, the terminal ledger's gate; it runs
+  # none of test-atlas-*, neither DOM check and not the benchmark. So between `branches-ignore`
+  # here and `[skip ci]` on every data-refresh commit, NO ATLAS GATE HAS EVER RUN AGAINST main.
+  # The drifted calibration ledger sat there unreported until a pull request happened to touch
+  # the Atlas and surfaced it.
+  #
+  # Per-push on main is the wrong fix: the refresh loop commits roughly every ten minutes, so
+  # that is ~144 full runs a day to catch a file that changes on a far slower cadence. A daily
+  # scheduled run costs one and would have caught this within a day of it appearing. `schedule`
+  # runs on the default branch, which is exactly the branch that had no coverage.
   pull_request:
   push:
     branches-ignore: [main]
+  schedule:
+    - cron: "17 6 * * *"      # 06:17 UTC daily, on main — the only thing that gates main
   workflow_dispatch: {}
 
 # A newer push supersedes a review still in flight.
@@ -292,7 +304,37 @@ jobs:
       - name: Verify the calibration ledger is the archive's own, failures included
         run: node scripts/test-atlas-calibration.mjs
 
-      # ---- THE BROWSER GATES -------------------------------------------------------------
+  # ---- THE BROWSER GATES, IN THEIR OWN JOB -----------------------------------------------
+  #
+  # THEY USED TO LIVE AT THE BOTTOM OF `checks`, AND THAT IS WHY THEY STOPPED RUNNING.
+  # A job runs its steps in order and stops at the first non-zero exit. These three sat below
+  # `test-atlas-calibration`, so when the calibration ledger drifted -- one volatile date field,
+  # nothing to do with the browser -- the job died at line 293 and the DOM checks and the
+  # performance budget were never reached. Not skipped loudly: never reached, on every pull
+  # request, for as long as the drift lasted. The suite reported "1 of 107 calibration checks
+  # failed" and a reader had no reason to suspect three other gates had gone silent behind it.
+  #
+  # These gates are logically independent of every data gate above them: they load the shipped
+  # pack in a real browser and assert what reaches the screen. Nothing about a calibration
+  # ledger can make that question unanswerable. So they are a separate job, with no `needs`,
+  # and the two run in parallel. An earlier failure can no longer suppress a later question.
+  #
+  # No Python here on purpose -- none of the three touches the archive's own answers.
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # Same single install as `checks`, and for the same reason: a second `npm i --no-save`
+      # prunes the first. This job needs playwright and the Atlas's build deps.
+      - name: Install dev dependencies
+        run: npm i --silent --no-fund --no-audit --no-save @babel/core @babel/preset-react esbuild@0.25.10 react@18.3.1 react-dom@18.3.1 playwright@1.49.1
+
       #
       # These ran by hand until now, and between them they caught the two worst regressions of
       # the last phase: a crash that took the live board from 46 honesty probes to 34, and a
@@ -319,3 +361,25 @@ jobs:
       # quietly loosened until it catches nothing. A 10x regression still trips a 3x budget.
       - name: Verify the Atlas still meets its performance budgets
         run: node scripts/bench-atlas.mjs --ci --require-browser
+
+  # ---- THE ONE REQUIRED CHECK ------------------------------------------------------------
+  #
+  # Splitting the gates into parallel jobs buys independence and costs a single verdict: a
+  # branch-protection rule naming `checks` would now go green while `browser` burned. This job
+  # exists to put that verdict back. It needs both, runs even when they fail (`always()`), and
+  # fails if either did -- so there is still exactly one status to require, and it cannot be
+  # satisfied by a job that never ran.
+  #
+  # `result` is checked explicitly rather than trusting the default: a SKIPPED dependency is
+  # not a passing one, and `always()` makes skipping reachable.
+  required:
+    if: always()
+    needs: [checks, browser]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Every gate group reported success
+        run: |
+          echo "checks=${{ needs.checks.result }}  browser=${{ needs.browser.result }}"
+          [ "${{ needs.checks.result }}" = "success" ] || { echo "::error::the checks job did not succeed"; exit 1; }
+          [ "${{ needs.browser.result }}" = "success" ] || { echo "::error::the browser job did not succeed"; exit 1; }
+          echo "all gate groups green"

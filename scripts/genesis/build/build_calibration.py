@@ -48,7 +48,7 @@ import json
 from pathlib import Path
 
 from ..provenance import (ARCHIVE_DIR, METHODOLOGY_VERSION, PROCESSING_VERSION, REPO_ROOT,
-                          sha256_file, today)
+                          sha256_file)
 from ..retrieval.analogs import MIN_EVENTS_FOR_SKILL, contract_event_counts, scope_phrase
 from ..schema import THRESHOLDS_KT
 from ..store import read_table
@@ -186,6 +186,36 @@ _AUDIT_NOTE = {
 }
 
 
+def _archive_as_of(base: Path) -> str:
+    """The date the ARCHIVE was built, from the archive's own manifest.
+
+    THIS IS NOT `today()`, AND THE DIFFERENCE IS THE WHOLE POINT OF THE FIELD. It is published
+    beside `backtest_built_utc` so a reader can see how far the record has moved since the
+    replay that scored it -- `agedDays()` in ui/calibration.jsx subtracts the two. Stamping the
+    day the LEDGER was generated answers a different question, and answers this one wrongly:
+    it drifts a day every day while nothing about the archive changes, so the published gap
+    grows on its own. Measured on 2026-08-22 the archive's manifest said 2026-08-18 and this
+    field said 2026-08-22 -- a four-day gap the record had not actually opened.
+
+    It also made the ledger unreproducible. `test-atlas-calibration.mjs` rebuilds the file and
+    compares it byte for byte, which is the only thing that makes the ledger auditable; a field
+    keyed to the wall clock fails that comparison every day after the one it was written on,
+    and there is no way to tell that apart from a ledger that really has diverged.
+
+    Raises rather than falling back. A silent `today()` fallback would reintroduce exactly the
+    drift this exists to remove, on the one path where nobody would look.
+    """
+    manifest = base / "MANIFEST.json"
+    if not manifest.exists():
+        raise FileNotFoundError(
+            f"{manifest} does not exist. `archive_as_of` states when the ARCHIVE was built and "
+            "is read from the archive's own manifest; it is not the current date.")
+    built = json.loads(manifest.read_text()).get("built_utc")
+    if not built:
+        raise ValueError(f"{manifest} carries no built_utc, so archive_as_of has no source.")
+    return built[:10]
+
+
 def build(archive_dir: Path | None = None, out_dir: Path | None = None) -> dict:
     base = archive_dir or ARCHIVE_DIR
     src = base / BACKTEST_NAME
@@ -267,7 +297,11 @@ def build(archive_dir: Path | None = None, out_dir: Path | None = None) -> dict:
             # current: a calibration measured on a record that has since grown is still the
             # best evidence available, but a reader is entitled to see how far apart they are
             # before leaning on it.
-            "archive_as_of": today(),
+            #
+            # Which is why this is the ARCHIVE's build date and not the current one -- see
+            # _archive_as_of. The gap between these two dates has to be a fact about the
+            # record, not about when someone last ran this script.
+            "archive_as_of": _archive_as_of(base),
             "backtest_processing_version": bt["processing_version"],
             "backtest_sha256": sha256_file(src),
             "methodology_version": METHODOLOGY_VERSION,
