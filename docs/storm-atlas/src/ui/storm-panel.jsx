@@ -209,6 +209,12 @@ function Bridge({ storm, archive, bridge, result, cohortSentence, onBridge, onCl
      cohort, and a flag would go on claiming they had not. */
   const onIt = !!(p && p.replaces
     && Math.abs(p.replaces.lat - glat) < 1e-6 && Math.abs(p.replaces.lon - glon) < 1e-6);
+  /* WHAT ACTUALLY KEPT IT OUT. Three different facts, and the panel used to print one sentence
+     for all of them. `provisionalScope` is excluded from `missed` deliberately: it is not one of
+     the reader's conditions, and calling it one is the thing this distinction exists to stop. */
+  const missed = why.filter((w) => w.verdict === "missed" && w.key !== "provisionalScope");
+  const unjudged = why.filter((w) => w.verdict === "unjudged");
+  const scopedOut = why.some((w) => w.key === "provisionalScope");
 
   return (
     <>
@@ -232,9 +238,18 @@ function Bridge({ storm, archive, bridge, result, cohortSentence, onBridge, onCl
       ) : (
         <>
           {/* WHAT THE COHORT IS, IN THE SAME WORDS THE RAIL USES. One formatter, so the storm
-              panel cannot describe the cohort differently from the surface that built it. */}
+              panel cannot describe the cohort differently from the surface that built it.
+
+              AND THE LEAD FOLLOWS THE VERDICT, like the list heading below it. "Including this
+              storm" is a membership CLAIM, and it was printed before membership had been
+              consulted -- so on every non-member path the panel asserted inclusion three lines
+              above its own bold denial, and on one reachable state described a cohort of zero
+              storms as including this one. The bold lead is the sentence that survives a skim;
+              it is the last place the two should be allowed to disagree. */}
           <Note style={{ marginTop: 7 }}>
-            <b>Historical cohort including this storm</b> — {cohortSentence
+            <b>{con && !con.isMember
+              ? "Historical cohort built on this storm's genesis point"
+              : "Historical cohort including this storm"}</b> — {cohortSentence
               ? cohortSentence.replace(/ — what happened next\?$/, "") : "the archive"}.
           </Note>
 
@@ -254,10 +269,29 @@ function Bridge({ storm, archive, bridge, result, cohortSentence, onBridge, onCl
               is 1 of {con.n.toLocaleString()}
             </span>} />
           ) : con ? (
+            /* WHY IT IS OUT, IN THE TERMS THAT ARE ACTUALLY TRUE OF IT.
+               This note used to assert a condition failure and point at MISSED rows in every
+               non-member state -- including the two states where there is no MISSED row to point
+               at. On the unjudged path it sent a reader looking for a failure that does not
+               exist, and the only row it could land on says the opposite: the archive never
+               measured this storm, so rule 4 leaves it neither included nor counted as failing.
+               On the provisional path the storm satisfies every condition the reader set and was
+               excluded by the record scope, which the old sentence flatly denied. */
             <Note style={{ marginTop: 6, color: "var(--flag)" }}>
               <b>THIS STORM IS NOT IN THAT COHORT.</b> Its genesis defines the location
-              condition, but it does not satisfy every other condition you have set — the ones it
-              misses are marked below. The rates the cohort publishes are not about it.
+              condition. {missed.length
+                ? "It does not satisfy every other condition you have set — the ones it misses "
+                  + "are marked below."
+                : unjudged.length
+                  ? "The archive holds nothing to judge "
+                    + (unjudged.length === 1 ? "one of your conditions" : "some of your conditions")
+                    + " with, so it is left out of the cohort without being counted as failing — "
+                    + "marked NOT JUDGED below."
+                  : scopedOut
+                    ? "It satisfies every condition you set; what excluded it is the record "
+                      + "scope, because this season has not been post-analysed."
+                    : "It is outside the population this cohort draws from."} The rates the
+              cohort publishes are not about it.
             </Note>
           ) : null}
 

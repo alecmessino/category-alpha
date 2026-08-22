@@ -1117,6 +1117,59 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
       /outside the population this query draws from/.test(t));
   }
 
+  /* THE OTHER TRANSPORT, AND THE ONLY REGRESSION A MUTATION SWEEP OF THIS SECTION GOT PAST.
+     `playing` and `cursorMs` belong to the STORM transport. In replay mode the ARCHIVE clock
+     holds the position and both stay null -- and the guard's only existing check clicks
+     [data-storm-replay], which sets `playing`, a term the broken expression still contains. So
+     the guard kept rendering under the regression and every gate stayed green. The two halves
+     of the blind spot were tested in sections that never met: [8d] never enters replay mode,
+     and [8] enters it but never selects a storm, so the panel never renders there.
+     The arrangement below is the one a reader actually reaches: park the archive clock, then
+     click the storm under the cursor. */
+  {
+    await open("v=1&mo=8.9");
+    await page.click('[data-chip="mode-replay"]');
+    await page.waitForTimeout(700);
+    await page.keyboard.press(" ");
+    await page.waitForTimeout(1500);
+    await page.keyboard.press(" ");
+    await page.waitForTimeout(400);
+    const parked = await page.evaluate(() => {
+      const r = globalThis.__ATLAS_REPLAY;
+      return r && r.cursor ? r.cursor() : null;
+    });
+    await selectRow(g.row);
+    await page.waitForTimeout(900);
+    ok("the archive clock is holding a position", parked !== null, String(parked));
+    ok("and the storm panel is open over it", /GENESIS POINT USED FOR MATCHING/.test(await text()));
+    ok("so the ARCHIVE transport raises the replay guard too, not just the storm transport",
+      await has("[data-bridge-replay-guard]"), page.url());
+  }
+
+  /* THE LEAD SENTENCE FOLLOWS THE VERDICT. It asserted membership before membership had been
+     consulted, so every non-member state printed a bold claim and its bold denial three lines
+     apart -- including one reachable state describing a cohort of ZERO storms as including this
+     one. Both halves are pinned: the member case must still say "including", and the non-member
+     case must not. */
+  {
+    await open(`v=1&mo=8.9&storm=${encodeURIComponent(INIKI)}`);
+    await page.click("[data-bridge-build]");
+    await page.waitForTimeout(1000);
+    let t = await text();
+    ok("a member cohort is named as including this storm",
+      /Historical cohort including this storm/.test(t));
+    await page.click('[data-chip="intensity-cat5"]');
+    await page.waitForTimeout(900);
+    t = await text();
+    ok("narrowing the cohort until the storm falls out flips the claim",
+      /THIS STORM IS NOT IN THAT COHORT/.test(t));
+    ok("and the lead no longer asserts a membership the panel then denies",
+      !/Historical cohort including this storm/.test(t),
+      (/Historical cohort[^\n]*/.exec(t) || ["(no lead)"])[0]);
+    ok("while still naming the cohort it built",
+      /Historical cohort built on this storm's genesis point/.test(t));
+  }
+
   /* THE TWO VERDICTS THAT ARE NEITHER YES NOR NO, on screen.
      Both are states the panel could regress into a flat MISSED without any other check
      noticing, and a flat MISSED is an empirical claim about a named storm. */
@@ -1142,6 +1195,11 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
       (/RECORD SCOPE[^\n]*\n[^\n]*/.exec(t) || ["(no record-scope row)"])[0]);
     ok("while the conditions it does satisfy still read as matched",
       /FORMED NEAR[\s\S]{0,40}MATCHED/.test(t));
+    /* AND THE NOTE SAYS WHAT IS TRUE OF THIS STORM. It used to assert a condition failure in
+       every non-member state, including the two where there is no MISSED row to point at. */
+    ok("the note does not blame a condition the storm actually satisfies",
+      /It satisfies every condition you set/.test(t) && !/the ones it misses are marked below/.test(t),
+      (/THIS STORM IS NOT IN THAT COHORT[^\n]*/.exec(t) || ["(no note)"])[0]);
   }
   {
     const unmeasured = await page.evaluate(() => {
@@ -1161,6 +1219,29 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
     ok("an intensity condition the archive cannot judge reads NOT JUDGED, never MISSED",
       /NOT JUDGED/.test(t) && !/REACHED[\s\S]{0,40}MISSED/.test(t),
       (/REACHED[^\n]*\n[^\n]*/.exec(t) || ["(no intensity row)"])[0]);
+    /* RULE 4 REACHES THE PROSE, NOT JUST THE ROW. The note pointed at MISSED rows that do not
+       exist here, sending a reader looking for a failure the archive never recorded -- and the
+       only row it could land on says the opposite. */
+    ok("and the note names the undecidable measurement rather than a condition failure",
+      /without being counted as failing/.test(t) && !/the ones it misses are marked below/.test(t),
+      (/THIS STORM IS NOT IN THAT COHORT[^\n]*/.exec(t) || ["(no note)"])[0]);
+  }
+
+  /* THE FIFTH RULE HOLDS ON SCREEN, NOT ONLY IN THE ENGINE. Bridging from a cohort conditioned
+     on a landfall region makes that region's ANY contract circular -- every storm in the cohort
+     carries it by construction -- and the ladder says so. The bridge must not list the same cell
+     under "part of the evidence", which would be the one place on the surface where a tautology
+     is offered to a reader as a finding. The node gate proves the engine drops it; this proves
+     the panel never prints it. */
+  {
+    await open("v=1&l=mexico&storm=2015293N13266");
+    await page.click("[data-bridge-build]");
+    await page.waitForTimeout(1100);
+    const t = await text();
+    ok("a landfall-conditioned cohort still bridges", /Historical cohort/.test(t));
+    ok("and the circular contract is not offered as evidence this storm supplies",
+      !/MEXICO · ANY[\s\S]{0,60}supplies/.test(t),
+      (/MEXICO · ANY[^\n]*\n[^\n]*/.exec(t) || ["(no mexico row)"])[0]);
   }
 
   /* NO GENESIS, NO BRIDGE. 54 storms in this pack carry no genesis position. */

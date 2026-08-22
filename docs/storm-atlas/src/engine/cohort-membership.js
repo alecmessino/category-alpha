@@ -220,6 +220,11 @@ export function bridgeSpec(archive, spec, row, { radiusKm } = {}) {
     lon,
     radiusKm: r,
     replaces: s.where ? { ...s.where } : null,
-    kept: conditionsOf(s).filter((c) => c.key !== "where").map((c) => c.label),
+    /* THE VALUE, NOT THE COLUMN HEADING. `label` is a two-word row header -- IN, SEASONS,
+       BASIN, REACHED -- which reads as a label beside its value and as noise inside a sentence:
+       "kept -- IN, SEASONS, BASIN, ENTERED, NAMED, PROVISIONAL, REACHED, CAME ASHORE" told a
+       reader nothing about which months or which threshold survived, immediately before a button
+       that rebuilds their whole question. `value` is the phrase the verdict rows already print. */
+    kept: conditionsOf(s).filter((c) => c.key !== "where").map((c) => c.value),
   };
 }

@@ -271,6 +271,13 @@ export function Atlas() {
      filling the back button with twelve half-formed cohorts would make Back useless for
      leaving the page. */
   React.useEffect(() => {
+    /* NOT BEFORE THE PACK LANDS. `storm` and `m` are both guarded on `archive`, so running this
+       on the first commit rewrote the address bar WITHOUT them -- the shared link's storm id was
+       erased from the bar for the whole length of the pack download, and permanently if the pack
+       never arrived, with no history entry to go back to because every write here is a
+       replaceState. The URL a reader arrived with is the only copy of that id; the surface has
+       nothing to say about it until it can read the archive. */
+    if (!archive) return;
     /* MERGED, NOT REPLACED. toQuery builds a fresh URLSearchParams from the spec alone, so
        writing it straight back would silently drop ?view= and ?contract= on the next chip
        click -- a deep link into the ledger that survives exactly until the reader touches
