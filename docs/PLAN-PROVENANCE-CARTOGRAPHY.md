@@ -167,12 +167,9 @@ inside a skipped span. Follow the precedent already in the file — *"The final 
 joined, whatever the stride"* (`population-layer.js:228`) — and always join the boundary
 segment at full resolution. A storm's genesis must not move because the reader zoomed out.
 
-**Open item that must be resolved before coding, not during.** `selection-layer.js:8` states
-1,580 pre-genesis fixes. The current archive yields 9,450 by the definition the code itself
-uses (`t < genesis_t`); restricting to disturbances and lows only (`LO`+`DB`+`WV`) yields 3,969.
-None of the three agree. Either the comment is stale, or the intended rule is narrower than the
-one implemented. **Resolve which is authoritative and correct the comment; do not silently
-adopt either number, and do not change the rule to fit the comment.**
+**The count discrepancy is resolved — see Amendment 1.** The rule is correct and unchanged;
+the comment was stale. Authoritative figures, measured from the pack the browser loads:
+**9,450 pre-genesis fixes across 744 storms, reaching 252 hours back.**
 
 ## Phase 2 — B3: landfall detection kind, where it is legible
 
@@ -209,8 +206,8 @@ threshold on `closest_approach_km`** — it scales a ring's weight and nothing e
 already confirmed Atlas's attribution here is independently correct to 4.7 cm; this phase must
 not put that at risk.
 
-**A fourth state exists and should be honoured.** `category` is NULL on 241 drawn
-`segment_crossing` rows — a *withheld* Saffir-Simpson class where the bracketing fixes
+**A fourth state exists and should be honoured.** `category` is NULL on 466 landfalls
+archive-wide — 241 of them on `segment_crossing` rows the population mat draws — a *withheld* Saffir-Simpson class where the bracketing fixes
 disagree, Iniki among them (`build_atlas_pack.py` landfall note; `archive.js:196-198`).
 `provenance.jsx:71-73` already counts these. The mark for a withheld class should not borrow a
 category colour it does not have; use `UNKNOWN_INK`, consistent with `palette.js`'s treatment
@@ -288,3 +285,102 @@ its subject encodes nothing. The data being available was never the question wor
 Ask of every proposed encoding, in this order: is the distinction *derivable* from what the
 browser already holds; does it *carry information* at the scale it will be drawn; and is it
 already *disclosed* somewhere more legible. B1 passed the first and failed the other two.
+
+---
+
+## Amendment 1 — the pre-genesis count, resolved
+
+Registered after measuring, because the measurement is the point. The plan as first written
+carried three numbers and refused to choose between them. It can now choose.
+
+**What each number counts.**
+
+| Number | What it actually counts | Source |
+|---|---|---|
+| **9,450** | fixes strictly before genesis, over all 3,959 storms, across 744 of them | measured from `atlas-tracks-v1.bin.gz` + `atlas-core-v1.bin.gz` |
+| 3,969 | the subset of those whose `stage` is a disturbance, low or wave (`LO`+`DB`+`WV`) | same, filtered |
+| 1,580 | **nothing reproducible** | `selection-layer.js:8` |
+
+**Which definition matches the renderer.** `selection-layer.js:127,147` treats a segment as
+pre-genesis when its forward endpoint is at or before genesis. Counting segments that way and
+counting fixes strictly before genesis give the *same* number on this archive — 9,450 both
+ways — so the two framings do not need to be distinguished in prose. That equality is now
+asserted rather than assumed.
+
+**Is the comment stale, the rule wrong, or are these different populations?** The comment is
+stale. The rule is right. Twenty-four candidate definitions were tried against the archive —
+observed-only, interpolated-only, non-tropical-only, `LO`/`DB`/`WV` in five combinations,
+per-basin (NA/EP/WP), `EP`+`WP`, `season >= 1971`, stage-null, storms rather than fixes, and
+each of those crossed with observed-only — and **none yields 1,580**. The nearest neighbours are
+1,623 (`stage` null and observed) and 1,557 (`DB` only); neither is a definition anyone would
+have written down. There is no git history to date the comment: the whole Atlas tree arrived in
+a single commit, so the sentence cannot be traced to an earlier archive.
+
+Two details make the diagnosis firm rather than merely likely. The same sentence's *"reaching
+252 hours back"* is **exactly right today** — a maximum is stable as an archive grows once its
+record-holder is in, while a count is not, which is the signature of a partially-refreshed
+comment. And the archive is rebuilt roughly four times a day, so any count written into a source
+comment drifts by construction.
+
+**The rule is sound, and that is now asserted structurally.** Genesis is defined as the first
+*tropical* fix (`schema.py:48-51`, `genesis_events.py:38-53`), so no fix before it may be
+tropical. Measured: **0 of 9,450 pre-genesis fixes are tropical.** That invariant — not the
+count — is what makes "drawn dimmed" honest, and a break in it would be a definition bug rather
+than a documentation one.
+
+**The rule was not changed to fit the numbers.** Only the sentence was corrected.
+
+**Anti-drift.** `scripts/test-atlas-provenance.mjs` recomputes every number the provenance
+comments state, from the pack, through the browser's own accessors, and fails naming the new
+value if any has moved. It also pins the tropicality invariant and the landfall detection counts
+against the manifest. It needs no Python and runs offline.
+
+## Amendment 2 — reconciliation against the adversarial cross-check
+
+The verification workflow returned 7 of 7 readers and 2 of 3 verifiers; the third verifier and
+the synthesis agent died on a session limit, so the reconciliation below was done directly. Both
+surviving verifiers approached the gating question independently — one from the build side, one
+from the browser side — and were instructed to refute rather than confirm.
+
+**The plan survived on every material point.** Both verifiers independently confirm:
+
+- `landfalls.detection` — **packed**, reachable as `archive.storm(i).landfalls[n].detection` and
+  column-form `archive.landfalls.str("detection", k)`. B3 stays renderer-only; Path B holds.
+- `landfalls.closest_approach_km`, `suspect_relocation`, `implied_speed_kt`, `region`,
+  `sub_region`, `category`, `vmax_kt` — all packed and named.
+- `track_points.quality` — packed, `archive.ptQuality` + `archive.qualityDict`.
+- `track_points.hours_since_genesis` — **not packed, accessor NONE**, exactly as the build note
+  states. Path C stays unused.
+
+Three refinements are folded in. None changes the path selection, the B1 withdrawal or the B4
+verdict.
+
+**1. There is no shared accessor for the pre-genesis rule, and it is already implemented three
+times.** Both verifiers flagged that `hours_since_genesis` "costs nothing to recover" overstates
+the position: the derivation exists only as a local expression inside one React component
+(`transport.jsx:85-87`), with no `archive.hoursSinceGenesis()` and no engine-level equivalent.
+Checking that against the tree, the pre-genesis *predicate* now exists at three sites —
+`selection-layer.js:127`, `selection-layer.js:147`, and `transport.jsx:87` — and they already
+disagree slightly on the null guard: selection-layer tests
+`!Number.isNaN(genesisMin) && genesisMin !== -2147483648` (`:103`), transport tests only
+`genesisMin !== -2147483648` (`:84`). Adding a fourth copy in the population layer would make
+that worse. **The implementation therefore introduces one shared predicate in the render layer
+and routes the new code through it**, rather than copying the comparison again. This is a
+strengthening of the plan, not a departure from it.
+
+**2. `track_points.stage` is null on 45,542 of 224,153 rows (20.3%).** Anything reading `stage`
+must handle null on one row in five. The pre-genesis population is itself 3,354 stage-null fixes
+out of 9,450. The regression test's tropicality check already handles this correctly by falling
+through to `nature`, mirroring `genesis_events.py:_is_tropical`; noted here so the next reader
+does not assume a clean column.
+
+**3. Byte budget, for the record.** `bench-atlas.mjs:159` gates `packTransferMB` at 3.0 MB over
+every `.gz` and `.json` in the data directory — including the lazily-fetched environment pack —
+leaving roughly 349,010 B of headroom. This pass spends none of it, and the figure is recorded
+only so a future pack proposal starts from the right number.
+
+**Corrections the verifiers raised that do not affect this plan:** several `schema.py` line
+references in the phase-1 reader's own report were off by one to three lines, and one
+`build_atlas_pack.py` tuple was cited a line late. Every citation in this document was verified
+independently against the current working tree — which matters, because `population-layer.js`
+grew from 337 to 346 lines mid-audit when the branch was restarted onto a refreshed `main`.
