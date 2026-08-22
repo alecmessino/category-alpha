@@ -1097,3 +1097,168 @@
   [data-atlas] .at-readouts{border-left:0}
   [data-atlas] .at-ro:first-child{padding-left:0}
 }
+
+/* ─── the evidence deck ───────────────────────────────────────────────────────────────────
+ *
+ * ONE GRID WHERE SIX SECTIONS WERE. Nine tracks, eight headings: MED h and P25-P75 sit under
+ * one heading because they are one statement about duration.
+ *
+ * ROWS ARE `display:contents`, WHICH IS THE POINT AND ALSO THE HAZARD. It puts every cell on the
+ * deck's own grid, so columns line up across groups without a nested table -- and it means a row
+ * generates no box, so a row-level rule or fill has to be painted on the CELLS. Both are done
+ * below. What it buys is worth the care: the alternative is a grid per row, and a grid per row is
+ * how a column silently stops aligning with its heading.
+ *
+ * ROW HEIGHT IS FIXED AND CELLS CARRY NO VERTICAL PADDING. The rhythm comes from the row, so a
+ * cell whose text wraps grows its own row rather than colliding with the next one. */
+
+[data-atlas] .at-deck{
+  display:grid;
+  grid-template-columns:170px minmax(0,1fr) 78px 100px 124px 92px 60px 112px 168px;
+  gap:0 var(--at-s3);
+  padding:0 var(--at-s5);
+  align-content:start;
+  font-family:var(--at-sans);
+}
+/* AT 1280-1439 THE TWO DURATION TRACKS FOLD, and the grid loses exactly those two tracks. The
+   data is not dropped -- the disclosure in the header brings them back -- and no type size
+   changes to buy the room, which is the rule for every breakpoint on this surface. */
+[data-atlas] .at-deck[data-timing-folded]{
+  grid-template-columns:170px minmax(0,1fr) 78px 100px 124px 92px 168px;
+}
+[data-atlas] .at-deck-row{display:contents}
+
+[data-atlas] .at-dc{
+  min-height:var(--at-row-h);
+  display:flex;align-items:center;gap:var(--at-s1);
+  min-width:0;
+  padding:0;
+}
+/* Every numeric cell is right-set, because a column of figures is read down its last digit. */
+[data-atlas] .at-dc-rate,[data-atlas] .at-dc-count,[data-atlas] .at-dc-int,
+[data-atlas] .at-dc-vs,[data-atlas] .at-dc-med,[data-atlas] .at-dc-iqr{justify-content:flex-end}
+
+[data-atlas] .at-deck-head > .at-dc{
+  min-height:var(--at-row-head-h);
+  font-family:var(--at-mono);font-size:var(--at-fs-label);font-weight:600;
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;
+  color:var(--t3);
+  border-bottom:1px solid var(--rule-2);
+}
+[data-atlas] .at-deck-group > .at-dc{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);font-weight:600;
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;
+  color:var(--t2);
+  background:var(--chrome-hi);
+  border-bottom:1px solid var(--rule);
+}
+[data-atlas] .at-deck-data > .at-dc{border-bottom:1px solid var(--rule)}
+
+/* THE OUTCOME CELL holds the mark and the name. The mark's slot is reserved whether or not a
+   mark is present, so a qualified row and an unqualified one start their names at the same x --
+   a name that shifts sideways when a status appears reads as a different row. */
+[data-atlas] .at-dc-outcome{
+  font-size:var(--at-fs-row);color:var(--t1);gap:var(--at-s2);
+  justify-content:flex-start;
+}
+[data-atlas] .at-dc-outcome .at-mark{
+  flex:none;width:11px;text-align:center;font-family:var(--at-mono);
+  font-size:var(--at-fs-label);color:var(--t3);
+}
+[data-atlas] .at-dc-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* EVERY NUMBER IS MONO AT THE VALUE TOKEN, which is the floor: nothing numeric goes below 12. */
+[data-atlas] .at-val{font-family:var(--at-mono);font-size:var(--at-fs-value);color:var(--t1)}
+[data-atlas] .at-dc-int .at-val,[data-atlas] .at-dc-vs .at-val,
+[data-atlas] .at-dc-med .at-val,[data-atlas] .at-dc-iqr .at-val{color:var(--t2)}
+[data-atlas] .at-need{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);color:var(--t3);
+  margin-left:var(--at-s1);white-space:nowrap;
+}
+/* A SLOT IS CONTENT. The dash means "the archive has no value here", which is a statement, so it
+   is held to the same contrast bar as the value it replaces and never dimmed into a hairline. */
+[data-atlas] .at-slot{font-family:var(--at-mono);font-size:var(--at-fs-value);color:var(--t3)}
+[data-atlas] .at-isarchive{font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t3)}
+[data-atlas] .at-reached,[data-atlas] .at-notreached{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t2);
+}
+
+/* STATUS: one ink, never coloured, never a score. The whole argument for a single ink is that a
+   coloured status becomes a verdict -- red for refused reads as an error, and a refusal is not
+   an error. It is left-set against the row's right edge so the words start on one line. */
+[data-atlas] .at-dc-status{
+  justify-content:flex-start;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);font-weight:500;
+  letter-spacing:var(--at-tr-label);color:var(--t2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* THE BAR. 7px track, no number on it ever. */
+[data-atlas] .at-dc-bar{padding-right:var(--at-s2)}
+[data-atlas] .at-bar-track{
+  position:relative;display:block;width:100%;height:7px;
+  background:var(--sunken);
+}
+[data-atlas] .at-bar-ci{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--bar) 30%,transparent)}
+[data-atlas] .at-bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--bar)}
+/* The archive baseline overhangs the track top and bottom, so it reads as a reference mark
+   rather than as part of the fill. */
+[data-atlas] .at-bar-base{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--t2)}
+/* A REFUSED TRACK IS HATCHED AND HAS NO FILL. An empty bar and a zero bar must never look
+   alike: one means the archive declined to answer, the other means it answered zero. */
+[data-atlas] .at-bar-refused{background:var(--hatch)}
+
+/* THE TWO RAMPS, RESOLVED PER SHELL.
+ *
+ * The dark shell paints the cartographic ink itself -- the chrome and the stage are close enough
+ * in tone that the plate's ramp reads on both. The light shell CANNOT: #f2c14e is 1.5:1 on paper,
+ * and no amount of stylesheet can rescue a Cat 2 nobody can see. So paper gets the derived echo,
+ * whose seven values are computed against contrast, adjacent separability and monochrome
+ * ordering, and pinned in scripts/check-atlas-adherence.mjs against these very declarations. */
+[data-atlas]{
+  --barink-td:#9aabbf; --barink-ts:#8cbdea; --barink-cat1:#4fc3f7; --barink-cat2:#f2c14e;
+  --barink-cat3:#ee7a1f; --barink-cat4:#ef5350; --barink-cat5:#9b7bf0;
+}
+[data-atlas][data-shell="light"]{
+  --barink-td:var(--at-bar-td); --barink-ts:var(--at-bar-ts); --barink-cat1:var(--at-bar-cat1);
+  --barink-cat2:var(--at-bar-cat2); --barink-cat3:var(--at-bar-cat3);
+  --barink-cat4:var(--at-bar-cat4); --barink-cat5:var(--at-bar-cat5);
+}
+[data-atlas] .at-bar-track[data-bar-class="td"]{--bar:var(--barink-td)}
+[data-atlas] .at-bar-track[data-bar-class="ts"]{--bar:var(--barink-ts)}
+[data-atlas] .at-bar-track[data-bar-class="cat1"]{--bar:var(--barink-cat1)}
+[data-atlas] .at-bar-track[data-bar-class="cat2"]{--bar:var(--barink-cat2)}
+[data-atlas] .at-bar-track[data-bar-class="cat3"]{--bar:var(--barink-cat3)}
+[data-atlas] .at-bar-track[data-bar-class="cat4"]{--bar:var(--barink-cat4)}
+[data-atlas] .at-bar-track[data-bar-class="cat5"]{--bar:var(--barink-cat5)}
+
+/* THE ROW'S OWN SENTENCE, spanning every column because it qualifies the whole row. Never an
+   alert box, never a tint, never a coloured background -- a refusal is part of the argument and
+   not an error in it, and a tinted panel is how a reader learns to skip one. */
+[data-atlas] .at-deck-say{
+  grid-column:1/-1;
+  display:flex;align-items:baseline;gap:var(--at-s2);flex-wrap:wrap;
+  padding:0 0 var(--at-s2) calc(11px + var(--at-s2));
+  border-bottom:1px solid var(--rule);
+  font-size:var(--at-fs-row);line-height:1.45;
+}
+[data-atlas] .at-say-text{color:var(--t2)}
+[data-atlas] .at-say-remedy{color:var(--t3)}
+[data-atlas] .at-say-link{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  background:transparent;border:1px solid var(--rule-2);color:var(--accent);
+  padding:1px 6px;cursor:pointer;
+}
+[data-atlas] .at-say-link:hover{border-color:var(--accent)}
+
+/* THE ONE PERMITTED FILL ON THIS DECK. Issue 15 and nothing else: a row whose numerator is the
+   reader's own selected storm. Everything else here is separated by hairlines alone. */
+[data-atlas] .at-deck-self > .at-dc{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+
+[data-atlas] .at-dc-fold{
+  justify-content:center;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  background:transparent;border:0;border-bottom:1px solid var(--rule-2);
+  color:var(--accent);cursor:pointer;text-transform:uppercase;
+}

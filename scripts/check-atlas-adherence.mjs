@@ -302,6 +302,22 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
   ok("the bar echo names exactly the plate's seven classes, in the plate's order",
      JSON.stringify(plateClasses) === JSON.stringify(CLASS_ORDER),
      `plate declares ${JSON.stringify(plateClasses)}`);
+
+  /* AND THE DARK SHELL'S BAR IS THE CARTOGRAPHIC RAMP ITSELF, not a copy that drifted from it.
+     The dark chrome and the stage are close enough in tone that the plate's own ink reads on
+     both, so the dark bar SHOULD be palette.js exactly -- which means the stylesheet is holding
+     a second copy of seven hexes, and a second copy is the thing this gate exists to catch. */
+  const plateInk = Object.fromEntries(
+    [...block.matchAll(/\b(td|ts|cat[1-5])\s*:\s*"(#[0-9a-f]{6})"/gi)].map((m) => [m[1].toLowerCase(), m[2].toLowerCase()]),
+  );
+  const css2 = await readFile(resolve(ROOT, "docs/storm-atlas/atlas.css"), "utf8");
+  const darkBar = Object.fromEntries(
+    [...css2.matchAll(/--barink-(td|ts|cat[1-5])\s*:\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1].toLowerCase(), m[2].toLowerCase()]),
+  );
+  for (const c of CLASS_ORDER) {
+    ok(`the dark shell's ${c.toUpperCase().padEnd(4)} bar is palette.js's own ink`,
+       darkBar[c] === plateInk[c], `stylesheet ${darkBar[c] || "missing"}, palette.js ${plateInk[c]}`);
+  }
 }
 
 console.log(

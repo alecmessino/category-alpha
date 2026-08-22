@@ -181,6 +181,22 @@ jobs:
       - name: Verify no rule, hairline or mark ink carries text
         run: node scripts/check-atlas-adherence.mjs --self-test
 
+      # THE DECK'S SEMANTICS, PER ROW. Folding six panel sections into one grid is the step where
+      # a status can silently DETACH from the row it governs: in a list of blocks a refusal is
+      # physically inside the thing it refuses, and in a grid every cell is a sibling of every
+      # other one. A row that emits its status one cell late puts RATE REFUSED beside a real
+      # percentage belonging to a different contract, and the page looks entirely normal doing it
+      # -- every value on screen is one the engine really produced.
+      #
+      # So the deck is rendered with fixtures covering every state a row can be in, parsed in a
+      # real browser rather than by regex, and audited against the four panel rules it inherited.
+      # --self-test seeds eight regressions, one per rule, and requires the audit to catch each;
+      # it also seeds a harmless change and requires silence. The first run of it caught two of
+      # its own seeds aiming at the header row instead of a data row -- a seed that cannot fail
+      # is the same problem as a rule that cannot fire.
+      - name: Verify every deck row carries its own status
+        run: node scripts/check-evidence-deck.mjs --self-test --require-browser
+
       # THE COVERAGE GATE, applied to the snapshot the change is asking to merge. On main
       # it runs against a snapshot the job has just fetched; here it runs against the
       # committed one, which answers a different and equally useful question: does the
