@@ -69,20 +69,29 @@ export const PRE_GENESIS_ALPHA = 0.5;
  * which is what preserves the withheld Saffir-Simpson class as withheld rather than letting a
  * mark imply a class the archive declined to publish.
  */
-export const DETECTION_RECORDED = "hurdat2_L_record";
-export const DETECTION_BRACKETED = "bracketing_fix";
-export const DETECTION_DERIVED = "segment_crossing";
+/* THE ARCHIVE'S OWN NAMES, NOT NEW ONES. These are the exact values the `detection` column
+   carries and the exact strings StormPanel already prints, so the map, the panel and the
+   Parquet all say the same word for the same thing. Renaming `hurdat2_L_record` to something
+   friendlier in the render layer would put a fourth vocabulary in front of a reader who can
+   see the third one in the panel beside it. */
+export const DETECTION_L_RECORD = "hurdat2_L_record";
+export const DETECTION_BRACKETING_FIX = "bracketing_fix";
+export const DETECTION_SEGMENT_CROSSING = "segment_crossing";
+/** Not a detection kind: a separate boolean the archive publishes alongside one. */
+export const SUSPECT_RELOCATION = "suspect_relocation";
 
 /**
  * How a landfall mark should state the way it was established.
  *
- * `suspect` outranks the detection kind because it is a stronger statement about the same row:
- * the archive excludes those crossings from every rate it publishes, so a mark that merely said
- * "derived" would understate it.
+ * `suspect_relocation` outranks the detection kind because it is a stronger statement about the
+ * same row: the archive excludes those crossings from every rate it publishes, so a mark that
+ * said only `segment_crossing` would understate it.
+ *
+ * Returns the detection value verbatim otherwise, including a kind this build has never seen.
+ * The renderer draws an unrecognised kind in the plain form, which claims nothing, rather than
+ * guessing that it was derived.
  */
 export function landfallForm(landfall) {
-  if (landfall.suspect_relocation === true) return "suspect";
-  if (landfall.detection === DETECTION_DERIVED) return "derived";
-  if (landfall.detection === DETECTION_BRACKETED) return "bracketed";
-  return "recorded";
+  if (landfall.suspect_relocation === true) return SUSPECT_RELOCATION;
+  return landfall.detection || DETECTION_L_RECORD;
 }

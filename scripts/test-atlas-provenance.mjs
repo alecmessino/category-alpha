@@ -27,11 +27,17 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { openArchive } from "../docs/storm-atlas/src/engine/node-io.js";
+/* IMPORTED, NOT RETYPED. The whole reason render/provenance-ink.js exists is that this rule had
+   been written three times and the copies had drifted, so a gate that re-implemented it would
+   be checking a fourth copy against the archive while the renderer quietly used a fifth. Every
+   count below is computed through the predicate the map itself calls. */
+import {
+  genesisMinute, isPreGenesisFix, isPreGenesisSegment,
+} from "../docs/storm-atlas/src/render/provenance-ink.js";
 import { ROOT } from "./lib/atlas-verify.mjs";
 
 const DATA = join(ROOT, "docs/storm-atlas/data");
 const SRC = join(ROOT, "docs/storm-atlas/src");
-const I32_NULL = -2147483648;
 
 let failures = 0;
 const ok = (label, cond, detail = "") => {
@@ -68,18 +74,18 @@ let maxHoursBack = 0;
 const preStorms = new Set();
 
 for (let i = 0; i < a.nStorms; i++) {
-  const g = a.genesisT[i];
-  if (Number.isNaN(g) || g === I32_NULL) continue;
+  const g = genesisMinute(a, i);
+  if (g === null) continue;
   const [s, e] = a.trackRange(i);
   for (let k = s; k < e; k++) {
-    if (a.ptT[k] < g) {
+    if (isPreGenesisFix(a.ptT[k], g)) {
       preFixes++;
       preStorms.add(i);
       if (isTropical(a.points.str("stage", k), a.points.str("nature", k))) tropicalBeforeGenesis++;
       const hours = (g - a.ptT[k]) / 60;
       if (hours > maxHoursBack) maxHoursBack = hours;
     }
-    if (k < e - 1 && a.ptT[k + 1] <= g) preSegments++;
+    if (k < e - 1 && isPreGenesisSegment(a.ptT[k + 1], g)) preSegments++;
   }
 }
 

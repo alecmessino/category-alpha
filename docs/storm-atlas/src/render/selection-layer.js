@@ -29,7 +29,10 @@ import {
   CATEGORY_COLOR, CATEGORY_ORDER, GENESIS_INK, LANDFALL_INK, SELECTION_INK, UNKNOWN_INK,
   categoryIndexRaw,
 } from "./palette.js";
-import { PRE_GENESIS_ALPHA, PRE_GENESIS_DASH, landfallForm } from "./provenance-ink.js";
+import {
+  DETECTION_BRACKETING_FIX, DETECTION_SEGMENT_CROSSING, PRE_GENESIS_ALPHA, PRE_GENESIS_DASH,
+  SUSPECT_RELOCATION, landfallForm,
+} from "./provenance-ink.js";
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
@@ -302,21 +305,23 @@ function drawMark(ctx, m) {
       ctx.lineTo(m.x - r, m.y);
       ctx.closePath();
     };
-    const form = m.form || (m.hollow ? "suspect" : "recorded");
+    const form = m.form || (m.hollow ? SUSPECT_RELOCATION : "");
+    const outlined = form === DETECTION_SEGMENT_CROSSING || form === SUSPECT_RELOCATION;
     diamond(s);
-    if (form === "recorded" || form === "bracketed") {
-      ctx.fillStyle = m.color;
-      ctx.fill();
-    } else {
+    if (outlined) {
       ctx.fill();   // the plate's own background, so the mark reads as a hole
       ctx.stroke();
+    } else {
+      // hurdat2_L_record, bracketing_fix, and any kind this build does not recognise.
+      ctx.fillStyle = m.color;
+      ctx.fill();
     }
     // A surrounding ring: the position is a published fix that fell inside the polygon, rather
-    // than an analyst's own landfall record. Both were read; only one was read as a landfall.
-    if (form === "bracketed") { diamond(s + 2.2); ctx.stroke(); }
+    // than a hurdat2_L_record. Both were read; only one was recorded AS a landfall.
+    if (form === DETECTION_BRACKETING_FIX) { diamond(s + 2.2); ctx.stroke(); }
     // A cross-bar: the archive flags this crossing as a probable centre relocation and excludes
-    // it from every rate it publishes, which is more than "derived" and has to look like more.
-    if (form === "suspect") {
+    // it from every rate it publishes -- more than segment_crossing, and it has to look like it.
+    if (form === SUSPECT_RELOCATION) {
       ctx.beginPath();
       ctx.moveTo(m.x - s, m.y);
       ctx.lineTo(m.x + s, m.y);
