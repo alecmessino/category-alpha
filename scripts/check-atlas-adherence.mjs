@@ -57,7 +57,13 @@ const ok = (label, cond, detail = "") => {
  * BY DESIGNATION catches the ones whose names do not say it. The ink tables designate
  * --t4 "marks only" and --rule-4 "hairlines only"; --t4's name says nothing at all, and it is
  * the token that actually carried published intervals in the draft this gate exists for. */
-const NAME_RULE = /^--(?:rule|hair|hairline|mark|stroke|grid|tick)(?:-|$)/;
+/* MATCHED PER SEGMENT, NOT AS A PREFIX. The first draft of this anchored at the start of the
+   token, which caught --rule-4 and would have missed --at-paper-rule -- and the light shell
+   names its hairlines exactly that way, so the gate would have gone green over the very
+   tokens it exists to police. A name is forbidden when ANY of its dash-separated segments is
+   one of these words. */
+const RULE_WORDS = new Set(["rule", "rules", "hair", "hairline", "hairlines", "mark", "marks", "stroke", "grid", "tick", "ticks"]);
+const NAME_RULE = { test: (tok) => tok.replace(/^--/, "").split("-").some((seg) => RULE_WORDS.has(seg)) };
 const DESIGNATED = new Map([
   ["--t4", "the dark shell's ink table designates it marks only"],
   ["--rule-4", "the dark shell's ink table designates it hairlines only"],
@@ -160,6 +166,13 @@ if (process.argv.includes("--self-test")) {
       snippet: '\nconst Seeded2 = () => <b style={{ fontSize: 11, color: "var(--rule-4)" }}>of 3,885</b>;\n' },
     { kind: "css", name: "a token invented later whose NAME declares it a rule ink",
       snippet: "\n[data-atlas] .at-seeded4{color:var(--hairline-dim)}\n" },
+    /* The light shell names its hairlines --at-paper-rule / --at-paper-hair, so the word sits
+       in the MIDDLE of the token. A prefix-anchored rule passes these, which is the exact
+       shape of the mistake this gate exists to stop. */
+    { kind: "css", name: "a light-shell hairline whose rule word is not the first segment",
+      snippet: "\n[data-atlas] .at-seeded5{color:var(--at-paper-rule)}\n" },
+    { kind: "jsx", name: "a light-shell mark ink mid-name (JSX inline style)",
+      snippet: '\nconst Seeded3 = () => <span style={{ color: "var(--at-paper-hair)" }}>—</span>;\n' },
   ];
 
   for (const seed of SEEDS) {
@@ -236,6 +249,45 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
   const seq = CLASS_ORDER.map((c) => luma(BAR_RAMP_LIGHT[c]));
   ok("the ramp darkens monotonically, so the ordering survives with no colour at all",
      seq.every((v, i) => i === 0 || seq[i - 1] > v), `sequence ${seq.map((v) => v.toFixed(0)).join(" → ")}`);
+}
+
+/* THE STYLESHEET AND THIS FILE NOW STATE THE SAME TABLE TWICE, WHICH IS A DRIFT WAITING TO
+ * HAPPEN -- and the drift would be silent, because a bar painted from a stale token still
+ * renders a bar. So the CSS is read back and compared value by value: the numbers asserted
+ * above are only meaningful if they are the numbers the surface actually paints with. */
+{
+  const css = await readFile(resolve(ROOT, "docs/storm-atlas/atlas.css"), "utf8");
+  const declared = Object.fromEntries(
+    [...css.matchAll(/--at-bar-(td|ts|cat[1-5])\s*:\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1].toLowerCase(), m[2].toLowerCase()]),
+  );
+  for (const c of CLASS_ORDER) {
+    ok(`atlas.css paints ${c.toUpperCase().padEnd(4)} with the ink this gate verified`,
+       declared[c] === BAR_RAMP_LIGHT[c], `stylesheet has ${declared[c] || "no value"}, gate verified ${BAR_RAMP_LIGHT[c]}`);
+  }
+
+  /* AND THE LIGHT SHELL'S TEXT TIERS CLEAR AA ON THE GROUND EACH ONE LANDS ON. The paper ramp
+     is new, so its contrast is asserted from the stylesheet rather than taken from the
+     handoff's table -- the whole point of this gate is that a written contrast figure and a
+     shipped ink are different things. ink-3 and ink-4 land on raised and sunken strips as well
+     as on paper, so each is checked against the worst ground it can meet. */
+  const inks = Object.fromEntries(
+    [...css.matchAll(/--at-(ink-[1-4]|paper-accent|paper-flag)\s*:\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1].toLowerCase(), m[2].toLowerCase()]),
+  );
+  const AA_BODY = 4.5;
+  for (const [name, ink] of Object.entries(inks)) {
+    const worst = Math.min(...Object.values(PAPER_GROUNDS).map((g) => contrast(ink, g)));
+    ok(`--at-${name} clears AA body text on every paper ground`,
+       worst >= AA_BODY, `worst ground contrast ${worst.toFixed(2)}:1 (need ${AA_BODY})`);
+  }
+  ok("the light shell declares all six text and signal inks",
+     Object.keys(inks).length === 6, `found ${Object.keys(inks).length}: ${Object.keys(inks).join(", ")}`);
+
+  /* THE PLATE IS EXCLUDED FROM THE SHELL SWAP BY CONSTRUCTION, and that is a structural claim
+     worth pinning: --stage is declared exactly once, so no later edit to a light shell can
+     lighten the cartographic plate by accident. */
+  const stageDecls = [...css.matchAll(/(?:^|[;{\s])--stage\s*:/gm)].length;
+  ok("--stage is declared exactly once, so no shell can re-tone the plate",
+     stageDecls === 1, `found ${stageDecls} declarations`);
 }
 
 /* THE PLATE'S RAMP IS NOT RE-TONED HERE, AND THAT IS THE POINT. It is authoritative, it is

@@ -25,6 +25,26 @@
 @font-face{font-family:'Erode';font-style:normal;font-weight:500;font-display:swap;
   src:url('../assets/fonts/erode-500.woff2') format('woff2')}
 
+/* SOURCE SANS 3 AND SOURCE SERIF 4, SELF-HOSTED, AND DECLARED HERE RATHER THAN IN
+   docs/tokens/fonts.css -- the same reason Erode 400/500 are declared here: the terminal
+   renders neither face and its font manifest should not grow two it never uses.
+
+   SELF-HOSTED RATHER THAN LINKED, WHICH IS NOT THE PROTOTYPE'S CHOICE. The design file pulls
+   both from fonts.googleapis.com, and every browser gate in this repository ABORTS that host
+   to stay hermetic (see scripts/lib/browser-harness.mjs). A linked face would therefore fall
+   back to a system font in every check that measures this surface -- the type scale, the fit
+   at each breakpoint, the answer-density count -- so the gates would be measuring a design
+   nobody ships. Both files are the latin subset, variable-weight, straight from Google's own
+   CDN; Source Sans 3 covers 400-700 in 28 KB and Source Serif 4 carries the one 400 the
+   question line asks for.
+
+   IBM Plex Mono is untouched: it is already declared in docs/tokens/fonts.css, shared with the
+   terminal, and has a real monospace fallback stack behind it. */
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 700;font-display:swap;
+  src:url('../assets/fonts/source-sans-3-latin.woff2') format('woff2')}
+@font-face{font-family:'Source Serif 4';font-style:normal;font-weight:400;font-display:swap;
+  src:url('../assets/fonts/source-serif-4-latin.woff2') format('woff2')}
+
 /* ─── tokens ──────────────────────────────────────────────────────────────────────────── */
 
 [data-atlas]{
@@ -164,6 +184,96 @@
      legend above that, and the invitation moved to the head of the plate entirely, because
      three things anchored to one bottom-right corner is not a stack, it is a collision. */
   --at-plate-gutter:16px;
+
+  /* ─── THE REDESIGN'S TOKENS ─────────────────────────────────────────────────────────────
+   *
+   * Added alongside the tokens above rather than replacing them, because the shell that reads
+   * the old ones is still standing: each handoff step ships on its own, and a token sweep that
+   * landed before the markup that consumes it would break the surface between two green
+   * commits. The old block is removed in the step that removes its last reader.
+   *
+   * TWO SHELLS, ONE ARCHITECTURE. The dark ramp already matches the specification exactly --
+   * --chrome, --chrome-hi, --stage, --t1..--t4, --rule-4, --accent, --flag are the audited
+   * values and are not restated here. What is new is the LIGHT ramp, and the plate is excluded
+   * from the swap BY CONSTRUCTION: --stage is one token, declared once, identical in both
+   * shells, so no future edit to a shell can lighten the cartographic plate by accident. */
+
+  /* THE LIGHT SHELL. Contrast is against the ground each ink actually lands on, and every tier
+     clears AA at the size it is used: ink-1 15.93, ink-2 7.27, ink-3 5.56/5.14, ink-4 5.16/4.77,
+     accent 6.29, flag 5.35. The three hairlines carry NO text -- enforced by
+     scripts/check-atlas-adherence.mjs, which reads the word "rule" or "hair" in any segment of
+     a token's name and fails the build if it reaches a colour declaration. */
+  --at-paper:#f6f3ee;
+  --at-paper-raised:#efeae1;
+  --at-paper-sunken:#ece7dd;
+  --at-ink-1:#16191d;
+  --at-ink-2:#4a5158;
+  --at-ink-3:#5c626a;
+  --at-ink-4:#61676e;
+  --at-paper-accent:#17607f;
+  --at-paper-flag:#8a5a05;
+  --at-paper-rule:#ded7cb;
+  --at-paper-hair:#c9c1b4;
+  --at-paper-strong:#a9a196;
+
+  /* THE EVIDENCE BAR'S LIGHT ECHO OF THE CARTOGRAPHIC RAMP.
+   *
+   * NOT palette.js. That ramp is authoritative, it is verified against the dark stage it draws
+   * on, and it ships unchanged -- these are its paper derivatives, and they are DERIVED rather
+   * than picked. The handoff's own draft of this table is the reason it is computed: it put
+   * CAT 2 at #9c7a1e against CAT 3 at #c2661a, which is 1.00:1 in luminance and one step apart
+   * in monochrome. That is the pair deciding "major hurricane", rendered indistinguishable, in
+   * the table whose stated job was to keep it separable.
+   *
+   * The constraint set, asserted in the gate rather than described here: >=3:1 on every paper
+   * ground a bar can land on (WCAG 1.4.11 -- a bar is a graphical object carrying meaning),
+   * >=1.25:1 between adjacent classes so a 1px stroke separates, >=12 Rec.601 luma between
+   * them so MONOCHROME separates too, and a strictly monotonic sequence so the ordering
+   * survives with no colour at all. Hue is held to the plate's class hue throughout, which is
+   * what keeps the two tables the same seven classes rather than two palettes. */
+  --at-bar-td:#788594;
+  --at-bar-ts:#577691;
+  --at-bar-cat1:#2a6985;
+  --at-bar-cat2:#5e4b1e;
+  --at-bar-cat3:#61320d;
+  --at-bar-cat4:#541d1c;
+  --at-bar-cat5:#1f1930;
+
+  /* THE TYPE SCALE. Sixteen declared sizes become six, carrying nine roles. The floor is 12 for
+     any number and 10 for any label; 9 exists only for the stamps -- methodology version, pack
+     hash, build time, URL echo -- and nothing else may use it. No italics anywhere, no
+     letter-spacing on the sans, uppercase only at label and stamp size, and sentence case for
+     every sentence including the refusal statements printed verbatim from the engine. */
+  --at-serif:'Source Serif 4',Georgia,serif;
+  --at-sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --at-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+
+  --at-fs-question:19px;   /* serif 400 · the research question, and the provenance heading   */
+  --at-fs-subject:26px;    /* sans 700 · the storm's name in the inspector                    */
+  --at-fs-figure:26px;     /* mono 400 · cohort size, refusal counts. One per screen, maximum */
+  --at-fs-action:13.5px;   /* sans 700 · BUILD HISTORICAL COHORT, VIEW COHORT, SEE EVIDENCE   */
+  --at-fs-body:13.5px;     /* sans 400 · interpretation, refusal statements, disclosure prose */
+  --at-fs-row:12px;        /* sans 400 · outcome names, inspector field names                 */
+  --at-fs-value:12px;      /* mono 400 · every rate, count, interval, coordinate, duration    */
+  --at-fs-label:10px;      /* mono 400-600 · column heads, zone labels, status words          */
+  --at-fs-stamp:9px;       /* mono 400 · stamps only                                          */
+
+  --at-tr-subject:-.2px;
+  --at-tr-label:1.2px;
+  --at-tr-stamp:.8px;
+
+  /* THE SPACING STEPS, AND THE ROW HEIGHTS THAT ARE NOT SPACING.
+     Cells carry no vertical padding on purpose: the rhythm comes from the ROW, so a cell whose
+     text wraps grows its own row instead of colliding with the next one. */
+  --at-s1:4px;    /* label to value            */
+  --at-s2:7px;    /* mark to text, chip padding */
+  --at-s3:10px;   /* table column gap          */
+  --at-s4:14px;   /* strip item gap            */
+  --at-s5:16px;   /* shell gutter, table inset */
+  --at-s6:18px;   /* inspector padding         */
+  --at-s7:26px;   /* block separation          */
+  --at-row-h:20px;
+  --at-row-head-h:24px;
 }
 
 /* ─── page ────────────────────────────────────────────────────────────────────────────── */
