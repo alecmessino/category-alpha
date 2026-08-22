@@ -1476,9 +1476,52 @@
 [data-atlas].atlas-shell.atlas-stacked{
   display:grid;
   grid-template-columns:minmax(0,1fr);
-  grid-template-rows:32px 38px 38px minmax(320px,1fr) 340px auto;
+  /* THE APERTURE, BOUNDED AT BOTH ENDS, COMPUTED RATHER THAN LEFT TO THE GRID.
+   *
+   * The plate may be no wider than 3.2 times its height -- past that a single East Pacific track
+   * stops being the subject of its own plate -- and no narrower in aspect than 1.421, below
+   * which the archive's core frame cannot fill it and the fit opens latitude holding no storms.
+   * Both bounds, on the same track, so the height is a clamp of three terms:
+   *
+   *   floor    avail / 3.2      the widest the plate may read
+   *   ideal    what is left once the chrome and a full 340px deck have taken theirs
+   *   ceiling  avail / 1.421    the tallest the archive's own shape can fill
+   *
+   * WHY NOT `minmax(floor, 1fr)` WITH A CAPPED DECK, which is the obvious form: it holds
+   * everywhere except a tall workstation, where the plate keeps growing past the ceiling --
+   * measured 1440x1600 -> aspect 1.25, well below the floor.
+   *
+   * AND WHY NOT `minmax(floor, ceiling)` WITH A FLEXIBLE DECK, which is the next thing to try:
+   * grid maximises non-flexible tracks toward their growth limits BEFORE expanding flexible
+   * ones, so the plate takes the whole surplus and the deck collapses. Measured at 1440x900:
+   * plate 792, evidence 0. Both were tested rather than reasoned about, and both failed.
+   *
+   * The clamp leaves the deck as the flexible track, so surplus height on a tall viewport
+   * becomes MORE VISIBLE ROWS rather than blank plane -- the acceptance test is 0% blank, and
+   * an instrument capped and centred inside empty chrome is what the old shell did and what
+   * this replaces.
+   *
+   * THE TRANSPORT COMES OUT OF THE PLATE, never out of the deck: it is a term in the plate's
+   * ideal height, so a selected storm shortens the map and leaves the answer untouched. */
+  grid-template-rows:
+    32px 38px 38px
+    clamp(calc(var(--at-plate-avail) / 3.2),
+          calc(100vh - 108px - 340px - var(--at-tport)),
+          calc(var(--at-plate-avail) / 1.421))
+    minmax(0,1fr)
+    var(--at-tport);
   background:var(--chrome);
+  --at-plate-avail:100vw;
+  --at-tport:0px;
 }
+/* The dock takes 380 of the plate's width, so both bounds are computed against what is left --
+   otherwise selecting a storm would narrow the plate without moving its aspect limits with it.
+   Measured with the dock open at 1440x900: 1060x452, aspect 2.345, which is the specification's
+   own stated validation state for the widest treatment. */
+[data-atlas].atlas-shell.atlas-stacked:has(.atlas-dock){--at-plate-avail:calc(100vw - 380px)}
+/* 40px only when the transport actually has something in it. The row exists either way; an
+   empty one must not reserve height the plate could be using. */
+[data-atlas].atlas-shell.atlas-stacked:has(.atlas-transport > *){--at-tport:40px}
 [data-atlas].atlas-shell.atlas-stacked > *{min-width:0}
 
 /* THE PLATE ROW, AND THE DOCK INSIDE IT. The dock is a fixed 380 and the plate takes what is
@@ -1543,3 +1586,39 @@
 }
 [data-atlas] .at-sheet-x:hover{color:var(--t1)}
 [data-atlas] .at-sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+
+
+/* ─── plate furniture, inside the plate ───────────────────────────────────────────────────
+ *
+ * THE CAPTION BANDS GO, BUT THEIR WORDS DO NOT. The three-column shell framed the map as a
+ * figure in a journal, with a band above and below as SIBLINGS of the plate so neither could
+ * ever sit on the geography. That cost 50px of plate height -- which is why the plate measured
+ * 402 in a 452 row and came out at aspect 3.58 against a 3.2 ceiling.
+ *
+ * They are not simply hidden. The foot carries the COASTLINE statement, which is the band's one
+ * epistemic claim -- whether the line on screen is the archive's own landfall geometry or
+ * contextual imagery -- and dropping it would remove a provenance statement to buy pixels. So
+ * the furniture moves INSIDE the plate and every word survives.
+ *
+ * EACH ITEM GETS ITS OWN ANCHOR, and nothing anchors two things to one corner: the title runs
+ * top-left indented past the latitude label, the counts sit beside it, the mode statement goes
+ * top-right, and the foot keeps scale, projection, coastline and coordinates on one row along
+ * the bottom. The legend, which is already bottom-right inside the plate, is lifted clear of
+ * that row rather than sharing the corner with it.
+ *
+ * A BACKDROP, NOT A TINT. Small type over cartography is unreadable without one, and a
+ * translucent wash would make the contrast a function of whatever the map happens to be drawing
+ * underneath. The backdrop is the stage's own ink at high alpha, so the text keeps a contrast
+ * that can actually be stated. */
+[data-atlas].atlas-stacked .atlas-stage{grid-template-rows:minmax(0,1fr);position:relative}
+[data-atlas].atlas-stacked .at-plate{grid-row:1;grid-column:1}
+[data-atlas].atlas-stacked .at-platehead,
+[data-atlas].atlas-stacked .at-platefoot{
+  position:absolute;left:0;right:0;z-index:460;
+  border:0;background:color-mix(in srgb,var(--stage) 88%,transparent);
+  pointer-events:none;
+}
+[data-atlas].atlas-stacked .at-platehead{top:0;padding-left:44px}
+[data-atlas].atlas-stacked .at-platefoot{bottom:0}
+/* Clear of the foot row rather than sharing the bottom-right corner with the coordinates. */
+[data-atlas].atlas-stacked .at-legend{bottom:calc(var(--at-band-bot) + var(--at-plate-gutter))}

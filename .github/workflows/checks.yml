@@ -418,6 +418,20 @@ jobs:
       - name: Verify the storm-to-cohort bridge is never reachable only by scrolling
         run: node scripts/check-inspector-bridge.mjs --self-test --require-browser
 
+      # THE PLATE'S APERTURE, BOUNDED AT BOTH ENDS. The two bounds fail at OPPOSITE viewports:
+      # the 1.421 floor on a tall workstation, where the archive's core frame cannot fill the
+      # plate and the fit opens latitude holding no storms; the 3.2 ceiling on a wide, short one,
+      # where a single East Pacific track stops being the subject of its own plate. The second is
+      # the case nobody develops at, and the specification says why it matters -- "a wide monitor
+      # will QUIETLY reintroduce a panoramic plate". Nothing about a 4:1 plate looks broken.
+      #
+      # So the aspect is measured in the real page at ten viewports including 2560x1080 and
+      # 1440x2000, plus the docked and transport-present states, and blank plane is asserted with
+      # it -- because the easy way to hold an aspect bound is to cap the instrument and centre it,
+      # which is what the previous shell did and what the 0% acceptance test exists to forbid.
+      - name: Verify the plate's aperture stays inside its bounds
+        run: node scripts/check-plate-aperture.mjs --self-test --require-browser
+
       - name: Verify the terminal's panels refuse on screen, not just in the engine
         run: node scripts/check-panel-dom.mjs --require-browser
 
