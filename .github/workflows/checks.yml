@@ -239,6 +239,19 @@ jobs:
       - name: Verify a cohort cannot report itself as its own outcome
         run: node scripts/test-atlas-rates.mjs
 
+      # The map draws two things differently because of WHERE THEY CAME FROM rather than what
+      # they are: a pre-genesis track portion, and a landfall the archive derived instead of
+      # read. Both are justified in header comments carrying counts -- and a count in a comment
+      # goes stale silently, because the archive is rebuilt about four times a day and nothing
+      # recomputes the sentence. It had already happened: the pre-genesis comment said 1,580
+      # against a real 9,450, and no definition of pre-genesis reproduced 1,580 at all. The rule
+      # was right and only the prose was wrong, which is the failure mode this gate exists for.
+      # It recomputes every stated number from the pack and fails naming the new value, and it
+      # pins the structural claim underneath: genesis is the first tropical fix, so no fix
+      # before it may be tropical.
+      - name: Verify the map's provenance ink still describes the archive
+        run: node scripts/test-atlas-provenance.mjs
+
       # The cohort spec is the only query surface: one object decides what is drawn AND what is
       # scored. The dangerous part was never the new code, it was the REPLACEMENT -- a rewrite
       # that silently dropped one filter would look completely healthy, because nothing on
