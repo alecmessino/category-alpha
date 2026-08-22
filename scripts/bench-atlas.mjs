@@ -47,6 +47,13 @@ const BUDGET = {
      budget of its own rather than being averaged away with the cohorts a reader actually
      builds. */
   cohortMs: 16,               // scoring a built cohort: one frame, so a chip click is live
+  /* THE BRIDGE'S EXPLANATION. `whyMatched` runs the engine's own filter once PER CONDITION, so
+     it is the only thing on the surface whose cost scales with how much the reader has asked.
+     It is computed once per (storm, cohort) and memoised; the budget is set at two cohort
+     scorings rather than at the measured figure so a future edit that moved it into the render
+     path -- where it would run on every frame of a replay -- fails here instead of being
+     noticed as a stutter. */
+  bridgeWhyMs: 32,            // explain a four-condition membership: four filter passes
   cohortWideMs: 90,           // the same over all 3,885 storms: reset and first paint only
   previewMs: 16,              // every chip's live count: five filter passes and five scans
 };
@@ -341,9 +348,19 @@ console.log("\n[3] the work the Atlas actually does");
       ? time(8, (i) => C.previewCounts(archive,
         { ...built, months: [(i % 12) + 1] })) : null;
 
+    /* The bridge, at its most expensive: four conditions, so four filter passes, on the row a
+       reader is most likely to have selected -- one inside the cohort. */
+    const heavy = C.normalise
+      ? C.normalise({ where: { lat: 12, lon: -105, radiusKm: 800 }, seasonFrom: 1971,
+        months: [8, 9], namedOnly: true })
+      : null;
+    const heavyRows = heavy && C.cohortResult ? C.cohortResult(archive, heavy).rows : null;
+    const bridgeWhyMs = C.whyMatched && heavy && heavyRows && heavyRows.length
+      ? time(8, (i) => C.whyMatched(archive, heavy, heavyRows[i % heavyRows.length])) : null;
+
     return { decodeAndIndex, filterMs, queryMs, drawMs, hitMs,
              densityMs, genesisDensityMs, timelineBuildMs, replayTickMs, replayRepaintMs,
-             cohortMs, cohortWideMs, previewMs,
+             cohortMs, cohortWideMs, previewMs, bridgeWhyMs,
              storms: archive.nStorms, points: archive.nPoints };
   });
 
@@ -360,6 +377,7 @@ console.log("\n[3] the work the Atlas actually does");
   if (m.cohortMs !== null) gate("score a built cohort (a chip click)", m.cohortMs, BUDGET.cohortMs, "ms");
   if (m.previewMs !== null) gate("every chip's live count", m.previewMs, BUDGET.previewMs, "ms");
   if (m.cohortWideMs !== null) gate("score the whole archive (reset, first paint)", m.cohortWideMs, BUDGET.cohortWideMs, "ms");
+  if (m.bridgeWhyMs !== null) gate("explain a membership, condition by condition", m.bridgeWhyMs, BUDGET.bridgeWhyMs, "ms");
   if (errors.length) { failures++; console.log("  FAIL  page errors: " + errors.join(" | ")); }
   else console.log("  ok    no page errors");
   await ctx.close();

@@ -18,6 +18,7 @@
 import React from "react";
 import { CATEGORY_COLOR } from "../render/palette.js";
 import { formatPosition } from "../engine/geo.js";
+import { regionLabel } from "../engine/cohort-language.js";
 import {
   Capt, Drv, Figure, Head, MONO, Masthead, Note, Num, OverDenom, Refusal, Row, TextButton, Txt,
   claimText, fmtHours, fmtUTC,
@@ -26,7 +27,8 @@ import {
 const CAT_LABEL = { td: "TROPICAL DEPRESSION", ts: "TROPICAL STORM", cat1: "CATEGORY 1",
   cat2: "CATEGORY 2", cat3: "CATEGORY 3", cat4: "CATEGORY 4", cat5: "CATEGORY 5" };
 
-export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec }) {
+export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec, specUrl,
+  bridge, cohortSentence, result, onBridge, cursorLive }) {
   if (!storm) return null;
   const s = storm;
   const catColor = s.max_category ? CATEGORY_COLOR[s.max_category] : "var(--t2)";
@@ -43,7 +45,7 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec 
     <>
       <Masthead kicker="One storm, whole life"
         right={<TextButton onClick={onClose} title="clear selection">Clear</TextButton>}
-        title={s.name || "UNNAMED"} titleClass="storm" loc={loc} spec={spec}>
+        title={s.name || "UNNAMED"} titleClass="storm" loc={loc} spec={spec} specUrl={specUrl}>
         {s.provisional === true ? (
           <div style={{ ...MONO, marginTop: 8, fontSize: 9, color: "var(--flag)",
             letterSpacing: ".8px", border: "1px solid #4a3a14", padding: "3px 6px",
@@ -55,7 +57,7 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec 
 
       <div className="at-pad">
         <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
-          <button type="button" onClick={onReplay}
+          <button type="button" onClick={onReplay} data-storm-replay
             className={replaying ? "at-tbtn at-wide at-on" : "at-tbtn at-wide"}>
             {replaying ? "❚❚ PAUSE REPLAY" : "▶ REPLAY THIS STORM"}
           </button>
@@ -142,7 +144,229 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec 
         <Row k="track type" dim v={<Txt value={s.track_type} />} />
         <Row k="storm id" dim v={<Txt value={s.storm_id} />} />
         <Row k="source" dim v={<Txt value={s.source_key} />} />
+
+        <Head n="07">This storm in the archive</Head>
+        <Bridge storm={s} archive={archive} bridge={bridge} result={result}
+          cohortSentence={cohortSentence} onBridge={onBridge} onClose={onClose}
+          cursorLive={cursorLive} />
       </div>
+    </>
+  );
+}
+
+/* THE BRIDGE, FROM ONE STORM TO THE POPULATION IT BELONGS TO.
+ *
+ * The flow this serves, in order: a selected storm, the genesis point the archive would match
+ * on, the cohort that point defines, which of the reader's conditions this storm satisfies,
+ * where it is itself part of the evidence, and the boundary past which the archive stops
+ * answering. Everything here is a restatement of state the engine already decided.
+ *
+ * THE STORM STAYS IN THE COHORT. It satisfies the conditions, so under the methodology it is a
+ * member, and removing it would be a new rule about which storms count. What is owed is that the
+ * membership is SAID: `historical cohort including this storm`, `this storm is 1 of 59`, and --
+ * where the archive's evidence is thin enough for one storm to matter -- how many of a contract's
+ * observed events this storm is. On a 500 km Aug-Sep cohort around Iniki's genesis, Iniki
+ * supplies 1 of the 1 observed Hawaii landfalls: the rate a reader would take as being ABOUT
+ * this storm is composed ENTIRELY OF IT. Nothing on this panel can make that a good statistic,
+ * and nothing should hide it either.
+ */
+/* FOUR VERDICTS, NOT TWO. A condition is satisfied, or it is not -- unless the archive holds
+   nothing to judge it with, which is rule 4 and is neither, or unless nothing tested it, which
+   is an unknown the panel must not dress as a pass. NOT JUDGED is the one that matters: printing
+   MISSED over a storm whose peak wind was never recorded would state an empirical no about a
+   measurement that does not exist, which is the failure this whole surface is built to refuse.
+   Its wording is the archive's own, from the same sentence the cohort panel prints. */
+const VERDICT = {
+  matched: { label: "MATCHED", tone: "var(--pos)" },
+  missed: { label: "MISSED", tone: "var(--neg)" },
+  unjudged: { label: "NOT JUDGED", tone: "var(--flag)",
+    why: "The archive records no wind for this storm, so this condition could not judge it. It "
+      + "is neither included nor counted as failing -- an absent measurement is not a zero." },
+  unchecked: { label: "NOT CHECKED", tone: "var(--t3)",
+    why: "This condition has no single-condition form the bridge can test, so nothing here "
+      + "claims the storm satisfied it." },
+};
+
+function Bridge({ storm, archive, bridge, result, cohortSentence, onBridge, onClose, cursorLive }) {
+  const glat = storm.genesis_lat;
+  const glon = storm.genesis_lon;
+  if (glat === null || glon === null) {
+    return (
+      <Refusal kind="unk">
+        The archive holds no genesis point for this storm, so there is no position to match on.
+        A genesis-keyed cohort cannot place it — the same reason it is outside every cohort the
+        rail can build.
+      </Refusal>
+    );
+  }
+
+  const at = formatPosition(glat, glon);
+  const p = bridge && bridge.proposed;
+  const con = bridge && bridge.contribution;
+  const why = (bridge && bridge.why) || [];
+  /* Bridged when the cohort's location condition IS this storm's genesis. Derived rather than
+     tracked in state: a reader who moves the probe afterwards has stopped looking at the bridged
+     cohort, and a flag would go on claiming they had not. */
+  const onIt = !!(p && p.replaces
+    && Math.abs(p.replaces.lat - glat) < 1e-6 && Math.abs(p.replaces.lon - glon) < 1e-6);
+  /* WHAT ACTUALLY KEPT IT OUT. Three different facts, and the panel used to print one sentence
+     for all of them. `provisionalScope` is excluded from `missed` deliberately: it is not one of
+     the reader's conditions, and calling it one is the thing this distinction exists to stop. */
+  const missed = why.filter((w) => w.verdict === "missed" && w.key !== "provisionalScope");
+  const unjudged = why.filter((w) => w.verdict === "unjudged");
+  const scopedOut = why.some((w) => w.key === "provisionalScope");
+
+  return (
+    <>
+      <Row k="genesis point used for matching" v={<Txt value={at} />}
+        title="The archive matches cohorts on where a storm FORMED. This is that point, and it
+               is the only position a cohort is ever built from -- never the storm's position at
+               the replay cursor." />
+
+      {!onIt ? (
+        <>
+          <Note style={{ marginTop: 7 }}>
+            Build the historical cohort around this genesis point. Every other condition you have
+            set is kept{p && p.kept.length ? <> — <b>{p.kept.join(", ")}</b></> : null}; only the
+            location condition {p && p.replaces ? "is replaced" : "is added"}.
+          </Note>
+          <button type="button" onClick={onBridge} data-bridge-build
+            className="at-tbtn at-wide" style={{ marginTop: 8, width: "100%" }}>
+            BUILD COHORT AROUND THIS GENESIS →
+          </button>
+        </>
+      ) : (
+        <>
+          {/* WHAT THE COHORT IS, IN THE SAME WORDS THE RAIL USES. One formatter, so the storm
+              panel cannot describe the cohort differently from the surface that built it.
+
+              AND THE LEAD FOLLOWS THE VERDICT, like the list heading below it. "Including this
+              storm" is a membership CLAIM, and it was printed before membership had been
+              consulted -- so on every non-member path the panel asserted inclusion three lines
+              above its own bold denial, and on one reachable state described a cohort of zero
+              storms as including this one. The bold lead is the sentence that survives a skim;
+              it is the last place the two should be allowed to disagree. */}
+          <Note style={{ marginTop: 7 }}>
+            <b>{con && !con.isMember
+              ? "Historical cohort built on this storm's genesis point"
+              : "Historical cohort including this storm"}</b> — {cohortSentence
+              ? cohortSentence.replace(/ — what happened next\?$/, "") : "the archive"}.
+          </Note>
+
+          {result ? (
+            <Row k="cohort" v={<span style={{ ...MONO }}>
+              {result.kept.toLocaleString()} storm{result.kept === 1 ? "" : "s"}{" "}
+              <span style={{ color: result.sufficient ? "var(--pos)" : "var(--neg)" }}>
+                {result.sufficient
+                  ? `SUFFICIENT · ${result.n_cases} ≥ ${result.min_sample}`
+                  : `BELOW SAMPLE · ${result.n_cases} < ${result.min_sample}`}
+              </span>
+            </span>} />
+          ) : null}
+
+          {con && con.isMember ? (
+            <Row k="this storm" v={<span style={{ ...MONO, color: "var(--accent)" }}>
+              is 1 of {con.n.toLocaleString()}
+            </span>} />
+          ) : con ? (
+            /* WHY IT IS OUT, IN THE TERMS THAT ARE ACTUALLY TRUE OF IT.
+               This note used to assert a condition failure and point at MISSED rows in every
+               non-member state -- including the two states where there is no MISSED row to point
+               at. On the unjudged path it sent a reader looking for a failure that does not
+               exist, and the only row it could land on says the opposite: the archive never
+               measured this storm, so rule 4 leaves it neither included nor counted as failing.
+               On the provisional path the storm satisfies every condition the reader set and was
+               excluded by the record scope, which the old sentence flatly denied. */
+            <Note style={{ marginTop: 6, color: "var(--flag)" }}>
+              <b>THIS STORM IS NOT IN THAT COHORT.</b> Its genesis defines the location
+              condition. {missed.length
+                ? "It does not satisfy every other condition you have set — the ones it misses "
+                  + "are marked below."
+                : unjudged.length
+                  ? "The archive holds nothing to judge "
+                    + (unjudged.length === 1 ? "one of your conditions" : "some of your conditions")
+                    + " with, so it is left out of the cohort without being counted as failing — "
+                    + "marked NOT JUDGED below."
+                  : scopedOut
+                    ? "It satisfies every condition you set; what excluded it is the record "
+                      + "scope, because this season has not been post-analysed."
+                    : "It is outside the population this cohort draws from."} The rates the
+              cohort publishes are not about it.
+            </Note>
+          ) : null}
+
+          {/* WHY IT MATCHED -- membership, condition by condition, decided by the engine's own
+              filter rather than by anything this file knows about storms. */}
+          {why.length ? (
+            <>
+              {/* THE HEADING FOLLOWS THE VERDICT. "Why it matched" over a list containing a
+                  MISSED row is a sentence contradicting the thing underneath it, which is the
+                  one place a reader skimming the list would take MISSED for a detail rather
+                  than the reason the rates below are not about this storm. */}
+              <Note style={{ marginTop: 9 }}>
+                {con && !con.isMember
+                  ? "Where it stands, condition by condition:"
+                  : "Why it matched, condition by condition:"}
+              </Note>
+              {why.map((w) => (
+                <Row key={w.key} k={w.label} dim={w.verdict === "missed"}
+                  title={VERDICT[w.verdict] ? VERDICT[w.verdict].why : undefined}
+                  v={<span style={{ ...MONO, fontSize: 9.5,
+                    color: (VERDICT[w.verdict] || VERDICT.unchecked).tone }}>
+                    {(VERDICT[w.verdict] || VERDICT.unchecked).label}
+                    <span style={{ color: "var(--t3)" }}> · {w.value}</span>
+                  </span>} />
+              ))}
+            </>
+          ) : (
+            <Note style={{ marginTop: 9 }}>
+              The cohort carries no conditions beyond this genesis point, so there is nothing
+              further to satisfy.
+            </Note>
+          )}
+
+          {/* WHERE THIS STORM IS ITSELF THE EVIDENCE. The sharp end of keeping it in the cohort:
+              a contract with two observed events, one of which is the storm being described, is
+              a rate a reader must not take as independent of it. */}
+          {con && con.isMember && con.contracts.length ? (
+            <>
+              <Note style={{ marginTop: 9, color: "var(--flag)" }}>
+                This storm is part of the evidence for the contracts below — it is inside these
+                numerators, not being compared against them.
+              </Note>
+              {con.contracts.map((c) => (
+                <Row key={c.key} k={`${regionLabel(c.region)} · ${c.kind === "hurricane" ? "≥64 kt" : "any"}`}
+                  v={<span style={{ ...MONO, fontSize: 9.5, color: "var(--flag)" }}>
+                    supplies 1 of {c.count === null ? "—" : c.count.toLocaleString()} observed
+                    event{c.count === 1 ? "" : "s"}
+                  </span>} />
+              ))}
+            </>
+          ) : null}
+
+          {/* THE HAND-OFF. The outcomes, the comparison and every refusal live in the answer
+              panel, which is the same column this one occupies -- so the way to read them is to
+              put the storm down, and the button says exactly that rather than pretending the two
+              can be read at once in one column. The map keeps both: the cohort stays lifted, the
+              storm stays drawn over it. */}
+          <button type="button" onClick={onClose} data-bridge-read
+            className="at-tbtn at-wide" style={{ marginTop: 10, width: "100%" }}>
+            WHAT HAPPENED TO THEM → (clears the storm, keeps the cohort)
+          </button>
+        </>
+      )}
+
+      {/* THE REPLAY GUARD. Stated whenever the transport is holding a position part-way along
+          this track, because that is the one arrangement in which a genesis-conditioned cohort
+          reads as a continuation of the storm in front of it. */}
+      {cursorLive ? (
+        <Note hook="data-bridge-replay-guard" style={{ marginTop: 9, color: "var(--warn)" }}>
+          <b>THE TRANSPORT IS HOLDING A POSITION ON THIS TRACK.</b> The cohort is conditioned on
+          where storms FORMED, not on where this one is at the cursor. It is not a continuation
+          of this track and it is not a forecast from this point — it is what the record holds
+          about storms that began near where this one began.
+        </Note>
+      ) : null}
     </>
   );
 }

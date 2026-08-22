@@ -24,6 +24,7 @@ import { activeAt, advance, buildTimeline, fromActive, toActive } from "../engin
 import { projectWorld } from "../render/atlas-layer.js";
 import { previewCounts } from "../engine/preview.js";
 import { changedKeyOf, compareResults } from "../engine/compare.js";
+import { bridgeSpec, contributionOf, whyMatched } from "../engine/cohort-membership.js";
 import { envAtGenesis, envCoverage } from "../engine/env.js";
 import { loadCalibration } from "../engine/calibration.js";
 import { AtlasMap } from "./map.jsx";
@@ -49,6 +50,12 @@ const CalibrationLedger = React.lazy(() =>
 
 const DATA_BASE = "data";
 const DEFAULT_RADIUS_KM = 500;
+
+/* The radius a bridged cohort inherits: whatever the reader already chose, and otherwise the
+   same default a probe click applies. Stated here rather than inside the bridge so the surface
+   keeps ONE default radius -- two would eventually disagree, and the one that disagreed would be
+   the one nobody was looking at. */
+const radiusFor = (spec) => (spec && spec.where ? spec.where.radiusKm : DEFAULT_RADIUS_KM);
 
 export function Atlas() {
   const [archive, setArchive] = React.useState(null);
@@ -103,6 +110,12 @@ export function Atlas() {
     colorBy: "uniform", genesis: true, landfalls: true,
   });
   const [selected, setSelected] = React.useState(null);
+  /* THE STORM A SHARED LINK WAS LOOKING AT. Read once on mount and resolved after the pack lands
+     -- the URL carries the archive's own `storm_id`, never the pack row, because a row is
+     pack-order and a rebuild would silently point the same link at a different storm. */
+  const [urlStorm] = React.useState(
+    () => new URLSearchParams(location.search).get("storm"));
+  const [urlStormResolved, setUrlStormResolved] = React.useState(false);
   /* Off by default. The individual trajectories are the hero -- the density surface is the
      same storms counted, and stacking both means neither reads. Turning it on dims the tracks
      so the surface can be seen. */
@@ -131,7 +144,8 @@ export function Atlas() {
       setArchive(a);
       globalThis.__ATLAS = { archive: a, world: w, getAnalogs, pathwayDensity, genesisDensity };
       globalThis.__ATLAS_QUERY = { filterStorms, seasonRange, genesisBounds };
-      globalThis.__ATLAS_COHORT = { cohortResult, previewCounts, normalise, parentOf, toQuery };
+      globalThis.__ATLAS_COHORT = { cohortResult, previewCounts, normalise, parentOf, toQuery,
+        whyMatched, contributionOf, bridgeSpec };
       globalThis.__ATLAS_TIMELINE = { buildTimeline, advance, activeAt, fromActive, toActive };
       globalThis.__ATLAS_PROJECT = projectWorld;
       /* THE COASTLINE COMES AFTER THE TRACKS, DELIBERATELY. It is the geometry the landfall
@@ -151,6 +165,25 @@ export function Atlas() {
     }).catch((e) => { if (!cancelled) setError(e); });
     return () => { cancelled = true; };
   }, []);
+
+  /* storm_id -> pack row. Built once per archive: 3,959 string reads, and the only thing that
+     can turn a shared link back into a selection. */
+  const rowOfStormId = React.useMemo(() => {
+    if (!archive) return null;
+    const m = new Map();
+    for (let i = 0; i < archive.nStorms; i++) m.set(archive.storms.str("storm_id", i), i);
+    return m;
+  }, [archive]);
+
+  React.useEffect(() => {
+    if (!archive || !rowOfStormId || urlStormResolved) return;
+    setUrlStormResolved(true);
+    if (!urlStorm) return;
+    const row = rowOfStormId.get(urlStorm);
+    /* An id this pack does not hold is dropped rather than guessed at. The cohort in the same
+       URL still opens, which is the half of the link that carries the question. */
+    if (row !== undefined) setSelected(row);
+  }, [archive, rowOfStormId, urlStorm, urlStormResolved]);
 
   const bounds = React.useMemo(() => (archive ? seasonRange(archive) : [1851, 2026]), [archive]);
   const home = React.useMemo(() => (archive ? coreFrame(archive) : null), [archive]);
@@ -238,6 +271,13 @@ export function Atlas() {
      filling the back button with twelve half-formed cohorts would make Back useless for
      leaving the page. */
   React.useEffect(() => {
+    /* NOT BEFORE THE PACK LANDS. `storm` and `m` are both guarded on `archive`, so running this
+       on the first commit rewrote the address bar WITHOUT them -- the shared link's storm id was
+       erased from the bar for the whole length of the pack download, and permanently if the pack
+       never arrived, with no history entry to go back to because every write here is a
+       replaceState. The URL a reader arrived with is the only copy of that id; the surface has
+       nothing to say about it until it can read the archive. */
+    if (!archive) return;
     /* MERGED, NOT REPLACED. toQuery builds a fresh URLSearchParams from the spec alone, so
        writing it straight back would silently drop ?view= and ?contract= on the next chip
        click -- a deep link into the ledger that survives exactly until the reader touches
@@ -254,10 +294,13 @@ export function Atlas() {
        are `mo` now, the reservation is declared in engine/cohort.js as RESERVED_QUERY_KEYS,
        and test-atlas-cohort.mjs fails if a cohort key ever takes one of these back. */
     if (archive) p.set("m", archive.manifest.methodology_version);
+    /* The selection travels with the link, so a bridged view can be sent to another analyst as
+       the thing it is: this storm, against this cohort. */
+    if (archive && selected !== null) p.set("storm", archive.storms.str("storm_id", selected));
     const q = p.toString();
     const next = q ? `?${q}` : location.pathname;
     if (location.search.replace(/^\?/, "") !== q) history.replaceState(null, "", next);
-  }, [cohort, surface, ledgerAnchor, archive]);
+  }, [cohort, surface, ledgerAnchor, archive, selected]);
 
   /* The ledger's 16 KB is fetched only when the ledger is opened. Nothing on the tactical
      surface needs it, and a reader who never asks the question should not pay for the answer. */
@@ -278,14 +321,31 @@ export function Atlas() {
      here would cite the previous cohort by one paint on every change. The methodology version
      and the pack stamp travel WITH it: a cohort is only reproducible against the definitions
      and the data it was answered under, and both move. */
-  const scenarioURL = React.useCallback(() => {
+  const scenarioURL = React.useCallback(({ withStorm = false } = {}) => {
     const p = new URLSearchParams(toQuery(cohort));
     if (surface !== "tactical") p.set("view", surface);
     if (ledgerAnchor) p.set("contract", ledgerAnchor);
     if (archive) p.set("m", archive.manifest.methodology_version);
+    /* OPT-IN, because the two citations are citations of different things. A cohort is a
+       question and its link should reproduce the question and nothing else -- a storm that
+       happened to be selected is not part of it. The STORM's citation is the bridged view, and
+       that one does carry the selection, because the pairing is the thing being cited. */
+    if (withStorm && archive && selected !== null) {
+      p.set("storm", archive.storms.str("storm_id", selected));
+    }
     const q = p.toString();
     return `${location.origin}${location.pathname}${q ? `?${q}` : ""}`;
-  }, [cohort, surface, ledgerAnchor, archive]);
+  }, [cohort, surface, ledgerAnchor, archive, selected]);
+
+  const stormCitation = React.useMemo(() => {
+    if (!archive || selected === null || !result) return null;
+    const m = archive.manifest;
+    const s = archive.storms;
+    return `STORM ATLAS · ${s.str("name", selected) || "UNNAMED"} ${s.num("season", selected)} `
+      + `(${s.str("storm_id", selected)}) · AGAINST ${sentenceOf(cohort).replace(/ — what happened next\?$/, "")} `
+      + `· ${result.kept.toLocaleString()} of ${m.counts.storms.toLocaleString()} storms · `
+      + `METHODOLOGY ${m.methodology_version} · PACK ${(m.provenance || {}).archive_stamp}`;
+  }, [archive, selected, result, cohort]);
 
   const citation = React.useMemo(() => {
     if (!archive || !result) return null;
@@ -294,6 +354,18 @@ export function Atlas() {
       + `${result.kept.toLocaleString()} of ${m.counts.storms.toLocaleString()} storms · `
       + `METHODOLOGY ${m.methodology_version} · PACK ${(m.provenance || {}).archive_stamp}`;
   }, [archive, result, cohort]);
+
+  /* THE BRIDGE'S OWN FACTS, memoised on (storm, cohort) because whyMatched runs one filter pass
+     per condition -- 6.4 ms on a three-condition cohort, which is affordable once and is the
+     most expensive thing on the surface if it runs per render. */
+  const bridge = React.useMemo(() => {
+    if (!archive || selected === null || !result) return null;
+    return {
+      why: whyMatched(archive, cohort, selected),
+      contribution: contributionOf(result, selected),
+      proposed: bridgeSpec(archive, cohort, selected, { radiusKm: radiusFor(cohort) }),
+    };
+  }, [archive, selected, cohort, result]);
 
   /* WHICH BASINS THE READER'S COHORT ACTUALLY DRAWS ON, for the ledger to compare against the
      one it replayed. Computed from the cohort's own rows rather than from the basin CONDITION,
@@ -327,6 +399,30 @@ export function Atlas() {
   // Handles for the interaction checks, alongside __ATLAS_MAP. Nothing in the app reads them.
   React.useEffect(() => { globalThis.__ATLAS_SELECT = selectStorm; }, [selectStorm]);
   React.useEffect(() => { globalThis.__ATLAS_SET_CURSOR = setCursorMs; }, []);
+
+  /* THE BRIDGE: build the cohort around where THIS storm formed, and keep the storm.
+   *
+   * `onProbe` below clears the selection, which is right for a click on open water -- the reader
+   * has asked about a place, not a storm. It is exactly wrong here: the whole feature is that
+   * the storm and the cohort built from its genesis are legible at the same time, and routing
+   * the bridge through onProbe would have destroyed the subject to answer the question about it.
+   *
+   * THE GENESIS POINT, NEVER THE CURSOR. `bridgeSpec` takes the storm's genesis coordinates; a
+   * position part-way along the track is where the storm WAS at an instant, and every rate a
+   * cohort publishes is conditioned on where storms FORMED. Matching on a mid-track position
+   * would quietly ask a question this archive does not answer.
+   *
+   * EVERY OTHER CONDITION SURVIVES. The spec keeps its months, seasons, basin and outcome-side
+   * conditions and replaces only the location, so the bridge narrows the reader's own question
+   * rather than substituting a different one. What it added or replaced is named on the panel. */
+  const onBridge = React.useCallback((row) => {
+    if (!archive || row === null) return;
+    const b = bridgeSpec(archive, cohort, row, { radiusKm: radiusFor(cohort) });
+    if (!b) return;
+    setPlaying(false);
+    setCursorMs(null);
+    setCohort(b.spec);
+  }, [archive, cohort, setCohort]);
 
   /* Clicking the ocean sets the cohort's LOCATION CONDITION -- it does not open a separate
      probe with its own query. That separation was the two-surface problem in miniature. */
@@ -468,7 +564,22 @@ export function Atlas() {
         borderLeft: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
         {storm ? (
           <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
-            onReplay={() => setPlaying((v) => !v)} replaying={playing} />
+            onReplay={() => setPlaying((v) => !v)} replaying={playing}
+            spec={stormCitation} specUrl={scenarioURL({ withStorm: true })}
+            bridge={bridge} cohortSentence={sentence} result={result}
+            onBridge={() => onBridge(selected)}
+            /* THE REPLAY GUARD. A cohort is genesis-conditioned; the transport can be parked
+               part-way along this storm's track. Read together those say "here is what happens
+               next from here", which is a forecast claim the archive does not make and this
+               feature must not imply. The panel is told the cursor is live and states the
+               distinction rather than hiding the bridge.
+               BOTH TRANSPORTS COUNT. This panel renders whenever a storm is selected, including
+               in replay mode -- where the ARCHIVE transport is the one on screen and `cursorMs`
+               stays null. Gated on the storm transport alone, a reader who parked the archive
+               clock mid-track and then selected the storm under the cursor got the bridge with
+               no guard at all, which is the exact arrangement the guard exists for. */
+            cursorLive={cursorMs !== null || playing
+              || (mode === "replay" && replayCursorMin !== null)} />
         ) : mode === "replay" ? (
           <ReplayNote timeline={timeline} result={result} />
         ) : (

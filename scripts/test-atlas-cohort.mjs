@@ -24,6 +24,9 @@ import {
   COHORT_V, EMPTY_COHORT, cohortResult, conditionedOn, conditionsOf, normalise, parentOf,
   RESERVED_QUERY_KEYS, parseQuery, sameCohort, sentenceOf, toFilters, toQuery,
 } from "../docs/storm-atlas/src/engine/cohort.js";
+import {
+  bridgeSpec, contributionOf, whyMatched,
+} from "../docs/storm-atlas/src/engine/cohort-membership.js";
 import { previewCounts } from "../docs/storm-atlas/src/engine/preview.js";
 import { ROOT } from "./lib/atlas-verify.mjs";
 
@@ -494,6 +497,368 @@ head("[11] the builder's chip counts are the archive's own counts");
     `${aug.months[9]} vs ${augSep.months[9]}`);
   ok(aug.basisOf.months === augSep.basisOf.months,
     "because both are counted over the same basis population");
+}
+
+/* ---- [12] THE BRIDGE ---------------------------------------------------------------------
+ *
+ * The storm -> cohort bridge adds one claim to the surface that nothing else makes: that a
+ * NAMED STORM stands in a particular relation to a cohort. Three things could go wrong quietly
+ * and none of them would show up anywhere else.
+ *
+ *   IT COULD EXPLAIN A MEMBERSHIP THAT IS NOT THE ONE THE ENGINE DECIDED. `whyMatched` runs
+ *   `filterStorms` once per condition, so its verdicts and the cohort must agree by
+ *   construction -- but "by construction" is a claim about code that has to be tested against
+ *   the code, because a normalisation that behaves differently on a one-condition spec than on
+ *   a whole one would break the equivalence without breaking anything visible.
+ *
+ *   IT COULD MISCOUNT WHAT THE STORM CONTRIBUTES. `contributionOf` says "this storm supplies 1
+ *   of N observed events", which is a statement about the scorer's numerator. If it applied
+ *   even a slightly different landfall rule, the panel would attribute an event to a storm that
+ *   the ladder above it did not count -- the two would disagree about the same cohort, in the
+ *   one place a reader is most likely to believe the smaller number.
+ *
+ *   IT COULD SILENTLY PASS A CONDITION NOBODY CHECKED. A condition with no entry in the ONLY
+ *   map must report as undecidable. The failure mode is a future condition added to the Cohort
+ *   Spec and not to the bridge: the panel would print MATCHED for something it never tested.
+ */
+head("[12] the bridge — one storm's standing in one cohort");
+{
+  const rowOfId = (id) => {
+    for (let i = 0; i < archive.nStorms; i++) {
+      if (archive.storms.str("storm_id", i) === id) return i;
+    }
+    return -1;
+  };
+
+  /* THE EQUIVALENCE, AT SCALE. Not "the storms I picked come back MATCHED", which would pass on
+     a bridge that answered true to everything: for EVERY storm in the basis population, all
+     conditions satisfied must mean IN the cohort and any condition missed must mean OUT. One
+     counterexample anywhere is a failure, and the count of storms actually tested is printed so
+     a future edit cannot turn this into a vacuous pass over an empty set. */
+  const COHORTS = [
+    ["a bare genesis circle", { where: { lat: 13.4, lon: -94.0, radiusKm: 500 } }],
+    ["a circle and two months",
+      { where: { lat: 13.8, lon: -111.0, radiusKm: 500 }, months: [8, 9] }],
+    ["a circle, a season floor and a basin",
+      { where: { lat: 16.1, lon: -82.9, radiusKm: 500 }, seasonFrom: 1971, basins: ["NA"] }],
+    ["an intensity condition with no circle at all", { intensity: "cat3", namedOnly: true }],
+    ["a landfall condition and a subbasin",
+      { landfall: "mexico", subbasinsEntered: ["CP"], includeProvisional: true }],
+  ];
+  let tested = 0;
+  let disagreed = 0;
+  let skipped = 0;
+  for (const [label, spec] of COHORTS) {
+    const norm = normalise(spec);
+    const r = cohortResult(archive, norm);
+    const inCohort = new Set(r.rows);
+    /* Over the whole archive, not over the cohort: a bridge that got membership right and
+       non-membership wrong is exactly the bug the non-member panel state exists for. */
+    for (let row = 0; row < archive.nStorms; row++) {
+      const why = whyMatched(archive, norm, row);
+      /* A storm the archive could not judge is neither in nor out under rule 4, so it is not
+         a counterexample either way -- but it is COUNTED, because a skip that grew silently
+         would hollow this proof out from the inside. */
+      if (why.some((w) => w.verdict === "unchecked" || w.verdict === "unjudged")) {
+        skipped++;
+        continue;
+      }
+      const all = why.every((w) => w.verdict === "matched");
+      tested++;
+      if (all !== inCohort.has(row)) disagreed++;
+    }
+    ok(disagreed === 0, `every condition satisfied means in the cohort — ${label}`,
+      `${disagreed} storm(s) disagreed with filterStorms`);
+  }
+  ok(tested >= 5 * 3000,
+    `and the equivalence was actually exercised (${tested.toLocaleString()} storm-cohort pairs, `
+    + `${skipped.toLocaleString()} unjudged)`,
+    `only ${tested} pairs tested`);
+
+  /* NO CONDITION GOES UNCHECKED. Every condition the Cohort Spec can publish must have a
+     one-condition form the bridge can test, or the panel prints NOT CHECKED. Setting all of
+     them at once is the cheapest way to notice a new one that was never wired up. */
+  {
+    const everything = normalise({
+      where: { lat: 13.4, lon: -94.0, radiusKm: 600 }, months: [8, 9],
+      seasonFrom: 1971, seasonTo: 2020, basins: ["EP"], subbasinsEntered: ["CP"],
+      namedOnly: true, includeProvisional: true, intensity: "cat3", landfall: "mexico",
+    });
+    const why = whyMatched(archive, everything, rowOfId("2015293N13266"));
+    const unchecked = why.filter((w) => w.verdict === "unchecked").map((w) => w.key);
+    ok(why.length === conditionsOf(everything).length,
+      `every condition on the spec is explained (${why.length})`);
+    ok(unchecked.length === 0,
+      "and none of them is reported as NOT CHECKED — the bridge knows every condition the "
+      + "spec can carry",
+      `unchecked: ${unchecked.join(", ")}`);
+  }
+
+  /* A CONDITION THE STORM MISSES IS THE ONE MARKED MISSED. Darby 2022 formed in July, so an
+     August-or-September cohort built on its own genesis point excludes it -- and the panel has
+     to be able to say which condition did that, not merely that something did. */
+  {
+    const row = rowOfId("2022191N14249");
+    const b = bridgeSpec(archive, normalise({ ...EMPTY_COHORT, months: [8, 9] }), row);
+    const why = whyMatched(archive, b.spec, row);
+    const missed = why.filter((w) => w.verdict === "missed").map((w) => w.key);
+    ok(missed.length === 1 && missed[0] === "months",
+      "a storm outside its own genesis cohort names the condition that excluded it",
+      `missed: ${missed.join(", ") || "none"}`);
+    ok(why.find((w) => w.key === "where").verdict === "matched",
+      "while the condition built from its own genesis is necessarily satisfied");
+    const con = contributionOf(cohortResult(archive, b.spec), row);
+    ok(con.isMember === false && con.contracts.length === 0,
+      "and it contributes nothing to a cohort it is not in");
+  }
+
+  /* THE STORM IS NOT REMOVED FROM ITS OWN COHORT. Under the methodology it satisfies the
+     conditions, so it is a member and it is in the denominators. This is the assertion that
+     would fail the day somebody "helpfully" excludes it. */
+  {
+    for (const [label, id, months] of [
+      ["Ivan 2004 (North Atlantic, Cape Verde)", "2004247N10332", null],
+      ["Patricia 2015 (East Pacific)", "2015293N13266", null],
+      ["Keith 2000 (north-west Caribbean)", "2000273N16277", null],
+      ["Iniki 1992 (Central Pacific, sparse)", "1992249N12229", [8, 9]],
+    ]) {
+      const row = rowOfId(id);
+      const base = normalise({ ...EMPTY_COHORT, ...(months ? { months } : {}) });
+      const b = bridgeSpec(archive, base, row);
+      const r = cohortResult(archive, b.spec);
+      const con = contributionOf(r, row);
+      ok(con.isMember && con.n === r.n_cases && r.rows.includes(row),
+        `the selected storm is a member of the cohort its own genesis defines — ${label}`,
+        `member=${con.isMember} n=${con.n} cases=${r.n_cases}`);
+    }
+  }
+
+  /* THE CONTRIBUTION IS THE SCORER'S OWN NUMERATOR, RECONSTRUCTED. Summing every case's
+     contribution to a contract must return exactly the count the scorer published. This is the
+     assertion that catches a landfall rule that drifted by one condition -- a dropped
+     suspect_relocation test, a hurricane flag read from the wrong row -- because such a rule
+     would still look completely reasonable on any single storm. */
+  {
+    const b = bridgeSpec(archive,
+      normalise({ ...EMPTY_COHORT }), rowOfId("2000273N16277"));
+    const r = cohortResult(archive, b.spec);
+    const tally = {};
+    for (const c of r.cases) {
+      for (const k of contributionOf(r, c.row).contracts) {
+        tally[k.key] = (tally[k.key] || 0) + 1;
+      }
+    }
+    let regions = 0;
+    let mismatched = [];
+    for (const [region, kinds] of Object.entries(r.landfall)) {
+      for (const kind of ["any", "hurricane"]) {
+        if (!kinds[kind]) continue;
+        regions++;
+        const mine = tally[`${region}:${kind}`] || 0;
+        if (mine !== kinds[kind].count) {
+          mismatched.push(`${region}:${kind} bridge=${mine} scorer=${kinds[kind].count}`);
+        }
+      }
+    }
+    ok(regions > 0, `the cohort publishes landfall contracts to check (${regions})`);
+    ok(mismatched.length === 0,
+      "and every contract's numerator is exactly the storms the bridge says supply it",
+      mismatched.join("; "));
+  }
+
+  /* A REFUSED RATE STILL HAS A COUNT, AND THE COUNT IS WHAT THE CONTRIBUTION IS ABOUT. Vince
+     2005 formed off Madeira; two storms in the archive formed within 500 km of it, so every
+     rate the cohort could publish is refused below min_sample. The contribution must survive
+     that -- "this storm supplies 1 of the 1 observed event" is the most important thing the
+     panel can say about a cohort this thin, and it is exactly the case where a
+     rate-shaped implementation would print nothing. */
+  {
+    const row = rowOfId("2005281N33339");
+    const b = bridgeSpec(archive, normalise({ ...EMPTY_COHORT }), row);
+    const r = cohortResult(archive, b.spec);
+    ok(r.n_cases < r.min_sample,
+      `the cohort is below sample (${r.n_cases} < ${r.min_sample})`);
+    const anyRate = Object.values(r.landfall).some((k) => k.any.rate !== null);
+    ok(!anyRate, "so no landfall contract publishes a rate");
+    const con = contributionOf(r, row);
+    ok(con.isMember && con.contracts.length > 0,
+      "and the storm's contribution is still reported, because a count is not a rate",
+      `contracts: ${con.contracts.map((c) => c.key).join(", ") || "none"}`);
+    ok(con.contracts.every((c) => c.count !== null && c.count >= 1),
+      "with the real numerator beside it");
+  }
+
+  /* THE GENESIS POINT, AND ONLY THE GENESIS POINT. */
+  {
+    const row = rowOfId("1992249N12229");
+    const before = normalise({ ...EMPTY_COHORT, months: [8, 9],
+      where: { lat: 20, lon: -157, radiusKm: 300 } });
+    const b = bridgeSpec(archive, before, row);
+    ok(b.lat === archive.genesisLat[row] && b.lon === archive.genesisLon[row],
+      "the bridge builds on the storm's genesis position",
+      `${b.lat},${b.lon} vs ${archive.genesisLat[row]},${archive.genesisLon[row]}`);
+    ok(b.replaces && b.replaces.lat === 20 && b.replaces.lon === -157,
+      "and reports the location condition it replaced, rather than replacing it silently");
+    ok(b.radiusKm === 300,
+      "keeping the radius the reader had already chosen", `${b.radiusKm}`);
+    ok(JSON.stringify(b.spec.months) === JSON.stringify([8, 9]),
+      "every non-location condition survives the bridge");
+    ok(b.kept.length === conditionsOf(before).length - 1,
+      "and the panel is told which ones those are",
+      `${b.kept.join(", ")}`);
+
+    const fresh = bridgeSpec(archive, normalise({ ...EMPTY_COHORT }), row);
+    ok(fresh.replaces === null && fresh.radiusKm === 500,
+      "with no location condition set, the bridge ADDS one at the default radius");
+
+    /* A SCENARIO IS A URL, AND A BRIDGED COHORT IS A SCENARIO. */
+    const q = toQuery(b.spec);
+    const round = parseQuery(q).spec;
+    ok(sameCohort(round, b.spec) && toQuery(round) === q,
+      "and the bridged cohort survives the URL round-trip", `${q} -> ${toQuery(round)}`);
+  }
+
+  /* NO GENESIS POINT, NO BRIDGE. 54 storms in this pack carry no genesis position; the bridge
+     must return nothing for them rather than a cohort built on NaN, which would silently be
+     a cohort built on nothing at all. */
+  {
+    let without = 0;
+    let built = 0;
+    for (let row = 0; row < archive.nStorms; row++) {
+      if (Number.isFinite(archive.genesisLat[row])) continue;
+      without++;
+      if (bridgeSpec(archive, normalise({ ...EMPTY_COHORT }), row) !== null) built++;
+    }
+    ok(without > 0, `the pack holds storms with no genesis position (${without})`);
+    ok(built === 0, "and the bridge refuses every one of them rather than matching on NaN",
+      `${built} built a spec anyway`);
+  }
+
+  /* NOTHING IS ANSWERED ABOUT A STORM THAT WAS NEVER SELECTED. */
+  {
+    const spec = normalise({ ...EMPTY_COHORT, months: [8, 9] });
+    ok(whyMatched(archive, spec, null).length === 0
+      && whyMatched(archive, spec, undefined).length === 0
+      && whyMatched(archive, spec, -1).length === 0,
+      "no selection means no explanation, not an explanation of row zero");
+    const con = contributionOf(cohortResult(archive, spec), null);
+    ok(con.isMember === false && con.contracts.length === 0,
+      "and no contribution either");
+  }
+
+  /* THE RECORD SCOPE IS NOT A CONDITION AND IT STILL DECIDES MEMBERSHIP.
+     `conditionsOf` publishes `includeProvisional` only when TRUE, so a probe rebuilt from
+     EMPTY_COHORT reverts it to false -- and `filterStorms` tests provisional FIRST, before
+     distance or month. The panel then reports that a 2025 storm did not form within 500 km of
+     its own genesis coordinates. Both directions of the switch are pinned here. */
+  {
+    let prov = -1;
+    for (let i = 0; i < archive.nStorms; i++) {
+      if (archive.storms.bool("provisional", i) === true
+          && Number.isFinite(archive.genesisLat[i])) { prov = i; break; }
+    }
+    ok(prov >= 0, "the pack holds provisional storms to test the scope switch with");
+
+    const on = bridgeSpec(archive,
+      normalise({ ...EMPTY_COHORT, includeProvisional: true, months: [6, 7, 8, 9] }), prov);
+    const whyOn = whyMatched(archive, on.spec, prov);
+    ok(whyOn.every((w) => w.verdict === "matched"),
+      "a provisional storm matches every condition of the cohort its own genesis defines",
+      whyOn.map((w) => `${w.key}=${w.verdict}`).join(" "));
+    ok(contributionOf(cohortResult(archive, on.spec), prov).isMember,
+      "and it really is a member, so the explanation and the membership agree");
+
+    const off = bridgeSpec(archive,
+      normalise({ ...EMPTY_COHORT, months: [6, 7, 8, 9] }), prov);
+    const whyOff = whyMatched(archive, off.spec, prov);
+    ok(whyOff.filter((w) => w.key !== "provisionalScope").every((w) => w.verdict === "matched"),
+      "with the switch off it still satisfies every condition the reader actually set",
+      whyOff.map((w) => `${w.key}=${w.verdict}`).join(" "));
+    ok(!contributionOf(cohortResult(archive, off.spec), prov).isMember,
+      "but it is not in the cohort");
+    const scope = whyOff.find((w) => w.key === "provisionalScope");
+    ok(scope && scope.verdict === "missed",
+      "and the record scope is named as the thing that excluded it, rather than a condition "
+      + "being blamed for it");
+    ok(scope && /post-analysed/.test(scope.value),
+      "in the archive's own terms", scope && scope.value);
+
+    /* THE FULL SWEEP. One counterexample anywhere means the panel can contradict the ladder. */
+    let contradictions = 0;
+    const SWEEP = [
+      { months: [6, 7, 8, 9] }, { months: [6, 7, 8, 9], includeProvisional: true },
+      { seasonFrom: 1971 }, { seasonFrom: 1971, includeProvisional: true },
+      { basins: ["NA"] }, { namedOnly: true, includeProvisional: true },
+    ];
+    for (const raw of SWEEP) {
+      const spec = normalise({ ...EMPTY_COHORT, ...raw });
+      const inCohort = new Set(cohortResult(archive, spec).rows);
+      for (let row = 0; row < archive.nStorms; row++) {
+        if (!inCohort.has(row)) continue;
+        if (whyMatched(archive, spec, row).some((w) => w.verdict === "missed")) contradictions++;
+      }
+    }
+    ok(contradictions === 0,
+      "and no storm the engine KEPT is ever explained as having missed a condition",
+      `${contradictions} contradiction(s)`);
+  }
+
+  /* RULE 4 REACHES THE EXPLANATION. A storm whose peak wind the archive never recorded is
+     UNDECIDABLE under an intensity condition -- filterStorms counts it and does not exclude it
+     (query.js:110). Reporting MISSED would state an empirical no about a measurement that does
+     not exist. */
+  {
+    let unmeasured = -1;
+    for (let i = 0; i < archive.nStorms; i++) {
+      if (archive.storms.num("max_vmax_kt", i) === null
+          && Number.isFinite(archive.genesisLat[i])) { unmeasured = i; break; }
+    }
+    ok(unmeasured >= 0, "the pack holds storms with no recorded intensity");
+    const spec = normalise({ ...EMPTY_COHORT, intensity: "cat1" });
+    const why = whyMatched(archive, spec, unmeasured);
+    const v = why.find((w) => w.key === "intensity");
+    ok(v && v.verdict === "unjudged",
+      "an intensity condition the archive cannot judge reports NOT JUDGED, never MISSED",
+      v ? v.verdict : "no intensity row");
+    const r = cohortResult(archive, spec);
+    ok(!r.rows.includes(unmeasured) && r.undecidable > 0,
+      "matching the engine, which counts it as undecidable rather than excluding it",
+      `undecidable=${r.undecidable}`);
+    /* A storm that WAS measured and fell short is a real miss and must still say so. */
+    let weak = -1;
+    for (let i = 0; i < archive.nStorms; i++) {
+      const p = archive.storms.num("max_vmax_kt", i);
+      if (p !== null && p < 40 && Number.isFinite(archive.genesisLat[i])) { weak = i; break; }
+    }
+    const wv = whyMatched(archive, spec, weak).find((w) => w.key === "intensity");
+    ok(wv && wv.verdict === "missed",
+      "while a storm the archive DID measure and that fell short still reports MISSED",
+      wv ? wv.verdict : "no intensity row");
+  }
+
+  /* A CIRCULAR CONTRACT IS NOT EVIDENCE. Condition the cohort on a landfall region and every
+     storm in it carries that outcome by construction; the ladder prints CONDITIONED ON -- NOT
+     AN OUTCOME over the cell. The bridge must not list the same cell as evidence the storm
+     supplies, which would be the fifth rule failing in the one place it is stated about a
+     named storm. */
+  {
+    const spec = normalise({ ...EMPTY_COHORT, landfall: "mexico" });
+    const r = cohortResult(archive, spec);
+    ok(/^CONDITIONED ON/.test(r.landfall.mexico.any.status || ""),
+      "conditioning on a region makes that region's ANY contract circular",
+      r.landfall.mexico.any.status || "(no status)");
+    const row = r.rows[0];
+    const con = contributionOf(r, row);
+    ok(con.isMember, "a storm in that cohort is a member");
+    ok(!con.contracts.some((c) => c.key === "mexico:any"),
+      "and the bridge does not offer the circular contract as evidence it supplies",
+      con.contracts.map((c) => c.key).join(", "));
+    /* Whereas a REFUSED rate keeps its contribution: the events are still observed events. */
+    const thin = cohortResult(archive,
+      normalise({ ...EMPTY_COHORT, where: { lat: 33.8, lon: -19.3, radiusKm: 500 } }));
+    ok(!thin.sufficient && contributionOf(thin, thin.rows[0]).contracts.length >= 0,
+      "while a refusal below min_sample is not circularity and does not suppress the count");
+  }
 }
 
 console.log(failed
