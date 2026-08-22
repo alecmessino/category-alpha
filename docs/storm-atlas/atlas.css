@@ -1262,3 +1262,132 @@
   background:transparent;border:0;border-bottom:1px solid var(--rule-2);
   color:var(--accent);cursor:pointer;text-transform:uppercase;
 }
+
+/* ─── the condition strip ─────────────────────────────────────────────────────────────────
+ *
+ * THREE ZONES, ALWAYS RENDERED, AND THE RULES ARE THE GRAMMAR. Genesis-side carries a 2px accent
+ * rule, outcome-side a 2px muted-accent rule, scope a 1px hairline -- three weights a reader can
+ * tell apart at a glance and without reading a word, which is the property the gate asserts with
+ * the prose covered. The outcome-side rule is the SAME ink the deck uses for a CONDITIONED ON
+ * row, and that is deliberate: it is how a reader connects a missing rate to the condition that
+ * removed it, across two different parts of the surface.
+ *
+ * SCOPE IS FIXED-WIDTH because it holds at most two short tokens and should not take width from
+ * the two zones that carry the question. */
+[data-atlas] .at-strip{
+  display:flex;align-items:stretch;gap:var(--at-s4);
+  padding:0 var(--at-s5);
+  min-width:0;overflow:hidden;
+  background:var(--chrome-hi);
+  border-bottom:1px solid var(--rule-2);
+}
+[data-atlas] .at-zone{
+  display:flex;align-items:center;gap:var(--at-s2);
+  min-width:0;flex:1 1 auto;
+  padding-left:var(--at-s2);
+}
+[data-atlas] .at-zone-accent{border-left:2px solid var(--accent)}
+[data-atlas] .at-zone-muted{border-left:2px solid var(--accent-2)}
+[data-atlas] .at-zone-hair{border-left:1px solid var(--rule-2);flex:0 0 clamp(250px,19vw,290px)}
+
+[data-atlas] .at-zone-label{
+  flex:none;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);font-weight:600;
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;
+  color:var(--t3);background:transparent;border:0;padding:0;cursor:pointer;
+}
+[data-atlas] .at-zone-label:hover{color:var(--t1)}
+[data-atlas] .at-zone-items{display:flex;align-items:center;gap:var(--at-s2);min-width:0;overflow:hidden}
+
+/* THE EMPTY STATE IS THE BOUNDARY. Dashed, so an unset zone is visibly a zone rather than a gap,
+   and it says what it WOULD hold -- a heading over nothing tells a reader the zone exists; this
+   tells them what it is for. */
+[data-atlas] .at-zone-hint{
+  font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t3);
+  border:1px dashed var(--rule-2);padding:1px var(--at-s2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;
+}
+[data-atlas] .at-cond{
+  display:inline-flex;align-items:baseline;gap:var(--at-s1);
+  border:1px solid var(--accent);
+  background:color-mix(in srgb,var(--accent) 12%,transparent);
+  padding:1px var(--at-s2);min-width:0;
+}
+[data-atlas] .at-zone-muted .at-cond{
+  border-color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 16%,transparent);
+}
+[data-atlas] .at-zone-hair .at-cond{
+  border-color:var(--rule-2);background:transparent;
+}
+[data-atlas] .at-cond-k{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);flex:none;
+}
+[data-atlas] .at-cond-v{
+  font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t1);
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+[data-atlas] .at-cond-x{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);
+  background:transparent;border:0;color:var(--t3);cursor:pointer;padding:0 0 0 2px;flex:none;
+}
+[data-atlas] .at-cond-x:hover{color:var(--t1)}
+
+[data-atlas] .at-lastedit{
+  display:flex;align-items:center;gap:var(--at-s1);flex:none;margin-left:auto;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+}
+[data-atlas] .at-lastedit-k{color:var(--t3)}
+[data-atlas] .at-lastedit-v{color:var(--t2)}
+
+/* WHAT CHANGED, at the deck's foot. The label is not decoration and is not optional: a delta
+   read as an effect is causal language the archive cannot support, so the denial travels with
+   the numbers rather than living in documentation. */
+[data-atlas] .at-changed{
+  display:flex;align-items:baseline;gap:var(--at-s3);flex-wrap:wrap;
+  padding:var(--at-s2) var(--at-s5);
+  border-top:1px solid var(--rule-2);
+  font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t2);
+}
+[data-atlas] .at-changed-label{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);flex:none;
+}
+[data-atlas] .at-changed-line{color:var(--t2)}
+
+/* ─── the inspector, and its pinned foot ──────────────────────────────────────────────────
+ *
+ * A FLEX COLUMN WHERE ONLY THE MIDDLE SCROLLS. The masthead is fixed, the whole-life blocks take
+ * what height is left and scroll inside it, and the bridge is pinned at the foot.
+ *
+ * WHAT IS ACTUALLY LOAD-BEARING IS `overflow-y:auto`, AND THAT IS NOT THE OBVIOUS ANSWER.
+ *
+ * The natural claim is that `min-height:0` is what lets the body shrink -- a flex item's default
+ * minimum is its CONTENT, so without it the column should grow past the dock and push the pinned
+ * foot off the bottom. That claim is wrong here, and the gate is what established it: seeding
+ * `min-height:auto` changes nothing, because a flex item that is a SCROLL CONTAINER has its
+ * automatic minimum resolve to zero already. The overflow declaration is doing the work.
+ *
+ * `min-height:0` stays anyway, and deliberately: it is what keeps this correct on the day the
+ * overflow is changed for some unrelated reason. It is belt-and-braces rather than the belt --
+ * which is worth writing down, because a comment that misnames the load-bearing line teaches the
+ * next reader to protect the wrong declaration.
+ *
+ * scripts/check-inspector-bridge.mjs drives the body to its full scroll extent at three content
+ * sizes and requires the bridge to stay on screen, so a regression fails a check rather than
+ * quietly hiding the surface's main affordance. */
+[data-atlas] .at-inspector{
+  display:flex;flex-direction:column;
+  min-height:0;height:100%;
+  border-left:1px solid var(--rule-2);
+  background:var(--chrome);
+}
+[data-atlas] .at-insp-head{flex:none}
+[data-atlas] .at-insp-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+[data-atlas] .at-insp-bridge{
+  flex:none;
+  border-top:2px solid var(--accent);
+  background:var(--chrome-hi);
+  padding:var(--at-s2) var(--at-s6) var(--at-s4);
+  max-height:46%;overflow-y:auto;overscroll-behavior:contain;
+}
