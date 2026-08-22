@@ -22,6 +22,9 @@ import {
   CATEGORY_COLOR, CATEGORY_ORDER, EMPHASIS_INK, GENESIS_INK, GENESIS_LIFTED_INK, LANDFALL_INK,
   MAJOR_FROM, MAJOR_WEIGHT, POPULATION_INK, UNKNOWN_INK, categoryIndexRaw,
 } from "./palette.js";
+import {
+  PRE_GENESIS_ALPHA, PRE_GENESIS_DASH, genesisMinute, isPreGenesisSegment,
+} from "./provenance-ink.js";
 
 /* Stride by zoom. At basin zoom a 6-hourly track is far denser than the screen can resolve, so
    drawing every other fix is invisible; below zoom 5 nothing is decimated at all. The stride in
@@ -60,6 +63,11 @@ export const PopulationLayer = AtlasLayer.extend({
     liftedWidth: 1.3,
     showGenesis: true,
     showLandfalls: true,
+    /* 744 storms carry track before genesis -- 9,450 fixes, reaching 252 hours back. Drawing
+       them like the rest implies a storm existed before one did, and it puts the genesis dot,
+       which is this map's primary click target, in the MIDDLE of a line. The selected storm has
+       always distinguished them; this is the same treatment on the population. */
+    showPreGenesis: true,
     colorBy: "uniform", // "uniform" | "intensity"
     dimmed: false, // true when a storm is selected and the population is context
     softenEmphasis: false, // true when the density surface is shown and should read through
@@ -146,6 +154,22 @@ export const PopulationLayer = AtlasLayer.extend({
           stride, -1);
         ctx.stroke();
       }
+
+      /* The pre-genesis portion, in the treatment the selected storm has always used.
+         Drawn per pass so an emphasised pool keeps its standing, and at FULL RESOLUTION
+         whatever the stride: the prefixes are short -- 9,450 segments in the whole archive
+         against 220,194 -- and a storm's genesis must not appear to move because the reader
+         zoomed out. */
+      if (o.showPreGenesis) {
+        ctx.save();
+        ctx.setLineDash(PRE_GENESIS_DASH);
+        ctx.globalAlpha = pass.alpha * PRE_GENESIS_ALPHA;
+        ctx.strokeStyle = UNKNOWN_INK;
+        ctx.beginPath();
+        segments += this._tracePreGenesis(ctx, pass.rows, wx, wy, scale, ox, oy, width, height);
+        ctx.stroke();
+        ctx.restore();
+      }
     }
     ctx.globalAlpha = 1;
 
@@ -186,6 +210,8 @@ export const PopulationLayer = AtlasLayer.extend({
     const a = this._a;
     const { minX, maxX } = this._world;
     const vmax = a.ptVmax;
+    const t = a.ptT;
+    const skipPre = this.options.showPreGenesis;
     const pad = 8;
     let segments = 0;
     const all = only === -1;
@@ -194,6 +220,9 @@ export const PopulationLayer = AtlasLayer.extend({
       const start = a.tpOffset[i];
       const end = start + a.tpCount[i];
       if (end - start < 2) continue;
+      /* Null for the 54 storms with no genesis, which makes every segment below post-genesis --
+         the right answer, because the archive published no threshold to be on either side of. */
+      const gMin = skipPre ? genesisMinute(a, i) : null;
       /* Longitudes are unwrapped along each storm, so a dateline crosser sits partly outside
          the [0,1] world. Drawing it at one or both neighbouring world offsets is what makes it
          appear on both sides of the seam instead of streaking between them. For the 99% of
@@ -213,7 +242,8 @@ export const PopulationLayer = AtlasLayer.extend({
             const outRight = px > w + pad && x > w + pad;
             const outTop = py < -pad && y < -pad;
             const outBottom = py > h + pad && y > h + pad;
-            if (!(outLeft || outRight || outTop || outBottom)) {
+            if (!(outLeft || outRight || outTop || outBottom)
+                && !isPreGenesisSegment(t[k], gMin)) {
               if (all || categoryIndexRaw(vmax[k - stride]) === only) {
                 ctx.moveTo(px, py);
                 ctx.lineTo(x, y);
@@ -228,7 +258,7 @@ export const PopulationLayer = AtlasLayer.extend({
         // The final fix is always joined, whatever the stride, so a track never stops short of
         // where the storm actually ended.
         const last = end - 1;
-        if (have && (last - start) % stride !== 0) {
+        if (have && (last - start) % stride !== 0 && !isPreGenesisSegment(t[last], gMin)) {
           const x = wx[last] * scale - ox + shift;
           const y = wy[last] * scale - oy;
           if (all || categoryIndexRaw(vmax[last - 1]) === only) {
@@ -236,6 +266,50 @@ export const PopulationLayer = AtlasLayer.extend({
             ctx.lineTo(x, y);
             segments++;
           }
+        }
+      }
+    }
+    return segments;
+  },
+
+  /* The pre-genesis prefix of every storm that has one, at full resolution.
+   *
+   * NOT DECIMATED, unlike the tracks. The stride exists because a 6-hourly fix is denser than
+   * the screen at basin zoom, and that argument holds for a whole track; it does not hold for a
+   * prefix whose entire job is to end in exactly the right place. Skipping fixes here would let
+   * the dash-to-solid transition drift a fix or two either side of the genesis dot as the reader
+   * zoomed, and the dot is what the map asks them to click. The cost of being exact is small:
+   * 9,450 segments across 744 storms, against 220,194 in the archive.
+   *
+   * Walks forward and stops at the first segment that leaves genesis behind, so the prefix is
+   * traversed rather than the whole track scanned. */
+  _tracePreGenesis(ctx, rows, wx, wy, scale, ox, oy, w, h) {
+    const a = this._a;
+    const { minX, maxX } = this._world;
+    const t = a.ptT;
+    const pad = 8;
+    let segments = 0;
+    for (let r = 0; r < rows.length; r++) {
+      const i = rows[r];
+      const gMin = genesisMinute(a, i);
+      if (gMin === null) continue;
+      const start = a.tpOffset[i];
+      const end = start + a.tpCount[i];
+      if (end - start < 2 || !isPreGenesisSegment(t[start + 1], gMin)) continue;
+      const offsets = worldOffsets(minX[i], maxX[i], scale, ox, w);
+      for (let oi = 0; oi < offsets.length; oi++) {
+        const shift = offsets[oi] * scale;
+        for (let k = start; k < end - 1; k++) {
+          if (!isPreGenesisSegment(t[k + 1], gMin)) break;
+          const x0 = wx[k] * scale - ox + shift;
+          const y0 = wy[k] * scale - oy;
+          const x1 = wx[k + 1] * scale - ox + shift;
+          const y1 = wy[k + 1] * scale - oy;
+          if ((x0 < -pad && x1 < -pad) || (x0 > w + pad && x1 > w + pad)
+              || (y0 < -pad && y1 < -pad) || (y0 > h + pad && y1 > h + pad)) continue;
+          ctx.moveTo(x0, y0);
+          ctx.lineTo(x1, y1);
+          segments++;
         }
       }
     }

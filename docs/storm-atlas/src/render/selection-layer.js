@@ -5,10 +5,17 @@
  * -- is drawn here as geometry rather than described in a table, and two of its stages exist
  * only because the archive is honest about things a best-track file usually hides:
  *
- * PRE-GENESIS IS REAL TRACK. The archive's genesis is the first TROPICAL fix, and 1,580 fixes
- * in this archive sit before it, as disturbances and lows, reaching 252 hours back. Truncating
- * the track at genesis would throw away observed positions; drawing them like the rest would
- * imply a storm existed before one did. They are drawn dimmed and named.
+ * PRE-GENESIS IS REAL TRACK. The archive's genesis is the first TROPICAL fix, and 9,450 fixes
+ * in this archive sit before it, as disturbances and lows, across 744 storms and reaching 252
+ * hours back. Truncating the track at genesis would throw away observed positions; drawing them
+ * like the rest would imply a storm existed before one did. They are drawn dimmed and named --
+ * and, since this build, on the population layer as well as on the selected storm.
+ *
+ * Those three counts are ASSERTED, by scripts/test-atlas-provenance.mjs, against the pack the
+ * browser loads. The previous version of this sentence said 1,580, and no definition of
+ * pre-genesis reproduced it -- the rule was right and the sentence had gone stale. The archive
+ * is rebuilt about four times a day, so a count written into a comment drifts by construction
+ * unless something recomputes it.
  *
  * INTERPOLATION IS NOT OBSERVATION. Roughly half of all fixes were interpolated by IBTrACS
  * rather than observed, and the archive refuses to let an interpolated point establish a
@@ -22,6 +29,7 @@ import {
   CATEGORY_COLOR, CATEGORY_ORDER, GENESIS_INK, LANDFALL_INK, SELECTION_INK, UNKNOWN_INK,
   categoryIndexRaw,
 } from "./palette.js";
+import { PRE_GENESIS_ALPHA, PRE_GENESIS_DASH, landfallForm } from "./provenance-ink.js";
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
@@ -118,8 +126,8 @@ export const SelectionLayer = AtlasLayer.extend({
     // 1. pre-genesis, dimmed and dashed
     if (hasGenesis) {
       ctx.save();
-      ctx.setLineDash([2, 3]);
-      ctx.globalAlpha = 0.5;
+      ctx.setLineDash(PRE_GENESIS_DASH);
+      ctx.globalAlpha = PRE_GENESIS_ALPHA;
       ctx.strokeStyle = UNKNOWN_INK;
       ctx.beginPath();
       let moved = false;
@@ -254,8 +262,13 @@ export const SelectionLayer = AtlasLayer.extend({
     }
     for (const l of d.landfalls) {
       const [x, y] = at(l.lat, l.lon);
+      /* `form` says HOW the archive established this landfall, not how much to trust it. The
+         mark keeps LANDFALL_INK in every form, and is never coloured by category -- which is
+         what keeps a withheld Saffir-Simpson class withheld instead of letting the mark imply
+         a class the archive declined to publish. Iniki 1992 is one of those rows. */
       out.push({ x, y, t: l.t, kind: "landfall", color: LANDFALL_INK,
         label: (l.sub_region || l.region || "LANDFALL").toUpperCase(),
+        form: landfallForm(l),
         hollow: l.suspect_relocation === true });
     }
     if (end - start > 0) {
@@ -275,14 +288,40 @@ function drawMark(ctx, m) {
   // The plate's own background, so a hollow mark reads as a hole rather than as a dark dot.
   ctx.fillStyle = "#0d131d";
   if (m.kind === "landfall") {
+    /* FOUR FORMS, ONE COLOUR. The form states how the archive established the landfall; it is
+       NOT a confidence scale and must not read as one. A derived crossing is the archive doing
+       its job -- for roughly forty years of East Pacific landfalls it is the only answer that
+       exists, because NHC did not systematically flag them until about 1988. So: no second hue,
+       no alert glyph, no reduced opacity. Solid is read, outlined is derived. */
     const s = 4.2;
-    ctx.beginPath();
-    ctx.moveTo(m.x, m.y - s);
-    ctx.lineTo(m.x + s, m.y);
-    ctx.lineTo(m.x, m.y + s);
-    ctx.lineTo(m.x - s, m.y);
-    ctx.closePath();
-    if (!m.hollow) { ctx.fillStyle = m.color; ctx.fill(); } else { ctx.fill(); ctx.stroke(); }
+    const diamond = (r) => {
+      ctx.beginPath();
+      ctx.moveTo(m.x, m.y - r);
+      ctx.lineTo(m.x + r, m.y);
+      ctx.lineTo(m.x, m.y + r);
+      ctx.lineTo(m.x - r, m.y);
+      ctx.closePath();
+    };
+    const form = m.form || (m.hollow ? "suspect" : "recorded");
+    diamond(s);
+    if (form === "recorded" || form === "bracketed") {
+      ctx.fillStyle = m.color;
+      ctx.fill();
+    } else {
+      ctx.fill();   // the plate's own background, so the mark reads as a hole
+      ctx.stroke();
+    }
+    // A surrounding ring: the position is a published fix that fell inside the polygon, rather
+    // than an analyst's own landfall record. Both were read; only one was read as a landfall.
+    if (form === "bracketed") { diamond(s + 2.2); ctx.stroke(); }
+    // A cross-bar: the archive flags this crossing as a probable centre relocation and excludes
+    // it from every rate it publishes, which is more than "derived" and has to look like more.
+    if (form === "suspect") {
+      ctx.beginPath();
+      ctx.moveTo(m.x - s, m.y);
+      ctx.lineTo(m.x + s, m.y);
+      ctx.stroke();
+    }
   } else if (m.kind === "peak") {
     ctx.beginPath();
     ctx.arc(m.x, m.y, 4.6, 0, TAU);
