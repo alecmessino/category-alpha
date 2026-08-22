@@ -1391,3 +1391,60 @@
   padding:var(--at-s2) var(--at-s6) var(--at-s4);
   max-height:46%;overflow-y:auto;overscroll-behavior:contain;
 }
+
+/* ─── identity strip and question line ────────────────────────────────────────────────────
+ *
+ * TWO ROWS, 32 AND 38, AND THEY ARE DIFFERENT KINDS OF THING. The first is read once a session
+ * and is set entirely in the stamp and label tokens. The second is read constantly and is the
+ * one place on this surface a sentence is typeset as a sentence. */
+[data-atlas] .at-ident{
+  display:flex;align-items:center;gap:var(--at-s4);
+  padding:0 var(--at-s5);min-width:0;
+  background:var(--chrome-hi);
+  border-bottom:1px solid var(--rule-2);
+}
+[data-atlas] .at-ident-brand{
+  margin:0;flex:none;
+  font-family:var(--at-sans);font-size:var(--at-fs-row);font-weight:700;
+  letter-spacing:.4px;text-transform:uppercase;color:var(--t1);
+}
+[data-atlas] .at-ident-back{
+  flex:none;font-family:var(--at-mono);font-size:var(--at-fs-label);
+  letter-spacing:var(--at-tr-label);color:var(--t3);text-decoration:none;
+}
+[data-atlas] .at-ident-back:hover{color:var(--accent)}
+/* The four stamps. 9px exists for these and for nothing else on the surface. */
+[data-atlas] .at-ident-stamps{
+  display:flex;align-items:center;gap:var(--at-s4);min-width:0;overflow:hidden;
+  font-family:var(--at-mono);font-size:var(--at-fs-stamp);letter-spacing:var(--at-tr-stamp);
+  color:var(--t3);white-space:nowrap;
+}
+[data-atlas] .at-ident-stamps span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+[data-atlas] .at-ident-stamps em{font-style:normal;color:var(--t2)}
+[data-atlas] .at-ident-acts{display:flex;align-items:center;gap:var(--at-s4);flex:none;margin-left:auto}
+
+/* THE QUESTION. Serif, 19px, weight 400, no tracking -- the one serif on the surface, and the
+   one place the instrument speaks in a sentence rather than in labels. The figure beside it is
+   the cohort size at the figure token: the type scale permits exactly one 26px number on screen
+   and this is it, because it is the denominator of every rate in the deck below. */
+[data-atlas] .at-question{
+  display:flex;align-items:baseline;gap:var(--at-s5);
+  padding:0 var(--at-s5);min-width:0;
+  background:var(--chrome);
+  border-bottom:1px solid var(--rule-2);
+}
+[data-atlas] .at-question-text{
+  margin:0;min-width:0;flex:1 1 auto;
+  font-family:var(--at-serif);font-size:var(--at-fs-question);font-weight:400;
+  line-height:1.25;color:var(--t1);letter-spacing:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+[data-atlas] .at-question-n{display:flex;align-items:baseline;gap:var(--at-s2);flex:none}
+[data-atlas] .at-question-fig{
+  font-family:var(--at-mono);font-size:var(--at-fs-figure);font-weight:400;
+  line-height:1;color:var(--t1);letter-spacing:0;
+}
+[data-atlas] .at-question-of{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  text-transform:uppercase;color:var(--t3);
+}

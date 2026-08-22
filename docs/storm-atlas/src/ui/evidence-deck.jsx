@@ -348,7 +348,7 @@ function VsArchive({ delta, refused }) {
    not a storm that failed the contract, and printing NO for it would publish a judgement the
    record does not contain. */
 function SubjectCell({ row, subject }) {
-  const v = subject && subject.reached ? subject.reached[row.contractKey] : undefined;
+  const v = subjectReached(subject, row.contractKey);
   if (row.selfContribution) return <span className="at-reached">IS THE COUNT</span>;
   if (v === true) return <span className="at-reached">REACHED</span>;
   if (v === false) return <span className="at-notreached">NO</span>;
@@ -492,8 +492,79 @@ function buildGroups(r, comparison, subject) {
  * existing one. */
 export function isSelfContribution(cell, subject, contractKey, minSample) {
   if (!subject || !subject.inCohort || !cell || cell.rate === null) return false;
-  if (!subject.reached || subject.reached[contractKey] !== true) return false;
+  if (subjectReached(subject, contractKey) !== true) return false;
   const n = cell.count;
   if (!n || !minSample || n >= minSample) return false;
   return n === 1;
+}
+
+/* ── THE SUBJECT'S OWN VERDICTS ───────────────────────────────────────────────────────────
+ *
+ * A PRESENTATION READ, AND NOTHING MORE. Every value here comes from fields the pack already
+ * holds on the storm -- `max_category` and the landfall rows -- compared against the same
+ * contract keys the ledger uses. Nothing is computed that the engine does not already compute,
+ * no threshold is introduced, and the archive's own answer is never overridden.
+ *
+ * THREE STATES, NOT TWO, AND THE THIRD IS THE WHOLE POINT. A contract this storm did not reach
+ * gets NO. A contract the archive cannot answer FOR THIS STORM -- an unrecorded peak intensity,
+ * a track with no landfall record at all -- gets NOTHING, and the deck renders the slot dash.
+ * Printing NO there would publish a judgement the record does not contain: "this storm did not
+ * reach Category 3" and "nobody recorded how strong this storm got" are different statements,
+ * and the second one is not evidence of the first.
+ *
+ * A KEY IS ABSENT RATHER THAN FALSE for the undecidable case, which is what makes the
+ * distinction survive: `reached[key] === true` is REACHED, `=== false` is NO, and `undefined`
+ * is the slot. A default of false anywhere in this function would quietly convert every
+ * unrecorded storm into a failed one.
+ */
+export function subjectVerdicts(storm) {
+  if (!storm) return null;
+  const out = {};
+
+  /* INTENSITY. The ladder is ordered, so reaching cat4 means reaching everything below it --
+     the same monotonic reading the archive's own thresholds carry. An unrecorded peak leaves
+     EVERY intensity contract undecided rather than defaulting them to NO. */
+  const peak = storm.max_category;
+  const at = peak ? CATEGORY_ORDER.indexOf(peak) : -1;
+  if (at >= 0) {
+    for (const cat of CATEGORY_ORDER) {
+      if (cat === "td") continue;
+      const key = intensityContractKey(cat);
+      if (key) out[key] = at >= CATEGORY_ORDER.indexOf(cat);
+    }
+  }
+
+  /* LANDFALL. `storm.landfalls` is the archive's own detection, so an empty array is a real
+     answer -- this storm came ashore nowhere the archive recognises -- while a missing array is
+     no answer at all. Only the first case may produce a NO. */
+  if (Array.isArray(storm.landfalls)) {
+    const byRegion = new Map();
+    for (const l of storm.landfalls) {
+      if (!l || !l.region) continue;
+      const seen = byRegion.get(l.region) || { any: false, hurricane: false };
+      seen.any = true;
+      if (l.hurricane_at_landfall === true) seen.hurricane = true;
+      byRegion.set(l.region, seen);
+    }
+    /* Regions the deck will ask about are not known here, so every region the storm touched is
+       answered TRUE and the deck's own rows supply the FALSE for the rest -- see below. */
+    for (const [region, seen] of byRegion) {
+      out[landfallContractKey(region, "any")] = seen.any;
+      out[landfallContractKey(region, "hurricane")] = seen.hurricane;
+    }
+    out.__landfallsKnown = true;
+  }
+  return out;
+}
+
+/* The deck asks about regions this storm may never have touched, and an absent key would render
+   a slot where the archive has a real NO. Given a known landfall record, any region not in it is
+   a genuine "did not come ashore here" -- so the deck fills the gap at read time rather than
+   this function enumerating every region the archive has. */
+export function subjectReached(subject, contractKey) {
+  if (!subject || !subject.reached) return undefined;
+  const v = subject.reached[contractKey];
+  if (v !== undefined) return v;
+  if (subject.reached.__landfallsKnown && /^landfall_/.test(contractKey)) return false;
+  return undefined;
 }

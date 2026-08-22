@@ -128,10 +128,12 @@ const entry = join(dir, "entry.jsx");
 await writeFile(entry, `
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { EvidenceDeck } from ${JSON.stringify(resolve(ROOT, "docs/storm-atlas/src/ui/evidence-deck.jsx"))};
+import { EvidenceDeck, subjectVerdicts, subjectReached }
+  from ${JSON.stringify(resolve(ROOT, "docs/storm-atlas/src/ui/evidence-deck.jsx"))};
 export function render(props) {
   return renderToStaticMarkup(React.createElement(EvidenceDeck, props));
 }
+export { subjectVerdicts, subjectReached };
 `);
 const outfile = join(dir, "bundle.mjs");
 await build({
@@ -139,7 +141,7 @@ await build({
   jsx: "automatic", logLevel: "silent",
   external: ["react", "react-dom", "react-dom/server", "react/jsx-runtime"],
 });
-const { render } = await import(outfile);
+const { render, subjectVerdicts, subjectReached } = await import(outfile);
 
 const HTML_DEFAULT = render({ result: RESULT, comparison: COMPARISON, onEvidence: () => {} });
 const HTML_SUBJECT = render({ result: RESULT, comparison: COMPARISON, subject: SUBJECT,
@@ -307,6 +309,55 @@ console.log("\n[deck] and every state the fixtures were built to reach is on the
     ok("and the rate is NOT withheld — nothing is excluded", /%/.test(s.rate || ""), s.rate);
     ok("and it keeps its numerator", /\d/.test(s.count || ""), s.count);
   }
+}
+
+/* ── THE SUBJECT'S VERDICTS ───────────────────────────────────────────────────────────────
+ *
+ * The rule that matters here is the one that is easy to get wrong and impossible to see: an
+ * archive that does not know how strong a storm got must NOT produce a NO. "This storm did not
+ * reach Category 3" and "nobody recorded how strong this storm got" are different statements,
+ * and the second is not evidence for the first. A `false` default anywhere in that derivation
+ * silently converts every unrecorded storm into a failed one, on a column a reader scans.
+ */
+console.log("\n[deck] the subject's verdicts, and the three states they must keep");
+{
+  const IDA = { max_category: "cat4", landfalls: [
+    { region: "conus", hurricane_at_landfall: true },
+    { region: "mexico", hurricane_at_landfall: false },
+  ] };
+  const v = subjectVerdicts(IDA);
+  const R = (k) => subjectReached({ reached: v }, k);
+
+  ok("a Cat 4 storm reached every rung at or below it",
+     R("reaches_cat4_113kt") === true && R("reaches_cat3_96kt") === true
+       && R("reaches_ts_34kt") === true, JSON.stringify(v));
+  ok("and did not reach the rung above it", R("reaches_cat5_137kt") === false);
+  ok("a region it came ashore in reads REACHED", R("landfall_conus_any") === true);
+  ok("at hurricane strength where the archive says so", R("landfall_conus_hurricane") === true);
+  ok("and NOT at hurricane strength where it says otherwise",
+     R("landfall_mexico_hurricane") === false);
+  ok("a region it never reached is a real NO, not a slot",
+     R("landfall_hawaii_any") === false,
+     "the landfall record is known, so an untouched region is an answer");
+
+  /* THE TWO UNDECIDABLE CASES. Both must come back undefined -- the deck renders the slot. */
+  const NOPEAK = { max_category: null, landfalls: [] };
+  const w = subjectVerdicts(NOPEAK);
+  ok("an unrecorded peak leaves EVERY intensity contract undecided",
+     subjectReached({ reached: w }, "reaches_cat3_96kt") === undefined,
+     `got ${JSON.stringify(subjectReached({ reached: w }, "reaches_cat3_96kt"))} — an unrecorded `
+     + "peak has been rendered as a failed one");
+  ok("and never as a NO", subjectReached({ reached: w }, "reaches_cat3_96kt") !== false);
+
+  const NOLF = { max_category: "cat1", landfalls: undefined };
+  const x = subjectVerdicts(NOLF);
+  ok("a storm with no landfall record leaves every landfall contract undecided",
+     subjectReached({ reached: x }, "landfall_conus_any") === undefined,
+     "a missing landfall record has been rendered as 'came ashore nowhere'");
+  ok("while its intensity contracts are still answered",
+     subjectReached({ reached: x }, "reaches_cat1_64kt") === true);
+
+  ok("and a storm with no record at all yields no verdicts", subjectVerdicts(null) === null);
 }
 
 /* ── the seeded regressions ───────────────────────────────────────────────────────────────
