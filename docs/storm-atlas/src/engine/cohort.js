@@ -337,8 +337,14 @@ const K = {
   includeProvisional: "p", namedOnly: "n",
 };
 
-/** Keys this surface owns on the same query string, which no cohort key may take. */
-export const RESERVED_QUERY_KEYS = Object.freeze(["m", "view", "contract"]);
+/** Keys this surface owns on the same query string, which no cohort key may take.
+ *
+ * `storm` joins them with the storm -> cohort bridge. It is a SURFACE key and not a cohort one,
+ * and the distinction is load-bearing: a selected storm is something a reader is looking at, not
+ * a condition on the population. Folding it into the spec would make two identical cohorts stop
+ * comparing equal because different storms happened to be selected, and would put a storm into
+ * the citation line as though it narrowed the question. */
+export const RESERVED_QUERY_KEYS = Object.freeze(["m", "view", "contract", "storm"]);
 
 export function toQuery(spec) {
   const s = normalise(spec);

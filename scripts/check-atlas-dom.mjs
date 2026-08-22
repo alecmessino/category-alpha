@@ -926,6 +926,262 @@ console.log("\n[8c] the density surfaces say what they count");
     JSON.stringify(peaks));
 }
 
+/* ---- [8d] THE BRIDGE ---------------------------------------------------------------------
+ *
+ * The bridge is the one place on this surface where a NAMED STORM and a POPULATION appear in
+ * the same sentence, which makes it the one place the surface could accidentally start
+ * forecasting. Four things have to hold and none of them is visible in a screenshot:
+ *
+ *   IT MATCHES ON GENESIS, NOT ON THE CURSOR. The section below deliberately runs the replay
+ *   forward first, so the storm is somewhere else entirely when the cohort is built. If the
+ *   bridge ever read the cursor, the `w=` it writes would follow the track -- so the check is
+ *   an equality against the archive's own genesis column, with the cursor position proved to be
+ *   a different place.
+ *
+ *   IT DOES NOT QUIETLY DROP THE READER'S OTHER CONDITIONS. A bridge that replaced the whole
+ *   spec rather than its location would answer a different question under the same heading.
+ *
+ *   THE STORM STAYS IN ITS OWN COHORT AND THE PANEL SAYS SO. "1 of N", and where the evidence
+ *   is thin, which numerator it is inside. A regression here reads as a rate ABOUT the storm.
+ *
+ *   AND THE HAND-OFF KEEPS THE COHORT WHILE PUTTING THE STORM DOWN. The button promises exactly
+ *   that; nothing else on the surface checks that it happens.
+ *
+ * Everything is addressed by data hook, never by label -- see Chip and TextButton in kit.jsx. */
+console.log("\n[8d] the bridge — one storm, and the population it belongs to");
+{
+  const open = async (query) => {
+    await page.goto(`http://127.0.0.1:${port}/storm-atlas/?${query}`,
+      { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
+      { timeout: 90000 });
+    await page.waitForTimeout(900);
+  };
+  const has = (sel) => page.evaluate((s) => !!document.querySelector(s), sel);
+  const genesisOf = (id) => page.evaluate((sid) => {
+    const a = globalThis.__ATLAS.archive;
+    for (let i = 0; i < a.nStorms; i++) {
+      if (a.storms.str("storm_id", i) === sid) {
+        return { row: i, lat: a.genesisLat[i], lon: a.genesisLon[i] };
+      }
+    }
+    return null;
+  }, id);
+  const whereOf = () => {
+    const w = new URL(page.url()).searchParams.get("w");
+    if (!w) return null;
+    const [lat, lon, r] = w.split(",").map(Number);
+    return { lat, lon, radiusKm: r };
+  };
+
+  /* INIKI: the Central Pacific case, where the cohort's whole Hawaii numerator is this storm. */
+  const INIKI = "1992249N12229";
+  await open(`v=1&mo=8.9&storm=${encodeURIComponent(INIKI)}`);
+  const g = await genesisOf(INIKI);
+  {
+    const t = await text();
+    ok("a storm_id in the URL reopens that storm cold", /INIKI/.test(t), t.slice(0, 120));
+    ok("and the panel names the genesis point a cohort would match on",
+      /GENESIS POINT USED FOR MATCHING/.test(t));
+    const m = /GENESIS POINT USED FOR MATCHING\s*\n?\s*([\d.]+)([NS])\s+([\d.]+)([EW])/.exec(t);
+    ok("which is the archive's own genesis position",
+      !!m && Math.abs((m[2] === "N" ? 1 : -1) * Number(m[1]) - g.lat) < 0.06
+          && Math.abs((m[4] === "E" ? 1 : -1) * Number(m[3]) - g.lon) < 0.06,
+      m ? `panel ${m[0].split("\n").pop()} vs archive ${g.lat},${g.lon}` : "no position row");
+    ok("the bridge offers to be built", await has("[data-bridge-build]"));
+    ok("and has not been", !(await has("[data-bridge-read]")));
+    ok("the replay guard is silent while the transport is not holding a position",
+      !(await has("[data-bridge-replay-guard]")));
+  }
+
+  /* RUN THE STORM FORWARD, so the cursor is demonstrably not the genesis point. */
+  await page.click("[data-storm-replay]");
+  await page.waitForTimeout(1600);
+  {
+    ok("holding a position on the track raises the replay guard",
+      await has("[data-bridge-replay-guard]"));
+    const guard = await page.evaluate(() =>
+      document.querySelector("[data-bridge-replay-guard]").innerText.replace(/\s+/g, " "));
+    ok("and the guard denies being a forecast from that point",
+      /not a forecast from this point/i.test(guard), guard.slice(0, 120));
+    ok("and says what the cohort is conditioned on instead",
+      /conditioned on where storms FORMED/i.test(guard));
+  }
+
+  /* BUILD IT WHILE THE CURSOR IS ELSEWHERE. */
+  await page.click("[data-bridge-build]");
+  await page.waitForTimeout(1100);
+  {
+    const w = whereOf();
+    ok("building the cohort writes a location condition",
+      !!w, page.url());
+    ok("and it is the storm's GENESIS, to three decimals — never the replay cursor",
+      w && Math.abs(w.lat - g.lat) < 0.001 && Math.abs(w.lon - g.lon) < 0.001,
+      `${w && w.lat},${w && w.lon} vs genesis ${g.lat},${g.lon}`);
+    const cursorPos = await page.evaluate((row) => {
+      const A = globalThis.__ATLAS;
+      const r = globalThis.__ATLAS_REPLAY;
+      const ms = r && r.cursor ? r.cursor() : null;
+      if (ms === null || !A.archive.trackAt) return null;
+      return A.archive.trackAt(row, ms) || null;
+    }, g.row);
+    if (cursorPos && Number.isFinite(cursorPos.lat)) {
+      ok("and the cursor really was somewhere else at the time",
+        Math.abs(cursorPos.lat - g.lat) + Math.abs(cursorPos.lon - g.lon) > 0.5,
+        `cursor ${cursorPos.lat},${cursorPos.lon} vs genesis ${g.lat},${g.lon}`);
+    }
+    ok("the reader's other conditions survive the bridge",
+      new URL(page.url()).searchParams.get("mo") === "8.9", page.url());
+    ok("and the URL carries the storm by its archive id, never a pack-row index",
+      new URL(page.url()).searchParams.get("storm") === INIKI, page.url());
+
+    const t = await text();
+    ok("the cohort is named as including this storm",
+      /Historical cohort including this storm/i.test(t));
+    ok("and never as OTHER storms — the selected storm is a member under the methodology",
+      !/other storms/i.test(t));
+    const one = /THIS STORM\s*\n?\s*is 1 of ([\d,]+)/.exec(t);
+    const size = /COHORT\s*\n?\s*([\d,]+) storms?/.exec(t);
+    ok("the panel states the storm's own membership", !!one, t.slice(0, 200));
+    ok("and the denominator it states is the cohort on screen",
+      !!one && !!size && one[1] === size[1], one && size ? `${one[1]} vs ${size[1]}` : "");
+    ok("every condition is explained as matched or missed, none left unchecked",
+      /MATCHED/.test(t) && !/NOT CHECKED/.test(t));
+    ok("and the location condition it built is one of them",
+      /FORMED NEAR[\s\S]{0,40}MATCHED/.test(t));
+    ok("where the storm is inside a numerator, the panel says so",
+      /supplies 1 of [\d,]+ observed event/.test(t));
+    ok("and says it in the singular when the whole numerator is this one storm",
+      /supplies 1 of 1 observed event\b/.test(t),
+      (/supplies 1 of [^\n]*/.exec(t) || ["(none)"])[0]);
+    ok("stated as evidence the storm is inside, not evidence it is compared against",
+      /it is inside these numerators, not being compared against them/i.test(t));
+  }
+
+  /* THE HAND-OFF: put the storm down, keep the cohort. */
+  const bridged = whereOf();
+  await page.click("[data-bridge-read]");
+  await page.waitForTimeout(1100);
+  {
+    const t = await text();
+    const w = whereOf();
+    ok("the hand-off puts the storm down", !/GENESIS POINT USED FOR MATCHING/.test(t));
+    ok("and drops the storm from the URL, so the link is now the cohort's",
+      new URL(page.url()).searchParams.get("storm") === null, page.url());
+    ok("while the cohort it built survives untouched",
+      w && bridged && w.lat === bridged.lat && w.lon === bridged.lon
+        && w.radiusKm === bridged.radiusKm,
+      `${JSON.stringify(w)} vs ${JSON.stringify(bridged)}`);
+    ok("and the reader lands on the outcomes, with the sample gate stated",
+      /SUFFICIENT · \d+ ≥ \d+|BELOW SAMPLE/.test(t));
+  }
+
+  /* THE NON-MEMBER STATE. Darby 2022 formed in July, so an August-or-September cohort built on
+     its own genesis point does not contain it -- and the panel has to say which condition did
+     that rather than implying the rates are about it. */
+  await open("v=1&mo=8.9&storm=2022191N14249");
+  await page.click("[data-bridge-build]");
+  await page.waitForTimeout(1100);
+  {
+    const t = await text();
+    ok("a storm outside its own genesis cohort is flagged, not quietly counted",
+      /THIS STORM IS NOT IN THAT COHORT/.test(t));
+    ok("the condition it misses is named", /MISSED · August or September/.test(t));
+    ok("the heading does not claim it matched", !/Why it matched/.test(t));
+    ok("and no contribution is claimed for it", !/supplies 1 of/.test(t));
+    ok("while the rates are explicitly not about it",
+      /rates the cohort publishes are not about it/i.test(t));
+  }
+
+  /* SCOPE SURVIVES THE BRIDGE. A cohort built on an Atlantic genesis still refuses the Hawaii
+     contract as OUT OF SCOPE rather than publishing a zero -- the bridge changed the location
+     condition, not the methodology that decides what the cohort can be asked. */
+  await open("v=1&storm=2004247N10332");
+  await page.click("[data-bridge-build]");
+  await page.waitForTimeout(600);
+  await page.click("[data-bridge-read]");
+  await page.waitForTimeout(1100);
+  {
+    const t = await text();
+    ok("a bridged Atlantic cohort still reaches OUT OF SCOPE",
+      /OUT OF SCOPE/.test(t));
+    /* AND THE ZERO IS NOT LEFT ALONE. Methodology 1.1.0 refuses a SKILL number here, not the
+       base rate: "a base rate can be quoted with its interval; a calibrated or skill-scored
+       probability cannot". So the ladder does print Hawaii as 0 / 75 with a Wilson interval,
+       and that is correct -- what would be dishonest is printing it with nothing to say that
+       the events exist outside this population. The refusal carries both counts. */
+    ok("and says how many events this population holds versus the whole archive",
+      /\d+ in the NA basin · \d+ archive-wide · \d+ needed/.test(t),
+      (/[^\n]*archive-wide[^\n]*/.exec(t) || ["(no line)"])[0]);
+    ok("so the zero is never left readable as an empirical never",
+      /outside the population this query draws from/.test(t));
+  }
+
+  /* THE TWO VERDICTS THAT ARE NEITHER YES NOR NO, on screen.
+     Both are states the panel could regress into a flat MISSED without any other check
+     noticing, and a flat MISSED is an empirical claim about a named storm. */
+  {
+    const prov = await page.evaluate(() => {
+      const a = globalThis.__ATLAS.archive;
+      for (let i = 0; i < a.nStorms; i++) {
+        if (a.storms.bool("provisional", i) === true && Number.isFinite(a.genesisLat[i])) {
+          return a.storms.str("storm_id", i);
+        }
+      }
+      return null;
+    });
+    ok("the pack holds a provisional storm", prov !== null);
+    await open(`v=1&storm=${encodeURIComponent(prov)}`);
+    await page.click("[data-bridge-build]");
+    await page.waitForTimeout(1100);
+    const t = await text();
+    ok("a provisional storm is not in a cohort that excludes provisional seasons",
+      /THIS STORM IS NOT IN THAT COHORT/.test(t));
+    ok("and the RECORD SCOPE is named as what excluded it, not one of the reader's conditions",
+      /RECORD SCOPE[\s\S]{0,60}MISSED/.test(t),
+      (/RECORD SCOPE[^\n]*\n[^\n]*/.exec(t) || ["(no record-scope row)"])[0]);
+    ok("while the conditions it does satisfy still read as matched",
+      /FORMED NEAR[\s\S]{0,40}MATCHED/.test(t));
+  }
+  {
+    const unmeasured = await page.evaluate(() => {
+      const a = globalThis.__ATLAS.archive;
+      for (let i = 0; i < a.nStorms; i++) {
+        if (a.storms.num("max_vmax_kt", i) === null && Number.isFinite(a.genesisLat[i])) {
+          return a.storms.str("storm_id", i);
+        }
+      }
+      return null;
+    });
+    ok("the pack holds a storm with no recorded intensity", unmeasured !== null);
+    await open(`v=1&i=cat1&storm=${encodeURIComponent(unmeasured)}`);
+    await page.click("[data-bridge-build]");
+    await page.waitForTimeout(1100);
+    const t = await text();
+    ok("an intensity condition the archive cannot judge reads NOT JUDGED, never MISSED",
+      /NOT JUDGED/.test(t) && !/REACHED[\s\S]{0,40}MISSED/.test(t),
+      (/REACHED[^\n]*\n[^\n]*/.exec(t) || ["(no intensity row)"])[0]);
+  }
+
+  /* NO GENESIS, NO BRIDGE. 54 storms in this pack carry no genesis position. */
+  {
+    const row = await page.evaluate(() => {
+      const a = globalThis.__ATLAS.archive;
+      for (let i = 0; i < a.nStorms; i++) {
+        if (!Number.isFinite(a.genesisLat[i])) return i;
+      }
+      return -1;
+    });
+    ok("the pack holds storms with no genesis position", row >= 0);
+    await selectRow(row);
+    await page.waitForTimeout(700);
+    const t = await text();
+    ok("and the bridge offers no button for them", !(await has("[data-bridge-build]")));
+    ok("saying instead that there is no position to match on",
+      /no genesis point for this storm/i.test(t));
+  }
+}
+
 console.log("\n[9] the page did not complain");
 ok("no claim rendered as a registry failure, in any state visited above",
   sentinelSeen === null, sentinelSeen || "");

@@ -153,8 +153,11 @@ export function Bar({ pct, tone }) {
   );
 }
 
-export function Note({ children, style }) {
-  return <div className="at-note" style={style}>{children}</div>;
+/* `hook`, like TextButton's, stamps a stable `data-*` attribute. A Note is prose, and prose is
+   rewritten; a gate that asserted a note's presence by matching its sentence would be a gate
+   that fails the first time the sentence is improved. */
+export function Note({ children, style, hook }) {
+  return <div className="at-note" style={style} {...(hook ? { [hook]: "" } : {})}>{children}</div>;
 }
 
 export function Prose({ children, style }) {
@@ -253,7 +256,7 @@ export function CohortSpec({ text, url }) {
 }
 
 /** The panel's masthead: kicker, title, optional location line, and the Cohort Spec. */
-export function Masthead({ kicker, right, title, titleClass, loc, spec, children }) {
+export function Masthead({ kicker, right, title, titleClass, loc, spec, specUrl, children }) {
   return (
     <div className="at-masthead">
       <div className="at-kicker">
@@ -263,7 +266,7 @@ export function Masthead({ kicker, right, title, titleClass, loc, spec, children
       <h2 className={titleClass ? `at-${titleClass}` : undefined}>{title}</h2>
       {loc ? <div className="at-loc">{loc}</div> : null}
       {children}
-      {spec ? <CohortSpec text={spec} /> : null}
+      {spec ? <CohortSpec text={spec} url={specUrl} /> : null}
     </div>
   );
 }
