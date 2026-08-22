@@ -1652,3 +1652,38 @@
   padding:1px var(--at-s2);cursor:pointer;
 }
 [data-atlas] .at-fold-btn:hover{border-color:var(--accent)}
+
+/* THE DECK'S PREAMBLE. Spans every column: the count, the gate, the effective sample and what
+   the rates assume all qualify the whole table rather than any row of it. */
+[data-atlas] .at-deck-pre{grid-column:1/-1;padding:var(--at-s3) 0 var(--at-s2)}
+[data-atlas] .at-pre-line{
+  display:flex;align-items:baseline;gap:var(--at-s3);flex-wrap:wrap;min-width:0;
+  margin-bottom:var(--at-s1);
+}
+[data-atlas] .at-pre-n{
+  font-family:var(--at-mono);font-size:var(--at-fs-figure);line-height:1;color:var(--t1);
+}
+[data-atlas] .at-pre-ok,[data-atlas] .at-pre-no,[data-atlas] .at-pre-shape{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+}
+[data-atlas] .at-pre-ok{color:var(--pos)}
+[data-atlas] .at-pre-no{color:var(--neg)}
+[data-atlas] .at-pre-shape{color:var(--t3);margin-left:auto}
+[data-atlas] .at-pre-prose{
+  font-family:var(--at-sans);font-size:var(--at-fs-row);line-height:1.45;color:var(--t2);
+}
+[data-atlas] .at-pre-assume,[data-atlas] .at-deck-env{grid-column:1/-1}
+[data-atlas] .at-pre-assume > summary,[data-atlas] .at-deck-env > summary{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  text-transform:uppercase;color:var(--t3);cursor:pointer;padding:var(--at-s1) 0;
+}
+[data-atlas] .at-pre-assume > summary:hover,[data-atlas] .at-deck-env > summary:hover{color:var(--t1)}
+[data-atlas] .at-pre-assume p{margin:0 0 var(--at-s2)}
+[data-atlas] .at-deck-env{border-top:1px solid var(--rule-2);padding-top:var(--at-s2)}
+[data-atlas] .at-env-body{padding-bottom:var(--at-s3)}
+[data-atlas] .at-deck-empty{grid-column:1/-1;padding:var(--at-s4) 0;max-width:76ch}
+[data-atlas] .at-empty-k{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--flag);margin-bottom:var(--at-s3);
+}
+[data-atlas] .at-deck-empty p{margin:0 0 var(--at-s3)}

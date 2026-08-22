@@ -22,6 +22,24 @@
 import React from "react";
 import { TextButton } from "./kit.jsx";
 
+function ScaleLine({ manifest }) {
+  if (!manifest) return null;
+  const c = manifest.counts;
+  const items = [
+    [c.storms, "STORMS"], [c.track_points, "TRACK POINTS"], [c.genesis_events, "GENESIS EVENTS"],
+    [c.landfalls, "LANDFALLS"], [c.environment, "ENVIRONMENT OBS"],
+  ];
+  return (
+    <div className="at-ledger">
+      {items.map(([n, label]) => (
+        <span className="at-fig" key={label}>
+          <b>{n.toLocaleString()}</b><span>{label}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 /* Who this is, which archive, and the two ways out. One line, 32px, read once.
  *
  * `data-open-ledger` and the provenance control keep their hooks and their behaviour: the
@@ -34,6 +52,14 @@ export function IdentityStrip({ archive, onProvenance, onLedger }) {
     <header className="at-ident" data-identity-strip>
       <h1 className="at-ident-brand">Storm Atlas</h1>
       <a className="at-ident-back" href="../" title="back to Millibar Terminal">‹ Millibar</a>
+
+      {/* THE ARCHIVE'S OWN SCALE. Five counts from the pack that was actually loaded, not from
+          anything written here -- which is what makes them a check on the load rather than a
+          decoration. The classes carry a measured degradation ladder: the fifth figure drops at
+          1560, the fourth at 1400, the third at 1240, the rest at 1040, on the rule that a strip
+          gives up WHOLE ITEMS rather than half a word. A truncated count is a wrong count; an
+          absent one is only absent. */}
+      <ScaleLine manifest={m} />
 
       <div className="at-ident-stamps">
         {/* THE STAMP TOKEN, AND THE ONLY THING ALLOWED TO USE IT. Methodology version, pack hash

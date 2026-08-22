@@ -260,7 +260,11 @@ await clickLatLng(14.6, -113.9);
   ok("and disclaimed as not a forecast", /THIS IS NOT A FORECAST/.test(t));
   ok("and denies being a cone", /not a forecast cone/.test(t));
   ok("a Wilson interval accompanies the rates",
-    /\[\s*\d+\s*[-–—]\s*\d+%\s*\]/.test(t));
+    /* DECIMALS ALLOWED, as the second interval check on this page has always allowed them. The
+       property is "a Wilson interval accompanies the rates"; the integer-only form was an
+       artefact of the compact RateLine, and the deck prints every interval to a tenth. A regex
+       narrower than the property it names is a gate that fails on a correct surface. */
+    /\[\s*\d+(\.\d+)?\s*[-–—]\s*\d+(\.\d+)?%\s*\]/.test(t));
   /* THE WEIGHTED RATE CHANGED MEANING IN 3.2, SO THE CHECK CHANGED WITH IT -- and got harder.
      The probe was a distance-weighted analog pool and published a weighted rate beside the
      unweighted one. A COHORT spends distance as a hard membership condition instead, so
@@ -407,12 +411,26 @@ console.log("\n[4b] the six refusals — reachable, distinct, and honest about t
    * So the property is checked where it lives: for every outcome row that REFUSES, the row
    * carries no percentage at all. The refusal occupies the rate column and there is nothing for
    * a reader to mistake for a rate. */
+  /* HOW A REFUSING ROW IS RECOGNISED, PORTED WITH THE GRAMMAR IT DESCRIBES.
+   *
+   * This matched the six original mark-and-title pairings as adjacent text -- "⊘ RATE REFUSED".
+   * Under the three-mark grammar that pairing no longer exists: RATE REFUSED and OUT OF SCOPE
+   * both carry ▤ now, and the mark sits in the OUTCOME cell while the word sits in STATUS, with
+   * five cells between them. The regex would have found zero refusing rows on a deck full of
+   * them, and the assertion below -- which passes when there are none -- would have gone green
+   * over exactly the case it exists to check.
+   *
+   * The PROPERTY is unchanged and the detection is now stronger: a row that refuses is one
+   * carrying [data-refusal], which is the attribute the surface stakes its refusal on, rather
+   * than a string two cells apart. The old text form is kept as an alternative so the same gate
+   * still recognises the three-column shell while both exist. */
   const refusedRows = await page.evaluate(() => {
     const titles = /⊘ RATE REFUSED|↺ CONDITIONED ON|▤ BASE RATE ONLY|⇱ OUT OF SCOPE/;
     return [...document.querySelectorAll("[data-outcome]")]
       .map((el) => ({ label: el.getAttribute("data-outcome"),
+        hook: !!el.querySelector("[data-refusal]"),
         text: (el.innerText || "").replace(/\s+/g, " ") }))
-      .filter((r) => titles.test(r.text));
+      .filter((r) => r.hook || titles.test(r.text));
   });
   const leaked = refusedRows.filter((r) => /\d+\.\d%/.test(r.text));
   ok("a refused rate never prints as a percentage where its number would have been",

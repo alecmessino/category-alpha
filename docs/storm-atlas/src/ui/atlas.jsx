@@ -672,6 +672,10 @@ export function Atlas() {
             onToggleTiming={() => setTimingOpen((v) => !v)}
             foldLandfall={vw < 1440} landfallOpen={landfallOpen}
             onToggleLandfall={() => setLandfallOpen((v) => !v)}
+            /* The pathway disclosure is always present, not gated on the layer being on:
+               it is the sentence that stops a shaded map being read as a forecast cone, and a
+               reader who turns the layer on should not have to also discover the caveat. */
+            spec={cohort} pathway
             environment={<EnvLens archive={archive} coverage={envCov} lens={envLens}
               loading={envLoading} onLoad={loadEnv} />} />
         </div>

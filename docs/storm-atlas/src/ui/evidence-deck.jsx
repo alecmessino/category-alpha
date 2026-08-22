@@ -40,6 +40,8 @@ import { regionLabel } from "../engine/cohort-language.js";
 import { intensityContractKey, landfallContractKey } from "../engine/calibration.js";
 import { REFUSALS } from "./refusal.jsx";
 import { refusalKindOf, countsOf } from "./outcome-card.jsx";
+import { Refusal } from "./refusal.jsx";
+import { claimText } from "./kit.jsx";
 
 const CIRCULAR = "CONDITIONED ON -- NOT AN OUTCOME";
 
@@ -121,13 +123,44 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
  */
 export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTiming = false,
   timingOpen = false, onToggleTiming, foldLandfall = false, landfallOpen = false,
-  onToggleLandfall, environment = null }) {
+  onToggleLandfall, environment = null, spec = null, pathway = null }) {
   if (!result) return null;
   const r = result;
+
+  /* AN EMPTY POOL IS NAMED, NOT TABULATED. With no storms every cell would be 0 of 0 and every
+     rate a refusal, which renders as a full table of nothing -- and a reader scanning it reads
+     structure before content and sees an answer. The state has one thing to say and says it. */
+  if (!r.n_cases) return <EmptyPool result={r} spec={spec} />;
+
   const groups = buildGroups(r, comparison, subject, foldLandfall && !landfallOpen);
+
+  /* WHICH REFUSAL SENTENCES REPEAT, WHICH IS WHAT THE BOUND IS ACTUALLY FOR.
+   *
+   * The specification bounds refusal copy to eighteen words with the full argument behind SEE
+   * THE EVIDENCE. Applied literally to every row it breaks a rule that outranks it: a refused
+   * rate prints THE ARCHIVE'S OWN REASON, VERBATIM -- panel rule 2 -- and truncating an OUT OF
+   * SCOPE reason at eighteen words cuts it precisely before "outside the population this query
+   * draws from", the clause that distinguishes "these events do not exist" from "these events
+   * exist somewhere you cannot reach". Methodology 1.1.0 split BASE RATE ONLY in two to make
+   * exactly that distinction; a bound that erases it would undo the split on screen.
+   *
+   * The repetition the bound exists to prevent is real, though: below the sample gate every
+   * contract refuses on the SAME sentence, twelve times over. So the two rules are reconciled
+   * the way the panel already reconciled them -- by HOISTING rather than truncating. A reason
+   * shared by more than one row is stated once beneath the group and marked on each row; a
+   * reason unique to its row is printed in full, where it is the finding rather than noise. */
+  const reasonCounts = new Map();
+  for (const g of groups) {
+    for (const row of g.rows) {
+      const reason = reasonOf(row);
+      if (reason) reasonCounts.set(reason, (reasonCounts.get(reason) || 0) + 1);
+    }
+  }
+  const shared = new Set([...reasonCounts].filter(([, n]) => n > 1).map(([k]) => k));
 
   return (
     <div className="at-deck" data-evidence-deck data-timing-folded={foldTiming ? "" : undefined}>
+      <DeckPreamble result={r} spec={spec} />
       <DeckHead foldTiming={foldTiming} timingOpen={timingOpen} onToggleTiming={onToggleTiming}
         subject={subject} />
       {groups.map((g) => (
@@ -135,8 +168,9 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
           <GroupRow group={g} foldTiming={foldTiming && !timingOpen} subject={subject} />
           {g.rows.map((row) => (
             <DataRow key={row.key} row={row} foldTiming={foldTiming && !timingOpen}
-              subject={subject} onEvidence={onEvidence} />
+              subject={subject} onEvidence={onEvidence} shared={shared} />
           ))}
+          <SharedReason group={g} shared={shared} onEvidence={onEvidence} />
           {g.folded ? (
             <FoldedRegions folded={g.folded} onOpen={onToggleLandfall} />
           ) : null}
@@ -156,6 +190,21 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
           never opens it would read every environment figure as though it covered the cohort. A
           disclosure that can be CLOSED is a way to reclaim space; one that starts closed is a
           way to hide a qualification. */}
+      {/* THE PATHWAY, AS A DISCLOSURE. It is a COUNT of distinct storms through each cell and
+          not a probability of anything, which is the single most misreadable surface here -- a
+          shaded map over an ocean is read as a forecast cone unless it says otherwise, in as
+          many words, next to itself. */}
+      {pathway ? (
+        <details className="at-deck-env" data-deck-pathway open>
+          <summary>HISTORICAL PATHWAY FREQUENCY</summary>
+          <div className="at-env-body">
+            <p className="at-foot-line">
+              <strong>THIS IS NOT A FORECAST.</strong> {claimText("atlas.pathway")}
+            </p>
+          </div>
+        </details>
+      ) : null}
+
       {environment ? (
         <details className="at-deck-env" data-deck-environment open>
           <summary>THE ENVIRONMENT THEY FORMED IN — a lens, not a filter</summary>
@@ -224,7 +273,7 @@ function GroupRow({ group, foldTiming, subject }) {
  * "a status detached from its row" unreachable rather than merely unlikely. A refused row takes
  * the refused branch for the rate cell AND the status cell in the same expression; there is no
  * arrangement of props that produces one without the other. */
-function DataRow({ row, foldTiming, subject, onEvidence }) {
+function DataRow({ row, foldTiming, subject, onEvidence, shared }) {
   const { label, tone, cell, unscoreable, delta, timing, contractKey, selfContribution } = row;
   const refused = !!unscoreable || (cell && (cell.status === CIRCULAR || cell.rate === null));
   const kind = unscoreable ? refusalKindOf(unscoreable)
@@ -278,9 +327,13 @@ function DataRow({ row, foldTiming, subject, onEvidence }) {
         ) : null}
       </span>
 
+      {/* ONE PERCENT SIGN, AT THE END. "[19.2%–31.2%]" reads as two quantities; the interval is
+          one, and this is the form every other surface in the repository prints it in. */}
       <span className="at-dc at-dc-int">
         {!refused && cell.ci95 ? (
-          <span className="at-val">[{pct1(cell.ci95[0])}–{pct1(cell.ci95[1])}]</span>
+          <span className="at-val">
+            [{(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%]
+          </span>
         ) : <span className="at-slot">—</span>}
       </span>
 
@@ -331,6 +384,7 @@ function DataRow({ row, foldTiming, subject, onEvidence }) {
           out, which a two-word status cell cannot do. */}
       {refused ? (
         <RowRefusal kind={kind} cell={cell} unscoreable={unscoreable}
+          hoisted={shared && shared.has(reasonOf(row))}
           onEvidence={onEvidence && contractKey ? () => onEvidence(contractKey) : undefined} />
       ) : null}
       {selfContribution ? <SelfContribution row={row} subject={subject} /> : null}
@@ -392,22 +446,54 @@ function SubjectCell({ row, subject }) {
 
 /* AT MOST EIGHTEEN WORDS, CARRYING THE COUNT. Never an alert box, never a tint, never a coloured
    background -- a refusal is part of the argument, not an error in it. */
-function RowRefusal({ kind, cell, unscoreable, onEvidence }) {
+function RowRefusal({ kind, cell, unscoreable, onEvidence, hoisted }) {
   const r = REFUSALS[kind];
   const statement = unscoreable ? unscoreable.reason
     : kind === "CONDITIONED_ON" ? cell.reason
       : cell.refused_reason;
   return (
     <div className="at-deck-say" data-refusal={r.kind}>
-      <span className="at-say-text">{bound(statement)}</span>
+      {/* VERBATIM WHERE IT IS THIS ROW'S OWN FINDING; a marker where the same sentence is about
+          to be said again under the group. Never truncated: see the note in EvidenceDeck. */}
+      <span className="at-say-text">{hoisted ? null : statement}</span>
+      {/* THE LINE THAT SEPARATES A REFUSAL A READER CAN ACT ON FROM ONE NOBODY CAN. The words
+          are the Refusal component's own, because a reader who learns "A LIMIT OF THE RECORD"
+          in one place must not meet a paraphrase of it in another. */}
       <span className="at-say-remedy">
-        {r.resolvable === "no" ? r.irreducible : (r.remedyShort || r.remedy)}
+        {r.resolvable === "no" ? <><strong>A LIMIT OF THE RECORD.</strong> {r.irreducible}</>
+          : <><strong>{r.resolvable === "partly" ? "PARTLY IN YOUR HANDS." : "YOU CAN CHANGE THIS."}</strong>{" "}
+            {r.remedyShort || r.remedy}</>}
       </span>
       {onEvidence ? (
         <button type="button" className="at-say-link" data-evidence-link onClick={onEvidence}>
           SEE THE EVIDENCE →
         </button>
       ) : null}
+    </div>
+  );
+}
+
+/* WHICH SENTENCE A ROW WOULD PRINT, so repetition can be counted before anything is rendered. */
+function reasonOf(row) {
+  if (row.unscoreable) return row.unscoreable.reason || null;
+  const c = row.cell;
+  if (!c) return null;
+  if (c.status === CIRCULAR) return c.reason || null;
+  return c.rate === null ? (c.refused_reason || null) : null;
+}
+
+/* ONE SENTENCE, ONCE, UNDER THE GROUP THAT SHARES IT. Below the sample gate every contract in a
+   group refuses on the same words -- twelve lines of one fact. Hoisted here, the rows keep their
+   marks and their status words and the reason is stated in full exactly once. */
+function SharedReason({ group, shared, onEvidence }) {
+  const reasons = [...new Set(group.rows.map(reasonOf).filter((x) => x && shared.has(x)))];
+  if (!reasons.length) return null;
+  return (
+    <div className="at-deck-say" data-refusal="RATE_REFUSED" data-shared-reason>
+      {reasons.map((x, i) => <span className="at-say-text" key={i}>{x}</span>)}
+      <span className="at-say-remedy">
+        <strong>YOU CAN CHANGE THIS.</strong> {REFUSALS.RATE_REFUSED.remedy}
+      </span>
     </div>
   );
 }
@@ -446,6 +532,69 @@ function SelfContribution({ row, subject }) {
 }
 
 
+
+/* ── WHAT THE READER NEEDS BEFORE THE FIRST RATE ─────────────────────────────────────────
+ *
+ * THE COUNT AND THE GATE ARE ONE FACT -- how much evidence is there, and is it enough -- so they
+ * read as one line. The effective sample size keeps its own, because it carries a statement
+ * neither of the others makes: every storm in a cohort counts once, membership being decided by
+ * hard conditions rather than by a weight, so the ESS IS the count and no storm is standing in
+ * for another. A distance-weighted analog pool does not have that property.
+ *
+ * AND THE ASSUMPTIONS TRAVEL WITH THE NUMBERS. This is the fourth panel rule, and it is the one
+ * a table makes easiest to lose: the rates are GENESIS-CONDITIONED, landfall does not decompose
+ * as a product of marginals, and a variable used to define a cohort is not reported as an
+ * outcome of it. None of that is standing methodology a reader can be assumed to carry -- it is
+ * a statement about how the numbers on THIS screen were computed.
+ *
+ * EVERY SENTENCE COMES FROM docs/app/claims.js, through claimText, and none is written here. The
+ * registry is the one authorship site for a capability claim; a second copy in a component is
+ * exactly the drift the claim audit exists to catch. */
+function DeckPreamble({ result, spec }) {
+  const r = result;
+  const n = r.n_cases;
+  return (
+    <div className="at-deck-pre" data-deck-preamble>
+      <div className="at-pre-line">
+        <span className="at-pre-n">{n.toLocaleString()}</span>
+        <span className="at-foot-k">storms</span>
+        <span className={r.sufficient ? "at-pre-ok" : "at-pre-no"}>
+          {r.sufficient ? `SUFFICIENT · ${n} ≥ ${r.min_sample}`
+            : `BELOW SAMPLE · ${n} < ${r.min_sample}`}
+        </span>
+        <span className="at-foot-k">EFFECTIVE SAMPLE SIZE</span>
+        <span className="at-val">{Number(r.effective_sample_size).toFixed(1)}</span>
+        <span className="at-pre-shape">count · rate · 95% Wilson</span>
+      </div>
+
+      <div className="at-pre-line at-pre-prose">
+        Distinct storms reaching each threshold, over the storms whose outcome the archive
+        actually recorded.
+      </div>
+
+      {/* WHY NO WEIGHTED RATE, SAID RATHER THAN SILENTLY OMITTED. Distance is already a
+          condition of membership, so weighting by it again would count the same variable twice
+          and the weighted rate would equal the unweighted one. Printed only when a location
+          condition is what makes it true. */}
+      {spec && spec.where ? (
+        <div className="at-pre-line at-pre-prose" data-weighting-note>
+          Every storm here counts once. Distance is already a condition of membership — within{" "}
+          {spec.where.radiusKm} km — so it is not also used as a weight; weighting by it again
+          would count the same variable twice. The weighted rate would equal the unweighted rate,
+          and is not printed twice under two names.
+        </div>
+      ) : null}
+
+      <details className="at-pre-assume" data-rates-assume open>
+        <summary>WHAT THESE RATES ARE, AND WHAT THEY ASSUME</summary>
+        <p className="at-foot-line">{claimText("atlas.subject")}</p>
+        <p className="at-foot-line">{claimText("atlas.rates")}</p>
+        <p className="at-foot-line">{claimText("atlas.conditioning")}</p>
+      </details>
+    </div>
+  );
+}
+
 /* THE FOLD NAMES WHAT IT HOLDS. "+ 4 MORE" would be an affordance that hides a refusal behind
    a number; this one says which regions, how many contracts, and how many of them refused. */
 function FoldedRegions({ folded, onOpen }) {
@@ -461,6 +610,45 @@ function FoldedRegions({ folded, onOpen }) {
           ? ` — ${folded.refusals} of ${folded.contracts} refuse at this sample size`
           : " — all scoreable"}
       </span>
+    </div>
+  );
+}
+
+/* THE EMPTY POOL. Its words are the panel's own, because they are the only correct ones: the
+   per-condition counts are taken IN THE ORDER THE FILTERS RUN, so the largest is not necessarily
+   the condition that emptied the cohort -- and a reader told otherwise will remove the wrong one.
+   The genesis-only paragraph appears only with a location condition, which is the only state it
+   is true of. */
+function EmptyPool({ result, spec }) {
+  return (
+    <div className="at-deck-empty" data-empty-pool>
+      <div className="at-empty-k">[ NO STORMS MATCHED THIS COHORT ]</div>
+      <p className="at-foot-line">
+        There is no sample here, so there are no rates. Every condition you set is listed above
+        with what it removed — but those counts are taken in the order the filters run, and a
+        storm rejected by two conditions is counted only against the first. The largest number is
+        therefore not necessarily the condition that emptied the cohort. Remove them one at a
+        time to find out which one did.
+      </p>
+      {spec && spec.where ? (
+        <>
+          <p className="at-foot-line">
+            Matching is on GENESIS LOCATION ONLY: where a storm formed, not where it went. A point
+            along a common track will usually match nothing, because storms arrive at those
+            positions rather than forming there.
+          </p>
+          <p className="at-foot-line">
+            Widen the radius only if that is a question you actually mean to ask — a wider circle
+            answers a different question, it does not find a missing sample.
+          </p>
+        </>
+      ) : null}
+      {result.gaps && result.gaps.length ? (
+        <div data-archive-gaps className="at-foot-block">
+          <span className="at-foot-k">GAPS THE ARCHIVE RECORDED</span>
+          {result.gaps.map((g, i) => <span className="at-foot-line" key={i}>{g}</span>)}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -503,16 +691,15 @@ function GroupQualification({ which, result }) {
             {gaps.map((g, i) => <span className="at-foot-line" key={i}>{g}</span>)}
           </div>
         ) : null}
+        {/* RENDERED THROUGH Refusal, NOT RE-DRAWN. UNKNOWN is one of the six states the
+            Epistemic Key documents, and test-atlas-refusals proves every state the surface can
+            print has a row a reader can look it up in. A hand-drawn copy here would carry the
+            words without the hook -- present on screen and invisible to the gate that checks
+            the correspondence, which is the worst of both. */}
         {unknown > 0 ? (
           <div className="at-foot-block" data-unknown-note>
-            <span className="at-mark" data-mark="NOT_EVALUABLE" aria-hidden="true">
-              {MARKS.NOT_EVALUABLE.glyph}
-            </span>
-            <span className="at-foot-k">{REFUSALS.UNKNOWN.title}</span>
-            <span className="at-foot-line">
-              {unknown.toLocaleString()} storm{unknown === 1 ? "" : "s"}.{" "}
-              {REFUSALS.UNKNOWN.irreducible}
-            </span>
+            <Refusal kind="UNKNOWN" compact
+              counts={`${unknown.toLocaleString()} storm${unknown === 1 ? "" : "s"}`} />
           </div>
         ) : null}
       </div>
