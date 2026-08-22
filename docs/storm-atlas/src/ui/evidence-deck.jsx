@@ -120,10 +120,11 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
  *                                         disclosure. The data is not dropped; the columns are.
  */
 export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTiming = false,
-  timingOpen = false, onToggleTiming }) {
+  timingOpen = false, onToggleTiming, foldLandfall = false, landfallOpen = false,
+  onToggleLandfall, environment = null }) {
   if (!result) return null;
   const r = result;
-  const groups = buildGroups(r, comparison, subject);
+  const groups = buildGroups(r, comparison, subject, foldLandfall && !landfallOpen);
 
   return (
     <div className="at-deck" data-evidence-deck data-timing-folded={foldTiming ? "" : undefined}>
@@ -136,8 +137,31 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
             <DataRow key={row.key} row={row} foldTiming={foldTiming && !timingOpen}
               subject={subject} onEvidence={onEvidence} />
           ))}
+          {g.folded ? (
+            <FoldedRegions folded={g.folded} onOpen={onToggleLandfall} />
+          ) : null}
+          <GroupQualification which={g.key} result={r} />
         </React.Fragment>
       ))}
+
+      {/* THE ENVIRONMENT, AS A DISCLOSURE RATHER THAN A SECTION.
+          It is a LENS and not a filter -- under half this archive carries any environment and
+          none of it predates 1982 -- so it qualifies the cohort without narrowing it, and it
+          belongs below the outcomes rather than beside them. Rendered through the existing
+          EnvLens so its coverage rules, its era-boundary warning and its refusal are the ones
+          already proven by test-atlas-env; this decides only where it sits.
+
+          OPEN BY DEFAULT, WHICH IS THE POINT OF THE DISCLOSURE HERE. Collapsing it would put a
+          coverage statement -- "1,430 of 3,885 evaluable" -- behind a click, and a reader who
+          never opens it would read every environment figure as though it covered the cohort. A
+          disclosure that can be CLOSED is a way to reclaim space; one that starts closed is a
+          way to hide a qualification. */}
+      {environment ? (
+        <details className="at-deck-env" data-deck-environment open>
+          <summary>THE ENVIRONMENT THEY FORMED IN — a lens, not a filter</summary>
+          <div className="at-env-body">{environment}</div>
+        </details>
+      ) : null}
     </div>
   );
 }
@@ -421,6 +445,109 @@ function SelfContribution({ row, subject }) {
   );
 }
 
+
+/* THE FOLD NAMES WHAT IT HOLDS. "+ 4 MORE" would be an affordance that hides a refusal behind
+   a number; this one says which regions, how many contracts, and how many of them refused. */
+function FoldedRegions({ folded, onOpen }) {
+  return (
+    <div className="at-deck-foot" data-folded-regions>
+      <button type="button" className="at-fold-btn" data-landfall-fold onClick={onOpen}
+        title="show every landfall region">
+        + {folded.contracts} MORE LANDFALL CONTRACTS
+      </button>
+      <span className="at-foot-line">
+        {folded.regions.join(", ")}
+        {folded.refusals
+          ? ` — ${folded.refusals} of ${folded.contracts} refuse at this sample size`
+          : " — all scoreable"}
+      </span>
+    </div>
+  );
+}
+
+/* ── WHAT QUALIFIES THE ROWS, DIRECTLY BENEATH THE ROWS IT QUALIFIES ──────────────────────
+ *
+ * These are not refusals and they do not belong to any single row. They are the archive's own
+ * statements about the evidence, and leaving them out was the most expensive omission in the
+ * first draft of this deck: with no conditions set nothing refuses, every status cell is empty,
+ * and the surface published thirteen confident rates with NOTHING qualifying them. The
+ * answer-density criterion that caught it -- "material evidence qualification visible" --
+ * measured zero, correctly.
+ *
+ * PLACED PER GROUP, WHICH IS BOTH A LEGIBILITY FIX AND A CORRECTNESS ONE.
+ *
+ * The first version put all of it at the deck's foot, below eighteen rows. It was present and it
+ * required scrolling to reach, which for an acceptance test measured at 0px scroll is the same
+ * as absent. But moving it UP to the head was not available either: the archive's own sentence
+ * reads "Intensity rates above are therefore biased LOW", so a block above the rates would make
+ * the engine's text wrong about the page, and rewording a measured finding to suit a layout is
+ * how a finding stops being one.
+ *
+ * Directly under the INTENSITY group satisfies both: "above" stays true, and it lands inside the
+ * first screen. That is also exactly where the panel this replaces put it, for the same reason.
+ *
+ * `data-archive-gaps` lets the DOM gate exempt the percentages quoted INSIDE these sentences --
+ * "1.7% Cat 3 in the 1960s" -- from the no-bare-percentage rule by identity rather than by
+ * position on the page.
+ */
+function GroupQualification({ which, result }) {
+  if (which === "intensity") {
+    const gaps = result.gaps || [];
+    const unknown = unknownOf(result);
+    if (!gaps.length && !unknown) return null;
+    return (
+      <div className="at-deck-foot" data-deck-qualification={which}>
+        {gaps.length ? (
+          <div data-archive-gaps className="at-foot-block">
+            <span className="at-foot-k">GAPS THE ARCHIVE RECORDED</span>
+            {gaps.map((g, i) => <span className="at-foot-line" key={i}>{g}</span>)}
+          </div>
+        ) : null}
+        {unknown > 0 ? (
+          <div className="at-foot-block" data-unknown-note>
+            <span className="at-mark" data-mark="NOT_EVALUABLE" aria-hidden="true">
+              {MARKS.NOT_EVALUABLE.glyph}
+            </span>
+            <span className="at-foot-k">{REFUSALS.UNKNOWN.title}</span>
+            <span className="at-foot-line">
+              {unknown.toLocaleString()} storm{unknown === 1 ? "" : "s"}.{" "}
+              {REFUSALS.UNKNOWN.irreducible}
+            </span>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
+  /* THE LANDFALL DENOMINATOR, when a condition has changed what these rates are rates OF. Not a
+     refusal -- they are real -- but "43.8% made landfall in Mexico" means something different
+     one condition later, and the difference is a factor of three. */
+  if (which === "landfall" && result.landfall_note) {
+    return (
+      <div className="at-deck-foot" data-deck-qualification={which}>
+        <div className="at-foot-block" data-landfall-note>
+          <span className="at-foot-k">LANDFALL DENOMINATOR</span>
+          <span className="at-foot-line">{result.landfall_note}</span>
+        </div>
+      </div>
+    );
+  }
+  return null;
+}
+
+/* THE UNKNOWNS ARE ONE SET, NOT ONE PER ROW. Every intensity contract shares a denominator, so
+   the largest n_unknown across them IS the count of storms the archive never recorded an outcome
+   for. Taken as a max rather than a sum for exactly that reason: summing would count the same
+   storms once per contract. Same derivation the panel used. */
+function unknownOf(r) {
+  let n = 0;
+  for (const c of CATEGORY_ORDER) {
+    const cell = r.intensity[c];
+    if (cell && cell.n_unknown > n) n = cell.n_unknown;
+  }
+  return n;
+}
+
 /* ── ROW ASSEMBLY ─────────────────────────────────────────────────────────────────────────
  *
  * Groups never interleave, because a landfall rate and an intensity rate do not share a
@@ -428,7 +555,7 @@ function SelfContribution({ row, subject }) {
  * group the archive's own ladder order is the default; landfall regions order by evidence, which
  * is what the panel already did -- alphabetical order buried the one region these storms reached
  * under four they did not. */
-function buildGroups(r, comparison, subject) {
+function buildGroups(r, comparison, subject, foldLandfall) {
   const groups = [];
   const tte = r.time_to_event || {};
 
@@ -458,9 +585,19 @@ function buildGroups(r, comparison, subject) {
   /* LANDFALL. Two contracts per region -- any, and >=64 kt -- on their own rows rather than
      packed into one, because they have different numerators and a shared row would have to pick
      one of them to draw. */
-  const regions = Object.entries(r.landfall || {})
+  const allRegions = Object.entries(r.landfall || {})
     .sort((a, b) => b[1].any.count - a[1].any.count || a[0].localeCompare(b[0]));
-  if (regions.length) {
+
+  /* BELOW 1440 THE LOW-EVIDENCE REGIONS COLLAPSE TO ONE ROW, and which ones is decided by the
+     archive rather than by the alphabet: the list is already ordered by evidence, so the ones
+     that fold are the ones a reader scanning from the top reaches last. The summary states how
+     many regions it holds AND how many of their contracts refused -- a fold that hid four
+     refusals behind the word "more" would be hiding exactly what a reader needs to know is
+     there. One click brings them all back, which is the rule for every fold on this surface. */
+  const KEEP = 3;
+  const regions = foldLandfall ? allRegions.slice(0, KEEP) : allRegions;
+  const hidden = foldLandfall ? allRegions.slice(KEEP) : [];
+  if (allRegions.length) {
     const rows = [];
     for (const [region, kinds] of regions) {
       for (const kind of ["any", "hurricane"]) {
@@ -479,11 +616,21 @@ function buildGroups(r, comparison, subject) {
         });
       }
     }
+    const hiddenRefusals = hidden.reduce((n, [region, kinds]) => n
+      + ["any", "hurricane"].filter((k) => {
+        const c = kinds[k];
+        const u = r.unscoreable ? r.unscoreable[`${region}:${k}`] : undefined;
+        return !!u || (c && c.rate === null);
+      }).length, 0);
     groups.push({
       key: "landfall", label: "LANDFALL",
       denom: rows.length && rows[0].cell ? rows[0].cell.n_storms : null,
       note: r.landfall_note ? "denominator changed by a condition" : null,
       rows,
+      folded: hidden.length
+        ? { regions: hidden.map(([region]) => regionLabel(region)), refusals: hiddenRefusals,
+            contracts: hidden.length * 2 }
+        : null,
     });
   }
 

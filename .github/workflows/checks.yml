@@ -432,6 +432,21 @@ jobs:
       - name: Verify the plate's aperture stays inside its bounds
         run: node scripts/check-plate-aperture.mjs --self-test --require-browser
 
+      # THE REAL-STATE MATRIX. Every layout bug this integration produced was invisible in the
+      # state it was introduced in and obvious two states later: the plate measured 0x0 only once
+      # it was inside a single-cell row; the rows came out shifted only once a transport existed
+      # to claim row 3; the qualification block was missing only when NOTHING refused -- which is
+      # the unqueried archive, the state a developer looks at least.
+      #
+      # So the surface is driven through twenty-two real states and the same invariants asserted
+      # in all of them. Coverage is DETECTED AND REPORTED rather than assumed: whether a cohort
+      # contains a BASE RATE ONLY contract depends on the archive and not on the query, so the
+      # harness records which refusals and statuses it actually reached and fails if any of the
+      # four refusal kinds went unvisited. A matrix that silently never reached a refusal proves
+      # nothing about refusals.
+      - name: Verify every real state holds, and 1440x900 answers five of five
+        run: node scripts/check-atlas-states.mjs --require-browser
+
       - name: Verify the terminal's panels refuse on screen, not just in the engine
         run: node scripts/check-panel-dom.mjs --require-browser
 

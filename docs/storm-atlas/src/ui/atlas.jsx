@@ -31,6 +31,7 @@ import { AtlasMap } from "./map.jsx";
 import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
 import { CohortPanel } from "./cohort-panel.jsx";
+import { EnvLens } from "./env-lens.jsx";
 /* THE STACKED SHELL'S OWN PARTS. Mounted only behind ?arch=deck for now -- see the render. */
 import { IdentityStrip, QuestionLine } from "./shell.jsx";
 import { ConditionStrip } from "./condition-strip.jsx";
@@ -163,6 +164,7 @@ export function Atlas() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
   const [timingOpen, setTimingOpen] = React.useState(false);
+  const [landfallOpen, setLandfallOpen] = React.useState(false);
 
 
   /* The manifest lands first so the scale line can paint while the 972 KB track block is still
@@ -631,6 +633,12 @@ export function Atlas() {
         <IdentityStrip archive={archive} onProvenance={() => setProvOpen(true)}
           onLedger={() => openLedger(null)} />
 
+        {/* THE METHODOLOGY NOTICE. It lived in the rail, and the rail is gone -- but the thing
+            it says is not a rail concern: a URL written under one methodology and opened under
+            another is describing a different question than the one it names, and the reader has
+            to be told before they read the answer. It sits with the question for that reason. */}
+        <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
+
         <QuestionLine question={sentence} kept={result.kept}
           total={archive.manifest.counts.storms} />
 
@@ -661,7 +669,11 @@ export function Atlas() {
           <EvidenceDeck result={result} comparison={comparison} subject={subject}
             onEvidence={openLedger}
             foldTiming={vw < 1440} timingOpen={timingOpen}
-            onToggleTiming={() => setTimingOpen((v) => !v)} />
+            onToggleTiming={() => setTimingOpen((v) => !v)}
+            foldLandfall={vw < 1440} landfallOpen={landfallOpen}
+            onToggleLandfall={() => setLandfallOpen((v) => !v)}
+            environment={<EnvLens archive={archive} coverage={envCov} lens={envLens}
+              loading={envLoading} onLoad={loadEnv} />} />
         </div>
 
         <div className="atlas-transport">

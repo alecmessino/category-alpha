@@ -1622,3 +1622,33 @@
 [data-atlas].atlas-stacked .at-platefoot{bottom:0}
 /* Clear of the foot row rather than sharing the bottom-right corner with the coordinates. */
 [data-atlas].atlas-stacked .at-legend{bottom:calc(var(--at-band-bot) + var(--at-plate-gutter))}
+
+/* THE DECK'S FOOT. Spans every column, because what it says qualifies every row above it. */
+[data-atlas] .at-deck-foot{
+  grid-column:1/-1;
+  display:flex;flex-direction:column;gap:var(--at-s2);
+  padding:var(--at-s3) 0 var(--at-s4);
+  border-top:1px solid var(--rule-2);
+}
+[data-atlas] .at-foot-block{
+  display:flex;align-items:baseline;gap:var(--at-s2);flex-wrap:wrap;min-width:0;
+}
+[data-atlas] .at-foot-k{
+  flex:none;font-family:var(--at-mono);font-size:var(--at-fs-label);
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;color:var(--t3);
+}
+[data-atlas] .at-foot-line{
+  font-family:var(--at-sans);font-size:var(--at-fs-row);line-height:1.45;color:var(--t2);
+  min-width:0;
+}
+[data-atlas] .at-deck-foot .at-mark{
+  flex:none;width:11px;text-align:center;font-family:var(--at-mono);
+  font-size:var(--at-fs-label);color:var(--t3);
+}
+[data-atlas] .at-fold-btn{
+  flex:none;font-family:var(--at-mono);font-size:var(--at-fs-label);
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;
+  background:transparent;border:1px solid var(--rule-2);color:var(--accent);
+  padding:1px var(--at-s2);cursor:pointer;
+}
+[data-atlas] .at-fold-btn:hover{border-color:var(--accent)}
