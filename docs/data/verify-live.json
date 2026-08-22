@@ -1,20 +1,24 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-22T01:51:54.265Z",
+  "ranAt": "2026-08-22T03:30:03.146Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "6864d245e12ab63ff1c8ddcfac3aeaa90b9a2296",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32544609996",
+  "sha": "6d62f1a0da3efa75545311f5f8bc71b1df2dc3cf",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32549099490",
   "ok": false,
-  "passed": 45,
+  "passed": 44,
   "total": 46,
   "failures": [
     {
+      "check": "served snapshot is fresh",
+      "detail": "2026-08-22T02:36:32.781Z · 53m old"
+    },
+    {
       "check": "all markets carried",
-      "detail": "300 contracts · 50 series · droppedForCap=18"
+      "detail": "300 contracts · 51 series · droppedForCap=18"
     }
   ],
-  "thirdPartyFailures": 70,
+  "thirdPartyFailures": 66,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -33,8 +37,8 @@
     },
     {
       "check": "served snapshot is fresh",
-      "pass": true,
-      "detail": "2026-08-22T01:40:31.306Z · 11m old"
+      "pass": false,
+      "detail": "2026-08-22T02:36:32.781Z · 53m old"
     },
     {
       "check": "renders: Situation",
@@ -94,12 +98,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "7 ranked of 15 candidates · 116/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "7 ranked of 12 candidates · 116/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 5 displayed-only · unverifiable=0"
+      "detail": "0 executable · 12 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -109,7 +113,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "83/96 tile(s) rendered · 13 hole(s) · 0 still loading"
+      "detail": "81/96 tile(s) rendered · 15 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -124,7 +128,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 2 screens tall (2751px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 843px · BANKROLL 749px · ▾ 698px"
+      "detail": "3 tabs · Situation is 2 screens tall (2744px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 836px · BANKROLL 742px · ▾ 698px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -149,12 +153,12 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "2/2 frame(s) carry a consensus peak against 2 in the snapshot · 2 carry its cycle · frame is 0m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "2/2 frame(s) carry a consensus peak against 2 in the snapshot · 2 carry its cycle · frame is 14m behind the snapshot (lagging — wiring asserted, coverage is the CI gate's job) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=LOW lag=309m raw=99%"
+      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=LOW lag=351m raw=99%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -164,12 +168,12 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "3 guidance cycle(s) turned over → 3 row(s) · 3 aircraft fix(es) arrived → 3 row(s) · 2 P-update row(s) · 2 SHIPS · 0 pass · strip arrivals=8"
+      "detail": "3 guidance cycle(s) turned over → 3 row(s) · 3 aircraft fix(es) arrived → 3 row(s) · 2 P-update row(s) · 2 SHIPS · 0 pass · strip arrivals=4"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: past the 180-min line — Lala 309m, Moke 305m · 0 row(s), 0 held, 0 TAKE · forced: 1 anchored row(s) pushed past it → 1 HOLD, 0 SUSPECT, 0 ACTIONABLE · 5 stale-crossing row(s) in the register"
+      "detail": "live: past the 180-min line — Lala 351m, Moke 347m · 0 row(s), 0 held, 0 TAKE · forced: 1 anchored row(s) pushed past it → 1 HOLD, 0 SUSPECT, 0 ACTIONABLE · 4 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
@@ -189,22 +193,22 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "112 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "82 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "78 tile(s) served on reload · 112 in cache"
+      "detail": "83 tile(s) served on reload · 82 in cache"
     },
     {
       "check": "all markets carried",
       "pass": false,
-      "detail": "300 contracts · 50 series · droppedForCap=18"
+      "detail": "300 contracts · 51 series · droppedForCap=18"
     },
     {
       "check": "board grouped by series",
       "pass": true,
-      "detail": "50 group headers vs 50 series"
+      "detail": "51 group headers vs 51 series"
     },
     {
       "check": "resting depth populated",
