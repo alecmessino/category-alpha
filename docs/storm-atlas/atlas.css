@@ -1687,3 +1687,13 @@
   color:var(--flag);margin-bottom:var(--at-s3);
 }
 [data-atlas] .at-deck-empty p{margin:0 0 var(--at-s3)}
+
+/* THE METHODOLOGY NOTICE IS OUT OF FLOW, AND THAT IS STRUCTURAL RATHER THAN COSMETIC.
+   It renders only when a shared URL was written under a different methodology than the one now
+   loaded -- rare, and important enough to interrupt. As a grid child it became a SEVENTH row in a
+   six-row model: measured, it displaced every track and took the plate to aspect 4.235, outside
+   its ceiling. Out of flow it interrupts without moving anything. */
+[data-atlas].atlas-stacked [data-methodology-moved]{
+  position:absolute;top:70px;left:0;right:0;z-index:820;margin:0;
+  background:var(--chrome-hi);
+}

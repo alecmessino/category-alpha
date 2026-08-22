@@ -190,6 +190,8 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
           never opens it would read every environment figure as though it covered the cohort. A
           disclosure that can be CLOSED is a way to reclaim space; one that starts closed is a
           way to hide a qualification. */}
+      <RatesAssume />
+
       {/* THE PATHWAY, AS A DISCLOSURE. It is a COUNT of distinct storms through each cell and
           not a probability of anything, which is the single most misreadable surface here -- a
           shaded map over an ocean is read as a forecast cone unless it says otherwise, in as
@@ -585,13 +587,33 @@ function DeckPreamble({ result, spec }) {
         </div>
       ) : null}
 
-      <details className="at-pre-assume" data-rates-assume open>
-        <summary>WHAT THESE RATES ARE, AND WHAT THEY ASSUME</summary>
-        <p className="at-foot-line">{claimText("atlas.subject")}</p>
-        <p className="at-foot-line">{claimText("atlas.rates")}</p>
-        <p className="at-foot-line">{claimText("atlas.conditioning")}</p>
-      </details>
     </div>
+  );
+}
+
+/* WHAT THE RATES ARE AND WHAT THEY ASSUME — BELOW THE TABLE, NOT ABOVE IT.
+ *
+ * This is standing methodology: genesis-conditioned rates, landfall not decomposing as a product
+ * of marginals, a variable used to define a cohort not being reported as an outcome of it. All
+ * three are true of every cohort and none is a fact about THIS one.
+ *
+ * It sat above the table for one draft and cost the acceptance test: three claim paragraphs of
+ * fifty words each pushed the outcome rows and their qualification off the first screen, and
+ * answer density fell from five of five to four. Below the table it is still rendered, still in
+ * the page's text, still one scroll from the rates it governs -- and the first screen is the
+ * question, the cohort, the map, the rates and what qualifies them, which is what the density
+ * target is measuring.
+ *
+ * NOT COLLAPSED TO ACHIEVE THAT. A closed disclosure would have bought the same pixels and hidden
+ * a statement about how every number above was computed; moving it is not hiding it. */
+function RatesAssume() {
+  return (
+    <details className="at-pre-assume" data-rates-assume open>
+      <summary>WHAT THESE RATES ARE, AND WHAT THEY ASSUME</summary>
+      <p className="at-foot-line">{claimText("atlas.subject")}</p>
+      <p className="at-foot-line">{claimText("atlas.rates")}</p>
+      <p className="at-foot-line">{claimText("atlas.conditioning")}</p>
+    </details>
   );
 }
 

@@ -125,8 +125,16 @@ const AUDIT = () => {
     if (!status) bad.push(`${name}: no status cell in the row`);
     if (refusal) {
       seen.push("refusal:" + refusal.getAttribute("data-refusal"));
-      if (PCT.test(row.textContent || "")) {
-        bad.push(`${name}: refused, yet a percentage appears in the row`);
+      /* THE CELLS, NOT THE PROSE. A conditioned-on row's reason legitimately contains "100%" --
+         "a rate would be 100% because of how the question was asked, not because of anything the
+         record says" -- and that sentence is the refusal, not a published rate. Scanning the
+         whole row flagged it, which was a false positive in this audit rather than a bug on the
+         surface. What must carry no percentage is the row's DATA CELLS: the place a reader looks
+         for a number. */
+      const cells = [...row.querySelectorAll(".at-dc")]
+        .map((c) => c.textContent || "").join(" ");
+      if (PCT.test(cells)) {
+        bad.push(`${name}: refused, yet a percentage appears in a data cell`);
       }
       if (!(status && status.textContent.trim())) bad.push(`${name}: refused with an empty status`);
     }
@@ -189,7 +197,10 @@ const STATES = [
   ["pre-genesis storm", `storm=${picks.preGenesis || picks.plain}`, 1440, 900],
   ["storm inside its own cohort", `i=cat4&storm=${picks.plain}`, 1440, 900],
   ["storm outside the cohort", `i=cat5&s0=2020&storm=${picks.plain}`, 1440, 900],
-  ["replay mid-life", "m=replay", 1440, 900],
+  /* NOT "m=replay": `m` is the METHODOLOGY VERSION on this surface, and setting it to a mode
+     name makes the surface correctly report a methodology mismatch. Replay is entered through
+     the builder's mode chip, which is where a reader enters it. */
+  ["replay mid-life", "__replay__", 1440, 900],
   ["narrow workstation", "", 1280, 800],
   ["narrower still", "", 1180, 800],
   ["the collapse width", "", 1100, 800],
@@ -200,7 +211,16 @@ const STATES = [
 console.log("[states] the invariants hold in every state a reader can reach");
 const coverage = new Set();
 for (const [name, query, w, h] of STATES) {
-  await open(query, w, h);
+  await open(query === "__replay__" ? "" : query, w, h);
+  if (query === "__replay__") {
+    /* Entered the way a reader enters it: open the builder, click the mode chip. */
+    const opener = await page.$("[data-zone-edit]");
+    if (opener) { await opener.click(); await page.waitForTimeout(250); }
+    const chip = await page.$('[data-chip="mode-replay"]');
+    if (chip) { await chip.click(); await page.waitForTimeout(900); }
+    const close = await page.$("[data-sheet-close]");
+    if (close) { await close.click(); await page.waitForTimeout(400); }
+  }
   const { bad, seen } = await page.evaluate(AUDIT);
   seen.forEach((x) => coverage.add(x));
   ok(`${name.padEnd(30)} ${w}x${h}`, bad.length === 0 && errors.length === 0,

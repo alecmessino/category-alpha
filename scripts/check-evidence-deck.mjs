@@ -71,6 +71,17 @@ const REFUSED_REASON = "3 storms with a known outcome < min_sample=10, so this r
   + "rather than published as a number nobody should act on.";
 
 const RESULT = {
+  /* THE COHORT'S OWN FIELDS, not just its contracts. The first version of this fixture carried
+     only the per-contract tables, and the deck rendered nothing at all once it learned to name
+     an empty pool -- `n_cases` was absent, so `!r.n_cases` was true and every row was correctly
+     replaced by the empty-pool state. The fixture was describing a cohort that could not exist.
+     These are the fields engine/cohort.js actually returns alongside the contracts. */
+  n_cases: 190,
+  kept: 190,
+  sufficient: true,
+  effective_sample_size: 190,
+  gaps: ["1,704 of 3,885 storms in this cohort are from before 1971, when the observing network "
+       + "was sparser; intensity rates above are therefore biased LOW."],
   min_sample: 10,
   landfall_note: null,
   time_to_event: { cat3: { median: 61, p25: 44, p75: 92, n: 40 } },
@@ -240,10 +251,28 @@ const AUDIT = () => {
     if (t && !WORDS.has(t)) bad.push(`a status cell prints a word outside the vocabulary: "${t}"`);
   }
 
-  /* A refusal statement is bounded — the argument lives behind SEE THE EVIDENCE. */
-  for (const el of document.querySelectorAll(".at-say-text")) {
-    const n = (el.textContent || "").trim().split(/\s+/).length;
-    if (n > 19) bad.push(`a refusal statement runs to ${n} words`);
+  /* NO SENTENCE IS SAID TWICE, WHICH IS WHAT THE WORD BOUND WAS ACTUALLY PROTECTING.
+   *
+   * The specification bounds refusal copy to eighteen words. Enforced as a word count it breaks
+   * a rule that outranks it -- a refused rate prints the archive's reason VERBATIM -- because an
+   * OUT OF SCOPE reason truncates precisely before the clause distinguishing "these events do
+   * not exist" from "these events exist somewhere you cannot reach".
+   *
+   * The problem the bound exists for is REPETITION: below the sample gate twelve contracts
+   * refuse on one sentence. So that is what is asserted. A reason shared by more than one row is
+   * hoisted beneath its group and stated once; a reason unique to its row prints in full. Either
+   * way no row repeats another, and nothing is truncated. */
+  const rowStatements = [];
+  for (const row of document.querySelectorAll("[data-outcome]")) {
+    for (const el of row.querySelectorAll(".at-say-text")) {
+      const t = (el.textContent || "").trim();
+      if (t) rowStatements.push(t);
+    }
+  }
+  const dupes = rowStatements.filter((t, i) => rowStatements.indexOf(t) !== i);
+  if (dupes.length) {
+    bad.push(`a refusal sentence is repeated across rows instead of hoisted: `
+      + `"${dupes[0].slice(0, 60)}…" (${dupes.length} repeats)`);
   }
   return bad;
 };
@@ -423,9 +452,18 @@ if (process.argv.includes("--self-test")) {
         "$1REACHED"),
     },
     {
-      name: "a refusal statement running past the bound",
-      mutate: (h) => h.replace(/(<span class="at-say-text">)/,
-        "$1" + "word ".repeat(25)),
+      name: "one refusal sentence repeated across rows instead of hoisted",
+      /* Copies the first row-level statement onto a second row, which is exactly what hoisting
+         exists to prevent and what a word bound would not have caught. */
+      mutate: (h) => {
+        const m = /<span class="at-say-text">([^<]{20,})<\/span>/.exec(h);
+        if (!m) return h;
+        let seen = 0;
+        return h.replace(/<span class="at-say-text">[^<]*<\/span>/g, (x) => {
+          seen += 1;
+          return seen === 2 ? `<span class="at-say-text">${m[1]}</span>` : x;
+        });
+      },
     },
   ];
 
