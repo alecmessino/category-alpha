@@ -126,11 +126,6 @@ page.on("console", (m) => {
   if (m.type() === "error" && !/net::|ERR_/.test(m.text())) errors.push("console: " + m.text().slice(0, 200));
 });
 
-/* THE SHELL UNDER TEST. Empty by default -- this gate drives whatever the surface serves. During
-   the stacked-shell transition ATLAS_QUERY=arch=deck points it at the new architecture, so the
-   SAME assertions run against both and the port is proven before the old shell is deleted rather
-   than after. The variable goes away with the flag. */
-const EXTRA = process.env.ATLAS_QUERY ? `${process.env.ATLAS_QUERY}&` : "";
 /* THE BUILDER MOVED, SO THE WAY TO IT MOVED WITH IT.
  *
  * In the three-column shell every chip was resident in the rail and a click found it. In the
@@ -147,7 +142,7 @@ const EXTRA = process.env.ATLAS_QUERY ? `${process.env.ATLAS_QUERY}&` : "";
 const openBuilder = async () => {
   if (await page.$("[data-builder-sheet]")) return;
   const opener = await page.$("[data-zone-edit]");
-  if (!opener) return;                       // three-column shell: the rail is already showing
+  if (!opener) return;                       // nothing to open
   await opener.click();
   await page.waitForTimeout(250);
 };
@@ -157,7 +152,7 @@ const chip = async (name, { optional = false } = {}) => {
   return page.click(`[data-chip="${name}"]`);
 };
 
-await page.goto(`http://127.0.0.1:${port}/storm-atlas/?${EXTRA}`, { waitUntil: "domcontentloaded" });
+await page.goto(`http://127.0.0.1:${port}/storm-atlas/`, { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive, { timeout: 90000 });
 await page.waitForTimeout(700);
 
@@ -1012,7 +1007,7 @@ console.log("\n[8c] the density surfaces say what they count");
 console.log("\n[8d] the bridge — one storm, and the population it belongs to");
 {
   const open = async (query) => {
-    await page.goto(`http://127.0.0.1:${port}/storm-atlas/?${EXTRA}${query}`,
+    await page.goto(`http://127.0.0.1:${port}/storm-atlas/?${query}`,
       { waitUntil: "domcontentloaded" });
     await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
       { timeout: 90000 });

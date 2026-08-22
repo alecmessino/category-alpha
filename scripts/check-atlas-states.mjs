@@ -83,7 +83,7 @@ page.on("console", (m) => {
 const open = async (query, w = 1440, h = 900) => {
   errors = [];
   await page.setViewportSize({ width: w, height: h });
-  await page.goto(`http://127.0.0.1:${port}/storm-atlas/?arch=deck&${query}`,
+  await page.goto(`http://127.0.0.1:${port}/storm-atlas/?${query}`,
     { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive, { timeout: 90000 });
   await page.waitForTimeout(1000);

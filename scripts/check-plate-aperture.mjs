@@ -121,7 +121,7 @@ const VIEWPORTS = [
 
 console.log("[aperture] the plate stays inside 1.421-3.2 at every supported viewport");
 for (const [w, h] of VIEWPORTS) {
-  await open("arch=deck", w, h);
+  await open("", w, h);
   const m = await measure();
   if (!m) { ok(`${w}x${h}`, false, "no stacked shell or no plate on the page"); continue; }
   const wide = w >= h * 1.9 ? "  (wide/short — the ceiling's case)" : "";
@@ -136,7 +136,7 @@ for (const [w, h] of VIEWPORTS) {
    it. Both change the aspect, and the bound has to hold through both. */
 console.log("\n[aperture] and through the states that change the plate's box");
 {
-  await open("arch=deck", 1440, 900);
+  await open("", 1440, 900);
   const sid = await page.evaluate(() => {
     const a = globalThis.__ATLAS.archive;
     for (let i = 0; i < a.nStorms; i++) {
@@ -148,7 +148,7 @@ console.log("\n[aperture] and through the states that change the plate's box");
   ok("a storm with landfalls exists to select", !!sid);
   if (sid) {
     for (const [w, h] of [[1440, 900], [1280, 800], [1920, 900]]) {
-      await open(`arch=deck&storm=${sid}`, w, h);
+      await open(`storm=${sid}`, w, h);
       const m = await measure();
       ok(`${String(w + "x" + h).padEnd(10)} selected storm — plate ${m.w}x${m.h}, aspect ${m.ar.toFixed(3)}`,
          m.docked && m.ar >= FLOOR - 0.002 && m.ar <= CEILING + 0.002,
@@ -221,7 +221,7 @@ if (process.argv.includes("--self-test")) {
   ];
 
   for (const seed of SEEDS) {
-    await open("arch=deck", seed.at[0], seed.at[1]);
+    await open("", seed.at[0], seed.at[1]);
     await page.addStyleTag({ content: seed.css });
     await page.waitForTimeout(400);
     const m = await measure();
@@ -232,7 +232,7 @@ if (process.argv.includes("--self-test")) {
 
   console.log("\n[aperture] and a change that moves nothing is not a failure");
   {
-    await open("arch=deck", 1440, 900);
+    await open("", 1440, 900);
     await page.addStyleTag({ content: "[data-atlas] .at-deck{letter-spacing:0}" });
     await page.waitForTimeout(300);
     const m = await measure();

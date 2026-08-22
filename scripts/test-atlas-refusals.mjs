@@ -102,7 +102,7 @@ console.log("\n[3] the panels use no mark the key does not define");
 
   /* Every panel that can print a refusal, named explicitly. A glob would quietly stop covering
      a panel the day someone renamed one, which is the failure this is meant to catch. */
-  const PANELS = ["cohort-panel.jsx", "cohort-builder.jsx", "outcome-card.jsx", "env-lens.jsx",
+  const PANELS = ["evidence-deck.jsx", "cohort-builder.jsx", "outcome-card.jsx", "env-lens.jsx",
                   "calibration.jsx", "storm-panel.jsx", "atlas.jsx", "kit.jsx"];
   const byKind = new Map(states.map((st) => [st.kind, st]));
   const seen = new Set();

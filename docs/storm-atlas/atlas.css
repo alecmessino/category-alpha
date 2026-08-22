@@ -1697,3 +1697,66 @@
   position:absolute;top:70px;left:0;right:0;z-index:820;margin:0;
   background:var(--chrome-hi);
 }
+
+/* ─── the light shell ─────────────────────────────────────────────────────────────────────
+ *
+ * THE DEFAULT SURFACE IS PAPER; THE DARK ONE IS A STORED PREFERENCE. Both shells are the same
+ * architecture with the same components -- what changes is which ink the semantic tokens resolve
+ * to, and nothing else. No component knows which shell it is in.
+ *
+ * THE PLATE IS EXCLUDED FROM THE SWAP BY CONSTRUCTION, and "by construction" is doing real work
+ * here. The cartographic plate is dark in BOTH shells: it is a canvas set into an instrument, not
+ * a panel of the page. But its furniture -- the title line, the scale bar, the coastline
+ * statement, the graticule labels -- inherits the surface's text tokens, so remapping --t1..--t4
+ * to paper inks would paint dark ink on a dark plate and make every one of them unreadable.
+ *
+ * So the stage RE-DECLARES the dark set for its own subtree. The values are not repeated: the
+ * dark ramp is named once as --d-*, the default shell points the semantic tokens at it, the
+ * light shell points them at the paper tokens, and the stage points them back. One set of hexes,
+ * three references, no drift.
+ *
+ * EVERY SEMANTIC INK IS CHOSEN FOR THE GROUND IT LANDS ON. green-600 measures 2.67:1 on paper and
+ * red-600 3.92:1 -- both below AA for a 10px status word -- so the light shell takes green-800 at
+ * 5.79 and red-700 at 5.25. Asserted in scripts/check-atlas-adherence.mjs rather than eyeballed. */
+[data-atlas]{
+  --d-chrome:#131b27; --d-chrome-hi:#18212f; --d-sunken:#0e151f;
+  --d-t1:#eaf0f7; --d-t2:#a2b2c6; --d-t3:#7d8fa5; --d-t4:#63758b;
+  --d-rule:#222d3c; --d-rule-2:#2e3a4a; --d-rule-3:#405064; --d-rule-4:#56687d;
+  --d-accent:#4fc3f7; --d-accent-2:#2b6f92; --d-flag:#f0b429;
+  --d-pos:#3ddc97; --d-neg:#ef5350; --d-special:#9b7bf0;
+  --d-hatch:repeating-linear-gradient(45deg,#3a4a60 0 1.5px,transparent 1.5px 5px);
+}
+
+/* THE LIGHT SHELL, AND IT IS THE DEFAULT: `:not([data-shell="dark"])` rather than
+   `[data-shell="light"]`, so a surface that has never stored a preference is paper. */
+[data-atlas]:not([data-shell="dark"]){
+  --chrome:var(--at-paper);
+  --chrome-hi:var(--at-paper-raised);
+  --sunken:var(--at-paper-sunken);
+  --t1:var(--at-ink-1); --t2:var(--at-ink-2); --t3:var(--at-ink-3); --t4:var(--at-ink-4);
+  --rule:var(--at-paper-rule); --rule-2:var(--at-paper-hair);
+  --rule-3:var(--at-paper-strong); --rule-4:var(--at-paper-strong);
+  --accent:var(--at-paper-accent); --accent-2:#4a7d92;
+  --flag:var(--at-paper-flag);
+  --pos:#166534; --neg:#b91c1c; --special:#6d28d9;
+  --hatch:repeating-linear-gradient(45deg,#a9a196 0 1.5px,transparent 1.5px 5px);
+  --surface-app:var(--chrome); --surface-card:var(--chrome); --surface-sunken:var(--sunken);
+  --border-dim:var(--rule); --border-strong:var(--rule-2);
+  --text-1:var(--t1); --text-2:var(--t3); --text-link:var(--accent);
+  --accent-bright:var(--accent); --border-accent:var(--accent);
+  color-scheme:light;
+}
+
+/* AND THE PLATE STAYS DARK, IN BOTH SHELLS, INCLUDING EVERYTHING DRAWN OVER IT. */
+[data-atlas]:not([data-shell="dark"]) .atlas-stage{
+  --chrome:var(--d-chrome); --chrome-hi:var(--d-chrome-hi); --sunken:var(--d-sunken);
+  --t1:var(--d-t1); --t2:var(--d-t2); --t3:var(--d-t3); --t4:var(--d-t4);
+  --rule:var(--d-rule); --rule-2:var(--d-rule-2);
+  --rule-3:var(--d-rule-3); --rule-4:var(--d-rule-4);
+  --accent:var(--d-accent); --accent-2:var(--d-accent-2); --flag:var(--d-flag);
+  --pos:var(--d-pos); --neg:var(--d-neg); --special:var(--d-special);
+  --hatch:var(--d-hatch);
+  --text-1:var(--t1); --text-2:var(--t3); --text-link:var(--accent);
+  --border-dim:var(--rule); --border-strong:var(--rule-2);
+  color-scheme:dark;
+}

@@ -30,9 +30,8 @@ import { loadCalibration } from "../engine/calibration.js";
 import { AtlasMap } from "./map.jsx";
 import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
-import { CohortPanel } from "./cohort-panel.jsx";
 import { EnvLens } from "./env-lens.jsx";
-/* THE STACKED SHELL'S OWN PARTS. Mounted only behind ?arch=deck for now -- see the render. */
+/* THE STACKED SHELL'S OWN PARTS. */
 import { IdentityStrip, QuestionLine } from "./shell.jsx";
 import { ConditionStrip } from "./condition-strip.jsx";
 import { EvidenceDeck, subjectVerdicts } from "./evidence-deck.jsx";
@@ -136,20 +135,6 @@ export function Atlas() {
   const [provOpen, setProvOpen] = React.useState(false);
   const [view, setView] = React.useState(null);
 
-  /* THE TRANSITION FLAG, AND IT IS TEMPORARY BY CONSTRUCTION.
-   *
-   * `?arch=deck` mounts the stacked shell; everything else keeps the three-column one. The
-   * integration replaces an entire architecture -- shell, query surface and answer surface at
-   * once -- and there is no honest half-landed version of that: a stacked shell with no
-   * condition strip has no query controls, and one with no deck has no answer. So both shells
-   * exist for exactly as long as it takes to validate the new one against the real states, and
-   * the flag is deleted in the same workstream that deletes the rail and the panel.
-   *
-   * READ ONCE, FROM THE URL, AND NEVER WRITTEN BACK. It is not part of the cohort spec, it is
-   * not in RESERVED_QUERY_KEYS, and scenarioURL() does not carry it -- so no citation, no
-   * copied spec and no stored=<storm_id> link can ever depend on it. */
-  const [arch] = React.useState(
-    () => new URLSearchParams(location.search).get("arch"));
 
   /* The builder is a summoned sheet in the stacked shell rather than a resident rail. */
   const [sheetZone, setSheetZone] = React.useState(null);
@@ -165,6 +150,14 @@ export function Atlas() {
   }, []);
   const [timingOpen, setTimingOpen] = React.useState(false);
   const [landfallOpen, setLandfallOpen] = React.useState(false);
+
+  /* WHICH INK SET. Paper is the default and the dark plate is unaffected either way -- see the
+     light-shell block in atlas.css, where --stage is declared once and the stage re-declares the
+     dark ramp for its own subtree. Stored per reader; absent means paper. */
+  const [shell] = React.useState(() => {
+    try { return localStorage.getItem("atlas.shell") === "dark" ? "dark" : "light"; }
+    catch { return "light"; }
+  });
 
 
   /* The manifest lands first so the scale line can paint while the 972 KB track block is still
@@ -613,188 +606,72 @@ export function Atlas() {
    * prevents -- an answer that shrinks when a reader asks about one storm -- is invisible until
    * the moment it matters.
    *
-   * Mounted behind ?arch=deck until the new surface is validated against the real states. */
-  if (arch === "deck") {
-    /* The subject's own verdicts, derived from fields the pack already holds. Membership comes
-       from the bridge, which is the one place it is decided. */
-    const subject = storm ? {
-      id: storm.storm_id,
-      name: storm.name,
-      inCohort: !!(bridge && bridge.contribution && bridge.contribution.isMember),
-      reached: subjectVerdicts(storm),
-    } : null;
-
-    return (
-      <div data-surface="tactical" data-view="tactical" data-atlas data-arch="deck"
-        className="atlas-shell atlas-stacked" style={{
-          position: "fixed", inset: 0,
-          background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
-        }}>
-        <IdentityStrip archive={archive} onProvenance={() => setProvOpen(true)}
-          onLedger={() => openLedger(null)} />
-
-        {/* THE METHODOLOGY NOTICE. It lived in the rail, and the rail is gone -- but the thing
-            it says is not a rail concern: a URL written under one methodology and opened under
-            another is describing a different question than the one it names, and the reader has
-            to be told before they read the answer. It sits with the question for that reason. */}
-        <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
-
-        <QuestionLine question={sentence} kept={result.kept}
-          total={archive.manifest.counts.storms} />
-
-        <ConditionStrip conditions={conditionsOf(cohort)} lastEdit={lastEdit}
-          onEdit={(zone) => setSheetZone(zone)}
-          onClear={(key) => setCohort(clearCondition(cohort, key))} />
-
-        {/* THE PLATE ROW. The dock takes width from the plate and nothing else. */}
-        <div className="atlas-plate-row">
-          <div className="atlas-stage" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
-            {plate}
-          </div>
-          {storm ? (
-            <div className="atlas-dock" data-inspector-dock>
-              <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
-                onReplay={() => setPlaying((v) => !v)} replaying={playing}
-                spec={stormCitation} specUrl={scenarioURL({ withStorm: true })}
-                bridge={bridge} cohortSentence={sentence} result={result}
-                onBridge={() => onBridge(selected)}
-                cursorLive={cursorMs !== null || playing
-                  || (mode === "replay" && replayCursorMin !== null)} />
-            </div>
-          ) : null}
-        </div>
-
-        {/* THE EVIDENCE, AS ONE TABLE. Fixed height; rows drop at a breakpoint, never shrink. */}
-        <div className="atlas-evidence" data-evidence-row>
-          <EvidenceDeck result={result} comparison={comparison} subject={subject}
-            onEvidence={openLedger}
-            foldTiming={vw < 1440} timingOpen={timingOpen}
-            onToggleTiming={() => setTimingOpen((v) => !v)}
-            foldLandfall={vw < 1440} landfallOpen={landfallOpen}
-            onToggleLandfall={() => setLandfallOpen((v) => !v)}
-            /* The pathway disclosure is always present, not gated on the layer being on:
-               it is the sentence that stops a shaded map being read as a forecast cone, and a
-               reader who turns the layer on should not have to also discover the caveat. */
-            spec={cohort} pathway
-            environment={<EnvLens archive={archive} coverage={envCov} lens={envLens}
-              loading={envLoading} onLoad={loadEnv} />} />
-        </div>
-
-        <div className="atlas-transport">
-          {mode === "replay" ? (
-            <ArchiveTransport timeline={timeline} cursorMin={replayCursorMin}
-              setCursorMin={setReplayCursorMin} playing={playing} setPlaying={setPlaying} />
-          ) : selected !== null ? (
-            <Transport archive={archive} row={selected} playing={playing} setPlaying={setPlaying}
-              cursorMs={cursorMs} setCursorMs={setCursorMs} />
-          ) : null}
-        </div>
-
-        {/* THE BUILDER, SUMMONED. Same component, same state, same costs -- it is the same query
-            surface the rail held, moved behind the zone label that opens it. */}
-        {sheetZone ? (
-          <div className="at-sheet" data-builder-sheet role="dialog" aria-label="edit conditions">
-            <div className="at-sheet-hd">
-              <span>EDIT CONDITIONS</span>
-              <button type="button" className="at-sheet-x" data-sheet-close
-                onClick={() => setSheetZone(null)} aria-label="close">×</button>
-            </div>
-            <div className="at-sheet-body">
-              <CohortBuilder archive={archive} cohort={cohort}
-                setCohort={(f) => setCohort(normalise(f))}
-                result={result} preview={preview}
-                layers={layers} setLayers={setLayers} bounds={bounds}
-                mode={mode} setMode={setMode}
-                showPathway={showPathway} setShowPathway={setShowPathway}
-                showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
-                timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
-                envCoverage={envCov}
-                onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
-            </div>
-          </div>
-        ) : null}
-
-        <React.Suspense fallback={null}>
-          {provOpen ? (
-            <ProvenanceDrawer archive={archive} coast={coast} open={provOpen}
-              onClose={() => setProvOpen(false)} frame={view ? view.frame : null} />
-          ) : null}
-        </React.Suspense>
-      </div>
-    );
-  }
+   * This is the only shell. The three-column one, its rail, its panel and the temporary flag
+   * that let both exist during the transition were removed together, once the new surface had
+   * been proven against the real states and check-atlas-dom had passed against both. */
+  /* The subject's own verdicts, derived from fields the pack already holds. Membership comes
+     from the bridge, which is the one place it is decided. */
+  const subject = storm ? {
+    id: storm.storm_id,
+    name: storm.name,
+    inCohort: !!(bridge && bridge.contribution && bridge.contribution.isMember),
+    reached: subjectVerdicts(storm),
+  } : null;
 
   return (
-    <div data-surface="tactical" data-view="tactical" data-atlas className="atlas-shell" style={{
-      position: "fixed", inset: 0,
-      background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
-    }}>
-      <Header archive={archive} onProvenance={() => setProvOpen(true)}
+    <div data-surface="tactical" data-view="tactical" data-atlas data-shell={shell}
+      className="atlas-shell atlas-stacked" style={{
+        position: "fixed", inset: 0,
+        background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
+      }}>
+      <IdentityStrip archive={archive} onProvenance={() => setProvOpen(true)}
         onLedger={() => openLedger(null)} />
 
-      <div className="atlas-rail" style={{ overflowY: "auto",
-        borderRight: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
-        <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
-        <CohortBuilder archive={archive} cohort={cohort}
-          setCohort={(f) => setCohort(normalise(f))}
-          result={result} preview={preview}
-          layers={layers} setLayers={setLayers} bounds={bounds}
-          mode={mode} setMode={setMode}
-          showPathway={showPathway} setShowPathway={setShowPathway}
-          showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
-          timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
-          envCoverage={envCov}
-          onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
-      </div>
+      {/* THE METHODOLOGY NOTICE. It lived in the rail, and the rail is gone -- but the thing
+          it says is not a rail concern: a URL written under one methodology and opened under
+          another is describing a different question than the one it names, and the reader has
+          to be told before they read the answer. It sits with the question for that reason. */}
+      <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
 
-      <div className="atlas-stage" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
-        {plate}
-      </div>
+      <QuestionLine question={sentence} kept={result.kept}
+        total={archive.manifest.counts.storms} />
 
-      <div className="atlas-panel" style={{ overflowY: "auto",
-        borderLeft: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
+      <ConditionStrip conditions={conditionsOf(cohort)} lastEdit={lastEdit}
+        onEdit={(zone) => setSheetZone(zone)}
+        onClear={(key) => setCohort(clearCondition(cohort, key))} />
+
+      {/* THE PLATE ROW. The dock takes width from the plate and nothing else. */}
+      <div className="atlas-plate-row">
+        <div className="atlas-stage" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
+          {plate}
+        </div>
         {storm ? (
-          <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
-            onReplay={() => setPlaying((v) => !v)} replaying={playing}
-            spec={stormCitation} specUrl={scenarioURL({ withStorm: true })}
-            bridge={bridge} cohortSentence={sentence} result={result}
-            onBridge={() => onBridge(selected)}
-            /* THE REPLAY GUARD. A cohort is genesis-conditioned; the transport can be parked
-               part-way along this storm's track. Read together those say "here is what happens
-               next from here", which is a forecast claim the archive does not make and this
-               feature must not imply. The panel is told the cursor is live and states the
-               distinction rather than hiding the bridge.
-               BOTH TRANSPORTS COUNT. This panel renders whenever a storm is selected, including
-               in replay mode -- where the ARCHIVE transport is the one on screen and `cursorMs`
-               stays null. Gated on the storm transport alone, a reader who parked the archive
-               clock mid-track and then selected the storm under the cursor got the bridge with
-               no guard at all, which is the exact arrangement the guard exists for. */
-            cursorLive={cursorMs !== null || playing
-              || (mode === "replay" && replayCursorMin !== null)} />
-        ) : mode === "replay" ? (
-          <ReplayNote timeline={timeline} result={result} />
-        ) : (
-          /* THE ANSWER IS PUBLISHED FOR ANY COHORT -- INCLUDING THE ONE WITH NO CONDITIONS.
-             Before 3.3 this panel answered a click on open water and nothing else, so narrowing
-             to "Cat 3+, since 1971, Aug-Sep" produced a map and no statistics at all. That was
-             fixed by gating on `conditionsOf(cohort).length`, which left one cohort still
-             unanswerable: the whole archive. And that is the one every other panel SUBTRACTS
-             FROM -- "the same cohort without the location condition · 3,885 storms" is quoted
-             on every comparison on the surface, and a reader who wanted to see what those 3,885
-             storms actually did could not, because asking for them by removing every condition
-             replaced the answer with the introduction.
-             The introduction is not lost; it is the lede above the answer, which is where an
-             unqueried surface should put an invitation anyway. */
-          <CohortPanel spec={cohort} result={result} sentence={sentence}
-            intro={conditionsOf(cohort).length ? null : <Introduction archive={archive} />}
-            citation={citation} citationUrl={scenarioURL()}
-            peak={peakOf(pathway)} pathway={pathway} onSelectStorm={selectStorm}
-            pathwayOn={showPathway} onShowPathway={setShowPathway}
-            comparison={comparison} conditions={conditionsOf(cohort)}
-            onBaseline={setBaselinePin}
-            archive={archive} envCoverage={envCov} envLens={envLens}
-            envLoading={envLoading} onLoadEnv={loadEnv} onEvidence={openLedger} />
-        )}
+          <div className="atlas-dock" data-inspector-dock>
+            <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
+              onReplay={() => setPlaying((v) => !v)} replaying={playing}
+              spec={stormCitation} specUrl={scenarioURL({ withStorm: true })}
+              bridge={bridge} cohortSentence={sentence} result={result}
+              onBridge={() => onBridge(selected)}
+              cursorLive={cursorMs !== null || playing
+                || (mode === "replay" && replayCursorMin !== null)} />
+          </div>
+        ) : null}
+      </div>
+
+      {/* THE EVIDENCE, AS ONE TABLE. Fixed height; rows drop at a breakpoint, never shrink. */}
+      <div className="atlas-evidence" data-evidence-row>
+        <EvidenceDeck result={result} comparison={comparison} subject={subject}
+          onEvidence={openLedger}
+          foldTiming={vw < 1440} timingOpen={timingOpen}
+          onToggleTiming={() => setTimingOpen((v) => !v)}
+          foldLandfall={vw < 1440} landfallOpen={landfallOpen}
+          onToggleLandfall={() => setLandfallOpen((v) => !v)}
+          /* The pathway disclosure is always present, not gated on the layer being on:
+             it is the sentence that stops a shaded map being read as a forecast cone, and a
+             reader who turns the layer on should not have to also discover the caveat. */
+          spec={cohort} pathway
+          environment={<EnvLens archive={archive} coverage={envCov} lens={envLens}
+            loading={envLoading} onLoad={loadEnv} />} />
       </div>
 
       <div className="atlas-transport">
@@ -807,6 +684,30 @@ export function Atlas() {
         ) : null}
       </div>
 
+      {/* THE BUILDER, SUMMONED. Same component, same state, same costs -- it is the same query
+          surface the rail held, moved behind the zone label that opens it. */}
+      {sheetZone ? (
+        <div className="at-sheet" data-builder-sheet role="dialog" aria-label="edit conditions">
+          <div className="at-sheet-hd">
+            <span>EDIT CONDITIONS</span>
+            <button type="button" className="at-sheet-x" data-sheet-close
+              onClick={() => setSheetZone(null)} aria-label="close">×</button>
+          </div>
+          <div className="at-sheet-body">
+            <CohortBuilder archive={archive} cohort={cohort}
+              setCohort={(f) => setCohort(normalise(f))}
+              result={result} preview={preview}
+              layers={layers} setLayers={setLayers} bounds={bounds}
+              mode={mode} setMode={setMode}
+              showPathway={showPathway} setShowPathway={setShowPathway}
+              showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
+              timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
+              envCoverage={envCov}
+              onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
+          </div>
+        </div>
+      ) : null}
+
       <React.Suspense fallback={null}>
         {provOpen ? (
           <ProvenanceDrawer archive={archive} coast={coast} open={provOpen}
@@ -816,6 +717,7 @@ export function Atlas() {
     </div>
   );
 }
+
 
 /* THE OPENING VIEW.
  *

@@ -282,6 +282,37 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
   ok("the light shell declares all six text and signal inks",
      Object.keys(inks).length === 6, `found ${Object.keys(inks).length}: ${Object.keys(inks).join(", ")}`);
 
+  /* THE LIGHT SHELL'S SEMANTIC INKS, ON THE GROUND THEY LAND ON.
+   *
+   * These are not the paper text tiers -- they are the status colours: the SUFFICIENT / BELOW
+   * SAMPLE line, the flag, the accent. They are set at the label token, 10px, which is normal
+   * text for contrast purposes and needs 4.5:1.
+   *
+   * MEASURED RATHER THAN INHERITED. The dark shell's green and red do not survive the swap:
+   * green-600 is 2.67:1 on paper and red-600 is 3.92:1, both below AA, and both would have read
+   * as perfectly ordinary status colours to anyone looking at them. The light shell takes
+   * green-800 and red-700 instead. Asserted here so the next edit to this block is measured too. */
+  const lightBlock = css.slice(css.indexOf('[data-atlas]:not([data-shell="dark"]){'),
+                               css.indexOf("color-scheme:light"));
+  const semantic = Object.fromEntries(
+    [...lightBlock.matchAll(/--(pos|neg|special)\s*:\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1].toLowerCase(), m[2].toLowerCase()]),
+  );
+  ok("the light shell declares its own status inks", Object.keys(semantic).length === 3,
+     JSON.stringify(semantic));
+  for (const [name, ink] of Object.entries(semantic)) {
+    const worst = Math.min(...Object.values(PAPER_GROUNDS).map((g) => contrast(ink, g)));
+    ok(`--${name} clears AA as a status word on paper`, worst >= AA_BODY,
+       `${ink} measures ${worst.toFixed(2)}:1 on its worst ground`);
+  }
+
+  /* AND THE PLATE KEEPS THE DARK RAMP IN THE LIGHT SHELL. The stage re-declares the dark ink set
+     for its own subtree, because its furniture -- the title line, the scale bar, the coastline
+     statement, every graticule label -- inherits the surface's text tokens. Without this the
+     light shell would paint dark ink on a plate that is dark in both shells. */
+  ok("the stage re-declares the dark ink set inside the light shell",
+     /\[data-atlas\]:not\(\[data-shell="dark"\]\) \.atlas-stage\{[^}]*--t1:var\(--d-t1\)/.test(css),
+     "the plate would inherit paper inks");
+
   /* THE PLATE IS EXCLUDED FROM THE SHELL SWAP BY CONSTRUCTION, and that is a structural claim
      worth pinning: --stage is declared exactly once, so no later edit to a light shell can
      lighten the cartographic plate by accident. */
