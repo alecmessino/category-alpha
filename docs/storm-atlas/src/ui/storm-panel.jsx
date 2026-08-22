@@ -42,7 +42,26 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec,
   );
 
   return (
-    <>
+    /* THREE PARTS, AND ONLY THE MIDDLE ONE SCROLLS.
+     *
+     * The inspector is a flex column: the masthead is fixed, the whole-life blocks take the
+     * remaining height and scroll inside it, and the bridge is pinned as a NON-SCROLLING SIBLING
+     * at the foot. That last part is the whole point of the arrangement.
+     *
+     * WHY THE BRIDGE CANNOT BE ALLOWED TO SCROLL. It is the one control that takes a reader from
+     * this storm to the population it belongs to -- the question the surface exists to answer --
+     * and it sat at the bottom of a single scrolling column, beneath seven sections of track
+     * geometry, landfalls, environment and data quality. On a docked 380px inspector that is
+     * roughly two screens down. A reader who does not scroll never learns the bridge exists, and
+     * "the feature is there, below the fold" is indistinguishable from "the feature is missing"
+     * for everyone who does not go looking.
+     *
+     * The middle block is a scroll container, and that -- not its `min-height:0` -- is what lets
+     * it shrink: a flex item that scrolls has its automatic minimum resolve to zero already. The
+     * arrangement is asserted by scripts/check-inspector-bridge.mjs, which scrolls the body to
+     * its end at three content sizes and requires the bridge to still be on screen. */
+    <div className="at-inspector" data-inspector>
+      <div className="at-insp-head">
       <Masthead kicker="One storm, whole life"
         right={<TextButton onClick={onClose} title="clear selection">Clear</TextButton>}
         title={s.name || "UNNAMED"} titleClass="storm" loc={loc} spec={spec} specUrl={specUrl}>
@@ -54,7 +73,9 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec,
           </div>
         ) : null}
       </Masthead>
+      </div>
 
+      <div className="at-insp-body">
       <div className="at-pad">
         <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
           <button type="button" onClick={onReplay} data-storm-replay
@@ -145,12 +166,19 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec,
         <Row k="storm id" dim v={<Txt value={s.storm_id} />} />
         <Row k="source" dim v={<Txt value={s.source_key} />} />
 
+      </div>
+      </div>
+
+      {/* PINNED. Outside the scrolling body, so it is on screen whatever the reader has scrolled
+          to -- and asserted as such by scripts/check-inspector-bridge.mjs, which drives the body
+          to its full scroll extent and requires the bridge to still be in the viewport. */}
+      <div className="at-insp-bridge" data-bridge-pinned>
         <Head n="07">This storm in the archive</Head>
         <Bridge storm={s} archive={archive} bridge={bridge} result={result}
           cohortSentence={cohortSentence} onBridge={onBridge} onClose={onClose}
           cursorLive={cursorLive} />
       </div>
-    </>
+    </div>
   );
 }
 

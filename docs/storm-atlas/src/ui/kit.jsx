@@ -57,7 +57,7 @@ export function Num({ value, unit, digits = 0, absent = "not recorded in the arc
   return (
     <span style={{ ...MONO, color: tone || "inherit" }}>
       {digits ? v.toFixed(digits) : Math.round(v).toLocaleString()}
-      {unit ? <small style={{ color: "var(--t4)", marginLeft: 3 }}>{unit}</small> : null}
+      {unit ? <small style={{ color: "var(--t3)", marginLeft: 3 }}>{unit}</small> : null}
     </span>
   );
 }
@@ -77,7 +77,7 @@ export function Txt({ value, absent = "not recorded in the archive", tone, trans
 export function OverDenom({ n, of, tone }) {
   return (
     <span style={{ ...MONO, color: tone || "inherit" }}>
-      {n.toLocaleString()}<span style={{ color: "var(--t4)" }}> / {of.toLocaleString()}</span>
+      {n.toLocaleString()}<span style={{ color: "var(--t3)" }}> / {of.toLocaleString()}</span>
     </span>
   );
 }

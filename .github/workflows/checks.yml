@@ -163,6 +163,24 @@ jobs:
       - name: Audit claim provenance
         run: node scripts/audit-claims.mjs
 
+      # THE INK RULE. Two independent drafts of this surface applied HAIRLINE inks to TEXT --
+      # published Wilson intervals, slot dashes and every graticule label, at 2.13-3.94:1. It is
+      # not a typo but a category of mistake: an ink picked because it sat well beside a rule,
+      # then reused for a sentence. So the constraint is enforced rather than reviewed.
+      #
+      # --self-test IS NOT DECORATION. The rule's value is entirely in its firing, and a detector
+      # that silently stopped matching would leave this step green forever while checking nothing.
+      # The flag seeds six real violations -- in both CSS and JSX, including one through
+      # -webkit-text-fill-color and one via a token name that does not exist yet -- and requires
+      # each to be caught, then seeds five LEGITIMATE uses (a hairline as a border, a mark as a
+      # background, a rule token's own definition) and requires silence on all five. A guard that
+      # flagged those would be switched off within a week, which is the same as not having one.
+      #
+      # It also pins the light shell's evidence-bar ramp, which is a DERIVED presentation table
+      # and not the cartography: the plate's palette.js is authoritative and untouched.
+      - name: Verify no rule, hairline or mark ink carries text
+        run: node scripts/check-atlas-adherence.mjs --self-test
+
       # THE COVERAGE GATE, applied to the snapshot the change is asking to merge. On main
       # it runs against a snapshot the job has just fetched; here it runs against the
       # committed one, which answers a different and equally useful question: does the
@@ -351,6 +369,54 @@ jobs:
 
       - name: Verify the honesty surface reaches the screen
         run: node scripts/check-atlas-dom.mjs --require-browser
+
+      # THE THREE NEW SURFACE GATES LIVE HERE, NOT IN `checks`, AND THE REASON IS THE BINARY.
+      # `checks` installs playwright the npm package; only this job runs `playwright install`, so
+      # only this job has a Chromium to drive. Placed in `checks` they would fail on the missing
+      # browser -- or, worse, be given a --require-browser flag that turns the skip into an exit 2
+      # and makes the whole distinction invisible in the log.
+
+      # THE DECK'S SEMANTICS, PER ROW. Folding six panel sections into one grid is the step where
+      # a status can silently DETACH from the row it governs: in a list of blocks a refusal is
+      # physically inside the thing it refuses, and in a grid every cell is a sibling of every
+      # other one. A row that emits its status one cell late puts RATE REFUSED beside a real
+      # percentage belonging to a different contract, and the page looks entirely normal doing it
+      # -- every value on screen is one the engine really produced.
+      #
+      # So the deck is rendered with fixtures covering every state a row can be in, parsed in a
+      # real browser rather than by regex, and audited against the four panel rules it inherited.
+      # --self-test seeds eight regressions, one per rule, and requires the audit to catch each;
+      # it also seeds a harmless change and requires silence. The first run of it caught two of
+      # its own seeds aiming at the header row instead of a data row -- a seed that cannot fail
+      # is the same problem as a rule that cannot fire.
+      - name: Verify every deck row carries its own status
+        run: node scripts/check-evidence-deck.mjs --self-test --require-browser
+
+      # THE BOUNDARY, READ WITHOUT READING. A cohort is defined by two kinds of condition that are
+      # not interchangeable: genesis-side ones narrow the population, outcome-side ones narrow it
+      # AND take the conditioned variable out of the evidence. A reader who cannot tell which side
+      # a condition sits on cannot tell a finding from an artefact of their own question -- and
+      # that failure passes every screenshot review, because the words are all correct and the two
+      # zones simply do not look different.
+      #
+      # So every assertion about the boundary is made against COMPUTED STYLE with the text
+      # ignored, including one that erases every word on the strip and requires the three zones to
+      # remain three distinct shapes. The zones are also asserted EMPTY: an unset zone that renders
+      # nothing leaves an unqueried surface with no way to show it has two sides at all.
+      - name: Verify the condition boundary is legible before a word is read
+        run: node scripts/check-condition-strip.mjs --self-test --require-browser
+
+      # THE BRIDGE IS PINNED. It is the one control taking a reader from a selected storm to the
+      # population it belongs to, and it used to sit at the bottom of a single scrolling column
+      # beneath seven sections -- about two screens down on a 380px dock. "Present, below the
+      # fold" is indistinguishable from "absent" for anyone who does not go looking.
+      #
+      # The gate does what a reader does: builds an inspector with more content than fits, scrolls
+      # the body to its end at three content sizes, and requires the bridge to stay on screen. It
+      # also asserts the body actually overflowed, because a pinning test that never scrolls
+      # proves nothing.
+      - name: Verify the storm-to-cohort bridge is never reachable only by scrolling
+        run: node scripts/check-inspector-bridge.mjs --self-test --require-browser
 
       - name: Verify the terminal's panels refuse on screen, not just in the engine
         run: node scripts/check-panel-dom.mjs --require-browser

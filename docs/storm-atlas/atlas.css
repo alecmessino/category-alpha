@@ -25,6 +25,26 @@
 @font-face{font-family:'Erode';font-style:normal;font-weight:500;font-display:swap;
   src:url('../assets/fonts/erode-500.woff2') format('woff2')}
 
+/* SOURCE SANS 3 AND SOURCE SERIF 4, SELF-HOSTED, AND DECLARED HERE RATHER THAN IN
+   docs/tokens/fonts.css -- the same reason Erode 400/500 are declared here: the terminal
+   renders neither face and its font manifest should not grow two it never uses.
+
+   SELF-HOSTED RATHER THAN LINKED, WHICH IS NOT THE PROTOTYPE'S CHOICE. The design file pulls
+   both from fonts.googleapis.com, and every browser gate in this repository ABORTS that host
+   to stay hermetic (see scripts/lib/browser-harness.mjs). A linked face would therefore fall
+   back to a system font in every check that measures this surface -- the type scale, the fit
+   at each breakpoint, the answer-density count -- so the gates would be measuring a design
+   nobody ships. Both files are the latin subset, variable-weight, straight from Google's own
+   CDN; Source Sans 3 covers 400-700 in 28 KB and Source Serif 4 carries the one 400 the
+   question line asks for.
+
+   IBM Plex Mono is untouched: it is already declared in docs/tokens/fonts.css, shared with the
+   terminal, and has a real monospace fallback stack behind it. */
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 700;font-display:swap;
+  src:url('../assets/fonts/source-sans-3-latin.woff2') format('woff2')}
+@font-face{font-family:'Source Serif 4';font-style:normal;font-weight:400;font-display:swap;
+  src:url('../assets/fonts/source-serif-4-latin.woff2') format('woff2')}
+
 /* ─── tokens ──────────────────────────────────────────────────────────────────────────── */
 
 [data-atlas]{
@@ -164,6 +184,96 @@
      legend above that, and the invitation moved to the head of the plate entirely, because
      three things anchored to one bottom-right corner is not a stack, it is a collision. */
   --at-plate-gutter:16px;
+
+  /* ─── THE REDESIGN'S TOKENS ─────────────────────────────────────────────────────────────
+   *
+   * Added alongside the tokens above rather than replacing them, because the shell that reads
+   * the old ones is still standing: each handoff step ships on its own, and a token sweep that
+   * landed before the markup that consumes it would break the surface between two green
+   * commits. The old block is removed in the step that removes its last reader.
+   *
+   * TWO SHELLS, ONE ARCHITECTURE. The dark ramp already matches the specification exactly --
+   * --chrome, --chrome-hi, --stage, --t1..--t4, --rule-4, --accent, --flag are the audited
+   * values and are not restated here. What is new is the LIGHT ramp, and the plate is excluded
+   * from the swap BY CONSTRUCTION: --stage is one token, declared once, identical in both
+   * shells, so no future edit to a shell can lighten the cartographic plate by accident. */
+
+  /* THE LIGHT SHELL. Contrast is against the ground each ink actually lands on, and every tier
+     clears AA at the size it is used: ink-1 15.93, ink-2 7.27, ink-3 5.56/5.14, ink-4 5.16/4.77,
+     accent 6.29, flag 5.35. The three hairlines carry NO text -- enforced by
+     scripts/check-atlas-adherence.mjs, which reads the word "rule" or "hair" in any segment of
+     a token's name and fails the build if it reaches a colour declaration. */
+  --at-paper:#f6f3ee;
+  --at-paper-raised:#efeae1;
+  --at-paper-sunken:#ece7dd;
+  --at-ink-1:#16191d;
+  --at-ink-2:#4a5158;
+  --at-ink-3:#5c626a;
+  --at-ink-4:#61676e;
+  --at-paper-accent:#17607f;
+  --at-paper-flag:#8a5a05;
+  --at-paper-rule:#ded7cb;
+  --at-paper-hair:#c9c1b4;
+  --at-paper-strong:#a9a196;
+
+  /* THE EVIDENCE BAR'S LIGHT ECHO OF THE CARTOGRAPHIC RAMP.
+   *
+   * NOT palette.js. That ramp is authoritative, it is verified against the dark stage it draws
+   * on, and it ships unchanged -- these are its paper derivatives, and they are DERIVED rather
+   * than picked. The handoff's own draft of this table is the reason it is computed: it put
+   * CAT 2 at #9c7a1e against CAT 3 at #c2661a, which is 1.00:1 in luminance and one step apart
+   * in monochrome. That is the pair deciding "major hurricane", rendered indistinguishable, in
+   * the table whose stated job was to keep it separable.
+   *
+   * The constraint set, asserted in the gate rather than described here: >=3:1 on every paper
+   * ground a bar can land on (WCAG 1.4.11 -- a bar is a graphical object carrying meaning),
+   * >=1.25:1 between adjacent classes so a 1px stroke separates, >=12 Rec.601 luma between
+   * them so MONOCHROME separates too, and a strictly monotonic sequence so the ordering
+   * survives with no colour at all. Hue is held to the plate's class hue throughout, which is
+   * what keeps the two tables the same seven classes rather than two palettes. */
+  --at-bar-td:#788594;
+  --at-bar-ts:#577691;
+  --at-bar-cat1:#2a6985;
+  --at-bar-cat2:#5e4b1e;
+  --at-bar-cat3:#61320d;
+  --at-bar-cat4:#541d1c;
+  --at-bar-cat5:#1f1930;
+
+  /* THE TYPE SCALE. Sixteen declared sizes become six, carrying nine roles. The floor is 12 for
+     any number and 10 for any label; 9 exists only for the stamps -- methodology version, pack
+     hash, build time, URL echo -- and nothing else may use it. No italics anywhere, no
+     letter-spacing on the sans, uppercase only at label and stamp size, and sentence case for
+     every sentence including the refusal statements printed verbatim from the engine. */
+  --at-serif:'Source Serif 4',Georgia,serif;
+  --at-sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --at-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+
+  --at-fs-question:19px;   /* serif 400 · the research question, and the provenance heading   */
+  --at-fs-subject:26px;    /* sans 700 · the storm's name in the inspector                    */
+  --at-fs-figure:26px;     /* mono 400 · cohort size, refusal counts. One per screen, maximum */
+  --at-fs-action:13.5px;   /* sans 700 · BUILD HISTORICAL COHORT, VIEW COHORT, SEE EVIDENCE   */
+  --at-fs-body:13.5px;     /* sans 400 · interpretation, refusal statements, disclosure prose */
+  --at-fs-row:12px;        /* sans 400 · outcome names, inspector field names                 */
+  --at-fs-value:12px;      /* mono 400 · every rate, count, interval, coordinate, duration    */
+  --at-fs-label:10px;      /* mono 400-600 · column heads, zone labels, status words          */
+  --at-fs-stamp:9px;       /* mono 400 · stamps only                                          */
+
+  --at-tr-subject:-.2px;
+  --at-tr-label:1.2px;
+  --at-tr-stamp:.8px;
+
+  /* THE SPACING STEPS, AND THE ROW HEIGHTS THAT ARE NOT SPACING.
+     Cells carry no vertical padding on purpose: the rhythm comes from the ROW, so a cell whose
+     text wraps grows its own row instead of colliding with the next one. */
+  --at-s1:4px;    /* label to value            */
+  --at-s2:7px;    /* mark to text, chip padding */
+  --at-s3:10px;   /* table column gap          */
+  --at-s4:14px;   /* strip item gap            */
+  --at-s5:16px;   /* shell gutter, table inset */
+  --at-s6:18px;   /* inspector padding         */
+  --at-s7:26px;   /* block separation          */
+  --at-row-h:20px;
+  --at-row-head-h:24px;
 }
 
 /* ─── page ────────────────────────────────────────────────────────────────────────────── */
@@ -287,7 +397,7 @@
   line-height:1;text-transform:uppercase;color:#f6fafe;white-space:nowrap;
 }
 [data-atlas] .at-brand .at-sub{
-  font-family:var(--font-mono);font-size:9px;letter-spacing:1.1px;color:var(--t4);
+  font-family:var(--font-mono);font-size:9px;letter-spacing:1.1px;color:var(--t3);
   text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 [data-atlas] .at-brand a{color:inherit;text-decoration:none}
@@ -303,14 +413,14 @@
 [data-atlas] .at-fig b{
   font-family:var(--font-mono);font-size:14px;font-weight:600;color:#f2f7fd;line-height:1;
 }
-[data-atlas] .at-fig span{font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t4)}
+[data-atlas] .at-fig span{font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t3)}
 [data-atlas] .at-sys{
   display:flex;align-items:center;justify-content:flex-end;gap:16px;flex:0 1 auto;
   width:var(--at-panel);min-width:0;padding:0 18px;border-left:1px solid var(--rule-2);
 }
 [data-atlas] .at-sys .at-stack{
   display:flex;flex-direction:column;gap:4px;text-align:right;min-width:0;
-  font-family:var(--font-mono);font-size:9px;letter-spacing:.8px;color:var(--t4);line-height:1.3;
+  font-family:var(--font-mono);font-size:9px;letter-spacing:.8px;color:var(--t3);line-height:1.3;
 }
 [data-atlas] .at-sys .at-stack div{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 [data-atlas] .at-sys .at-stack em{font-style:normal;color:var(--t2)}
@@ -334,7 +444,7 @@
   margin:26px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--rule-2);
 }
 [data-atlas] .at-sechd .at-n{
-  font-family:var(--font-mono);font-size:9px;color:var(--t4);letter-spacing:.5px;flex:none;width:16px;
+  font-family:var(--font-mono);font-size:9px;color:var(--t3);letter-spacing:.5px;flex:none;width:16px;
 }
 [data-atlas] .at-sechd h3{
   margin:0;font-family:var(--font-sans);font-size:10px;font-weight:700;letter-spacing:1.7px;
@@ -377,14 +487,14 @@
   font-family:var(--font-mono);font-size:11px;color:var(--t1);text-align:right;white-space:nowrap;
   letter-spacing:.1px;flex:none;
 }
-[data-atlas] .at-row.at-dim .at-k,[data-atlas] .at-row.at-dim .at-v{color:var(--t4)}
-[data-atlas] .at-row .at-v small{font-size:9px;color:var(--t4);margin-left:3px}
+[data-atlas] .at-row.at-dim .at-k,[data-atlas] .at-row.at-dim .at-v{color:var(--t3)}
+[data-atlas] .at-row .at-v small{font-size:9px;color:var(--t3);margin-left:3px}
 [data-atlas] .at-grp{border-top:1px solid var(--rule);margin-top:10px;padding-top:8px}
 
 /* A value the Atlas derived by replaying the archive's own rule, rather than an archive
    column. Kept as a superscript so it annotates the number without competing with it. */
 [data-atlas] sup.at-drv{
-  font-family:var(--font-mono);font-size:7.5px;color:var(--t4);margin-left:2px;
+  font-family:var(--font-mono);font-size:7.5px;color:var(--t3);margin-left:2px;
   vertical-align:super;letter-spacing:0;
 }
 
@@ -398,7 +508,7 @@
   font-family:var(--font-mono);font-size:11px;color:var(--t2);padding-bottom:3px;line-height:1.4;
 }
 [data-atlas] .at-capt{
-  font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--t4);
+  font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);
   border-top:1px solid var(--rule);margin-top:11px;padding-top:6px;
 }
 [data-atlas] .at-bar{height:2px;background:#243040;margin:11px 0 0;position:relative;overflow:hidden}
@@ -431,7 +541,7 @@
 [data-atlas] .at-years{display:flex;align-items:flex-end;gap:9px}
 [data-atlas] .at-years label{flex:1;min-width:0;display:block}
 [data-atlas] .at-years span{
-  display:block;font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t4);
+  display:block;font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t3);
   margin-bottom:4px;text-transform:uppercase;
 }
 [data-atlas] .at-years input{
@@ -479,7 +589,7 @@
 }
 [data-atlas] .at-stage-row.at-on .at-nm{color:var(--t1)}
 [data-atlas] .at-stage-row .at-st{
-  margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.7px;color:var(--t4);
+  margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.7px;color:var(--t3);
   text-align:right;flex:none;
 }
 [data-atlas] .at-stage-row.at-on .at-st{color:#9edcfa}
@@ -511,7 +621,7 @@
 }
 [data-atlas] .at-platehead,[data-atlas] .at-platefoot{
   display:flex;align-items:center;gap:16px;padding:0 14px;min-width:0;
-  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t4);
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t3);
   text-transform:uppercase;white-space:nowrap;overflow:hidden;
 }
 [data-atlas] .at-platehead > span,[data-atlas] .at-platefoot > span{
@@ -544,7 +654,7 @@
 }
 [data-atlas] .leaflet-control-zoom a:hover{background:#1d2836!important;color:#fff!important}
 [data-atlas] .leaflet-control-attribution{
-  background:rgba(13,19,29,.82)!important;color:var(--t4)!important;
+  background:rgba(13,19,29,.82)!important;color:var(--t3)!important;
   font-family:var(--font-mono);font-size:8.5px;border-radius:0;
   margin-bottom:calc(var(--at-plate-gutter) + 5px)!important;
 }
@@ -593,7 +703,7 @@
 }
 [data-atlas] .at-masthead .at-kicker{
   display:flex;align-items:baseline;gap:9px;font-family:var(--font-mono);font-size:9px;
-  letter-spacing:1.3px;color:var(--t4);text-transform:uppercase;
+  letter-spacing:1.3px;color:var(--t3);text-transform:uppercase;
 }
 [data-atlas] .at-masthead .at-kicker .at-x{margin-left:auto;flex:none}
 [data-atlas] .at-masthead h2{
@@ -622,7 +732,7 @@
 /* The URL half of a citation. Never uppercased -- the query carries case-sensitive values and a
    citation that cannot be pasted back is not a citation. */
 [data-atlas] .at-spec code.at-url{
-  display:block;text-transform:none;color:var(--t4);margin-top:4px;letter-spacing:0;
+  display:block;text-transform:none;color:var(--t3);margin-top:4px;letter-spacing:0;
   word-break:break-all;
 }
 [data-atlas] .at-spec button{flex:none;align-self:flex-start}
@@ -640,7 +750,7 @@
   color:var(--t1);
 }
 [data-atlas] .at-itable .at-val b{font-weight:400;text-align:right}
-[data-atlas] .at-itable .at-val s{text-decoration:none;color:var(--t4);text-align:center}
+[data-atlas] .at-itable .at-val s{text-decoration:none;color:var(--t3);text-align:center}
 [data-atlas] .at-itable .at-val u{text-decoration:none;color:var(--t3);text-align:left;padding-left:1px}
 
 /* ─── THE OUTCOME LADDER ──────────────────────────────────────────────────────────────────
@@ -806,7 +916,7 @@
 [data-atlas] .at-scrub input::-moz-range-thumb{width:3px;height:14px;border:0;border-radius:0;background:var(--accent)}
 [data-atlas] .at-scrub .at-ends{
   display:flex;justify-content:space-between;gap:12px;font-family:var(--font-mono);font-size:8.5px;
-  letter-spacing:.8px;color:var(--t4);margin-top:-2px;
+  letter-spacing:.8px;color:var(--t3);margin-top:-2px;
 }
 [data-atlas] .at-scrub .at-ends span{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
 [data-atlas] .at-readouts{display:flex;flex:none;border-left:1px solid var(--rule)}
@@ -816,7 +926,7 @@
 }
 [data-atlas] .at-ro:last-child{border-right:0;padding-right:0}
 [data-atlas] .at-ro .at-k{
-  font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t4);text-transform:uppercase;
+  font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t3);text-transform:uppercase;
 }
 [data-atlas] .at-ro .at-v{font-family:var(--font-mono);font-size:12.5px;color:var(--t1);letter-spacing:.1px}
 /* The working-state instruction, at caption weight in the foot band. It gives way before the
@@ -824,12 +934,12 @@
    which is the band's one epistemic claim -- an instruction is the most recoverable thing here,
    since the gesture is still available whether or not the words are. */
 [data-atlas] .at-plate-hint{
-  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t4);
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t3);
   white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis;
 }
 
 [data-atlas] .at-hint{
-  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t4);
+  font-family:var(--font-mono);font-size:9.5px;letter-spacing:1px;color:var(--t3);
   text-transform:uppercase;display:flex;gap:22px;width:100%;min-width:0;overflow:hidden;
 }
 [data-atlas] .at-hint span{white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
@@ -986,4 +1096,298 @@
   [data-atlas] .at-transport{flex-wrap:wrap;padding:8px 14px}
   [data-atlas] .at-readouts{border-left:0}
   [data-atlas] .at-ro:first-child{padding-left:0}
+}
+
+/* ─── the evidence deck ───────────────────────────────────────────────────────────────────
+ *
+ * ONE GRID WHERE SIX SECTIONS WERE. Nine tracks, eight headings: MED h and P25-P75 sit under
+ * one heading because they are one statement about duration.
+ *
+ * ROWS ARE `display:contents`, WHICH IS THE POINT AND ALSO THE HAZARD. It puts every cell on the
+ * deck's own grid, so columns line up across groups without a nested table -- and it means a row
+ * generates no box, so a row-level rule or fill has to be painted on the CELLS. Both are done
+ * below. What it buys is worth the care: the alternative is a grid per row, and a grid per row is
+ * how a column silently stops aligning with its heading.
+ *
+ * ROW HEIGHT IS FIXED AND CELLS CARRY NO VERTICAL PADDING. The rhythm comes from the row, so a
+ * cell whose text wraps grows its own row rather than colliding with the next one. */
+
+[data-atlas] .at-deck{
+  display:grid;
+  grid-template-columns:170px minmax(0,1fr) 78px 100px 124px 92px 60px 112px 168px;
+  gap:0 var(--at-s3);
+  padding:0 var(--at-s5);
+  align-content:start;
+  font-family:var(--at-sans);
+}
+/* AT 1280-1439 THE TWO DURATION TRACKS FOLD, and the grid loses exactly those two tracks. The
+   data is not dropped -- the disclosure in the header brings them back -- and no type size
+   changes to buy the room, which is the rule for every breakpoint on this surface. */
+[data-atlas] .at-deck[data-timing-folded]{
+  grid-template-columns:170px minmax(0,1fr) 78px 100px 124px 92px 168px;
+}
+[data-atlas] .at-deck-row{display:contents}
+
+[data-atlas] .at-dc{
+  min-height:var(--at-row-h);
+  display:flex;align-items:center;gap:var(--at-s1);
+  min-width:0;
+  padding:0;
+}
+/* Every numeric cell is right-set, because a column of figures is read down its last digit. */
+[data-atlas] .at-dc-rate,[data-atlas] .at-dc-count,[data-atlas] .at-dc-int,
+[data-atlas] .at-dc-vs,[data-atlas] .at-dc-med,[data-atlas] .at-dc-iqr{justify-content:flex-end}
+
+[data-atlas] .at-deck-head > .at-dc{
+  min-height:var(--at-row-head-h);
+  font-family:var(--at-mono);font-size:var(--at-fs-label);font-weight:600;
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;
+  color:var(--t3);
+  border-bottom:1px solid var(--rule-2);
+}
+[data-atlas] .at-deck-group > .at-dc{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);font-weight:600;
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;
+  color:var(--t2);
+  background:var(--chrome-hi);
+  border-bottom:1px solid var(--rule);
+}
+[data-atlas] .at-deck-data > .at-dc{border-bottom:1px solid var(--rule)}
+
+/* THE OUTCOME CELL holds the mark and the name. The mark's slot is reserved whether or not a
+   mark is present, so a qualified row and an unqualified one start their names at the same x --
+   a name that shifts sideways when a status appears reads as a different row. */
+[data-atlas] .at-dc-outcome{
+  font-size:var(--at-fs-row);color:var(--t1);gap:var(--at-s2);
+  justify-content:flex-start;
+}
+[data-atlas] .at-dc-outcome .at-mark{
+  flex:none;width:11px;text-align:center;font-family:var(--at-mono);
+  font-size:var(--at-fs-label);color:var(--t3);
+}
+[data-atlas] .at-dc-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* EVERY NUMBER IS MONO AT THE VALUE TOKEN, which is the floor: nothing numeric goes below 12. */
+[data-atlas] .at-val{font-family:var(--at-mono);font-size:var(--at-fs-value);color:var(--t1)}
+[data-atlas] .at-dc-int .at-val,[data-atlas] .at-dc-vs .at-val,
+[data-atlas] .at-dc-med .at-val,[data-atlas] .at-dc-iqr .at-val{color:var(--t2)}
+[data-atlas] .at-need{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);color:var(--t3);
+  margin-left:var(--at-s1);white-space:nowrap;
+}
+/* A SLOT IS CONTENT. The dash means "the archive has no value here", which is a statement, so it
+   is held to the same contrast bar as the value it replaces and never dimmed into a hairline. */
+[data-atlas] .at-slot{font-family:var(--at-mono);font-size:var(--at-fs-value);color:var(--t3)}
+[data-atlas] .at-isarchive{font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t3)}
+[data-atlas] .at-reached,[data-atlas] .at-notreached{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t2);
+}
+
+/* STATUS: one ink, never coloured, never a score. The whole argument for a single ink is that a
+   coloured status becomes a verdict -- red for refused reads as an error, and a refusal is not
+   an error. It is left-set against the row's right edge so the words start on one line. */
+[data-atlas] .at-dc-status{
+  justify-content:flex-start;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);font-weight:500;
+  letter-spacing:var(--at-tr-label);color:var(--t2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+
+/* THE BAR. 7px track, no number on it ever. */
+[data-atlas] .at-dc-bar{padding-right:var(--at-s2)}
+[data-atlas] .at-bar-track{
+  position:relative;display:block;width:100%;height:7px;
+  background:var(--sunken);
+}
+[data-atlas] .at-bar-ci{position:absolute;top:0;bottom:0;background:color-mix(in srgb,var(--bar) 30%,transparent)}
+[data-atlas] .at-bar-fill{position:absolute;left:0;top:0;bottom:0;background:var(--bar)}
+/* The archive baseline overhangs the track top and bottom, so it reads as a reference mark
+   rather than as part of the fill. */
+[data-atlas] .at-bar-base{position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--t2)}
+/* A REFUSED TRACK IS HATCHED AND HAS NO FILL. An empty bar and a zero bar must never look
+   alike: one means the archive declined to answer, the other means it answered zero. */
+[data-atlas] .at-bar-refused{background:var(--hatch)}
+
+/* THE TWO RAMPS, RESOLVED PER SHELL.
+ *
+ * The dark shell paints the cartographic ink itself -- the chrome and the stage are close enough
+ * in tone that the plate's ramp reads on both. The light shell CANNOT: #f2c14e is 1.5:1 on paper,
+ * and no amount of stylesheet can rescue a Cat 2 nobody can see. So paper gets the derived echo,
+ * whose seven values are computed against contrast, adjacent separability and monochrome
+ * ordering, and pinned in scripts/check-atlas-adherence.mjs against these very declarations. */
+[data-atlas]{
+  --barink-td:#9aabbf; --barink-ts:#8cbdea; --barink-cat1:#4fc3f7; --barink-cat2:#f2c14e;
+  --barink-cat3:#ee7a1f; --barink-cat4:#ef5350; --barink-cat5:#9b7bf0;
+}
+[data-atlas][data-shell="light"]{
+  --barink-td:var(--at-bar-td); --barink-ts:var(--at-bar-ts); --barink-cat1:var(--at-bar-cat1);
+  --barink-cat2:var(--at-bar-cat2); --barink-cat3:var(--at-bar-cat3);
+  --barink-cat4:var(--at-bar-cat4); --barink-cat5:var(--at-bar-cat5);
+}
+[data-atlas] .at-bar-track[data-bar-class="td"]{--bar:var(--barink-td)}
+[data-atlas] .at-bar-track[data-bar-class="ts"]{--bar:var(--barink-ts)}
+[data-atlas] .at-bar-track[data-bar-class="cat1"]{--bar:var(--barink-cat1)}
+[data-atlas] .at-bar-track[data-bar-class="cat2"]{--bar:var(--barink-cat2)}
+[data-atlas] .at-bar-track[data-bar-class="cat3"]{--bar:var(--barink-cat3)}
+[data-atlas] .at-bar-track[data-bar-class="cat4"]{--bar:var(--barink-cat4)}
+[data-atlas] .at-bar-track[data-bar-class="cat5"]{--bar:var(--barink-cat5)}
+
+/* THE ROW'S OWN SENTENCE, spanning every column because it qualifies the whole row. Never an
+   alert box, never a tint, never a coloured background -- a refusal is part of the argument and
+   not an error in it, and a tinted panel is how a reader learns to skip one. */
+[data-atlas] .at-deck-say{
+  grid-column:1/-1;
+  display:flex;align-items:baseline;gap:var(--at-s2);flex-wrap:wrap;
+  padding:0 0 var(--at-s2) calc(11px + var(--at-s2));
+  border-bottom:1px solid var(--rule);
+  font-size:var(--at-fs-row);line-height:1.45;
+}
+[data-atlas] .at-say-text{color:var(--t2)}
+[data-atlas] .at-say-remedy{color:var(--t3)}
+[data-atlas] .at-say-link{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  background:transparent;border:1px solid var(--rule-2);color:var(--accent);
+  padding:1px 6px;cursor:pointer;
+}
+[data-atlas] .at-say-link:hover{border-color:var(--accent)}
+
+/* THE ONE PERMITTED FILL ON THIS DECK. Issue 15 and nothing else: a row whose numerator is the
+   reader's own selected storm. Everything else here is separated by hairlines alone. */
+[data-atlas] .at-deck-self > .at-dc{background:color-mix(in srgb,var(--accent) 9%,transparent)}
+
+[data-atlas] .at-dc-fold{
+  justify-content:center;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  background:transparent;border:0;border-bottom:1px solid var(--rule-2);
+  color:var(--accent);cursor:pointer;text-transform:uppercase;
+}
+
+/* ─── the condition strip ─────────────────────────────────────────────────────────────────
+ *
+ * THREE ZONES, ALWAYS RENDERED, AND THE RULES ARE THE GRAMMAR. Genesis-side carries a 2px accent
+ * rule, outcome-side a 2px muted-accent rule, scope a 1px hairline -- three weights a reader can
+ * tell apart at a glance and without reading a word, which is the property the gate asserts with
+ * the prose covered. The outcome-side rule is the SAME ink the deck uses for a CONDITIONED ON
+ * row, and that is deliberate: it is how a reader connects a missing rate to the condition that
+ * removed it, across two different parts of the surface.
+ *
+ * SCOPE IS FIXED-WIDTH because it holds at most two short tokens and should not take width from
+ * the two zones that carry the question. */
+[data-atlas] .at-strip{
+  display:flex;align-items:stretch;gap:var(--at-s4);
+  padding:0 var(--at-s5);
+  min-width:0;overflow:hidden;
+  background:var(--chrome-hi);
+  border-bottom:1px solid var(--rule-2);
+}
+[data-atlas] .at-zone{
+  display:flex;align-items:center;gap:var(--at-s2);
+  min-width:0;flex:1 1 auto;
+  padding-left:var(--at-s2);
+}
+[data-atlas] .at-zone-accent{border-left:2px solid var(--accent)}
+[data-atlas] .at-zone-muted{border-left:2px solid var(--accent-2)}
+[data-atlas] .at-zone-hair{border-left:1px solid var(--rule-2);flex:0 0 clamp(250px,19vw,290px)}
+
+[data-atlas] .at-zone-label{
+  flex:none;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);font-weight:600;
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;
+  color:var(--t3);background:transparent;border:0;padding:0;cursor:pointer;
+}
+[data-atlas] .at-zone-label:hover{color:var(--t1)}
+[data-atlas] .at-zone-items{display:flex;align-items:center;gap:var(--at-s2);min-width:0;overflow:hidden}
+
+/* THE EMPTY STATE IS THE BOUNDARY. Dashed, so an unset zone is visibly a zone rather than a gap,
+   and it says what it WOULD hold -- a heading over nothing tells a reader the zone exists; this
+   tells them what it is for. */
+[data-atlas] .at-zone-hint{
+  font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t3);
+  border:1px dashed var(--rule-2);padding:1px var(--at-s2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;
+}
+[data-atlas] .at-cond{
+  display:inline-flex;align-items:baseline;gap:var(--at-s1);
+  border:1px solid var(--accent);
+  background:color-mix(in srgb,var(--accent) 12%,transparent);
+  padding:1px var(--at-s2);min-width:0;
+}
+[data-atlas] .at-zone-muted .at-cond{
+  border-color:var(--accent-2);background:color-mix(in srgb,var(--accent-2) 16%,transparent);
+}
+[data-atlas] .at-zone-hair .at-cond{
+  border-color:var(--rule-2);background:transparent;
+}
+[data-atlas] .at-cond-k{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);flex:none;
+}
+[data-atlas] .at-cond-v{
+  font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t1);
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+[data-atlas] .at-cond-x{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);
+  background:transparent;border:0;color:var(--t3);cursor:pointer;padding:0 0 0 2px;flex:none;
+}
+[data-atlas] .at-cond-x:hover{color:var(--t1)}
+
+[data-atlas] .at-lastedit{
+  display:flex;align-items:center;gap:var(--at-s1);flex:none;margin-left:auto;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+}
+[data-atlas] .at-lastedit-k{color:var(--t3)}
+[data-atlas] .at-lastedit-v{color:var(--t2)}
+
+/* WHAT CHANGED, at the deck's foot. The label is not decoration and is not optional: a delta
+   read as an effect is causal language the archive cannot support, so the denial travels with
+   the numbers rather than living in documentation. */
+[data-atlas] .at-changed{
+  display:flex;align-items:baseline;gap:var(--at-s3);flex-wrap:wrap;
+  padding:var(--at-s2) var(--at-s5);
+  border-top:1px solid var(--rule-2);
+  font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t2);
+}
+[data-atlas] .at-changed-label{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);flex:none;
+}
+[data-atlas] .at-changed-line{color:var(--t2)}
+
+/* ─── the inspector, and its pinned foot ──────────────────────────────────────────────────
+ *
+ * A FLEX COLUMN WHERE ONLY THE MIDDLE SCROLLS. The masthead is fixed, the whole-life blocks take
+ * what height is left and scroll inside it, and the bridge is pinned at the foot.
+ *
+ * WHAT IS ACTUALLY LOAD-BEARING IS `overflow-y:auto`, AND THAT IS NOT THE OBVIOUS ANSWER.
+ *
+ * The natural claim is that `min-height:0` is what lets the body shrink -- a flex item's default
+ * minimum is its CONTENT, so without it the column should grow past the dock and push the pinned
+ * foot off the bottom. That claim is wrong here, and the gate is what established it: seeding
+ * `min-height:auto` changes nothing, because a flex item that is a SCROLL CONTAINER has its
+ * automatic minimum resolve to zero already. The overflow declaration is doing the work.
+ *
+ * `min-height:0` stays anyway, and deliberately: it is what keeps this correct on the day the
+ * overflow is changed for some unrelated reason. It is belt-and-braces rather than the belt --
+ * which is worth writing down, because a comment that misnames the load-bearing line teaches the
+ * next reader to protect the wrong declaration.
+ *
+ * scripts/check-inspector-bridge.mjs drives the body to its full scroll extent at three content
+ * sizes and requires the bridge to stay on screen, so a regression fails a check rather than
+ * quietly hiding the surface's main affordance. */
+[data-atlas] .at-inspector{
+  display:flex;flex-direction:column;
+  min-height:0;height:100%;
+  border-left:1px solid var(--rule-2);
+  background:var(--chrome);
+}
+[data-atlas] .at-insp-head{flex:none}
+[data-atlas] .at-insp-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+[data-atlas] .at-insp-bridge{
+  flex:none;
+  border-top:2px solid var(--accent);
+  background:var(--chrome-hi);
+  padding:var(--at-s2) var(--at-s6) var(--at-s4);
+  max-height:46%;overflow-y:auto;overscroll-behavior:contain;
 }
