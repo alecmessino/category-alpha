@@ -264,9 +264,20 @@ function DataRow({ row, foldTiming, subject, onEvidence }) {
           the archive; with one selected it answers a different question -- did THIS storm reach
           this contract -- and the heading changes with it. A storm the archive holds no verdict
           for gets the slot dash rather than a NO it never earned. */}
+      {/* CONDITIONED ON WINS OVER THE SUBJECT, AND THIS IS THE FIFTH RULE ENFORCED IN A CELL.
+          A variable in the query is not an outcome of it: every storm in this cohort reached
+          this contract BY CONSTRUCTION, so the selected storm did too, and printing REACHED
+          would be true, vacuous, and read as evidence -- the one reading the whole conditioned-on
+          treatment exists to prevent. The row states the circularity and the subject cell holds
+          the slot. Other refusals keep their subject verdict: below the sample gate the archive
+          still knows what THIS storm did, and that is a fact about the storm rather than an
+          artefact of the question. */}
       <span className="at-dc at-dc-vs">
-        {subject ? <SubjectCell row={row} subject={subject} />
-          : <VsArchive delta={delta} refused={refused} />}
+        {kind === "CONDITIONED_ON"
+          ? <span className="at-slot"
+              title="this variable is in the query, so it is not an outcome of it">—</span>
+          : subject ? <SubjectCell row={row} subject={subject} />
+            : <VsArchive delta={delta} refused={refused} />}
       </span>
 
       {foldTiming ? null : (

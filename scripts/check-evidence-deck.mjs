@@ -203,6 +203,17 @@ const AUDIT = () => {
       }
     }
 
+    /* THE FIFTH RULE, IN THE SUBJECT COLUMN. A conditioned-on row must not present the selected
+       storm's verdict: every member reached that contract by construction, so REACHED there is
+       vacuous and reads as evidence. */
+    if (refusalBlock && refusalBlock.getAttribute("data-refusal") === "CONDITIONED_ON") {
+      const vs = row.querySelector(".at-dc-vs");
+      if (vs && /(REACHED|IS THE COUNT|\bNO\b)/.test(vs.textContent || "")) {
+        bad.push(`${name}: conditioned on, yet the subject column publishes a verdict `
+          + `("${(vs.textContent || "").trim()}")`);
+      }
+    }
+
     /* The bar never carries a number. */
     const bar = row.querySelector(".at-dc-bar");
     if (bar && /\d/.test(bar.textContent || "")) bad.push(`${name}: the bar carries a number`);
@@ -404,6 +415,12 @@ if (process.argv.includes("--self-test")) {
     {
       name: "a data-refusal block reduced to a two-word status",
       mutate: (h) => h.replace(/(<div class="at-deck-say" data-refusal="[A-Z_]+">).*?(<\/div>)/, "$1RATE REFUSED$2"),
+    },
+    {
+      name: "a conditioned-on row publishing the subject's verdict as evidence",
+      mutate: (h) => h.replace(
+        /(<span class="at-dc at-dc-vs"><span class="at-slot" title="this variable is in the query[^"]*">)—/,
+        "$1REACHED"),
     },
     {
       name: "a refusal statement running past the bound",

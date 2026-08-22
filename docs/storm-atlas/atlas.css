@@ -1448,3 +1448,98 @@
   font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
   text-transform:uppercase;color:var(--t3);
 }
+
+/* ─── the stacked shell ───────────────────────────────────────────────────────────────────
+ *
+ * FIVE ROWS, AND ONLY THE PLATE IS ELASTIC.
+ *
+ *   32   identity strip     fixed
+ *   38   question line      fixed
+ *   38   condition strip    fixed
+ *   1fr  plate              elastic, floor 320
+ *   340  evidence deck      fixed; rows drop at a breakpoint, never shrink
+ *   auto transport          40 with a subject, 0 without
+ *
+ * THE TABLE IS NEVER SQUEEZED TO GIVE THE MAP HEIGHT. Selecting a storm takes WIDTH from the
+ * plate for the dock and never height from the evidence -- an answer that shrinks the moment a
+ * reader asks about one storm is the failure this row model exists to prevent, and it is
+ * invisible until exactly the moment it matters.
+ *
+ * The plate row is `minmax(320px, 1fr)` rather than `1fr`: a viewport short enough to squeeze it
+ * below 320 should scroll the shell instead of publishing a map too small to read a track on. */
+/* EVERY SELECTOR HERE CARRIES BOTH CLASSES, AND THAT IS NOT STYLE -- IT IS ARITHMETIC.
+ * `[data-atlas].atlas-shell` is 0,2,1 and so is `[data-atlas].atlas-stacked`, so source order
+ * would decide -- and the three-column shell's BREAKPOINTS are declared later in this file than
+ * the stacked rules can be. At 1180 and below they would silently re-impose a three-row grid on
+ * a five-row shell. `[data-atlas].atlas-shell.atlas-stacked` is 0,3,1 and wins outright,
+ * everywhere, which is what lets both shells share a stylesheet during the transition. */
+[data-atlas].atlas-shell.atlas-stacked{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:32px 38px 38px minmax(320px,1fr) 340px auto;
+  background:var(--chrome);
+}
+[data-atlas].atlas-shell.atlas-stacked > *{min-width:0}
+
+/* THE PLATE ROW, AND THE DOCK INSIDE IT. The dock is a fixed 380 and the plate takes what is
+   left -- the whole width when no storm is selected. */
+[data-atlas].atlas-stacked .atlas-plate-row{
+  display:grid;grid-template-columns:minmax(0,1fr);
+  min-width:0;min-height:0;position:relative;
+}
+[data-atlas].atlas-stacked .atlas-plate-row:has(.atlas-dock){
+  grid-template-columns:minmax(0,1fr) 380px;
+}
+[data-atlas].atlas-stacked .atlas-dock{min-width:0;min-height:0;overflow:hidden}
+
+/* THE STAGE, RE-SEATED. It keeps its own internal grid -- the caption bands and the plate --
+   but the three-column shell pins it at `grid-column:2; grid-row:2` with a height computed from
+   the aspect cap and `align-self:center`. Inside a single-cell plate row those place it in a
+   phantom second column of a grid that has one, which is how the plate first measured 0x0.
+   Re-seated at 1/1, stretched, and sized by the row rather than by the old cap. */
+[data-atlas].atlas-stacked .atlas-stage{
+  grid-column:1;grid-row:1;
+  height:auto;align-self:stretch;
+  min-width:0;min-height:0;
+}
+
+/* THE EVIDENCE ROW. Fixed height, its own scroll, and the deck's header stays put inside it so
+   the column names survive a scroll of the rows beneath them. */
+[data-atlas].atlas-stacked .atlas-evidence{
+  min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  border-top:1px solid var(--rule-2);
+  background:var(--chrome);
+}
+[data-atlas].atlas-stacked .atlas-evidence .at-deck-head > .at-dc{
+  position:sticky;top:0;z-index:2;background:var(--chrome);
+}
+/* THE TRANSPORT IS AUTO-PLACED, AND THE OVERRIDE IS THE WHOLE REASON THIS RULE EXISTS.
+   The three-column shell pins it at `grid-row:3` -- correct there, where row 3 is the transport.
+   Here row 3 is the CONDITION STRIP, so the pin claimed it, and auto-placement pushed the strip,
+   the plate and the evidence each down one track: the strip took the plate's 320px floor, the
+   plate row took the evidence's 340, and the evidence got the 132px that was left. Every row
+   was the wrong height and nothing was missing, which is why it looked like a sizing bug rather
+   than a placement one. Reset to auto so source order decides, as it does for its five siblings. */
+[data-atlas].atlas-stacked .atlas-transport{grid-column:1;grid-row:auto}
+
+/* THE BUILDER SHEET. Summoned, not resident. It overlays the plate rather than the evidence,
+   because a reader editing a condition is looking at what the map holds, not at the answer they
+   are about to invalidate. */
+[data-atlas] .at-sheet{
+  position:absolute;left:0;top:108px;bottom:0;width:clamp(320px,26vw,420px);
+  z-index:900;display:flex;flex-direction:column;
+  background:var(--chrome);border-right:1px solid var(--rule-2);
+}
+[data-atlas] .at-sheet-hd{
+  flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--at-s5);height:var(--at-row-head-h);
+  border-bottom:1px solid var(--rule-2);background:var(--chrome-hi);
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);
+}
+[data-atlas] .at-sheet-x{
+  background:transparent;border:0;color:var(--t3);cursor:pointer;
+  font-family:var(--at-mono);font-size:var(--at-fs-value);padding:0 2px;
+}
+[data-atlas] .at-sheet-x:hover{color:var(--t1)}
+[data-atlas] .at-sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
