@@ -457,6 +457,17 @@ jobs:
       # It also asserts that the ladder STEPS: the fold state is read at each width and compared
       # with the one the specification names, so a boundary that moved shows up as the wrong
       # column count rather than as a layout that merely still fits.
+      # EVERY WORD ON EVERY SURFACE, IN BOTH SHELLS, AGAINST THE GROUND IT ACTUALLY LANDS ON.
+      # The adherence gate enumerates the light shell's TOKEN TABLE, and that is exactly why it
+      # missed a storm name shipped at 1.07:1: the inspector's masthead used a literal written
+      # when the only chrome was near-black, and a rule that reads tokens cannot see a literal.
+      # The same hole ran the other way -- the provenance drawer kept a hard-coded dark ground
+      # under the light shell's near-black inks. This gate reads no stylesheet: it opens the six
+      # real surfaces and measures the contrast the browser resolved, with SVG text taken from
+      # `fill` rather than `color`, in the light shell and the dark one.
+      - name: Verify every word clears AA on the ground it lands on, in both shells
+        run: node scripts/check-light-contrast.mjs --require-browser
+
       - name: Verify every state holds at every breakpoint the ladder names
         run: node scripts/check-responsive-matrix.mjs --require-browser
 

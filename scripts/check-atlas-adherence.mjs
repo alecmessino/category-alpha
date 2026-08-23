@@ -376,6 +376,42 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
      && /calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css),
      "the stacked shell's clamp is not reading the pinned tokens");
 
+  /* AND NO RULE MAY NAME AN INK THAT IS NOT A TOKEN.
+   *
+   * THE RULE ABOVE ENUMERATES TOKENS, WHICH IS EXACTLY WHY IT MISSED WHAT IT MISSED. A stylesheet
+   * written for one chrome and then given a second one keeps every literal it ever had, and a
+   * literal answers to no shell: `.at-masthead h2{color:#f8fbff}` put the selected storm's NAME
+   * at 1.07:1 on paper -- invisible -- while every token assertion in this file passed, because
+   * none of them was looking at a declaration that mentions no token at all. There were nineteen.
+   *
+   * So: a `color:` declaration in atlas.css must resolve through a custom property, unless the
+   * thing it paints sits ON THE CARTOGRAPHIC PLATE, which is dark in both shells and is the one
+   * place a fixed light ink is always right. Those are listed by selector, so adding one is a
+   * decision with a name on it rather than an oversight.
+   *
+   * check-light-contrast.mjs is the other half: this rule stops a literal being WRITTEN, that
+   * one measures what the browser actually resolved on every surface in both shells. Neither
+   * subsumes the other -- a token can be wrong too, and this file cannot see a JSX inline style. */
+  const ON_PLATE = [
+    "[data-atlas] .leaflet-control-zoom a:hover",   // the map's own zoom control
+    "[data-atlas] .at-invite em",                   // the invitation, drawn over the plate
+  ];
+  const literalInks = [];
+  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const sel = m[1].replace(/\/\*[\s\S]*?\*\//g, "").split("\n").pop().trim();
+    for (const d of m[2].matchAll(/(?<![-\w])color\s*:\s*(#[0-9a-f]{3,6})\b/gi)) {
+      if (ON_PLATE.includes(sel)) continue;
+      literalInks.push(`${sel} { color:${d[1]} }`);
+    }
+  }
+  ok("no rule paints text with a literal ink instead of a token",
+     literalInks.length === 0,
+     literalInks.join("\n") + "\n  a literal answers to no shell; use a token, or add the "
+     + "selector to ON_PLATE if it really is on the plate");
+  ok("the on-plate exemptions still exist to be exempt",
+     ON_PLATE.every((sel) => css.includes(sel)),
+     "an exemption names a selector that is no longer in the stylesheet");
+
   /* THE PLATE IS EXCLUDED FROM THE SHELL SWAP BY CONSTRUCTION, and that is a structural claim
      worth pinning: --stage is declared exactly once, so no later edit to a light shell can
      lighten the cartographic plate by accident. */

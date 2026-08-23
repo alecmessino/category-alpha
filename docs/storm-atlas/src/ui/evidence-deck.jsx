@@ -40,7 +40,7 @@ import { regionLabel } from "../engine/cohort-language.js";
 import { intensityContractKey, landfallContractKey } from "../engine/calibration.js";
 import { REFUSALS } from "./refusal.jsx";
 import { refusalKindOf, countsOf } from "./outcome-card.jsx";
-import { Chip } from "./kit.jsx";
+import { Chip, CohortSpec } from "./kit.jsx";
 import { WhatChanged } from "./condition-strip.jsx";
 import { baselineSentence } from "../engine/cohort-language.js";
 import { Refusal } from "./refusal.jsx";
@@ -126,12 +126,15 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
  * @param {object[]} [props.conditions]   conditionsOf(spec) -- the hold-out control's inventory
  * @param {function} [props.onBaseline]   pins a different condition as the one held out
  * @param {object}   [props.whatChanged]  `{ edit }` -- what the last edit was and what it cost
+ * @param {string}   [props.citation]     the Cohort Spec, as one citable line
+ * @param {string}   [props.citationUrl]  the URL that reopens exactly this cohort
  */
 export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTiming = false,
   foldInterval = false, timingOpen = false, onToggleTiming,
   foldLandfall = false, landfallOpen = false,
   onToggleLandfall, environment = null, spec = null, pathway = null,
   conditions = [], onBaseline, whatChanged = null, replayNote = null,
+  citation = null, citationUrl = null,
   collapseGroups = false, openGroups = null, onToggleGroup }) {
   if (!result) return null;
   const r = result;
@@ -235,7 +238,8 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
           read the ladder, and a block between the question and the evidence is a block they
           scroll past. */}
       <DeckFoot comparison={comparison} conditions={conditions} onBaseline={onBaseline}
-        whatChanged={whatChanged} groups={groups} />
+        whatChanged={whatChanged} groups={groups}
+        citation={citation} citationUrl={citationUrl} />
 
       {/* THE ENVIRONMENT, AS A DISCLOSURE RATHER THAN A SECTION.
           It is a LENS and not a filter -- under half this archive carries any environment and
@@ -1070,7 +1074,8 @@ export function subjectReached(subject, contractKey) {
  * Both are stated once, in the foot, because both are facts about the whole table. The HOLD OUT
  * control comes with them -- "what if I had not restricted the season" is one click rather than
  * a re-entry, and it is the control that makes the baseline a choice rather than a default. */
-function DeckFoot({ comparison, conditions, onBaseline, whatChanged, groups }) {
+function DeckFoot({ comparison, conditions, onBaseline, whatChanged, groups,
+  citation, citationUrl }) {
   const c = comparison;
   return (
     <div className="at-deck-foot-block" data-deck-foot>
@@ -1081,6 +1086,22 @@ function DeckFoot({ comparison, conditions, onBaseline, whatChanged, groups }) {
         deltas={c ? topDeltas(groups) : []} />
       {c ? (
         <Baseline c={c} conditions={conditions} onBaseline={onBaseline} groups={groups} />
+      ) : null}
+
+      {/* CITE THIS COHORT — THE THIRD THING THE PANEL CARRIED AND THE DECK HAD DROPPED.
+          It closes the answer rather than opening it, which is where the deleted panel put it
+          and for the reason it gave: a reader cites a result AFTER reading it, and five lines of
+          stamps above the table push the first outcome rate off a 1280 viewport. It computes
+          nothing and asserts nothing the conditions have not already applied -- its whole point
+          is that the analyst it is sent to opens the identical cohort. `citation` went on being
+          computed in atlas.jsx after cohort-panel.jsx was deleted, with nothing consuming it:
+          a live wire ending in air, which is exactly how a provenance surface disappears
+          without a single gate going red. */}
+      {citation ? (
+        <div className="at-deck-cite" data-cohort-citation>
+          <span className="at-foot-k">CITE THIS COHORT</span>
+          <CohortSpec text={citation} url={citationUrl} />
+        </div>
       ) : null}
     </div>
   );

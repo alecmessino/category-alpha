@@ -693,6 +693,7 @@ export function Atlas() {
              facts about the whole table and live in its foot. */
           conditions={conditionsOf(cohort)} onBaseline={setBaselinePin}
           whatChanged={whatChanged}
+          citation={citation} citationUrl={scenarioURL()}
           replayNote={mode === "replay"
             ? <ReplayNote timeline={timeline} result={result} /> : null}
           /* The pathway disclosure is always present, not gated on the layer being on:

@@ -229,6 +229,20 @@ const AUDIT = (vw) => {
     if (!shown(dock)) bad.push("a storm is selected and the inspector is not on screen");
     if (db.right > innerWidth + 1 || db.left < -1) bad.push("the inspector is off the side of the viewport");
     if (db.bottom > innerHeight + 1) bad.push("the inspector runs past the bottom of the viewport");
+    /* THE SUBJECT'S NAME IS THE ONE FACT THE INSPECTOR EXISTS TO CARRY, and "rendered" is not
+       "on screen": the masthead was once 29px tall around 226px of content, so the name was
+       painted in legible ink and clipped out of its own scroll box. Measured against the head's
+       visible rectangle, not against the document. */
+    const nm = document.querySelector(".at-masthead h2");
+    const hd = document.querySelector(".at-insp-head");
+    if (!nm || !hd) bad.push("the inspector has no subject masthead");
+    else {
+      const nb = nm.getBoundingClientRect(), hb = hd.getBoundingClientRect();
+      if (nb.height < 8 || nb.top < hb.top - 1 || nb.bottom > hb.bottom + 1) {
+        bad.push(`the subject's name is clipped out of the masthead `
+          + `(name ${Math.round(nb.top)}-${Math.round(nb.bottom)}, head ${Math.round(hb.top)}-${Math.round(hb.bottom)})`);
+      }
+    }
     const bridge = document.querySelector("[data-bridge-pinned]");
     if (!shown(bridge)) bad.push("the Storm to Cohort bridge is not on screen with a storm selected");
     else {
