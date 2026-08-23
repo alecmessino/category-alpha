@@ -356,6 +356,26 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
      /\[data-atlas\]:not\(\[data-shell="dark"\]\) \.atlas-stage\{[^}]*--t1:var\(--d-t1\)/.test(css),
      "the plate would inherit paper inks");
 
+  /* THE APERTURE'S TWO BOUNDS, PINNED TO THE NUMBERS THEY WERE DERIVED AS.
+   *
+   * 1.421 is 1.303 (the archive's core frame, north 66N to 69N, south 16S to 24S) times 1.0905,
+   * which is half a Leaflet zoom-snap step -- the median landing rather than the best case.
+   * 3.2 is where a single East Pacific track stops being the subject of its own plate. Neither
+   * is a preference, and both are now single declarations used by one clamp -- which is exactly
+   * the shape a failing aperture gate is easiest to "fix" by widening. Pinned here so that
+   * widening a bound is a change to this file with a number in the diff. */
+  const bounds = Object.fromEntries(
+    [...css.matchAll(/--at-plate-(ar|ar-max)\s*:\s*([\d.]+)/g)].map((m) => [m[1], m[2]]),
+  );
+  ok("the aperture floor is the archive's own core frame at the median snap",
+     bounds.ar === "1.421", `--at-plate-ar is ${bounds.ar}`);
+  ok("and the ceiling is where one track stops being the subject of its plate",
+     bounds["ar-max"] === "3.2", `--at-plate-ar-max is ${bounds["ar-max"]}`);
+  ok("both bounds reach the clamp as tokens, not as literals",
+     /clamp\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)/.test(css)
+     && /calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css),
+     "the stacked shell's clamp is not reading the pinned tokens");
+
   /* THE PLATE IS EXCLUDED FROM THE SHELL SWAP BY CONSTRUCTION, and that is a structural claim
      worth pinning: --stage is declared exactly once, so no later edit to a light shell can
      lighten the cartographic plate by accident. */

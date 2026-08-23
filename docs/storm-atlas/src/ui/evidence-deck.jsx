@@ -153,6 +153,18 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
    * attributes are the EFFECTIVE state now, and head, group and data rows all emit exactly one
    * child per track in every combination. */
   const timingOn = !foldTiming || timingOpen;
+  /* THE INTERVAL DOES NOT FOLD AWAY, IT MOVES IN WITH THE RATE, and the difference is a rule.
+   *
+   * The specification's ladder says the interval "folds into the bar's title" below 1280. Its
+   * own section on the table says, of the same column, that "the band alone is not an accessible
+   * statement" -- and panel rule 1, which predates the redesign, says a published rate implies a
+   * count AND an interval on the same row. A title is hover-only and absent on touch, so the
+   * ladder's step would have retired a rule the same document states two pages earlier.
+   *
+   * Reconciled by giving up the COLUMN and keeping the VALUE: below 1280 the bounds render
+   * inside the rate cell, on the same line, in the same row. The track is reclaimed, nothing is
+   * behind a hover, and check-evidence-deck's rule 1 still finds an interval element in the row.
+   * The bar keeps the bounds in its title as well, because the band is drawn there. */
   const intervalOn = !foldInterval || timingOpen;
 
   /* WHICH REFUSAL SENTENCES REPEAT, WHICH IS WHAT THE BOUND IS ACTUALLY FOR.
@@ -284,12 +296,15 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
    folded item stays reachable in one click from where it was, and the affordance says what it
    holds. */
 function DeckHead({ timingOn, intervalOn, onToggleTiming, subject }) {
-  const folded = [!intervalOn ? "INTERVAL" : null, !timingOn ? "TIMING" : null].filter(Boolean);
+  /* Only TIMING is ever behind this control: the interval gives up its track but keeps its
+     value, so there is nothing about it to restore. */
   return (
     <div className="at-deck-row at-deck-head" role="row">
       <span className="at-dc at-dc-outcome">OUTCOME</span>
       <span className="at-dc at-dc-bar" aria-hidden="true" />
-      <span className="at-dc at-dc-rate">RATE</span>
+      <span className={"at-dc at-dc-rate" + (intervalOn ? "" : " at-dc-rate-wide")}>
+        RATE{intervalOn ? null : <span className="at-dc-int-inline">95% CI</span>}
+      </span>
       <span className="at-dc at-dc-count">COUNT</span>
       {intervalOn ? <span className="at-dc at-dc-int">INTERVAL</span> : null}
       <span className="at-dc at-dc-vs">{subject ? "SUBJECT" : "VS ARCHIVE"}</span>
@@ -301,9 +316,8 @@ function DeckHead({ timingOn, intervalOn, onToggleTiming, subject }) {
       ) : (
         <button type="button" className="at-dc at-dc-fold" data-timing-fold
           onClick={onToggleTiming}
-          title={"the 95% Wilson bounds and the median and interquartile duration for every row"
-            + ", folded at this width"}>
-          + {folded.join(" · ")} COLUMN{folded.length > 1 ? "S" : ""}
+          title="the median and interquartile duration for every row, folded at this width">
+          + TIMING COLUMNS
         </button>
       )}
       <span className="at-dc at-dc-status">STATUS</span>
@@ -333,7 +347,7 @@ function GroupRow({ group, timingOn, intervalOn, subject, collapsed, onExpand })
         ) : null}
       </span>
       <span className="at-dc at-dc-bar" aria-hidden="true" />
-      <span className="at-dc at-dc-rate" />
+      <span className={"at-dc at-dc-rate" + (intervalOn ? "" : " at-dc-rate-wide")} />
       <span className="at-dc at-dc-count">{group.denom !== null ? (
         <>of {group.denom.toLocaleString()}</>
       ) : null}</span>
@@ -398,9 +412,21 @@ function DataRow({ row, timingOn, intervalOn, subject, onEvidence, shared }) {
           em dash and the word lives in STATUS. The dash is CONTENT, not decoration -- it means
           "the archive has no value here" -- so it is held to the same contrast bar as the value
           it replaces and never dimmed into a hairline ink. */}
-      <span className="at-dc at-dc-rate">
+      <span className={"at-dc at-dc-rate" + (intervalOn ? "" : " at-dc-rate-wide")}>
         {refused ? <span className="at-slot" title="the archive publishes no rate here">—</span>
           : <span className="at-val">{pct1(cell.rate)}</span>}
+        {/* THE MERGED INTERVAL. Still an `at-dc-int`, so every rule written against the interval
+            element goes on finding one; it is simply nested in the cell the rate is in rather
+            than occupying a track of its own. */}
+        {!intervalOn ? (
+          <span className="at-dc-int at-dc-int-inline">
+            {!refused && cell.ci95 ? (
+              <span className="at-val">
+                [{(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%]
+              </span>
+            ) : <span className="at-slot">—</span>}
+          </span>
+        ) : null}
       </span>
 
       {/* RULE 1 AND RULE 3. The count publishes whether or not the rate does -- a refusal is not

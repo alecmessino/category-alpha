@@ -173,10 +173,18 @@
    * workstation gets the same instrument with its own chrome above and below it, and NEVER more
    * geography. Where a viewport is shorter than the cap the padding is zero and the plate takes
    * every pixel of height there is. */
+  /* THE NUMBER SURVIVED THE SHELL; THE ARITHMETIC AROUND IT DID NOT. 1.421 is now the APERTURE'S
+     FLOOR, applied by the stacked shell's own row clamp against the width actually available --
+     see `--at-plate-avail` there. What is gone with the three-column shell is the chain that
+     derived a whole-instrument height from it: --at-plate-w subtracted a rail and a panel that
+     no longer exist, --at-chrome-h added a masthead row this shell does not have, and --at-frame
+     was the padding target of a `padding-block` cap that was removed two commits before them. */
   --at-plate-ar:1.421;
-  --at-plate-w:calc(100vw - var(--at-rail) - var(--at-panel));
-  --at-chrome-h:calc(var(--at-head) + var(--at-band-top) + var(--at-band-bot));
-  --at-frame:calc(var(--at-chrome-h) + var(--at-plate-w) / var(--at-plate-ar));
+  /* AND THE OTHER END OF THE APERTURE, which had been a literal inside the clamp. Past 3.2 a
+     single East Pacific track stops being the subject of its own plate. Both bounds are declared
+     here, once, and scripts/check-atlas-adherence.mjs pins them: a bound that can be edited in
+     the one place it is used is a bound that can be widened to make a failing gate pass. */
+  --at-plate-ar-max:3.2;
 
   /* THE PLATE'S OWN MARGIN. The graticule is ruled on the plate's edges and its longitude
      labels sit in the bottom 16px of it -- measured, an 11px line five pixels up. Everything
@@ -311,57 +319,29 @@
    one declaration and it degrades to nothing: on a viewport shorter than the cap the max() is
    0 and the grid is exactly what it was. All three columns end at the same baseline, both
    vertical rules run the instrument's full height, and no column is left holding a gap. */
+/* THE SHELL IS A GRID AND NOTHING ELSE HERE DECIDES ITS SHAPE.
+ *
+ * It used to declare the three-column instrument -- rail, stage, panel -- and both surfaces that
+ * still use this class override every track of it: the stacked shell with its own six rows, the
+ * calibration variant with its own two. What is left is what both actually share.
+ *
+ * WHAT WAS REMOVED WITH IT. `.atlas-rail` and `.atlas-panel` are elements no JSX in this
+ * repository renders any more, and their rules were seating them in columns 1 and 3 of a grid
+ * that has one. `.atlas-stage` was pinned at column 2, row 2 with `align-self:center` and a
+ * height computed from the plate's aspect cap -- which is how the plate first measured 0x0 in a
+ * single-cell row, and which the stacked shell has had to override ever since. `.atlas-transport`
+ * was pinned at row 3, which in the stacked shell is the CONDITION STRIP, and it took that row
+ * until the override went in. Every one of them was a rule about a shell that is gone, still
+ * aimed at a live surface. */
 [data-atlas].atlas-shell{
   position:fixed;inset:0;
   display:grid;
-  grid-template-columns:var(--at-rail) minmax(0,1fr) var(--at-panel);
-  grid-template-rows:var(--at-head) minmax(0,1fr) auto;
   background:var(--chrome);
 }
 /* A grid item's default min-height is `auto`, which means CONTENT, which means a stage holding
-   a map that wants to be as tall as its own content escapes the row it was given. All three
-   columns get an explicit floor of zero so the row height wins. */
-[data-atlas] .atlas-rail,[data-atlas] .atlas-stage,[data-atlas] .atlas-panel{
-  min-width:0;min-height:0;
-}
-[data-atlas] .atlas-rail{grid-column:1;grid-row:2;border-right:1px solid var(--rule-2);background:var(--chrome)}
-/* THE CAP APPLIES TO THE PLATE, AND USED TO APPLY TO EVERYTHING.
- *
- * It was `padding-block` on the SHELL, which is the honest way to describe the intent -- the
- * instrument is capped and centred -- and the wrong way to implement it, because the rail and
- * the panel are not the plate and have no aspect to hold. Measured at viewport height 1000, the
- * padding it produced per side: 1920 -> 15.6px, 1600 -> 91.9px, 1440 -> 142.6px, 1280 -> 198.9px,
- * 1181 -> 233.7px. At 1440 that is 285px of a 1000px viewport painted blank ABOVE AND BELOW THE
- * EVIDENCE COLUMN, which is the column whose entire job in this pass is to answer without being
- * scrolled -- so the narrower the workstation, the less of the answer it showed, for the sake of
- * a map on the other side of the screen.
- *
- * The cap now binds the STAGE alone: the same term, the same aspect, the same arithmetic. The
- * plate's width was never a function of this (the columns decide it) and its height is still
- * exactly plate-width / --at-plate-ar, so the opening view, the zoom snap and every framing
- * decision in coreFrame() are untouched -- measured identical at 1920, 1600, 1440, 1280, 1181
- * and 1040 before and after. What changed is where the surplus goes: to the rail and the panel,
- * instead of to a band of empty chrome across all three. */
-[data-atlas] .atlas-stage{
-  grid-column:2;grid-row:2;
-  /* HEIGHT, NOT MAX-HEIGHT. `align-self:center` stops a grid item stretching, so a max-height
-     leaves it sized to CONTENT -- and the stage's middle row is `minmax(0,1fr)`, which sizes to
-     nothing. Measured: the plate came out 1229x0. An explicit height resolved against the row
-     keeps the stretch and applies the cap: min() takes the row when the viewport is short, the
-     cap when it is tall, which is exactly what the shell's padding computed. */
-  height:min(100%, calc(var(--at-band-top) + var(--at-band-bot)
-                        + var(--at-plate-w) / var(--at-plate-ar)));
-  align-self:center;
-}
-[data-atlas] .atlas-panel{grid-column:3;grid-row:2;border-left:1px solid var(--rule-2);background:var(--chrome)}
-[data-atlas] .atlas-transport{grid-column:1/-1;grid-row:3}
-/* Each column scrolls on its own and nothing chains out of it: a wheel that runs off the end
-   of the rail must not move the page under the map. The gutter is reserved whether or not the
-   column is currently overflowing, so a state change that adds a section cannot shift the
-   column's text sideways by the width of a scrollbar. */
-[data-atlas] .atlas-rail,[data-atlas] .atlas-panel{
-  overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;
-}
+   a map that wants to be as tall as its own content escapes the row it was given. An explicit
+   floor of zero so the row height wins. */
+[data-atlas] .atlas-stage{min-width:0;min-height:0}
 
 /* THE CALIBRATION SURFACE IS A SHELL VARIANT, not a fourth child rule.
    Written as a variant because the media queries below cap row 2 -- at 760px it is
@@ -384,8 +364,11 @@
 
 /* ─── header ──────────────────────────────────────────────────────────────────────────── */
 
+/* THE CALIBRATION SURFACE'S MASTHEAD, and the last thing `--at-head` sizes. The tactical shell
+   replaced it with the identity strip; the ledger and the boot screen still render it. */
 [data-atlas] .at-header{
-  grid-column:1/-1;grid-row:1;display:flex;align-items:stretch;min-width:0;
+  grid-column:1/-1;grid-row:1;height:var(--at-head);
+  display:flex;align-items:stretch;min-width:0;
   border-bottom:1px solid var(--rule-2);background:var(--chrome-hi);
 }
 [data-atlas] .at-brand{
@@ -1093,9 +1076,18 @@
 [data-atlas] .at-deck[data-timing-folded]{
   grid-template-columns:170px minmax(0,1fr) 78px 100px 124px 92px 128px 168px;
 }
+/* THE INTERVAL GIVES UP ITS TRACK AND MOVES IN WITH THE RATE, so the rate track widens by
+   roughly what the interval track and its gap were and the row still reads as one line. Measured
+   at 1180: 826px of fixed track, six gaps and the padding leave the bar 262px, which is a bar. */
 [data-atlas] .at-deck[data-timing-folded][data-interval-folded]{
-  grid-template-columns:170px minmax(0,1fr) 78px 100px 92px 128px 168px;
+  grid-template-columns:170px minmax(0,1fr) 168px 100px 92px 128px 168px;
 }
+[data-atlas] .at-dc-int-inline{
+  margin-left:var(--at-s2);
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);white-space:nowrap;
+}
+[data-atlas] .at-dc-int-inline .at-val{font-size:var(--at-fs-label);color:var(--t3)}
 /* THE FOLDED GROUP'S OWN QUALIFIER, on a line of its own because the cell it rode in is gone.
    Spans every track: it is a sentence about the denominator, not a value in a column. */
 [data-atlas] .at-deck-groupnote{
@@ -1512,10 +1504,10 @@
   --at-strip:38px;
   grid-template-rows:
     var(--at-ident) var(--at-q) var(--at-strip)
-    clamp(calc(var(--at-plate-avail) / 3.2),
+    clamp(calc(var(--at-plate-avail) / var(--at-plate-ar-max)),
           calc(100vh - var(--at-ident) - var(--at-q) - var(--at-strip)
                - 340px - var(--at-tport)),
-          calc(var(--at-plate-avail) / 1.421))
+          calc(var(--at-plate-avail) / var(--at-plate-ar)))
     minmax(0,1fr)
     var(--at-tport);
   background:var(--chrome);

@@ -169,15 +169,26 @@ const AUDIT = (vw) => {
   if (foldBtn) {
     const t = (foldBtn.textContent || "").trim();
     if (timingFolded && !/TIMING/.test(t)) bad.push(`the fold does not name TIMING: "${t}"`);
-    if (intervalFolded && !/INTERVAL/.test(t)) bad.push(`the fold does not name INTERVAL: "${t}"`);
+    /* AND IT MUST NOT NAME THE INTERVAL, because the interval is not behind it. The interval
+       gives up its TRACK below 1280 and keeps its VALUE, in the rate's cell -- a control
+       offering to restore something that never left is a control that lies about the state. */
+    if (/INTERVAL/.test(t)) bad.push(`the fold offers to restore an interval that never left: "${t}"`);
     note.push("fold:" + t);
   }
   if (intervalFolded) {
-    /* THE BOUNDS MOVED INTO THE BAR, so at least one bar must actually carry them. A folded
-       column whose values went nowhere is a deleted column. */
-    const carried = [...deck.querySelectorAll(".at-dc-bar[title]")]
-      .some((b) => /95% Wilson interval/.test(b.title));
-    if (!carried) bad.push("the interval folded and no bar carries the bounds");
+    /* THE COLUMN GAVE UP ITS TRACK; THE VALUE STAYED ON THE ROW.
+       Panel rule 1 -- a published rate implies a count and an interval on the same row -- does
+       not relax at a narrower viewport, and a hover-only title is not an interval a touch reader
+       can reach. So every row that prints a rate must still print its bounds, in the cell the
+       rate is in. */
+    for (const row of deck.querySelectorAll("[data-outcome]")) {
+      const rate = row.querySelector(".at-dc-rate");
+      if (!rate || !/\d[\d,.]*\s*%/.test(rate.textContent || "")) continue;
+      const ci = rate.querySelector(".at-dc-int");
+      if (!ci || !/\d/.test(ci.textContent || "")) {
+        bad.push(`${row.getAttribute("data-outcome")}: the interval folded and the bounds went with it`);
+      }
+    }
     note.push("interval-folded");
   }
   for (const g of deck.querySelectorAll("[data-group-fold]")) {

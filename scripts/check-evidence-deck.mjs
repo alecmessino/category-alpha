@@ -121,7 +121,25 @@ const COMPARISON = {
   },
   landfall: { conus: { any: { baseRate: 0.250, deltaPp: 3.9, direction: "higher", overlap: true },
     hurricane: null } },
+  /* THE PARTS THE FOOT READS, AND THE FIXTURE DID NOT HAVE THEM.
+     compareResults returns `baseline`, `changed` and `relation` alongside the per-contract
+     deltas, and the deck's foot -- which is where the whole VS ARCHIVE column is named, counted
+     and qualified -- reads all three. The fixture carried only the deltas, so the foot threw on
+     `c.baseline.n_cases` the moment it was rendered. A fixture that cannot render a block is a
+     fixture that cannot test it, so the block's own inputs are here, shaped as the engine
+     writes them. */
+  baseline: { n_cases: 653, effective_sample_size: 653.0, sufficient: true, min_sample: 40 },
+  changed: { key: "season", noun: "the season condition" },
+  relation: { note: "539 of this cohort's 539 storms are also in the baseline, so these are not "
+    + "independent estimates. Shared storms pull the two rates toward each other, which makes "
+    + "the interval comparison below weaker still — read it as a reading aid, never as a test." },
 };
+
+/* The two conditions the HOLD OUT control offers, named the way conditionsOf() names them. */
+const CONDITIONS = [
+  { key: "where", zone: "given", label: "FORMED NEAR", noun: "the location condition" },
+  { key: "season", zone: "given", label: "SEASONS", noun: "the season condition" },
+];
 
 /* KEYED BY THE HARNESS'S OWN CONTRACT KEY -- see engine/calibration.js. Writing a plausible key
    here instead ("intensity:cat5") is exactly how a fixture passes while the feature never fires,
@@ -154,10 +172,17 @@ await build({
 });
 const { render, subjectVerdicts, subjectReached } = await import(outfile);
 
-const HTML_DEFAULT = render({ result: RESULT, comparison: COMPARISON, onEvidence: () => {} });
+const HTML_DEFAULT = render({ result: RESULT, comparison: COMPARISON, onEvidence: () => {},
+  conditions: CONDITIONS });
 const HTML_SUBJECT = render({ result: RESULT, comparison: COMPARISON, subject: SUBJECT,
   onEvidence: () => {} });
-const HTML_FOLDED = render({ result: RESULT, comparison: COMPARISON, foldTiming: true });
+const HTML_FOLDED = render({ result: RESULT, comparison: COMPARISON, foldTiming: true,
+  conditions: CONDITIONS });
+/* THE NARROWEST TEMPLATE, RENDERED. Below 1280 the interval folds as well, and the fold is
+   what decides how many cells a row emits -- so the state where a row can come apart is a
+   state this gate has to build rather than one it can reason about. */
+const HTML_NARROW = render({ result: RESULT, comparison: COMPARISON, foldTiming: true,
+  foldInterval: true, conditions: CONDITIONS });
 
 /* ── the audit ────────────────────────────────────────────────────────────────────────────
  *
@@ -296,6 +321,41 @@ console.log("[deck] the rendered deck, per row");
 {
   const bad = await auditOf(HTML_FOLDED);
   ok("and so does the deck with the timing columns folded", bad.length === 0, bad.join("\n"));
+}
+{
+  const bad = await auditOf(HTML_NARROW);
+  ok("and so does the deck with the interval folded as well", bad.length === 0, bad.join("\n"));
+}
+
+/* THE FOOT NAMES WHAT THE VS ARCHIVE COLUMN IS AGAINST, AND SAYS WHAT IT IS NOT.
+   The column prints one signed figure per row; everything that makes those figures readable --
+   which cohort is the baseline, how big it is, and the fact that it CONTAINS this one, so the
+   two rates are not independent estimates -- is a fact about the whole table and is stated once
+   beneath it. Asserted from the rendered markup rather than from the component, because the
+   failure this is written against is a block that quietly stops being rendered. */
+console.log("\n[deck] the table's foot names the baseline and refuses to be read as a test");
+{
+  await page.setContent(`<!doctype html><html><body>${HTML_DEFAULT}</body></html>`);
+  const foot = await page.evaluate(() => {
+    const b = document.querySelector("[data-baseline]");
+    return {
+      present: !!b,
+      text: b ? b.textContent : "",
+      holdOut: [...document.querySelectorAll("[data-chip^='baseline-']")]
+        .map((e) => e.getAttribute("data-chip")),
+    };
+  });
+  ok("the baseline block is rendered", foot.present);
+  ok("and it names the condition it holds out",
+     /the same cohort without/.test(foot.text) && /season condition/.test(foot.text), foot.text.slice(0, 120));
+  ok("with its own denominator and effective sample",
+     /653 storms · effective sample 653\.0/.test(foot.text), foot.text.slice(0, 200));
+  ok("it publishes how the two populations overlap",
+     /are also in the baseline/.test(foot.text) && /not independent estimates/.test(foot.text));
+  ok("and refuses to be read as a test", /never as a test/.test(foot.text));
+  ok("every applied condition can be the one held out",
+     JSON.stringify(foot.holdOut) === '["baseline-where","baseline-season"]',
+     JSON.stringify(foot.holdOut));
 }
 
 /* The states that must actually be present, so the audit above is not passing over an empty
