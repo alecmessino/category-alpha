@@ -1041,62 +1041,18 @@
   [data-atlas] .at-sys .at-stack{display:none}
 }
 
-/* Below the workstation the columns are dropped one at a time rather than squeezed: the map IS
-   the page, and a map wedged between two rails at 1000 px is not one.
-
-   WHERE THE THIRD COLUMN STOPS PAYING FOR ITSELF, RE-DERIVED. The cap above took the plate's
-   SHAPE out of this decision -- it is 1.303 in either arrangement now, where before the third
-   column at 1240 left a 572x632 portrait plate and the collapse was the only thing that could
-   rescue it. What is left is a question of area and of where the evidence sits, and it was
-   measured rather than argued: at 1240 three columns give a 700x537 plate against two columns'
-   954x340, at 1180 a 640x492 against an 894x340, and at 1100 a 560x430 against an 814x340.
-   Three columns are ahead on drawn map until about 1150, and they also keep the query, the
-   plate and the evidence in one glance instead of stacking two of them. So the boundary stays
-   exactly where production put it, at 1180, on the near side of that crossing. It is stated
-   here because it was re-derived, not because it moved.
-
-   When it does collapse the PANEL gives up the height, not the map: at 46vh the plate was left
-   266px of map on an 800px viewport, which is a caption band with a sliver under it. The cap
-   still applies here -- the panel row is a term in the chrome rather than an exception to it. */
-@media (max-width:1180px){
-  [data-atlas]{
-    --at-side:clamp(220px,26vw,286px);
-    --at-panel-row:38vh;
-    --at-plate-w:calc(100vw - var(--at-side));
-    --at-chrome-h:calc(var(--at-head) + var(--at-band-top) + var(--at-band-bot)
-                       + var(--at-panel-row));
-  }
-  [data-atlas].atlas-shell{
-    grid-template-columns:var(--at-side) minmax(0,1fr);
-    grid-template-rows:var(--at-head) minmax(320px,1fr) minmax(0,auto) auto;
-  }
-  [data-atlas] .atlas-panel{
-    grid-column:1 / -1;grid-row:3;border-left:0;border-top:1px solid var(--rule-2);
-    max-height:var(--at-panel-row);
-  }
-  [data-atlas] .atlas-transport{grid-row:4}
-  [data-atlas] .at-brand{width:var(--at-side)}
-  [data-atlas] .at-sys{width:auto;flex:0 1 auto}
-}
-/* One column, and the stage row is already a definite fraction of the viewport, so there is no
-   surplus for the cap to take and it is switched off rather than left to compute against a
-   layout it was not derived for. */
-@media (max-width:760px){
-  [data-atlas].atlas-shell{
-    padding-block:0;
-    grid-template-columns:minmax(0,1fr);
-    grid-template-rows:var(--at-head) minmax(280px,46vh) minmax(0,auto) minmax(0,auto) auto;
-  }
-  [data-atlas] .atlas-stage{grid-column:1;grid-row:2}
-  [data-atlas] .atlas-panel{grid-column:1;grid-row:3;max-height:none}
-  [data-atlas] .atlas-rail{grid-column:1;grid-row:4;border-right:0;border-top:1px solid var(--rule-2)}
-  [data-atlas] .atlas-transport{grid-row:5}
-  [data-atlas] .at-brand{width:auto;flex:1 1 auto;border-right:0}
-  [data-atlas] .at-ledger{display:none}
-  [data-atlas] .at-transport{flex-wrap:wrap;padding:8px 14px}
-  [data-atlas] .at-readouts{border-left:0}
-  [data-atlas] .at-ro:first-child{padding-left:0}
-}
+/* THE THREE-COLUMN SHELL'S OWN BREAKPOINTS ARE GONE WITH THE SHELL.
+ *
+ * Two media blocks lived here -- one at 1180 that re-laid the rail, the stage and the panel into
+ * two columns, one at 760 that stacked all three -- and every element they named except the
+ * stage has been deleted. They were not merely inert: both re-declared `grid-template-rows` on
+ * `[data-atlas].atlas-shell`, which is the selector the calibration surface still uses, and both
+ * would have gone on winning against anything less specific than the stacked shell's own
+ * `[data-atlas].atlas-shell.atlas-stacked`. Dead CSS that still sizes a live surface is a
+ * compatibility surface, and the instruction was that none of it ships.
+ *
+ * The stacked shell's ladder is declared with the shell itself, below, so that what a width
+ * gives up is stated next to the grid it gives it up from. */
 
 /* ─── the evidence deck ───────────────────────────────────────────────────────────────────
  *
@@ -1120,12 +1076,41 @@
   align-content:start;
   font-family:var(--at-sans);
 }
-/* AT 1280-1439 THE TWO DURATION TRACKS FOLD, and the grid loses exactly those two tracks. The
-   data is not dropped -- the disclosure in the header brings them back -- and no type size
-   changes to buy the room, which is the rule for every breakpoint on this surface. */
+/* THE THREE TEMPLATES, AND EVERY ROW EMITS ONE CHILD PER TRACK IN ALL OF THEM.
+ *
+ *   9  nothing folded                     >= 1440, or either fold opened by the reader
+ *   8  the two duration tracks fold       1280-1439; ONE fold track replaces the two of them
+ *   7  the interval folds as well         below 1280; its bounds move into the bar's title
+ *
+ * THE FOLD TRACK IS A TRACK, NOT AN ABSENCE, and that is the correction. The folded template
+ * used to have seven columns while the folded HEAD still emitted eight children -- outcome, bar,
+ * rate, count, interval, vs, the fold button, status -- so the head's STATUS wrapped into an
+ * implicit second grid row, one line below the column it names. Group and data rows now emit an
+ * empty cell in the fold track, so all three row kinds are the same width in every state.
+ *
+ * No type size changes at any of them, which is the rule for every breakpoint on this surface:
+ * a column is given up whole, and it is given up to a control that names what it holds. */
 [data-atlas] .at-deck[data-timing-folded]{
-  grid-template-columns:170px minmax(0,1fr) 78px 100px 124px 92px 168px;
+  grid-template-columns:170px minmax(0,1fr) 78px 100px 124px 92px 128px 168px;
 }
+[data-atlas] .at-deck[data-timing-folded][data-interval-folded]{
+  grid-template-columns:170px minmax(0,1fr) 78px 100px 92px 128px 168px;
+}
+/* THE FOLDED GROUP'S OWN QUALIFIER, on a line of its own because the cell it rode in is gone.
+   Spans every track: it is a sentence about the denominator, not a value in a column. */
+[data-atlas] .at-deck-groupnote{
+  grid-column:1/-1;padding:0 0 var(--at-s2);
+  font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t3);
+}
+/* + N, ON THE GROUP ROW, COUNTING WHAT IS FOLDED. Never a bare chevron: a control that does not
+   say how many contracts it holds turns a folded group and an empty one into the same picture. */
+[data-atlas] .at-group-fold{
+  margin-left:var(--at-s2);flex:none;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  background:transparent;border:1px solid var(--rule-2);color:var(--accent);
+  padding:0 var(--at-s1);cursor:pointer;
+}
+[data-atlas] .at-group-fold:hover{border-color:var(--accent)}
 [data-atlas] .at-deck-row{display:contents}
 
 [data-atlas] .at-dc{
@@ -1382,7 +1367,22 @@
   border-left:1px solid var(--rule-2);
   background:var(--chrome);
 }
-[data-atlas] .at-insp-head{flex:none}
+/* THE MASTHEAD IS BOUNDED, AND THAT IS WHAT KEEPS THE BRIDGE PINNED.
+ *
+ * It was `flex:none` -- an unshrinkable block whose height is whatever the storm's name, its
+ * coordinate line, its citation and its provisional flag come to. Measured at 1440x900 that is
+ * 226px of a 412px dock, or 55%, and the bridge below it may take 46%: 101%, so the bridge hung
+ * 4px past the inspector that pins it. The failure scales with how short the plate row is, and
+ * the plate row is exactly what a narrower or shorter workstation takes height out of.
+ *
+ * Capped at 42% with its own scroll, which leaves 46 for the bridge and at least 12 for the
+ * middle. The storm's NAME is the first line of the block, so it is on screen at every height;
+ * what a very short dock scrolls away is the citation beneath it, and the citation is also the
+ * URL in the address bar. */
+[data-atlas] .at-insp-head{
+  flex:0 1 auto;min-height:0;max-height:42%;
+  overflow-y:auto;overscroll-behavior:contain;
+}
 [data-atlas] .at-insp-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 [data-atlas] .at-insp-bridge{
   flex:none;
@@ -1503,10 +1503,18 @@
    *
    * THE TRANSPORT COMES OUT OF THE PLATE, never out of the deck: it is a term in the plate's
    * ideal height, so a selected storm shortens the map and leaves the answer untouched. */
+  /* THE THREE FIXED ROWS ARE NAMED, because the aperture's ideal term is the viewport MINUS
+     them and a literal 108 in that subtraction is a number that silently stops being true the
+     moment one of the three changes height. Below 1280 the condition strip takes a second line
+     and `--at-strip` is the only edit that needs. */
+  --at-ident:32px;
+  --at-q:38px;
+  --at-strip:38px;
   grid-template-rows:
-    32px 38px 38px
+    var(--at-ident) var(--at-q) var(--at-strip)
     clamp(calc(var(--at-plate-avail) / 3.2),
-          calc(100vh - 108px - 340px - var(--at-tport)),
+          calc(100vh - var(--at-ident) - var(--at-q) - var(--at-strip)
+               - 340px - var(--at-tport)),
           calc(var(--at-plate-avail) / 1.421))
     minmax(0,1fr)
     var(--at-tport);
@@ -1564,6 +1572,81 @@
    was the wrong height and nothing was missing, which is why it looked like a sizing bug rather
    than a placement one. Reset to auto so source order decides, as it does for its five siblings. */
 [data-atlas].atlas-stacked .atlas-transport{grid-column:1;grid-row:auto}
+
+/* ─── the stacked shell's ladder ──────────────────────────────────────────────────────────
+ *
+ * FOUR STEPS BELOW THE WORKSTATION, IN ORDER, AND THE MAP NEVER PAYS FIRST. Stated here rather
+ * than scattered, so that a narrower workstation is a decision rather than an accident. Two of
+ * the four are widths at which a COLUMN is folded and the fold is in the deck's own markup --
+ * the duration pair at 1440 and the interval at 1280, both restored by one control that names
+ * what it holds. What is here is the two steps that change the SHELL.
+ *
+ * No step reduces a type size. Every step gives up a whole item to a control that names it. */
+
+/* 1180-1279 · THE CONDITION STRIP TAKES A SECOND LINE, AND THE PLATE ABSORBS IT.
+ * Three zones and a last-edit figure stop fitting on one 38px line somewhere in this band, and
+ * the alternative to a second line is a zone that ellipsises -- which on this strip means a
+ * condition a reader cannot read. The strip is the query; it wins. The aperture's ideal term is
+ * computed from `--at-strip`, so raising it moves the height out of the plate automatically and
+ * out of the evidence not at all. */
+@media (max-width:1279px){
+  [data-atlas].atlas-shell.atlas-stacked{--at-strip:76px}
+  [data-atlas] .at-strip{flex-wrap:wrap;align-content:center;row-gap:0}
+  [data-atlas] .at-lastedit{margin-left:0}
+}
+
+/* 900-1179 · THE INSPECTOR STOPS BEING A DOCK.
+ *
+ * A 380px dock beside a plate is 32% of a 1180px shell and 37% of a 1024px one, and what is left
+ * cannot hold a track. So the inspector lifts off the row and overlays the right edge from the
+ * plate down through the evidence -- full height, as specified -- and the plate goes back to the
+ * whole width beneath it.
+ *
+ * IT STOPS AT THE TRANSPORT, WHICH IS NOT A DETAIL. The transport is how a reader plays the
+ * storm the inspector is describing; an overlay that covered it would leave the subject on
+ * screen and its controls underneath the thing describing it. */
+@media (max-width:1179px){
+  [data-atlas].atlas-shell.atlas-stacked:has(.atlas-dock){--at-plate-avail:100vw}
+  [data-atlas].atlas-stacked .atlas-plate-row:has(.atlas-dock){
+    grid-template-columns:minmax(0,1fr);
+  }
+  [data-atlas].atlas-stacked .atlas-dock{
+    position:absolute;grid-row:4 / 6;grid-column:1 / 2;
+    inset:0;left:auto;width:min(380px,86vw);
+    z-index:880;overflow:hidden;
+    background:var(--chrome);border-left:1px solid var(--rule-2);
+  }
+}
+
+/* < 900 · ONE COLUMN, AND THE SHELL SCROLLS.
+ *
+ * The plate takes a stated 40vh and the aspect bound is switched off rather than computed
+ * against a layout it was not derived for: the bound exists to keep the archive's own frame
+ * fillable inside an elastic row, and this row is not elastic. Below this width the evidence is
+ * not a pane with its own scroll either -- the page is the scroll, so the table simply continues
+ * under the map and a reader gets one gesture instead of two nested ones.
+ *
+ * The identity strip's five archive counts go here, whole: at this width they are the only thing
+ * on the surface that is neither the question, the map, nor the answer. */
+@media (max-width:899px){
+  [data-atlas].atlas-shell.atlas-stacked{
+    position:fixed;inset:0;overflow-y:auto;overscroll-behavior:contain;
+    grid-template-rows:auto auto auto 40vh auto var(--at-tport);
+  }
+  [data-atlas].atlas-shell.atlas-stacked{--at-ident:auto;--at-q:auto;--at-strip:auto}
+  [data-atlas] .at-ident{height:auto;flex-wrap:wrap;row-gap:0}
+  [data-atlas] .at-ledger{display:none}
+  [data-atlas] .at-question{height:auto;flex-wrap:wrap;row-gap:2px}
+  [data-atlas] .at-question-text{white-space:normal}
+  [data-atlas].atlas-stacked .atlas-evidence{overflow-y:visible}
+  [data-atlas].atlas-stacked .atlas-dock{
+    grid-row:4 / 6;inset:0;width:auto;
+  }
+  [data-atlas] .at-sheet{width:auto;right:0;border-right:0}
+  [data-atlas] .at-transport{flex-wrap:wrap;padding:8px 14px}
+  [data-atlas] .at-readouts{border-left:0}
+  [data-atlas] .at-ro:first-child{padding-left:0}
+}
 
 /* THE BUILDER SHEET. Summoned, not resident. It overlays the plate rather than the evidence,
    because a reader editing a condition is looking at what the map holds, not at the answer they

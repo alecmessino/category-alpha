@@ -128,9 +128,11 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
  * @param {object}   [props.whatChanged]  `{ edit }` -- what the last edit was and what it cost
  */
 export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTiming = false,
-  timingOpen = false, onToggleTiming, foldLandfall = false, landfallOpen = false,
+  foldInterval = false, timingOpen = false, onToggleTiming,
+  foldLandfall = false, landfallOpen = false,
   onToggleLandfall, environment = null, spec = null, pathway = null,
-  conditions = [], onBaseline, whatChanged = null, replayNote = null }) {
+  conditions = [], onBaseline, whatChanged = null, replayNote = null,
+  collapseGroups = false, openGroups = null, onToggleGroup }) {
   if (!result) return null;
   const r = result;
 
@@ -140,6 +142,18 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
   if (!r.n_cases) return <EmptyPool result={r} spec={spec} />;
 
   const groups = buildGroups(r, comparison, subject, foldLandfall && !landfallOpen);
+
+  /* THE GRID IS SIZED BY WHAT IS ACTUALLY RENDERED, NOT BY WHAT THE WIDTH ASKED FOR.
+   *
+   * `data-timing-folded` used to carry the PROP, and the cells were emitted from the prop AND
+   * the reader's disclosure state. So opening + TIMING COLUMNS at 1300 put two more cells into
+   * every row while the grid still had seven tracks, and each row's last cell wrapped into an
+   * implicit eighth row -- a STATUS word one line below the row it governs, which is the single
+   * failure the whole `display:contents` construction exists to make unreachable. Both
+   * attributes are the EFFECTIVE state now, and head, group and data rows all emit exactly one
+   * child per track in every combination. */
+  const timingOn = !foldTiming || timingOpen;
+  const intervalOn = !foldInterval || timingOpen;
 
   /* WHICH REFUSAL SENTENCES REPEAT, WHICH IS WHAT THE BOUND IS ACTUALLY FOR.
    *
@@ -166,24 +180,43 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
   const shared = new Set([...reasonCounts].filter(([, n]) => n > 1).map(([k]) => k));
 
   return (
-    <div className="at-deck" data-evidence-deck data-timing-folded={foldTiming ? "" : undefined}>
+    <div className="at-deck" data-evidence-deck
+      data-timing-folded={timingOn ? undefined : ""}
+      data-interval-folded={intervalOn ? undefined : ""}>
       <DeckPreamble result={r} spec={spec} />
-      <DeckHead foldTiming={foldTiming} timingOpen={timingOpen} onToggleTiming={onToggleTiming}
+      <DeckHead timingOn={timingOn} intervalOn={intervalOn} onToggleTiming={onToggleTiming}
         subject={subject} />
-      {groups.map((g) => (
-        <React.Fragment key={g.key}>
-          <GroupRow group={g} foldTiming={foldTiming && !timingOpen} subject={subject} />
-          {g.rows.map((row) => (
-            <DataRow key={row.key} row={row} foldTiming={foldTiming && !timingOpen}
-              subject={subject} onEvidence={onEvidence} shared={shared} />
-          ))}
-          <SharedReason group={g} shared={shared} onEvidence={onEvidence} />
-          {g.folded ? (
-            <FoldedRegions folded={g.folded} onOpen={onToggleLandfall} />
-          ) : null}
-          <GroupQualification which={g.key} result={r} />
-        </React.Fragment>
-      ))}
+      {groups.map((g) => {
+        /* INTENSITY IS RESIDENT AT EVERY WIDTH. It is the ladder the archive is built on and the
+           one group a reader arrives to read; the others give up their rows first, and give them
+           up to a control that names how many it holds rather than to silence. */
+        const collapsed = collapseGroups && g.key !== "intensity"
+          && !(openGroups && openGroups[g.key]);
+        return (
+          <React.Fragment key={g.key}>
+            <GroupRow group={g} timingOn={timingOn} intervalOn={intervalOn} subject={subject}
+              collapsed={collapsed}
+              onExpand={onToggleGroup ? () => onToggleGroup(g.key) : undefined} />
+            {/* THE DENOMINATOR'S OWN QUALIFIER, WHERE THE INTERVAL COLUMN USED TO HOLD IT.
+                It rides in the INTERVAL cell at full width; when that column folds the sentence
+                moves to a line of its own rather than ellipsising inside a narrower cell. A
+                strip gives up whole items, never half a word -- and the whole word here is the
+                definition of what these rates are rates OF. */}
+            {!intervalOn && g.note ? (
+              <div className="at-deck-groupnote" data-group-note={g.key}>{g.note}</div>
+            ) : null}
+            {collapsed ? null : g.rows.map((row) => (
+              <DataRow key={row.key} row={row} timingOn={timingOn} intervalOn={intervalOn}
+                subject={subject} onEvidence={onEvidence} shared={shared} />
+            ))}
+            {collapsed ? null : <SharedReason group={g} shared={shared} onEvidence={onEvidence} />}
+            {!collapsed && g.folded ? (
+              <FoldedRegions folded={g.folded} onOpen={onToggleLandfall} />
+            ) : null}
+            {collapsed ? null : <GroupQualification which={g.key} result={r} />}
+          </React.Fragment>
+        );
+      })}
 
       {/* THE TABLE'S FOOT. What the last edit did, and what every delta above is measured
           against. Both belong here rather than above the rows: a reader arrives at the deck to
@@ -244,17 +277,23 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
 
 /* THE COLUMN HEADS. Uppercase at the label token, which is the only size uppercase is allowed
    at besides the stamps. The duration heading spans both of its tracks. */
-function DeckHead({ foldTiming, timingOpen, onToggleTiming, subject }) {
-  const showTiming = !foldTiming || timingOpen;
+/* ONE CONTROL, NAMING EVERYTHING IT HOLDS. Two folded column groups could have been two
+   buttons, but there is one track to put them in and a second affordance would have to come out
+   of a column that is carrying data. So the fold names its contents -- + TIMING COLUMNS, or
+   + INTERVAL · TIMING once the interval has folded too -- and opening it restores both. Every
+   folded item stays reachable in one click from where it was, and the affordance says what it
+   holds. */
+function DeckHead({ timingOn, intervalOn, onToggleTiming, subject }) {
+  const folded = [!intervalOn ? "INTERVAL" : null, !timingOn ? "TIMING" : null].filter(Boolean);
   return (
     <div className="at-deck-row at-deck-head" role="row">
       <span className="at-dc at-dc-outcome">OUTCOME</span>
       <span className="at-dc at-dc-bar" aria-hidden="true" />
       <span className="at-dc at-dc-rate">RATE</span>
       <span className="at-dc at-dc-count">COUNT</span>
-      <span className="at-dc at-dc-int">INTERVAL</span>
+      {intervalOn ? <span className="at-dc at-dc-int">INTERVAL</span> : null}
       <span className="at-dc at-dc-vs">{subject ? "SUBJECT" : "VS ARCHIVE"}</span>
-      {showTiming ? (
+      {timingOn ? (
         <>
           <span className="at-dc at-dc-med">MED h</span>
           <span className="at-dc at-dc-iqr">P25–P75</span>
@@ -262,8 +301,9 @@ function DeckHead({ foldTiming, timingOpen, onToggleTiming, subject }) {
       ) : (
         <button type="button" className="at-dc at-dc-fold" data-timing-fold
           onClick={onToggleTiming}
-          title="the median and interquartile duration for every row, folded at this width">
-          + TIMING COLUMNS
+          title={"the 95% Wilson bounds and the median and interquartile duration for every row"
+            + ", folded at this width"}>
+          + {folded.join(" · ")} COLUMN{folded.length > 1 ? "S" : ""}
         </button>
       )}
       <span className="at-dc at-dc-status">STATUS</span>
@@ -276,18 +316,32 @@ function DeckHead({ foldTiming, timingOpen, onToggleTiming, subject }) {
    without its count, not that every cell restates the population. The group's own status word is
    the one thing it may add: where a whole group refuses for one reason, the word sits here and
    the rows say which contracts it fired on. */
-function GroupRow({ group, foldTiming, subject }) {
+function GroupRow({ group, timingOn, intervalOn, subject, collapsed, onExpand }) {
   return (
     <div className="at-deck-row at-deck-group" data-deck-group={group.label} role="row">
-      <span className="at-dc at-dc-outcome">{group.label}</span>
+      <span className="at-dc at-dc-outcome">
+        {group.label}
+        {/* THE ROWS ARE FOLDED, NOT DROPPED, AND THE CONTROL COUNTS THEM. A group row that
+            simply stopped having rows beneath it would read as a group with nothing in it --
+            which is the one thing a refusal-carrying table must never look like. */}
+        {collapsed ? (
+          <button type="button" className="at-group-fold" data-group-fold={group.key}
+            onClick={onExpand}
+            title={`${group.rows.length} contracts in this group, folded at this width`}>
+            + {group.rows.length}
+          </button>
+        ) : null}
+      </span>
       <span className="at-dc at-dc-bar" aria-hidden="true" />
       <span className="at-dc at-dc-rate" />
       <span className="at-dc at-dc-count">{group.denom !== null ? (
         <>of {group.denom.toLocaleString()}</>
       ) : null}</span>
-      <span className="at-dc at-dc-int">{group.note || null}</span>
+      {intervalOn ? <span className="at-dc at-dc-int">{group.note || null}</span> : null}
       <span className="at-dc at-dc-vs" />
-      {foldTiming ? null : <><span className="at-dc at-dc-med" /><span className="at-dc at-dc-iqr" /></>}
+      {timingOn
+        ? <><span className="at-dc at-dc-med" /><span className="at-dc at-dc-iqr" /></>
+        : <span className="at-dc at-dc-fold" aria-hidden="true" />}
       <span className="at-dc at-dc-status" />
     </div>
   );
@@ -300,7 +354,7 @@ function GroupRow({ group, foldTiming, subject }) {
  * "a status detached from its row" unreachable rather than merely unlikely. A refused row takes
  * the refused branch for the rate cell AND the status cell in the same expression; there is no
  * arrangement of props that produces one without the other. */
-function DataRow({ row, foldTiming, subject, onEvidence, shared }) {
+function DataRow({ row, timingOn, intervalOn, subject, onEvidence, shared }) {
   const { label, tone, cell, unscoreable, delta, timing, contractKey, selfContribution } = row;
   const refused = !!unscoreable || (cell && (cell.status === CIRCULAR || cell.rate === null));
   const kind = unscoreable ? refusalKindOf(unscoreable)
@@ -328,7 +382,14 @@ function DataRow({ row, foldTiming, subject, onEvidence, shared }) {
           so whether the two separate is settled by the eye and confirmed by the digits two
           cells to the right. A refused row shows the hatched track and no fill at all: an empty
           bar and a zero bar must not look alike. */}
-      <span className="at-dc at-dc-bar">
+      {/* AND WHEN THE INTERVAL COLUMN FOLDS, THE BOUNDS GO INTO THE BAR'S OWN TITLE -- the band
+          is already drawn there, and a drawn band with no numbers beside it is not an accessible
+          statement of an interval. The column comes back in one click from the head. */}
+      <span className="at-dc at-dc-bar"
+        title={!intervalOn && !refused && cell && cell.ci95
+          ? `95% Wilson interval [${(100 * cell.ci95[0]).toFixed(1)}`
+            + `–${(100 * cell.ci95[1]).toFixed(1)}%]`
+          : undefined}>
         <Bar cell={refused ? null : cell} classKey={tone} baseline={delta ? delta.baseRate : null}
           refused={refused} />
       </span>
@@ -356,13 +417,15 @@ function DataRow({ row, foldTiming, subject, onEvidence, shared }) {
 
       {/* ONE PERCENT SIGN, AT THE END. "[19.2%–31.2%]" reads as two quantities; the interval is
           one, and this is the form every other surface in the repository prints it in. */}
-      <span className="at-dc at-dc-int">
-        {!refused && cell.ci95 ? (
-          <span className="at-val">
-            [{(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%]
-          </span>
-        ) : <span className="at-slot">—</span>}
-      </span>
+      {intervalOn ? (
+        <span className="at-dc at-dc-int">
+          {!refused && cell.ci95 ? (
+            <span className="at-val">
+              [{(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%]
+            </span>
+          ) : <span className="at-slot">—</span>}
+        </span>
+      ) : null}
 
       {/* VS ARCHIVE, OR THE SUBJECT. With no storm selected the column compares this cohort with
           the archive; with one selected it answers a different question -- did THIS storm reach
@@ -384,7 +447,7 @@ function DataRow({ row, foldTiming, subject, onEvidence, shared }) {
             : <VsArchive delta={delta} refused={refused} />}
       </span>
 
-      {foldTiming ? null : (
+      {timingOn ? (
         <>
           <span className="at-dc at-dc-med">
             {timing && timing.n ? <span className="at-val">{Math.round(timing.median)}</span>
@@ -396,7 +459,7 @@ function DataRow({ row, foldTiming, subject, onEvidence, shared }) {
             ) : <span className="at-slot">—</span>}
           </span>
         </>
-      )}
+      ) : <span className="at-dc at-dc-fold" aria-hidden="true" />}
 
       {/* ONE INK, NEVER COLOURED, NEVER AGGREGATED, NEVER A SCORE. The status is a word about
           THIS row and it is rendered inside this row's element -- see the header comment. */}

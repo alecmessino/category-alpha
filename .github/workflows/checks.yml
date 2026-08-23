@@ -447,6 +447,19 @@ jobs:
       - name: Verify every real state holds, and 1440x900 answers five of five
         run: node scripts/check-atlas-states.mjs --require-browser
 
+      # THE VISUAL RESPONSIVE MATRIX. The state matrix above drives many states at ONE width and
+      # asserts what must be true of the ANSWER. This one drives five states at EVERY width the
+      # ladder names and asserts what must be true of the SURFACE -- nothing clipped without a
+      # way to read it, no qualification hidden, no row whose cells fall onto two grid lines, and
+      # an inspector whose pinned bridge survives a viewport narrow enough to lift the dock off
+      # the plate row. Three of those four had already happened once in this integration.
+      #
+      # It also asserts that the ladder STEPS: the fold state is read at each width and compared
+      # with the one the specification names, so a boundary that moved shows up as the wrong
+      # column count rather than as a layout that merely still fits.
+      - name: Verify every state holds at every breakpoint the ladder names
+        run: node scripts/check-responsive-matrix.mjs --require-browser
+
       - name: Verify the terminal's panels refuse on screen, not just in the engine
         run: node scripts/check-panel-dom.mjs --require-browser
 

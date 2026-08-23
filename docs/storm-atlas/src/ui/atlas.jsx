@@ -248,6 +248,7 @@ export function Atlas() {
      changes and replaced by the next edit -- never accumulated, because a running list of
      deltas is a narrative and this is an orientation aid. Held in a ref rather than derived,
      since the PREVIOUS population is not recoverable from the current spec. */
+  const [openGroups, setOpenGroups] = React.useState({});
   const [lastEdit, setLastEdit] = React.useState(null);
   const keptRef = React.useRef(null);
   const specRef = React.useRef(null);
@@ -676,8 +677,14 @@ export function Atlas() {
       <div className="atlas-evidence" data-evidence-row>
         <EvidenceDeck result={result} comparison={comparison} subject={subject}
           onEvidence={openLedger}
-          foldTiming={vw < 1440} timingOpen={timingOpen}
+          /* THE LADDER, CUMULATIVELY. Each step keeps every step above it: at 1200 the duration
+             pair AND the interval are folded, at 1000 the non-intensity groups are folded on
+             top of both. One control in the head restores the columns; one on each group row
+             restores its rows, and both name what they hold. */
+          foldTiming={vw < 1440} foldInterval={vw < 1280} timingOpen={timingOpen}
           onToggleTiming={() => setTimingOpen((v) => !v)}
+          collapseGroups={vw < 1180} openGroups={openGroups}
+          onToggleGroup={(k) => setOpenGroups((m) => ({ ...m, [k]: !m[k] }))}
           foldLandfall={vw < 1440} landfallOpen={landfallOpen}
           onToggleLandfall={() => setLandfallOpen((v) => !v)}
           /* THE COMPARISON'S IDENTITY AND ITS CONTROL, WHICH THE DECK'S COLUMN CANNOT CARRY.
