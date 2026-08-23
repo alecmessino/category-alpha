@@ -173,10 +173,18 @@
    * workstation gets the same instrument with its own chrome above and below it, and NEVER more
    * geography. Where a viewport is shorter than the cap the padding is zero and the plate takes
    * every pixel of height there is. */
+  /* THE NUMBER SURVIVED THE SHELL; THE ARITHMETIC AROUND IT DID NOT. 1.421 is now the APERTURE'S
+     FLOOR, applied by the stacked shell's own row clamp against the width actually available --
+     see `--at-plate-avail` there. What is gone with the three-column shell is the chain that
+     derived a whole-instrument height from it: --at-plate-w subtracted a rail and a panel that
+     no longer exist, --at-chrome-h added a masthead row this shell does not have, and --at-frame
+     was the padding target of a `padding-block` cap that was removed two commits before them. */
   --at-plate-ar:1.421;
-  --at-plate-w:calc(100vw - var(--at-rail) - var(--at-panel));
-  --at-chrome-h:calc(var(--at-head) + var(--at-band-top) + var(--at-band-bot));
-  --at-frame:calc(var(--at-chrome-h) + var(--at-plate-w) / var(--at-plate-ar));
+  /* AND THE OTHER END OF THE APERTURE, which had been a literal inside the clamp. Past 3.2 a
+     single East Pacific track stops being the subject of its own plate. Both bounds are declared
+     here, once, and scripts/check-atlas-adherence.mjs pins them: a bound that can be edited in
+     the one place it is used is a bound that can be widened to make a failing gate pass. */
+  --at-plate-ar-max:3.2;
 
   /* THE PLATE'S OWN MARGIN. The graticule is ruled on the plate's edges and its longitude
      labels sit in the bottom 16px of it -- measured, an 11px line five pixels up. Everything
@@ -281,8 +289,8 @@
 [data-atlas]{background:var(--chrome);color:var(--t1)}
 [data-atlas] *{box-sizing:border-box}
 [data-atlas] button{font:inherit}
-[data-atlas] ::-webkit-scrollbar-thumb{background:#2b3746;border-radius:0}
-[data-atlas] ::-webkit-scrollbar-thumb:hover{background:#3b4a5e}
+[data-atlas] ::-webkit-scrollbar-thumb{background:var(--rule-3);border-radius:0}
+[data-atlas] ::-webkit-scrollbar-thumb:hover{background:var(--rule-4)}
 
 /* Keyboard focus is visible on every control, not only the ones that happened to be links. */
 [data-atlas] :focus-visible{outline:1px solid var(--accent);outline-offset:2px}
@@ -311,57 +319,29 @@
    one declaration and it degrades to nothing: on a viewport shorter than the cap the max() is
    0 and the grid is exactly what it was. All three columns end at the same baseline, both
    vertical rules run the instrument's full height, and no column is left holding a gap. */
+/* THE SHELL IS A GRID AND NOTHING ELSE HERE DECIDES ITS SHAPE.
+ *
+ * It used to declare the three-column instrument -- rail, stage, panel -- and both surfaces that
+ * still use this class override every track of it: the stacked shell with its own six rows, the
+ * calibration variant with its own two. What is left is what both actually share.
+ *
+ * WHAT WAS REMOVED WITH IT. `.atlas-rail` and `.atlas-panel` are elements no JSX in this
+ * repository renders any more, and their rules were seating them in columns 1 and 3 of a grid
+ * that has one. `.atlas-stage` was pinned at column 2, row 2 with `align-self:center` and a
+ * height computed from the plate's aspect cap -- which is how the plate first measured 0x0 in a
+ * single-cell row, and which the stacked shell has had to override ever since. `.atlas-transport`
+ * was pinned at row 3, which in the stacked shell is the CONDITION STRIP, and it took that row
+ * until the override went in. Every one of them was a rule about a shell that is gone, still
+ * aimed at a live surface. */
 [data-atlas].atlas-shell{
   position:fixed;inset:0;
   display:grid;
-  grid-template-columns:var(--at-rail) minmax(0,1fr) var(--at-panel);
-  grid-template-rows:var(--at-head) minmax(0,1fr) auto;
   background:var(--chrome);
 }
 /* A grid item's default min-height is `auto`, which means CONTENT, which means a stage holding
-   a map that wants to be as tall as its own content escapes the row it was given. All three
-   columns get an explicit floor of zero so the row height wins. */
-[data-atlas] .atlas-rail,[data-atlas] .atlas-stage,[data-atlas] .atlas-panel{
-  min-width:0;min-height:0;
-}
-[data-atlas] .atlas-rail{grid-column:1;grid-row:2;border-right:1px solid var(--rule-2);background:var(--chrome)}
-/* THE CAP APPLIES TO THE PLATE, AND USED TO APPLY TO EVERYTHING.
- *
- * It was `padding-block` on the SHELL, which is the honest way to describe the intent -- the
- * instrument is capped and centred -- and the wrong way to implement it, because the rail and
- * the panel are not the plate and have no aspect to hold. Measured at viewport height 1000, the
- * padding it produced per side: 1920 -> 15.6px, 1600 -> 91.9px, 1440 -> 142.6px, 1280 -> 198.9px,
- * 1181 -> 233.7px. At 1440 that is 285px of a 1000px viewport painted blank ABOVE AND BELOW THE
- * EVIDENCE COLUMN, which is the column whose entire job in this pass is to answer without being
- * scrolled -- so the narrower the workstation, the less of the answer it showed, for the sake of
- * a map on the other side of the screen.
- *
- * The cap now binds the STAGE alone: the same term, the same aspect, the same arithmetic. The
- * plate's width was never a function of this (the columns decide it) and its height is still
- * exactly plate-width / --at-plate-ar, so the opening view, the zoom snap and every framing
- * decision in coreFrame() are untouched -- measured identical at 1920, 1600, 1440, 1280, 1181
- * and 1040 before and after. What changed is where the surplus goes: to the rail and the panel,
- * instead of to a band of empty chrome across all three. */
-[data-atlas] .atlas-stage{
-  grid-column:2;grid-row:2;
-  /* HEIGHT, NOT MAX-HEIGHT. `align-self:center` stops a grid item stretching, so a max-height
-     leaves it sized to CONTENT -- and the stage's middle row is `minmax(0,1fr)`, which sizes to
-     nothing. Measured: the plate came out 1229x0. An explicit height resolved against the row
-     keeps the stretch and applies the cap: min() takes the row when the viewport is short, the
-     cap when it is tall, which is exactly what the shell's padding computed. */
-  height:min(100%, calc(var(--at-band-top) + var(--at-band-bot)
-                        + var(--at-plate-w) / var(--at-plate-ar)));
-  align-self:center;
-}
-[data-atlas] .atlas-panel{grid-column:3;grid-row:2;border-left:1px solid var(--rule-2);background:var(--chrome)}
-[data-atlas] .atlas-transport{grid-column:1/-1;grid-row:3}
-/* Each column scrolls on its own and nothing chains out of it: a wheel that runs off the end
-   of the rail must not move the page under the map. The gutter is reserved whether or not the
-   column is currently overflowing, so a state change that adds a section cannot shift the
-   column's text sideways by the width of a scrollbar. */
-[data-atlas] .atlas-rail,[data-atlas] .atlas-panel{
-  overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;
-}
+   a map that wants to be as tall as its own content escapes the row it was given. An explicit
+   floor of zero so the row height wins. */
+[data-atlas] .atlas-stage{min-width:0;min-height:0}
 
 /* THE CALIBRATION SURFACE IS A SHELL VARIANT, not a fourth child rule.
    Written as a variant because the media queries below cap row 2 -- at 760px it is
@@ -384,8 +364,11 @@
 
 /* ─── header ──────────────────────────────────────────────────────────────────────────── */
 
+/* THE CALIBRATION SURFACE'S MASTHEAD, and the last thing `--at-head` sizes. The tactical shell
+   replaced it with the identity strip; the ledger and the boot screen still render it. */
 [data-atlas] .at-header{
-  grid-column:1/-1;grid-row:1;display:flex;align-items:stretch;min-width:0;
+  grid-column:1/-1;grid-row:1;height:var(--at-head);
+  display:flex;align-items:stretch;min-width:0;
   border-bottom:1px solid var(--rule-2);background:var(--chrome-hi);
 }
 [data-atlas] .at-brand{
@@ -394,7 +377,7 @@
 }
 [data-atlas] .at-brand h1{
   margin:0;font-family:var(--font-sans);font-size:14px;font-weight:700;letter-spacing:3px;
-  line-height:1;text-transform:uppercase;color:#f6fafe;white-space:nowrap;
+  line-height:1;text-transform:uppercase;color:var(--t1);white-space:nowrap;
 }
 [data-atlas] .at-brand .at-sub{
   font-family:var(--font-mono);font-size:9px;letter-spacing:1.1px;color:var(--t3);
@@ -411,7 +394,7 @@
   padding:0 17px;border-right:1px solid var(--rule);white-space:nowrap;
 }
 [data-atlas] .at-fig b{
-  font-family:var(--font-mono);font-size:14px;font-weight:600;color:#f2f7fd;line-height:1;
+  font-family:var(--font-mono);font-size:14px;font-weight:600;color:var(--t1);line-height:1;
 }
 [data-atlas] .at-fig span{font-family:var(--font-mono);font-size:8.5px;letter-spacing:1px;color:var(--t3)}
 [data-atlas] .at-sys{
@@ -433,7 +416,7 @@
   text-transform:uppercase;flex:none;cursor:pointer;
   transition:color .1s linear,border-color .1s linear;
 }
-[data-atlas] .at-hbtn:hover{color:#fff;border-bottom-color:var(--accent)}
+[data-atlas] .at-hbtn:hover{color:var(--t1);border-bottom-color:var(--accent)}
 
 /* ─── editorial furniture ─────────────────────────────────────────────────────────────── */
 
@@ -448,7 +431,7 @@
 }
 [data-atlas] .at-sechd h3{
   margin:0;font-family:var(--font-sans);font-size:10px;font-weight:700;letter-spacing:1.7px;
-  text-transform:uppercase;color:#e3ebf5;white-space:nowrap;flex:none;
+  text-transform:uppercase;color:var(--t1);white-space:nowrap;flex:none;
 }
 /* the section label is never abbreviated; its right-hand annotation is what gives way */
 [data-atlas] .at-sechd .at-r{
@@ -468,7 +451,7 @@
 [data-atlas] .at-prose{font-family:var(--font-sans);font-size:12px;line-height:1.62;color:var(--t2)}
 [data-atlas] .at-prose strong{color:var(--t1);font-weight:500}
 [data-atlas] .at-lede{
-  font-family:var(--font-display);font-weight:400;font-size:16px;line-height:1.42;color:#f1f6fc;
+  font-family:var(--font-display);font-weight:400;font-size:16px;line-height:1.42;color:var(--t1);
   letter-spacing:.1px;
 }
 
@@ -502,7 +485,7 @@
 [data-atlas] .at-figure{display:flex;align-items:flex-end;gap:11px;margin:14px 0 0;min-width:0}
 [data-atlas] .at-figure .at-big{
   font-family:var(--font-mono);font-size:36px;font-weight:600;line-height:.82;letter-spacing:-1.2px;
-  color:#fbfdff;flex:none;
+  color:var(--t1);flex:none;
 }
 [data-atlas] .at-figure .at-den{
   font-family:var(--font-mono);font-size:11px;color:var(--t2);padding-bottom:3px;line-height:1.4;
@@ -511,7 +494,7 @@
   font-family:var(--font-mono);font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--t3);
   border-top:1px solid var(--rule);margin-top:11px;padding-top:6px;
 }
-[data-atlas] .at-bar{height:2px;background:#243040;margin:11px 0 0;position:relative;overflow:hidden}
+[data-atlas] .at-bar{height:2px;background:var(--sunken);margin:11px 0 0;position:relative;overflow:hidden}
 [data-atlas] .at-bar i{position:absolute;inset:0 auto 0 0;background:var(--accent);opacity:.7}
 [data-atlas] .at-bar u{position:absolute;top:-3px;bottom:-3px;width:1px;background:var(--accent)}
 
@@ -524,8 +507,9 @@
   border-radius:0;cursor:pointer;white-space:nowrap;
   transition:color .1s linear,border-color .1s linear,background-color .1s linear;
 }
-[data-atlas] .at-chip:hover{border-color:var(--rule-4);color:#fff}
-[data-atlas] .at-chip[aria-pressed=true]{border-color:var(--accent-2);color:#e4f4ff;background:#152e3d}
+[data-atlas] .at-chip:hover{border-color:var(--rule-4);color:var(--t1)}
+[data-atlas] .at-chip[aria-pressed=true]{border-color:var(--accent);color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 12%,var(--chrome))}
 [data-atlas] .at-chip[disabled]{opacity:.4;cursor:not-allowed}
 
 /* Twelve contiguous cells sharing their borders — a strip, not twelve buttons. */
@@ -535,8 +519,9 @@
   background:transparent;border:0;border-right:1px solid var(--rule-2);border-radius:0;cursor:pointer;
   transition:background-color .1s linear,color .1s linear;
 }
-[data-atlas] .at-months button:hover{color:#fff;background:#1a2331}
-[data-atlas] .at-months button[aria-pressed=true]{color:#e4f4ff;background:#173241}
+[data-atlas] .at-months button:hover{color:var(--t1);background:var(--chrome-hi)}
+[data-atlas] .at-months button[aria-pressed=true]{color:var(--accent);
+  background:color-mix(in srgb,var(--accent) 12%,var(--chrome))}
 
 [data-atlas] .at-years{display:flex;align-items:flex-end;gap:9px}
 [data-atlas] .at-years label{flex:1;min-width:0;display:block}
@@ -566,7 +551,7 @@
   color:var(--t3);transition:color .1s linear;
 }
 [data-atlas] .at-tg[aria-pressed=true] .at-lb{color:var(--t1)}
-[data-atlas] .at-tg:hover .at-lb{color:#fff}
+[data-atlas] .at-tg:hover .at-lb{color:var(--t1)}
 [data-atlas] .at-tgnote{
   font-family:var(--font-sans);font-size:11px;line-height:1.55;color:var(--t3);
   padding:0 0 6px 22px;margin-top:-1px;
@@ -592,7 +577,7 @@
   margin-left:auto;font-family:var(--font-mono);font-size:9px;letter-spacing:.7px;color:var(--t3);
   text-align:right;flex:none;
 }
-[data-atlas] .at-stage-row.at-on .at-st{color:#9edcfa}
+[data-atlas] .at-stage-row.at-on .at-st{color:var(--accent)}
 [data-atlas] .at-stage-row.at-na .at-st{color:var(--flag)}
 
 [data-atlas] details.at-excl{margin-top:11px}
@@ -652,6 +637,7 @@
   background:rgba(19,27,39,.92)!important;color:var(--t2)!important;
   border-color:var(--rule-2)!important;
 }
+/* ON-PLATE, DARK IN BOTH SHELLS -- see the exemption list in check-atlas-adherence.mjs. */
 [data-atlas] .leaflet-control-zoom a:hover{background:#1d2836!important;color:#fff!important}
 [data-atlas] .leaflet-control-attribution{
   background:rgba(13,19,29,.82)!important;color:var(--t3)!important;
@@ -686,6 +672,7 @@
   color:var(--t2);text-transform:uppercase;background:rgba(14,20,30,.9);padding:6px 14px;
   border-bottom:1px solid var(--rule-3);max-width:calc(100% - 96px);
 }
+/* ON-PLATE, DARK IN BOTH SHELLS. */
 [data-atlas] .at-invite em{font-style:normal;color:#fff}
 /* Clamped on BOTH axes against the plate, so a chip near an edge can never end up under a
    caption band or off the side. */
@@ -708,12 +695,12 @@
 [data-atlas] .at-masthead .at-kicker .at-x{margin-left:auto;flex:none}
 [data-atlas] .at-masthead h2{
   margin:9px 0 0;font-family:var(--font-sans);font-size:17px;font-weight:700;letter-spacing:.1px;
-  line-height:1.18;color:#f8fbff;text-transform:uppercase;text-wrap:pretty;
+  line-height:1.18;color:var(--t1);text-transform:uppercase;text-wrap:pretty;
 }
 [data-atlas] .at-masthead h2.at-storm{font-size:22px;letter-spacing:-.2px;
   overflow:hidden;text-overflow:ellipsis}
 [data-atlas] .at-masthead .at-loc{
-  font-family:var(--font-mono);font-size:11px;color:#9edcfa;margin-top:7px;letter-spacing:.3px;
+  font-family:var(--font-mono);font-size:11px;color:var(--accent);margin-top:7px;letter-spacing:.3px;
   line-height:1.45;
 }
 [data-atlas] .at-masthead .at-loc span{color:var(--t3)}
@@ -742,7 +729,7 @@
   display:grid;grid-template-columns:112px minmax(40px,1fr) 78px;align-items:center;gap:0 10px;
 }
 [data-atlas] .at-itable .at-lab{font-family:var(--font-mono);font-size:9px;letter-spacing:.7px;padding:4px 0}
-[data-atlas] .at-itable .at-meas{height:3px;background:#243040;position:relative}
+[data-atlas] .at-itable .at-meas{height:3px;background:var(--sunken);position:relative}
 [data-atlas] .at-itable .at-meas i{position:absolute;inset:0 auto 0 0;opacity:.7}
 [data-atlas] .at-itable .at-meas u{position:absolute;top:-2px;bottom:-2px;width:1px}
 [data-atlas] .at-itable .at-val{
@@ -795,7 +782,7 @@
   text-align:right;
 }
 [data-atlas] .at-lbars{margin-top:6px}
-[data-atlas] .at-lmeas{position:relative;height:6px;background:#1b2430;overflow:hidden}
+[data-atlas] .at-lmeas{position:relative;height:6px;background:var(--sunken);overflow:hidden}
 [data-atlas] .at-lmeas + .at-lmeas{margin-top:2px;height:4px}
 [data-atlas] .at-lmeas i{position:absolute;top:0;bottom:0;left:0}      /* the rate, as a length */
 [data-atlas] .at-lmeas b{position:absolute;top:0;bottom:0}             /* the interval, as a band */
@@ -829,7 +816,7 @@
    publish a string the archive never produced. */
 [data-atlas] .at-ref .at-st{
   font-family:var(--font-sans);font-size:10px;font-weight:700;letter-spacing:1.5px;
-  color:#e8eff7;
+  color:var(--t1);
 }
 [data-atlas] .at-ref .at-why{
   font-family:var(--font-sans);font-size:11px;line-height:1.6;color:var(--t3);margin-top:5px;
@@ -872,7 +859,7 @@
   padding:4.5px 0;border:0;border-top:1px solid var(--rule);background:transparent;cursor:pointer;
   font-family:var(--font-mono);font-size:9.5px;align-items:baseline;letter-spacing:.3px;
 }
-[data-atlas] .at-pool button:hover{background:#1a2331}
+[data-atlas] .at-pool button:hover{background:var(--chrome-hi)}
 [data-atlas] .at-pool .at-nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--t1)}
 [data-atlas] .at-pool .at-se,[data-atlas] .at-pool .at-km{color:var(--t3);text-align:right}
 [data-atlas] .at-pool .at-ct{text-align:right}
@@ -890,8 +877,8 @@
   font-family:var(--font-mono);font-size:10.5px;color:var(--t1);flex:none;cursor:pointer;
   transition:border-color .1s linear,background-color .1s linear,color .1s linear;
 }
-[data-atlas] .at-tbtn:hover{border-color:var(--rule-4);background:#1b2533}
-[data-atlas] .at-tbtn.at-on{border-color:var(--accent);color:var(--accent);background:#152e3d}
+[data-atlas] .at-tbtn:hover{border-color:var(--rule-4);background:var(--chrome-hi)}
+[data-atlas] .at-tbtn.at-on{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--chrome))}
 [data-atlas] .at-tbtn.at-wide{width:auto;padding:0 10px;font-size:9px;letter-spacing:.8px}
 [data-atlas] .at-speeds{display:flex;border:1px solid var(--rule-2);flex:none}
 [data-atlas] .at-speeds button{
@@ -899,20 +886,20 @@
   border:0;border-right:1px solid var(--rule-2);border-radius:0;cursor:pointer;
   transition:color .1s linear,background-color .1s linear;
 }
-[data-atlas] .at-speeds button:hover{color:#fff}
+[data-atlas] .at-speeds button:hover{color:var(--t1)}
 [data-atlas] .at-speeds button:last-child{border-right:0}
-[data-atlas] .at-speeds button.at-on{color:var(--accent);background:#152e3d}
+[data-atlas] .at-speeds button.at-on{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,var(--chrome))}
 [data-atlas] .at-scrub{flex:1;min-width:90px}
 [data-atlas] .at-scrub input{
   width:100%;-webkit-appearance:none;appearance:none;height:14px;background:transparent;
   cursor:pointer;accent-color:#4fc3f7;
 }
-[data-atlas] .at-scrub input::-webkit-slider-runnable-track{height:2px;background:#2e3a4a;border-radius:0}
+[data-atlas] .at-scrub input::-webkit-slider-runnable-track{height:2px;background:var(--rule-3);border-radius:0}
 [data-atlas] .at-scrub input::-webkit-slider-thumb{
   -webkit-appearance:none;appearance:none;width:3px;height:14px;border:0;border-radius:0;
   box-shadow:none;background:var(--accent);margin-top:-6px;
 }
-[data-atlas] .at-scrub input::-moz-range-track{height:2px;background:#2e3a4a}
+[data-atlas] .at-scrub input::-moz-range-track{height:2px;background:var(--rule-3)}
 [data-atlas] .at-scrub input::-moz-range-thumb{width:3px;height:14px;border:0;border-radius:0;background:var(--accent)}
 [data-atlas] .at-scrub .at-ends{
   display:flex;justify-content:space-between;gap:12px;font-family:var(--font-mono);font-size:8.5px;
@@ -954,16 +941,16 @@
 /* ─── provenance drawer ───────────────────────────────────────────────────────────────── */
 
 [data-atlas] .at-drawer{
-  position:fixed;top:0;right:0;bottom:0;width:560px;max-width:94vw;background:#151d29;
+  position:fixed;top:0;right:0;bottom:0;width:560px;max-width:94vw;background:var(--chrome);
   border-left:1px solid var(--rule-2);z-index:1200;overflow-y:auto;
 }
 [data-atlas] .at-drawer .at-dh{
   display:flex;align-items:baseline;gap:10px;padding:18px 22px 14px;
-  border-bottom:1px solid var(--rule-2);position:sticky;top:0;background:#151d29;z-index:2;
+  border-bottom:1px solid var(--rule-2);position:sticky;top:0;background:var(--chrome);z-index:2;
 }
 [data-atlas] .at-drawer .at-dh h2{
   margin:0;font-family:var(--font-display);font-weight:500;font-size:21px;letter-spacing:.2px;
-  color:#f4f8fd;
+  color:var(--t1);
 }
 [data-atlas] .at-drawer .at-body{padding:0 22px 44px}
 [data-atlas] .at-veil{position:fixed;inset:0;background:rgba(2,4,9,.62);z-index:1199}
@@ -1041,62 +1028,18 @@
   [data-atlas] .at-sys .at-stack{display:none}
 }
 
-/* Below the workstation the columns are dropped one at a time rather than squeezed: the map IS
-   the page, and a map wedged between two rails at 1000 px is not one.
-
-   WHERE THE THIRD COLUMN STOPS PAYING FOR ITSELF, RE-DERIVED. The cap above took the plate's
-   SHAPE out of this decision -- it is 1.303 in either arrangement now, where before the third
-   column at 1240 left a 572x632 portrait plate and the collapse was the only thing that could
-   rescue it. What is left is a question of area and of where the evidence sits, and it was
-   measured rather than argued: at 1240 three columns give a 700x537 plate against two columns'
-   954x340, at 1180 a 640x492 against an 894x340, and at 1100 a 560x430 against an 814x340.
-   Three columns are ahead on drawn map until about 1150, and they also keep the query, the
-   plate and the evidence in one glance instead of stacking two of them. So the boundary stays
-   exactly where production put it, at 1180, on the near side of that crossing. It is stated
-   here because it was re-derived, not because it moved.
-
-   When it does collapse the PANEL gives up the height, not the map: at 46vh the plate was left
-   266px of map on an 800px viewport, which is a caption band with a sliver under it. The cap
-   still applies here -- the panel row is a term in the chrome rather than an exception to it. */
-@media (max-width:1180px){
-  [data-atlas]{
-    --at-side:clamp(220px,26vw,286px);
-    --at-panel-row:38vh;
-    --at-plate-w:calc(100vw - var(--at-side));
-    --at-chrome-h:calc(var(--at-head) + var(--at-band-top) + var(--at-band-bot)
-                       + var(--at-panel-row));
-  }
-  [data-atlas].atlas-shell{
-    grid-template-columns:var(--at-side) minmax(0,1fr);
-    grid-template-rows:var(--at-head) minmax(320px,1fr) minmax(0,auto) auto;
-  }
-  [data-atlas] .atlas-panel{
-    grid-column:1 / -1;grid-row:3;border-left:0;border-top:1px solid var(--rule-2);
-    max-height:var(--at-panel-row);
-  }
-  [data-atlas] .atlas-transport{grid-row:4}
-  [data-atlas] .at-brand{width:var(--at-side)}
-  [data-atlas] .at-sys{width:auto;flex:0 1 auto}
-}
-/* One column, and the stage row is already a definite fraction of the viewport, so there is no
-   surplus for the cap to take and it is switched off rather than left to compute against a
-   layout it was not derived for. */
-@media (max-width:760px){
-  [data-atlas].atlas-shell{
-    padding-block:0;
-    grid-template-columns:minmax(0,1fr);
-    grid-template-rows:var(--at-head) minmax(280px,46vh) minmax(0,auto) minmax(0,auto) auto;
-  }
-  [data-atlas] .atlas-stage{grid-column:1;grid-row:2}
-  [data-atlas] .atlas-panel{grid-column:1;grid-row:3;max-height:none}
-  [data-atlas] .atlas-rail{grid-column:1;grid-row:4;border-right:0;border-top:1px solid var(--rule-2)}
-  [data-atlas] .atlas-transport{grid-row:5}
-  [data-atlas] .at-brand{width:auto;flex:1 1 auto;border-right:0}
-  [data-atlas] .at-ledger{display:none}
-  [data-atlas] .at-transport{flex-wrap:wrap;padding:8px 14px}
-  [data-atlas] .at-readouts{border-left:0}
-  [data-atlas] .at-ro:first-child{padding-left:0}
-}
+/* THE THREE-COLUMN SHELL'S OWN BREAKPOINTS ARE GONE WITH THE SHELL.
+ *
+ * Two media blocks lived here -- one at 1180 that re-laid the rail, the stage and the panel into
+ * two columns, one at 760 that stacked all three -- and every element they named except the
+ * stage has been deleted. They were not merely inert: both re-declared `grid-template-rows` on
+ * `[data-atlas].atlas-shell`, which is the selector the calibration surface still uses, and both
+ * would have gone on winning against anything less specific than the stacked shell's own
+ * `[data-atlas].atlas-shell.atlas-stacked`. Dead CSS that still sizes a live surface is a
+ * compatibility surface, and the instruction was that none of it ships.
+ *
+ * The stacked shell's ladder is declared with the shell itself, below, so that what a width
+ * gives up is stated next to the grid it gives it up from. */
 
 /* ─── the evidence deck ───────────────────────────────────────────────────────────────────
  *
@@ -1120,12 +1063,50 @@
   align-content:start;
   font-family:var(--at-sans);
 }
-/* AT 1280-1439 THE TWO DURATION TRACKS FOLD, and the grid loses exactly those two tracks. The
-   data is not dropped -- the disclosure in the header brings them back -- and no type size
-   changes to buy the room, which is the rule for every breakpoint on this surface. */
+/* THE THREE TEMPLATES, AND EVERY ROW EMITS ONE CHILD PER TRACK IN ALL OF THEM.
+ *
+ *   9  nothing folded                     >= 1440, or either fold opened by the reader
+ *   8  the two duration tracks fold       1280-1439; ONE fold track replaces the two of them
+ *   7  the interval folds as well         below 1280; its bounds move into the bar's title
+ *
+ * THE FOLD TRACK IS A TRACK, NOT AN ABSENCE, and that is the correction. The folded template
+ * used to have seven columns while the folded HEAD still emitted eight children -- outcome, bar,
+ * rate, count, interval, vs, the fold button, status -- so the head's STATUS wrapped into an
+ * implicit second grid row, one line below the column it names. Group and data rows now emit an
+ * empty cell in the fold track, so all three row kinds are the same width in every state.
+ *
+ * No type size changes at any of them, which is the rule for every breakpoint on this surface:
+ * a column is given up whole, and it is given up to a control that names what it holds. */
 [data-atlas] .at-deck[data-timing-folded]{
-  grid-template-columns:170px minmax(0,1fr) 78px 100px 124px 92px 168px;
+  grid-template-columns:170px minmax(0,1fr) 78px 100px 124px 92px 128px 168px;
 }
+/* THE INTERVAL GIVES UP ITS TRACK AND MOVES IN WITH THE RATE, so the rate track widens by
+   roughly what the interval track and its gap were and the row still reads as one line. Measured
+   at 1180: 826px of fixed track, six gaps and the padding leave the bar 262px, which is a bar. */
+[data-atlas] .at-deck[data-timing-folded][data-interval-folded]{
+  grid-template-columns:170px minmax(0,1fr) 168px 100px 92px 128px 168px;
+}
+[data-atlas] .at-dc-int-inline{
+  margin-left:var(--at-s2);
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);white-space:nowrap;
+}
+[data-atlas] .at-dc-int-inline .at-val{font-size:var(--at-fs-label);color:var(--t3)}
+/* THE FOLDED GROUP'S OWN QUALIFIER, on a line of its own because the cell it rode in is gone.
+   Spans every track: it is a sentence about the denominator, not a value in a column. */
+[data-atlas] .at-deck-groupnote{
+  grid-column:1/-1;padding:0 0 var(--at-s2);
+  font-family:var(--at-sans);font-size:var(--at-fs-row);color:var(--t3);
+}
+/* + N, ON THE GROUP ROW, COUNTING WHAT IS FOLDED. Never a bare chevron: a control that does not
+   say how many contracts it holds turns a folded group and an empty one into the same picture. */
+[data-atlas] .at-group-fold{
+  margin-left:var(--at-s2);flex:none;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  background:transparent;border:1px solid var(--rule-2);color:var(--accent);
+  padding:0 var(--at-s1);cursor:pointer;
+}
+[data-atlas] .at-group-fold:hover{border-color:var(--accent)}
 [data-atlas] .at-deck-row{display:contents}
 
 [data-atlas] .at-dc{
@@ -1382,7 +1363,31 @@
   border-left:1px solid var(--rule-2);
   background:var(--chrome);
 }
-[data-atlas] .at-insp-head{flex:none}
+/* THE MASTHEAD IS BOUNDED, AND THAT IS WHAT KEEPS THE BRIDGE PINNED.
+ *
+ * It was `flex:none` -- an unshrinkable block whose height is whatever the storm's name, its
+ * coordinate line, its citation and its provisional flag come to. Measured at 1440x900 that is
+ * 226px of a 412px dock, or 55%, and the bridge below it may take 46%: 101%, so the bridge hung
+ * 4px past the inspector that pins it. The failure scales with how short the plate row is, and
+ * the plate row is exactly what a narrower or shorter workstation takes height out of.
+ *
+ * Capped at 42% with its own scroll, which leaves 46 for the bridge and at least 12 for the
+ * middle. The storm's NAME is the first line of the block, so it is on screen at every height;
+ * what a very short dock scrolls away is the citation beneath it, and the citation is also the
+ * URL in the address bar. */
+[data-atlas] .at-insp-head{
+  /* A FLOOR AS WELL AS A CAP, AND THE FLOOR IS THE POINT.
+     `flex:0 1 auto` with `min-height:0` is permission to shrink to NOTHING, and flexbox took it:
+     measured at 1440x900 the masthead was 29px tall around 226px of content, so the block showed
+     its kicker and clipped the storm's NAME -- the one fact the whole inspector is about --
+     into a scroll nobody would think to perform. Capping it stopped the bridge overflowing and
+     started this instead.
+     The floor is the identity: kicker, name, and the season/basin/id line beneath it. Below that
+     the squeeze goes to the BODY, which is the block the design nominates as the one that
+     scrolls; the bridge keeps its 46% and never moves. */
+  flex:0 1 auto;min-height:96px;max-height:42%;
+  overflow-y:auto;overscroll-behavior:contain;
+}
 [data-atlas] .at-insp-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 [data-atlas] .at-insp-bridge{
   flex:none;
@@ -1390,4 +1395,532 @@
   background:var(--chrome-hi);
   padding:var(--at-s2) var(--at-s6) var(--at-s4);
   max-height:46%;overflow-y:auto;overscroll-behavior:contain;
+}
+
+/* ─── identity strip and question line ────────────────────────────────────────────────────
+ *
+ * TWO ROWS, 32 AND 38, AND THEY ARE DIFFERENT KINDS OF THING. The first is read once a session
+ * and is set entirely in the stamp and label tokens. The second is read constantly and is the
+ * one place on this surface a sentence is typeset as a sentence. */
+[data-atlas] .at-ident{
+  display:flex;align-items:center;gap:var(--at-s4);
+  padding:0 var(--at-s5);min-width:0;
+  background:var(--chrome-hi);
+  border-bottom:1px solid var(--rule-2);
+}
+[data-atlas] .at-ident-brand{
+  margin:0;flex:none;
+  font-family:var(--at-sans);font-size:var(--at-fs-row);font-weight:700;
+  letter-spacing:.4px;text-transform:uppercase;color:var(--t1);
+}
+[data-atlas] .at-ident-back{
+  flex:none;font-family:var(--at-mono);font-size:var(--at-fs-label);
+  letter-spacing:var(--at-tr-label);color:var(--t3);text-decoration:none;
+}
+[data-atlas] .at-ident-back:hover{color:var(--accent)}
+/* The four stamps. 9px exists for these and for nothing else on the surface. */
+[data-atlas] .at-ident-stamps{
+  display:flex;align-items:center;gap:var(--at-s4);min-width:0;overflow:hidden;
+  font-family:var(--at-mono);font-size:var(--at-fs-stamp);letter-spacing:var(--at-tr-stamp);
+  color:var(--t3);white-space:nowrap;
+}
+[data-atlas] .at-ident-stamps span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+[data-atlas] .at-ident-stamps em{font-style:normal;color:var(--t2)}
+[data-atlas] .at-ident-acts{display:flex;align-items:center;gap:var(--at-s4);flex:none;margin-left:auto}
+
+/* THE QUESTION. Serif, 19px, weight 400, no tracking -- the one serif on the surface, and the
+   one place the instrument speaks in a sentence rather than in labels. The figure beside it is
+   the cohort size at the figure token: the type scale permits exactly one 26px number on screen
+   and this is it, because it is the denominator of every rate in the deck below. */
+[data-atlas] .at-question{
+  display:flex;align-items:baseline;gap:var(--at-s5);
+  padding:0 var(--at-s5);min-width:0;
+  background:var(--chrome);
+  border-bottom:1px solid var(--rule-2);
+}
+[data-atlas] .at-question-text{
+  margin:0;min-width:0;flex:1 1 auto;
+  font-family:var(--at-serif);font-size:var(--at-fs-question);font-weight:400;
+  line-height:1.25;color:var(--t1);letter-spacing:0;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+[data-atlas] .at-question-n{display:flex;align-items:baseline;gap:var(--at-s2);flex:none}
+[data-atlas] .at-question-fig{
+  font-family:var(--at-mono);font-size:var(--at-fs-figure);font-weight:400;
+  line-height:1;color:var(--t1);letter-spacing:0;
+}
+[data-atlas] .at-question-of{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  text-transform:uppercase;color:var(--t3);
+}
+
+/* ─── the stacked shell ───────────────────────────────────────────────────────────────────
+ *
+ * FIVE ROWS, AND ONLY THE PLATE IS ELASTIC.
+ *
+ *   32   identity strip     fixed
+ *   38   question line      fixed
+ *   38   condition strip    fixed
+ *   1fr  plate              elastic, floor 320
+ *   340  evidence deck      fixed; rows drop at a breakpoint, never shrink
+ *   auto transport          40 with a subject, 0 without
+ *
+ * THE TABLE IS NEVER SQUEEZED TO GIVE THE MAP HEIGHT. Selecting a storm takes WIDTH from the
+ * plate for the dock and never height from the evidence -- an answer that shrinks the moment a
+ * reader asks about one storm is the failure this row model exists to prevent, and it is
+ * invisible until exactly the moment it matters.
+ *
+ * The plate row is `minmax(320px, 1fr)` rather than `1fr`: a viewport short enough to squeeze it
+ * below 320 should scroll the shell instead of publishing a map too small to read a track on. */
+/* EVERY SELECTOR HERE CARRIES BOTH CLASSES, AND THAT IS NOT STYLE -- IT IS ARITHMETIC.
+ * `[data-atlas].atlas-shell` is 0,2,1 and so is `[data-atlas].atlas-stacked`, so source order
+ * would decide -- and the three-column shell's BREAKPOINTS are declared later in this file than
+ * the stacked rules can be. At 1180 and below they would silently re-impose a three-row grid on
+ * a five-row shell. `[data-atlas].atlas-shell.atlas-stacked` is 0,3,1 and wins outright,
+ * everywhere, which is what lets both shells share a stylesheet during the transition. */
+[data-atlas].atlas-shell.atlas-stacked{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  /* THE APERTURE, BOUNDED AT BOTH ENDS, COMPUTED RATHER THAN LEFT TO THE GRID.
+   *
+   * The plate may be no wider than 3.2 times its height -- past that a single East Pacific track
+   * stops being the subject of its own plate -- and no narrower in aspect than 1.421, below
+   * which the archive's core frame cannot fill it and the fit opens latitude holding no storms.
+   * Both bounds, on the same track, so the height is a clamp of three terms:
+   *
+   *   floor    avail / 3.2      the widest the plate may read
+   *   ideal    what is left once the chrome and a full 340px deck have taken theirs
+   *   ceiling  avail / 1.421    the tallest the archive's own shape can fill
+   *
+   * WHY NOT `minmax(floor, 1fr)` WITH A CAPPED DECK, which is the obvious form: it holds
+   * everywhere except a tall workstation, where the plate keeps growing past the ceiling --
+   * measured 1440x1600 -> aspect 1.25, well below the floor.
+   *
+   * AND WHY NOT `minmax(floor, ceiling)` WITH A FLEXIBLE DECK, which is the next thing to try:
+   * grid maximises non-flexible tracks toward their growth limits BEFORE expanding flexible
+   * ones, so the plate takes the whole surplus and the deck collapses. Measured at 1440x900:
+   * plate 792, evidence 0. Both were tested rather than reasoned about, and both failed.
+   *
+   * The clamp leaves the deck as the flexible track, so surplus height on a tall viewport
+   * becomes MORE VISIBLE ROWS rather than blank plane -- the acceptance test is 0% blank, and
+   * an instrument capped and centred inside empty chrome is what the old shell did and what
+   * this replaces.
+   *
+   * THE TRANSPORT COMES OUT OF THE PLATE, never out of the deck: it is a term in the plate's
+   * ideal height, so a selected storm shortens the map and leaves the answer untouched. */
+  /* THE THREE FIXED ROWS ARE NAMED, because the aperture's ideal term is the viewport MINUS
+     them and a literal 108 in that subtraction is a number that silently stops being true the
+     moment one of the three changes height. Below 1280 the condition strip takes a second line
+     and `--at-strip` is the only edit that needs. */
+  --at-ident:32px;
+  --at-q:38px;
+  --at-strip:38px;
+  grid-template-rows:
+    var(--at-ident) var(--at-q) var(--at-strip)
+    clamp(calc(var(--at-plate-avail) / var(--at-plate-ar-max)),
+          calc(100vh - var(--at-ident) - var(--at-q) - var(--at-strip)
+               - 340px - var(--at-tport)),
+          calc(var(--at-plate-avail) / var(--at-plate-ar)))
+    minmax(0,1fr)
+    var(--at-tport);
+  background:var(--chrome);
+  --at-plate-avail:100vw;
+  --at-tport:0px;
+}
+/* The dock takes 380 of the plate's width, so both bounds are computed against what is left --
+   otherwise selecting a storm would narrow the plate without moving its aspect limits with it.
+   Measured with the dock open at 1440x900: 1060x452, aspect 2.345, which is the specification's
+   own stated validation state for the widest treatment. */
+[data-atlas].atlas-shell.atlas-stacked:has(.atlas-dock){--at-plate-avail:calc(100vw - 380px)}
+/* 40px only when the transport actually has something in it. The row exists either way; an
+   empty one must not reserve height the plate could be using. */
+[data-atlas].atlas-shell.atlas-stacked:has(.atlas-transport > *){--at-tport:40px}
+[data-atlas].atlas-shell.atlas-stacked > *{min-width:0}
+
+/* THE PLATE ROW, AND THE DOCK INSIDE IT. The dock is a fixed 380 and the plate takes what is
+   left -- the whole width when no storm is selected. */
+[data-atlas].atlas-stacked .atlas-plate-row{
+  display:grid;grid-template-columns:minmax(0,1fr);
+  min-width:0;min-height:0;position:relative;
+}
+[data-atlas].atlas-stacked .atlas-plate-row:has(.atlas-dock){
+  grid-template-columns:minmax(0,1fr) 380px;
+}
+[data-atlas].atlas-stacked .atlas-dock{min-width:0;min-height:0;overflow:hidden}
+
+/* THE STAGE, RE-SEATED. It keeps its own internal grid -- the caption bands and the plate --
+   but the three-column shell pins it at `grid-column:2; grid-row:2` with a height computed from
+   the aspect cap and `align-self:center`. Inside a single-cell plate row those place it in a
+   phantom second column of a grid that has one, which is how the plate first measured 0x0.
+   Re-seated at 1/1, stretched, and sized by the row rather than by the old cap. */
+[data-atlas].atlas-stacked .atlas-stage{
+  grid-column:1;grid-row:1;
+  height:auto;align-self:stretch;
+  min-width:0;min-height:0;
+}
+
+/* THE EVIDENCE ROW. Fixed height, its own scroll, and the deck's header stays put inside it so
+   the column names survive a scroll of the rows beneath them. */
+[data-atlas].atlas-stacked .atlas-evidence{
+  min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  border-top:1px solid var(--rule-2);
+  background:var(--chrome);
+}
+[data-atlas].atlas-stacked .atlas-evidence .at-deck-head > .at-dc{
+  position:sticky;top:0;z-index:2;background:var(--chrome);
+}
+/* THE TRANSPORT IS AUTO-PLACED, AND THE OVERRIDE IS THE WHOLE REASON THIS RULE EXISTS.
+   The three-column shell pins it at `grid-row:3` -- correct there, where row 3 is the transport.
+   Here row 3 is the CONDITION STRIP, so the pin claimed it, and auto-placement pushed the strip,
+   the plate and the evidence each down one track: the strip took the plate's 320px floor, the
+   plate row took the evidence's 340, and the evidence got the 132px that was left. Every row
+   was the wrong height and nothing was missing, which is why it looked like a sizing bug rather
+   than a placement one. Reset to auto so source order decides, as it does for its five siblings. */
+[data-atlas].atlas-stacked .atlas-transport{grid-column:1;grid-row:auto}
+
+/* ─── the stacked shell's ladder ──────────────────────────────────────────────────────────
+ *
+ * FOUR STEPS BELOW THE WORKSTATION, IN ORDER, AND THE MAP NEVER PAYS FIRST. Stated here rather
+ * than scattered, so that a narrower workstation is a decision rather than an accident. Two of
+ * the four are widths at which a COLUMN is folded and the fold is in the deck's own markup --
+ * the duration pair at 1440 and the interval at 1280, both restored by one control that names
+ * what it holds. What is here is the two steps that change the SHELL.
+ *
+ * No step reduces a type size. Every step gives up a whole item to a control that names it. */
+
+/* 1180-1279 · THE CONDITION STRIP TAKES A SECOND LINE, AND THE PLATE ABSORBS IT.
+ * Three zones and a last-edit figure stop fitting on one 38px line somewhere in this band, and
+ * the alternative to a second line is a zone that ellipsises -- which on this strip means a
+ * condition a reader cannot read. The strip is the query; it wins. The aperture's ideal term is
+ * computed from `--at-strip`, so raising it moves the height out of the plate automatically and
+ * out of the evidence not at all. */
+@media (max-width:1279px){
+  [data-atlas].atlas-shell.atlas-stacked{--at-strip:76px}
+  [data-atlas] .at-strip{flex-wrap:wrap;align-content:center;row-gap:0}
+  [data-atlas] .at-lastedit{margin-left:0}
+}
+
+/* 900-1179 · THE INSPECTOR STOPS BEING A DOCK.
+ *
+ * A 380px dock beside a plate is 32% of a 1180px shell and 37% of a 1024px one, and what is left
+ * cannot hold a track. So the inspector lifts off the row and overlays the right edge from the
+ * plate down through the evidence -- full height, as specified -- and the plate goes back to the
+ * whole width beneath it.
+ *
+ * IT STOPS AT THE TRANSPORT, WHICH IS NOT A DETAIL. The transport is how a reader plays the
+ * storm the inspector is describing; an overlay that covered it would leave the subject on
+ * screen and its controls underneath the thing describing it. */
+@media (max-width:1179px){
+  [data-atlas].atlas-shell.atlas-stacked:has(.atlas-dock){--at-plate-avail:100vw}
+  [data-atlas].atlas-stacked .atlas-plate-row:has(.atlas-dock){
+    grid-template-columns:minmax(0,1fr);
+  }
+  [data-atlas].atlas-stacked .atlas-dock{
+    position:absolute;grid-row:4 / 6;grid-column:1 / 2;
+    inset:0;left:auto;width:min(380px,86vw);
+    z-index:880;overflow:hidden;
+    background:var(--chrome);border-left:1px solid var(--rule-2);
+  }
+}
+
+/* < 900 · ONE COLUMN, AND THE SHELL SCROLLS.
+ *
+ * The plate takes a stated 40vh and the aspect bound is switched off rather than computed
+ * against a layout it was not derived for: the bound exists to keep the archive's own frame
+ * fillable inside an elastic row, and this row is not elastic. Below this width the evidence is
+ * not a pane with its own scroll either -- the page is the scroll, so the table simply continues
+ * under the map and a reader gets one gesture instead of two nested ones.
+ *
+ * The identity strip's five archive counts go here, whole: at this width they are the only thing
+ * on the surface that is neither the question, the map, nor the answer. */
+@media (max-width:899px){
+  [data-atlas].atlas-shell.atlas-stacked{
+    position:fixed;inset:0;overflow-y:auto;overscroll-behavior:contain;
+    grid-template-rows:auto auto auto 40vh auto var(--at-tport);
+  }
+  [data-atlas].atlas-shell.atlas-stacked{--at-ident:auto;--at-q:auto;--at-strip:auto}
+  [data-atlas] .at-ident{height:auto;flex-wrap:wrap;row-gap:0}
+  [data-atlas] .at-ledger{display:none}
+  [data-atlas] .at-question{height:auto;flex-wrap:wrap;row-gap:2px}
+  [data-atlas] .at-question-text{white-space:normal}
+  [data-atlas].atlas-stacked .atlas-evidence{overflow-y:visible}
+  [data-atlas].atlas-stacked .atlas-dock{
+    grid-row:4 / 6;inset:0;width:auto;
+  }
+  [data-atlas] .at-sheet{width:auto;right:0;border-right:0}
+  [data-atlas] .at-transport{flex-wrap:wrap;padding:8px 14px}
+  [data-atlas] .at-readouts{border-left:0}
+  [data-atlas] .at-ro:first-child{padding-left:0}
+}
+
+/* THE BUILDER SHEET. Summoned, not resident. It overlays the plate rather than the evidence,
+   because a reader editing a condition is looking at what the map holds, not at the answer they
+   are about to invalidate. */
+/* PINNED TO THE PLATE'S GRID AREA, NOT TO THE SHELL'S BOX.
+ *
+ * It was `top:108px; bottom:0`, which is the chrome's height and the bottom of the WINDOW -- so
+ * the sheet ran the full height of everything below the strip and covered the evidence deck as
+ * well as the plate. That is the opposite of the rule this element was written to: a reader
+ * editing a condition is looking at what the map holds, not at the answer they are about to
+ * invalidate, so the sheet must cover the map and nothing else. It went unnoticed because the
+ * sheet is 420px of a 1440px shell and the deck's LEFT edge -- the outcome names and, once the
+ * foot was added, the HOLD OUT chips -- is the only part it hides.
+ *
+ * An absolutely-positioned grid child that names a grid area gets THAT AREA as its containing
+ * block, so `inset:0` here resolves to the plate row exactly, at whatever height the aperture
+ * clamp gave it. Out of flow either way, so auto-placement of the six in-flow rows is untouched.
+ *
+ * BOTH LINES, NOT ONE, AND THE SHORTHAND IS THE TRAP. `grid-row:4` is `4 / auto`, and for an
+ * ABSOLUTELY POSITIONED grid child an `auto` line resolves to the grid container's PADDING EDGE
+ * rather than to a one-track span. Measured with the shorthand: top 108 (the plate row's start,
+ * correct) and bottom 900 (the window, wrong) -- a sheet still covering the whole deck while
+ * appearing to be placed. `4 / 5` closes the area at the row it names. */
+[data-atlas] .at-sheet{
+  position:absolute;grid-row:4 / 5;grid-column:1 / 2;
+  inset:0;right:auto;width:clamp(320px,26vw,420px);
+  z-index:900;display:flex;flex-direction:column;
+  background:var(--chrome);border-right:1px solid var(--rule-2);
+}
+[data-atlas] .at-sheet-hd{
+  flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--at-s5);height:var(--at-row-head-h);
+  border-bottom:1px solid var(--rule-2);background:var(--chrome-hi);
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);
+}
+[data-atlas] .at-sheet-x{
+  background:transparent;border:0;color:var(--t3);cursor:pointer;
+  font-family:var(--at-mono);font-size:var(--at-fs-value);padding:0 2px;
+}
+[data-atlas] .at-sheet-x:hover{color:var(--t1)}
+[data-atlas] .at-sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+
+
+/* ─── plate furniture, inside the plate ───────────────────────────────────────────────────
+ *
+ * THE CAPTION BANDS GO, BUT THEIR WORDS DO NOT. The three-column shell framed the map as a
+ * figure in a journal, with a band above and below as SIBLINGS of the plate so neither could
+ * ever sit on the geography. That cost 50px of plate height -- which is why the plate measured
+ * 402 in a 452 row and came out at aspect 3.58 against a 3.2 ceiling.
+ *
+ * They are not simply hidden. The foot carries the COASTLINE statement, which is the band's one
+ * epistemic claim -- whether the line on screen is the archive's own landfall geometry or
+ * contextual imagery -- and dropping it would remove a provenance statement to buy pixels. So
+ * the furniture moves INSIDE the plate and every word survives.
+ *
+ * EACH ITEM GETS ITS OWN ANCHOR, and nothing anchors two things to one corner: the title runs
+ * top-left indented past the latitude label, the counts sit beside it, the mode statement goes
+ * top-right, and the foot keeps scale, projection, coastline and coordinates on one row along
+ * the bottom. The legend, which is already bottom-right inside the plate, is lifted clear of
+ * that row rather than sharing the corner with it.
+ *
+ * A BACKDROP, NOT A TINT. Small type over cartography is unreadable without one, and a
+ * translucent wash would make the contrast a function of whatever the map happens to be drawing
+ * underneath. The backdrop is the stage's own ink at high alpha, so the text keeps a contrast
+ * that can actually be stated. */
+[data-atlas].atlas-stacked .atlas-stage{grid-template-rows:minmax(0,1fr);position:relative}
+[data-atlas].atlas-stacked .at-plate{grid-row:1;grid-column:1}
+[data-atlas].atlas-stacked .at-platehead,
+[data-atlas].atlas-stacked .at-platefoot{
+  position:absolute;left:0;right:0;z-index:460;
+  border:0;background:color-mix(in srgb,var(--stage) 88%,transparent);
+  pointer-events:none;
+}
+[data-atlas].atlas-stacked .at-platehead{top:0;padding-left:44px}
+[data-atlas].atlas-stacked .at-platefoot{bottom:0}
+/* Clear of the foot row rather than sharing the bottom-right corner with the coordinates. */
+[data-atlas].atlas-stacked .at-legend{bottom:calc(var(--at-band-bot) + var(--at-plate-gutter))}
+
+/* THE DECK'S FOOT. Spans every column, because what it says qualifies every row above it. */
+[data-atlas] .at-deck-foot{
+  grid-column:1/-1;
+  display:flex;flex-direction:column;gap:var(--at-s2);
+  padding:var(--at-s3) 0 var(--at-s4);
+  border-top:1px solid var(--rule-2);
+}
+[data-atlas] .at-foot-block{
+  display:flex;align-items:baseline;gap:var(--at-s2);flex-wrap:wrap;min-width:0;
+}
+[data-atlas] .at-foot-k{
+  flex:none;font-family:var(--at-mono);font-size:var(--at-fs-label);
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;color:var(--t3);
+}
+[data-atlas] .at-foot-line{
+  font-family:var(--at-sans);font-size:var(--at-fs-row);line-height:1.45;color:var(--t2);
+  min-width:0;
+}
+[data-atlas] .at-deck-foot .at-mark{
+  flex:none;width:11px;text-align:center;font-family:var(--at-mono);
+  font-size:var(--at-fs-label);color:var(--t3);
+}
+[data-atlas] .at-fold-btn{
+  flex:none;font-family:var(--at-mono);font-size:var(--at-fs-label);
+  letter-spacing:var(--at-tr-label);text-transform:uppercase;
+  background:transparent;border:1px solid var(--rule-2);color:var(--accent);
+  padding:1px var(--at-s2);cursor:pointer;
+}
+[data-atlas] .at-fold-btn:hover{border-color:var(--accent)}
+
+/* THE DECK'S PREAMBLE. Spans every column: the count, the gate, the effective sample and what
+   the rates assume all qualify the whole table rather than any row of it. */
+[data-atlas] .at-deck-pre{grid-column:1/-1;padding:var(--at-s3) 0 var(--at-s2)}
+[data-atlas] .at-pre-line{
+  display:flex;align-items:baseline;gap:var(--at-s3);flex-wrap:wrap;min-width:0;
+  margin-bottom:var(--at-s1);
+}
+[data-atlas] .at-pre-n{
+  font-family:var(--at-mono);font-size:var(--at-fs-figure);line-height:1;color:var(--t1);
+}
+[data-atlas] .at-pre-ok,[data-atlas] .at-pre-no,[data-atlas] .at-pre-shape{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+}
+[data-atlas] .at-pre-ok{color:var(--pos)}
+[data-atlas] .at-pre-no{color:var(--neg)}
+[data-atlas] .at-pre-shape{color:var(--t3);margin-left:auto}
+[data-atlas] .at-pre-prose{
+  font-family:var(--at-sans);font-size:var(--at-fs-row);line-height:1.45;color:var(--t2);
+}
+[data-atlas] .at-pre-assume,[data-atlas] .at-deck-env{grid-column:1/-1}
+[data-atlas] .at-pre-assume > summary,[data-atlas] .at-deck-env > summary{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  text-transform:uppercase;color:var(--t3);cursor:pointer;padding:var(--at-s1) 0;
+}
+[data-atlas] .at-pre-assume > summary:hover,[data-atlas] .at-deck-env > summary:hover{color:var(--t1)}
+[data-atlas] .at-pre-assume p{margin:0 0 var(--at-s2)}
+[data-atlas] .at-deck-env{border-top:1px solid var(--rule-2);padding-top:var(--at-s2)}
+[data-atlas] .at-env-body{padding-bottom:var(--at-s3)}
+
+/* ─── the table's foot ────────────────────────────────────────────────────────────────────
+ *
+ * SPANS EVERY COLUMN, BECAUSE IT QUALIFIES EVERY ROW. What the last edit did and what the whole
+ * VS ARCHIVE column is measured against are facts about the table, not about any rung of it.
+ *
+ * `.at-changed` already carries its own top rule and padding -- it was written for exactly this
+ * position -- so the block adds none of its own around it, and the baseline sits beneath on the
+ * same hairline rhythm the deck uses everywhere else. */
+[data-atlas] .at-deck-foot-block{grid-column:1/-1}
+[data-atlas] .at-deck-baseline{
+  padding:var(--at-s3) var(--at-s5) var(--at-s4);
+  border-top:1px solid var(--rule-2);
+  /* THE ONE 2px RULE THIS BLOCK IS ALLOWED. A box may only exist where two planes meet, and the
+     baseline is a different plane from the ladder: everything above is this cohort, everything
+     stated here is the OTHER population the deltas are against. */
+  border-left:2px solid var(--rule-3);
+  max-width:88ch;
+}
+[data-atlas] .at-deck-baseline .at-foot-line{margin:2px 0 0;color:var(--t1)}
+[data-atlas] .at-foot-fig{
+  margin:var(--at-s1) 0 0;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);
+}
+/* THE CAVEAT IS NOT AN ERROR AND IS NOT PAINTED AS ONE -- no tint, no box, no coloured ground.
+   It is the sentence engine/compare.js wrote about how the two populations overlap, and it is
+   held to the body contrast bar because a reader who misses it misreads every delta above. */
+[data-atlas] .at-foot-note{
+  margin:var(--at-s2) 0 0;
+  font-family:var(--at-sans);font-size:var(--at-fs-row);line-height:1.45;color:var(--t2);
+}
+[data-atlas] .at-foot-none{
+  margin:var(--at-s2) 0 0;
+  font-family:var(--at-sans);font-size:var(--at-fs-row);line-height:1.45;color:var(--neg);
+}
+/* THE ARCHIVE RAISING ITS HAND, INSIDE A PARAGRAPH. Same ink as every other flag on the
+   surface, which on paper is the burnt amber and on the dark chrome the bright one. */
+[data-atlas] .at-foot-flag{color:var(--flag)}
+[data-atlas] .at-deck-cite{
+  grid-column:1/-1;padding:var(--at-s3) var(--at-s5) var(--at-s5);
+  border-top:1px solid var(--rule-2);
+}
+[data-atlas] .at-deck-cite .at-foot-k{display:block;margin-bottom:var(--at-s2)}
+[data-atlas] .at-foot-holdout{
+  display:flex;align-items:center;flex-wrap:wrap;gap:var(--at-s1);
+  margin-top:var(--at-s3);
+}
+[data-atlas] .at-deck-empty{grid-column:1/-1;padding:var(--at-s4) 0;max-width:76ch}
+[data-atlas] .at-empty-k{
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--flag);margin-bottom:var(--at-s3);
+}
+[data-atlas] .at-deck-empty p{margin:0 0 var(--at-s3)}
+
+/* THE METHODOLOGY NOTICE IS OUT OF FLOW, AND THAT IS STRUCTURAL RATHER THAN COSMETIC.
+   It renders only when a shared URL was written under a different methodology than the one now
+   loaded -- rare, and important enough to interrupt. As a grid child it became a SEVENTH row in a
+   six-row model: measured, it displaced every track and took the plate to aspect 4.235, outside
+   its ceiling. Out of flow it interrupts without moving anything. */
+[data-atlas].atlas-stacked [data-methodology-moved]{
+  position:absolute;top:70px;left:0;right:0;z-index:820;margin:0;
+  background:var(--chrome-hi);
+}
+
+/* ─── the light shell ─────────────────────────────────────────────────────────────────────
+ *
+ * THE DEFAULT SURFACE IS PAPER; THE DARK ONE IS A STORED PREFERENCE. Both shells are the same
+ * architecture with the same components -- what changes is which ink the semantic tokens resolve
+ * to, and nothing else. No component knows which shell it is in.
+ *
+ * THE PLATE IS EXCLUDED FROM THE SWAP BY CONSTRUCTION, and "by construction" is doing real work
+ * here. The cartographic plate is dark in BOTH shells: it is a canvas set into an instrument, not
+ * a panel of the page. But its furniture -- the title line, the scale bar, the coastline
+ * statement, the graticule labels -- inherits the surface's text tokens, so remapping --t1..--t4
+ * to paper inks would paint dark ink on a dark plate and make every one of them unreadable.
+ *
+ * So the stage RE-DECLARES the dark set for its own subtree. The values are not repeated: the
+ * dark ramp is named once as --d-*, the default shell points the semantic tokens at it, the
+ * light shell points them at the paper tokens, and the stage points them back. One set of hexes,
+ * three references, no drift.
+ *
+ * EVERY SEMANTIC INK IS CHOSEN FOR THE GROUND IT LANDS ON. green-600 measures 2.67:1 on paper and
+ * red-600 3.92:1 -- both below AA for a 10px status word -- so the light shell takes green-800 at
+ * 5.79 and red-700 at 5.25. Asserted in scripts/check-atlas-adherence.mjs rather than eyeballed. */
+[data-atlas]{
+  --d-chrome:#131b27; --d-chrome-hi:#18212f; --d-sunken:#0e151f;
+  --d-t1:#eaf0f7; --d-t2:#a2b2c6; --d-t3:#7d8fa5; --d-t4:#63758b;
+  --d-rule:#222d3c; --d-rule-2:#2e3a4a; --d-rule-3:#405064; --d-rule-4:#56687d;
+  --d-accent:#4fc3f7; --d-accent-2:#2b6f92; --d-flag:#f0b429;
+  --d-pos:#3ddc97; --d-neg:#ef5350; --d-special:#9b7bf0;
+  --d-hatch:repeating-linear-gradient(45deg,#3a4a60 0 1.5px,transparent 1.5px 5px);
+}
+
+/* THE LIGHT SHELL, AND IT IS THE DEFAULT: `:not([data-shell="dark"])` rather than
+   `[data-shell="light"]`, so a surface that has never stored a preference is paper. */
+[data-atlas]:not([data-shell="dark"]){
+  --chrome:var(--at-paper);
+  --chrome-hi:var(--at-paper-raised);
+  --sunken:var(--at-paper-sunken);
+  --t1:var(--at-ink-1); --t2:var(--at-ink-2); --t3:var(--at-ink-3); --t4:var(--at-ink-4);
+  --rule:var(--at-paper-rule); --rule-2:var(--at-paper-hair);
+  --rule-3:var(--at-paper-strong); --rule-4:var(--at-paper-strong);
+  --accent:var(--at-paper-accent); --accent-2:#4a7d92;
+  --flag:var(--at-paper-flag);
+  --pos:#166534; --neg:#b91c1c; --special:#6d28d9;
+  --hatch:repeating-linear-gradient(45deg,#a9a196 0 1.5px,transparent 1.5px 5px);
+  --surface-app:var(--chrome); --surface-card:var(--chrome); --surface-sunken:var(--sunken);
+  --border-dim:var(--rule); --border-strong:var(--rule-2);
+  --text-1:var(--t1); --text-2:var(--t3); --text-link:var(--accent);
+  --accent-bright:var(--accent); --border-accent:var(--accent);
+  /* `--warn` IS `--flag` UNDER AN OLDER NAME, and leaving it out of this table shipped an amber
+     written for a near-black chrome onto paper: #f0b429 measures 1.68:1 on --at-paper, against
+     an AA bar of 4.5. It is not a decorative token -- it is the ink on the methodology notice,
+     the builder's outcome-side warnings, the environment lens's era boundary and the
+     inspector's replay guard, so on the light shell the four places the archive raises its hand
+     were the four hardest things on the surface to read. Same role, same table, one ink. */
+  --warn:var(--at-paper-flag);
+  color-scheme:light;
+}
+
+/* AND THE PLATE STAYS DARK, IN BOTH SHELLS, INCLUDING EVERYTHING DRAWN OVER IT. */
+[data-atlas]:not([data-shell="dark"]) .atlas-stage{
+  --chrome:var(--d-chrome); --chrome-hi:var(--d-chrome-hi); --sunken:var(--d-sunken);
+  --t1:var(--d-t1); --t2:var(--d-t2); --t3:var(--d-t3); --t4:var(--d-t4);
+  --rule:var(--d-rule); --rule-2:var(--d-rule-2);
+  --rule-3:var(--d-rule-3); --rule-4:var(--d-rule-4);
+  --accent:var(--d-accent); --accent-2:var(--d-accent-2); --flag:var(--d-flag);
+  --warn:var(--d-flag);
+  --pos:var(--d-pos); --neg:var(--d-neg); --special:var(--d-special);
+  --hatch:var(--d-hatch);
+  --text-1:var(--t1); --text-2:var(--t3); --text-link:var(--accent);
+  --border-dim:var(--rule); --border-strong:var(--rule-2);
+  color-scheme:dark;
 }

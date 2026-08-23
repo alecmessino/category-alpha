@@ -30,7 +30,11 @@ import { loadCalibration } from "../engine/calibration.js";
 import { AtlasMap } from "./map.jsx";
 import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
-import { CohortPanel } from "./cohort-panel.jsx";
+import { EnvLens } from "./env-lens.jsx";
+/* THE STACKED SHELL'S OWN PARTS. */
+import { IdentityStrip, QuestionLine } from "./shell.jsx";
+import { ConditionStrip } from "./condition-strip.jsx";
+import { EvidenceDeck, subjectVerdicts } from "./evidence-deck.jsx";
 import { Transport } from "./transport.jsx";
 import { ArchiveTransport } from "./archive-transport.jsx";
 import { MONO, TextButton, claimText } from "./kit.jsx";
@@ -131,6 +135,31 @@ export function Atlas() {
   const [provOpen, setProvOpen] = React.useState(false);
   const [view, setView] = React.useState(null);
 
+
+  /* The builder is a summoned sheet in the stacked shell rather than a resident rail. */
+  const [sheetZone, setSheetZone] = React.useState(null);
+
+  /* THE TWO DURATION COLUMNS FOLD BELOW 1440, and the fold is measured rather than assumed:
+     the deck asks the viewport directly instead of a breakpoint guess, because the columns it
+     is deciding about are the ones a narrower workstation cannot hold. */
+  const [vw, setVw] = React.useState(() => window.innerWidth);
+  React.useEffect(() => {
+    const onResize = () => setVw(window.innerWidth);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const [timingOpen, setTimingOpen] = React.useState(false);
+  const [landfallOpen, setLandfallOpen] = React.useState(false);
+
+  /* WHICH INK SET. Paper is the default and the dark plate is unaffected either way -- see the
+     light-shell block in atlas.css, where --stage is declared once and the stage re-declares the
+     dark ramp for its own subtree. Stored per reader; absent means paper. */
+  const [shell] = React.useState(() => {
+    try { return localStorage.getItem("atlas.shell") === "dark" ? "dark" : "light"; }
+    catch { return "light"; }
+  });
+
+
   /* The manifest lands first so the scale line can paint while the 972 KB track block is still
      in flight; the two packs are then fetched in parallel. */
   React.useEffect(() => {
@@ -215,6 +244,39 @@ export function Atlas() {
      block is fetched only when a reader asks to see the distributions, and `envEpoch` exists
      so the lens recomputes once it lands: the archive object is mutated in place by
      loadEnvironment, which React has no way to notice. */
+  /* WHAT THE LAST EDIT COST, IN POPULATION. One number to one number, recorded when the spec
+     changes and replaced by the next edit -- never accumulated, because a running list of
+     deltas is a narrative and this is an orientation aid. Held in a ref rather than derived,
+     since the PREVIOUS population is not recoverable from the current spec. */
+  const [openGroups, setOpenGroups] = React.useState({});
+  const [lastEdit, setLastEdit] = React.useState(null);
+  const keptRef = React.useRef(null);
+  const specRef = React.useRef(null);
+  React.useEffect(() => {
+    if (!result) return;
+    const key = JSON.stringify(cohort);
+    if (specRef.current !== null && specRef.current !== key && keptRef.current !== null
+        && keptRef.current !== result.kept) {
+      setLastEdit({ from: keptRef.current, to: result.kept });
+    }
+    specRef.current = key;
+    keptRef.current = result.kept;
+  }, [cohort, result]);
+
+  /* THE EDIT, NAMED, FOR THE DECK'S FOOT. The condition strip prints the population move on its
+     own -- 964 → 847 -- and the foot needs the same move WITH the name of what moved it, since
+     a reading aid that says only "847" is an aid to nothing. Null until the reader has actually
+     changed something: WhatChanged renders nothing without an edit, which is the correct first
+     state rather than a block explaining that nothing has happened yet. */
+  const whatChanged = React.useMemo(() => {
+    if (!lastEdit || lastEdit.from === null || lastEdit.to === null) return null;
+    const cond = conditionsOf(cohort).find((x) => x.key === lastChanged);
+    return {
+      edit: `${cond ? cond.label : "THE COHORT"} · `
+        + `${lastEdit.from.toLocaleString()} → ${lastEdit.to.toLocaleString()} storms`,
+    };
+  }, [lastEdit, cohort, lastChanged]);
+
   const [envLoading, setEnvLoading] = React.useState(false);
   const [envEpoch, setEnvEpoch] = React.useState(0);
   const envCov = React.useMemo(
@@ -464,6 +526,57 @@ export function Atlas() {
 
   const storm = selected === null ? null : archive.storm(selected);
 
+  /* THE PLATE, DEFINED ONCE AND RENDERED BY BOTH SHELLS.
+   *
+   * Two shells exist during the integration and the map is the largest thing they share. Copied
+   * into each, its twenty-odd props would be two things to keep in step for as long as the
+   * transition lasts -- and a prop that drifted would change what the map DRAWS on one shell
+   * only, which is the kind of difference that survives a screenshot comparison. One definition,
+   * two mount points. */
+  const plate = (
+    <AtlasMap
+      archive={archive} world={world} coast={coast} rows={contextRows} emphasis={emphasis}
+      selected={selected} home={home}
+      onSelect={selectStorm} onProbe={onProbe} probe={cohort.where}
+      replayMs={selected !== null && cursorMs !== null ? cursorMs : undefined}
+      colorBy={layers.colorBy} dimPopulation={selected !== null}
+      softenEmphasis={showPathway}
+      showGenesis={layers.genesis} showLandfalls={layers.landfalls}
+      showPathway={showPathway} pathway={pathway}
+      showGenesisDensity={showGenesisDensity} genesisDensity={genesisGrid}
+      mode={mode} timeline={timeline} replayCursorMin={replayCursorMin}
+      pathwayStep={2.0} onViewChange={setView}
+      kept={contextRows ? contextRows.length : result.kept}
+      lifted={emphasis ? emphasis.length : 0}
+      selectedCount={selected === null ? 0 : 1}
+      /* ONE CLAUSE, NOT TWO. The foot band's measured budget -- scale bar, projection,
+         coastline, coordinates -- was derived before this line existed, and a 68-character
+         hint pushed the COASTLINE statement out at 1920. That statement is the band's one
+         epistemic claim (which geometry is authoritative); an instruction is the most
+         recoverable thing on the band, because the gesture works whether or not the words
+         are there. So the hint is short, and it is also the first casualty in the container
+         ladder -- see atlas.css. */
+      hint={mode === "explore" && conditionsOf(cohort).length && selected === null
+        ? (cohort.where ? "CLICK OPEN WATER TO MOVE THE PROBE"
+          : "CLICK OPEN WATER TO ADD A LOCATION CONDITION")
+        : undefined}
+    >
+      {/* THE INVITATION IS FOR AN UNQUERIED MAP, AND ONLY FOR ONE.
+          It was gated on `!cohort.where` alone, so an analyst who built a cohort entirely
+          from chips -- Cat 3+, since 1971, August and September -- kept a full-size banner
+          reading "CLICK ANY OCEAN POINT" parked over their own data for as long as they
+          worked. The condition is now "has this reader asked anything at all": with no
+          conditions the plate is a blank invitation and the banner is the only instruction
+          on the surface; with any condition it becomes the compact line in the caption
+          band. No tutorial, no dismissal to remember, and nothing that has to be earned --
+          the two states are just the two things that are true. */}
+      {mode === "explore" && !conditionsOf(cohort).length && selected === null
+        ? <Invitation /> : null}
+      <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
+        showGenesisDensity={showGenesisDensity} />
+    </AtlasMap>
+  );
+
   /* THE LEDGER IS A SURFACE, NOT A PANEL. It replaces the rail, stage and panel rather than
      opening beside them, because a page that answers "is any of this any good" while the thing
      being judged is still on screen invites the reader to skim it. The header stays: the
@@ -493,117 +606,102 @@ export function Atlas() {
     );
   }
 
+
+  /* ── THE STACKED SHELL ───────────────────────────────────────────────────────────────────
+   *
+   * FIVE ROWS, NO SIDE RAILS, ONE DOCKED INSPECTOR. The three-column shell spent a fifth of the
+   * width on a builder nobody edits continuously and another fifth on a panel that had to
+   * scroll to answer, and the plate -- the only element whose job is to be large -- took what
+   * was left. Stacked, the plate spans the shell and the answer is a table with every outcome
+   * domain on one axis.
+   *
+   * ROW HEIGHTS ARE FIXED AND THE PLATE IS THE ONLY ELASTIC ONE. The table is never squeezed to
+   * give the map height: selecting a storm takes WIDTH from the plate for the dock, never height
+   * from the evidence. That is the rule the whole arrangement rests on, because the failure it
+   * prevents -- an answer that shrinks when a reader asks about one storm -- is invisible until
+   * the moment it matters.
+   *
+   * This is the only shell. The three-column one, its rail, its panel and the temporary flag
+   * that let both exist during the transition were removed together, once the new surface had
+   * been proven against the real states and check-atlas-dom had passed against both. */
+  /* The subject's own verdicts, derived from fields the pack already holds. Membership comes
+     from the bridge, which is the one place it is decided. */
+  const subject = storm ? {
+    id: storm.storm_id,
+    name: storm.name,
+    inCohort: !!(bridge && bridge.contribution && bridge.contribution.isMember),
+    reached: subjectVerdicts(storm),
+  } : null;
+
   return (
-    <div data-surface="tactical" data-view="tactical" data-atlas className="atlas-shell" style={{
-      position: "fixed", inset: 0,
-      background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
-    }}>
-      <Header archive={archive} onProvenance={() => setProvOpen(true)}
+    <div data-surface="tactical" data-view="tactical" data-atlas data-shell={shell}
+      className="atlas-shell atlas-stacked" style={{
+        position: "fixed", inset: 0,
+        background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
+      }}>
+      <IdentityStrip archive={archive} onProvenance={() => setProvOpen(true)}
         onLedger={() => openLedger(null)} />
 
-      <div className="atlas-rail" style={{ overflowY: "auto",
-        borderRight: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
-        <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
-        <CohortBuilder archive={archive} cohort={cohort}
-          setCohort={(f) => setCohort(normalise(f))}
-          result={result} preview={preview}
-          layers={layers} setLayers={setLayers} bounds={bounds}
-          mode={mode} setMode={setMode}
-          showPathway={showPathway} setShowPathway={setShowPathway}
-          showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
-          timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
-          envCoverage={envCov}
-          onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
-      </div>
+      {/* THE METHODOLOGY NOTICE. It lived in the rail, and the rail is gone -- but the thing
+          it says is not a rail concern: a URL written under one methodology and opened under
+          another is describing a different question than the one it names, and the reader has
+          to be told before they read the answer. It sits with the question for that reason. */}
+      <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
 
-      <div className="atlas-stage" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
-        <AtlasMap
-          archive={archive} world={world} coast={coast} rows={contextRows} emphasis={emphasis}
-          selected={selected} home={home}
-          onSelect={selectStorm} onProbe={onProbe} probe={cohort.where}
-          replayMs={selected !== null && cursorMs !== null ? cursorMs : undefined}
-          colorBy={layers.colorBy} dimPopulation={selected !== null}
-          softenEmphasis={showPathway}
-          showGenesis={layers.genesis} showLandfalls={layers.landfalls}
-          showPathway={showPathway} pathway={pathway}
-          showGenesisDensity={showGenesisDensity} genesisDensity={genesisGrid}
-          mode={mode} timeline={timeline} replayCursorMin={replayCursorMin}
-          pathwayStep={2.0} onViewChange={setView}
-          kept={contextRows ? contextRows.length : result.kept}
-          lifted={emphasis ? emphasis.length : 0}
-          selectedCount={selected === null ? 0 : 1}
-          /* ONE CLAUSE, NOT TWO. The foot band's measured budget -- scale bar, projection,
-             coastline, coordinates -- was derived before this line existed, and a 68-character
-             hint pushed the COASTLINE statement out at 1920. That statement is the band's one
-             epistemic claim (which geometry is authoritative); an instruction is the most
-             recoverable thing on the band, because the gesture works whether or not the words
-             are there. So the hint is short, and it is also the first casualty in the container
-             ladder -- see atlas.css. */
-          hint={mode === "explore" && conditionsOf(cohort).length && selected === null
-            ? (cohort.where ? "CLICK OPEN WATER TO MOVE THE PROBE"
-              : "CLICK OPEN WATER TO ADD A LOCATION CONDITION")
-            : undefined}
-        >
-          {/* THE INVITATION IS FOR AN UNQUERIED MAP, AND ONLY FOR ONE.
-              It was gated on `!cohort.where` alone, so an analyst who built a cohort entirely
-              from chips -- Cat 3+, since 1971, August and September -- kept a full-size banner
-              reading "CLICK ANY OCEAN POINT" parked over their own data for as long as they
-              worked. The condition is now "has this reader asked anything at all": with no
-              conditions the plate is a blank invitation and the banner is the only instruction
-              on the surface; with any condition it becomes the compact line in the caption
-              band. No tutorial, no dismissal to remember, and nothing that has to be earned --
-              the two states are just the two things that are true. */}
-          {mode === "explore" && !conditionsOf(cohort).length && selected === null
-            ? <Invitation /> : null}
-          <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
-            showGenesisDensity={showGenesisDensity} />
-        </AtlasMap>
-      </div>
+      <QuestionLine question={sentence} kept={result.kept}
+        total={archive.manifest.counts.storms} />
 
-      <div className="atlas-panel" style={{ overflowY: "auto",
-        borderLeft: "1px solid var(--border-dim)", background: "var(--surface-card)" }}>
+      <ConditionStrip conditions={conditionsOf(cohort)} lastEdit={lastEdit}
+        onEdit={(zone) => setSheetZone(zone)}
+        onClear={(key) => setCohort(clearCondition(cohort, key))} />
+
+      {/* THE PLATE ROW. The dock takes width from the plate and nothing else. */}
+      <div className="atlas-plate-row">
+        <div className="atlas-stage" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
+          {plate}
+        </div>
         {storm ? (
-          <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
-            onReplay={() => setPlaying((v) => !v)} replaying={playing}
-            spec={stormCitation} specUrl={scenarioURL({ withStorm: true })}
-            bridge={bridge} cohortSentence={sentence} result={result}
-            onBridge={() => onBridge(selected)}
-            /* THE REPLAY GUARD. A cohort is genesis-conditioned; the transport can be parked
-               part-way along this storm's track. Read together those say "here is what happens
-               next from here", which is a forecast claim the archive does not make and this
-               feature must not imply. The panel is told the cursor is live and states the
-               distinction rather than hiding the bridge.
-               BOTH TRANSPORTS COUNT. This panel renders whenever a storm is selected, including
-               in replay mode -- where the ARCHIVE transport is the one on screen and `cursorMs`
-               stays null. Gated on the storm transport alone, a reader who parked the archive
-               clock mid-track and then selected the storm under the cursor got the bridge with
-               no guard at all, which is the exact arrangement the guard exists for. */
-            cursorLive={cursorMs !== null || playing
-              || (mode === "replay" && replayCursorMin !== null)} />
-        ) : mode === "replay" ? (
-          <ReplayNote timeline={timeline} result={result} />
-        ) : (
-          /* THE ANSWER IS PUBLISHED FOR ANY COHORT -- INCLUDING THE ONE WITH NO CONDITIONS.
-             Before 3.3 this panel answered a click on open water and nothing else, so narrowing
-             to "Cat 3+, since 1971, Aug-Sep" produced a map and no statistics at all. That was
-             fixed by gating on `conditionsOf(cohort).length`, which left one cohort still
-             unanswerable: the whole archive. And that is the one every other panel SUBTRACTS
-             FROM -- "the same cohort without the location condition · 3,885 storms" is quoted
-             on every comparison on the surface, and a reader who wanted to see what those 3,885
-             storms actually did could not, because asking for them by removing every condition
-             replaced the answer with the introduction.
-             The introduction is not lost; it is the lede above the answer, which is where an
-             unqueried surface should put an invitation anyway. */
-          <CohortPanel spec={cohort} result={result} sentence={sentence}
-            intro={conditionsOf(cohort).length ? null : <Introduction archive={archive} />}
-            citation={citation} citationUrl={scenarioURL()}
-            peak={peakOf(pathway)} pathway={pathway} onSelectStorm={selectStorm}
-            pathwayOn={showPathway} onShowPathway={setShowPathway}
-            comparison={comparison} conditions={conditionsOf(cohort)}
-            onBaseline={setBaselinePin}
-            archive={archive} envCoverage={envCov} envLens={envLens}
-            envLoading={envLoading} onLoadEnv={loadEnv} onEvidence={openLedger} />
-        )}
+          <div className="atlas-dock" data-inspector-dock>
+            <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
+              onReplay={() => setPlaying((v) => !v)} replaying={playing}
+              spec={stormCitation} specUrl={scenarioURL({ withStorm: true })}
+              bridge={bridge} cohortSentence={sentence} result={result}
+              onBridge={() => onBridge(selected)}
+              cursorLive={cursorMs !== null || playing
+                || (mode === "replay" && replayCursorMin !== null)} />
+          </div>
+        ) : null}
+      </div>
+
+      {/* THE EVIDENCE, AS ONE TABLE. Fixed height; rows drop at a breakpoint, never shrink. */}
+      <div className="atlas-evidence" data-evidence-row>
+        <EvidenceDeck result={result} comparison={comparison} subject={subject}
+          onEvidence={openLedger}
+          /* THE LADDER, CUMULATIVELY. Each step keeps every step above it: at 1200 the duration
+             pair AND the interval are folded, at 1000 the non-intensity groups are folded on
+             top of both. One control in the head restores the columns; one on each group row
+             restores its rows, and both name what they hold. */
+          foldTiming={vw < 1440} foldInterval={vw < 1280} timingOpen={timingOpen}
+          onToggleTiming={() => setTimingOpen((v) => !v)}
+          collapseGroups={vw < 1180} openGroups={openGroups}
+          onToggleGroup={(k) => setOpenGroups((m) => ({ ...m, [k]: !m[k] }))}
+          foldLandfall={vw < 1440} landfallOpen={landfallOpen}
+          onToggleLandfall={() => setLandfallOpen((v) => !v)}
+          /* THE COMPARISON'S IDENTITY AND ITS CONTROL, WHICH THE DECK'S COLUMN CANNOT CARRY.
+             The VS ARCHIVE cell holds one signed figure per row; what the baseline IS, how it
+             relates to this cohort, and which condition a reader would rather hold out are
+             facts about the whole table and live in its foot. */
+          conditions={conditionsOf(cohort)} onBaseline={setBaselinePin}
+          whatChanged={whatChanged}
+          citation={citation} citationUrl={scenarioURL()}
+          replayNote={mode === "replay"
+            ? <ReplayNote timeline={timeline} result={result} /> : null}
+          /* The pathway disclosure is always present, not gated on the layer being on:
+             it is the sentence that stops a shaded map being read as a forecast cone, and a
+             reader who turns the layer on should not have to also discover the caveat. */
+          spec={cohort} pathway
+          environment={<EnvLens archive={archive} coverage={envCov} lens={envLens}
+            loading={envLoading} onLoad={loadEnv} />} />
       </div>
 
       <div className="atlas-transport">
@@ -616,6 +714,30 @@ export function Atlas() {
         ) : null}
       </div>
 
+      {/* THE BUILDER, SUMMONED. Same component, same state, same costs -- it is the same query
+          surface the rail held, moved behind the zone label that opens it. */}
+      {sheetZone ? (
+        <div className="at-sheet" data-builder-sheet role="dialog" aria-label="edit conditions">
+          <div className="at-sheet-hd">
+            <span>EDIT CONDITIONS</span>
+            <button type="button" className="at-sheet-x" data-sheet-close
+              onClick={() => setSheetZone(null)} aria-label="close">×</button>
+          </div>
+          <div className="at-sheet-body">
+            <CohortBuilder archive={archive} cohort={cohort}
+              setCohort={(f) => setCohort(normalise(f))}
+              result={result} preview={preview}
+              layers={layers} setLayers={setLayers} bounds={bounds}
+              mode={mode} setMode={setMode}
+              showPathway={showPathway} setShowPathway={setShowPathway}
+              showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
+              timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
+              envCoverage={envCov}
+              onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
+          </div>
+        </div>
+      ) : null}
+
       <React.Suspense fallback={null}>
         {provOpen ? (
           <ProvenanceDrawer archive={archive} coast={coast} open={provOpen}
@@ -625,6 +747,7 @@ export function Atlas() {
     </div>
   );
 }
+
 
 /* THE OPENING VIEW.
  *
@@ -927,92 +1050,57 @@ function Legend({ colorBy, showPathway, showGenesisDensity, probe }) {
 const CAT_HEX = { ts: "#7fb2e6", cat1: "#38bdf8", cat2: "#fbbf24", cat3: "#f59e0b",
   cat4: "#ef4444", cat5: "#8b5cf6" };
 
-function Introduction({ archive }) {
-  const m = archive.manifest;
-  return (
-    <div style={{ padding: "var(--sp-6)" }}>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-body)",
-        color: "var(--text-1)", lineHeight: "var(--lh-body)" }}>
-        Every line on this map is a storm that happened.
-      </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
-        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: "var(--sp-5)" }}>
-        <p style={{ margin: "0 0 var(--sp-5)" }}>
-          <strong style={{ color: "var(--text-1)" }}>Click any point on the ocean</strong> to ask
-          what formed near there and where it went.{" "}
-          <strong style={{ color: "var(--text-1)" }}>Click a genesis point</strong> — one of the
-          cyan dots — to follow that storm from its first fix to its last.
-        </p>
-        <p style={{ margin: "0 0 var(--sp-5)" }}>
-          Tracks themselves are not click targets. At this zoom forty of them lie under any
-          given pixel, so a click on one would select a storm essentially at random. The genesis
-          points are discrete, and so is the choice.
-        </p>
-        <p style={{ margin: "0 0 var(--sp-5)" }}>
-          {claimText("atlas.subject")} {m.counts.storms.toLocaleString()} storms and{" "}
-          {m.counts.track_points.toLocaleString()} observed positions, with every threshold
-          crossing, every coastline crossing and every gap the archive recorded about itself.
-        </p>
-        <p style={{ margin: 0 }}>
-          Where the archive cannot answer, it says so. That is the point.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* What the run is doing, and what it is doing to time. The skip is a real distortion of pace and
-   the reader is told about it before it happens, not only when it flashes past on the transport. */
+/* WHAT THE RUN IS DOING TO TIME, AND WHY IT HAS TO BE SAID BEFORE IT HAPPENS.
+ *
+ * The clock skips off-season stretches. That is a real distortion of pace -- a reader watching
+ * 174 years unfold in a minute is watching 43 of them -- and a jump announced only as it flashes
+ * past on a 40px transport is a jump nobody reads. So the whole statement is made once, where
+ * the reader enters replay, and the transport's announcement is the reminder rather than the
+ * disclosure.
+ *
+ * IT LIVED IN THE PANEL AND THE PANEL IS GONE. Rebuilt on the deck's own classes rather than
+ * ported with its inline styles: the panel's `--warn` amber was written for a near-black chrome
+ * and this surface is paper. The words are unchanged. */
 function ReplayNote({ timeline, result }) {
   const tl = timeline;
-  const quiet = tl && tl.spanMin ? (tl.spanMin - tl.activeMin) / tl.spanMin : null;
+  if (!tl || !tl.n) {
+    return (
+      <p className="at-foot-line">
+        The current filter selects no storms, so there is nothing to replay.
+      </p>
+    );
+  }
   return (
-    <div style={{ padding: "var(--sp-6)" }}>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-body)",
-        color: "var(--text-1)", lineHeight: "var(--lh-body)" }}>
-        The record, in the order it happened.
-      </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
-        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: "var(--sp-5)" }}>
-        {!tl || !tl.n ? (
-          <p style={{ margin: 0 }}>
-            The current filter selects no storms, so there is nothing to replay.
-          </p>
-        ) : (
-          <>
-            <p style={{ margin: "0 0 var(--sp-5)" }}>
-              <strong style={{ color: "var(--text-1)" }}>{tl.n.toLocaleString()} storms</strong>{" "}
-              between {fmtYear(tl.firstT)} and {fmtYear(tl.lastT)}. Tracks stay on the map as they
-              are revealed, so what builds up is the shape of the whole record rather than one
-              storm at a time.
-            </p>
-            {/* Stated as years rather than as a percentage, deliberately: this build renders no
-                percentage it computed itself, and "43.5 of 174.5 years" is the more concrete
-                statement anyway. */}
-            <p style={{ margin: "0 0 var(--sp-5)" }}>
-              <strong style={{ color: "var(--warn)" }}>The clock skips quiet stretches.</strong>{" "}
-              {quiet !== null
-                ? <>Only {yearsOf(tl.activeMin)} of those {yearsOf(tl.spanMin)} calendar years
-                    have a storm anywhere on the map</>
-                : <>Much of the span has no storm active</>} — the rest is off-season, repeated.
-              Those gaps are jumped and every jump is announced on the transport. Nothing else is
-              changed: every storm appears, once, in order, over its whole observed span.
-            </p>
-            {result && result.excluded && result.excluded.noGenesis ? (
-              <p style={{ margin: "0 0 var(--sp-5)" }}>
-                {result.excluded.noGenesis} storms are not in this run: the archive holds no
-                genesis point for them, so the filter cannot place them.
-              </p>
-            ) : null}
-            <p style={{ margin: "0 0 var(--sp-5)" }}>
-              The filters on the left drive the run. Narrow to Cat 3+ and only the majors unfold;
-              narrow to a landfall region and only the storms that reached it do.
-            </p>
-            <p style={{ margin: 0, color: "var(--text-2)" }}>{claimText("atlas.replay")}</p>
-          </>
-        )}
-      </div>
-    </div>
+    <>
+      <p className="at-foot-line">
+        <strong>{tl.n.toLocaleString()} storms</strong> between {fmtYear(tl.firstT)} and{" "}
+        {fmtYear(tl.lastT)}. Tracks stay on the map as they are revealed, so what builds up is
+        the shape of the whole record rather than one storm at a time.
+      </p>
+      {/* Stated as years rather than as a percentage, deliberately: this build renders no
+          percentage it computed itself, and "43.5 of 174.5 years" is the more concrete
+          statement anyway. */}
+      <p className="at-foot-line">
+        <strong className="at-foot-flag">The clock skips quiet stretches.</strong>{" "}
+        {tl.activeMin !== null && tl.activeMin !== undefined
+          ? <>Only {yearsOf(tl.activeMin)} of those {yearsOf(tl.spanMin)} calendar years have a
+              storm anywhere on the map</>
+          : <>Much of the span has no storm active</>} — the rest is off-season, repeated.
+        Those gaps are jumped and every jump is announced on the transport. Nothing else is
+        changed: every storm appears, once, in order, over its whole observed span.
+      </p>
+      {result && result.excluded && result.excluded.noGenesis ? (
+        <p className="at-foot-line">
+          {result.excluded.noGenesis} storms are not in this run: the archive holds no genesis
+          point for them, so the filter cannot place them.
+        </p>
+      ) : null}
+      <p className="at-foot-line">
+        The conditions drive the run. Narrow to Cat 3+ and only the majors unfold; narrow to a
+        landfall region and only the storms that reached it do.
+      </p>
+      <p className="at-foot-line">{claimText("atlas.replay")}</p>
+    </>
   );
 }
 
@@ -1071,4 +1159,33 @@ function peakOf(grid) {
   let peak = 0;
   if (grid) for (const v of grid.values()) if (v > peak) peak = v;
   return peak;
+}
+
+/* REMOVING ONE CONDITION, BY THE KEY THE STRIP PRINTS.
+ *
+ * The mapping is from a CONDITION key -- what conditionsOf() names -- back to the spec fields
+ * that produced it, and the two are not one-to-one: "season" is a range and clears two fields.
+ * Written as data rather than a switch so the strip and the spec cannot drift about what a chip
+ * removes, and so an unrecognised key is a no-op rather than a silent reset of the whole cohort.
+ *
+ * EVERY RESET VALUE IS EMPTY_COHORT'S OWN. Writing `false` or `null` here by hand would be a
+ * second declaration of the defaults, and the first time the two disagreed the strip would
+ * "clear" a condition into a state the builder never produces. */
+export function clearCondition(spec, key) {
+  const FIELDS = {
+    where: ["where"],
+    months: ["months"],
+    season: ["seasonFrom", "seasonTo"],
+    basins: ["basins"],
+    subbasinsEntered: ["subbasinsEntered"],
+    namedOnly: ["namedOnly"],
+    includeProvisional: ["includeProvisional"],
+    intensity: ["intensity"],
+    landfall: ["landfall"],
+  };
+  const fields = FIELDS[key];
+  if (!fields) return spec;
+  const next = { ...spec };
+  for (const f of fields) next[f] = EMPTY_COHORT[f];
+  return normalise(next);
 }

@@ -33,8 +33,8 @@
 
 import React from "react";
 import { INTENSITY_FILTERS, LANDFALL_FILTERS } from "../engine/query.js";
-import { CATEGORY_COLOR } from "../render/palette.js";
-import { Chip, Head, MONO, Row, claimText } from "./kit.jsx";
+
+import { Chip, Head, MONO, Row, claimText, CATEGORY_INK } from "./kit.jsx";
 import { Refusal } from "./refusal.jsx";
 
 const MONTHS = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
@@ -370,7 +370,7 @@ export function CohortBuilder({
         {INTENSITY_FILTERS.map((x) => (
           <Chip key={x.key} chipKey={`intensity-${x.key}`} active={s.intensity === x.key}
             onClick={() => set({ intensity: x.key })}
-            tone={x.key === "all" ? undefined : CATEGORY_COLOR[x.key === "ts" ? "ts" : x.key]}
+            tone={x.key === "all" ? undefined : CATEGORY_INK[x.key === "ts" ? "ts" : x.key]}
             title={x.key === "all" ? "No intensity condition."
               : `Conditioning on ${x.label} means every intensity row at or below ${x.key} `
                 + "stops being an outcome of this cohort and reports its count only."}>

@@ -282,6 +282,136 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
   ok("the light shell declares all six text and signal inks",
      Object.keys(inks).length === 6, `found ${Object.keys(inks).length}: ${Object.keys(inks).join(", ")}`);
 
+  /* THE LIGHT SHELL'S SEMANTIC INKS, ON THE GROUND THEY LAND ON.
+   *
+   * These are not the paper text tiers -- they are the status colours: the SUFFICIENT / BELOW
+   * SAMPLE line, the flag, the accent. They are set at the label token, 10px, which is normal
+   * text for contrast purposes and needs 4.5:1.
+   *
+   * MEASURED RATHER THAN INHERITED. The dark shell's green and red do not survive the swap:
+   * green-600 is 2.67:1 on paper and red-600 is 3.92:1, both below AA, and both would have read
+   * as perfectly ordinary status colours to anyone looking at them. The light shell takes
+   * green-800 and red-700 instead. Asserted here so the next edit to this block is measured too. */
+  const lightBlock = css.slice(css.indexOf('[data-atlas]:not([data-shell="dark"]){'),
+                               css.indexOf("color-scheme:light"));
+  const semantic = Object.fromEntries(
+    [...lightBlock.matchAll(/--(pos|neg|special)\s*:\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1].toLowerCase(), m[2].toLowerCase()]),
+  );
+  ok("the light shell declares its own status inks", Object.keys(semantic).length === 3,
+     JSON.stringify(semantic));
+  for (const [name, ink] of Object.entries(semantic)) {
+    const worst = Math.min(...Object.values(PAPER_GROUNDS).map((g) => contrast(ink, g)));
+    ok(`--${name} clears AA as a status word on paper`, worst >= AA_BODY,
+       `${ink} measures ${worst.toFixed(2)}:1 on its worst ground`);
+  }
+
+  /* EVERY DARK-SHELL COLOUR TOKEN IS EITHER RE-DECLARED FOR PAPER OR EXEMPT BY NAME.
+   *
+   * THIS RULE EXISTS BECAUSE ONE TOKEN WAS MISSED AND NOTHING NOTICED. `--warn` -- an amber
+   * written for a near-black chrome -- was declared once in the base block and never re-declared
+   * for the light shell, so it inherited straight through: #f0b429 measures 1.68:1 on
+   * --at-paper against an AA bar of 4.5. It is not decoration. It is the ink on the methodology
+   * notice, the builder's outcome-side warnings, the environment lens's era boundary and the
+   * inspector's replay guard, so the four places the archive raises its hand were the four
+   * hardest things on the light surface to read -- and every per-token contrast check above
+   * passed, because none of them was looking at a token the light shell never mentions.
+   *
+   * Checking the tokens the light shell DOES declare can only ever find the ones somebody
+   * remembered. So the assertion is inverted: enumerate the base block's colour tokens and
+   * require each to appear in the light block, with a stated reason for any that must not. */
+  const baseBlock = (() => {
+    const i = css.indexOf("[data-atlas]{");
+    let depth = 0;
+    for (let k = i + "[data-atlas]".length; k < css.length; k += 1) {
+      if (css[k] === "{") depth += 1;
+      else if (css[k] === "}") { depth -= 1; if (depth === 0) return css.slice(i, k); }
+    }
+    return "";
+  })();
+  /* THE PLATE'S OWN INK, WHICH MUST NOT BE RE-DECLARED: --stage is the cartographic ground and
+     the whole light shell is built on it staying exactly where it is. The assertion above pins
+     that it appears once; this one records WHY it is absent from the light table. And the
+     `--at-*` names are the paper palette's own definitions -- they are what the light block
+     resolves TO, so requiring them inside it would be circular. */
+  const SHELL_EXEMPT = new Map([["--stage", "the cartographic plate is dark in both shells"]]);
+  const baseColour = [...baseBlock.matchAll(/(--[a-z0-9-]+)\s*:\s*(#[0-9a-f]{3,8}\b|rgba?\()/gi)]
+    .map((m) => m[1].toLowerCase())
+    .filter((n) => !n.startsWith("--at-"));
+  const lightDeclares = new Set(
+    [...lightBlock.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1].toLowerCase()),
+  );
+  const missed = [...new Set(baseColour)].filter(
+    (n) => !lightDeclares.has(n) && !SHELL_EXEMPT.has(n));
+  ok("every dark-shell colour token is re-declared for paper or exempt by name",
+     missed.length === 0,
+     `${missed.join(", ")} would inherit a dark-chrome ink onto the paper shell`);
+  ok("the base block still declares the colour tokens this rule reads",
+     baseColour.length >= 15, `found only ${baseColour.length}`);
+
+  /* AND THE PLATE KEEPS THE DARK RAMP IN THE LIGHT SHELL. The stage re-declares the dark ink set
+     for its own subtree, because its furniture -- the title line, the scale bar, the coastline
+     statement, every graticule label -- inherits the surface's text tokens. Without this the
+     light shell would paint dark ink on a plate that is dark in both shells. */
+  ok("the stage re-declares the dark ink set inside the light shell",
+     /\[data-atlas\]:not\(\[data-shell="dark"\]\) \.atlas-stage\{[^}]*--t1:var\(--d-t1\)/.test(css),
+     "the plate would inherit paper inks");
+
+  /* THE APERTURE'S TWO BOUNDS, PINNED TO THE NUMBERS THEY WERE DERIVED AS.
+   *
+   * 1.421 is 1.303 (the archive's core frame, north 66N to 69N, south 16S to 24S) times 1.0905,
+   * which is half a Leaflet zoom-snap step -- the median landing rather than the best case.
+   * 3.2 is where a single East Pacific track stops being the subject of its own plate. Neither
+   * is a preference, and both are now single declarations used by one clamp -- which is exactly
+   * the shape a failing aperture gate is easiest to "fix" by widening. Pinned here so that
+   * widening a bound is a change to this file with a number in the diff. */
+  const bounds = Object.fromEntries(
+    [...css.matchAll(/--at-plate-(ar|ar-max)\s*:\s*([\d.]+)/g)].map((m) => [m[1], m[2]]),
+  );
+  ok("the aperture floor is the archive's own core frame at the median snap",
+     bounds.ar === "1.421", `--at-plate-ar is ${bounds.ar}`);
+  ok("and the ceiling is where one track stops being the subject of its plate",
+     bounds["ar-max"] === "3.2", `--at-plate-ar-max is ${bounds["ar-max"]}`);
+  ok("both bounds reach the clamp as tokens, not as literals",
+     /clamp\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)/.test(css)
+     && /calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css),
+     "the stacked shell's clamp is not reading the pinned tokens");
+
+  /* AND NO RULE MAY NAME AN INK THAT IS NOT A TOKEN.
+   *
+   * THE RULE ABOVE ENUMERATES TOKENS, WHICH IS EXACTLY WHY IT MISSED WHAT IT MISSED. A stylesheet
+   * written for one chrome and then given a second one keeps every literal it ever had, and a
+   * literal answers to no shell: `.at-masthead h2{color:#f8fbff}` put the selected storm's NAME
+   * at 1.07:1 on paper -- invisible -- while every token assertion in this file passed, because
+   * none of them was looking at a declaration that mentions no token at all. There were nineteen.
+   *
+   * So: a `color:` declaration in atlas.css must resolve through a custom property, unless the
+   * thing it paints sits ON THE CARTOGRAPHIC PLATE, which is dark in both shells and is the one
+   * place a fixed light ink is always right. Those are listed by selector, so adding one is a
+   * decision with a name on it rather than an oversight.
+   *
+   * check-light-contrast.mjs is the other half: this rule stops a literal being WRITTEN, that
+   * one measures what the browser actually resolved on every surface in both shells. Neither
+   * subsumes the other -- a token can be wrong too, and this file cannot see a JSX inline style. */
+  const ON_PLATE = [
+    "[data-atlas] .leaflet-control-zoom a:hover",   // the map's own zoom control
+    "[data-atlas] .at-invite em",                   // the invitation, drawn over the plate
+  ];
+  const literalInks = [];
+  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const sel = m[1].replace(/\/\*[\s\S]*?\*\//g, "").split("\n").pop().trim();
+    for (const d of m[2].matchAll(/(?<![-\w])color\s*:\s*(#[0-9a-f]{3,6})\b/gi)) {
+      if (ON_PLATE.includes(sel)) continue;
+      literalInks.push(`${sel} { color:${d[1]} }`);
+    }
+  }
+  ok("no rule paints text with a literal ink instead of a token",
+     literalInks.length === 0,
+     literalInks.join("\n") + "\n  a literal answers to no shell; use a token, or add the "
+     + "selector to ON_PLATE if it really is on the plate");
+  ok("the on-plate exemptions still exist to be exempt",
+     ON_PLATE.every((sel) => css.includes(sel)),
+     "an exemption names a selector that is no longer in the stylesheet");
+
   /* THE PLATE IS EXCLUDED FROM THE SHELL SWAP BY CONSTRUCTION, and that is a structural claim
      worth pinning: --stage is declared exactly once, so no later edit to a light shell can
      lighten the cartographic plate by accident. */

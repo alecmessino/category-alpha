@@ -71,6 +71,17 @@ const REFUSED_REASON = "3 storms with a known outcome < min_sample=10, so this r
   + "rather than published as a number nobody should act on.";
 
 const RESULT = {
+  /* THE COHORT'S OWN FIELDS, not just its contracts. The first version of this fixture carried
+     only the per-contract tables, and the deck rendered nothing at all once it learned to name
+     an empty pool -- `n_cases` was absent, so `!r.n_cases` was true and every row was correctly
+     replaced by the empty-pool state. The fixture was describing a cohort that could not exist.
+     These are the fields engine/cohort.js actually returns alongside the contracts. */
+  n_cases: 190,
+  kept: 190,
+  sufficient: true,
+  effective_sample_size: 190,
+  gaps: ["1,704 of 3,885 storms in this cohort are from before 1971, when the observing network "
+       + "was sparser; intensity rates above are therefore biased LOW."],
   min_sample: 10,
   landfall_note: null,
   time_to_event: { cat3: { median: 61, p25: 44, p75: 92, n: 40 } },
@@ -110,7 +121,25 @@ const COMPARISON = {
   },
   landfall: { conus: { any: { baseRate: 0.250, deltaPp: 3.9, direction: "higher", overlap: true },
     hurricane: null } },
+  /* THE PARTS THE FOOT READS, AND THE FIXTURE DID NOT HAVE THEM.
+     compareResults returns `baseline`, `changed` and `relation` alongside the per-contract
+     deltas, and the deck's foot -- which is where the whole VS ARCHIVE column is named, counted
+     and qualified -- reads all three. The fixture carried only the deltas, so the foot threw on
+     `c.baseline.n_cases` the moment it was rendered. A fixture that cannot render a block is a
+     fixture that cannot test it, so the block's own inputs are here, shaped as the engine
+     writes them. */
+  baseline: { n_cases: 653, effective_sample_size: 653.0, sufficient: true, min_sample: 40 },
+  changed: { key: "season", noun: "the season condition" },
+  relation: { note: "539 of this cohort's 539 storms are also in the baseline, so these are not "
+    + "independent estimates. Shared storms pull the two rates toward each other, which makes "
+    + "the interval comparison below weaker still — read it as a reading aid, never as a test." },
 };
+
+/* The two conditions the HOLD OUT control offers, named the way conditionsOf() names them. */
+const CONDITIONS = [
+  { key: "where", zone: "given", label: "FORMED NEAR", noun: "the location condition" },
+  { key: "season", zone: "given", label: "SEASONS", noun: "the season condition" },
+];
 
 /* KEYED BY THE HARNESS'S OWN CONTRACT KEY -- see engine/calibration.js. Writing a plausible key
    here instead ("intensity:cat5") is exactly how a fixture passes while the feature never fires,
@@ -128,10 +157,12 @@ const entry = join(dir, "entry.jsx");
 await writeFile(entry, `
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { EvidenceDeck } from ${JSON.stringify(resolve(ROOT, "docs/storm-atlas/src/ui/evidence-deck.jsx"))};
+import { EvidenceDeck, subjectVerdicts, subjectReached }
+  from ${JSON.stringify(resolve(ROOT, "docs/storm-atlas/src/ui/evidence-deck.jsx"))};
 export function render(props) {
   return renderToStaticMarkup(React.createElement(EvidenceDeck, props));
 }
+export { subjectVerdicts, subjectReached };
 `);
 const outfile = join(dir, "bundle.mjs");
 await build({
@@ -139,12 +170,19 @@ await build({
   jsx: "automatic", logLevel: "silent",
   external: ["react", "react-dom", "react-dom/server", "react/jsx-runtime"],
 });
-const { render } = await import(outfile);
+const { render, subjectVerdicts, subjectReached } = await import(outfile);
 
-const HTML_DEFAULT = render({ result: RESULT, comparison: COMPARISON, onEvidence: () => {} });
+const HTML_DEFAULT = render({ result: RESULT, comparison: COMPARISON, onEvidence: () => {},
+  conditions: CONDITIONS });
 const HTML_SUBJECT = render({ result: RESULT, comparison: COMPARISON, subject: SUBJECT,
   onEvidence: () => {} });
-const HTML_FOLDED = render({ result: RESULT, comparison: COMPARISON, foldTiming: true });
+const HTML_FOLDED = render({ result: RESULT, comparison: COMPARISON, foldTiming: true,
+  conditions: CONDITIONS });
+/* THE NARROWEST TEMPLATE, RENDERED. Below 1280 the interval folds as well, and the fold is
+   what decides how many cells a row emits -- so the state where a row can come apart is a
+   state this gate has to build rather than one it can reason about. */
+const HTML_NARROW = render({ result: RESULT, comparison: COMPARISON, foldTiming: true,
+  foldInterval: true, conditions: CONDITIONS });
 
 /* ── the audit ────────────────────────────────────────────────────────────────────────────
  *
@@ -201,6 +239,17 @@ const AUDIT = () => {
       }
     }
 
+    /* THE FIFTH RULE, IN THE SUBJECT COLUMN. A conditioned-on row must not present the selected
+       storm's verdict: every member reached that contract by construction, so REACHED there is
+       vacuous and reads as evidence. */
+    if (refusalBlock && refusalBlock.getAttribute("data-refusal") === "CONDITIONED_ON") {
+      const vs = row.querySelector(".at-dc-vs");
+      if (vs && /(REACHED|IS THE COUNT|\bNO\b)/.test(vs.textContent || "")) {
+        bad.push(`${name}: conditioned on, yet the subject column publishes a verdict `
+          + `("${(vs.textContent || "").trim()}")`);
+      }
+    }
+
     /* The bar never carries a number. */
     const bar = row.querySelector(".at-dc-bar");
     if (bar && /\d/.test(bar.textContent || "")) bad.push(`${name}: the bar carries a number`);
@@ -227,10 +276,28 @@ const AUDIT = () => {
     if (t && !WORDS.has(t)) bad.push(`a status cell prints a word outside the vocabulary: "${t}"`);
   }
 
-  /* A refusal statement is bounded — the argument lives behind SEE THE EVIDENCE. */
-  for (const el of document.querySelectorAll(".at-say-text")) {
-    const n = (el.textContent || "").trim().split(/\s+/).length;
-    if (n > 19) bad.push(`a refusal statement runs to ${n} words`);
+  /* NO SENTENCE IS SAID TWICE, WHICH IS WHAT THE WORD BOUND WAS ACTUALLY PROTECTING.
+   *
+   * The specification bounds refusal copy to eighteen words. Enforced as a word count it breaks
+   * a rule that outranks it -- a refused rate prints the archive's reason VERBATIM -- because an
+   * OUT OF SCOPE reason truncates precisely before the clause distinguishing "these events do
+   * not exist" from "these events exist somewhere you cannot reach".
+   *
+   * The problem the bound exists for is REPETITION: below the sample gate twelve contracts
+   * refuse on one sentence. So that is what is asserted. A reason shared by more than one row is
+   * hoisted beneath its group and stated once; a reason unique to its row prints in full. Either
+   * way no row repeats another, and nothing is truncated. */
+  const rowStatements = [];
+  for (const row of document.querySelectorAll("[data-outcome]")) {
+    for (const el of row.querySelectorAll(".at-say-text")) {
+      const t = (el.textContent || "").trim();
+      if (t) rowStatements.push(t);
+    }
+  }
+  const dupes = rowStatements.filter((t, i) => rowStatements.indexOf(t) !== i);
+  if (dupes.length) {
+    bad.push(`a refusal sentence is repeated across rows instead of hoisted: `
+      + `"${dupes[0].slice(0, 60)}…" (${dupes.length} repeats)`);
   }
   return bad;
 };
@@ -254,6 +321,41 @@ console.log("[deck] the rendered deck, per row");
 {
   const bad = await auditOf(HTML_FOLDED);
   ok("and so does the deck with the timing columns folded", bad.length === 0, bad.join("\n"));
+}
+{
+  const bad = await auditOf(HTML_NARROW);
+  ok("and so does the deck with the interval folded as well", bad.length === 0, bad.join("\n"));
+}
+
+/* THE FOOT NAMES WHAT THE VS ARCHIVE COLUMN IS AGAINST, AND SAYS WHAT IT IS NOT.
+   The column prints one signed figure per row; everything that makes those figures readable --
+   which cohort is the baseline, how big it is, and the fact that it CONTAINS this one, so the
+   two rates are not independent estimates -- is a fact about the whole table and is stated once
+   beneath it. Asserted from the rendered markup rather than from the component, because the
+   failure this is written against is a block that quietly stops being rendered. */
+console.log("\n[deck] the table's foot names the baseline and refuses to be read as a test");
+{
+  await page.setContent(`<!doctype html><html><body>${HTML_DEFAULT}</body></html>`);
+  const foot = await page.evaluate(() => {
+    const b = document.querySelector("[data-baseline]");
+    return {
+      present: !!b,
+      text: b ? b.textContent : "",
+      holdOut: [...document.querySelectorAll("[data-chip^='baseline-']")]
+        .map((e) => e.getAttribute("data-chip")),
+    };
+  });
+  ok("the baseline block is rendered", foot.present);
+  ok("and it names the condition it holds out",
+     /the same cohort without/.test(foot.text) && /season condition/.test(foot.text), foot.text.slice(0, 120));
+  ok("with its own denominator and effective sample",
+     /653 storms · effective sample 653\.0/.test(foot.text), foot.text.slice(0, 200));
+  ok("it publishes how the two populations overlap",
+     /are also in the baseline/.test(foot.text) && /not independent estimates/.test(foot.text));
+  ok("and refuses to be read as a test", /never as a test/.test(foot.text));
+  ok("every applied condition can be the one held out",
+     JSON.stringify(foot.holdOut) === '["baseline-where","baseline-season"]',
+     JSON.stringify(foot.holdOut));
 }
 
 /* The states that must actually be present, so the audit above is not passing over an empty
@@ -309,6 +411,55 @@ console.log("\n[deck] and every state the fixtures were built to reach is on the
   }
 }
 
+/* ── THE SUBJECT'S VERDICTS ───────────────────────────────────────────────────────────────
+ *
+ * The rule that matters here is the one that is easy to get wrong and impossible to see: an
+ * archive that does not know how strong a storm got must NOT produce a NO. "This storm did not
+ * reach Category 3" and "nobody recorded how strong this storm got" are different statements,
+ * and the second is not evidence for the first. A `false` default anywhere in that derivation
+ * silently converts every unrecorded storm into a failed one, on a column a reader scans.
+ */
+console.log("\n[deck] the subject's verdicts, and the three states they must keep");
+{
+  const IDA = { max_category: "cat4", landfalls: [
+    { region: "conus", hurricane_at_landfall: true },
+    { region: "mexico", hurricane_at_landfall: false },
+  ] };
+  const v = subjectVerdicts(IDA);
+  const R = (k) => subjectReached({ reached: v }, k);
+
+  ok("a Cat 4 storm reached every rung at or below it",
+     R("reaches_cat4_113kt") === true && R("reaches_cat3_96kt") === true
+       && R("reaches_ts_34kt") === true, JSON.stringify(v));
+  ok("and did not reach the rung above it", R("reaches_cat5_137kt") === false);
+  ok("a region it came ashore in reads REACHED", R("landfall_conus_any") === true);
+  ok("at hurricane strength where the archive says so", R("landfall_conus_hurricane") === true);
+  ok("and NOT at hurricane strength where it says otherwise",
+     R("landfall_mexico_hurricane") === false);
+  ok("a region it never reached is a real NO, not a slot",
+     R("landfall_hawaii_any") === false,
+     "the landfall record is known, so an untouched region is an answer");
+
+  /* THE TWO UNDECIDABLE CASES. Both must come back undefined -- the deck renders the slot. */
+  const NOPEAK = { max_category: null, landfalls: [] };
+  const w = subjectVerdicts(NOPEAK);
+  ok("an unrecorded peak leaves EVERY intensity contract undecided",
+     subjectReached({ reached: w }, "reaches_cat3_96kt") === undefined,
+     `got ${JSON.stringify(subjectReached({ reached: w }, "reaches_cat3_96kt"))} — an unrecorded `
+     + "peak has been rendered as a failed one");
+  ok("and never as a NO", subjectReached({ reached: w }, "reaches_cat3_96kt") !== false);
+
+  const NOLF = { max_category: "cat1", landfalls: undefined };
+  const x = subjectVerdicts(NOLF);
+  ok("a storm with no landfall record leaves every landfall contract undecided",
+     subjectReached({ reached: x }, "landfall_conus_any") === undefined,
+     "a missing landfall record has been rendered as 'came ashore nowhere'");
+  ok("while its intensity contracts are still answered",
+     subjectReached({ reached: x }, "reaches_cat1_64kt") === true);
+
+  ok("and a storm with no record at all yields no verdicts", subjectVerdicts(null) === null);
+}
+
 /* ── the seeded regressions ───────────────────────────────────────────────────────────────
  *
  * Each mutation breaks exactly one rule. The audit must catch every one; a rule that cannot be
@@ -355,9 +506,24 @@ if (process.argv.includes("--self-test")) {
       mutate: (h) => h.replace(/(<div class="at-deck-say" data-refusal="[A-Z_]+">).*?(<\/div>)/, "$1RATE REFUSED$2"),
     },
     {
-      name: "a refusal statement running past the bound",
-      mutate: (h) => h.replace(/(<span class="at-say-text">)/,
-        "$1" + "word ".repeat(25)),
+      name: "a conditioned-on row publishing the subject's verdict as evidence",
+      mutate: (h) => h.replace(
+        /(<span class="at-dc at-dc-vs"><span class="at-slot" title="this variable is in the query[^"]*">)—/,
+        "$1REACHED"),
+    },
+    {
+      name: "one refusal sentence repeated across rows instead of hoisted",
+      /* Copies the first row-level statement onto a second row, which is exactly what hoisting
+         exists to prevent and what a word bound would not have caught. */
+      mutate: (h) => {
+        const m = /<span class="at-say-text">([^<]{20,})<\/span>/.exec(h);
+        if (!m) return h;
+        let seen = 0;
+        return h.replace(/<span class="at-say-text">[^<]*<\/span>/g, (x) => {
+          seen += 1;
+          return seen === 2 ? `<span class="at-say-text">${m[1]}</span>` : x;
+        });
+      },
     },
   ];
 

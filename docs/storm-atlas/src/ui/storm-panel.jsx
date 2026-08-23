@@ -16,13 +16,10 @@
  */
 
 import React from "react";
-import { CATEGORY_COLOR } from "../render/palette.js";
+
 import { formatPosition } from "../engine/geo.js";
 import { regionLabel } from "../engine/cohort-language.js";
-import {
-  Capt, Drv, Figure, Head, MONO, Masthead, Note, Num, OverDenom, Refusal, Row, TextButton, Txt,
-  claimText, fmtHours, fmtUTC,
-} from "./kit.jsx";
+import { Capt, Drv, Figure, Head, MONO, Masthead, Note, Num, OverDenom, Refusal, Row, TextButton, Txt, claimText, fmtHours, fmtUTC, CATEGORY_INK } from "./kit.jsx";
 
 const CAT_LABEL = { td: "TROPICAL DEPRESSION", ts: "TROPICAL STORM", cat1: "CATEGORY 1",
   cat2: "CATEGORY 2", cat3: "CATEGORY 3", cat4: "CATEGORY 4", cat5: "CATEGORY 5" };
@@ -31,7 +28,7 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec,
   bridge, cohortSentence, result, onBridge, cursorLive }) {
   if (!storm) return null;
   const s = storm;
-  const catColor = s.max_category ? CATEGORY_COLOR[s.max_category] : "var(--t2)";
+  const catColor = s.max_category ? CATEGORY_INK[s.max_category] : "var(--t2)";
   const q = s.quality;
 
   const loc = (
@@ -122,7 +119,7 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec,
           ["cat3", "CATEGORY 3 · 96 kt", s.hours_to_cat3, false],
           ["cat4", "CATEGORY 4 · 113 kt", s.hours_to_cat4, true],
           ["cat5", "CATEGORY 5 · 137 kt", s.hours_to_cat5, true]].map(([k, label, v, derived]) => (
-          <Row key={k} k={label} dim={v === null} tone={v === null ? undefined : CATEGORY_COLOR[k]}
+          <Row key={k} k={label} dim={v === null}
             title={derived
               ? "Derived by the Atlas pack by replaying the archive's own crossing rule; the "
                 + "archive stores no elapsed-hours column for this threshold."

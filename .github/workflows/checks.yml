@@ -418,6 +418,59 @@ jobs:
       - name: Verify the storm-to-cohort bridge is never reachable only by scrolling
         run: node scripts/check-inspector-bridge.mjs --self-test --require-browser
 
+      # THE PLATE'S APERTURE, BOUNDED AT BOTH ENDS. The two bounds fail at OPPOSITE viewports:
+      # the 1.421 floor on a tall workstation, where the archive's core frame cannot fill the
+      # plate and the fit opens latitude holding no storms; the 3.2 ceiling on a wide, short one,
+      # where a single East Pacific track stops being the subject of its own plate. The second is
+      # the case nobody develops at, and the specification says why it matters -- "a wide monitor
+      # will QUIETLY reintroduce a panoramic plate". Nothing about a 4:1 plate looks broken.
+      #
+      # So the aspect is measured in the real page at ten viewports including 2560x1080 and
+      # 1440x2000, plus the docked and transport-present states, and blank plane is asserted with
+      # it -- because the easy way to hold an aspect bound is to cap the instrument and centre it,
+      # which is what the previous shell did and what the 0% acceptance test exists to forbid.
+      - name: Verify the plate's aperture stays inside its bounds
+        run: node scripts/check-plate-aperture.mjs --self-test --require-browser
+
+      # THE REAL-STATE MATRIX. Every layout bug this integration produced was invisible in the
+      # state it was introduced in and obvious two states later: the plate measured 0x0 only once
+      # it was inside a single-cell row; the rows came out shifted only once a transport existed
+      # to claim row 3; the qualification block was missing only when NOTHING refused -- which is
+      # the unqueried archive, the state a developer looks at least.
+      #
+      # So the surface is driven through twenty-two real states and the same invariants asserted
+      # in all of them. Coverage is DETECTED AND REPORTED rather than assumed: whether a cohort
+      # contains a BASE RATE ONLY contract depends on the archive and not on the query, so the
+      # harness records which refusals and statuses it actually reached and fails if any of the
+      # four refusal kinds went unvisited. A matrix that silently never reached a refusal proves
+      # nothing about refusals.
+      - name: Verify every real state holds, and 1440x900 answers five of five
+        run: node scripts/check-atlas-states.mjs --require-browser
+
+      # THE VISUAL RESPONSIVE MATRIX. The state matrix above drives many states at ONE width and
+      # asserts what must be true of the ANSWER. This one drives five states at EVERY width the
+      # ladder names and asserts what must be true of the SURFACE -- nothing clipped without a
+      # way to read it, no qualification hidden, no row whose cells fall onto two grid lines, and
+      # an inspector whose pinned bridge survives a viewport narrow enough to lift the dock off
+      # the plate row. Three of those four had already happened once in this integration.
+      #
+      # It also asserts that the ladder STEPS: the fold state is read at each width and compared
+      # with the one the specification names, so a boundary that moved shows up as the wrong
+      # column count rather than as a layout that merely still fits.
+      # EVERY WORD ON EVERY SURFACE, IN BOTH SHELLS, AGAINST THE GROUND IT ACTUALLY LANDS ON.
+      # The adherence gate enumerates the light shell's TOKEN TABLE, and that is exactly why it
+      # missed a storm name shipped at 1.07:1: the inspector's masthead used a literal written
+      # when the only chrome was near-black, and a rule that reads tokens cannot see a literal.
+      # The same hole ran the other way -- the provenance drawer kept a hard-coded dark ground
+      # under the light shell's near-black inks. This gate reads no stylesheet: it opens the six
+      # real surfaces and measures the contrast the browser resolved, with SVG text taken from
+      # `fill` rather than `color`, in the light shell and the dark one.
+      - name: Verify every word clears AA on the ground it lands on, in both shells
+        run: node scripts/check-light-contrast.mjs --require-browser
+
+      - name: Verify every state holds at every breakpoint the ladder names
+        run: node scripts/check-responsive-matrix.mjs --require-browser
+
       - name: Verify the terminal's panels refuse on screen, not just in the engine
         run: node scripts/check-panel-dom.mjs --require-browser
 

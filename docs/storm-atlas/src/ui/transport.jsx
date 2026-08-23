@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import { CATEGORY_COLOR } from "../render/palette.js";
+
 import { categoryFor } from "../engine/stats.js";
 import { formatPosition } from "../engine/geo.js";
 import { MONO, Num, Txt, fmtUTC } from "./kit.jsx";
@@ -127,8 +127,8 @@ export function Transport({ archive, row, playing, setPlaying, cursorMs, setCurs
         <Readout label="INTENSITY" value={
           <span>
             <Num value={vmax} unit="kt" absent="no wind was recorded at this fix"
-              tone={cat ? CATEGORY_COLOR[cat] : undefined} />
-            {cat ? <span style={{ ...MONO, color: CATEGORY_COLOR[cat], marginLeft: 6 }}>
+              />
+            {cat ? <span style={{ ...MONO, marginLeft: 6 }}>
               {cat.toUpperCase()}
             </span> : null}
           </span>} />

@@ -126,6 +126,32 @@ page.on("console", (m) => {
   if (m.type() === "error" && !/net::|ERR_/.test(m.text())) errors.push("console: " + m.text().slice(0, 200));
 });
 
+/* THE BUILDER MOVED, SO THE WAY TO IT MOVED WITH IT.
+ *
+ * In the three-column shell every chip was resident in the rail and a click found it. In the
+ * stacked shell the builder is a SHEET summoned from a condition-strip zone label, which is the
+ * whole point of the change -- a reader looks at their conditions constantly and edits them
+ * rarely. The chips are the same chips with the same keys and the same costs; only the path to
+ * them is new.
+ *
+ * So this opens the sheet if the chip is not already on the page, and clicks directly if it is.
+ * That keeps ONE gate driving both shells through the transition, which is what makes the port
+ * provable rather than asserted -- and it degrades to a plain click the moment the old shell is
+ * deleted, because there will be no sheet to open that is not already open.
+ */
+const openBuilder = async () => {
+  if (await page.$("[data-builder-sheet]")) return;
+  const opener = await page.$("[data-zone-edit]");
+  if (!opener) return;                       // nothing to open
+  await opener.click();
+  await page.waitForTimeout(250);
+};
+const chip = async (name, { optional = false } = {}) => {
+  if (!(await page.$(`[data-chip="${name}"]`))) await openBuilder();
+  if (optional) return page.click(`[data-chip="${name}"]`).catch(() => {});
+  return page.click(`[data-chip="${name}"]`);
+};
+
 await page.goto(`http://127.0.0.1:${port}/storm-atlas/`, { waitUntil: "domcontentloaded" });
 await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive, { timeout: 90000 });
 await page.waitForTimeout(700);
@@ -182,7 +208,7 @@ console.log("\n[1] the archive's scale, from the pack that was actually loaded")
 console.log("\n[2] an intensity filter reports what it could NOT judge");
 /* Chips carry live counts in their labels now, so they are addressed by their stable hook
    rather than by visible text -- a text match would break when the archive grows by a storm. */
-await page.click('[data-chip="intensity-cat3"]');
+await chip("intensity-cat3");
 await page.waitForTimeout(500);
 {
   const t = await text();
@@ -192,7 +218,7 @@ await page.waitForTimeout(500);
   ok("and they are not called failures",
     /neither included nor counted as failing/.test(t));
 }
-await page.click('[data-chip="intensity-all"]');
+await chip("intensity-all");
 await page.waitForTimeout(500);
 
 console.log("\n[3] an ocean point where nothing formed");
@@ -229,7 +255,11 @@ await clickLatLng(14.6, -113.9);
   ok("and disclaimed as not a forecast", /THIS IS NOT A FORECAST/.test(t));
   ok("and denies being a cone", /not a forecast cone/.test(t));
   ok("a Wilson interval accompanies the rates",
-    /\[\s*\d+\s*[-–—]\s*\d+%\s*\]/.test(t));
+    /* DECIMALS ALLOWED, as the second interval check on this page has always allowed them. The
+       property is "a Wilson interval accompanies the rates"; the integer-only form was an
+       artefact of the compact RateLine, and the deck prints every interval to a tenth. A regex
+       narrower than the property it names is a gate that fails on a correct surface. */
+    /\[\s*\d+(\.\d+)?\s*[-–—]\s*\d+(\.\d+)?%\s*\]/.test(t));
   /* THE WEIGHTED RATE CHANGED MEANING IN 3.2, SO THE CHECK CHANGED WITH IT -- and got harder.
      The probe was a distance-weighted analog pool and published a weighted rate beside the
      unweighted one. A COHORT spends distance as a hard membership condition instead, so
@@ -338,7 +368,7 @@ console.log("\n[4b] the six refusals — reachable, distinct, and honest about t
 
   /* CONDITIONED ON -- the fifth rule. Conditioning the cohort on an outcome must make that
      outcome refuse to be reported back as a finding. */
-  await page.click('[data-chip="intensity-cat3"]');
+  await chip("intensity-cat3");
   await page.waitForTimeout(700);
   states = await byKind();
   const t1 = await text();
@@ -352,7 +382,7 @@ console.log("\n[4b] the six refusals — reachable, distinct, and honest about t
     /GIVEN THAT IT ALSO/.test(t1));
 
   /* RATE REFUSED -- the sample gate. A cohort small enough to refuse still publishes counts. */
-  await page.click('[data-chip="radius-250"]').catch(() => {});
+  await chip("radius-250", { optional: true });
   await page.waitForTimeout(700);
   const t2 = await text();
   states = await byKind();
@@ -376,12 +406,26 @@ console.log("\n[4b] the six refusals — reachable, distinct, and honest about t
    * So the property is checked where it lives: for every outcome row that REFUSES, the row
    * carries no percentage at all. The refusal occupies the rate column and there is nothing for
    * a reader to mistake for a rate. */
+  /* HOW A REFUSING ROW IS RECOGNISED, PORTED WITH THE GRAMMAR IT DESCRIBES.
+   *
+   * This matched the six original mark-and-title pairings as adjacent text -- "⊘ RATE REFUSED".
+   * Under the three-mark grammar that pairing no longer exists: RATE REFUSED and OUT OF SCOPE
+   * both carry ▤ now, and the mark sits in the OUTCOME cell while the word sits in STATUS, with
+   * five cells between them. The regex would have found zero refusing rows on a deck full of
+   * them, and the assertion below -- which passes when there are none -- would have gone green
+   * over exactly the case it exists to check.
+   *
+   * The PROPERTY is unchanged and the detection is now stronger: a row that refuses is one
+   * carrying [data-refusal], which is the attribute the surface stakes its refusal on, rather
+   * than a string two cells apart. The old text form is kept as an alternative so the same gate
+   * still recognises the three-column shell while both exist. */
   const refusedRows = await page.evaluate(() => {
     const titles = /⊘ RATE REFUSED|↺ CONDITIONED ON|▤ BASE RATE ONLY|⇱ OUT OF SCOPE/;
     return [...document.querySelectorAll("[data-outcome]")]
       .map((el) => ({ label: el.getAttribute("data-outcome"),
+        hook: !!el.querySelector("[data-refusal]"),
         text: (el.innerText || "").replace(/\s+/g, " ") }))
-      .filter((r) => titles.test(r.text));
+      .filter((r) => r.hook || titles.test(r.text));
   });
   const leaked = refusedRows.filter((r) => /\d+\.\d%/.test(r.text));
   ok("a refused rate never prints as a percentage where its number would have been",
@@ -400,8 +444,8 @@ console.log("\n[4b] the six refusals — reachable, distinct, and honest about t
   ok("at least four distinct refusals are reachable in one session",
     kinds.size >= 4, [...kinds.keys()].join(","));
 
-  await page.click('[data-chip="intensity-all"]');
-  await page.click('[data-chip="radius-800"]').catch(() => {});
+  await chip("intensity-all");
+  await chip("radius-800", { optional: true });
   await page.waitForTimeout(700);
 }
 
@@ -436,6 +480,8 @@ console.log("\n[4c] the builder reads as a question, not as a schema");
     /ENVIRONMENT — NO CONDITION OFFERED/.test(t) && /NOT EVALUABLE/.test(t));
   ok("the given zone is named", /GIVEN — at or before genesis/.test(t));
   ok("applied conditions show what they cost", /−[\d,]+ excluded/.test(t));
+  /* The chip inventory is read from the builder, wherever the builder currently lives. */
+  await openBuilder();
   const chips = await page.evaluate(() =>
     [...document.querySelectorAll("[data-chip]")].map((e) => e.getAttribute("data-chip")));
   ok("every Phase 1/2 filter survives as a first-class condition",
@@ -455,6 +501,12 @@ console.log("\n[4d] the comparison answers four questions and overstates none of
   await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
     { timeout: 90000 });
   await page.waitForTimeout(900);
+  /* THE RELOAD CLOSES THE SHEET, AND THE MONTH SELECTOR LIVES IN IT.
+     This block sets its cohort through the URL and then reaches for two month chips directly
+     rather than through `chip()`, so it never went through `openBuilder()` -- and once the
+     builder stopped being resident in a rail, a 30s timeout on `August` was the whole failure.
+     The months are the same months with the same titles; only the path to them is new. */
+  await openBuilder();
   await page.getByTitle(/^August/).click();
   await page.waitForTimeout(300);
   await page.getByTitle(/^September/).click();
@@ -465,8 +517,16 @@ console.log("\n[4d] the comparison answers four questions and overstates none of
   ok("and says which condition is held out", /the same cohort without/.test(t));
   ok("with its own denominator and effective sample",
     /\d[\d,]* storms · effective sample \d/.test(t));
-  ok("the delta is in percentage points, with a direction",
-    /[+−-]\d+\.\d points (higher|lower|identical)/.test(t));
+  /* THE SIGN AND THE DIRECTION WORD MOVED APART, AND BOTH ARE STILL ON SCREEN.
+     The panel printed one card per contract and each card carried "+5.1 points higher". The deck
+     replaces thirteen cards with one column, so the SIGNED figure is the cell -- `+5.1 pp` -- and
+     the DIRECTION WORD is in the foot, inside the sentence engine/compare.js writes verbatim.
+     Asserting the old card string would be asserting the old surface; asserting only one half
+     would let the other silently disappear. Both, separately. */
+  ok("the delta is signed, in percentage points, on the row it belongs to",
+    /[+−]\d+\.\d pp/.test(t));
+  ok("and the foot states its direction in the engine's own words",
+    /\d+\.\d points (higher|lower|identical)/.test(t));
   ok("each card names the baseline it is measured against", /baseline \d+\.\d%/.test(t));
 
   /* THE HONESTY CONSTRAINT. Overlapping intervals are a weak heuristic and this build runs no
@@ -490,7 +550,7 @@ console.log("\n[4d] the comparison answers four questions and overstates none of
   ok("the reader can hold out a different condition", /HOLD OUT/.test(t));
   const heldOut = (x) => (x.match(/the same cohort without[^\n]{0,60}/) || [""])[0];
   const before = heldOut(t);
-  await page.click('[data-chip="baseline-where"]');
+  await chip("baseline-where");
   await page.waitForTimeout(900);
   const t2 = await text();
   /* WHAT IS HELD OUT IS NAMED AS A NOUN, NOT AS THE CONDITION'S OWN CLAUSE.
@@ -633,9 +693,19 @@ console.log("\n[4f] the calibration ledger — reachable, and it publishes its o
 
   ok("opening it makes it a surface, not a panel over the map",
     await page.evaluate(() => {
+      /* NAMED BY WHAT THE LEDGER REPLACES, IN WHATEVER SHELL IS SERVING.
+         This used to read `!.atlas-rail && !.atlas-stage`. The rail does not exist in the stacked
+         shell at all, so half of it would go TRIVIALLY TRUE the moment the three-column shell was
+         deleted -- an assertion that still passes while testing nothing, which is the precise
+         failure mode of porting a gate. Every element listed here is one the map surface renders
+         and the ledger must not: the stage in both shells, the deck and the condition strip in
+         the stacked one. */
       const shell = document.querySelector(".atlas-shell");
       return shell.getAttribute("data-view") === "calibration"
-        && !document.querySelector(".atlas-rail") && !document.querySelector(".atlas-stage");
+        && !document.querySelector(".atlas-stage")
+        && !document.querySelector("[data-evidence-deck]")
+        && !document.querySelector("[data-condition-strip]")
+        && !document.querySelector(".atlas-rail");
     }));
   ok("and it is addressable — the URL carries the surface",
     await page.evaluate(() => location.search.includes("view=calibration")));
@@ -797,7 +867,7 @@ console.log("\n[8] the replay reveals the record without lying about time");
 await page.keyboard.press("Escape");
 await page.waitForTimeout(300);
 {
-  await page.click('[data-chip="mode-replay"]');
+  await chip("mode-replay");
   await page.waitForTimeout(700);
   const t = await text();
   ok("the transport shows a real UTC date, not a frame index",
@@ -886,7 +956,7 @@ console.log("\n[8b] accumulated ink survives a pan, a zoom and a resize");
 
 console.log("\n[8c] the density surfaces say what they count");
 {
-  await page.click('[data-chip="mode-explore"]');
+  await chip("mode-explore");
   await page.waitForTimeout(400);
   /* The layer and density toggles sit under a disclosure now. The query is the product; how the
      cohort is DRAWN is a preference, and putting it behind one triangle is what keeps the
@@ -1128,7 +1198,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
      click the storm under the cursor. */
   {
     await open("v=1&mo=8.9");
-    await page.click('[data-chip="mode-replay"]');
+    await chip("mode-replay");
     await page.waitForTimeout(700);
     await page.keyboard.press(" ");
     await page.waitForTimeout(1500);
@@ -1158,7 +1228,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
     let t = await text();
     ok("a member cohort is named as including this storm",
       /Historical cohort including this storm/.test(t));
-    await page.click('[data-chip="intensity-cat5"]');
+    await chip("intensity-cat5");
     await page.waitForTimeout(900);
     t = await text();
     ok("narrowing the cohort until the storm falls out flips the claim",
