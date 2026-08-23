@@ -262,6 +262,20 @@ export function Atlas() {
     keptRef.current = result.kept;
   }, [cohort, result]);
 
+  /* THE EDIT, NAMED, FOR THE DECK'S FOOT. The condition strip prints the population move on its
+     own -- 964 → 847 -- and the foot needs the same move WITH the name of what moved it, since
+     a reading aid that says only "847" is an aid to nothing. Null until the reader has actually
+     changed something: WhatChanged renders nothing without an edit, which is the correct first
+     state rather than a block explaining that nothing has happened yet. */
+  const whatChanged = React.useMemo(() => {
+    if (!lastEdit || lastEdit.from === null || lastEdit.to === null) return null;
+    const cond = conditionsOf(cohort).find((x) => x.key === lastChanged);
+    return {
+      edit: `${cond ? cond.label : "THE COHORT"} · `
+        + `${lastEdit.from.toLocaleString()} → ${lastEdit.to.toLocaleString()} storms`,
+    };
+  }, [lastEdit, cohort, lastChanged]);
+
   const [envLoading, setEnvLoading] = React.useState(false);
   const [envEpoch, setEnvEpoch] = React.useState(0);
   const envCov = React.useMemo(
@@ -666,6 +680,14 @@ export function Atlas() {
           onToggleTiming={() => setTimingOpen((v) => !v)}
           foldLandfall={vw < 1440} landfallOpen={landfallOpen}
           onToggleLandfall={() => setLandfallOpen((v) => !v)}
+          /* THE COMPARISON'S IDENTITY AND ITS CONTROL, WHICH THE DECK'S COLUMN CANNOT CARRY.
+             The VS ARCHIVE cell holds one signed figure per row; what the baseline IS, how it
+             relates to this cohort, and which condition a reader would rather hold out are
+             facts about the whole table and live in its foot. */
+          conditions={conditionsOf(cohort)} onBaseline={setBaselinePin}
+          whatChanged={whatChanged}
+          replayNote={mode === "replay"
+            ? <ReplayNote timeline={timeline} result={result} /> : null}
           /* The pathway disclosure is always present, not gated on the layer being on:
              it is the sentence that stops a shaded map being read as a forecast cone, and a
              reader who turns the layer on should not have to also discover the caveat. */
@@ -1020,92 +1042,57 @@ function Legend({ colorBy, showPathway, showGenesisDensity, probe }) {
 const CAT_HEX = { ts: "#7fb2e6", cat1: "#38bdf8", cat2: "#fbbf24", cat3: "#f59e0b",
   cat4: "#ef4444", cat5: "#8b5cf6" };
 
-function Introduction({ archive }) {
-  const m = archive.manifest;
-  return (
-    <div style={{ padding: "var(--sp-6)" }}>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-body)",
-        color: "var(--text-1)", lineHeight: "var(--lh-body)" }}>
-        Every line on this map is a storm that happened.
-      </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
-        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: "var(--sp-5)" }}>
-        <p style={{ margin: "0 0 var(--sp-5)" }}>
-          <strong style={{ color: "var(--text-1)" }}>Click any point on the ocean</strong> to ask
-          what formed near there and where it went.{" "}
-          <strong style={{ color: "var(--text-1)" }}>Click a genesis point</strong> — one of the
-          cyan dots — to follow that storm from its first fix to its last.
-        </p>
-        <p style={{ margin: "0 0 var(--sp-5)" }}>
-          Tracks themselves are not click targets. At this zoom forty of them lie under any
-          given pixel, so a click on one would select a storm essentially at random. The genesis
-          points are discrete, and so is the choice.
-        </p>
-        <p style={{ margin: "0 0 var(--sp-5)" }}>
-          {claimText("atlas.subject")} {m.counts.storms.toLocaleString()} storms and{" "}
-          {m.counts.track_points.toLocaleString()} observed positions, with every threshold
-          crossing, every coastline crossing and every gap the archive recorded about itself.
-        </p>
-        <p style={{ margin: 0 }}>
-          Where the archive cannot answer, it says so. That is the point.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* What the run is doing, and what it is doing to time. The skip is a real distortion of pace and
-   the reader is told about it before it happens, not only when it flashes past on the transport. */
+/* WHAT THE RUN IS DOING TO TIME, AND WHY IT HAS TO BE SAID BEFORE IT HAPPENS.
+ *
+ * The clock skips off-season stretches. That is a real distortion of pace -- a reader watching
+ * 174 years unfold in a minute is watching 43 of them -- and a jump announced only as it flashes
+ * past on a 40px transport is a jump nobody reads. So the whole statement is made once, where
+ * the reader enters replay, and the transport's announcement is the reminder rather than the
+ * disclosure.
+ *
+ * IT LIVED IN THE PANEL AND THE PANEL IS GONE. Rebuilt on the deck's own classes rather than
+ * ported with its inline styles: the panel's `--warn` amber was written for a near-black chrome
+ * and this surface is paper. The words are unchanged. */
 function ReplayNote({ timeline, result }) {
   const tl = timeline;
-  const quiet = tl && tl.spanMin ? (tl.spanMin - tl.activeMin) / tl.spanMin : null;
+  if (!tl || !tl.n) {
+    return (
+      <p className="at-foot-line">
+        The current filter selects no storms, so there is nothing to replay.
+      </p>
+    );
+  }
   return (
-    <div style={{ padding: "var(--sp-6)" }}>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-body)",
-        color: "var(--text-1)", lineHeight: "var(--lh-body)" }}>
-        The record, in the order it happened.
-      </div>
-      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
-        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: "var(--sp-5)" }}>
-        {!tl || !tl.n ? (
-          <p style={{ margin: 0 }}>
-            The current filter selects no storms, so there is nothing to replay.
-          </p>
-        ) : (
-          <>
-            <p style={{ margin: "0 0 var(--sp-5)" }}>
-              <strong style={{ color: "var(--text-1)" }}>{tl.n.toLocaleString()} storms</strong>{" "}
-              between {fmtYear(tl.firstT)} and {fmtYear(tl.lastT)}. Tracks stay on the map as they
-              are revealed, so what builds up is the shape of the whole record rather than one
-              storm at a time.
-            </p>
-            {/* Stated as years rather than as a percentage, deliberately: this build renders no
-                percentage it computed itself, and "43.5 of 174.5 years" is the more concrete
-                statement anyway. */}
-            <p style={{ margin: "0 0 var(--sp-5)" }}>
-              <strong style={{ color: "var(--warn)" }}>The clock skips quiet stretches.</strong>{" "}
-              {quiet !== null
-                ? <>Only {yearsOf(tl.activeMin)} of those {yearsOf(tl.spanMin)} calendar years
-                    have a storm anywhere on the map</>
-                : <>Much of the span has no storm active</>} — the rest is off-season, repeated.
-              Those gaps are jumped and every jump is announced on the transport. Nothing else is
-              changed: every storm appears, once, in order, over its whole observed span.
-            </p>
-            {result && result.excluded && result.excluded.noGenesis ? (
-              <p style={{ margin: "0 0 var(--sp-5)" }}>
-                {result.excluded.noGenesis} storms are not in this run: the archive holds no
-                genesis point for them, so the filter cannot place them.
-              </p>
-            ) : null}
-            <p style={{ margin: "0 0 var(--sp-5)" }}>
-              The filters on the left drive the run. Narrow to Cat 3+ and only the majors unfold;
-              narrow to a landfall region and only the storms that reached it do.
-            </p>
-            <p style={{ margin: 0, color: "var(--text-2)" }}>{claimText("atlas.replay")}</p>
-          </>
-        )}
-      </div>
-    </div>
+    <>
+      <p className="at-foot-line">
+        <strong>{tl.n.toLocaleString()} storms</strong> between {fmtYear(tl.firstT)} and{" "}
+        {fmtYear(tl.lastT)}. Tracks stay on the map as they are revealed, so what builds up is
+        the shape of the whole record rather than one storm at a time.
+      </p>
+      {/* Stated as years rather than as a percentage, deliberately: this build renders no
+          percentage it computed itself, and "43.5 of 174.5 years" is the more concrete
+          statement anyway. */}
+      <p className="at-foot-line">
+        <strong className="at-foot-flag">The clock skips quiet stretches.</strong>{" "}
+        {tl.activeMin !== null && tl.activeMin !== undefined
+          ? <>Only {yearsOf(tl.activeMin)} of those {yearsOf(tl.spanMin)} calendar years have a
+              storm anywhere on the map</>
+          : <>Much of the span has no storm active</>} — the rest is off-season, repeated.
+        Those gaps are jumped and every jump is announced on the transport. Nothing else is
+        changed: every storm appears, once, in order, over its whole observed span.
+      </p>
+      {result && result.excluded && result.excluded.noGenesis ? (
+        <p className="at-foot-line">
+          {result.excluded.noGenesis} storms are not in this run: the archive holds no genesis
+          point for them, so the filter cannot place them.
+        </p>
+      ) : null}
+      <p className="at-foot-line">
+        The conditions drive the run. Narrow to Cat 3+ and only the majors unfold; narrow to a
+        landfall region and only the storms that reached it do.
+      </p>
+      <p className="at-foot-line">{claimText("atlas.replay")}</p>
+    </>
   );
 }
 

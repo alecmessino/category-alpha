@@ -305,6 +305,49 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
        `${ink} measures ${worst.toFixed(2)}:1 on its worst ground`);
   }
 
+  /* EVERY DARK-SHELL COLOUR TOKEN IS EITHER RE-DECLARED FOR PAPER OR EXEMPT BY NAME.
+   *
+   * THIS RULE EXISTS BECAUSE ONE TOKEN WAS MISSED AND NOTHING NOTICED. `--warn` -- an amber
+   * written for a near-black chrome -- was declared once in the base block and never re-declared
+   * for the light shell, so it inherited straight through: #f0b429 measures 1.68:1 on
+   * --at-paper against an AA bar of 4.5. It is not decoration. It is the ink on the methodology
+   * notice, the builder's outcome-side warnings, the environment lens's era boundary and the
+   * inspector's replay guard, so the four places the archive raises its hand were the four
+   * hardest things on the light surface to read -- and every per-token contrast check above
+   * passed, because none of them was looking at a token the light shell never mentions.
+   *
+   * Checking the tokens the light shell DOES declare can only ever find the ones somebody
+   * remembered. So the assertion is inverted: enumerate the base block's colour tokens and
+   * require each to appear in the light block, with a stated reason for any that must not. */
+  const baseBlock = (() => {
+    const i = css.indexOf("[data-atlas]{");
+    let depth = 0;
+    for (let k = i + "[data-atlas]".length; k < css.length; k += 1) {
+      if (css[k] === "{") depth += 1;
+      else if (css[k] === "}") { depth -= 1; if (depth === 0) return css.slice(i, k); }
+    }
+    return "";
+  })();
+  /* THE PLATE'S OWN INK, WHICH MUST NOT BE RE-DECLARED: --stage is the cartographic ground and
+     the whole light shell is built on it staying exactly where it is. The assertion above pins
+     that it appears once; this one records WHY it is absent from the light table. And the
+     `--at-*` names are the paper palette's own definitions -- they are what the light block
+     resolves TO, so requiring them inside it would be circular. */
+  const SHELL_EXEMPT = new Map([["--stage", "the cartographic plate is dark in both shells"]]);
+  const baseColour = [...baseBlock.matchAll(/(--[a-z0-9-]+)\s*:\s*(#[0-9a-f]{3,8}\b|rgba?\()/gi)]
+    .map((m) => m[1].toLowerCase())
+    .filter((n) => !n.startsWith("--at-"));
+  const lightDeclares = new Set(
+    [...lightBlock.matchAll(/(--[a-z0-9-]+)\s*:/g)].map((m) => m[1].toLowerCase()),
+  );
+  const missed = [...new Set(baseColour)].filter(
+    (n) => !lightDeclares.has(n) && !SHELL_EXEMPT.has(n));
+  ok("every dark-shell colour token is re-declared for paper or exempt by name",
+     missed.length === 0,
+     `${missed.join(", ")} would inherit a dark-chrome ink onto the paper shell`);
+  ok("the base block still declares the colour tokens this rule reads",
+     baseColour.length >= 15, `found only ${baseColour.length}`);
+
   /* AND THE PLATE KEEPS THE DARK RAMP IN THE LIGHT SHELL. The stage re-declares the dark ink set
      for its own subtree, because its furniture -- the title line, the scale bar, the coastline
      statement, every graticule label -- inherits the surface's text tokens. Without this the

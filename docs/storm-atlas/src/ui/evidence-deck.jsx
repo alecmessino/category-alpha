@@ -40,6 +40,9 @@ import { regionLabel } from "../engine/cohort-language.js";
 import { intensityContractKey, landfallContractKey } from "../engine/calibration.js";
 import { REFUSALS } from "./refusal.jsx";
 import { refusalKindOf, countsOf } from "./outcome-card.jsx";
+import { Chip } from "./kit.jsx";
+import { WhatChanged } from "./condition-strip.jsx";
+import { baselineSentence } from "../engine/cohort-language.js";
 import { Refusal } from "./refusal.jsx";
 import { claimText } from "./kit.jsx";
 
@@ -120,10 +123,14 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
  * @param {function} [props.onEvidence]    opens a contract's row in the calibration ledger
  * @param {boolean}  [props.foldTiming]    1280-1439: the two duration columns fold behind a
  *                                         disclosure. The data is not dropped; the columns are.
+ * @param {object[]} [props.conditions]   conditionsOf(spec) -- the hold-out control's inventory
+ * @param {function} [props.onBaseline]   pins a different condition as the one held out
+ * @param {object}   [props.whatChanged]  `{ edit }` -- what the last edit was and what it cost
  */
 export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTiming = false,
   timingOpen = false, onToggleTiming, foldLandfall = false, landfallOpen = false,
-  onToggleLandfall, environment = null, spec = null, pathway = null }) {
+  onToggleLandfall, environment = null, spec = null, pathway = null,
+  conditions = [], onBaseline, whatChanged = null, replayNote = null }) {
   if (!result) return null;
   const r = result;
 
@@ -178,6 +185,13 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
         </React.Fragment>
       ))}
 
+      {/* THE TABLE'S FOOT. What the last edit did, and what every delta above is measured
+          against. Both belong here rather than above the rows: a reader arrives at the deck to
+          read the ladder, and a block between the question and the evidence is a block they
+          scroll past. */}
+      <DeckFoot comparison={comparison} conditions={conditions} onBaseline={onBaseline}
+        whatChanged={whatChanged} groups={groups} />
+
       {/* THE ENVIRONMENT, AS A DISCLOSURE RATHER THAN A SECTION.
           It is a LENS and not a filter -- under half this archive carries any environment and
           none of it predates 1982 -- so it qualifies the cohort without narrowing it, and it
@@ -204,6 +218,17 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
               <strong>THIS IS NOT A FORECAST.</strong> {claimText("atlas.pathway")}
             </p>
           </div>
+        </details>
+      ) : null}
+
+      {/* THE REPLAY'S DISCLOSURE, AND IT IS OPEN. The clock skips off-season stretches, which
+          is a distortion of pace a reader has to be told about BEFORE it happens rather than
+          when it flashes past on a 40px transport. Present only in replay mode, because in
+          explore mode there is no clock to distort. */}
+      {replayNote ? (
+        <details className="at-deck-env" data-deck-replay open>
+          <summary>THE RECORD, IN THE ORDER IT HAPPENED — what the clock does to time</summary>
+          <div className="at-env-body">{replayNote}</div>
         </details>
       ) : null}
 
@@ -934,4 +959,113 @@ export function subjectReached(subject, contractKey) {
   if (v !== undefined) return v;
   if (subject.reached.__landfallsKnown && /^landfall_/.test(contractKey)) return false;
   return undefined;
+}
+
+/* ── THE TABLE'S FOOT ──────────────────────────────────────────────────────────────────────
+ *
+ * TWO BLOCKS THAT THE DELETED PANEL CARRIED AND THE DECK MUST NOT LOSE.
+ *
+ * The redesign folds thirteen comparison CARDS into one column of signed percentage points, and
+ * that is the intended trade: the per-row question "by how much" is answered in the cell, and
+ * "do the samples separate" is answered by the STATUS word. But two things a card carried are
+ * not per-row at all, and deleting cohort-panel.jsx deleted them with it:
+ *
+ *   WHAT IS THE BASELINE   every "+5.1 pp" on this page is relative to something, and a reader
+ *                          must not be able to scroll into a column of deltas without having
+ *                          passed the sentence that names what they are deltas FROM.
+ *   HOW ARE THE TWO POPULATIONS RELATED  the baseline CONTAINS the cohort, so the same storms
+ *                          are on both sides and the two rates are not independent estimates.
+ *                          engine/compare.js measures the relation and writes the sentence; the
+ *                          surface's only job is to print it where the deltas are.
+ *
+ * Both are stated once, in the foot, because both are facts about the whole table. The HOLD OUT
+ * control comes with them -- "what if I had not restricted the season" is one click rather than
+ * a re-entry, and it is the control that makes the baseline a choice rather than a default. */
+function DeckFoot({ comparison, conditions, onBaseline, whatChanged, groups }) {
+  const c = comparison;
+  return (
+    <div className="at-deck-foot-block" data-deck-foot>
+      {/* WHAT CHANGED, AND WHAT IT IS NOT. Written to the specification's bound -- the edit, the
+          population delta, and at most two rate deltas -- and labelled in as many words as
+          A READING AID, NOT AN ATTRIBUTION. */}
+      <WhatChanged edit={whatChanged ? whatChanged.edit : null}
+        deltas={c ? topDeltas(groups) : []} />
+      {c ? (
+        <Baseline c={c} conditions={conditions} onBaseline={onBaseline} groups={groups} />
+      ) : null}
+    </div>
+  );
+}
+
+/* AT MOST TWO, AND THE ENGINE WRITES BOTH OF THEM.
+ *
+ * `delta.statement` is compare.js's own sentence -- the magnitude, the direction word, and which
+ * of the two permitted interval readings applies -- and it is printed verbatim. What this adds
+ * is the row's name and the baseline RATE, because a statement that says "5.1 points higher"
+ * without saying higher than what is the exact omission the baseline block exists to prevent.
+ *
+ * Ordered by magnitude rather than by ladder position: two lines is the whole budget, so they
+ * go to the two rows where the cohort and its baseline differ most. */
+function topDeltas(groups) {
+  const out = [];
+  for (const g of groups) {
+    for (const row of g.rows) {
+      const d = row.delta;
+      if (!d || d.baseRate === null || d.deltaPp === null || !d.statement) continue;
+      out.push({ label: row.label, d });
+    }
+  }
+  out.sort((a, b) => Math.abs(b.d.deltaPp) - Math.abs(a.d.deltaPp));
+  return out.slice(0, 2).map(({ label, d }) =>
+    `${label} — baseline ${(100 * d.baseRate).toFixed(1)}%, ${d.statement}`);
+}
+
+/* THE BASELINE, ABOVE NOTHING AND BELOW EVERYTHING IT QUALIFIES.
+ *
+ * In the panel this block sat above the cards, on the reasoning that a reader must not reach a
+ * "+5.1 points" without having passed the sentence naming what it is relative to. In the deck
+ * the deltas are a COLUMN, and a block above the table is a block between the question and the
+ * evidence -- so it moves to the foot, and the column head carries the short form. The words are
+ * the same words and the relation note is still the engine's. */
+function Baseline({ c, conditions, onBaseline, groups }) {
+  const b = c.baseline;
+  const comparable = groups.some((g) => g.rows.some(
+    (row) => row.delta && row.delta.deltaPp !== null));
+  return (
+    <div className="at-deck-baseline" data-baseline>
+      <span className="at-foot-k">COMPARED WITH</span>
+      <p className="at-foot-line">
+        {c.changed
+          ? <>the same cohort without <strong>{c.changed.noun}</strong></>
+          : baselineSentence(null)}
+      </p>
+      <p className="at-foot-fig">
+        {b.n_cases.toLocaleString()} storms · effective sample{" "}
+        {b.effective_sample_size.toFixed(1)}
+        {" · "}{b.sufficient ? "SUFFICIENT" : `BELOW SAMPLE · ${b.n_cases} < ${b.min_sample}`}
+      </p>
+      {/* THE NOTE POINTS AT A COMPARISON, AND SOMETIMES THERE IS NONE. compareResults returns an
+          object even when every contract short-circuits, so on a below-gate cohort the block
+          would promise a comparison over a ladder in which every rung is refused. The engine's
+          words are unchanged; what is added is the state they were written without. */}
+      {!comparable ? (
+        <p className="at-foot-none" data-no-comparison>
+          ⊘ NO CONTRACT IN THIS COHORT HAS A RATE TO COMPARE — every one of them is refused
+          above, so there is no delta on this page. The baseline&rsquo;s own figures stand.
+        </p>
+      ) : null}
+      <p className="at-foot-note">{c.relation.note}</p>
+
+      {conditions && conditions.length > 1 ? (
+        <div className="at-foot-holdout">
+          <span className="at-foot-k">HOLD OUT</span>
+          {conditions.map((cond) => (
+            <Chip key={cond.key} chipKey={`baseline-${cond.key}`}
+              active={!!(c.changed && c.changed.key === cond.key)}
+              onClick={() => onBaseline && onBaseline(cond.key)}>{cond.label}</Chip>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
 }

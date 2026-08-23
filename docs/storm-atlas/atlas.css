@@ -1568,8 +1568,28 @@
 /* THE BUILDER SHEET. Summoned, not resident. It overlays the plate rather than the evidence,
    because a reader editing a condition is looking at what the map holds, not at the answer they
    are about to invalidate. */
+/* PINNED TO THE PLATE'S GRID AREA, NOT TO THE SHELL'S BOX.
+ *
+ * It was `top:108px; bottom:0`, which is the chrome's height and the bottom of the WINDOW -- so
+ * the sheet ran the full height of everything below the strip and covered the evidence deck as
+ * well as the plate. That is the opposite of the rule this element was written to: a reader
+ * editing a condition is looking at what the map holds, not at the answer they are about to
+ * invalidate, so the sheet must cover the map and nothing else. It went unnoticed because the
+ * sheet is 420px of a 1440px shell and the deck's LEFT edge -- the outcome names and, once the
+ * foot was added, the HOLD OUT chips -- is the only part it hides.
+ *
+ * An absolutely-positioned grid child that names a grid area gets THAT AREA as its containing
+ * block, so `inset:0` here resolves to the plate row exactly, at whatever height the aperture
+ * clamp gave it. Out of flow either way, so auto-placement of the six in-flow rows is untouched.
+ *
+ * BOTH LINES, NOT ONE, AND THE SHORTHAND IS THE TRAP. `grid-row:4` is `4 / auto`, and for an
+ * ABSOLUTELY POSITIONED grid child an `auto` line resolves to the grid container's PADDING EDGE
+ * rather than to a one-track span. Measured with the shorthand: top 108 (the plate row's start,
+ * correct) and bottom 900 (the window, wrong) -- a sheet still covering the whole deck while
+ * appearing to be placed. `4 / 5` closes the area at the row it names. */
 [data-atlas] .at-sheet{
-  position:absolute;left:0;top:108px;bottom:0;width:clamp(320px,26vw,420px);
+  position:absolute;grid-row:4 / 5;grid-column:1 / 2;
+  inset:0;right:auto;width:clamp(320px,26vw,420px);
   z-index:900;display:flex;flex-direction:column;
   background:var(--chrome);border-right:1px solid var(--rule-2);
 }
@@ -1681,6 +1701,49 @@
 [data-atlas] .at-pre-assume p{margin:0 0 var(--at-s2)}
 [data-atlas] .at-deck-env{border-top:1px solid var(--rule-2);padding-top:var(--at-s2)}
 [data-atlas] .at-env-body{padding-bottom:var(--at-s3)}
+
+/* ─── the table's foot ────────────────────────────────────────────────────────────────────
+ *
+ * SPANS EVERY COLUMN, BECAUSE IT QUALIFIES EVERY ROW. What the last edit did and what the whole
+ * VS ARCHIVE column is measured against are facts about the table, not about any rung of it.
+ *
+ * `.at-changed` already carries its own top rule and padding -- it was written for exactly this
+ * position -- so the block adds none of its own around it, and the baseline sits beneath on the
+ * same hairline rhythm the deck uses everywhere else. */
+[data-atlas] .at-deck-foot-block{grid-column:1/-1}
+[data-atlas] .at-deck-baseline{
+  padding:var(--at-s3) var(--at-s5) var(--at-s4);
+  border-top:1px solid var(--rule-2);
+  /* THE ONE 2px RULE THIS BLOCK IS ALLOWED. A box may only exist where two planes meet, and the
+     baseline is a different plane from the ladder: everything above is this cohort, everything
+     stated here is the OTHER population the deltas are against. */
+  border-left:2px solid var(--rule-3);
+  max-width:88ch;
+}
+[data-atlas] .at-deck-baseline .at-foot-line{margin:2px 0 0;color:var(--t1)}
+[data-atlas] .at-foot-fig{
+  margin:var(--at-s1) 0 0;
+  font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
+  color:var(--t3);
+}
+/* THE CAVEAT IS NOT AN ERROR AND IS NOT PAINTED AS ONE -- no tint, no box, no coloured ground.
+   It is the sentence engine/compare.js wrote about how the two populations overlap, and it is
+   held to the body contrast bar because a reader who misses it misreads every delta above. */
+[data-atlas] .at-foot-note{
+  margin:var(--at-s2) 0 0;
+  font-family:var(--at-sans);font-size:var(--at-fs-row);line-height:1.45;color:var(--t2);
+}
+[data-atlas] .at-foot-none{
+  margin:var(--at-s2) 0 0;
+  font-family:var(--at-sans);font-size:var(--at-fs-row);line-height:1.45;color:var(--neg);
+}
+/* THE ARCHIVE RAISING ITS HAND, INSIDE A PARAGRAPH. Same ink as every other flag on the
+   surface, which on paper is the burnt amber and on the dark chrome the bright one. */
+[data-atlas] .at-foot-flag{color:var(--flag)}
+[data-atlas] .at-foot-holdout{
+  display:flex;align-items:center;flex-wrap:wrap;gap:var(--at-s1);
+  margin-top:var(--at-s3);
+}
 [data-atlas] .at-deck-empty{grid-column:1/-1;padding:var(--at-s4) 0;max-width:76ch}
 [data-atlas] .at-empty-k{
   font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
@@ -1744,6 +1807,13 @@
   --border-dim:var(--rule); --border-strong:var(--rule-2);
   --text-1:var(--t1); --text-2:var(--t3); --text-link:var(--accent);
   --accent-bright:var(--accent); --border-accent:var(--accent);
+  /* `--warn` IS `--flag` UNDER AN OLDER NAME, and leaving it out of this table shipped an amber
+     written for a near-black chrome onto paper: #f0b429 measures 1.68:1 on --at-paper, against
+     an AA bar of 4.5. It is not a decorative token -- it is the ink on the methodology notice,
+     the builder's outcome-side warnings, the environment lens's era boundary and the
+     inspector's replay guard, so on the light shell the four places the archive raises its hand
+     were the four hardest things on the surface to read. Same role, same table, one ink. */
+  --warn:var(--at-paper-flag);
   color-scheme:light;
 }
 
@@ -1754,6 +1824,7 @@
   --rule:var(--d-rule); --rule-2:var(--d-rule-2);
   --rule-3:var(--d-rule-3); --rule-4:var(--d-rule-4);
   --accent:var(--d-accent); --accent-2:var(--d-accent-2); --flag:var(--d-flag);
+  --warn:var(--d-flag);
   --pos:var(--d-pos); --neg:var(--d-neg); --special:var(--d-special);
   --hatch:var(--d-hatch);
   --text-1:var(--t1); --text-2:var(--t3); --text-link:var(--accent);

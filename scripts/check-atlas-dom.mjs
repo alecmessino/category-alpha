@@ -501,6 +501,12 @@ console.log("\n[4d] the comparison answers four questions and overstates none of
   await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive,
     { timeout: 90000 });
   await page.waitForTimeout(900);
+  /* THE RELOAD CLOSES THE SHEET, AND THE MONTH SELECTOR LIVES IN IT.
+     This block sets its cohort through the URL and then reaches for two month chips directly
+     rather than through `chip()`, so it never went through `openBuilder()` -- and once the
+     builder stopped being resident in a rail, a 30s timeout on `August` was the whole failure.
+     The months are the same months with the same titles; only the path to them is new. */
+  await openBuilder();
   await page.getByTitle(/^August/).click();
   await page.waitForTimeout(300);
   await page.getByTitle(/^September/).click();
@@ -511,8 +517,16 @@ console.log("\n[4d] the comparison answers four questions and overstates none of
   ok("and says which condition is held out", /the same cohort without/.test(t));
   ok("with its own denominator and effective sample",
     /\d[\d,]* storms · effective sample \d/.test(t));
-  ok("the delta is in percentage points, with a direction",
-    /[+−-]\d+\.\d points (higher|lower|identical)/.test(t));
+  /* THE SIGN AND THE DIRECTION WORD MOVED APART, AND BOTH ARE STILL ON SCREEN.
+     The panel printed one card per contract and each card carried "+5.1 points higher". The deck
+     replaces thirteen cards with one column, so the SIGNED figure is the cell -- `+5.1 pp` -- and
+     the DIRECTION WORD is in the foot, inside the sentence engine/compare.js writes verbatim.
+     Asserting the old card string would be asserting the old surface; asserting only one half
+     would let the other silently disappear. Both, separately. */
+  ok("the delta is signed, in percentage points, on the row it belongs to",
+    /[+−]\d+\.\d pp/.test(t));
+  ok("and the foot states its direction in the engine's own words",
+    /\d+\.\d points (higher|lower|identical)/.test(t));
   ok("each card names the baseline it is measured against", /baseline \d+\.\d%/.test(t));
 
   /* THE HONESTY CONSTRAINT. Overlapping intervals are a weak heuristic and this build runs no
