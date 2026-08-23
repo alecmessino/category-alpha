@@ -114,6 +114,22 @@ export function Atlas() {
     colorBy: "uniform", genesis: true, landfalls: true,
   });
   const [selected, setSelected] = React.useState(null);
+  /* THE CAMERA'S HANDLE, filled by the map. H and F are bound to the same two functions the
+     plate's own controls call, so a keystroke and a click cannot come to mean different things. */
+  const cameraRef = React.useRef(null);
+  /* HAS THIS READER DONE ANYTHING YET. One bit, set by the first probe, the first selection or
+     the first condition, and never cleared -- it is what retires the plate's click instruction.
+     An instruction that keeps repeating after the gesture has been used is not guidance.
+     
+     A SHARED LINK ARRIVES ALREADY-INTERACTED, but only if it actually carries a question or a
+     storm. Any non-empty query string would have been the easy test and the wrong one: a URL
+     carrying nothing but `?m=1.1.0` -- which this surface writes on its own, into the address bar
+     of a reader who has done nothing -- would have retired the instruction before it was ever
+     shown. */
+  const [interacted, setInteracted] = React.useState(() => {
+    const p = new URLSearchParams(location.search);
+    return !!p.get("storm") || conditionsOf(parseQuery(location.search).spec).length > 0;
+  });
   /* THE STORM A SHARED LINK WAS LOOKING AT. Read once on mount and resolved after the pack lands
      -- the URL carries the archive's own `storm_id`, never the pack row, because a row is
      pack-order and a rebuild would silently point the same link at a different storm. */
@@ -302,6 +318,20 @@ export function Atlas() {
   const contextRows = context ? context.rows : (result ? result.rows : null);
   const emphasis = context ? result.rows : null;
 
+  /* WHAT FIT WOULD FRAME, AND WHAT SELECTING A STORM WOULD.
+   *
+   * FIT takes the LIFTED evidence when there is any and the drawn population otherwise, which is
+   * the same thing the plate head counts as COHORT: the control frames what the caption says is
+   * there. It is recomputed per cohort rather than per render because it walks track points, and
+   * NOTHING CONSUMES IT AUTOMATICALLY -- it is handed to the map as a target the reader may ask
+   * for, never as a camera instruction. That distinction is the persistence rule in one line. */
+  const evidenceFrame = React.useMemo(
+    () => (archive ? rowsFrame(archive, emphasis || contextRows) : null),
+    [archive, emphasis, contextRows]);
+  const subjectFrame = React.useMemo(
+    () => (archive && selected !== null ? rowsFrame(archive, [selected], { stride: 1 }) : null),
+    [archive, selected]);
+
   /* THE DENSITY SURFACES ARE NOT TIED TO A PROBE. With a probe they show the matched pool --
      where those storms went. Without one they show the current filter over the whole archive,
      which is what makes "all storms · TS+ · Cat 3+ · Mexico · CONUS · Hawaii" reachable: every
@@ -456,10 +486,17 @@ export function Atlas() {
     setSelected(row);
     setCursorMs(null);
     setPlaying(false);
+    setInteracted(true);
   }, []);
 
   // Handles for the interaction checks, alongside __ATLAS_MAP. Nothing in the app reads them.
   React.useEffect(() => { globalThis.__ATLAS_SELECT = selectStorm; }, [selectStorm]);
+  /* WHICH ROWS ARE LIFTED, which is what FIT frames and what the plate head counts as COHORT.
+     Exposed so the camera gate can assert containment against the same rows the layer drew,
+     rather than against its own re-derivation of what the cohort ought to be. */
+  React.useEffect(() => {
+    globalThis.__ATLAS_DRAWN_ROWS = emphasis || contextRows || [];
+  }, [emphasis, contextRows]);
   React.useEffect(() => { globalThis.__ATLAS_SET_CURSOR = setCursorMs; }, []);
 
   /* THE BRIDGE: build the cohort around where THIS storm formed, and keep the storm.
@@ -491,10 +528,27 @@ export function Atlas() {
   const onProbe = React.useCallback((lat, lon) => {
     setSelected(null);
     setPlaying(false);
+    setInteracted(true);
     setCohort((c) => normalise({
       ...c, where: { lat, lon, radiusKm: c.where ? c.where.radiusKm : DEFAULT_RADIUS_KM },
     }));
   }, []);
+
+  /* RESET QUERY — ONE OF THREE WAYS OUT, AND THE ONLY ONE THAT TOUCHES THE QUESTION.
+   *
+   * It clears the CONDITIONS. It does not move the camera, and it does not put the plate's click
+   * instruction back: a reader who has used the gesture has used it, and re-teaching them
+   * because they cleared a filter would be the surface forgetting what it already knew.
+   *
+   * The selection goes with the conditions, and that is deliberate rather than incidental: a
+   * selected storm is shown against a cohort -- the inspector's bridge is a statement about
+   * membership -- so leaving one docked beside a cohort that has just ceased to exist would
+   * leave the membership verdict describing nothing. HOME and FIT, which do move the camera,
+   * leave both the query and the selection exactly where they were. */
+  const onResetQuery = React.useCallback(() => {
+    setCohort(normalise(EMPTY_COHORT));
+    setSelected(null);
+  }, [setCohort]);
 
   React.useEffect(() => {
     const onKey = (e) => {
@@ -513,6 +567,10 @@ export function Atlas() {
         if (selected !== null) { setSelected(null); return; }
       }
       if (e.key === "p" || e.key === "P") setProvOpen((v) => !v);
+      /* THE TWO CAMERA KEYS, ROUTED THROUGH THE MAP'S OWN HANDLE so a keystroke and a click on
+         the plate's controls are literally the same call. Neither touches the query. */
+      if ((e.key === "h" || e.key === "H") && cameraRef.current) cameraRef.current.home();
+      if ((e.key === "f" || e.key === "F") && cameraRef.current) cameraRef.current.fit();
       if (e.key === " " && (selected !== null || mode === "replay")) {
         e.preventDefault(); setPlaying((v) => !v);
       }
@@ -536,7 +594,8 @@ export function Atlas() {
   const plate = (
     <AtlasMap
       archive={archive} world={world} coast={coast} rows={contextRows} emphasis={emphasis}
-      selected={selected} home={home}
+      selected={selected} home={home} homeClamp={NA_EP}
+      evidenceFrame={evidenceFrame} subjectFrame={subjectFrame} cameraApi={cameraRef}
       onSelect={selectStorm} onProbe={onProbe} probe={cohort.where}
       replayMs={selected !== null && cursorMs !== null ? cursorMs : undefined}
       colorBy={layers.colorBy} dimPopulation={selected !== null}
@@ -546,8 +605,13 @@ export function Atlas() {
       showGenesisDensity={showGenesisDensity} genesisDensity={genesisGrid}
       mode={mode} timeline={timeline} replayCursorMin={replayCursorMin}
       pathwayStep={2.0} onViewChange={setView}
-      kept={contextRows ? contextRows.length : result.kept}
-      lifted={emphasis ? emphasis.length : 0}
+      /* THE HEAD BAND'S TWO FIGURES, AND WHICH IS WHICH. `kept` is the COHORT -- what is lifted,
+         and the denominator of every rate in the deck -- and `context` is the population drawn
+         behind it. They were the other way round when the band read "TRACKS DRAWN · LIFTED BY
+         THE QUERY", which put the larger number first and made the caption disagree with the
+         deck's own denominator. */
+      kept={emphasis ? emphasis.length : (contextRows ? contextRows.length : result.kept)}
+      context={contextRows ? contextRows.length : 0}
       selectedCount={selected === null ? 0 : 1}
       /* ONE CLAUSE, NOT TWO. The foot band's measured budget -- scale bar, projection,
          coastline, coordinates -- was derived before this line existed, and a 68-character
@@ -556,7 +620,7 @@ export function Atlas() {
          recoverable thing on the band, because the gesture works whether or not the words
          are there. So the hint is short, and it is also the first casualty in the container
          ladder -- see atlas.css. */
-      hint={mode === "explore" && conditionsOf(cohort).length && selected === null
+      hint={mode === "explore" && !interacted && conditionsOf(cohort).length && selected === null
         ? (cohort.where ? "CLICK OPEN WATER TO MOVE THE PROBE"
           : "CLICK OPEN WATER TO ADD A LOCATION CONDITION")
         : undefined}
@@ -570,7 +634,7 @@ export function Atlas() {
           on the surface; with any condition it becomes the compact line in the caption
           band. No tutorial, no dismissal to remember, and nothing that has to be earned --
           the two states are just the two things that are true. */}
-      {mode === "explore" && !conditionsOf(cohort).length && selected === null
+      {mode === "explore" && !interacted && !conditionsOf(cohort).length && selected === null
         ? <Invitation /> : null}
       <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
         showGenesisDensity={showGenesisDensity} />
@@ -649,11 +713,13 @@ export function Atlas() {
       <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
 
       <QuestionLine question={sentence} kept={result.kept}
-        total={archive.manifest.counts.storms} />
+        total={archive.manifest.counts.storms}
+        citation={citation} citationUrl={scenarioURL()} />
 
       <ConditionStrip conditions={conditionsOf(cohort)} lastEdit={lastEdit}
-        onEdit={(zone) => setSheetZone(zone)}
-        onClear={(key) => setCohort(clearCondition(cohort, key))} />
+        onEdit={(zone) => { setInteracted(true); setSheetZone(zone); }}
+        onClear={(key) => setCohort(clearCondition(cohort, key))}
+        onReset={onResetQuery} />
 
       {/* THE PLATE ROW. The dock takes width from the plate and nothing else. */}
       <div className="atlas-plate-row">
@@ -681,7 +747,7 @@ export function Atlas() {
              pair AND the interval are folded, at 1000 the non-intensity groups are folded on
              top of both. One control in the head restores the columns; one on each group row
              restores its rows, and both name what they hold. */
-          foldTiming={vw < 1440} foldInterval={vw < 1280} timingOpen={timingOpen}
+          foldTiming={vw < 1440} timingOpen={timingOpen}
           onToggleTiming={() => setTimingOpen((v) => !v)}
           collapseGroups={vw < 1180} openGroups={openGroups}
           onToggleGroup={(k) => setOpenGroups((m) => ({ ...m, [k]: !m[k] }))}
@@ -769,15 +835,27 @@ export function Atlas() {
  *      Atlantic plus East Pacific the plate is titled for.
  *   2. ITS CORE LONGITUDE, at the 1st and 99th percentile of that lobe. Percentiles rather than
  *      extremes because one storm at 179.8W should not widen the opening view by 15 degrees.
- *   3. ITS LATITUDE BAND, from the TRACK POINTS of those storms rather than their genesis --
- *      the plate draws whole trajectories, and a storm that forms at 12N and recurves to 50N
- *      occupies all of that. The floor is the genesis floor, because nothing forms below it.
+ *   3. ITS LATITUDE BAND -- a TROPICAL/RECURVATURE band rather than the full extent of the ink.
+ *      The floor comes from the lobe's GENESIS latitudes at q0.5 (7.2N on this pack): nothing
+ *      forms below the deep tropics, and the archive's single 1.9N genesis should not pull the
+ *      band down five degrees on its own. The ceiling comes from the lobe's TRACK latitudes at
+ *      q97.5 (47.4N): the plate draws whole trajectories, and a storm that forms at 12N and
+ *      recurves to 45N occupies all of that -- but the last 2.5% of fixes are extratropical
+ *      tails running to 66N, and framing for them opens the plate on the Labrador Sea.
  *
- * WHAT IT COMES OUT AS, on this pack: 1.9N to 58.0N, 166.3W to 17.4W. That is 148.9 degrees of
- * longitude against 56.1 of latitude -- in Web Mercator a band 2.14 times wider than it is tall,
- * which is the number the plate's aspect cap in atlas.css is derived from. The two have to be
- * read together: this decides WHAT the plate opens on, and the cap decides what SHAPE it opens
- * on, and a fit is only honest when both are right.
+ * WHAT IT COMES OUT AS, on this pack: 7.2N to 47.4N, 166.3W to 17.4W. That is 148.9 degrees of
+ * longitude against 40.2 of latitude -- in Web Mercator a band 3.19 times wider than it is tall,
+ * which is within a hundredth of the plate's own 3.2 ceiling. That is the point of the band:
+ * FRAME AND PLATE ARE THE SAME SHAPE, so at a workstation width the fit is nearly exact in both
+ * axes and neither a crop nor a margin of empty ocean is doing any work. 98.6% of the lobe's
+ * track fixes are inside it.
+ *
+ * AND IT IS CLAMPED, WHICH IS THE PART A PERCENTILE CANNOT DO. Percentiles bound the FRAME; they
+ * do not bound the VIEW, and the view is what a reader sees. Measured on the previous model at
+ * 1920x1080: the frame was 2.14 wide against a 3.04 plate, so the contain fit bound on latitude
+ * and opened 253 degrees of longitude -- 141E to 34E, the whole West Pacific and half of Asia,
+ * on a plate captioned NORTH ATLANTIC + EAST PACIFIC. NA_EP below is the research geography the
+ * plate declares, and applyFrame in map.jsx will not open a view outside it.
  *
  * NOTHING HERE IS A CLAIM. It is a camera position, derived from coordinates the pack already
  * holds, and it changes only where the map opens: pan, zoom and every filter behave exactly as
@@ -786,7 +864,22 @@ export function Atlas() {
  */
 const LOBE_DEG = 110;      // half-width of the dominant-lobe window, in degrees of longitude
 const CORE_Q = 0.01;       // the lobe's core longitude, at q1..q99
-const TRACK_Q = 0.005;     // the band's north edge, at q99.5 of the lobe's track latitudes
+const GENESIS_Q = 0.005;   // the band's south edge, at q0.5 of the lobe's genesis latitudes
+const RECURVE_Q = 0.975;   // the band's north edge, at q97.5 of the lobe's track latitudes
+
+/* THE RESEARCH GEOGRAPHY, STATED ONCE, AS A BOX.
+ *
+ * The plate is captioned NA + EP and every rate on the surface is computed over storms that
+ * formed in those two basins. This is that caption as coordinates: the equator south, 65N north
+ * (past which the archive holds only extratropical remnants), the antimeridian west (past which
+ * is the West Pacific, and the 371 dateline crossers IBTrACS keeps in the loaded basin files are
+ * the reason the percentiles above are taken over a LOBE rather than over everything), and the
+ * prime meridian east (the archive's easternmost genesis is 9.5W).
+ *
+ * It is a CAMERA bound and nothing else. No storm is filtered by it, no rate is computed from
+ * it, and a reader who drags west finds the West Pacific tail exactly where it always was. What
+ * it forbids is the surface OPENING on geography it does not research. */
+export const NA_EP = [[0, -180], [65, 0]];
 
 export function coreFrame(archive) {
   const glat = archive.genesisLat;
@@ -806,30 +899,83 @@ export function coreFrame(archive) {
   };
 
   const lobeLon = [];
+  const lobeLat = [];
   const rows = [];
   for (let i = 0; i < archive.nStorms; i++) {
     if (Number.isNaN(glat[i]) || !near(glon[i])) continue;
     lobeLon.push(glon[i]);
+    lobeLat.push(glat[i]);
     rows.push(i);
   }
   if (lobeLon.length < 2) return genesisBounds(archive);
   lobeLon.sort(asc);
+  lobeLat.sort(asc);
 
-  /* The latitude the plate has to hold is the one the TRACKS reach, not the one they start at.
-     Sampled every third fix: the band is a framing decision, not a measurement anyone cites. */
+  /* The latitude the plate has to hold at the TOP is the one the TRACKS reach, not the one they
+     start at -- a storm that forms at 12N and recurves to 45N occupies all of it. At the BOTTOM
+     it is the one they start at: nothing forms below the deep tropics, and a track that dips a
+     degree south of its own genesis is not a reason to open the plate on the equator. Sampled
+     every third fix: the band is a framing decision, not a measurement anyone cites. */
   const lat = [];
-  let floor = Infinity;
   for (const i of rows) {
-    if (glat[i] < floor) floor = glat[i];
     const [s, e] = archive.trackRange(i);
     for (let k = s; k < e; k += 3) lat.push(archive.ptLat[k] / 100);
   }
   if (!lat.length) return genesisBounds(archive);
   lat.sort(asc);
 
-  const south = Math.min(floor, quantile(lat, TRACK_Q));
-  const north = quantile(lat, 1 - TRACK_Q);
+  const south = quantile(lobeLat, GENESIS_Q);
+  const north = quantile(lat, RECURVE_Q);
   return [[south, quantile(lobeLon, CORE_Q)], [north, quantile(lobeLon, 1 - CORE_Q)]];
+}
+
+/* THE BOUNDING BOX OF A SET OF DRAWN TRACKS, which is what FIT frames and what selecting a
+ * storm frames.
+ *
+ * LONGITUDE IS UNWRAPPED BEFORE IT IS BOUNDED, and without that this function is wrong in
+ * exactly the case it matters. This archive holds 371 storms whose tracks cross the
+ * antimeridian, so a naive min/max over their longitudes returns -180 and +180 -- a "bounding
+ * box" spanning the entire planet for a cohort occupying forty degrees of it. The fixes are
+ * shifted by whole turns to sit within 180 degrees of the set's own median first, so the span is
+ * measured the short way round and the resulting box may legitimately run past ±180. Leaflet
+ * accepts that and the map is not world-wrapped, so the camera lands where the storms are.
+ *
+ * SAMPLED, because this is a camera position and not a measurement anyone cites: every third fix
+ * for a population, every fix for a single storm, where the difference between a track's true
+ * extreme and a sampled one is a few pixels of margin.
+ */
+export function rowsFrame(archive, rows, { stride = 3 } = {}) {
+  if (!archive || !rows || !rows.length) return null;
+  const lats = [];
+  const lons = [];
+  for (const i of rows) {
+    const [a, b] = archive.trackRange(i);
+    for (let k = a; k < b; k += stride) {
+      lats.push(archive.ptLat[k] / 100);
+      lons.push(archive.ptLon[k] / 100);
+    }
+  }
+  if (!lats.length) return null;
+  const mid = quantile(lons.slice().sort(asc), 0.5);
+  let s = Infinity;
+  let n = -Infinity;
+  let w = Infinity;
+  let e = -Infinity;
+  for (let k = 0; k < lats.length; k++) {
+    const la = lats[k];
+    let lo = lons[k];
+    while (lo - mid > 180) lo -= 360;
+    while (mid - lo > 180) lo += 360;
+    if (la < s) s = la;
+    if (la > n) n = la;
+    if (lo < w) w = lo;
+    if (lo > e) e = lo;
+  }
+  /* A single fix, or a storm that never moved, is a degenerate box no fit can use. Padded to a
+     degree so the camera lands on a place rather than dividing by zero. */
+  if (n - s < 0.5) { s -= 0.5; n += 0.5; }
+  if (e - w < 0.5) { w -= 0.5; e += 0.5; }
+  return [[s, w], [n, e]];
 }
 
 function asc(a, b) { return a - b; }

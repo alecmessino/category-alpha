@@ -45,12 +45,115 @@ const EMPTY_ROWS = new Uint32Array(0);
    A bar labelled "1,143 KM" is a measurement of the viewport, not of the map. */
 const SCALE_STEPS = [100, 200, 250, 500, 1000, 2000, 4000];
 
+/* ── THE CAMERA ────────────────────────────────────────────────────────────────────────────
+ *
+ * THREE THINGS MOVE THIS MAP AND THEY ARE NAMED SEPARATELY, because a reader who cannot predict
+ * when the view will move stops trusting the view.
+ *
+ *   HOME     the canonical NA + EP aperture. Cover-fitted and clamped: see below.
+ *   FIT      whatever evidence is currently drawn. Contain-fitted, with a margin, unclamped --
+ *            a reader who has filtered to dateline crossers is asking to be taken to them.
+ *   SUBJECT  selecting a storm fits that storm's track. The one automatic move, and it is a
+ *            NAVIGATION rather than a re-frame: the reader asked to look at one storm.
+ *
+ * AND NOTHING ELSE MOVES IT. A cohort edit, a layer toggle, a mode switch and a replay tick all
+ * leave the camera exactly where the reader put it. That is the rule `userMoved` records and
+ * scripts/check-atlas-camera.mjs measures; it is stated here because the failure it prevents --
+ * a query change quietly re-framing a map somebody had just panned -- reads as a bug in the
+ * filter rather than as a camera decision.
+ */
+
+/**
+ * Fit `frame` on the map, with an optional clamp the resulting VIEW may not leave.
+ *
+ * COVER, NOT CONTAIN, FOR THE APERTURE, and this is the correction the previous model needed.
+ * `fitBounds` contains: it shows the whole frame and whatever else the plate's shape demands on
+ * the looser axis. With a 3.19-shaped frame on a 3.84-shaped plate that surplus is 100 degrees
+ * of longitude, and it opened a plate captioned NORTH ATLANTIC + EAST PACIFIC on the Philippine
+ * Sea. Covering binds on the axis the plate is TIGHTER in and crops the other, so the frame's
+ * informative axis is what fills the plate.
+ *
+ * SNAP IS FLOORED, NOT CEILED. Leaflet quantises zoom to zoomSnap; ceiling a cover fit would
+ * crop up to a fifth of the frame away to satisfy the snap. Flooring shows slightly MORE than
+ * the frame instead, which is the direction an aperture is allowed to be wrong in.
+ *
+ * THE CLAMP IS A SEPARATE STEP AND IT OUTRANKS THE FIT. It raises the zoom until the clamp box
+ * covers the plate -- so no view outside it is reachable at that zoom -- and then pans the
+ * result back inside, in projected pixels rather than in degrees, since a degree of latitude is
+ * not a fixed number of pixels in Mercator.
+ */
+export function applyFrame(m, frame, { clamp = null, mode = "cover", padPx = 0 } = {}) {
+  if (!m || !frame) return false;
+  let tb;
+  try { tb = L.latLngBounds(frame); } catch { return false; }
+  if (!tb || !tb.isValid()) return false;
+
+  /* THE SIZE IS RE-READ BEFORE ANYTHING IS MEASURED, AND THAT IS NOT DEFENSIVE -- IT IS THE FIX
+   * FOR A REAL CROP.
+   *
+   * Leaflet caches its container size and refreshes it only on invalidateSize, which this
+   * component drives from a ResizeObserver -- asynchronously, after React has committed. So a
+   * fit that runs IN the commit that changed the plate's box measures the box it had BEFORE.
+   * Selecting a storm is exactly that commit: the inspector docks and takes 380px of width in
+   * the same render the subject fit fires in. Measured: a track spanning 31.8 degrees of
+   * longitude was fitted against a 1920px plate and drawn on the 1540px one it had become --
+   * zoom 6.25 where 6.0 was needed, and 3.4 degrees of the storm off both ends of its own plate.
+   *
+   * pan:false because this is a measurement, not a move: the fit below decides where the camera
+   * goes, and letting invalidateSize re-centre first would put a pan the reader did not ask for
+   * in front of it. */
+  try { m.invalidateSize({ animate: false, pan: false }); } catch { /* not yet in the document */ }
+  const z0 = m.getZoom() || 0;
+  const size = m.getSize();
+  const w = Math.max(32, size.x - 2 * padPx);
+  const h = Math.max(32, size.y - 2 * padPx);
+  const nw0 = m.project(tb.getNorthWest(), z0);
+  const se0 = m.project(tb.getSouthEast(), z0);
+  const sx = Math.abs(se0.x - nw0.x);
+  const sy = Math.abs(se0.y - nw0.y);
+  if (!(sx > 0) || !(sy > 0)) return false;
+
+  const snap = m.options.zoomSnap || 0;
+  let z = m.getScaleZoom(mode === "cover"
+    ? Math.max(w / sx, h / sy)
+    : Math.min(w / sx, h / sy), z0);
+  if (snap) z = Math.floor(z / snap) * snap;
+
+  const cb = clamp ? L.latLngBounds(clamp) : null;
+  if (cb && cb.isValid()) z = Math.max(z, m.getBoundsZoom(cb, true));
+  z = Math.max(m.getMinZoom(), Math.min(m.getMaxZoom(), z));
+
+  /* The frame's MERCATOR midpoint, not the mean of its degrees. A band from 7N to 47N has its
+     arithmetic centre at 27N and its projected centre at 30N, and centring on the former puts
+     three degrees of the recurvature corridor off the top of the plate. */
+  const nw = m.project(tb.getNorthWest(), z);
+  const se = m.project(tb.getSouthEast(), z);
+  m.setView(m.unproject(nw.add(se).divideBy(2), z), z, { animate: false });
+
+  if (!cb || !cb.isValid()) return true;
+  const vb = m.getBounds();
+  const vnw = m.project(vb.getNorthWest(), z);
+  const vse = m.project(vb.getSouthEast(), z);
+  const cnw = m.project(cb.getNorthWest(), z);
+  const cse = m.project(cb.getSouthEast(), z);
+  let dx = 0;
+  let dy = 0;
+  if (vnw.x < cnw.x) dx = cnw.x - vnw.x; else if (vse.x > cse.x) dx = cse.x - vse.x;
+  if (vnw.y < cnw.y) dy = cnw.y - vnw.y; else if (vse.y > cse.y) dy = cse.y - vse.y;
+  if (dx || dy) {
+    const c = m.project(m.getCenter(), z).add(L.point(dx, dy));
+    m.setView(m.unproject(c, z), z, { animate: false });
+  }
+  return true;
+}
+
 export function AtlasMap({
   archive, world, coast, rows, emphasis, selected, onSelect, onProbe, probe, replayMs, home,
+  homeClamp = null, evidenceFrame = null, subjectFrame = null,
   colorBy, showPathway, pathway, pathwayStep, dimPopulation, softenEmphasis, onViewChange,
   onHover, showGenesis = true, showLandfalls = true,
   showGenesisDensity, genesisDensity, mode = "explore", timeline, replayCursorMin,
-  kept = 0, lifted = 0, selectedCount = 0, hint, children,
+  kept = 0, context = 0, selectedCount = 0, hint, onGesture, cameraApi = null, children,
 }) {
   const el = React.useRef(null);
   const plate = React.useRef(null);
@@ -60,9 +163,54 @@ export function AtlasMap({
   const [hover, setHover] = React.useState(null);
   const [frame, setFrame] = React.useState(null);
 
+  /* THE CAMERA'S TWO BITS OF MEMORY.
+     `moving` counts the re-frames this component is itself performing, so the move events they
+     emit are not mistaken for the reader's hand. `userMoved` is what those events set, and the
+     only thing that clears it is an explicit HOME or FIT. */
+  const moving = React.useRef(0);
+  const userMoved = React.useRef(false);
+  const fittedSubject = React.useRef(null);
+
   // Callers change identity every render; keep them in a ref so the map is built once.
   const cb = React.useRef({});
-  cb.current = { onSelect, onProbe, onViewChange, onHover };
+  cb.current = { onSelect, onProbe, onViewChange, onHover, onGesture };
+  /* The frames change identity on every cohort edit; the controls read them from here so that
+     wiring HOME and FIT does not rebuild the map. */
+  const frames = React.useRef({});
+  frames.current = { home, homeClamp, evidenceFrame, subjectFrame };
+
+  /* EVERY MOVE THIS COMPONENT MAKES GOES THROUGH HERE, so that the move events Leaflet emits
+     from it are attributable. Synchronous by construction -- every re-frame is `animate:false`,
+     and Leaflet fires move/zoom/moveend inline for those -- so the counter is back at zero
+     before any event the reader could have caused. */
+  const camera = (m, fn) => {
+    moving.current += 1;
+    try { return fn(); } finally { moving.current -= 1; }
+  };
+
+  /* HOME AND FIT, AS FUNCTIONS RATHER THAN AS BUTTONS, because three things call them: the two
+     controls on the plate, and the keyboard. Both CLEAR `userMoved`: an explicit re-frame is the
+     reader handing the camera back. */
+  const goHome = React.useCallback(() => {
+    const m = map.current;
+    if (!m) return;
+    const f = frames.current;
+    camera(m, () => applyFrame(m, f.home, { clamp: f.homeClamp, mode: "cover" }));
+    userMoved.current = false;
+  }, []);
+
+  /* FIT IS CONTAIN, AND IT IS NOT CLAMPED. The clamp exists so the surface does not OPEN on
+     geography it does not research; a reader who has asked for the storms that crossed the
+     dateline is asking to be taken to them, and refusing would be the camera overruling the
+     query. The margin is 24px on each side so a track does not run into the graticule ticks. */
+  const goFit = React.useCallback(() => {
+    const m = map.current;
+    if (!m) return;
+    const f = frames.current;
+    const target = f.subjectFrame || f.evidenceFrame || f.home;
+    camera(m, () => applyFrame(m, target, { mode: "contain", padPx: 24 }));
+    userMoved.current = false;
+  }, []);
 
   React.useEffect(() => {
     if (!el.current || map.current) return;
@@ -70,29 +218,48 @@ export function AtlasMap({
       preferCanvas: true, zoomControl: false, attributionControl: true,
       minZoom: 2, maxZoom: 8, zoomSnap: 0.25, worldCopyJump: false,
     }).setView(FALLBACK_CENTER, FALLBACK_ZOOM);
-    if (home) {
-      /* A CONTAIN FIT, AND NOTHING TAKEN OUT OF IT.
-       *
-       * The plate's aspect is capped at the archive's own working shape in atlas.css, so a
-       * contain fit of the core frame already opens on the working region: there is no cover
-       * step here, nothing is cropped to make the plate look busier, and the whole frame is on
-       * the plate at every supported viewport.
-       *
-       * What changed is the padding, from 4% on each side to none. `fitBounds` FLOORS the zoom
-       * to zoomSnap, which is a quarter step here, so the fit is already as much as 19% looser
-       * than the frame asked for before any padding is added. Eight per cent of pad on top of
-       * that floor was compounding into as much as 103 degrees of latitude on a plate whose
-       * frame is 56 -- and every one of the extra degrees is empty Southern Ocean or Arctic.
-       * With no pad the floor is the only slack left, which is what the plate's aspect cap is
-       * sized against.
-       *
-       * The snap floor is deliberate and stays: rounding to the NEAREST step instead would
-       * tighten the view by up to half a step, and measured on this pack that took the dominant
-       * genesis lobe from 99.9% inside the opening window to 98.1% at one supported width. A
-       * frame that is not entirely on the plate is not a frame. */
-      try { m.fitBounds(L.latLngBounds(home), { animate: false }); }
-      catch { /* a degenerate extent keeps the fallback view */ }
-    }
+    /* THE OPENING FRAME, COVERED AND CLAMPED. See applyFrame above for why it is not a
+       fitBounds: a contain fit of a 3.19-shaped frame on a 3.84-shaped plate opens a hundred
+       degrees of Pacific the plate is not titled for. `homeClamp` is the research geography
+       and is the bound that makes the difference visible in a gate rather than in a review. */
+    camera(m, () => applyFrame(m, home, { clamp: homeClamp, mode: "cover" }));
+
+    /* THE TWO RECOVERY CONTROLS, ON THE MAP, ABOVE THE ZOOM.
+     *
+     * THEY ARE NOT THE SAME CONTROL AND THEY ARE NOT RESET QUERY EITHER. Three things a reader
+     * can be lost in, three ways out, and each names exactly one of them:
+     *
+     *   RESET QUERY  clears the conditions.        It is on the condition strip.
+     *   HOME         restores the canonical camera. It changes nothing about the question.
+     *   FIT          frames the current evidence.   It changes nothing about the question either.
+     *
+     * A single "reset" that did all three would be the fastest control to build and the one a
+     * reader can never use deliberately: having panned away from a cohort they spent five
+     * minutes building, the way back must not also throw the cohort away.
+     *
+     * Built with Leaflet's own control plumbing rather than as an absolutely positioned overlay,
+     * so it participates in the same stacking and pointer-event containment as the zoom control
+     * beneath it and cannot end up under the graticule or over the attribution. */
+    const nav = L.control({ position: "topright" });
+    nav.onAdd = () => {
+      const box = L.DomUtil.create("div", "leaflet-bar at-mapnav");
+      const mk = (label, title, hook, fn) => {
+        const a = L.DomUtil.create("a", "", box);
+        a.href = "#";
+        a.textContent = label;
+        a.title = title;
+        a.setAttribute("role", "button");
+        a.setAttribute(hook, "");
+        L.DomEvent.on(a, "click", (ev) => { L.DomEvent.stop(ev); fn(); });
+        return a;
+      };
+      mk("HOME", "the canonical North Atlantic + East Pacific aperture (H)",
+        "data-camera-home", () => goHome());
+      mk("FIT", "frame the evidence currently drawn (F)", "data-camera-fit", () => goFit());
+      L.DomEvent.disableClickPropagation(box);
+      return box;
+    };
+    nav.addTo(m);
     L.control.zoom({ position: "topright" }).addTo(m);
     /* CONTEXT, AND ONLY CONTEXT. This is the same tile endpoint the terminal draws, backed off
        from 0.62 to 0.42 so it sits at the contextual ink level against the plate's own
@@ -125,6 +292,12 @@ export function AtlasMap({
       readFrame();
       if (cb.current.onViewChange) cb.current.onViewChange(readView(m, population));
     });
+    /* WHOSE HAND MOVED THE CAMERA. `moving` is non-zero only inside applyFrame, so anything
+       arriving with it at zero is the reader -- a drag, a wheel, a zoom button, a double click.
+       A resize is NOT one of those: the plate changes height when the inspector's transport
+       appears, and treating that as the reader's pan would let one automatic re-frame authorise
+       the next. */
+    m.on("movestart zoomstart", () => { if (!moving.current) userMoved.current = true; });
     m.on("click", (e) => {
       const hit = hitGenesis(archiveRef.current, m, e.containerPoint,
         { rows: rowSetRef.current });
@@ -264,6 +437,42 @@ export function AtlasMap({
     layers.current.selection.setStorm(selected === null ? -1 : selected);
   }, [ready, selected]);
 
+  /* THE CAMERA, REACHABLE FROM OUTSIDE. The shell binds H and F to these, and the camera gate
+     drives them; both are the same two functions the controls call, so a keystroke and a click
+     cannot come to mean different things. `userMoved` is exposed read-only, because the whole
+     persistence rule is a claim about it and a claim that cannot be measured is not enforced. */
+  React.useEffect(() => {
+    if (!ready) return undefined;
+    const api = { home: goHome, fit: goFit, movedByReader: () => userMoved.current };
+    if (cameraApi) cameraApi.current = api;
+    globalThis.__ATLAS_CAMERA = api;
+    return () => { if (cameraApi) cameraApi.current = null; };
+  }, [ready, cameraApi, goHome, goFit]);
+
+  /* THE ONE AUTOMATIC MOVE, AND ITS THREE GUARDS.
+   *
+   * Selecting a storm frames that storm, because the reader asked to look at it and hunting for
+   * a single 40-hour track inside a 150-degree aperture is not a thing anyone should have to do.
+   * The specification permits this explicitly -- selected-storm navigation MAY intentionally fit
+   * the track -- and it is the only place camera persistence yields.
+   *
+   *   IT FIRES ON THE SELECTION CHANGING, not on the frame's identity changing. `subjectFrame`
+   *   is a fresh array on every render; keyed on it, a cohort edit with a storm already selected
+   *   would re-frame the map, which is exactly the theft the persistence rule forbids.
+   *   IT DOES NOT FIRE ON DESELECTION. Closing the inspector returns the reader to whatever they
+   *   were looking at, not to a camera decision made on their behalf.
+   *   IT IS CONTAIN, WITH A MARGIN, so the whole track and its landfall marks are on the plate. */
+  React.useEffect(() => {
+    if (!ready) return;
+    if (selected === null) { fittedSubject.current = null; return; }
+    if (fittedSubject.current === selected) return;
+    fittedSubject.current = selected;
+    const f = frames.current.subjectFrame;
+    if (!f) return;
+    const m = map.current;
+    camera(m, () => applyFrame(m, f, { mode: "contain", padPx: 34 }));
+  }, [ready, selected]);
+
   React.useEffect(() => {
     if (!ready) return;
     layers.current.selection.setReplayTime(replayMs === undefined ? null : replayMs);
@@ -320,32 +529,36 @@ export function AtlasMap({
 
   return (
     <>
+      {/* THE HEAD BAND, AT THE LENGTH THE SPECIFICATION SETS IT.
+          PLATE · NA + EP · 390 COHORT · 3,885 CONTEXT, and nothing else. What left was the
+          right-hand caption -- "EXPLORE · THE RECORD AS A FINISHED MAP" -- which is atmosphere:
+          it never changes in explore mode, it says nothing a reader can act on, and the mode is
+          already legible from the transport that only exists while the clock runs. The basin is
+          abbreviated because the plate is captioned once and read a hundred times; the full
+          words are in the Cohort Spec, which is what anyone would quote.
+
+          THE TWO FIGURES ARE THE ONE THING ON THIS BAND A READER CHECKS. They reconcile the ink
+          with the deck: COHORT is what is lifted and is the denominator of every rate below,
+          CONTEXT is the population drawn behind it. Unfiltered they are the same number, so
+          only one is printed -- "3,959 COHORT · 3,959 CONTEXT" states nothing twice. */}
       <div className="at-platehead">
-        <span className="at-plate-title">PLATE · NORTH ATLANTIC + EAST PACIFIC</span>
-        {/* WHAT IS ACTUALLY ON THE PLATE.
-            `kept` was the COHORT count and `lifted` was the cohort count again, while the layer
-            underneath was handed the BASELINE's rows -- so a 192-storm probe reported
-            "192 TRACKS DRAWN · 192 LIFTED BY THE QUERY" with 3,885 tracks visibly on screen.
-            Two numbers, both wrong, and neither of them the one a reader would use to check
-            that the map and the panel are answering the same question. `kept` is now the row
-            count the plate was given and `lifted` is the cohort inside it, so the second figure
-            reconciles with the cohort in both rails and the first reconciles with the ink. */}
-        {/* IN REPLAY, NOTHING IS DRAWN YET. The static population is withheld on purpose while
-            the clock runs -- revealing it over time is the whole point -- so "3,885 TRACKS
-            DRAWN" sat over an empty plate at the start of every run, contradicting the picture
-            and the transport beneath it, which correctly reads REVEALED 1 / 3,885. The same
-            number is true of the run as a POPULATION, which is what it names here instead; how
-            much of it has been revealed is the transport's to say, and it does. */}
-        <span>
-          <em>{kept.toLocaleString()}</em> {mode === "replay" ? "IN THIS RUN" : "TRACKS DRAWN"}
-          {lifted && mode !== "replay"
-            ? <> · <em>{lifted.toLocaleString()}</em> LIFTED BY THE QUERY</> : null}
-          {selectedCount ? <> · <em>{selectedCount}</em> SELECTED</> : null}
+        <span className="at-plate-title">PLATE · NA + EP</span>
+        <span className="at-plate-counts">
+          {mode === "replay" ? (
+            <><em>{kept.toLocaleString()}</em> IN THIS RUN</>
+          ) : (
+            <>
+              <em>{kept.toLocaleString()}</em> COHORT
+              {context && context !== kept
+                ? <> · <em>{context.toLocaleString()}</em> CONTEXT</> : null}
+              {selectedCount ? <> · <em>{selectedCount}</em> SELECTED</> : null}
+            </>
+          )}
         </span>
-        <span className="at-r">
-          {mode === "replay" ? "REPLAY · ARCHIVE CLOCK RUNNING"
-            : "EXPLORE · THE RECORD AS A FINISHED MAP"}
-        </span>
+        {/* THE ONE STATE THE BAND STILL NAMES, and it is not atmosphere: in replay the static
+            population is deliberately withheld, so a plate that looks empty is correct and a
+            reader has to be told which of the two things they are looking at. */}
+        {mode === "replay" ? <span className="at-r">REPLAY</span> : null}
       </div>
 
       <div className="at-plate" ref={plate}>
@@ -355,18 +568,50 @@ export function AtlasMap({
         {hover ? <HoverChip hover={hover} frame={frame} /> : null}
       </div>
 
+      {/* THE FOOT BAND, AT THE LENGTH THE SPECIFICATION SETS IT.
+          Scale, projection and graticule, the live coordinate, and the attribution Leaflet
+          draws over the plate's own bottom-right. Everything else on this band was methodology
+          or instruction, and both have a place that is not a caption strip under a map.
+
+          THE COASTLINE STATEMENT IS THE ONE THAT NEEDED CARE, because it is two different
+          statements wearing one sentence. With the archive's rings loaded it is METHODOLOGY --
+          which geometry is authoritative -- and it goes behind the disclosure with the rest.
+          With the rings ABSENT it is a DEGRADED STATE: the plate is drawing a coastline the
+          landfall rule was never written against, and that is not something a reader should
+          have to open anything to discover. So the fallback stays in the band, at full weight,
+          and only the healthy case is folded away. */}
       <div className="at-platefoot">
         <ScaleBar frame={frame} />
         <span className="at-plate-proj">MERCATOR · GRATICULE 10° · TICKS 5°</span>
-        <span className="at-plate-model">
-          {hasArchiveCoast
-            ? "COASTLINE AT FULL CONTRAST · THE FIVE MODELLED LANDFALL REGIONS"
-            : "CONTEXTUAL COASTLINE ONLY · THE ARCHIVE'S RINGS HAVE NOT LOADED"}
-        </span>
-        {/* The gesture, restated compactly once the reader is working. The full-size invitation
-            over the plate is right on an unqueried map and wrong the moment there is data under
-            it; this is where it goes instead -- in the caption band, at caption weight, beside
-            the scale and the projection, where it competes with nothing. */}
+        {hasArchiveCoast ? (
+          <details className="at-plate-notes" data-plate-notes>
+            <summary title="what this plate draws, and from which geometry">PLATE NOTES</summary>
+            <div className="at-plate-notes-body">
+              <p>
+                <b>COASTLINE</b> The five modelled landfall regions are drawn from the archive&rsquo;s
+                own rings at full contrast. Everything else is a contextual basemap and the
+                landfall rule never consults it.
+              </p>
+              <p>
+                <b>PROJECTION</b> Web Mercator. The graticule is ruled on the plate&rsquo;s margin
+                rather than across it: 10° major ticks with labels, 5° minor.
+              </p>
+              <p>
+                <b>THE GESTURE</b> Click open water to ask what formed near there and where it
+                went. Click a genesis point to open that storm. HOME restores the canonical
+                aperture; FIT frames whatever is drawn now.
+              </p>
+            </div>
+          </details>
+        ) : (
+          <span className="at-plate-model">
+            CONTEXTUAL COASTLINE ONLY · THE ARCHIVE&rsquo;S RINGS HAVE NOT LOADED
+          </span>
+        )}
+        {/* THE INSTRUCTION RETIRES ITSELF. It is here for a reader who has not yet discovered
+            that the plate answers a click, and it is noise for one who has -- so the shell stops
+            passing it after the first probe, selection or condition. The gesture is unchanged
+            and the sentence is still in PLATE NOTES; what goes away is the nagging. */}
         {hint ? <span className="at-plate-hint">{hint}</span> : null}
         <span className="at-r"><em id="at-coords">—</em></span>
       </div>

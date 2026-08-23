@@ -156,41 +156,58 @@ const AUDIT = (vw) => {
   }
   /* AND A DISCLOSURE THAT STARTS CLOSED IS A WAY TO HIDE ONE. Every details element the deck
      owns carries a qualification -- what the rates assume, the pathway's denial of being a
-     forecast, the environment's coverage -- and all of them ship open. */
+     forecast, the environment's coverage -- and all of them ship open.
+     
+     ONE KIND IS ALLOWED TO SHIP CLOSED, AND IT PAYS FOR THE PRIVILEGE IN ITS SUMMARY. A caveat
+     may be collapsed to its FINDING with its ARGUMENT behind the disclosure -- that is the
+     difference between shortening a qualification and hiding one -- but only if the summary
+     states the finding as a sentence a reader can act on. "MORE" or "DETAILS" over a hidden
+     caveat is the exact move this rule exists to forbid, so a closed disclosure whose summary is
+     a label rather than a statement fails here as loudly as a hidden refusal. */
   for (const d of deck.querySelectorAll("details")) {
-    if (!d.open) bad.push(`a deck disclosure is closed: ${(d.querySelector("summary") || {}).textContent}`);
+    if (d.open) continue;
+    const sum = ((d.querySelector("summary") || {}).textContent || "").trim();
+    if (!d.hasAttribute("data-weighting-note")) {
+      bad.push(`a deck disclosure is closed: ${sum}`);
+    } else if (sum.split(/\s+/).length < 8 || !/[a-z]/.test(sum)) {
+      bad.push(`a collapsed caveat states no finding in its summary: "${sum}"`);
+    }
   }
 
   /* 4 · WHAT IS FOLDED IS COUNTED AND NAMED, never silently dropped. */
   const foldBtn = deck.querySelector("[data-timing-fold]");
-  const intervalFolded = deck.hasAttribute("data-interval-folded");
   const timingFolded = deck.hasAttribute("data-timing-folded");
   if (timingFolded && !foldBtn) bad.push("columns are folded with no control to restore them");
   if (foldBtn) {
     const t = (foldBtn.textContent || "").trim();
     if (timingFolded && !/TIMING/.test(t)) bad.push(`the fold does not name TIMING: "${t}"`);
-    /* AND IT MUST NOT NAME THE INTERVAL, because the interval is not behind it. The interval
-       gives up its TRACK below 1280 and keeps its VALUE, in the rate's cell -- a control
-       offering to restore something that never left is a control that lies about the state. */
+    /* AND IT MUST NOT NAME THE INTERVAL, because the interval is not a column at any width. It
+       shares the rate's cell everywhere -- "53.3% [48.5-58.2%]" is one statement -- so a control
+       offering to restore it would be a control that lies about the state. */
     if (/INTERVAL/.test(t)) bad.push(`the fold offers to restore an interval that never left: "${t}"`);
     note.push("fold:" + t);
   }
-  if (intervalFolded) {
-    /* THE COLUMN GAVE UP ITS TRACK; THE VALUE STAYED ON THE ROW.
-       Panel rule 1 -- a published rate implies a count and an interval on the same row -- does
-       not relax at a narrower viewport, and a hover-only title is not an interval a touch reader
-       can reach. So every row that prints a rate must still print its bounds, in the cell the
-       rate is in. */
-    for (const row of deck.querySelectorAll("[data-outcome]")) {
-      const rate = row.querySelector(".at-dc-rate");
-      if (!rate || !/\d[\d,.]*\s*%/.test(rate.textContent || "")) continue;
-      const ci = rate.querySelector(".at-dc-int");
-      if (!ci || !/\d/.test(ci.textContent || "")) {
-        bad.push(`${row.getAttribute("data-outcome")}: the interval folded and the bounds went with it`);
-      }
+  /* THE RATE AND ITS INTERVAL ARE ONE CELL AT EVERY WIDTH, and that is now asserted rather than
+     merely arranged. Panel rule 1 -- a published rate implies a count and an interval on the
+     same row -- does not relax at a narrower viewport, and a hover-only title is not an interval
+     a touch reader can reach. Every row that prints a rate prints its bounds in the same cell,
+     at 820px and at 1920. */
+  for (const row of deck.querySelectorAll("[data-outcome]")) {
+    const rate = row.querySelector(".at-dc-rate");
+    if (!rate || !/\d[\d,.]*\s*%/.test(rate.textContent || "")) continue;
+    const ci = rate.querySelector(".at-dc-int");
+    if (!ci || !/\d/.test(ci.textContent || "")) {
+      bad.push(`${row.getAttribute("data-outcome")}: a rate without its interval in the same cell`);
     }
-    note.push("interval-folded");
   }
+  /* AND THE TWO CONDITIONAL COLUMNS ARE CONSISTENT WITH WHAT THE ROWS HOLD. The allocation may
+     drop VS ARCHIVE and STATUS -- see evidence-deck.jsx -- but never while a row has something
+     to put in them. This is the rule check-atlas-states asserts per row, stated per deck. */
+  const hasStatusCol = !!deck.querySelector(".at-deck-head .at-dc-status");
+  if (!hasStatusCol && deck.querySelector("[data-outcome] [data-refusal]")) {
+    bad.push("a row is refused and the deck is rendering no status column");
+  }
+  note.push("deck-mode:" + (deck.getAttribute("data-deck-mode") || "?"));
   for (const g of deck.querySelectorAll("[data-group-fold]")) {
     if (!/\+\s*\d+/.test(g.textContent || "")) bad.push("a folded group does not count its rows");
     note.push("group-folded:" + g.getAttribute("data-group-fold"));
@@ -209,7 +226,13 @@ const AUDIT = (vw) => {
     const b = rect(plate);
     if (vw >= 900) {
       const ar = b.width / b.height;
-      if (!(ar >= 1.419 && ar <= 3.202)) bad.push(`plate aspect ${ar.toFixed(3)} outside [1.421, 3.2]`);
+      const docked = !!document.querySelector("[data-inspector-dock]");
+      const ceil = vw >= 1600 && !docked ? 4.0 : 3.2;
+      if (b.height > 501) bad.push(`plate is ${Math.round(b.height)}px, past the 500px cap`);
+      if (ar < 1.419) bad.push(`plate aspect ${ar.toFixed(3)} below the 1.421 floor`);
+      if (b.width <= 2001 && ar > ceil + 0.002) {
+        bad.push(`plate aspect ${ar.toFixed(3)} above the ${ceil} ceiling`);
+      }
       note.push("aspect:" + ar.toFixed(3));
     } else {
       /* THE BOUND IS OFF BY DESIGN HERE, so what is asserted instead is the thing it was
@@ -318,12 +341,17 @@ for (const [vname, w, h] of VIEWPORTS) {
    which also pins the boundaries, since a step that moved would show up here as the wrong
    column count rather than as a layout that merely still fits. */
 console.log("\n[responsive] the ladder gives up what it says it gives up, where it says it does");
+/* THE INTERVAL IS NOT ON THIS LADDER ANY MORE, and its absence is the point. It used to give up
+   its track at 1280 and move into the rate's cell, so the most-read statement on the surface had
+   two shapes depending on the monitor; it is one cell at every width now, which is asserted per
+   row in the audit above rather than as a rung here. What is left is the two steps that still
+   change the deck's shape, plus the one that changes the shell's. */
 const LADDER = [
-  [1440, 900, { timing: false, interval: false, groups: false, dockColumn: true }],
-  [1320, 860, { timing: true, interval: false, groups: false, dockColumn: true }],
-  [1220, 820, { timing: true, interval: true, groups: false, dockColumn: true }],
-  [1024, 768, { timing: true, interval: true, groups: true, dockColumn: false }],
-  [880, 1180, { timing: true, interval: true, groups: true, dockColumn: false }],
+  [1440, 900, { timing: false, groups: false, dockColumn: true }],
+  [1320, 860, { timing: true, groups: false, dockColumn: true }],
+  [1220, 820, { timing: true, groups: false, dockColumn: true }],
+  [1024, 768, { timing: true, groups: true, dockColumn: false }],
+  [880, 1180, { timing: true, groups: true, dockColumn: false }],
 ];
 for (const [w, h, want] of LADDER) {
   await open(`i=cat4&storm=${pick}`, w, h);
@@ -333,7 +361,6 @@ for (const [w, h, want] of LADDER) {
     const row = document.querySelector(".atlas-plate-row");
     return {
       timing: deck.hasAttribute("data-timing-folded"),
-      interval: deck.hasAttribute("data-interval-folded"),
       groups: !!deck.querySelector("[data-group-fold]"),
       /* A DOCK IN THE ROW TAKES A COLUMN OF IT; AN OVERLAY DOES NOT. Read from the plate row's
          own track list rather than from the dock's position, because that is the thing the
@@ -344,7 +371,6 @@ for (const [w, h, want] of LADDER) {
   });
   const diff = Object.keys(want).filter((k) => want[k] !== got[k]);
   ok(`${String(w).padStart(4)}px  timing ${got.timing ? "folded" : "resident"}`
-     + ` · interval ${got.interval ? "folded" : "resident"}`
      + ` · groups ${got.groups ? "folded" : "resident"}`
      + ` · inspector ${got.dockColumn ? "docked" : "overlaid"}`,
      diff.length === 0, diff.map((k) => `${k}: want ${want[k]}, got ${got[k]}`).join("; "));

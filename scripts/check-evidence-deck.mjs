@@ -178,11 +178,13 @@ const HTML_SUBJECT = render({ result: RESULT, comparison: COMPARISON, subject: S
   onEvidence: () => {} });
 const HTML_FOLDED = render({ result: RESULT, comparison: COMPARISON, foldTiming: true,
   conditions: CONDITIONS });
-/* THE NARROWEST TEMPLATE, RENDERED. Below 1280 the interval folds as well, and the fold is
-   what decides how many cells a row emits -- so the state where a row can come apart is a
-   state this gate has to build rather than one it can reason about. */
-const HTML_NARROW = render({ result: RESULT, comparison: COMPARISON, foldTiming: true,
-  foldInterval: true, conditions: CONDITIONS });
+/* THE ARCHIVE-MODE TEMPLATE, RENDERED. With no comparison and no subject the deck drops the
+   VS ARCHIVE column, and its rows therefore emit two fewer cells -- so the state where a row can
+   come apart is a state this gate builds rather than one it reasons about. It replaced a
+   `foldInterval: true` fixture that no longer described anything: the interval shares the rate's
+   cell at every width now, and a fixture for a prop that does not exist is a passing check of
+   nothing. */
+const HTML_ARCHIVE = render({ result: RESULT, onEvidence: () => {} });
 
 /* ── the audit ────────────────────────────────────────────────────────────────────────────
  *
@@ -193,6 +195,7 @@ const AUDIT = () => {
   const PCT = /\d[\d,.]*\s*%/;
   const rows = [...document.querySelectorAll("[data-outcome]")];
   if (!rows.length) bad.push("no rows rendered at all");
+  const hasStatusColumn = !!document.querySelector(".at-deck-head .at-dc-status");
 
   for (const row of rows) {
     const name = row.getAttribute("data-outcome");
@@ -203,9 +206,15 @@ const AUDIT = () => {
     const refusalBlock = row.querySelector("[data-refusal]");
     const refused = !!refusalBlock;
 
-    /* RULE 4 — exactly one status, and it is inside this row. */
+    /* RULE 4 — exactly one status, and it is inside this row.
+       THE COLUMN IS CONDITIONAL AND THE RULE IS NOT. Archive-mode allocation drops STATUS when
+       no row in the deck has a word for it; one refusal anywhere brings it back for every row.
+       So the presence of a CELL is required exactly when the deck has the COLUMN, and a refused
+       row's cell-with-text is required unconditionally, below. */
     if (statuses.length > 1) bad.push(`${name}: ${statuses.length} status cells in one row`);
-    if (!row.querySelector(".at-dc-status")) bad.push(`${name}: no status cell in the row`);
+    if (hasStatusColumn && !row.querySelector(".at-dc-status")) {
+      bad.push(`${name}: no status cell in the row`);
+    }
     for (const s of statuses) {
       if (!row.contains(s)) bad.push(`${name}: a status is not inside its own row`);
     }
@@ -224,9 +233,12 @@ const AUDIT = () => {
       if (rate && !/[—–-]/.test(rate.textContent || "")) {
         bad.push(`${name}: refused, but the rate cell holds no slot dash`);
       }
-      /* RULE 4 again, the sharp edge: a refused row must SAY so in its own status cell. */
+      /* RULE 4 again, the sharp edge: a refused row must SAY so in its own status cell, and the
+         deck must therefore be rendering the column at all. Neither half depends on the mode. */
       const st = row.querySelector(".at-dc-status");
-      if (!(st && (st.textContent || "").trim())) {
+      if (!hasStatusColumn) {
+        bad.push(`${name}: refused, and the deck is rendering no status column`);
+      } else if (!(st && (st.textContent || "").trim())) {
         bad.push(`${name}: refused, but its status cell is empty — the status has detached`);
       }
     }
@@ -323,8 +335,8 @@ console.log("[deck] the rendered deck, per row");
   ok("and so does the deck with the timing columns folded", bad.length === 0, bad.join("\n"));
 }
 {
-  const bad = await auditOf(HTML_NARROW);
-  ok("and so does the deck with the interval folded as well", bad.length === 0, bad.join("\n"));
+  const bad = await auditOf(HTML_ARCHIVE);
+  ok("and so does the archive-mode deck, with two fewer columns", bad.length === 0, bad.join("\n"));
 }
 
 /* THE FOOT NAMES WHAT THE VS ARCHIVE COLUMN IS AGAINST, AND SAYS WHAT IT IS NOT.
@@ -474,8 +486,20 @@ if (process.argv.includes("--self-test")) {
          matched on the class alone and moved the HEADER's "STATUS" heading instead -- a mutation
          that breaks nothing, seeding a regression the audit was right not to report. THE SEED
          WAS WRONG, NOT THE RULE, and a seed that cannot fail is the same problem as a rule that
-         cannot fire. */
-      mutate: (h) => h.replace(/(<span class="at-dc at-dc-status" data-status="[^"]*">[^<]*<\/span>)(<\/div>)/, "$2$1"),
+         cannot fire.
+
+         AND IT IS NO LONGER A TWO-GROUP SWAP, because STATUS is no longer the row's last cell:
+         the duration pair follows it now, so a pattern anchored on `</div>` stopped matching and
+         reported itself as unchecked -- which is the failure mode this seed exists to have. The
+         status is lifted past the END of its row instead, wherever in the row it sits. */
+      mutate: (h) => {
+        const m = /<span class="at-dc at-dc-status" data-status="[^"]*">[^<]*<\/span>/.exec(h);
+        if (!m) return h;
+        const close = h.indexOf("</div>", m.index + m[0].length);
+        if (close < 0) return h;
+        return h.slice(0, m.index) + h.slice(m.index + m[0].length, close + 6)
+          + m[0] + h.slice(close + 6);
+      },
     },
     {
       name: "a refused row leaking a percentage into its rate cell",

@@ -196,11 +196,34 @@ const selectRow = (row) => page.evaluate((r) => globalThis.__ATLAS_SELECT(r), ro
 
 console.log("\n[1] the archive's scale, from the pack that was actually loaded");
 {
+  /* TWO CLAIMS, NOT ONE, because the header carries three of the five counts and the drawer
+     carries all of them.
+     THE HEADLINE THREE are on the identity strip: storms, track points and landfalls, which are
+     the three denominators this surface publishes rates over.
+     THE OTHER TWO WERE FILED, NOT DROPPED, and that is the half of the claim a probe has to
+     make -- "it is in the drawer" is exactly the sentence anybody removing something from a
+     header says, so it is checked rather than asserted. genesis_events is 3,959 on this pack,
+     the same integer as storms, so a probe that only scanned the tactical surface would go on
+     passing for it whether or not it was published anywhere. */
   const t = await text();
   const m = await page.evaluate(() => globalThis.__ATLAS.archive.manifest.counts);
-  for (const [k, n] of Object.entries(m)) {
-    ok(`${k} count on screen (${n.toLocaleString()})`, t.includes(n.toLocaleString()));
+  const HEADLINE = ["storms", "track_points", "landfalls"];
+  for (const k of HEADLINE) {
+    ok(`${k} count on the identity strip (${m[k].toLocaleString()})`,
+       t.includes(m[k].toLocaleString()));
   }
+  await page.keyboard.press("p");
+  await page.waitForTimeout(400);
+  const drawer = await page.evaluate(() => {
+    const d = document.querySelector(".at-drawer");
+    return d ? d.innerText : "";
+  });
+  for (const [k, n] of Object.entries(m)) {
+    ok(`${k} count in provenance (${n.toLocaleString()})`, drawer.includes(n.toLocaleString()),
+       `the drawer does not publish ${k}; a count moved out of the header has to land somewhere`);
+  }
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(300);
   ok("the surface names itself", /STORM ATLAS/.test(t));
   ok("it says what it is not", /not a forecast|not a weather map/i.test(t));
 }
@@ -268,10 +291,24 @@ await clickLatLng(14.6, -113.9);
      twice under two names would be the dishonest option, and so would dropping it in silence.
      The surface must therefore STATE the decision -- which is a stricter thing to satisfy than
      rendering a number. */
-  ok("the surface says every member counts once", /Every storm here counts once/.test(t));
-  ok("and why distance is not also used as a weight",
-    /Distance is already a condition of membership/.test(t)
-    && /count the same variable twice/.test(t));
+  /* THE FINDING IS ON THE SURFACE; THE ARGUMENT IS ONE CLICK BELOW IT, AND BOTH ARE PROBED.
+     The note was four lines of prose between the question and the table -- a paragraph a reader
+     arriving to read a ladder scrolls past. What changes an interpretation is the one line
+     ("these are storms, not storm-kilometres") and that stays in the innerText of the closed
+     surface; the reasoning is behind the disclosure, and "it is in the detail" is exactly the
+     sentence anybody collapsing a caveat says, so it is opened and read rather than trusted. */
+  ok("the surface says every member counts once, in one line",
+    /Every storm here counts once/.test(t) && /not a weight/.test(t));
+  {
+    const more = await page.$("[data-weighting-note]");
+    if (more) await more.evaluate((d) => { d.open = true; });
+    await page.waitForTimeout(200);
+    const opened = await text();
+    ok("and why distance is not also used as a weight, one click below it",
+      /Distance is already a condition of membership/.test(opened)
+      && /count the same variable twice/.test(opened));
+    if (more) await more.evaluate((d) => { d.open = false; });
+  }
   ok("the conditioning the rates assume is stated",
     /GENESIS-CONDITIONED|assume a tropical cyclone forms/i.test(t));
   ok("and that landfall does not decompose as a product",
@@ -869,6 +906,22 @@ await page.waitForTimeout(300);
 {
   await chip("mode-replay");
   await page.waitForTimeout(700);
+
+  /* HOME FIRST, AND THE REASON IS THE CAMERA RULE RATHER THAN THE PROBE'S CONVENIENCE.
+   *
+   * By this point the run has selected two storms, and selecting a storm fits its track -- the
+   * one automatic camera move the surface makes. Switching to replay does NOT move the camera
+   * back: a mode change is not allowed to steal a view the reader is holding, which is the whole
+   * persistence rule. So the plate is legitimately framed on one storm while the clock reveals
+   * three thousand, and the ink this section measures is off the plate.
+   *
+   * That is not a bug to work around; it is the state the recovery controls exist for. So the
+   * probe uses one -- which also asserts that HOME is on the plate, is clickable, and actually
+   * reframes. A gate that reached this state by accident and then measured nothing was reporting
+   * a camera decision as an empty canvas. */
+  const homeBtn = await page.$("[data-camera-home]");
+  ok("HOME is on the plate", !!homeBtn);
+  if (homeBtn) { await homeBtn.click(); await page.waitForTimeout(500); }
   const t = await text();
   ok("the transport shows a real UTC date, not a frame index",
     /\d{4}-\d{2}-\d{2}|\d{1,2}\s+\w{3}\s+\d{4}/.test(t), t.slice(0, 160));
