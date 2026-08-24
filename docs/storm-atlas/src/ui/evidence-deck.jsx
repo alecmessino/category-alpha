@@ -112,6 +112,52 @@ function statusOfScoreable(delta) {
 
 const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
 
+/* THE COLUMN LIST. Every consumer of the grid reads this and nothing else.
+ *
+ * `timing` false replaces the two duration tracks with ONE fold track rather than removing them,
+ * so a folded deck is still the same number of cells per row as its own template -- an absence
+ * where a track is expected is how the head's STATUS once ended up on a line of its own. */
+export function columnsOf({ vs, status, timing }) {
+  const cols = ["outcome", "bar", "rate", "count"];
+  if (vs) cols.push("vs");
+  if (status) cols.push("status");
+  if (timing) cols.push("med", "iqr"); else cols.push("fold");
+  return cols;
+}
+
+/* THE RATE AND ITS INTERVAL, AS ONE STATEMENT. Rendered from one branch so that a refusal takes
+   the refused path for BOTH halves: there is no arrangement of props that prints a percentage
+   without its bounds or bounds without their percentage.
+
+   THE INTERVAL KEEPS ITS OWN ELEMENT INSIDE THE CELL. `.at-dc-int` is what panel rule 1 is
+   checked through -- "a rate implies a count and an interval on the same row" -- and every gate
+   written against that selector goes on finding one; it is simply nested in the rate's cell
+   rather than occupying a track of its own.
+
+   ONE PERCENT SIGN, AT THE END OF THE INTERVAL. "[19.2%-31.2%]" reads as two quantities; the
+   interval is one, and this is the form every other surface in the repository prints it in. */
+function RateCell({ cell, refused }) {
+  return (
+    <>
+      {refused
+        ? <span className="at-slot" title="the archive publishes no rate here">—</span>
+        : <span className="at-val">{pct1(cell.rate)}</span>}
+      {/* ONE DASH, NOT TWO. A refused row published "— —" while the interval was a column of
+          its own, which read as a long rule rather than as one absent value; merged into the
+          rate's cell the second dash says nothing the first has not. The element is still
+          emitted so panel rule 1's selector finds an interval in every row -- it simply holds
+          nothing when there is no rate for it to bound. */}
+      <span className="at-dc-int">
+        {!refused && cell && cell.ci95 ? (
+          <span className="at-val">
+            [{(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%]
+          </span>
+        ) : null}
+      </span>
+    </>
+  );
+}
+
 /* ── THE DECK ─────────────────────────────────────────────────────────────────────────── */
 
 /**
@@ -130,7 +176,7 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
  * @param {string}   [props.citationUrl]  the URL that reopens exactly this cohort
  */
 export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTiming = false,
-  foldInterval = false, timingOpen = false, onToggleTiming,
+  timingOpen = false, onToggleTiming,
   foldLandfall = false, landfallOpen = false,
   onToggleLandfall, environment = null, spec = null, pathway = null,
   conditions = [], onBaseline, whatChanged = null, replayNote = null,
@@ -152,23 +198,24 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
    * the reader's disclosure state. So opening + TIMING COLUMNS at 1300 put two more cells into
    * every row while the grid still had seven tracks, and each row's last cell wrapped into an
    * implicit eighth row -- a STATUS word one line below the row it governs, which is the single
-   * failure the whole `display:contents` construction exists to make unreachable. Both
-   * attributes are the EFFECTIVE state now, and head, group and data rows all emit exactly one
-   * child per track in every combination. */
+   * failure the whole `display:contents` construction exists to make unreachable. The attribute
+   * is the EFFECTIVE state now, and the column list below is what both the template and the
+   * cells are built from, so the two cannot disagree at all. */
   const timingOn = !foldTiming || timingOpen;
-  /* THE INTERVAL DOES NOT FOLD AWAY, IT MOVES IN WITH THE RATE, and the difference is a rule.
+
+  /* THE TWO CONDITIONAL COLUMNS, DECIDED FROM THE DATA RATHER THAN FROM THE WIDTH.
    *
-   * The specification's ladder says the interval "folds into the bar's title" below 1280. Its
-   * own section on the table says, of the same column, that "the band alone is not an accessible
-   * statement" -- and panel rule 1, which predates the redesign, says a published rate implies a
-   * count AND an interval on the same row. A title is hover-only and absent on touch, so the
-   * ladder's step would have retired a rule the same document states two pages earlier.
+   * VS ARCHIVE needs something to compare against: a comparison, or a selected storm whose
+   * verdicts the column answers instead. With neither, every cell in it read "is the archive".
    *
-   * Reconciled by giving up the COLUMN and keeping the VALUE: below 1280 the bounds render
-   * inside the rate cell, on the same line, in the same row. The track is reclaimed, nothing is
-   * behind a hover, and check-evidence-deck's rule 1 still finds an interval element in the row.
-   * The bar keeps the bounds in its title as well, because the band is drawn there. */
-  const intervalOn = !foldInterval || timingOpen;
+   * STATUS needs a status. Panel rule 4 is not negotiable -- a refused row says so in its own
+   * status cell -- so this is computed by ASKING EVERY ROW what word it would print, with the
+   * same three expressions the row itself uses, before anything is rendered. One refusal
+   * anywhere brings the column back for the whole deck. */
+  const showVs = !!comparison || !!subject;
+  const showStatus = groups.some((g) => g.rows.some((row) => !!statusWordOf(row)));
+  const cols = columnsOf({ vs: showVs, status: showStatus, timing: timingOn });
+  const shape = { cols, subject, onEvidence };
 
   /* WHICH REFUSAL SENTENCES REPEAT, WHICH IS WHAT THE BOUND IS ACTUALLY FOR.
    *
@@ -194,13 +241,18 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
   }
   const shared = new Set([...reasonCounts].filter(([, n]) => n > 1).map(([k]) => k));
 
+  /* THE TEMPLATE IS COMPOSED FROM THE SAME LIST THE CELLS ARE, so a column that is not emitted
+     has no track and a track with no column cannot exist. The track SIZES stay in atlas.css as
+     --at-col-* custom properties: this decides which columns there ARE, the stylesheet decides
+     how WIDE each one is, and neither can silently become the other. */
+  const gridStyle = { "--at-deck-cols": cols.map((k) => `var(--at-col-${k})`).join(" ") };
+
   return (
-    <div className="at-deck" data-evidence-deck
-      data-timing-folded={timingOn ? undefined : ""}
-      data-interval-folded={intervalOn ? undefined : ""}>
+    <div className="at-deck" data-evidence-deck style={gridStyle}
+      data-deck-mode={showVs ? "cohort" : "archive"}
+      data-timing-folded={timingOn ? undefined : ""}>
       <DeckPreamble result={r} spec={spec} />
-      <DeckHead timingOn={timingOn} intervalOn={intervalOn} onToggleTiming={onToggleTiming}
-        subject={subject} />
+      <DeckHead shape={shape} onToggleTiming={onToggleTiming} />
       {groups.map((g) => {
         /* INTENSITY IS RESIDENT AT EVERY WIDTH. It is the ladder the archive is built on and the
            one group a reader arrives to read; the others give up their rows first, and give them
@@ -209,20 +261,19 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
           && !(openGroups && openGroups[g.key]);
         return (
           <React.Fragment key={g.key}>
-            <GroupRow group={g} timingOn={timingOn} intervalOn={intervalOn} subject={subject}
-              collapsed={collapsed}
+            <GroupRow group={g} shape={shape} collapsed={collapsed}
               onExpand={onToggleGroup ? () => onToggleGroup(g.key) : undefined} />
-            {/* THE DENOMINATOR'S OWN QUALIFIER, WHERE THE INTERVAL COLUMN USED TO HOLD IT.
-                It rides in the INTERVAL cell at full width; when that column folds the sentence
-                moves to a line of its own rather than ellipsising inside a narrower cell. A
-                strip gives up whole items, never half a word -- and the whole word here is the
-                definition of what these rates are rates OF. */}
-            {!intervalOn && g.note ? (
+            {/* THE DENOMINATOR'S OWN QUALIFIER, ON A LINE OF ITS OWN.
+                It used to ride in the INTERVAL cell and move to a full-width line only when that
+                column folded, so the same sentence had two positions depending on the monitor.
+                The interval no longer has a cell of its own, and this was always the better of
+                the two: it is a sentence about what these rates are rates OF, not a value in a
+                column, and a strip gives up whole items rather than half a word. */}
+            {g.note ? (
               <div className="at-deck-groupnote" data-group-note={g.key}>{g.note}</div>
             ) : null}
             {collapsed ? null : g.rows.map((row) => (
-              <DataRow key={row.key} row={row} timingOn={timingOn} intervalOn={intervalOn}
-                subject={subject} onEvidence={onEvidence} shared={shared} />
+              <DataRow key={row.key} row={row} shape={shape} shared={shared} />
             ))}
             {collapsed ? null : <SharedReason group={g} shared={shared} onEvidence={onEvidence} />}
             {!collapsed && g.folded ? (
@@ -291,53 +342,72 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
   );
 }
 
+/* WHICH WORD A ROW WOULD PRINT IN STATUS, computed in one place because two things read it:
+   the row that renders it, and the deck deciding whether the column exists at all. Two
+   expressions that had to agree would eventually not, and the day they disagreed a refusal
+   would lose its word. */
+function statusWordOf(row) {
+  const { cell, unscoreable, delta, selfContribution } = row;
+  const refused = !!unscoreable || (cell && (cell.status === CIRCULAR || cell.rate === null));
+  if (refused) return REFUSALS[refusalKindOfRow(row)].title;
+  if (selfContribution) return "SELF-CONTRIBUTION";
+  return statusOfScoreable(delta);
+}
+
+/* The refusal kind, from the same three tests, for the same reason. */
+function refusalKindOfRow(row) {
+  const { cell, unscoreable } = row;
+  if (unscoreable) return refusalKindOf(unscoreable);
+  if (cell && cell.status === CIRCULAR) return "CONDITIONED_ON";
+  if (cell && cell.rate === null) return "RATE_REFUSED";
+  return null;
+}
+
 /* THE COLUMN HEADS. Uppercase at the label token, which is the only size uppercase is allowed
-   at besides the stamps. The duration heading spans both of its tracks. */
-/* ONE CONTROL, NAMING EVERYTHING IT HOLDS. Two folded column groups could have been two
-   buttons, but there is one track to put them in and a second affordance would have to come out
-   of a column that is carrying data. So the fold names its contents -- + TIMING COLUMNS, or
-   + INTERVAL · TIMING once the interval has folded too -- and opening it restores both. Every
-   folded item stays reachable in one click from where it was, and the affordance says what it
-   holds. */
-function DeckHead({ timingOn, intervalOn, onToggleTiming, subject }) {
-  /* Only TIMING is ever behind this control: the interval gives up its track but keeps its
-     value, so there is nothing about it to restore. */
-  return (
-    <div className="at-deck-row at-deck-head" role="row">
-      <span className="at-dc at-dc-outcome">OUTCOME</span>
-      <span className="at-dc at-dc-bar" aria-hidden="true" />
-      <span className={"at-dc at-dc-rate" + (intervalOn ? "" : " at-dc-rate-wide")}>
-        RATE{intervalOn ? null : <span className="at-dc-int-inline">95% CI</span>}
+   at besides the stamps. The duration heading is two tracks, because MED h and P25-P75 are one
+   statement about duration and a reader reads them together. */
+/* ONE CONTROL, NAMING EVERYTHING IT HOLDS. The fold names its contents -- + TIMING COLUMNS --
+   and opening it restores both duration tracks. Only TIMING is ever behind it: the interval is
+   not a column any more and so has nothing to restore, and a control offering to bring back
+   something that never left is a control that lies about the state. */
+function DeckHead({ shape, onToggleTiming }) {
+  const { cols, subject } = shape;
+  const head = {
+    outcome: <span className="at-dc at-dc-outcome" key="outcome">OUTCOME</span>,
+    bar: <span className="at-dc at-dc-bar" key="bar" aria-hidden="true" />,
+    rate: (
+      <span className="at-dc at-dc-rate" key="rate">
+        RATE <span className="at-dc-ci-head">95% CI</span>
       </span>
-      <span className="at-dc at-dc-count">COUNT</span>
-      {intervalOn ? <span className="at-dc at-dc-int">INTERVAL</span> : null}
-      <span className="at-dc at-dc-vs">{subject ? "SUBJECT" : "VS ARCHIVE"}</span>
-      {timingOn ? (
-        <>
-          <span className="at-dc at-dc-med">MED h</span>
-          <span className="at-dc at-dc-iqr">P25–P75</span>
-        </>
-      ) : (
-        <button type="button" className="at-dc at-dc-fold" data-timing-fold
-          onClick={onToggleTiming}
-          title="the median and interquartile duration for every row, folded at this width">
-          + TIMING COLUMNS
-        </button>
-      )}
-      <span className="at-dc at-dc-status">STATUS</span>
-    </div>
+    ),
+    count: <span className="at-dc at-dc-count" key="count">COUNT</span>,
+    vs: (
+      <span className="at-dc at-dc-vs" key="vs">{subject ? "SUBJECT" : "VS ARCHIVE"}</span>
+    ),
+    status: <span className="at-dc at-dc-status" key="status">STATUS</span>,
+    med: <span className="at-dc at-dc-med" key="med">MED h</span>,
+    iqr: <span className="at-dc at-dc-iqr" key="iqr">P25–P75</span>,
+    fold: (
+      <button type="button" className="at-dc at-dc-fold" data-timing-fold key="fold"
+        onClick={onToggleTiming}
+        title="the median and interquartile duration for every row, folded at this width">
+        + TIMING COLUMNS
+      </button>
+    ),
+  };
+  return (
+    <div className="at-deck-row at-deck-head" role="row">{cols.map((k) => head[k])}</div>
   );
 }
 
 /* A GROUP ROW CARRIES THE DENOMINATOR ONCE. Every row beneath it shares that denominator, so
    repeating it per row is thirteen copies of one fact -- and the rule is that no percent appears
-   without its count, not that every cell restates the population. The group's own status word is
-   the one thing it may add: where a whole group refuses for one reason, the word sits here and
-   the rows say which contracts it fired on. */
-function GroupRow({ group, timingOn, intervalOn, subject, collapsed, onExpand }) {
-  return (
-    <div className="at-deck-row at-deck-group" data-deck-group={group.label} role="row">
-      <span className="at-dc at-dc-outcome">
+   without its count, not that every cell restates the population. */
+function GroupRow({ group, shape, collapsed, onExpand }) {
+  const { cols } = shape;
+  const cell = {
+    outcome: (
+      <span className="at-dc at-dc-outcome" key="outcome">
         {group.label}
         {/* THE ROWS ARE FOLDED, NOT DROPPED, AND THE CONTROL COUNTS THEM. A group row that
             simply stopped having rows beneath it would read as a group with nothing in it --
@@ -350,17 +420,23 @@ function GroupRow({ group, timingOn, intervalOn, subject, collapsed, onExpand })
           </button>
         ) : null}
       </span>
-      <span className="at-dc at-dc-bar" aria-hidden="true" />
-      <span className={"at-dc at-dc-rate" + (intervalOn ? "" : " at-dc-rate-wide")} />
-      <span className="at-dc at-dc-count">{group.denom !== null ? (
-        <>of {group.denom.toLocaleString()}</>
-      ) : null}</span>
-      {intervalOn ? <span className="at-dc at-dc-int">{group.note || null}</span> : null}
-      <span className="at-dc at-dc-vs" />
-      {timingOn
-        ? <><span className="at-dc at-dc-med" /><span className="at-dc at-dc-iqr" /></>
-        : <span className="at-dc at-dc-fold" aria-hidden="true" />}
-      <span className="at-dc at-dc-status" />
+    ),
+    bar: <span className="at-dc at-dc-bar" key="bar" aria-hidden="true" />,
+    rate: <span className="at-dc at-dc-rate" key="rate" />,
+    count: (
+      <span className="at-dc at-dc-count" key="count">
+        {group.denom !== null ? <>of {group.denom.toLocaleString()}</> : null}
+      </span>
+    ),
+    vs: <span className="at-dc at-dc-vs" key="vs" />,
+    status: <span className="at-dc at-dc-status" key="status" />,
+    med: <span className="at-dc at-dc-med" key="med" />,
+    iqr: <span className="at-dc at-dc-iqr" key="iqr" />,
+    fold: <span className="at-dc at-dc-fold" key="fold" aria-hidden="true" />,
+  };
+  return (
+    <div className="at-deck-row at-deck-group" data-deck-group={group.label} role="row">
+      {cols.map((k) => cell[k])}
     </div>
   );
 }
@@ -368,75 +444,52 @@ function GroupRow({ group, timingOn, intervalOn, subject, collapsed, onExpand })
 /* ONE CONTRACT.
  *
  * EVERY CELL IS AUTHORED INSIDE THIS ELEMENT. The row is `display:contents` so the cells sit on
- * the parent grid, but they are emitted here, together, from one branch -- which is what makes
- * "a status detached from its row" unreachable rather than merely unlikely. A refused row takes
- * the refused branch for the rate cell AND the status cell in the same expression; there is no
- * arrangement of props that produces one without the other. */
-function DataRow({ row, timingOn, intervalOn, subject, onEvidence, shared }) {
+ * the parent grid, but they are emitted here, together, from one map over one column list --
+ * which is what makes "a status detached from its row" unreachable rather than merely unlikely.
+ * A refused row takes the refused branch for the rate cell AND the status cell in the same
+ * expression; there is no arrangement of props that produces one without the other. */
+function DataRow({ row, shape, shared }) {
+  const { cols, subject, onEvidence } = shape;
   const { label, tone, cell, unscoreable, delta, timing, contractKey, selfContribution } = row;
   const refused = !!unscoreable || (cell && (cell.status === CIRCULAR || cell.rate === null));
-  const kind = unscoreable ? refusalKindOf(unscoreable)
-    : cell && cell.status === CIRCULAR ? "CONDITIONED_ON"
-      : cell && cell.rate === null ? "RATE_REFUSED" : null;
+  const kind = refusalKindOfRow(row);
   const mark = kind ? markGroupOf(kind) : null;
-  const status = refused ? REFUSALS[kind].title
-    : selfContribution ? "SELF-CONTRIBUTION"
-      : statusOfScoreable(delta);
+  const status = statusWordOf(row);
 
-  return (
-    <div className={"at-deck-row at-deck-data" + (selfContribution ? " at-deck-self" : "")}
-      data-outcome={label} data-contract-row={contractKey || undefined}
-      data-self-contribution={selfContribution ? "" : undefined} role="row">
-
-      <span className="at-dc at-dc-outcome">
+  const out = {
+    outcome: (
+      <span className="at-dc at-dc-outcome" key="outcome">
         {mark ? (
           <span className="at-mark" data-mark={mark} aria-hidden="true">{MARKS[mark].glyph}</span>
         ) : <span className="at-mark" aria-hidden="true" />}
         <span className="at-dc-name">{label}</span>
       </span>
-
-      {/* THE BAR NEVER CARRIES A NUMBER. It carries the rate as a length, the interval as the
-          band it sits inside, and the archive baseline as a tick that overhangs the track --
-          so whether the two separate is settled by the eye and confirmed by the digits two
-          cells to the right. A refused row shows the hatched track and no fill at all: an empty
-          bar and a zero bar must not look alike. */}
-      {/* AND WHEN THE INTERVAL COLUMN FOLDS, THE BOUNDS GO INTO THE BAR'S OWN TITLE -- the band
-          is already drawn there, and a drawn band with no numbers beside it is not an accessible
-          statement of an interval. The column comes back in one click from the head. */}
-      <span className="at-dc at-dc-bar"
-        title={!intervalOn && !refused && cell && cell.ci95
-          ? `95% Wilson interval [${(100 * cell.ci95[0]).toFixed(1)}`
-            + `–${(100 * cell.ci95[1]).toFixed(1)}%]`
-          : undefined}>
+    ),
+    /* THE BAR NEVER CARRIES A NUMBER. It carries the rate as a length, the interval as the band
+       it sits inside, and the archive baseline as a tick that overhangs the track -- so whether
+       the two separate is settled by the eye and confirmed by the digits one cell to the right.
+       A refused row shows the hatched track and no fill at all: an empty bar and a zero bar must
+       not look alike. */
+    bar: (
+      <span className="at-dc at-dc-bar" key="bar">
         <Bar cell={refused ? null : cell} classKey={tone} baseline={delta ? delta.baseRate : null}
           refused={refused} />
       </span>
-
-      {/* RULE 2, STRUCTURALLY. A refusal never inflates to the rate's size; the slot holds an
-          em dash and the word lives in STATUS. The dash is CONTENT, not decoration -- it means
-          "the archive has no value here" -- so it is held to the same contrast bar as the value
-          it replaces and never dimmed into a hairline ink. */}
-      <span className={"at-dc at-dc-rate" + (intervalOn ? "" : " at-dc-rate-wide")}>
-        {refused ? <span className="at-slot" title="the archive publishes no rate here">—</span>
-          : <span className="at-val">{pct1(cell.rate)}</span>}
-        {/* THE MERGED INTERVAL. Still an `at-dc-int`, so every rule written against the interval
-            element goes on finding one; it is simply nested in the cell the rate is in rather
-            than occupying a track of its own. */}
-        {!intervalOn ? (
-          <span className="at-dc-int at-dc-int-inline">
-            {!refused && cell.ci95 ? (
-              <span className="at-val">
-                [{(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%]
-              </span>
-            ) : <span className="at-slot">—</span>}
-          </span>
-        ) : null}
+    ),
+    /* RULE 1 AND RULE 2 IN ONE CELL. The rate and its interval are one statement, and a refusal
+       never inflates to the rate's size: the slot holds an em dash in both halves and the word
+       lives in STATUS. The dash is CONTENT, not decoration -- it means "the archive has no value
+       here" -- so it is held to the same contrast bar as the value it replaces. */
+    rate: (
+      <span className="at-dc at-dc-rate" key="rate">
+        <RateCell cell={cell} refused={refused} />
       </span>
-
-      {/* RULE 1 AND RULE 3. The count publishes whether or not the rate does -- a refusal is not
-          a blank -- and an unscoreable contract states what it has against what it needs, which
-          is the finding rather than a consolation. */}
-      <span className="at-dc at-dc-count">
+    ),
+    /* RULE 1 AND RULE 3. The count publishes whether or not the rate does -- a refusal is not a
+       blank -- and an unscoreable contract states what it has against what it needs, which is
+       the finding rather than a consolation. */
+    count: (
+      <span className="at-dc at-dc-count" key="count">
         {cell ? <span className="at-val">{cell.count.toLocaleString()}</span> : null}
         {unscoreable ? (
           <span className="at-need" title="events in scope · archive-wide · required">
@@ -444,58 +497,56 @@ function DataRow({ row, timingOn, intervalOn, subject, onEvidence, shared }) {
           </span>
         ) : null}
       </span>
+    ),
+    /* VS ARCHIVE, OR THE SUBJECT. With no storm selected the column compares this cohort with
+       the archive; with one selected it answers a different question -- did THIS storm reach
+       this contract -- and the heading changes with it. A storm the archive holds no verdict
+       for gets the slot dash rather than a NO it never earned.
 
-      {/* ONE PERCENT SIGN, AT THE END. "[19.2%–31.2%]" reads as two quantities; the interval is
-          one, and this is the form every other surface in the repository prints it in. */}
-      {intervalOn ? (
-        <span className="at-dc at-dc-int">
-          {!refused && cell.ci95 ? (
-            <span className="at-val">
-              [{(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%]
-            </span>
-          ) : <span className="at-slot">—</span>}
-        </span>
-      ) : null}
-
-      {/* VS ARCHIVE, OR THE SUBJECT. With no storm selected the column compares this cohort with
-          the archive; with one selected it answers a different question -- did THIS storm reach
-          this contract -- and the heading changes with it. A storm the archive holds no verdict
-          for gets the slot dash rather than a NO it never earned. */}
-      {/* CONDITIONED ON WINS OVER THE SUBJECT, AND THIS IS THE FIFTH RULE ENFORCED IN A CELL.
-          A variable in the query is not an outcome of it: every storm in this cohort reached
-          this contract BY CONSTRUCTION, so the selected storm did too, and printing REACHED
-          would be true, vacuous, and read as evidence -- the one reading the whole conditioned-on
-          treatment exists to prevent. The row states the circularity and the subject cell holds
-          the slot. Other refusals keep their subject verdict: below the sample gate the archive
-          still knows what THIS storm did, and that is a fact about the storm rather than an
-          artefact of the question. */}
-      <span className="at-dc at-dc-vs">
+       CONDITIONED ON WINS OVER THE SUBJECT, AND THIS IS THE FIFTH RULE ENFORCED IN A CELL.
+       A variable in the query is not an outcome of it: every storm in this cohort reached this
+       contract BY CONSTRUCTION, so the selected storm did too, and printing REACHED would be
+       true, vacuous, and read as evidence. Other refusals keep their subject verdict: below the
+       sample gate the archive still knows what THIS storm did, and that is a fact about the
+       storm rather than an artefact of the question. */
+    vs: (
+      <span className="at-dc at-dc-vs" key="vs">
         {kind === "CONDITIONED_ON"
           ? <span className="at-slot"
               title="this variable is in the query, so it is not an outcome of it">—</span>
           : subject ? <SubjectCell row={row} subject={subject} />
             : <VsArchive delta={delta} refused={refused} />}
       </span>
-
-      {timingOn ? (
-        <>
-          <span className="at-dc at-dc-med">
-            {timing && timing.n ? <span className="at-val">{Math.round(timing.median)}</span>
-              : <span className="at-slot">—</span>}
-          </span>
-          <span className="at-dc at-dc-iqr">
-            {timing && timing.n ? (
-              <span className="at-val">{Math.round(timing.p25)}–{Math.round(timing.p75)}</span>
-            ) : <span className="at-slot">—</span>}
-          </span>
-        </>
-      ) : <span className="at-dc at-dc-fold" aria-hidden="true" />}
-
-      {/* ONE INK, NEVER COLOURED, NEVER AGGREGATED, NEVER A SCORE. The status is a word about
-          THIS row and it is rendered inside this row's element -- see the header comment. */}
-      <span className="at-dc at-dc-status" data-status={status || undefined}>
+    ),
+    /* ONE INK, NEVER COLOURED, NEVER AGGREGATED, NEVER A SCORE. The status is a word about THIS
+       row and it is rendered inside this row's element -- see the header comment. */
+    status: (
+      <span className="at-dc at-dc-status" key="status" data-status={status || undefined}>
         {status || null}
       </span>
+    ),
+    med: (
+      <span className="at-dc at-dc-med" key="med">
+        {timing && timing.n ? <span className="at-val">{Math.round(timing.median)}</span>
+          : <span className="at-slot">—</span>}
+      </span>
+    ),
+    iqr: (
+      <span className="at-dc at-dc-iqr" key="iqr">
+        {timing && timing.n ? (
+          <span className="at-val">{Math.round(timing.p25)}–{Math.round(timing.p75)}</span>
+        ) : <span className="at-slot">—</span>}
+      </span>
+    ),
+    fold: <span className="at-dc at-dc-fold" key="fold" aria-hidden="true" />,
+  };
+
+  return (
+    <div className={"at-deck-row at-deck-data" + (selfContribution ? " at-deck-self" : "")}
+      data-outcome={label} data-contract-row={contractKey || undefined}
+      data-self-contribution={selfContribution ? "" : undefined} role="row">
+
+      {cols.map((k) => out[k])}
 
       {/* THE ARGUMENT, BOUNDED. A statement of at most eighteen words carrying the count that
           produced it; the full reason is behind SEE THE EVIDENCE. It spans every column because
@@ -692,17 +743,33 @@ function DeckPreamble({ result, spec }) {
         actually recorded.
       </div>
 
-      {/* WHY NO WEIGHTED RATE, SAID RATHER THAN SILENTLY OMITTED. Distance is already a
-          condition of membership, so weighting by it again would count the same variable twice
-          and the weighted rate would equal the unweighted one. Printed only when a location
-          condition is what makes it true. */}
+      {/* WHY NO WEIGHTED RATE, SAID RATHER THAN SILENTLY OMITTED -- AND SAID IN ONE LINE.
+          Distance is already a condition of membership, so weighting by it again would count the
+          same variable twice and the weighted rate would equal the unweighted one. Printed only
+          when a location condition is what makes it true.
+
+          FOUR LINES OF PROSE BETWEEN THE QUESTION AND THE TABLE IS WHERE THIS WAS, and a reader
+          arriving to read a ladder scrolls past a paragraph. The SURFACE now carries the claim in
+          one line -- which is the whole of what changes an interpretation: these are storms, not
+          storm-kilometres -- and the ARGUMENT for it sits one disclosure below, in the wording it
+          always had. Nothing was shortened away: `at-pre-more` holds the same sentences, and the
+          summary states the finding rather than promising "more information".
+
+          IT IS A COLLAPSE, NOT A MOVE. The note is still adjacent to the evidence it qualifies,
+          still inside the deck, and still above the first rate -- a caveat that changes how a
+          number is read may be made shorter and may not be made further away. */}
       {spec && spec.where ? (
-        <div className="at-pre-line at-pre-prose" data-weighting-note>
-          Every storm here counts once. Distance is already a condition of membership — within{" "}
-          {spec.where.radiusKm} km — so it is not also used as a weight; weighting by it again
-          would count the same variable twice. The weighted rate would equal the unweighted rate,
-          and is not printed twice under two names.
-        </div>
+        <details className="at-pre-line at-pre-prose at-pre-more" data-weighting-note>
+          <summary>
+            Every storm here counts once — distance is a condition of membership, not a weight.
+          </summary>
+          <p>
+            Distance is already a condition of membership — within {spec.where.radiusKm} km — so
+            it is not also used as a weight; weighting by it again would count the same variable
+            twice. The weighted rate would equal the unweighted rate, and is not printed twice
+            under two names.
+          </p>
+        </details>
       ) : null}
 
     </div>

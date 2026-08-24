@@ -432,6 +432,22 @@ jobs:
       - name: Verify the plate's aperture stays inside its bounds
         run: node scripts/check-plate-aperture.mjs --self-test --require-browser
 
+      # THE CAMERA, WHICH IS THE OTHER HALF OF THE APERTURE AND FAILS DIFFERENTLY.
+      # The gate above measures the plate's BOX. This one measures what is IN it, and the reason
+      # both exist is that the box was right throughout the bug it was written after: a contain
+      # fit of a 3.19-shaped frame on a 3.84-shaped plate opened 253 degrees of longitude -- the
+      # whole West Pacific and half of Asia -- on a plate captioned NORTH ATLANTIC + EAST
+      # PACIFIC, at every supported viewport, with every aspect assertion passing.
+      #
+      # It also pins the persistence rule, which is invisible by construction: a surface that
+      # quietly re-frames on every filter change looks helpful, and the cost is only paid by
+      # someone doing real work -- an analyst who panned to the Gulf, added a month condition and
+      # found themselves back over the mid-Atlantic. Each way the question can change is applied
+      # through the surface's own controls and the camera is required not to move; HOME, FIT and
+      # a storm selection are required to move it, and to remain three different answers.
+      - name: Verify the camera opens on NA + EP and is never stolen by a query
+        run: node scripts/check-atlas-camera.mjs --require-browser
+
       # THE REAL-STATE MATRIX. Every layout bug this integration produced was invisible in the
       # state it was introduced in and obvious two states later: the plate measured 0x0 only once
       # it was inside a single-cell row; the rows came out shifted only once a transport existed
@@ -446,6 +462,17 @@ jobs:
       # nothing about refusals.
       - name: Verify every real state holds, and 1440x900 answers five of five
         run: node scripts/check-atlas-states.mjs --require-browser
+
+      # THE ACCEPTANCE CRITERION ITSELF, MEASURED RATHER THAN REVIEWED. Eight things on screen at
+      # the same time at 1920x1080, with nothing scrolled and nothing opened -- the question, the
+      # conditions, a focused map, the cohort size, the WHOLE intensity ladder, a rate with its
+      # Wilson interval in one cell, the archive comparison or its status where applicable, and
+      # the first material qualification. Driven at 1600x900 and 1440x900 as well, since a layout
+      # that answers eight of eight only on the largest monitor has answered a different
+      # question. The type floor is asserted alongside them: fitting all eight by dropping the
+      # interval a size would satisfy the letter of the criterion and break the sentence under it.
+      - name: Verify all eight are on screen at first paint
+        run: node scripts/check-atlas-acceptance.mjs --require-browser
 
       # THE VISUAL RESPONSIVE MATRIX. The state matrix above drives many states at ONE width and
       # asserts what must be true of the ANSWER. This one drives five states at EVERY width the

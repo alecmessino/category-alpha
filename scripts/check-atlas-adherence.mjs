@@ -356,25 +356,50 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
      /\[data-atlas\]:not\(\[data-shell="dark"\]\) \.atlas-stage\{[^}]*--t1:var\(--d-t1\)/.test(css),
      "the plate would inherit paper inks");
 
-  /* THE APERTURE'S TWO BOUNDS, PINNED TO THE NUMBERS THEY WERE DERIVED AS.
+  /* THE APERTURE'S FOUR BOUNDS, PINNED TO THE NUMBERS THEY WERE DERIVED AS.
    *
-   * 1.421 is 1.303 (the archive's core frame, north 66N to 69N, south 16S to 24S) times 1.0905,
-   * which is half a Leaflet zoom-snap step -- the median landing rather than the best case.
-   * 3.2 is where a single East Pacific track stops being the subject of its own plate. Neither
-   * is a preference, and both are now single declarations used by one clamp -- which is exactly
-   * the shape a failing aperture gate is easiest to "fix" by widening. Pinned here so that
-   * widening a bound is a change to this file with a number in the diff. */
+   * 1.421 is 1.303 (the archive's core frame) times 1.0905, which is half a Leaflet zoom-snap
+   * step -- the median landing rather than the best case.
+   * 3.2 is where a single East Pacific track stops being the subject of its own plate.
+   * 4.0 is the same argument at a width where the HEIGHT CAP, not the shell's leftover space,
+   * is what set the shape: past it the plate is panoramic on any monitor.
+   * 500px is the cap itself, and it is the one that decides how much of a large monitor the map
+   * is allowed to take. Every one of the four is a single declaration read by one clamp --
+   * exactly the shape a failing aperture gate is easiest to "fix" by widening -- so widening any
+   * of them is a change to this file with a number in the diff.
+   *
+   * AND THE CAP HAS TO REACH BOTH ENDS OF THE CLAMP, which is the assertion that would have
+   * caught the first draft of this model. Capping only the ceiling leaves `avail / 3.2` as a
+   * FLOOR of 800px at 2560 and 1,075 at 3440: the clamp returns its floor, and the cap is inert
+   * at precisely the widths it was written for. Both min() terms are required here. */
   const bounds = Object.fromEntries(
-    [...css.matchAll(/--at-plate-(ar|ar-max)\s*:\s*([\d.]+)/g)].map((m) => [m[1], m[2]]),
+    [...css.matchAll(/--at-plate-(ar|ar-max|ar-wide|hmax)\s*:\s*([\d.]+)/g)].map((m) => [m[1], m[2]]),
   );
   ok("the aperture floor is the archive's own core frame at the median snap",
      bounds.ar === "1.421", `--at-plate-ar is ${bounds.ar}`);
   ok("and the ceiling is where one track stops being the subject of its plate",
      bounds["ar-max"] === "3.2", `--at-plate-ar-max is ${bounds["ar-max"]}`);
-  ok("both bounds reach the clamp as tokens, not as literals",
-     /clamp\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)/.test(css)
-     && /calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css),
+  ok("the wide-desktop ceiling is the audited 4.0 and not a rounder number",
+     bounds["ar-wide"] === "4.0", `--at-plate-ar-wide is ${bounds["ar-wide"]}`);
+  ok("the map's hard height cap is 500px", bounds.hmax === "500",
+     `--at-plate-hmax is ${bounds.hmax}`);
+  ok("both aspect bounds reach the clamp as tokens, not as literals",
+     /var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)/.test(css)
+     && /var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css),
      "the stacked shell's clamp is not reading the pinned tokens");
+  ok("and the cap is applied to BOTH ends of the clamp, not only the ceiling",
+     (css.match(/min\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar(?:-max)?\)\), var\(--at-plate-hmax\)\)/g) || []).length === 2,
+     "a cap on the ceiling alone leaves avail/ar-max as an 800px floor at 2560");
+  ok("the deck's guaranteed height is a token the clamp subtracts, not a literal",
+     /--at-deck-min\s*:\s*\d+px/.test(css) && /- var\(--at-deck-min\)/.test(css),
+     "the plate's ideal term is not reading --at-deck-min");
+  /* THE WIDE CEILING APPLIES ONLY WHERE THE CAP IS WHAT WIDENED THE ASPECT. With the inspector
+     docked the plate has already given 380px to the dock and its subject is one storm, so the
+     tighter bound returns -- and a media query that forgot to exclude the dock would relax it
+     everywhere above 1600 without changing a single number in this file. */
+  ok("the wide ceiling is excluded while the inspector is docked",
+     /@media \(min-width:1600px\)\{[^@]*?:not\(:has\(\.atlas-dock\)\)\{\s*--at-plate-ar-max:var\(--at-plate-ar-wide\)/s.test(css),
+     "the 4.0 ceiling is not gated on the dock being absent");
 
   /* AND NO RULE MAY NAME AN INK THAT IS NOT A TOKEN.
    *
@@ -394,6 +419,7 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
    * subsumes the other -- a token can be wrong too, and this file cannot see a JSX inline style. */
   const ON_PLATE = [
     "[data-atlas] .leaflet-control-zoom a:hover",   // the map's own zoom control
+    "[data-atlas] .at-mapnav a:hover",              // HOME and FIT, in the same bar as the zoom
     "[data-atlas] .at-invite em",                   // the invitation, drawn over the plate
   ];
   const literalInks = [];

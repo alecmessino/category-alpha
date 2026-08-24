@@ -104,25 +104,50 @@ const AUDIT = () => {
     bad.push(`row order is ${JSON.stringify(order.slice(0, 6))}`);
   }
 
-  /* the plate's aperture */
+  /* THE PLATE'S APERTURE AND ITS CAP.
+     The envelope is 1.421 to 3.2, widened to 4.0 from 1600 up with nothing docked -- there the
+     500px cap, not the shell's leftover height, is what set the shape. Past 2000px of plate the
+     cap and the 4.0 ceiling cannot both hold and the cap wins; the aspect is not asserted there
+     and the cap still is. check-plate-aperture.mjs is where all of that is derived. */
   const plate = document.querySelector(".at-plate");
   if (!plate) bad.push("no plate");
   else {
     const b = plate.getBoundingClientRect();
     const ar = b.width / b.height;
-    if (!(ar >= 1.419 && ar <= 3.202)) bad.push(`plate aspect ${ar.toFixed(3)} outside [1.421, 3.2]`);
+    const docked = !!document.querySelector("[data-inspector-dock]");
+    const ceil = innerWidth >= 1600 && !docked ? 4.0 : 3.2;
+    if (b.height > 501) bad.push(`plate is ${Math.round(b.height)}px, past the 500px cap`);
+    if (ar < 1.419) bad.push(`plate aspect ${ar.toFixed(3)} below the 1.421 floor`);
+    if (b.width <= 2001 && ar > ceil + 0.002) {
+      bad.push(`plate aspect ${ar.toFixed(3)} above the ${ceil} ceiling`);
+    }
   }
 
   /* the condition boundary — three zones, always */
   const zones = [...document.querySelectorAll("[data-zone]")].map((z) => z.getAttribute("data-zone"));
   if (JSON.stringify(zones) !== '["given","outcome","scope"]') bad.push(`zones are ${JSON.stringify(zones)}`);
 
-  /* per row: a refused contract publishes no rate, and its status is inside it */
+  /* PER ROW: A REFUSED CONTRACT PUBLISHES NO RATE, AND ITS STATUS IS INSIDE IT.
+   *
+   * THE STATUS COLUMN IS CONDITIONAL AND THE RULE IS NOT, so the rule is stated the sharp way
+   * round. The archive-mode allocation drops the column when NO row in the deck has a word to
+   * put in it; one refusal anywhere brings it back for every row. So:
+   *
+   *   the column exists  ->  every row carries exactly one status cell
+   *   a row is refused   ->  it carries a status cell WITH TEXT, whatever the mode
+   *
+   * The second is what panel rule 4 actually protects, and it is strictly stronger than the flat
+   * "every row has a cell" this replaced: that version passed on a deck whose refusal had a cell
+   * and no word in it. */
+  const hasStatusColumn = !!document.querySelector(".at-deck-head .at-dc-status");
   for (const row of document.querySelectorAll("[data-outcome]")) {
     const name = row.getAttribute("data-outcome");
     const refusal = row.querySelector("[data-refusal]");
     const status = row.querySelector(".at-dc-status");
-    if (!status) bad.push(`${name}: no status cell in the row`);
+    if (hasStatusColumn && !status) bad.push(`${name}: no status cell in the row`);
+    if (refusal && !status) {
+      bad.push(`${name}: refused, and the deck is rendering no status column at all`);
+    }
     if (refusal) {
       seen.push("refusal:" + refusal.getAttribute("data-refusal"));
       /* THE CELLS, NOT THE PROSE. A conditioned-on row's reason legitimately contains "100%" --

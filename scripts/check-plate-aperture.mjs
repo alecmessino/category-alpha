@@ -1,29 +1,44 @@
 #!/usr/bin/env node
-/* THE PLATE'S APERTURE, BOUNDED AT BOTH ENDS, MEASURED IN THE REAL PAGE.
+/* THE PLATE'S APERTURE, BOUNDED AT THREE ENDS, MEASURED IN THE REAL PAGE.
  *
- * TWO BOUNDS, AND THEY FAIL AT OPPOSITE VIEWPORTS.
+ * TWO ASPECT BOUNDS AND A HARD HEIGHT CAP, AND THEY FAIL AT DIFFERENT VIEWPORTS.
  *
- *   FLOOR 1.421   Derived, not chosen: the archive's core frame is a band 2.14 times wider than
- *                 it is tall, and after Leaflet's quarter-step zoom snap the median landing puts
- *                 the working region at 1.421. A plate narrower in aspect than that cannot be
- *                 filled by the archive -- the fit binds on width and the leftover height opens
- *                 as ocean holding no storms. It fails on a TALL workstation.
+ *   FLOOR 1.421   Derived, not chosen: the archive's core frame is a band wider than it is tall,
+ *                 and after Leaflet's quarter-step zoom snap the median landing puts the working
+ *                 region at 1.421. A plate narrower in aspect than that cannot be filled by the
+ *                 archive. It fails on a TALL workstation.
  *
  *   CEILING 3.2   Past it a single East Pacific track stops being the subject of its own plate.
  *                 It fails on a WIDE, SHORT one -- and that is the case a developer never sees,
- *                 because nobody develops at 2560x1080.
+ *                 because nobody develops at 2560x1080. It holds below 1600 and, at every width,
+ *                 with the inspector docked.
  *
- * The specification is explicit that the bound must be enforced in the fit rather than emerging
- * from layout: "or a wide monitor will quietly reintroduce a panoramic plate no storm can be the
- * subject of". Quietly is the operative word. Nothing about a 4:1 plate looks broken; it looks
- * like a map. So the aspect is measured at every supported viewport, including the ones nobody
- * works at, plus the docked and transport-present states where the plate's available width and
- * ideal height both change.
+ *   CEILING 4.0   From 1600 up with nothing docked, the plate's height is set by the CAP rather
+ *                 than by the shell's leftover space, so its aspect is a consequence of the cap.
+ *                 4.0 is the audited limit for that case. It is not a relaxation of 3.2: 3.2
+ *                 still binds everywhere the cap is not what decided the height.
  *
- * AND BLANK PLANE IS ASSERTED WITH IT, because the two are one trade. The easy way to hold an
- * aspect bound is to cap the instrument and centre it, which is what the previous shell did --
- * measured 285px of a 1000px viewport painted blank at 1440. The acceptance test is 0%, so
- * every row's height is summed against the viewport here and any shortfall is a failure.
+ *   CAP 500px     THE BOUND THIS PASS ADDED, AND THE ONE THAT OUTRANKS BOTH SHAPES. Geography is
+ *                 communicated once. Measured before it existed: 632px of map at 1920x1080, 800
+ *                 at 2560x1080 and 1,075 at 3440x1440, with the evidence deck down to 172px at
+ *                 the second of those. The surplus belongs to evidence, so the map is capped and
+ *                 the deck takes the rest.
+ *
+ * AND THE FOUR VIEWPORT TARGETS ARE ASSERTED AS RANGES, not merely as bounds, because a plate
+ * that satisfies every bound and still takes 632px of a 1080px screen is the failure this pass
+ * was opened for. A bound says what is forbidden; a range says what was asked for.
+ *
+ * WHERE THE CAP AND THE 4.0 CEILING CANNOT BOTH HOLD. Past about 2000px of plate width, 500px of
+ * height IS an aspect wider than 4.0 -- 5.12 at 2560, 6.88 at 3440 -- and one of the two has to
+ * give. The cap is the hard one, in as many words, so beyond that width the aspect ceiling is
+ * not asserted and the cap is. That is a stated trade and not an unchecked gap: the cap is
+ * measured at exactly those widths, and ASPECT_FREE_ABOVE below is what a future change would
+ * have to edit to widen it.
+ *
+ * AND BLANK PLANE IS ASSERTED WITH ALL OF IT, because they are one trade. The easy way to hold
+ * an aspect bound is to cap the instrument and centre it, which is what an earlier shell did --
+ * measured 285px of a 1000px viewport painted blank at 1440. The acceptance test is 0%, so every
+ * row's height is summed against the viewport here and any shortfall is a failure.
  *
  * Run: node scripts/check-plate-aperture.mjs [--self-test] [--require-browser]
  */
@@ -38,6 +53,14 @@ const DOCS = resolve(ROOT, "docs");
 
 const FLOOR = 1.421;
 const CEILING = 3.2;
+const CEILING_WIDE = 4.0;
+const CAP = 500;
+/* THE WIDTH PAST WHICH 500px OF HEIGHT IS ITSELF WIDER THAN 4.0. Above it the cap is asserted
+   and the aspect ceiling is not -- see the note above. 2000 = CAP x CEILING_WIDE. */
+const ASPECT_FREE_ABOVE = CAP * CEILING_WIDE;
+/* Which ceiling applies to a given state. The wide one is for a plate whose height the CAP set:
+   from 1600 up, with nothing docked. */
+const ceilingFor = (vw, docked) => (vw >= 1600 && !docked ? CEILING_WIDE : CEILING);
 
 let failures = 0;
 const ok = (label, cond, detail = "") => {
@@ -109,27 +132,62 @@ const measure = () => page.evaluate(() => {
   };
 });
 
-/* THE SUPPORTED MATRIX, PLUS THE TWO NOBODY DEVELOPS AT. 1920x900 and 2560x1080 are the wide,
-   short cases the ceiling exists for; 1440x1600 and 1440x2000 are the tall ones the floor
-   exists for. Without those four this gate would pass on a broken bound. */
+/* THE SUPPORTED MATRIX, PLUS THE ONES NOBODY DEVELOPS AT. 1920x900 and 2560x1080 are the wide,
+   short cases the ceiling exists for; 1440x1600 and 1440x2000 are the tall ones the floor exists
+   for; 3440x1440 is the ultrawide the cap exists for. Without those five this gate would pass on
+   a broken bound. */
 const VIEWPORTS = [
   [1440, 900], [1280, 800], [1180, 800], [1024, 768],
   [1920, 1080], [1600, 900],
-  [1920, 900], [2560, 1080],
+  [1920, 900], [2560, 1080], [3440, 1440],
   [1440, 1600], [1440, 2000],
 ];
 
-console.log("[aperture] the plate stays inside 1.421-3.2 at every supported viewport");
+console.log("[aperture] the plate stays inside its aspect envelope and under the cap, everywhere");
 for (const [w, h] of VIEWPORTS) {
   await open("", w, h);
   const m = await measure();
   if (!m) { ok(`${w}x${h}`, false, "no stacked shell or no plate on the page"); continue; }
   const wide = w >= h * 1.9 ? "  (wide/short — the ceiling's case)" : "";
   const tall = h >= w ? "  (tall — the floor's case)" : "";
-  ok(`${String(w + "x" + h).padEnd(10)} plate ${m.w}x${m.h}, aspect ${m.ar.toFixed(3)}${wide}${tall}`,
-     m.ar >= FLOOR - 0.002 && m.ar <= CEILING + 0.002,
-     `aspect ${m.ar.toFixed(3)} is outside [${FLOOR}, ${CEILING}]`);
+  const ceil = ceilingFor(w, m.docked);
+  const label = `${String(w + "x" + h).padEnd(10)} plate ${m.w}x${m.h}, aspect ${m.ar.toFixed(3)}`;
+  /* THE CAP IS ASSERTED EVERYWHERE. It is the bound that decides how much of a large monitor
+     the map takes, and it is the one a future layout change is most likely to lose. */
+  ok(`${label} — under the ${CAP}px cap${wide}${tall}`, m.h <= CAP + 1,
+     `${m.h}px of map, against a ${CAP}px cap`);
+  ok(`${label} — at or above the ${FLOOR} floor`, m.ar >= FLOOR - 0.002,
+     `aspect ${m.ar.toFixed(3)} is below ${FLOOR}: the archive cannot fill this plate`);
+  if (m.w <= ASPECT_FREE_ABOVE + 1) {
+    ok(`${label} — at or below the ${ceil} ceiling`, m.ar <= ceil + 0.002,
+       `aspect ${m.ar.toFixed(3)} is above ${ceil}`);
+  } else {
+    console.log(`  note  ${label} — past ${ASPECT_FREE_ABOVE}px of plate the cap and the `
+      + "4.0 ceiling cannot both hold; the cap is the hard one and is asserted above");
+  }
   ok(`${String(w + "x" + h).padEnd(10)} no blank plane`, m.blank === 0, `${m.blank}px unaccounted`);
+}
+
+/* THE FOUR VIEWPORT TARGETS, AS RANGES. Every bound above can be satisfied by a plate that is
+   still taking two thirds of the screen, which is the state this pass replaced. These are what
+   was actually asked for, and the deck's height is asserted with each of them -- a plate inside
+   its range that got there by squeezing the answer would be the same failure wearing a
+   different number. */
+console.log("\n[aperture] and it lands inside the stated range at each target viewport");
+const TARGETS = [
+  [1440, 900, 430, 455],
+  [1600, 900, 430, 460],
+  [1920, 1080, 470, 500],
+  [2560, 1080, 0, 500],
+  [3440, 1440, 0, 500],
+];
+for (const [w, h, lo, hi] of TARGETS) {
+  await open("", w, h);
+  const m = await measure();
+  ok(`${String(w + "x" + h).padEnd(10)} plate ${m.h}px, wanted ${lo || "≤"}–${hi}`,
+     m.h >= lo - 1 && m.h <= hi + 1, `${m.h}px is outside [${lo}, ${hi}]`);
+  ok(`${String(w + "x" + h).padEnd(10)} the deck got the rest — ${m.evidence}px`,
+     m.evidence >= 292, `evidence fell to ${m.evidence}px`);
 }
 
 /* THE STATES THAT MOVE BOTH TERMS. A docked inspector narrows the plate; a transport shortens
@@ -150,9 +208,14 @@ console.log("\n[aperture] and through the states that change the plate's box");
     for (const [w, h] of [[1440, 900], [1280, 800], [1920, 900]]) {
       await open(`storm=${sid}`, w, h);
       const m = await measure();
+      /* THE DOCKED CEILING IS THE TIGHT ONE AT EVERY WIDTH, 1920 included. A plate that has
+         already given 380px to an inspector, and whose subject is one storm, does not get the
+         wide-desktop bound. */
       ok(`${String(w + "x" + h).padEnd(10)} selected storm — plate ${m.w}x${m.h}, aspect ${m.ar.toFixed(3)}`,
          m.docked && m.ar >= FLOOR - 0.002 && m.ar <= CEILING + 0.002,
-         m.docked ? `aspect ${m.ar.toFixed(3)} outside the bound` : "the inspector did not dock");
+         m.docked ? `aspect ${m.ar.toFixed(3)} outside [${FLOOR}, ${CEILING}]` : "the inspector did not dock");
+      ok(`${String(w + "x" + h).padEnd(10)} selected storm — under the ${CAP}px cap`,
+         m.h <= CAP + 1, `${m.h}px of map`);
       ok(`${String(w + "x" + h).padEnd(10)} selected storm — no blank plane`, m.blank === 0, `${m.blank}px`);
       /* THE RULE THE ROW MODEL RESTS ON, STATED AS IT ACTUALLY HOLDS.
        *
@@ -181,7 +244,7 @@ console.log("\n[aperture] and through the states that change the plate's box");
       /* AND WHERE THE PLATE DOES HAVE SLACK, THE TRANSPORT COMES OUT OF IT. Measured by
          comparing the plate's height against its own aspect floor: slack means the ceiling is
          not what is deciding, so nothing but the plate should have paid. */
-      const floorH = (m.w) / 3.2;
+      const floorH = m.w / CEILING;
       if (m.h > floorH + 1) {
         ok(`${String(w + "x" + h).padEnd(10)} the plate had slack, so the deck kept its height`,
            m.evidence >= 292,
@@ -204,15 +267,30 @@ if (process.argv.includes("--self-test")) {
      term is what holds the bound. A seed that does not actually move the aspect out of range is
      reported as unchecked rather than counted as a pass. */
   const SEEDS = [
-    { name: "the ceiling dropped — a wide, short workstation goes panoramic",
+    { name: "the height cap dropped — a large monitor takes the map back",
       at: [2560, 1080],
-      css: `[data-atlas].atlas-shell.atlas-stacked{grid-template-rows:32px 38px 38px
-              minmax(0,1fr) minmax(0,340px) var(--at-tport)!important}`,
-      broke: (m) => m.ar > CEILING + 0.002 },
+      css: `[data-atlas].atlas-shell.atlas-stacked{grid-template-rows:28px 34px 38px
+              minmax(calc(var(--at-plate-avail) / var(--at-plate-ar-max)),1fr)
+              minmax(0,340px) var(--at-tport)!important}`,
+      broke: (m) => m.h > CAP + 1 },
+    { name: "the cap reached the ceiling only — avail/3.2 is still an 800px floor",
+      at: [2560, 1080],
+      css: `[data-atlas].atlas-shell.atlas-stacked{grid-template-rows:28px 34px 38px
+              clamp(calc(var(--at-plate-avail) / var(--at-plate-ar-max)),
+                    calc(100vh - 100px - var(--at-deck-min) - var(--at-tport)),
+                    min(calc(var(--at-plate-avail) / var(--at-plate-ar)), var(--at-plate-hmax)))
+              minmax(0,1fr) var(--at-tport)!important}`,
+      broke: (m) => m.h > CAP + 1 },
+    { name: "the ceiling dropped — a wide, short workstation goes panoramic",
+      at: [1920, 900],
+      css: `[data-atlas].atlas-shell.atlas-stacked{grid-template-rows:28px 34px 38px
+              minmax(0,220px) minmax(0,1fr) var(--at-tport)!important}`,
+      broke: (m) => m.ar > CEILING_WIDE + 0.002 },
     { name: "the floor dropped — a tall workstation opens empty latitude",
       at: [1440, 2000],
-      css: `[data-atlas].atlas-shell.atlas-stacked{grid-template-rows:32px 38px 38px
-              minmax(calc(var(--at-plate-avail) / 3.2),1fr) minmax(0,340px) var(--at-tport)!important}`,
+      css: `[data-atlas].atlas-shell.atlas-stacked{grid-template-rows:28px 34px 38px
+              minmax(calc(var(--at-plate-avail) / 3.2),1fr) minmax(0,340px)
+              var(--at-tport)!important}`,
       broke: (m) => m.ar < FLOOR - 0.002 },
     { name: "the instrument capped and centred — the aspect holds but blank plane returns",
       at: [1440, 1600],

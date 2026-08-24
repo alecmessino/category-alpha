@@ -158,6 +158,83 @@ console.log("\n[strip] and the boundary survives the prose being covered");
      new Set(blind.map((b) => b.split(":")[1])).size === 3, blind.join("  "));
 }
 
+console.log("\n[strip] an unset zone is a target, not a decoration");
+{
+  await mount(render({ conditions: OUTCOME, onEdit: () => {} }));
+  const z = await page.evaluate(() => {
+    const empty = document.querySelector("[data-zone-empty]");
+    const filled = document.querySelector('[data-zone="outcome"]');
+    const hint = empty && empty.querySelector("[data-zone-hint]");
+    const cs = empty && getComputedStyle(empty);
+    const hs = hint && getComputedStyle(hint);
+    return {
+      tag: empty ? empty.tagName : null,
+      edits: empty ? empty.getAttribute("data-zone-edit") : null,
+      /* THE WHOLE ZONE, not a heading inside it: the click target's area against the label's. */
+      zoneArea: empty ? Math.round(empty.getBoundingClientRect().width
+        * empty.getBoundingClientRect().height) : 0,
+      labelArea: empty ? (() => { const l = empty.querySelector(".at-zone-label");
+        const b = l.getBoundingClientRect(); return Math.round(b.width * b.height); })() : 0,
+      tinted: cs ? cs.backgroundColor : null,
+      filledTint: filled ? getComputedStyle(filled).backgroundColor : null,
+      /* NO DASHED BOX. The hint used to draw its own dashed rectangle, which reads as a drop
+         target and frames one idea twice inside a zone that already has a rule and a heading. */
+      hintBorder: hs ? [hs.borderTopStyle, hs.borderRightStyle, hs.borderBottomStyle,
+        hs.borderLeftStyle].join(",") : null,
+      filledIsButton: filled ? filled.tagName === "BUTTON" : null,
+    };
+  });
+  ok("an empty zone is a real button, so it answers Enter and takes focus", z.tag === "BUTTON", z.tag);
+  ok("and the whole zone opens the editor, not just its heading",
+     z.edits === "given" || z.edits === "scope", `data-zone-edit is ${z.edits}`);
+  ok("the target is the zone's whole area", z.zoneArea > z.labelArea * 3,
+     `${z.zoneArea}px² of zone against ${z.labelArea}px² of label`);
+  ok("it carries a faint tint that a populated zone does not", z.tinted !== z.filledTint,
+     `both ${z.tinted}`);
+  ok("and its hint draws no dashed box", !/dashed/.test(z.hintBorder || ""), z.hintBorder);
+  /* AND A POPULATED ZONE IS NOT A BUTTON. Its conditions carry their own × removals, and a click
+     anywhere in it opening an editor would make removing one condition a coin flip. */
+  ok("a populated zone is not itself a click target", z.filledIsButton === false);
+}
+
+console.log("\n[strip] RESET QUERY is present exactly when there is a query to reset");
+{
+  await mount(render({ conditions: [], onReset: () => {} }));
+  ok("absent on an unqueried archive",
+     !(await page.evaluate(() => !!document.querySelector("[data-reset-query]"))));
+  await mount(render({ conditions: [...GENESIS, ...OUTCOME], onReset: () => {}, onClear: () => {} }));
+  const r = await page.evaluate(() => {
+    const b = document.querySelector("[data-reset-query]");
+    if (!b) return null;
+    const strip = document.querySelector("[data-condition-strip]");
+    const zs = [...document.querySelectorAll("[data-zone]")];
+    return {
+      text: b.textContent.trim(),
+      title: b.title || "",
+      /* FAR RIGHT: past the right edge of every zone, and inside the strip. */
+      right: Math.round(b.getBoundingClientRect().right),
+      stripRight: Math.round(strip.getBoundingClientRect().right),
+      pastZones: zs.every((z) => b.getBoundingClientRect().left >= z.getBoundingClientRect().right - 1),
+      removals: document.querySelectorAll("[data-condition-clear]").length,
+    };
+  });
+  ok("present the moment any condition is set", !!r);
+  if (r) {
+    ok("it says RESET QUERY", r.text === "RESET QUERY", r.text);
+    ok("at the far right of the strip", r.pastZones && r.right <= r.stripRight + 1,
+       `right ${r.right} against strip ${r.stripRight}`);
+    /* THE THREE WAYS OUT ARE DISTINCT, AND THIS ONE SAYS WHICH IT IS. RESET QUERY clears the
+       conditions; HOME and FIT move the camera. A control that did both would be the one a
+       reader can never use deliberately. */
+    ok("and it says what it does NOT touch", /camera/i.test(r.title), r.title);
+    /* ONE PER CONDITION, WHICH IS THE POINT. RESET is the blunt instrument and these are the
+       precise one: a reader dropping one of three conditions should not have to rebuild the
+       other two. Counted against the fixture rather than pinned to a literal. */
+    ok("the individual × removals survive alongside it, one per condition",
+       r.removals === 3, `${r.removals} removals for 3 conditions`);
+  }
+}
+
 console.log("\n[strip] the last edit is one number to one number, and nothing accumulates");
 {
   await mount(render({ conditions: GENESIS, lastEdit: { from: 964, to: 847 } }));
