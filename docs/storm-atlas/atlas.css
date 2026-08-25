@@ -1568,6 +1568,34 @@
   flex:0 1 auto;min-height:96px;max-height:42%;
   overflow-y:auto;overscroll-behavior:contain;
 }
+/* THE FLOOR IS ONE LINE TALLER WHEN THERE IS A SOURCE STATE TO DECLARE, and only then.
+ *
+ * The 96px floor above is exactly kicker + name + id line, measured. A storm whose record is
+ * OPERATIONAL, PROVISIONAL or missing its live continuation carries a fourth identity fact --
+ * which record this is, and how fresh -- and it is the fact the panel now exists to answer. At
+ * 1440x900 the head is squeezed to its floor (96 visible pixels around 144 of content, because
+ * the BODY's flex basis is its full 2.5k scroll height and the shrink lands on both), so a badge
+ * outside the floor is a badge inside a scroll box nobody opens. That is where it was, and it is
+ * the one element that must not be.
+ *
+ * 144px = the 96 floor plus the measured 48 of badge, freshness line and their margins.
+ *
+ * SCOPED TO THE STATES THAT HAVE ONE. A post-analysed storm renders no badge, so raising its
+ * floor would take 41px off the body of all 3,958 of them to reserve space for nothing. */
+[data-atlas] .at-inspector:not([data-source-state="archive"]) .at-insp-head{min-height:144px}
+/* AND THE BRIDGE GIVES BACK WHAT THE HEAD TOOK, in the same states and for the same reason.
+ *
+ * The 46% below was set when the head's floor was 96px: head 96 + bridge 188 left the body 124
+ * visible pixels on a 408px dock, which is one section head and one headline figure. Raising the
+ * floor to 144 without touching this would have left 76 -- enough to clip the figure the panel
+ * exists to show, so a reader would have met "115" with its unit and class cut off. 40% of 408
+ * is 163, and 144 + 163 leaves the body its 101.
+ *
+ * The bridge scrolls internally and its content is 263px in this state, so it was already
+ * showing part of itself at 188; at 163 it shows slightly less of the same scroll. What the
+ * bridge must never lose is being ON SCREEN AT ALL WITHOUT SCROLLING, which is what
+ * scripts/check-inspector-bridge.mjs asserts, and which a cap of any size preserves. */
+[data-atlas] .at-inspector:not([data-source-state="archive"]) .at-insp-bridge{max-height:40%}
 [data-atlas] .at-insp-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
 [data-atlas] .at-insp-bridge{
   flex:none;

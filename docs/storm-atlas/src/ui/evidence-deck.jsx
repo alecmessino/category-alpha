@@ -987,7 +987,29 @@ function buildGroups(r, comparison, subject, foldLandfall) {
      that fold are the ones a reader scanning from the top reaches last. The summary states how
      many regions it holds AND how many of their contracts refused -- a fold that hid four
      refusals behind the word "more" would be hiding exactly what a reader needs to know is
-     there. One click brings them all back, which is the rule for every fold on this surface. */
+     there. One click brings them all back, which is the rule for every fold on this surface.
+
+     AND ABOVE 1440 NOTHING FOLDS, INCLUDING THE REGIONS WITH NO EVIDENCE. That was tried and
+     reverted, and the reason is worth keeping.
+
+     The case for folding them looks strong. On a 500 km cohort around CP012026's genesis the
+     deck holds 26 storms, ONE observed crossing -- in Hawaii -- and eight further rows reading 0
+     for Caribbean, Central America, CONUS and Mexico, four regions those storms never
+     approached. Eight rows of zero under the one row that answers the question reads as the
+     answer competing with four non-answers for the same eye, and folding them behind the summary
+     put Hawaii and the intensity ladder alone above the fold.
+
+     IT ALSO HID THE REFUSALS, WHICH ARE THE POINT. Six of those eight contracts publish no rate
+     at all: they publish OUT OF SCOPE or BASE RATE ONLY. Methodology 1.1.0 split those two apart
+     precisely so a zero could never be read as an empirical never -- the Florida click, where an
+     Atlantic cohort was told its Hawaii landfall rate was 0.0% [0.0-3.2%] as a scoreable
+     contract on the strength of eleven Pacific storms it could never contain. A fold keyed on
+     "no evidence" folds exactly the rows whose whole content is the explanation of why there is
+     none, and scripts/check-atlas-dom.mjs [4g] fails when it does.
+
+     The prioritisation the fold was reaching for is already here and costs none of that: the
+     list is ORDERED BY EVIDENCE, so Hawaii leads a Hawaii cohort and the four zeros follow it.
+     Order demotes. Hiding deletes. */
   const KEEP = 3;
   const regions = foldLandfall ? allRegions.slice(0, KEEP) : allRegions;
   const hidden = foldLandfall ? allRegions.slice(KEEP) : [];

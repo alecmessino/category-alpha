@@ -237,7 +237,11 @@ jobs:
             # score. Never allowed to stop the board publishing: a report on the pipeline
             # must not be able to break the thing it reports on.
             node scripts/calibrate.mjs || echo "calibration pass failed this tick — the ledger keeps its last state"
-            git add docs/data/latest.json docs/data/frames.json docs/data/wind.json docs/data/forecast-log.json docs/data/calibration.json
+            # docs/storm-atlas/data/atlas-live-v1.json is written on this tick too. It is a LIVE
+            # product and belongs on the live cadence: the Storm Atlas packs are rebuilt by
+            # genesis-archive.yml four times a day, and an operational record refreshed that
+            # slowly would be past its own published freshness bound most of the time.
+            git add docs/data/latest.json docs/data/frames.json docs/data/wind.json docs/data/forecast-log.json docs/data/calibration.json docs/storm-atlas/data/atlas-live-v1.json
             if git diff --cached --quiet; then
               echo "No data changes this tick."
             else

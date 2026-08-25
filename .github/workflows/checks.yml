@@ -322,6 +322,34 @@ jobs:
       - name: Verify the calibration ledger is the archive's own, failures included
         run: node scripts/test-atlas-calibration.mjs
 
+      # THE ACTIVE / PROVISIONAL FRESHNESS CONTRACT.
+      #
+      # IBTrACS publishes a PROVISIONAL row for the running season and stops updating it long
+      # before the storm stops existing. CP012026 / LALA reached the Atlas as 65 kt, Category 1,
+      # 988 mb, 49 fixes -- a finished storm -- while the forecast office was still writing it up
+      # nine days later at 115 kt and 947 mb. Every number on screen was a correct archive
+      # column; the sentence around them, "One storm, whole life", was the bug. The ATCF b-deck
+      # carrying the rest was already being fetched on the same tick and was never joined.
+      #
+      # This gate states the rule GENERICALLY -- for every provisional storm with a fresher
+      # operational record -- and proves it against a PINNED b-deck fixture rather than against
+      # production, so its verdict is the same in five years. A build that renders that fixture
+      # as 65 kt / Category 1 fails here.
+      - name: Verify the operational record leads where it is fresher
+        run: node scripts/test-atlas-live.mjs
+
+      # AND THAT IT GOES NOWHERE ELSE. The operational layer is a selected-storm representation
+      # and must never enter cohort membership, analog matching, intensity or landfall rates,
+      # Wilson intervals, ESS, calibration, the archive comparison, an event gate, a refusal or
+      # zero-peek replay. The leak would be silent and attractive: scoreCases takes an untyped
+      # array of plain objects and reads peak_vmax_kt off each one, so a live-aware case builder
+      # would put an operational wind into a published archive rate with nothing in the way, and
+      # every existing test would still pass -- they ask whether the arithmetic is right, not
+      # whose numbers went into it. Two halves: the import graph, and every published historical
+      # value computed with the artifact absent and again with it loaded.
+      - name: Verify the operational layer never reaches the archive
+        run: node scripts/test-atlas-live-boundary.mjs
+
   # ---- THE BROWSER GATES, IN THEIR OWN JOB -----------------------------------------------
   #
   # THEY USED TO LIVE AT THE BOTTOM OF `checks`, AND THAT IS WHY THEY STOPPED RUNNING.
@@ -389,6 +417,17 @@ jobs:
       # it also seeds a harmless change and requires silence. The first run of it caught two of
       # its own seeds aiming at the header row instead of a data row -- a seed that cannot fail
       # is the same problem as a rule that cannot fire.
+      # The operational record was never an arithmetic bug -- every number the old panel printed
+      # was a correct archive column, and what was wrong was the sentence around them. A sentence
+      # is not something an engine test can see, so this drives the three source states onto a
+      # real screen: the record loading and governing the storm, the record 404ing (which must
+      # produce LIVE CONTINUATION UNAVAILABLE and name the instant the archive ends, never a
+      # silent fall back to a stub that looks complete), and nothing being expected at all.
+      # It serves the PINNED fixture in place of the committed artifact, which is rewritten every
+      # ten minutes -- a gate asserting what that file contains would be asserting the weather.
+      - name: Verify the operational record reaches the screen, and so does its absence
+        run: node scripts/check-atlas-live-dom.mjs --require-browser
+
       - name: Verify every deck row carries its own status
         run: node scripts/check-evidence-deck.mjs --self-test --require-browser
 

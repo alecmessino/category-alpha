@@ -14,3 +14,7 @@ plugins/**/.build/
 # bundle keeps react external and node resolves that from the importer's directory; removed
 # on the way out, and ignored here so a killed run cannot leave one committable.
 .deck-build-*/
+# scripts/check-condition-strip.mjs does the same thing under its own prefix, and was missed
+# here: a run killed part-way left .strip-build-XXXXXX/ sitting in `git status` as untracked
+# build output. Same mechanism, same hazard, same rule.
+.strip-build-*/

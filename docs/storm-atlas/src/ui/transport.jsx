@@ -30,13 +30,56 @@ export function prefersReducedMotion() {
   try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; }
 }
 
-export function Transport({ archive, row, playing, setPlaying, cursorMs, setCursorMs }) {
-  const [speed, setSpeed] = React.useState(2);
-  const a = archive;
-  const range = React.useMemo(() => (row === null ? null : a.trackRange(row)), [a, row]);
+/* THE TRACK THE TRANSPORT SCRUBS, from whichever record is on the plate.
+ *
+ * WHY THIS ADAPTER EXISTS. The transport and the map must agree about which track is being
+ * replayed, and for a current storm the plate draws the OPERATIONAL one. A transport still
+ * scrubbing the archive stub would run the head off the end of a track nine days shorter than
+ * the line underneath it -- the same class of failure as the cursor-at-t0 bug this file already
+ * records, where the panel and the map described different things.
+ *
+ * `operational` is null for every storm but a current one, and the archive branch below is
+ * byte-for-byte the reads this component always did. Nothing about the 3,958 archive storms
+ * changes.
+ *
+ * QUALITY IS NOT INVENTED FOR THE OPERATIONAL BRANCH. A b-deck has no interpolated rows, so the
+ * readout says `operational` -- the source's own word for what every one of its fixes is --
+ * rather than borrowing the archive's `observed`, which means something the archive measured. */
+function trackOf(archive, row, operational) {
+  if (operational && operational.fixes && operational.fixes.length) {
+    const f = operational.fixes;
+    return {
+      n: f.length,
+      t: (k) => Date.parse(f[k].t),
+      lat: (k) => f[k].lat,
+      lon: (k) => f[k].lon,
+      kt: (k) => (f[k].kt === undefined ? null : f[k].kt),
+      quality: () => "operational",
+      genesisMs: operational.genesisMs === undefined ? null : operational.genesisMs,
+    };
+  }
+  if (row === null || !archive) return null;
+  const [a, b] = archive.trackRange(row);
+  const g = archive.genesisT[row];
+  return {
+    n: b - a,
+    t: (k) => archive.ptT[a + k] * 60000,
+    lat: (k) => archive.ptLat[a + k] / 100,
+    lon: (k) => archive.ptLon[a + k] / 100,
+    kt: (k) => (archive.ptVmax[a + k] === -32768 ? null : archive.ptVmax[a + k]),
+    quality: (k) => archive.points.str("quality", a + k),
+    genesisMs: g === -2147483648 ? null : g * 60000,
+  };
+}
 
-  const t0 = range ? a.ptT[range[0]] * 60000 : null;
-  const t1 = range ? a.ptT[range[1] - 1] * 60000 : null;
+export function Transport({ archive, row, playing, setPlaying, cursorMs, setCursorMs,
+  operational = null }) {
+  const [speed, setSpeed] = React.useState(2);
+  const track = React.useMemo(
+    () => trackOf(archive, row, operational), [archive, row, operational]);
+
+  const t0 = track && track.n ? track.t(0) : null;
+  const t1 = track && track.n ? track.t(track.n - 1) : null;
 
   /* SELECTING A STORM IS NOT STARTING A REPLAY, and parking the cursor here made it one.
    *
@@ -69,22 +112,21 @@ export function Transport({ archive, row, playing, setPlaying, cursorMs, setCurs
     return () => clearInterval(iv);
   }, [playing, speed, row, t0, t1]);
 
-  if (row === null || !range) return null;
+  if (row === null || !track || !track.n) return null;
 
   // The fix in force: the last one at or before the cursor. Nothing is interpolated here.
   // With no cursor the whole track is drawn, so the transport stands at its last fix.
   const cursor = cursorMs === null ? t1 : cursorMs;
-  let k = range[0];
-  while (k + 1 < range[1] && a.ptT[k + 1] * 60000 <= cursor) k++;
+  let k = 0;
+  while (k + 1 < track.n && track.t(k + 1) <= cursor) k++;
 
-  const vmaxRaw = a.ptVmax[k];
-  const vmax = vmaxRaw === -32768 ? null : vmaxRaw;
+  const vmax = track.kt(k);
   const cat = categoryFor(vmax);
-  const genesisMin = a.genesisT[row];
-  const hasGenesis = genesisMin !== -2147483648;
-  const hoursSinceGenesis = hasGenesis ? (a.ptT[k] - genesisMin) / 60 : null;
-  const quality = a.points.str("quality", k);
-  const preGenesis = hasGenesis && a.ptT[k] < genesisMin;
+  const genesisMs = track.genesisMs;
+  const hasGenesis = genesisMs !== null;
+  const hoursSinceGenesis = hasGenesis ? (track.t(k) - genesisMs) / 3600000 : null;
+  const quality = track.quality(k);
+  const preGenesis = hasGenesis && track.t(k) < genesisMs;
   const atEnd = cursor >= t1;
 
   return (
@@ -110,20 +152,20 @@ export function Transport({ archive, row, playing, setPlaying, cursorMs, setCurs
           aria-label="replay position along the track" />
         <div className="at-ends">
           <span>{fmtUTC(t0, { time: false })}</span>
-          <span>FIX {k - range[0] + 1} / {range[1] - range[0]}</span>
+          <span>FIX {k + 1} / {track.n}</span>
           <span>{fmtUTC(t1, { time: false })}</span>
         </div>
       </div>
 
       <div className="at-readouts">
-        <Readout label="UTC" value={<Txt value={fmtUTC(a.ptT[k] * 60000)} />} />
+        <Readout label="UTC" value={<Txt value={fmtUTC(track.t(k))} />} />
         <Readout label={preGenesis ? "BEFORE GENESIS" : "SINCE GENESIS"}
           value={hoursSinceGenesis === null
             ? <Txt value={null} absent="this storm has no genesis point in the archive" />
             : <span style={{ ...MONO }}>{hoursSinceGenesis >= 0 ? "+" : "−"}
                 {Math.abs(Math.round(hoursSinceGenesis))} h</span>} />
         <Readout label="POSITION"
-          value={<Txt value={formatPosition(a.ptLat[k] / 100, a.ptLon[k] / 100)} />} />
+          value={<Txt value={formatPosition(track.lat(k), track.lon(k))} />} />
         <Readout label="INTENSITY" value={
           <span>
             <Num value={vmax} unit="kt" absent="no wind was recorded at this fix"

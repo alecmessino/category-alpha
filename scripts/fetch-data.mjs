@@ -23,6 +23,7 @@ import { ingestIntel, arrivalEvents } from "./ingest.mjs";
 import { calibratedIntensityP, evidenceQuality } from "./lib/probability.mjs";
 import { riFloorFor } from "./lib/ships.mjs";
 import { parseOutlookShapes, attachShapes } from "./lib/shapefile.mjs";
+import { buildAtlasLive } from "./lib/atlas-live.mjs";
 /* Moved to lib so the backtest replays the same estimator the board trades. Pure move,
    proven by scripts/verify-extraction.mjs. */
 import { INTENSITY_MAE, HURRICANE_REPORTED_KT, KT_INCREMENT, LATENT_THRESHOLD,
@@ -31,6 +32,12 @@ import { INTENSITY_MAE, HURRICANE_REPORTED_KT, KT_INCREMENT, LATENT_THRESHOLD,
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = resolve(__dir, "../docs/data");
+/* The Storm Atlas reads its own data directory. The OPERATIONAL artifact is written here
+   rather than with the packs' four-times-a-day archive job, because it is a live product and
+   has to move at the live cadence: an operational record refreshed every six hours would be
+   stale by its own published bound most of the time. */
+const ATLAS_DATA_DIR = resolve(__dir, "../docs/storm-atlas/data");
+const ATLAS_LIVE_FILE = "atlas-live-v1.json";
 const STEP_MIN = Number(process.env.MT_STEP_MIN || 10);
 const FRAME_GAP_MIN = Number(process.env.MT_FRAME_GAP_MIN || 20);  // replay-history granularity
 const FRAME_KEEP = Number(process.env.MT_FRAME_KEEP || 96);        // 96 x 20min = 32h of real history
@@ -2534,6 +2541,31 @@ async function main() {
   await writeFile(resolve(DATA_DIR, "latest.json"), JSON.stringify(latest, null, 2) + "\n");
   // Minified: pure machine history, re-written often enough that formatting costs real bytes.
   if (appendFrame) await writeFile(resolve(DATA_DIR, "frames.json"), JSON.stringify(framesJson) + "\n");
+
+  /* THE STORM ATLAS'S OPERATIONAL ARTIFACT.
+   *
+   * Written last, from the same intel object the board was built from, so the two surfaces
+   * cannot disagree about what the decks said on this tick. The previous artifact is read for
+   * RETENTION ONLY -- a storm that has left the active list keeps its last operational record
+   * rather than reverting the Atlas to the archive stub the day it dissipates.
+   *
+   * It cannot stop the board publishing. The terminal's snapshot is already on disk by the time
+   * this runs, and a failure here is reported and stepped over for the same reason the wind
+   * field's is: a second surface's data file must not be able to take the first one down. */
+  try {
+    await mkdir(ATLAS_DATA_DIR, { recursive: true });
+    let prevLive = null;
+    try {
+      prevLive = JSON.parse(await readFile(resolve(ATLAS_DATA_DIR, ATLAS_LIVE_FILE), "utf8"));
+    } catch { /* first run, or a rewrite of an unreadable file */ }
+    const live = buildAtlasLive({ storms, intel, nowMs: now.getTime(), previous: prevLive });
+    await writeFile(resolve(ATLAS_DATA_DIR, ATLAS_LIVE_FILE),
+      JSON.stringify(live, null, 2) + "\n");
+    console.log(`  atlas-live: ${live.health.note}`
+      + (live.health.stale_atcf_ids.length ? ` · STALE ${live.health.stale_atcf_ids.join(",")}` : ""));
+  } catch (e) {
+    console.log(`  atlas-live: FAILED — ${e && e.message ? e.message : e}`);
+  }
 
   console.log(`[millibar] refreshed ${nowIso}`);
   console.log(`  NHC: ${nhcFeed.ok ? "ok" : "FAIL"} (${nhcFeed.note})`);

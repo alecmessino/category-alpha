@@ -27,6 +27,14 @@ import { changedKeyOf, compareResults } from "../engine/compare.js";
 import { bridgeSpec, contributionOf, whyMatched } from "../engine/cohort-membership.js";
 import { envAtGenesis, envCoverage } from "../engine/env.js";
 import { loadCalibration } from "../engine/calibration.js";
+/* THE OPERATIONAL LAYER. Imported by the SHELL and by nothing that computes anything: the
+   join happens here, between two objects neither of which knows about the other, and the
+   result is handed to the inspector and the plate. scripts/test-atlas-live-boundary.mjs
+   fails the build if any engine module that does historical research ever imports it. */
+import {
+  LIVE_OPERATIONAL, categoryLadder, liveStateFor, loadLive, operationalLifecycle,
+  operationalView, shortfall, sourceDisagreement,
+} from "../engine/live.js";
 import { AtlasMap } from "./map.jsx";
 import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
@@ -102,6 +110,11 @@ export function Atlas() {
       ? "calibration" : "tactical"));
   const [ledgerAnchor, setLedgerAnchor] = React.useState(
     () => new URLSearchParams(location.search).get("contract") || null);
+  /* THE OPERATIONAL LAYER'S STATE. `null` means "not attempted yet"; a Live object with ok=false
+     means "attempted and failed", which is the state that makes a provisional storm fail closed.
+     The two are deliberately different values, because a panel that cannot tell them apart is a
+     panel that would show a stub as current truth during the second the file is in flight. */
+  const [live, setLive] = React.useState(null);
   const [cal, setCal] = React.useState(null);
   const [calError, setCalError] = React.useState(null);
   /* THE METHODOLOGY A SHARED LINK WAS MADE UNDER. A cohort URL carries `v`, which versions the
@@ -208,6 +221,18 @@ export function Atlas() {
         if (!cancelled) setCoast({ failed: String(e && e.message ? e.message : e) });
       });
     }).catch((e) => { if (!cancelled) setError(e); });
+
+    /* THE OPERATIONAL ARTIFACT, IN PARALLEL AND OFF THE CRITICAL PATH.
+     *
+     * Roughly 20 KB of JSON against the pack's 1.4 MB, so it is requested alongside rather than
+     * after -- but it is deliberately NOT awaited with the archive. It cannot delay a first paint
+     * and it cannot fail one: `loadLive` resolves to an UNAVAILABLE layer instead of rejecting,
+     * because a broken live file must degrade the selected-storm panel and nothing else. */
+    loadLive(DATA_BASE).then((l) => {
+      if (cancelled) return;
+      setLive(l);
+      globalThis.__ATLAS_LIVE = l;
+    });
     return () => { cancelled = true; };
   }, []);
 
@@ -318,6 +343,67 @@ export function Atlas() {
   const contextRows = context ? context.rows : (result ? result.rows : null);
   const emphasis = context ? result.rows : null;
 
+  /* MEMOISED, and that is not a micro-optimisation. `Archive.storm(i)` allocates -- it is marked
+     "not for hot loops" where it is defined -- and everything the operational join derives hangs
+     off this object's identity. Recomputed every render it would hand the plate a new track
+     object sixty times a second, and the layer would re-project and repaint each one. */
+  const storm = React.useMemo(
+    () => (selected === null ? null : archive.storm(selected)), [archive, selected]);
+
+  /* ================= THE JOIN, AND THE ONLY PLACE IT HAPPENS =================
+   *
+   * `archive.storm(selected)` above is untouched and is what every research surface on this page
+   * reads. This block builds a SECOND object beside it, from the operational artifact, and hands
+   * both to the inspector and the plate. Nothing merges them, and no value computed here is
+   * passed to cohortResult, getAnalogs, filterStorms, compareResults, envCoverage, envAtGenesis,
+   * buildTimeline, loadCalibration, whyMatched, contributionOf or bridgeSpec -- every one of
+   * those still takes exactly the arguments it took before this change, so there is no call site
+   * that could pass one.
+   *
+   * `liveState` is computed even when `live` is still null, because "not loaded yet" and "loaded
+   * and says nothing is expected" are different answers and the panel has to be able to tell.
+   * While the artifact is in flight a provisional storm reads as LIVE CONTINUATION UNAVAILABLE,
+   * which is the correct thing to say about a record whose continuation has not arrived. */
+  const liveState = React.useMemo(
+    () => (archive && selected !== null ? liveStateFor(archive, selected, live) : null),
+    [archive, selected, live]);
+
+  const liveBundle = React.useMemo(() => {
+    if (!liveState || !storm) return null;
+    if (liveState.state !== LIVE_OPERATIONAL) {
+      return { state: liveState.state, reason: liveState.reason, view: null, lifecycle: null,
+        disagreement: [], shortfall: null };
+    }
+    const view = operationalView(liveState.record, { manifest: archive.manifest });
+    return {
+      state: liveState.state,
+      reason: null,
+      view,
+      lifecycle: operationalLifecycle(view.fixes, categoryLadder(archive.manifest)),
+      disagreement: sourceDisagreement(storm, view),
+      shortfall: shortfall(storm, view),
+    };
+  }, [liveState, storm, archive]);
+
+  /* THE TRACK THE PLATE DRAWS FOR A CURRENT STORM, and null for every other storm on the surface.
+     `archiveGenesis` travels with it because the genesis point a cohort matches on is the
+     ARCHIVE's, and it has to stay visible on an operational track. */
+  const operationalTrack = React.useMemo(() => {
+    const v = liveBundle && liveBundle.view;
+    if (!v || !v.fixes.length) return null;
+    const ladder = categoryLadder(archive.manifest) || [];
+    /* CATEGORY_ORDER's own order, ascending in knots, so the renderer can index straight into it
+       without carrying a second copy of the class names. */
+    const byName = Object.fromEntries(ladder);
+    return {
+      fixes: v.fixes,
+      genesisMs: liveBundle.lifecycle ? liveBundle.lifecycle.genesis : null,
+      archiveGenesis: { lat: storm.genesis_lat, lon: storm.genesis_lon, t: storm.genesis_t },
+      ladderKt: ["td", "ts", "cat1", "cat2", "cat3", "cat4", "cat5"]
+        .map((k) => (byName[k] === undefined ? Infinity : byName[k])),
+    };
+  }, [liveBundle, storm, archive]);
+
   /* WHAT FIT WOULD FRAME, AND WHAT SELECTING A STORM WOULD.
    *
    * FIT takes the LIFTED evidence when there is any and the drawn population otherwise, which is
@@ -328,9 +414,18 @@ export function Atlas() {
   const evidenceFrame = React.useMemo(
     () => (archive ? rowsFrame(archive, emphasis || contextRows) : null),
     [archive, emphasis, contextRows]);
+  /* THE FRAME SELECTING A STORM ASKS FOR.
+   *
+   * It has to cover the track that is actually DRAWN. For a current storm that is the operational
+   * one, and CP012026's runs from 137W to 176E while its archive stub stops at 160W -- so a frame
+   * taken from the archive alone would put half the visible track off the plate and look, to a
+   * reader, exactly like a map that had cut the storm short. */
   const subjectFrame = React.useMemo(
-    () => (archive && selected !== null ? rowsFrame(archive, [selected], { stride: 1 }) : null),
-    [archive, selected]);
+    () => (archive && selected !== null
+      ? rowsFrame(archive, [selected], { stride: 1, extra: operationalTrack
+        ? operationalTrack.fixes.map((f) => [f.lat, f.lon]) : null })
+      : null),
+    [archive, selected, operationalTrack]);
 
   /* THE DENSITY SURFACES ARE NOT TIED TO A PROBE. With a probe they show the matched pool --
      where those storms went. Without one they show the current filter over the whole archive,
@@ -582,8 +677,6 @@ export function Atlas() {
   if (error) return <BootError error={error} />;
   if (!archive || !world || !result) return <Boot manifest={manifest} />;
 
-  const storm = selected === null ? null : archive.storm(selected);
-
   /* THE PLATE, DEFINED ONCE AND RENDERED BY BOTH SHELLS.
    *
    * Two shells exist during the integration and the map is the largest thing they share. Copied
@@ -597,6 +690,7 @@ export function Atlas() {
       selected={selected} home={home} homeClamp={NA_EP}
       evidenceFrame={evidenceFrame} subjectFrame={subjectFrame} cameraApi={cameraRef}
       onSelect={selectStorm} onProbe={onProbe} probe={cohort.where}
+      operationalTrack={operationalTrack}
       replayMs={selected !== null && cursorMs !== null ? cursorMs : undefined}
       colorBy={layers.colorBy} dimPopulation={selected !== null}
       softenEmphasis={showPathway}
@@ -733,6 +827,7 @@ export function Atlas() {
               spec={stormCitation} specUrl={scenarioURL({ withStorm: true })}
               bridge={bridge} cohortSentence={sentence} result={result}
               onBridge={() => onBridge(selected)}
+              live={liveBundle}
               cursorLive={cursorMs !== null || playing
                 || (mode === "replay" && replayCursorMin !== null)} />
           </div>
@@ -776,7 +871,7 @@ export function Atlas() {
             setCursorMin={setReplayCursorMin} playing={playing} setPlaying={setPlaying} />
         ) : selected !== null ? (
           <Transport archive={archive} row={selected} playing={playing} setPlaying={setPlaying}
-            cursorMs={cursorMs} setCursorMs={setCursorMs} />
+            cursorMs={cursorMs} setCursorMs={setCursorMs} operational={operationalTrack} />
         ) : null}
       </div>
 
@@ -944,16 +1039,26 @@ export function coreFrame(archive) {
  * for a population, every fix for a single storm, where the difference between a track's true
  * extreme and a sampled one is a few pixels of margin.
  */
-export function rowsFrame(archive, rows, { stride = 3 } = {}) {
-  if (!archive || !rows || !rows.length) return null;
+export function rowsFrame(archive, rows, { stride = 3, extra = null } = {}) {
+  if (!archive) return null;
+  if ((!rows || !rows.length) && !(extra && extra.length)) return null;
   const lats = [];
   const lons = [];
-  for (const i of rows) {
+  for (const i of rows || []) {
     const [a, b] = archive.trackRange(i);
     for (let k = a; k < b; k += stride) {
       lats.push(archive.ptLat[k] / 100);
       lons.push(archive.ptLon[k] / 100);
     }
+  }
+  /* POSITIONS THAT ARE NOT IN THE PACK. The operational track is the only caller: its fixes are
+     drawn on the plate and must therefore be inside what FIT frames, but they belong to no pack
+     row. Unioned in BEFORE the median is taken, so the unwrapping below measures the span of what
+     is actually on screen rather than of the archive half of it. */
+  for (const [la, lo] of extra || []) {
+    if (la === null || lo === null || la === undefined || lo === undefined) continue;
+    lats.push(la);
+    lons.push(lo);
   }
   if (!lats.length) return null;
   const mid = quantile(lons.slice().sort(asc), 0.5);

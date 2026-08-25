@@ -110,6 +110,24 @@ export async function fetchDecks(stormId) {
     forecastAids: adeck && adeck.ok ? adeck.forecastTechs.length : 0,
     bestTrack: bdeck && bdeck.ok ? bdeck.latest : null,
     bestTrackRecords: bdeck && bdeck.ok ? bdeck.records.length : 0,
+    /* THE WHOLE DECK, NOT JUST ITS LAST ROW.
+     *
+     * parseBestTrack has always returned every fix; only `latest` was ever carried out of here,
+     * because the terminal's question is "how strong is it NOW". The Storm Atlas asks a
+     * different one -- what has this storm DONE so far -- and the answer was being parsed and
+     * thrown away on every tick while the Atlas rendered a nine-day-old IBTrACS stub instead.
+     * This is that history, and scripts/lib/atlas-live.mjs is the only thing that reads it.
+     * It does NOT go into latest.json: `byStorm` is internal to the ingest, and the terminal's
+     * snapshot keeps carrying one fix, exactly as before. */
+    bestTrackHistory: bdeck && bdeck.ok ? bdeck.records : null,
+    /* Where that deck came from, for the operational artifact's provenance block. The b-deck is
+       a single-candidate fetch, so the last attempt IS the attempt. */
+    bestTrackSource: b.attempts && b.attempts.length ? {
+      url: b.attempts[b.attempts.length - 1].url,
+      status: b.attempts[b.attempts.length - 1].status,
+      bytes: b.attempts[b.attempts.length - 1].bytes,
+      ok: b.attempts[b.attempts.length - 1].ok,
+    } : null,
     scat: fdeck ? latestScatPass(fdeck) : null,
     aircraftFix: fdeck ? latestAircraftFix(fdeck) : null,
     fixCount: fdeck && fdeck.ok ? fdeck.fixes.length : 0,
@@ -225,6 +243,11 @@ export async function ingestIntel(storms, opts) {
       deck: r.decks && r.decks.ok
         ? { cycle: r.decks.cycle, techCount: r.decks.techCount, forecastAids: r.decks.forecastAids } : null,
       bestTrack: r.decks ? r.decks.bestTrack : null,
+      /* Carried for scripts/lib/atlas-live.mjs and for nothing else. Deliberately NOT attached
+         to a storm by applyIntel: 63 fixes per storm on a ten-minute tick is a file the terminal
+         has no use for, and the Atlas reads its own artifact. */
+      bestTrackHistory: r.decks ? r.decks.bestTrackHistory : null,
+      bestTrackSource: r.decks ? r.decks.bestTrackSource : null,
       recon: r.vdm || null,
       aircraftFix: r.decks ? r.decks.aircraftFix : null,
       ascat: r.decks ? r.decks.scat : null,
