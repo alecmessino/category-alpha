@@ -1,0 +1,1462 @@
+{
+  "schema": "atlas-live-v1",
+  "generated_at": "2026-08-25T15:43:45.983Z",
+  "source": {
+    "name": "NHC ATCF b-deck (best track)",
+    "url": "https://ftp.nhc.noaa.gov/atcf/btk/",
+    "kind": "operational",
+    "note": "Operational best track and operational SHIPS, read on the terminal's refresh tick. This artifact is the OPERATIONAL representation of a current storm. It is not the archive, it never enters one, and no value in it is used to build a cohort, match an analog, compute a rate or an interval, or calibrate anything."
+  },
+  "freshness": {
+    "active_stale_hours": 18,
+    "retention_days": 60,
+    "note": "age_hours is latest_valid_time to fetched_at. The stale bound applies to ACTIVE storms only; a retained record is complete to its last fix and ages by design."
+  },
+  "health": {
+    "ok": true,
+    "active_atcf_ids": [
+      "CP012026",
+      "CP022026",
+      "EP092026",
+      "EP102026"
+    ],
+    "retained_atcf_ids": [],
+    "expected_atcf_ids": [
+      "CP012026",
+      "CP022026",
+      "EP092026",
+      "EP102026"
+    ],
+    "emitted_atcf_ids": [
+      "CP012026",
+      "CP022026",
+      "EP092026",
+      "EP102026"
+    ],
+    "missing_atcf_ids": [],
+    "stale_atcf_ids": [],
+    "note": "4 operational record(s) emitted"
+  },
+  "storms": {
+    "EP092026": {
+      "atcf_id": "EP092026",
+      "season": 2026,
+      "basin": "EP",
+      "name": "ISELLE",
+      "fetched_at": "2026-08-25T15:43:45.983Z",
+      "first_valid_time": "2026-08-21T12:00:00.000Z",
+      "latest_valid_time": "2026-08-25T12:00:00.000Z",
+      "age_hours": 3.7,
+      "fix_count": 17,
+      "fixes": [
+        {
+          "t": "2026-08-21T12:00:00.000Z",
+          "lat": 10,
+          "lon": -105,
+          "kt": 20,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-21T18:00:00.000Z",
+          "lat": 10.8,
+          "lon": -106.4,
+          "kt": 20,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-22T00:00:00.000Z",
+          "lat": 11.4,
+          "lon": -107.5,
+          "kt": 20,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-22T06:00:00.000Z",
+          "lat": 12,
+          "lon": -108.6,
+          "kt": 20,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-22T12:00:00.000Z",
+          "lat": 12.5,
+          "lon": -109.9,
+          "kt": 25,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-22T18:00:00.000Z",
+          "lat": 13.2,
+          "lon": -111.7,
+          "kt": 30,
+          "mslp": 1008,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-23T00:00:00.000Z",
+          "lat": 14.1,
+          "lon": -111.9,
+          "kt": 35,
+          "mslp": 1005,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-23T06:00:00.000Z",
+          "lat": 14.6,
+          "lon": -112.6,
+          "kt": 40,
+          "mslp": 1005,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-23T12:00:00.000Z",
+          "lat": 15.5,
+          "lon": -113.7,
+          "kt": 40,
+          "mslp": 1003,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-23T18:00:00.000Z",
+          "lat": 16.6,
+          "lon": -114.6,
+          "kt": 45,
+          "mslp": 1001,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T00:00:00.000Z",
+          "lat": 16.8,
+          "lon": -114.9,
+          "kt": 45,
+          "mslp": 999,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T06:00:00.000Z",
+          "lat": 17.6,
+          "lon": -115.8,
+          "kt": 50,
+          "mslp": 996,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T12:00:00.000Z",
+          "lat": 18.2,
+          "lon": -116.7,
+          "kt": 55,
+          "mslp": 992,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T18:00:00.000Z",
+          "lat": 18.9,
+          "lon": -117.6,
+          "kt": 60,
+          "mslp": 988,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-25T00:00:00.000Z",
+          "lat": 19.5,
+          "lon": -118.3,
+          "kt": 60,
+          "mslp": 988,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-25T06:00:00.000Z",
+          "lat": 20.3,
+          "lon": -119.6,
+          "kt": 60,
+          "mslp": 988,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-25T12:00:00.000Z",
+          "lat": 20.8,
+          "lon": -120.7,
+          "kt": 60,
+          "mslp": 988,
+          "stage": "TS"
+        }
+      ],
+      "latest": {
+        "t": "2026-08-25T12:00:00.000Z",
+        "lat": 20.8,
+        "lon": -120.7,
+        "kt": 60,
+        "mslp": 988,
+        "stage": "TS"
+      },
+      "stage": "TS",
+      "stage_label": "TROPICAL STORM",
+      "peak_wind_kt": 60,
+      "peak_wind_at": "2026-08-24T18:00:00.000Z",
+      "min_mslp_mb": 988,
+      "min_mslp_at": "2026-08-24T18:00:00.000Z",
+      "fixes_with_wind": 17,
+      "fixes_with_pressure": 14,
+      "ships_rt": {
+        "source": "ships_rt",
+        "product": "NHC operational SHIPS (stext)",
+        "tau": 0,
+        "valid_time": "2026-08-25T12:00:00.000Z",
+        "fetched_at": "2026-08-25T15:43:45.983Z",
+        "age_hours": 3.7,
+        "lat": null,
+        "lon": null,
+        "availability": {
+          "ohc": true,
+          "ir": true
+        },
+        "fields": {
+          "shearKt": {
+            "value": 23,
+            "label": "850-200 mb deep-layer shear"
+          },
+          "shearAdjKt": {
+            "value": 0,
+            "label": "shear adjusted for storm motion"
+          },
+          "sstC": {
+            "value": 27.1,
+            "label": "sea-surface temperature"
+          },
+          "mpiKt": {
+            "value": 135,
+            "label": "maximum potential intensity the ocean supports"
+          },
+          "rhMid": {
+            "value": 60,
+            "label": "mid-level relative humidity"
+          },
+          "ohc": {
+            "value": 4,
+            "label": "ocean heat content (kJ/cm2)"
+          },
+          "landKm": {
+            "value": 952,
+            "label": "distance to land"
+          },
+          "vNoLandKt": {
+            "value": 60,
+            "label": "SHIPS intensity forecast, no land interaction"
+          },
+          "vLgemKt": {
+            "value": 60,
+            "label": "LGEM intensity forecast"
+          }
+        },
+        "field_count": 9,
+        "not_comparable_with": "ships_dev",
+        "note": "Operational SHIPS, not the developmental SHIPS archive. The two are sequential eras measured differently and are never pooled, differenced or compared as one instrument."
+      },
+      "source": {
+        "name": "NHC ATCF b-deck (best track)",
+        "kind": "operational",
+        "url": "https://ftp.nhc.noaa.gov/atcf/btk/bep092026.dat",
+        "status": 200,
+        "bytes": 5039,
+        "note": "Operational best track, revised by the forecast office while the storm is live. Not post-analysed and not an archive record."
+      },
+      "active": true
+    },
+    "EP102026": {
+      "atcf_id": "EP102026",
+      "season": 2026,
+      "basin": "EP",
+      "name": "JULIO",
+      "fetched_at": "2026-08-25T15:43:45.983Z",
+      "first_valid_time": "2026-08-20T00:00:00.000Z",
+      "latest_valid_time": "2026-08-25T12:00:00.000Z",
+      "age_hours": 3.7,
+      "fix_count": 23,
+      "fixes": [
+        {
+          "t": "2026-08-20T00:00:00.000Z",
+          "lat": 9.5,
+          "lon": -110,
+          "kt": 15,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-20T06:00:00.000Z",
+          "lat": 9.2,
+          "lon": -111,
+          "kt": 15,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-20T12:00:00.000Z",
+          "lat": 8.9,
+          "lon": -112.1,
+          "kt": 15,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-20T18:00:00.000Z",
+          "lat": 8.5,
+          "lon": -113,
+          "kt": 20,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-21T00:00:00.000Z",
+          "lat": 8.4,
+          "lon": -114,
+          "kt": 20,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-21T06:00:00.000Z",
+          "lat": 8.4,
+          "lon": -114.9,
+          "kt": 20,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-21T12:00:00.000Z",
+          "lat": 9,
+          "lon": -115,
+          "kt": 20,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-21T18:00:00.000Z",
+          "lat": 9.2,
+          "lon": -114.5,
+          "kt": 20,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-22T00:00:00.000Z",
+          "lat": 9.3,
+          "lon": -115.6,
+          "kt": 20,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-22T06:00:00.000Z",
+          "lat": 9.4,
+          "lon": -116.7,
+          "kt": 20,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-22T12:00:00.000Z",
+          "lat": 9.8,
+          "lon": -117.5,
+          "kt": 20,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-22T18:00:00.000Z",
+          "lat": 9.9,
+          "lon": -118.2,
+          "kt": 25,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-23T00:00:00.000Z",
+          "lat": 10,
+          "lon": -119.4,
+          "kt": 25,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-23T06:00:00.000Z",
+          "lat": 10.2,
+          "lon": -120.9,
+          "kt": 25,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-23T12:00:00.000Z",
+          "lat": 10.3,
+          "lon": -122.7,
+          "kt": 25,
+          "mslp": 1007,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-23T18:00:00.000Z",
+          "lat": 10.7,
+          "lon": -121.3,
+          "kt": 25,
+          "mslp": 1009,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-24T00:00:00.000Z",
+          "lat": 11.5,
+          "lon": -121.3,
+          "kt": 25,
+          "mslp": 1008,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-24T06:00:00.000Z",
+          "lat": 11.7,
+          "lon": -121.3,
+          "kt": 30,
+          "mslp": 1008,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-24T12:00:00.000Z",
+          "lat": 12.5,
+          "lon": -121.3,
+          "kt": 30,
+          "mslp": 1007,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-24T18:00:00.000Z",
+          "lat": 13.1,
+          "lon": -121,
+          "kt": 30,
+          "mslp": 1006,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-25T00:00:00.000Z",
+          "lat": 13.8,
+          "lon": -120.5,
+          "kt": 35,
+          "mslp": 1005,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-25T06:00:00.000Z",
+          "lat": 15.3,
+          "lon": -119.6,
+          "kt": 40,
+          "mslp": 1003,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-25T12:00:00.000Z",
+          "lat": 17,
+          "lon": -119.1,
+          "kt": 45,
+          "mslp": 1001,
+          "stage": "TS"
+        }
+      ],
+      "latest": {
+        "t": "2026-08-25T12:00:00.000Z",
+        "lat": 17,
+        "lon": -119.1,
+        "kt": 45,
+        "mslp": 1001,
+        "stage": "TS"
+      },
+      "stage": "TS",
+      "stage_label": "TROPICAL STORM",
+      "peak_wind_kt": 45,
+      "peak_wind_at": "2026-08-25T12:00:00.000Z",
+      "min_mslp_mb": 1001,
+      "min_mslp_at": "2026-08-25T12:00:00.000Z",
+      "fixes_with_wind": 23,
+      "fixes_with_pressure": 19,
+      "ships_rt": {
+        "source": "ships_rt",
+        "product": "NHC operational SHIPS (stext)",
+        "tau": 0,
+        "valid_time": "2026-08-25T12:00:00.000Z",
+        "fetched_at": "2026-08-25T15:43:45.983Z",
+        "age_hours": 3.7,
+        "lat": null,
+        "lon": null,
+        "availability": {
+          "ohc": true,
+          "ir": true
+        },
+        "fields": {
+          "shearKt": {
+            "value": 16,
+            "label": "850-200 mb deep-layer shear"
+          },
+          "shearAdjKt": {
+            "value": 1,
+            "label": "shear adjusted for storm motion"
+          },
+          "sstC": {
+            "value": 28.9,
+            "label": "sea-surface temperature"
+          },
+          "mpiKt": {
+            "value": 156,
+            "label": "maximum potential intensity the ocean supports"
+          },
+          "rhMid": {
+            "value": 71,
+            "label": "mid-level relative humidity"
+          },
+          "ohc": {
+            "value": 20,
+            "label": "ocean heat content (kJ/cm2)"
+          },
+          "landKm": {
+            "value": 1133,
+            "label": "distance to land"
+          },
+          "vNoLandKt": {
+            "value": 45,
+            "label": "SHIPS intensity forecast, no land interaction"
+          },
+          "vLgemKt": {
+            "value": 45,
+            "label": "LGEM intensity forecast"
+          }
+        },
+        "field_count": 9,
+        "not_comparable_with": "ships_dev",
+        "note": "Operational SHIPS, not the developmental SHIPS archive. The two are sequential eras measured differently and are never pooled, differenced or compared as one instrument."
+      },
+      "source": {
+        "name": "NHC ATCF b-deck (best track)",
+        "kind": "operational",
+        "url": "https://ftp.nhc.noaa.gov/atcf/btk/bep102026.dat",
+        "status": 200,
+        "bytes": 5039,
+        "note": "Operational best track, revised by the forecast office while the storm is live. Not post-analysed and not an archive record."
+      },
+      "active": true
+    },
+    "CP012026": {
+      "atcf_id": "CP012026",
+      "season": 2026,
+      "basin": "CP",
+      "name": "LALA",
+      "fetched_at": "2026-08-25T15:43:45.983Z",
+      "first_valid_time": "2026-08-10T00:00:00.000Z",
+      "latest_valid_time": "2026-08-25T12:00:00.000Z",
+      "age_hours": 3.7,
+      "fix_count": 63,
+      "fixes": [
+        {
+          "t": "2026-08-10T00:00:00.000Z",
+          "lat": 14.5,
+          "lon": -137.3,
+          "kt": 20,
+          "mslp": 1007,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-10T06:00:00.000Z",
+          "lat": 14.5,
+          "lon": -137.3,
+          "kt": 20,
+          "mslp": 1007,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-10T12:00:00.000Z",
+          "lat": 14.6,
+          "lon": -137.3,
+          "kt": 20,
+          "mslp": 1006,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-10T18:00:00.000Z",
+          "lat": 14.7,
+          "lon": -137.3,
+          "kt": 20,
+          "mslp": 1006,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-11T00:00:00.000Z",
+          "lat": 14.8,
+          "lon": -137.3,
+          "kt": 20,
+          "mslp": 1006,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-11T06:00:00.000Z",
+          "lat": 14.8,
+          "lon": -137.3,
+          "kt": 25,
+          "mslp": 1006,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-11T12:00:00.000Z",
+          "lat": 14.9,
+          "lon": -137.4,
+          "kt": 25,
+          "mslp": 1006,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-11T18:00:00.000Z",
+          "lat": 15,
+          "lon": -137.6,
+          "kt": 30,
+          "mslp": 1004,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-12T00:00:00.000Z",
+          "lat": 15.1,
+          "lon": -139.4,
+          "kt": 30,
+          "mslp": 1003,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-12T06:00:00.000Z",
+          "lat": 15,
+          "lon": -140.4,
+          "kt": 30,
+          "mslp": 1003,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-12T12:00:00.000Z",
+          "lat": 14.9,
+          "lon": -141.4,
+          "kt": 30,
+          "mslp": 1003,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-12T18:00:00.000Z",
+          "lat": 14.7,
+          "lon": -142.2,
+          "kt": 35,
+          "mslp": 1003,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-13T00:00:00.000Z",
+          "lat": 14.7,
+          "lon": -143.1,
+          "kt": 35,
+          "mslp": 1002,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-13T06:00:00.000Z",
+          "lat": 14.7,
+          "lon": -144.1,
+          "kt": 35,
+          "mslp": 1002,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-13T12:00:00.000Z",
+          "lat": 14.9,
+          "lon": -145,
+          "kt": 35,
+          "mslp": 1001,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-13T18:00:00.000Z",
+          "lat": 15.2,
+          "lon": -145.7,
+          "kt": 40,
+          "mslp": 1000,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-14T00:00:00.000Z",
+          "lat": 16,
+          "lon": -147,
+          "kt": 45,
+          "mslp": 999,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-14T06:00:00.000Z",
+          "lat": 16.2,
+          "lon": -147.9,
+          "kt": 50,
+          "mslp": 997,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-14T12:00:00.000Z",
+          "lat": 16.5,
+          "lon": -149,
+          "kt": 50,
+          "mslp": 997,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-14T18:00:00.000Z",
+          "lat": 17,
+          "lon": -150.3,
+          "kt": 50,
+          "mslp": 997,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-15T00:00:00.000Z",
+          "lat": 17.4,
+          "lon": -151.9,
+          "kt": 55,
+          "mslp": 995,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-15T06:00:00.000Z",
+          "lat": 17.6,
+          "lon": -153,
+          "kt": 55,
+          "mslp": 991,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-15T12:00:00.000Z",
+          "lat": 17.8,
+          "lon": -154.1,
+          "kt": 55,
+          "mslp": 991,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-15T18:00:00.000Z",
+          "lat": 17.9,
+          "lon": -155,
+          "kt": 65,
+          "mslp": 988,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-16T00:00:00.000Z",
+          "lat": 18.3,
+          "lon": -155.7,
+          "kt": 65,
+          "mslp": 988,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-16T06:00:00.000Z",
+          "lat": 19.1,
+          "lon": -156.5,
+          "kt": 65,
+          "mslp": 988,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-16T12:00:00.000Z",
+          "lat": 19.9,
+          "lon": -157.6,
+          "kt": 60,
+          "mslp": 991,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-16T18:00:00.000Z",
+          "lat": 20.8,
+          "lon": -158.8,
+          "kt": 55,
+          "mslp": 994,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-17T00:00:00.000Z",
+          "lat": 20.8,
+          "lon": -160.8,
+          "kt": 55,
+          "mslp": 994,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-17T06:00:00.000Z",
+          "lat": 20.6,
+          "lon": -162,
+          "kt": 50,
+          "mslp": 997,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-17T12:00:00.000Z",
+          "lat": 20.5,
+          "lon": -162.9,
+          "kt": 50,
+          "mslp": 997,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-17T18:00:00.000Z",
+          "lat": 20.4,
+          "lon": -163.9,
+          "kt": 55,
+          "mslp": 994,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-18T00:00:00.000Z",
+          "lat": 20.3,
+          "lon": -165,
+          "kt": 60,
+          "mslp": 992,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-18T06:00:00.000Z",
+          "lat": 20.4,
+          "lon": -165.8,
+          "kt": 65,
+          "mslp": 989,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-18T12:00:00.000Z",
+          "lat": 20.3,
+          "lon": -166.7,
+          "kt": 70,
+          "mslp": 985,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-18T18:00:00.000Z",
+          "lat": 20.3,
+          "lon": -167.7,
+          "kt": 85,
+          "mslp": 974,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-19T00:00:00.000Z",
+          "lat": 20.5,
+          "lon": -168.5,
+          "kt": 100,
+          "mslp": 960,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-19T06:00:00.000Z",
+          "lat": 20.7,
+          "lon": -169.3,
+          "kt": 115,
+          "mslp": 947,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-19T12:00:00.000Z",
+          "lat": 21,
+          "lon": -169.9,
+          "kt": 110,
+          "mslp": 953,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-19T18:00:00.000Z",
+          "lat": 21.8,
+          "lon": -170.7,
+          "kt": 105,
+          "mslp": 956,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-20T00:00:00.000Z",
+          "lat": 22.4,
+          "lon": -171.3,
+          "kt": 100,
+          "mslp": 959,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-20T06:00:00.000Z",
+          "lat": 23.1,
+          "lon": -171.8,
+          "kt": 95,
+          "mslp": 963,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-20T12:00:00.000Z",
+          "lat": 23.8,
+          "lon": -172,
+          "kt": 80,
+          "mslp": 972,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-20T18:00:00.000Z",
+          "lat": 24.6,
+          "lon": -172.3,
+          "kt": 80,
+          "mslp": 973,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-21T00:00:00.000Z",
+          "lat": 25.4,
+          "lon": -172.2,
+          "kt": 80,
+          "mslp": 974,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-21T06:00:00.000Z",
+          "lat": 26.1,
+          "lon": -171.9,
+          "kt": 80,
+          "mslp": 974,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-21T12:00:00.000Z",
+          "lat": 27,
+          "lon": -171.3,
+          "kt": 85,
+          "mslp": 970,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-21T18:00:00.000Z",
+          "lat": 28,
+          "lon": -170.7,
+          "kt": 80,
+          "mslp": 974,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-22T00:00:00.000Z",
+          "lat": 29.1,
+          "lon": -170.5,
+          "kt": 75,
+          "mslp": 976,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-22T06:00:00.000Z",
+          "lat": 30.2,
+          "lon": -171.4,
+          "kt": 75,
+          "mslp": 976,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-22T12:00:00.000Z",
+          "lat": 30.3,
+          "lon": -172.2,
+          "kt": 70,
+          "mslp": 979,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-22T18:00:00.000Z",
+          "lat": 30.8,
+          "lon": -172.5,
+          "kt": 65,
+          "mslp": 981,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-23T00:00:00.000Z",
+          "lat": 31.3,
+          "lon": -172.7,
+          "kt": 65,
+          "mslp": 981,
+          "stage": "HU"
+        },
+        {
+          "t": "2026-08-23T06:00:00.000Z",
+          "lat": 31.8,
+          "lon": -173.3,
+          "kt": 60,
+          "mslp": 984,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-23T12:00:00.000Z",
+          "lat": 31.9,
+          "lon": -173.7,
+          "kt": 55,
+          "mslp": 988,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-23T18:00:00.000Z",
+          "lat": 32.3,
+          "lon": -174.2,
+          "kt": 55,
+          "mslp": 988,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T00:00:00.000Z",
+          "lat": 32.9,
+          "lon": -174.5,
+          "kt": 55,
+          "mslp": 988,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T06:00:00.000Z",
+          "lat": 33.1,
+          "lon": -174.7,
+          "kt": 55,
+          "mslp": 988,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T12:00:00.000Z",
+          "lat": 33.3,
+          "lon": -174.9,
+          "kt": 55,
+          "mslp": 988,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T18:00:00.000Z",
+          "lat": 33.6,
+          "lon": -175.1,
+          "kt": 55,
+          "mslp": 988,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-25T00:00:00.000Z",
+          "lat": 34.1,
+          "lon": -175.4,
+          "kt": 50,
+          "mslp": 992,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-25T06:00:00.000Z",
+          "lat": 34.5,
+          "lon": -175.8,
+          "kt": 50,
+          "mslp": 992,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-25T12:00:00.000Z",
+          "lat": 34.8,
+          "lon": -176.4,
+          "kt": 45,
+          "mslp": 994,
+          "stage": "TS"
+        }
+      ],
+      "latest": {
+        "t": "2026-08-25T12:00:00.000Z",
+        "lat": 34.8,
+        "lon": -176.4,
+        "kt": 45,
+        "mslp": 994,
+        "stage": "TS"
+      },
+      "stage": "TS",
+      "stage_label": "TROPICAL STORM",
+      "peak_wind_kt": 115,
+      "peak_wind_at": "2026-08-19T06:00:00.000Z",
+      "min_mslp_mb": 947,
+      "min_mslp_at": "2026-08-19T06:00:00.000Z",
+      "fixes_with_wind": 63,
+      "fixes_with_pressure": 63,
+      "ships_rt": {
+        "source": "ships_rt",
+        "product": "NHC operational SHIPS (stext)",
+        "tau": 0,
+        "valid_time": "2026-08-25T12:00:00.000Z",
+        "fetched_at": "2026-08-25T15:43:45.983Z",
+        "age_hours": 3.7,
+        "lat": null,
+        "lon": null,
+        "availability": {
+          "ohc": true,
+          "ir": true
+        },
+        "fields": {
+          "shearKt": {
+            "value": 6,
+            "label": "850-200 mb deep-layer shear"
+          },
+          "shearAdjKt": {
+            "value": 2,
+            "label": "shear adjusted for storm motion"
+          },
+          "sstC": {
+            "value": 24,
+            "label": "sea-surface temperature"
+          },
+          "mpiKt": {
+            "value": 100,
+            "label": "maximum potential intensity the ocean supports"
+          },
+          "rhMid": {
+            "value": 43,
+            "label": "mid-level relative humidity"
+          },
+          "ohc": {
+            "value": 0,
+            "label": "ocean heat content (kJ/cm2)"
+          },
+          "landKm": {
+            "value": 2136,
+            "label": "distance to land"
+          },
+          "vNoLandKt": {
+            "value": 45,
+            "label": "SHIPS intensity forecast, no land interaction"
+          },
+          "vLgemKt": {
+            "value": 45,
+            "label": "LGEM intensity forecast"
+          }
+        },
+        "field_count": 9,
+        "not_comparable_with": "ships_dev",
+        "note": "Operational SHIPS, not the developmental SHIPS archive. The two are sequential eras measured differently and are never pooled, differenced or compared as one instrument."
+      },
+      "source": {
+        "name": "NHC ATCF b-deck (best track)",
+        "kind": "operational",
+        "url": "https://ftp.nhc.noaa.gov/atcf/btk/bcp012026.dat",
+        "status": 200,
+        "bytes": 25545,
+        "note": "Operational best track, revised by the forecast office while the storm is live. Not post-analysed and not an archive record."
+      },
+      "active": true
+    },
+    "CP022026": {
+      "atcf_id": "CP022026",
+      "season": 2026,
+      "basin": "CP",
+      "name": "MOKE",
+      "fetched_at": "2026-08-25T15:43:45.983Z",
+      "first_valid_time": "2026-08-18T12:00:00.000Z",
+      "latest_valid_time": "2026-08-25T06:00:00.000Z",
+      "age_hours": 9.7,
+      "fix_count": 28,
+      "fixes": [
+        {
+          "t": "2026-08-18T12:00:00.000Z",
+          "lat": 9.5,
+          "lon": -132.5,
+          "kt": 20,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-18T18:00:00.000Z",
+          "lat": 9.3,
+          "lon": -133.9,
+          "kt": 25,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-19T00:00:00.000Z",
+          "lat": 9.3,
+          "lon": -134.9,
+          "kt": 25,
+          "mslp": null,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-19T06:00:00.000Z",
+          "lat": 9.3,
+          "lon": -136,
+          "kt": 25,
+          "mslp": 1009,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-19T12:00:00.000Z",
+          "lat": 9.5,
+          "lon": -137.3,
+          "kt": 30,
+          "mslp": 1008,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-19T18:00:00.000Z",
+          "lat": 9.9,
+          "lon": -138.7,
+          "kt": 30,
+          "mslp": 1007,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-20T00:00:00.000Z",
+          "lat": 10.4,
+          "lon": -140,
+          "kt": 30,
+          "mslp": 1007,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-20T06:00:00.000Z",
+          "lat": 10.9,
+          "lon": -141.1,
+          "kt": 30,
+          "mslp": 1007,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-20T12:00:00.000Z",
+          "lat": 11.7,
+          "lon": -142.6,
+          "kt": 30,
+          "mslp": 1006,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-20T18:00:00.000Z",
+          "lat": 12.3,
+          "lon": -143.4,
+          "kt": 30,
+          "mslp": 1006,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-21T00:00:00.000Z",
+          "lat": 12.8,
+          "lon": -144.6,
+          "kt": 30,
+          "mslp": 1006,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-21T06:00:00.000Z",
+          "lat": 12.9,
+          "lon": -145.2,
+          "kt": 30,
+          "mslp": 1006,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-21T12:00:00.000Z",
+          "lat": 13.2,
+          "lon": -145.8,
+          "kt": 30,
+          "mslp": 1005,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-21T18:00:00.000Z",
+          "lat": 13.7,
+          "lon": -146.7,
+          "kt": 35,
+          "mslp": 1002,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-22T00:00:00.000Z",
+          "lat": 13.8,
+          "lon": -147.8,
+          "kt": 40,
+          "mslp": 1002,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-22T06:00:00.000Z",
+          "lat": 14.1,
+          "lon": -148.7,
+          "kt": 40,
+          "mslp": 1002,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-22T12:00:00.000Z",
+          "lat": 14.5,
+          "lon": -149.6,
+          "kt": 45,
+          "mslp": 994,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-22T18:00:00.000Z",
+          "lat": 14.8,
+          "lon": -150.6,
+          "kt": 45,
+          "mslp": 996,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-23T00:00:00.000Z",
+          "lat": 15.1,
+          "lon": -151.5,
+          "kt": 45,
+          "mslp": 998,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-23T06:00:00.000Z",
+          "lat": 15.1,
+          "lon": -152.7,
+          "kt": 40,
+          "mslp": 1001,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-23T12:00:00.000Z",
+          "lat": 15.1,
+          "lon": -154.2,
+          "kt": 40,
+          "mslp": 1002,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-23T18:00:00.000Z",
+          "lat": 15.1,
+          "lon": -155.7,
+          "kt": 35,
+          "mslp": 1003,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T00:00:00.000Z",
+          "lat": 15.2,
+          "lon": -156.8,
+          "kt": 35,
+          "mslp": 1003,
+          "stage": "TS"
+        },
+        {
+          "t": "2026-08-24T06:00:00.000Z",
+          "lat": 15.3,
+          "lon": -157.9,
+          "kt": 30,
+          "mslp": 1004,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-24T12:00:00.000Z",
+          "lat": 15.4,
+          "lon": -159.5,
+          "kt": 30,
+          "mslp": 1004,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-24T18:00:00.000Z",
+          "lat": 15.6,
+          "lon": -161.1,
+          "kt": 30,
+          "mslp": 1005,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-25T00:00:00.000Z",
+          "lat": 15.9,
+          "lon": -162.5,
+          "kt": 30,
+          "mslp": 1005,
+          "stage": "TD"
+        },
+        {
+          "t": "2026-08-25T06:00:00.000Z",
+          "lat": 16.2,
+          "lon": -163.5,
+          "kt": 30,
+          "mslp": 1006,
+          "stage": "TD"
+        }
+      ],
+      "latest": {
+        "t": "2026-08-25T06:00:00.000Z",
+        "lat": 16.2,
+        "lon": -163.5,
+        "kt": 30,
+        "mslp": 1006,
+        "stage": "TD"
+      },
+      "stage": "TD",
+      "stage_label": "TROPICAL DEPRESSION",
+      "peak_wind_kt": 45,
+      "peak_wind_at": "2026-08-22T12:00:00.000Z",
+      "min_mslp_mb": 994,
+      "min_mslp_at": "2026-08-22T12:00:00.000Z",
+      "fixes_with_wind": 28,
+      "fixes_with_pressure": 25,
+      "ships_rt": {
+        "source": "ships_rt",
+        "product": "NHC operational SHIPS (stext)",
+        "tau": 0,
+        "valid_time": "2026-08-25T06:00:00.000Z",
+        "fetched_at": "2026-08-25T15:43:45.983Z",
+        "age_hours": 9.7,
+        "lat": null,
+        "lon": null,
+        "availability": {
+          "ohc": true,
+          "ir": true
+        },
+        "fields": {
+          "shearKt": {
+            "value": 14,
+            "label": "850-200 mb deep-layer shear"
+          },
+          "shearAdjKt": {
+            "value": 2,
+            "label": "shear adjusted for storm motion"
+          },
+          "sstC": {
+            "value": 28.5,
+            "label": "sea-surface temperature"
+          },
+          "mpiKt": {
+            "value": 150,
+            "label": "maximum potential intensity the ocean supports"
+          },
+          "rhMid": {
+            "value": 52,
+            "label": "mid-level relative humidity"
+          },
+          "ohc": {
+            "value": 37,
+            "label": "ocean heat content (kJ/cm2)"
+          },
+          "landKm": {
+            "value": 711,
+            "label": "distance to land"
+          },
+          "vNoLandKt": {
+            "value": 30,
+            "label": "SHIPS intensity forecast, no land interaction"
+          },
+          "vLgemKt": {
+            "value": 30,
+            "label": "LGEM intensity forecast"
+          }
+        },
+        "field_count": 9,
+        "not_comparable_with": "ships_dev",
+        "note": "Operational SHIPS, not the developmental SHIPS archive. The two are sequential eras measured differently and are never pooled, differenced or compared as one instrument."
+      },
+      "source": {
+        "name": "NHC ATCF b-deck (best track)",
+        "kind": "operational",
+        "url": "https://ftp.nhc.noaa.gov/atcf/btk/bcp022026.dat",
+        "status": 200,
+        "bytes": 6119,
+        "note": "Operational best track, revised by the forecast office while the storm is live. Not post-analysed and not an archive record."
+      },
+      "active": true
+    }
+  }
+}

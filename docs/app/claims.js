@@ -1042,6 +1042,20 @@
         + "record has none.",
     ok: false,
   }));
+  /* THE OPERATIONAL LAYER. The one Atlas claim that is about a LIVE file rather than the committed
+     archive, and the one that most needs an owner: it is a statement about what a current storm's
+     numbers are and are not, printed beside numbers that look exactly like archive columns. */
+  define("atlas.operational", "none", () => ({
+    text: "For a storm whose archive row is PROVISIONAL, the selected-storm figures above come "
+        + "from the operational ATCF best track rather than from IBTrACS. That record is revised "
+        + "while the storm is live and has not been post-analysed. It is used HERE and nowhere "
+        + "else: no cohort draws on it, no analog matches against it, no rate, interval, "
+        + "effective sample size, calibration or archive comparison contains it, and no refusal "
+        + "is decided by it. The two records are never concatenated and never averaged; where "
+        + "they disagree both are printed. When the season is post-analysed the archive record "
+        + "becomes the record and this layer stops being used.",
+    ok: true,
+  }));
   define("atlas.geometry", "none", () => ({
     text: "Track positions are drawn at the archive's own published precision. Genesis, "
         + "threshold-crossing and landfall coordinates -- the ones distances are computed "

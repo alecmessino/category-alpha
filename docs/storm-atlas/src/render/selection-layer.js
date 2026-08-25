@@ -284,7 +284,12 @@ export const SelectionLayer = AtlasLayer.extend({
   },
 });
 
-function drawMark(ctx, m) {
+/* EXPORTED so the operational layer draws the SAME marks.
+ *
+ * The operational track needs a genesis dot, a peak ring and a position mark, and reimplementing
+ * them there would put two mark vocabularies on one plate -- which is the exact failure
+ * provenance-ink.js warns about for landfall forms. One definition, two callers. */
+export function drawMark(ctx, m) {
   ctx.save();
   ctx.lineWidth = 1.4;
   ctx.strokeStyle = m.color;

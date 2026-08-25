@@ -26,6 +26,7 @@
 import React from "react";
 import { PopulationLayer } from "../render/population-layer.js";
 import { SelectionLayer } from "../render/selection-layer.js";
+import { OperationalLayer } from "../render/operational-layer.js";
 import { PathwayLayer } from "../render/pathway-layer.js";
 import { CoastlineLayer } from "../render/coastline-layer.js";
 import { ReplayHeadsLayer, ReplayLayer } from "../render/replay-layer.js";
@@ -149,6 +150,7 @@ export function applyFrame(m, frame, { clamp = null, mode = "cover", padPx = 0 }
 
 export function AtlasMap({
   archive, world, coast, rows, emphasis, selected, onSelect, onProbe, probe, replayMs, home,
+  operationalTrack = null,
   homeClamp = null, evidenceFrame = null, subjectFrame = null,
   colorBy, showPathway, pathway, pathwayStep, dimPopulation, softenEmphasis, onViewChange,
   onHover, showGenesis = true, showLandfalls = true,
@@ -283,9 +285,14 @@ export function AtlasMap({
     const population = new PopulationLayer().addTo(m);
     const replay = new ReplayLayer().addTo(m);
     const selection = new SelectionLayer().addTo(m);
+    /* THE OPERATIONAL TRACK OF A CURRENT STORM. Mounted always, holding a track almost never --
+       an empty layer costs one canvas and no paint. When it DOES hold one the selection layer is
+       fed -1, so the two never draw at the same time: precedence on the plate is one track or
+       the other, never both a pixel apart. */
+    const operational = new OperationalLayer().addTo(m);
     const replayHeads = new ReplayHeadsLayer().addTo(m);
     layers.current = { coastline, pathwayLayer, genesisLayer, population, replay, selection,
-      replayHeads };
+      operational, replayHeads };
 
     const readFrame = () => setFrame(measure(m));
     m.on("moveend zoomend resize", () => {
@@ -434,8 +441,14 @@ export function AtlasMap({
 
   React.useEffect(() => {
     if (!ready) return;
-    layers.current.selection.setStorm(selected === null ? -1 : selected);
-  }, [ready, selected]);
+    /* ONE TRACK ON SCREEN. Where an operational record governs the selected storm, the ARCHIVE's
+       track for that storm is not drawn -- the operational layer draws instead. This is the map's
+       half of the precedence rule, and it is why the archive stub of a current storm never
+       appears alongside the record that supersedes it. */
+    const governed = !!operationalTrack;
+    layers.current.selection.setStorm(selected === null || governed ? -1 : selected);
+    layers.current.operational.setTrack(governed ? operationalTrack : null);
+  }, [ready, selected, operationalTrack]);
 
   /* THE CAMERA, REACHABLE FROM OUTSIDE. The shell binds H and F to these, and the camera gate
      drives them; both are the same two functions the controls call, so a keystroke and a click
@@ -465,17 +478,33 @@ export function AtlasMap({
   React.useEffect(() => {
     if (!ready) return;
     if (selected === null) { fittedSubject.current = null; return; }
-    if (fittedSubject.current === selected) return;
-    fittedSubject.current = selected;
+    /* THE KEY IS THE SELECTION AND THE TRACK'S EXTENT, not the selection alone.
+     *
+     * A current storm's operational track is a separate 20 KB fetch, so it can land AFTER a
+     * `?storm=` link has already selected the storm and framed it. Framed on the archive stub
+     * alone, CP012026 fits a 49-fix track and then draws a 63-fix one running 1,900 km further
+     * west -- half of it off the plate, which reads as a map that cut the storm short.
+     *
+     * SO THE SECOND FIT EXISTS, AND IT YIELDS TO THE READER. If they have moved the camera since
+     * the first one, the late-arriving track does not take it back: an automatic move that
+     * overrides a deliberate one is exactly the theft the persistence rule forbids, and the fact
+     * that this one is finishing an earlier move does not make it the reader's. */
+    const key = `${selected}|${operationalTrack ? operationalTrack.fixes.length : 0}`;
+    if (fittedSubject.current === key) return;
+    const refit = fittedSubject.current !== null;
+    fittedSubject.current = key;
+    if (refit && userMoved.current) return;
     const f = frames.current.subjectFrame;
     if (!f) return;
     const m = map.current;
     camera(m, () => applyFrame(m, f, { mode: "contain", padPx: 34 }));
-  }, [ready, selected]);
+  }, [ready, selected, operationalTrack]);
 
   React.useEffect(() => {
     if (!ready) return;
-    layers.current.selection.setReplayTime(replayMs === undefined ? null : replayMs);
+    const ms = replayMs === undefined ? null : replayMs;
+    layers.current.selection.setReplayTime(ms);
+    layers.current.operational.setReplayTime(ms);
   }, [ready, replayMs]);
 
   React.useEffect(() => {
