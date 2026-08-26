@@ -1,10 +1,10 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-26T04:16:54.880Z",
+  "ranAt": "2026-08-26T04:56:50.227Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "0af087727e19881af24eb19d932e7ad492bab183",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32929572875",
+  "sha": "7b6937e10a029321aa612d3309e9a3a7c6f31ad6",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32932069250",
   "ok": false,
   "passed": 43,
   "total": 46,
@@ -15,14 +15,14 @@
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
-      "detail": "2/3 frames carry a calibrated P · 2 carry the raw one · 3 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=95m raw=1%"
+      "detail": "2/3 frames carry a calibrated P · 2 carry the raw one · 3 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=137m raw=1%"
     },
     {
       "check": "all markets carried",
       "detail": "300 contracts · 51 series · droppedForCap=18"
     }
   ],
-  "thirdPartyFailures": 28,
+  "thirdPartyFailures": 32,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -42,7 +42,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-26T04:05:36.266Z · 11m old"
+      "detail": "2026-08-26T04:47:38.205Z · 9m old"
     },
     {
       "check": "renders: Situation",
@@ -102,12 +102,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "8 ranked of 12 candidates · 114/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "6 ranked of 6 candidates · 114/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 18 displayed-only · unverifiable=0"
+      "detail": "0 executable · 19 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -117,7 +117,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "36/42 tile(s) rendered · 6 hole(s) · 0 still loading"
+      "detail": "34/42 tile(s) rendered · 8 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -132,7 +132,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 2 screens tall (2745px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 837px · BANKROLL 743px · ▾ 698px"
+      "detail": "3 tabs · Situation is 2 screens tall (2736px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 828px · BANKROLL 734px · ▾ 698px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -162,7 +162,7 @@
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": false,
-      "detail": "2/3 frames carry a calibrated P · 2 carry the raw one · 3 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=95m raw=1%"
+      "detail": "2/3 frames carry a calibrated P · 2 carry the raw one · 3 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=137m raw=1%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -177,7 +177,7 @@
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: past the 180-min line — Julio 448m · 0 row(s), 0 held, 0 TAKE · forced: 1 anchored row(s) pushed past it → 1 HOLD, 0 SUSPECT, 0 ACTIONABLE · 11 stale-crossing row(s) in the register"
+      "detail": "live: past the 180-min line — Julio 490m · 0 row(s), 0 held, 0 TAKE · forced: 1 anchored row(s) pushed past it → 1 HOLD, 0 SUSPECT, 0 ACTIONABLE · 8 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
