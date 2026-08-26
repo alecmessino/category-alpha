@@ -80,6 +80,11 @@ const open = async (query, w = 1920, h = 1080) => {
   await page.setViewportSize({ width: w, height: h });
   await page.goto(`http://127.0.0.1:${port}/storm-atlas/?${query}`, { waitUntil: "domcontentloaded" });
   await page.waitForFunction(() => globalThis.__ATLAS && globalThis.__ATLAS.archive, { timeout: 90000 });
+  /* AND THE MAP HANDLE, not just the archive. Every check below reads __ATLAS_MAP through
+     view(); waiting only on the archive and then sleeping a fixed 800ms is a race that a loaded
+     runner loses -- the gate then dies on `undefined.getZoom()` before asserting anything, which
+     reads as an infrastructure error rather than as the camera check it never reached. */
+  await page.waitForFunction(() => globalThis.__ATLAS_MAP, { timeout: 90000 });
   await page.waitForTimeout(800);
 };
 
@@ -92,8 +97,65 @@ const view = () => page.evaluate(() => {
     moved: globalThis.__ATLAS_CAMERA ? globalThis.__ATLAS_CAMERA.movedByReader() : null,
   };
 });
-const same = (a, b) => Math.abs(a.lat - b.lat) < 1e-6 && Math.abs(a.lon - b.lon) < 1e-6
-  && Math.abs(a.zoom - b.zoom) < 1e-6;
+/* CAMERA EQUALITY IS MEASURED IN SCREEN PIXELS, NOT IN DEGREES.
+ *
+ * This helper used to compare lat/lon to 1e-6 degrees -- about 0.1 m, roughly one part in
+ * 22,000 of a pixel at zoom 6. That is not an invariant the surface can hold, and the gate went
+ * red on it: deselecting a storm closes the inspector dock, the plate's container grows back by
+ * 380px, the ResizeObserver in map.jsx calls invalidateSize, and Leaflet compensates for the new
+ * box by adjusting the centre -- which is the CORRECT behaviour, and it necessarily moves
+ * getCenter(). Measured, that compensation lands 0.32 of one CSS pixel differently on a loaded
+ * runner than on an idle one. Reproduced identically on main, so it was never a regression;
+ * the gate was asserting sub-pixel identity across a resize that legitimately pans.
+ *
+ * The thing worth protecting is that deselection does not RE-FRAME: the three real camera moves
+ * measure 281, 335 and 496 px, three orders of magnitude above that noise floor. So the question
+ * the gate asks is now "did the camera move a distance a reader could see", and the answer is a
+ * projected pixel displacement.
+ *
+ * TWO PREDICATES, NOT ONE, and a deliberate dead band between them. A single tolerance serving
+ * both `same` and `!same` is ambiguous in a way that can WEAKEN a negative assertion: loosening
+ * it lets a small-but-intended camera change be classified as "same", and the `!same` that was
+ * meant to catch a missing move passes vacuously. So the two questions are asked by name, with
+ * a gap between 1px and MEANINGFUL_PX that satisfies NEITHER. A change landing in that band
+ * fails both the "stayed" and the "moved" assertion -- loudly, rather than silently picking one.
+ *
+ * AND CANONICAL RESTORATION IS STILL EXACT. HOME sets a deterministic aperture with no resize in
+ * play, and it measures 0.00 px in both the idle and the loaded condition, so those two
+ * assertions keep degree-exact equality. Nothing is loosened that does not need to be. */
+
+const MEANINGFUL_PX = 8;
+
+/* Web Mercator, the projection Leaflet's default CRS uses, at 256px tiles. Implemented here
+   rather than read from the page so the self-test below can run without a browser; asserted
+   against the live map's own project() in [0], so it cannot drift from what the map does. */
+function projectPx(lat, lon, zoom) {
+  const world = 256 * 2 ** zoom;
+  const clamped = Math.max(-85.05112878, Math.min(85.05112878, lat)) * Math.PI / 180;
+  return [
+    (lon + 180) / 360 * world,
+    world / 2 - world * Math.log(Math.tan(Math.PI / 4 + clamped / 2)) / (2 * Math.PI),
+  ];
+}
+
+/** Centre-to-centre displacement in CSS pixels, projected at `a`'s zoom. */
+function centrePxDelta(a, b) {
+  const [ax, ay] = projectPx(a.lat, a.lon, a.zoom);
+  const [bx, by] = projectPx(b.lat, b.lon, a.zoom);
+  return Math.hypot(ax - bx, ay - by);
+}
+
+/** The camera stayed put: identical zoom, and a centre a reader could not see move. */
+const sameCameraWithinPx = (a, b, tolPx = 1) =>
+  a.zoom === b.zoom && centrePxDelta(a, b) < tolPx;
+
+/** The camera is exactly where it was, to the degree. For canonical HOME restoration only. */
+const sameCameraExactly = (a, b) => Math.abs(a.lat - b.lat) < 1e-6
+  && Math.abs(a.lon - b.lon) < 1e-6 && Math.abs(a.zoom - b.zoom) < 1e-6;
+
+/** The camera made a move a reader would see: a zoom change, or a visible centre displacement. */
+const cameraMovedMeaningfully = (a, b, minPx = MEANINGFUL_PX) =>
+  a.zoom !== b.zoom || centrePxDelta(a, b) >= minPx;
 const fmt = (v) => `lat ${v.s.toFixed(1)}..${v.n.toFixed(1)}  lon ${v.w.toFixed(1)}..${v.e.toFixed(1)}  z${v.zoom}`;
 
 /* THE RESEARCH GEOGRAPHY, restated here rather than imported: a gate that reads its bound from
@@ -109,6 +171,97 @@ const MUST_HOLD = [
   { name: "the East Pacific development region", s: 11, n: 19, w: -140, e: -95 },
   { name: "the US east-coast recurvature corridor", s: 30, n: 42, w: -80, e: -62 },
 ];
+
+/* [0] THE MEASURING STICK ITSELF, before it is used to judge anything.
+ *
+ * These predicates decide every verdict below, so a fault in them is invisible: a
+ * sameCameraWithinPx that is too generous turns a real re-frame into a pass, and a
+ * cameraMovedMeaningfully that is too generous turns a MISSING move into a pass. Both are
+ * checked against real measurements taken from this surface -- the sub-pixel resize
+ * compensation that made this gate red, and the three genuine camera moves it must keep
+ * catching -- plus the 191px displacement produced by a pan:false experiment on map.jsx's
+ * ResizeObserver, which is the shape of the regression this gate exists to catch.
+ */
+console.log("[camera] the pixel yardstick, before anything is measured with it");
+{
+  const at = (lat, lon, zoom) => ({ lat, lon, zoom, s: 0, n: 0, w: 0, e: 0 });
+
+  /* The measured resize compensation: 0.32px at zoom 6. Must read as "stayed". */
+  const before = at(12.7039, -74.7000, 6);
+  const resized = at(12.7047, -74.7070, 6);
+  const dResize = centrePxDelta(before, resized);
+  ok(`the 0.32px resize compensation is not a move (${dResize.toFixed(2)} px)`,
+    dResize < 1 && sameCameraWithinPx(before, resized),
+    "the sub-pixel pan Leaflet applies on a container resize must not read as a re-frame");
+  ok("and it is not a meaningful move either", !cameraMovedMeaningfully(before, resized));
+
+  /* THE REGRESSION THIS GATE EXISTS TO CATCH. Passing pan:false to the ResizeObserver's
+     invalidateSize in map.jsx -- a plausible "fix" for the above -- stops Leaflet compensating
+     and the plate jumps 4.2 degrees of longitude. Measured: lon -74.7000 -> -70.5322 at zoom 6.
+     If that ever reads as "the camera stayed where it is", this gate is worthless. */
+  const panFalse = at(12.7047, -70.5322, 6);
+  const dPanFalse = centrePxDelta(before, panFalse);
+  ok(`the pan:false jump is ~191px (${dPanFalse.toFixed(1)} px)`,
+    dPanFalse > 150 && dPanFalse < 250, "the recorded regression fixture has drifted");
+  ok("and it fails a stayed-put assertion decisively",
+    !sameCameraWithinPx(before, panFalse),
+    `${dPanFalse.toFixed(1)} px read as unchanged`);
+  ok("and registers as a meaningful move", cameraMovedMeaningfully(before, panFalse));
+  ok(`it clears the dead band by ${(dPanFalse / MEANINGFUL_PX).toFixed(0)}x`,
+    dPanFalse >= MEANINGFUL_PX * 10);
+
+  /* The three real moves, at their measured sizes. Each must register as a move, so the
+     negative assertions below cannot pass vacuously. */
+  for (const [name, a, b] of [
+    ["a reader's drag (~335-456 px)", at(24.5, -96.0, 5), at(24.5, -78.0, 5)],
+    ["FIT reframing to evidence (~496 px)", at(25.0, -75.0, 5), at(38.0, -52.0, 5)],
+    ["selecting a storm (~281 px, +2 zoom)", at(24.5, -96.0, 4), at(12.7, -74.7, 6)],
+  ]) {
+    ok(`${name} registers as a move`, cameraMovedMeaningfully(a, b),
+      `only ${centrePxDelta(a, b).toFixed(1)} px`);
+    ok(`${name} does not read as unchanged`, !sameCameraWithinPx(a, b));
+  }
+
+  /* A zoom change alone is a move, whatever the centre does. */
+  ok("a zoom change alone is a move", cameraMovedMeaningfully(at(20, -70, 5), at(20, -70, 6)));
+  ok("and never reads as unchanged", !sameCameraWithinPx(at(20, -70, 5), at(20, -70, 6)));
+
+  /* The dead band is deliberate and must stay empty of verdicts: 1px..8px satisfies NEITHER
+     predicate, so a change landing there fails whichever assertion was made about it. */
+  const degPerPx = 360 / (256 * 2 ** 6);
+  const band = at(12.7039, -74.7000 + degPerPx * (1 + MEANINGFUL_PX) / 2, 6);
+  const dBand = centrePxDelta(before, band);
+  ok(`the ${dBand.toFixed(1)}px dead band satisfies neither predicate`,
+    dBand > 1 && dBand < MEANINGFUL_PX
+      && !sameCameraWithinPx(before, band) && !cameraMovedMeaningfully(before, band),
+    "a change between 1px and MEANINGFUL_PX must fail loudly, not be classified either way");
+
+  /* Exact restoration stays exact: HOME measures 0.00px, so it is held to degrees. */
+  ok("sameCameraExactly rejects even the sub-pixel compensation",
+    !sameCameraExactly(before, resized));
+  ok("and accepts an identical camera", sameCameraExactly(before, at(12.7039, -74.7000, 6)));
+}
+
+/* AND THAT THE YARDSTICK IS THE MAP'S OWN. projectPx is Web Mercator written out here so the
+   block above can run without a browser; if the map's CRS were ever something else, every pixel
+   verdict would be measured with the wrong ruler while still looking self-consistent. So it is
+   checked against Leaflet's own project() on the live map. */
+await open("", 1920, 1080);
+{
+  const probes = [[12.7, -74.7, 6], [38.0, -52.0, 5], [24.5, -96.0, 4], [-15.0, 150.0, 3]];
+  const leaflet = await page.evaluate((ps) => ps.map(([la, lo, z]) => {
+    const pt = globalThis.__ATLAS_MAP.project({ lat: la, lng: lo }, z);
+    return [pt.x, pt.y];
+  }), probes);
+  let worst = 0;
+  for (let i = 0; i < probes.length; i++) {
+    const [la, lo, z] = probes[i];
+    const [mx, my] = projectPx(la, lo, z);
+    worst = Math.max(worst, Math.hypot(mx - leaflet[i][0], my - leaflet[i][1]));
+  }
+  ok(`projectPx agrees with the map's own CRS (worst ${worst.toFixed(4)} px over 4 probes)`,
+    worst < 0.01, "the gate is measuring pixels with a different projection than the map draws");
+}
 
 console.log("[camera] the opening view is the NA + EP aperture, at every supported viewport");
 for (const [w, h] of [[1440, 900], [1600, 900], [1920, 1080], [1280, 800], [2560, 1080],
@@ -200,8 +353,9 @@ console.log("\n[camera] a query change never steals a camera the reader has move
   for (const [name, act] of STEPS) {
     await act();
     const v = await view();
-    ok(`${name} leaves the camera alone`, same(prev, v),
-       `camera moved from ${fmt(prev)} to ${fmt(v)}`);
+    ok(`${name} leaves the camera alone`, sameCameraWithinPx(prev, v),
+       `camera moved from ${fmt(prev)} to ${fmt(v)} `
+       + `(${centrePxDelta(prev, v).toFixed(2)} px)`);
     prev = v;
   }
 }
@@ -218,12 +372,13 @@ console.log("\n[camera] HOME and FIT reframe, and they are not the same control"
   await page.mouse.up();
   await page.waitForTimeout(400);
   const moved = await view();
-  ok("the reader has moved away from HOME", !same(home, moved));
+  ok("the reader has moved away from HOME", cameraMovedMeaningfully(home, moved),
+     `only ${centrePxDelta(home, moved).toFixed(2)} px — a drag must move the camera visibly`);
 
   await (await page.$("[data-camera-home]")).click();
   await page.waitForTimeout(500);
   const back = await view();
-  ok("HOME restores the canonical aperture exactly", same(home, back),
+  ok("HOME restores the canonical aperture exactly", sameCameraExactly(home, back),
      `${fmt(home)}  vs  ${fmt(back)}`);
   ok("and it hands the camera back — the reader's move is cleared", back.moved === false);
 
@@ -238,7 +393,8 @@ console.log("\n[camera] HOME and FIT reframe, and they are not the same control"
   await (await page.$("[data-camera-fit]")).click();
   await page.waitForTimeout(500);
   const fit = await view();
-  ok("FIT frames the evidence, not the aperture", !same(h2, fit), `${fmt(h2)}  vs  ${fmt(fit)}`);
+  ok("FIT frames the evidence, not the aperture", cameraMovedMeaningfully(h2, fit),
+     `${fmt(h2)}  vs  ${fmt(fit)}  (only ${centrePxDelta(h2, fit).toFixed(2)} px)`);
   const drawn = await page.evaluate(() => {
     const a = globalThis.__ATLAS.archive;
     const rows = globalThis.__ATLAS_DRAWN_ROWS || [];
@@ -262,7 +418,7 @@ console.log("\n[camera] HOME and FIT reframe, and they are not the same control"
   }
   await (await page.$("[data-camera-home]")).click();
   await page.waitForTimeout(500);
-  ok("and HOME comes back from FIT", same(h2, await view()));
+  ok("and HOME comes back from FIT", sameCameraExactly(h2, await view()));
 }
 
 console.log("\n[camera] selecting a storm frames that storm, and deselecting does not move");
@@ -281,7 +437,8 @@ console.log("\n[camera] selecting a storm frames that storm, and deselecting doe
   await page.evaluate((row) => globalThis.__ATLAS_SELECT(row), sid.row);
   await page.waitForTimeout(700);
   const on = await view();
-  ok("the camera framed the subject", !same(before, on), `${fmt(before)}  vs  ${fmt(on)}`);
+  ok("the camera framed the subject", cameraMovedMeaningfully(before, on),
+     `${fmt(before)}  vs  ${fmt(on)}  (only ${centrePxDelta(before, on).toFixed(2)} px)`);
   const track = await page.evaluate((row) => {
     const a = globalThis.__ATLAS.archive;
     const [s, e] = a.trackRange(row);
@@ -316,12 +473,19 @@ console.log("\n[camera] selecting a storm frames that storm, and deselecting doe
     if (close) { await close.click(); await page.waitForTimeout(400); }
   }
   const afterEdit = await view();
-  ok("a cohort edit with the inspector open does not re-frame the subject", same(on, afterEdit),
-     `${fmt(on)}  vs  ${fmt(afterEdit)}`);
+  ok("a cohort edit with the inspector open does not re-frame the subject",
+     sameCameraWithinPx(on, afterEdit),
+     `${fmt(on)}  vs  ${fmt(afterEdit)}  (${centrePxDelta(on, afterEdit).toFixed(2)} px)`);
 
   await page.keyboard.press("Escape");
   await page.waitForTimeout(500);
-  ok("and deselecting leaves the camera where it is", same(afterEdit, await view()));
+  {
+    /* The dock closes here, so the container resizes and Leaflet pans to compensate. What must
+       hold is that no RE-FRAME happened -- see the helper's note. */
+    const off = await view();
+    ok("and deselecting leaves the camera where it is", sameCameraWithinPx(afterEdit, off),
+       `${fmt(afterEdit)}  vs  ${fmt(off)}  (${centrePxDelta(afterEdit, off).toFixed(2)} px)`);
+  }
 }
 
 ok("no page errors in any state", errors.length === 0, errors.slice(0, 3).join("\n"));

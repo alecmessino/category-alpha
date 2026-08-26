@@ -350,6 +350,29 @@ jobs:
       - name: Verify the operational layer never reaches the archive
         run: node scripts/test-atlas-live-boundary.mjs
 
+      # ---- THE LALA EVENT DOSSIER ------------------------------------------------------------
+      #
+      # /dossier/lala is generated, not written. Its one quotable number -- "closest approach to
+      # the Main Hawaiian Islands: 61 km" -- comes out of scripts/lib/geo-segment.mjs, whose
+      # first draft measured to the nearest STORED COASTLINE VERTEX instead. That error is a
+      # function of how finely the coastline happens to be sampled, it is always positive, and
+      # nothing about it looks wrong on the page. Worse, the function's containment test can fail
+      # SILENTLY: if it always answered "no", every call would quietly return the nearer endpoint
+      # -- the vertex distance again, now wearing the word "segment". So the interior branch is
+      # asserted to actually fire.
+      - name: Verify distances are to the coastline, not to its stored vertices
+        run: node scripts/test-geo-segment.mjs
+
+      # AND THAT THE COMMITTED PAGE IS WHAT THE GENERATOR PRODUCES. The dossier is a
+      # point-in-time document quoting 115 kt, 61 km, 1/26 and 141 ledger entries as facts. A
+      # hand edit to index.html would make the page say something facts.json does not, and would
+      # be silently reverted by the next generator run. Its b-deck, SHIPS series, ledger slice
+      # and calibration state are pinned under docs/dossier/lala/data/ so a data refresh cannot
+      # move them; the archive pack is not pinned, and this gate also requires the stamp the
+      # masthead prints to be the stamp of the pack actually in the tree.
+      - name: Verify the committed dossier is byte-identical to a fresh build
+        run: node scripts/check-dossier-lala.mjs
+
   # ---- THE BROWSER GATES, IN THEIR OWN JOB -----------------------------------------------
   #
   # THEY USED TO LIVE AT THE BOTTOM OF `checks`, AND THAT IS WHY THEY STOPPED RUNNING.

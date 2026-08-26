@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lala CP012026 — Event Dossier — Millibar</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="What was knowable about Hurricane Lala (CP012026), when it was knowable, and what the historical record does and does not support about Hawaii risk. Archive, operational and derived evidence kept separate throughout.">
+<link rel="icon" href="../../assets/millibar-icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../styles.css">
+<style>
+
+:root{ --dz-rule:1px solid var(--border-dim); --dz-max:informal; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-app);color:var(--text-1);
+  font-family:var(--font-sans);font-variant-numeric:tabular-nums;
+  -webkit-font-smoothing:antialiased;line-height:1.5}
+.dossier{max-width:1080px;margin:0 auto;padding:48px 32px 96px}
+h1,h2,h3{font-weight:600;letter-spacing:-.01em}
+h1{font-size:44px;line-height:1.05;margin:6px 0 4px}
+h1 .id{font-family:var(--font-mono);font-size:20px;font-weight:400;color:var(--text-2);
+  letter-spacing:.02em;vertical-align:middle;margin-left:10px}
+h2{font-size:21px;margin:0 0 14px;display:flex;align-items:baseline;gap:12px}
+h3{font-size:14px;margin:26px 0 8px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-2)}
+.callout h3{margin-top:0;color:inherit;text-transform:none;letter-spacing:0;font-size:15px}
+h2 .num{font-family:var(--font-mono);font-size:12px;color:var(--text-2);border:var(--dz-rule);
+  border-radius:2px;padding:2px 7px;font-weight:400;flex:none}
+
+/* masthead */
+.mast{border-bottom:2px solid var(--text-1);padding-bottom:20px;margin-bottom:36px}
+.kicker{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.18em;color:var(--text-2)}
+.mast .sub{font-family:var(--font-mono);font-size:12px;color:var(--text-2);margin-top:2px}
+.stamps{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:14px;
+  font-family:var(--font-mono);font-size:10.5px;color:var(--text-2)}
+
+section{margin:0 0 44px;padding-top:8px;border-top:var(--dz-rule)}
+section:first-of-type{border-top:0}
+.key{border-top:0}
+p{margin:9px 0;max-width:76ch}
+.lead{font-size:16px;color:var(--text-1);margin-top:0}
+.note{font-size:12.5px;color:var(--text-2);max-width:82ch}
+.q{color:var(--text-2);font-size:12px}
+code{font-family:var(--font-mono);font-size:.92em;color:var(--text-2)}
+b{font-weight:600}
+
+/* tables */
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13px}
+th,td{text-align:left;padding:6px 10px;border-bottom:var(--dz-rule);vertical-align:top}
+thead th{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;color:var(--text-2);
+  text-transform:uppercase;font-weight:400;border-bottom:1px solid var(--border-strong)}
+tbody th{font-weight:500;color:var(--text-1);width:1%;white-space:nowrap}
+.n{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+thead .n{text-align:right}
+.th2{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.04em;color:var(--text-2);
+  text-transform:none;font-weight:400}
+tr.dim td,tr.dim th{color:var(--text-2)}
+tr.mark td,tr.mark th{background:var(--surface-sunken)}
+.chron .t{font-family:var(--font-mono);font-size:11.5px;white-space:nowrap;color:var(--text-2)}
+.also{color:var(--text-2);font-size:12px;margin-top:2px}
+.cmp tbody th{width:24%}
+/* A three-column comparison is read ACROSS, not summed down, so its values sit under their own
+   column heading rather than pushed to the far right of it. Right alignment is for a column of
+   numbers being compared to each other; these are two different sources answering one question. */
+.cmp td.n{text-align:left}
+.stat tbody th{width:1%;padding-right:14px}
+.wide tbody th{width:26%;white-space:normal}
+.verdicts{margin:8px 0}
+.verdicts td,.verdicts th{border-bottom:0;padding:3px 10px 3px 0;font-size:12.5px}
+.v-matched{color:var(--pos);font-family:var(--font-mono);font-size:11px}
+.v-missed{color:var(--neg);font-family:var(--font-mono);font-size:11px}
+.v-unjudged,.v-unchecked{color:var(--warn);font-family:var(--font-mono);font-size:11px}
+
+/* provenance tags */
+.tag{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.08em;padding:2px 5px;
+  border:1px solid currentColor;border-radius:2px;white-space:nowrap;display:inline-block}
+.t-archive{color:var(--text-2)}
+.t-operational{color:var(--accent)}
+.t-derived{color:var(--text-2)}
+.t-recordedmillibar{color:var(--accent)}
+.t-externalpubliccontract{color:var(--warn)}
+.flag{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:var(--warn)}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+.refuse-in{font-family:var(--font-mono);font-size:10px;color:var(--warn);letter-spacing:.04em}
+
+/* callouts */
+.callout{border:var(--dz-rule);border-left:3px solid var(--text-2);
+  padding:14px 18px;margin:18px 0;background:var(--surface-sunken);border-radius:var(--radius-sm)}
+.callout.warn{border-left-color:var(--warn)}
+.callout.refuse{border-left-color:var(--neg)}
+.callout p{margin:7px 0}
+.callout p:first-of-type{margin-top:0}
+
+/* close */
+.cta{border:2px solid var(--text-1);padding:20px 22px;margin-top:24px;border-radius:var(--radius-sm)}
+.cta h3{margin:0 0 6px;font-size:17px;text-transform:none;letter-spacing:-.01em;color:var(--text-1)}
+.cta p{margin:0;color:var(--text-2);font-size:13px}
+footer{border-top:var(--dz-rule);padding-top:16px;margin-top:8px}
+footer p{font-size:11.5px;color:var(--text-2);max-width:none}
+
+@media (max-width:820px){
+  .dossier{padding:28px 16px 64px}
+  h1{font-size:32px}
+  table{font-size:12px}
+  th,td{padding:5px 6px}
+  .chron .t{font-size:10.5px}
+}
+
+/* PRINT / PDF. One page per section boundary is not attempted; what is enforced is that a table
+   never splits across a page break in the middle of a row, and that the provenance tags stay
+   legible without colour. */
+@media print{
+  body{background:#fff;color:#000}
+  .dossier{max-width:none;padding:0}
+  section{break-inside:auto;page-break-inside:auto}
+  tr,.callout,.cta{break-inside:avoid;page-break-inside:avoid}
+  h2,h3{break-after:avoid;page-break-after:avoid}
+  .tag{border-color:#666;color:#000}
+  .callout{background:#f4f4f4}
+  a[href]:after{content:""}
+}
+
+</style>
+</head>
+<body>
+<article class="dossier">
+
+<header class="mast">
+  <div class="kicker">MILLIBAR · EVENT DOSSIER</div>
+  <h1>Lala <span class="id">CP012026</span></h1>
+  <div class="sub">2026 · EP / CP Pacific · archive id 2026222N15223</div>
+  <div class="stamps">
+    <span>Built 2026-08-25 20:52Z</span>
+    <span>Archive c3998bd7bd784a62 · built 2026-08-18</span>
+    <span>Methodology 1.1.0</span>
+    <span>Insurance / reinsurance contract facts used: <b>none</b></span>
+  </div>
+</header>
+
+<section class="key">
+  <h2>How to read every number on this page</h2>
+  <p class="lead">Five sources answer five different questions. They are labelled everywhere and
+  never combined.</p>
+  <table>
+    <tbody>
+      <tr><td><span class="tag t-archive">ARCHIVE</span></td><td>IBTrACS best track, as the Storm Atlas holds it. Post-analysed for closed seasons; <b>provisional</b> for this one. The only source any statistic on this page is computed from.</td></tr>
+      <tr><td><span class="tag t-operational">OPERATIONAL</span></td><td>ATCF b-deck and operational SHIPS, as the forecast office had them. Revised while a storm is live. Used to describe <b>this storm</b>, and nothing else.</td></tr>
+      <tr><td><span class="tag t-derived">DERIVED</span></td><td>Computed here by replaying a rule the archive already owns. The rule is named wherever a derived value appears.</td></tr>
+      <tr><td><span class="tag t-recordedmillibar">RECORDED / MILLIBAR</span></td><td>Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time.</td></tr>
+      <tr><td><span class="tag t-externalpubliccontract">EXTERNAL / PUBLIC CONTRACT</span></td><td>The last quoted price on <code>KXHURRICANENAMES-26DEC01CPAC-LAL</code>, a public binary event contract, as Millibar recorded it at that instant. It appears in one column of section 4 and nowhere else. It is not an insurance or reinsurance contract, and not a Millibar valuation of one.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">No insurance or reinsurance contract fact is used anywhere in this document. No
+  carrier, policy, trigger geometry, attachment threshold or payout function is named, reconstructed
+  or implied.</p>
+</section>
+
+<!-- ============================================================ 1 -->
+<section>
+  <h2><span class="num">1</span> Event overview</h2>
+
+  <p class="lead">Two records describe Lala. They begin at the same instant and end
+  9.8 d apart.</p>
+
+  <table class="cmp">
+    <thead><tr><th></th><th><span class="tag t-archive">ARCHIVE</span><div class="th2">IBTrACS, provisional</div></th><th><span class="tag t-operational">OPERATIONAL</span><div class="th2">ATCF b-deck</div></th></tr></thead>
+    <tbody>
+      <tr><th>First fix</th><td>2026-08-10 00:00Z <span class=q>disturbance</span></td><td>2026-08-10 00:00Z <span class=q>disturbance</span></td></tr>
+      <tr><th>Last fix</th><td>2026-08-16 00:00Z</td><td><b>2026-08-25 18:00Z</b></td></tr>
+      <tr><th>Full track extent</th><td class="n">6.0 d</td><td class="n">15.8 d</td></tr>
+      <tr><th>Genesis to end of record</th><td class="n">2.5 d</td><td class="n">12.3 d</td></tr>
+      <tr><th>Fixes</th><td class="n">49 <span class=q>(28 pre-genesis, 21 from genesis)</span></td><td class="n">64 <span class=q>(14 pre-genesis, 50 from genesis)</span></td></tr>
+      <tr><th>Peak wind</th><td class="n">65 kt <span class=q>Category 1</span></td><td class="n"><b>115 kt</b> <span class=q>Category 4 <span class="tag t-derived">DERIVED</span></span></td></tr>
+      <tr><th>Minimum pressure</th><td class="n">988 mb</td><td class="n"><b>947 mb</b></td></tr>
+      <tr><th>Record status</th><td><span class=flag>PROVISIONAL</span> — not post-analysed</td><td><span class=flag>OPERATIONAL</span> — revised while live</td></tr>
+      <tr><th>Fix quality</th><td>0 observed · 24 interpolated · 25 provisional</td><td>64 forecast-office analyses; a b-deck carries no interpolated rows</td></tr>
+      <tr><th>Source</th><td><code>ibtracs.EP.csv</code></td><td><code>data/bdeck-cp012026.dat</code><div class=q>fetched 2026-08-25 20:52Z from https://ftp.nhc.noaa.gov/atcf/btk/bcp012026.dat</div></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <h3>This was not a Category 4 near-miss of Hawaiʻi</h3>
+    <p>Lala reached 115 kt at 2026-08-19 06:00Z, at 20.7°N 169.3°W.
+    At that instant it was 946 km from the Main Hawaiian Islands
+    — 15× its closest approach.
+    The passage nearest the main islands happened
+    3.0 d <b>earlier</b>, at
+    50 kt weaker
+    (65 kt, hurricane).
+    The intensity and the proximity did not coincide.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section>
+  <h2><span class="num">2</span> Point-in-time chronology</h2>
+  <p class="lead">Every row carries the source-valid time of the fix it came from, not the time
+  Millibar read it.</p>
+
+  <table class="chron">
+    <thead><tr><th>UTC</th><th>Event</th><th class="n">kt</th><th class="n">mb</th><th>Position</th><th class="n">Main Hawaiian Islands</th><th></th></tr></thead>
+    <tbody>
+      <tr class=""><td class="t">2026-08-10 00:00Z</td><td>b-deck stage <code>DB</code> — disturbance</td><td class="n">20</td><td class="n">1007</td><td>14.5°N 137.3°W</td><td class="n">1,942 km</td><td><span class="tag t-operational">OPERATIONAL</span></td></tr>
+      <tr class=""><td class="t">2026-08-12 00:00Z</td><td>b-deck stage <code>LO</code> — low</td><td class="n">30</td><td class="n">1003</td><td>15.1°N 139.4°W</td><td class="n">1,707 km</td><td><span class="tag t-operational">OPERATIONAL</span></td></tr>
+      <tr class="mark"><td class="t">2026-08-13 12:00Z</td><td><b>Genesis</b> — first tropical fix; both records agree<div class="also">b-deck stage <code>TS</code> — tropical storm</div><div class="also"><b>Tropical Storm</b> crossing — first fix ≥ 34 kt, 0 min from genesis</div></td><td class="n">35</td><td class="n">1001</td><td>14.9°N 145.0°W</td><td class="n">1,160 km</td><td><span class="tag t-archive">ARCHIVE</span> <span class="tag t-operational">OPERATIONAL</span> <span class="tag t-derived">DERIVED</span></td></tr>
+      <tr class=""><td class="t">2026-08-15 18:00Z</td><td>b-deck stage <code>HU</code> — hurricane<div class="also"><b>Category 1</b> crossing — first fix ≥ 64 kt, 2.3 d from genesis</div></td><td class="n">65</td><td class="n">988</td><td>17.9°N 155.0°W</td><td class="n">133 km</td><td><span class="tag t-operational">OPERATIONAL</span> <span class="tag t-derived">DERIVED</span></td></tr>
+      <tr class="mark"><td class="t">2026-08-16 00:00Z</td><td><b>Archive record ends</b> — IBTrACS publishes nothing after this</td><td class="n">65</td><td class="n">988</td><td>18.3°N 155.7°W</td><td class="n">67 km</td><td><span class="tag t-archive">ARCHIVE</span></td></tr>
+      <tr class="mark"><td class="t">2026-08-16 06:00Z</td><td><b>Closest approach, Main Hawaiian Islands</b> — 61 km</td><td class="n">65</td><td class="n">988</td><td>19.1°N 156.5°W</td><td class="n">61 km</td><td><span class="tag t-derived">DERIVED</span></td></tr>
+      <tr class=""><td class="t">2026-08-16 12:00Z</td><td>b-deck stage <code>TS</code> — tropical storm</td><td class="n">60</td><td class="n">991</td><td>19.9°N 157.6°W</td><td class="n">114 km</td><td><span class="tag t-operational">OPERATIONAL</span></td></tr>
+      <tr class=""><td class="t">2026-08-18 06:00Z</td><td>b-deck stage <code>HU</code> — hurricane</td><td class="n">65</td><td class="n">989</td><td>20.4°N 165.8°W</td><td class="n">597 km</td><td><span class="tag t-operational">OPERATIONAL</span></td></tr>
+      <tr class=""><td class="t">2026-08-18 18:00Z</td><td><b>Category 2</b> crossing — first fix ≥ 83 kt, 5.3 d from genesis</td><td class="n">85</td><td class="n">974</td><td>20.3°N 167.7°W</td><td class="n">792 km</td><td><span class="tag t-derived">DERIVED</span></td></tr>
+      <tr class=""><td class="t">2026-08-19 00:00Z</td><td><b>Category 3</b> crossing — first fix ≥ 96 kt, 5.5 d from genesis</td><td class="n">100</td><td class="n">960</td><td>20.5°N 168.5°W</td><td class="n">868 km</td><td><span class="tag t-derived">DERIVED</span></td></tr>
+      <tr class="mark"><td class="t">2026-08-19 06:00Z</td><td><b>Peak — 115 kt, Category 4</b><div class="also"><b>Category 4</b> crossing — first fix ≥ 113 kt, 5.8 d from genesis</div></td><td class="n">115</td><td class="n">947</td><td>20.7°N 169.3°W</td><td class="n">946 km</td><td><span class="tag t-operational">OPERATIONAL</span> <span class="tag t-derived">DERIVED</span></td></tr>
+      <tr class=""><td class="t">2026-08-21 06:00Z</td><td>Closest approach, Northwestern Hawaiian Islands — 40 km</td><td class="n">80</td><td class="n">974</td><td>26.1°N 171.9°W</td><td class="n">1,274 km</td><td><span class="tag t-derived">DERIVED</span></td></tr>
+      <tr class=""><td class="t">2026-08-23 06:00Z</td><td>b-deck stage <code>TS</code> — tropical storm</td><td class="n">60</td><td class="n">984</td><td>31.8°N 173.3°W</td><td class="n">1,699 km</td><td><span class="tag t-operational">OPERATIONAL</span></td></tr>
+      <tr class="mark"><td class="t">2026-08-25 18:00Z</td><td><b>Latest operational fix</b> — the record is open</td><td class="n">45</td><td class="n">994</td><td>34.9°N 177.0°W</td><td class="n">2,181 km</td><td><span class="tag t-operational">OPERATIONAL</span></td></tr>
+    </tbody>
+  </table>
+  <p class="note">Distances are the minimum geodesic distance from the fix to the nearest
+  <b>coastline segment</b> of the archive's own Main Hawaiian Islands geometry
+  (8 rings, 605 vertices),
+  not the distance to the nearest stored vertex. <span class="tag t-derived">DERIVED</span></p>
+
+  <h3>Closest approach</h3>
+  <table>
+    <thead><tr><th></th><th class="n">Distance</th><th>UTC</th><th class="n">Intensity</th><th>Position</th></tr></thead>
+    <tbody>
+      <tr><th>Main Hawaiian Islands</th><td class="n"><b>61 km</b></td><td>2026-08-16 06:00Z</td><td class="n">65 kt hurricane</td><td>19.1°N 156.5°W</td></tr>
+      <tr><th>Northwestern Hawaiian Islands</th><td class="n">40 km</td><td>2026-08-21 06:00Z</td><td class="n">80 kt hurricane</td><td>26.1°N 171.9°W</td></tr>
+      <tr class="dim"><th>At the Category 4 peak</th><td class="n">946 km</td><td>2026-08-19 06:00Z</td><td class="n">115 kt</td><td>20.7°N 169.3°W</td></tr>
+    </tbody>
+  </table>
+  <p class="note">The two island groups are reported separately because they are different
+  exposure questions, not because they are far apart — their nearest points are only
+  218 km apart. What differs is extent and population: the archive's
+  <code>hawaii</code> region is 14 rings
+  (8 main islands,
+  605 vertices; 6
+  northwestern, 46 vertices), and the northwestern chain runs a
+  further 1,807 km west, to
+  178.3°W. The partition is by ring, not by a
+  longitude guess.</p>
+
+  <div class="callout">
+    <h3>The archive record ends 6 h before the closest approach</h3>
+    <p>IBTrACS stops at 2026-08-16 00:00Z, with Lala 67 km from the Main Hawaiian Islands
+    and still closing. The nearest passage — 61 km — is at
+    2026-08-16 06:00Z, and everything after it exists only in the operational record.</p>
+  </div>
+
+  <h3>Environment</h3>
+  <div class="callout refuse">
+    <h3>Genesis environment — REFUSED</h3>
+    <p>No operational environment record exists before 2026-08-18T00:00Z, and the archive holds no developmental SHIPS record within 12 h of genesis. The environment Lala formed in is unmeasured by both sources.</p>
+    <p class="q">Operational SHIPS coverage for this storm begins
+    4.5 d after genesis, at
+    2026-08-18 00:00Z. The archive's genesis window is
+    ±12 h and holds no row.</p>
+  </div>
+
+  <p>31 operational SHIPS analyses exist for Lala, 2026-08-18 00:00Z to 2026-08-25 12:00Z,
+  at tau 0. <span class="tag t-operational">OPERATIONAL</span></p>
+  <table class="chron">
+    <thead><tr><th>UTC valid</th><th class="n">Deep-layer shear<div class="th2">kt</div></th><th class="n">Sea-surface temp<div class="th2">°C</div></th><th class="n">Ocean heat content<div class="th2">kJ/cm²</div></th><th class="n">Mid-level RH<div class="th2">%</div></th><th class="n">Potential intensity<div class="th2">kt</div></th><th class="n">Storm</th></tr></thead>
+    <tbody>
+      <tr class=""><td class="t">2026-08-18 00:00Z</td><td class="n">9</td><td class="n">27.8</td><td class="n">25</td><td class="n">41</td><td class="n">142</td><td class="n"></td></tr>
+      <tr class=""><td class="t">2026-08-19 00:00Z</td><td class="n">16</td><td class="n">27.9</td><td class="n">20</td><td class="n">44</td><td class="n">142</td><td class="n"></td></tr>
+      <tr class="mark"><td class="t">2026-08-19 06:00Z</td><td class="n">20</td><td class="n">27.9</td><td class="n">20</td><td class="n">45</td><td class="n">142</td><td class="n"><b>115 kt peak</b></td></tr>
+      <tr class=""><td class="t">2026-08-20 00:00Z</td><td class="n">19</td><td class="n">28.1</td><td class="n">19</td><td class="n">46</td><td class="n">145</td><td class="n"></td></tr>
+      <tr class=""><td class="t">2026-08-21 00:00Z</td><td class="n">23</td><td class="n">27.8</td><td class="n">16</td><td class="n">47</td><td class="n">141</td><td class="n"></td></tr>
+      <tr class=""><td class="t">2026-08-22 00:00Z</td><td class="n">34</td><td class="n">27.1</td><td class="n">7</td><td class="n">50</td><td class="n">134</td><td class="n"></td></tr>
+      <tr class=""><td class="t">2026-08-23 00:00Z</td><td class="n">5</td><td class="n">26.6</td><td class="n">1</td><td class="n">44</td><td class="n">128</td><td class="n"></td></tr>
+      <tr class=""><td class="t">2026-08-24 00:00Z</td><td class="n">9</td><td class="n">25.7</td><td class="n">0</td><td class="n">44</td><td class="n">118</td><td class="n"></td></tr>
+      <tr class=""><td class="t">2026-08-25 00:00Z</td><td class="n">7</td><td class="n">24.8</td><td class="n">0</td><td class="n">44</td><td class="n">108</td><td class="n"></td></tr>
+      <tr class=""><td class="t">2026-08-25 12:00Z</td><td class="n">6</td><td class="n">24</td><td class="n">0</td><td class="n">43</td><td class="n">100</td><td class="n"></td></tr>
+    </tbody>
+  </table>
+  <p class="note">Every 4th analysis shown, plus the peak row and the last; all 31 are in
+  <code>data/env-ships-rt.json</code>. Operational SHIPS is not the developmental SHIPS archive
+  section 3's cohort draws on — they are sequential eras measured differently and are never pooled,
+  differenced or compared here as one instrument.</p>
+  <p class="note">These are observations at timestamps. This dossier draws no causal link between
+  any environmental value and any intensity change: temporal association is not attribution, and
+  nothing here tests one.</p>
+</section>
+
+<!-- ============================================================ 3 -->
+<section>
+  <h2><span class="num">3</span> What the historical record holds</h2>
+  <p class="lead">Storms that formed within 500 km of 14.9°N 145.0°W — what happened next?</p>
+
+  <table class="stat">
+    <tbody>
+      <tr><th>Cohort</th><td class="n"><b>26</b> storms</td><th>Effective sample size</th><td class="n">26</td></tr>
+      <tr><th>Minimum sample</th><td class="n">10</td><th>Sufficiency</th><td class="n"><span class="pos">SUFFICIENT</span></td></tr>
+      <tr><th>Match point</th><td>14.9°N 145.0°W</td><th>Radius</th><td class="n">500 km</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <h3>Lala is not in this cohort</h3>
+    <p>Its genesis point defines the cohort's location condition, and the archive's record scope
+    then excludes it:</p>
+    <table class="verdicts">
+      <tbody>
+        <tr><th>FORMED NEAR</th><td class="v-matched">MATCHED</td><td>within 500 km of 14.9°N 145.0°W</td></tr>
+        <tr><th>RECORD SCOPE</th><td class="v-missed">MISSED</td><td>provisional seasons are excluded — this one has not been post-analysed</td></tr>
+      </tbody>
+    </table>
+    <p>No operational value from Lala enters any number in this section. That is a property of the
+    archive's own provisional-scope rule, not a choice made for this document.</p>
+  </div>
+
+  <h3>Intensity outcomes</h3>
+  <p class="note"><b>These are cumulative thresholds, not exclusive peak-category bins.</b>
+  &ldquo;Reached Cat 3+&rdquo; counts every storm whose peak reached at least Category 3, including
+  those that went further. The rows do not sum to the cohort.</p>
+  <table class="stat wide">
+    <thead><tr><th>Outcome</th><th class="n">Storms</th><th class="n">Rate</th><th class="n">95% Wilson</th><th class="n">From 1971</th><th class="n">Rate</th><th class="n">95% Wilson</th></tr></thead>
+    <tbody>
+      <tr><th>Reached TS+</th><td class="n">15/26</td><td class="n">57.7%</td><td class="n">38.9–74.5%</td><td class="n">10/18</td><td class="n">55.6%</td><td class="n">33.7–75.4%</td></tr>
+      <tr><th>Reached Cat 1+</th><td class="n">7/26</td><td class="n">26.9%</td><td class="n">13.7–46.1%</td><td class="n">4/18</td><td class="n">22.2%</td><td class="n">9.0–45.2%</td></tr>
+      <tr><th>Reached Cat 2+</th><td class="n">5/26</td><td class="n">19.2%</td><td class="n">8.5–37.9%</td><td class="n">3/18</td><td class="n">16.7%</td><td class="n">5.8–39.2%</td></tr>
+      <tr><th>Reached Cat 3+</th><td class="n">5/26</td><td class="n">19.2%</td><td class="n">8.5–37.9%</td><td class="n">3/18</td><td class="n">16.7%</td><td class="n">5.8–39.2%</td></tr>
+      <tr><th>Reached Cat 4+</th><td class="n">4/26</td><td class="n">15.4%</td><td class="n">6.1–33.5%</td><td class="n">2/18</td><td class="n">11.1%</td><td class="n">3.1–32.8%</td></tr>
+      <tr><th>Reached Cat 5</th><td class="n">0/26</td><td class="n">0.0%</td><td class="n">0.0–12.9%</td><td class="n">0/18</td><td class="n">0.0%</td><td class="n">0.0–17.6%</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Hawaiʻi outcomes</h3>
+  <table class="stat wide">
+    <thead><tr><th>Outcome</th><th class="n">Storms</th><th class="n">Rate</th><th class="n">95% Wilson</th><th class="n">From 1971</th><th class="n">Rate</th><th class="n">95% Wilson</th></tr></thead>
+    <tbody>
+      <tr><th>Hawaiʻi landfall, any intensity</th><td class="n">1/26</td><td class="n">3.8%</td><td class="n">0.7–18.9%</td><td class="n">0/18</td><td class="n">—</td><td class="n"><span class="refuse-in">OUT OF SCOPE -- unscoreable here</span></td></tr>
+      <tr><th>Hawaiʻi landfall, ≥ 64 kt</th><td class="n">1/26</td><td class="n">—</td><td class="n"><span class="refuse-in">BASE RATE ONLY -- unscoreable</span></td><td class="n">0/18</td><td class="n">—</td><td class="n"><span class="refuse-in">BASE RATE ONLY -- unscoreable</span></td></tr>
+    </tbody>
+  </table>
+  <p class="note">Regions the cohort's storms never approached are refused rather than reported as
+  zero: <b>caribbean</b> OUT OF SCOPE -- unscoreable here, <b>central america</b> OUT OF SCOPE -- unscoreable here, <b>conus</b> OUT OF SCOPE -- unscoreable here.
+  A refused region is not a region with no risk; it is a region this cohort cannot measure.</p>
+
+  <div class="callout warn">
+    <h3>The entire Hawaiʻi numerator is one storm</h3>
+    <p>Dot (1959), <code>CP011959</code> —
+    Kauai, 1959-08-07, 75 kt, Category 1, detection <code>bracketing_fix</code>.
+    A rate of 3.8% whose numerator is a single 1959 event is a
+    count, not a frequency, and its interval 0.7–18.9% says so.</p>
+  </div>
+
+  <div class="callout refuse">
+    <h3>Under the archive's own quality remedy, the Hawaiʻi rate refuses</h3>
+    <p class="q">8 of 26 storms in this cohort are from before 1971, when East Pacific intensities were estimated without geostationary satellites or Dvorak analysis and major hurricanes were under-observed (measured: 1.7% Cat 3 in the 1960s vs 20-30% from the 1970s on). Intensity rates above are therefore biased LOW. Set a season floor of 1971 to restrict the cohort to the reliably-observed era.</p>
+    <p>Applying that remedy — a season floor of 1971 — takes the cohort
+    from 26 storms to 18, and removes Dot (1959) with it.
+    The Hawaiʻi landfall outcome becomes
+    0/18 and the engine stops publishing a rate:
+    <b>OUT OF SCOPE -- unscoreable here</b>.</p>
+    <p><b>This is the answer to what the historical record supports about Hawaiʻi risk at Lala's
+    genesis point: over the reliably-observed era, it declines to support a rate at all.</b></p>
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section>
+  <h2><span class="num">4</span> What Millibar recorded, and what happened afterwards</h2>
+  <p class="lead">The historical prior above and the record below are separate evidence. Neither
+  was computed from the other.</p>
+
+  <table class="stat">
+    <tbody>
+      <tr><th>Entries for CP012026</th><td class="n">141</td><th>Question recorded</th><td><code>hurricane@65</code></td></tr>
+      <tr><th>First record</th><td>2026-08-14 16:22Z</td><th>Most recent</th><td>2026-08-25 20:48Z</td></tr>
+      <tr><th>Ledger begins</th><td>28 h after genesis</td><th>Source</th><td><code>data/forecast-log-cp012026.json</code></td></tr>
+    </tbody>
+  </table>
+
+  <p class="note">The recorded question is whether Lala would reach <b>65 kt</b>.
+  It is not a question about Hawaiʻi, it is not a question about Category 4, and no record of
+  either exists for this storm.</p>
+
+  <table class="chron">
+    <thead><tr><th>UTC recorded</th><th>Checkpoint</th><th class="n">Storm</th><th class="n">Model</th><th class="n">Calibrated</th><th class="n">Market<div class="th2">external / public contract</div></th><th class="n">Lead to outcome</th></tr></thead>
+    <tbody>
+      <tr><td>2026-08-14 16:22Z</td><td>first record of any kind</td><td class="n">50 kt</td><td class="n">59.8%</td><td class="n">—</td><td class="n">81.5%</td><td class="n">26 h</td></tr>
+      <tr><td>2026-08-15 17:57Z</td><td>last record before the outcome</td><td class="n">60 kt</td><td class="n">67.4%</td><td class="n">75.4%</td><td class="n">79.0%</td><td class="n">3 min</td></tr>
+      <tr><td>2026-08-19 08:35Z</td><td>highest intensity recorded</td><td class="n">115 kt</td><td class="n">99.0%</td><td class="n">99.0%</td><td class="n">99.0%</td><td class="n">—</td></tr>
+      <tr><td>2026-08-25 20:48Z</td><td>most recent record</td><td class="n">45 kt</td><td class="n">1.0%</td><td class="n">1.0%</td><td class="n">—</td><td class="n">—</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Checkpoints are chosen for what each establishes — the first record, the last before the outcome, the highest intensity recorded, and the current state — not for how they read. Full ledger: <code>data/forecast-log-cp012026.json</code>,
+  141 entries. <span class="tag t-recordedmillibar">RECORDED / MILLIBAR</span></p>
+
+  <p class="note">The market column is the last quoted price on <code>KXHURRICANENAMES-26DEC01CPAC-LAL</code>, a
+  public binary event contract settling on the same 65 kt question, recorded by Millibar at the
+  same instant as the model value beside it. <span class="tag t-externalpubliccontract">EXTERNAL / PUBLIC CONTRACT</span> It is
+  not an insurance or reinsurance contract, and not a Millibar valuation of one. Millibar did not write, price, hedge or hold it, and no model on this page is
+  fitted to it.</p>
+
+  <p>The outcome the question was about: Lala first reached 65 kt at
+  2026-08-15 18:00Z <span class="tag t-operational">OPERATIONAL</span>.</p>
+
+  <div class="callout refuse">
+    <h3>This demonstrates replay discipline, not forecasting skill</h3>
+    <p>Millibar's calibration ledger declines to publish a score:
+    <b>2 resolved storms of the 10
+    required</b>, behind 59 resolved forecasts.</p>
+    <p class="q">2 resolved storms of the 10 needed to publish a score. 59 resolved forecasts sit behind them, and that gap is the reason the threshold counts STORMS: every forecast made during one storm's life shares that storm's single outcome, so scoring the entries would quote a handful of coin flips to three decimal places.</p>
+    <p>One storm cannot establish calibration, and this document does not claim it does. What the
+    ledger establishes is that the values above were recorded <b>before</b> the outcome and have not
+    been edited since — which is a provenance property, and a precondition for measuring skill
+    later rather than a substitute for having measured it.</p>
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section>
+  <h2><span class="num">5</span> Provenance discipline, demonstrated</h2>
+  <p class="lead">Lala is a case where two authoritative sources disagreed by
+  50 kt and 41 mb, and both were kept.</p>
+
+  <table class="cmp">
+    <thead><tr><th>Question</th><th>Answered by</th><th>Answer</th></tr></thead>
+    <tbody>
+      <tr><td>How strong did this storm get, as the forecast office has it now?</td><td><span class="tag t-operational">OPERATIONAL</span></td><td><b>115 kt, Category 4, 947 mb</b>, 2026-08-19 06:00Z</td></tr>
+      <tr><td>What does the post-analysable archive record for this season hold?</td><td><span class="tag t-archive">ARCHIVE</span></td><td>65 kt, Category 1, 988 mb, through 2026-08-16 00:00Z</td></tr>
+      <tr><td>What happened to storms that formed here historically?</td><td><span class="tag t-archive">ARCHIVE</span></td><td>A 26-storm cohort that contains no Lala data at all</td></tr>
+    </tbody>
+  </table>
+
+  <p>The archive record is not extended, corrected or overwritten by the operational one. IBTrACS
+  publishes a provisional row for a running season and revises it at post-analysis; that row is the
+  input to every historical statistic Millibar computes, and it stays exactly as published. The
+  operational deck describes the storm that is happening. Both are on this page, labelled, with
+  their own timestamps and their own source files.</p>
+
+  <p>The separation is enforced rather than observed. The operational layer cannot be reached by
+  any module that computes cohort membership, analog matching, intensity or landfall rates, Wilson
+  intervals, effective sample size, calibration, the archive comparison, an event gate or a refusal
+  — a build gate walks the import graph and fails when one can, and a second gate recomputes every
+  published historical value with the operational artifact absent and again with it loaded,
+  requiring them to be identical.</p>
+
+  <p class="note">The two records also agree where they overlap, which is worth stating: both begin
+  at 2026-08-10 00:00Z, and both place genesis at 2026-08-13 12:00Z,
+  14.9°N 145.0°W. The disagreement is entirely about where the record
+  <em>stops</em>.</p>
+</section>
+
+<!-- ============================================================ 6 -->
+<section>
+  <h2><span class="num">6</span> Where this architecture is relevant to parametric risk</h2>
+  <p class="lead">Capabilities, against public primitives. No insurance or reinsurance contract
+  terms are used, held or implied.</p>
+
+  <table class="cmp">
+    <thead><tr><th>Need</th><th>What this architecture provides</th></tr></thead>
+    <tbody>
+      <tr><td>Independent historical validation</td><td>Rates computed in the reader's browser from a versioned archive pack, with the effective sample size, the Wilson interval and the refusal shown next to every number. The cohort above is reproducible from a URL.</td></tr>
+      <tr><td>Trigger research</td><td>Threshold crossings and their elapsed times are re-derivable from either record under a stated rule. This page shows the 6-step ladder for one storm; the same rule runs over 3,959 archive storms.</td></tr>
+      <tr><td>Basis-risk research</td><td>Lala separated peak intensity from proximity by 885 km and 3.0 d. That is a <b>spatial-temporal separation relevant to basis-risk research</b> — not a basis-risk analysis. Millibar can support basis-risk analysis when actual exposure locations and trigger terms are supplied.</td></tr>
+      <tr><td>Event reconstruction</td><td>Dual-source, timestamped, with the fetch time and the source-valid time kept distinct, and the point at which each source stopped stated explicitly.</td></tr>
+      <tr><td>Model challenge</td><td>Refusals are first-class outputs. A cohort that cannot support a probability says which population it counted and why, as section 3 does for the Hawaiʻi rate under the 1971 floor.</td></tr>
+    </tbody>
+  </table>
+  <p class="note">Insurance / reinsurance contract facts used in this document: <b>none</b>. The
+  one external contract fact that does appear — the section 4 market column — is a public event
+  contract price, labelled <span class="tag t-externalpubliccontract">EXTERNAL / PUBLIC CONTRACT</span> where it is used.</p>
+</section>
+
+<!-- ============================================================ 7 -->
+<section class="close">
+  <h2><span class="num">7</span> Institutional use</h2>
+  <table class="cmp">
+    <thead><tr><th>Function</th><th>The question this answers</th></tr></thead>
+    <tbody>
+      <tr><td>ILS &amp; reinsurance</td><td>What does the observed record support about a peril at a given genesis region, with the sample size and the interval attached — and where does it decline to support anything?</td></tr>
+      <tr><td>Parametric insurance</td><td>How do candidate index definitions behave over the archive, and how far apart can intensity and proximity sit for one event?</td></tr>
+      <tr><td>Catastrophe modelling &amp; validation</td><td>An independent, versioned, refusal-preserving reference to validate a vendor or in-house view against, with provisional and post-analysed records kept apart.</td></tr>
+      <tr><td>Weather-sensitive financial markets</td><td>Timestamped point-in-time state with source-valid and ingestion times kept distinct, so a backtest reads what was knowable then rather than what is known now.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="cta">
+    <h3>Request an institutional walkthrough / design-partner discussion</h3>
+    <p>The Storm Atlas, the archive, this dossier and the gates behind them are available for
+    review against your own questions.</p>
+  </div>
+</section>
+
+<footer>
+  <p>Subject CP012026. Archive c3998bd7bd784a62,
+  3,959 storms,
+  224,153 track points, methodology
+  1.1.0. Operational record
+  <code>data/bdeck-cp012026.dat</code>, 25,710 bytes, fetched
+  2026-08-25 20:52Z. Every value on this page is reproduced by
+  <code>node scripts/build-dossier-lala.mjs</code> and recorded in
+  <code>facts.json</code> beside it. Research use. Not a forecast, not advice, and not an offer.</p>
+</footer>
+
+</article>
+</body>
+</html>

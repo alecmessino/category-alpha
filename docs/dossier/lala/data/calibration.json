@@ -1,0 +1,27 @@
+{
+ "pinned_from": "docs/data/calibration.json",
+ "pinned_at": "2026-08-25T20:48:26.627Z",
+ "calibration": {
+  "schema": "millibar-calibration/1",
+  "generatedAt": "2026-08-25T20:48:26.627Z",
+  "thresholdKt": 65,
+  "minResolvedStorms": 10,
+  "ok": false,
+  "counts": {
+   "entries": 234,
+   "storms": 5,
+   "resolvedEntries": 59,
+   "resolvedStorms": 2,
+   "outcomes": {
+    "reached": 0,
+    "notReached": 2
+   },
+   "provisional": 59
+  },
+  "note": "2 resolved storms of the 10 needed to publish a score. 59 resolved forecasts sit behind them, and that gap is the reason the threshold counts STORMS: every forecast made during one storm's life shares that storm's single outcome, so scoring the entries would quote a handful of coin flips to three decimal places.",
+  "progress": {
+   "have": 2,
+   "need": 10
+  }
+ }
+}

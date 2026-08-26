@@ -1,0 +1,1138 @@
+{
+  "schema": "millibar-dossier-lala/1",
+  "built_utc": "2026-08-25T20:52:00.000Z",
+  "subject": "CP012026",
+  "insurance_contract_facts": "none",
+  "external_public_contract": {
+    "id": "KXHURRICANENAMES-26DEC01CPAC-LAL",
+    "kind": "public binary event contract",
+    "used_for": "the market column in section 4, as a recorded price at that instant",
+    "not": "not an insurance or reinsurance contract, and not a Millibar valuation of one"
+  },
+  "provenance_classes": {
+    "ARCHIVE": "IBTrACS, via docs/storm-atlas/data/atlas-core-v1.bin.gz",
+    "OPERATIONAL": "ATCF b-deck and operational SHIPS, via the pinned files under docs/dossier/lala/data/",
+    "DERIVED": "computed by replaying a rule the archive already owns; the rule is named where used",
+    "RECORDED / MILLIBAR": "Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time."
+  },
+  "archive_provenance": {
+    "archive_built_utc": "2026-08-18T05:18:57Z",
+    "archive_stamp": "c3998bd7bd784a62",
+    "methodology_version": "1.1.0",
+    "storms": 3959,
+    "track_points": 224153
+  },
+  "archive_record": {
+    "provenance": "ARCHIVE",
+    "storm_id": "2026222N15223",
+    "atcf_id": "CP012026",
+    "name": "LALA",
+    "season": 2026,
+    "basin": "EP",
+    "subbasin": "CP",
+    "track_type": "PROVISIONAL",
+    "source_key": "ibtracs.EP.csv",
+    "provisional": true,
+    "first_fix_t": 1786320000000,
+    "first_fix_stage": "DB",
+    "genesis_t": 1786622400000,
+    "genesis_lat": 14.9,
+    "genesis_lon": -145,
+    "end_t": 1786838400000,
+    "fixes": 49,
+    "fixes_pre_genesis": 28,
+    "fixes_from_genesis": 21,
+    "full_extent_hours": 144,
+    "genesis_to_end_hours": 60,
+    "max_vmax_kt": 65,
+    "min_mslp_mb": 988,
+    "max_category": "cat1",
+    "quality": {
+      "observed": 0,
+      "interpolated": 24,
+      "provisional": 25,
+      "total": 49,
+      "crossings_interpolated_only": false
+    }
+  },
+  "operational_record": {
+    "provenance": "OPERATIONAL",
+    "source": {
+      "file": "data/bdeck-cp012026.dat",
+      "url": "https://ftp.nhc.noaa.gov/atcf/btk/bcp012026.dat",
+      "fetched_at": "2026-08-25T20:52:00Z",
+      "bytes": 25710
+    },
+    "fixes": 64,
+    "fixes_pre_genesis": 14,
+    "fixes_from_genesis": 50,
+    "first_fix_t": 1786320000000,
+    "first_fix_stage": "DB",
+    "latest_t": 1787680800000,
+    "latest": {
+      "t": "2026-08-25T18:00:00.000Z",
+      "lat": 34.9,
+      "lon": -177,
+      "kt": 45,
+      "mslp": 994,
+      "stage": "TS"
+    },
+    "latest_category": "ts",
+    "full_extent_hours": 378,
+    "genesis_to_latest_hours": 294,
+    "peak_wind_kt": 115,
+    "peak_wind_t": 1787119200000,
+    "peak_wind_lat": 20.7,
+    "peak_wind_lon": -169.3,
+    "peak_category": "cat4",
+    "min_mslp_mb": 947,
+    "min_mslp_t": 1787119200000,
+    "fixes_with_wind": 64,
+    "fixes_with_pressure": 64,
+    "stage_changes": [
+      {
+        "t": 1786320000000,
+        "stage": "DB",
+        "kt": 20,
+        "mslp": 1007,
+        "lat": 14.5,
+        "lon": -137.3
+      },
+      {
+        "t": 1786492800000,
+        "stage": "LO",
+        "kt": 30,
+        "mslp": 1003,
+        "lat": 15.1,
+        "lon": -139.4
+      },
+      {
+        "t": 1786622400000,
+        "stage": "TS",
+        "kt": 35,
+        "mslp": 1001,
+        "lat": 14.9,
+        "lon": -145
+      },
+      {
+        "t": 1786816800000,
+        "stage": "HU",
+        "kt": 65,
+        "mslp": 988,
+        "lat": 17.9,
+        "lon": -155
+      },
+      {
+        "t": 1786881600000,
+        "stage": "TS",
+        "kt": 60,
+        "mslp": 991,
+        "lat": 19.9,
+        "lon": -157.6
+      },
+      {
+        "t": 1787032800000,
+        "stage": "HU",
+        "kt": 65,
+        "mslp": 989,
+        "lat": 20.4,
+        "lon": -165.8
+      },
+      {
+        "t": 1787464800000,
+        "stage": "TS",
+        "kt": 60,
+        "mslp": 984,
+        "lat": 31.8,
+        "lon": -173.3
+      }
+    ],
+    "crossings": {
+      "ts": {
+        "t": 1786622400000,
+        "kt": 35,
+        "mslp": 1001,
+        "lat": 14.9,
+        "lon": -145,
+        "threshold_kt": 34,
+        "hours_from_genesis": 0
+      },
+      "cat1": {
+        "t": 1786816800000,
+        "kt": 65,
+        "mslp": 988,
+        "lat": 17.9,
+        "lon": -155,
+        "threshold_kt": 64,
+        "hours_from_genesis": 54
+      },
+      "cat2": {
+        "t": 1787076000000,
+        "kt": 85,
+        "mslp": 974,
+        "lat": 20.3,
+        "lon": -167.7,
+        "threshold_kt": 83,
+        "hours_from_genesis": 126
+      },
+      "cat3": {
+        "t": 1787097600000,
+        "kt": 100,
+        "mslp": 960,
+        "lat": 20.5,
+        "lon": -168.5,
+        "threshold_kt": 96,
+        "hours_from_genesis": 132
+      },
+      "cat4": {
+        "t": 1787119200000,
+        "kt": 115,
+        "mslp": 947,
+        "lat": 20.7,
+        "lon": -169.3,
+        "threshold_kt": 113,
+        "hours_from_genesis": 138
+      },
+      "cat5": {
+        "t": null,
+        "threshold_kt": 137,
+        "hours_from_genesis": null
+      }
+    },
+    "extends_archive_by_hours": 234
+  },
+  "geometry": {
+    "provenance": "DERIVED",
+    "method": "minimum geodesic distance from each operational fix to the nearest COASTLINE SEGMENT (not to the nearest stored vertex), computed by scripts/lib/geo-segment.mjs and gated by scripts/test-geo-segment.mjs",
+    "coastline_source": {
+      "file": "docs/storm-atlas/data/atlas-coastlines-v1.bin.gz",
+      "built_utc": "2026-08-18T00:36:50Z",
+      "geometry_sources": [
+        "ne_10m_admin_1_states_provinces.json",
+        "ne_10m_admin_0_map_units.json",
+        "gnis.DomesticNames_HI_Text.zip"
+      ],
+      "hawaii_rings": 14,
+      "main_islands_rings": 8,
+      "main_islands_vertices": 605,
+      "nwhi_rings": 6,
+      "nwhi_vertices": 46
+    },
+    "closest_main_islands": {
+      "km": 61.09704297806635,
+      "t": 1786860000000,
+      "kt": 65,
+      "mslp": 988,
+      "stage": "HU",
+      "lat": 19.1,
+      "lon": -156.5
+    },
+    "closest_nwhi": {
+      "km": 40.10485283384133,
+      "t": 1787292000000,
+      "kt": 80,
+      "mslp": 974,
+      "stage": "HU",
+      "lat": 26.1,
+      "lon": -171.9
+    },
+    "at_archive_end": {
+      "t": 1786838400000,
+      "kt": 65,
+      "mslp": 988,
+      "stage": "HU",
+      "lat": 18.3,
+      "lon": -155.7,
+      "mhi_km": 67.44764122062874,
+      "nwhi_km": 836.1839929026668
+    },
+    "at_peak": {
+      "t": 1787119200000,
+      "kt": 115,
+      "mslp": 947,
+      "stage": "HU",
+      "lat": 20.7,
+      "lon": -169.3,
+      "mhi_km": 946.2115159004985,
+      "nwhi_km": 496.5409660324437
+    },
+    "main_islands_km_by_t": {
+      "1786320000000": 1942.0504168756574,
+      "1786341600000": 1942.0504168756574,
+      "1786363200000": 1938.4565015423166,
+      "1786384800000": 1934.918032726395,
+      "1786406400000": 1931.435315411367,
+      "1786428000000": 1931.435315411367,
+      "1786449600000": 1917.7792103842912,
+      "1786471200000": 1893.9236330893636,
+      "1786492800000": 1706.8488791542286,
+      "1786514400000": 1609.2697790929733,
+      "1786536000000": 1512.7952155494704,
+      "1786557600000": 1441.8185847883615,
+      "1786579200000": 1353.4332952287896,
+      "1786600800000": 1256.455321614526,
+      "1786622400000": 1160.132893096026,
+      "1786644000000": 1078.0521253093095,
+      "1786665600000": 913.6512273104989,
+      "1786687200000": 817.8160339233856,
+      "1786708800000": 698.6639215361404,
+      "1786730400000": 550.9517448433327,
+      "1786752000000": 384.90974119755026,
+      "1786773600000": 282.32691179464854,
+      "1786795200000": 194.78463986181092,
+      "1786816800000": 132.60656630806804,
+      "1786838400000": 67.44764122062874,
+      "1786860000000": 61.09704297806635,
+      "1786881600000": 113.96922681126503,
+      "1786903200000": 90.57035415918786,
+      "1786924800000": 124.89831723592384,
+      "1786946400000": 225.9488331801383,
+      "1786968000000": 311.47358482430525,
+      "1786989600000": 410.47945380479143,
+      "1787011200000": 521.5056333265837,
+      "1787032800000": 597.3492496460581,
+      "1787054400000": 690.642781256642,
+      "1787076000000": 791.6018989254069,
+      "1787097600000": 868.2171368957038,
+      "1787119200000": 946.2115159004985,
+      "1787140800000": 1003.227623535003,
+      "1787162400000": 1078.7882371556827,
+      "1787184000000": 1140.0416152468235,
+      "1787205600000": 1194.9846638278584,
+      "1787227200000": 1223.630278090265,
+      "1787248800000": 1268.6200364890492,
+      "1787270400000": 1279.5857213042152,
+      "1787292000000": 1274.1567097042957,
+      "1787313600000": 1256.0523336235638,
+      "1787335200000": 1255.0453010523731,
+      "1787356800000": 1305.5020188239312,
+      "1787378400000": 1448.0697732529754,
+      "1787400000000": 1516.6568722401007,
+      "1787421600000": 1572.4635900049393,
+      "1787443200000": 1620.6828211954787,
+      "1787464800000": 1699.4795146635265,
+      "1787486400000": 1736.507085439021,
+      "1787508000000": 1800.7526658121922,
+      "1787529600000": 1863.0136325955725,
+      "1787551200000": 1891.2924746794386,
+      "1787572800000": 1919.5469117823777,
+      "1787594400000": 1954.5179580962215,
+      "1787616000000": 2010.4583476744522,
+      "1787637600000": 2066.8154601941296,
+      "1787659200000": 2130.6180958810455,
+      "1787680800000": 2180.98254570148
+    },
+    "group_separation_km": 218.18241556358743,
+    "group_extent": {
+      "main_islands_lon": [
+        -160.248,
+        -154.8141
+      ],
+      "nwhi_lon": [
+        -178.3044,
+        -161.9404
+      ],
+      "nwhi_extends_west_km": 1807.444391474185
+    },
+    "archive_ends_before_closest_approach_hours": 6
+  },
+  "cohort": {
+    "radius_km": 500,
+    "where": {
+      "lat": 14.9,
+      "lon": -145,
+      "radiusKm": 500
+    },
+    "all_seasons": {
+      "provenance": "ARCHIVE",
+      "sentence": "Storms that formed within 500 km of 14.9°N 145.0°W — what happened next?",
+      "kept": 26,
+      "n_cases": 26,
+      "effective_sample_size": 26,
+      "min_sample": 10,
+      "sufficient": true,
+      "thresholds": {
+        "ts": {
+          "count": 15,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0.5769230769230769,
+          "ci95": [
+            0.3894829692111983,
+            0.744558100972706
+          ],
+          "refused": null
+        },
+        "cat1": {
+          "count": 7,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0.2692307692307692,
+          "ci95": [
+            0.13704275525067386,
+            0.46083403419761304
+          ],
+          "refused": null
+        },
+        "cat2": {
+          "count": 5,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0.19230769230769232,
+          "ci95": [
+            0.08506935771788268,
+            0.3787663615465
+          ],
+          "refused": null
+        },
+        "cat3": {
+          "count": 5,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0.19230769230769232,
+          "ci95": [
+            0.08506935771788268,
+            0.3787663615465
+          ],
+          "refused": null
+        },
+        "cat4": {
+          "count": 4,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0.15384615384615385,
+          "ci95": [
+            0.06149933998929477,
+            0.33531584418313565
+          ],
+          "refused": null
+        },
+        "cat5": {
+          "count": 0,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.12873304380462175
+          ],
+          "refused": null
+        }
+      },
+      "hawaii_any": {
+        "count": 1,
+        "n_storms": 26,
+        "n_unknown": 0,
+        "rate": 0.038461538461538464,
+        "ci95": [
+          0.0068218089769898765,
+          0.18893176991958405
+        ],
+        "refused": null
+      },
+      "hawaii_hurricane": {
+        "count": 1,
+        "n_storms": 26,
+        "n_unknown": 0,
+        "rate": 0.038461538461538464,
+        "ci95": [
+          0.0068218089769898765,
+          0.18893176991958405
+        ],
+        "refused": "BASE RATE ONLY -- unscoreable"
+      },
+      "other_regions": {
+        "caribbean": {
+          "count": 0,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.12873304380462175
+          ],
+          "refused": "OUT OF SCOPE -- unscoreable here"
+        },
+        "central_america": {
+          "count": 0,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.12873304380462175
+          ],
+          "refused": "OUT OF SCOPE -- unscoreable here"
+        },
+        "conus": {
+          "count": 0,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.12873304380462175
+          ],
+          "refused": "OUT OF SCOPE -- unscoreable here"
+        },
+        "mexico": {
+          "count": 0,
+          "n_storms": 26,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.12873304380462175
+          ],
+          "refused": null
+        }
+      },
+      "gaps": [
+        "8 of 26 storms in this cohort are from before 1971, when East Pacific intensities were estimated without geostationary satellites or Dvorak analysis and major hurricanes were under-observed (measured: 1.7% Cat 3 in the 1960s vs 20-30% from the 1970s on). Intensity rates above are therefore biased LOW. Set a season floor of 1971 to restrict the cohort to the reliably-observed era."
+      ],
+      "rows": [
+        19,
+        106,
+        147,
+        155,
+        213,
+        268,
+        309,
+        314,
+        394,
+        449,
+        538,
+        632,
+        725,
+        777,
+        782,
+        787,
+        922,
+        949,
+        1005,
+        1056,
+        1118,
+        1208,
+        1418,
+        1444,
+        1684,
+        1685
+      ]
+    },
+    "reliable_era": {
+      "provenance": "ARCHIVE",
+      "sentence": "Storms that formed within 500 km of 14.9°N 145.0°W, in seasons from 1971 onwards — what happened next?",
+      "kept": 18,
+      "n_cases": 18,
+      "effective_sample_size": 18,
+      "min_sample": 10,
+      "sufficient": true,
+      "thresholds": {
+        "ts": {
+          "count": 10,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0.5555555555555556,
+          "ci95": [
+            0.3371606942825164,
+            0.7544076889861088
+          ],
+          "refused": null
+        },
+        "cat1": {
+          "count": 4,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0.2222222222222222,
+          "ci95": [
+            0.09000781913382,
+            0.4521502645230549
+          ],
+          "refused": null
+        },
+        "cat2": {
+          "count": 3,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0.16666666666666666,
+          "ci95": [
+            0.05836470400465757,
+            0.39222499638359243
+          ],
+          "refused": null
+        },
+        "cat3": {
+          "count": 3,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0.16666666666666666,
+          "ci95": [
+            0.05836470400465757,
+            0.39222499638359243
+          ],
+          "refused": null
+        },
+        "cat4": {
+          "count": 2,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0.1111111111111111,
+          "ci95": [
+            0.031018868453582787,
+            0.3280024486660421
+          ],
+          "refused": null
+        },
+        "cat5": {
+          "count": 0,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.1758845505823749
+          ],
+          "refused": null
+        }
+      },
+      "hawaii_any": {
+        "count": 0,
+        "n_storms": 18,
+        "n_unknown": 0,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.1758845505823749
+        ],
+        "refused": "OUT OF SCOPE -- unscoreable here"
+      },
+      "hawaii_hurricane": {
+        "count": 0,
+        "n_storms": 18,
+        "n_unknown": 0,
+        "rate": 0,
+        "ci95": [
+          0,
+          0.1758845505823749
+        ],
+        "refused": "BASE RATE ONLY -- unscoreable"
+      },
+      "other_regions": {
+        "caribbean": {
+          "count": 0,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.1758845505823749
+          ],
+          "refused": "OUT OF SCOPE -- unscoreable here"
+        },
+        "central_america": {
+          "count": 0,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.1758845505823749
+          ],
+          "refused": "OUT OF SCOPE -- unscoreable here"
+        },
+        "conus": {
+          "count": 0,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.1758845505823749
+          ],
+          "refused": "OUT OF SCOPE -- unscoreable here"
+        },
+        "mexico": {
+          "count": 0,
+          "n_storms": 18,
+          "n_unknown": 0,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.1758845505823749
+          ],
+          "refused": null
+        }
+      },
+      "gaps": [],
+      "rows": [
+        394,
+        449,
+        538,
+        632,
+        725,
+        777,
+        782,
+        787,
+        922,
+        949,
+        1005,
+        1056,
+        1118,
+        1208,
+        1418,
+        1444,
+        1684,
+        1685
+      ]
+    },
+    "reliable_era_from": 1971,
+    "hawaii_contributors": [
+      {
+        "name": "DOT",
+        "season": 1959,
+        "atcf_id": "CP011959",
+        "storm_id": "1959214N16219",
+        "landfalls": [
+          {
+            "t": -328298400000,
+            "sub_region": "Kauai",
+            "vmax_kt": 75,
+            "category": "cat1",
+            "detection": "bracketing_fix",
+            "hurricane_at_landfall": true
+          }
+        ]
+      }
+    ],
+    "own_membership": {
+      "provenance": "ARCHIVE",
+      "is_member": false,
+      "why": [
+        {
+          "key": "where",
+          "verdict": "matched",
+          "label": "FORMED NEAR",
+          "value": "within 500 km of 14.9°N 145.0°W"
+        },
+        {
+          "key": "provisionalScope",
+          "verdict": "missed",
+          "label": "RECORD SCOPE",
+          "value": "provisional seasons are excluded — this one has not been post-analysed"
+        }
+      ]
+    }
+  },
+  "recorded": {
+    "provenance": "RECORDED / MILLIBAR",
+    "definition": "Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time.",
+    "source": "data/forecast-log-cp012026.json",
+    "source_pinned_from": "docs/data/forecast-log.json",
+    "source_pinned_at": "2026-08-25T20:48:26.627Z",
+    "entries": 141,
+    "questions": [
+      "hurricane@65"
+    ],
+    "threshold_kt": 65,
+    "first_t": 1786724569618,
+    "last_t": 1787690888024,
+    "starts_after_genesis_hours": 28.380449444444444,
+    "outcome": {
+      "t": 1786816800000,
+      "kt": 65,
+      "provenance": "OPERATIONAL"
+    },
+    "checkpoints": [
+      {
+        "label": "first record of any kind",
+        "tsZ": "2026-08-14T16:22:49.618Z",
+        "advNum": "9",
+        "currentKt": 50,
+        "pRaw": 0.5979,
+        "pCal": null,
+        "pMarket": 0.815,
+        "quality": null,
+        "lead_hours_to_outcome": 25.619550555555556
+      },
+      {
+        "label": "last record before the outcome",
+        "tsZ": "2026-08-15T17:57:18.649Z",
+        "advNum": "13A",
+        "currentKt": 60,
+        "pRaw": 0.6742332013260945,
+        "pCal": 0.7538479399841849,
+        "pMarket": 0.79,
+        "quality": "MEDIUM",
+        "lead_hours_to_outcome": 0.04481972222222222
+      },
+      {
+        "label": "highest intensity recorded",
+        "tsZ": "2026-08-19T08:35:11.493Z",
+        "advNum": "28",
+        "currentKt": 115,
+        "pRaw": 0.99,
+        "pCal": 0.99,
+        "pMarket": 0.99,
+        "quality": "MEDIUM",
+        "lead_hours_to_outcome": -86.58652583333334
+      },
+      {
+        "label": "most recent record",
+        "tsZ": "2026-08-25T20:48:08.024Z",
+        "advNum": "54",
+        "currentKt": 45,
+        "pRaw": 0.01,
+        "pCal": 0.01,
+        "pMarket": null,
+        "quality": "MEDIUM",
+        "lead_hours_to_outcome": -242.8022288888889
+      }
+    ],
+    "calibration": {
+      "ok": false,
+      "resolved_storms": 2,
+      "required_storms": 10,
+      "resolved_entries": 59,
+      "note": "2 resolved storms of the 10 needed to publish a score. 59 resolved forecasts sit behind them, and that gap is the reason the threshold counts STORMS: every forecast made during one storm's life shares that storm's single outcome, so scoring the entries would quote a handful of coin flips to three decimal places."
+    }
+  },
+  "environment": {
+    "provenance": "OPERATIONAL",
+    "source": "data/genesis-archive/environment.parquet",
+    "filter": "atcf_id = 'CP012026'",
+    "note": "Operational SHIPS (ships_rt) rows the genesis archive holds for CP012026, tau 0 only. Extracted verbatim; no interpolation, no gap filling.",
+    "rows": 31,
+    "first_t": 1787011200000,
+    "last_t": 1787659200000,
+    "at_peak": {
+      "iso_time": "2026-08-19T06:00:00Z",
+      "env_source": "ships_rt",
+      "lead_hours": 0,
+      "shear_kt": 20,
+      "sst_c": 27.9,
+      "ohc_kj_cm2": 20,
+      "rh_mid_pct": 45,
+      "pot_intensity_kt": 142
+    },
+    "series": [
+      {
+        "iso_time": "2026-08-18T00:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 9,
+        "sst_c": 27.8,
+        "ohc_kj_cm2": 25,
+        "rh_mid_pct": 41,
+        "pot_intensity_kt": 142
+      },
+      {
+        "iso_time": "2026-08-18T06:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 13,
+        "sst_c": 27.8,
+        "ohc_kj_cm2": 24,
+        "rh_mid_pct": 39,
+        "pot_intensity_kt": 142
+      },
+      {
+        "iso_time": "2026-08-18T12:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 18,
+        "sst_c": 28,
+        "ohc_kj_cm2": 27,
+        "rh_mid_pct": 42,
+        "pot_intensity_kt": 144
+      },
+      {
+        "iso_time": "2026-08-18T18:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 18,
+        "sst_c": 28.1,
+        "ohc_kj_cm2": 23,
+        "rh_mid_pct": 45,
+        "pot_intensity_kt": 145
+      },
+      {
+        "iso_time": "2026-08-19T00:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 16,
+        "sst_c": 27.9,
+        "ohc_kj_cm2": 20,
+        "rh_mid_pct": 44,
+        "pot_intensity_kt": 142
+      },
+      {
+        "iso_time": "2026-08-19T06:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 20,
+        "sst_c": 27.9,
+        "ohc_kj_cm2": 20,
+        "rh_mid_pct": 45,
+        "pot_intensity_kt": 142
+      },
+      {
+        "iso_time": "2026-08-19T12:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 19,
+        "sst_c": 28.2,
+        "ohc_kj_cm2": 32,
+        "rh_mid_pct": 46,
+        "pot_intensity_kt": 145
+      },
+      {
+        "iso_time": "2026-08-19T18:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 17,
+        "sst_c": 28.3,
+        "ohc_kj_cm2": 25,
+        "rh_mid_pct": 46,
+        "pot_intensity_kt": 147
+      },
+      {
+        "iso_time": "2026-08-20T00:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 19,
+        "sst_c": 28.1,
+        "ohc_kj_cm2": 19,
+        "rh_mid_pct": 46,
+        "pot_intensity_kt": 145
+      },
+      {
+        "iso_time": "2026-08-20T06:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 22,
+        "sst_c": 27.9,
+        "ohc_kj_cm2": 14,
+        "rh_mid_pct": 43,
+        "pot_intensity_kt": 142
+      },
+      {
+        "iso_time": "2026-08-20T12:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 22,
+        "sst_c": 27.7,
+        "ohc_kj_cm2": 13,
+        "rh_mid_pct": 45,
+        "pot_intensity_kt": 140
+      },
+      {
+        "iso_time": "2026-08-20T18:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 21,
+        "sst_c": 27.8,
+        "ohc_kj_cm2": 17,
+        "rh_mid_pct": 46,
+        "pot_intensity_kt": 141
+      },
+      {
+        "iso_time": "2026-08-21T00:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 23,
+        "sst_c": 27.8,
+        "ohc_kj_cm2": 16,
+        "rh_mid_pct": 47,
+        "pot_intensity_kt": 141
+      },
+      {
+        "iso_time": "2026-08-21T06:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 31,
+        "sst_c": 27.8,
+        "ohc_kj_cm2": 16,
+        "rh_mid_pct": 49,
+        "pot_intensity_kt": 142
+      },
+      {
+        "iso_time": "2026-08-21T12:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 33,
+        "sst_c": 27.3,
+        "ohc_kj_cm2": 7,
+        "rh_mid_pct": 50,
+        "pot_intensity_kt": 137
+      },
+      {
+        "iso_time": "2026-08-21T18:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 29,
+        "sst_c": 27.2,
+        "ohc_kj_cm2": 10,
+        "rh_mid_pct": 49,
+        "pot_intensity_kt": 136
+      },
+      {
+        "iso_time": "2026-08-22T00:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 34,
+        "sst_c": 27.1,
+        "ohc_kj_cm2": 7,
+        "rh_mid_pct": 50,
+        "pot_intensity_kt": 134
+      },
+      {
+        "iso_time": "2026-08-22T06:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 20,
+        "sst_c": 26.7,
+        "ohc_kj_cm2": 2,
+        "rh_mid_pct": 44,
+        "pot_intensity_kt": 131
+      },
+      {
+        "iso_time": "2026-08-22T12:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 12,
+        "sst_c": 26.7,
+        "ohc_kj_cm2": 3,
+        "rh_mid_pct": 43,
+        "pot_intensity_kt": 130
+      },
+      {
+        "iso_time": "2026-08-22T18:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 8,
+        "sst_c": 26.8,
+        "ohc_kj_cm2": 3,
+        "rh_mid_pct": 44,
+        "pot_intensity_kt": 130
+      },
+      {
+        "iso_time": "2026-08-23T00:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 5,
+        "sst_c": 26.6,
+        "ohc_kj_cm2": 1,
+        "rh_mid_pct": 44,
+        "pot_intensity_kt": 128
+      },
+      {
+        "iso_time": "2026-08-23T06:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 8,
+        "sst_c": 26.6,
+        "ohc_kj_cm2": 2,
+        "rh_mid_pct": 43,
+        "pot_intensity_kt": 128
+      },
+      {
+        "iso_time": "2026-08-23T12:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 12,
+        "sst_c": 26.1,
+        "ohc_kj_cm2": 0,
+        "rh_mid_pct": 43,
+        "pot_intensity_kt": 122
+      },
+      {
+        "iso_time": "2026-08-23T18:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 14,
+        "sst_c": 26,
+        "ohc_kj_cm2": 0,
+        "rh_mid_pct": 44,
+        "pot_intensity_kt": 121
+      },
+      {
+        "iso_time": "2026-08-24T00:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 9,
+        "sst_c": 25.7,
+        "ohc_kj_cm2": 0,
+        "rh_mid_pct": 44,
+        "pot_intensity_kt": 118
+      },
+      {
+        "iso_time": "2026-08-24T06:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 9,
+        "sst_c": 25.6,
+        "ohc_kj_cm2": 0,
+        "rh_mid_pct": 45,
+        "pot_intensity_kt": 117
+      },
+      {
+        "iso_time": "2026-08-24T12:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 12,
+        "sst_c": 25.3,
+        "ohc_kj_cm2": 0,
+        "rh_mid_pct": 44,
+        "pot_intensity_kt": 114
+      },
+      {
+        "iso_time": "2026-08-24T18:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 8,
+        "sst_c": 25.2,
+        "ohc_kj_cm2": 0,
+        "rh_mid_pct": 47,
+        "pot_intensity_kt": 112
+      },
+      {
+        "iso_time": "2026-08-25T00:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 7,
+        "sst_c": 24.8,
+        "ohc_kj_cm2": 0,
+        "rh_mid_pct": 44,
+        "pot_intensity_kt": 108
+      },
+      {
+        "iso_time": "2026-08-25T06:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 6,
+        "sst_c": 24.6,
+        "ohc_kj_cm2": 0,
+        "rh_mid_pct": 43,
+        "pot_intensity_kt": 106
+      },
+      {
+        "iso_time": "2026-08-25T12:00:00Z",
+        "env_source": "ships_rt",
+        "lead_hours": 0,
+        "shear_kt": 6,
+        "sst_c": 24,
+        "ohc_kj_cm2": 0,
+        "rh_mid_pct": 43,
+        "pot_intensity_kt": 100
+      }
+    ],
+    "genesis_environment": {
+      "available": false,
+      "operational_begins_t": 1787011200000,
+      "operational_begins_after_genesis_hours": 108,
+      "archive_env_row": -1,
+      "archive_window_hours": 12,
+      "refusal": "No operational environment record exists before 2026-08-18T00:00Z, and the archive holds no developmental SHIPS record within 12 h of genesis. The environment Lala formed in is unmeasured by both sources."
+    }
+  }
+}
