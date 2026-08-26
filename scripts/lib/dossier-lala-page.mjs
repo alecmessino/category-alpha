@@ -303,8 +303,10 @@ ${cAll.gaps.map((x) => `    <p class="q">${esc(x)}</p>`).join("\n")}
 ${rec.checkpoints.map((c) => `      <tr><td>${Z(Date.parse(c.tsZ))}</td><td>${esc(c.label)}</td>${tdn(c.currentKt === null ? "—" : c.currentKt + " kt")}${tdn(c.pRaw === null ? "—" : pct(c.pRaw))}${tdn(c.pCal === null ? "—" : pct(c.pCal))}${tdn(c.lead_hours_to_outcome === null || c.lead_hours_to_outcome < 0 ? "—" : dur(c.lead_hours_to_outcome))}</tr>`).join("\n")}
     </tbody>
   </table>
-  <p class="note">${LEDGER_NOTE(rec)} Full ledger: <code>${esc(rec.source)}</code>,
-  ${rec.entries} entries. ${tag("RECORDED / MILLIBAR")}</p>
+  <p class="note">${LEDGER_NOTE(rec)} All ${rec.entries} entries are in
+  <code>${esc(rec.source)}</code> — a purpose-limited extract of Millibar's recorded ledger
+  carrying the fields this document reads, with unrelated fields omitted rather than
+  altered. ${tag("RECORDED / MILLIBAR")}</p>
 
 
   <p>The outcome the question was about: Lala first reached ${rec.threshold_kt} kt at
@@ -385,7 +387,6 @@ ${rec.checkpoints.map((c) => `      <tr><td>${Z(Date.parse(c.tsZ))}</td><td>${es
       <tr><td>ILS &amp; reinsurance</td><td>What does the observed record support about a peril at a given genesis region, with the sample size and the interval attached — and where does it decline to support anything?</td></tr>
       <tr><td>Parametric insurance</td><td>How do candidate index definitions behave over the archive, and how far apart can intensity and proximity sit for one event?</td></tr>
       <tr><td>Catastrophe modelling &amp; validation</td><td>An independent, versioned, refusal-preserving reference to validate a vendor or in-house view against, with provisional and post-analysed records kept apart.</td></tr>
-      <tr><td>Weather-sensitive financial markets</td><td>Timestamped point-in-time state with source-valid and ingestion times kept distinct, so a backtest reads what was knowable then rather than what is known now.</td></tr>
     </tbody>
   </table>
 

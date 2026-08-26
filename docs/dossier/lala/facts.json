@@ -7,7 +7,7 @@
     "ARCHIVE": "IBTrACS, via docs/storm-atlas/data/atlas-core-v1.bin.gz",
     "OPERATIONAL": "ATCF b-deck and operational SHIPS, via the pinned files under docs/dossier/lala/data/",
     "DERIVED": "computed by replaying a rule the archive already owns; the rule is named where used",
-    "RECORDED / MILLIBAR": "Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time."
+    "RECORDED / MILLIBAR": "Timestamped Millibar system output, extracted here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time."
   },
   "archive_provenance": {
     "archive_built_utc": "2026-08-18T05:18:57Z",
@@ -719,10 +719,12 @@
   },
   "recorded": {
     "provenance": "RECORDED / MILLIBAR",
-    "definition": "Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time.",
+    "definition": "Timestamped Millibar system output, extracted here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time.",
     "source": "data/forecast-log-cp012026.json",
-    "source_pinned_from": "docs/data/forecast-log.json",
-    "source_pinned_at": "2026-08-25T20:48:26.627Z",
+    "source_kind": "institutional-dossier-extract",
+    "source_extracted_from": "docs/data/forecast-log.json",
+    "source_extracted_at": "2026-08-25T20:48:26.627Z",
+    "source_fields_omitted_count": 6,
     "entries": 141,
     "questions": [
       "hurricane@65"

@@ -80,7 +80,12 @@ const env = JSON.parse(await readFile(join(DATA, "env-ships-rt.json"), "utf8"));
 /* The ledger and the calibration state are PINNED, not read live. scripts/fetch-data.mjs rewrites
    docs/data/forecast-log.json on every refresh; a dossier that re-read it would silently restate
    what Millibar recorded about a past storm every time the site refreshed, which is the exact
-   failure this document argues against. The pinned files are the CP012026 slice verbatim. */
+   failure this document argues against.
+
+   THE PINNED LEDGER IS A PURPOSE-LIMITED EXTRACT, and says so in its own `note` field. It carries
+   the CP012026 entries with only the fields this dossier reads; the complete recorded ledger is
+   retained unchanged in Millibar's system of record and in this repository's history. The values
+   are untouched -- what is omitted is omitted, not rewritten. */
 const ledger = JSON.parse(await readFile(join(DATA, "forecast-log-cp012026.json"), "utf8"));
 const calibrationPin = JSON.parse(await readFile(join(DATA, "calibration.json"), "utf8"));
 const calibration = calibrationPin.calibration;
@@ -429,13 +434,15 @@ const checkpoints = [
 
 const recorded = {
   provenance: "RECORDED / MILLIBAR",
-  definition: "Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. "
+  definition: "Timestamped Millibar system output, extracted here from docs/data/forecast-log.json. "
     + "Evidence of what the system recorded at that instant. It is not an upstream observation, "
     + "it is not evidence of forecasting skill, and it was not necessarily published externally "
     + "at the time.",
   source: "data/forecast-log-cp012026.json",
-  source_pinned_from: ledger.pinned_from,
-  source_pinned_at: ledger.pinned_at,
+  source_kind: ledger.kind ?? null,
+  source_extracted_from: ledger.extracted_from ?? ledger.pinned_from ?? null,
+  source_extracted_at: ledger.extracted_at ?? ledger.pinned_at ?? null,
+  source_fields_omitted_count: ledger.fields_omitted_count ?? null,
   entries: entries.length,
   questions,
   threshold_kt: ledgerThresholdKt,

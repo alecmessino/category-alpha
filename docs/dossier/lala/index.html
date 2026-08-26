@@ -143,7 +143,7 @@ footer p{font-size:11.5px;color:var(--text-2);max-width:none}
       <tr><td><span class="tag t-archive">ARCHIVE</span></td><td>IBTrACS best track, as the Storm Atlas holds it. Post-analysed for closed seasons; <b>provisional</b> for this one. The only source any statistic on this page is computed from.</td></tr>
       <tr><td><span class="tag t-operational">OPERATIONAL</span></td><td>ATCF b-deck and operational SHIPS, as the forecast office had them. Revised while a storm is live. Used to describe <b>this storm</b>, and nothing else.</td></tr>
       <tr><td><span class="tag t-derived">DERIVED</span></td><td>Computed here by replaying a rule the archive already owns. The rule is named wherever a derived value appears.</td></tr>
-      <tr><td><span class="tag t-recordedmillibar">RECORDED / MILLIBAR</span></td><td>Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time.</td></tr>
+      <tr><td><span class="tag t-recordedmillibar">RECORDED / MILLIBAR</span></td><td>Timestamped Millibar system output, extracted here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time.</td></tr>
     </tbody>
   </table>
   <p class="note">No external or public contract fact is used anywhere in this document. No carrier,
@@ -383,8 +383,10 @@ footer p{font-size:11.5px;color:var(--text-2);max-width:none}
       <tr><td>2026-08-25 20:48Z</td><td>most recent record</td><td class="n">45 kt</td><td class="n">1.0%</td><td class="n">1.0%</td><td class="n">—</td></tr>
     </tbody>
   </table>
-  <p class="note">Checkpoints are chosen for what each establishes — the first record, the last before the outcome, the highest intensity recorded, and the current state — not for how they read. Full ledger: <code>data/forecast-log-cp012026.json</code>,
-  141 entries. <span class="tag t-recordedmillibar">RECORDED / MILLIBAR</span></p>
+  <p class="note">Checkpoints are chosen for what each establishes — the first record, the last before the outcome, the highest intensity recorded, and the current state — not for how they read. All 141 entries are in
+  <code>data/forecast-log-cp012026.json</code> — a purpose-limited extract of Millibar's recorded ledger
+  carrying the fields this document reads, with unrelated fields omitted rather than
+  altered. <span class="tag t-recordedmillibar">RECORDED / MILLIBAR</span></p>
 
 
   <p>The outcome the question was about: Lala first reached 65 kt at
@@ -465,7 +467,6 @@ footer p{font-size:11.5px;color:var(--text-2);max-width:none}
       <tr><td>ILS &amp; reinsurance</td><td>What does the observed record support about a peril at a given genesis region, with the sample size and the interval attached — and where does it decline to support anything?</td></tr>
       <tr><td>Parametric insurance</td><td>How do candidate index definitions behave over the archive, and how far apart can intensity and proximity sit for one event?</td></tr>
       <tr><td>Catastrophe modelling &amp; validation</td><td>An independent, versioned, refusal-preserving reference to validate a vendor or in-house view against, with provisional and post-analysed records kept apart.</td></tr>
-      <tr><td>Weather-sensitive financial markets</td><td>Timestamped point-in-time state with source-valid and ingestion times kept distinct, so a backtest reads what was knowable then rather than what is known now.</td></tr>
     </tbody>
   </table>
 
