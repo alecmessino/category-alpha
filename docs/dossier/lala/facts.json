@@ -2,18 +2,12 @@
   "schema": "millibar-dossier-lala/1",
   "built_utc": "2026-08-25T20:52:00.000Z",
   "subject": "CP012026",
-  "insurance_contract_facts": "none",
-  "external_public_contract": {
-    "id": "KXHURRICANENAMES-26DEC01CPAC-LAL",
-    "kind": "public binary event contract",
-    "used_for": "the market column in section 4, as a recorded price at that instant",
-    "not": "not an insurance or reinsurance contract, and not a Millibar valuation of one"
-  },
+  "external_public_contract_facts": "none",
   "provenance_classes": {
     "ARCHIVE": "IBTrACS, via docs/storm-atlas/data/atlas-core-v1.bin.gz",
     "OPERATIONAL": "ATCF b-deck and operational SHIPS, via the pinned files under docs/dossier/lala/data/",
     "DERIVED": "computed by replaying a rule the archive already owns; the rule is named where used",
-    "RECORDED / MILLIBAR": "Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time."
+    "RECORDED / MILLIBAR": "Timestamped Millibar system output, extracted here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time."
   },
   "archive_provenance": {
     "archive_built_utc": "2026-08-18T05:18:57Z",
@@ -725,10 +719,12 @@
   },
   "recorded": {
     "provenance": "RECORDED / MILLIBAR",
-    "definition": "Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time.",
+    "definition": "Timestamped Millibar system output, extracted here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time.",
     "source": "data/forecast-log-cp012026.json",
-    "source_pinned_from": "docs/data/forecast-log.json",
-    "source_pinned_at": "2026-08-25T20:48:26.627Z",
+    "source_kind": "institutional-dossier-extract",
+    "source_extracted_from": "docs/data/forecast-log.json",
+    "source_extracted_at": "2026-08-25T20:48:26.627Z",
+    "source_fields_omitted_count": 6,
     "entries": 141,
     "questions": [
       "hurricane@65"
@@ -750,7 +746,6 @@
         "currentKt": 50,
         "pRaw": 0.5979,
         "pCal": null,
-        "pMarket": 0.815,
         "quality": null,
         "lead_hours_to_outcome": 25.619550555555556
       },
@@ -761,7 +756,6 @@
         "currentKt": 60,
         "pRaw": 0.6742332013260945,
         "pCal": 0.7538479399841849,
-        "pMarket": 0.79,
         "quality": "MEDIUM",
         "lead_hours_to_outcome": 0.04481972222222222
       },
@@ -772,7 +766,6 @@
         "currentKt": 115,
         "pRaw": 0.99,
         "pCal": 0.99,
-        "pMarket": 0.99,
         "quality": "MEDIUM",
         "lead_hours_to_outcome": -86.58652583333334
       },
@@ -783,7 +776,6 @@
         "currentKt": 45,
         "pRaw": 0.01,
         "pCal": 0.01,
-        "pMarket": null,
         "quality": "MEDIUM",
         "lead_hours_to_outcome": -242.8022288888889
       }

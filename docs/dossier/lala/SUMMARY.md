@@ -2,7 +2,7 @@
 
 **Millibar · 2026 EP/CP Pacific · archive id 2026222N15223 · built 2026-08-25 20:52Z**
 Archive c3998bd7bd784a62 · methodology 1.1.0 · full dossier `/dossier/lala` · facts `facts.json`
-Insurance / reinsurance contract facts used: **none**.
+External / public contract facts used: **none**.
 
 **Two records describe this storm. They begin at the same instant, 2026-08-10 00:00Z, and end 9.8 d apart.**
 

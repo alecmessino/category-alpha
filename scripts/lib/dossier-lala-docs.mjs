@@ -50,7 +50,7 @@ export function renderSummary(f) {
 
 **Millibar · ${a.season} ${a.basin}/${a.subbasin} Pacific · archive id ${a.storm_id} · built ${Z(Date.parse(f.built_utc))}**
 Archive ${f.archive_provenance.archive_stamp} · methodology ${f.archive_provenance.methodology_version} · full dossier \`/dossier/lala\` · facts \`facts.json\`
-Insurance / reinsurance contract facts used: **${f.insurance_contract_facts}**.
+External / public contract facts used: **${f.external_public_contract_facts}**.
 
 **Two records describe this storm. They begin at the same instant, ${Z(a.first_fix_t)}, and end ${dur(o.extends_archive_by_hours)} apart.**
 
@@ -215,9 +215,9 @@ scope, so no live data touches the statistics.
 
 ## 2:50 – 3:00 · Close
 
-> "Two sources, five provenance classes, never blended, refusals on the page rather than in a
-> footnote. No insurance or reinsurance contract fact anywhere in it. If you want to test it
-> against your own exposure and your own trigger terms, that is the conversation."
+> "Two sources, four provenance classes, never blended, refusals on the page rather than in a
+> footnote. No contract fact of any kind anywhere in it. If you want to test it against your own
+> exposure and your own trigger terms, that is the conversation."
 
 ---
 
@@ -233,10 +233,8 @@ const CTA = "Request an institutional walkthrough / design-partner discussion.";
 const FOOTER = (f) => `---
 Millibar · \`/dossier/lala\` · built ${Z(Date.parse(f.built_utc))} · archive `
   + `${f.archive_provenance.archive_stamp} · methodology ${f.archive_provenance.methodology_version}
-Insurance / reinsurance contract facts used: ${f.insurance_contract_facts}. No carrier, policy,
-trigger geometry, attachment threshold or payout function is named, reconstructed or implied. The
-${f.external_public_contract.kind} \`${f.external_public_contract.id}\` appears as a recorded price
-in one column of the dossier's section 4 and is labelled there.
+External / public contract facts used: ${f.external_public_contract_facts}. No carrier, policy,
+trigger geometry, attachment threshold or payout function is named, reconstructed or implied.
 Research use. Not a forecast, not advice, not an offer.`;
 
 export function renderOutreach(f) {

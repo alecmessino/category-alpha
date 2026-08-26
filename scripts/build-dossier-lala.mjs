@@ -80,7 +80,12 @@ const env = JSON.parse(await readFile(join(DATA, "env-ships-rt.json"), "utf8"));
 /* The ledger and the calibration state are PINNED, not read live. scripts/fetch-data.mjs rewrites
    docs/data/forecast-log.json on every refresh; a dossier that re-read it would silently restate
    what Millibar recorded about a past storm every time the site refreshed, which is the exact
-   failure this document argues against. The pinned files are the CP012026 slice verbatim. */
+   failure this document argues against.
+
+   THE PINNED LEDGER IS A PURPOSE-LIMITED EXTRACT, and says so in its own `note` field. It carries
+   the CP012026 entries with only the fields this dossier reads; the complete recorded ledger is
+   retained unchanged in Millibar's system of record and in this repository's history. The values
+   are untouched -- what is omitted is omitted, not rewritten. */
 const ledger = JSON.parse(await readFile(join(DATA, "forecast-log-cp012026.json"), "utf8"));
 const calibrationPin = JSON.parse(await readFile(join(DATA, "calibration.json"), "utf8"));
 const calibration = calibrationPin.calibration;
@@ -411,7 +416,7 @@ const outcomeFix = afterGenesis.find((f) => f.kt !== null && f.kt >= ledgerThres
 const pick = (i) => {
   const e = entries[i];
   return { tsZ: e.tsZ, advNum: e.advNum, currentKt: e.currentKt,
-    pRaw: e.pRaw ?? null, pCal: e.pCal ?? null, pMarket: e.pMarket ?? null,
+    pRaw: e.pRaw ?? null, pCal: e.pCal ?? null,
     quality: e.quality ?? null,
     lead_hours_to_outcome: outcomeFix ? hrs(Date.parse(e.tsZ), T(outcomeFix)) : null };
 };
@@ -429,13 +434,15 @@ const checkpoints = [
 
 const recorded = {
   provenance: "RECORDED / MILLIBAR",
-  definition: "Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. "
+  definition: "Timestamped Millibar system output, extracted here from docs/data/forecast-log.json. "
     + "Evidence of what the system recorded at that instant. It is not an upstream observation, "
     + "it is not evidence of forecasting skill, and it was not necessarily published externally "
     + "at the time.",
   source: "data/forecast-log-cp012026.json",
-  source_pinned_from: ledger.pinned_from,
-  source_pinned_at: ledger.pinned_at,
+  source_kind: ledger.kind ?? null,
+  source_extracted_from: ledger.extracted_from ?? ledger.pinned_from ?? null,
+  source_extracted_at: ledger.extracted_at ?? ledger.pinned_at ?? null,
+  source_fields_omitted_count: ledger.fields_omitted_count ?? null,
   entries: entries.length,
   questions,
   threshold_kt: ledgerThresholdKt,
@@ -500,16 +507,11 @@ const facts = {
   schema: "millibar-dossier-lala/1",
   built_utc: new Date(Date.parse(DECK_FETCHED_AT)).toISOString(),
   subject: ATCF_ID,
-  /* The §4 ledger carries pMarket: the last quoted price on a PUBLIC event contract, recorded by
-     Millibar at that instant. That is an external public contract fact and is labelled as one.
-     What is NOT used anywhere is an insurance or reinsurance contract fact. */
-  insurance_contract_facts: "none",
-  external_public_contract: {
-    id: entries.find((e) => e.contractId)?.contractId ?? null,
-    kind: "public binary event contract",
-    used_for: "the market column in section 4, as a recorded price at that instant",
-    not: "not an insurance or reinsurance contract, and not a Millibar valuation of one",
-  },
+  /* NO EXTERNAL CONTRACT FACT OF ANY KIND REACHES THIS DOCUMENT. The pinned ledger under data/
+     carries Millibar's own recorded fields verbatim, including ones this dossier does not use;
+     the projection above takes only the model and calibrated probabilities. Nothing priced,
+     quoted or settled outside Millibar enters any figure, table or sentence here. */
+  external_public_contract_facts: "none",
   provenance_classes: {
     ARCHIVE: "IBTrACS, via docs/storm-atlas/data/atlas-core-v1.bin.gz",
     OPERATIONAL: "ATCF b-deck and operational SHIPS, via the pinned files under docs/dossier/lala/data/",
