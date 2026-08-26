@@ -74,9 +74,9 @@ scope, so no live data touches the statistics.
 
 ## 2:50 – 3:00 · Close
 
-> "Two sources, five provenance classes, never blended, refusals on the page rather than in a
-> footnote. No insurance or reinsurance contract fact anywhere in it. If you want to test it
-> against your own exposure and your own trigger terms, that is the conversation."
+> "Two sources, four provenance classes, never blended, refusals on the page rather than in a
+> footnote. No contract fact of any kind anywhere in it. If you want to test it against your own
+> exposure and your own trigger terms, that is the conversation."
 
 ---
 

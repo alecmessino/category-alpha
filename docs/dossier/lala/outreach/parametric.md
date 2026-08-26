@@ -27,8 +27,6 @@ Request an institutional walkthrough / design-partner discussion.
 
 ---
 Millibar · `/dossier/lala` · built 2026-08-25 20:52Z · archive c3998bd7bd784a62 · methodology 1.1.0
-Insurance / reinsurance contract facts used: none. No carrier, policy,
-trigger geometry, attachment threshold or payout function is named, reconstructed or implied. The
-public binary event contract `KXHURRICANENAMES-26DEC01CPAC-LAL` appears as a recorded price
-in one column of the dossier's section 4 and is labelled there.
+External / public contract facts used: none. No carrier, policy,
+trigger geometry, attachment threshold or payout function is named, reconstructed or implied.
 Research use. Not a forecast, not advice, not an offer.

@@ -76,7 +76,6 @@ tr.mark td,tr.mark th{background:var(--surface-sunken)}
 .t-operational{color:var(--accent)}
 .t-derived{color:var(--text-2)}
 .t-recordedmillibar{color:var(--accent)}
-.t-externalpubliccontract{color:var(--warn)}
 .flag{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:var(--warn)}
 .pos{color:var(--pos)}.neg{color:var(--neg)}
 .refuse-in{font-family:var(--font-mono);font-size:10px;color:var(--warn);letter-spacing:.04em}
@@ -131,13 +130,13 @@ footer p{font-size:11.5px;color:var(--text-2);max-width:none}
     <span>Built 2026-08-25 20:52Z</span>
     <span>Archive c3998bd7bd784a62 · built 2026-08-18</span>
     <span>Methodology 1.1.0</span>
-    <span>Insurance / reinsurance contract facts used: <b>none</b></span>
+    <span>External / public contract facts used: <b>none</b></span>
   </div>
 </header>
 
 <section class="key">
   <h2>How to read every number on this page</h2>
-  <p class="lead">Five sources answer five different questions. They are labelled everywhere and
+  <p class="lead">Four sources answer four different questions. They are labelled everywhere and
   never combined.</p>
   <table>
     <tbody>
@@ -145,12 +144,11 @@ footer p{font-size:11.5px;color:var(--text-2);max-width:none}
       <tr><td><span class="tag t-operational">OPERATIONAL</span></td><td>ATCF b-deck and operational SHIPS, as the forecast office had them. Revised while a storm is live. Used to describe <b>this storm</b>, and nothing else.</td></tr>
       <tr><td><span class="tag t-derived">DERIVED</span></td><td>Computed here by replaying a rule the archive already owns. The rule is named wherever a derived value appears.</td></tr>
       <tr><td><span class="tag t-recordedmillibar">RECORDED / MILLIBAR</span></td><td>Timestamped Millibar system output, pinned here from docs/data/forecast-log.json. Evidence of what the system recorded at that instant. It is not an upstream observation, it is not evidence of forecasting skill, and it was not necessarily published externally at the time.</td></tr>
-      <tr><td><span class="tag t-externalpubliccontract">EXTERNAL / PUBLIC CONTRACT</span></td><td>The last quoted price on <code>KXHURRICANENAMES-26DEC01CPAC-LAL</code>, a public binary event contract, as Millibar recorded it at that instant. It appears in one column of section 4 and nowhere else. It is not an insurance or reinsurance contract, and not a Millibar valuation of one.</td></tr>
     </tbody>
   </table>
-  <p class="note">No insurance or reinsurance contract fact is used anywhere in this document. No
-  carrier, policy, trigger geometry, attachment threshold or payout function is named, reconstructed
-  or implied.</p>
+  <p class="note">No external or public contract fact is used anywhere in this document. No carrier,
+  policy, trigger geometry, attachment threshold or payout function is named, reconstructed or
+  implied, and no price quoted or settled outside Millibar enters any figure here.</p>
 </section>
 
 <!-- ============================================================ 1 -->
@@ -377,22 +375,17 @@ footer p{font-size:11.5px;color:var(--text-2);max-width:none}
   either exists for this storm.</p>
 
   <table class="chron">
-    <thead><tr><th>UTC recorded</th><th>Checkpoint</th><th class="n">Storm</th><th class="n">Model</th><th class="n">Calibrated</th><th class="n">Market<div class="th2">external / public contract</div></th><th class="n">Lead to outcome</th></tr></thead>
+    <thead><tr><th>UTC recorded</th><th>Checkpoint</th><th class="n">Storm</th><th class="n">Model</th><th class="n">Calibrated</th><th class="n">Lead to outcome</th></tr></thead>
     <tbody>
-      <tr><td>2026-08-14 16:22Z</td><td>first record of any kind</td><td class="n">50 kt</td><td class="n">59.8%</td><td class="n">—</td><td class="n">81.5%</td><td class="n">26 h</td></tr>
-      <tr><td>2026-08-15 17:57Z</td><td>last record before the outcome</td><td class="n">60 kt</td><td class="n">67.4%</td><td class="n">75.4%</td><td class="n">79.0%</td><td class="n">3 min</td></tr>
-      <tr><td>2026-08-19 08:35Z</td><td>highest intensity recorded</td><td class="n">115 kt</td><td class="n">99.0%</td><td class="n">99.0%</td><td class="n">99.0%</td><td class="n">—</td></tr>
-      <tr><td>2026-08-25 20:48Z</td><td>most recent record</td><td class="n">45 kt</td><td class="n">1.0%</td><td class="n">1.0%</td><td class="n">—</td><td class="n">—</td></tr>
+      <tr><td>2026-08-14 16:22Z</td><td>first record of any kind</td><td class="n">50 kt</td><td class="n">59.8%</td><td class="n">—</td><td class="n">26 h</td></tr>
+      <tr><td>2026-08-15 17:57Z</td><td>last record before the outcome</td><td class="n">60 kt</td><td class="n">67.4%</td><td class="n">75.4%</td><td class="n">3 min</td></tr>
+      <tr><td>2026-08-19 08:35Z</td><td>highest intensity recorded</td><td class="n">115 kt</td><td class="n">99.0%</td><td class="n">99.0%</td><td class="n">—</td></tr>
+      <tr><td>2026-08-25 20:48Z</td><td>most recent record</td><td class="n">45 kt</td><td class="n">1.0%</td><td class="n">1.0%</td><td class="n">—</td></tr>
     </tbody>
   </table>
   <p class="note">Checkpoints are chosen for what each establishes — the first record, the last before the outcome, the highest intensity recorded, and the current state — not for how they read. Full ledger: <code>data/forecast-log-cp012026.json</code>,
   141 entries. <span class="tag t-recordedmillibar">RECORDED / MILLIBAR</span></p>
 
-  <p class="note">The market column is the last quoted price on <code>KXHURRICANENAMES-26DEC01CPAC-LAL</code>, a
-  public binary event contract settling on the same 65 kt question, recorded by Millibar at the
-  same instant as the model value beside it. <span class="tag t-externalpubliccontract">EXTERNAL / PUBLIC CONTRACT</span> It is
-  not an insurance or reinsurance contract, and not a Millibar valuation of one. Millibar did not write, price, hedge or hold it, and no model on this page is
-  fitted to it.</p>
 
   <p>The outcome the question was about: Lala first reached 65 kt at
   2026-08-15 18:00Z <span class="tag t-operational">OPERATIONAL</span>.</p>
@@ -447,8 +440,8 @@ footer p{font-size:11.5px;color:var(--text-2);max-width:none}
 <!-- ============================================================ 6 -->
 <section>
   <h2><span class="num">6</span> Where this architecture is relevant to parametric risk</h2>
-  <p class="lead">Capabilities, against public primitives. No insurance or reinsurance contract
-  terms are used, held or implied.</p>
+  <p class="lead">Capabilities, against public primitives. No contract terms of any kind are used,
+  held or implied.</p>
 
   <table class="cmp">
     <thead><tr><th>Need</th><th>What this architecture provides</th></tr></thead>
@@ -460,9 +453,7 @@ footer p{font-size:11.5px;color:var(--text-2);max-width:none}
       <tr><td>Model challenge</td><td>Refusals are first-class outputs. A cohort that cannot support a probability says which population it counted and why, as section 3 does for the Hawaiʻi rate under the 1971 floor.</td></tr>
     </tbody>
   </table>
-  <p class="note">Insurance / reinsurance contract facts used in this document: <b>none</b>. The
-  one external contract fact that does appear — the section 4 market column — is a public event
-  contract price, labelled <span class="tag t-externalpubliccontract">EXTERNAL / PUBLIC CONTRACT</span> where it is used.</p>
+  <p class="note">External / public contract facts used in this document: <b>none</b>.</p>
 </section>
 
 <!-- ============================================================ 7 -->

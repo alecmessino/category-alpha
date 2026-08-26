@@ -77,7 +77,6 @@ export function renderDossier(f) {
   const cAll = f.cohort.all_seasons;
   const cRel = f.cohort.reliable_era;
   const rec = f.recorded;
-  const xc = f.external_public_contract;
   const env = f.environment;
   const dot = f.cohort.hawaii_contributors[0] || null;
 
@@ -105,13 +104,13 @@ ${CSS}
     <span>Built ${Z(Date.parse(f.built_utc))}</span>
     <span>Archive ${esc(f.archive_provenance.archive_stamp)} · built ${Zd(Date.parse(f.archive_provenance.archive_built_utc))}</span>
     <span>Methodology ${esc(f.archive_provenance.methodology_version)}</span>
-    <span>Insurance / reinsurance contract facts used: <b>${esc(f.insurance_contract_facts)}</b></span>
+    <span>External / public contract facts used: <b>${esc(f.external_public_contract_facts)}</b></span>
   </div>
 </header>
 
 <section class="key">
   <h2>How to read every number on this page</h2>
-  <p class="lead">Five sources answer five different questions. They are labelled everywhere and
+  <p class="lead">Four sources answer four different questions. They are labelled everywhere and
   never combined.</p>
   <table>
     <tbody>
@@ -119,12 +118,11 @@ ${CSS}
       <tr>${td(tag("OPERATIONAL"))}${td("ATCF b-deck and operational SHIPS, as the forecast office had them. Revised while a storm is live. Used to describe <b>this storm</b>, and nothing else.")}</tr>
       <tr>${td(tag("DERIVED"))}${td("Computed here by replaying a rule the archive already owns. The rule is named wherever a derived value appears.")}</tr>
       <tr>${td(tag("RECORDED / MILLIBAR"))}${td(esc(rec.definition))}</tr>
-      <tr>${td(tag("EXTERNAL / PUBLIC CONTRACT"))}${td("The last quoted price on <code>" + esc(xc.id) + "</code>, a " + esc(xc.kind) + ", as Millibar recorded it at that instant. It appears in one column of section 4 and nowhere else. It is " + esc(xc.not) + ".")}</tr>
     </tbody>
   </table>
-  <p class="note">No insurance or reinsurance contract fact is used anywhere in this document. No
-  carrier, policy, trigger geometry, attachment threshold or payout function is named, reconstructed
-  or implied.</p>
+  <p class="note">No external or public contract fact is used anywhere in this document. No carrier,
+  policy, trigger geometry, attachment threshold or payout function is named, reconstructed or
+  implied, and no price quoted or settled outside Millibar enters any figure here.</p>
 </section>
 
 <!-- ============================================================ 1 -->
@@ -300,19 +298,14 @@ ${cAll.gaps.map((x) => `    <p class="q">${esc(x)}</p>`).join("\n")}
   either exists for this storm.</p>
 
   <table class="chron">
-    <thead><tr><th>UTC recorded</th><th>Checkpoint</th><th class="n">Storm</th><th class="n">Model</th><th class="n">Calibrated</th><th class="n">Market<div class="th2">external / public contract</div></th><th class="n">Lead to outcome</th></tr></thead>
+    <thead><tr><th>UTC recorded</th><th>Checkpoint</th><th class="n">Storm</th><th class="n">Model</th><th class="n">Calibrated</th><th class="n">Lead to outcome</th></tr></thead>
     <tbody>
-${rec.checkpoints.map((c) => `      <tr><td>${Z(Date.parse(c.tsZ))}</td><td>${esc(c.label)}</td>${tdn(c.currentKt === null ? "—" : c.currentKt + " kt")}${tdn(c.pRaw === null ? "—" : pct(c.pRaw))}${tdn(c.pCal === null ? "—" : pct(c.pCal))}${tdn(c.pMarket === null ? "—" : pct(c.pMarket))}${tdn(c.lead_hours_to_outcome === null || c.lead_hours_to_outcome < 0 ? "—" : dur(c.lead_hours_to_outcome))}</tr>`).join("\n")}
+${rec.checkpoints.map((c) => `      <tr><td>${Z(Date.parse(c.tsZ))}</td><td>${esc(c.label)}</td>${tdn(c.currentKt === null ? "—" : c.currentKt + " kt")}${tdn(c.pRaw === null ? "—" : pct(c.pRaw))}${tdn(c.pCal === null ? "—" : pct(c.pCal))}${tdn(c.lead_hours_to_outcome === null || c.lead_hours_to_outcome < 0 ? "—" : dur(c.lead_hours_to_outcome))}</tr>`).join("\n")}
     </tbody>
   </table>
   <p class="note">${LEDGER_NOTE(rec)} Full ledger: <code>${esc(rec.source)}</code>,
   ${rec.entries} entries. ${tag("RECORDED / MILLIBAR")}</p>
 
-  <p class="note">The market column is the last quoted price on <code>${esc(xc.id)}</code>, a
-  ${esc(xc.kind)} settling on the same ${rec.threshold_kt} kt question, recorded by Millibar at the
-  same instant as the model value beside it. ${tag("EXTERNAL / PUBLIC CONTRACT")} It is
-  ${esc(xc.not)}. Millibar did not write, price, hedge or hold it, and no model on this page is
-  fitted to it.</p>
 
   <p>The outcome the question was about: Lala first reached ${rec.threshold_kt} kt at
   ${Z(rec.outcome.t)} ${tag("OPERATIONAL")}.</p>
@@ -367,8 +360,8 @@ ${rec.checkpoints.map((c) => `      <tr><td>${Z(Date.parse(c.tsZ))}</td><td>${es
 <!-- ============================================================ 6 -->
 <section>
   <h2><span class="num">6</span> Where this architecture is relevant to parametric risk</h2>
-  <p class="lead">Capabilities, against public primitives. No insurance or reinsurance contract
-  terms are used, held or implied.</p>
+  <p class="lead">Capabilities, against public primitives. No contract terms of any kind are used,
+  held or implied.</p>
 
   <table class="cmp">
     <thead><tr><th>Need</th><th>What this architecture provides</th></tr></thead>
@@ -380,9 +373,7 @@ ${rec.checkpoints.map((c) => `      <tr><td>${Z(Date.parse(c.tsZ))}</td><td>${es
       <tr><td>Model challenge</td><td>Refusals are first-class outputs. A cohort that cannot support a probability says which population it counted and why, as section 3 does for the Hawaiʻi rate under the ${f.cohort.reliable_era_from} floor.</td></tr>
     </tbody>
   </table>
-  <p class="note">Insurance / reinsurance contract facts used in this document: <b>none</b>. The
-  one external contract fact that does appear — the section 4 market column — is a public event
-  contract price, labelled ${tag("EXTERNAL / PUBLIC CONTRACT")} where it is used.</p>
+  <p class="note">External / public contract facts used in this document: <b>none</b>.</p>
 </section>
 
 <!-- ============================================================ 7 -->
@@ -629,7 +620,6 @@ tr.mark td,tr.mark th{background:var(--surface-sunken)}
 .t-operational{color:var(--accent)}
 .t-derived{color:var(--text-2)}
 .t-recordedmillibar{color:var(--accent)}
-.t-externalpubliccontract{color:var(--warn)}
 .flag{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;color:var(--warn)}
 .pos{color:var(--pos)}.neg{color:var(--neg)}
 .refuse-in{font-family:var(--font-mono);font-size:10px;color:var(--warn);letter-spacing:.04em}

@@ -411,7 +411,7 @@ const outcomeFix = afterGenesis.find((f) => f.kt !== null && f.kt >= ledgerThres
 const pick = (i) => {
   const e = entries[i];
   return { tsZ: e.tsZ, advNum: e.advNum, currentKt: e.currentKt,
-    pRaw: e.pRaw ?? null, pCal: e.pCal ?? null, pMarket: e.pMarket ?? null,
+    pRaw: e.pRaw ?? null, pCal: e.pCal ?? null,
     quality: e.quality ?? null,
     lead_hours_to_outcome: outcomeFix ? hrs(Date.parse(e.tsZ), T(outcomeFix)) : null };
 };
@@ -500,16 +500,11 @@ const facts = {
   schema: "millibar-dossier-lala/1",
   built_utc: new Date(Date.parse(DECK_FETCHED_AT)).toISOString(),
   subject: ATCF_ID,
-  /* The §4 ledger carries pMarket: the last quoted price on a PUBLIC event contract, recorded by
-     Millibar at that instant. That is an external public contract fact and is labelled as one.
-     What is NOT used anywhere is an insurance or reinsurance contract fact. */
-  insurance_contract_facts: "none",
-  external_public_contract: {
-    id: entries.find((e) => e.contractId)?.contractId ?? null,
-    kind: "public binary event contract",
-    used_for: "the market column in section 4, as a recorded price at that instant",
-    not: "not an insurance or reinsurance contract, and not a Millibar valuation of one",
-  },
+  /* NO EXTERNAL CONTRACT FACT OF ANY KIND REACHES THIS DOCUMENT. The pinned ledger under data/
+     carries Millibar's own recorded fields verbatim, including ones this dossier does not use;
+     the projection above takes only the model and calibrated probabilities. Nothing priced,
+     quoted or settled outside Millibar enters any figure, table or sentence here. */
+  external_public_contract_facts: "none",
   provenance_classes: {
     ARCHIVE: "IBTrACS, via docs/storm-atlas/data/atlas-core-v1.bin.gz",
     OPERATIONAL: "ATCF b-deck and operational SHIPS, via the pinned files under docs/dossier/lala/data/",
