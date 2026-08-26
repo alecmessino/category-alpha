@@ -1,20 +1,28 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-25T19:17:25.734Z",
+  "ranAt": "2026-08-26T01:57:28.400Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "de8f0f7b009a1206a4c7d5b82414674d1edcc504",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32888610928",
+  "sha": "630eab7469ae379c7615e2340f19b79a2e2446b2",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/32920853947",
   "ok": false,
-  "passed": 45,
+  "passed": 43,
   "total": 46,
   "failures": [
+    {
+      "check": "a new advisory moves P(hurricane) and the Situation strip",
+      "detail": "24 frames · newest carries advisory state for 2/3 storm(s) · 3 advisory change(s) · 0 moved P · 1 pinned at the clamp · 3 register row(s) · situation P=1% at adv #10 · DID NOT MOVE: EP102026 #4->#5 peak 45->null P 0.01->null"
+    },
+    {
+      "check": "the calibrated probability ships with the raw estimate and its evidence tier",
+      "detail": "2/3 frames carry a calibrated P · 2 carry the raw one · 3 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=LOW lag=284m raw=1%"
+    },
     {
       "check": "all markets carried",
       "detail": "300 contracts · 51 series · droppedForCap=18"
     }
   ],
-  "thirdPartyFailures": 48,
+  "thirdPartyFailures": 34,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -34,7 +42,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-08-25T19:09:37.886Z · 8m old"
+      "detail": "2026-08-26T01:27:23.883Z · 30m old"
     },
     {
       "check": "renders: Situation",
@@ -94,12 +102,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "8 ranked of 13 candidates · 115/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "8 ranked of 15 candidates · 114/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 20 displayed-only · unverifiable=0"
+      "detail": "0 executable · 16 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -109,7 +117,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "79/88 tile(s) rendered · 9 hole(s) · 0 still loading"
+      "detail": "34/42 tile(s) rendered · 8 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -124,12 +132,12 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 2 screens tall (2757px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 850px · BANKROLL 756px · ▾ 698px"
+      "detail": "3 tabs · Situation is 2 screens tall (2768px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 860px · BANKROLL 767px · ▾ 698px"
     },
     {
       "check": "the official-advisory console reaches the page",
       "pass": true,
-      "detail": "3 storm(s) · console=true · forecast=3 · P=3 · watches=0 · discussion=3"
+      "detail": "3 storm(s) · console=true · forecast=2 · P=2 · watches=0 · discussion=3"
     },
     {
       "check": "no watch area is truncated at a line wrap",
@@ -139,12 +147,12 @@
     {
       "check": "the initial forecast point carries its intensity",
       "pass": true,
-      "detail": "3/3 storm(s) have an hour-zero intensity"
+      "detail": "2/2 storm(s) have an hour-zero intensity"
     },
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
-      "pass": true,
-      "detail": "24 frames · newest carries advisory state for 3/3 storm(s) · 3 advisory change(s) · 0 moved P · 1 pinned at the clamp · 3 register row(s) · situation P=31% at adv #9"
+      "pass": false,
+      "detail": "24 frames · newest carries advisory state for 2/3 storm(s) · 3 advisory change(s) · 0 moved P · 1 pinned at the clamp · 3 register row(s) · situation P=1% at adv #10 · DID NOT MOVE: EP102026 #4->#5 peak 45->null P 0.01->null"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
@@ -153,48 +161,48 @@
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
-      "pass": true,
-      "detail": "3/3 frames carry a calibrated P · 3 carry the raw one · 3 carry an evidence tier · contracts: 2 calibrated, 2 with the official estimate beside it · strip: quality=LOW lag=264m raw=1%"
+      "pass": false,
+      "detail": "2/3 frames carry a calibrated P · 2 carry the raw one · 3 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=LOW lag=284m raw=1%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
       "pass": true,
-      "detail": "2/2 calibrated contract(s) publish the raw official estimate"
+      "detail": "1/1 calibrated contract(s) publish the raw official estimate"
     },
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "3 guidance cycle(s) turned over → 3 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 2 SHIPS · 2 pass · strip arrivals=5"
+      "detail": "4 guidance cycle(s) turned over → 4 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 2 P-update row(s) · 2 SHIPS · 3 pass · strip arrivals=5"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: past the 180-min line — Iselle 264m, Julio 261m, Lala 263m · 0 row(s), 0 held, 0 TAKE · forced: 2 anchored row(s) pushed past it → 0 HOLD, 2 SUSPECT, 0 ACTIONABLE · 10 stale-crossing row(s) in the register"
+      "detail": "live: past the 180-min line — Iselle 284m, Julio 286m, Lala 293m · 1 row(s), 1 held, 0 TAKE · forced: 1 anchored row(s) pushed past it → 1 HOLD, 0 SUSPECT, 0 ACTIONABLE · 9 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
       "pass": true,
-      "detail": "0 row(s) on HOLD live · $0 staked · forced: $0 across 0 held row(s)"
+      "detail": "1 row(s) on HOLD live · $0 staked · forced: $0 across 1 held row(s)"
     },
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-08-25T12:00:00Z"
+      "detail": "cycle 2026-08-25T18:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
       "pass": true,
-      "detail": "12 drawer(s) opened · all load-bearing caveats present"
+      "detail": "11 drawer(s) opened · all load-bearing caveats present"
     },
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "79 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "38 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "80 tile(s) served on reload · 79 in cache"
+      "detail": "38 tile(s) served on reload · 38 in cache"
     },
     {
       "check": "all markets carried",
@@ -214,7 +222,7 @@
     {
       "check": "fillable cap priced at the ask",
       "pass": true,
-      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 110962 × $0.01 = $1110"
+      "detail": "KXFIRSTHURRICANE-26DEC01ATL-BER: 110869 × $0.01 = $1109"
     },
     {
       "check": "order book shows depth",
