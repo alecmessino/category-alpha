@@ -232,14 +232,14 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
    * the way the panel already reconciled them -- by HOISTING rather than truncating. A reason
    * shared by more than one row is stated once beneath the group and marked on each row; a
    * reason unique to its row is printed in full, where it is the finding rather than noise. */
-  const reasonCounts = new Map();
+  const hoistCounts = new Map();
   for (const g of groups) {
     for (const row of g.rows) {
-      const reason = reasonOf(row);
-      if (reason) reasonCounts.set(reason, (reasonCounts.get(reason) || 0) + 1);
+      const key = hoistKeyOf(row);
+      if (key) hoistCounts.set(key, (hoistCounts.get(key) || 0) + 1);
     }
   }
-  const shared = new Set([...reasonCounts].filter(([, n]) => n > 1).map(([k]) => k));
+  const shared = new Set([...hoistCounts].filter(([, n]) => n > 1).map(([k]) => k));
 
   /* THE TEMPLATE IS COMPOSED FROM THE SAME LIST THE CELLS ARE, so a column that is not emitted
      has no track and a track with no column cannot exist. The track SIZES stay in atlas.css as
@@ -275,7 +275,7 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
             {collapsed ? null : g.rows.map((row) => (
               <DataRow key={row.key} row={row} shape={shape} shared={shared} />
             ))}
-            {collapsed ? null : <SharedReason group={g} shared={shared} onEvidence={onEvidence} />}
+            {collapsed ? null : <SharedReason group={g} shared={shared} />}
             {!collapsed && g.folded ? (
               <FoldedRegions folded={g.folded} onOpen={onToggleLandfall} />
             ) : null}
@@ -553,9 +553,14 @@ function DataRow({ row, shape, shared }) {
           it qualifies the whole row, and it is the only element here that may carry
           `data-refusal` -- the DOM gate requires everything with that attribute to name the way
           out, which a two-word status cell cannot do. */}
-      {refused ? (
+      {/* HOISTED ROWS EMIT NO REFUSAL LINE AT ALL, rather than an empty one. The row keeps its
+          mark, its status word and its count; the sentence and the way out are stated once
+          beneath the group. An emptied line would still carry `data-refusal`, and the DOM gate
+          requires every element with that attribute to name the way out -- so a blank one would
+          be a refusal that offers no remedy, which is the one thing that attribute must never
+          mean. */}
+      {refused && !(shared && shared.has(hoistKeyOf(row))) ? (
         <RowRefusal kind={kind} cell={cell} unscoreable={unscoreable}
-          hoisted={shared && shared.has(reasonOf(row))}
           onEvidence={onEvidence && contractKey ? () => onEvidence(contractKey) : undefined} />
       ) : null}
       {selfContribution ? <SelfContribution row={row} subject={subject} /> : null}
@@ -617,24 +622,34 @@ function SubjectCell({ row, subject }) {
 
 /* AT MOST EIGHTEEN WORDS, CARRYING THE COUNT. Never an alert box, never a tint, never a coloured
    background -- a refusal is part of the argument, not an error in it. */
-function RowRefusal({ kind, cell, unscoreable, onEvidence, hoisted }) {
+/* THE WAY OUT, IN THE REFUSAL COMPONENT'S OWN WORDS, wherever it is printed. A reader who
+   learns "A LIMIT OF THE RECORD" on one row must not meet a paraphrase of it under the group,
+   so the row and the hoisted line render the SAME component rather than two copies of the same
+   branch -- which is how the hoisted line came to print the RATE_REFUSED remedy over an
+   OUT OF SCOPE reason. */
+function RemedyLine({ kind }) {
+  const r = REFUSALS[kind];
+  if (!r) return null;
+  return (
+    <span className="at-say-remedy">
+      {r.resolvable === "no" ? <><strong>A LIMIT OF THE RECORD.</strong> {r.irreducible}</>
+        : <><strong>{r.resolvable === "partly" ? "PARTLY IN YOUR HANDS." : "YOU CAN CHANGE THIS."}</strong>{" "}
+          {r.remedyShort || r.remedy}</>}
+    </span>
+  );
+}
+
+function RowRefusal({ kind, cell, unscoreable, onEvidence }) {
   const r = REFUSALS[kind];
   const statement = unscoreable ? unscoreable.reason
     : kind === "CONDITIONED_ON" ? cell.reason
       : cell.refused_reason;
   return (
     <div className="at-deck-say" data-refusal={r.kind}>
-      {/* VERBATIM WHERE IT IS THIS ROW'S OWN FINDING; a marker where the same sentence is about
-          to be said again under the group. Never truncated: see the note in EvidenceDeck. */}
-      <span className="at-say-text">{hoisted ? null : statement}</span>
-      {/* THE LINE THAT SEPARATES A REFUSAL A READER CAN ACT ON FROM ONE NOBODY CAN. The words
-          are the Refusal component's own, because a reader who learns "A LIMIT OF THE RECORD"
-          in one place must not meet a paraphrase of it in another. */}
-      <span className="at-say-remedy">
-        {r.resolvable === "no" ? <><strong>A LIMIT OF THE RECORD.</strong> {r.irreducible}</>
-          : <><strong>{r.resolvable === "partly" ? "PARTLY IN YOUR HANDS." : "YOU CAN CHANGE THIS."}</strong>{" "}
-            {r.remedyShort || r.remedy}</>}
-      </span>
+      {/* VERBATIM: this row is the only place the sentence is said. A row whose reason is
+          shared with another renders no line at all -- see DataRow. Never truncated. */}
+      <span className="at-say-text">{statement}</span>
+      <RemedyLine kind={kind} />
       {onEvidence ? (
         <button type="button" className="at-say-link" data-evidence-link onClick={onEvidence}>
           SEE THE EVIDENCE →
@@ -642,6 +657,21 @@ function RowRefusal({ kind, cell, unscoreable, onEvidence, hoisted }) {
       ) : null}
     </div>
   );
+}
+
+/* WHAT A ROW WOULD SAY AND WHY IT REFUSED, as one key.
+ *
+ * KEYED ON THE KIND AS WELL AS THE SENTENCE, because the two are not separable. Hoisting used to
+ * be keyed on the reason alone and the hoisted line hard-coded the RATE_REFUSED remedy -- so a
+ * group where several rows shared an OUT OF SCOPE reason printed "YOU CAN CHANGE THIS. A wider
+ * cohort would carry a rate" over a refusal a wider cohort cannot fix. Two rows may only be
+ * spoken for by one line when they refuse for the same reason AND in the same way out. */
+function hoistKeyOf(row) {
+  const reason = reasonOf(row);
+  if (!reason) return null;
+  const kind = refusalKindOfRow(row);
+  if (!kind) return null;
+  return `${kind}\u0000${reason}`;
 }
 
 /* WHICH SENTENCE A ROW WOULD PRINT, so repetition can be counted before anything is rendered. */
@@ -656,16 +686,29 @@ function reasonOf(row) {
 /* ONE SENTENCE, ONCE, UNDER THE GROUP THAT SHARES IT. Below the sample gate every contract in a
    group refuses on the same words -- twelve lines of one fact. Hoisted here, the rows keep their
    marks and their status words and the reason is stated in full exactly once. */
-function SharedReason({ group, shared, onEvidence }) {
-  const reasons = [...new Set(group.rows.map(reasonOf).filter((x) => x && shared.has(x)))];
-  if (!reasons.length) return null;
+function SharedReason({ group, shared }) {
+  /* ONE LINE PER (KIND, REASON) THIS GROUP HOISTS, in the order the rows appear. A group can
+     hoist more than one -- below the sample gate its contracts share one sentence while its
+     out-of-scope regions share another -- and collapsing those into a single line would put one
+     kind's way out under the other kind's refusal. */
+  const seen = new Set();
+  const lines = [];
+  for (const row of group.rows) {
+    const key = hoistKeyOf(row);
+    if (!key || !shared.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    lines.push({ key, kind: refusalKindOfRow(row), reason: reasonOf(row) });
+  }
+  if (!lines.length) return null;
   return (
-    <div className="at-deck-say" data-refusal="RATE_REFUSED" data-shared-reason>
-      {reasons.map((x, i) => <span className="at-say-text" key={i}>{x}</span>)}
-      <span className="at-say-remedy">
-        <strong>YOU CAN CHANGE THIS.</strong> {REFUSALS.RATE_REFUSED.remedy}
-      </span>
-    </div>
+    <>
+      {lines.map((l) => (
+        <div className="at-deck-say" data-refusal={l.kind} data-shared-reason key={l.key}>
+          <span className="at-say-text">{l.reason}</span>
+          <RemedyLine kind={l.kind} />
+        </div>
+      ))}
+    </>
   );
 }
 

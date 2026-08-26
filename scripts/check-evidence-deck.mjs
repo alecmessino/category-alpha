@@ -186,6 +186,46 @@ const HTML_FOLDED = render({ result: RESULT, comparison: COMPARISON, foldTiming:
    nothing. */
 const HTML_ARCHIVE = render({ result: RESULT, onEvidence: () => {} });
 
+/* A DECK THAT HOISTS, WHICH NONE OF THE FOUR ABOVE DO.
+ *
+ * RESULT carries exactly one row refusing on REFUSED_REASON, so no two rows ever share a reason
+ * and the hoist never fires in this harness. That is how a defect measuring seventeen repeated
+ * lines on a real below-sample cohort passed every fixture-based rule here: the fixtures had no
+ * hoisted state to be wrong about.
+ *
+ * This one is the shape that breaks: a cohort under the sample gate, where every intensity
+ * contract refuses on the SAME sentence -- which must be stated once beneath the group -- while
+ * two landfall regions refuse OUT OF SCOPE on DIFFERENT sentences that happen to share one way
+ * out, and must each keep their own line. */
+const THIN_REFUSED = "1 storms with a known outcome < min_sample=10";
+const RESULT_THIN = {
+  ...RESULT,
+  n_cases: 1, kept: 1, sufficient: false, effective_sample_size: 1, time_to_event: {},
+  intensity: {
+    ts: cell({ count: 1, rate: null, ci95: null, refused_reason: THIN_REFUSED }),
+    cat1: cell({ count: 0, rate: null, ci95: null, refused_reason: THIN_REFUSED }),
+    cat2: cell({ count: 0, rate: null, ci95: null, refused_reason: THIN_REFUSED }),
+    cat3: cell({ count: 0, rate: null, ci95: null, refused_reason: THIN_REFUSED }),
+    cat4: cell({ count: 0, rate: null, ci95: null, refused_reason: THIN_REFUSED }),
+    cat5: cell({ count: 0, rate: null, ci95: null, refused_reason: THIN_REFUSED }),
+  },
+  landfall: {
+    conus: { any: cell({ count: 0, rate: null, ci95: null, refused_reason: THIN_REFUSED }),
+      hurricane: cell({ count: 0, rate: null, ci95: null, refused_reason: THIN_REFUSED }) },
+    caribbean: { any: cell({ count: 0, rate: null, ci95: null, refused_reason: THIN_REFUSED }),
+      hurricane: cell({ count: 0, rate: null, ci95: null, refused_reason: THIN_REFUSED }) },
+  },
+  unscoreable: {
+    "caribbean:any": { status: "OUT OF SCOPE", scope_events: 0, archive_events: 11, required: 10,
+      scope: "in this cohort",
+      reason: "only 0 storm(s) in the EP basin carry this outcome, fewer than the 10 required." },
+    "caribbean:hurricane": { status: "OUT OF SCOPE", scope_events: 2, archive_events: 11,
+      required: 10, scope: "in this cohort",
+      reason: "only 2 storm(s) in the EP basin carry this outcome, fewer than the 10 required." },
+  },
+};
+const HTML_HOISTED = render({ result: RESULT_THIN, onEvidence: () => {}, conditions: CONDITIONS });
+
 /* ── the audit ────────────────────────────────────────────────────────────────────────────
  *
  * Runs in the page, against a real DOM. Returns a list of violation strings; an empty list is
@@ -311,6 +351,56 @@ const AUDIT = () => {
     bad.push(`a refusal sentence is repeated across rows instead of hoisted: `
       + `"${dupes[0].slice(0, 60)}…" (${dupes.length} repeats)`);
   }
+
+  /* AND THE WHOLE LINE, NOT HALF OF IT. This rule used to read `.at-say-text` alone, so hoisting
+     suppressed the REASON on every shared row and left the REMEDY on all of them: measured on a
+     below-sample cohort, seventeen rows each rendered a line whose entire content was "YOU CAN
+     CHANGE THIS. A wider cohort would carry a rate…", under a deck that had already said it once.
+     Every one of those lines was distinct-by-reason (there was no reason) and identical in fact.
+     So the unit of repetition is the RENDERED LINE.
+     Two rows that refuse for genuinely different reasons and happen to share a way out are NOT
+     repeating each other -- six regions each stating their own count, all reachable by widening
+     the same population, is six findings with one exit. */
+  const rowLines = [];
+  for (const row of document.querySelectorAll("[data-outcome]")) {
+    for (const el of row.querySelectorAll(".at-deck-say")) {
+      const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (t) rowLines.push(t);
+    }
+  }
+  const dupeLines = rowLines.filter((t, i) => rowLines.indexOf(t) !== i);
+  if (dupeLines.length) {
+    bad.push(`a refusal line is repeated verbatim across rows instead of hoisted: `
+      + `"${dupeLines[0].slice(0, 60)}…" (${dupeLines.length} repeats)`);
+  }
+
+  /* AND NO LINE ANYWHERE MAY BE LEFT HOLDING ONLY THE WAY OUT. Hoisting suppressed the reason
+     and kept the remedy, so every shared row rendered a line that said how to fix a refusal it
+     no longer stated. A refusal that names an exit without naming what it is an exit FROM is
+     the one shape this surface must never render -- row line or hoisted line alike, which is
+     why this walks every .at-deck-say rather than only the ones inside a row. */
+  for (const el of document.querySelectorAll(".at-deck-say")) {
+    const reason = (el.querySelector(".at-say-text")?.textContent || "").trim();
+    const remedy = (el.querySelector(".at-say-remedy")?.textContent || "").trim();
+    if (remedy && !reason) {
+      bad.push(`a refusal line offers a way out without stating what it refuses: "${remedy.slice(0, 60)}…"`);
+    }
+  }
+
+  /* A HOISTED LINE MUST SPEAK FOR ITS OWN KIND. The hoisted line hard-coded the RATE_REFUSED
+     remedy, so a group hoisting an OUT OF SCOPE reason printed "a wider cohort would carry a
+     rate" over a refusal no cohort can fix. */
+  for (const el of document.querySelectorAll("[data-shared-reason]")) {
+    const kind = el.getAttribute("data-refusal");
+    const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+    const irreducible = /A LIMIT OF THE RECORD/.test(t);
+    if ((kind === "UNKNOWN" || kind === "BASE_RATE_ONLY") && !irreducible) {
+      bad.push(`a hoisted ${kind} line offers a remedy for a limit of the record: "${t.slice(0, 70)}…"`);
+    }
+    if (kind === "RATE_REFUSED" && irreducible) {
+      bad.push(`a hoisted RATE_REFUSED line calls itself irreducible: "${t.slice(0, 70)}…"`);
+    }
+  }
   return bad;
 };
 
@@ -337,6 +427,10 @@ console.log("[deck] the rendered deck, per row");
 {
   const bad = await auditOf(HTML_ARCHIVE);
   ok("and so does the archive-mode deck, with two fewer columns", bad.length === 0, bad.join("\n"));
+}
+{
+  const bad = await auditOf(HTML_HOISTED);
+  ok("a below-sample deck that hoists is clean", bad.length === 0, bad.join(" | "));
 }
 
 /* THE FOOT NAMES WHAT THE VS ARCHIVE COLUMN IS AGAINST, AND SAYS WHAT IT IS NOT.
@@ -536,6 +630,23 @@ if (process.argv.includes("--self-test")) {
         "$1REACHED"),
     },
     {
+      name: "a hoisted row left holding a bare remedy line",
+      source: HTML_HOISTED,
+      /* THE EXACT DEFECT THIS PR FIXED. Empties the reason out of two row lines, leaving each
+         holding nothing but the way out -- which is what seventeen rows rendered before the
+         hoist suppressed the whole line rather than half of it. */
+      mutate: (h) => h.replace(/<span class="at-say-text">[^<]*<\/span>/g,
+        '<span class="at-say-text"></span>'),
+    },
+    {
+      name: "a hoisted line offering a remedy for a limit of the record",
+      source: HTML_HOISTED,
+      /* Rewrites a hoisted line's kind to UNKNOWN while leaving a resolvable remedy on it --
+         the exact shape of the hard-coded RATE_REFUSED remedy under a foreign reason. */
+      mutate: (h) => h.replace(/data-refusal="RATE_REFUSED"( data-shared-reason)/,
+        'data-refusal="UNKNOWN"$1'),
+    },
+    {
       name: "one refusal sentence repeated across rows instead of hoisted",
       /* Copies the first row-level statement onto a second row, which is exactly what hoisting
          exists to prevent and what a word bound would not have caught. */
@@ -552,8 +663,9 @@ if (process.argv.includes("--self-test")) {
   ];
 
   for (const seed of SEEDS) {
-    const mutated = seed.mutate(HTML_DEFAULT);
-    if (mutated === HTML_DEFAULT) {
+    const source = seed.source || HTML_DEFAULT;
+    const mutated = seed.mutate(source);
+    if (mutated === source) {
       ok(seed.name, false, "the mutation did not change the markup — the seed no longer matches "
         + "the deck's output, so this regression is going unchecked");
       continue;
