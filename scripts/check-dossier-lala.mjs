@@ -17,7 +17,7 @@
  * Run: node scripts/check-dossier-lala.mjs
  */
 import { execFileSync } from "node:child_process";
-import { readFile, readdir, mkdtemp, cp, rm } from "node:fs/promises";
+import { readFile, writeFile, readdir, mkdtemp, cp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -78,13 +78,22 @@ try {
         : `${a.length} committed bytes vs ${b.length} rebuilt — run node scripts/build-dossier-lala.mjs and commit`);
   }
 
+  /* THE COMMITTED STAMP, READ FROM THE STASH -- NOT FROM THE TREE [1] JUST REGENERATED.
+     This check read facts.json out of LIVE, which step [1] had already overwritten, so it
+     compared a freshly-built stamp against the manifest that built it and could never fail. It
+     reported `ok archive stamp c3998bd7bd784a62 is the current pack's` on a run where [2] was
+     failing precisely because the COMMITTED masthead still printed d4c919a670f68bb2. A check
+     written to catch a stale stamp was green on a stale stamp. It reads the stash now. */
   console.log("\n[3] the masthead's archive stamp matches the pack it claims");
-  const facts = JSON.parse(await readFile(join(LIVE, "facts.json"), "utf8"));
+  const facts = JSON.parse(await readFile(join(scratch, "facts.json"), "utf8"));
   const manifest = JSON.parse(await readFile(join(ROOT, "docs/storm-atlas/data/atlas-manifest.json"), "utf8"));
   const stamp = facts.archive_provenance.archive_stamp;
-  ok(`archive stamp ${stamp} is the current pack's`,
-    stamp === manifest.stamp || stamp === manifest.archive_stamp,
-    `manifest holds ${manifest.stamp ?? manifest.archive_stamp}; the page prints ${stamp}`);
+  const packStamp = manifest.stamp ?? manifest.archive_stamp;
+  ok("the manifest carries a stamp to compare against", typeof packStamp === "string" && packStamp.length > 0,
+    "no stamp field in atlas-manifest.json -- this check would otherwise pass vacuously");
+  ok(`the committed masthead prints the current pack's stamp (${stamp})`, stamp === packStamp,
+    `the pack in the tree is ${packStamp}; the committed page prints ${stamp}. The archive was `
+    + "rebuilt under the dossier -- regenerate it and re-shoot the screenshots, which print it too.");
 
   console.log("\n[4] the pinned inputs are pinned, not read live");
   const gen = await readFile(join(ROOT, "scripts/build-dossier-lala.mjs"), "utf8");
@@ -99,6 +108,16 @@ try {
     ok(`data/${pin} is committed`, await readFile(p).then(() => true, () => false));
   }
 } finally {
+  /* AND PUT THE TREE BACK. The generator writes in place, so without this a FAILING run leaves
+     regenerated files behind as uncommitted changes -- the next `git status` shows a diff nobody
+     made, and re-running the gate then compares the rebuild against itself and passes. A check
+     that launders its own failure on the second run is worse than no check. */
+  try {
+    for (const f of await outputs(LIVE)) {
+      const stashed = await readFile(join(scratch, f)).catch(() => null);
+      if (stashed) await writeFile(join(LIVE, f), stashed);
+    }
+  } catch { /* the scratch copy is gone; nothing to restore from */ }
   await rm(scratch, { recursive: true, force: true });
 }
 

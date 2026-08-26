@@ -12,7 +12,7 @@ Why this matters to a note-holder rather than a meteorologist:
   and at what point in its revision cycle, is a term worth reading.
 - **Historical validation you can reproduce.** 26 storms around this genesis point, every
   outcome a cumulative threshold with a Wilson interval and a stated effective sample size,
-  computed in the browser from a versioned pack (archive d4c919a670f68bb2,
+  computed in the browser from a versioned pack (archive c3998bd7bd784a62,
   3,959 storms).
 - **Point-in-time state, kept honestly.** 141 timestamped entries for this storm, with
   source-valid time and ingestion time recorded separately, so a backtest reads what was knowable
@@ -25,7 +25,7 @@ No skill claim is made or implied.
 Request an institutional walkthrough / design-partner discussion.
 
 ---
-Millibar · `/dossier/lala` · built 2026-08-25 20:52Z · archive d4c919a670f68bb2 · methodology 1.1.0
+Millibar · `/dossier/lala` · built 2026-08-25 20:52Z · archive c3998bd7bd784a62 · methodology 1.1.0
 Insurance / reinsurance contract facts used: none. No carrier, policy,
 trigger geometry, attachment threshold or payout function is named, reconstructed or implied. The
 public binary event contract `KXHURRICANENAMES-26DEC01CPAC-LAL` appears as a recorded price
