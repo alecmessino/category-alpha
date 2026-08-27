@@ -370,6 +370,18 @@ jobs:
       # and calibration state are pinned under docs/dossier/lala/data/ so a data refresh cannot
       # move them; the archive pack is not pinned, and this gate also requires the stamp the
       # masthead prints to be the stamp of the pack actually in the tree.
+      # AND THAT IT IS FROZEN AGAINST AN ARCHIVE, NOT AGAINST WHATEVER PACK IS IN THE TREE.
+      # The dossier used to compute from docs/storm-atlas/data/, which the genesis ingest rebuilds
+      # about four times a day, and to publish that pack's stamp as its own provenance -- so the
+      # artifact restamped itself on every ingest and this gate compared a frozen claim against a
+      # moving target. Measured across three ingests, exactly one field moved: archive_stamp.
+      # The archive bytes now live beside the dossier. These four mutations prove the two failure
+      # modes stay distinct: frozen bytes that do not match their hash are an INTEGRITY failure
+      # and stop the generator; a fact that moves while the source is intact is DRIFT, which the
+      # generator must still emit so the byte-identity gate can name the field.
+      - name: Verify the dossier is frozen against its own archive, not the live pack
+        run: node scripts/test-dossier-frozen.mjs
+
       - name: Verify the committed dossier is byte-identical to a fresh build
         run: node scripts/check-dossier-lala.mjs
 
