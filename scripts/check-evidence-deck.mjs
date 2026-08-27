@@ -262,9 +262,14 @@ const AUDIT = () => {
       }
     }
 
-    /* The bar never carries a number. */
-    const bar = row.querySelector(".at-dc-bar");
-    if (bar && /\d/.test(bar.textContent || "")) bad.push(`${name}: the bar carries a number`);
+    /* THE CLASS HAIRLINE NEVER CARRIES A NUMBER, which is the same rule the bar was held to and
+       the reason the mark that replaced it is allowed to exist at all. It encodes CLASS, in the
+       row's own paper ramp, and nothing else: the moment it carries a digit it is a second,
+       softer answer to the rate two cells along, and a reader with two answers has none. */
+    const tick = row.querySelector(".at-dc-tick");
+    if (tick && (tick.textContent || "").trim()) {
+      bad.push(`${name}: the class hairline carries text ("${(tick.textContent || "").trim()}")`);
+    }
   }
 
   /* Everything carrying data-refusal must name the way out — the rule the old panel kept, and
@@ -493,7 +498,7 @@ if (process.argv.includes("--self-test")) {
          reported itself as unchecked -- which is the failure mode this seed exists to have. The
          status is lifted past the END of its row instead, wherever in the row it sits. */
       mutate: (h) => {
-        const m = /<span class="at-dc at-dc-status" data-status="[^"]*">[^<]*<\/span>/.exec(h);
+        const m = /<span class="at-dc at-dc-status" data-status="[^"]*"[^>]*>[^<]*<\/span>/.exec(h);
         if (!m) return h;
         const close = h.indexOf("</div>", m.index + m[0].length);
         if (close < 0) return h;
@@ -522,8 +527,9 @@ if (process.argv.includes("--self-test")) {
       mutate: (h) => h.replace(/>SUPPORTED</, ">LIKELY<"),
     },
     {
-      name: "a number leaking onto the bar",
-      mutate: (h) => h.replace(/(<span class="at-dc at-dc-bar">)/, "$124.7%"),
+      name: "a number leaking onto the class hairline",
+      mutate: (h) => h.replace(/<i class="at-dc-tick"([^>]*)\/>/, '<i class="at-dc-tick"$1>24.7%</i>')
+        .replace(/(<i class="at-dc-tick"[^>]*><\/i>)/, '<i class="at-dc-tick">24.7%</i>'),
     },
     {
       name: "a data-refusal block reduced to a two-word status",

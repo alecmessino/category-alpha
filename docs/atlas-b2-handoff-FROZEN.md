@@ -1,0 +1,162 @@
+# Storm Atlas — B2+ handoff (FROZEN, approved for implementation)
+
+**Status: frozen and approved.** Design is closed. The next work begins in Claude Code with
+**PR 1 · Resting instrument**. Nothing in this document is implemented.
+
+> **Implementation record — appended, not part of the frozen design.**
+>
+> **PR 1 · Resting instrument is built.** `docs/storm-atlas/` now ships the 5c frame: plate left
+> and evidence ledger right, a 30px question whose unset genesis and outcome sides are pressable
+> clauses, one cohort line, five type steps, paper-set plate metadata, an uninterrupted dark
+> plate, the `OUTCOME | n / N | RATE | 95% WILSON` research table with the limits pinned to its
+> foot, the Saffir–Simpson key, the Figure 1 caption and the foot colophon.
+> `scripts/check-atlas-instrument.mjs` asserts that frame in the real page at 1920 / 1440 / 900 /
+> 768 / 760 / 390, and `scripts/check-atlas-published-values.mjs` pins every published figure
+> against a committed snapshot.
+>
+> **Three measured deviations from 5c, each forced by a gate this repository already had:**
+>
+> 1. **Plate 834×499, not 834×580.** The aspect floor is 1.67 rather than 1.421, derived from the
+>    research corridors the opening view must contain, the NA + EP clamp and Leaflet's zoom snap.
+>    At the frozen height the opening view drops the East Pacific development region off a plate
+>    captioned for it — `scripts/check-atlas-camera.mjs` fails on it. See `atlas.css`.
+> 2. **The Wilson interval keeps its percent sign** (`88.1–90.1%`, not `88.1–90.1`). The brackets
+>    went with the shared cell; the unit is the house form every other surface prints and a bound
+>    with no unit beside a rate with one is a reader's problem.
+> 3. **Outcome names keep the archive's own labels** (`TROPICAL STORM`, not `Reached tropical
+>    storm`). They are the published row identifiers the gates and the values snapshot key on.
+> 4. **A limit's count is not set at 14px.** The archive publishes each limit as one measured
+>    sentence with its figures inside it — there is no free-standing numeral to promote, and
+>    pulling one out means rewording the finding. The block is pinned under its ink rule as
+>    specified; only the count's type step is unmet. See the comment at `.at-deck-limits`.
+>
+> **Two things 5c does not place, left where they were:** HOME and FIT stay Leaflet controls on
+> the plate rather than moving to the paper caption line (map interaction semantics are outside
+> this PR), and the coordinate readout is on paper beneath the plate, which is what 5c's own
+> implementation-QA note asks for.
+>
+> Everything else in this document is still design, still unimplemented, and still the authority.
+> **PR 2 onward has not been started.**
+
+## Two authorities
+
+| Concern | Authority |
+|---|---|
+| **Resting-screen specification** — type scale, proportions, chrome, ledger, plate framing, spacing | **`5c` · Minimal Research Instrument** (turn 5). **Supersedes 4a / B2+.** |
+| **Interaction and state behaviour** — the 16 states, contracts, gates, methodology boundaries, responsive rules, PR sequence | **Turn 4** (`4e` state contract, `4f` treatment table, `4g` responsive contract, `4h` governance), with `3j` as the interaction contract. **Unchanged.** |
+
+Artifact: `Storm Atlas - Directions.dc.html`. Where an earlier turn disagrees with these two,
+these two are right.
+
+## 5c — the authoritative resting frame
+- **Two type families, five sizes.** Source Serif 4 carries the question and every outcome
+  name; IBM Plex Mono carries every figure. No sans in the frame. Sizes: **30 · 14 · 11.5 ·
+  10.5 · 9.5** — every element assigned to one step. (4a used 12 sizes and three families.)
+- **Uninterrupted dark plate.** No chrome bands. The plate is one rectangle; its metadata is
+  paper-set immediately above and below, aligned to its edges. Measured plate box 834×580.
+- **Class key preserved.** The Saffir–Simpson class legend (TD · TS · 1 · 2 · 3 · 4 · 5, with
+  `MAJORS CARRY EXTRA STROKE`) sits on the paper line directly beneath the plate at 9.5px
+  mono — compact and subordinate to the question and plate, but present wherever
+  class-coloured tracks are shown. **The class palette is never removed for minimalism.**
+- **Figure 1 caption** — the one borrowing from `5b`. A serif sentence under the plate naming
+  what is drawn, the five modelled landfall regions, that the landfall rule never consults
+  the basemap, and the two gestures.
+- **Cohort / promotion line.** One 11.5px mono line: `3,885 / 3,959 archive storms ·
+  SUFFICIENT · MIN 10`, scope, and the promoted unknown as a clause in the same voice with
+  one `see the row`.
+- **Simplified ledger.** `OUTCOME | n / N | RATE | 95% WILSON`, interval in type, 29px rows,
+  hairline rules, no header band, no filled group bands.
+- **Pinned limits** under one ink rule, counts at 14px — the same size as a rate, because a
+  limit is a finding.
+- **Foot colophon.** Wordmark, method, pack, build, and CALIBRATION · PROVENANCE · CITE on
+  one hairline-ruled line at the foot.
+
+## Not to be reintroduced
+Chrome bands · rails · a third type voice · dashboard furniture · a light plate in the
+instrument · KPI cards · filled group bands.
+
+## Implementation QA (not design)
+The coordinate readout sits on paper rather than on dark, so during a pan the numbers change
+just off the map. Left-aligned to the plate's edge and immediately beneath it. **Treat as an
+implementation QA item, not another design cycle.**
+
+## Retired · parked
+- Turn-1 frames **1a, 1c, 1d, 1h**: `EXPLORATION — SUPERSEDED BY B2+ · NOT AN ENGINEERING
+  SPEC`. Not to be corrected.
+- **4a / B2+ resting frame**: superseded by 5c for the resting screen; its structural
+  decisions live on in turn 4's contracts.
+- **5b · Editorial institutional**: not shipped. Its rail and numbered notes are the right
+  material for Direction C.
+- **Direction C**: journal / CITE / export treatment, and the only place the paper plate
+  belongs. Outside the seven PRs; not to be developed now. `1c` is its reference.
+
+## Architecture and law
+Architecture: **B2** plate + ledger, carried by **E** every row is a lens.
+Governing law: **Inspection changes the view. Commit changes the answer.**
+
+## Frozen rules (turn 4, unchanged)
+- **The PUBLISHES chip is the state-contract test.** Of sixteen states, fourteen publish
+  nothing, one publishes an editor-local preview count, and exactly one — commit — publishes
+  an answer and writes the URL. If a proposed state cannot be given one of these chips
+  honestly, it is not an inspection and belongs behind the query sentence.
+- Only commit publishes the answer and writes the URL. The query sentence is the only
+  publishing surface. The preview count is editor-local and must come from the canonical
+  query path.
+- A canonical member-ID feed is required before the lens ships. The renderer never
+  approximates cohort membership and never reproduces a statistical predicate.
+- Nonmember context loses colour, never contrast — a nonmember row still publishes a rate
+  and must stay AA.
+- Overlap remains conditional on the real basin-density test. Fallback: set emphasis plus a
+  legend entry carrying **no number**.
+- Below 900px, loss of simultaneity is explicit and handled by the held-row + plate-footer
+  echo, with the held row sticking to the top of the ledger. 390px clause-edit and
+  single-hold treatments are specified in `4g`.
+- The scale bar is computed from the actual rendered plate box at layout time, from the
+  plate's own aperture and centre latitude. **Never stored as a fixed constant.** (Evidence:
+  restoring the class key and Figure 1 caption to 5c moved its bar from 65px to 61px.)
+- Holds are view state: they never write rates, cohort, citation or URL. Nested/containing
+  thresholds cannot be co-held. Overlap publishes nothing. `SCORE THIS AS A COHORT →` opens
+  the clause editor unset.
+- Limits stay pinned at the ledger foot; promotion is presentation priority only.
+- Coordinate readouts are legal only inside the plate's stated aperture; off-plate reads `—`.
+- East Pacific questions use the EP plate (168°W–98°W). Reticles make no distance claim.
+- Dark plate inside the paper shell. Tracks remain placeholder until the engine supplies
+  canonical member IDs.
+
+## Promotion terminology (locked)
+- **PROMOTE UNKNOWN** when `unknown_n > min(numerator)` over **every published row** where
+  `numerator > 0` — not only visible rows. A statement of scale, not of consequence.
+- **ZERO-EVENT / UNKNOWN-DOMINANT** is a separate case: `max(numerator) = 0` over relevant
+  rows with `unknown_n > 0`. Copy order: nothing was observed, *then* part of the cohort is
+  unseen.
+- Out of bounds: any clause about what the unknown "could" do to a conclusion; a zero
+  rendered as `0.0%` with an interval; the word "no" without its denominator in the same
+  sentence.
+- Invariant: identical in every view state. A hold cannot alter it.
+
+## Implementation gates
+- **GATE A · 300px basin plate.** Prove the two-ink lens stays interpretable at 390 on a real
+  device. If it fails: use the documented fallback (set emphasis + legend, count and rate in
+  the plate footer). Do not thicken strokes until the population turns to mud.
+- **GATE B · 180px mobile plate strip.** Prove ring geometry stays judgeable — a 500 km ring
+  is ~27px there. If it fails: adjust the mobile inspection treatment rather than shrinking
+  blindly. A ring too small to judge is a condition set on trust.
+
+## PR sequence
+1. **Resting instrument** — build to `5c`. No engine surface; improves the product alone.
+2. **Refusal and limits presentation** — needs `unknown_n`, per-row numerators, unpublishable flag.
+3. **Single-row lens** — gated on the member-ID feed.
+4. **Clause preview and commit** — needs a count-only endpoint sharing the cohort builder's predicate path.
+5. **Selected storm, ledger preserved** — the strip stays a strip.
+6. **Reverse membership** (genesis → ledger) — reuses PR 3's feed and de-colouring rule.
+7. **Two-row inspection** — gated on the basin-density test.
+
+Ordering principle: presentation before interaction; inside interaction, least new engine
+surface first.
+
+## Sources
+`alecmessino/category-alpha@main`: `docs/storm-atlas/atlas.css`,
+`docs/storm-atlas/src/render/palette.js` (CATEGORY_COLOR, POPULATION_INK `#7a9cbb`,
+EMPHASIS_INK `#cfe6fa`, GENESIS_LIFTED_INK `#9fdfff`, MAJOR_WEIGHT 1.35),
+`docs/storm-atlas/ATLAS-LIVE.md`, `docs/dossier/lala/`. Plate geometry rendered from Natural
+Earth 110m via `ref/plate-render.html`.

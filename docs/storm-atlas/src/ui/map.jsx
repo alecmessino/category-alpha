@@ -31,6 +31,7 @@ import { PathwayLayer } from "../render/pathway-layer.js";
 import { CoastlineLayer } from "../render/coastline-layer.js";
 import { ReplayHeadsLayer, ReplayLayer } from "../render/replay-layer.js";
 import { hitGenesis } from "../render/hit-test.js";
+import { CATEGORY_COLOR, MAJOR_FROM } from "../render/palette.js";
 import { formatPosition } from "../engine/geo.js";
 
 const L = globalThis.L;
@@ -51,7 +52,7 @@ const SCALE_STEPS = [100, 200, 250, 500, 1000, 2000, 4000];
  * THREE THINGS MOVE THIS MAP AND THEY ARE NAMED SEPARATELY, because a reader who cannot predict
  * when the view will move stops trusting the view.
  *
- *   HOME     the canonical NA + EP aperture. Cover-fitted and clamped: see below.
+ *   HOME     the canonical NA + EP aperture. Longitude-fitted and clamped: see below.
  *   FIT      whatever evidence is currently drawn. Contain-fitted, with a margin, unclamped --
  *            a reader who has filtered to dateline crossers is asking to be taken to them.
  *   SUBJECT  selecting a storm fits that storm's track. The one automatic move, and it is a
@@ -67,12 +68,25 @@ const SCALE_STEPS = [100, 200, 250, 500, 1000, 2000, 4000];
 /**
  * Fit `frame` on the map, with an optional clamp the resulting VIEW may not leave.
  *
- * COVER, NOT CONTAIN, FOR THE APERTURE, and this is the correction the previous model needed.
- * `fitBounds` contains: it shows the whole frame and whatever else the plate's shape demands on
+ * THE APERTURE BINDS ON LONGITUDE, AND THAT IS THE RULE BOTH EARLIER MODELS WERE REACHING FOR.
+ *
+ * `fitBounds` CONTAINS: it shows the whole frame and whatever else the plate's shape demands on
  * the looser axis. With a 3.19-shaped frame on a 3.84-shaped plate that surplus is 100 degrees
  * of longitude, and it opened a plate captioned NORTH ATLANTIC + EAST PACIFIC on the Philippine
- * Sea. Covering binds on the axis the plate is TIGHTER in and crops the other, so the frame's
- * informative axis is what fills the plate.
+ * Sea. So the aperture COVERED instead, which binds on the axis the plate is tighter in.
+ *
+ * That was the same rule stated in terms of one plate shape, and it stopped being true when the
+ * plate changed shape. The instrument's plate is 834x541 beside its ledger rather than 1920x500
+ * above its deck -- aspect 1.54 against the frame's projected 2.89 -- and a cover fit on a plate
+ * SQUARER than its frame binds on LATITUDE and crops the other axis. Measured at 1440: longitude
+ * 128.5W to 55.2W, seventy-three degrees, with the East Pacific development region off the left
+ * edge of a plate captioned for it. check-atlas-camera caught it, which is what it is for.
+ *
+ * `aperture` states the rule directly: the frame's LONGITUDE is what fills the plate, always.
+ * On a plate wider than its frame that is what cover did; on a squarer one it is what contain
+ * does; and it is never either of their failure modes, because it never consults the plate's
+ * shape at all. Latitude is whatever follows -- bounded, as it always was, by the clamp below,
+ * which is the research geography and the only thing that decides what a reader may open on.
  *
  * SNAP IS FLOORED, NOT CEILED. Leaflet quantises zoom to zoomSnap; ceiling a cover fit would
  * crop up to a fifth of the frame away to satisfy the snap. Flooring shows slightly MORE than
@@ -83,7 +97,7 @@ const SCALE_STEPS = [100, 200, 250, 500, 1000, 2000, 4000];
  * result back inside, in projected pixels rather than in degrees, since a degree of latitude is
  * not a fixed number of pixels in Mercator.
  */
-export function applyFrame(m, frame, { clamp = null, mode = "cover", padPx = 0 } = {}) {
+export function applyFrame(m, frame, { clamp = null, mode = "cover", padPx = 0, anchor = null } = {}) {
   if (!m || !frame) return false;
   let tb;
   try { tb = L.latLngBounds(frame); } catch { return false; }
@@ -115,43 +129,97 @@ export function applyFrame(m, frame, { clamp = null, mode = "cover", padPx = 0 }
   if (!(sx > 0) || !(sy > 0)) return false;
 
   const snap = m.options.zoomSnap || 0;
-  let z = m.getScaleZoom(mode === "cover"
-    ? Math.max(w / sx, h / sy)
-    : Math.min(w / sx, h / sy), z0);
+  /* THREE MODES, AND ONLY ONE OF THEM CONSULTS THE PLATE'S SHAPE.
+       aperture  the frame's longitude fills the plate. The opening view, and the one fit whose
+                 job is to show a stated geography rather than a measured object.
+       contain   the whole frame fits, with surplus on the looser axis. FIT and the subject fit,
+                 where the frame IS the object and cropping any of it would hide evidence.
+       cover     the frame fills the plate and the looser axis is cropped. Kept because a caller
+                 may still want it; no caller does today. */
+  let z = m.getScaleZoom(mode === "aperture"
+    ? w / sx
+    : mode === "cover"
+      ? Math.max(w / sx, h / sy)
+      : Math.min(w / sx, h / sy), z0);
   if (snap) z = Math.floor(z / snap) * snap;
 
   const cb = clamp ? L.latLngBounds(clamp) : null;
   if (cb && cb.isValid()) z = Math.max(z, m.getBoundsZoom(cb, true));
   z = Math.max(m.getMinZoom(), Math.min(m.getMaxZoom(), z));
 
-  /* The frame's MERCATOR midpoint, not the mean of its degrees. A band from 7N to 47N has its
-     arithmetic centre at 27N and its projected centre at 30N, and centring on the former puts
-     three degrees of the recurvature corridor off the top of the plate. */
+  /* THE CENTRE. Two rules, and the second only matters when the view is narrower than the frame.
+   *
+   * BY DEFAULT, THE FRAME'S MERCATOR MIDPOINT, not the mean of its degrees. A band from 7N to
+   * 47N has its arithmetic centre at 27N and its projected centre at 30N, and centring on the
+   * former puts three degrees of the recurvature corridor off the top of the plate.
+   *
+   * AND AN EXPLICIT ANCHOR WHERE ONE IS GIVEN, WHICH IS THE APERTURE'S CASE. A midpoint is the
+   * middle of a RANGE and a range has two ends; the archive's genesis longitude runs from a
+   * 1st percentile of 164W -- the East Pacific tail -- to a 99th of 17W, and its midpoint is
+   * 91W, twelve degrees west of where the storms actually are. That cost nothing while the plate
+   * was wide enough to show the whole range. On the instrument's 834px plate the clamp allows
+   * about 133 degrees of the frame's 149, so sixteen degrees are cropped, and centring on the
+   * midpoint cropped eight of them off the EAST -- taking the Atlantic main development region,
+   * the densest genesis region in the archive, off a plate captioned for it.
+   *
+   * The anchor is the archive's MEDIAN genesis position, which is 79.4W on this pack. A median
+   * is not dragged by a tail and a midpoint is, and it is derived from the archive rather than
+   * typed here, so it moves if the archive does. */
   const nw = m.project(tb.getNorthWest(), z);
   const se = m.project(tb.getSouthEast(), z);
-  m.setView(m.unproject(nw.add(se).divideBy(2), z), z, { animate: false });
+  const centre = anchor ? m.project(L.latLng(anchor[0], anchor[1]), z) : nw.add(se).divideBy(2);
 
-  if (!cb || !cb.isValid()) return true;
-  const vb = m.getBounds();
-  const vnw = m.project(vb.getNorthWest(), z);
-  const vse = m.project(vb.getSouthEast(), z);
-  const cnw = m.project(cb.getNorthWest(), z);
-  const cse = m.project(cb.getSouthEast(), z);
-  let dx = 0;
-  let dy = 0;
-  if (vnw.x < cnw.x) dx = cnw.x - vnw.x; else if (vse.x > cse.x) dx = cse.x - vse.x;
-  if (vnw.y < cnw.y) dy = cnw.y - vnw.y; else if (vse.y > cse.y) dy = cse.y - vse.y;
-  if (dx || dy) {
-    const c = m.project(m.getCenter(), z).add(L.point(dx, dy));
-    m.setView(m.unproject(c, z), z, { animate: false });
+  /* THE CLAMP IS APPLIED IN PROJECTED SPACE, BEFORE THE ONLY setView, AND THAT IS NOT TIDINESS.
+   *
+   * It used to set the view, read the resulting bounds back, work out how far outside the clamp
+   * they were, and set the view again. Every one of those steps goes through project/unproject,
+   * and the round trip does not return exactly what it was given -- so the SAME frame, clamp and
+   * container produced two answers a tenth of a degree apart depending on where the camera
+   * happened to be standing when it was asked. Measured: the opening view landed at 0.1S and
+   * HOME, from a panned camera, at 0.0 -- which is invisible to a reader and is precisely what
+   * "HOME restores the canonical aperture EXACTLY" exists to forbid, because a camera that
+   * cannot return to its own aperture cannot be trusted to have one.
+   *
+   * Clamping the CENTRE against the clamp's own projected box makes the result a pure function
+   * of (frame, clamp, anchor, zoom, container size). Two calls with the same five agree to the
+   * bit, whatever the camera was doing beforehand.
+   *
+   * AND WHERE THE VIEW IS LARGER THAN THE CLAMP the centre is the clamp's own, rather than an
+   * edge. That case is reachable at a viewport short enough that the plate cannot hold the
+   * clamp's aspect, and aligning to an edge there would open the plate on the Arctic or the
+   * southern hemisphere depending only on which test ran first. */
+  if (cb && cb.isValid()) {
+    const cnw = m.project(cb.getNorthWest(), z);
+    const cse = m.project(cb.getSouthEast(), z);
+    const halfView = m.getSize().divideBy(2);
+    const lo = { x: cnw.x + halfView.x, y: cnw.y + halfView.y };
+    const hi = { x: cse.x - halfView.x, y: cse.y - halfView.y };
+    centre.x = lo.x <= hi.x ? Math.min(Math.max(centre.x, lo.x), hi.x) : (cnw.x + cse.x) / 2;
+    centre.y = lo.y <= hi.y ? Math.min(Math.max(centre.y, lo.y), hi.y) : (cnw.y + cse.y) / 2;
   }
+  /* AND THE VIEW'S TOP-LEFT IS PUT ON THE PIXEL GRID BEFORE THE CENTRE IS UNPROJECTED.
+   *
+   * Leaflet reports `getCenter()` two different ways: the latLng it was SET to, while the map
+   * has not moved, and the latLng under the container's MIDDLE PIXEL once it has. With an odd
+   * container height the middle pixel is a half pixel, so those two differ -- and the same
+   * aperture, read back after a pan and after a clean set, was two coordinates a third of a
+   * pixel apart. Invisible on screen, and fatal to "HOME restores the canonical aperture
+   * EXACTLY", which is the assertion that a reader can always get back to where they started.
+   *
+   * Rounding the centre alone does not close it, because it is the OFFSET between the centre and
+   * the container's middle that is fractional. Rounding the view's top-left does: with the
+   * origin on a whole pixel, the container's middle lands exactly where the centre was set, and
+   * the two readings are the same coordinate by construction. */
+  const half = m.getSize().divideBy(2);
+  const origin = L.point(Math.round(centre.x - half.x), Math.round(centre.y - half.y));
+  m.setView(m.unproject(origin.add(half), z), z, { animate: false });
   return true;
 }
 
 export function AtlasMap({
   archive, world, coast, rows, emphasis, selected, onSelect, onProbe, probe, replayMs, home,
   operationalTrack = null,
-  homeClamp = null, evidenceFrame = null, subjectFrame = null,
+  homeClamp = null, homeAnchor = null, evidenceFrame = null, subjectFrame = null,
   colorBy, showPathway, pathway, pathwayStep, dimPopulation, softenEmphasis, onViewChange,
   onHover, showGenesis = true, showLandfalls = true,
   showGenesisDensity, genesisDensity, mode = "explore", timeline, replayCursorMin,
@@ -172,6 +240,10 @@ export function AtlasMap({
   const moving = React.useRef(0);
   const userMoved = React.useRef(false);
   const fittedSubject = React.useRef(null);
+  /* WHETHER THE CAMERA IS STILL SHOWING THE CANONICAL APERTURE AND NOTHING ELSE HAS CLAIMED IT.
+     Separate from `userMoved`, which records only whether the READER moved: FIT and the subject
+     fit also leave the aperture, and a resize must not drag either of them back to it. */
+  const atAperture = React.useRef(true);
 
   // Callers change identity every render; keep them in a ref so the map is built once.
   const cb = React.useRef({});
@@ -179,7 +251,7 @@ export function AtlasMap({
   /* The frames change identity on every cohort edit; the controls read them from here so that
      wiring HOME and FIT does not rebuild the map. */
   const frames = React.useRef({});
-  frames.current = { home, homeClamp, evidenceFrame, subjectFrame };
+  frames.current = { home, homeClamp, homeAnchor, evidenceFrame, subjectFrame };
 
   /* EVERY MOVE THIS COMPONENT MAKES GOES THROUGH HERE, so that the move events Leaflet emits
      from it are attributable. Synchronous by construction -- every re-frame is `animate:false`,
@@ -197,8 +269,10 @@ export function AtlasMap({
     const m = map.current;
     if (!m) return;
     const f = frames.current;
-    camera(m, () => applyFrame(m, f.home, { clamp: f.homeClamp, mode: "cover" }));
+    camera(m, () => applyFrame(m, f.home,
+      { clamp: f.homeClamp, anchor: f.homeAnchor, mode: "aperture" }));
     userMoved.current = false;
+    atAperture.current = true;
   }, []);
 
   /* FIT IS CONTAIN, AND IT IS NOT CLAMPED. The clamp exists so the surface does not OPEN on
@@ -212,6 +286,7 @@ export function AtlasMap({
     const target = f.subjectFrame || f.evidenceFrame || f.home;
     camera(m, () => applyFrame(m, target, { mode: "contain", padPx: 24 }));
     userMoved.current = false;
+    atAperture.current = false;
   }, []);
 
   React.useEffect(() => {
@@ -220,11 +295,15 @@ export function AtlasMap({
       preferCanvas: true, zoomControl: false, attributionControl: true,
       minZoom: 2, maxZoom: 8, zoomSnap: 0.25, worldCopyJump: false,
     }).setView(FALLBACK_CENTER, FALLBACK_ZOOM);
-    /* THE OPENING FRAME, COVERED AND CLAMPED. See applyFrame above for why it is not a
-       fitBounds: a contain fit of a 3.19-shaped frame on a 3.84-shaped plate opens a hundred
-       degrees of Pacific the plate is not titled for. `homeClamp` is the research geography
-       and is the bound that makes the difference visible in a gate rather than in a review. */
-    camera(m, () => applyFrame(m, home, { clamp: homeClamp, mode: "cover" }));
+    /* THE OPENING FRAME: LONGITUDE-FITTED, ANCHORED AND CLAMPED. See applyFrame above for why
+       it is neither a fitBounds nor a cover -- each of those is the right rule for one plate
+       shape and the wrong one for the other, and the plate's shape is a layout decision. The
+       anchor is the archive's median genesis position, so the sixteen degrees the clamp makes
+       this plate crop come off the sparse ends of both tails rather than off the Atlantic main
+       development region. `homeClamp` is the research geography and is the bound that makes the
+       difference visible in a gate rather than in a review. */
+    camera(m, () => applyFrame(m, home,
+      { clamp: homeClamp, anchor: homeAnchor, mode: "aperture" }));
 
     /* THE TWO RECOVERY CONTROLS, ON THE MAP, ABOVE THE ZOOM.
      *
@@ -304,7 +383,9 @@ export function AtlasMap({
        A resize is NOT one of those: the plate changes height when the inspector's transport
        appears, and treating that as the reader's pan would let one automatic re-frame authorise
        the next. */
-    m.on("movestart zoomstart", () => { if (!moving.current) userMoved.current = true; });
+    m.on("movestart zoomstart", () => {
+      if (!moving.current) { userMoved.current = true; atAperture.current = false; }
+    });
     m.on("click", (e) => {
       const hit = hitGenesis(archiveRef.current, m, e.containerPoint,
         { rows: rowSetRef.current });
@@ -340,8 +421,42 @@ export function AtlasMap({
     /* Leaflet caches the container size and does not observe it. All three of these exist in
        the terminal for the same reason: without them the map paints grey bands where tiles
        should be, and a click lands several degrees from where it looked. */
-    const t = setTimeout(() => { m.invalidateSize(); readFrame(); }, 200);
-    const ro = new ResizeObserver(() => { m.invalidateSize({ animate: false }); readFrame(); });
+    /* THE APERTURE IS RE-DERIVED ON A RESIZE, NOT PAN-COMPENSATED, AND THAT IS THE DIFFERENCE
+     * BETWEEN A VIEW AND A POSITION.
+     *
+     * `invalidateSize` keeps the geographic CENTRE still when the container changes size, which
+     * is right for a camera the reader placed and wrong for a stated aperture: the aperture is
+     * defined by a frame, a clamp and the plate's box, so when the box changes the aperture
+     * changes with it. Measured, that distinction was worth 0.04 degrees of longitude and it was
+     * visible as a gate failure: the ledger widens the moment the deck first renders a
+     * comparison column, the plate narrows in the same commit, and the opening view drifted off
+     * the canonical aperture by half the width delta -- so HOME and the opening view were two
+     * different views of the same archive.
+     *
+     * ONLY WHILE THE APERTURE IS WHAT IS ON SCREEN. A reader who has panned, a FIT, and the
+     * subject fit all clear `atAperture`, and a resize leaves every one of them exactly where it
+     * is -- re-framing a storm somebody is reading because a panel opened is the same theft the
+     * persistence rule forbids. */
+    const settle = () => {
+      /* THE WHOLE SETTLE IS ATTRIBUTABLE, AND THAT IS A FIX RATHER THAN TIDINESS. `invalidateSize`
+         pans to keep the geographic centre still, and a pan fires `movestart` -- so outside
+         `camera()` a container resize registered as THE READER MOVING THE MAP. It cleared
+         `atAperture` before the line below could read it, which is why the aperture was never
+         actually re-derived; it also told every automatic fit on this surface to yield to a
+         reader who had done nothing but change the width of their window. */
+      camera(m, () => {
+        const wasAtAperture = atAperture.current;
+        m.invalidateSize({ animate: false });
+        if (wasAtAperture) {
+          const f = frames.current;
+          applyFrame(m, f.home,
+            { clamp: f.homeClamp, anchor: f.homeAnchor, mode: "aperture" });
+        }
+      });
+      readFrame();
+    };
+    const t = setTimeout(settle, 200);
+    const ro = new ResizeObserver(settle);
     ro.observe(el.current);
 
     map.current = m;
@@ -498,6 +613,7 @@ export function AtlasMap({
     if (!f) return;
     const m = map.current;
     camera(m, () => applyFrame(m, f, { mode: "contain", padPx: 34 }));
+    atAperture.current = false;
   }, [ready, selected, operationalTrack]);
 
   React.useEffect(() => {
@@ -558,20 +674,25 @@ export function AtlasMap({
 
   return (
     <>
-      {/* THE HEAD BAND, AT THE LENGTH THE SPECIFICATION SETS IT.
-          PLATE · NA + EP · 390 COHORT · 3,885 CONTEXT, and nothing else. What left was the
-          right-hand caption -- "EXPLORE · THE RECORD AS A FINISHED MAP" -- which is atmosphere:
-          it never changes in explore mode, it says nothing a reader can act on, and the mode is
-          already legible from the transport that only exists while the clock runs. The basin is
-          abbreviated because the plate is captioned once and read a hundred times; the full
-          words are in the Cohort Spec, which is what anyone would quote.
+      {/* THE PAPER SET, ABOVE THE PLATE AND ALIGNED TO ITS EDGES.
+          PLATE 1 · NORTH ATLANTIC + EAST PACIFIC, what is drawn, and the aperture it is drawn
+          through. The band it replaces was a dark strip INSIDE the rectangle, and 5c's first
+          move is to take both strips off: the plate becomes one uninterrupted rectangle and its
+          metadata is set in paper immediately above and below it, which is how a plate in a
+          journal is captioned. It also returns the 58px the two bands were using.
 
-          THE TWO FIGURES ARE THE ONE THING ON THIS BAND A READER CHECKS. They reconcile the ink
-          with the deck: COHORT is what is lifted and is the denominator of every rate below,
-          CONTEXT is the population drawn behind it. Unfiltered they are the same number, so
-          only one is printed -- "3,959 COHORT · 3,959 CONTEXT" states nothing twice. */}
+          THE TWO FIGURES ARE THE ONE THING ON THIS LINE A READER CHECKS. They reconcile the ink
+          with the ledger: COHORT is what is lifted and is the denominator of every rate beside
+          it, CONTEXT is the population drawn behind it. Unfiltered they are the same number, so
+          only one is printed -- "3,959 COHORT · 3,959 CONTEXT" states nothing twice.
+
+          THE APERTURE IS READ OFF THE MAP, NOT WRITTEN HERE. It is the plate's STATED aperture
+          in the sense the locked rules use -- the bounds a coordinate readout is legal inside --
+          so it has to be the bounds actually rendered, and it moves when the reader pans. A
+          fixed pair of coordinates under a movable camera is a caption that becomes a lie on the
+          first drag. */}
       <div className="at-platehead">
-        <span className="at-plate-title">PLATE · NA + EP</span>
+        <span className="at-plate-title">PLATE 1 · NORTH ATLANTIC + EAST PACIFIC</span>
         <span className="at-plate-counts">
           {mode === "replay" ? (
             <><em>{kept.toLocaleString()}</em> IN THIS RUN</>
@@ -584,68 +705,173 @@ export function AtlasMap({
             </>
           )}
         </span>
-        {/* THE ONE STATE THE BAND STILL NAMES, and it is not atmosphere: in replay the static
+        {/* THE ONE STATE THE LINE STILL NAMES, and it is not atmosphere: in replay the static
             population is deliberately withheld, so a plate that looks empty is correct and a
             reader has to be told which of the two things they are looking at. */}
-        {mode === "replay" ? <span className="at-r">REPLAY</span> : null}
+        {mode === "replay" ? <span className="at-plate-mode">REPLAY</span> : null}
+        <span className="at-r at-plate-aperture" data-plate-aperture>{apertureOf(frame)}</span>
       </div>
 
-      <div className="at-plate" ref={plate}>
-        <div ref={el} style={{ position: "absolute", inset: 0 }} />
-        <PlateFrame frame={frame} />
-        {children}
-        {hover ? <HoverChip hover={hover} frame={frame} /> : null}
+      {/* THE STAGE IS THE DARK SUBTREE AND IT HOLDS THE PLATE AND NOTHING ELSE.
+          atlas.css re-declares the whole dark ink ramp on `.atlas-stage` inside the light shell,
+          because everything drawn over cartography inherits the surface's text tokens. Now that
+          the captions are on paper they must be OUTSIDE that boundary or they would resolve
+          near-white ink on a near-white ground -- so the stage wraps exactly the rectangle. */}
+      <div className="atlas-stage">
+        <div className="at-plate" ref={plate}>
+          <div ref={el} style={{ position: "absolute", inset: 0 }} />
+          <PlateFrame frame={frame} />
+          {children}
+          {hover ? <HoverChip hover={hover} frame={frame} /> : null}
+        </div>
       </div>
 
-      {/* THE FOOT BAND, AT THE LENGTH THE SPECIFICATION SETS IT.
-          Scale, projection and graticule, the live coordinate, and the attribution Leaflet
-          draws over the plate's own bottom-right. Everything else on this band was methodology
-          or instruction, and both have a place that is not a caption strip under a map.
+      {/* THE CLASS KEY AND THE MEASURE, ON THE PAPER LINE DIRECTLY BENEATH THE PLATE.
+          The Saffir-Simpson key is not decoration and it is never dropped for minimalism: the
+          plate colours every fix by the class it had reached, and a coloured map with no key is
+          a map that cannot be read. It is compact and subordinate -- 9.5px mono, the smallest
+          step the frame has -- but it is present wherever class-coloured tracks are.
 
-          THE COASTLINE STATEMENT IS THE ONE THAT NEEDED CARE, because it is two different
-          statements wearing one sentence. With the archive's rings loaded it is METHODOLOGY --
-          which geometry is authoritative -- and it goes behind the disclosure with the rest.
-          With the rings ABSENT it is a DEGRADED STATE: the plate is drawing a coastline the
-          landfall rule was never written against, and that is not something a reader should
-          have to open anything to discover. So the fallback stays in the band, at full weight,
-          and only the healthy case is folded away. */}
+          THE SCALE BAR IS COMPUTED, NOT STATED. `measure()` asks the projection how far 100px
+          is at the plate's own centre latitude, at the size the plate actually rendered, and
+          snaps the bar to a round distance. It moves with a pan and with a resize, and there is
+          no constant anywhere in this file that a layout change could leave stale.
+
+          THE LIVE COORDINATE NOW SITS ON PAPER, which is 5c's one named risk: during a pan the
+          numbers change just off the map. Left-aligned to the plate's own edge and immediately
+          beneath it so it reads as the plate's footer. */}
       <div className="at-platefoot">
-        <ScaleBar frame={frame} />
-        <span className="at-plate-proj">MERCATOR · GRATICULE 10° · TICKS 5°</span>
-        {hasArchiveCoast ? (
-          <details className="at-plate-notes" data-plate-notes>
-            <summary title="what this plate draws, and from which geometry">PLATE NOTES</summary>
-            <div className="at-plate-notes-body">
-              <p>
-                <b>COASTLINE</b> The five modelled landfall regions are drawn from the archive&rsquo;s
-                own rings at full contrast. Everything else is a contextual basemap and the
-                landfall rule never consults it.
-              </p>
-              <p>
-                <b>PROJECTION</b> Web Mercator. The graticule is ruled on the plate&rsquo;s margin
-                rather than across it: 10° major ticks with labels, 5° minor.
-              </p>
-              <p>
-                <b>THE GESTURE</b> Click open water to ask what formed near there and where it
-                went. Click a genesis point to open that storm. HOME restores the canonical
-                aperture; FIT frames whatever is drawn now.
-              </p>
-            </div>
-          </details>
-        ) : (
-          <span className="at-plate-model">
-            CONTEXTUAL COASTLINE ONLY · THE ARCHIVE&rsquo;S RINGS HAVE NOT LOADED
+        <ClassKey />
+        <span className="at-plate-measure">
+          <ScaleBar frame={frame} />
+          <span className="at-plate-proj">MERCATOR · TICKS 10° / 5°</span>
+          <span className="at-r"><em id="at-coords">—</em></span>
+        </span>
+      </div>
+
+      {/* FIGURE 1 — WHAT IS DRAWN, IN A SENTENCE, IN THE SAME SERIF AS THE QUESTION.
+          The one borrowing from 5b. It names what the ink is, that five landfall regions are
+          drawn at full contrast while every other coastline is context, that the landfall rule
+          never consults the basemap, and the two gestures.
+
+          THE COASTLINE STATEMENT IS TWO STATEMENTS WEARING ONE SENTENCE. With the archive's
+          rings loaded it is METHODOLOGY -- which geometry is authoritative -- and the caption
+          carries it in prose with the rest of the argument behind PLATE NOTES. With the rings
+          ABSENT it is a DEGRADED STATE: the plate is drawing a coastline the landfall rule was
+          never written against, and that is not something a reader should have to open anything
+          to discover. So the fallback is stated at full weight, in the caption's own line. */}
+      <div className="at-plate-figure">
+        <p className="at-plate-caption" data-plate-caption>
+          <em>Figure 1.</em>{" "}
+          {mode === "replay"
+            ? <>Genesis points and tracks of the {kept.toLocaleString()} storms in this run, drawn
+                in the order the archive recorded them and coloured by the class each fix had
+                reached.</>
+            : <>Genesis points and tracks of the {kept.toLocaleString()} storms in this cohort,
+                coloured by the class each fix had reached.</>}{" "}
+          {hasArchiveCoast ? (
+            <>Five modelled landfall regions are drawn at full contrast; every other coastline is
+              context, and the landfall rule never consults it.</>
+          ) : (
+            <b className="at-plate-model" data-coastline-degraded>
+              Contextual coastline only — the archive’s own rings have not loaded, so the line on
+              screen is not the geometry the landfall rule is written against.
+            </b>
+          )}{" "}
+          <span className="at-plate-gesture">
+            Click any ocean point for what formed near there; click a genesis point for one storm.
           </span>
-        )}
-        {/* THE INSTRUCTION RETIRES ITSELF. It is here for a reader who has not yet discovered
-            that the plate answers a click, and it is noise for one who has -- so the shell stops
-            passing it after the first probe, selection or condition. The gesture is unchanged
-            and the sentence is still in PLATE NOTES; what goes away is the nagging. */}
-        {hint ? <span className="at-plate-hint">{hint}</span> : null}
-        <span className="at-r"><em id="at-coords">—</em></span>
+          {/* THE INSTRUCTION RETIRES ITSELF. It is here for a reader who has not yet discovered
+              that the plate answers a click, and it is noise for one who has -- so the shell
+              stops passing it after the first probe, selection or condition. */}
+          {hint ? <span className="at-plate-hint">{" "}{hint}</span> : null}
+        </p>
+        <span className="at-plate-acts">
+          {hasArchiveCoast ? (
+            <details className="at-plate-notes" data-plate-notes>
+              <summary title="what this plate draws, and from which geometry">PLATE NOTES</summary>
+              <div className="at-plate-notes-body">
+                <p>
+                  <b>COASTLINE</b> The five modelled landfall regions are drawn from the
+                  archive&rsquo;s own rings at full contrast. Everything else is a contextual
+                  basemap and the landfall rule never consults it.
+                </p>
+                <p>
+                  <b>PROJECTION</b> Web Mercator. The graticule is ruled on the plate&rsquo;s
+                  margin rather than across it: 10° major ticks with labels, 5° minor.
+                </p>
+                <p>
+                  <b>THE GESTURE</b> Click open water to ask what formed near there and where it
+                  went. Click a genesis point to open that storm. HOME restores the canonical
+                  aperture; FIT frames whatever is drawn now.
+                </p>
+              </div>
+            </details>
+          ) : null}
+        </span>
       </div>
     </>
   );
+}
+
+/* THE SAFFIR-SIMPSON KEY, AT THE SMALLEST STEP THE FRAME HAS.
+ *
+ * THE INK IS THE PLATE'S OWN, WHICH IS THE ONLY THING A KEY IS ALLOWED TO BE. It comes from
+ * render/palette.js -- the same table the tracks are drawn from -- so the key cannot drift from
+ * the cartography it explains. It is deliberately NOT the paper ramp the ledger's row ticks use:
+ * that ramp is a paper derivation for marks that live on paper, and printing it here would be a
+ * key to a map nobody is looking at.
+ *
+ * AND EACH SWATCH CARRIES THE PLATE'S GROUND WITH IT. The cartographic ramp was chosen against a
+ * near-black stage; on paper #4fc3f7 measures 1.8:1, which is below the 3:1 WCAG 1.4.11 asks of
+ * a graphical object that carries meaning. So the swatch is a tile of the stage's own ink with
+ * the class stroke inside it -- a two-millimetre sample of the plate rather than a colour chip.
+ * The identity ink is unchanged, the contrast is the contrast the reader sees on the map itself,
+ * and the sample says what it is a sample OF.
+ *
+ * THE MAJOR CLASSES CARRY THE EXTRA STROKE HERE TOO. MAJOR_WEIGHT is 1.35 on the plate, and the
+ * key's strokes are 3px and 4px for the same reason: the cat2/cat3 pair decides "major
+ * hurricane" and is the one pair a reader must never misread, so the distinction is drawn in
+ * weight as well as hue and survives monochrome and colour blindness.
+ */
+const CLASS_KEY = [
+  ["td", "TD"], ["ts", "TS"], ["cat1", "1"], ["cat2", "2"],
+  ["cat3", "3"], ["cat4", "4"], ["cat5", "5"],
+];
+
+function ClassKey() {
+  return (
+    <span className="at-classkey" data-class-key>
+      <span className="at-classkey-k">CLASS</span>
+      {CLASS_KEY.map(([k, label], i) => (
+        <span className="at-classkey-item" key={k}>
+          <span className="at-classkey-sw" aria-hidden="true">
+            {/* MAJOR_FROM is an INDEX INTO CATEGORY_ORDER, and CLASS_KEY is that order, so the
+                comparison is against the index itself: cat3 and above carry the extra stroke,
+                cat2 does not, and the pair that decides "major hurricane" is the pair the extra
+                pixel separates. */}
+            <i data-class={k}
+              style={{ background: CATEGORY_COLOR[k], height: i >= MAJOR_FROM ? 4 : 3 }} />
+          </span>
+          {label}
+        </span>
+      ))}
+      <span className="at-classkey-major">MAJORS CARRY EXTRA STROKE</span>
+    </span>
+  );
+}
+
+/* THE PLATE'S STATED APERTURE, READ OFF THE RENDERED VIEW.
+ *
+ * The locked geometry rule is that a coordinate readout is legal only inside the plate's stated
+ * aperture and reads `—` outside it. This is that aperture, stated: whatever the camera is
+ * actually showing, to the degree, in the same hemisphere letters the graticule labels use. */
+function apertureOf(frame) {
+  if (!frame || !frame.bounds) return "—";
+  const { west, east, south, north } = frame.bounds;
+  const lon = (v) => `${Math.abs(Math.round(v))}°${v < 0 ? "W" : "E"}`;
+  const lat = (v) => `${Math.abs(Math.round(v))}°${v < 0 ? "S" : "N"}`;
+  return `${lon(west)} – ${lon(east)} · ${lat(south)} – ${lat(north)}`;
 }
 
 /* The tick frame and the graticule labels, ruled on the plate's own edges.
@@ -759,7 +985,13 @@ function measure(m) {
       scale = { km, px: Math.max(24, Math.min(180, Math.round((100 * km) / per100))) };
     }
   }
-  return { w, h, ticksX, ticksY, labX, labY, scale };
+  /* THE RENDERED BOUNDS, CARRIED WITH THE REST OF THE FRAME. The aperture caption and the
+     coordinate readout are both claims about what is on the plate right now, so they are read
+     from the same settled measurement the ticks and the scale bar are. */
+  return {
+    w, h, ticksX, ticksY, labX, labY, scale,
+    bounds: { west: b.getWest(), east: b.getEast(), south: b.getSouth(), north: b.getNorth() },
+  };
 }
 
 function round1(v) {

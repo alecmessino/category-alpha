@@ -114,47 +114,61 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
 
 /* THE COLUMN LIST. Every consumer of the grid reads this and nothing else.
  *
- * `timing` false replaces the two duration tracks with ONE fold track rather than removing them,
- * so a folded deck is still the same number of cells per row as its own template -- an absence
- * where a track is expected is how the head's STATUS once ended up on a line of its own. */
+ * THE LOCKED RESEARCH-TABLE HIERARCHY IS `OUTCOME | n / N | RATE | 95% WILSON`, and the two
+ * changes from the deck it replaces are both subtractions.
+ *
+ * THE WIDE BAR IS GONE. It was a 110px-minimum track carrying the rate as a length, the interval
+ * as a band and the archive baseline as a tick -- a second, softer rendering of the two columns
+ * beside it, competing with them for the same eye at four times the width. What magnitude
+ * encoding survives is a 3px hairline in the row's own class ink, inside the outcome cell: enough
+ * to group the ladder by class at a glance, too little to be read as a second answer.
+ *
+ * THE INTERVAL TAKES A COLUMN OF ITS OWN. It shared the rate's cell so that "89.2% [88.1-90.1%]"
+ * read as one statement, which it is -- but the frozen table heads it `95% WILSON`, and a
+ * bracketed suffix under a heading that names it is the same value stated twice. Panel rule 1 is
+ * unchanged and is what the gates assert: A PUBLISHED RATE IMPLIES A COUNT AND AN INTERVAL ON
+ * THE SAME ROW. `.at-dc-int` is still the element that carries it, one track to the right.
+ *
+ * `timing` false simply removes the two duration tracks. The control that restores them is a
+ * line of its own beneath the rows rather than a ninth column: at a 486px measure a track spent
+ * on a fold is a track taken from an outcome name. */
 export function columnsOf({ vs, status, timing }) {
-  const cols = ["outcome", "bar", "rate", "count"];
+  const cols = ["outcome", "count", "rate", "int"];
   if (vs) cols.push("vs");
   if (status) cols.push("status");
-  if (timing) cols.push("med", "iqr"); else cols.push("fold");
+  if (timing) cols.push("med", "iqr");
   return cols;
 }
 
-/* THE RATE AND ITS INTERVAL, AS ONE STATEMENT. Rendered from one branch so that a refusal takes
-   the refused path for BOTH halves: there is no arrangement of props that prints a percentage
-   without its bounds or bounds without their percentage.
+/* THE RATE AND ITS INTERVAL, AS ONE STATEMENT IN TWO COLUMNS. Both read the same `refused`
+   branch, so there is no arrangement of props that prints a percentage without its bounds or
+   bounds without their percentage -- the coupling that mattered was never the shared cell, it
+   was the shared condition.
 
-   THE INTERVAL KEEPS ITS OWN ELEMENT INSIDE THE CELL. `.at-dc-int` is what panel rule 1 is
-   checked through -- "a rate implies a count and an interval on the same row" -- and every gate
-   written against that selector goes on finding one; it is simply nested in the rate's cell
-   rather than occupying a track of its own.
-
-   ONE PERCENT SIGN, AT THE END OF THE INTERVAL. "[19.2%-31.2%]" reads as two quantities; the
-   interval is one, and this is the form every other surface in the repository prints it in. */
+   ONE PERCENT SIGN, AT THE END OF THE INTERVAL, AND NO BRACKETS. "[19.2%-31.2%]" reads as two
+   quantities; the interval is one, and this is the form every other surface in the repository
+   prints it in. The brackets were the cell's punctuation -- they said "this belongs to the
+   number on its left" -- and under a column headed `95% WILSON` they say nothing the heading has
+   not. The unit stays: a bound with no unit beside a rate with one is a reader's problem, not a
+   designer's economy. */
 function RateCell({ cell, refused }) {
+  return refused
+    ? <span className="at-slot" title="the archive publishes no rate here">—</span>
+    : <span className="at-val">{pct1(cell.rate)}</span>;
+}
+
+/* THE INTERVAL, IN TYPE, WHICH IS THE CANONICAL RENDERING. A refused row shows one dash: the
+   element is still emitted so panel rule 1's selector finds an interval on every row -- it
+   simply holds nothing when there is no rate for it to bound. */
+function IntervalCell({ cell, refused }) {
   return (
-    <>
-      {refused
-        ? <span className="at-slot" title="the archive publishes no rate here">—</span>
-        : <span className="at-val">{pct1(cell.rate)}</span>}
-      {/* ONE DASH, NOT TWO. A refused row published "— —" while the interval was a column of
-          its own, which read as a long rule rather than as one absent value; merged into the
-          rate's cell the second dash says nothing the first has not. The element is still
-          emitted so panel rule 1's selector finds an interval in every row -- it simply holds
-          nothing when there is no rate for it to bound. */}
-      <span className="at-dc-int">
-        {!refused && cell && cell.ci95 ? (
-          <span className="at-val">
-            [{(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%]
-          </span>
-        ) : null}
-      </span>
-    </>
+    <span className="at-dc-int">
+      {!refused && cell && cell.ci95 ? (
+        <span className="at-val">
+          {(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%
+        </span>
+      ) : <span className="at-slot" aria-hidden="true">—</span>}
+    </span>
   );
 }
 
@@ -167,8 +181,8 @@ function RateCell({ cell, refused }) {
  * @param {object}   [props.subject]       the selected storm's membership, when one is selected.
  *                                         `{ id, name, reached: {key: bool}, inCohort: bool }`
  * @param {function} [props.onEvidence]    opens a contract's row in the calibration ledger
- * @param {boolean}  [props.foldTiming]    1280-1439: the two duration columns fold behind a
- *                                         disclosure. The data is not dropped; the columns are.
+ * @param {boolean}  [props.foldTiming]    the two duration columns fold behind a control that
+ *                                         names them. The data is not dropped; the columns are.
  * @param {object[]} [props.conditions]   conditionsOf(spec) -- the hold-out control's inventory
  * @param {function} [props.onBaseline]   pins a different condition as the one held out
  * @param {object}   [props.whatChanged]  `{ edit }` -- what the last edit was and what it cost
@@ -177,8 +191,7 @@ function RateCell({ cell, refused }) {
  */
 export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTiming = false,
   timingOpen = false, onToggleTiming,
-  foldLandfall = false, landfallOpen = false,
-  onToggleLandfall, environment = null, spec = null, pathway = null,
+  environment = null, spec = null, pathway = null,
   conditions = [], onBaseline, whatChanged = null, replayNote = null,
   citation = null, citationUrl = null,
   collapseGroups = false, openGroups = null, onToggleGroup }) {
@@ -190,7 +203,7 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
      structure before content and sees an answer. The state has one thing to say and says it. */
   if (!r.n_cases) return <EmptyPool result={r} spec={spec} />;
 
-  const groups = buildGroups(r, comparison, subject, foldLandfall && !landfallOpen);
+  const groups = buildGroups(r, comparison, subject);
 
   /* THE GRID IS SIZED BY WHAT IS ACTUALLY RENDERED, NOT BY WHAT THE WIDTH ASKED FOR.
    *
@@ -248,11 +261,18 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
   const gridStyle = { "--at-deck-cols": cols.map((k) => `var(--at-col-${k})`).join(" ") };
 
   return (
+    /* THE LIMITS ARE A SIBLING OF THE GRID, NOT A CELL IN IT, AND THAT IS A POSITIONING FACT
+       RATHER THAN A TASTE ONE. They are pinned to the ledger's foot with `position:sticky`, and a
+       sticky GRID ITEM is confined to its own grid area -- one row tall -- so it has nowhere to
+       stick to and simply sits where it was placed. Measured: the block was on screen before a
+       scroll and gone after one, which is the exact opposite of what pinning is for. Outside the
+       grid its containing block is the scrolling column, and it stays against the foot of it. */
+    <>
     <div className="at-deck" data-evidence-deck style={gridStyle}
       data-deck-mode={showVs ? "cohort" : "archive"}
       data-timing-folded={timingOn ? undefined : ""}>
       <DeckPreamble result={r} spec={spec} />
-      <DeckHead shape={shape} onToggleTiming={onToggleTiming} />
+      <DeckHead shape={shape} />
       {groups.map((g) => {
         /* INTENSITY IS RESIDENT AT EVERY WIDTH. It is the ladder the archive is built on and the
            one group a reader arrives to read; the others give up their rows first, and give them
@@ -276,13 +296,14 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
               <DataRow key={row.key} row={row} shape={shape} shared={shared} />
             ))}
             {collapsed ? null : <SharedReason group={g} shared={shared} onEvidence={onEvidence} />}
-            {!collapsed && g.folded ? (
-              <FoldedRegions folded={g.folded} onOpen={onToggleLandfall} />
-            ) : null}
             {collapsed ? null : <GroupQualification which={g.key} result={r} />}
           </React.Fragment>
         );
       })}
+
+      <TimingFold open={timingOn} onToggle={onToggleTiming} />
+
+
 
       {/* THE TABLE'S FOOT. What the last edit did, and what every delta above is measured
           against. Both belong here rather than above the rows: a reader arrives at the deck to
@@ -339,6 +360,30 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
         </details>
       ) : null}
     </div>
+
+    {/* THE LIMITS, PINNED AT THE LEDGER'S FOOT UNDER ONE INK RULE.
+       *
+       * WHY PINNED RATHER THAN PLACED. These were under the INTENSITY group, which was the right
+       * answer in a deck that ran the width of the screen: at the foot they sat below eighteen
+       * rows, and a qualification that needs scrolling to reach is, for a reader who does not
+       * scroll, absent. In a 486px column that scrolls, `position:sticky` gives the property
+       * both placements were reaching for -- they are on screen at EVERY scroll position, and
+       * they are still below every rate they qualify, so the archive's own sentence ("Intensity
+       * rates above are therefore biased LOW") stays true about the page.
+       *
+       * THE ARCHIVE'S OWN SENTENCES, VERBATIM, WHICH IS WHERE THE FROZEN FRAME AND THE ENGINE
+       * DISAGREE AND THE ENGINE WINS. 5c sets each limit as a 14px mono count against an 11.5px
+       * serif clause -- `269 · no recorded outcome` -- and that typesetting would be right: a
+       * limit is a finding of the same kind and weight as a rate, and setting it smaller would
+       * be an editorial claim the archive never made. But the counts are not separable here.
+       * The archive publishes these as whole measured sentences with their figures inside them
+       * ("1704 of 3885 storms in this cohort are from before 1971, when East Pacific intensities
+       * were estimated without geostationary satellites..."), and pulling a numeral out of one
+       * to set it larger means parsing a published string and rewording what is left. Rewording
+       * a finding is how a finding stops being one. So the block is pinned, ruled and given the
+       * frame's prose step, and its counts stay inside the sentences that measured them. */}
+    <Limits result={r} />
+    </>
   );
 }
 
@@ -370,33 +415,47 @@ function refusalKindOfRow(row) {
    and opening it restores both duration tracks. Only TIMING is ever behind it: the interval is
    not a column any more and so has nothing to restore, and a control offering to bring back
    something that never left is a control that lies about the state. */
-function DeckHead({ shape, onToggleTiming }) {
+function DeckHead({ shape }) {
   const { cols, subject } = shape;
   const head = {
     outcome: <span className="at-dc at-dc-outcome" key="outcome">OUTCOME</span>,
-    bar: <span className="at-dc at-dc-bar" key="bar" aria-hidden="true" />,
-    rate: (
-      <span className="at-dc at-dc-rate" key="rate">
-        RATE <span className="at-dc-ci-head">95% CI</span>
-      </span>
-    ),
-    count: <span className="at-dc at-dc-count" key="count">COUNT</span>,
+    count: <span className="at-dc at-dc-count" key="count">n / N</span>,
+    rate: <span className="at-dc at-dc-rate" key="rate">RATE</span>,
+    int: <span className="at-dc at-dc-interval" key="int">95% WILSON</span>,
     vs: (
       <span className="at-dc at-dc-vs" key="vs">{subject ? "SUBJECT" : "VS ARCHIVE"}</span>
     ),
     status: <span className="at-dc at-dc-status" key="status">STATUS</span>,
     med: <span className="at-dc at-dc-med" key="med">MED h</span>,
     iqr: <span className="at-dc at-dc-iqr" key="iqr">P25–P75</span>,
-    fold: (
-      <button type="button" className="at-dc at-dc-fold" data-timing-fold key="fold"
-        onClick={onToggleTiming}
-        title="the median and interquartile duration for every row, folded at this width">
-        + TIMING COLUMNS
-      </button>
-    ),
   };
   return (
     <div className="at-deck-row at-deck-head" role="row">{cols.map((k) => head[k])}</div>
+  );
+}
+
+/* THE FOLD, ON A LINE OF ITS OWN BENEATH THE ROWS.
+ *
+ * It was a ninth column in the head, which at a 486px measure is a track spent on a control
+ * rather than on an outcome name. On its own full-width line it can say what it holds in words
+ * instead of in four characters, and it sits where the reader who has finished the ladder is
+ * looking rather than in the row they read first.
+ *
+ * ONE CONTROL, NAMING EVERYTHING IT HOLDS. Only TIMING is ever behind it: the interval is a
+ * column at every width and so has nothing to restore, and a control offering to bring back
+ * something that never left is a control that lies about the state. */
+function TimingFold({ open, onToggle }) {
+  if (!onToggle) return null;
+  return (
+    <div className="at-deck-foldline">
+      <button type="button" className="at-fold-btn" data-timing-fold onClick={onToggle}
+        title="the median and interquartile hours to each outcome, for every row">
+        {open ? "− TIMING COLUMNS" : "+ TIMING COLUMNS"}
+      </button>
+      <span className="at-deck-foldnote">
+        median and interquartile hours to each outcome
+      </span>
+    </div>
   );
 }
 
@@ -421,18 +480,17 @@ function GroupRow({ group, shape, collapsed, onExpand }) {
         ) : null}
       </span>
     ),
-    bar: <span className="at-dc at-dc-bar" key="bar" aria-hidden="true" />,
-    rate: <span className="at-dc at-dc-rate" key="rate" />,
     count: (
       <span className="at-dc at-dc-count" key="count">
         {group.denom !== null ? <>of {group.denom.toLocaleString()}</> : null}
       </span>
     ),
+    rate: <span className="at-dc at-dc-rate" key="rate" />,
+    int: <span className="at-dc at-dc-interval" key="int" />,
     vs: <span className="at-dc at-dc-vs" key="vs" />,
     status: <span className="at-dc at-dc-status" key="status" />,
     med: <span className="at-dc at-dc-med" key="med" />,
     iqr: <span className="at-dc at-dc-iqr" key="iqr" />,
-    fold: <span className="at-dc at-dc-fold" key="fold" aria-hidden="true" />,
   };
   return (
     <div className="at-deck-row at-deck-group" data-deck-group={group.label} role="row">
@@ -457,40 +515,58 @@ function DataRow({ row, shape, shared }) {
   const status = statusWordOf(row);
 
   const out = {
+    /* THE CLASS HAIRLINE LIVES HERE, WHICH IS THE WHOLE OF WHAT IS LEFT OF THE BAR.
+       Three pixels of the row's own class ink, four on a major -- the same 1.35 extra stroke the
+       plate gives cat3 and above, for the same reason: the cat2/cat3 pair decides "major
+       hurricane" and is the one pair a reader must never misread. It encodes CLASS, not
+       magnitude, and it carries no number, so nothing about it can be read as a second answer
+       to the rate two cells along. The ink is the PAPER derivation of the cartographic ramp --
+       verified in check-atlas-adherence to clear 3:1 on every paper ground, to separate at 1px
+       from its neighbours and to darken monotonically so the ordering survives in monochrome. */
     outcome: (
       <span className="at-dc at-dc-outcome" key="outcome">
+        <i className="at-dc-tick" data-bar-class={tone} aria-hidden="true" />
         {mark ? (
           <span className="at-mark" data-mark={mark} aria-hidden="true">{MARKS[mark].glyph}</span>
         ) : <span className="at-mark" aria-hidden="true" />}
-        <span className="at-dc-name">{label}</span>
+        {/* THE NAME CARRIES ITSELF AS A TITLE. At a 486px measure the longest region contracts
+            -- "Central America · ≥64 KT" -- ellipsise, and an ellipsis is an acceptable answer to
+            a narrow column ONLY when the whole string is one hover away. */}
+        <span className="at-dc-name" title={label}>{label}</span>
       </span>
     ),
-    /* THE BAR NEVER CARRIES A NUMBER. It carries the rate as a length, the interval as the band
-       it sits inside, and the archive baseline as a tick that overhangs the track -- so whether
-       the two separate is settled by the eye and confirmed by the digits one cell to the right.
-       A refused row shows the hatched track and no fill at all: an empty bar and a zero bar must
-       not look alike. */
-    bar: (
-      <span className="at-dc at-dc-bar" key="bar">
-        <Bar cell={refused ? null : cell} classKey={tone} baseline={delta ? delta.baseRate : null}
-          refused={refused} />
-      </span>
-    ),
-    /* RULE 1 AND RULE 2 IN ONE CELL. The rate and its interval are one statement, and a refusal
-       never inflates to the rate's size: the slot holds an em dash in both halves and the word
-       lives in STATUS. The dash is CONTENT, not decoration -- it means "the archive has no value
-       here" -- so it is held to the same contrast bar as the value it replaces. */
+    /* RULE 1 AND RULE 2. The rate publishes or it does not, and a refusal never inflates to the
+       rate's size: the slot holds an em dash and the word lives in STATUS. The dash is CONTENT,
+       not decoration -- it means "the archive has no value here" -- so it is held to the same
+       contrast bar as the value it replaces. */
     rate: (
       <span className="at-dc at-dc-rate" key="rate">
         <RateCell cell={cell} refused={refused} />
       </span>
     ),
-    /* RULE 1 AND RULE 3. The count publishes whether or not the rate does -- a refusal is not a
-       blank -- and an unscoreable contract states what it has against what it needs, which is
-       the finding rather than a consolation. */
+    int: (
+      <span className="at-dc at-dc-interval" key="int">
+        <IntervalCell cell={cell} refused={refused} />
+      </span>
+    ),
+    /* RULE 1 AND RULE 3, AND THE DENOMINATOR TRAVELS WITH THE NUMERATOR NOW.
+       The count published `3,224` and the denominator lived once, in the group heading -- which
+       is correct until a reader scrolls the group heading off the top of a 486px column and is
+       left with a numerator and no idea what it is out of. `n / N` states the fraction on the row
+       that publishes it. Neither figure is new: N is the same `n_storms` the group heading
+       prints, from the same cell, and check-atlas-published-values fails if a count cell ever
+       carries a number no group publishes as a denominator.
+
+       An unscoreable contract states what it has against what it needs, which is the finding
+       rather than a consolation. */
     count: (
       <span className="at-dc at-dc-count" key="count">
-        {cell ? <span className="at-val">{cell.count.toLocaleString()}</span> : null}
+        {cell ? (
+          <span className="at-val">
+            {cell.count.toLocaleString()}
+            {cell.n_storms ? <> / {cell.n_storms.toLocaleString()}</> : null}
+          </span>
+        ) : null}
         {unscoreable ? (
           <span className="at-need" title="events in scope · archive-wide · required">
             {countsOf(unscoreable)}
@@ -521,7 +597,8 @@ function DataRow({ row, shape, shared }) {
     /* ONE INK, NEVER COLOURED, NEVER AGGREGATED, NEVER A SCORE. The status is a word about THIS
        row and it is rendered inside this row's element -- see the header comment. */
     status: (
-      <span className="at-dc at-dc-status" key="status" data-status={status || undefined}>
+      <span className="at-dc at-dc-status" key="status" data-status={status || undefined}
+        title={status || undefined}>
         {status || null}
       </span>
     ),
@@ -538,7 +615,6 @@ function DataRow({ row, shape, shared }) {
         ) : <span className="at-slot">—</span>}
       </span>
     ),
-    fold: <span className="at-dc at-dc-fold" key="fold" aria-hidden="true" />,
   };
 
   return (
@@ -560,34 +636,6 @@ function DataRow({ row, shape, shared }) {
       ) : null}
       {selfContribution ? <SelfContribution row={row} subject={subject} /> : null}
     </div>
-  );
-}
-
-/* THE BAR. 7px track; the rate as a fill in the class ink, the 95% interval as a lighter band
-   over it, the archive baseline as a 1px tick overhanging 2px top and bottom. */
-/* THE INK IS CHOSEN IN CSS, NOT HERE, and that is the whole reason this takes a class key
-   instead of a colour. The plate's ramp and the light shell's bar echo are two different tables
-   -- palette.js draws on a dark stage where a bright amber reads, paper does not -- so an inline
-   `background: CATEGORY_COLOR[cat]` would paint the cartographic ink on paper at 1.5:1 and no
-   stylesheet could correct it. `data-bar-class` lets each shell resolve its own ramp, which is
-   also what keeps the verified light table in atlas.css where the adherence gate reads it. */
-function Bar({ cell, classKey, baseline, refused }) {
-  const clamp = (x) => `${Math.max(0, Math.min(100, 100 * x))}%`;
-  if (refused || !cell || cell.rate === null) {
-    return <span className="at-bar-track at-bar-refused" data-bar-class={classKey}
-      aria-hidden="true" />;
-  }
-  return (
-    <span className="at-bar-track" data-bar-class={classKey} aria-hidden="true">
-      {cell.ci95 ? (
-        <span className="at-bar-ci" style={{ left: clamp(cell.ci95[0]),
-          width: clamp(cell.ci95[1] - cell.ci95[0]) }} />
-      ) : null}
-      <span className="at-bar-fill" style={{ width: clamp(cell.rate) }} />
-      {baseline !== null && baseline !== undefined ? (
-        <span className="at-bar-base" style={{ left: clamp(baseline) }} />
-      ) : null}
-    </span>
   );
 }
 
@@ -723,19 +771,25 @@ function SelfContribution({ row, subject }) {
  * exactly the drift the claim audit exists to catch. */
 function DeckPreamble({ result, spec }) {
   const r = result;
-  const n = r.n_cases;
   return (
     <div className="at-deck-pre" data-deck-preamble>
+      {/* THE COHORT COUNT AND THE SAMPLE GATE ARE NOT HERE ANY MORE, AND THAT IS THE POINT.
+       *
+       * `3,885` used to be printed three times on one screen: a 22px numeral beside the question,
+       * a 26px numeral here, and again in the plate's head band. Three renderings of one number
+       * make a reader look for the difference between them, and the frozen frame gives cohort
+       * identity ONE primary home -- the 11.5px line directly under the question, where it is the
+       * denominator of everything below it. `SUFFICIENT · 3885 ≥ 10` went with it, to the same
+       * line, in the same words.
+       *
+       * WHAT STAYED IS WHAT IS NOT A REPEAT. The effective sample size is a DIFFERENT number from
+       * the count -- it is what the count is worth once the design effect is taken out -- and
+       * dropping a published figure to tidy a line is not a layout decision anybody gets to
+       * make. `count · rate · 95% Wilson` did go: the column heads now say exactly that, one
+       * line below, in the table it describes. */}
       <div className="at-pre-line">
-        <span className="at-pre-n">{n.toLocaleString()}</span>
-        <span className="at-foot-k">storms</span>
-        <span className={r.sufficient ? "at-pre-ok" : "at-pre-no"}>
-          {r.sufficient ? `SUFFICIENT · ${n} ≥ ${r.min_sample}`
-            : `BELOW SAMPLE · ${n} < ${r.min_sample}`}
-        </span>
         <span className="at-foot-k">EFFECTIVE SAMPLE SIZE</span>
         <span className="at-val">{Number(r.effective_sample_size).toFixed(1)}</span>
-        <span className="at-pre-shape">count · rate · 95% Wilson</span>
       </div>
 
       <div className="at-pre-line at-pre-prose">
@@ -799,25 +853,6 @@ function RatesAssume() {
       <p className="at-foot-line">{claimText("atlas.rates")}</p>
       <p className="at-foot-line">{claimText("atlas.conditioning")}</p>
     </details>
-  );
-}
-
-/* THE FOLD NAMES WHAT IT HOLDS. "+ 4 MORE" would be an affordance that hides a refusal behind
-   a number; this one says which regions, how many contracts, and how many of them refused. */
-function FoldedRegions({ folded, onOpen }) {
-  return (
-    <div className="at-deck-foot" data-folded-regions>
-      <button type="button" className="at-fold-btn" data-landfall-fold onClick={onOpen}
-        title="show every landfall region">
-        + {folded.contracts} MORE LANDFALL CONTRACTS
-      </button>
-      <span className="at-foot-line">
-        {folded.regions.join(", ")}
-        {folded.refusals
-          ? ` — ${folded.refusals} of ${folded.contracts} refuse at this sample size`
-          : " — all scoreable"}
-      </span>
-    </div>
   );
 }
 
@@ -885,34 +920,37 @@ function EmptyPool({ result, spec }) {
  * "1.7% Cat 3 in the 1960s" -- from the no-bare-percentage rule by identity rather than by
  * position on the page.
  */
-function GroupQualification({ which, result }) {
-  if (which === "intensity") {
-    const gaps = result.gaps || [];
-    const unknown = unknownOf(result);
-    if (!gaps.length && !unknown) return null;
-    return (
-      <div className="at-deck-foot" data-deck-qualification={which}>
-        {gaps.length ? (
-          <div data-archive-gaps className="at-foot-block">
-            <span className="at-foot-k">GAPS THE ARCHIVE RECORDED</span>
-            {gaps.map((g, i) => <span className="at-foot-line" key={i}>{g}</span>)}
-          </div>
-        ) : null}
-        {/* RENDERED THROUGH Refusal, NOT RE-DRAWN. UNKNOWN is one of the six states the
-            Epistemic Key documents, and test-atlas-refusals proves every state the surface can
-            print has a row a reader can look it up in. A hand-drawn copy here would carry the
-            words without the hook -- present on screen and invisible to the gate that checks
-            the correspondence, which is the worst of both. */}
-        {unknown > 0 ? (
-          <div className="at-foot-block" data-unknown-note>
-            <Refusal kind="UNKNOWN" compact
-              counts={`${unknown.toLocaleString()} storm${unknown === 1 ? "" : "s"}`} />
-          </div>
-        ) : null}
-      </div>
-    );
-  }
+function Limits({ result }) {
+  const gaps = result.gaps || [];
+  const unknown = unknownOf(result);
+  if (!gaps.length && !unknown) return null;
+  return (
+    <div className="at-deck-limits" data-deck-limits data-deck-qualification="intensity">
+      {gaps.length ? (
+        <div data-archive-gaps className="at-foot-block">
+          {/* THE HEADING IS THE ONE IT ALWAYS WAS. The block moved and its typesetting changed;
+              its words did not, and a published string is not something a layout gets to
+              rewrite on its way past. */}
+          <span className="at-foot-k">GAPS THE ARCHIVE RECORDED</span>
+          {gaps.map((g, i) => <span className="at-foot-line" key={i}>{g}</span>)}
+        </div>
+      ) : null}
+      {/* RENDERED THROUGH Refusal, NOT RE-DRAWN. UNKNOWN is one of the six states the Epistemic
+          Key documents, and test-atlas-refusals proves every state the surface can print has a
+          row a reader can look it up in. A hand-drawn copy here would carry the words without
+          the hook -- present on screen and invisible to the gate that checks the correspondence,
+          which is the worst of both. */}
+      {unknown > 0 ? (
+        <div className="at-foot-block" data-unknown-note>
+          <Refusal kind="UNKNOWN" compact
+            counts={`${unknown.toLocaleString()} storm${unknown === 1 ? "" : "s"}`} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
+function GroupQualification({ which, result }) {
   /* THE LANDFALL DENOMINATOR, when a condition has changed what these rates are rates OF. Not a
      refusal -- they are real -- but "43.8% made landfall in Mexico" means something different
      one condition later, and the difference is a factor of three. */
@@ -949,7 +987,7 @@ function unknownOf(r) {
  * group the archive's own ladder order is the default; landfall regions order by evidence, which
  * is what the panel already did -- alphabetical order buried the one region these storms reached
  * under four they did not. */
-function buildGroups(r, comparison, subject, foldLandfall) {
+function buildGroups(r, comparison, subject) {
   const groups = [];
   const tte = r.time_to_event || {};
 
@@ -1010,9 +1048,7 @@ function buildGroups(r, comparison, subject, foldLandfall) {
      The prioritisation the fold was reaching for is already here and costs none of that: the
      list is ORDERED BY EVIDENCE, so Hawaii leads a Hawaii cohort and the four zeros follow it.
      Order demotes. Hiding deletes. */
-  const KEEP = 3;
-  const regions = foldLandfall ? allRegions.slice(0, KEEP) : allRegions;
-  const hidden = foldLandfall ? allRegions.slice(KEEP) : [];
+  const regions = allRegions;
   if (allRegions.length) {
     const rows = [];
     for (const [region, kinds] of regions) {
@@ -1032,21 +1068,11 @@ function buildGroups(r, comparison, subject, foldLandfall) {
         });
       }
     }
-    const hiddenRefusals = hidden.reduce((n, [region, kinds]) => n
-      + ["any", "hurricane"].filter((k) => {
-        const c = kinds[k];
-        const u = r.unscoreable ? r.unscoreable[`${region}:${k}`] : undefined;
-        return !!u || (c && c.rate === null);
-      }).length, 0);
     groups.push({
       key: "landfall", label: "LANDFALL",
       denom: rows.length && rows[0].cell ? rows[0].cell.n_storms : null,
       note: r.landfall_note ? "denominator changed by a condition" : null,
       rows,
-      folded: hidden.length
-        ? { regions: hidden.map(([region]) => regionLabel(region)), refusals: hiddenRefusals,
-            contracts: hidden.length * 2 }
-        : null,
     });
   }
 

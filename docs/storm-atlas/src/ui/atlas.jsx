@@ -18,8 +18,14 @@ import { genesisDensity, getAnalogs, pathwayDensity } from "../engine/analogs.js
 import { filterStorms, genesisBounds, seasonRange } from "../engine/query.js";
 import {
   EMPTY_COHORT, cohortResult, conditionsOf, normalise, parentOf, parseQuery, sameCohort,
-  sentenceOf, toQuery,
+  toQuery,
 } from "../engine/cohort.js";
+/* THE ATLAS'S OWN READING OF THE QUESTION. `openQuestion` writes the unset genesis and outcome
+   sides out as clauses and `questionSegmentsOf` returns the same string in the pieces the
+   sentence is pressable by -- the question line renders the segments and the citation quotes
+   their join, so the sentence a reader presses and the one they would paste are the same
+   characters. Every other consumer of a cohort sentence keeps the closed form. */
+import { openQuestion, questionSegmentsOf } from "../engine/cohort-language.js";
 import { activeAt, advance, buildTimeline, fromActive, toActive } from "../engine/timeline.js";
 import { projectWorld } from "../render/atlas-layer.js";
 import { previewCounts } from "../engine/preview.js";
@@ -39,9 +45,9 @@ import { AtlasMap } from "./map.jsx";
 import { CohortBuilder } from "./cohort-builder.jsx";
 import { StormPanel } from "./storm-panel.jsx";
 import { EnvLens } from "./env-lens.jsx";
-/* THE STACKED SHELL'S OWN PARTS. */
-import { IdentityStrip, QuestionLine } from "./shell.jsx";
-import { ConditionStrip } from "./condition-strip.jsx";
+/* THE INSTRUMENT'S OWN PARTS. */
+import { Colophon } from "./shell.jsx";
+import { QueryHead } from "./condition-strip.jsx";
 import { EvidenceDeck, subjectVerdicts } from "./evidence-deck.jsx";
 import { Transport } from "./transport.jsx";
 import { ArchiveTransport } from "./archive-transport.jsx";
@@ -178,7 +184,6 @@ export function Atlas() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
   const [timingOpen, setTimingOpen] = React.useState(false);
-  const [landfallOpen, setLandfallOpen] = React.useState(false);
 
   /* WHICH INK SET. Paper is the default and the dark plate is unaffected either way -- see the
      light-shell block in atlas.css, where --stage is declared once and the stage re-declares the
@@ -257,6 +262,7 @@ export function Atlas() {
 
   const bounds = React.useMemo(() => (archive ? seasonRange(archive) : [1851, 2026]), [archive]);
   const home = React.useMemo(() => (archive ? coreFrame(archive) : null), [archive]);
+  const homeAnchor = React.useMemo(() => (archive ? coreAnchor(archive) : null), [archive]);
   /* ONE COHORT, ONE ANSWER. Membership and outcomes come from the same object now: the storms
      drawn on the map ARE the storms in every denominator. Until 3.2 these were two calls -- one
      deciding what was drawn, another deciding what was scored -- and keeping them from
@@ -338,7 +344,11 @@ export function Atlas() {
      is what makes a live count on every control affordable rather than aspirational. */
   const preview = React.useMemo(
     () => (archive ? previewCounts(archive, cohort) : null), [archive, cohort]);
-  const sentence = React.useMemo(() => sentenceOf(cohort), [cohort]);
+  /* THE QUESTION, IN ONE READING AND TWO RENDERINGS. `segments` is what the head prints and
+     `sentence` is what the citation quotes; the second is the join of the first, from one
+     assembler, so they cannot disagree about a single character. */
+  const segments = React.useMemo(() => questionSegmentsOf(cohort), [cohort]);
+  const sentence = React.useMemo(() => openQuestion(cohort), [cohort]);
 
   const contextRows = context ? context.rows : (result ? result.rows : null);
   const emphasis = context ? result.rows : null;
@@ -529,7 +539,7 @@ export function Atlas() {
     const m = archive.manifest;
     const s = archive.storms;
     return `STORM ATLAS · ${s.str("name", selected) || "UNNAMED"} ${s.num("season", selected)} `
-      + `(${s.str("storm_id", selected)}) · AGAINST ${sentenceOf(cohort).replace(/ — what happened next\?$/, "")} `
+      + `(${s.str("storm_id", selected)}) · AGAINST ${openQuestion(cohort).replace(/ — what happened next\?$/, "")} `
       + `· ${result.kept.toLocaleString()} of ${m.counts.storms.toLocaleString()} storms · `
       + `METHODOLOGY ${m.methodology_version} · PACK ${(m.provenance || {}).archive_stamp}`;
   }, [archive, selected, result, cohort]);
@@ -537,7 +547,7 @@ export function Atlas() {
   const citation = React.useMemo(() => {
     if (!archive || !result) return null;
     const m = archive.manifest;
-    return `STORM ATLAS · ${sentenceOf(cohort).replace(/ — what happened next\?$/, "")} · `
+    return `STORM ATLAS · ${openQuestion(cohort).replace(/ — what happened next\?$/, "")} · `
       + `${result.kept.toLocaleString()} of ${m.counts.storms.toLocaleString()} storms · `
       + `METHODOLOGY ${m.methodology_version} · PACK ${(m.provenance || {}).archive_stamp}`;
   }, [archive, result, cohort]);
@@ -687,7 +697,7 @@ export function Atlas() {
   const plate = (
     <AtlasMap
       archive={archive} world={world} coast={coast} rows={contextRows} emphasis={emphasis}
-      selected={selected} home={home} homeClamp={NA_EP}
+      selected={selected} home={home} homeClamp={NA_EP} homeAnchor={homeAnchor}
       evidenceFrame={evidenceFrame} subjectFrame={subjectFrame} cameraApi={cameraRef}
       onSelect={selectStorm} onProbe={onProbe} probe={cohort.where}
       operationalTrack={operationalTrack}
@@ -791,35 +801,50 @@ export function Atlas() {
     reached: subjectVerdicts(storm),
   } : null;
 
+  const conditions = conditionsOf(cohort);
+
   return (
     <div data-surface="tactical" data-view="tactical" data-atlas data-shell={shell}
-      className="atlas-shell atlas-stacked" style={{
+      className="atlas-shell atlas-instrument" style={{
         position: "fixed", inset: 0,
         background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
       }}>
-      <IdentityStrip archive={archive} onProvenance={() => setProvOpen(true)}
-        onLedger={() => openLedger(null)} />
+      {/* THE HEAD, AND IT IS THE QUESTION.
+          The identity strip that used to open the surface is gone from the top: 5c moves the
+          wordmark, the method stamp, the pack and the three provenance controls to a colophon on
+          one hairline-ruled line at the foot -- a printed-plate convention -- which clears the
+          top of the screen entirely for the question. Nothing was dropped; it is all still one
+          glance away, at the bottom of a page that does not scroll.
 
-      {/* THE METHODOLOGY NOTICE. It lived in the rail, and the rail is gone -- but the thing
-          it says is not a rail concern: a URL written under one methodology and opened under
-          another is describing a different question than the one it names, and the reader has
-          to be told before they read the answer. It sits with the question for that reason. */}
-      <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
-
-      <QuestionLine question={sentence} kept={result.kept}
-        total={archive.manifest.counts.storms}
-        citation={citation} citationUrl={scenarioURL()} />
-
-      <ConditionStrip conditions={conditionsOf(cohort)} lastEdit={lastEdit}
+          THE METHODOLOGY NOTICE SITS WITH THE QUESTION, because a URL written under one
+          methodology and opened under another is describing a different question than the one it
+          names, and the reader has to be told before they read the answer. */}
+      <QueryHead segments={segments} conditions={conditions}
+        scope={conditions.filter((c) => c.zone === "scope")}
+        kept={result.kept} total={archive.manifest.counts.storms}
+        sufficient={result.sufficient} minSample={result.min_sample}
+        lastEdit={lastEdit}
+        notice={<MethodologyMoved was={urlMethodology}
+          now={archive.manifest.methodology_version} />}
         onEdit={(zone) => { setInteracted(true); setSheetZone(zone); }}
         onClear={(key) => setCohort(clearCondition(cohort, key))}
         onReset={onResetQuery} />
 
-      {/* THE PLATE ROW. The dock takes width from the plate and nothing else. */}
+      {/* THE BODY: PLATE LEFT, EVIDENCE LEDGER RIGHT.
+          The two are simultaneous at every width from 900 up, which is the whole architecture --
+          a reader reads a rate while looking at what is drawn. The dock takes width from the
+          plate and nothing else. */}
       <div className="atlas-plate-row">
-        <div className="atlas-stage" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
+        <div className="atlas-stage-col" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
           {plate}
         </div>
+        {/* THE INSPECTOR OVERLAYS THE PLATE RATHER THAN TAKING A COLUMN FROM IT.
+            In the stacked shell the dock was a third of the row's width and the plate spanned
+            what was left. Here the ledger already holds the right-hand column, so a resident
+            dock would take the plate to 414px at 1440 -- narrower than a track needs to be
+            judgeable, and bought out of the one element whose job is to be large. Overlaying is
+            the treatment the stacked shell already used below 1180 and it is unchanged here:
+            same panel, same state, same bridge, same close. */}
         {storm ? (
           <div className="atlas-dock" data-inspector-dock>
             <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
@@ -832,22 +857,31 @@ export function Atlas() {
                 || (mode === "replay" && replayCursorMin !== null)} />
           </div>
         ) : null}
-      </div>
 
-      {/* THE EVIDENCE, AS ONE TABLE. Fixed height; rows drop at a breakpoint, never shrink. */}
-      <div className="atlas-evidence" data-evidence-row>
+        {/* THE EVIDENCE LEDGER, BESIDE THE PLATE.
+            A research table: OUTCOME | n / N | RATE | 95% WILSON, 29px rows, hairline rules, no
+            header band and no filled group bands. It scrolls in its own column with its head
+            pinned to the top and the limits pinned to the foot, so the two things that qualify
+            every row -- what the columns are, and what the record does not hold -- are on screen
+            at every scroll position. */}
+        <div className="atlas-evidence" data-evidence-row>
         <EvidenceDeck result={result} comparison={comparison} subject={subject}
           onEvidence={openLedger}
-          /* THE LADDER, CUMULATIVELY. Each step keeps every step above it: at 1200 the duration
-             pair AND the interval are folded, at 1000 the non-intensity groups are folded on
-             top of both. One control in the head restores the columns; one on each group row
-             restores its rows, and both name what they hold. */
-          foldTiming={vw < 1440} timingOpen={timingOpen}
+          /* THE LADDER, CUMULATIVELY. The ledger is a 486px column at the canonical width, so
+             the duration pair folds at every width rather than at a breakpoint -- behind the
+             same control that names how many columns it holds. Nothing is dropped: the fold is
+             counted and named, and one press restores it. */
+          foldTiming timingOpen={timingOpen}
           onToggleTiming={() => setTimingOpen((v) => !v)}
-          collapseGroups={vw < 1180} openGroups={openGroups}
+          /* AND NOTHING FOLDS ON WIDTH. The landfall fold and the group collapse both existed
+             because the deck ran the width of the screen and a narrower one had to give up
+             ROWS; the ledger is a column that scrolls, at every width, so there is nothing to
+             buy. Both were also folds a refusal could hide behind: the landfall list is ordered
+             by evidence, so the rows a width-keyed fold reaches last are exactly the ones whose
+             whole content is the explanation of why there is no evidence -- OUT OF SCOPE and
+             BASE RATE ONLY. Order demotes; hiding deletes. */
+          collapseGroups={false} openGroups={openGroups}
           onToggleGroup={(k) => setOpenGroups((m) => ({ ...m, [k]: !m[k] }))}
-          foldLandfall={vw < 1440} landfallOpen={landfallOpen}
-          onToggleLandfall={() => setLandfallOpen((v) => !v)}
           /* THE COMPARISON'S IDENTITY AND ITS CONTROL, WHICH THE DECK'S COLUMN CANNOT CARRY.
              The VS ARCHIVE cell holds one signed figure per row; what the baseline IS, how it
              relates to this cohort, and which condition a reader would rather hold out are
@@ -863,6 +897,7 @@ export function Atlas() {
           spec={cohort} pathway
           environment={<EnvLens archive={archive} coverage={envCov} lens={envLens}
             loading={envLoading} onLoad={loadEnv} />} />
+        </div>
       </div>
 
       <div className="atlas-transport">
@@ -898,6 +933,17 @@ export function Atlas() {
           </div>
         </div>
       ) : null}
+
+      {/* THE COLOPHON. Wordmark, the archive's scale, the three stamps that say what these
+          numbers MEAN, and the three ways out to provenance, calibration and a citation -- on
+          one hairline-ruled line at the foot. It is a printed-plate convention and it is the
+          reason the top of the screen is the question and nothing else.
+
+          NOTHING WAS DROPPED IN THE MOVE. The identity strip held exactly these items; what
+          changed is that they are at the foot of a surface that does not scroll, so they are
+          still one glance away and no longer competing with the question for the first line. */}
+      <Colophon archive={archive} citation={citation} citationUrl={scenarioURL()}
+        onProvenance={() => setProvOpen(true)} onLedger={() => openLedger(null)} />
 
       <React.Suspense fallback={null}>
         {provOpen ? (
@@ -975,6 +1021,40 @@ const RECURVE_Q = 0.975;   // the band's north edge, at q97.5 of the lobe's trac
  * it, and a reader who drags west finds the West Pacific tail exactly where it always was. What
  * it forbids is the surface OPENING on geography it does not research. */
 export const NA_EP = [[0, -180], [65, 0]];
+
+/* WHERE THE APERTURE IS CENTRED, WHICH IS NOT THE MIDDLE OF WHAT IT FRAMES.
+ *
+ * `coreFrame` returns a RANGE -- the lobe's 1st to 99th percentile of genesis longitude -- and a
+ * range has two ends. On this pack those ends are 164W and 17W, so its midpoint is 91W: twelve
+ * degrees west of where the storms are, because the East Pacific tail is longer than the
+ * Atlantic one. That costs nothing while the plate is wide enough to show the whole range, and
+ * it costs the Atlantic main development region the moment the plate is not.
+ *
+ * The instrument's plate is 834px beside its ledger, and the research clamp allows about 133 of
+ * the frame's 149 degrees at that shape -- so sixteen degrees are cropped and WHICH sixteen is a
+ * decision somebody has to make. Centred on the median it is the sparse ends of both tails;
+ * centred on the midpoint it was eight degrees off the east, which is the densest genesis
+ * region in the archive.
+ *
+ * A MEDIAN, NOT A MIDPOINT, AND THE DIFFERENCE IS THE WHOLE ARGUMENT: a midpoint moves when one
+ * storm forms further west, a median does not. Measured on this pack: 79.4W, 15.5N. Nothing here
+ * is typed -- it is read from the same genesis columns `coreFrame` frames -- so it moves with the
+ * archive rather than needing to be re-measured by hand when the archive grows. */
+export function coreAnchor(archive) {
+  const glat = archive.genesisLat;
+  const glon = archive.genesisLon;
+  const lats = [];
+  const lons = [];
+  for (let i = 0; i < archive.nStorms; i++) {
+    if (Number.isNaN(glat[i])) continue;
+    lats.push(glat[i]);
+    lons.push(glon[i]);
+  }
+  if (!lons.length) return null;
+  lats.sort(asc);
+  lons.sort(asc);
+  return [quantile(lats, 0.5), quantile(lons, 0.5)];
+}
 
 export function coreFrame(archive) {
   const glat = archive.genesisLat;

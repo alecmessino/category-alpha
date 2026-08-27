@@ -94,14 +94,31 @@ const AUDIT = () => {
   const bad = [];
   const seen = [];
   const PCT = /\d[\d,.]*\s*%/;
-  const shell = document.querySelector(".atlas-stacked");
-  if (!shell) { bad.push("the stacked shell did not render"); return { bad, seen }; }
+  const shell = document.querySelector(".atlas-instrument");
+  if (!shell) { bad.push("the instrument did not render"); return { bad, seen }; }
 
-  /* the five rows, in order */
+  /* THE FOUR ROWS, IN ORDER. The question and its cohort line, then the body -- plate left,
+     ledger right -- then the transport, then the colophon. The identity strip and the condition
+     strip are gone from the top: identity is the colophon at the foot and the query is the
+     sentence itself, so the first thing on the surface is the question and the second is what
+     it is asked of. */
   const order = [...shell.children].map((c) => c.className.split(" ")[0]);
-  const want = ["at-ident", "at-question", "at-strip", "atlas-plate-row", "atlas-evidence", "atlas-transport"];
-  if (JSON.stringify(order.slice(0, 6)) !== JSON.stringify(want)) {
-    bad.push(`row order is ${JSON.stringify(order.slice(0, 6))}`);
+  const want = ["at-head", "atlas-plate-row", "atlas-transport", "at-colophon"];
+  if (JSON.stringify(order.slice(0, 4)) !== JSON.stringify(want)) {
+    bad.push(`row order is ${JSON.stringify(order.slice(0, 4))}`);
+  }
+  /* AND THE PLATE AND THE LEDGER ARE SIMULTANEOUS, which is the whole architecture: the plate
+     takes the left column of the body row and the ledger the right, so a reader reads a rate
+     while looking at what is drawn. Asserted as geometry rather than as class names -- side by
+     side means their boxes overlap vertically and not horizontally. */
+  const stage = document.querySelector(".atlas-stage");
+  const ledger = document.querySelector("[data-evidence-row]");
+  if (stage && ledger && innerWidth >= 900) {
+    const a = stage.getBoundingClientRect(); const b = ledger.getBoundingClientRect();
+    if (!(a.right <= b.left + 1 && a.top < b.bottom && b.top < a.bottom)) {
+      bad.push(`the plate and the ledger are not side by side: plate ${Math.round(a.left)}..`
+        + `${Math.round(a.right)}, ledger ${Math.round(b.left)}..${Math.round(b.right)}`);
+    }
   }
 
   /* THE PLATE'S APERTURE AND ITS CAP.
@@ -115,17 +132,30 @@ const AUDIT = () => {
     const b = plate.getBoundingClientRect();
     const ar = b.width / b.height;
     const docked = !!document.querySelector("[data-inspector-dock]");
-    const ceil = innerWidth >= 1600 && !docked ? 4.0 : 3.2;
-    if (b.height > 501) bad.push(`plate is ${Math.round(b.height)}px, past the 500px cap`);
-    if (ar < 1.419) bad.push(`plate aspect ${ar.toFixed(3)} below the 1.421 floor`);
-    if (b.width <= 2001 && ar > ceil + 0.002) {
-      bad.push(`plate aspect ${ar.toFixed(3)} above the ${ceil} ceiling`);
+    /* THE TWO APERTURE BOUNDS, AND THE HARD HEIGHT CAP IS NOT ONE OF THEM ANY MORE. 500px
+       existed because the deck sat UNDER the map and every pixel of plate height came out of
+       visible rows. Beside a ledger with its own full-height column there is no such trade, and
+       the bound that replaced it is the aspect floor -- derived in atlas.css from the research
+       corridors the opening view has to hold. check-plate-aperture owns that derivation. */
+    if (ar < 1.668) bad.push(`plate aspect ${ar.toFixed(3)} below the 1.67 floor`);
+    if (b.width <= 2001 && ar > 3.202) {
+      bad.push(`plate aspect ${ar.toFixed(3)} above the 3.2 ceiling`);
     }
   }
 
-  /* the condition boundary — three zones, always */
+  /* THE CONDITION BOUNDARY — all three zones, always, and genesis before outcome.
+     They are clauses in the sentence now rather than three boxes in a band, so a side can hold
+     more than one: "formed within 400 km of X, in seasons from 1971 onwards" is two genesis
+     conditions and two controls. What must hold is that every zone is addressable and that the
+     two SIDES are in lifecycle order; scope is not pinned to a position because `namedOnly`
+     reads as an adjective on the head noun and English puts it first. */
   const zones = [...document.querySelectorAll("[data-zone]")].map((z) => z.getAttribute("data-zone"));
-  if (JSON.stringify(zones) !== '["given","outcome","scope"]') bad.push(`zones are ${JSON.stringify(zones)}`);
+  for (const z of ["given", "outcome", "scope"]) {
+    if (!zones.includes(z)) bad.push(`the ${z} zone is not addressable: zones are ${JSON.stringify(zones)}`);
+  }
+  if (zones.indexOf("given") > zones.indexOf("outcome")) {
+    bad.push(`the outcome side is read before the genesis side: ${JSON.stringify(zones)}`);
+  }
 
   /* PER ROW: A REFUSED CONTRACT PUBLISHES NO RATE, AND ITS STATUS IS INSIDE IT.
    *
@@ -173,7 +203,12 @@ const AUDIT = () => {
   if (document.querySelector("[data-self-contribution]")) seen.push("self-contribution");
   if (document.querySelector("[data-bridge-pinned]")) seen.push("bridge");
   if (document.querySelector("[data-bridge-replay-guard]")) seen.push("replay-guard");
-  if (document.querySelector("[data-folded-regions]")) seen.push("landfall-fold");
+  /* THE LANDFALL FOLD IS GONE, AND ITS COVERAGE REQUIREMENT WENT WITH IT rather than being
+     quietly dropped. It folded the low-evidence regions behind a summary at narrow widths, and
+     the list is ordered by evidence -- so the rows it reached were exactly the ones whose whole
+     content is the explanation of why there is no evidence. It existed because the deck ran the
+     width of the screen and a narrower one had to give up rows; the ledger is a column that
+     scrolls, so there is nothing to buy and nothing to hide behind. */
   if (document.querySelector("[data-inspector-dock]")) seen.push("inspector-dock");
   if (document.querySelector("[data-last-edit]")) seen.push("last-edit");
   for (const c of document.querySelectorAll("[data-condition-zone]")) {
@@ -291,7 +326,7 @@ console.log("\n[states] answer density at 1440x900 — the acceptance target");
 /* WHAT THE MATRIX ACTUALLY REACHED. Printed rather than asserted where the archive decides, and
    asserted where the surface does. */
 console.log("\n[states] coverage the matrix actually reached");
-const REQUIRED = ["bridge", "inspector-dock", "landfall-fold", "archive-gaps", "unknown-note",
+const REQUIRED = ["bridge", "inspector-dock", "archive-gaps", "unknown-note",
   "mark:REFUSED", "mark:CONDITIONED_ON", "condition:given", "condition:outcome", "condition:scope",
   /* The three ways the gate can bind, each reached by a real query rather than assumed. */
   "refusal:RATE_REFUSED", "refusal:BASE_RATE_ONLY", "refusal:OUT_OF_SCOPE", "refusal:CONDITIONED_ON",

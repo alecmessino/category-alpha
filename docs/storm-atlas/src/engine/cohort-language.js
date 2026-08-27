@@ -240,22 +240,77 @@ export function languageOf(spec) {
 /** The empty cohort, said the same way everywhere. */
 export const EVERY_STORM = "Every storm in the archive";
 
+/* THE TWO SIDES, WHEN NOTHING HAS BEEN ASKED OF THEM.
+ *
+ * WHY AN UNSET CONDITION IS A CLAUSE AND NOT A TAG. The strip said it in labels --
+ * `GENESIS-SIDE  no condition on where or when these storms formed` -- and a label beside a
+ * sentence is a second surface a reader has to assemble the question out of. The frozen frame
+ * (5c, and turn 4's first scope item) puts both sides INSIDE the sentence, so the question reads
+ * as English before any condition exists and each side is pressable exactly where it is read.
+ *
+ * THEY ARE PHRASED TO SLOT INTO THE ASSEMBLER'S OWN GRAMMAR and nowhere else. The genesis
+ * placeholder is a `formed …` clause because that is the shape every real genesis part takes;
+ * the outcome placeholder is a `went on to …` clause because a real outcome part is a past-tense
+ * verb phrase ("reached Category 4") and the two are never concatenated -- a placeholder is used
+ * only when its side holds nothing, so no path can ever emit "went on to reached Category 4".
+ *
+ * NEITHER NARROWS ANYTHING. "anywhere, in any season" and "any outcome" are the absence of a
+ * condition written out, so the population they describe is the population with no condition on
+ * that side -- which is what the count beside the question already reports. */
+export const GENESIS_ANY = "formed anywhere, in any season";
+export const OUTCOME_ANY = "went on to any outcome";
+
 /**
  * The whole cohort as one grammatical sentence, with no trailing question.
  *
+ * THE CLOSED FORM IS STILL THE DEFAULT, AND THE REASON IS NOT TASTE. This sentence is quoted by
+ * more than the Atlas: `docs/dossier/lala/` publishes it as the lead of its historical-record
+ * section, frozen against a pinned archive and byte-checked by scripts/check-dossier-lala.mjs.
+ * Writing the unset sides into every caller's sentence would re-publish a frozen research
+ * document to satisfy a layout, which is the wrong way round. So the open form is a named
+ * OPTION on the one assembler rather than a second assembler: one grammar, one set of branches,
+ * and the difference between the two renderings is a single argument a reader of this file can
+ * see -- not two functions that agree until somebody edits one of them.
+ *
  * @param {object} spec        a NORMALISED cohort spec
  * @param {Array}  [parts]     the output of `languageOf`, when the caller already has it
+ * @param {object} [opts]      `{ open }` -- write the unset sides out as clauses
  */
-export function cohortSentence(spec, parts) {
+export function cohortSentence(spec, parts, opts) {
+  return segmentsOf(spec, parts, opts).map((seg) => seg.text).join("");
+}
+
+/**
+ * The same sentence, in the pieces the question is pressable by.
+ *
+ * ONE ASSEMBLER, TWO READERS, AND THAT IS THE WHOLE POINT. `cohortSentence` joins these and the
+ * question line renders them, so the words a reader presses and the words a citation carries are
+ * the same characters by construction rather than by two functions agreeing. There is no
+ * arrangement of conditions under which the joined segments and the quoted sentence differ, and
+ * scripts/test-atlas-cohort.mjs [5b] asserts exactly that over a matrix of specs.
+ *
+ * Each segment is `{ text, zone, key }`. `zone` is the condition zone the segment opens for
+ * editing -- `given`, `outcome` or `scope` -- or null for the connective tissue between them.
+ * `key` is the spec key behind a SET clause, or null when the clause is the unset placeholder;
+ * a caller that wants to offer "remove this condition" needs the difference.
+ *
+ * @param {object} spec        a NORMALISED cohort spec
+ * @param {Array}  [parts]     the output of `languageOf`, when the caller already has it
+ * @param {object} [opts]      `{ open }` -- write the unset sides out as clauses
+ * @returns {Array<{text:string, zone:string|null, key:string|null}>}
+ */
+export function segmentsOf(spec, parts, opts) {
+  const open = !!(opts && opts.open);
   const cs = parts || languageOf(spec);
-  /* A cohort whose only condition is a SCOPE switch has not narrowed the question, it has
-     widened the record the question is asked over -- so it reads as the whole archive with the
-     scope named, not as "Storms including seasons not yet post-analysed". */
-  const substantive = cs.filter((c) => c.adjective || c.genesis || c.trajectory || c.outcome);
-  if (!substantive.length) {
-    const trailing = cs.map((c) => c.trailing).filter(Boolean);
-    return trailing.length ? `${EVERY_STORM}, ${serial(trailing)}` : EVERY_STORM;
-  }
+  const lit = (text) => (text ? [{ text, zone: null, key: null }] : []);
+  const clause = (text, zone, key) => (text ? [{ text, zone, key: key || null }] : []);
+
+  /* SCOPE CONTRIBUTES AN ADJECTIVE AND IS STILL NOT A GENESIS CONDITION. `namedOnly` reads as
+     "Named storms", which narrows the RECORD rather than the geography or the era -- so it must
+     not satisfy the genesis side and suppress its placeholder. The two scope keys are named here
+     rather than inferred from the grammar because the grammar cannot tell them apart. */
+  const isScope = (c) => c.key === "namedOnly" || c.key === "includeProvisional";
+  const genesisSet = cs.some((c) => !isScope(c) && (c.adjective || c.genesis || c.trajectory));
 
   /* ADJECTIVE ORDER IS NOT THE LIFECYCLE ORDER. The conditions arrive in the order a storm
      lives them, which puts the basin before the record's naming scope and reads "East Pacific
@@ -263,35 +318,129 @@ export function cohortSentence(spec, parts) {
      assembled in its own order and the lifecycle order is left to the clauses, where it is the
      thing the reader is actually following. */
   const adjectives = [
-    ...cs.filter((c) => c.key === "namedOnly").map((c) => c.adjective),
-    ...cs.filter((c) => c.key !== "namedOnly").map((c) => c.adjective),
-  ].filter(Boolean);
-  const genesis = cs.map((c) => c.genesis).filter(Boolean);
-  const trajectory = cs.map((c) => c.trajectory).filter(Boolean);
-  const outcome = cs.map((c) => c.outcome).filter(Boolean);
-  const trailing = cs.map((c) => c.trailing).filter(Boolean);
+    ...cs.filter((c) => c.key === "namedOnly"),
+    ...cs.filter((c) => c.key !== "namedOnly"),
+  ].filter((c) => c.adjective);
+  const genesis = cs.filter((c) => c.genesis);
+  const trajectory = cs.filter((c) => c.trajectory);
+  const outcome = cs.filter((c) => c.outcome);
+  const trailing = cs.filter((c) => c.trailing);
 
-  let s = adjectives.length
-    ? `${capitalise(adjectives.join(" "))} storms`
-    : "Storms";
+  const out = [];
 
-  const givens = [];
-  if (genesis.length) givens.push(`formed ${genesis.join(", ")}`);
-  if (trajectory.length) givens.push(serial(trajectory));
-  if (givens.length) s += ` that ${serial(givens)}`;
-
-  if (outcome.length) {
-    s += givens.length
-      ? `, given that they also ${serial(outcome)}`
-      : ` that ${serial(outcome)}`;
+  /* THE CLOSED FORM'S EMPTY CASE, UNCHANGED. A cohort whose only condition is a SCOPE switch has
+     not narrowed the question, it has widened the record the question is asked over -- so it
+     reads as the whole archive with the scope named, not as "Storms including seasons not yet
+     post-analysed". The open form has both sides written out and is a sentence either way, so it
+     never reaches here. */
+  if (!open && !adjectives.length && !genesis.length && !trajectory.length && !outcome.length) {
+    out.push(...lit(EVERY_STORM));
+    if (trailing.length) {
+      out.push(...lit(", "));
+      out.push(...serialSegments(trailing.map((c) => clause(c.trailing, "scope", c.key))));
+    }
+    return out;
   }
-  if (trailing.length) s += `, ${serial(trailing)}`;
-  return s;
+
+  if (adjectives.length) {
+    adjectives.forEach((c, i) => {
+      out.push(...lit(i === 0 ? "" : " "));
+      out.push(...clause(i === 0 ? capitalise(c.adjective) : c.adjective,
+        isScope(c) ? "scope" : "given", c.key));
+    });
+    out.push(...lit(" storms"));
+  } else {
+    out.push(...lit("Storms"));
+  }
+
+  /* THE GENESIS SIDE. The real parts keep the assembler's own shape -- one `formed X, Y` run and
+     the trajectory clauses serially joined after it -- and the placeholder takes the whole side
+     only when there is nothing at all on it. */
+  const givenRuns = [];
+  if (genesis.length) {
+    const run = [...lit("formed ")];
+    genesis.forEach((c, i) => {
+      run.push(...lit(i ? ", " : ""));
+      run.push(...clause(c.genesis, "given", c.key));
+    });
+    givenRuns.push(run);
+  }
+  if (trajectory.length) {
+    givenRuns.push(serialSegments(trajectory.map((c) => clause(c.trajectory, "given", c.key))));
+  }
+  const realGivens = givenRuns.length;
+  if (open && !realGivens && !genesisSet) givenRuns.push(clause(GENESIS_ANY, "given", null));
+  if (givenRuns.length) {
+    out.push(...lit(" that "));
+    out.push(...serialSegments(givenRuns));
+  }
+
+  /* THE OUTCOME SIDE. `given that they also` is reserved for a REAL genesis condition: it tells
+     a reader the question moved from "what happens to storms that begin like this" to "what did
+     the storms that ended up like this have in common", and an unset placeholder has moved
+     nothing. With only the placeholder above it, the outcome is a plain relative clause. */
+  if (outcome.length) {
+    out.push(...lit(realGivens ? ", given that they also "
+      : givenRuns.length ? ", that " : " that "));
+    out.push(...serialSegments(outcome.map((c) => clause(c.outcome, "outcome", c.key))));
+  } else if (open) {
+    out.push(...lit(givenRuns.length ? ", that " : " that "));
+    out.push(...clause(OUTCOME_ANY, "outcome", null));
+  }
+
+  if (trailing.length) {
+    out.push(...lit(", "));
+    out.push(...serialSegments(trailing.map((c) => clause(c.trailing, "scope", c.key))));
+  }
+  return out;
+}
+
+/* A SERIAL JOIN OVER SEGMENT RUNS, PUNCTUATED EXACTLY AS `serial` PUNCTUATES STRINGS.
+ *
+ * The two must not drift: `cohortSentence` is the join of these segments, and every sentence
+ * this repository has ever published came out of `serial`. So the rules are transcribed rather
+ * than re-derived -- the serial comma appears only when a run already contains one, which is the
+ * only thing separating "A, B and C" from "A, B, and C" meaning different groupings. */
+function serialSegments(runs, conj = "and") {
+  const xs = runs.filter((r) => r.length && r.map((s) => s.text).join("").trim() !== "");
+  if (!xs.length) return [];
+  if (xs.length === 1) return xs[0];
+  const oxford = xs.some((r) => r.map((s) => s.text).join("").includes(","));
+  const out = [];
+  xs.forEach((run, i) => {
+    if (i > 0) {
+      out.push({ text: i === xs.length - 1 ? `${oxford ? "," : ""} ${conj} ` : ", ",
+        zone: null, key: null });
+    }
+    out.push(...run);
+  });
+  return out;
 }
 
 /** The sentence as the question the surface actually asks. */
-export function cohortQuestion(spec, parts) {
-  return `${cohortSentence(spec, parts)} — what happened next?`;
+export function cohortQuestion(spec, parts, opts) {
+  return `${cohortSentence(spec, parts, opts)} — what happened next?`;
+}
+
+/** The question mark, as its own unpressable segment. Both forms end here. */
+const TAIL = { text: " — what happened next?", zone: null, key: null };
+
+/**
+ * The question in the pieces the Atlas makes pressable, with both unset sides written out.
+ *
+ * This is the ONE reading the Atlas surface publishes: the question line renders these segments
+ * and the citation quotes their join, so the sentence a reader presses and the sentence they
+ * would paste are the same characters. Every other consumer of a cohort sentence -- the dossier
+ * above all -- keeps the closed form, which is why this is a separate entry point rather than a
+ * new default.
+ */
+export function questionSegmentsOf(spec, parts) {
+  return [...segmentsOf(spec, parts, { open: true }), TAIL];
+}
+
+/** The open question as one string -- exactly the join of `questionSegmentsOf`. */
+export function openQuestion(spec, parts) {
+  return questionSegmentsOf(spec, parts).map((s) => s.text).join("");
 }
 
 /**

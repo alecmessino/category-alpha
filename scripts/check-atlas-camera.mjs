@@ -418,7 +418,16 @@ console.log("\n[camera] HOME and FIT reframe, and they are not the same control"
   }
   await (await page.$("[data-camera-home]")).click();
   await page.waitForTimeout(500);
-  ok("and HOME comes back from FIT", sameCameraExactly(h2, await view()));
+  {
+    const back2 = await view();
+    /* THE CENTRE AT FULL PRECISION IN THE FAILURE MESSAGE, because this assertion is exact and
+       the differences it catches are sub-pixel: a bounds line rounded to a tenth of a degree
+       reports two identical-looking views and leaves nobody any way to see what moved. */
+    ok("and HOME comes back from FIT", sameCameraExactly(h2, back2),
+       `${fmt(h2)}  vs  ${fmt(back2)}\n`
+       + `centre ${h2.lat.toFixed(9)},${h2.lon.toFixed(9)} `
+       + `vs ${back2.lat.toFixed(9)},${back2.lon.toFixed(9)}`);
+  }
 }
 
 console.log("\n[camera] selecting a storm frames that storm, and deselecting does not move");
