@@ -30,6 +30,7 @@
  *
  * Run: node scripts/build-dossier-lala.mjs
  */
+import { createHash } from "node:crypto";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { gunzipSync } from "node:zlib";
 import { dirname, join, resolve } from "node:path";
@@ -45,7 +46,26 @@ import { whyMatched } from "../docs/storm-atlas/src/engine/cohort-membership.js"
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "docs/dossier/lala");
 const DATA = join(OUT, "data");
-const PACKS = join(ROOT, "docs/storm-atlas/data");
+/* THE FROZEN ARCHIVE, BESIDE THE DOSSIER -- NOT THE LIVE PACK.
+ *
+ * This document is a point-in-time artifact and its masthead names the archive vintage it was
+ * built from. It used to compute from docs/storm-atlas/data/, which the genesis ingest rebuilds
+ * about four times a day, and to publish that live pack's stamp as its own provenance. So the
+ * artifact restamped itself on every rebuild, and the gate that checked the stamp compared a
+ * frozen claim against a moving target -- which turned every daily ingest into a red build on a
+ * document nothing had changed.
+ *
+ * Measured across three ingests: exactly one field moved, `archive_stamp`. Structurally so --
+ * the ingest revises 2026 PROVISIONAL rows, this cohort sets includeProvisional false and
+ * excludes them, and the stamp is a hash over the whole pack including the rows the dossier does
+ * not read. The numbers were never in question; the identity was attached to the wrong thing.
+ *
+ * The fix is that the frozen bytes live here. `openArchive` runs over them unchanged, so every
+ * rate, refusal and distance is computed by the same engine as before -- there is no second
+ * representation of the archive and no precomputed answer. */
+const FROZEN_ARCHIVE = join(DATA, "archive");
+const ARCHIVE_PIN = join(DATA, "archive-pin.json");
+
 
 const ATCF_ID = "CP012026";
 /* The b-deck snapshot this dossier is built from, and when it was taken. Both are printed on the
@@ -73,7 +93,62 @@ const assert = (cond, msg) => { if (!cond) failures.push(msg); };
 
 /* ---- sources ---------------------------------------------------------------------------- */
 
-const archive = await openArchive(PACKS);
+/* ---- the frozen archive, verified before a single number is computed ------------------------
+ *
+ * INTEGRITY IS A HARD FAILURE AND FACT DRIFT IS NOT, and the difference is the whole contract.
+ * If a frozen byte moved without its hash moving, the dossier cannot claim the vintage it prints
+ * and there is nothing to compute; that stops here. If the frozen source is intact but a derived
+ * fact differs from what is committed, the generator emits the new value and the byte-identity
+ * gate names the field that moved -- because a refusal here would hide exactly the diff a reader
+ * needs in order to decide whether to republish. */
+const pin = await readFile(ARCHIVE_PIN, "utf8").then(JSON.parse).catch((e) => {
+  console.error(`[dossier] the archive pin is missing or unreadable: ${ARCHIVE_PIN}\n  ${e.message}`);
+  process.exit(1);
+});
+for (const field of ["archive_stamp", "archive_built_utc", "methodology_version",
+  "processing_version", "files"]) {
+  if (pin[field] === undefined || pin[field] === null || pin[field] === "") {
+    console.error(`[dossier] the archive pin is malformed: no ${field}. The dossier cannot claim `
+      + "a vintage the pin does not name.");
+    process.exit(1);
+  }
+}
+{
+  const names = Object.keys(pin.files);
+  if (!names.length) {
+    console.error("[dossier] the archive pin declares no files, so nothing can be verified.");
+    process.exit(1);
+  }
+  for (const name of names) {
+    const want = pin.files[name];
+    let bytes;
+    try { bytes = await readFile(join(FROZEN_ARCHIVE, name)); }
+    catch { console.error(`[dossier] frozen archive file missing: ${name}`); process.exit(1); }
+    const got = "sha256:" + createHash("sha256").update(bytes).digest("hex");
+    if (got !== want) {
+      console.error(`[dossier] FROZEN SOURCE INTEGRITY FAILURE on ${name}\n`
+        + `  pin declares ${want}\n  bytes are    ${got}\n`
+        + "  The dossier cannot claim archive vintage " + pin.archive_stamp
+        + " while reading different bytes.");
+      process.exit(1);
+    }
+  }
+}
+
+const archive = await openArchive(FROZEN_ARCHIVE);
+
+/* AND THE FROZEN MANIFEST MUST AGREE WITH THE PIN. The hashes prove the bytes are the ones the
+   pin describes; this proves the pin describes the archive it claims to. */
+for (const [k, v] of [["archive_stamp", archive.manifest.archive_stamp],
+  ["archive_built_utc", archive.manifest.archive_built_utc],
+  ["methodology_version", archive.manifest.methodology_version],
+  ["processing_version", archive.manifest.processing_version]]) {
+  if (pin[k] !== v) {
+    console.error(`[dossier] the pin and the frozen manifest disagree on ${k}: `
+      + `pin says ${JSON.stringify(pin[k])}, frozen manifest says ${JSON.stringify(v)}.`);
+    process.exit(1);
+  }
+}
 const deckText = await readFile(join(DATA, DECK_FILE), "utf8");
 const deck = parseBestTrack(deckText);
 const env = JSON.parse(await readFile(join(DATA, "env-ships-rt.json"), "utf8"));
@@ -90,7 +165,7 @@ const ledger = JSON.parse(await readFile(join(DATA, "forecast-log-cp012026.json"
 const calibrationPin = JSON.parse(await readFile(join(DATA, "calibration.json"), "utf8"));
 const calibration = calibrationPin.calibration;
 
-const coastRaw = gunzipSync(await readFile(join(PACKS, "atlas-coastlines-v1.bin.gz")));
+const coastRaw = gunzipSync(await readFile(join(FROZEN_ARCHIVE, "atlas-coastlines-v1.bin.gz")));
 const coast = decodeCoastlines(
   coastRaw.buffer.slice(coastRaw.byteOffset, coastRaw.byteOffset + coastRaw.byteLength));
 
@@ -513,15 +588,20 @@ const facts = {
      quoted or settled outside Millibar enters any figure, table or sentence here. */
   external_public_contract_facts: "none",
   provenance_classes: {
-    ARCHIVE: "IBTrACS, via docs/storm-atlas/data/atlas-core-v1.bin.gz",
+    ARCHIVE: "IBTrACS, via the frozen archive pack under docs/dossier/lala/data/archive/",
     OPERATIONAL: "ATCF b-deck and operational SHIPS, via the pinned files under docs/dossier/lala/data/",
     DERIVED: "computed by replaying a rule the archive already owns; the rule is named where used",
     "RECORDED / MILLIBAR": recorded.definition,
   },
+  /* FROM THE PIN, NOT FROM WHATEVER PACK HAPPENS TO BE IN THE TREE. The two are identical here
+     by the check above; taking it from the pin is what makes that identity a requirement rather
+     than a coincidence. */
   archive_provenance: {
-    archive_built_utc: archive.manifest.archive_built_utc,
-    archive_stamp: archive.manifest.archive_stamp,
-    methodology_version: archive.manifest.methodology_version,
+    archive_built_utc: pin.archive_built_utc,
+    archive_stamp: pin.archive_stamp,
+    methodology_version: pin.methodology_version,
+    processing_version: pin.processing_version,
+    frozen_source: "data/archive/ — pinned by data/archive-pin.json",
     storms: archive.manifest.counts.storms,
     track_points: archive.manifest.counts.track_points,
   },
