@@ -228,10 +228,12 @@ for (const [w, h] of WIDTHS) {
       h: Math.round(parseFloat(getComputedStyle(i).height)),
     }));
     const r = key.getBoundingClientRect();
+    const note = key.querySelector(".at-classkey-major");
     return {
       classes: sw, text: (key.textContent || "").replace(/\s+/g, " ").trim(),
       onScreen: r.width > 0 && r.height > 0 && r.top >= -1 && r.bottom <= innerHeight + 1,
       size: parseFloat(getComputedStyle(key).fontSize),
+      noteCut: !!note && note.scrollWidth > note.clientWidth + 1,
     };
   });
   const at = `${w}x${h}`;
@@ -259,6 +261,15 @@ for (const [w, h] of WIDTHS) {
      major.length === 3 && minor.length === 4 && minor.every((c) => c.h < major[0].h),
      `${minor.map((c) => c.h).join(",")} against ${major.map((c) => c.h).join(",")}`);
   ok(`${at.padEnd(9)} the key says so in words too`, /MAJORS CARRY EXTRA STROKE/.test(d.text));
+  /* AND AT THE FRAME'S OWN WIDTHS THE WORDS ARE READ, NOT MERELY PRESENT. The plate foot is one
+     line and the note is the lowest-priority thing on it, so below 1440 it gives way to the
+     swatches and the measure -- which is the right order, since the swatches ARE the key. At
+     1440 and above there is room for all of it, and 1440 is the width 5c was drawn at. */
+  if (w >= 1440) {
+    ok(`${at.padEnd(9)} and the note is not truncated at the frame's own width`, !d.noteCut);
+  } else if (d.noteCut) {
+    console.log(`  note  ${at.padEnd(9)} the stroke note gives way to the swatches at this width`);
+  }
   ok(`${at.padEnd(9)} and it is subordinate — the frame's smallest step`, d.size === 9.5,
      `${d.size}px`);
 }
@@ -389,6 +400,43 @@ for (const [w, h] of WIDTHS) {
   } else {
     console.log(`  note  ${at.padEnd(9)} the ledger did not need to scroll at this height`);
   }
+}
+
+/* ── 5b · AND NOTHING IN IT IS TRUNCATED ────────────────────────────────────────────────── */
+/* THE FAILURE THIS EXISTS FOR IS INVISIBLE TO EVERY OTHER GATE IN THE REPOSITORY, INCLUDING THE
+ * VALUES SNAPSHOT. `textContent` is complete whether or not a pixel of it reached the reader, so
+ * a column head reading `5% WILSON`, an outcome reading `Central Ame…` and a status reading
+ * `BASE RATE O…` all pass a content check and all publish something the surface does not mean.
+ * At a 486px measure that is not a hypothetical: it happened three times while this frame was
+ * being built, and each time the text was right there in the DOM.
+ *
+ * So every published string in the ledger is measured against the box it was given. A head is
+ * the worst of them -- it is right-set, so a track one pixel short eats its FIRST character and
+ * `95% WILSON` becomes the name of a different interval. */
+console.log("\n[instrument] and nothing the ledger publishes is truncated to fit");
+for (const [w, h] of WIDTHS) {
+  await open("", w, h);
+  const cut = await page.evaluate(() => {
+    /* THE BOX, NOT THE GLYPHS. scrollWidth against clientWidth catches an ellipsis and a clip
+       alike; the 1px tolerance is for sub-pixel layout, not for a truncated character. */
+    const over = (el) => el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+    const label = (el) => (el.textContent || "").replace(/\s+/g, " ").trim();
+    const out = [];
+    const look = (sel, what) => {
+      for (const el of document.querySelectorAll(sel)) {
+        const t = label(el);
+        if (t && over(el)) out.push(`${what} "${t}"`);
+      }
+    };
+    look(".at-deck-head .at-dc", "head");
+    look("[data-outcome] .at-dc-name", "outcome");
+    look("[data-outcome] .at-dc-status", "status");
+    look(".at-deck .at-val", "value");
+    look("[data-cohort-line] .at-cohort-n", "cohort line");
+    return out;
+  });
+  ok(`${`${w}x${h}`.padEnd(9)} every head, name, figure and status renders whole`,
+     cut.length === 0, cut.join("\n"));
 }
 
 /* ── 6 · THE COLOPHON ───────────────────────────────────────────────────────────────────── */

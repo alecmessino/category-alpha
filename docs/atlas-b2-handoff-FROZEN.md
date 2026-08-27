@@ -35,6 +35,21 @@
 > this PR), and the coordinate readout is on paper beneath the plate, which is what 5c's own
 > implementation-QA note asks for.
 >
+> **What the frozen measure costs between 900 and 1387, measured:** 5c states the ledger as a
+> percentage that is 486px at 1440, and a percentage alone falls to 304px at 900 — a measure that
+> puts a refused row's STATUS off the right-hand edge of a horizontal scroll. The measure is
+> therefore floored at the five resting tracks' own width, and what pays for it is the plate:
+> 834px at 1440 and 1180 at 1920 as specified, but 460 at 1024 and 336 at 900. Below 1280 the
+> plate's two paper lines wrap rather than truncate, so the seven-class key survives the narrower
+> figure whole. The instrument stacks at 900 exactly as frozen.
+>
+> **One consequence of the frozen measure, recorded rather than designed:** the inspector is an
+> overlay on the plate at every width, where the previous shell gave it a column of its own above
+> 1180. The panel, its state, its bridge and its close are untouched — but a resident column
+> would make the plate's width a function of whether a storm is selected, and the plate's width
+> is what 5c freezes at 834 and 1180. The selected-storm state is otherwise unchanged and its
+> redesign is still PR-later work.
+>
 > Everything else in this document is still design, still unimplemented, and still the authority.
 > **PR 2 onward has not been started.**
 

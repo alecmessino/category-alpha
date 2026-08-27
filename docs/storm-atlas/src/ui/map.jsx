@@ -842,7 +842,11 @@ const CLASS_KEY = [
 function ClassKey() {
   return (
     <span className="at-classkey" data-class-key>
-      <span className="at-classkey-k">CLASS</span>
+      {/* NO `CLASS` LABEL IN FRONT OF IT. 5c's key is the seven swatches and the stroke note,
+          and the label was 44px of the 834px plate foot spent saying what a row of coloured
+          rules beside a storm map self-evidently is -- 44px that the note it pushed off the
+          line needed. A legend that truncates its own rule to introduce itself has its
+          priorities backwards. */}
       {CLASS_KEY.map(([k, label], i) => (
         <span className="at-classkey-item" key={k}>
           <span className="at-classkey-sw" aria-hidden="true">

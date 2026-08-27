@@ -409,9 +409,17 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
      THE MAP TAKES. Read as an expression rather than as three separate numbers, because it is
      the expression that has to hold: any of the three edited alone moves the plate off both
      frozen widths. */
+  /* THE FLOOR IS THE FROZEN TABLE'S OWN MEASURE, WHICH IS THE HALF OF THIS EXPRESSION THAT IS
+     EASIEST TO GET WRONG AND HARDEST TO SEE. 33.75vw is 486 at 1440 and less on every narrower
+     screen, and what a percentage-only measure gives up first is the RIGHT-HAND column: at 900
+     it left the deck 304px for a table that needs 468, so a refused row's STATUS sat off the
+     right-hand edge of a horizontal scroll. A refusal a reader has to drag sideways to find has
+     not been published. 486 is not a round number, it is 150 + 84 + 52 + 70 + 72 and four 10px
+     gutters -- the five resting tracks -- and it is also exactly 33.75vw at 1440, so the floor
+     binds ONLY below the width where 5c's own percentage had already run out. */
   const ledger = (css.match(/--at-ledger:\s*clamp\(([^)]*)\)/) || [])[1];
   ok("the ledger measure is the frozen clamp",
-     (ledger || "").replace(/\s+/g, "") === "300px,33.75vw,620px",
+     (ledger || "").replace(/\s+/g, "") === "486px,33.75vw,620px",
      `--at-ledger is clamp(${ledger})`);
   const pad = (css.match(/--at-pad:\s*(\d+)px/) || [])[1];
   const gap = (css.match(/--at-gap:\s*(\d+)px/) || [])[1];
@@ -421,10 +429,15 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
      design states a plate box for, and this is that statement as a calculation: if any of the
      three numbers above moves, one of these two stops being true. */
   const plateAt = (vw) => vw - 2 * Number(pad) - Number(gap)
-    - Math.min(620, Math.max(300, 0.3375 * vw));
+    - Math.min(620, Math.max(486, 0.3375 * vw));
   ok("which puts the plate at 5c's measured 834px at 1440", plateAt(1440) === 834,
      `${plateAt(1440)}px`);
   ok("and at turn 4's stated 1180px at 1920", plateAt(1920) === 1180, `${plateAt(1920)}px`);
+  /* AND THE FLOOR IS INERT AT BOTH OF THEM, which is the claim that lets it exist at all: it may
+     only bind below 1440, where 5c states no plate box. If a future edit raised it, this is the
+     assertion that fails before either measured width does. */
+  ok("and the floor binds nowhere 5c states a plate box",
+     0.3375 * 1440 >= 486 && 0.3375 * 1920 >= 620, "the floor has reached a stated width");
   ok("the plate's available width is derived from them rather than from the viewport",
      /--at-plate-avail:calc\(100vw - 2 \* var\(--at-pad\) - var\(--at-gap\) - var\(--at-ledger\)\)/.test(css),
      "--at-plate-avail is not composed from the measure tokens");

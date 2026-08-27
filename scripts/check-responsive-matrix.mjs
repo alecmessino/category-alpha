@@ -312,9 +312,9 @@ const AUDIT = (vw) => {
    the band works. */
 const VIEWPORTS = [
   ["workstation      >=1440", 1440, 900],
-  ["timing folded  1280-1439", 1320, 860],
-  ["interval folded 1180-1279", 1220, 820],
-  ["groups folded    900-1179", 1024, 768],
+  ["two columns    1280-1439", 1320, 860],
+  ["two columns    1180-1279", 1220, 820],
+  ["two columns     900-1179", 1024, 768],
   ["one column         < 900", 820, 1180],
 ];
 
@@ -353,21 +353,40 @@ for (const [vname, w, h] of VIEWPORTS) {
 
 /* ── the ladder actually steps ────────────────────────────────────────────────────────────── */
 /* A MATRIX THAT PASSED WITHOUT THE LADDER EVER FIRING WOULD PROVE NOTHING ABOUT THE LADDER.
-   So the fold state is read at each width and asserted to be the one the specification names --
-   which also pins the boundaries, since a step that moved would show up here as the wrong
-   column count rather than as a layout that merely still fits. */
+   So the shape is read at each width and asserted to be the one the specification names -- which
+   also pins the boundary, since a step that moved would show up here as the wrong column count
+   rather than as a layout that merely still fits.
+
+   THE LADDER IS SHORTER THAN IT WAS, AND THAT IS THE FROZEN FRAME'S DOING RATHER THAN AN
+   OMISSION. Three rungs were retired by the resting instrument, and each is asserted below as an
+   INVARIANT instead -- which is a stronger statement than a rung, not a weaker one:
+
+     the interval   used to move into the rate's cell at 1280. It is its own column at every
+                    width now, asserted per row in the audit above.
+     the timing pair used to be resident at >=1440 and fold below it, so the most-read table on
+                    the surface had two shapes depending on the monitor. The frozen ledger is
+                    OUTCOME | n / N | RATE | 95% WILSON at every width, and the two duration
+                    columns are behind their named control everywhere -- including at 2560.
+     the groups     used to fold behind a `+ N` chevron below 1180. Nothing folds now: every
+                    contract, including every refused one, is resident at every width. A
+                    qualification one interaction from view is a qualification a reader does
+                    not apply, and the narrow ledger has the measure for them because the bar
+                    and the duration columns left.
+
+   WHAT STILL STEPS IS THE SHELL, ONCE, AT 900: plate and ledger side by side above it, stacked
+   below. The inspector is an overlay on both sides of that step -- it never takes a column of
+   the plate row, so the plate's width, and therefore its aperture, is not a function of whether
+   a storm is selected. That is what the frozen 834/1180 plate boxes require, and it is what the
+   `dock` reading below is actually checking. */
 console.log("\n[responsive] the ladder gives up what it says it gives up, where it says it does");
-/* THE INTERVAL IS NOT ON THIS LADDER ANY MORE, and its absence is the point. It used to give up
-   its track at 1280 and move into the rate's cell, so the most-read statement on the surface had
-   two shapes depending on the monitor; it is one cell at every width now, which is asserted per
-   row in the audit above rather than as a rung here. What is left is the two steps that still
-   change the deck's shape, plus the one that changes the shell's. */
 const LADDER = [
-  [1440, 900, { timing: false, groups: false, dockColumn: true }],
-  [1320, 860, { timing: true, groups: false, dockColumn: true }],
-  [1220, 820, { timing: true, groups: false, dockColumn: true }],
-  [1024, 768, { timing: true, groups: true, dockColumn: false }],
-  [880, 1180, { timing: true, groups: true, dockColumn: false }],
+  [1920, 1080, { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [1440, 900,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [1320, 860,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [1220, 820,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [1024, 768,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [900, 900,   { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [880, 1180,  { columns: 1, dock: "over the column", timing: true, groups: false }],
 ];
 for (const [w, h, want] of LADDER) {
   await open(`i=cat4&storm=${pick}`, w, h);
@@ -375,20 +394,26 @@ for (const [w, h, want] of LADDER) {
     const deck = document.querySelector("[data-evidence-deck]");
     const dock = document.querySelector("[data-inspector-dock]");
     const row = document.querySelector(".atlas-plate-row");
+    const box = (el) => (el ? el.getBoundingClientRect() : null);
+    const hits = (a, b) => !!a && !!b && a.left < b.right && b.left < a.right
+      && a.top < b.bottom && b.top < a.bottom;
+    const d = box(dock), led = box(document.querySelector(".atlas-evidence"));
     return {
+      /* THE ROW'S OWN TRACK LIST, which is the thing the plate's width is computed against. */
+      columns: getComputedStyle(row).gridTemplateColumns.trim().split(/\s+/).length,
+      /* AN OVERLAY THAT REACHES THE LEDGER HAS TAKEN THE READER'S TABLE AWAY, not just the map's
+         right-hand margin. Above the step the dock is allowed over the plate and nothing else;
+         below it there is only one column for it to be over. */
+      dock: !dock ? "absent" : hits(d, led) ? "over the column" : "over the plate",
       timing: deck.hasAttribute("data-timing-folded"),
       groups: !!deck.querySelector("[data-group-fold]"),
-      /* A DOCK IN THE ROW TAKES A COLUMN OF IT; AN OVERLAY DOES NOT. Read from the plate row's
-         own track list rather than from the dock's position, because that is the thing the
-         plate's width -- and therefore its aperture -- is actually computed against. */
-      dockColumn: !!dock
-        && getComputedStyle(row).gridTemplateColumns.trim().split(/\s+/).length === 2,
     };
   });
   const diff = Object.keys(want).filter((k) => want[k] !== got[k]);
-  ok(`${String(w).padStart(4)}px  timing ${got.timing ? "folded" : "resident"}`
+  ok(`${String(w).padStart(4)}px  ${got.columns} column${got.columns === 1 ? "" : "s"}`
+     + ` · timing ${got.timing ? "folded" : "resident"}`
      + ` · groups ${got.groups ? "folded" : "resident"}`
-     + ` · inspector ${got.dockColumn ? "docked" : "overlaid"}`,
+     + ` · inspector ${got.dock}`,
      diff.length === 0, diff.map((k) => `${k}: want ${want[k]}, got ${got[k]}`).join("; "));
 }
 

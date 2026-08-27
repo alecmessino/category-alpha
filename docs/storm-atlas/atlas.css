@@ -1204,25 +1204,31 @@
   /* EVERY TRACK IS ITS OWN WIDEST REAL CONTENT AT ITS OWN TYPE STEP, MEASURED, AND THE OUTCOME
      NAME CARRIES A FLOOR RATHER THAN A SHARE. IBM Plex Mono is 0.6em, so:
 
-       count   `3,224 / 3,616`  13 characters at 10.5  →  82
+       count   `3,224 / 3,616`  measured at 83 in the rendered page, not multiplied out of an
+                                0.6em advance, because the separators and the tracking are half
+                                of it. 82 was one pixel short and broke the pair over two lines,
+                                which reads as two numbers  →  84
        rate    `100.0%`          6 characters at 14    →  52
-       int     `95% WILSON`     10 characters at 9.5 + 1.1 tracking, which is the HEAD and is
-                                wider than any interval it heads  →  68
-       status  `STATUS`          the head; the longest word, BASE RATE ONLY, ellipsises with the
-                                whole string on its own title  →  72
+       int     `95% WILSON`     the HEAD, and wider than any interval it heads (`88.1-90.1%`
+                                measures 64). Measured at 69 with its tracking, so 70: a head
+                                right-set in a track one pixel short loses its FIRST character,
+                                and `5% WILSON` heads a column of ninety-five percent intervals
+                                while naming a different one  →  70
+       status  `STATUS`          the head. The longest word, BASE RATE ONLY, is 96 and WRAPS
+                                rather than truncating -- see below  →  72
        outcome a 150px floor, which is `TROPICAL STORM` at 14 serif plus the class hairline and
                                 the mark slot. Below that a ladder rung stops being readable, and
                                 the two optional columns are what would have taken it.
 
-     150 + 82 + 52 + 68 + 72 and four 10px gutters is 464 against the 486 measure, so the resting
+     150 + 84 + 52 + 70 + 72 and four 10px gutters is 468 against the 486 measure, so the resting
      five-column deck fits with room. The two OPTIONAL columns -- VS ARCHIVE, and the duration
      pair -- do not, and the ledger scrolls horizontally rather than crushing the name: both
      appear only because the reader asked for them, and neither may be paid for out of the
      column that says what the row IS. */
   --at-col-outcome:minmax(150px,1fr);
-  --at-col-count:82px;
+  --at-col-count:84px;
   --at-col-rate:52px;
-  --at-col-int:68px;
+  --at-col-int:70px;
   --at-col-vs:64px;
   --at-col-status:72px;
   --at-col-med:44px;
@@ -1393,7 +1399,13 @@
   flex:none;width:11px;text-align:center;font-family:var(--at-mono);
   font-size:var(--at-t5);color:var(--t3);
 }
-[data-atlas] .at-dc-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* THE NAME WRAPS; IT DOES NOT ELLIPSISE. `Central America · ≥64 KT` measures 162 against the
+   135 this track leaves after the indent, and a 486px ledger is not going to hold it on one
+   line at any distribution of the five columns -- so the question is only which way it gives.
+   An ellipsis truncates the ROW'S OWN IDENTITY, and `Central Ame…` beside a rate is a figure
+   whose subject the reader has to hover to learn. A second line costs 11px of a row whose 29 is
+   a MINIMUM by construction, and costs it on two rows of eighteen. */
+[data-atlas] .at-dc-name{min-width:0;overflow-wrap:anywhere;hyphens:none}
 
 /* EVERY NUMBER IS MONO AT THE VALUE TOKEN, which is the floor: nothing numeric goes below 12. */
 [data-atlas] .at-val{font-family:var(--at-mono);font-size:var(--at-fs-value);color:var(--t1)}
@@ -1419,7 +1431,11 @@
   justify-content:flex-start;
   font-family:var(--at-mono);font-size:var(--at-t5);font-weight:400;
   letter-spacing:1.1px;color:var(--t2);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  /* AND IT WRAPS, FOR THE REASON THE NAME DOES. `BASE RATE ONLY` measures 96 against a 72 track,
+     and a status is the sentence a refused row says INSTEAD of a rate: `BASE RATE O…` is a
+     qualification the reader cannot read, which is the one failure mode a status column exists
+     to prevent. Two lines of 9.5 is 21px inside a 29px row and costs nothing at all. */
+  min-width:0;overflow-wrap:anywhere;line-height:1.15;
 }
 
 /* THE TWO RAMPS, RESOLVED PER SHELL.
@@ -1739,7 +1755,16 @@
  * map nobody asked to be wider; a pure percentage would have broken the ledger below 900. The
  * clamp is the two frozen measurements and the floor that keeps the table readable, and nothing
  * in it is a number chosen to make one screenshot look right.
- */
+ *
+ * THE FLOOR IS 486, WHICH IS THE FROZEN TABLE'S OWN MEASURE RATHER THAN A ROUND NUMBER.
+ * 33.75vw is 486 at 1440 and falls below it on every narrower screen, and what the percentage
+ * gives up first is the right-hand column -- so between 900 and 1387 a percentage-only measure
+ * put the STATUS of a refused row off the right-hand edge of a table the reader has to drag
+ * sideways to finish reading. A refused row that says so off-screen has not said so. So the
+ * measure never goes below the five resting tracks and their gutters, and what pays for it in
+ * that band is the plate, which is the same answer this file already gives for the comparison
+ * column below. 5c's 834 at 1440 and 1180 at 1920 are the clamp's own endpoints and are
+ * untouched: the floor binds only where 5c's own measure had already run out. */
 [data-atlas].atlas-shell.atlas-instrument{
   display:grid;
   grid-template-rows:auto minmax(0,1fr) var(--at-tport) auto;
@@ -1747,7 +1772,7 @@
   background:var(--chrome);
   --at-pad:40px;
   --at-gap:40px;
-  --at-ledger:clamp(300px,33.75vw,620px);
+  --at-ledger:clamp(486px,33.75vw,620px);
   --at-tport:0px;
   /* The plate's available width: the body row less the page padding, the gutter and the ledger.
      Everything that bounds the plate's shape is computed against THIS rather than against the
@@ -1777,9 +1802,14 @@
  * 41vw against 33.75 is 590px at 1440 and a 730px plate, still well inside the aspect bounds.
  * The resting screen never reaches this rule, so 5c's measured 834px plate is untouched where it
  * is specified; what moves is the width of a screen that has more evidence on it, which is the
- * right direction for evidence to push. */
+ * right direction for evidence to push.
+ *
+ * THE FLOOR HERE IS THE RESTING FLOOR, NOT A SIXTH-COLUMN FLOOR. Below the width where 41vw
+ * stops holding six tracks, VS ARCHIVE is the column that scrolls -- it is the OPTIONAL one, it
+ * appears only because a condition exists, and the alternative is buying it out of the plate on
+ * a screen that has already given the plate up to the resting five. */
 [data-atlas].atlas-shell.atlas-instrument:has(.at-dc-vs){
-  --at-ledger:clamp(380px,41vw,700px);
+  --at-ledger:clamp(486px,41vw,700px);
 }
 [data-atlas].atlas-shell.atlas-instrument > *{min-width:0}
 
@@ -2048,6 +2078,17 @@
  * surface that carries no information at all. */
 @media (max-width:1279px){
   [data-atlas].atlas-shell.atlas-instrument{--at-pad:26px;--at-gap:26px}
+  /* AND THE PLATE'S TWO PAPER LINES WRAP RATHER THAN TRUNCATE.
+   *
+   * Both lines are ordered by priority and give way from the right, which is right at 834px and
+   * wrong at 460: the class key is the LAST thing on the foot before the measure, and a plate
+   * whose key has lost Category 4 and Category 5 is a coloured map that cannot be read -- the
+   * one thing 5c says the palette is never removed for. So below this width the lines wrap
+   * instead, the key keeps the whole line it needs, and the measure takes the second. It costs
+   * the stage column a row of 9.5px type and nothing else: the head and the foot are paper set
+   * OUTSIDE the plate, so neither the rectangle nor its aspect moves. */
+  [data-atlas].atlas-instrument .at-platehead,
+  [data-atlas].atlas-instrument .at-platefoot{flex-wrap:wrap;row-gap:5px}
 }
 
 /* < 900 · ONE COLUMN, AND THE SHELL SCROLLS.
@@ -2228,7 +2269,6 @@
 [data-atlas] .at-classkey{
   display:flex;align-items:center;gap:9px;flex:0 1 auto;min-width:0;overflow:hidden;
 }
-[data-atlas] .at-classkey-k{color:var(--t3);letter-spacing:1.1px;flex:none}
 [data-atlas] .at-classkey-item{display:flex;align-items:center;gap:5px;flex:none;color:var(--t3)}
 [data-atlas] .at-classkey-sw{
   display:block;flex:none;background:var(--stage);padding:2px;line-height:0;
