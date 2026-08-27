@@ -390,9 +390,20 @@ for (const [w, h] of WIDTHS) {
   ok(`${at.padEnd(9)} the columns are OUTCOME | n / N | RATE | 95% WILSON`,
      JSON.stringify(d.heads.slice(0, 4)) === JSON.stringify(["OUTCOME", "n / N", "RATE", "95% WILSON"]),
      d.heads.join(" | "));
-  ok(`${at.padEnd(9)} both ends are on screen before any scroll`,
-     d.before.head && d.before.limits,
-     `head ${d.before.head}, limits ${d.before.limits}`);
+  /* "BOTH ENDS BEFORE ANY SCROLL" IS A CLAIM ABOUT THE LEDGER'S OWN SCROLLER, and below 900
+     there isn't one: the instrument stacks, the PAGE becomes the scroll, and the ledger opens
+     below a 392px figure and both its captions -- so its head starting under the fold is the
+     stacked reading order working, not a pin that failed. What must hold there is the same
+     thing in the place it means something, and that is the assertion below: once the reader has
+     scrolled to the ledger, the heads and the limits are both on screen. */
+  if (w >= 900) {
+    ok(`${at.padEnd(9)} both ends are on screen before any scroll`,
+       d.before.head && d.before.limits,
+       `head ${d.before.head}, limits ${d.before.limits}`);
+  } else {
+    ok(`${at.padEnd(9)} the limits are pinned to the viewport before any scroll`,
+       d.before.limits, `limits ${d.before.limits}`);
+  }
   if (d.scrolled) {
     ok(`${at.padEnd(9)} and both are still on screen at the foot of the scroll`,
        d.after.head && d.after.limits,

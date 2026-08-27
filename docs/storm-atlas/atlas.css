@@ -1988,8 +1988,13 @@
 [data-atlas].atlas-instrument .atlas-dock{
   position:absolute;grid-row:1;grid-column:1;
   top:20px;bottom:0;right:auto;
+  /* THE PLATE'S OWN WIDTH IS THE THIRD BOUND, AND IT IS THE ONE THAT MATTERS AT 900. `overlays
+     the plate` is the whole rule; a panel wider than the plate it overlays is a panel over the
+     LEDGER, and covering the table with the inspector is the one thing an overlay is supposed
+     to avoid. Measured at 900, where the plate is 336: an unbounded 380 reached 18px into the
+     ledger's first column. */
   left:calc(var(--at-pad) + max(0px, var(--at-plate-avail) - min(380px, 86vw)));
-  width:min(380px,86vw);
+  width:min(380px, 86vw, var(--at-plate-avail));
   z-index:880;overflow:hidden;
   background:var(--chrome);border-left:1px solid var(--rule-2);
 }
