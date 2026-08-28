@@ -242,17 +242,22 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
    *
    * The repetition the bound exists to prevent is real, though: below the sample gate every
    * contract refuses on the SAME sentence, twelve times over. So the two rules are reconciled
-   * the way the panel already reconciled them -- by HOISTING rather than truncating. A reason
-   * shared by more than one row is stated once beneath the group and marked on each row; a
-   * reason unique to its row is printed in full, where it is the finding rather than noise. */
-  const reasonCounts = new Map();
+   * the way the panel already reconciled them -- by HOISTING rather than truncating. A refusal
+   * line shared by more than one row is stated once beneath the group and the rows it speaks for
+   * print no line at all; a line unique to its row is printed in full, where it is the finding
+   * rather than noise. Either way every row keeps its mark, its status word and its rate slot,
+   * so what is hoisted is the SENTENCE and never the refusal.
+   *
+   * WHAT COUNTS AS THE SAME LINE IS THE WHOLE LINE -- kind, counts and sentence, see hoistKeyOf.
+   * Keyed on the sentence alone, one line came to speak for rows it does not describe. */
+  const hoistCounts = new Map();
   for (const g of groups) {
     for (const row of g.rows) {
-      const reason = reasonOf(row);
-      if (reason) reasonCounts.set(reason, (reasonCounts.get(reason) || 0) + 1);
+      const key = hoistKeyOf(row);
+      if (key) hoistCounts.set(key, (hoistCounts.get(key) || 0) + 1);
     }
   }
-  const shared = new Set([...reasonCounts].filter(([, n]) => n > 1).map(([k]) => k));
+  const shared = new Set([...hoistCounts].filter(([, n]) => n > 1).map(([k]) => k));
 
   /* THE TEMPLATE IS COMPOSED FROM THE SAME LIST THE CELLS ARE, so a column that is not emitted
      has no track and a track with no column cannot exist. The track SIZES stay in atlas.css as
@@ -295,7 +300,7 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
             {collapsed ? null : g.rows.map((row) => (
               <DataRow key={row.key} row={row} shape={shape} shared={shared} />
             ))}
-            {collapsed ? null : <SharedReason group={g} shared={shared} onEvidence={onEvidence} />}
+            {collapsed ? null : <SharedReason group={g} shared={shared} />}
             {collapsed ? null : <GroupQualification which={g.key} result={r} />}
           </React.Fragment>
         );
@@ -631,9 +636,16 @@ function DataRow({ row, shape, shared }) {
           it qualifies the whole row, and it is the only element here that may carry
           `data-refusal` -- the DOM gate requires everything with that attribute to name the way
           out, which a two-word status cell cannot do. */}
-      {refused ? (
+      {/* A HOISTED ROW EMITS NO LINE AT ALL, rather than an emptied one. The row keeps its mark,
+          its status word and its rate slot; the sentence, the counts and the way out are stated
+          once beneath the group. Blanking only the REASON and keeping the remedy -- which is
+          what this did -- left the row holding a way out of a refusal it no longer stated, and
+          measured on a two-storm cohort that was eleven lines whose entire content was "YOU CAN
+          CHANGE THIS. A wider cohort would carry a rate…". It also put `data-refusal` on an
+          element naming an exit and nothing to exit FROM, which is the one thing that attribute
+          must never mean. */}
+      {refused && !(shared && shared.has(hoistKeyOf(row))) ? (
         <RowRefusal kind={kind} cell={cell} unscoreable={unscoreable}
-          hoisted={shared && shared.has(reasonOf(row))}
           onEvidence={onEvidence && contractKey ? () => onEvidence(contractKey) : undefined} />
       ) : null}
       {selfContribution ? <SelfContribution row={row} subject={subject} /> : null}
@@ -665,9 +677,26 @@ function SubjectCell({ row, subject }) {
   return <span className="at-slot" title="the archive records no verdict for this storm here">—</span>;
 }
 
+/* THE WAY OUT, IN THE REFUSAL REGISTRY'S OWN WORDS, WHEREVER IT IS PRINTED. A reader who learns
+   "A LIMIT OF THE RECORD" on a row must not meet a paraphrase of it under the group, so the row
+   line and the hoisted line render THIS, rather than two copies of one branch. Two copies is
+   exactly how the hoisted line came to print the RATE_REFUSED remedy over a CONDITIONED_ON
+   reason: it had been written out a second time, with the kind hard-coded. */
+function RemedyLine({ kind }) {
+  const r = REFUSALS[kind];
+  if (!r) return null;
+  return (
+    <span className="at-say-remedy">
+      {r.resolvable === "no" ? <><strong>A LIMIT OF THE RECORD.</strong> {r.irreducible}</>
+        : <><strong>{r.resolvable === "partly" ? "PARTLY IN YOUR HANDS." : "YOU CAN CHANGE THIS."}</strong>{" "}
+          {r.remedyShort || r.remedy}</>}
+    </span>
+  );
+}
+
 /* AT MOST EIGHTEEN WORDS, CARRYING THE COUNT. Never an alert box, never a tint, never a coloured
    background -- a refusal is part of the argument, not an error in it. */
-function RowRefusal({ kind, cell, unscoreable, onEvidence, hoisted }) {
+function RowRefusal({ kind, cell, unscoreable, onEvidence }) {
   const r = REFUSALS[kind];
   const statement = unscoreable ? unscoreable.reason
     : kind === "CONDITIONED_ON" ? cell.reason
@@ -685,17 +714,12 @@ function RowRefusal({ kind, cell, unscoreable, onEvidence, hoisted }) {
           {countsOf(unscoreable)}
         </span>
       ) : null}
-      {/* VERBATIM WHERE IT IS THIS ROW'S OWN FINDING; a marker where the same sentence is about
-          to be said again under the group. Never truncated: see the note in EvidenceDeck. */}
-      <span className="at-say-text">{hoisted ? null : statement}</span>
-      {/* THE LINE THAT SEPARATES A REFUSAL A READER CAN ACT ON FROM ONE NOBODY CAN. The words
-          are the Refusal component's own, because a reader who learns "A LIMIT OF THE RECORD"
-          in one place must not meet a paraphrase of it in another. */}
-      <span className="at-say-remedy">
-        {r.resolvable === "no" ? <><strong>A LIMIT OF THE RECORD.</strong> {r.irreducible}</>
-          : <><strong>{r.resolvable === "partly" ? "PARTLY IN YOUR HANDS." : "YOU CAN CHANGE THIS."}</strong>{" "}
-            {r.remedyShort || r.remedy}</>}
-      </span>
+      {/* VERBATIM: this row is the only place the sentence is said. A row whose whole line is
+          shared with another renders no line at all -- see DataRow. Never truncated: see the
+          note in EvidenceDeck. */}
+      <span className="at-say-text">{statement}</span>
+      {/* THE LINE THAT SEPARATES A REFUSAL A READER CAN ACT ON FROM ONE NOBODY CAN. */}
+      <RemedyLine kind={kind} />
       {onEvidence ? (
         <button type="button" className="at-say-link" data-evidence-link onClick={onEvidence}>
           SEE THE EVIDENCE →
@@ -703,6 +727,35 @@ function RowRefusal({ kind, cell, unscoreable, onEvidence, hoisted }) {
       ) : null}
     </div>
   );
+}
+
+/* THE WHOLE OF WHAT A ROW'S REFUSAL LINE WOULD SAY, AS ONE KEY.
+ *
+ * Hoisting replaces N lines with one, so the key has to be everything those N lines would have
+ * printed. All three parts are load-bearing and each was reached by a different route:
+ *
+ *   kind    A hoisted line names a way out, and which way out there is IS the kind. Keyed on the
+ *           sentence alone, the hoisted line hard-coded RATE_REFUSED -- so ?i=cat4, where five
+ *           contracts refuse CONDITIONED_ON because the cohort was defined by the outcome, was
+ *           told "a wider cohort would carry a rate: drop a condition, widen the radius, or
+ *           extend the seasons". None of those three moves a circular contract; the fifth rule
+ *           is escaped by removing the CONDITION, which is what CONDITIONED_ON's own remedy says.
+ *   counts  The scope/archive/required triple is published on this line and it is not derivable
+ *           from the sentence. A BASE RATE ONLY reason names only the ARCHIVE-WIDE total, so two
+ *           regions with the same total and different in-scope counts write the same sentence
+ *           and publish different numbers. Not reachable in today's archive -- hawaii:hurricane
+ *           is the only contract under the archive-wide gate -- which is exactly why it belongs
+ *           in the key rather than in a comment about why it cannot happen yet.
+ *   reason  The sentence itself, which is what hoisting was always about.
+ *
+ * Two rows may be spoken for by one line only when all three agree. Joined on NUL, the one
+ * character none of the three can contain, so no two distinct triples can collide. */
+function hoistKeyOf(row) {
+  const reason = reasonOf(row);
+  if (!reason) return null;
+  const kind = refusalKindOfRow(row);
+  if (!kind) return null;
+  return [kind, countsOf(row.unscoreable) || "", reason].join("\u0000");
 }
 
 /* WHICH SENTENCE A ROW WOULD PRINT, so repetition can be counted before anything is rendered. */
@@ -717,16 +770,38 @@ function reasonOf(row) {
 /* ONE SENTENCE, ONCE, UNDER THE GROUP THAT SHARES IT. Below the sample gate every contract in a
    group refuses on the same words -- twelve lines of one fact. Hoisted here, the rows keep their
    marks and their status words and the reason is stated in full exactly once. */
-function SharedReason({ group, shared, onEvidence }) {
-  const reasons = [...new Set(group.rows.map(reasonOf).filter((x) => x && shared.has(x)))];
-  if (!reasons.length) return null;
+function SharedReason({ group, shared }) {
+  /* ONE LINE PER HOISTED KEY, IN THE ORDER THE ROWS APPEAR. A group can hoist more than one: its
+     contracts share the sample-gate sentence while its out-of-scope regions share another, and
+     folding those into a single element would put one kind's way out under the other kind's
+     refusal -- which is the shape this whole function existed in before. */
+  const seen = new Set();
+  const lines = [];
+  for (const row of group.rows) {
+    const key = hoistKeyOf(row);
+    if (!key || !shared.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    lines.push({ key, kind: refusalKindOfRow(row), reason: reasonOf(row),
+      need: countsOf(row.unscoreable) });
+  }
+  if (!lines.length) return null;
   return (
-    <div className="at-deck-say" data-refusal="RATE_REFUSED" data-shared-reason>
-      {reasons.map((x, i) => <span className="at-say-text" key={i}>{x}</span>)}
-      <span className="at-say-remedy">
-        <strong>YOU CAN CHANGE THIS.</strong> {REFUSALS.RATE_REFUSED.remedy}
-      </span>
-    </div>
+    <>
+      {lines.map((l) => (
+        /* EVERYTHING THE ROWS WOULD HAVE PUBLISHED, ON THE LINE THAT NOW SPEAKS FOR THEM: the
+           counts, the sentence, and the way out OF THIS KIND. The rows it replaces render
+           nothing, so anything missing here is published nowhere. */
+        <div className="at-deck-say" data-refusal={l.kind} data-shared-reason key={l.key}>
+          {l.need ? (
+            <span className="at-need" title="events in scope · archive-wide · required">
+              {l.need}
+            </span>
+          ) : null}
+          <span className="at-say-text">{l.reason}</span>
+          <RemedyLine kind={l.kind} />
+        </div>
+      ))}
+    </>
   );
 }
 

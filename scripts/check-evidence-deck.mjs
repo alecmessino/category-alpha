@@ -162,6 +162,10 @@ import { EvidenceDeck, subjectVerdicts, subjectReached }
 export function render(props) {
   return renderToStaticMarkup(React.createElement(EvidenceDeck, props));
 }
+/* THE REFUSAL REGISTRY ITSELF, so the assertions below compare the surface against the SOURCE
+   of its sentences rather than against a second copy of them typed into this file. A gate that
+   quotes the prose it is checking drifts with the prose. */
+export { REFUSALS } from ${JSON.stringify(resolve(ROOT, "docs/storm-atlas/src/ui/refusal.jsx"))};
 export { subjectVerdicts, subjectReached };
 `);
 const outfile = join(dir, "bundle.mjs");
@@ -170,7 +174,7 @@ await build({
   jsx: "automatic", logLevel: "silent",
   external: ["react", "react-dom", "react-dom/server", "react/jsx-runtime"],
 });
-const { render, subjectVerdicts, subjectReached } = await import(outfile);
+const { render, subjectVerdicts, subjectReached, REFUSALS } = await import(outfile);
 
 const HTML_DEFAULT = render({ result: RESULT, comparison: COMPARISON, onEvidence: () => {},
   conditions: CONDITIONS });
@@ -186,11 +190,75 @@ const HTML_FOLDED = render({ result: RESULT, comparison: COMPARISON, foldTiming:
    nothing. */
 const HTML_ARCHIVE = render({ result: RESULT, onEvidence: () => {} });
 
+/* ── A DECK THAT ACTUALLY HOISTS, WHICH NONE OF THE FOUR ABOVE DO ────────────────────────
+ *
+ * Measured: rendering RESULT through the deck produces ZERO elements carrying
+ * `data-shared-reason`. Every refusing contract in it refuses on a sentence no other contract
+ * shares, so the hoist has never once fired inside this harness -- and a rule about hoisting
+ * that runs only over decks which do not hoist is a passing check of nothing. That is how a
+ * surface printing eleven contentless refusal lines on `?w=25,-80,200&s0=2018`, and telling
+ * `?i=cat4` that a wider cohort fixes a circular contract, passed forty-six checks here.
+ *
+ * TWO FIXTURES, BECAUSE THE TWO DEFECTS ARE DIFFERENT SHAPES:
+ *
+ *   RESULT_THIN   a cohort under the sample gate. Six intensity contracts refuse on one
+ *                 sentence and must be spoken for once; two out-of-scope regions refuse on
+ *                 DIFFERENT sentences and must each keep their own line.
+ *   RESULT_CIRC   the ?i=cat4 shape. Five contracts refuse CONDITIONED_ON on one sentence --
+ *                 the fifth rule -- so the line that speaks for them must carry CONDITIONED_ON's
+ *                 way out and not the sample gate's. This is the state that was wrong in
+ *                 production and could not be expressed here at all.
+ */
+const THIN_REFUSED = "1 storms with a known outcome < min_sample=10, so this rate is refused "
+  + "rather than published as a number nobody should act on.";
+const thinCell = (over) => cell({ n_storms: 1, count: 0, rate: null, weighted_rate: null,
+  ci95: null, refused_reason: THIN_REFUSED, ...over });
+const RESULT_THIN = {
+  ...RESULT,
+  n_cases: 1, kept: 1, sufficient: false, effective_sample_size: 1, time_to_event: {},
+  intensity: { ts: thinCell({ count: 1 }), cat1: thinCell(), cat2: thinCell(),
+    cat3: thinCell(), cat4: thinCell(), cat5: thinCell() },
+  landfall: {
+    conus: { any: thinCell(), hurricane: thinCell() },
+    caribbean: { any: thinCell(), hurricane: thinCell() },
+  },
+  /* Two OUT OF SCOPE contracts whose sentences differ only in their counts -- which is what the
+     engine writes, and which must NOT be collapsed into one line. */
+  unscoreable: {
+    "caribbean:any": { status: "OUT OF SCOPE", scope_events: 0, archive_events: 11, required: 10,
+      scope: "in this cohort",
+      reason: "only 0 storm(s) in the EP basin carry this outcome, fewer than the 10 required." },
+    "caribbean:hurricane": { status: "OUT OF SCOPE", scope_events: 2, archive_events: 11,
+      required: 10, scope: "in this cohort",
+      reason: "only 2 storm(s) in the EP basin carry this outcome, fewer than the 10 required." },
+  },
+};
+const HTML_HOISTED = render({ result: RESULT_THIN, onEvidence: () => {}, conditions: CONDITIONS });
+
+/* THE ENGINE'S OWN SENTENCE FOR A CIRCULAR CONTRACT, which is one sentence across every rung the
+   condition implies -- so five rows carry it verbatim. See engine/rates.js. */
+const CIRC_REASON = "This cohort was defined by a peak intensity of cat4 or above, so every "
+  + "storm in it carries this outcome by construction. Remove that condition to make this an "
+  + "outcome again.";
+const circCell = () => cell({ count: 470, rate: null, ci95: null,
+  status: "CONDITIONED ON -- NOT AN OUTCOME",
+  conditioned_on: "a peak intensity of cat4 or above", reason: CIRC_REASON });
+const RESULT_CIRC = {
+  ...RESULT,
+  n_cases: 470, kept: 470, effective_sample_size: 470,
+  intensity: { ts: circCell(), cat1: circCell(), cat2: circCell(), cat3: circCell(),
+    cat4: circCell(), cat5: cell({ count: 88, rate: 0.187, ci95: [0.154, 0.226] }) },
+  landfall: { conus: { any: cell({ count: 130, rate: 0.277, ci95: [0.238, 0.319] }),
+    hurricane: cell({ count: 70, rate: 0.149, ci95: [0.119, 0.185] }) } },
+  unscoreable: {},
+};
+const HTML_CIRC = render({ result: RESULT_CIRC, onEvidence: () => {} });
+
 /* ── the audit ────────────────────────────────────────────────────────────────────────────
  *
  * Runs in the page, against a real DOM. Returns a list of violation strings; an empty list is
  * the only passing result. */
-const AUDIT = () => {
+const AUDIT = (REFUSALS) => {
   const bad = [];
   const PCT = /\d[\d,.]*\s*%/;
   const rows = [...document.querySelectorAll("[data-outcome]")];
@@ -316,6 +384,81 @@ const AUDIT = () => {
     bad.push(`a refusal sentence is repeated across rows instead of hoisted: `
       + `"${dupes[0].slice(0, 60)}…" (${dupes.length} repeats)`);
   }
+
+  /* AND THE UNIT OF REPETITION IS THE WHOLE LINE, NOT HALF OF IT. The rule above reads
+     `.at-say-text` alone, so a hoist that suppressed the REASON and kept the REMEDY satisfied it
+     completely: measured on `?w=25,-80,200&s0=2018`, eleven rows each rendered a line whose
+     entire content was "YOU CAN CHANGE THIS. A wider cohort would carry a rate…", beneath a deck
+     that had already said it once. Every one of those lines was distinct-by-reason -- there was
+     no reason -- and identical in fact.
+
+     Two rows that refuse for genuinely DIFFERENT reasons and happen to share a way out are not
+     repeating each other: six regions each naming their own counts, all reachable by widening
+     the same population, is six findings with one exit. So the comparison is the rendered line. */
+  const rowLines = [];
+  for (const row of document.querySelectorAll("[data-outcome]")) {
+    for (const el of row.querySelectorAll(".at-deck-say")) {
+      const t = (el.textContent || "").replace(/\s+/g, " ").trim();
+      if (t) rowLines.push(t);
+    }
+  }
+  const dupeLines = rowLines.filter((t, i) => rowLines.indexOf(t) !== i);
+  if (dupeLines.length) {
+    bad.push(`a refusal line is repeated verbatim across rows instead of hoisted: `
+      + `"${dupeLines[0].slice(0, 60)}…" (${dupeLines.length} repeats)`);
+  }
+
+  /* AND NOTHING ANYWHERE MAY BE LEFT HOLDING ONLY THE WAY OUT. A line naming an exit without
+     naming what it is an exit FROM is the one shape this surface must never render -- it is also
+     an element carrying `data-refusal` that cannot satisfy the DOM gate's own rule in spirit
+     while satisfying it in letter. Walks every `.at-deck-say`, row-level and hoisted alike. */
+  for (const el of document.querySelectorAll(".at-deck-say")) {
+    const reason = (el.querySelector(".at-say-text")?.textContent || "").trim();
+    const remedy = (el.querySelector(".at-say-remedy")?.textContent || "").trim();
+    if (remedy && !reason) {
+      bad.push("a refusal line offers a way out without stating what it refuses: "
+        + `"${remedy.slice(0, 60)}…"`);
+    }
+  }
+
+  /* AND THE WAY OUT MUST BE THE ONE ITS OWN KIND AUTHORISES.
+     Every `.at-deck-say` declares a kind in `data-refusal`; the registry decides, for that kind,
+     both the kicker and the sentence. Compared against REFUSALS rather than against a copy of
+     the prose typed into this file, so the rule cannot drift away from the surface it checks.
+     This is the rule the production defect broke: the hoisted line wrote its own remedy with
+     RATE_REFUSED hard-coded, so ?i=cat4 declared CONDITIONED_ON and then told the reader to
+     widen the radius -- a move that cannot reach a circular contract. Neither half of that is
+     visible to a rule that only looks for repetition or for emptiness. */
+  for (const el of document.querySelectorAll(".at-deck-say[data-refusal]")) {
+    const kind = el.getAttribute("data-refusal");
+    const r = REFUSALS[kind];
+    if (!r) { bad.push(`a refusal line declares an unknown kind: "${kind}"`); continue; }
+    const remedy = (el.querySelector(".at-say-remedy")?.textContent || "")
+      .replace(/\s+/g, " ").trim();
+    if (!remedy) continue;
+    const want = (r.resolvable === "no" ? `A LIMIT OF THE RECORD. ${r.irreducible}`
+      : `${r.resolvable === "partly" ? "PARTLY IN YOUR HANDS." : "YOU CAN CHANGE THIS."} `
+        + `${r.remedyShort || r.remedy}`).replace(/\s+/g, " ").trim();
+    if (remedy !== want) {
+      bad.push(`a ${kind} line offers a way out that is not ${kind}'s: `
+        + `"${remedy.slice(0, 70)}…"`);
+    }
+  }
+
+  /* AND AN UNSCOREABLE CONTRACT PUBLISHES ITS COUNTS WHEREVER ITS SENTENCE IS PRINTED.
+     Panel rule 3 -- what it has against what it needs -- and the deck's only place for it is the
+     refusal line. When a line is hoisted the rows it speaks for render nothing, so a hoisted line
+     that dropped the triple would delete it from the page entirely. That is also what a hoist key
+     blind to the counts would cause: two regions whose sentences match but whose numbers differ
+     would collapse onto one line and one region's numbers would be published nowhere. */
+  for (const el of document.querySelectorAll(".at-deck-say[data-refusal]")) {
+    const kind = el.getAttribute("data-refusal");
+    if (kind !== "OUT_OF_SCOPE" && kind !== "BASE_RATE_ONLY") continue;
+    const need = (el.querySelector(".at-need")?.textContent || "").trim();
+    if (!/\d+ archive-wide · \d+ needed$/.test(need)) {
+      bad.push(`a ${kind} line does not say what it has against what it needs: "${need}"`);
+    }
+  }
   return bad;
 };
 
@@ -323,7 +466,7 @@ const browser = await chromium.launch();
 const page = await browser.newPage();
 const auditOf = async (html) => {
   await page.setContent(`<!doctype html><html><body>${html}</body></html>`);
-  return page.evaluate(AUDIT);
+  return page.evaluate(AUDIT, REFUSALS);
 };
 
 console.log("[deck] the rendered deck, per row");
@@ -342,6 +485,99 @@ console.log("[deck] the rendered deck, per row");
 {
   const bad = await auditOf(HTML_ARCHIVE);
   ok("and so does the archive-mode deck, with two fewer columns", bad.length === 0, bad.join("\n"));
+}
+{
+  const bad = await auditOf(HTML_HOISTED);
+  ok("and so does a below-sample deck, which is the one that hoists", bad.length === 0, bad.join(" | "));
+}
+{
+  const bad = await auditOf(HTML_CIRC);
+  ok("and so does a cohort conditioned on its own outcome", bad.length === 0, bad.join(" | "));
+}
+
+/* ── WHAT THE HOISTED LINE SAYS, ASSERTED DIRECTLY ───────────────────────────────────────
+ *
+ * The audit above is a set of prohibitions -- nothing is repeated, nothing is left bare. None of
+ * them can state what the line that replaced eleven rows is SUPPOSED to say, and a rule that only
+ * forbids is a rule a blank element satisfies. These assert the content.
+ *
+ * The case that matters most is CONDITIONED_ON, because it is the one that was wrong in
+ * production and the one whose remedy is not interchangeable with any other. RATE_REFUSED says
+ * to widen the cohort; CONDITIONED_ON says to remove the condition. A circular contract is not
+ * reachable by widening anything -- the fifth rule is not a sample-size problem -- so a hoisted
+ * line that inherits RATE_REFUSED's sentence sends the reader to three controls, none of which
+ * moves the refusal. */
+console.log("\n[deck] the line that speaks for a group says what that group refused, and how to leave it");
+const hoistedLinesOf = async (html) => {
+  await page.setContent(`<!doctype html><html><body>${html}</body></html>`);
+  return page.evaluate(() => [...document.querySelectorAll("[data-shared-reason]")].map((el) => ({
+    kind: el.getAttribute("data-refusal"),
+    reason: (el.querySelector(".at-say-text")?.textContent || "").trim(),
+    remedy: (el.querySelector(".at-say-remedy")?.textContent || "").trim(),
+    need: (el.querySelector(".at-need")?.textContent || "").trim(),
+  })));
+};
+const bareRemedyCount = async (html) => {
+  await page.setContent(`<!doctype html><html><body>${html}</body></html>`);
+  return page.evaluate(() => [...document.querySelectorAll(".at-deck-say")].filter((el) =>
+    (el.querySelector(".at-say-remedy")?.textContent || "").trim()
+    && !(el.querySelector(".at-say-text")?.textContent || "").trim()).length);
+};
+{
+  const lines = await hoistedLinesOf(HTML_CIRC);
+  /* NON-VACUOUS FIRST. Every assertion below is over `lines`, so an empty list would pass all of
+     them -- which is precisely the failure this fixture exists to end. */
+  ok("a circular cohort hoists exactly one line", lines.length === 1,
+     JSON.stringify(lines.map((l) => l.kind)));
+  const l = lines[0] || {};
+  ok("it declares the kind its rows actually refused with", l.kind === "CONDITIONED_ON",
+     `data-refusal="${l.kind}"`);
+  ok("it states the archive's own reason, verbatim and whole", l.reason === CIRC_REASON,
+     `saw "${String(l.reason).slice(0, 90)}…"`);
+  /* THE EXACT REGRESSION. Not "does not contain the words RATE REFUSED" -- the failure printed
+     RATE_REFUSED's REMEDY, which never names itself. So the sentence is compared to the registry
+     entry, both ways: it must BE the one CONDITIONED_ON authorises and must NOT be the one
+     RATE_REFUSED does. */
+  ok("its way out is the one CONDITIONED_ON authorises",
+     l.remedy === `YOU CAN CHANGE THIS. ${REFUSALS.CONDITIONED_ON.remedyShort
+       || REFUSALS.CONDITIONED_ON.remedy}`,
+     `saw "${String(l.remedy).slice(0, 110)}…"`);
+  ok("and CONDITIONED_ON never inherits RATE_REFUSED's messaging",
+     !String(l.remedy).includes(REFUSALS.RATE_REFUSED.remedy)
+     && !/widen the radius|extend the seasons|a wider cohort/i.test(String(l.remedy)),
+     `saw "${String(l.remedy).slice(0, 110)}…"`);
+  /* A CIRCULAR CONTRACT HAS NO SCOPE COUNTS -- it is not unscoreable, it is excluded by the fifth
+     rule -- so the line must publish none rather than borrow another row's. */
+  ok("it publishes no scope counts, because a circular contract has none", l.need === "",
+     `saw "${l.need}"`);
+  ok("and no row it speaks for is left holding a bare way out",
+     (await bareRemedyCount(HTML_CIRC)) === 0);
+}
+{
+  const lines = await hoistedLinesOf(HTML_HOISTED);
+  ok("a below-sample cohort hoists its sample-gate sentence", lines.length >= 1,
+     JSON.stringify(lines.map((l) => l.kind)));
+  const l = lines[0] || {};
+  ok("under the kind the sample gate actually produces", l.kind === "RATE_REFUSED",
+     `data-refusal="${l.kind}"`);
+  ok("stating the engine's sentence in full", l.reason === THIN_REFUSED,
+     `saw "${String(l.reason).slice(0, 90)}…"`);
+  ok("with the way out RATE_REFUSED authorises",
+     l.remedy === `YOU CAN CHANGE THIS. ${REFUSALS.RATE_REFUSED.remedy}`,
+     `saw "${String(l.remedy).slice(0, 110)}…"`);
+  ok("and no row it speaks for is left holding a bare way out",
+     (await bareRemedyCount(HTML_HOISTED)) === 0);
+  /* TWO OUT OF SCOPE REGIONS DIFFERING ONLY IN THEIR COUNTS ARE TWO FINDINGS, NOT ONE. If the
+     key ever loses its counts component these collapse into a single line and one region's
+     numbers stop being published anywhere. */
+  await page.setContent(`<!doctype html><html><body>${HTML_HOISTED}</body></html>`);
+  const oos = await page.evaluate(() => [...document.querySelectorAll('[data-refusal="OUT_OF_SCOPE"]')]
+    .map((el) => (el.querySelector(".at-need")?.textContent || "").trim()));
+  ok("two out-of-scope regions with different counts keep two lines",
+     oos.length === 2 && oos[0] !== oos[1], JSON.stringify(oos));
+  ok("and each still publishes its own scope · archive · required triple",
+     oos.every((t) => /\d+ in this cohort · \d+ archive-wide · \d+ needed/.test(t)),
+     JSON.stringify(oos));
 }
 
 /* THE FOOT NAMES WHAT THE VS ARCHIVE COLUMN IS AGAINST, AND SAYS WHAT IT IS NOT.
@@ -555,11 +791,46 @@ if (process.argv.includes("--self-test")) {
         });
       },
     },
+    {
+      name: "a hoisted row left holding nothing but the way out",
+      source: HTML_HOISTED,
+      /* THE DEFECT ITSELF. Empties the reason out of every line while leaving the remedy, which
+         is exactly what the surface rendered when the hoist suppressed half a line instead of
+         all of it -- eleven rows each saying how to fix a refusal none of them stated. */
+      mutate: (h) => h.replace(/<span class="at-say-text">[^<]*<\/span>/g,
+        '<span class="at-say-text"></span>'),
+    },
+    {
+      name: "a hoisted line wearing another refusal's kind",
+      source: HTML_CIRC,
+      /* Relabels the circular cohort's hoisted line RATE_REFUSED while leaving CONDITIONED_ON's
+         remedy beneath it -- the mirror of the production defect, and the reason the assertion
+         above compares the kind and the sentence rather than either alone. */
+      mutate: (h) => h.replace(/data-refusal="CONDITIONED_ON"( data-shared-reason)/,
+        'data-refusal="RATE_REFUSED"$1'),
+    },
+    {
+      name: "a hoisted line inheriting the sample gate's way out",
+      source: HTML_CIRC,
+      /* The exact string that shipped: RATE_REFUSED's remedy printed over a circular contract,
+         telling a reader to widen a radius that cannot move the fifth rule. */
+      mutate: (h) => h.replace(
+        /(<div class="at-deck-say" data-refusal="CONDITIONED_ON" data-shared-reason[^>]*>[\s\S]*?<span class="at-say-remedy"><strong>)[^<]*(<\/strong> )[^<]*/,
+        `$1YOU CAN CHANGE THIS.$2${REFUSALS.RATE_REFUSED.remedy}`),
+    },
+    {
+      name: "two out-of-scope regions collapsed onto one line",
+      source: HTML_HOISTED,
+      /* What losing the counts component of the hoist key would do: one region's scope · archive
+         · required triple stops being published anywhere on the page. */
+      mutate: (h) => h.replace(/<span class="at-need"[^>]*>[^<]*<\/span>/g, ""),
+    },
   ];
 
   for (const seed of SEEDS) {
-    const mutated = seed.mutate(HTML_DEFAULT);
-    if (mutated === HTML_DEFAULT) {
+    const source = seed.source || HTML_DEFAULT;
+    const mutated = seed.mutate(source);
+    if (mutated === source) {
       ok(seed.name, false, "the mutation did not change the markup — the seed no longer matches "
         + "the deck's output, so this regression is going unchecked");
       continue;
