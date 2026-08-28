@@ -602,6 +602,27 @@ function landfallView(l) {
  *                     here: a float sum is order-dependent, so the caller owns the order.
  * @param gaps         appended to, not replaced.
  */
+/* CANONICAL MEMBERSHIP, OFF BY DEFAULT — the `members` option below.
+ *
+ * With `members: true` every published cohort cell also carries `member_ids`: the storm_ids that
+ * make up ITS numerator, collected inside the same branch that increments the count. That is the
+ * whole of the mechanism, and the reason it lives here rather than anywhere else -- this
+ * function is the one seam both surfaces score through, so a member set built here cannot
+ * disagree with a count built here. A set assembled later, from a threshold or a region test
+ * re-run against the same cases, would be a SECOND implementation of the numerator, and the two
+ * would drift the first time either was touched.
+ *
+ * Off by default so that every existing caller gets the work it already got. The lens is the
+ * only consumer that needs identities; the dossier, the parity path and the live surfaces want
+ * counts, and none of them should start paying for arrays they will not read.
+ *
+ * THIS NOTE IS OUTSIDE THE PARAMETER LIST ON PURPOSE. Section [A3] of the operational-boundary
+ * gate proves that no historical entry point can accept an operational record by regex-scanning
+ * these signatures for that vocabulary -- COMMENTS INCLUDED. Three drafts of this note tripped
+ * it from inside the parentheses: one listed the callers by name, one named the gate's own file
+ * (whose name carries a banned token between hyphens), and one simply described the rule using
+ * the words the rule bans. The rule was right all three times. Prose about the wall does not
+ * belong inside the thing the wall is checking. */
 export function scoreCases(A, cases, {
   minSample = 10, regions = null, conditionedOn = null, wsum = 0, gaps = [],
   /* THE POPULATION THIS QUERY CAN DRAW FROM: {basins, minSeason, maxSeason}, or null for the
@@ -610,19 +631,7 @@ export function scoreCases(A, cases, {
      has to arrive -- and until methodology 1.1.0 it arrived nowhere, which is exactly how the
      gate came to count a population no query could reach. */
   scope = null,
-  /* CANONICAL MEMBERSHIP, OFF BY DEFAULT.
-   *
-   * With `members: true` every published cohort cell also carries `member_ids` -- the storm_ids
-   * that make up ITS numerator, collected inside the same branch that increments the count a
-   * few lines below. That is the whole of the mechanism, and the reason it is here rather than
-   * anywhere else: this function is the one seam both surfaces score through, so a member set
-   * built here cannot disagree with a count built here. A set assembled later, from a threshold
-   * or a region test re-run against the same cases, would be a SECOND implementation of the
-   * numerator, and the two would drift the first time either was touched.
-   *
-   * OFF BY DEFAULT so that every existing caller gets the work it already got. The lens is the
-   * only consumer that needs identities; the dossier, the parity path and the live surfaces
-   * want counts, and none of them should start paying for arrays they will not read. */
+  /* Canonical membership, off by default. See the note above this function. */
   members = false,
 } = {}) {
   const circular = circularOutcomes(conditionedOn);
