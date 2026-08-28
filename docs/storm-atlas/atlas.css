@@ -1233,7 +1233,14 @@
   --at-col-count:84px;
   --at-col-rate:52px;
   --at-col-int:70px;
-  --at-col-vs:64px;
+  /* vs      `VS ARCHIVE` -- the HEAD again, at 69, and not `+22.8 pp` at 58. This track is
+              RIGHT-SET like every other numeric one, and a right-set cell that is one pixel
+              short does not ellipsise: `text-overflow` works at the end of the line, the
+              overflow here is at the START, and `overflow:hidden` simply cuts the first
+              characters off. Measured at 64: the head published `'S ARCHIVE`, which is the
+              `95% WILSON` failure again in the one column that only appears once a reader has
+              asked a question  →  72 */
+  --at-col-vs:72px;
   --at-col-status:78px;
   --at-col-med:44px;
   --at-col-iqr:70px;
