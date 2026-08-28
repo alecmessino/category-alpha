@@ -165,7 +165,7 @@ function LadderRow({ label, tone, cell, unscoreable, subject, delta, baselineCel
           <span className="at-lct"><OverDenom n={cell.count} of={cell.n_storms} /></span>
         ) : null}
         {refused ? (
-          <span className="at-lref" style={{ color: r ? r.tone : "var(--text-2)" }}>
+          <span className="at-lref">
             {r ? `${r.mark} ${r.title}` : "—"}
           </span>
         ) : (

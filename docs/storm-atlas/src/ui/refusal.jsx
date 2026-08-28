@@ -27,13 +27,21 @@
  * never contain. Those are now OUT OF SCOPE, they are resolvable, and they say where the events
  * actually are. BASE RATE ONLY keeps its sentence, which is once again true.
  *
- * Each carries a distinct mark, a distinct colour role and distinct wording, so which refusal
- * fired is legible without reading the sentence. check-atlas-dom asserts all five reach the
- * screen and that no two of them say the same thing.
+ * Each carries a distinct mark and distinct wording, so which refusal fired is legible without
+ * reading the sentence. check-atlas-dom asserts all five reach the screen and that no two of
+ * them say the same thing.
+ *
+ * THE COLOUR ROLE IS GONE, AND THE MARK IS WHAT REPLACED IT. These states used to be drawn in
+ * three tones -- `--neg`, `--warn`, `--text-2` -- carried on a title, a tinted panel and a
+ * coloured left bar. In the resting instrument that is a second vocabulary: the frame keeps one
+ * ink for what the surface SAYS and reserves the palette for the cartography, so a refusal
+ * printed in a warning hue reads as an error in the argument rather than as part of it. Nothing
+ * was distinguished by the tone that is not still distinguished: the mark, the title and the
+ * remedy kicker each name the state, and the resolvable/irreducible split -- the only one that
+ * decides what a reader can DO -- is drawn as the rule above the block, solid or dashed.
  */
 
 import React from "react";
-import { MONO } from "./kit.jsx";
 
 /* One definition per state. The UI reads this; it never writes its own copy of a refusal, for
    the same reason the gaps are reproduced verbatim -- prose written twice drifts.
@@ -49,7 +57,6 @@ export const REFUSALS = {
     claim: "refused",
     title: "RATE REFUSED",
     mark: "⊘",
-    tone: "var(--neg)",
     resolvable: "yes",
     remedy: "A wider cohort would carry a rate: drop a condition, widen the radius, or extend "
           + "the seasons. The counts below are real either way.",
@@ -59,7 +66,6 @@ export const REFUSALS = {
     claim: "cond",
     title: "CONDITIONED ON",
     mark: "↺",
-    tone: "var(--warn)",
     resolvable: "yes",
     /* Short on purpose. The engine's own `reason` is rendered above this line and explains the
        circularity in full; a second paragraph restating it turns the card into a lecture and
@@ -76,7 +82,6 @@ export const REFUSALS = {
     claim: "oos",
     title: "OUT OF SCOPE",
     mark: "⇱",
-    tone: "var(--warn)",
     resolvable: "yes",
     remedy: "The events exist in this archive, outside the population you asked about. Widen the "
           + "basin or the era and this contract becomes scoreable — a skill number over a "
@@ -98,7 +103,6 @@ export const REFUSALS = {
     claim: "notev",
     title: "NOT EVALUABLE",
     mark: "⌁",
-    tone: "var(--text-2)",
     resolvable: "partly",
     /* TWO REMEDIES, BECAUSE THERE ARE TWO STATES AND ONLY ONE OF THEM IS REACHABLE TODAY.
      *
@@ -134,7 +138,6 @@ export const REFUSALS = {
     claim: "base",
     title: "BASE RATE ONLY",
     mark: "▤",
-    tone: "var(--text-2)",
     resolvable: "no",
     remedy: null,
     irreducible: "The whole archive holds too few of these events for any conditioned claim. "
@@ -145,7 +148,6 @@ export const REFUSALS = {
     claim: "unk",
     title: "— UNKNOWN",
     mark: "—",
-    tone: "var(--text-2)",
     resolvable: "no",
     remedy: null,
     irreducible: "Nobody recorded this outcome. These storms are out of every denominator above "
@@ -180,95 +182,80 @@ export function Refusal({ kind, detail, subject, counts, compact, onEvidence, ca
     ? r.remedyShort : full;
 
   return (
-    <div
-      data-refusal={r.kind}
-      style={{
-        border: hard ? "1px dashed var(--border-strong)" : "1px solid var(--border-strong)",
-        borderLeft: hard ? "1px dashed var(--border-strong)"
-          : `var(--bw-signal) solid ${r.tone}`,
-        borderRadius: "var(--radius-sm)",
-        padding: compact ? "var(--sp-3)" : "var(--sp-4) var(--sp-5)",
-        background: hard ? "transparent" : `color-mix(in srgb, ${r.tone} 6%, transparent)`,
-        marginTop: "var(--sp-3)",
-      }}
-    >
-      {/* WRAPS AS WHOLE ITEMS. In a 260px rail the three parts of this line -- the status, what
-          it is about, and what the archive DOES publish -- were breaking mid-phrase against each
-          other, so "NOT EVALUABLE · shear · SST · OHC · 123 of 192 evaluable" interleaved into
-          two unreadable columns. Each part now keeps itself whole and moves to the next line
-          instead; the counts still push right when there is room for them. */}
-      <div style={{ display: "flex", alignItems: "baseline", gap: "var(--sp-3)",
-        flexWrap: "wrap" }}>
-        <span aria-hidden="true" style={{ ...MONO, fontSize: "var(--fs-mono-sm)", color: r.tone,
-          flex: "none", width: 12, textAlign: "center" }}>{r.mark}</span>
-        <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", fontWeight: 800, color: r.tone,
-          letterSpacing: ".5px", flex: "none" }}>{r.title}</span>
-        {subject ? (
-          <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-            flex: "0 1 auto", minWidth: 0 }}>
-            {subject}
-          </span>
+    /* NO BOX, NO TINT, NO RADIUS, NO COLOURED BAR. A refusal is part of the argument, so it is
+       set the way the argument is set: a rule, a mono kicker, and the sentence in the serif the
+       rest of the instrument reads in. The rule is DASHED when nothing the reader can do will
+       move the refusal -- the one distinction the old panel drew in colour, redrawn in the
+       frame's own material. */
+    <div data-refusal={r.kind}
+      className={`at-ref${hard ? " at-ref-hard" : ""}${compact ? " at-ref-compact" : ""}`}>
+      {/* THE MARK SITS IN THE MARGINAL RULE'S OWN COLUMN, which is what `.at-ref` already is:
+          `grid-template-columns: auto 1fr` with a hairline down the left, the way a journal sets
+          a caveat. This component used to draw its own box beside that grammar instead of
+          joining it — a bordered, rounded, tinted card with a coloured signal bar — so the
+          surface had TWO refusal idioms and the louder one was the one the frame does not own.
+          There is one now. The rule goes DASHED where nothing the reader can build will move the
+          refusal, which is the single distinction the colour was carrying that a reader can
+          act on. */}
+      <span aria-hidden="true" className="at-ref-mark">{r.mark}</span>
+      <div className="at-ref-body">
+        {/* WRAPS AS WHOLE ITEMS. In a 260px rail the three parts of this line -- the status,
+            what it is about, and what the archive DOES publish -- were breaking mid-phrase
+            against each other, so "NOT EVALUABLE · shear · SST · OHC · 123 of 192 evaluable"
+            interleaved into two unreadable columns. Each part now keeps itself whole and moves
+            to the next line instead; the counts still push right when there is room. */}
+        <div className="at-ref-head">
+          <span className="at-ref-title">{r.title}</span>
+          {subject ? <span className="at-ref-subject">{subject}</span> : null}
+          {counts ? <span className="at-ref-counts">{counts}</span> : null}
+        </div>
+
+        {/* THE REASON, AND WHERE IT SITS.
+            By default the archive's own explanation is open, because a refusal a reader cannot
+            interrogate is a refusal they have to take on trust. `detailSummary` makes it a
+            disclosure instead, for the one place the explanation is a hundred words of standing
+            methodology rather than a fact about this cohort -- and even there the status, the
+            subject, the counts and the remedy stay on screen, so what is hidden is the argument
+            and never the refusal. */}
+        {detail ? (
+          detailSummary ? (
+            <details className="at-ref-more">
+              <summary>{detailSummary}</summary>
+              <div className="at-ref-detail">{detail}</div>
+            </details>
+          ) : (
+            <div className="at-ref-detail">{detail}</div>
+          )
         ) : null}
-        {counts ? (
-          <span style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-1)",
-            marginLeft: "auto", flex: "none" }}>{counts}</span>
+
+        {/* THE REFUSAL CARRIES ITS OWN EVIDENCE. A refusal is a claim about the record -- "too
+            few events exist for a skill claim here" -- and a reader is entitled to check it.
+            This links straight to that contract's row in the calibration ledger, where the
+            archive's own backtest says whether the refusal was right. It is the difference
+            between a policy and a finding, and it is also where the reader discovers that the
+            gate misses three of the four contracts it should be catching. */}
+        {onEvidence ? (
+          <button type="button" className="at-ref-link" data-evidence-link onClick={onEvidence}>
+            SEE THE EVIDENCE →
+          </button>
         ) : null}
-      </div>
 
-      {/* THE REASON, AND WHERE IT SITS.
-          By default the archive's own explanation is open, because a refusal a reader cannot
-          interrogate is a refusal they have to take on trust. `detailSummary` makes it a
-          disclosure instead, for the one place the explanation is a hundred words of standing
-          methodology rather than a fact about this cohort -- and even there the status, the
-          subject, the counts and the remedy stay on screen, so what is hidden is the argument
-          and never the refusal. */}
-      {detail ? (
-        detailSummary ? (
-          <details style={{ marginTop: 4, paddingLeft: 24 }}>
-            <summary style={{ ...MONO, fontSize: "var(--fs-mono-xs)", color: "var(--text-2)",
-              cursor: "pointer", letterSpacing: "var(--track-label)" }}>{detailSummary}</summary>
-            <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
-              color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 4 }}>
-              {detail}
-            </div>
-          </details>
-        ) : (
-          <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
-            color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 4, paddingLeft: 24 }}>
-            {detail}
-          </div>
-        )
-      ) : null}
-
-      {/* THE REFUSAL CARRIES ITS OWN EVIDENCE. A refusal is a claim about the record -- "too few
-          events exist for a skill claim here" -- and a reader is entitled to check it. This
-          links straight to that contract's row in the calibration ledger, where the archive's
-          own backtest says whether the refusal was right. It is the difference between a
-          policy and a finding, and it is also where the reader discovers that the gate misses
-          three of the four contracts it should be catching. */}
-      {onEvidence ? (
-        <button type="button" onClick={onEvidence} data-evidence-link style={{
-          ...MONO, fontSize: "var(--fs-mono-xs)", background: "transparent",
-          border: "1px solid var(--border-strong)", borderRadius: "var(--radius-sm)",
-          color: "var(--text-link)", cursor: "pointer", padding: "3px 7px",
-          marginTop: 6, marginLeft: 24,
-        }}>SEE THE EVIDENCE →</button>
-      ) : null}
-
-      {/* The line that separates a refusal a reader can act on from one nobody can. */}
-      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", lineHeight: "var(--lh-body)",
-        marginTop: 5, paddingLeft: 24, color: hard ? "var(--text-2)" : "var(--text-link)" }}>
-        {hard ? (
-          <>
-            <strong style={{ color: "var(--text-2)" }}>A LIMIT OF THE RECORD.</strong>{" "}
-            {r.irreducible}
-          </>
-        ) : (
-          <>
-            <strong>{r.resolvable === "partly" ? "PARTLY IN YOUR HANDS." : "YOU CAN CHANGE THIS."}</strong>{" "}
-            {remedy}
-          </>
-        )}
+        {/* The line that separates a refusal a reader can act on from one nobody can. */}
+        <div className="at-ref-remedy">
+          {hard ? (
+            <>
+              <strong className="at-ref-k">A LIMIT OF THE RECORD.</strong>{" "}
+              {r.irreducible}
+            </>
+          ) : (
+            <>
+              <strong className="at-ref-k">
+                {r.resolvable === "partly" ? "PARTLY IN YOUR HANDS." : "YOU CAN CHANGE THIS."}
+              </strong>{" "}
+              {remedy}
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

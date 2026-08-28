@@ -423,11 +423,26 @@ for (const [w, h] of WIDTHS) {
  *
  * So every published string in the ledger is measured against the box it was given. A head is
  * the worst of them -- it is right-set, so a track one pixel short eats its FIRST character and
- * `95% WILSON` becomes the name of a different interval. */
+ * `95% WILSON` becomes the name of a different interval.
+ *
+ * AND IT RUNS IN THREE STATES, NOT ONE, because two of the ledger's columns do not exist until a
+ * reader has asked something. `VS ARCHIVE` appears only for a conditioned cohort and STATUS only
+ * where something refuses -- so a resting-state sweep had nothing to measure them against, and
+ * the comparison head shipped at 64px against the 69 it needs, publishing `'S ARCHIVE` at the
+ * canonical desktop width. A gate that only visits the state everything fits in is a gate for
+ * the state nobody has a problem with. */
 console.log("\n[instrument] and nothing the ledger publishes is truncated to fit");
-for (const [w, h] of WIDTHS) {
-  await open("", w, h);
-  const cut = await page.evaluate(() => {
+/* THE THIRD IS NOT A THIRD VIEWPORT, IT IS A THIRD SET OF COLUMNS. Resting is the frozen four;
+   a conditioned cohort adds the comparison; below the sample gate adds the refusals, their
+   statuses and the scope counts that qualify them. */
+const CUT_STATES = [
+  ["resting", ""],
+  ["a conditioned cohort", "i=cat4"],
+  ["below the sample gate", "s0=2022&b=NA&i=cat3"],
+];
+for (const [w, h] of WIDTHS) for (const [sname, query] of CUT_STATES) {
+  await open(query, w, h);
+  const cut = await page.evaluate((resting) => {
     /* THE BOX, NOT THE GLYPHS. scrollWidth against clientWidth catches an ellipsis and a clip
        alike; the 1px tolerance is for sub-pixel layout, not for a truncated character. */
     /* AN INVISIBLE ELEMENT PUBLISHES NOTHING, so it cannot publish something truncated. This
@@ -435,8 +450,26 @@ for (const [w, h] of WIDTHS) {
        is checked as `visibility`, which still occupies layout, rather than as `display:none`,
        which would take the cell out of the deck's shared grid entirely. */
     const shown = (el) => getComputedStyle(el).visibility !== "hidden";
+    /* THE CONTENT'S OWN EXTENT, WHICH IS THE ONLY MEASURE THAT SEES A RIGHT-SET CELL CLIPPED.
+       `scrollWidth` reports overflow past the END edge only. Every numeric cell in this ledger
+       is `justify-content:flex-end`, so a cell one pixel short overflows at the START, and
+       `scrollWidth` equals `clientWidth` while the first characters are being cut off by
+       `overflow:hidden` -- which is exactly how `'S ARCHIVE` passed this check. A Range over the
+       element's contents measures the laid-out run itself and does not care which edge it ran
+       off. Wrapped content is unaffected: the Range's union box is the wrapped box.
+
+       ONLY WHERE THERE IS A BOX TO COMPARE IT TO. An INLINE element has no client box at all --
+       `clientWidth` is 0 for a `<span>` -- so measuring a run against it reports every value on
+       the surface as truncated. The comparison belongs to the CELL, which is a flex box with a
+       real width; the run inside it is what the cell either fits or cuts. */
+    const runWidth = (el) => {
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      return r.getBoundingClientRect().width;
+    };
     const over = (el) => shown(el)
-      && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1);
+      && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1
+        || (el.clientWidth > 0 && runWidth(el) > el.clientWidth + 1));
     const label = (el) => (el.textContent || "").replace(/\s+/g, " ").trim();
     const out = [];
     const look = (sel, what) => {
@@ -446,9 +479,13 @@ for (const [w, h] of WIDTHS) {
       }
     };
     look(".at-deck-head .at-dc", "head");
+    /* EVERY DATA CELL, WHICH IS WHERE THE FIGURES ACTUALLY LIVE. A value is an inline span with
+       no box of its own; the cell holding it is the thing that either fits it or cuts it, so the
+       cell is what is measured and `n / N`, the rate, the interval and the comparison are all
+       covered by this one selector rather than by a list that has to be kept in step. */
+    look("[data-outcome] .at-dc", "cell");
     look("[data-outcome] .at-dc-name", "outcome");
     look("[data-outcome] .at-dc-status", "status");
-    look(".at-deck .at-val", "value");
     look("[data-cohort-line] .at-cohort-n", "cohort line");
 
     /* AND NOTHING IS PUSHED PAST THE RIGHT-HAND EDGE OF THE SCREEN, which is the same failure
@@ -457,13 +494,21 @@ for (const [w, h] of WIDTHS) {
        viewport behind a sideways scroll, and the last column is STATUS. Measured at 390: the
        five resting tracks are 468px against 350px of phone, and a refused row refused 118px to
        the right of anything a reader was looking at. */
-    const shell = document.querySelector(".atlas-instrument");
-    if (shell && shell.scrollWidth > shell.clientWidth + 1) {
-      out.push(`the instrument scrolls sideways: ${shell.scrollWidth} into ${shell.clientWidth}`);
+    if (resting) {
+      const shell = document.querySelector(".atlas-instrument");
+      if (shell && shell.scrollWidth > shell.clientWidth + 1) {
+        out.push(`the instrument scrolls sideways: ${shell.scrollWidth} into ${shell.clientWidth}`);
+      }
+      if (document.documentElement.scrollWidth > innerWidth + 1) {
+        out.push(`the page scrolls sideways: ${document.documentElement.scrollWidth} into ${innerWidth}`);
+      }
     }
-    if (document.documentElement.scrollWidth > innerWidth + 1) {
-      out.push(`the page scrolls sideways: ${document.documentElement.scrollWidth} into ${innerWidth}`);
-    }
+    /* ASSERTED IN THE RESTING STATE ONLY, AND THE LIMIT IS DELIBERATE. The frozen five tracks
+       must fit every screen the frame supports. The OPTIONAL comparison column may not: at 390
+       six tracks do not fit 350px by any distribution that leaves an outcome name readable, so
+       it keeps its track and the ledger scrolls to reach it -- the rule atlas.css already states
+       for it. What must hold in EVERY state is that nothing a row SAYS is off screen, which is
+       the status check below and the box checks above; those run unconditionally. */
     /* AND A STATUS THAT EXISTS IS A STATUS ON SCREEN -- in its column where there is one, on its
        own line where there is not. Panel rule 4 is about what a reader can see. */
     for (const c of document.querySelectorAll("[data-outcome] .at-dc-status")) {
@@ -473,8 +518,8 @@ for (const [w, h] of WIDTHS) {
       if (r.right > innerWidth + 1 || r.left < -1) out.push(`status off screen "${t}"`);
     }
     return out;
-  });
-  ok(`${`${w}x${h}`.padEnd(9)} every head, name, figure and status renders whole`,
+  }, query === "");
+  ok(`${`${w}x${h}`.padEnd(9)} ${sname.padEnd(21)} every head, name, figure and status renders whole`,
      cut.length === 0, cut.join("\n"));
 }
 
