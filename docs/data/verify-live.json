@@ -1,24 +1,24 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-28T11:21:02.722Z",
+  "ranAt": "2026-08-28T15:04:15.953Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "cde7f64c5ebbe6eb179c453229f9c471a537b5ae",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/33166753859",
+  "sha": "09bf2c073bc00fbe11fce13e0d51e0ff7cd9640d",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/33183221773",
   "ok": false,
   "passed": 44,
   "total": 46,
   "failures": [
     {
       "check": "served snapshot is fresh",
-      "detail": "2026-08-28T08:44:18.982Z · 157m old"
+      "detail": "2026-08-28T08:44:18.982Z · 380m old"
     },
     {
       "check": "all markets carried",
       "detail": "300 contracts · 51 series · droppedForCap=18"
     }
   ],
-  "thirdPartyFailures": 50,
+  "thirdPartyFailures": 28,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -38,7 +38,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": false,
-      "detail": "2026-08-28T08:44:18.982Z · 157m old"
+      "detail": "2026-08-28T08:44:18.982Z · 380m old"
     },
     {
       "check": "renders: Situation",
@@ -113,7 +113,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "45/60 tile(s) rendered · 15 hole(s) · 0 still loading"
+      "detail": "54/60 tile(s) rendered · 6 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -168,7 +168,7 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "14 guidance cycle(s) turned over → 14 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 1 P-update row(s) · 9 SHIPS · 3 pass · strip arrivals=17"
+      "detail": "14 guidance cycle(s) turned over → 14 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 1 P-update row(s) · 9 SHIPS · 3 pass · strip arrivals=0"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
@@ -193,12 +193,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "54 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "56 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "55 tile(s) served on reload · 54 in cache"
+      "detail": "57 tile(s) served on reload · 56 in cache"
     },
     {
       "check": "all markets carried",
