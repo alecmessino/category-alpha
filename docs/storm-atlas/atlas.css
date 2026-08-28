@@ -1224,11 +1224,15 @@
                                 the mark slot. Below that a ladder rung stops being readable, and
                                 the two optional columns are what would have taken it.
 
-     150 + 84 + 52 + 70 + 78 and four 10px gutters is 474 against the 486 measure, so the resting
-     five-column deck fits with room. The two OPTIONAL columns -- VS ARCHIVE, and the duration
-     pair -- do not, and the ledger scrolls horizontally rather than crushing the name: both
-     appear only because the reader asked for them, and neither may be paid for out of the
-     column that says what the row IS. */
+     THE BUDGET, RESTATED, NOW THAT STATUS IS NOT A TRACK. Resting is 150 + 84 + 52 + 70 and
+     three 10px gutters -- 386 against the 486 measure, with the name taking the surplus. A
+     CONDITIONED cohort adds the comparison and measures 150 + 84 + 52 + 70 + 72 and four
+     gutters, 468, which the SAME 486 holds. That is the whole of the change: the sixth column
+     this file used to buy out of the plate is bought out of the column the status vacated, and
+     the measure is now the only one this surface has in any state. The status figure below is
+     kept because it is what the phone's outcome floor was derived against; no template uses it.
+     The duration pair remains genuinely optional and the ledger still scrolls horizontally to
+     reach it rather than crushing the name. */
   --at-col-outcome:minmax(150px,1fr);
   --at-col-count:84px;
   --at-col-rate:52px;
@@ -1241,7 +1245,10 @@
               `95% WILSON` failure again in the one column that only appears once a reader has
               asked a question  →  72 */
   --at-col-vs:72px;
-  --at-col-status:78px;
+  /* status  NOT A TRACK. The word is a line under the row it governs, at every width -- see the
+              rule below. The measure is kept because it is what the phone's outcome floor was
+              derived against, and because deleting a number a comment still reasons from is how
+              a budget stops being checkable  →  78, unused by any template */
   --at-col-med:44px;
   --at-col-iqr:70px;
 
@@ -1440,6 +1447,39 @@
   font-family:var(--at-mono);font-size:var(--at-fs-label);letter-spacing:var(--at-tr-label);
   color:var(--t2);
 }
+
+/* STATUS IS A LINE UNDER ITS ROW, AT EVERY WIDTH, AND NO LONGER A TRACK.
+ *
+ * WHY IT WAS PROMOTED. This treatment already existed twice -- below 1340 with a comparison on
+ * screen, and below 480 -- each time for a width that could not hold six tracks. The reason it
+ * is now unconditional is not width. It is that a 14-term controlled vocabulary set at 9.5px in
+ * the rightmost, most-droppable track is the least legible thing on a row whose whole content,
+ * when it refuses, IS the qualification; and that retiring the track is what pays for the
+ * comparison track being RESERVED at rest, which is what stops the ledger's measure -- and with
+ * it `--at-plate-avail`, the stage, and the camera -- moving when a condition arrives.
+ *
+ * NOTHING IS HIDDEN AND NOTHING IS ABBREVIATED. The cell is emitted on every row, the head's and
+ * the group rows' included, and spans every track. That uniformity is load-bearing: the deck's
+ * rows are `display:contents`, so the cells are auto-placed onto one shared grid in document
+ * order and every row must contribute the same number of items. `display:none` on the empty ones
+ * removes them from that flow and the next row's outcome name lands in whatever column the last
+ * row stopped at -- measured, the Category 1 name was placed in a 0px track and the deck's
+ * columns walked out of alignment one row at a time. So the empty ones stay, at zero height,
+ * taking no line and no rule.
+ *
+ * check-responsive-matrix draws exactly one exception for a cell leaving the line and this is
+ * it: a cell may do so only by spanning every track and sitting below its row's other cells. */
+[data-atlas] .at-deck .at-dc-status{
+  grid-column:1/-1;justify-content:flex-start;min-height:0;padding:0;
+}
+[data-atlas] .at-deck .at-dc-status:not(:empty){
+  padding:0 0 var(--at-s1) calc(11px + var(--at-s2));
+}
+/* THE HEAD'S IS HIDDEN RATHER THAN REMOVED, for the same auto-placement reason and one more: a
+   column head over a column that is no longer there is a promise the table does not keep.
+   `visibility` rather than `display` keeps the cell in the shared flow, and check-atlas-instrument
+   exempts an invisible element from its truncation sweep on exactly that basis. */
+[data-atlas] .at-deck-head .at-dc-status{visibility:hidden}
 
 /* STATUS: one ink, never coloured, never a score. The whole argument for a single ink is that a
    coloured status becomes a verdict -- red for refused reads as an error, and a refusal is not
@@ -1869,33 +1909,35 @@
    empty one must not reserve height the plate could be using. */
 [data-atlas].atlas-shell.atlas-instrument:has(.atlas-transport > *){--at-tport:40px}
 
-/* THE LEDGER TAKES ITS SIXTH COLUMN OUT OF THE PLATE, NOT OUT OF THE OUTCOME NAME.
+/* THE LEDGER TOOK ITS SIXTH COLUMN OUT OF THE PLATE. IT NO LONGER HAS A SIXTH COLUMN.
  *
- * The frozen measure holds the frozen table -- OUTCOME | n / N | RATE | 95% WILSON -- plus the
- * STATUS column that a refusal brings back, and that is what the resting screen is measured at.
- * A CONDITIONED cohort has one more: VS ARCHIVE, the comparison against the same cohort without
- * its last condition, which the engine computes the moment any condition exists. Six tracks do
- * not fit 486px, and there are only three places the width can come from:
+ * WHAT WAS HERE. `:has(.at-dc-vs){--at-ledger:clamp(486px,41vw,700px)}` -- the measure widened
+ * from 33.75vw the moment the deck rendered a comparison, so that six tracks would fit. The
+ * reasoning was sound and the alternatives it rejected are still the right things to reject: the
+ * outcome name may not be ellipsised to pay for a secondary column, and a refusal that says so
+ * off the right-hand edge of a sideways scroll has not said so. What it got wrong was where the
+ * width came from. It came from the plate.
  *
- *   the outcome name   -- which would ellipsise "Central America · ≥64 KT" to four characters,
- *                         paying for a secondary column with the primary one;
- *   a horizontal scroll -- which measured, at 1440, put the STATUS column and the refusal line
- *                         beneath it off the right-hand edge. A refused row that says so
- *                         off-screen has not said so;
- *   the plate           -- which is what happens here.
+ * WHAT THAT COST, MEASURED. `--at-plate-avail` is computed from `--at-ledger`, and the stage's
+ * height bounds are computed from `--at-plate-avail`, so one condition resized the map. At 1440
+ * the plate went 834x499 -> 730x437; at 1920, 1180x707 -> 1100x659; at 1680 it lost 23% of its
+ * area. And because the box changed while the view was still AT the aperture, settle() correctly
+ * re-derived the aperture against the new box and took the CAMERA with it -- zoom 3.75 -> 3.50
+ * and the centre 3.2 degrees north at 1920, with the reader's hands nowhere near the map. A
+ * cohort edit is not a camera command, and the surface answered one as though it were.
  *
- * 41vw against 33.75 is 590px at 1440 and a 730px plate, still well inside the aspect bounds.
- * The resting screen never reaches this rule, so 5c's measured 834px plate is untouched where it
- * is specified; what moves is the width of a screen that has more evidence on it, which is the
- * right direction for evidence to push.
+ * WHAT REPLACED IT. Nothing here: the fix is in the deck. STATUS stops being a track and becomes
+ * the line under the row it governs at every width -- which it already was below 1340 and below
+ * 480 -- and the comparison track is RESERVED at rest rather than summoned. Five tracks and four
+ * gutters measure 468 against the 486 the resting screen was always given, so the sixth column
+ * this rule bought is a column the ledger no longer needs, and the measure below is now the only
+ * one this surface has in any state.
  *
- * THE FLOOR HERE IS THE RESTING FLOOR, NOT A SIXTH-COLUMN FLOOR. Below the width where 41vw
- * stops holding six tracks, VS ARCHIVE is the column that scrolls -- it is the OPTIONAL one, it
- * appears only because a condition exists, and the alternative is buying it out of the plate on
- * a screen that has already given the plate up to the resting five. */
-[data-atlas].atlas-shell.atlas-instrument:has(.at-dc-vs){
-  --at-ledger:clamp(486px,41vw,700px);
-}
+ * settle() IS UNTOUCHED, DELIBERATELY. Its re-derivation is right -- an aperture is defined by a
+ * frame, a clamp and the plate's box -- and pan-compensating instead once put HOME and the
+ * opening view measurably apart. With the box no longer moving, that branch re-derives the same
+ * aperture against the same rectangle and is inert. scripts/check-atlas-stability.mjs asserts
+ * exactly that, in both the at-aperture and the post-drag branch. */
 [data-atlas].atlas-shell.atlas-instrument > *{min-width:0}
 
 /* ─── the head: the question, and the line that sizes it ────────────────────────────────── */
@@ -2181,40 +2223,6 @@
   [data-atlas].atlas-instrument .at-platefoot{flex-wrap:wrap;row-gap:5px}
 }
 
-/* < 1340 WITH A COMPARISON ON SCREEN · THE STATUS LEAVES ITS COLUMN.
- *
- * SIX TRACKS MEASURE 548 AND THE MEASURE THAT HOLDS THEM IS 41vw, so below 1337px of viewport a
- * conditioned cohort's deck is wider than the ledger it sits in -- and what goes off the right
- * is the LAST column, which is STATUS. Measured at 900: `CONDITIONED ON`, `OUT OF SCOPE` and
- * `BASE RATE ONLY` all sat past the right-hand edge of a sideways scroll on rows whose rate cell
- * showed a dash. A refused row that says so off-screen has not said so, and this is the same
- * failure the ledger measure is floored against, arriving through the one optional column a
- * reader asked for rather than through the percentage.
- *
- * The answer is the one the phone already uses: the status stops being a column and becomes a
- * line of its own under the row that owns it, reading straight into that row's refusal sentence.
- * The comparison keeps its track, the four tracks 5c specifies keep theirs, and nothing is
- * abbreviated, hidden or moved off the row. Above 1340 the column fits and the column is used.
- *
- * THE RULES ARE THE PHONE'S, RESTATED RATHER THAN SHARED, because the two conditions are
- * different -- one is a screen too narrow for five tracks, the other a ledger too narrow for six
- * -- and a selector list spanning two media queries would hide that. What must stay identical is
- * the treatment, and it is asserted rather than trusted: check-atlas-instrument measures every
- * status's position at six widths across the refusal states. */
-@media (max-width:1339px){
-  [data-atlas].atlas-instrument:has(.at-dc-vs) .at-deck{--at-col-status:0px}
-  /* Every status cell spans the row, the head's and the group rows' included, at zero height
-     when empty: the deck's rows are `display:contents`, so a `display:none` cell takes an item
-     out of one shared auto-placement flow and walks every column after it out of alignment. */
-  [data-atlas].atlas-instrument:has(.at-dc-vs) .at-deck .at-dc-status{
-    grid-column:1/-1;justify-content:flex-start;min-height:0;padding:0;
-  }
-  [data-atlas].atlas-instrument:has(.at-dc-vs) .at-deck .at-dc-status:not(:empty){
-    padding:0 0 var(--at-s1) calc(11px + var(--at-s2));
-  }
-  [data-atlas].atlas-instrument:has(.at-dc-vs) .at-deck-head .at-dc-status{visibility:hidden}
-}
-
 /* < 900 · ONE COLUMN, AND THE SHELL SCROLLS.
  *
  * SIMULTANEITY IS THE ONLY REAL LOSS, AND IT IS STATED RATHER THAN PAPERED OVER. Below this
@@ -2307,26 +2315,9 @@
    * actually specifies -- OUTCOME | n / N | RATE | 95% WILSON -- fit the measure with the
    * outcome name taking what is left. */
   [data-atlas].atlas-instrument .at-deck{
-    --at-col-status:0px;
     --at-col-outcome:minmax(100px,1fr);
     column-gap:8px;
   }
-  /* EVERY STATUS CELL SPANS THE ROW -- THE HEAD'S AND THE GROUP ROWS' INCLUDED -- AND THAT
-     UNIFORMITY IS LOAD-BEARING, NOT TIDINESS. The deck's rows are `display:contents`, so the
-     cells are auto-placed onto one shared grid in document order and every row must contribute
-     the SAME NUMBER OF ITEMS. `display:none` on the empty ones removes them from that flow, and
-     the next row's outcome name lands in whatever column the last row stopped at: measured, the
-     Category 1 name was placed in a 0px track and the deck's columns walked out of alignment
-     one row at a time. So the empty ones stay, at zero height, taking no line and no rule. */
-  [data-atlas].atlas-instrument .at-deck .at-dc-status{
-    grid-column:1/-1;justify-content:flex-start;min-height:0;padding:0;
-  }
-  [data-atlas].atlas-instrument .at-deck .at-dc-status:not(:empty){
-    padding:0 0 var(--at-s1) calc(11px + var(--at-s2));
-  }
-  /* THE HEAD'S IS HIDDEN RATHER THAN REMOVED, for the same reason and one more: a column head
-     over a column that is no longer there is a promise the table does not keep. */
-  [data-atlas].atlas-instrument .at-deck-head .at-dc-status{visibility:hidden}
   /* AND THE NAME'S OWN INDENT TIGHTENS BY SIX PIXELS, which is the difference between
      `Unattributed` fitting the measure and being broken across two lines mid-word. The class
      hairline and the mark slot keep their widths; only the two gutters between them close. */

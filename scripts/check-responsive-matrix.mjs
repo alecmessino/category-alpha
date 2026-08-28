@@ -130,12 +130,25 @@ const AUDIT = (vw) => {
     const all = [...row.children].filter((c) => c.classList.contains("at-dc"));
     const label = row.getAttribute("data-outcome") || row.getAttribute("data-deck-group")
       || (row.classList.contains("at-deck-head") ? "HEAD" : "row");
-    if (all.length !== tracks) {
-      bad.push(`${label}: ${all.length} cells against ${tracks} tracks — the last one wraps`);
-      continue;
-    }
     const cells = all.filter((c) => !spansTheRow(c));
     const below = all.filter(spansTheRow);
+    /* THE COUNT IS OF CELLS THAT ARE ON THE LINE, WHICH IS WHAT THE RULE WAS ALWAYS ABOUT.
+     *
+     * This compared EVERY cell against the track count, which was the same number while the
+     * status still occupied a 0px track and spanned it. It no longer does: the status has no
+     * track at any width, so a row emits one more element than the deck has columns and this
+     * read it as the wrap it exists to catch.
+     *
+     * The property is unchanged and so is its sharpness. A cell may leave the line ONLY by
+     * spanning every track, and it must still sit below its row -- both asserted below. What is
+     * counted here is the cells that claim a column: too few and a row is short, too many and one
+     * of them really has wrapped into an implicit row where it detaches from its contract. A
+     * status that merely drifted still fails, because it would not span. */
+    if (cells.length !== tracks) {
+      bad.push(`${label}: ${cells.length} cells on the line against ${tracks} tracks`
+        + `${below.length ? ` (${below.length} spanning below)` : " — the last one wraps"}`);
+      continue;
+    }
     const tops = cells.map((c) => Math.round(rect(c).top));
     /* AND THE SUB-LINE IS UNDER ITS OWN ROW, not above it and not beside it. */
     for (const c of below) {

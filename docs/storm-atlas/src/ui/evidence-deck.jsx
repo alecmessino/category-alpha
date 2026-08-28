@@ -132,10 +132,32 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
  * `timing` false simply removes the two duration tracks. The control that restores them is a
  * line of its own beneath the rows rather than a ninth column: at a 486px measure a track spent
  * on a fold is a track taken from an outcome name. */
-export function columnsOf({ vs, status, timing }) {
+/* THE DECK'S TRACKS, AND STATUS IS NO LONGER ONE OF THEM.
+ *
+ * TWO THINGS CHANGED HERE AND BOTH EXIST TO STOP THE LEDGER'S MEASURE MOVING THE MAP.
+ *
+ * THE COMPARISON TRACK IS STILL SUMMONED, AND IT NO LONGER COSTS THE PLATE ANYTHING. `vs` is
+ * pushed only once a comparison exists, as before -- an empty column headed `VS ARCHIVE` would
+ * claim a comparison the deck is not making, which check-atlas-acceptance asserts against in as
+ * many words. What changed is that atlas.css no longer widens `--at-ledger` from 33.75vw to 41vw
+ * under `:has(.at-dc-vs)` to make room for it. That widening came out of `--at-plate-avail`,
+ * which is what bounds the plate: measured at 1440, one condition took the plate from 834x499 to
+ * 730x437 and the camera from zoom 3.25 to 3.00, three degrees north, with the reader's hands
+ * nowhere near the map. Retiring the status track is what pays for the comparison inside the
+ * measure the ledger already had. scripts/check-atlas-stability.mjs asserts the consequence.
+ *
+ * STATUS IS A LINE, NOT A COLUMN, AT EVERY WIDTH. It was already this below 1340 and below 480,
+ * for the reason that applies at every width: a 14-term controlled vocabulary set at 9.5px in
+ * the rightmost, most-droppable track is the least legible thing on the row whose whole content,
+ * when it refuses, IS the qualification. Promoting the narrow treatment is also what pays for
+ * the reserved comparison track -- five tracks and four gutters measure 468 against the 486
+ * measure, where six and five would measure 556 and scroll the ledger sideways at the canonical
+ * width. The CELL is still emitted on every row, the head's included: it is what the DOM gates
+ * read, what check-atlas-published-values captures, and what keeps a status inside the row it
+ * governs. It is emitted OUTSIDE this list and spans the row -- see DataRow. */
+export function columnsOf({ vs, timing }) {
   const cols = ["outcome", "count", "rate", "int"];
   if (vs) cols.push("vs");
-  if (status) cols.push("status");
   if (timing) cols.push("med", "iqr");
   return cols;
 }
@@ -226,8 +248,7 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
    * same three expressions the row itself uses, before anything is rendered. One refusal
    * anywhere brings the column back for the whole deck. */
   const showVs = !!comparison || !!subject;
-  const showStatus = groups.some((g) => g.rows.some((row) => !!statusWordOf(row)));
-  const cols = columnsOf({ vs: showVs, status: showStatus, timing: timingOn });
+  const cols = columnsOf({ vs: showVs, timing: timingOn });
   const shape = { cols, subject, onEvidence };
 
   /* WHICH REFUSAL SENTENCES REPEAT, WHICH IS WHAT THE BOUND IS ACTUALLY FOR.
@@ -434,8 +455,15 @@ function DeckHead({ shape }) {
     med: <span className="at-dc at-dc-med" key="med">MED h</span>,
     iqr: <span className="at-dc at-dc-iqr" key="iqr">P25–P75</span>,
   };
+  /* THE STATUS HEAD IS EMITTED AND HIDDEN RATHER THAN DROPPED, and the distinction is the deck's
+     own: `visibility:hidden` still occupies layout, so the cell stays in the shared
+     auto-placement flow, while `display:none` would take one item out of one row and walk every
+     column after it out of alignment. It is also what `hasStatusColumn` reads in three gates. */
   return (
-    <div className="at-deck-row at-deck-head" role="row">{cols.map((k) => head[k])}</div>
+    <div className="at-deck-row at-deck-head" role="row">
+      {cols.map((k) => head[k])}
+      {head.status}
+    </div>
   );
 }
 
@@ -500,6 +528,7 @@ function GroupRow({ group, shape, collapsed, onExpand }) {
   return (
     <div className="at-deck-row at-deck-group" data-deck-group={group.label} role="row">
       {cols.map((k) => cell[k])}
+      {cell.status}
     </div>
   );
 }
@@ -630,6 +659,13 @@ function DataRow({ row, shape, shared }) {
       data-self-contribution={selfContribution ? "" : undefined} role="row">
 
       {cols.map((k) => out[k])}
+      {/* THE STATUS, ON THE LINE BELOW ITS OWN ROW AND INSIDE ITS OWN ROW ELEMENT. It is emitted
+          after the tracks rather than among them because it no longer HAS a track: it spans every
+          one of them, which is the single exception check-responsive-matrix draws for a cell
+          leaving the line -- "it has not fallen off the end of a line it was meant to be on, it
+          has been GIVEN the whole next line". Empty on a row with nothing to qualify, at zero
+          height, so a resting deck reads exactly as it did. */}
+      {out.status}
 
       {/* THE ARGUMENT, BOUNDED. A statement of at most eighteen words carrying the count that
           produced it; the full reason is behind SEE THE EVIDENCE. It spans every column because
