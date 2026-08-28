@@ -119,7 +119,15 @@ const AUDIT = (vw) => {
    * So the exception is drawn as narrowly as it can be: a cell may leave the line only if its
    * own `grid-column` spans every track, and it must then sit BELOW its row's other cells. A
    * status that merely wrapped, drifted or landed beside the wrong row still fails. */
-  const tracks = getComputedStyle(deck).gridTemplateColumns.trim().split(/\s+/).length;
+  /* A TRACK THE DECK DECLARES AS RESERVED IS CLAIMED BY NOTHING, ON PURPOSE.
+     The comparison column's WIDTH is held open before the comparison exists, so the resting
+     columns do not shift when it arrives, while no `.at-dc-vs` cell and no `VS ARCHIVE` heading
+     is rendered -- which is what check-atlas-acceptance requires of a cohort that IS the archive.
+     The rule below is unchanged in strength: every track is still claimed by exactly one cell,
+     less a count the DECK PUBLISHES rather than a tolerance this gate grants. A cell that goes
+     missing still fails, because the offset does not move when it does. */
+  const reserved = Number(deck.getAttribute("data-reserved-tracks") || 0);
+  const tracks = getComputedStyle(deck).gridTemplateColumns.trim().split(/\s+/).length - reserved;
   const spansTheRow = (c) => {
     const cs = getComputedStyle(c);
     return cs.gridColumnStart === "1" && cs.gridColumnEnd === "-1";

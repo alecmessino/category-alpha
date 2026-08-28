@@ -2318,6 +2318,21 @@
     --at-col-outcome:minmax(100px,1fr);
     column-gap:8px;
   }
+  /* AND THE RESERVED COMPARISON WIDTH IS GIVEN BACK, BECAUSE HERE IT CANNOT BE AFFORDED.
+   *
+   * The deck holds the comparison's width open before the comparison exists so that the resting
+   * columns do not shift when it arrives. That is worth a track where the measure can hold one.
+   * On a phone it is not: the budget is `100 + 84 + 52 + 70` and four 8px gutters against 350px
+   * of screen, and 72px held open for a column nobody has asked for measured 430 into 390 --
+   * the instrument scrolling sideways in the RESTING state, which check-atlas-instrument asserts
+   * against at every width.
+   *
+   * Keyed on `data-reserved-tracks`, which the deck sets only while it is holding width for a
+   * comparison that does not exist yet. So this zeroes the reserved track and nothing else: a
+   * cohort that HAS a comparison keeps the real 72px column and the deck scrolls sideways to
+   * reach it, which is the rule this file already states for the optional columns. Nothing here
+   * touches `--at-ledger`, so the plate is not a function of it either way. */
+  [data-atlas].atlas-instrument .at-deck[data-reserved-tracks]{--at-col-vs:0px}
   /* AND THE NAME'S OWN INDENT TIGHTENS BY SIX PIXELS, which is the difference between
      `Unattributed` fitting the measure and being broken across two lines mid-word. The class
      hairline and the mark slot keep their widths; only the two gutters between them close. */

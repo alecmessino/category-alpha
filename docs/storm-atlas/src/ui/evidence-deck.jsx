@@ -136,15 +136,23 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
  *
  * TWO THINGS CHANGED HERE AND BOTH EXIST TO STOP THE LEDGER'S MEASURE MOVING THE MAP.
  *
- * THE COMPARISON TRACK IS STILL SUMMONED, AND IT NO LONGER COSTS THE PLATE ANYTHING. `vs` is
- * pushed only once a comparison exists, as before -- an empty column headed `VS ARCHIVE` would
- * claim a comparison the deck is not making, which check-atlas-acceptance asserts against in as
- * many words. What changed is that atlas.css no longer widens `--at-ledger` from 33.75vw to 41vw
- * under `:has(.at-dc-vs)` to make room for it. That widening came out of `--at-plate-avail`,
- * which is what bounds the plate: measured at 1440, one condition took the plate from 834x499 to
- * 730x437 and the camera from zoom 3.25 to 3.00, three degrees north, with the reader's hands
- * nowhere near the map. Retiring the status track is what pays for the comparison inside the
- * measure the ledger already had. scripts/check-atlas-stability.mjs asserts the consequence.
+ * THE COMPARISON COLUMN IS SUMMONED. ITS WIDTH IS RESERVED. THOSE ARE TWO DIFFERENT THINGS.
+ *
+ * `vs` is pushed into this list only once a comparison exists, and no `.at-dc-vs` cell and no
+ * `VS ARCHIVE` heading is rendered before then -- an empty column under that heading claims a
+ * comparison the deck is not making, which check-atlas-acceptance asserts against in as many
+ * words. But the WIDTH it will need is held open from the start, as a trailing track that no
+ * cell claims (see `deckTemplate`), so the four resting columns land on exactly the same
+ * x-positions whether or not a condition exists.
+ *
+ * WHY BOTH HALVES MATTER. `--at-ledger` used to widen from 33.75vw to 41vw under
+ * `:has(.at-dc-vs)` to make room for the sixth column. That came out of `--at-plate-avail`,
+ * which bounds the plate: measured at 1440, one condition took the plate from 834x499 to 730x437
+ * and the camera from zoom 3.25 to 3.00, three degrees north, with the reader's hands nowhere
+ * near the map. Retiring the status track pays for the comparison inside the measure the ledger
+ * already had; reserving its width stops the ledger's own columns shifting under the reader when
+ * it arrives. scripts/check-atlas-stability.mjs asserts the first, and the deck's own geometry
+ * is what makes the second true rather than approximately true.
  *
  * STATUS IS A LINE, NOT A COLUMN, AT EVERY WIDTH. It was already this below 1340 and below 480,
  * for the reason that applies at every width: a 14-term controlled vocabulary set at 9.5px in
@@ -250,6 +258,16 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
   const showVs = !!comparison || !!subject;
   const cols = columnsOf({ vs: showVs, timing: timingOn });
   const shape = { cols, subject, onEvidence };
+  /* THE RESERVATION IS A TRACK IN THE TEMPLATE THAT NO CELL IS EMITTED FOR, and it is DECLARED
+     rather than inferred. `data-reserved-tracks` is what lets check-responsive-matrix keep the
+     rule it has always enforced -- every track is claimed by exactly one cell -- while allowing
+     the one track that is deliberately unclaimed. A cell that genuinely goes missing still fails
+     it, because the offset is a number the deck publishes rather than a tolerance the gate grants.
+     It is a trailing track, so the full-width blocks that span `1/-1` -- every refusal sentence,
+     the preamble, the limits -- keep the whole measure and are unaffected either way. */
+  const reserved = showVs ? 0 : 1;
+  const deckTemplate = cols.map((k) => `var(--at-col-${k})`)
+    .concat(reserved ? ["var(--at-col-vs)"] : []).join(" ");
 
   /* WHICH REFUSAL SENTENCES REPEAT, WHICH IS WHAT THE BOUND IS ACTUALLY FOR.
    *
@@ -284,7 +302,7 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
      has no track and a track with no column cannot exist. The track SIZES stay in atlas.css as
      --at-col-* custom properties: this decides which columns there ARE, the stylesheet decides
      how WIDE each one is, and neither can silently become the other. */
-  const gridStyle = { "--at-deck-cols": cols.map((k) => `var(--at-col-${k})`).join(" ") };
+  const gridStyle = { "--at-deck-cols": deckTemplate };
 
   return (
     /* THE LIMITS ARE A SIBLING OF THE GRID, NOT A CELL IN IT, AND THAT IS A POSITIONING FACT
@@ -295,6 +313,7 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
        grid its containing block is the scrolling column, and it stays against the foot of it. */
     <>
     <div className="at-deck" data-evidence-deck style={gridStyle}
+      data-reserved-tracks={reserved ? String(reserved) : undefined}
       data-deck-mode={showVs ? "cohort" : "archive"}
       data-timing-folded={timingOn ? undefined : ""}>
       <DeckPreamble result={r} spec={spec} />
