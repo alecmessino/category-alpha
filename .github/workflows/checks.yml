@@ -293,6 +293,23 @@ jobs:
       - name: Verify one cohort spec gives one answer
         run: node scripts/test-atlas-cohort.mjs
 
+      # THE MEMBER-ID FEED, RECONCILED TO THE NUMBERS IT CLAIMS TO BE THE IDENTITIES OF.
+      # The lens has to draw the storms behind one ledger row, and the frozen rule is that the
+      # renderer never approximates membership and never reproduces a statistical predicate --
+      # so the engine emits the identities from inside the same branch that increments the
+      # count. This proves two different things, and the second is the one that matters: that
+      # every set is the right SIZE (length and unique-set size equal the published numerator),
+      # and that it is the right SET, checked against a reconstruction derived independently in
+      # the test from the archive's own fields. A count and a cardinality can agree while the
+      # members are wrong, and that failure reaches a reader as the wrong tracks lit on the
+      # plate beside a correct-looking number.
+      #
+      # It also proves the feed is INERT unless asked for: with the flag off every cell carries
+      # `member_ids: null` and is otherwise field-for-field what it was, which is what makes
+      # this addition safe for the dossier, the parity path and every live surface.
+      - name: Verify every member set is exactly its numerator
+        run: node scripts/test-atlas-members.mjs
+
       # Comparing two Wilson intervals for overlap is a WEAK heuristic, not a hypothesis test,
       # and this repository runs none. The danger is the vocabulary: "significant" would borrow
       # an authority the method does not have, and a reader cannot tell from a rendered page

@@ -432,10 +432,19 @@ const ALL_REGIONS = LANDFALL_FILTERS.map((f) => f.region).filter(Boolean);
 const MIN_SAMPLE = 10;
 
 /**
+ * @param {object}  [opts]
+ * @param {Array}   [opts.regions]  which landfall regions to report on
+ * @param {boolean} [opts.members]  ask every published cell to carry `member_ids` -- the
+ *   storm_ids behind ITS numerator, collected by scoreCases inside the branch that increments
+ *   the count. Off by default. It changes no filter, no threshold, no denominator, no rate and
+ *   no refusal: the cohort computed with it is the cohort computed without it, plus identities.
+ *   `unscoreable` entries never carry them -- those count events in the archive or the scope,
+ *   not in this cohort, and an id list there would assert a membership that does not exist.
+ *
  * @returns {{spec, rows, kept, undecidable, excluded, cases, intensity, landfall,
  *            time_to_event, unscoreable, gaps, n_cases}}
  */
-export function cohortResult(archive, spec, { regions = ALL_REGIONS } = {}) {
+export function cohortResult(archive, spec, { regions = ALL_REGIONS, members = false } = {}) {
   const s = normalise(spec);
   const filtered = filterStorms(archive, toFilters(s));
   const gaps = [];
@@ -496,6 +505,10 @@ export function cohortResult(archive, spec, { regions = ALL_REGIONS } = {}) {
     conditionedOn: conditionedOn(s),
     wsum: cases.length,           // uniform weights: the sum IS the count
     gaps,
+    /* THE ONLY THING THIS FLAG DOES IS ASK scoreCases TO KEEP WHAT IT ALREADY KNOWS. It changes
+       no filter, no threshold, no denominator and no refusal -- the cohort computed with it is
+       the cohort computed without it, plus the identities behind each numerator. */
+    members,
     scope: { basins: scopeBasins, minSeason: s.seasonFrom, maxSeason: s.seasonTo },
   });
 

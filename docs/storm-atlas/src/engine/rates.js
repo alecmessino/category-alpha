@@ -25,8 +25,16 @@ import { percentile, wilsonInterval } from "./stats.js";
  * The refusal reason is the archive's own string, character for character, because the surface
  * prints it verbatim: a reason that drifts between the two implementations would be a second
  * methodology announcing itself in prose.
+ *
+ * `memberIds` IS THE NUMERATOR'S IDENTITIES, AND IT ARRIVES HERE FOR ONE REASON: this is the
+ * call that publishes `count`, so it is the only place the two cannot drift apart. The caller
+ * collects them inside the same branch that increments the count -- see scoreCases -- and
+ * nothing downstream may reconstruct them from a threshold, a region or a rate. `null` means
+ * the caller did not ask for them; `[]` means the numerator is genuinely empty, and the two are
+ * different statements about the archive.
  */
-export function rateResult(count, nKnown, nUnknown, minSample, weightedNum, weightedDen) {
+export function rateResult(count, nKnown, nUnknown, minSample, weightedNum, weightedDen,
+  memberIds = null) {
   if (nKnown < minSample) {
     return {
       n_storms: nKnown,
@@ -36,6 +44,10 @@ export function rateResult(count, nKnown, nUnknown, minSample, weightedNum, weig
       weighted_rate: null,
       ci95: null,
       refused_reason: `${nKnown} storms with a known outcome < min_sample=${minSample}`,
+      /* A REFUSED CELL KEEPS ITS IDENTITIES, because it keeps its count. The rate is what the
+         sample did not earn; the events behind it are observed events, and "which storms" is
+         answerable whether or not a percentage is. */
+      member_ids: memberIds,
     };
   }
   return {
@@ -46,6 +58,7 @@ export function rateResult(count, nKnown, nUnknown, minSample, weightedNum, weig
     weighted_rate: weightedDen > 0 ? weightedNum / weightedDen : null,
     ci95: wilsonInterval(count, nKnown),
     refused_reason: null,
+    member_ids: memberIds,
   };
 }
 
@@ -133,7 +146,7 @@ export function circularOutcomes(conditionedOn) {
 
 /** The refusal a circular outcome renders instead of a rate. Counts survive -- they are facts
  *  about the cohort; only the RATE is meaningless, and the reason says which condition did it. */
-export function circularRefusal(count, nStorms, nUnknown, because) {
+export function circularRefusal(count, nStorms, nUnknown, because, memberIds = null) {
   return {
     n_storms: nStorms,
     n_unknown: nUnknown,
@@ -142,6 +155,10 @@ export function circularRefusal(count, nStorms, nUnknown, because) {
     weighted_rate: null,
     ci95: null,
     refused_reason: null,
+    /* AND SO DOES A CIRCULAR ONE. Every storm in the cohort carries this outcome by
+       construction, so the identities are the cohort's -- which is exactly why the RATE is
+       refused and the COUNT is not. */
+    member_ids: memberIds,
     conditioned_on: because,
     status: "CONDITIONED ON -- NOT AN OUTCOME",
     reason:

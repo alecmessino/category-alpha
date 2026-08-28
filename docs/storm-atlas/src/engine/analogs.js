@@ -88,6 +88,9 @@ export function getAnalogs(archive, opts = {}) {
        variables as outcomes. Absent by default, which is what every parity vector uses -- with
        no conditioning declared this function is byte-for-byte the Python. See rates.js. */
     conditionedOn = null,
+    /* Passed straight to scoreCases; see the note on the option there. Off by default, so every
+       existing vector -- parity included -- gets exactly the payload it got before. */
+    members = false,
   } = opts;
 
   const gaps = [];
@@ -318,7 +321,7 @@ export function getAnalogs(archive, opts = {}) {
   const matchedBasins = [...new Set(cases.map((c) => c.basin).filter(Boolean))].sort();
   const scopeBasins = matchedBasins.length ? matchedBasins : (basins ? [...basins].sort() : null);
   const scored = scoreCases(A, cases, {
-    minSample, regions, conditionedOn, wsum, gaps,
+    minSample, regions, conditionedOn, wsum, gaps, members,
     scope: { basins: scopeBasins, minSeason: minPoolSeason ?? null, maxSeason: null },
   });
   const { intensity, landfall, time_to_event: timeToEvent, unscoreable } = scored;
@@ -607,6 +610,20 @@ export function scoreCases(A, cases, {
      has to arrive -- and until methodology 1.1.0 it arrived nowhere, which is exactly how the
      gate came to count a population no query could reach. */
   scope = null,
+  /* CANONICAL MEMBERSHIP, OFF BY DEFAULT.
+   *
+   * With `members: true` every published cohort cell also carries `member_ids` -- the storm_ids
+   * that make up ITS numerator, collected inside the same branch that increments the count a
+   * few lines below. That is the whole of the mechanism, and the reason it is here rather than
+   * anywhere else: this function is the one seam both surfaces score through, so a member set
+   * built here cannot disagree with a count built here. A set assembled later, from a threshold
+   * or a region test re-run against the same cases, would be a SECOND implementation of the
+   * numerator, and the two would drift the first time either was touched.
+   *
+   * OFF BY DEFAULT so that every existing caller gets the work it already got. The lens is the
+   * only consumer that needs identities; the dossier, the parity path and the live surfaces
+   * want counts, and none of them should start paying for arrays they will not read. */
+  members = false,
 } = {}) {
   const circular = circularOutcomes(conditionedOn);
   const becamePeak = conditionedOn && conditionedOn.minPeak
@@ -642,16 +659,20 @@ export function scoreCases(A, cases, {
     let unknown = 0;
     let wnum = 0;
     let wden = 0;
+    /* One array per contract, filled on the same line that moves the count. A storm whose
+       intensity the archive never recorded takes the `continue` above and enters neither the
+       denominator nor this set -- rule 4 holds here exactly as it holds for the count. */
+    const ids = members ? [] : null;
     for (const c of cases) {
       const v = c.peak_vmax_kt;
       if (v === null || v === undefined || Number.isNaN(v)) { unknown++; continue; }
       known++;
       wden += c.weight;
-      if (v >= thr) { count++; wnum += c.weight; }
+      if (v >= thr) { count++; wnum += c.weight; if (ids) ids.push(c.storm_id); }
     }
     intensity[cat] = circular.intensity.has(cat)
-      ? circularRefusal(count, known, unknown, becamePeak)
-      : rateResult(count, known, unknown, minSample, wnum, wden);
+      ? circularRefusal(count, known, unknown, becamePeak, ids)
+      : rateResult(count, known, unknown, minSample, wnum, wden, ids);
   }
 
   // Regions reported are the ones the matched storms actually hit, plus any the caller named
@@ -672,10 +693,15 @@ export function scoreCases(A, cases, {
     let hur = 0;
     let wAny = 0;
     let wHur = 0;
+    /* TWO CONTRACTS, TWO SETS. `hurricane` is not a subset filter applied afterwards -- it is
+       its own numerator over the same hits, and it gets its own array from its own branch, so
+       the relocation-suspect exclusion and the intensity test are each applied exactly once. */
+    const anyIds = members ? [] : null;
+    const hurIds = members ? [] : null;
     for (const c of cases) {
       const hits = c.landfalls.filter((l) => l.region === region && !l.suspect_relocation);
-      if (hits.length) { any++; wAny += c.weight; }
-      if (hits.some((h) => h.hurricane)) { hur++; wHur += c.weight; }
+      if (hits.length) { any++; wAny += c.weight; if (anyIds) anyIds.push(c.storm_id); }
+      if (hits.some((h) => h.hurricane)) { hur++; wHur += c.weight; if (hurIds) hurIds.push(c.storm_id); }
     }
     const because = conditionedOn && conditionedOn.landfallRegion === region
       ? `a landfall in ${region}` +
@@ -683,11 +709,11 @@ export function scoreCases(A, cases, {
       : null;
     landfall[region] = {
       any: circular.landfall.has(`${region}:any`)
-        ? circularRefusal(any, cases.length, 0, because)
-        : rateResult(any, cases.length, 0, minSample, wAny, wsum),
+        ? circularRefusal(any, cases.length, 0, because, anyIds)
+        : rateResult(any, cases.length, 0, minSample, wAny, wsum, anyIds),
       hurricane: circular.landfall.has(`${region}:hurricane`)
-        ? circularRefusal(hur, cases.length, 0, because)
-        : rateResult(hur, cases.length, 0, minSample, wHur, wsum),
+        ? circularRefusal(hur, cases.length, 0, because, hurIds)
+        : rateResult(hur, cases.length, 0, minSample, wHur, wsum, hurIds),
     };
   }
 
