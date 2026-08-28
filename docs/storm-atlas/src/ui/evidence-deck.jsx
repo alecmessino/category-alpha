@@ -567,11 +567,13 @@ function DataRow({ row, shape, shared }) {
             {cell.n_storms ? <> / {cell.n_storms.toLocaleString()}</> : null}
           </span>
         ) : null}
-        {unscoreable ? (
-          <span className="at-need" title="events in scope · archive-wide · required">
-            {countsOf(unscoreable)}
-          </span>
-        ) : null}
+        {/* THE SCOPE COUNTS ARE NOT IN THIS CELL ANY MORE -- see RowRefusal. They are one
+            measured sentence, `8 in the NA basin since 2022 · 181 archive-wide · 10 needed`,
+            and an 84px numeric track cannot hold it: set `nowrap` it ran 350px across the
+            ledger and painted over three other rows' outcome names; set to wrap it was five
+            lines of prose in the column that exists to carry `n / N`. It belongs with the
+            refusal it qualifies, which is where a reader is already reading why this row has
+            no rate. The string itself is unchanged and so is the row it is on. */}
       </span>
     ),
     /* VS ARCHIVE, OR THE SUBJECT. With no storm selected the column compares this cohort with
@@ -672,6 +674,17 @@ function RowRefusal({ kind, cell, unscoreable, onEvidence, hoisted }) {
       : cell.refused_reason;
   return (
     <div className="at-deck-say" data-refusal={r.kind}>
+      {/* WHAT THE ARCHIVE DOES PUBLISH HERE, ON THE LINE THAT SAYS WHY IT PUBLISHES NO RATE.
+          Both counts, because their difference IS the finding: `8 in the NA basin since 2022`
+          against `181 archive-wide` says "your population cannot reach these", which is a
+          different statement from "they do not exist". Same string, same title, same row -- it
+          has moved out of a numeric cell that could not hold it and onto the sentence it
+          qualifies, which is the slot the panel's own Refusal has always put it in. */}
+      {unscoreable ? (
+        <span className="at-need" title="events in scope · archive-wide · required">
+          {countsOf(unscoreable)}
+        </span>
+      ) : null}
       {/* VERBATIM WHERE IT IS THIS ROW'S OWN FINDING; a marker where the same sentence is about
           to be said again under the group. Never truncated: see the note in EvidenceDeck. */}
       <span className="at-say-text">{hoisted ? null : statement}</span>

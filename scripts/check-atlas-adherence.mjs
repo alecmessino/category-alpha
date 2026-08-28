@@ -414,9 +414,9 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
      screen, and what a percentage-only measure gives up first is the RIGHT-HAND column: at 900
      it left the deck 304px for a table that needs 468, so a refused row's STATUS sat off the
      right-hand edge of a horizontal scroll. A refusal a reader has to drag sideways to find has
-     not been published. 486 is not a round number, it is 150 + 84 + 52 + 70 + 72 and four 10px
-     gutters -- the five resting tracks -- and it is also exactly 33.75vw at 1440, so the floor
-     binds ONLY below the width where 5c's own percentage had already run out. */
+     not been published. 486 is not a round number: the five resting tracks and their four 10px
+     gutters measure 474, and 486 is the next step up that is also exactly 33.75vw at 1440 -- so
+     the floor binds ONLY below the width where 5c's own percentage had already run out. */
   const ledger = (css.match(/--at-ledger:\s*clamp\(([^)]*)\)/) || [])[1];
   ok("the ledger measure is the frozen clamp",
      (ledger || "").replace(/\s+/g, "") === "486px,33.75vw,620px",

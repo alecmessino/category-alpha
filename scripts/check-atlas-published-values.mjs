@@ -135,7 +135,10 @@ const READ = () => {
     countRaw: txt(r.querySelector(".at-dc-count .at-val")),
     /* WHAT AN UNSCOREABLE CONTRACT HAS AGAINST WHAT IT NEEDS. A refusal is not a blank, so this
        is published and is pinned like everything else the surface prints. */
-    need: txt(r.querySelector(".at-dc-count .at-need")),
+    /* SCOPED TO THE ROW, NOT TO A CELL. The scope/archive-wide/required counts are a published
+       figure wherever the layout puts them; pinning the CELL they sat in would make this gate
+       an assertion about grid columns, which is the one thing a values snapshot must not be. */
+    need: txt(r.querySelector(".at-need")),
     rate: txt(r.querySelector(".at-dc-rate .at-val")),
     /* THE TWO WILSON BOUNDS, IN ORDER. Whatever brackets or unit sign wrap them. */
     interval: valueOf(r.querySelector(".at-dc-int")),
@@ -143,7 +146,17 @@ const READ = () => {
     status: txt(r.querySelector(".at-dc-status")),
     refusalKind: (r.querySelector("[data-refusal]") || {}).getAttribute
       ? r.querySelector("[data-refusal]").getAttribute("data-refusal") : null,
-    refusalText: txt(r.querySelector("[data-refusal]")),
+    /* THE ARCHIVE'S SENTENCE, WITHOUT THE COUNTS THAT SIT BESIDE IT. `need` is captured on its
+       own line above; reading it a second time here, as part of a concatenation, would pin the
+       two together and make a change to WHERE the counts sit read as a change to WHAT the
+       refusal says. They are different claims and this file keeps them apart. */
+    refusalText: (() => {
+      const el = r.querySelector("[data-refusal]");
+      if (!el) return null;
+      const c = el.cloneNode(true);
+      c.querySelectorAll(".at-need").forEach((n) => n.remove());
+      return (c.textContent || "").replace(/\s+/g, " ").trim() || null;
+    })(),
   }));
   const groups = [...document.querySelectorAll("[data-deck-group]")].map((g) => ({
     label: g.getAttribute("data-deck-group"),
