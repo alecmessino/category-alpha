@@ -331,24 +331,40 @@ for (const [w, h] of VIEWPORTS) {
   const base0 = await read();
   if (!ok(`${w}x${h} opens with a measurable plate`, !!base0, "no .at-plate or no __ATLAS_MAP")) continue;
 
+  /* A PAGE IS REUSED ONLY WHILE IT IS PROVABLY STILL THE PAGE IT STARTED AS.
+     `clean` holds a reading that has been SHOWN to match the opening -- rect and camera -- so the
+     next transition can be measured against it without reloading. The moment a transition fails
+     to put it back, `clean` is dropped and the next one reopens. See the note below for what
+     that costs and why it is not simply "reload every time". */
+  let clean = base0;
+
   for (const t of TRANSITIONS) {
-    /* EACH TRANSITION IS MEASURED FROM ITS OWN CLEAN OPENING, AND THAT IS A CORRECTNESS FIX.
+    /* EACH TRANSITION IS MEASURED FROM A BASELINE THAT IS STILL THE OPENING, AND THAT IS A
+     * CORRECTNESS FIX RATHER THAN A PRECAUTION.
      *
      * Driven back to back on one page these contaminate each other. Measured at 1220: the scope
      * toggle lengthens the question, the question row grows, the elastic plate row gives up 3px,
      * settle() re-derives the aperture for the smaller box -- and on revert the box comes back
      * exactly while the camera lands 0.165 degrees from where it started. Every later transition
-     * in the sequence then compared against a baseline that had already drifted, and the
-     * duration-columns fold was reported as moving a camera it never touches: driven alone,
-     * four unfold/fold cycles leave the plate rect and the camera bit-identical.
+     * then compared against a baseline that had already drifted, and the duration-columns fold
+     * was reported as moving a camera it never touches: driven alone, four unfold/fold cycles
+     * leave the plate rect and the camera bit-identical.
      *
-     * Reloading between them is NOT the reload this file warns against. That warning is about
-     * comparing two independent openings ACROSS a state change, which cannot fail and proves
-     * nothing. This is one opening, then a live in-page state change, measured against the
-     * opening it actually started from -- the same comparison as before, with nothing else in
-     * it. What it costs is wall-clock; what it buys is an assertion that means what it says. */
-    await open("", w, h);
-    const base = await read();
+     * REOPENING IS NOT THE RELOAD THIS FILE WARNS ABOUT. That warning is about comparing two
+     * independent openings ACROSS a state change, which cannot fail and proves nothing. This is
+     * one opening, then a live in-page state change, measured against the opening it actually
+     * started from.
+     *
+     * AND IT IS DONE ONLY WHEN THE LAST TRANSITION DID NOT PUT THE PAGE BACK. Reopening before
+     * every one of them is 45 loads across the matrix and pushed the browser job past its
+     * fifteen-minute cap -- a gate nobody can afford to run is a gate that gets deleted. Most
+     * transitions revert exactly, and one that provably did leaves a baseline as good as a fresh
+     * opening, because it has been compared against it. */
+    if (!clean) {
+      await open("", w, h);
+      clean = await read();
+    }
+    const base = clean;
     if (!base) { ok(`${t.name} — reopened`, false, "the plate went away on reopen"); continue; }
 
     await t.apply();
@@ -387,6 +403,7 @@ for (const [w, h] of VIEWPORTS) {
 
     await t.revert();
     const back = await read();
+    if (t.cameraExempt) clean = null;
     if (back && !t.cameraExempt) {
       const backWrapped = base.qh !== null && back.qh !== null && Math.abs(back.qh - base.qh) > 0.5;
       const rectReturned = !sizeMoved(base, back) && !originMoved(base, back);
@@ -416,6 +433,10 @@ for (const [w, h] of VIEWPORTS) {
          && !(sizeMoved(base, back) && !backWrapped)
          && !(camMoved(base, back) && !backWrapped && !wrapResidue),
          why(base, back));
+      /* THE PAGE CARRIES FORWARD ONLY IF THE REVERT ACTUALLY RESTORED IT, rect AND camera. The
+         wrap residue above is exactly the case where it did not: that baseline is spent. */
+      clean = (!sizeMoved(base, back) && !originMoved(base, back) && !camMoved(base, back))
+        ? back : null;
       if (wrapResidue) {
         note(`${t.name} — and the camera returns with it`, false,
              `the rectangle came back exactly and the camera did not: `
