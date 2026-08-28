@@ -554,6 +554,36 @@ jobs:
       - name: Verify the camera opens on NA + EP and is never stolen by a query
         run: node scripts/check-atlas-camera.mjs --require-browser
 
+      # THE APERTURE INVARIANT, WHICH IS WHAT THE TWO GATES ABOVE EACH SAW HALF OF.
+      #
+      # check-plate-aperture measures the plate's box, and every one of its measurement sites
+      # opens with an EMPTY query -- it has never seen a conditioned plate. check-atlas-camera
+      # asserts that a cohort edit leaves the camera alone, but establishes its premise with a
+      # drag, and a pointer-originated movestart clears `atAperture` -- so the `if (wasAtAperture)`
+      # branch of settle() was dead for the whole of its persistence sequence. Between them they
+      # tested the box in one state and the camera in the branch that was never broken.
+      #
+      # What neither saw: `:has(.at-dc-vs)` widened `--at-ledger` from 33.75vw to 41vw the moment
+      # the deck rendered a comparison, `--at-plate-avail` is computed from the ledger, and the
+      # stage's height bounds are computed from that -- so ONE CONDITION took the plate from
+      # 834x499 to 730x437 at 1440 and, because the view was still at the aperture, took the
+      # camera with it: zoom 3.75 to 3.50 and the centre 3.2 degrees north at 1920, with the
+      # reader's hands nowhere near the map. Every gate in this file was green throughout.
+      #
+      # So this one records the RECT and the CAMERA at five viewports and drives the surface's own
+      # controls through every state change that is not itself a camera command -- each condition
+      # type, the comparison column, a refusal, the duration columns, the editor, the transport --
+      # and requires both back identical. It is deliberately blind to everything INSIDE the
+      # ledger: the status leaving its track and the outcome column taking the slack are the
+      # ledger rearranging its own contents and are none of the aperture's business.
+      #
+      # --self-test IS NOT DECORATION, for the same reason it is not on the adherence gate. Once
+      # the surface is stable this step prints nothing but ok forever, and a detector that quietly
+      # stopped detecting would look exactly the same. It seeds a 60px ledger widening -- which is
+      # precisely the shape of the defect it was written for -- and fails if that goes unnoticed.
+      - name: Verify the plate's box and camera survive every non-camera state change
+        run: node scripts/check-atlas-stability.mjs --self-test --require-browser
+
       # THE REAL-STATE MATRIX. Every layout bug this integration produced was invisible in the
       # state it was introduced in and obvious two states later: the plate measured 0x0 only once
       # it was inside a single-cell row; the rows came out shifted only once a transport existed
