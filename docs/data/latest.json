@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-28T21:24:16.424Z",
+  "generatedAt": "2026-08-28T21:34:38.114Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 67,
+      "latencyMs": 123,
       "count": 3,
       "note": "3 active",
       "raw": "{\"id\":\"al042026\",\"binNumber\":\"AT4\",\"name\":\"Dolly\",\"classification\":\"PTC\",\"intensity\":\"35\",\"pressure\":\"1008\",\"latitude\":\"15.0N\",\"longitude\":\"46.9W\",\"latitudeNumeric\":15,\"longitudeNumeric\":-46.9,\"movementDir\":280,\"movementSpeed\":25,\"lastUpdate\":\"2026-08-28T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"005\",\"issuance\":\"2026-08-28T15:00:00.000Z\",\"fileUpdateTime\":\"2026-08-28T14:46:03.810Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPAT4.shtml\"},\"forecastAdvisory\":{\"advNum\":\"005\",\"issuance\":\"2026-08-28T15",
-      "forecast": "Dolly: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 399m old | Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 54m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 97% · forecast undefined guidance · advisory 50m old",
-      "advisoryLagMin": 399
+      "forecast": "Dolly: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 410m old | Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 65m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 97% · forecast undefined guidance · advisory 61m old",
+      "advisoryLagMin": 410
     },
     "markets": {
       "ok": true,
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 2,
       "note": "2 area(s) under watch · 0 Atlantic",
-      "latencyMs": 147,
+      "latencyMs": 153,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -280,7 +280,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 7,
+      "latencyMs": 105,
       "source": "NHC graphical TWO",
       "count": 2,
       "note": "2 of 2 area(s) with geometry"
@@ -290,7 +290,7 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 795,
+      "latencyMs": 933,
       "count": 3,
       "note": "3/3 storm decks read · AL042026: a-deck cycle 2026082818 · 31 techs · consensus 3 member(s) peak 44.3 kt · b-deck 20 records · f-deck 68 fixes | EP112026: a-deck cycle 2026082818 · 37 techs · consensus 3 member(s) peak 103.7 kt · b-deck 16 records · f-deck 44 fixes | EP122026: a-deck cycle 2026082818 · 34 techs · consensus 3 member(s) peak 115 kt · b-deck 13 records · f-deck 38 fixes",
       "attempts": [
@@ -319,7 +319,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 484,
+      "latencyMs": 476,
       "count": 2,
       "note": "2 vortex data message(s): AL022026 11:36Z, CP022026 08:53Z",
       "attempts": [
@@ -354,7 +354,7 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 546,
+      "latencyMs": 553,
       "count": 3,
       "note": "3/3 storms · AL042026: 2026-08-28T18:00Z · shear 26 kt · OHC 33 · MPI 140 kt · 8 RI thresholds | EP112026: 2026-08-28T18:00Z · shear 10 kt · OHC 30 · MPI 157 kt · 8 RI thresholds | EP122026: 2026-08-28T18:00Z · shear 16 kt · OHC 22 · MPI 154 kt · 8 RI thresholds",
       "attempts": [
@@ -440,11 +440,11 @@
         "already": false,
         "basis": "official forecast peaks at 35 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 399,
+      "advisoryLagMin": 410,
       "discussion": {
         "forecaster": "Beven",
         "issuedZ": "2026-08-28T14:46:00.000Z",
-        "lagMin": 398,
+        "lagMin": 409,
         "guidance": {
           "intensity": null,
           "track": null
@@ -1909,9 +1909,9 @@
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 2065,
+        "ascatAgeMin": 2076,
         "ascatUsed": false,
-        "consensusAgeMin": 204,
+        "consensusAgeMin": 215,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 30,
@@ -1961,7 +1961,7 @@
           }
         ],
         "notes": [
-          "scatterometer pass is 2065 min old, past the 360-min line — band not tightened",
+          "scatterometer pass is 2076 min old, past the 360-min line — band not tightened",
           "SHIPS RI implies a floor of 6% — published, NOT scored (no operator claim)"
         ],
         "used": {
@@ -1976,8 +1976,8 @@
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 399 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "ATCF consensus 204 min old, no aircraft in the storm",
+          "the advisory under this estimate is 410 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 215 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -2065,11 +2065,11 @@
         "already": false,
         "basis": "official forecast peaks at 110 kt at 57h; NHC's published mean absolute intensity error there is 10.6 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths"
       },
-      "advisoryLagMin": 54,
+      "advisoryLagMin": 65,
       "discussion": {
         "forecaster": "Blake",
         "issuedZ": "2026-08-28T20:31:00.000Z",
-        "lagMin": 53,
+        "lagMin": 64,
         "guidance": {
           "intensity": null,
           "track": null
@@ -3819,9 +3819,9 @@
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 219,
+        "ascatAgeMin": 230,
         "ascatUsed": true,
-        "consensusAgeMin": 204,
+        "consensusAgeMin": 215,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
@@ -3878,12 +3878,12 @@
           "ascat": true,
           "ships": false
         },
-        "basis": "combined 2 intensity estimates at 107 kt (sigma 19.8 kt, of which 14.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 219 min ago · driven by the forecast peak · raw official estimate 99%, calibrated 99%"
+        "basis": "combined 2 intensity estimates at 107 kt (sigma 19.8 kt, of which 14.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 230 min ago · driven by the forecast peak · raw official estimate 99%, calibrated 99%"
       },
       "evidenceQuality": {
         "tier": "MEDIUM",
         "reasons": [
-          "ATCF consensus 204 min old, no aircraft in the storm",
+          "ATCF consensus 215 min old, no aircraft in the storm",
           "scatterometer pass tightened the current-intensity band",
           "SHIPS RI diagnostics present, published but not scored"
         ]
@@ -3972,11 +3972,11 @@
         "already": false,
         "basis": "official forecast peaks at 95 kt at 117h; NHC's published mean absolute intensity error there is 13.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 97% central, 89-99% across a plausible range of error widths"
       },
-      "advisoryLagMin": 50,
+      "advisoryLagMin": 61,
       "discussion": {
         "forecaster": "Beven",
         "issuedZ": "2026-08-28T20:35:00.000Z",
-        "lagMin": 49,
+        "lagMin": 60,
         "guidance": {
           "intensity": null,
           "track": null
@@ -5710,7 +5710,7 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 204,
+        "consensusAgeMin": 215,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 25,
@@ -5772,7 +5772,7 @@
       "evidenceQuality": {
         "tier": "MEDIUM",
         "reasons": [
-          "ATCF consensus 204 min old, no aircraft in the storm",
+          "ATCF consensus 215 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -5790,7 +5790,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 40 kt now · combined 2 intensity estimates at 105 kt (sigma 31.1 kt, of which 26.2 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 97%, calibrated 91% · official forecast peaks at 95 kt at 117h; NHC's published mean absolute intensity error there is 13.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 97% central, 89-99% across a plausible range of error widths · advisory 50 min old when fetched",
+      "modelBasis": "Lowell is 40 kt now · combined 2 intensity estimates at 105 kt (sigma 31.1 kt, of which 26.2 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 97%, calibrated 91% · official forecast peaks at 95 kt at 117h; NHC's published mean absolute intensity error there is 13.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 97% central, 89-99% across a plausible range of error widths · advisory 61 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -5830,7 +5830,7 @@
       ],
       "modelLow": 0.8029287032358717,
       "modelHigh": 0.9737363024426521,
-      "modelLagMin": 50,
+      "modelLagMin": 61,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -5839,7 +5839,7 @@
       "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 115,
-        "conAgeMin": 204,
+        "conAgeMin": 215,
         "spreadKt": 26.2,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -5856,10 +5856,10 @@
       "liquidity": 67,
       "spread": 0.10999999999999999,
       "volume": 292.75,
-      "volume24h": 178.84,
+      "volume24h": 96.84,
       "openInterest": 287.84,
       "depth": {
-        "bidSize": 36,
+        "bidSize": 27,
         "askSize": 75,
         "notional": 1
       },
@@ -5878,7 +5878,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Karina is 55 kt now · combined 2 intensity estimates at 107 kt (sigma 19.8 kt, of which 14.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 219 min ago · driven by the forecast peak · raw official estimate 99%, calibrated 99% · official forecast peaks at 110 kt at 57h; NHC's published mean absolute intensity error there is 10.6 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths · advisory 54 min old when fetched",
+      "modelBasis": "Karina is 55 kt now · combined 2 intensity estimates at 107 kt (sigma 19.8 kt, of which 14.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 230 min ago · driven by the forecast peak · raw official estimate 99%, calibrated 99% · official forecast peaks at 110 kt at 57h; NHC's published mean absolute intensity error there is 10.6 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths · advisory 65 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -5918,7 +5918,7 @@
       ],
       "modelLow": 0.9206761160833886,
       "modelHigh": 0.99,
-      "modelLagMin": 54,
+      "modelLagMin": 65,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -5927,7 +5927,7 @@
       "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 103.7,
-        "conAgeMin": 204,
+        "conAgeMin": 215,
         "spreadKt": 14.7,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -5990,7 +5990,7 @@
       "volume24h": 10911.37,
       "openInterest": 22877.92,
       "depth": {
-        "bidSize": 71.33,
+        "bidSize": 70.33,
         "askSize": 6.99,
         "notional": 1
       },
@@ -6142,7 +6142,7 @@
         "subject": "Karina",
         "active": true
       },
-      "market": 0.905,
+      "market": 0.9099999999999999,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6162,17 +6162,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 2,
-      "yesBid": 0.87,
+      "yesBid": 0.88,
       "yesAsk": 0.94,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 130,
-      "spread": 0.06999999999999995,
+      "liquidity": 118,
+      "spread": 0.05999999999999994,
       "volume": 176.24,
       "volume24h": 176.24,
       "openInterest": 176.24,
       "depth": {
-        "bidSize": 149,
-        "askSize": 138,
+        "bidSize": 2,
+        "askSize": 125,
         "notional": 1
       },
       "proxy": false,
@@ -6372,7 +6372,7 @@
         "subject": "Lowell",
         "active": true
       },
-      "market": 0.885,
+      "market": 0.8799999999999999,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6393,16 +6393,16 @@
       "horizon": "storm",
       "strike": 1,
       "yesBid": 0.82,
-      "yesAsk": 0.95,
+      "yesAsk": 0.94,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 38,
-      "spread": 0.13,
+      "liquidity": 27,
+      "spread": 0.12,
       "volume": 15,
       "volume24h": 15,
       "openInterest": 15,
       "depth": {
         "bidSize": 10,
-        "askSize": 40,
+        "askSize": 29,
         "notional": 1
       },
       "proxy": false,
@@ -6885,7 +6885,7 @@
       "short": "Will there be more than 4 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.05500000000000001,
+      "market": 0.060000000000000005,
       "model": 0.05183204879881225,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -6936,16 +6936,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.04,
+      "yesBid": 0.05,
       "yesAsk": 0.07,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 8,
-      "spread": 0.030000000000000006,
+      "spread": 0.020000000000000004,
       "volume": 12672.51,
       "volume24h": 2,
       "openInterest": 3402.97,
       "depth": {
-        "bidSize": 51.67,
+        "bidSize": 0.01,
         "askSize": 115,
         "notional": 1
       },
@@ -7072,7 +7072,7 @@
       "liquidity": 1,
       "spread": 0.010000000000000009,
       "volume": 11701.96,
-      "volume24h": 396.66,
+      "volume24h": 360.58,
       "openInterest": 7214.04,
       "depth": {
         "bidSize": 10,
@@ -7294,7 +7294,7 @@
       "liquidity": 27,
       "spread": 0.009999999999999981,
       "volume": 10646.18,
-      "volume24h": 501.2,
+      "volume24h": 462.14,
       "openInterest": 6366.23,
       "depth": {
         "bidSize": 4.63,
@@ -8579,7 +8579,7 @@
       "volume24h": 2,
       "openInterest": 2543.01,
       "depth": {
-        "bidSize": 100,
+        "bidSize": 100.01,
         "askSize": 634,
         "notional": 1
       },
@@ -9299,7 +9299,7 @@
       "short": "Will there be more than 6 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.01,
+      "market": 0.015,
       "model": 0.02782418566056733,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -9350,16 +9350,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 6,
-      "yesBid": null,
+      "yesBid": 0.01,
       "yesAsk": 0.02,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.02,
+      "spread": 0.01,
       "volume": 1914.7,
       "volume24h": 0,
       "openInterest": 1473.07,
       "depth": {
-        "bidSize": 0,
+        "bidSize": 0.01,
         "askSize": 34,
         "notional": 1
       },
@@ -14933,7 +14933,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.13999999999999999,
+      "market": 0.135,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -14954,10 +14954,10 @@
       "horizon": "storm",
       "strike": null,
       "yesBid": 0.04,
-      "yesAsk": 0.24,
+      "yesAsk": 0.23,
       "closeTime": "2026-10-01T03:59:00Z",
       "liquidity": 2,
-      "spread": 0.19999999999999998,
+      "spread": 0.19,
       "volume": 706.24,
       "volume24h": 82.76,
       "openInterest": 609.18,
