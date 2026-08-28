@@ -182,7 +182,23 @@ const text = async () => {
   }
   return t;
 };
+/* THE SHEET COMES DOWN BEFORE THE PLATE IS CLICKED, and this is a fixture correction rather
+ * than a product one.
+ *
+ * The builder is a sheet OVER the plate -- a reader editing a condition is looking at what the
+ * map holds -- so a click aimed at a coordinate underneath it lands on the sheet, as it should.
+ * This helper's whole purpose is to click the MAP, and it used to get away with not saying so:
+ * the plate spanned the full width, the sheet covered its left 374px, and 25.8N 119.9W happened
+ * to land at x=452. On the instrument's 834px plate the same coordinate is at x=183, which is
+ * inside the sheet -- so the probe was clicking a chip and then asserting things about a cohort
+ * it had never set. The sheet is closed first, the way a reader closes it. */
+const closeBuilder = async () => {
+  if (!(await page.$("[data-builder-sheet]"))) return;
+  await page.click("[data-sheet-close]");
+  await page.waitForTimeout(250);
+};
 const clickLatLng = async (lat, lng) => {
+  await closeBuilder();
   const p = await page.evaluate(({ lat, lng }) => {
     const m = globalThis.__ATLAS_MAP;
     const c = m.latLngToContainerPoint([lat, lng]);
@@ -263,8 +279,20 @@ await clickLatLng(14.6, -113.9);
   const t = await text();
   ok("a count over a denominator", /\d+\s*\/\s*\d+/.test(t));
   ok("the effective sample size is published", /EFFECTIVE SAMPLE SIZE/.test(t));
-  ok("the sample gate states its own threshold", /SUFFICIENT · \d+ ≥ \d+|BELOW SAMPLE/.test(t));
-  ok("the rate ladder declares its own shape", /count · rate · 95% Wilson/.test(t));
+  /* THE SAMPLE GATE, IN THE WORDS THE FROZEN FRAME GIVES IT. It read `SUFFICIENT · 3885 ≥ 10`
+     in the deck's preamble, beside a 26px repeat of a count the question already carried. 5c
+     gives the cohort one primary home -- the line directly under the question -- and the gate
+     states its THRESHOLD there rather than restating the count on both sides of a comparison
+     the reader can make for themselves: `3,885 of 3,959 archive storms · SUFFICIENT · MIN 10`.
+     Both halves are still on screen and neither is smaller than it was. */
+  ok("the sample gate states its own threshold",
+    /(SUFFICIENT|BELOW SAMPLE)[\s\S]{0,20}MIN \d+/.test(t));
+  /* THE LADDER DECLARES ITS OWN SHAPE IN ITS COLUMN HEADS, which is where a table declares it.
+     `count · rate · 95% Wilson` was a sentence above the table naming three columns the table
+     did not head; the frozen research table heads them -- OUTCOME | n / N | RATE | 95% WILSON --
+     so the declaration and the columns are the same words in the same place. */
+  ok("the rate ladder declares its own shape",
+    /n \/ N/.test(t) && /RATE/.test(t) && /95% WILSON/.test(t));
   ok("storms with no recorded intensity leave the denominator",
     /out of every denominator above/.test(t));
   ok("an unscoreable contract is badged", /BASE RATE ONLY/.test(t));
@@ -282,7 +310,12 @@ await clickLatLng(14.6, -113.9);
        property is "a Wilson interval accompanies the rates"; the integer-only form was an
        artefact of the compact RateLine, and the deck prints every interval to a tenth. A regex
        narrower than the property it names is a gate that fails on a correct surface. */
-    /\[\s*\d+(\.\d+)?\s*[-–—]\s*\d+(\.\d+)?%\s*\]/.test(t));
+    /* BRACKETS OPTIONAL, BECAUSE THEY WERE THE CELL'S PUNCTUATION RATHER THAN THE INTERVAL'S.
+       While the rate and its interval shared a cell the brackets said "this belongs to the
+       number on its left"; under a column headed `95% WILSON` they say nothing the heading has
+       not. The unit stays and is still required here -- a bound with no unit beside a rate with
+       one is a reader's problem. */
+    /\[?\s*\d+(\.\d+)?\s*[-–—]\s*\d+(\.\d+)?%\s*\]?/.test(t));
   /* THE WEIGHTED RATE CHANGED MEANING IN 3.2, SO THE CHECK CHANGED WITH IT -- and got harder.
      The probe was a distance-weighted analog pool and published a weighted rate beside the
      unweighted one. A COHORT spends distance as a hard membership condition instead, so
@@ -349,7 +382,7 @@ await clickLatLng(14.6, -113.9);
      and the old pattern would have been satisfied by those lines alone while the intensity
      rates it is actually about went unchecked. Same shape, same rule, one more digit. */
   ok("and none appears without an interval beside it",
-    !pcts.length || /\[\s*\d+(\.\d+)?\s*[-–—]\s*\d+(\.\d+)?%\s*\]/.test(computed));
+    !pcts.length || /\d+(\.\d+)?\s*[-–—]\s*\d+(\.\d+)?%/.test(computed));
   ok("the archive's own measured percentages survive verbatim in its gaps",
     /1\.7% Cat 3 in the 1960s/.test(t));
 }
@@ -1196,7 +1229,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
         && w.radiusKm === bridged.radiusKm,
       `${JSON.stringify(w)} vs ${JSON.stringify(bridged)}`);
     ok("and the reader lands on the outcomes, with the sample gate stated",
-      /SUFFICIENT · \d+ ≥ \d+|BELOW SAMPLE/.test(t));
+      /(SUFFICIENT|BELOW SAMPLE)[\s\S]{0,20}MIN \d+/.test(t));
   }
 
   /* THE NON-MEMBER STATE. Darby 2022 formed in July, so an August-or-September cohort built on

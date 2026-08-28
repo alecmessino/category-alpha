@@ -130,7 +130,8 @@ const AUDIT = (vw) => {
    * hover away. Anything overflowing its box with no title is a word a reader simply cannot
    * get to. Scroll containers are exempt: overflow there is the design. */
   for (const el of document.querySelectorAll(
-    ".at-dc, .at-cond, .at-zone-label, .at-question-text, .at-fig, .at-foot-line, .at-say-text")) {
+    ".at-dc, .at-clause, .at-cohort-n, .at-question-text, .at-fig, .at-foot-line, "
+    + ".at-say-text, .at-plate-caption, .at-classkey-item")) {
     if (!shown(el)) continue;
     const s = getComputedStyle(el);
     if (s.overflowX === "auto" || s.overflowX === "scroll") continue;
@@ -175,6 +176,9 @@ const AUDIT = (vw) => {
   }
 
   /* 4 · WHAT IS FOLDED IS COUNTED AND NAMED, never silently dropped. */
+  /* THE FOLD IS A LINE OF ITS OWN NOW RATHER THAN A NINTH COLUMN -- at a 486px measure a track
+     spent on a control is a track taken from an outcome name -- but the rule is unchanged: what
+     is folded is counted and named, never silently dropped. */
   const foldBtn = deck.querySelector("[data-timing-fold]");
   const timingFolded = deck.hasAttribute("data-timing-folded");
   if (timingFolded && !foldBtn) bad.push("columns are folded with no control to restore them");
@@ -187,17 +191,24 @@ const AUDIT = (vw) => {
     if (/INTERVAL/.test(t)) bad.push(`the fold offers to restore an interval that never left: "${t}"`);
     note.push("fold:" + t);
   }
-  /* THE RATE AND ITS INTERVAL ARE ONE CELL AT EVERY WIDTH, and that is now asserted rather than
-     merely arranged. Panel rule 1 -- a published rate implies a count and an interval on the
-     same row -- does not relax at a narrower viewport, and a hover-only title is not an interval
-     a touch reader can reach. Every row that prints a rate prints its bounds in the same cell,
-     at 820px and at 1920. */
+  /* THE RATE, ITS COUNT AND ITS INTERVAL ARE ONE ROW AT EVERY WIDTH, and that is asserted rather
+     than merely arranged. Panel rule 1 -- a published rate implies a count and an interval on
+     the same row -- does not relax at a narrower viewport, and a hover-only title is not an
+     interval a touch reader can reach.
+     ON THE ROW, NOT IN THE CELL. The shared cell was one implementation of the rule, chosen when
+     the interval had no heading of its own; the frozen research table heads it `95% WILSON` and
+     gives it a track. `.at-dc-int` is still the element it is checked through, and it must be
+     VISIBLE -- a track scrolled off the side of the ledger is not on the row a reader can see. */
   for (const row of deck.querySelectorAll("[data-outcome]")) {
     const rate = row.querySelector(".at-dc-rate");
     if (!rate || !/\d[\d,.]*\s*%/.test(rate.textContent || "")) continue;
-    const ci = rate.querySelector(".at-dc-int");
-    if (!ci || !/\d/.test(ci.textContent || "")) {
-      bad.push(`${row.getAttribute("data-outcome")}: a rate without its interval in the same cell`);
+    const ci = row.querySelector(".at-dc-int");
+    const count = row.querySelector(".at-dc-count");
+    if (!ci || !/\d/.test(ci.textContent || "") || !shown(ci)) {
+      bad.push(`${row.getAttribute("data-outcome")}: a rate without its interval on the same row`);
+    }
+    if (!count || !/\d/.test(count.textContent || "") || !shown(count)) {
+      bad.push(`${row.getAttribute("data-outcome")}: a rate without its count on the same row`);
     }
   }
   /* AND THE TWO CONDITIONAL COLUMNS ARE CONSISTENT WITH WHAT THE ROWS HOLD. The allocation may
@@ -225,22 +236,27 @@ const AUDIT = (vw) => {
   else {
     const b = rect(plate);
     if (vw >= 900) {
+      /* THE TWO APERTURE BOUNDS. The hard 500px height cap is gone: it existed because the deck
+         sat UNDER the map, so plate height came straight out of visible rows, and beside a
+         ledger with its own full-height column there is no such trade. What bounds the plate now
+         is the aspect floor, derived in atlas.css from the research corridors the opening view
+         has to hold, and the ceiling that keeps one track from being a horizontal scratch. */
       const ar = b.width / b.height;
-      const docked = !!document.querySelector("[data-inspector-dock]");
-      const ceil = vw >= 1600 && !docked ? 4.0 : 3.2;
-      if (b.height > 501) bad.push(`plate is ${Math.round(b.height)}px, past the 500px cap`);
-      if (ar < 1.419) bad.push(`plate aspect ${ar.toFixed(3)} below the 1.421 floor`);
-      if (b.width <= 2001 && ar > ceil + 0.002) {
-        bad.push(`plate aspect ${ar.toFixed(3)} above the ${ceil} ceiling`);
+      if (ar < 1.668) bad.push(`plate aspect ${ar.toFixed(3)} below the 1.67 floor`);
+      if (b.width <= 2001 && ar > 3.202) {
+        bad.push(`plate aspect ${ar.toFixed(3)} above the 3.2 ceiling`);
       }
       note.push("aspect:" + ar.toFixed(3));
     } else {
       /* THE BOUND IS OFF BY DESIGN HERE, so what is asserted instead is the thing it was
-         switched off in favour of: a stated 40vh, which is a fraction of the viewport rather
-         than a shape derived from a layout this width does not have. */
-      const share = b.height / innerHeight;
-      if (!(share > 0.30 && share < 0.50)) bad.push(`plate is ${(100 * share).toFixed(1)}vh, not the stated 40`);
-      note.push("plate-vh:" + (100 * share).toFixed(1));
+         switched off in favour of: a STATED FIGURE HEIGHT. Below 900 the instrument stacks and
+         the plate is a fixed 392px figure with both its captions -- a smaller figure, not a
+         scaled copy of the 834px one -- dropping to 300px at 480 and below. */
+      const want = vw <= 480 ? 300 : 392;
+      if (Math.abs(b.height - want) > 2) {
+        bad.push(`plate is ${Math.round(b.height)}px, not the stated ${want}px figure`);
+      }
+      note.push("plate-figure:" + Math.round(b.height));
     }
   }
 
@@ -296,9 +312,9 @@ const AUDIT = (vw) => {
    the band works. */
 const VIEWPORTS = [
   ["workstation      >=1440", 1440, 900],
-  ["timing folded  1280-1439", 1320, 860],
-  ["interval folded 1180-1279", 1220, 820],
-  ["groups folded    900-1179", 1024, 768],
+  ["two columns    1280-1439", 1320, 860],
+  ["two columns    1180-1279", 1220, 820],
+  ["two columns     900-1179", 1024, 768],
   ["one column         < 900", 820, 1180],
 ];
 
@@ -337,21 +353,40 @@ for (const [vname, w, h] of VIEWPORTS) {
 
 /* ── the ladder actually steps ────────────────────────────────────────────────────────────── */
 /* A MATRIX THAT PASSED WITHOUT THE LADDER EVER FIRING WOULD PROVE NOTHING ABOUT THE LADDER.
-   So the fold state is read at each width and asserted to be the one the specification names --
-   which also pins the boundaries, since a step that moved would show up here as the wrong
-   column count rather than as a layout that merely still fits. */
+   So the shape is read at each width and asserted to be the one the specification names -- which
+   also pins the boundary, since a step that moved would show up here as the wrong column count
+   rather than as a layout that merely still fits.
+
+   THE LADDER IS SHORTER THAN IT WAS, AND THAT IS THE FROZEN FRAME'S DOING RATHER THAN AN
+   OMISSION. Three rungs were retired by the resting instrument, and each is asserted below as an
+   INVARIANT instead -- which is a stronger statement than a rung, not a weaker one:
+
+     the interval   used to move into the rate's cell at 1280. It is its own column at every
+                    width now, asserted per row in the audit above.
+     the timing pair used to be resident at >=1440 and fold below it, so the most-read table on
+                    the surface had two shapes depending on the monitor. The frozen ledger is
+                    OUTCOME | n / N | RATE | 95% WILSON at every width, and the two duration
+                    columns are behind their named control everywhere -- including at 2560.
+     the groups     used to fold behind a `+ N` chevron below 1180. Nothing folds now: every
+                    contract, including every refused one, is resident at every width. A
+                    qualification one interaction from view is a qualification a reader does
+                    not apply, and the narrow ledger has the measure for them because the bar
+                    and the duration columns left.
+
+   WHAT STILL STEPS IS THE SHELL, ONCE, AT 900: plate and ledger side by side above it, stacked
+   below. The inspector is an overlay on both sides of that step -- it never takes a column of
+   the plate row, so the plate's width, and therefore its aperture, is not a function of whether
+   a storm is selected. That is what the frozen 834/1180 plate boxes require, and it is what the
+   `dock` reading below is actually checking. */
 console.log("\n[responsive] the ladder gives up what it says it gives up, where it says it does");
-/* THE INTERVAL IS NOT ON THIS LADDER ANY MORE, and its absence is the point. It used to give up
-   its track at 1280 and move into the rate's cell, so the most-read statement on the surface had
-   two shapes depending on the monitor; it is one cell at every width now, which is asserted per
-   row in the audit above rather than as a rung here. What is left is the two steps that still
-   change the deck's shape, plus the one that changes the shell's. */
 const LADDER = [
-  [1440, 900, { timing: false, groups: false, dockColumn: true }],
-  [1320, 860, { timing: true, groups: false, dockColumn: true }],
-  [1220, 820, { timing: true, groups: false, dockColumn: true }],
-  [1024, 768, { timing: true, groups: true, dockColumn: false }],
-  [880, 1180, { timing: true, groups: true, dockColumn: false }],
+  [1920, 1080, { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [1440, 900,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [1320, 860,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [1220, 820,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [1024, 768,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [900, 900,   { columns: 2, dock: "over the plate", timing: true, groups: false }],
+  [880, 1180,  { columns: 1, dock: "over the column", timing: true, groups: false }],
 ];
 for (const [w, h, want] of LADDER) {
   await open(`i=cat4&storm=${pick}`, w, h);
@@ -359,20 +394,26 @@ for (const [w, h, want] of LADDER) {
     const deck = document.querySelector("[data-evidence-deck]");
     const dock = document.querySelector("[data-inspector-dock]");
     const row = document.querySelector(".atlas-plate-row");
+    const box = (el) => (el ? el.getBoundingClientRect() : null);
+    const hits = (a, b) => !!a && !!b && a.left < b.right && b.left < a.right
+      && a.top < b.bottom && b.top < a.bottom;
+    const d = box(dock), led = box(document.querySelector(".atlas-evidence"));
     return {
+      /* THE ROW'S OWN TRACK LIST, which is the thing the plate's width is computed against. */
+      columns: getComputedStyle(row).gridTemplateColumns.trim().split(/\s+/).length,
+      /* AN OVERLAY THAT REACHES THE LEDGER HAS TAKEN THE READER'S TABLE AWAY, not just the map's
+         right-hand margin. Above the step the dock is allowed over the plate and nothing else;
+         below it there is only one column for it to be over. */
+      dock: !dock ? "absent" : hits(d, led) ? "over the column" : "over the plate",
       timing: deck.hasAttribute("data-timing-folded"),
       groups: !!deck.querySelector("[data-group-fold]"),
-      /* A DOCK IN THE ROW TAKES A COLUMN OF IT; AN OVERLAY DOES NOT. Read from the plate row's
-         own track list rather than from the dock's position, because that is the thing the
-         plate's width -- and therefore its aperture -- is actually computed against. */
-      dockColumn: !!dock
-        && getComputedStyle(row).gridTemplateColumns.trim().split(/\s+/).length === 2,
     };
   });
   const diff = Object.keys(want).filter((k) => want[k] !== got[k]);
-  ok(`${String(w).padStart(4)}px  timing ${got.timing ? "folded" : "resident"}`
+  ok(`${String(w).padStart(4)}px  ${got.columns} column${got.columns === 1 ? "" : "s"}`
+     + ` · timing ${got.timing ? "folded" : "resident"}`
      + ` · groups ${got.groups ? "folded" : "resident"}`
-     + ` · inspector ${got.dockColumn ? "docked" : "overlaid"}`,
+     + ` · inspector ${got.dock}`,
      diff.length === 0, diff.map((k) => `${k}: want ${want[k]}, got ${got[k]}`).join("; "));
 }
 

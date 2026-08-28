@@ -25,6 +25,9 @@ import {
   RESERVED_QUERY_KEYS, parseQuery, sameCohort, sentenceOf, toFilters, toQuery,
 } from "../docs/storm-atlas/src/engine/cohort.js";
 import {
+  GENESIS_ANY, OUTCOME_ANY, openQuestion, questionSegmentsOf,
+} from "../docs/storm-atlas/src/engine/cohort-language.js";
+import {
   bridgeSpec, contributionOf, whyMatched,
 } from "../docs/storm-atlas/src/engine/cohort-membership.js";
 import { previewCounts } from "../docs/storm-atlas/src/engine/preview.js";
@@ -296,6 +299,71 @@ head("[5] conditions carry their zone, their sentence and their cost");
     "the whole question reads as a sentence", sentence);
   ok(sentenceOf({}) === "Every storm in the archive — what happened next?",
     "and an empty cohort still reads as a question");
+}
+
+/* THE ONE INVARIANT THE PRESSABLE QUESTION RESTS ON.
+ *
+ * The question line renders the sentence in PIECES so a reader can press the clause they want to
+ * change, and the citation quotes the sentence WHOLE. Those are two renderings of one string, and
+ * the entire honesty of the arrangement is that they cannot differ -- a reader who presses
+ * "in any season" and a reader who pastes the citation must be looking at the same question.
+ *
+ * The guarantee is structural: `cohortSentence` IS the join of the segments. This asserts the
+ * structure holds over every combination the grammar has a branch for, because the one way to
+ * break it is to add a branch to one and not the other, and that is a change nobody making it
+ * would think of as touching the citation. */
+head("[5b] the Atlas question's pressable clauses join back into its citation, exactly");
+{
+  const SPECS = [
+    ["nothing asked", {}],
+    ["a location", { where: { lat: 24.1, lon: -71.3, radiusKm: 400 } }],
+    ["a season floor", { seasonFrom: 1971 }],
+    ["a season range", { seasonFrom: 1971, seasonTo: 2020 }],
+    ["genesis months", { months: [8, 9] }],
+    ["a basin, which is an adjective", { basins: ["NA"] }],
+    ["a trajectory", { subbasinsEntered: ["CS"] }],
+    ["two trajectories", { subbasinsEntered: ["CS", "GM"] }],
+    ["a scope adjective", { namedOnly: true }],
+    ["a trailing scope", { includeProvisional: true }],
+    ["one outcome", { intensity: "cat4" }],
+    ["the other outcome", { landfall: "mexico" }],
+    ["both outcomes, no genesis", { intensity: "cat3", landfall: "conus" }],
+    ["genesis and outcome together",
+      { where: { lat: 12, lon: -105, radiusKm: 800 }, seasonFrom: 1971, intensity: "cat4" }],
+    ["every dimension at once", {
+      where: { lat: 12, lon: -105, radiusKm: 800 }, months: [8, 9],
+      seasonFrom: 1971, seasonTo: 2020, basins: ["NA", "EP"], subbasinsEntered: ["CS"],
+      namedOnly: true, includeProvisional: true, intensity: "cat4", landfall: "conus",
+    }],
+  ];
+  for (const [name, spec] of SPECS) {
+    const segs = questionSegmentsOf(normalise(spec));
+    const open = openQuestion(normalise(spec));
+    ok(segs.map((s) => s.text).join("") === open,
+      `${name} — the segments are the sentence`,
+      `${JSON.stringify(segs.map((s) => s.text).join(""))}\n!== ${JSON.stringify(open)}`);
+    /* AND THE CLOSED FORM IS UNTOUCHED. Every other consumer of a cohort sentence -- the
+       dossier's frozen lead above all -- reads `sentenceOf`, and this pull request moved the
+       Atlas's question, not theirs. A closed sentence that grew a placeholder would be a frozen
+       research document re-published to satisfy a layout. */
+    ok(!sentenceOf(spec).includes(GENESIS_ANY) && !sentenceOf(spec).includes(OUTCOME_ANY),
+      `${name} — and the closed form carries no placeholder`, sentenceOf(spec));
+    /* AND EVERY SIDE IS REACHABLE. A question with a side that has no pressable clause is a
+       question one of whose conditions can only be edited from somewhere else -- which is the
+       arrangement 5c replaced. Genesis and outcome are always addressable, set or not. */
+    const zones = new Set(segs.filter((s) => s.zone).map((s) => s.zone));
+    ok(zones.has("given") && zones.has("outcome"),
+      `${name} — both sides are pressable`, [...zones].join(","));
+  }
+  /* THE PLACEHOLDERS CARRY NO CONDITION KEY, which is what tells a caller that pressing them
+     opens an editor rather than offering to remove something that was never set. */
+  const empty = questionSegmentsOf(normalise({}));
+  const clauses = empty.filter((s) => s.zone);
+  ok(clauses.length === 2 && clauses.every((c) => c.key === null),
+    "an unset clause carries no condition key");
+  ok(clauses[0].text === GENESIS_ANY && clauses[1].text === OUTCOME_ANY,
+    "and reads as the absence of a condition, in the sentence's own voice",
+    clauses.map((c) => c.text).join(" | "));
 }
 
 head("[6] the parent cohort — the default baseline");

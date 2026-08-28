@@ -356,50 +356,91 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
      /\[data-atlas\]:not\(\[data-shell="dark"\]\) \.atlas-stage\{[^}]*--t1:var\(--d-t1\)/.test(css),
      "the plate would inherit paper inks");
 
-  /* THE APERTURE'S FOUR BOUNDS, PINNED TO THE NUMBERS THEY WERE DERIVED AS.
+  /* THE APERTURE'S TWO BOUNDS AND THE MEASURE THAT SETS THE PLATE'S WIDTH, PINNED TO THE NUMBERS
+   * THEY WERE DERIVED AS.
    *
    * 1.421 is 1.303 (the archive's core frame) times 1.0905, which is half a Leaflet zoom-snap
    * step -- the median landing rather than the best case.
    * 3.2 is where a single East Pacific track stops being the subject of its own plate.
-   * 4.0 is the same argument at a width where the HEIGHT CAP, not the shell's leftover space,
-   * is what set the shape: past it the plate is panoramic on any monitor.
-   * 500px is the cap itself, and it is the one that decides how much of a large monitor the map
-   * is allowed to take. Every one of the four is a single declaration read by one clamp --
-   * exactly the shape a failing aperture gate is easiest to "fix" by widening -- so widening any
-   * of them is a change to this file with a number in the diff.
    *
-   * AND THE CAP HAS TO REACH BOTH ENDS OF THE CLAMP, which is the assertion that would have
-   * caught the first draft of this model. Capping only the ceiling leaves `avail / 3.2` as a
-   * FLOOR of 800px at 2560 and 1,075 at 3440: the clamp returns its floor, and the cap is inert
-   * at precisely the widths it was written for. Both min() terms are required here. */
+   * THREE BOUNDS THAT USED TO BE PINNED HERE ARE GONE, AND THEIR ABSENCE IS RECORDED RATHER THAN
+   * SILENT. `--at-plate-hmax:500px`, `--at-plate-ar-wide:4.0` and `--at-deck-min:352px` all
+   * existed because the evidence sat UNDER the map: plate height came out of visible rows, so a
+   * cap, a relaxed ceiling for the widths the cap governed, and a floor for the deck were three
+   * halves of one trade. Beside a ledger with its own full-height column there is no trade --
+   * the two are different tracks -- and a height cap would only force the frozen 834px plate to
+   * aspect 1.67 where 5c measures 1.44.
+   *
+   * WHAT REPLACED THEM IS THE LEDGER MEASURE, AND IT IS PINNED THE SAME WAY. `--at-ledger` with
+   * the page padding and the gutter is what decides the plate's width, and therefore -- through
+   * the two aspect bounds -- its height. The expression below produces 5c's measured 834px plate
+   * at 1440 and turn 4's stated 1180px plate at 1920; widening it is the modern form of exactly
+   * the edit the old cap was pinned to prevent, so it is a change to this file with a number in
+   * the diff. */
   const bounds = Object.fromEntries(
-    [...css.matchAll(/--at-plate-(ar|ar-max|ar-wide|hmax)\s*:\s*([\d.]+)/g)].map((m) => [m[1], m[2]]),
+    [...css.matchAll(/--at-plate-(ar|ar-max)\s*:\s*([\d.]+)/g)].map((m) => [m[1], m[2]]),
   );
-  ok("the aperture floor is the archive's own core frame at the median snap",
-     bounds.ar === "1.421", `--at-plate-ar is ${bounds.ar}`);
+  /* 1.668 ROUNDED UP. 86.1 world-units of longitude (the four research corridors plus a degree
+     of margin) times 1.189 (Leaflet's quarter-step ceil on the clamp fit) over 61.37 (the NA + EP
+     clamp's height). Rounded UP rather than to nearest, because every term is a bound rather
+     than an estimate and the rounding has to go the way that keeps them. */
+  ok("the aperture floor is the one the research corridors require",
+     bounds.ar === "1.67", `--at-plate-ar is ${bounds.ar}`);
   ok("and the ceiling is where one track stops being the subject of its plate",
      bounds["ar-max"] === "3.2", `--at-plate-ar-max is ${bounds["ar-max"]}`);
-  ok("the wide-desktop ceiling is the audited 4.0 and not a rounder number",
-     bounds["ar-wide"] === "4.0", `--at-plate-ar-wide is ${bounds["ar-wide"]}`);
-  ok("the map's hard height cap is 500px", bounds.hmax === "500",
-     `--at-plate-hmax is ${bounds.hmax}`);
-  ok("both aspect bounds reach the clamp as tokens, not as literals",
-     /var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)/.test(css)
-     && /var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css),
-     "the stacked shell's clamp is not reading the pinned tokens");
-  ok("and the cap is applied to BOTH ends of the clamp, not only the ceiling",
-     (css.match(/min\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar(?:-max)?\)\), var\(--at-plate-hmax\)\)/g) || []).length === 2,
-     "a cap on the ceiling alone leaves avail/ar-max as an 800px floor at 2560");
-  ok("the deck's guaranteed height is a token the clamp subtracts, not a literal",
-     /--at-deck-min\s*:\s*\d+px/.test(css) && /- var\(--at-deck-min\)/.test(css),
-     "the plate's ideal term is not reading --at-deck-min");
-  /* THE WIDE CEILING APPLIES ONLY WHERE THE CAP IS WHAT WIDENED THE ASPECT. With the inspector
-     docked the plate has already given 380px to the dock and its subject is one storm, so the
-     tighter bound returns -- and a media query that forgot to exclude the dock would relax it
-     everywhere above 1600 without changing a single number in this file. */
-  ok("the wide ceiling is excluded while the inspector is docked",
-     /@media \(min-width:1600px\)\{[^@]*?:not\(:has\(\.atlas-dock\)\)\{\s*--at-plate-ar-max:var\(--at-plate-ar-wide\)/s.test(css),
-     "the 4.0 ceiling is not gated on the dock being absent");
+  ok("both aspect bounds reach the stage as tokens, not as literals",
+     /max-height:min\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css)
+     && /min-height:min\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)/.test(css),
+     "the stage's height bounds are not reading the pinned tokens");
+  /* AND THE THREE RETIRED TOKENS MUST STAY RETIRED. A cap re-declared but unread is a bound
+     somebody will wire back up on the first aperture failure; a cap re-declared AND read is the
+     stacked shell returning by the back door. Either way the argument above stops being true, so
+     neither is allowed to happen quietly. */
+  /* READ WITH THE COMMENTS STRIPPED, because the paragraph above NAMES all three in prose --
+     that is the record of why they went, and a rule that could not tell an explanation from a
+     declaration would forbid the file from explaining itself. */
+  const cssCode = css.replace(/\/\*[\s\S]*?\*\//g, " ");
+  for (const dead of ["--at-plate-hmax", "--at-plate-ar-wide", "--at-deck-min"]) {
+    ok(`${dead} is retired, not merely unused`,
+       !new RegExp(`${dead}\\s*:`).test(cssCode) && !cssCode.includes(`var(${dead})`),
+       `${dead} is still declared or read; the plate's height model has two answers`);
+  }
+  /* THE LEDGER MEASURE, WHICH IS NOW THE ONE NUMBER THAT DECIDES HOW MUCH OF A LARGE MONITOR
+     THE MAP TAKES. Read as an expression rather than as three separate numbers, because it is
+     the expression that has to hold: any of the three edited alone moves the plate off both
+     frozen widths. */
+  /* THE FLOOR IS THE FROZEN TABLE'S OWN MEASURE, WHICH IS THE HALF OF THIS EXPRESSION THAT IS
+     EASIEST TO GET WRONG AND HARDEST TO SEE. 33.75vw is 486 at 1440 and less on every narrower
+     screen, and what a percentage-only measure gives up first is the RIGHT-HAND column: at 900
+     it left the deck 304px for a table that needs 468, so a refused row's STATUS sat off the
+     right-hand edge of a horizontal scroll. A refusal a reader has to drag sideways to find has
+     not been published. 486 is not a round number, it is 150 + 84 + 52 + 70 + 72 and four 10px
+     gutters -- the five resting tracks -- and it is also exactly 33.75vw at 1440, so the floor
+     binds ONLY below the width where 5c's own percentage had already run out. */
+  const ledger = (css.match(/--at-ledger:\s*clamp\(([^)]*)\)/) || [])[1];
+  ok("the ledger measure is the frozen clamp",
+     (ledger || "").replace(/\s+/g, "") === "486px,33.75vw,620px",
+     `--at-ledger is clamp(${ledger})`);
+  const pad = (css.match(/--at-pad:\s*(\d+)px/) || [])[1];
+  const gap = (css.match(/--at-gap:\s*(\d+)px/) || [])[1];
+  ok("with the page padding and gutter it names", pad === "40" && gap === "40",
+     `--at-pad ${pad}px, --at-gap ${gap}px`);
+  /* AND THE ARITHMETIC IS ASSERTED, NOT ASSUMED. 1440 and 1920 are the two widths the frozen
+     design states a plate box for, and this is that statement as a calculation: if any of the
+     three numbers above moves, one of these two stops being true. */
+  const plateAt = (vw) => vw - 2 * Number(pad) - Number(gap)
+    - Math.min(620, Math.max(486, 0.3375 * vw));
+  ok("which puts the plate at 5c's measured 834px at 1440", plateAt(1440) === 834,
+     `${plateAt(1440)}px`);
+  ok("and at turn 4's stated 1180px at 1920", plateAt(1920) === 1180, `${plateAt(1920)}px`);
+  /* AND THE FLOOR IS INERT AT BOTH OF THEM, which is the claim that lets it exist at all: it may
+     only bind below 1440, where 5c states no plate box. If a future edit raised it, this is the
+     assertion that fails before either measured width does. */
+  ok("and the floor binds nowhere 5c states a plate box",
+     0.3375 * 1440 >= 486 && 0.3375 * 1920 >= 620, "the floor has reached a stated width");
+  ok("the plate's available width is derived from them rather than from the viewport",
+     /--at-plate-avail:calc\(100vw - 2 \* var\(--at-pad\) - var\(--at-gap\) - var\(--at-ledger\)\)/.test(css),
+     "--at-plate-avail is not composed from the measure tokens");
 
   /* AND NO RULE MAY NAME AN INK THAT IS NOT A TOKEN.
    *

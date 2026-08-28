@@ -1,46 +1,48 @@
-/* THE CONDITION STRIP — the query, as three labelled zones, always visible.
+/* THE QUERY, AS THE SENTENCE ITSELF — the question and the one line that sizes it.
  *
- * WHAT IT REPLACES. The rail held a builder: six stacked sections of chips, month cells, year
- * inputs and toggles, permanently occupying a fifth of the width whether or not anyone was
- * editing. The strip keeps the STATE and moves the EDITING behind a sheet, on the argument the
- * handoff makes and the measurements support -- a reader looks at their conditions constantly
- * and changes them rarely, so the surface should show the first and summon the second.
+ * WHAT THIS REPLACES, AND WHY THE STRIP HAD TO GO. The query used to be three labelled zones in a
+ * 38px band under the question:
  *
- * THE ONE THING THIS SURFACE CANNOT LOSE IS THE BOUNDARY.
+ *     GENESIS-SIDE  no condition on where or when these storms formed
+ *     OUTCOME-SIDE  no condition on what they went on to do
+ *     SCOPE         the archive's default record scope
  *
- * A cohort is defined by two kinds of condition and they are not interchangeable:
+ * Everything that band said was true, and a reader still had to assemble the question out of two
+ * surfaces: a sentence at the top that did not mention either side, and three headings below it
+ * that named the sides in a vocabulary the sentence never used. `5c` collapses the two into one:
+ * the unset sides are written INTO the sentence as clauses, and each clause is the control that
+ * sets it. The sentence reads as English before any condition exists, and there is exactly one
+ * place a reader looks to learn what is being asked.
  *
- *   GENESIS-SIDE   where and when a storm formed. These narrow the POPULATION.
- *   OUTCOME-SIDE   what the storm went on to do. These narrow the population AND take the
- *                  conditioned variable out of the evidence -- the fifth rule. A cohort defined
- *                  by "reached Cat 4" cannot report a Category 4 rate, because every member has
- *                  one by construction.
+ * THE BOUNDARY IS STILL THE THING THIS FILE EXISTS TO CARRY, and it is carried twice.
  *
- * A reader who cannot see which side a condition sits on cannot tell a finding from an artefact
- * of their own question. So the three zones are ALWAYS rendered, including when they are empty:
- * an empty zone carries a faint tint, its own rule, and a line saying what it would hold. That
- * is the property scripts/check-condition-strip.mjs asserts with the prose covered -- the
- * boundary has to be legible from structure alone, because a reader scanning a strip reads the
- * shapes first.
+ *   IN THE GRAMMAR.  Genesis-side conditions are inside a `formed …` clause; outcome-side ones
+ *                    follow `that …` or `given that they also …`. Which side a condition sits on
+ *                    is a fact about the sentence, and engine/cohort-language.js is where the
+ *                    grammar that guarantees it lives.
+ *   IN THE INK.      A set genesis clause is ruled in the accent; a set outcome clause is ruled
+ *                    in the flag ink, because an outcome-side condition COSTS a row -- a cohort
+ *                    defined by "reached Cat 4" cannot report a Category 4 rate, since every
+ *                    member has one by construction. An unset clause is ruled with a dotted
+ *                    neutral: it is an invitation, not a condition.
  *
- * THE EMPTY ZONE IS A SURFACE, NOT A BOX WITH A BOX INSIDE IT. It used to draw a dashed
- * rectangle around the placeholder sentence, which said two things at once and neither well: a
- * dashed border reads as a drop target, and a box inside a zone that already has a rule and a
- * heading is a second frame around the same idea. The tint does the work the box was doing --
- * this zone is a zone and it is unset -- and the whole zone is the click target, so the reader
- * is not aiming at eleven pixels of heading.
+ * scripts/check-condition-strip.mjs asserts both, with the prose covered for the second: a reader
+ * scanning a sentence reads its shapes before its words, and a boundary that only exists once you
+ * have parsed a subordinate clause is a boundary that is late.
  *
- * SCOPE IS THE THIRD ZONE AND IT IS NEITHER OF THE OTHER TWO. Named-only and provisional-season
- * handling change WHICH RECORDS ARE ELIGIBLE, not which storms qualify -- they are properties of
- * the archive being consulted rather than of the question being asked, and filing them under
- * either of the first two zones would misstate what they do.
+ * THE COHORT LINE IS THE ONE PRIMARY HOME FOR THE POPULATION. `3,885 of 3,959 archive storms ·
+ * SUFFICIENT · MIN 10`, in one neutral mono voice, immediately under the question it is the
+ * denominator of. It is not repeated as a headline anywhere else on the surface -- the deck's
+ * preamble used to print the same count at the figure token, and two 3,885s on one screen make a
+ * reader look for the difference between them.
  */
 
 import React from "react";
 
 /* The three zones, in reading order, with what each would hold when it holds nothing. The
-   placeholder is not filler: it is the only thing standing between an empty strip and a reader
-   who cannot tell an unasked question from an unanswerable one. */
+   placeholder is not filler: it is the only thing standing between an unasked question and a
+   reader who cannot tell one from an unanswerable one. `empty` is the title on the control;
+   the sentence carries its own words, from the engine. */
 export const ZONES = [
   { key: "given", label: "GENESIS-SIDE", rule: "accent",
     empty: "no condition on where or when these storms formed" },
@@ -50,95 +52,155 @@ export const ZONES = [
     empty: "the archive's default record scope" },
 ];
 
+const ZONE_BY_KEY = new Map(ZONES.map((z) => [z.key, z]));
+
 /**
- * @param {Array}  props.conditions  engine/cohort.js conditionsOf(spec) -- each carries `zone`
- * @param {object} [props.lastEdit]  `{ from, to }` populations, or null before the first edit
- * @param {func}   [props.onEdit]    opens the builder sheet for one zone
- * @param {func}   [props.onClear]   removes one condition by key
- * @param {func}   [props.onReset]   clears every condition at once
+ * The research question, as one typeset sentence whose clauses are the query's controls.
+ *
+ * @param {Array}  props.segments   engine/cohort-language.js questionSegmentsOf(spec)
+ * @param {func}   [props.onEdit]   opens the builder sheet for one zone
+ * @param {func}   [props.onClear]  removes one condition by key
  */
-export function ConditionStrip({ conditions = [], lastEdit = null, onEdit, onClear, onReset }) {
-  const byZone = new Map(ZONES.map((z) => [z.key, []]));
-  for (const c of conditions) {
-    /* An unknown zone is a bug in the engine, not a reason to drop the condition on the floor:
-       filing it under SCOPE would misreport which side of the boundary it sits on, so it goes
-       nowhere and the count below will not match. Better a visible discrepancy than a quiet
-       misfiling. */
-    if (byZone.has(c.zone)) byZone.get(c.zone).push(c);
-  }
-
+export function QuestionSentence({ segments = [], onEdit, onClear }) {
   return (
-    <div className="at-strip" data-condition-strip>
-      {ZONES.map((z) => (
-        <Zone key={z.key} zone={z} conditions={byZone.get(z.key)}
-          onEdit={onEdit} onClear={onClear} />
-      ))}
-      <LastEdit lastEdit={lastEdit} />
-      {/* RESET QUERY — ONE OF THREE WAYS OUT, AND THE ONLY ONE THAT TOUCHES THE QUESTION.
-          It clears the conditions and nothing else: not the camera, not the selection's history,
-          not the layers. HOME and FIT are on the plate and move the camera without touching the
-          query. Keeping the three separate is what lets a reader who has panned away from a
-          cohort they spent five minutes building get the view back without losing the cohort.
-
-          PRESENT ONLY WITH SOMETHING TO CLEAR. A permanent RESET on an unqueried archive is a
-          control that does nothing, and a control that does nothing teaches a reader to ignore
-          the row it lives on. The individual × removals stay: reset is the blunt instrument and
-          they are the precise one, and a reader who wants to drop one of four conditions should
-          not have to rebuild the other three. */}
-      {conditions.length && onReset ? (
-        <button type="button" className="at-strip-reset" data-reset-query onClick={onReset}
-          title={`clear ${conditions.length === 1 ? "this condition" : `all ${conditions.length} conditions`} — the camera and the selection are not touched`}>
-          RESET QUERY
-        </button>
-      ) : null}
-    </div>
+    /* NOT TRUNCATED AND NOT ELLIPSISED. At 30px the question is the largest thing on the surface
+       and it is allowed the two or three lines it needs; what it must never do is take its
+       height from the plate, which is why the head row is `auto` and the plate row is the
+       elastic one. The whole sentence is also the element's title, so a gate and a hover both
+       find the text even in the states where a clause wraps. */
+    <p className="at-question-text" data-question
+      title={segments.map((s) => s.text).join("")}>
+      {segments.map((seg, i) => {
+        if (!seg.zone) return <span key={i}>{seg.text}</span>;
+        return (
+          <Clause key={i} seg={seg} onEdit={onEdit} onClear={onClear} />
+        );
+      })}
+    </p>
   );
 }
 
-function Zone({ zone, conditions, onEdit, onClear }) {
-  const empty = conditions.length === 0;
-  const open = onEdit ? () => onEdit(zone.key) : undefined;
-  /* THE WHOLE EMPTY ZONE IS THE CONTROL, and it is a real button rather than a div with a click
-     handler -- so it is in the tab order, answers Enter and Space, and gets the focus ring the
-     surface already draws. A zone that HOLDS something is not a button: the conditions inside it
-     carry their own removals, and a click anywhere in it opening an editor would make removing
-     one condition a coin flip. There the heading stays the affordance, as it always was. */
-  const Tag = empty && open ? "button" : "div";
-  const zoneProps = empty && open
-    ? { type: "button", onClick: open, "data-zone-edit": zone.key,
-        title: `set a ${zone.label.toLowerCase()} condition — ${zone.empty}` }
-    : {};
+/* ONE CLAUSE, WHICH IS EITHER A CONDITION OR THE INVITATION TO SET ONE.
+ *
+ * A REAL BUTTON, NOT A SPAN WITH A HANDLER, so it is in the tab order, answers Enter and Space,
+ * and gets the focus ring the surface already draws. It is `display:inline` so it wraps with the
+ * sentence rather than sitting in it as a box -- a clause that cannot break across a line turns
+ * a 30px question into a horizontal scroll at 768.
+ *
+ * THE REMOVAL RIDES WITH THE CLAUSE THAT CARRIES THE CONDITION. It is a sibling rather than a
+ * child, because a × inside the button that opens the editor would make removing one condition a
+ * coin flip against editing it -- which is the same rule the strip's zones were built on. */
+function Clause({ seg, onEdit, onClear }) {
+  const zone = ZONE_BY_KEY.get(seg.zone) || ZONES[0];
+  const set = !!seg.key;
+  const open = onEdit ? () => onEdit(seg.zone) : undefined;
   return (
-    <Tag className={`at-zone at-zone-${zone.rule}${empty ? " at-zone-empty" : ""}`}
-      data-zone={zone.key} data-zone-empty={empty ? "" : undefined} {...zoneProps}>
-      {empty ? (
-        <span className="at-zone-label">{zone.label}</span>
-      ) : (
-        <button type="button" className="at-zone-label" data-zone-edit={zone.key}
-          onClick={open} title={`edit the ${zone.label.toLowerCase()} conditions`}>
-          {zone.label}
-        </button>
-      )}
-      <div className="at-zone-items">
-        {empty ? (
-          /* THE PLACEHOLDER IS THE BOUNDARY WHEN NOTHING IS SET. It states what the zone WOULD
-             do -- an empty box with a heading tells a reader the zone exists; this tells them
-             what it is for. The dashed rectangle it used to sit in is gone: the zone's own tint
-             says "unset" without also saying "drop something here". */
-          <span className="at-zone-hint" data-zone-hint>{zone.empty}</span>
-        ) : conditions.map((c) => (
-          <span key={c.key} className="at-cond" data-condition={c.key} data-condition-zone={zone.key}>
-            <span className="at-cond-k">{c.label}</span>
-            <span className="at-cond-v">{c.value || c.sentence}</span>
-            {onClear ? (
-              <button type="button" className="at-cond-x" data-condition-clear={c.key}
-                onClick={() => onClear(c.key)} title={`remove: ${c.label}`}
-                aria-label={`remove condition ${c.label}`}>×</button>
-            ) : null}
-          </span>
-        ))}
-      </div>
-    </Tag>
+    <>
+      <button type="button"
+        className={`at-clause at-zone at-zone-${zone.rule}${set ? "" : " at-zone-empty"}`}
+        data-zone={seg.zone} data-zone-edit={seg.zone}
+        data-zone-empty={set ? undefined : ""}
+        data-condition={set ? seg.key : undefined}
+        data-condition-zone={set ? seg.zone : undefined}
+        data-zone-hint={set ? undefined : ""}
+        onClick={open}
+        title={set ? `edit the ${zone.label.toLowerCase()} condition — ${seg.text}`
+          : `set a ${zone.label.toLowerCase()} condition — ${zone.empty}`}>
+        {seg.text}
+      </button>
+      {/* THE × IS DRAWN, NOT WRITTEN, AND THAT IS NOT A STYLE CHOICE.
+          `[data-question]`'s text IS the question -- it is what the citation quotes, what a gate
+          reads and what a screen reader announces -- and a removal control inside the sentence
+          put its glyph in all three: "formed within 800 km of 12.0°N 105.0°W×, in seasons from
+          1971 onwards×". The mark is a CSS pseudo-element, so it is painted and clickable and is
+          in neither `textContent` nor `innerText`; the control keeps its own accessible name,
+          which says what it removes rather than saying "×". */}
+      {set && onClear ? (
+        <button type="button" className="at-clause-x" data-condition-clear={seg.key}
+          onClick={() => onClear(seg.key)} title={`remove: ${seg.text}`}
+          aria-label={`remove condition ${seg.text}`} />
+      ) : null}
+    </>
+  );
+}
+
+/**
+ * The cohort, its sufficiency and its scope — one line, one voice, directly under the question.
+ *
+ * ONE TYPOGRAPHIC WEIGHT UNLESS THE COHORT IS THE FINDING. The count is the denominator of every
+ * rate below and it is stated once, quietly. `SUFFICIENT` and `BELOW SAMPLE` are the same size as
+ * the rest of the line and differ only in ink, because whether the sample clears the gate is a
+ * fact about the cohort, not a headline about it -- and BELOW SAMPLE is the one state where the
+ * cohort IS the finding, which is exactly when the ink change earns its keep.
+ *
+ * @param {number}  props.kept        storms in the cohort
+ * @param {number}  props.total       storms in the archive
+ * @param {boolean} props.sufficient  whether the cohort clears the sample gate
+ * @param {number}  props.minSample   the gate itself
+ * @param {Array}   props.conditions  conditionsOf(spec) — only to know whether RESET applies
+ * @param {Array}   [props.scope]     the scope-zone conditions, for the scope control's words
+ */
+export function CohortLine({ kept, total, sufficient, minSample, conditions = [], scope = [],
+  lastEdit = null, onEdit, onReset, children }) {
+  const narrowed = total !== undefined && total !== null && kept !== total;
+  const scopeWords = scope.length
+    ? scope.map((c) => c.value || c.sentence).join(" · ")
+    : "archive default";
+  return (
+    <div className="at-cohort" data-cohort-line>
+      <span className="at-cohort-n">
+        <em data-cohort-size>{kept.toLocaleString()}</em>
+        {narrowed ? <> of {total.toLocaleString()} archive storms</> : <> archive storms</>}
+        {" · "}
+        <b className={sufficient ? "at-cohort-ok" : "at-cohort-no"}>
+          {sufficient ? "SUFFICIENT" : "BELOW SAMPLE"}
+        </b>
+        <span className="at-cohort-min"> · MIN {minSample}</span>
+      </span>
+
+      {/* SCOPE IS NEITHER OF THE OTHER TWO SIDES, AND IT IS NOT IN THE SENTENCE'S HEAD.
+          Named-only and provisional-season handling change WHICH RECORDS ARE ELIGIBLE, not which
+          storms qualify — they are properties of the archive being consulted rather than of the
+          question being asked. So the third zone lives here, on the line that says how big the
+          record is, where it qualifies the count rather than the question. */}
+      <button type="button"
+        className={`at-zone at-zone-hair at-cohort-scope${scope.length ? "" : " at-zone-empty"}`}
+        data-zone="scope" data-zone-edit="scope"
+        data-zone-empty={scope.length ? undefined : ""}
+        data-zone-hint={scope.length ? undefined : ""}
+        onClick={onEdit ? () => onEdit("scope") : undefined}
+        title={`edit the record scope — ${scope.length ? scopeWords : ZONE_BY_KEY.get("scope").empty}`}>
+        scope · {scopeWords}
+      </button>
+
+      <LastEdit lastEdit={lastEdit} />
+
+      <span className="at-cohort-acts">
+        {children}
+        {/* RESET QUERY — ONE OF THREE WAYS OUT, AND THE ONLY ONE THAT TOUCHES THE QUESTION.
+            It clears the conditions and nothing else: not the camera, not the selection's
+            history, not the layers. Present only with something to clear, because a permanent
+            RESET on an unqueried archive is a control that does nothing, and a control that does
+            nothing teaches a reader to ignore the row it lives on. */}
+        {conditions.length && onReset ? (
+          <button type="button" className="at-strip-reset" data-reset-query onClick={onReset}
+            title={`clear ${conditions.length === 1 ? "this condition" : `all ${conditions.length} conditions`} — the camera and the selection are not touched`}>
+            RESET QUERY
+          </button>
+        ) : null}
+        {/* THE BUILDER'S OWN OPENER, NAMED AS THE THING IT DOES. Every clause in the sentence
+            already opens the builder at its own zone; this opens it at the genesis side for a
+            reader who has decided to narrow the question before deciding how. It is the same
+            sheet, the same state and the same costs — one more door, not one more control. */}
+        {onEdit ? (
+          <button type="button" className="at-cohort-add" data-add-condition
+            onClick={() => onEdit("given")}
+            title="add a condition — the same editor every clause above opens">
+            + condition
+          </button>
+        ) : null}
+      </span>
+    </div>
   );
 }
 
@@ -148,11 +210,34 @@ function Zone({ zone, conditions, onEdit, onClear }) {
 function LastEdit({ lastEdit }) {
   if (!lastEdit || lastEdit.from === null || lastEdit.to === null) return null;
   return (
-    <div className="at-lastedit" data-last-edit>
+    <span className="at-lastedit" data-last-edit>
       <span className="at-lastedit-k">LAST EDIT</span>
       <span className="at-lastedit-v">
         {lastEdit.from.toLocaleString()} → {lastEdit.to.toLocaleString()}
       </span>
+    </span>
+  );
+}
+
+/**
+ * The question and its cohort line, as the one head of the instrument.
+ *
+ * `data-condition-strip` survives the rewrite deliberately: it is the hook every gate that asks
+ * "where is the query on this surface" reads, and the answer is still one element — it is simply
+ * a sentence now rather than a band of zones.
+ */
+export function QueryHead({ segments, conditions = [], scope = [], kept, total,
+  sufficient, minSample, lastEdit = null, onEdit, onClear, onReset, notice = null,
+  children }) {
+  return (
+    <div className="at-head" data-condition-strip>
+      {notice}
+      <QuestionSentence segments={segments} onEdit={onEdit} onClear={onClear} />
+      <CohortLine kept={kept} total={total} sufficient={sufficient} minSample={minSample}
+        conditions={conditions} scope={scope} lastEdit={lastEdit}
+        onEdit={onEdit} onReset={onReset}>
+        {children}
+      </CohortLine>
     </div>
   );
 }

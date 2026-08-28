@@ -493,18 +493,50 @@ jobs:
         run: node scripts/check-inspector-bridge.mjs --self-test --require-browser
 
       # THE PLATE'S APERTURE, BOUNDED AT BOTH ENDS. The two bounds fail at OPPOSITE viewports:
-      # the 1.421 floor on a tall workstation, where the archive's core frame cannot fill the
-      # plate and the fit opens latitude holding no storms; the 3.2 ceiling on a wide, short one,
-      # where a single East Pacific track stops being the subject of its own plate. The second is
-      # the case nobody develops at, and the specification says why it matters -- "a wide monitor
-      # will QUIETLY reintroduce a panoramic plate". Nothing about a 4:1 plate looks broken.
+      # the 1.67 floor on a tall workstation, where a plate taller than that opens a view with a
+      # research corridor off its edge; the 3.2 ceiling on a wide, short one, where a single East
+      # Pacific track stops being the subject of its own plate. The second is the case nobody
+      # develops at, and the specification says why it matters -- "a wide monitor will QUIETLY
+      # reintroduce a panoramic plate". Nothing about a 4:1 plate looks broken.
       #
-      # So the aspect is measured in the real page at ten viewports including 2560x1080 and
-      # 1440x2000, plus the docked and transport-present states, and blank plane is asserted with
-      # it -- because the easy way to hold an aspect bound is to cap the instrument and centre it,
-      # which is what the previous shell did and what the 0% acceptance test exists to forbid.
+      # So the aspect is measured in the real page at eleven viewports including 2560x1080 and
+      # 1440x2000, plus the docked state, and blank plane is asserted with it -- because the easy
+      # way to hold an aspect bound is to cap the instrument and centre it, which is what an
+      # earlier shell did and what the 0% acceptance test exists to forbid. The two FROZEN plate
+      # boxes are measured with them: 834px at 1440 and 1180px at 1920, which is what a widened
+      # ledger measure would move and what the retired 500px height cap used to guard.
       - name: Verify the plate's aperture stays inside its bounds
         run: node scripts/check-plate-aperture.mjs --self-test --require-browser
+
+      # THE RESTING INSTRUMENT ITSELF, AGAINST THE FROZEN FRAME. Every other browser gate holds
+      # ONE property across every state; none of them asserts the resting screen's composition,
+      # and that composition is a specification with numbers in it. Six things are measured in
+      # the real page at the five widths the responsive contract names: the question dominates at
+      # 30px with the cohort stated once beneath it; the plate is one uninterrupted rectangle
+      # whose captions are set in paper OUTSIDE the dark subtree; the Saffir-Simpson key is
+      # present, in the plate's own palette, with the majors carrying extra stroke; the ledger's
+      # heads and its limits are pinned at both ends of a scroll; and identity, provenance and
+      # the citation are at the foot.
+      #
+      # THE SCALE BAR IS THE ONE THE HANDOFF SINGLES OUT, and it is checked as GEOMETRY rather
+      # than as markup: the projection's own distance across the bar's rendered pixels against
+      # the distance the bar claims, at every width, after a resize and after a zoom. A bar
+      # stored as a constant is a measurement of a mock and is wrong on every screen that is not
+      # the mock -- and it passes any check that only asks whether a bar is present.
+      - name: Verify the resting instrument is the frozen frame
+        run: node scripts/check-atlas-instrument.mjs --require-browser
+
+      # AND EVERY PUBLISHED FIGURE, AGAINST A COMMITTED SNAPSHOT. The gates above assert the
+      # SHAPE of the surface -- that a rate carries its interval, that a refused row says so.
+      # None of them asserts the DIGITS, so a presentation change that re-rounded a rate, swapped
+      # a Wilson bound for a Wald one or renamed a denominator would pass all of them while the
+      # surface went on looking exactly as honest. That is the failure a layout pull request is
+      # most likely to cause and least likely to notice, so the numbers are frozen as data:
+      # cohort size, per-row numerator and denominator, rate, both Wilson bounds, status word,
+      # refusal kind and its verbatim sentence, the pinned limits and the URL, over four states
+      # chosen so every publishing path is exercised.
+      - name: Verify every published figure is unchanged
+        run: node scripts/check-atlas-published-values.mjs --require-browser
 
       # THE CAMERA, WHICH IS THE OTHER HALF OF THE APERTURE AND FAILS DIFFERENTLY.
       # The gate above measures the plate's BOX. This one measures what is IN it, and the reason

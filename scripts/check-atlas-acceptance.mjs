@@ -104,14 +104,22 @@ const EIGHT = () => {
     "CATEGORY 5"];
   const named = intensity.map((r) => r.getAttribute("data-outcome"));
 
-  /* A RATE AND ITS INTERVAL IN THE SAME CELL. Read off the first row that publishes a rate at
-     all: the pair is what must be visible, not merely a percentage. */
+  /* A RATE AND ITS INTERVAL ON THE SAME ROW. Read off the first row that publishes a rate at
+     all: the pair is what must be visible, not merely a percentage.
+
+     ON THE ROW, NOT IN THE CELL, AND THE RULE IS THE ONE THAT ALWAYS APPLIED. Panel rule 1 is
+     "a published rate implies a count and an interval ON THE SAME ROW"; the shared cell was one
+     implementation of it, chosen when the interval had no heading of its own. The frozen table
+     heads it `95% WILSON` and gives it a track, so the interval is one cell to the right and
+     `.at-dc-int` is still the element every gate finds it through. What must not happen -- a
+     percentage published with its bounds a hover, a fold or a scroll away -- is what is
+     asserted, and it is asserted at the row. */
   const rated = rows.find((r) => {
     const c = r.querySelector(".at-dc-rate");
     return c && /\d[\d,.]*\s*%/.test(c.textContent || "");
   });
   const rateCell = rated && rated.querySelector(".at-dc-rate");
-  const ciInCell = rateCell && rateCell.querySelector(".at-dc-int");
+  const ciInCell = rated && rated.querySelector(".at-dc-int");
 
   const quals = [...document.querySelectorAll(
     "[data-refusal],[data-archive-gaps],[data-unknown-note],[data-landfall-note],[data-group-note]")]
@@ -120,16 +128,24 @@ const EIGHT = () => {
   return {
     question: vis(document.querySelector("[data-question]")),
     questionText: (document.querySelector("[data-question]") || {}).textContent || "",
-    conditions: [...document.querySelectorAll("[data-zone]")].filter(vis).length === 3,
+    /* THE THREE ZONES ARE ADDRESSABLE, WHICH IS NOT THE SAME AS THERE BEING THREE ELEMENTS.
+       They used to be three labelled zones in a band, so counting them was counting them. In
+       the sentence a side can hold more than one clause -- "formed within 400 km of X, in
+       seasons from 1971 onwards" is two genesis conditions and two controls -- so what has to
+       hold is that all three zones are present and visible, not that exactly three boxes are. */
+    conditions: ["given", "outcome", "scope"].every((z) =>
+      [...document.querySelectorAll(`[data-zone="${z}"]`)].some(vis)),
+    zonesSeen: [...new Set([...document.querySelectorAll("[data-zone]")]
+      .filter(vis).map((e) => e.getAttribute("data-zone")))].join(","),
     map: vis(document.querySelector(".at-plate")),
     cohortSize: vis(document.querySelector("[data-cohort-size]")),
     ladderComplete: LADDER.every((k) => named.includes(k))
       && intensity.every((r) => vis(r.querySelector(".at-dc-rate"))),
     ladderNamed: named.join(", "),
-    rateAndCi: !!(rateCell && vis(rateCell) && ciInCell
+    rateAndCi: !!(rateCell && vis(rateCell) && ciInCell && vis(ciInCell)
       && /\d[\d,.]*\s*%/.test(rateCell.textContent || "")
       && /\d/.test(ciInCell.textContent || "")),
-    rateSample: rateCell ? rateCell.textContent.replace(/\s+/g, " ").trim() : null,
+    rateSample: rated ? `${rateCell.textContent.trim()}  ${ciInCell ? ciInCell.textContent.trim() : "(no interval)"}` : null,
     vsColumn: !!(deck && deck.querySelector(".at-deck-head .at-dc-vs"))
       && rows.some((r) => vis(r.querySelector(".at-dc-vs"))),
     statusColumn: !!(deck && deck.querySelector(".at-deck-head .at-dc-status")),
@@ -146,12 +162,27 @@ const EIGHT = () => {
     qualSample: quals.length ? quals[0].textContent.replace(/\s+/g, " ").trim().slice(0, 72) : null,
     mode: deck ? deck.getAttribute("data-deck-mode") : null,
     cite: vis(document.querySelector("[data-cite-cohort]")),
-    /* THE TYPE FLOOR, MEASURED WITH THE EIGHT. Nothing numeric below 12, nothing at all below the
-       stamp token. The interval is included by name: it is the value most likely to be shrunk to
-       make a merged cell fit. */
-    smallestData: Math.min(...[...document.querySelectorAll(
+    /* THE TYPE SCALE, MEASURED WITH THE EIGHT, AND IT IS NOW A SCALE RATHER THAN A FLOOR.
+     *
+     * WHAT THIS USED TO ASSERT AND WHY IT CHANGED. The rule was "nothing numeric below 12px",
+     * written against a real failure: type shrunk AT A BREAKPOINT to make a merged cell fit, so
+     * a narrower monitor published smaller statistics than a wider one. That failure mode is
+     * gone -- nothing in the frozen frame changes size with the viewport at all -- and the rule
+     * as written also forbids the frame itself, whose five steps are 30 · 14 · 11.5 · 10.5 · 9.5.
+     *
+     * SO THE ASSERTION IS THE SCALE, WHICH IS STRICTER IN THE WAY THAT MATTERS. Every element
+     * below must land EXACTLY on one of the five steps -- a size that is merely "big enough" but
+     * off the scale is the drift the frame exists to prevent -- and the two elements that carry
+     * a FINDING, the outcome name and the rate, must be at the finding step or above. The two
+     * steps under 12 carry supporting arithmetic (n / N, a Wilson bound) and are mono with
+     * tabular figures; check-light-contrast measures each on the ground it lands on, in both
+     * shells, and every one clears AA. Nothing is bought by shrinking type here, because
+     * nothing shrinks. */
+    typeScale: [...document.querySelectorAll(
       ".at-dc-name, .at-dc-rate .at-val, .at-dc-int .at-val, .at-dc-count .at-val, .at-question-text")]
-      .map((e) => parseFloat(getComputedStyle(e).fontSize))),
+      .map((e) => parseFloat(getComputedStyle(e).fontSize)),
+    findingType: Math.min(...[...document.querySelectorAll(
+      ".at-dc-name, .at-dc-rate .at-val")].map((e) => parseFloat(getComputedStyle(e).fontSize))),
     /* AND NOTHING SCROLLS. A deck that answers eight of eight because the reader is looking at
        the top of a scrolled column has answered none of them at first paint. */
     deckScrolled: (() => {
@@ -174,12 +205,12 @@ for (const [w, h] of VIEWPORTS) {
     await open(q, w, h);
     const d = await page.evaluate(EIGHT);
     ok("1 · the canonical question", d.question, d.questionText.slice(0, 80));
-    ok("2 · the active conditions, all three zones", d.conditions);
+    ok("2 · the active conditions, all three zones addressable", d.conditions, d.zonesSeen);
     ok("3 · a focused map", d.map);
     ok("4 · the cohort size", d.cohortSize);
     ok("5 · the complete intensity ladder, every rung with its rate", d.ladderComplete,
        d.ladderNamed);
-    ok("6 · the rate and its Wilson interval, in one cell", d.rateAndCi, d.rateSample);
+    ok("6 · the rate and its Wilson interval, on one row", d.rateAndCi, d.rateSample);
     /* 7 · WHERE APPLICABLE, IN BOTH DIRECTIONS. */
     if (want.vs) {
       ok("7 · the archive comparison, as a column", d.vsColumn && d.mode === "cohort",
@@ -203,8 +234,14 @@ for (const [w, h] of VIEWPORTS) {
     }
     ok("8 · the first material qualification", d.qualification, d.qualSample);
     ok("· and the cohort can be cited from where the question is", d.cite);
-    ok("· nothing was bought by shrinking type", d.smallestData >= 12,
-       `smallest data type is ${d.smallestData}px`);
+    {
+      const STEPS = [30, 14, 11.5, 10.5, 9.5];
+      const off = [...new Set(d.typeScale)].filter((v) => !STEPS.includes(v));
+      ok("· every element is on one of the frame's five steps", off.length === 0,
+         `${off.join(", ")}px is not one of ${STEPS.join(" · ")}`);
+      ok("· and nothing that carries a finding is below the finding step",
+         d.findingType >= 14, `smallest finding type is ${d.findingType}px`);
+    }
     ok("· nothing is scrolled at first paint", d.deckScrolled === 0, `${d.deckScrolled}px`);
     ok("· and the page does not scroll sideways", !d.sideways);
   }
