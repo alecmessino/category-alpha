@@ -1405,7 +1405,10 @@
    An ellipsis truncates the ROW'S OWN IDENTITY, and `Central Ame…` beside a rate is a figure
    whose subject the reader has to hover to learn. A second line costs 11px of a row whose 29 is
    a MINIMUM by construction, and costs it on two rows of eighteen. */
-[data-atlas] .at-dc-name{min-width:0;overflow-wrap:anywhere;hyphens:none}
+/* `break-word`, NOT `anywhere`: a word is broken only when it cannot fit a line BY ITSELF, so
+   the wrap happens at the spaces every name has -- `Central America ·` / `≥64 KT` -- and
+   `Unattributed` is never served as `Unattribute` / `d`. */
+[data-atlas] .at-dc-name{min-width:0;overflow-wrap:break-word;hyphens:none}
 
 /* EVERY NUMBER IS MONO AT THE VALUE TOKEN, which is the floor: nothing numeric goes below 12. */
 [data-atlas] .at-val{font-family:var(--at-mono);font-size:var(--at-fs-value);color:var(--t1)}
@@ -2172,6 +2175,69 @@
   [data-atlas].atlas-shell.atlas-instrument{--at-t1:24px}
   [data-atlas].atlas-instrument .atlas-stage{
     height:300px;max-height:300px;min-height:300px;
+  }
+
+  /* THE STATUS GIVES UP ITS COLUMN HERE, AND KEEPS ITS ROW.
+   *
+   * The five resting tracks are 468px wide and a 390px phone has 350 of them, so something on
+   * this row is going to be off-screen -- and left alone it is the RIGHTMOST column, which is
+   * STATUS. That is the same failure the ledger measure is floored against between 900 and
+   * 1387, arriving from the other end: a refused row whose refusal sits past the right edge of
+   * a sideways scroll has not refused where the reader is looking.
+   *
+   * So on a phone the status stops being a column and becomes a line of its own directly under
+   * the row that owns it, indented to the same rule as that row's refusal sentence and reading
+   * straight into it. Nothing is hidden, nothing is abbreviated, and the four tracks 5c
+   * actually specifies -- OUTCOME | n / N | RATE | 95% WILSON -- fit the measure with the
+   * outcome name taking what is left. */
+  [data-atlas].atlas-instrument .at-deck{
+    --at-col-status:0px;
+    --at-col-outcome:minmax(100px,1fr);
+    column-gap:8px;
+  }
+  /* EVERY STATUS CELL SPANS THE ROW -- THE HEAD'S AND THE GROUP ROWS' INCLUDED -- AND THAT
+     UNIFORMITY IS LOAD-BEARING, NOT TIDINESS. The deck's rows are `display:contents`, so the
+     cells are auto-placed onto one shared grid in document order and every row must contribute
+     the SAME NUMBER OF ITEMS. `display:none` on the empty ones removes them from that flow, and
+     the next row's outcome name lands in whatever column the last row stopped at: measured, the
+     Category 1 name was placed in a 0px track and the deck's columns walked out of alignment
+     one row at a time. So the empty ones stay, at zero height, taking no line and no rule. */
+  [data-atlas].atlas-instrument .at-deck .at-dc-status{
+    grid-column:1/-1;justify-content:flex-start;min-height:0;padding:0;
+  }
+  [data-atlas].atlas-instrument .at-deck .at-dc-status:not(:empty){
+    padding:0 0 var(--at-s1) calc(11px + var(--at-s2));
+  }
+  /* THE HEAD'S IS HIDDEN RATHER THAN REMOVED, for the same reason and one more: a column head
+     over a column that is no longer there is a promise the table does not keep. */
+  [data-atlas].atlas-instrument .at-deck-head .at-dc-status{visibility:hidden}
+  /* AND THE NAME'S OWN INDENT TIGHTENS BY SIX PIXELS, which is the difference between
+     `Unattributed` fitting the measure and being broken across two lines mid-word. The class
+     hairline and the mark slot keep their widths; only the two gutters between them close. */
+  [data-atlas].atlas-instrument .at-deck .at-dc-outcome{gap:4px}
+
+  /* THE COMPARISON IS STILL THE COLUMN THAT SCROLLS, AND THE ROW'S OWN WORDS STILL DO NOT.
+   *
+   * VS ARCHIVE is the optional sixth track: it exists only because a condition does, and at
+   * 350px of phone there is no distribution of six columns that leaves the outcome name
+   * readable. So it keeps its column and the deck scrolls sideways to reach it -- the rule this
+   * file already states for the optional columns.
+   *
+   * What must NOT scroll with it is anything the row SAYS. A refusal sentence and a status word
+   * span every column, so a deck 60px wider than the screen would take the last 60px of both
+   * off the right-hand edge -- the same failure the measure is floored against elsewhere,
+   * arriving through a track the reader asked for. Pinned to the left of the scrollport and
+   * bounded by the screen, they are whole wherever the comparison happens to be scrolled to. */
+  [data-atlas].atlas-instrument .at-deck .at-dc-status:not(:empty),
+  [data-atlas].atlas-instrument .at-deck .at-deck-say,
+  [data-atlas].atlas-instrument .at-deck .at-deck-pre,
+  [data-atlas].atlas-instrument .at-deck .at-deck-groupnote,
+  [data-atlas].atlas-instrument .at-deck .at-deck-foldline,
+  [data-atlas].atlas-instrument .at-deck .at-deck-foot,
+  [data-atlas].atlas-instrument .at-deck .at-deck-foot-block,
+  [data-atlas].atlas-instrument .at-deck .at-deck-cite{
+    position:sticky;left:0;
+    max-width:calc(100vw - 2 * var(--at-pad));
   }
 }
 

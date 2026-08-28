@@ -430,7 +430,13 @@ for (const [w, h] of WIDTHS) {
   const cut = await page.evaluate(() => {
     /* THE BOX, NOT THE GLYPHS. scrollWidth against clientWidth catches an ellipsis and a clip
        alike; the 1px tolerance is for sub-pixel layout, not for a truncated character. */
-    const over = (el) => el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1;
+    /* AN INVISIBLE ELEMENT PUBLISHES NOTHING, so it cannot publish something truncated. This
+       exempts exactly one thing -- the status head where the status is not a column -- and it
+       is checked as `visibility`, which still occupies layout, rather than as `display:none`,
+       which would take the cell out of the deck's shared grid entirely. */
+    const shown = (el) => getComputedStyle(el).visibility !== "hidden";
+    const over = (el) => shown(el)
+      && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 1);
     const label = (el) => (el.textContent || "").replace(/\s+/g, " ").trim();
     const out = [];
     const look = (sel, what) => {
@@ -444,6 +450,28 @@ for (const [w, h] of WIDTHS) {
     look("[data-outcome] .at-dc-status", "status");
     look(".at-deck .at-val", "value");
     look("[data-cohort-line] .at-cohort-n", "cohort line");
+
+    /* AND NOTHING IS PUSHED PAST THE RIGHT-HAND EDGE OF THE SCREEN, which is the same failure
+       arriving as geometry rather than as an ellipsis. A ledger wider than the shell does not
+       truncate a single cell -- every check above passes -- it moves the LAST COLUMN off the
+       viewport behind a sideways scroll, and the last column is STATUS. Measured at 390: the
+       five resting tracks are 468px against 350px of phone, and a refused row refused 118px to
+       the right of anything a reader was looking at. */
+    const shell = document.querySelector(".atlas-instrument");
+    if (shell && shell.scrollWidth > shell.clientWidth + 1) {
+      out.push(`the instrument scrolls sideways: ${shell.scrollWidth} into ${shell.clientWidth}`);
+    }
+    if (document.documentElement.scrollWidth > innerWidth + 1) {
+      out.push(`the page scrolls sideways: ${document.documentElement.scrollWidth} into ${innerWidth}`);
+    }
+    /* AND A STATUS THAT EXISTS IS A STATUS ON SCREEN -- in its column where there is one, on its
+       own line where there is not. Panel rule 4 is about what a reader can see. */
+    for (const c of document.querySelectorAll("[data-outcome] .at-dc-status")) {
+      const t = label(c);
+      if (!t) continue;
+      const r = c.getBoundingClientRect();
+      if (r.right > innerWidth + 1 || r.left < -1) out.push(`status off screen "${t}"`);
+    }
     return out;
   });
   ok(`${`${w}x${h}`.padEnd(9)} every head, name, figure and status renders whole`,
