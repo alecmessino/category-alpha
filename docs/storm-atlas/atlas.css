@@ -1418,9 +1418,12 @@
 [data-atlas] .at-val{font-family:var(--at-mono);font-size:var(--at-fs-value);color:var(--t1)}
 [data-atlas] .at-dc-int .at-val,[data-atlas] .at-dc-vs .at-val,
 [data-atlas] .at-dc-med .at-val,[data-atlas] .at-dc-iqr .at-val{color:var(--t2)}
+/* THE SCOPE COUNTS, ON THE REFUSAL LINE THEY QUALIFY. `nowrap` was right while this sat in an
+   84px numeric cell and had to stay on one line to be read as a figure; on a sentence line it is
+   a measured phrase, and held to one line it ran off the right of a 390px screen. It wraps. */
 [data-atlas] .at-need{
   font-family:var(--at-mono);font-size:var(--at-fs-label);color:var(--t3);
-  margin-left:var(--at-s1);white-space:nowrap;
+  margin-left:var(--at-s1);min-width:0;overflow-wrap:break-word;
 }
 /* A SLOT IS CONTENT. The dash means "the archive has no value here", which is a statement, so it
    is held to the same contrast bar as the value it replaces and never dimmed into a hairline. */
@@ -1533,7 +1536,13 @@
   font-family:var(--at-mono);font-size:var(--at-t5);color:var(--t3);
   width:12px;text-align:center;line-height:1.5;
 }
+/* BOTH COLUMNS MAY SHRINK. `.at-ref` is a grid inside a flex block inside the ledger, and a
+   grid item's automatic minimum is its CONTENT -- so a long unbroken reason held the whole block
+   at its own measure and pushed a 390px shell to 430. Measured on the env-lens refusal. */
+[data-atlas] .at-ref{min-width:0}
 [data-atlas] .at-ref-body{min-width:0}
+[data-atlas] .at-ref-detail,[data-atlas] .at-ref-remedy,
+[data-atlas] .at-ref .at-why{overflow-wrap:break-word}
 [data-atlas] .at-ref-head{
   display:flex;align-items:baseline;gap:var(--at-s2);flex-wrap:wrap;min-width:0;
   font-family:var(--at-mono);font-size:var(--at-t5);letter-spacing:1.1px;color:var(--t3);
@@ -2165,6 +2174,40 @@
   [data-atlas].atlas-instrument .at-platefoot{flex-wrap:wrap;row-gap:5px}
 }
 
+/* < 1340 WITH A COMPARISON ON SCREEN · THE STATUS LEAVES ITS COLUMN.
+ *
+ * SIX TRACKS MEASURE 548 AND THE MEASURE THAT HOLDS THEM IS 41vw, so below 1337px of viewport a
+ * conditioned cohort's deck is wider than the ledger it sits in -- and what goes off the right
+ * is the LAST column, which is STATUS. Measured at 900: `CONDITIONED ON`, `OUT OF SCOPE` and
+ * `BASE RATE ONLY` all sat past the right-hand edge of a sideways scroll on rows whose rate cell
+ * showed a dash. A refused row that says so off-screen has not said so, and this is the same
+ * failure the ledger measure is floored against, arriving through the one optional column a
+ * reader asked for rather than through the percentage.
+ *
+ * The answer is the one the phone already uses: the status stops being a column and becomes a
+ * line of its own under the row that owns it, reading straight into that row's refusal sentence.
+ * The comparison keeps its track, the four tracks 5c specifies keep theirs, and nothing is
+ * abbreviated, hidden or moved off the row. Above 1340 the column fits and the column is used.
+ *
+ * THE RULES ARE THE PHONE'S, RESTATED RATHER THAN SHARED, because the two conditions are
+ * different -- one is a screen too narrow for five tracks, the other a ledger too narrow for six
+ * -- and a selector list spanning two media queries would hide that. What must stay identical is
+ * the treatment, and it is asserted rather than trusted: check-atlas-instrument measures every
+ * status's position at six widths across the refusal states. */
+@media (max-width:1339px){
+  [data-atlas].atlas-instrument:has(.at-dc-vs) .at-deck{--at-col-status:0px}
+  /* Every status cell spans the row, the head's and the group rows' included, at zero height
+     when empty: the deck's rows are `display:contents`, so a `display:none` cell takes an item
+     out of one shared auto-placement flow and walks every column after it out of alignment. */
+  [data-atlas].atlas-instrument:has(.at-dc-vs) .at-deck .at-dc-status{
+    grid-column:1/-1;justify-content:flex-start;min-height:0;padding:0;
+  }
+  [data-atlas].atlas-instrument:has(.at-dc-vs) .at-deck .at-dc-status:not(:empty){
+    padding:0 0 var(--at-s1) calc(11px + var(--at-s2));
+  }
+  [data-atlas].atlas-instrument:has(.at-dc-vs) .at-deck-head .at-dc-status{visibility:hidden}
+}
+
 /* < 900 · ONE COLUMN, AND THE SHELL SCROLLS.
  *
  * SIMULTANEITY IS THE ONLY REAL LOSS, AND IT IS STATED RATHER THAN PAPERED OVER. Below this
@@ -2301,6 +2344,7 @@
   [data-atlas].atlas-instrument .at-deck .at-deck-foldline,
   [data-atlas].atlas-instrument .at-deck .at-deck-foot,
   [data-atlas].atlas-instrument .at-deck .at-deck-foot-block,
+  [data-atlas].atlas-instrument .at-deck .at-deck-env,
   [data-atlas].atlas-instrument .at-deck .at-deck-cite{
     position:sticky;left:0;
     max-width:calc(100vw - 2 * var(--at-pad));
