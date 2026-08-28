@@ -101,24 +101,49 @@ const AUDIT = (vw) => {
   const deck = document.querySelector("[data-evidence-deck]");
   if (!deck) { bad.push("no evidence deck"); return { bad, note }; }
 
-  /* 1 · NO ROW COMES APART.
+  /* 1 · NO ROW COMES APART BY ACCIDENT.
    *
    * Rows are `display:contents`, so a row is only a row because its cells landed on the same
    * grid line. Cell count per row must equal the deck's TRACK count -- one child too many and
    * the last one wraps into an implicit row, which is a status word detached from its contract
-   * and looks like nothing at all until you measure it. */
+   * and looks like nothing at all until you measure it.
+   *
+   * ONE CELL IS ALLOWED OFF THE LINE, AND ONLY BY SPANNING IT. Where the ledger's measure will
+   * not hold every track -- a phone, or a conditioned cohort below 1340 where the comparison
+   * column takes a sixth -- the STATUS stops being a column and becomes a full-width line
+   * directly under the row that owns it. That is the opposite of the failure above rather than
+   * an instance of it: the cell has not fallen off the end of a line it was meant to be on, it
+   * has been GIVEN the whole next line, and it is still emitted inside its own row element, so
+   * it cannot detach from the contract it qualifies.
+   *
+   * So the exception is drawn as narrowly as it can be: a cell may leave the line only if its
+   * own `grid-column` spans every track, and it must then sit BELOW its row's other cells. A
+   * status that merely wrapped, drifted or landed beside the wrong row still fails. */
   const tracks = getComputedStyle(deck).gridTemplateColumns.trim().split(/\s+/).length;
+  const spansTheRow = (c) => {
+    const cs = getComputedStyle(c);
+    return cs.gridColumnStart === "1" && cs.gridColumnEnd === "-1";
+  };
   const rows = [...deck.querySelectorAll(".at-deck-row")];
   if (!rows.length) bad.push("the deck rendered no rows");
   for (const row of rows) {
-    const cells = [...row.children].filter((c) => c.classList.contains("at-dc"));
+    const all = [...row.children].filter((c) => c.classList.contains("at-dc"));
     const label = row.getAttribute("data-outcome") || row.getAttribute("data-deck-group")
       || (row.classList.contains("at-deck-head") ? "HEAD" : "row");
-    if (cells.length !== tracks) {
-      bad.push(`${label}: ${cells.length} cells against ${tracks} tracks — the last one wraps`);
+    if (all.length !== tracks) {
+      bad.push(`${label}: ${all.length} cells against ${tracks} tracks — the last one wraps`);
       continue;
     }
+    const cells = all.filter((c) => !spansTheRow(c));
+    const below = all.filter(spansTheRow);
     const tops = cells.map((c) => Math.round(rect(c).top));
+    /* AND THE SUB-LINE IS UNDER ITS OWN ROW, not above it and not beside it. */
+    for (const c of below) {
+      const t = Math.round(rect(c).top);
+      if (tops.length && t < Math.min(...tops) - 1) {
+        bad.push(`${label}: a full-width cell sits ABOVE the row it belongs to`);
+      }
+    }
     if (Math.max(...tops) - Math.min(...tops) > 1) {
       bad.push(`${label}: cells span ${Math.max(...tops) - Math.min(...tops)}px of vertical — the row is on two lines`);
     }
