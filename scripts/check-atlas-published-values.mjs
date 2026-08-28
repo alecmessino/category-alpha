@@ -161,9 +161,33 @@ const READ = () => {
     unknown: txt(document.querySelector("[data-unknown-note]")),
     landfallNote: txt(document.querySelector("[data-landfall-note]")),
     /* THE CITATION. The line a reader would quote, which must not diverge from the question.
-       The origin is folded out: this fixture is served from an ephemeral port, and the host a
-       reader copies from is not one of the values this gate is pinning. */
-    citation: (txt(document.querySelector("[data-cohort-spec]")) || "").split(location.origin).join("{origin}") || null,
+       Two stamps are folded out of it, and for the same reason in both cases: they are not
+       PUBLISHED VALUES, they are where this build happened to come from.
+
+         the origin  this fixture is served from an ephemeral port, and the host a reader
+                     copies from is not one of the values this gate is pinning.
+         the pack    the archive's own content stamp, which the daily ingest rewrites whenever
+                     the record is rebuilt. Pinned literally it fails the gate on the day the
+                     archive is updated and no figure moved -- measured, on a run where all
+                     eighteen rows, both denominators and every refusal matched exactly and the
+                     only difference in four states was `PACK 476b25a0` against `984fc4d7`.
+
+       The pack is not simply discarded, though: a citation quoting a DIFFERENT pack from the
+       one the surface loaded would be a real defect -- a reader would be handed a stamp that
+       does not identify the numbers above it -- so the identity is asserted below instead of
+       the digits being frozen here. */
+    citation: (txt(document.querySelector("[data-cohort-spec]")) || "")
+      .split(location.origin).join("{origin}")
+      .replace(/PACK [0-9a-f]{6,}/, "PACK {pack}") || null,
+    /* AND THE STAMP IT FOLDED IS THE ARCHIVE'S OWN. Read from the manifest the surface is
+       actually serving, so the check is an identity rather than a second copy of the string. */
+    packQuotesTheArchive: (() => {
+      const cited = ((txt(document.querySelector("[data-cohort-spec]")) || "")
+        .match(/PACK ([0-9a-f]{6,})/) || [])[1] || null;
+      const a = globalThis.__ATLAS && globalThis.__ATLAS.archive;
+      const stamp = a && a.manifest && (a.manifest.provenance || {}).archive_stamp;
+      return cited !== null && stamp != null && cited === String(stamp);
+    })(),
   };
 };
 
@@ -253,7 +277,7 @@ for (const [name] of STATES) {
          : `${k}: want ${JSON.stringify(e[k])}, got ${JSON.stringify(g[k])}`)).join("\n"));
   }
 
-  for (const k of ["gaps", "unknown", "landfallNote", "citation"]) {
+  for (const k of ["gaps", "unknown", "landfallNote", "citation", "packQuotesTheArchive"]) {
     ok(`  ${k}`, got[k] === exp[k], `want ${JSON.stringify(exp[k])}\ngot  ${JSON.stringify(got[k])}`);
   }
 }
