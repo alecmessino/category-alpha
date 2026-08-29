@@ -403,7 +403,17 @@ jobs:
   # No Python here on purpose -- none of the three touches the archive's own answers.
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 20 RATHER THAN 15, AND IT IS A MEASUREMENT RATHER THAN A ROUND-UP. This job drives sixteen
+    # gates through a real Chromium at up to eleven viewports each, and UX-1B added the two things
+    # a declared aperture has to be proved against: the longest question the editor can be driven
+    # to, at five viewports, and a second seeded regression. Measured here on the first green run,
+    # the job took 13m24s -- inside the old cap, with 96 seconds of margin on a runner whose speed
+    # is not ours to choose. A cap that a passing job clears by a minute and a half is a cap that
+    # fails a passing job on a slow morning, and a browser gate that goes red for the weather is a
+    # browser gate somebody stops believing. The fix for a job that is genuinely too slow is to
+    # make it faster -- the same commit cut 77 seconds of idle waiting out of the new fixture --
+    # and then to give the honest remainder the room it needs.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 

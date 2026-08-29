@@ -41,8 +41,8 @@
  * PRINTS them on failure, because they are the likeliest cause, but it never fails on them. It
  * fails when the plate moved.
  *
- * WHAT BLOCKS, AFTER UX-1B. The plate's SIZE, its X, the CAMERA, the DECLARED ROW it sits in and
- * the USABLE WIDTH of the page. Nothing excuses any of them any more. The first version of this
+ * WHAT BLOCKS, AFTER UX-1B. The plate's SIZE, its X, the CAMERA, and the USABLE WIDTH of the page.
+ * Nothing excuses any of them any more. The first version of this
  * file excused a size or camera move when the question sentence had taken another line, because
  * under the geometry it was written against a longer sentence HAD to come out of the map: the
  * head row was `auto`, the plate row was `minmax(0,1fr)`, and the shell was pinned to exactly one
@@ -56,12 +56,14 @@
  * and the plate follows it down by exactly that. The cause is measured per occurrence, so a plate
  * that slides inside a row whose caption did not move still fails. `--strict-origin` promotes it.
  *
- * THE PAGE-ABSOLUTE `y` IS DELIBERATELY NOT ASSERTED, and that is not a weakening. A question
- * long enough to need a fourth line pushes the whole row down a document that is now allowed to
- * be taller than the screen; that is the design. The invariant that replaced it -- the row's own
- * height, plus the plate's offset within it -- is strictly stronger, because it fails on a row
- * that is quietly content-sized again even while the aspect ceiling is still holding the plate's
- * numbers steady.
+ * THE PAGE-ABSOLUTE `y` IS DELIBERATELY NOT ASSERTED, and neither is the plate ROW's height. A
+ * question long enough to need a fourth line pushes the whole row down a document that is now
+ * allowed to be taller than the screen, and the row is content-sized on purpose -- as tall as the
+ * figure and its captions actually are, so that whatever the viewport has left over collects under
+ * the colophon where a longer question can spend it instead of coming out of the map. What is
+ * declared, and what is read instead, is the figure column's CAP and the plate's own height under
+ * it. A row that changed height while the plate did not is the captions rewrapping, which is
+ * tracked with its cause rather than asserted.
  *
  * Run: node scripts/check-atlas-stability.mjs [--require-browser] [--self-test] [--strict-origin]
  */
@@ -266,13 +268,24 @@ const why = (a, b) => {
  * storm fits that storm's track, which is a camera command and is the surface's documented
  * behaviour. Its RECTANGLE is still asserted -- the transport appearing must not resize the
  * plate even though the selection may re-frame it. */
-const click = async (sel) => {
+const click = async (sel, wait = SETTLE) => {
   const el = await page.$(sel);
   if (!el) return false;
   await el.click();
-  await page.waitForTimeout(SETTLE);
+  await page.waitForTimeout(wait);
   return true;
 };
+/* A CONTROL PRESSED ON THE WAY TO A STATE, RATHER THAN THE ONE THAT MAKES IT.
+ *
+ * Every reading in this file is taken after a full `SETTLE`, because a reading taken before the
+ * ResizeObserver has run records the old box against the new query. But the twenty-two controls
+ * that build the longest question are not read: only the state they arrive at is, and the sheet's
+ * own close waits a full settle after the last of them. Waiting 700ms on each of the intermediate
+ * presses cost 77 seconds across the matrix and measured nothing -- and this gate runs inside a
+ * browser job with a wall-clock cap, where a gate that cannot finish is a gate that gets deleted.
+ * Playwright still waits for each control to be visible, stable and hit-testable before pressing
+ * it, so what is dropped is idle time and not the guarantee. */
+const PRESS = 150;
 const openSheet = () => click("[data-zone-edit]");
 const closeSheet = () => click("[data-sheet-close]");
 /* THE SCOPE TOGGLES CARRY NO HOOK -- `Toggle` renders a bare <button> holding a pill and a label
@@ -629,8 +642,8 @@ const LONGEST = {
 };
 const driveLongest = async () => {
   await openSheet();
-  for (const k of LONGEST.chips) await click(`[data-chip="${k}"]`);
-  for (const m of LONGEST.months) await click(`[data-month="${m}"]`);
+  for (const k of LONGEST.chips) await click(`[data-chip="${k}"]`, PRESS);
+  for (const m of LONGEST.months) await click(`[data-month="${m}"]`, PRESS);
   for (const t of LONGEST.toggles) await toggle(t);
   await closeSheet();
 };
