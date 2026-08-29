@@ -529,26 +529,32 @@ for (const [w, h] of VIEWPORTS) {
 
   /* ── the declared chrome, and the one screen it is declared against ────────────────────────
    *
-   * `--at-chrome-h` is the frozen measurement the whole of UX-1B rests on: the head and the
-   * colophon at rest, which is everything in the shell that is not the plate row or the
-   * transport. If it drifts, nothing looks broken -- the plate keeps its declared height because
-   * the declaration is what moved -- and the surface silently either opens a scrollbar on a
-   * screen that fits or leaves a strip of chrome under the fold. Both are caught here, and they
-   * are caught as two separate readings so a failure says which happened:
+   * `--at-chrome-h` is the bound the whole of UX-1B rests on: at or above the head plus the
+   * colophon at rest, which is everything in the shell that is not the plate row or the transport.
+   * It is asserted as an INEQUALITY rather than as an equality, and that is not a loosening --
+   * it is what the number actually is. The two directions fail differently and only one of them
+   * is visible, so both are read here and read separately:
    *
-   *   the sum      the composition still measures what the stylesheet says it does;
-   *   the screen   and therefore the resting instrument is still exactly one screen.
-   *
-   * The second is the one that matters to a reader and the first is the one that explains it. */
+   *   at or above   a bound even a fraction of a pixel MEAN makes the plate row's `max-content`
+   *                 floor exceed its `1fr` share of the viewport, and the resting instrument grows
+   *                 a scrollbar on a screen it fits on. CI found exactly this at 1px, on a runner
+   *                 whose font metrics put the head about a pixel taller than the machine the
+   *                 number was measured on.
+   *   within 6px    and a bound far ABOVE it is invisible -- the surplus stays inside the row --
+   *                 but it is a reservation, quietly costing the map a few pixels on every wide,
+   *                 short screen. It may be generous; it may not become a policy.
+   *   the screen    and therefore the resting instrument is still exactly one screen, which is
+   *                 the reading that matters to a reader; the two above explain it. */
   await open("", w, h);
   const rest = await read();
   if (rest) {
     const declared = parseFloat(rest.declaredChrome);
-    ok(`the resting chrome still measures its declared ${rest.declaredChrome}`,
-       Number.isFinite(declared) && Math.abs(rest.chrome - declared) <= 0.01,
-       `head + transport + colophon measured ${rest.chrome}px against a declared `
-       + `${rest.declaredChrome}. --at-chrome-h is a frozen measurement of this composition; a `
-       + `type or spacing change that moves it has to move this number with it.`);
+    ok(`the resting chrome is inside its declared ${rest.declaredChrome} bound`,
+       Number.isFinite(declared) && rest.chrome <= declared && declared - rest.chrome <= 6,
+       `head + transport + colophon measured ${rest.chrome}px against a declared bound of `
+       + `${rest.declaredChrome}. --at-chrome-h must be at or above what this composition `
+       + `measures -- under it the resting instrument overflows the screen it fits on -- and no `
+       + `more than 6px above it, or it is a reservation rather than a bound.`);
     ok(`the resting instrument is still exactly one screen`,
        rest.docH <= rest.clientH,
        `the document is ${rest.docH}px tall inside a ${rest.clientH}px viewport. A document `

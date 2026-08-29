@@ -1955,15 +1955,29 @@
   --at-gap:40px;
   --at-ledger:clamp(486px,33.75vw,620px);
   --at-tport:0px;
-  /* THE CHROME THAT IS NOT THE PLATE ROW, AS ONE MEASURED NUMBER.
-     `.at-head` 135.890625 + `.at-colophon` 53, at rest, identical at every width this composition
-     covers (measured 1920, 1440, 1220, 1024, 960 and 900). It is a frozen measurement and it is
-     meant to be: check-atlas-stability asserts, at every gated viewport, that the resting head,
-     transport and colophon still sum to exactly this and that the resting document therefore does
-     not scroll -- so a type change that moves it fails a gate rather than silently costing the
-     plate a pixel or opening a scrollbar on a screen that fits. The transport is NOT in the
-     number because it is already its own track and its own variable. */
-  --at-chrome-h:188.890625px;
+  /* THE CHROME THAT IS NOT THE PLATE ROW, AS AN UPPER BOUND RATHER THAN AS A MEASUREMENT.
+   *
+   * `.at-head` plus `.at-colophon` at rest -- everything in the shell that is not the plate row or
+   * the transport, which has its own track and its own variable. Measured here it is 188.89px and
+   * identical at every width this composition covers.
+   *
+   * IT IS DECLARED AS A BOUND, AND THE DIRECTION OF THE ROUNDING IS THE WHOLE POINT. This number
+   * only ever reduces the figure column's cap, and the cap only binds on a wide, short screen; the
+   * plate row itself still takes its full `1fr` share of the viewport, so a bound that is a few
+   * pixels GENEROUS costs a few pixels of map on those screens and nothing anywhere else -- no
+   * blank plane, because the surplus stays inside the row. A bound that is even a fraction of a
+   * pixel MEAN is a different thing entirely: the row's `max-content` floor then exceeds its `1fr`
+   * share, the shell overflows the viewport, and the resting instrument grows a scrollbar on a
+   * screen it fits on.
+   *
+   * AND IT HAD TO BECOME A BOUND, BECAUSE THE MEASUREMENT IS NOT PORTABLE. Declared at the 188.89
+   * measured here, CI measured the same composition at roughly 189.9 -- the head is typeset, some
+   * of it at `line-height:normal`, and font metrics differ by a pixel between a local Chromium and
+   * a runner's. check-plate-aperture caught it as a 1px negative blank plane in the three states
+   * where the cap binds. So the number is the measurement rounded UP past that spread, and the
+   * gate asserts the INEQUALITY -- measured chrome at or under the declared bound, and the bound
+   * no more than 6px over it, so it can never quietly become a reservation. */
+  --at-chrome-h:192px;
   /* THE DECLARED SPACE THE FIGURE COLUMN IS ALLOWED, and the only place `100vh` enters the
      plate's geometry. Viewport height, less the composition's own chrome, less the plate row's
      own padding -- no term in it can be moved by a query, a cohort, a condition or a sentence.
