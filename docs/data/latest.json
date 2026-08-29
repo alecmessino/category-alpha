@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-29T22:08:38.921Z",
+  "generatedAt": "2026-08-29T23:42:50.851Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 196,
+      "latencyMs": 225,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep112026\",\"binNumber\":\"EP1\",\"name\":\"Karina\",\"classification\":\"TS\",\"intensity\":\"60\",\"pressure\":\"987\",\"latitude\":\"16.4N\",\"longitude\":\"118.8W\",\"latitudeNumeric\":16.4,\"longitudeNumeric\":-118.8,\"movementDir\":295,\"movementSpeed\":12,\"lastUpdate\":\"2026-08-29T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"009\",\"issuance\":\"2026-08-29T21:00:00.000Z\",\"fileUpdateTime\":\"2026-08-29T20:32:09.592Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP1.shtml\"},\"forecastAdvisory\":{\"advNum\":\"009\",\"issuance\":\"2026-08-29",
-      "forecast": "Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 97m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 98% · forecast undefined guidance · advisory 97m old",
-      "advisoryLagMin": 97
+      "forecast": "Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 191m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 98% · forecast undefined guidance · advisory 191m old",
+      "advisoryLagMin": 191
     },
     "markets": {
       "ok": true,
@@ -47,14 +47,14 @@
             "noPrice": 0
           },
           "samples": [
-            "When will the next hurricane form? | Before Sep 15, | px=0.395",
-            "When will the next hurricane form? | Before Sep 1,  | px=0.005",
-            "When will the next hurricane form? | Before Oct 15, | px=0.815",
-            "When will the next hurricane form? | Before Oct 1,  | px=0.805",
-            "When will the next hurricane form? | Before Nov 15, | px=0.890",
-            "When will the next hurricane form? | Before Nov 1,  | px=0.875"
+            "Will there be more than 7 major Atlantic | Above 7 | px=0.005",
+            "Will there be more than 6 major Atlantic | Above 6 | px=0.005",
+            "Will there be more than 5 major Atlantic | Above 5 | px=0.010",
+            "Will there be more than 4 major Atlantic | Above 4 | px=0.015",
+            "Will there be more than 3 major Atlantic | Above 3 | px=0.075",
+            "Will there be more than 2 major Atlantic | Above 2 | px=0.115"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"793.46\",\"volume_24h_fp\":\"122.81\",\"volume_fp\":\"1820.09\"},\"px\":{\"last_price_dollars\":\"0.5100\",\"no_ask_dollars\":\"0.7200\",\"no_bid_dollars\":\"0.4900\",\"previous_price_dollars\":\"0.5000\",\"previous_yes_ask_dollars\":\"0.5000\",\"previous_yes_bid_dollars\":\"0.3800\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.5100\",\"yes_ask_size_fp\":\"396.76\",\"yes_bid_dollars\":\"0.2800\",\"yes_bid_size_fp\":\"15.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2544.01\",\"volume_24h_fp\":\"2.00\",\"volume_fp\":\"3555.78\"},\"px\":{\"last_price_dollars\":\"0.0200\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0200\",\"previous_yes_ask_dollars\":\"0.0200\",\"previous_yes_bid_dollars\":\"0.0100\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"139.00\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
         }
       ]
     },
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 307,
+      "latencyMs": 324,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,14 +249,14 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 4,
       "note": "4 area(s) under watch · 2 Atlantic · highest 7-day 20%",
-      "latencyMs": 102,
+      "latencyMs": 135,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
           "ok": true,
           "status": 200,
           "count": 2,
-          "note": "2 area(s) · issued 200 PM EDT Sat Aug 29 2026",
+          "note": "2 area(s) · issued 800 PM EDT Sat Aug 29 2026",
           "quietOrUnparsed": null,
           "diag": null
         },
@@ -265,7 +265,7 @@
           "ok": true,
           "status": 200,
           "count": 2,
-          "note": "2 area(s) · issued 1100 AM PDT Sat Aug 29 2026",
+          "note": "2 area(s) · issued 500 PM PDT Sat Aug 29 2026",
           "quietOrUnparsed": null,
           "diag": null
         }
@@ -274,7 +274,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 289,
+      "latencyMs": 136,
       "source": "NHC graphical TWO",
       "count": 4,
       "note": "4 of 4 area(s) with geometry"
@@ -284,7 +284,7 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 768,
+      "latencyMs": 958,
       "count": 2,
       "note": "2/2 storm decks read · EP112026: a-deck cycle 2026082918 · 34 techs · consensus 3 member(s) peak 104.3 kt · b-deck 20 records · f-deck 71 fixes | EP122026: a-deck cycle 2026082918 · 33 techs · consensus 3 member(s) peak 122.3 kt · b-deck 17 records · f-deck 65 fixes",
       "attempts": [
@@ -307,7 +307,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 315,
+      "latencyMs": 539,
       "count": 2,
       "note": "2 vortex data message(s): AL022026 11:36Z, CP022026 08:53Z",
       "attempts": [
@@ -342,7 +342,7 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 435,
+      "latencyMs": 537,
       "count": 2,
       "note": "2/2 storms · EP112026: 2026-08-29T18:00Z · shear 9 kt · OHC 23 · MPI 155 kt · 8 RI thresholds | EP122026: 2026-08-29T18:00Z · shear 12 kt · OHC 21 · MPI 156 kt · 8 RI thresholds",
       "attempts": [
@@ -452,11 +452,11 @@
         "already": false,
         "basis": "official forecast peaks at 100 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 97-99% across a plausible range of error widths"
       },
-      "advisoryLagMin": 97,
+      "advisoryLagMin": 191,
       "discussion": {
         "forecaster": "Katz/Beven",
         "issuedZ": "2026-08-29T20:32:00.000Z",
-        "lagMin": 97,
+        "lagMin": 191,
         "guidance": {
           "intensity": {
             "position": "with",
@@ -617,7 +617,7 @@
       "reconTracks": null,
       "pastIdx": 0,
       "modelCat4": null,
-      "marketCat4": 0.6849999999999999,
+      "marketCat4": 0.37,
       "reconAge": null,
       "trackPoints": [
         {
@@ -2205,9 +2205,9 @@
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 1704,
+        "ascatAgeMin": 1798,
         "ascatUsed": false,
-        "consensusAgeMin": 249,
+        "consensusAgeMin": 343,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
@@ -2257,7 +2257,7 @@
           }
         ],
         "notes": [
-          "scatterometer pass is 1704 min old, past the 360-min line — band not tightened"
+          "scatterometer pass is 1798 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
@@ -2269,9 +2269,10 @@
         "basis": "combined 2 intensity estimates at 102 kt (sigma 22.7 kt, of which 19.1 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 96%"
       },
       "evidenceQuality": {
-        "tier": "MEDIUM",
+        "tier": "LOW",
         "reasons": [
-          "ATCF consensus 249 min old, no aircraft in the storm",
+          "the advisory under this estimate is 191 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 343 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -2359,11 +2360,11 @@
         "already": false,
         "basis": "official forecast peaks at 95 kt at 93h; NHC's published mean absolute intensity error there is 12.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 98% central, 90-99% across a plausible range of error widths"
       },
-      "advisoryLagMin": 97,
+      "advisoryLagMin": 191,
       "discussion": {
         "forecaster": "Beven",
         "issuedZ": "2026-08-29T20:33:00.000Z",
-        "lagMin": 96,
+        "lagMin": 190,
         "guidance": {
           "intensity": null,
           "track": null
@@ -2518,7 +2519,7 @@
       "reconTracks": null,
       "pastIdx": 0,
       "modelCat4": null,
-      "marketCat4": 0.23,
+      "marketCat4": 0.08,
       "reconAge": null,
       "trackPoints": [
         {
@@ -4092,7 +4093,7 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 249,
+        "consensusAgeMin": 343,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 25,
@@ -4152,9 +4153,10 @@
         "basis": "combined 2 intensity estimates at 107 kt (sigma 39.8 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 98%, calibrated 87%"
       },
       "evidenceQuality": {
-        "tier": "MEDIUM",
+        "tier": "LOW",
         "reasons": [
-          "ATCF consensus 249 min old, no aircraft in the storm",
+          "the advisory under this estimate is 191 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 343 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -4167,12 +4169,12 @@
       "short": "Will Lowell be categorized as a hurricane in…",
       "storm": "EP122026",
       "subject": null,
-      "market": 0.7250000000000001,
+      "market": 0.27,
       "model": 0.870460204289691,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 40 kt now · combined 2 intensity estimates at 107 kt (sigma 39.8 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 98%, calibrated 87% · official forecast peaks at 95 kt at 93h; NHC's published mean absolute intensity error there is 12.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 98% central, 90-99% across a plausible range of error widths · advisory 97 min old when fetched",
+      "modelBasis": "Lowell is 40 kt now · combined 2 intensity estimates at 107 kt (sigma 39.8 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 98%, calibrated 87% · official forecast peaks at 95 kt at 93h; NHC's published mean absolute intensity error there is 12.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 98% central, 90-99% across a plausible range of error widths · advisory 191 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -4212,16 +4214,16 @@
       ],
       "modelLow": 0.7597056898693213,
       "modelHigh": 0.9819347547524303,
-      "modelLagMin": 97,
+      "modelLagMin": 191,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
       "modelOfficialP": 0.9819347547524303,
       "modelCalibrated": true,
-      "modelQuality": "MEDIUM",
+      "modelQuality": "LOW",
       "modelIntel": {
         "conKt": 122.3,
-        "conAgeMin": 249,
+        "conAgeMin": 343,
         "spreadKt": 36.7,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -4232,17 +4234,17 @@
       },
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.68,
-      "yesAsk": 0.77,
+      "yesBid": 0.15,
+      "yesAsk": 0.39,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 22,
-      "spread": 0.08999999999999997,
-      "volume": 2743.03,
-      "volume24h": 2382.28,
-      "openInterest": 1091.72,
+      "liquidity": 9,
+      "spread": 0.24000000000000002,
+      "volume": 2904.03,
+      "volume24h": 2519.28,
+      "openInterest": 1251.72,
       "depth": {
-        "bidSize": 13,
-        "askSize": 28,
+        "bidSize": 353,
+        "askSize": 22,
         "notional": 1
       },
       "proxy": false,
@@ -4255,12 +4257,12 @@
       "short": "Will Karina be categorized as a hurricane in…",
       "storm": "EP112026",
       "subject": null,
-      "market": 0.97,
+      "market": 0.99,
       "model": 0.9596170446687797,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Karina is 60 kt now · combined 2 intensity estimates at 102 kt (sigma 22.7 kt, of which 19.1 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 96% · official forecast peaks at 100 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 97-99% across a plausible range of error widths · advisory 97 min old when fetched",
+      "modelBasis": "Karina is 60 kt now · combined 2 intensity estimates at 102 kt (sigma 22.7 kt, of which 19.1 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 96% · official forecast peaks at 100 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 97-99% across a plausible range of error widths · advisory 191 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -4300,16 +4302,16 @@
       ],
       "modelLow": 0.8624540866617267,
       "modelHigh": 0.99,
-      "modelLagMin": 97,
+      "modelLagMin": 191,
       "modelMaxLagMin": 360,
       "modelGuidance": "with",
       "modelRawP": null,
       "modelOfficialP": 0.99,
       "modelCalibrated": true,
-      "modelQuality": "MEDIUM",
+      "modelQuality": "LOW",
       "modelIntel": {
         "conKt": 104.3,
-        "conAgeMin": 249,
+        "conAgeMin": 343,
         "spreadKt": 19.1,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -4320,17 +4322,17 @@
       },
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.95,
-      "yesAsk": 0.99,
+      "yesBid": 0.99,
+      "yesAsk": 1,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 104,
-      "spread": 0.040000000000000036,
-      "volume": 195.12,
-      "volume24h": 0,
+      "liquidity": null,
+      "spread": 0.010000000000000009,
+      "volume": 302.12,
+      "volume24h": 107,
       "openInterest": 189.12,
       "depth": {
-        "bidSize": 48,
-        "askSize": 105,
+        "bidSize": 498,
+        "askSize": 0,
         "notional": 1
       },
       "proxy": false,
@@ -4346,7 +4348,7 @@
         "subject": "Lowell",
         "active": true
       },
-      "market": 0.765,
+      "market": 0.76,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -4367,16 +4369,16 @@
       "horizon": "storm",
       "strike": 1,
       "yesBid": 0.72,
-      "yesAsk": 0.81,
+      "yesAsk": 0.8,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 173,
-      "spread": 0.09000000000000008,
-      "volume": 1280,
-      "volume24h": 1217,
-      "openInterest": 959,
+      "liquidity": 2,
+      "spread": 0.08000000000000007,
+      "volume": 1321,
+      "volume24h": 1214,
+      "openInterest": 1000,
       "depth": {
-        "bidSize": 246,
-        "askSize": 213,
+        "bidSize": 205,
+        "askSize": 2,
         "notional": 1
       },
       "proxy": false,
@@ -4415,14 +4417,14 @@
       "yesBid": 0.69,
       "yesAsk": 0.7,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 70,
+      "liquidity": 91,
       "spread": 0.010000000000000009,
-      "volume": 614.88,
-      "volume24h": 334.97,
-      "openInterest": 495.35,
+      "volume": 714.88,
+      "volume24h": 434.97,
+      "openInterest": 595.35,
       "depth": {
         "bidSize": 128.47,
-        "askSize": 100,
+        "askSize": 130,
         "notional": 1
       },
       "proxy": false,
@@ -4438,7 +4440,7 @@
         "subject": "Karina",
         "active": true
       },
-      "market": 0.9299999999999999,
+      "market": 0.935,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -4458,17 +4460,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 2,
-      "yesBid": 0.91,
+      "yesBid": 0.92,
       "yesAsk": 0.95,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 100,
-      "spread": 0.039999999999999925,
+      "liquidity": 5,
+      "spread": 0.029999999999999916,
       "volume": 176.24,
       "volume24h": 0,
       "openInterest": 176.24,
       "depth": {
         "bidSize": 2,
-        "askSize": 105,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -4484,7 +4486,7 @@
         "subject": "Karina",
         "active": true
       },
-      "market": 0.6849999999999999,
+      "market": 0.37,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -4504,17 +4506,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 4,
-      "yesBid": 0.42,
-      "yesAsk": 0.95,
+      "yesBid": 0.33,
+      "yesAsk": 0.41,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 4,
-      "spread": 0.53,
+      "liquidity": 41,
+      "spread": 0.07999999999999996,
       "volume": 100,
       "volume24h": 100,
       "openInterest": 100,
       "depth": {
         "bidSize": 25,
-        "askSize": 4,
+        "askSize": 100,
         "notional": 1
       },
       "proxy": false,
@@ -4622,7 +4624,7 @@
         "subject": "Lowell",
         "active": true
       },
-      "market": 0.475,
+      "market": 0.46499999999999997,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -4642,63 +4644,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 3,
-      "yesBid": 0.46,
+      "yesBid": 0.44,
       "yesAsk": 0.49,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 62,
-      "spread": 0.02999999999999997,
+      "spread": 0.04999999999999999,
       "volume": 52,
       "volume24h": 52,
       "openInterest": 52,
       "depth": {
         "bidSize": 25,
         "askSize": 126,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26LOWELL"
-    },
-    {
-      "id": "KXHURCAT-26LOWELL-T4",
-      "label": "Will Lowell become a Category 4 hurricane?",
-      "short": "Will Lowell become a Category 4 hurricane…",
-      "storm": "EP122026",
-      "subject": {
-        "subject": "Lowell",
-        "active": true
-      },
-      "market": 0.23,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 4,
-      "yesBid": 0.14,
-      "yesAsk": 0.32,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 32,
-      "spread": 0.18,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 50,
-        "askSize": 100,
         "notional": 1
       },
       "proxy": false,
@@ -4714,7 +4670,7 @@
         "subject": "Karina",
         "active": true
       },
-      "market": 0.095,
+      "market": 0.08499999999999999,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -4734,16 +4690,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 5,
-      "yesBid": 0.07,
+      "yesBid": 0.05,
       "yesAsk": 0.12,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 12,
-      "spread": 0.04999999999999999,
+      "spread": 0.06999999999999999,
       "volume": 0,
       "volume24h": 0,
       "openInterest": 0,
       "depth": {
-        "bidSize": 25,
+        "bidSize": 45,
         "askSize": 100,
         "notional": 1
       },
@@ -4791,6 +4747,52 @@
       "depth": {
         "bidSize": 45,
         "askSize": 100,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26LOWELL"
+    },
+    {
+      "id": "KXHURCAT-26LOWELL-T4",
+      "label": "Will Lowell become a Category 4 hurricane?",
+      "short": "Will Lowell become a Category 4 hurricane…",
+      "storm": "EP122026",
+      "subject": {
+        "subject": "Lowell",
+        "active": true
+      },
+      "market": 0.22999999999999998,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 4,
+      "yesBid": 0.15,
+      "yesAsk": 0.31,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 2,
+      "spread": 0.16,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -4860,7 +4862,7 @@
       "liquidity": 19,
       "spread": 0.009999999999999995,
       "volume": 30685.68,
-      "volume24h": 879.23,
+      "volume24h": 847.77,
       "openInterest": 12721.69,
       "depth": {
         "bidSize": 9,
@@ -4934,10 +4936,10 @@
       "liquidity": 19,
       "spread": 0.03,
       "volume": 16786.41,
-      "volume24h": 1270.62,
+      "volume24h": 1269.62,
       "openInterest": 6078.24,
       "depth": {
-        "bidSize": 28.51,
+        "bidSize": 8.51,
         "askSize": 213,
         "notional": 1
       },
@@ -5025,7 +5027,7 @@
       "short": "Will there be more than 4 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.02,
+      "market": 0.015,
       "model": 0.05183204879881225,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -5076,16 +5078,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.01,
+      "yesBid": null,
       "yesAsk": 0.03,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.019999999999999997,
+      "spread": 0.03,
       "volume": 12754.14,
       "volume24h": 81.63,
       "openInterest": 3401.97,
       "depth": {
-        "bidSize": 28,
+        "bidSize": 0,
         "askSize": 40,
         "notional": 1
       },
@@ -5094,12 +5096,68 @@
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
+      "id": "KXFIRSTHURRICANE-26DEC01ATL-EDO",
+      "label": "Will Edouard be the first named hurricane in the Atlantic in 2026?",
+      "short": "Will Edouard be the first named hurricane in…",
+      "storm": null,
+      "subject": null,
+      "market": 0.42,
+      "model": 0.5670857069261002,
+      "modelQuantity": "firsthurricane",
+      "modelBasin": "atlantic",
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Edouard is name #5 on the Atlantic list and 4 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 63% of seasons · 57% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.625,
+      "modelLayers": [
+        {
+          "id": "ordinal",
+          "label": "Ordinal climatology",
+          "p": 0.625,
+          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form was the season's FIRST hurricane in 63% of seasons"
+        },
+        {
+          "id": "onisim",
+          "label": "ONI-similarity weighted",
+          "p": 0.5670857069261002,
+          "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
+        }
+      ],
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": 0.41,
+      "yesAsk": 0.43,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": 4,
+      "spread": 0.020000000000000018,
+      "volume": 12566.41,
+      "volume24h": 225.83,
+      "openInterest": 4169.33,
+      "depth": {
+        "bidSize": 46.91,
+        "askSize": 8.44,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
+    },
+    {
       "id": "KXHURCTOTMAJ-26DEC01-T1",
       "label": "Will there be more than 1 major Atlantic hurricanes in 2026?",
       "short": "Will there be more than 1 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.275,
+      "market": 0.28,
       "model": 0.6376516039275617,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -5150,78 +5208,22 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 1,
-      "yesBid": 0.26,
+      "yesBid": 0.27,
       "yesAsk": 0.29,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 1,
-      "spread": 0.02999999999999997,
-      "volume": 12532.18,
-      "volume24h": 830.22,
+      "liquidity": 38,
+      "spread": 0.019999999999999962,
+      "volume": 12538.59,
+      "volume24h": 831.56,
       "openInterest": 7350.5,
       "depth": {
-        "bidSize": 254,
-        "askSize": 2.13,
+        "bidSize": 1,
+        "askSize": 132,
         "notional": 1
       },
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
-    },
-    {
-      "id": "KXFIRSTHURRICANE-26DEC01ATL-EDO",
-      "label": "Will Edouard be the first named hurricane in the Atlantic in 2026?",
-      "short": "Will Edouard be the first named hurricane in…",
-      "storm": null,
-      "subject": null,
-      "market": 0.41000000000000003,
-      "model": 0.5670857069261002,
-      "modelQuantity": "firsthurricane",
-      "modelBasin": "atlantic",
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Edouard is name #5 on the Atlantic list and 4 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 63% of seasons · 57% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.625,
-      "modelLayers": [
-        {
-          "id": "ordinal",
-          "label": "Ordinal climatology",
-          "p": 0.625,
-          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form was the season's FIRST hurricane in 63% of seasons"
-        },
-        {
-          "id": "onisim",
-          "label": "ONI-similarity weighted",
-          "p": 0.5670857069261002,
-          "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
-        }
-      ],
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": 0.39,
-      "yesAsk": 0.43,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 20,
-      "spread": 0.03999999999999998,
-      "volume": 12497.1,
-      "volume24h": 156.52,
-      "openInterest": 4113.94,
-      "depth": {
-        "bidSize": 0.22,
-        "askSize": 47.51,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
     },
     {
       "id": "KXHURCTOT-26DEC01-T5",
@@ -5360,7 +5362,7 @@
       "liquidity": 28,
       "spread": 0.009999999999999981,
       "volume": 10746.81,
-      "volume24h": 21.51,
+      "volume24h": 0,
       "openInterest": 6344.72,
       "depth": {
         "bidSize": 4.63,
@@ -5619,7 +5621,7 @@
       "short": "Will Gonzalo be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.10500000000000001,
+      "market": 0.125,
       "model": 0.22946315574853082,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -5653,16 +5655,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.1,
-      "yesAsk": 0.11,
+      "yesAsk": 0.15,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 0,
-      "spread": 0.009999999999999995,
-      "volume": 7988.62,
-      "volume24h": 0,
-      "openInterest": 4070.04,
+      "liquidity": 28,
+      "spread": 0.04999999999999999,
+      "volume": 8037.69,
+      "volume24h": 49.07,
+      "openInterest": 4088.11,
       "depth": {
-        "bidSize": 15,
-        "askSize": 1,
+        "bidSize": 50.63,
+        "askSize": 189.19,
         "notional": 1
       },
       "proxy": false,
@@ -5877,14 +5879,14 @@
       "yesBid": 0.17,
       "yesAsk": 0.18,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 8,
+      "liquidity": 7,
       "spread": 0.009999999999999981,
       "volume": 7462.59,
       "volume24h": 0,
       "openInterest": 3007.95,
       "depth": {
         "bidSize": 1,
-        "askSize": 44,
+        "askSize": 40,
         "notional": 1
       },
       "proxy": false,
@@ -5953,7 +5955,7 @@
       "short": "Will Fay be the first named hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.265,
+      "market": 0.26,
       "model": 0.15623127897508884,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -5987,16 +5989,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.25,
-      "yesAsk": 0.28,
+      "yesAsk": 0.27,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 40,
-      "spread": 0.030000000000000027,
-      "volume": 7065.97,
-      "volume24h": 412.42,
-      "openInterest": 4221.75,
+      "liquidity": 1,
+      "spread": 0.020000000000000018,
+      "volume": 7120.57,
+      "volume24h": 446.18,
+      "openInterest": 4228.45,
       "depth": {
-        "bidSize": 10,
-        "askSize": 142.03,
+        "bidSize": 18.99,
+        "askSize": 5.32,
         "notional": 1
       },
       "proxy": false,
@@ -6009,7 +6011,7 @@
       "short": "Will there be more than 0 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.515,
+      "market": 0.525,
       "model": 0.9073161336475513,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -6060,17 +6062,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 0,
-      "yesBid": 0.5,
-      "yesAsk": 0.53,
+      "yesBid": 0.51,
+      "yesAsk": 0.54,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 6,
+      "liquidity": 212,
       "spread": 0.030000000000000027,
-      "volume": 6697.36,
-      "volume24h": 443.6,
-      "openInterest": 4119.72,
+      "volume": 6701.8,
+      "volume24h": 448.04,
+      "openInterest": 4120.72,
       "depth": {
-        "bidSize": 6,
-        "askSize": 12,
+        "bidSize": 5,
+        "askSize": 391.99,
         "notional": 1
       },
       "proxy": false,
@@ -6083,7 +6085,7 @@
       "short": "Will Hanna be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.07,
+      "market": 0.07500000000000001,
       "model": 0.10286822967141479,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -6117,16 +6119,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.05,
-      "yesAsk": 0.09,
+      "yesAsk": 0.1,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 1,
-      "spread": 0.039999999999999994,
+      "liquidity": 0,
+      "spread": 0.05,
       "volume": 6602.4,
       "volume24h": 0.92,
       "openInterest": 4016.93,
       "depth": {
         "bidSize": 4.92,
-        "askSize": 15.07,
+        "askSize": 4.74,
         "notional": 1
       },
       "proxy": false,
@@ -6195,7 +6197,7 @@
       "short": "Will there be more than 12 Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.26,
+      "market": 0.255,
       "model": 0.5222158489812838,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
@@ -6247,16 +6249,16 @@
       "horizon": "seasonal",
       "strike": 12,
       "yesBid": 0.22,
-      "yesAsk": 0.3,
+      "yesAsk": 0.29,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 35,
-      "spread": 0.07999999999999999,
+      "liquidity": 1,
+      "spread": 0.06999999999999998,
       "volume": 5335.93,
       "volume24h": 0,
       "openInterest": 2043.69,
       "depth": {
-        "bidSize": 34.62,
-        "askSize": 117,
+        "bidSize": 2.62,
+        "askSize": 3,
         "notional": 1
       },
       "proxy": false,
@@ -6719,7 +6721,7 @@
       "volume24h": 0,
       "openInterest": 2520.75,
       "depth": {
-        "bidSize": 293.23,
+        "bidSize": 285.23,
         "askSize": 21,
         "notional": 1
       },
@@ -6905,7 +6907,7 @@
       "volume24h": 0,
       "openInterest": 1273.85,
       "depth": {
-        "bidSize": 19.81,
+        "bidSize": 5.81,
         "askSize": 350,
         "notional": 1
       },
@@ -7309,7 +7311,7 @@
       "short": "Will Isaias be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.33999999999999997,
+      "market": 0.345,
       "model": 0.5346132090862166,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -7342,16 +7344,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.27,
+      "yesBid": 0.28,
       "yesAsk": 0.41,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 39,
-      "spread": 0.13999999999999996,
+      "spread": 0.12999999999999995,
       "volume": 1928.7,
       "volume24h": 0,
       "openInterest": 1217.68,
       "depth": {
-        "bidSize": 100,
+        "bidSize": 10,
         "askSize": 95.32,
         "notional": 1
       },
@@ -7661,7 +7663,7 @@
       "short": "Will there be more than 6 named storms in the…",
       "storm": null,
       "subject": null,
-      "market": 0.655,
+      "market": 0.6599999999999999,
       "model": 0.1428423312202238,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
@@ -7712,16 +7714,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 6,
-      "yesBid": 0.56,
+      "yesBid": 0.57,
       "yesAsk": 0.75,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 75,
-      "spread": 0.18999999999999995,
+      "spread": 0.18000000000000005,
       "volume": 1318.41,
       "volume24h": 0,
       "openInterest": 469.34,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 10,
         "askSize": 100,
         "notional": 1
       },
@@ -7735,7 +7737,7 @@
       "short": "Will there be more than 5 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.35,
+      "market": 0.355,
       "model": 0.0840405672335867,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
@@ -7786,16 +7788,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 5,
-      "yesBid": 0.27,
+      "yesBid": 0.28,
       "yesAsk": 0.43,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 43,
-      "spread": 0.15999999999999998,
+      "spread": 0.14999999999999997,
       "volume": 1107.73,
       "volume24h": 0,
       "openInterest": 388.28,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 10,
         "askSize": 100,
         "notional": 1
       },
@@ -7809,7 +7811,7 @@
       "short": "Will Gonzalo be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.43000000000000005,
+      "market": 0.42500000000000004,
       "model": 0.601156943083961,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -7843,16 +7845,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.33,
-      "yesAsk": 0.53,
+      "yesAsk": 0.52,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 53,
-      "spread": 0.2,
+      "liquidity": 5,
+      "spread": 0.19,
       "volume": 1094.18,
       "volume24h": 0,
       "openInterest": 910.09,
       "depth": {
         "bidSize": 200,
-        "askSize": 100,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -7865,7 +7867,7 @@
       "short": "Will there be more than 4 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.54,
+      "market": 0.545,
       "model": 0.14650802864715287,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
@@ -7916,16 +7918,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.45,
+      "yesBid": 0.46,
       "yesAsk": 0.63,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 65,
-      "spread": 0.18,
+      "spread": 0.16999999999999998,
       "volume": 1082.71,
       "volume24h": 0,
       "openInterest": 604.91,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 10,
         "askSize": 103,
         "notional": 1
       },
@@ -8087,7 +8089,7 @@
       "short": "Will there be more than 7 named storms in the…",
       "storm": null,
       "subject": null,
-      "market": 0.41500000000000004,
+      "market": 0.41000000000000003,
       "model": 0.10438460940297674,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
@@ -8139,16 +8141,16 @@
       "horizon": "seasonal",
       "strike": 7,
       "yesBid": 0.33,
-      "yesAsk": 0.5,
+      "yesAsk": 0.49,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 3,
-      "spread": 0.16999999999999998,
+      "liquidity": 5,
+      "spread": 0.15999999999999998,
       "volume": 999.24,
       "volume24h": 0,
       "openInterest": 441.58,
       "depth": {
         "bidSize": 5,
-        "askSize": 5,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -8383,7 +8385,7 @@
       "short": "Will Leah be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.16,
+      "market": 0.165,
       "model": 0.23787483339459956,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -8416,16 +8418,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.1,
+      "yesBid": 0.11,
       "yesAsk": 0.22,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 22,
-      "spread": 0.12,
+      "spread": 0.11,
       "volume": 714.43,
       "volume24h": 0,
       "openInterest": 640.43,
       "depth": {
-        "bidSize": 100,
+        "bidSize": 10,
         "askSize": 100,
         "notional": 1
       },
@@ -8661,7 +8663,7 @@
       "short": "Will there be more than 2 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.465,
+      "market": 0.47000000000000003,
       "model": 0.23358626339766358,
       "modelQuantity": "major",
       "modelBasin": "cpac",
@@ -8712,16 +8714,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 2,
-      "yesBid": 0.37,
+      "yesBid": 0.38,
       "yesAsk": 0.56,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 56,
-      "spread": 0.19000000000000006,
+      "spread": 0.18000000000000005,
       "volume": 577.48,
       "volume24h": 0,
       "openInterest": 569.96,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 10,
         "askSize": 100,
         "notional": 1
       },
@@ -8796,7 +8798,7 @@
       "openInterest": 227.87,
       "depth": {
         "bidSize": 43.23,
-        "askSize": 11.4,
+        "askSize": 11.92,
         "notional": 1
       },
       "proxy": false,
@@ -9028,16 +9030,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.3,
-      "yesAsk": 0.52,
+      "yesBid": 0.31,
+      "yesAsk": 0.51,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 3,
-      "spread": 0.22000000000000003,
+      "spread": 0.2,
       "volume": 403.05,
       "volume24h": 0,
       "openInterest": 8.05,
       "depth": {
-        "bidSize": 7.04,
+        "bidSize": 5,
         "askSize": 5,
         "notional": 1
       },
@@ -9347,7 +9349,7 @@
       "short": "Will there be more than 11 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.375,
+      "market": 0.37,
       "model": 0.02782418566056733,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
@@ -9399,16 +9401,16 @@
       "horizon": "seasonal",
       "strike": 11,
       "yesBid": 0.28,
-      "yesAsk": 0.47,
+      "yesAsk": 0.46,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 47,
-      "spread": 0.18999999999999995,
+      "liquidity": 5,
+      "spread": 0.18,
       "volume": 322.75,
       "volume24h": 0,
       "openInterest": 255.4,
       "depth": {
         "bidSize": 5,
-        "askSize": 100,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -9495,7 +9497,7 @@
       "short": "Will there be more than 19 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.6499999999999999,
+      "market": 0.645,
       "model": 0.47549424473412505,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
@@ -9547,16 +9549,16 @@
       "horizon": "seasonal",
       "strike": 19,
       "yesBid": 0.59,
-      "yesAsk": 0.71,
+      "yesAsk": 0.7,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 71,
-      "spread": 0.12,
+      "liquidity": 6,
+      "spread": 0.10999999999999999,
       "volume": 289.14,
       "volume24h": 0,
       "openInterest": 241.4,
       "depth": {
         "bidSize": 5,
-        "askSize": 100,
+        "askSize": 8.56,
         "notional": 1
       },
       "proxy": false,
@@ -9643,7 +9645,7 @@
       "short": "Will there be more than 20 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.495,
+      "market": 0.49,
       "model": 0.0953681820904384,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
@@ -9695,16 +9697,16 @@
       "horizon": "seasonal",
       "strike": 20,
       "yesBid": 0.43,
-      "yesAsk": 0.56,
+      "yesAsk": 0.55,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 56,
-      "spread": 0.13000000000000006,
+      "liquidity": 6,
+      "spread": 0.12000000000000005,
       "volume": 244.41,
       "volume24h": 0,
       "openInterest": 100.82,
       "depth": {
         "bidSize": 5,
-        "askSize": 100,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -9791,7 +9793,7 @@
       "short": "Will there be more than 9 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.655,
+      "market": 0.65,
       "model": 0.04191714798941059,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
@@ -9843,16 +9845,16 @@
       "horizon": "seasonal",
       "strike": 9,
       "yesBid": 0.56,
-      "yesAsk": 0.75,
+      "yesAsk": 0.74,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 75,
-      "spread": 0.18999999999999995,
+      "liquidity": 7,
+      "spread": 0.17999999999999994,
       "volume": 226.5,
       "volume24h": 0,
       "openInterest": 131.37,
       "depth": {
         "bidSize": 5,
-        "askSize": 100,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -10069,7 +10071,7 @@
       "short": "Will there be more than 22 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.32999999999999996,
+      "market": 0.33499999999999996,
       "model": 0.04191714798941059,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
@@ -10120,16 +10122,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 22,
-      "yesBid": 0.24,
+      "yesBid": 0.25,
       "yesAsk": 0.42,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 42,
-      "spread": 0.18,
+      "spread": 0.16999999999999998,
       "volume": 205.21,
       "volume24h": 0,
       "openInterest": 204.95,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 10,
         "askSize": 100,
         "notional": 1
       },
@@ -10324,17 +10326,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 8,
-      "yesBid": 0.67,
-      "yesAsk": 0.84,
+      "yesBid": 0.68,
+      "yesAsk": 0.83,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 4,
-      "spread": 0.16999999999999993,
+      "liquidity": 6,
+      "spread": 0.1499999999999999,
       "volume": 140.25,
       "volume24h": 0,
       "openInterest": 99.47,
       "depth": {
-        "bidSize": 5,
-        "askSize": 5,
+        "bidSize": 3,
+        "askSize": 7,
         "notional": 1
       },
       "proxy": false,
@@ -10403,7 +10405,7 @@
       "short": "Will Fay be categorized as a hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.28500000000000003,
+      "market": 0.29,
       "model": 0.35348827228884305,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -10436,16 +10438,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.14,
+      "yesBid": 0.15,
       "yesAsk": 0.43,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 0,
-      "spread": 0.29,
+      "spread": 0.28,
       "volume": 129.46,
       "volume24h": 0.16,
       "openInterest": 115.79,
       "depth": {
-        "bidSize": 9.84,
+        "bidSize": 10,
         "askSize": 0.41,
         "notional": 1
       },
@@ -10663,7 +10665,7 @@
       "short": "Will there be more than 10 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.48,
+      "market": 0.47500000000000003,
       "model": 0.02782418566056733,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
@@ -10715,16 +10717,16 @@
       "horizon": "seasonal",
       "strike": 10,
       "yesBid": 0.39,
-      "yesAsk": 0.57,
+      "yesAsk": 0.56,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 3,
-      "spread": 0.17999999999999994,
+      "liquidity": 6,
+      "spread": 0.17000000000000004,
       "volume": 100.87,
       "volume24h": 0,
       "openInterest": 56.25,
       "depth": {
         "bidSize": 5,
-        "askSize": 5,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -10793,7 +10795,7 @@
       "short": "Will Hanna be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.435,
+      "market": 0.44,
       "model": 0.5564533754704131,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -10826,16 +10828,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.37,
+      "yesBid": 0.38,
       "yesAsk": 0.5,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 123,
-      "spread": 0.13,
+      "spread": 0.12,
       "volume": 83.75,
       "volume24h": 9.74,
       "openInterest": 46.75,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 10,
         "askSize": 245.41,
         "notional": 1
       },
@@ -10965,7 +10967,7 @@
       "volume24h": 0,
       "openInterest": 45.42,
       "depth": {
-        "bidSize": 16,
+        "bidSize": 20,
         "askSize": 100,
         "notional": 1
       },
@@ -11091,7 +11093,7 @@
       "short": "Will Yolanda be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.485,
+      "market": 0.48500000000000004,
       "model": 0.02782418566056733,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
@@ -11124,17 +11126,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.15,
-      "yesAsk": 0.82,
+      "yesBid": 0.16,
+      "yesAsk": 0.81,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 12,
-      "spread": 0.6699999999999999,
+      "liquidity": 4,
+      "spread": 0.65,
       "volume": 26.54,
       "volume24h": 0,
       "openInterest": 26.54,
       "depth": {
-        "bidSize": 27,
-        "askSize": 15,
+        "bidSize": 5,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -11277,7 +11279,7 @@
       "short": "Will there be more than 3 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.87,
+      "market": 0.865,
       "model": 0.4360272003135476,
       "modelQuantity": "major",
       "modelBasin": "epac",
@@ -11329,16 +11331,16 @@
       "horizon": "seasonal",
       "strike": 3,
       "yesBid": 0.78,
-      "yesAsk": 0.96,
+      "yesAsk": 0.95,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 0,
-      "spread": 0.17999999999999994,
+      "liquidity": 10,
+      "spread": 0.16999999999999993,
       "volume": 14.03,
       "volume24h": 0,
       "openInterest": 13.94,
       "depth": {
         "bidSize": 5,
-        "askSize": 0.09,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -11384,17 +11386,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.25,
-      "yesAsk": 0.91,
+      "yesBid": 0.26,
+      "yesAsk": 0.9,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 4,
-      "spread": 0.66,
+      "liquidity": 5,
+      "spread": 0.64,
       "volume": 6.88,
       "volume24h": 1.09,
       "openInterest": 5.88,
       "depth": {
-        "bidSize": 1,
-        "askSize": 3.91,
+        "bidSize": 5,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -11440,17 +11442,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.07,
-      "yesAsk": 0.3,
+      "yesBid": 0.08,
+      "yesAsk": 0.29,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 0,
-      "spread": 0.22999999999999998,
+      "liquidity": 1,
+      "spread": 0.20999999999999996,
       "volume": 6.82,
       "volume24h": 0,
       "openInterest": 6.82,
       "depth": {
-        "bidSize": 1,
-        "askSize": 1,
+        "bidSize": 5,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -11463,7 +11465,7 @@
       "short": "Will Xavier be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.41000000000000003,
+      "market": 0.4,
       "model": 0.04191714798941059,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
@@ -11496,16 +11498,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.02,
+      "yesBid": null,
       "yesAsk": 0.8,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 3,
-      "spread": 0.78,
+      "spread": 0.8,
       "volume": 6.21,
       "volume24h": 1.23,
       "openInterest": 1.23,
       "depth": {
-        "bidSize": 14,
+        "bidSize": 0,
         "askSize": 3.77,
         "notional": 1
       },
@@ -11519,7 +11521,7 @@
       "short": "Will Polo be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.375,
+      "market": 0.365,
       "model": 0.5040323381294581,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
@@ -11552,16 +11554,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.02,
+      "yesBid": null,
       "yesAsk": 0.73,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 3,
-      "spread": 0.71,
+      "spread": 0.73,
       "volume": 5.03,
       "volume24h": 0,
       "openInterest": 4.52,
       "depth": {
-        "bidSize": 2,
+        "bidSize": 0,
         "askSize": 4,
         "notional": 1
       },
@@ -11617,7 +11619,7 @@
       "volume24h": 0,
       "openInterest": 1.87,
       "depth": {
-        "bidSize": 16,
+        "bidSize": 20,
         "askSize": 500,
         "notional": 1
       },
@@ -11761,7 +11763,7 @@
       "short": "Will Teddy be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.060000000000000005,
+      "market": 0.05,
       "model": 0.038725011063111034,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -11794,16 +11796,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.02,
+      "yesBid": null,
       "yesAsk": 0.1,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 10,
-      "spread": 0.08,
+      "spread": 0.1,
       "volume": 0,
       "volume24h": 0,
       "openInterest": 0,
       "depth": {
-        "bidSize": 16,
+        "bidSize": 0,
         "askSize": 100,
         "notional": 1
       },
@@ -11817,7 +11819,7 @@
       "short": "Will Wilfred be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.035,
+      "market": 0.025,
       "model": 0.038725011063111034,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -11850,16 +11852,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.02,
+      "yesBid": null,
       "yesAsk": 0.05,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 5,
-      "spread": 0.030000000000000002,
+      "spread": 0.05,
       "volume": 0,
       "volume24h": 0,
       "openInterest": 0,
       "depth": {
-        "bidSize": 16,
+        "bidSize": 0,
         "askSize": 100,
         "notional": 1
       },
@@ -11873,7 +11875,7 @@
       "short": "Will Vicky be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.035,
+      "market": 0.025,
       "model": 0.042529786476088106,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -11906,16 +11908,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.02,
+      "yesBid": null,
       "yesAsk": 0.05,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 5,
-      "spread": 0.030000000000000002,
+      "spread": 0.05,
       "volume": 0,
       "volume24h": 0,
       "openInterest": 0,
       "depth": {
-        "bidSize": 16,
+        "bidSize": 0,
         "askSize": 100,
         "notional": 1
       },
@@ -12127,7 +12129,50 @@
       "short": "Will Dolly be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.085,
+      "market": 0.05,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": 0.03,
+      "yesAsk": 0.07,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": 2,
+      "spread": 0.04000000000000001,
+      "volume": 63257.21,
+      "volume24h": 11123.51,
+      "openInterest": 28497.89,
+      "depth": {
+        "bidSize": 39.72,
+        "askSize": 33,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
+    },
+    {
+      "id": "KXHURPATHHAWAII-26DEC",
+      "label": "Will a hurricane make landfall in Hawaii during the 2026 hurricane season?",
+      "short": "Will a hurricane make landfall in Hawaii…",
+      "storm": null,
+      "subject": null,
+      "market": 0.11,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -12148,59 +12193,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.07,
-      "yesAsk": 0.1,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 9,
-      "spread": 0.03,
-      "volume": 63068.63,
-      "volume24h": 11093.37,
-      "openInterest": 28600.32,
-      "depth": {
-        "bidSize": 1,
-        "askSize": 86.94,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
-    },
-    {
-      "id": "KXHURPATHHAWAII-26DEC",
-      "label": "Will a hurricane make landfall in Hawaii during the 2026 hurricane season?",
-      "short": "Will a hurricane make landfall in Hawaii…",
-      "storm": null,
-      "subject": null,
-      "market": 0.105,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": 0.09,
-      "yesAsk": 0.12,
+      "yesAsk": 0.15,
       "closeTime": "2027-01-01T04:59:00Z",
-      "liquidity": 2,
-      "spread": 0.03,
-      "volume": 27400.71,
-      "volume24h": 19.55,
-      "openInterest": 10404.31,
+      "liquidity": 149,
+      "spread": 0.07999999999999999,
+      "volume": 27517.1,
+      "volume24h": 130.89,
+      "openInterest": 10510.7,
       "depth": {
-        "bidSize": 19.7,
-        "askSize": 20,
+        "bidSize": 10,
+        "askSize": 992.71,
         "notional": 1
       },
       "proxy": false,
@@ -12324,12 +12326,12 @@
       "closeTime": "2026-09-01T03:59:00Z",
       "liquidity": 47,
       "spread": 0.01,
-      "volume": 10103.08,
-      "volume24h": 303.93,
+      "volume": 10135.08,
+      "volume24h": 335.93,
       "openInterest": 5054.44,
       "depth": {
         "bidSize": 0,
-        "askSize": 4708.07,
+        "askSize": 4676.07,
         "notional": 1
       },
       "proxy": false,
@@ -12887,17 +12889,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.28,
-      "yesAsk": 0.51,
+      "yesBid": 0.3,
+      "yesAsk": 0.49,
       "closeTime": "2026-09-15T03:59:00Z",
-      "liquidity": 202,
-      "spread": 0.22999999999999998,
+      "liquidity": 5,
+      "spread": 0.19,
       "volume": 1820.09,
       "volume24h": 122.81,
       "openInterest": 793.46,
       "depth": {
-        "bidSize": 15,
-        "askSize": 396.76,
+        "bidSize": 0.36,
+        "askSize": 9.64,
         "notional": 1
       },
       "proxy": false,
@@ -12946,6 +12948,52 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01EPAC"
+    },
+    {
+      "id": "KXHURCAT-26DOLLY-T3",
+      "label": "Will Dolly become a Category 3 hurricane?",
+      "short": "Will Dolly become a Category 3 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Dolly",
+        "active": false
+      },
+      "market": 0.01,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 3,
+      "yesBid": null,
+      "yesAsk": 0.01,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 43,
+      "spread": 0.01,
+      "volume": 1251.46,
+      "volume24h": 1115.11,
+      "openInterest": 1204.12,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 4334.89,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26DOLLY"
     },
     {
       "id": "KXHURCAT-26DOLLY-T2",
@@ -13111,14 +13159,14 @@
       "yesBid": 0.05,
       "yesAsk": 0.11,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 7,
+      "liquidity": 6,
       "spread": 0.06,
       "volume": 1000,
       "volume24h": 0,
       "openInterest": 200,
       "depth": {
         "bidSize": 20,
-        "askSize": 66,
+        "askSize": 50,
         "notional": 1
       },
       "proxy": false,
@@ -13177,7 +13225,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.835,
+      "market": 0.885,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -13197,11 +13245,11 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.71,
-      "yesAsk": 0.96,
+      "yesBid": 0.83,
+      "yesAsk": 0.94,
       "closeTime": "2026-12-01T04:59:00Z",
       "liquidity": 5,
-      "spread": 0.25,
+      "spread": 0.10999999999999999,
       "volume": 752.18,
       "volume24h": 552,
       "openInterest": 685,
@@ -13220,7 +13268,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.16,
+      "market": 0.14,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -13240,17 +13288,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.08,
-      "yesAsk": 0.24,
+      "yesBid": 0.06,
+      "yesAsk": 0.22,
       "closeTime": "2026-10-01T03:59:00Z",
-      "liquidity": 60,
-      "spread": 0.15999999999999998,
+      "liquidity": 1,
+      "spread": 0.16,
       "volume": 727.99,
       "volume24h": 21.75,
       "openInterest": 625.93,
       "depth": {
-        "bidSize": 1.76,
-        "askSize": 250,
+        "bidSize": 10,
+        "askSize": 3.24,
         "notional": 1
       },
       "proxy": false,
@@ -13263,7 +13311,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.815,
+      "market": 0.825,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -13283,11 +13331,11 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.68,
+      "yesBid": 0.7,
       "yesAsk": 0.95,
       "closeTime": "2026-10-15T03:59:00Z",
       "liquidity": 475,
-      "spread": 0.2699999999999999,
+      "spread": 0.25,
       "volume": 654.18,
       "volume24h": 199,
       "openInterest": 654,
@@ -13412,17 +13460,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.25,
-      "yesAsk": 0.4,
+      "yesBid": 0.26,
+      "yesAsk": 0.39,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 0,
-      "spread": 0.15000000000000002,
+      "liquidity": 1,
+      "spread": 0.13,
       "volume": 479.27,
       "volume24h": 0,
       "openInterest": 61.84,
       "depth": {
-        "bidSize": 5,
-        "askSize": 0.83,
+        "bidSize": 6.3,
+        "askSize": 3.7,
         "notional": 1
       },
       "proxy": false,
@@ -13524,7 +13572,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.21000000000000002,
+      "market": 0.23500000000000001,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -13544,17 +13592,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.02,
-      "yesAsk": 0.4,
+      "yesBid": 0.08,
+      "yesAsk": 0.39,
       "closeTime": "2026-12-01T04:59:00Z",
-      "liquidity": 40,
-      "spread": 0.38,
+      "liquidity": 2,
+      "spread": 0.31,
       "volume": 349.58,
       "volume24h": 115.1,
       "openInterest": 222.38,
       "depth": {
-        "bidSize": 1000,
-        "askSize": 100,
+        "bidSize": 10,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -13616,7 +13664,7 @@
         "subject": "Rene",
         "active": false
       },
-      "market": 0.05,
+      "market": 0.04,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -13636,16 +13684,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 2,
-      "yesBid": 0.02,
+      "yesBid": null,
       "yesAsk": 0.08,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 2,
-      "spread": 0.06,
+      "spread": 0.08,
       "volume": 340,
       "volume24h": 0,
       "openInterest": 160,
       "depth": {
-        "bidSize": 16,
+        "bidSize": 0,
         "askSize": 30,
         "notional": 1
       },
@@ -13659,7 +13707,7 @@
       "short": "Will a hurricane make landfall in North…",
       "storm": null,
       "subject": null,
-      "market": 0.105,
+      "market": 0.11499999999999999,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -13679,17 +13727,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.02,
-      "yesAsk": 0.19,
+      "yesBid": 0.05,
+      "yesAsk": 0.18,
       "closeTime": "2027-01-01T04:59:00Z",
-      "liquidity": 9,
-      "spread": 0.17,
+      "liquidity": 10,
+      "spread": 0.13,
       "volume": 324.07,
       "volume24h": 14.94,
       "openInterest": 321.16,
       "depth": {
-        "bidSize": 5,
-        "askSize": 48.24,
+        "bidSize": 10,
+        "askSize": 58,
         "notional": 1
       },
       "proxy": false,
@@ -13748,7 +13796,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.8899999999999999,
+      "market": 0.89,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -13768,17 +13816,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.84,
-      "yesAsk": 0.94,
+      "yesBid": 0.85,
+      "yesAsk": 0.93,
       "closeTime": "2026-11-15T04:59:00Z",
-      "liquidity": 47,
-      "spread": 0.09999999999999998,
+      "liquidity": 5,
+      "spread": 0.08000000000000007,
       "volume": 244.34,
       "volume24h": 5,
       "openInterest": 234.2,
       "depth": {
-        "bidSize": 23.02,
-        "askSize": 50,
+        "bidSize": 5,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -13832,58 +13880,12 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26ISELLE"
     },
     {
-      "id": "KXHURCAT-26DOLLY-T3",
-      "label": "Will Dolly become a Category 3 hurricane?",
-      "short": "Will Dolly become a Category 3 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Dolly",
-        "active": false
-      },
-      "market": 0.01,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 3,
-      "yesBid": null,
-      "yesAsk": 0.01,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 54,
-      "spread": 0.01,
-      "volume": 222.76,
-      "volume24h": 86.41,
-      "openInterest": 175.42,
-      "depth": {
-        "bidSize": 0,
-        "askSize": 5363.59,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26DOLLY"
-    },
-    {
       "id": "KXNEXTHURDATE-26DEC01-26OCT01",
       "label": "When will the next hurricane form?",
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.8049999999999999,
+      "market": 0.81,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -13903,17 +13905,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.77,
+      "yesBid": 0.78,
       "yesAsk": 0.84,
       "closeTime": "2026-10-01T03:59:00Z",
-      "liquidity": 45,
-      "spread": 0.06999999999999995,
+      "liquidity": 42,
+      "spread": 0.05999999999999994,
       "volume": 221.24,
       "volume24h": 4,
       "openInterest": 216.24,
       "depth": {
-        "bidSize": 11.15,
-        "askSize": 54,
+        "bidSize": 5,
+        "askSize": 50,
         "notional": 1
       },
       "proxy": false,
@@ -14248,7 +14250,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.875,
+      "market": 0.885,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -14268,16 +14270,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.79,
+      "yesBid": 0.81,
       "yesAsk": 0.96,
       "closeTime": "2026-11-01T03:59:00Z",
       "liquidity": 384,
-      "spread": 0.16999999999999993,
+      "spread": 0.1499999999999999,
       "volume": 142.94,
       "volume24h": 0,
       "openInterest": 142.94,
       "depth": {
-        "bidSize": 37.94,
+        "bidSize": 10,
         "askSize": 400,
         "notional": 1
       },
@@ -14383,7 +14385,7 @@
         "subject": "Wilfred",
         "active": false
       },
-      "market": 0.095,
+      "market": 0.1,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -14404,16 +14406,16 @@
       "horizon": "storm",
       "strike": 1,
       "yesBid": 0.05,
-      "yesAsk": 0.14,
+      "yesAsk": 0.15,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 2,
-      "spread": 0.09000000000000001,
+      "liquidity": 8,
+      "spread": 0.09999999999999999,
       "volume": 103.16,
       "volume24h": 0,
       "openInterest": 103.16,
       "depth": {
         "bidSize": 25,
-        "askSize": 16,
+        "askSize": 50,
         "notional": 1
       },
       "proxy": false,
@@ -14656,7 +14658,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.22,
+      "market": 0.23500000000000001,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -14676,17 +14678,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.02,
-      "yesAsk": 0.42,
+      "yesBid": 0.07,
+      "yesAsk": 0.4,
       "closeTime": "2026-11-01T03:59:00Z",
-      "liquidity": 29,
-      "spread": 0.39999999999999997,
+      "liquidity": 2,
+      "spread": 0.33,
       "volume": 85.38,
-      "volume24h": 27,
+      "volume24h": 26,
       "openInterest": 54.38,
       "depth": {
-        "bidSize": 1000,
-        "askSize": 68.96,
+        "bidSize": 10.09,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -14745,7 +14747,7 @@
         "subject": "Paulette",
         "active": false
       },
-      "market": 0.095,
+      "market": 0.1,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -14766,16 +14768,16 @@
       "horizon": "storm",
       "strike": 1,
       "yesBid": 0.05,
-      "yesAsk": 0.14,
+      "yesAsk": 0.15,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 2,
-      "spread": 0.09000000000000001,
+      "liquidity": 1,
+      "spread": 0.09999999999999999,
       "volume": 81.76,
       "volume24h": 0,
       "openInterest": 64.76,
       "depth": {
         "bidSize": 62.76,
-        "askSize": 16,
+        "askSize": 7.24,
         "notional": 1
       },
       "proxy": false,
@@ -14826,6 +14828,52 @@
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01CPAC"
     },
     {
+      "id": "KXHURCAT-26WILFRED-T2",
+      "label": "Will Wilfred become a Category 2 hurricane?",
+      "short": "Will Wilfred become a Category 2 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Wilfred",
+        "active": false
+      },
+      "market": 0.075,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 2,
+      "yesBid": 0.02,
+      "yesAsk": 0.13,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 5,
+      "spread": 0.11,
+      "volume": 58.48,
+      "volume24h": 38.48,
+      "openInterest": 30.24,
+      "depth": {
+        "bidSize": 10.24,
+        "askSize": 39.76,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26WILFRED"
+    },
+    {
       "id": "KXHURCAT-26SALLY-T1",
       "label": "Will Sally become a Category 1 hurricane?",
       "short": "Will Sally become a Category 1 hurricane…",
@@ -14834,7 +14882,7 @@
         "subject": "Sally",
         "active": false
       },
-      "market": 0.060000000000000005,
+      "market": 0.055,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -14854,16 +14902,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 1,
-      "yesBid": 0.02,
+      "yesBid": 0.01,
       "yesAsk": 0.1,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 0,
-      "spread": 0.08,
+      "spread": 0.09000000000000001,
       "volume": 56,
       "volume24h": 0,
       "openInterest": 28,
       "depth": {
-        "bidSize": 3,
+        "bidSize": 42,
         "askSize": 4,
         "notional": 1
       },
@@ -14923,7 +14971,7 @@
         "subject": "Nana",
         "active": false
       },
-      "market": 0.49000000000000005,
+      "market": 0.48500000000000004,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -14944,16 +14992,16 @@
       "horizon": "storm",
       "strike": 1,
       "yesBid": 0.05,
-      "yesAsk": 0.93,
+      "yesAsk": 0.92,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 12,
-      "spread": 0.88,
+      "liquidity": 9,
+      "spread": 0.87,
       "volume": 36,
       "volume24h": 0,
       "openInterest": 18,
       "depth": {
         "bidSize": 20,
-        "askSize": 13,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -15145,15 +15193,15 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26VICKY"
     },
     {
-      "id": "KXHURCAT-26WILFRED-T2",
-      "label": "Will Wilfred become a Category 2 hurricane?",
-      "short": "Will Wilfred become a Category 2 hurricane…",
+      "id": "KXHURCAT-26VICKY-T1",
+      "label": "Will Vicky become a Category 1 hurricane?",
+      "short": "Will Vicky become a Category 1 hurricane…",
       "storm": null,
       "subject": {
-        "subject": "Wilfred",
+        "subject": "Vicky",
         "active": false
       },
-      "market": 0.07,
+      "market": 0.1,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -15172,23 +15220,23 @@
       "modelQuality": null,
       "modelIntel": null,
       "horizon": "storm",
-      "strike": 2,
-      "yesBid": 0.01,
-      "yesAsk": 0.13,
+      "strike": 1,
+      "yesBid": 0.05,
+      "yesAsk": 0.15,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 7,
-      "spread": 0.12000000000000001,
+      "liquidity": 8,
+      "spread": 0.09999999999999999,
       "volume": 20,
       "volume24h": 0,
       "openInterest": 20,
       "depth": {
-        "bidSize": 50,
+        "bidSize": 25,
         "askSize": 50,
         "notional": 1
       },
       "proxy": false,
       "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26WILFRED"
+      "url": "https://kalshi.com/markets/KXHURCAT-26VICKY"
     },
     {
       "id": "KXHURCAT-26WILFRED-T3",
@@ -15322,52 +15370,6 @@
       "depth": {
         "bidSize": 50,
         "askSize": 50,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26VICKY"
-    },
-    {
-      "id": "KXHURCAT-26VICKY-T1",
-      "label": "Will Vicky become a Category 1 hurricane?",
-      "short": "Will Vicky become a Category 1 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Vicky",
-        "active": false
-      },
-      "market": 0.095,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 1,
-      "yesBid": 0.05,
-      "yesAsk": 0.14,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 2,
-      "spread": 0.09000000000000001,
-      "volume": 20,
-      "volume24h": 0,
-      "openInterest": 20,
-      "depth": {
-        "bidSize": 25,
-        "askSize": 16,
         "notional": 1
       },
       "proxy": false,
@@ -15613,7 +15615,7 @@
         "subject": "Marie",
         "active": false
       },
-      "market": 0.53,
+      "market": 0.545,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -15633,16 +15635,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 2,
-      "yesBid": 0.07,
+      "yesBid": 0.1,
       "yesAsk": 0.99,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 50,
-      "spread": 0.9199999999999999,
+      "spread": 0.89,
       "volume": 2.05,
       "volume24h": 0,
       "openInterest": 2.05,
       "depth": {
-        "bidSize": 2,
+        "bidSize": 1,
         "askSize": 50,
         "notional": 1
       },
@@ -15688,7 +15690,7 @@
       "volume24h": 1.62,
       "openInterest": 1.62,
       "depth": {
-        "bidSize": 53,
+        "bidSize": 50,
         "askSize": 2,
         "notional": 1
       },
@@ -17123,52 +17125,6 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26EDOUARD"
     },
     {
-      "id": "KXHURCAT-26XAVIER-T1",
-      "label": "Will Xavier become a Category 1 hurricane?",
-      "short": "Will Xavier become a Category 1 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Xavier",
-        "active": false
-      },
-      "market": 0.495,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 1,
-      "yesBid": 0.05,
-      "yesAsk": 0.94,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 13,
-      "spread": 0.8899999999999999,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 20,
-        "askSize": 14,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26XAVIER"
-    },
-    {
       "id": "KXHURCAT-26TEDDY-T2",
       "label": "Will Teddy become a Category 2 hurricane?",
       "short": "Will Teddy become a Category 2 hurricane…",
@@ -17213,6 +17169,98 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26TEDDY"
+    },
+    {
+      "id": "KXHURCAT-26TEDDY-T1",
+      "label": "Will Teddy become a Category 1 hurricane?",
+      "short": "Will Teddy become a Category 1 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Teddy",
+        "active": false
+      },
+      "market": 0.1,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 1,
+      "yesBid": 0.05,
+      "yesAsk": 0.15,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 8,
+      "spread": 0.09999999999999999,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 20,
+        "askSize": 50,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26TEDDY"
+    },
+    {
+      "id": "KXHURCAT-26OMAR-T1",
+      "label": "Will Omar become a Category 1 hurricane?",
+      "short": "Will Omar become a Category 1 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Omar",
+        "active": false
+      },
+      "market": 0.1,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 1,
+      "yesBid": 0.05,
+      "yesAsk": 0.15,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 8,
+      "spread": 0.09999999999999999,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 20,
+        "askSize": 50,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26OMAR"
     },
     {
       "id": "KXHURCAT-26TEDDY-T3",
@@ -17299,7 +17347,7 @@
       "openInterest": 0,
       "depth": {
         "bidSize": 20,
-        "askSize": 53,
+        "askSize": 50,
         "notional": 1
       },
       "proxy": false,
@@ -17903,6 +17951,52 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26NORBERT"
+    },
+    {
+      "id": "KXHURCAT-26XAVIER-T1",
+      "label": "Will Xavier become a Category 1 hurricane?",
+      "short": "Will Xavier become a Category 1 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Xavier",
+        "active": false
+      },
+      "market": 0.5,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 1,
+      "yesBid": 0.05,
+      "yesAsk": 0.95,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 5,
+      "spread": 0.8999999999999999,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 20,
+        "askSize": 5,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26XAVIER"
     },
     {
       "id": "KXHURCAT-26KYLE-T1",
@@ -18779,6 +18873,52 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26VANCE"
     },
     {
+      "id": "KXHURCAT-26POLO-T1",
+      "label": "Will Polo become a Category 1 hurricane?",
+      "short": "Will Polo become a Category 1 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Polo",
+        "active": false
+      },
+      "market": 0.5,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 1,
+      "yesBid": 0.05,
+      "yesAsk": 0.95,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 4,
+      "spread": 0.8999999999999999,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 20,
+        "askSize": 4,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26POLO"
+    },
+    {
       "id": "KXHURCAT-26LEAH-T1",
       "label": "Will Leah become a Category 1 hurricane?",
       "short": "Will Leah become a Category 1 hurricane…",
@@ -19283,6 +19423,52 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26ODALYS"
+    },
+    {
+      "id": "KXHURCAT-26SIMON-T2",
+      "label": "Will Simon become a Category 2 hurricane?",
+      "short": "Will Simon become a Category 2 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Simon",
+        "active": false
+      },
+      "market": 0.5,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 2,
+      "yesBid": 0.05,
+      "yesAsk": 0.95,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 4,
+      "spread": 0.8999999999999999,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 20,
+        "askSize": 4,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26SIMON"
     },
     {
       "id": "KXHURCAT-26VANCE-T2",
@@ -19973,190 +20159,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26ISAIAS"
-    },
-    {
-      "id": "KXHURCAT-26NANA-T3",
-      "label": "Will Nana become a Category 3 hurricane?",
-      "short": "Will Nana become a Category 3 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Nana",
-        "active": false
-      },
-      "market": 0.5,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 3,
-      "yesBid": 0.05,
-      "yesAsk": 0.95,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 4,
-      "spread": 0.8999999999999999,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 20,
-        "askSize": 4,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26NANA"
-    },
-    {
-      "id": "KXHURCAT-26GONZALO-T3",
-      "label": "Will Gonzalo become a Category 3 hurricane?",
-      "short": "Will Gonzalo become a Category 3 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Gonzalo",
-        "active": false
-      },
-      "market": 0.5,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 3,
-      "yesBid": 0.05,
-      "yesAsk": 0.95,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 4,
-      "spread": 0.8999999999999999,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 20,
-        "askSize": 4,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26GONZALO"
-    },
-    {
-      "id": "KXHURCAT-26MARIE-T4",
-      "label": "Will Marie become a Category 4 hurricane?",
-      "short": "Will Marie become a Category 4 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Marie",
-        "active": false
-      },
-      "market": 0.5,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 4,
-      "yesBid": 0.05,
-      "yesAsk": 0.95,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 4,
-      "spread": 0.8999999999999999,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 20,
-        "askSize": 4,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26MARIE"
-    },
-    {
-      "id": "KXHURCAT-26NORBERT-T4",
-      "label": "Will Norbert become a Category 4 hurricane?",
-      "short": "Will Norbert become a Category 4 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Norbert",
-        "active": false
-      },
-      "market": 0.5,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 4,
-      "yesBid": 0.05,
-      "yesAsk": 0.95,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 4,
-      "spread": 0.8999999999999999,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 20,
-        "askSize": 4,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26NORBERT"
     }
   ],
   "models": [],
@@ -20187,8 +20189,8 @@
       "title": "East of the Leeward Islands (Remnants of Dolly)",
       "pct48": null,
       "pct7d": 10,
-      "summary": "Disorganized showers and thunderstorm continue in association with the remnants of Tropical Storm Dolly, located about 300 miles east of the Leeward Islands. However, there are no signs that the system is developing a closed circulation. Redevelopment of this system is unlikely while it moves westward to west-northwest",
-      "issued": "200 PM EDT Sat Aug 29 2026",
+      "summary": "Showers and thunderstorm continue in association with the remnants of Tropical Storm Dolly, located about 150 miles east of the Leeward Islands. However, there are no signs that the system is developing a closed circulation. Redevelopment of this system is unlikely while it moves westward to west-northwestward near 25 ",
+      "issued": "800 PM EDT Sat Aug 29 2026",
       "url": "https://api.weather.gov/products/types/ABNT20/locations/NHC",
       "rings": [
         [
@@ -20197,1196 +20199,1196 @@
             -67.7259918773332
           ],
           [
-            19.337823755494313,
-            -67.8465967141397
+            19.33540939225728,
+            -67.8485714812212
           ],
           [
-            19.327131677151012,
-            -67.97469063603607
+            19.322039819817547,
+            -67.97909302109751
           ],
           [
-            19.319971297016444,
-            -68.10993930176569
+            19.311983304003373,
+            -68.11720011618979
           ],
           [
-            19.316255666633673,
-            -68.25200837007193
+            19.30519738563403,
+            -68.26253638572567
           ],
           [
-            19.315897837545737,
-            -68.40056349969822
+            19.3016396055288,
+            -68.41474544893279
           ],
           [
-            19.318810861295688,
-            -68.55527034938791
+            19.301267504506942,
+            -68.57347092503879
           ],
           [
-            19.32490778942657,
-            -68.7157945778844
+            19.304038623387743,
+            -68.73835643327133
           ],
           [
-            19.334101673481445,
-            -68.88180184393106
+            19.30991050299047,
+            -68.90904559285808
           ],
           [
-            19.346305565003355,
-            -69.05295780627127
+            19.3188406841344,
+            -69.08518202302665
           ],
           [
-            19.361432515535355,
-            -69.22892812364846
+            19.330786707638804,
+            -69.26640934300468
           ],
           [
-            19.379395576620485,
-            -69.40937845480595
+            19.345706114322955,
+            -69.45237117201987
           ],
           [
-            19.400107799801805,
-            -69.59397445848718
+            19.363556445006132,
+            -69.6427111292998
           ],
           [
-            19.423482236622366,
-            -69.7823817934355
+            19.3842952405076,
+            -69.83707283407215
           ],
           [
-            19.44943193862521,
-            -69.97426611839431
+            19.407880041646642,
+            -70.03509990556455
           ],
           [
-            19.47786995735339,
-            -70.16929309210703
+            19.434268389242526,
+            -70.23643596300468
           ],
           [
-            19.508709344349953,
-            -70.36712837331696
+            19.463417824114522,
+            -70.44072462562013
           ],
           [
-            19.54186315115796,
-            -70.56743762076755
+            19.495285887081916,
+            -70.6476095126386
           ],
           [
-            19.577244429320444,
-            -70.76988649320218
+            19.52983011896397,
+            -70.85673424328772
           ],
           [
-            19.614766230380464,
-            -70.97414064936422
+            19.567008060579962,
+            -71.06774243679511
           ],
           [
-            19.654341605881072,
-            -71.17986574799706
+            19.606777252749165,
+            -71.28027771238844
           ],
           [
-            19.695883607365314,
-            -71.38672744784408
+            19.64909523629085,
+            -71.49398368929535
           ],
           [
-            19.739305286376243,
-            -71.59439140764867
+            19.6939195520243,
+            -71.7085039867435
           ],
           [
-            19.78451969445691,
-            -71.80252328615423
+            19.741207740768775,
+            -71.92348222396052
           ],
           [
-            19.831439883150356,
-            -72.01078874210411
+            19.790917343343562,
+            -72.13856202017406
           ],
           [
-            19.879978903999636,
-            -72.21885343424172
+            19.84300590056793,
+            -72.35338699461175
           ],
           [
-            19.930049808547803,
-            -72.42638302131044
+            19.897430953261146,
+            -72.56760076650126
           ],
           [
-            19.981565648337906,
-            -72.63304316205368
+            19.954150042242492,
+            -72.78084695507022
           ],
           [
-            20.034439474912993,
-            -72.83849951521476
+            20.013120708331236,
+            -72.99276917954629
           ],
           [
-            20.08858433981611,
-            -73.04241773953714
+            20.074300492346655,
+            -73.20301105915709
           ],
           [
-            20.143913294590316,
-            -73.24446349376416
+            20.137646935108023,
+            -73.41121621313029
           ],
           [
-            20.200339390778655,
-            -73.4443024366392
+            20.20311757743461,
+            -73.61702826069356
           ],
           [
-            20.257775679924176,
-            -73.64160022690568
+            20.270669960145693,
+            -73.82009082107447
           ],
           [
-            20.316135213569925,
-            -73.83602252330695
+            20.340261624060545,
+            -74.02004751350074
           ],
           [
-            20.375331892508825,
-            -74.02726910054619
+            20.41184008791551,
+            -74.21657623651801
           ],
           [
-            20.435286362013667,
-            -74.21531067173596
+            20.48527327816149,
+            -74.40962712442192
           ],
           [
-            20.49592248361256,
-            -74.40024715299681
+            20.56039116589743,
+            -74.59928013318192
           ],
           [
-            20.557164138641166,
-            -74.58217925615685
+            20.63702348847105,
+            -74.78561601828505
           ],
           [
-            20.61893520843517,
-            -74.76120769304413
+            20.714999983230076,
+            -74.96871553521838
           ],
           [
-            20.68115957433023,
-            -74.93743317548675
+            20.794150387522244,
+            -75.14865943946893
           ],
           [
-            20.743761117662036,
-            -75.11095641531278
+            20.874304438695276,
+            -75.32552848652374
           ],
           [
-            20.806663719766245,
-            -75.28187812435034
+            20.955291874096904,
+            -75.49940343186984
           ],
           [
-            20.869791261978538,
-            -75.45029901442746
+            21.036942431074863,
+            -75.67036503099432
           ],
           [
-            20.933067625634582,
-            -75.61631979737223
+            21.119085846976866,
+            -75.8384940393842
           ],
           [
-            20.996416692070053,
-            -75.78004118501276
+            21.20155185915065,
+            -76.00387121252653
           ],
           [
-            21.059762342620633,
-            -75.94156388917713
+            21.284170204943944,
+            -76.16657730590836
           ],
           [
-            21.123028458621974,
-            -76.10098862169342
+            21.36677062170448,
+            -76.32669307501672
           ],
           [
-            21.186138921409768,
-            -76.25841609438969
+            21.449182846779973,
+            -76.48429927533867
           ],
           [
-            21.249017612319676,
-            -76.41394701909404
+            21.53123661751816,
+            -76.63947666236123
           ],
           [
-            21.311588412687378,
-            -76.56768210763454
+            21.612761671266778,
+            -76.79230599157147
           ],
           [
-            21.373775203848542,
-            -76.7197220718393
+            21.693587745373538,
+            -76.94286801845644
           ],
           [
-            21.435501867138843,
-            -76.87016762353636
+            21.773544577186183,
+            -77.09124349850315
           ],
           [
-            21.49669228389395,
-            -77.01911947455385
+            21.852461904052433,
+            -77.23751318719867
           ],
           [
-            21.55727033544954,
-            -77.1666783367198
+            21.930169463320013,
+            -77.38175784003005
           ],
           [
-            21.61715990314128,
-            -77.31294492186234
+            22.00649699233666,
+            -77.52405821248432
           ],
           [
-            21.676284868304855,
-            -77.45801994180954
+            22.0812742284501,
+            -77.66449506004852
           ],
           [
-            21.734569112275924,
-            -77.60200410838948
+            22.15433090900806,
+            -77.80314913820972
           ],
           [
-            21.791936516390166,
-            -77.74499813343022
+            22.225496771358273,
+            -77.94010120245494
           ],
           [
-            21.848310961983252,
-            -77.88710272875986
+            22.294601552848462,
+            -78.07543200827124
           ],
           [
-            21.903616330390854,
-            -78.0284186062065
+            22.361474990826352,
+            -78.20922231114565
           ],
           [
-            21.957776502948647,
-            -78.16904647759819
+            22.42594682263968,
+            -78.34155286656525
           ],
           [
-            22.0107153609923,
-            -78.30908705476301
+            22.487846785636172,
+            -78.47250443001703
           ],
           [
-            22.062356785857496,
-            -78.44864104952907
+            22.547004617163545,
+            -78.60215775698808
           ],
           [
-            22.112624658879895,
-            -78.58780917372445
+            22.60325005456955,
+            -78.73059360296541
           ],
           [
-            22.161442861395177,
-            -78.72669213917723
+            22.65641283520189,
+            -78.8578927234361
           ],
           [
-            22.20873527473901,
-            -78.86539065771548
+            22.706322696408314,
+            -78.98413587388717
           ],
           [
-            22.254425780247065,
-            -79.00400544116727
+            22.75280937553654,
+            -79.10940380980568
           ],
           [
-            22.298444488282392,
-            -79.14262982514458
+            22.795714193772692,
+            -79.23377227534236
           ],
           [
-            22.340833332707344,
-            -79.28122472742714
+            22.83508642536966,
+            -79.35722705113908
           ],
           [
-            22.38173097172126,
-            -79.41963652791047
+            22.87115521842288,
+            -79.4796761018078
           ],
           [
-            22.42127925278549,
-            -79.55770782986741
+            22.904155651953026,
+            -79.60102482615635
           ],
           [
-            22.459620023361374,
-            -79.69528123657082
+            22.93432280498079,
+            -79.72117862299258
           ],
           [
-            22.49689513091027,
-            -79.83219935129353
+            22.96189175652684,
+            -79.84004289112433
           ],
           [
-            22.533246422893523,
-            -79.96830477730838
+            22.98709758561186,
+            -79.95752302935941
           ],
           [
-            22.568815746772483,
-            -80.10344011788821
+            23.01017537125654,
+            -80.07352443650562
           ],
           [
-            22.603744950008497,
-            -80.2374479763059
+            23.031360192481547,
+            -80.18795251137087
           ],
           [
-            22.638175880062914,
-            -80.37017095583427
+            23.050887128307565,
+            -80.30071265276294
           ],
           [
-            22.67225038439709,
-            -80.50145165974614
+            23.068991257755282,
+            -80.41171025948964
           ],
           [
-            22.70611031047236,
-            -80.6311326913144
+            23.085907659845375,
+            -80.52085073035886
           ],
           [
-            22.739897505750086,
-            -80.7590566538119
+            23.101871413598523,
+            -80.62803946417839
           ],
           [
-            22.77375381769161,
-            -80.88506615051143
+            23.117117598035403,
+            -80.73318185975607
           ],
           [
-            22.80782109375828,
-            -81.00900378468589
+            23.13188129217671,
+            -80.83618331589973
           ],
           [
-            22.842241181411453,
-            -81.13071215960807
+            23.14639757504311,
+            -80.93694923141722
           ],
           [
-            22.877155928112465,
-            -81.25003387855087
+            23.16090152565529,
+            -81.03538500511634
           ],
           [
-            22.912707181322677,
-            -81.36681154478708
+            23.175628223033932,
+            -81.13139603580491
           ],
           [
-            22.949036788503435,
-            -81.4808877615896
+            23.190812746199715,
+            -81.22488772229082
           ],
           [
-            22.98628659711608,
-            -81.59210513223125
+            23.206690174173318,
+            -81.31576546338185
           ],
           [
-            23.024598454621966,
-            -81.70030625998487
+            23.22349558597542,
+            -81.40393465788584
           ],
           [
-            23.064114208482444,
-            -81.8053337481233
+            23.24146406062671,
+            -81.48930070461064
           ],
           [
-            23.104975706158857,
-            -81.9070301999194
+            23.26083067714786,
+            -81.57176900236406
           ],
           [
-            23.14732479511256,
-            -82.005238218646
+            23.281830514559562,
+            -81.65124494995396
           ],
           [
-            23.1913033228049,
-            -82.09980040757597
+            23.304698651882486,
+            -81.72763394618812
           ],
           [
-            23.237053136697224,
-            -82.19055936998214
+            23.329670168137312,
+            -81.8008413898744
           ],
           [
-            23.284716084250885,
-            -82.27735770913735
+            23.35698014234473,
+            -81.87077267982066
           ],
           [
-            23.334434012927225,
-            -82.36003802831443
+            23.386863653525417,
+            -81.93733321483468
           ],
           [
-            23.3863487701876,
-            -82.43844293078624
+            23.41955578070005,
+            -82.00042839372433
           ],
           [
-            23.440602203493352,
-            -82.51241501982564
+            23.45529160288931,
+            -82.0599636152974
           ],
           [
-            23.497336160305835,
-            -82.58179689870546
+            23.49430619911389,
+            -82.11584427836178
           ],
           [
-            23.556692488086394,
-            -82.64643117069855
+            23.53683464839445,
+            -82.16797578172522
           ],
           [
-            23.61881303429638,
-            -82.70616043907776
+            23.583112029751685,
+            -82.21626352419564
           ],
           [
-            23.683837466962725,
-            -82.76082819620687
+            23.633370479090086,
+            -82.2606135889608
           ],
           [
-            23.751774688047192,
-            -82.8103312799073
+            23.687665545342934,
+            -82.30097312200873
           ],
           [
-            23.822430912110526,
-            -82.85464921345978
+            23.745779067638146,
+            -82.3373529166677
           ],
           [
-            23.89559491823814,
-            -82.89376863287268
+            23.807469340174123,
+            -82.36976924130595
           ],
           [
-            23.97105548551543,
-            -82.92767617415439
+            23.872494657149282,
+            -82.39823836429176
           ],
           [
-            24.04860139302778,
-            -82.95635847331327
+            23.94061331276204,
+            -82.42277655399343
           ],
           [
-            24.128021419860616,
-            -82.97980216635776
+            24.011583601210802,
+            -82.44340007877922
           ],
           [
-            24.20910434509932,
-            -82.9979938892962
+            24.085163816693992,
+            -82.46012520701741
           ],
           [
-            24.291638947829295,
-            -83.010920278137
+            24.161112253410007,
+            -82.47296820707628
           ],
           [
-            24.37541400713594,
-            -83.01856796888853
+            24.239187205557275,
+            -82.48194534732407
           ],
           [
-            24.460218302104657,
-            -83.02092359755918
+            24.3191469673342,
+            -82.4870728961291
           ],
           [
-            24.545840611820843,
-            -83.01797380015735
+            24.400749832939198,
+            -82.48836712185964
           ],
           [
-            24.6320697153699,
-            -83.00970521269143
+            24.483754096570685,
+            -82.48584429288394
           ],
           [
-            24.718694391837225,
-            -82.99610447116976
+            24.567918052427064,
+            -82.47952067757028
           ],
           [
-            24.805503420308224,
-            -82.97715821160078
+            24.652999994706757,
+            -82.46941254428695
           ],
           [
-            24.892285579868286,
-            -82.95285306999287
+            24.738758217608172,
+            -82.45553616140222
           ],
           [
-            24.978829649602822,
-            -82.92317568235438
+            24.824951015329727,
+            -82.43790779728437
           ],
           [
-            25.064924408597225,
-            -82.88811268469372
+            24.91133668206983,
+            -82.41654372030166
           ],
           [
-            25.15035863593689,
-            -82.84765071301929
+            24.997673512026896,
+            -82.39146019882237
           ],
           [
-            25.234921110707223,
-            -82.80177640333945
+            25.083719799399343,
+            -82.36267350121479
           ],
           [
-            25.318400611993624,
-            -82.75047639166259
+            25.16923383838557,
+            -82.33019989584719
           ],
           [
-            25.400585918881493,
-            -82.69373731399712
+            25.253973923184002,
+            -82.29405565108783
           ],
           [
-            25.481265810456225,
-            -82.63154580635141
+            25.337698347993047,
+            -82.25425703530499
           ],
           [
-            25.56022906580322,
-            -82.56388850473385
+            25.42016540701112,
+            -82.21082031686694
           ],
           [
-            25.637264464007885,
-            -82.49075204515282
+            25.50113339443663,
+            -82.16376176414198
           ],
           [
-            25.71216078415561,
-            -82.4121230636167
+            25.580360604467995,
+            -82.11309764549837
           ],
           [
-            25.7847068053318,
-            -82.32798819613389
+            25.65760533130362,
+            -82.0588442293044
           ],
           [
-            25.854691306621856,
-            -82.23833407871277
+            25.73262586914193,
+            -82.0010177839283
           ],
           [
-            25.921903067111174,
-            -82.14314734736175
+            25.805180512181327,
+            -81.9396345777384
           ],
           [
-            25.986130865885155,
-            -82.04241463808917
+            25.87502755462023,
+            -81.87471087910292
           ],
           [
-            26.04716348202919,
-            -81.93612258690344
+            25.94192529065705,
+            -81.80626295639021
           ],
           [
-            26.104789694628696,
-            -81.82425782981296
+            26.0056320144902,
+            -81.73430707796847
           ],
           [
-            26.15879828276906,
-            -81.7068070028261
+            26.065906020318092,
+            -81.658859512206
           ],
           [
-            26.208978098316457,
-            -81.58375681012775
+            26.122505677030226,
+            -81.57993654173276
           ],
           [
-            26.25519048279019,
-            -81.45516185968737
+            26.17526374584081,
+            -81.49756865377496
           ],
           [
-            26.297505294633424,
-            -81.32127208511987
+            26.22422697793419,
+            -81.41182719516588
           ],
           [
-            26.336029656046748,
-            -81.18237232640342
+            26.26948036633232,
+            -81.32279081469996
           ],
           [
-            26.370870689230767,
-            -81.03874742351607
+            26.311108904057146,
+            -81.23053816117158
           ],
           [
-            26.402135516386075,
-            -80.89068221643592
+            26.349197584130618,
+            -81.1351478833752
           ],
           [
-            26.42993125971326,
-            -80.73846154514108
+            26.383831399574685,
+            -81.03669863010525
           ],
           [
-            26.454365041412927,
-            -80.58237024960965
+            26.41509534341129,
+            -80.93526905015614
           ],
           [
-            26.475543983685665,
-            -80.42269316981972
+            26.443074408662394,
+            -80.83093779232227
           ],
           [
-            26.493575208732075,
-            -80.25971514574942
+            26.467853588349932,
+            -80.72378350539816
           ],
           [
-            26.508565838752745,
-            -80.09372101737682
+            26.489517875495856,
+            -80.61388483817814
           ],
           [
-            26.52062299594828,
-            -79.92499562468005
+            26.508152263122128,
+            -80.50132043945668
           ],
           [
-            26.52985380251927,
-            -79.75382380763716
+            26.523841744250678,
+            -80.3861689580282
           ],
           [
-            26.53636538066631,
-            -79.58049040622629
+            26.53667131190347,
+            -80.26850904268714
           ],
           [
-            26.54026485259,
-            -79.40528026042553
+            26.54672595910244,
+            -80.1484193422279
           ],
           [
-            26.541659340490934,
-            -79.22847821021298
+            26.55409067886955,
+            -80.02597850544491
           ],
           [
-            26.5406559665697,
-            -79.05036909556674
+            26.558850464226737,
+            -79.9012651811326
           ],
           [
-            26.53736185302691,
-            -78.87123775646491
+            26.561090308195954,
+            -79.77435801808544
           ],
           [
-            26.531884122063147,
-            -78.69136903288558
+            26.560895203799156,
+            -79.64533566509778
           ],
           [
-            26.524329895879006,
-            -78.51104776480688
+            26.558350144058277,
+            -79.51427677096409
           ],
           [
-            26.51480629667509,
-            -78.33055879220689
+            26.553540121995287,
+            -79.38125998447879
           ],
           [
-            26.503420446651987,
-            -78.15018695506369
+            26.546550130632117,
+            -79.24636395443633
           ],
           [
-            26.4902794680103,
-            -77.97021709335542
+            26.53746516299072,
+            -79.1096673296311
           ],
           [
-            26.475490482950622,
-            -77.79093404706013
+            26.52637021209305,
+            -78.97124875885753
           ],
           [
-            26.459160613673543,
-            -77.61262265615598
+            26.513350270961045,
+            -78.83118689091006
           ],
           [
-            26.44139698237967,
-            -77.43556776062103
+            26.49849033261667,
+            -78.68956037458312
           ],
           [
-            26.422306711269588,
-            -77.26005420043339
+            26.48187539008186,
+            -78.54644785867113
           ],
           [
-            26.401996922543894,
-            -77.08636681557117
+            26.46359043637857,
+            -78.4019279919685
           ],
           [
-            26.38057473840319,
-            -76.91479044601245
+            26.44372046452875,
+            -78.2560794232697
           ],
           [
-            26.358147281048073,
-            -76.74560993173534
+            26.42235046755434,
+            -78.10898080136911
           ],
           [
-            26.334821672679126,
-            -76.57911011271794
+            26.399565438477303,
+            -77.96071077506117
           ],
           [
-            26.31070503549696,
-            -76.41557582893834
+            26.375450370319573,
+            -77.81134799314033
           ],
           [
-            26.28590449170215,
-            -76.25529192037467
+            26.35009025610311,
+            -77.66097110440099
           ],
           [
-            26.26052716349531,
-            -76.09854322700502
+            26.323570088849856,
+            -77.50965875763758
           ],
           [
-            26.234666962359984,
-            -75.94556607244118
+            26.295968589490403,
+            -77.3574893064311
           ],
           [
-            26.20834387652903,
-            -75.79632529711247
+            26.26732938219413,
+            -77.20453945243584
           ],
           [
-            26.181552195262306,
-            -75.65069136195451
+            26.23768388995269,
+            -77.05088532302366
           ],
           [
-            26.154286182017476,
-            -75.50853463314425
+            26.207063523507568,
+            -76.89660304498992
           ],
           [
-            26.12654010025222,
-            -75.3697254768587
+            26.175499693600234,
+            -76.74176874512989
           ],
           [
-            26.09830821342421,
-            -75.23413425927492
+            26.143023810972167,
+            -76.58645855023887
           ],
           [
-            26.069584784991108,
-            -75.10163134656989
+            26.109667286364846,
+            -76.43074858711222
           ],
           [
-            26.040364078410587,
-            -74.9720871049206
+            26.075461530519753,
+            -76.27471498254519
           ],
           [
-            26.01064035714032,
-            -74.84537190050415
+            26.04043795417836,
+            -76.11843386333315
           ],
           [
-            25.980407884637987,
-            -74.72135609949743
+            26.004627968082143,
+            -75.96198135627137
           ],
           [
-            25.94966092436125,
-            -74.59991006807756
+            25.968062982972587,
+            -75.80543358815517
           ],
           [
-            25.918393739767783,
-            -74.48090417242149
+            25.930774409591162,
+            -75.64886668577985
           ],
           [
-            25.886600594315258,
-            -74.36420877870626
+            25.892793658679356,
+            -75.49235677594072
           ],
           [
-            25.854275751461337,
-            -74.24969425310888
+            25.854152140978634,
+            -75.3359799854331
           ],
           [
-            25.821413474663704,
-            -74.13723096180638
+            25.814881267230483,
+            -75.17981244105229
           ],
           [
-            25.788008027380027,
-            -74.02668927097574
+            25.775012448176383,
+            -75.0239302695936
           ],
           [
-            25.754053673067972,
-            -73.91793954679399
+            25.734577094557803,
+            -74.86840959785236
           ],
           [
-            25.71954467518522,
-            -73.81085215543813
+            25.693606617116224,
+            -74.71332655262385
           ],
           [
-            25.68447529718943,
-            -73.70529746308519
+            25.65213242659313,
+            -74.55875726070339
           ],
           [
-            25.648839802538287,
-            -73.60114583591218
+            25.61018593372999,
+            -74.40477784888631
           ],
           [
-            25.61263245468945,
-            -73.49826764009612
+            25.567798549268286,
+            -74.25146444396789
           ],
           [
-            25.5758475171006,
-            -73.396533241814
+            25.525001683949498,
+            -74.09889317274343
           ],
           [
-            25.538479253229397,
-            -73.29581300724287
+            25.481826748515097,
+            -73.94714016200828
           ],
           [
-            25.500521926533523,
-            -73.1959773025597
+            25.43830515370657,
+            -73.79628153855771
           ],
           [
-            25.46196980047064,
-            -73.09689649394151
+            25.39446831026538,
+            -73.64639342918706
           ],
           [
-            25.422817138498434,
-            -72.99844094756537
+            25.350347628933022,
+            -73.49755196069162
           ],
           [
-            25.38305820407456,
-            -72.90048102960822
+            25.305974520450967,
+            -73.3498332598667
           ],
           [
-            25.342687260656696,
-            -72.80288710624711
+            25.26138039556069,
+            -73.20331345350763
           ],
           [
-            25.301698571702516,
-            -72.70552954365904
+            25.216596665003674,
+            -73.05806866840967
           ],
           [
-            25.260086400669685,
-            -72.60827870802103
+            25.17165473952139,
+            -72.91417503136822
           ],
           [
-            25.217845011015882,
-            -72.51100496551012
+            25.126586029855325,
+            -72.77170866917847
           ],
           [
-            25.174968666198776,
-            -72.41357868230328
+            25.081421946746946,
+            -72.63074570863583
           ],
           [
-            25.131451629676036,
-            -72.31587022457754
+            25.036193900937743,
+            -72.49136227653555
           ],
           [
-            25.087288952236804,
-            -72.21775888824662
+            24.990930735060065,
+            -72.35363096366707
           ],
           [
-            25.04248483739863,
-            -72.11922777741353
+            24.945631437477832,
+            -72.21758325475113
           ],
           [
-            24.997049393665115,
-            -72.02032696920664
+            24.90027573573659,
+            -72.0832241144642
           ],
           [
-            24.950992827956295,
-            -71.92110765697134
+            24.85484303636826,
+            -71.95055806548203
           ],
           [
-            24.904325347192213,
-            -71.82162103405314
+            24.809312745904744,
+            -71.81958963048032
           ],
           [
-            24.857057158292903,
-            -71.72191829379739
+            24.763664270877964,
+            -71.69032333213485
           ],
           [
-            24.809198468178412,
-            -71.6220506295496
+            24.717877017819827,
+            -71.56276369312134
           ],
           [
-            24.760759483768762,
-            -71.52206923465518
+            24.671930393262247,
+            -71.43691523611551
           ],
           [
-            24.711750411984006,
-            -71.42202530245957
+            24.625803803737135,
+            -71.31278248379309
           ],
           [
-            24.662181459744172,
-            -71.3219700263082
+            24.579476655776404,
+            -71.19036995882983
           ],
           [
-            24.61206283396931,
-            -71.2219545995465
+            24.532928355911967,
+            -71.06968218390145
           ],
           [
-            24.561404741579448,
-            -71.12203021551994
+            24.48613831067574,
+            -70.9507236816837
           ],
           [
-            24.510217389494628,
-            -71.02224806757397
+            24.43908592659963,
+            -70.8334989748523
           ],
           [
-            24.458510984634888,
-            -70.92265934905396
+            24.391750610215553,
+            -70.718012586083
           ],
           [
-            24.406295733920267,
-            -70.82331525330541
+            24.34411176805542,
+            -70.60426903805153
           ],
           [
-            24.353581844270803,
-            -70.72426697367372
+            24.296148806651143,
+            -70.49227285343363
           ],
           [
-            24.300379522606534,
-            -70.62556570350434
+            24.24784113253464,
+            -70.382028554905
           ],
           [
-            24.2466989758475,
-            -70.52726263614274
+            24.199168152237817,
+            -70.27354066514141
           ],
           [
-            24.192550410913736,
-            -70.4294089649343
+            24.150109272292585,
+            -70.16681370681859
           ],
           [
-            24.137944034725283,
-            -70.33205588322451
+            24.100643899230867,
+            -70.06185220261224
           ],
           [
-            24.082890054202178,
-            -70.23525458435877
+            24.050751439584563,
+            -69.95866067519813
           ],
           [
-            24.02739867626446,
-            -70.13905626168255
+            24.00041129988559,
+            -69.85724364725199
           ],
           [
-            23.97148010783217,
-            -70.04351210854126
+            23.94960288666587,
+            -69.75760564144956
           ],
           [
-            23.915144555825343,
-            -69.94867331828037
+            23.898305606457303,
+            -69.65975118046654
           ],
           [
-            23.858402227164017,
-            -69.85459108424529
+            23.846498865791805,
+            -69.5636847869787
           ],
           [
-            23.801263328768226,
-            -69.76131659978147
+            23.79416207120129,
+            -69.46941098366175
           ],
           [
-            23.743738067558017,
-            -69.66890105823433
+            23.74127462921767,
+            -69.37693429319145
           ],
           [
-            23.685836650453425,
-            -69.57739565294933
+            23.687815946372854,
+            -69.28625923824352
           ],
           [
-            23.627569284374484,
-            -69.48685157727189
+            23.633765429198768,
+            -69.19739034149367
           ],
           [
-            23.568946176241244,
-            -69.3973200245475
+            23.57910248422731,
+            -69.11033212561769
           ],
           [
-            23.509977532973732,
-            -69.3088521881215
+            23.523806517990394,
+            -69.02508911329124
           ],
           [
-            23.450673561491982,
-            -69.22149926133942
+            23.467856937019935,
+            -68.94166582719012
           ],
           [
-            23.39104446871605,
-            -69.13531243754666
+            23.411233147847852,
+            -68.86006678999004
           ],
           [
-            23.331100281319817,
-            -69.05034228851538
+            23.353915092846353,
+            -68.78029604795888
           ],
           [
-            23.270845559449597,
-            -68.9666205348658
+            23.29589896541929,
+            -68.70234319880802
           ],
           [
-            23.210278543371285,
-            -68.88415710330521
+            23.237199746871084,
+            -68.62618113619891
           ],
           [
-            23.149397121307516,
-            -68.80296070653061
+            23.177833465069256,
+            -68.55178182330889
           ],
           [
-            23.08819918148093,
-            -68.72304005723898
+            23.1178161478813,
+            -68.47911722331537
           ],
           [
-            23.026682612114175,
-            -68.6444038681273
+            23.057163823174733,
+            -68.40815929939575
           ],
           [
-            22.964845301429886,
-            -68.56706085189256
+            22.995892518817065,
+            -68.33888001472737
           ],
           [
-            22.902685137650707,
-            -68.49101972123178
+            22.93401826267581,
+            -68.27125133248765
           ],
           [
-            22.84020000899928,
-            -68.41628918884193
+            22.87155708261847,
+            -68.20524521585395
           ],
           [
-            22.77738780369824,
-            -68.34287796741998
+            22.80852500651256,
+            -68.14083362800366
           ],
           [
-            22.71424640997023,
-            -68.27079476966296
+            22.74493806222559,
+            -68.07798853211416
           ],
           [
-            22.650773716037886,
-            -68.20004830826781
+            22.680812277625062,
+            -68.01668189136286
           ],
           [
-            22.58696761012386,
-            -68.13064729593158
+            22.6161636805785,
+            -67.9568856689271
           ],
           [
-            22.52282598045079,
-            -68.06260044535122
+            22.551008298953395,
+            -67.89857182798427
           ],
           [
-            22.458346715241312,
-            -67.99591646922373
+            22.485362160617274,
+            -67.84171233171178
           ],
           [
-            22.39352770271807,
-            -67.9306040802461
+            22.419241293437636,
+            -67.78627914328699
           ],
           [
-            22.328366831103704,
-            -67.8666719911153
+            22.352661725282,
+            -67.73224422588729
           ],
           [
-            22.262861988620855,
-            -67.80412891452835
+            22.285639484017867,
+            -67.67957954269005
           ],
           [
-            22.197011063492155,
-            -67.74298356318225
+            22.218190597512756,
+            -67.62825705687267
           ],
           [
-            22.13081194394026,
-            -67.68324464977393
+            22.15033109363416,
+            -67.57824873161252
           ],
           [
-            22.064262518187803,
-            -67.62492088700044
+            22.082077000249612,
+            -67.52952653008697
           ],
           [
-            21.99736067445743,
-            -67.56802098755875
+            22.013444345226606,
+            -67.48206241547345
           ],
           [
-            21.93010430097177,
-            -67.51255366414584
+            21.94444915643265,
+            -67.4358283509493
           ],
           [
-            21.862491285953475,
-            -67.45852762945871
+            21.87510746173527,
+            -67.3907962996919
           ],
           [
-            21.794519517625183,
-            -67.40595159619436
+            21.805435289001956,
+            -67.34693822487867
           ],
           [
-            21.72618688420953,
-            -67.35483427704975
+            21.735448666100233,
+            -67.30422608968695
           ],
           [
-            21.65749127392916,
-            -67.30518438472191
+            21.6651636208976,
+            -67.26263185729417
           ],
           [
-            21.588430575006722,
-            -67.25701063190778
+            21.59459618126158,
+            -67.22212749087765
           ],
           [
-            21.519002675664844,
-            -67.2103217313044
+            21.523762375059665,
+            -67.18268495361481
           ],
           [
-            21.449205464126173,
-            -67.16512639560874
+            21.452678230159382,
+            -67.14427620868304
           ],
           [
-            21.37903682861335,
-            -67.12143333751776
+            21.381359774428226,
+            -67.1068732192597
           ],
           [
-            21.308494657349012,
-            -67.07925126972849
+            21.309823035733718,
+            -67.07044794852219
           ],
           [
-            21.237576838555803,
-            -67.03858890493791
+            21.238084041943367,
+            -67.03497235964788
           ],
           [
-            21.166281489210917,
-            -66.99945528609494
+            21.166158988245357,
+            -67.00041887440308
           ],
           [
-            21.094643870311817,
-            -66.96191308080869
+            21.094091238523827,
+            -66.96683437792906
           ],
           [
-            21.022777133780693,
-            -66.92613740747656
+            21.02198112935553,
+            -66.93442190489246
           ],
           [
-            20.950804239391136,
-            -66.89231754404835
+            20.949936171191535,
+            -66.90340415195963
           ],
           [
-            20.878848146916724,
-            -66.86064276847382
+            20.878063874482883,
+            -66.87400381579695
           ],
           [
-            20.80703181613104,
-            -66.83130235870273
+            20.806471749680643,
+            -66.84644359307073
           ],
           [
-            20.735478206807674,
-            -66.80448559268481
+            20.73526730723586,
+            -66.82094618044735
           ],
           [
-            20.6643102787202,
-            -66.78038174836988
+            20.664558057599592,
+            -66.79773427459315
           ],
           [
-            20.593650991642203,
-            -66.75918010370764
+            20.594451511222896,
+            -66.7770305721745
           ],
           [
-            20.523623305347268,
-            -66.74106993664789
+            20.52505517855683,
+            -66.75905776985769
           ],
           [
-            20.45435017960898,
-            -66.72624052514037
+            20.456476570052445,
+            -66.74403856430915
           ],
           [
-            20.38595457420092,
-            -66.71488114713485
+            20.388823196160793,
+            -66.73219565219519
           ],
           [
-            20.318559448896668,
-            -66.70718108058108
+            20.322202567332937,
+            -66.72375173018216
           ],
           [
-            20.252287763469813,
-            -66.70332960342883
+            20.25672219401993,
+            -66.71892949493643
           ],
           [
-            20.187262477693935,
-            -66.70351599362786
+            20.192489586672828,
+            -66.71795164312434
           ],
           [
-            20.12360655134261,
-            -66.70792952912791
+            20.129612255742682,
+            -66.72104087141224
           ],
           [
-            20.061442944189434,
-            -66.71675948787878
+            20.068197711680554,
+            -66.72841987646648
           ],
           [
-            20.000894616007983,
-            -66.7301951478302
+            20.008353464937493,
+            -66.74031135495339
           ],
           [
-            19.94208452657184,
-            -66.74842578693195
+            19.95018702596456,
+            -66.75693800353936
           ],
           [
-            19.885135635654592,
-            -66.77164068313375
+            19.893805905212805,
+            -66.77852251889074
           ],
           [
-            19.83017090302982,
-            -66.80002911438541
+            19.839317613133293,
+            -66.80528759767387
           ],
           [
-            19.777313288471102,
-            -66.83378035863667
+            19.786829660177066,
+            -66.83745593655507
           ],
           [
-            19.72668575175203,
-            -66.87308369383729
+            19.736449556795186,
+            -66.87525023220074
           ],
           [
-            19.678411252646182,
-            -66.91812839793701
+            19.688284813438713,
+            -66.91889318127721
           ],
           [
-            19.63261275092714,
-            -66.96910374888563
+            19.6424429405587,
+            -66.96860748045083
           ],
           [
-            19.589413206368484,
-            -67.02619902463289
+            19.599031448606194,
+            -67.02461582638796
           ],
           [
-            19.54893557874381,
-            -67.08960350312854
+            19.55815784803226,
+            -67.08714091575493
           ],
           [
-            19.51130282782669,
-            -67.15950646232235
+            19.51992964928795,
+            -67.15640544521813
           ],
           [
-            19.476637913390707,
-            -67.2360971801641
+            19.484454362824312,
+            -67.23263211144386
           ],
           [
-            19.445063795209446,
-            -67.31956493460352
+            19.451839499092422,
+            -67.31604361109851
           ],
           [
-            19.416703433056494,
-            -67.41009900359037
+            19.422192568543316,
+            -67.40686264084842
           ],
           [
-            19.391679786705428,
-            -67.50788866507442
+            19.395621081628057,
+            -67.50531189735993
           ],
           [
-            19.37011581592984,
-            -67.61312319700545
+            19.372232548797705,
+            -67.61161407729941
           ],
           [
             19.3521344805033,
@@ -21395,1231 +21397,1231 @@
         ]
       ],
       "bbox": [
-        -83.02092359755918,
-        19.315897837545737,
-        -66.70332960342883,
-        26.541659340490934
+        -82.48836712185964,
+        19.301267504506942,
+        -66.71795164312434,
+        26.561090308195954
       ]
     },
     {
       "n": 2,
       "basin": "atlantic",
-      "id": null,
+      "id": "AL97",
       "title": "Northeastern and North-Central Gulf of America",
       "pct48": null,
       "pct7d": 20,
-      "summary": "Cloudiness and showers associated with a weak low pressure area centered about 125 miles south of Pensacola, Florida, have become a little better organized since yesterday. Some additional slow development of this system is possible during the next few days as it drifts westward.",
-      "issued": "200 PM EDT Sat Aug 29 2026",
+      "summary": "A weak low pressure area located around 125 miles south of Pensacola, Florida is producing showers and thunderstorms. Some additional slow development of this system is possible during the next few days as it drifts westward across the northern Gulf.",
+      "issued": "800 PM EDT Sat Aug 29 2026",
       "url": "https://api.weather.gov/products/types/ABNT20/locations/NHC",
       "rings": [
         [
           [
-            26.608570797560656,
-            -94.13760224552415
+            26.78460525561897,
+            -93.82267501961262
           ],
           [
-            26.565367416273645,
-            -94.05949487444698
+            26.753638845861058,
+            -93.73818273165173
           ],
           [
-            26.522981999822537,
-            -93.97914048343488
+            26.724197623889857,
+            -93.65157341847927
           ],
           [
-            26.481429216068356,
-            -93.89661027029452
+            26.696251974725364,
+            -93.5629249885175
           ],
           [
-            26.44072373287213,
-            -93.81197543283261
+            26.66977228338758,
+            -93.47231535018858
           ],
           [
-            26.400880218094873,
-            -93.72530716885592
+            26.644728934896495,
+            -93.37982241191474
           ],
           [
-            26.361913339597617,
-            -93.63667667617108
+            26.62109231427212,
+            -93.28552408211823
           ],
           [
-            26.323837765241382,
-            -93.54615515258484
+            26.598832806534443,
+            -93.18949826922122
           ],
           [
-            26.286668162887192,
-            -93.45381379590388
+            26.577920796703467,
+            -93.09182288164594
           ],
           [
-            26.25041920039607,
-            -93.35972380393493
+            26.55832666979919,
+            -92.99257582781462
           ],
           [
-            26.215105545629047,
-            -93.2639563744847
+            26.540020810841607,
+            -92.89183501614947
           ],
           [
-            26.180741866447136,
-            -93.16658270535986
+            26.52297360485072,
+            -92.78967835507268
           ],
           [
-            26.14734283071137,
-            -93.06767399436715
+            26.507155436846524,
+            -92.68618375300649
           ],
           [
-            26.114923106282763,
-            -92.96730143931329
+            26.492536691849015,
+            -92.58142911837312
           ],
           [
-            26.08349736102235,
-            -92.86553623800494
+            26.4790877548782,
+            -92.47549235959477
           ],
           [
-            26.053080262791145,
-            -92.76244958824884
+            26.466779010954074,
+            -92.36845138509365
           ],
           [
-            26.023686479450173,
-            -92.6581126878517
+            26.45558084509663,
+            -92.260384103292
           ],
           [
-            25.995330678860466,
-            -92.5525967346202
+            26.445463642325866,
+            -92.15136842261198
           ],
           [
-            25.968027528883045,
-            -92.44597292636108
+            26.436397787661782,
+            -92.04148225147588
           ],
           [
-            25.941791697378925,
-            -92.33831246088101
+            26.428353666124384,
+            -91.93080349830588
           ],
           [
-            25.916637852209135,
-            -92.22968653598673
+            26.421301662733665,
+            -91.81941007152416
           ],
           [
-            25.892580661234703,
-            -92.12016634948492
+            26.41521216250962,
+            -91.707379879553
           ],
           [
-            25.869634792316646,
-            -92.0098230991823
+            26.410055550472247,
+            -91.59479083081459
           ],
           [
-            25.84781491331599,
-            -91.89872798288559
+            26.40580221164155,
+            -91.4817208337311
           ],
           [
-            25.827135692093766,
-            -91.78695219840148
+            26.40242253103752,
+            -91.36824779672482
           ],
           [
-            25.807611796510983,
-            -91.67456694353668
+            26.39988689368016,
+            -91.2544496282179
           ],
           [
-            25.789257894428676,
-            -91.56164341609788
+            26.398165684589472,
+            -91.1404042366326
           ],
           [
-            25.772088653707872,
-            -91.44825281389181
+            26.397229288785443,
+            -91.02618953039112
           ],
           [
-            25.75611874220958,
-            -91.33446633472518
+            26.397048091288077,
+            -90.91188341791567
           ],
           [
-            25.741362827794834,
-            -91.2203551764047
+            26.39759247711738,
+            -90.79756380762848
           ],
           [
-            25.72783557832466,
-            -91.10599053673704
+            26.398832831293333,
+            -90.68330860795173
           ],
           [
-            25.715551661660072,
-            -90.99144361352894
+            26.40073953883595,
+            -90.56919572730767
           ],
           [
-            25.704525745662107,
-            -90.87678560458711
+            26.403282984765223,
+            -90.4553030741185
           ],
           [
-            25.694772498191774,
-            -90.76208770771822
+            26.406433554101152,
+            -90.34170855680645
           ],
           [
-            25.686306587110106,
-            -90.647421120729
+            26.41016163186373,
+            -90.22849008379372
           ],
           [
-            25.67914268027813,
-            -90.5328570414262
+            26.414437603072958,
+            -90.11572556350252
           ],
           [
-            25.673295445556853,
-            -90.41846666761644
+            26.41923185274884,
+            -90.00349290435508
           ],
           [
-            25.668779550807322,
-            -90.30432119710647
+            26.424514765911365,
+            -89.8918700147736
           ],
           [
-            25.665609663890542,
-            -90.19049182770303
+            26.430256727580538,
+            -89.78093480318032
           ],
           [
-            25.66380045266754,
-            -90.07704975721279
+            26.436428122776352,
+            -89.67076517799742
           ],
           [
-            25.663366584999352,
-            -89.96406618344245
+            26.44299933651881,
+            -89.56143904764714
           ],
           [
-            25.66432272874699,
-            -89.85161230419872
+            26.449940753827903,
+            -89.4530343205517
           ],
           [
-            25.66668355177148,
-            -89.73975931728833
+            26.457222759723642,
+            -89.34562890513328
           ],
           [
-            25.670463721933846,
-            -89.62857842051798
+            26.46481573922601,
+            -89.23930070981413
           ],
           [
-            25.675677907095118,
-            -89.51814081169435
+            26.47269007735502,
+            -89.13412764301647
           ],
           [
-            25.682340775116305,
-            -89.40851768862417
+            26.480816159130658,
+            -89.03018761316247
           ],
           [
-            25.690466993858443,
-            -89.29978024911416
+            26.489164369572926,
+            -88.9275585286744
           ],
           [
-            25.70007123118256,
-            -89.19199969097099
+            26.497705093701825,
+            -88.82631829797442
           ],
           [
-            25.71116815494966,
-            -89.08524721200139
+            26.50640871653735,
+            -88.72654482948481
           ],
           [
-            25.723772433020784,
-            -88.9795940100121
+            26.515245623099503,
+            -88.62831603162769
           ],
           [
-            25.737898733256955,
-            -88.87511128280974
+            26.524186239115124,
+            -88.53170974010327
           ],
           [
-            25.753561723519184,
-            -88.77187022820108
+            26.53321478993265,
+            -88.43677913780996
           ],
           [
-            25.770776071668507,
-            -88.66994204399282
+            26.542349328291486,
+            -88.34351697555755
           ],
           [
-            25.78955644556595,
-            -88.56939792799164
+            26.55161299528706,
+            -88.25190691388973
           ],
           [
-            25.809917513072524,
-            -88.4703090780043
+            26.561028932014814,
+            -88.1619326133501
           ],
           [
-            25.83187394204926,
-            -88.37274669183746
+            26.570620279570196,
+            -88.07357773448238
           ],
           [
-            25.855440400357182,
-            -88.27678196729784
+            26.580410179048645,
+            -87.98682593783023
           ],
           [
-            25.88063155585731,
-            -88.18248610219216
+            26.590421771545607,
+            -87.90166088393731
           ],
           [
-            25.907462076410674,
-            -88.08993029432709
+            26.600678198156505,
+            -87.8180662333473
           ],
           [
-            25.93594662987829,
-            -87.99918574150936
+            26.6112025999768,
+            -87.73602564660386
           ],
           [
-            25.96609979957481,
-            -87.91032353884064
+            26.622018118101916,
+            -87.65552278425068
           ],
           [
-            25.997918244980937,
-            -87.82339300795267
+            26.633147893627307,
+            -87.57654130683139
           ],
           [
-            26.031358635136673,
-            -87.73839489099001
+            26.644615067648406,
+            -87.4990648748897
           ],
           [
-            26.06637222811326,
-            -87.65532335697425
+            26.656442781260655,
+            -87.42307714896926
           ],
           [
-            26.10291028198194,
-            -87.57417257492698
+            26.668654175559496,
+            -87.34856178961373
           ],
           [
-            26.14092405481397,
-            -87.49493671386975
+            26.68127239164037,
+            -87.27550245736678
           ],
           [
-            26.1803648046806,
-            -87.4176099428242
+            26.694320570598716,
+            -87.20388281277211
           ],
           [
-            26.22118378965308,
-            -87.34218643081189
+            26.70782185352998,
+            -87.13368651637336
           ],
           [
-            26.26333226780266,
-            -87.2686603468544
+            26.72179938152959,
+            -87.06489722871419
           ],
           [
-            26.306761497200586,
-            -87.19702585997335
+            26.736276295692996,
+            -86.99749861033831
           ],
           [
-            26.35142273591811,
-            -87.12727713919027
+            26.751275737115645,
+            -86.93147432178934
           ],
           [
-            26.397267242026487,
-            -87.05940835352679
+            26.766820846892962,
+            -86.866808023611
           ],
           [
-            26.44424627359696,
-            -86.99341367200445
+            26.782934766120405,
+            -86.80348337634693
           ],
           [
-            26.492311088700784,
-            -86.92928726364488
+            26.7996406358934,
+            -86.7414840405408
           ],
           [
-            26.54141294540921,
-            -86.86702329746966
+            26.816961597307394,
+            -86.68079367673627
           ],
           [
-            26.59150310179348,
-            -86.80661594250036
+            26.834920791457826,
+            -86.62139594547703
           ],
           [
-            26.642532815924852,
-            -86.74805936775856
+            26.85354135944014,
+            -86.56327450730674
           ],
           [
-            26.69445334587457,
-            -86.69134774226585
+            26.87284644234978,
+            -86.50641302276907
           ],
           [
-            26.74721594971389,
-            -86.63647523504382
+            26.892859181282173,
+            -86.45079515240771
           ],
           [
-            26.80077188551406,
-            -86.58343601511406
+            26.91360271733277,
+            -86.39640455676629
           ],
           [
-            26.85507241134633,
-            -86.53222425149815
+            26.93510019159701,
+            -86.34322489638848
           ],
           [
-            26.910068785281947,
-            -86.48283411321766
+            26.957374745170334,
+            -86.29123983181798
           ],
           [
-            26.965712265392163,
-            -86.43525976929422
+            26.98044951914818,
+            -86.24043302359844
           ],
           [
-            27.021954109748233,
-            -86.38949538874937
+            27.004347654625995,
+            -86.19078813227357
           ],
           [
-            27.078745576421394,
-            -86.3455351406047
+            27.029092292699215,
+            -86.14228881838696
           ],
           [
-            27.136037923482913,
-            -86.30337319388182
+            27.054706574463278,
+            -86.09491874248234
           ],
           [
-            27.193782409004026,
-            -86.26300371760229
+            27.08121364101363,
+            -86.04866156510337
           ],
           [
-            27.251930291055988,
-            -86.22442088078772
+            27.10863663344571,
+            -86.0035009467937
           ],
           [
-            27.310432827710052,
-            -86.18761885245966
+            27.13699869285496,
+            -85.95942054809701
           ],
           [
-            27.369241277037464,
-            -86.15259180163974
+            27.166322960336817,
+            -85.91640402955699
           ],
           [
-            27.428306897109476,
-            -86.1193338973495
+            27.196632576986726,
+            -85.87443505171727
           ],
           [
-            27.487580945997337,
-            -86.08783930861058
+            27.227950683900122,
+            -85.83349727512154
           ],
           [
-            27.547014681772296,
-            -86.05810220444451
+            27.26030042217245,
+            -85.79357436031347
           ],
           [
-            27.606559362505607,
-            -86.03011675387289
+            27.293704932899153,
+            -85.75464996783673
           ],
           [
-            27.666166246268517,
-            -86.00387712591733
+            27.32818735717567,
+            -85.71670775823497
           ],
           [
-            27.725786591132273,
-            -85.97937748959939
+            27.363770836097434,
+            -85.67973139205189
           ],
           [
-            27.78537165516813,
-            -85.95661201394066
+            27.400478510759896,
+            -85.64370452983115
           ],
           [
-            27.844872696447343,
-            -85.93557486796274
+            27.43833352225849,
+            -85.60861083211643
           ],
           [
-            27.90424097304115,
-            -85.91626022068719
+            27.477359011688666,
+            -85.57443395945134
           ],
           [
-            27.963427743020805,
-            -85.89866224113563
+            27.517578120145853,
+            -85.5411575723796
           ],
           [
-            28.02238426445756,
-            -85.88277509832959
+            27.559013503595423,
+            -85.5087655594781
           ],
           [
-            28.08106179542267,
-            -85.86859296129072
+            27.6016587101983,
+            -85.47725549131611
           ],
           [
-            28.139411593987376,
-            -85.85610999904054
+            27.64546217101852,
+            -85.44664614555117
           ],
           [
-            28.197384918222927,
-            -85.84532038060071
+            27.690368436079527,
+            -85.41695812410647
           ],
           [
-            28.254933026200582,
-            -85.83621827499276
+            27.73632205540477,
+            -85.38821202890527
           ],
           [
-            28.312007175991585,
-            -85.82879785123828
+            27.783267579017686,
+            -85.3604284618707
           ],
           [
-            28.36855862566719,
-            -85.82305327835888
+            27.831149556941725,
+            -85.33362802492597
           ],
           [
-            28.424538633298642,
-            -85.81897872537611
+            27.87991253920033,
+            -85.30783131999432
           ],
           [
-            28.479898456957194,
-            -85.81656836131161
+            27.929501075816944,
+            -85.28305894899891
           ],
           [
-            28.5345893547141,
-            -85.8158163551869
+            27.979859716815014,
+            -85.25933151386296
           ],
           [
-            28.588562584640602,
-            -85.8167168760236
+            28.03093301221798,
+            -85.23666961650967
           ],
           [
-            28.64176940480795,
-            -85.8192640928433
+            28.08266551204929,
+            -85.21509385886223
           ],
           [
-            28.694161073287404,
-            -85.82345217466758
+            28.13500176633239,
+            -85.19462484284385
           ],
           [
-            28.745688848150206,
-            -85.82927529051803
+            28.18788632509072,
+            -85.17528317037772
           ],
           [
-            28.79630398746761,
-            -85.8367276094162
+            28.241263738347726,
+            -85.15708944338704
           ],
           [
-            28.845957749310855,
-            -85.84580330038372
+            28.295078556126857,
+            -85.14006426379501
           ],
           [
-            28.894601391751205,
-            -85.85649653244215
+            28.349275328451554,
+            -85.12422823352483
           ],
           [
-            28.942186172859905,
-            -85.8688014746131
+            28.403798605345255,
+            -85.10960195449971
           ],
           [
-            28.988663350708208,
-            -85.88271229591813
+            28.458592936831412,
+            -85.09620602864285
           ],
           [
-            29.03398418336736,
-            -85.89822316537881
+            28.51360287293347,
+            -85.08406105787743
           ],
           [
-            29.078100645541543,
-            -85.91532819322943
+            28.56877296367487,
+            -85.07318764412668
           ],
           [
-            29.120992571040443,
-            -85.93401920434583
+            28.62404775907906,
+            -85.06360638931376
           ],
           [
-            29.16267598363711,
-            -85.9542850548427
+            28.679371809169485,
+            -85.0553378953619
           ],
           [
-            29.203169325740785,
-            -85.97611440242731
+            28.73468966396958,
+            -85.04840276419428
           ],
           [
-            29.242491039760694,
-            -85.999495904807
+            28.7899458735028,
+            -85.04282159773412
           ],
           [
-            29.280659568106067,
-            -86.02441821968904
+            28.845084987792585,
+            -85.03861499790462
           ],
           [
-            29.317693353186133,
-            -86.05087000478076
+            28.900051556862376,
+            -85.03580356662899
           ],
           [
-            29.35361083741013,
-            -86.0788399177895
+            28.954790130735628,
+            -85.03440790583036
           ],
           [
-            29.388430463187284,
-            -86.10831661642248
+            29.009245259435776,
+            -85.034448617432
           ],
           [
-            29.42217067292682,
-            -86.13928875838711
+            29.063361492986267,
+            -85.0359463033571
           ],
           [
-            29.454849909037986,
-            -86.17174500139063
+            29.11708338141055,
+            -85.03892156552884
           ],
           [
-            29.486486613929998,
-            -86.20567400314037
+            29.17035547473206,
+            -85.04339500587042
           ],
           [
-            29.51709923001209,
-            -86.24106442134367
+            29.22312232297425,
+            -85.04938722630506
           ],
           [
-            29.546706199693492,
-            -86.27790491370777
+            29.27532847616056,
+            -85.05691882875594
           ],
           [
-            29.57532596538344,
-            -86.31618413794007
+            29.326918484314433,
+            -85.06601041514627
           ],
           [
-            29.602976969491156,
-            -86.3558907517478
+            29.377836897459318,
+            -85.07668258739925
           ],
           [
-            29.62967765442588,
-            -86.3970134128383
+            29.428028265618657,
+            -85.08895594743807
           ],
           [
-            29.655446462596835,
-            -86.43954077891887
+            29.477437138815898,
+            -85.10285109718593
           ],
           [
-            29.680301836413257,
-            -86.48346150769683
+            29.52600806707448,
+            -85.11838863856606
           ],
           [
-            29.70426221828438,
-            -86.52876425687948
+            29.573685600417853,
+            -85.13558917350163
           ],
           [
-            29.727346050619424,
-            -86.57543768417415
+            29.620414288869455,
+            -85.15447330391584
           ],
           [
-            29.74957177582763,
-            -86.62347044728813
+            29.666138682452733,
+            -85.17506163173188
           ],
           [
-            29.77095783631822,
-            -86.67285120392872
+            29.710803331191137,
+            -85.19737475887298
           ],
           [
-            29.79152267450043,
-            -86.72356861180326
+            29.754352785108104,
+            -85.22143328726233
           ],
           [
-            29.811284732783495,
-            -86.77561132861901
+            29.79673159422708,
+            -85.24725781882313
           ],
           [
-            29.830262453576637,
-            -86.82896801208334
+            29.83788430857151,
+            -85.27486895547857
           ],
           [
-            29.84847427928909,
-            -86.88362731990351
+            29.87775547816484,
+            -85.30428729915184
           ],
           [
-            29.86593865233009,
-            -86.93957790978683
+            29.91628965303051,
+            -85.33553345176615
           ],
           [
-            29.882674015108858,
-            -86.99680843944064
+            29.953431383191976,
+            -85.36862801524474
           ],
           [
-            29.89869881003463,
-            -87.05530756657227
+            29.98912521867267,
+            -85.40359159151075
           ],
           [
-            29.914031479516645,
-            -87.11506394888896
+            30.023317405040633,
+            -85.44044408687648
           ],
           [
-            29.928690465964117,
-            -87.17606624409805
+            30.055993185389596,
+            -85.47918940860326
           ],
           [
-            29.94269421178629,
-            -87.23830310990685
+            30.08717680033896,
+            -85.51981546490136
           ],
           [
-            29.956061159392387,
-            -87.30176320402269
+            30.116894186052733,
+            -85.56230946837019
           ],
           [
-            29.968809751191642,
-            -87.36643518415285
+            30.145171278694914,
+            -85.60665863160912
           ],
           [
-            29.98095842959329,
-            -87.43230770800463
+            30.172034014429506,
+            -85.65285016721758
           ],
           [
-            29.99252563700655,
-            -87.4993694332854
+            30.19750832942052,
+            -85.70087128779494
           ],
           [
-            30.00352981584067,
-            -87.5676090177024
+            30.22162015983194,
+            -85.75070920594061
           ],
           [
-            30.013989408504862,
-            -87.63701511896296
+            30.24439544182779,
+            -85.80235113425397
           ],
           [
-            30.023922857408373,
-            -87.7075763947744
+            30.265860111572064,
+            -85.85578428533441
           ],
           [
-            30.033348604960423,
-            -87.77928150284401
+            30.286040105228764,
+            -85.91099587178134
           ],
           [
-            30.042285093570246,
-            -87.85211910087914
+            30.30496135896189,
+            -85.96797310619414
           ],
           [
-            30.050750765647077,
-            -87.92607784658705
+            30.322649808935456,
+            -86.02670320117218
           ],
           [
-            30.05876406360014,
-            -88.0011463976751
+            30.33913139131345,
+            -86.08717336931491
           ],
           [
-            30.066343429838668,
-            -88.07731341185054
+            30.35443204225989,
+            -86.14937082322167
           ],
           [
-            30.073507306771898,
-            -88.15456754682072
+            30.368577697938775,
+            -86.21328277549189
           ],
           [
-            30.08027413680905,
-            -88.23289746029293
+            30.381594294514098,
+            -86.27889643872494
           ],
           [
-            30.086662362359363,
-            -88.31229180997448
+            30.39350776814987,
+            -86.34619902552024
           ],
           [
-            30.092690425832064,
-            -88.3927392535727
+            30.4043440550101,
+            -86.41517774847713
           ],
           [
-            30.09837676963638,
-            -88.47422844879488
+            30.414129091258776,
+            -86.48581982019508
           ],
           [
-            30.103739836181557,
-            -88.55674805334831
+            30.422888813059913,
+            -86.55811245327341
           ],
           [
-            30.10879806787681,
-            -88.64028672494037
+            30.430649156577505,
+            -86.63204286031156
           ],
           [
-            30.11356990713137,
-            -88.7248331212783
+            30.437436057975567,
+            -86.70759825390891
           ],
           [
-            30.11807379635448,
-            -88.81037590006943
+            30.44327545341809,
+            -86.78476584666485
           ],
           [
-            30.12232817795536,
-            -88.89690371902105
+            30.448193279069084,
+            -86.86353285117877
           ],
           [
-            30.126351494343247,
-            -88.98440523584051
+            30.45221547109255,
+            -86.94388648005007
           ],
           [
-            30.13016218792737,
-            -89.07286910823508
+            30.455367965652485,
+            -87.02581394587813
           ],
           [
-            30.133778701116956,
-            -89.1622839939121
+            30.457676698912906,
+            -87.10930246126237
           ],
           [
-            30.13721947632124,
-            -89.25263855057888
+            30.459167607037802,
+            -87.19433923880217
           ],
           [
-            30.140502955949447,
-            -89.34392143594269
+            30.459866626191182,
+            -87.28091149109692
           ],
           [
-            30.143646324636183,
-            -89.43611988785291
+            30.459799692537054,
+            -87.36900643074601
           ],
           [
-            30.146647946980668,
-            -89.52919989887697
+            30.45899274223941,
+            -87.45861127034885
           ],
           [
-            30.149491699881672,
-            -89.62311110692215
+            30.45747171146226,
+            -87.5497132225048
           ],
           [
-            30.152161087563982,
-            -89.71780272919713
+            30.45526253636961,
+            -87.64229949981329
           ],
           [
-            30.15463961425239,
-            -89.81322398291054
+            30.45239115312545,
+            -87.7363573148737
           ],
           [
-            30.15691078417168,
-            -89.90932408527104
+            30.4488834978938,
+            -87.83187388028541
           ],
           [
-            30.15895810154665,
-            -90.00605225348727
+            30.44476550683865,
+            -87.92883640864781
           ],
           [
-            30.16076507060209,
-            -90.10335770476792
+            30.440063116124005,
+            -88.02723211256034
           ],
           [
-            30.162315195562783,
-            -90.20118965632162
+            30.434802261913877,
+            -88.12704820462235
           ],
           [
-            30.163591980653532,
-            -90.29949732535701
+            30.42900888037226,
+            -88.22827189743323
           ],
           [
-            30.164578930099115,
-            -90.39822992908275
+            30.422708907663154,
+            -88.33089040359242
           ],
           [
-            30.16525954812433,
-            -90.4973366847075
+            30.41592827995057,
+            -88.43489093569926
           ],
           [
-            30.16561733895396,
-            -90.59676680943994
+            30.408692933398513,
+            -88.54026070635317
           ],
           [
-            30.16563580681281,
-            -90.69646952048866
+            30.40102880417098,
+            -88.64698692815352
           ],
           [
-            30.165298455925655,
-            -90.79639403506238
+            30.392961828431968,
+            -88.75505681369974
           ],
           [
-            30.16458879051729,
-            -90.89648957036972
+            30.384517942345497,
+            -88.86445757559119
           ],
           [
-            30.16349031481251,
-            -90.99670534361933
+            30.375723082075552,
+            -88.9751764264273
           ],
           [
-            30.161986533036103,
-            -91.09699057201985
+            30.366603183786147,
+            -89.08720057880741
           ],
           [
-            30.160060949412856,
-            -91.19729447277997
+            30.357184183641284,
+            -89.20051724533096
           ],
           [
-            30.15769706816757,
-            -91.29756626310832
+            30.347492017804967,
+            -89.31511363859732
           ],
           [
-            30.154878393525017,
-            -91.39775516021356
+            30.33755049165713,
+            -89.43097285491416
           ],
           [
-            30.151588429710003,
-            -91.49781038130435
+            30.327358640213028,
+            -89.54803013869771
           ],
           [
-            30.147810680947316,
-            -91.59768114358931
+            30.316899517607457,
+            -89.66618986217614
           ],
           [
-            30.143528651461743,
-            -91.69731666427714
+            30.306155911627215,
+            -89.7853558830412
           ],
           [
-            30.138725845478078,
-            -91.79666616057646
+            30.29511061005908,
+            -89.90543205898464
           ],
           [
-            30.133385767221107,
-            -91.89567884969593
+            30.283746400689854,
+            -90.02632224769819
           ],
           [
-            30.127491920915624,
-            -91.99430394884422
+            30.272046071306328,
+            -90.14793030687358
           ],
           [
-            30.121027810786416,
-            -92.09249067522997
+            30.25999240969528,
+            -90.27016009420254
           ],
           [
-            30.113976941058276,
-            -92.19018824606181
+            30.247568203643517,
+            -90.3929154673768
           ],
           [
-            30.106322815955995,
-            -92.28734587854842
+            30.234756240937823,
+            -90.5161002840881
           ],
           [
-            30.098048939704363,
-            -92.38391278989846
+            30.22153930936499,
+            -90.63961840202819
           ],
           [
-            30.08913881652817,
-            -92.47983819732057
+            30.207900196711805,
+            -90.76337367888877
           ],
           [
-            30.079575950652206,
-            -92.57507131802342
+            30.19382169076507,
+            -90.88726997236161
           ],
           [
-            30.069343846301265,
-            -92.66956136921563
+            30.179286579311565,
+            -91.01121114013843
           ],
           [
-            30.058426007700135,
-            -92.76325756810587
+            30.164277650138082,
+            -91.13510103991098
           ],
           [
-            30.0468059390736,
-            -92.85610913190281
+            30.14877769103142,
+            -91.25884352937096
           ],
           [
-            30.03446714464646,
-            -92.94806527781508
+            30.13276948977836,
+            -91.38234246621012
           ],
           [
-            30.021393128643503,
-            -93.03907522305134
+            30.116235834165707,
+            -91.50550170812022
           ],
           [
-            30.007567395289513,
-            -93.12908818482025
+            30.099159511980236,
+            -91.62822511279296
           ],
           [
-            29.99297344880929,
-            -93.21805338033045
+            30.081523311008745,
+            -91.75041653792009
           ],
           [
-            29.97759479342762,
-            -93.30592002679059
+            30.063310019038028,
+            -91.87197984119335
           ],
           [
-            29.961414933369298,
-            -93.39263734140934
+            30.044502423854873,
+            -91.99281888030447
           ],
           [
-            29.944417372859103,
-            -93.47815454139536
+            30.02508331324607,
+            -92.11283751294518
           ],
           [
-            29.926585616121837,
-            -93.56242084395727
+            30.00503547499842,
+            -92.23193959680721
           ],
           [
-            29.907903167382283,
-            -93.64538546630376
+            29.984341696898692,
+            -92.35002898958231
           ],
           [
-            29.88835353086524,
-            -93.72699762564346
+            29.962984766733697,
+            -92.46700954896221
           ],
           [
-            29.867920210795493,
-            -93.80720653918503
+            29.940947472290222,
+            -92.58278513263863
           ],
           [
-            29.846586711397826,
-            -93.88596142413712
+            29.918212601355055,
+            -92.69725959830333
           ],
           [
-            29.82433653689704,
-            -93.96321149770837
+            29.894762941714987,
+            -92.81033680364804
           ],
           [
-            29.801153191517923,
-            -94.03890597710748
+            29.87058128115681,
+            -92.92192060636447
           ],
           [
-            29.777020179485262,
-            -94.11299407954306
+            29.845650407467314,
+            -93.03191486414437
           ],
           [
-            29.75192100502385,
-            -94.18542502222377
+            29.819953108433296,
+            -93.14022343467948
           ],
           [
-            29.725839172358477,
-            -94.25614802235826
+            29.79347217184154,
+            -93.24675017566153
           ],
           [
-            29.698758185713928,
-            -94.3251122971552
+            29.766190385478836,
+            -93.35139894478225
           ],
           [
-            29.670661549315007,
-            -94.39226706382323
+            29.73809053713198,
+            -93.45407359973339
           ],
           [
-            29.641532767386494,
-            -94.45756153957102
+            29.709155414587766,
+            -93.55467799820667
           ],
           [
-            29.611355344153182,
-            -94.5209449416072
+            29.679367805632975,
+            -93.65311599789382
           ],
           [
-            29.580112783839862,
-            -94.58236648714043
+            29.648710498054406,
+            -93.74929145648662
           ],
           [
-            29.54778859067132,
-            -94.64177539337936
+            29.617166279638845,
+            -93.84310823167672
           ],
           [
-            29.514366268872354,
-            -94.69912087753268
+            29.58471793817309,
+            -93.93447018115593
           ],
           [
-            29.479833471848245,
-            -94.75435621364501
+            29.551348261443927,
+            -94.02328116261594
           ],
           [
-            29.444208518041368,
-            -94.80746465831474
+            29.517040037238147,
+            -94.10944503374853
           ],
           [
-            29.407523470054475,
-            -94.85844290640955
+            29.48177605334254,
+            -94.19286565224539
           ],
           [
-            29.36981045532128,
-            -94.9072877161852
+            29.445539097543904,
+            -94.27344687579826
           ],
           [
-            29.33110160127548,
-            -94.95399584589744
+            29.408311957629017,
+            -94.3510925620989
           ],
           [
-            29.29142903535079,
-            -94.998564053802
+            29.370077421384686,
+            -94.42570656883903
           ],
           [
-            29.25082488498091,
-            -95.04098909815461
+            29.330818276597693,
+            -94.49719275371038
           ],
           [
-            29.209321277599546,
-            -95.08126773721105
+            29.290517311054824,
+            -94.56545497440472
           ],
           [
-            29.1669503406404,
-            -95.11939672922706
+            29.249157312542884,
+            -94.6303970886137
           ],
           [
-            29.12374420153718,
-            -95.15537283245837
+            29.206721068848655,
+            -94.69192295402914
           ],
           [
-            29.079734987723587,
-            -95.18919280516073
+            29.163198159051706,
+            -94.74994828223242
           ],
           [
-            29.034954826633328,
-            -95.22085340558988
+            29.118623310746003,
+            -94.80446758946341
           ],
           [
-            28.98943584570011,
-            -95.25035139200158
+            29.07304966951153,
+            -94.85550753971083
           ],
           [
-            28.943210172357638,
-            -95.27768352265157
+            29.026530435258604,
+            -94.90309489179441
           ],
           [
-            28.896309934039618,
-            -95.30284655579561
+            28.979118807897553,
+            -94.94725640453396
           ],
           [
-            28.848767258179752,
-            -95.3258372496894
+            28.930867987338697,
+            -94.98801883674928
           ],
           [
-            28.800614272211742,
-            -95.34665236258876
+            28.881831173492355,
+            -95.02540894726016
           ],
           [
-            28.7518831035693,
-            -95.36528865274937
+            28.83206156626885,
+            -95.05945349488637
           ],
           [
-            28.70260587968612,
-            -95.38174287842702
+            28.781612365578514,
+            -95.0901792384477
           ],
           [
-            28.652814727995928,
-            -95.39601179787739
+            28.73053677133166,
+            -95.11761293676396
           ],
           [
-            28.60254177593241,
-            -95.40809216935632
+            28.678887983438614,
+            -95.14178134865492
           ],
           [
-            28.551819150929273,
-            -95.41798075111949
+            28.6267192018097,
+            -95.16271123294037
           ],
           [
-            28.50067898042023,
-            -95.42567430142266
+            28.57408362635524,
+            -95.1804293484401
           ],
           [
-            28.449153391838976,
-            -95.43116957852158
+            28.521034456985554,
+            -95.1949624539739
           ],
           [
-            28.39727451261923,
-            -95.434463340672
+            28.467624893610967,
+            -95.20633730836155
           ],
           [
-            28.34507447019468,
-            -95.43555234612967
+            28.4139081361418,
+            -95.21458067042285
           ],
           [
-            28.292585391999047,
-            -95.43443335315031
+            28.359937384488372,
+            -95.21971929897758
           ],
           [
-            28.23983940546603,
-            -95.43110311998969
+            28.305765838561015,
+            -95.22177995284555
           ],
           [
-            28.186868638029328,
-            -95.42555840490354
+            28.251446698270048,
+            -95.2207893908465
           ],
           [
-            28.13370521712265,
-            -95.41779596614764
+            28.197033163525788,
+            -95.21677437180026
           ],
           [
-            28.080381270179704,
-            -95.40781256197768
+            28.142578434238565,
+            -95.2097616545266
           ],
           [
-            28.026928924634195,
-            -95.39560495064944
+            28.0881357103187,
+            -95.19977799784533
           ],
           [
-            27.97338030791982,
-            -95.38116989041869
+            28.033758191676508,
+            -95.1868501605762
           ],
           [
-            27.919767547470293,
-            -95.36450413954113
+            27.979499078222325,
+            -95.171004901539
           ],
           [
-            27.86612277071932,
-            -95.34560445627253
+            27.925411569866462,
+            -95.15226897955358
           ],
           [
-            27.812478105100595,
-            -95.32446759886861
+            27.871548866519245,
+            -95.13066915343967
           ],
           [
-            27.75886567804783,
-            -95.30109032558515
+            27.817964168091002,
+            -95.10623218201708
           ],
           [
-            27.705317616994733,
-            -95.27546939467788
+            27.764710674492047,
+            -95.07898482410559
           ],
           [
-            27.651866049375005,
-            -95.24760156440257
+            27.71184158563271,
+            -95.04895383852498
           ],
           [
-            27.59854310262235,
-            -95.2174835930149
+            27.65941010142331,
+            -95.01616598409505
           ],
           [
-            27.545380904170475,
-            -95.18511223877069
+            27.607469421774166,
+            -94.9806480196356
           ],
           [
-            27.49241158145309,
-            -95.15048425992566
+            27.556072746595603,
+            -94.94242670396638
           ],
           [
-            27.439667261903885,
-            -95.11359641473553
+            27.505273275797954,
+            -94.90152879590721
           ],
           [
-            27.387180072956582,
-            -95.07444546145607
+            27.455124209291526,
+            -94.85798105427789
           ],
           [
-            27.334982142044876,
-            -95.03302815834303
+            27.405678746986652,
+            -94.81181023789817
           ],
           [
-            27.283105596602475,
-            -94.98934126365215
+            27.356990088793648,
+            -94.76304310558785
           ],
           [
-            27.231582564063082,
-            -94.94338153563916
+            27.30911143462285,
+            -94.71170641616675
           ],
           [
-            27.18044517186041,
-            -94.89514573255984
+            27.26209598438456,
+            -94.65782692845463
           ],
           [
-            27.12972554742815,
-            -94.84463061266992
+            27.215996937989114,
+            -94.60143140127127
           ],
           [
-            27.079455818200017,
-            -94.79183293422513
+            27.17086749534683,
+            -94.54254659343646
           ],
           [
-            27.029668111609716,
-            -94.73674945548122
+            27.126760856368033,
+            -94.48119926377001
           ],
           [
-            26.98039455509095,
-            -94.67937693469395
+            27.083730220963044,
+            -94.4174161710917
           ],
           [
-            26.93166727607742,
-            -94.61971213011907
+            27.04182878904219,
+            -94.35122407422129
           ],
           [
-            26.88351840200284,
-            -94.5577518000123
+            27.00110976051578,
+            -94.28264973197861
           ],
           [
-            26.835980060300905,
-            -94.49349270262941
+            26.961626335294156,
+            -94.21171990318344
           ],
           [
-            26.789084378405327,
-            -94.42693159622615
+            26.923431713287634,
+            -94.13846134665555
           ],
           [
-            26.742863483749808,
-            -94.35806523905823
+            26.886579094406528,
+            -94.06290082121471
           ],
           [
-            26.697349503768052,
-            -94.28689038938144
+            26.851121678561167,
+            -93.98506508568077
           ],
           [
-            26.652574565893765,
-            -94.21340380545149
+            26.817112665661877,
+            -93.90498089887348
           ],
           [
-            26.608570797560656,
-            -94.13760224552415
+            26.78460525561897,
+            -93.82267501961262
           ]
         ]
       ],
       "bbox": [
-        -95.43555234612967,
-        25.663366584999352,
-        -85.8158163551869,
-        30.16563580681281
+        -95.22177995284555,
+        26.397048091288077,
+        -85.03440790583036,
+        30.459866626191182
       ]
     },
     {
@@ -22627,10 +22629,10 @@
       "basin": "pacific",
       "id": null,
       "title": "Well Offshore of Southwestern Mexico",
-      "pct48": 40,
+      "pct48": 50,
       "pct7d": 90,
       "summary": "An area of disturbed weather, associated with a tropical wave, is located well to the south of southwestern Mexico. This system is expected to move west-northwestward to northwestward at 10 to 15 mph. Environmental conditions appear favorable for gradual development of this system, and a tropical depression is likely t",
-      "issued": "1100 AM PDT Sat Aug 29 2026",
+      "issued": "500 PM PDT Sat Aug 29 2026",
       "url": "https://api.weather.gov/products/types/ABPZ20/locations/NHC",
       "rings": [
         [
@@ -23850,8 +23852,8 @@
       "title": "Central Pacific",
       "pct48": null,
       "pct7d": 40,
-      "summary": "An area of low pressure could form well south or southwest of the Hawaiian Islands in the next few days. Some gradual development is possible thereafter and a tropical depression could form during the middle part of next week. The system should move slowly west-northwestward, and stay well offshore of the Hawaiian Isla",
-      "issued": "1100 AM PDT Sat Aug 29 2026",
+      "summary": "An area of low pressure could form well south or southwest of the Hawaiian Islands in the next few days. Some gradual development is possible thereafter and a tropical depression could form during the middle to latter part of next week. The system should move slowly west-northwestward, and stay well southwest of the Ha",
+      "issued": "500 PM PDT Sat Aug 29 2026",
       "url": "https://api.weather.gov/products/types/ABPZ20/locations/NHC",
       "rings": [
         [
