@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-08-29T00:30:13.085Z",
+  "generatedAt": "2026-08-29T00:40:31.004Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 104,
+      "latencyMs": 210,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep112026\",\"binNumber\":\"EP1\",\"name\":\"Karina\",\"classification\":\"TS\",\"intensity\":\"55\",\"pressure\":\"990\",\"latitude\":\"13.7N\",\"longitude\":\"115.5W\",\"latitudeNumeric\":13.7,\"longitudeNumeric\":-115.5,\"movementDir\":315,\"movementSpeed\":9,\"lastUpdate\":\"2026-08-28T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"005\",\"issuance\":\"2026-08-28T21:00:00.000Z\",\"fileUpdateTime\":\"2026-08-28T20:30:47.134Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP1.shtml\"},\"forecastAdvisory\":{\"advNum\":\"005\",\"issuance\":\"2026-08-28T",
-      "forecast": "Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 240m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 97% · forecast undefined guidance · advisory 236m old",
-      "advisoryLagMin": 240
+      "forecast": "Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 251m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 97% · forecast undefined guidance · advisory 247m old",
+      "advisoryLagMin": 251
     },
     "markets": {
       "ok": true,
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 149,
+      "latencyMs": 140,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 4,
       "note": "4 area(s) under watch · 2 Atlantic · highest 7-day 10%",
-      "latencyMs": 117,
+      "latencyMs": 328,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -274,7 +274,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 9,
+      "latencyMs": 51,
       "source": "NHC graphical TWO",
       "count": 4,
       "note": "4 of 4 area(s) with geometry"
@@ -284,21 +284,21 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 268,
+      "latencyMs": 513,
       "count": 2,
-      "note": "2/2 storm decks read · EP112026: a-deck cycle 2026082900 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 16 records · f-deck 44 fixes | EP122026: a-deck cycle 2026082900 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 13 records · f-deck 38 fixes",
+      "note": "2/2 storm decks read · EP112026: a-deck cycle 2026082900 · 35 techs · consensus 3 member(s) peak 101.7 kt · b-deck 17 records · f-deck 49 fixes | EP122026: a-deck cycle 2026082900 · 32 techs · consensus 3 member(s) peak 115.3 kt · b-deck 14 records · f-deck 42 fixes",
       "attempts": [
         {
           "source": "EP112026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026082900 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 16 records · f-deck 44 fixes"
+          "note": "a-deck cycle 2026082900 · 35 techs · consensus 3 member(s) peak 101.7 kt · b-deck 17 records · f-deck 49 fixes"
         },
         {
           "source": "EP122026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026082900 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 13 records · f-deck 38 fixes"
+          "note": "a-deck cycle 2026082900 · 32 techs · consensus 3 member(s) peak 115.3 kt · b-deck 14 records · f-deck 42 fixes"
         }
       ]
     },
@@ -307,7 +307,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 142,
+      "latencyMs": 366,
       "count": 2,
       "note": "2 vortex data message(s): AL022026 11:36Z, CP022026 08:53Z",
       "attempts": [
@@ -342,21 +342,21 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 113,
+      "latencyMs": 431,
       "count": 2,
-      "note": "2/2 storms · EP112026: 2026-08-28T18:00Z · shear 10 kt · OHC 30 · MPI 157 kt · 8 RI thresholds | EP122026: 2026-08-28T18:00Z · shear 16 kt · OHC 22 · MPI 154 kt · 8 RI thresholds",
+      "note": "2/2 storms · EP112026: 2026-08-29T00:00Z · shear 7 kt · OHC 28 · MPI 157 kt · 8 RI thresholds | EP122026: 2026-08-29T00:00Z · shear 15 kt · OHC 22 · MPI 156 kt · 8 RI thresholds",
       "attempts": [
         {
           "source": "EP112026",
           "ok": true,
           "status": 200,
-          "note": "2026-08-28T18:00Z · shear 10 kt · OHC 30 · MPI 157 kt · 8 RI thresholds"
+          "note": "2026-08-29T00:00Z · shear 7 kt · OHC 28 · MPI 157 kt · 8 RI thresholds"
         },
         {
           "source": "EP122026",
           "ok": true,
           "status": 200,
-          "note": "2026-08-28T18:00Z · shear 16 kt · OHC 22 · MPI 154 kt · 8 RI thresholds"
+          "note": "2026-08-29T00:00Z · shear 15 kt · OHC 22 · MPI 156 kt · 8 RI thresholds"
         }
       ]
     },
@@ -452,11 +452,11 @@
         "already": false,
         "basis": "official forecast peaks at 110 kt at 57h; NHC's published mean absolute intensity error there is 10.6 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths"
       },
-      "advisoryLagMin": 240,
+      "advisoryLagMin": 251,
       "discussion": {
         "forecaster": "Blake",
         "issuedZ": "2026-08-28T20:31:00.000Z",
-        "lagMin": 239,
+        "lagMin": 250,
         "guidance": {
           "intensity": null,
           "track": null
@@ -720,14 +720,415 @@
       ],
       "advisoryIssuedZ": "2026-08-28T20:30:00.000Z",
       "advNumFull": "5",
-      "consensus": null,
+      "consensus": {
+        "cycle": "2026082900",
+        "cycleIso": "2026-08-29T00:00:00.000Z",
+        "peakKt": 101.7,
+        "peakHr": 72,
+        "spreadKt": 14.5,
+        "minKt": 85,
+        "maxKt": 111,
+        "n": 3,
+        "members": [
+          {
+            "tech": "HCCA",
+            "label": "HFIP corrected consensus",
+            "peakKt": 111,
+            "peakHr": 72,
+            "initialKt": 55
+          },
+          {
+            "tech": "IVCN",
+            "label": "variable consensus (intensity)",
+            "peakKt": 85,
+            "peakHr": 60,
+            "initialKt": 55
+          },
+          {
+            "tech": "GDMI",
+            "label": "DeepMind (interpolated)",
+            "peakKt": 109,
+            "peakHr": 72,
+            "initialKt": 55
+          }
+        ],
+        "corrected": {
+          "tech": "HCCA",
+          "peakKt": 111,
+          "peakHr": 72,
+          "intensity": [
+            {
+              "hr": 0,
+              "kt": 55,
+              "mslp": null
+            },
+            {
+              "hr": 12,
+              "kt": 63,
+              "mslp": null
+            },
+            {
+              "hr": 24,
+              "kt": 75,
+              "mslp": null
+            },
+            {
+              "hr": 36,
+              "kt": 90,
+              "mslp": null
+            },
+            {
+              "hr": 48,
+              "kt": 103,
+              "mslp": null
+            },
+            {
+              "hr": 60,
+              "kt": 108,
+              "mslp": null
+            },
+            {
+              "hr": 72,
+              "kt": 111,
+              "mslp": null
+            },
+            {
+              "hr": 84,
+              "kt": 107,
+              "mslp": null
+            },
+            {
+              "hr": 96,
+              "kt": 109,
+              "mslp": null
+            },
+            {
+              "hr": 108,
+              "kt": 106,
+              "mslp": null
+            },
+            {
+              "hr": 120,
+              "kt": 99,
+              "mslp": null
+            },
+            {
+              "hr": 132,
+              "kt": 97,
+              "mslp": null
+            },
+            {
+              "hr": 144,
+              "kt": 88,
+              "mslp": null
+            },
+            {
+              "hr": 156,
+              "kt": 74,
+              "mslp": null
+            },
+            {
+              "hr": 168,
+              "kt": 64,
+              "mslp": null
+            }
+          ],
+          "track": [
+            {
+              "hr": 0,
+              "lat": 13.9,
+              "lon": -115.9
+            },
+            {
+              "hr": 12,
+              "lat": 15.1,
+              "lon": -117.6
+            },
+            {
+              "hr": 24,
+              "lat": 16.2,
+              "lon": -119.4
+            },
+            {
+              "hr": 36,
+              "lat": 16.9,
+              "lon": -121.2
+            },
+            {
+              "hr": 48,
+              "lat": 17.3,
+              "lon": -122.8
+            },
+            {
+              "hr": 60,
+              "lat": 17.5,
+              "lon": -124.6
+            },
+            {
+              "hr": 72,
+              "lat": 17.7,
+              "lon": -126.2
+            },
+            {
+              "hr": 84,
+              "lat": 18.2,
+              "lon": -127.9
+            },
+            {
+              "hr": 96,
+              "lat": 18.8,
+              "lon": -129.4
+            },
+            {
+              "hr": 108,
+              "lat": 19.6,
+              "lon": -130.8
+            },
+            {
+              "hr": 120,
+              "lat": 20.6,
+              "lon": -131.7
+            },
+            {
+              "hr": 132,
+              "lat": 21.6,
+              "lon": -132.4
+            },
+            {
+              "hr": 144,
+              "lat": 22.8,
+              "lon": -132.9
+            },
+            {
+              "hr": 156,
+              "lat": 23.6,
+              "lon": -133.8
+            },
+            {
+              "hr": 168,
+              "lat": 24.7,
+              "lon": -134.5
+            }
+          ]
+        },
+        "variableIntensity": {
+          "tech": "IVCN",
+          "peakKt": 85,
+          "peakHr": 60
+        },
+        "variableTrack": {
+          "tech": "TVCN",
+          "track": [
+            {
+              "hr": 0,
+              "lat": 13.9,
+              "lon": -115.9
+            },
+            {
+              "hr": 12,
+              "lat": 15.1,
+              "lon": -117.4
+            },
+            {
+              "hr": 24,
+              "lat": 16.2,
+              "lon": -119.1
+            },
+            {
+              "hr": 36,
+              "lat": 17,
+              "lon": -120.7
+            },
+            {
+              "hr": 48,
+              "lat": 17.5,
+              "lon": -122.1
+            },
+            {
+              "hr": 60,
+              "lat": 18,
+              "lon": -123.5
+            },
+            {
+              "hr": 72,
+              "lat": 18.5,
+              "lon": -124.7
+            },
+            {
+              "hr": 84,
+              "lat": 19.2,
+              "lon": -125.9
+            },
+            {
+              "hr": 96,
+              "lat": 19.9,
+              "lon": -127
+            },
+            {
+              "hr": 108,
+              "lat": 20.7,
+              "lon": -128
+            },
+            {
+              "hr": 120,
+              "lat": 21.8,
+              "lon": -128.8
+            },
+            {
+              "hr": 132,
+              "lat": 22.8,
+              "lon": -129.5
+            },
+            {
+              "hr": 144,
+              "lat": 22.6,
+              "lon": -132.8
+            },
+            {
+              "hr": 156,
+              "lat": 23.5,
+              "lon": -133.7
+            },
+            {
+              "hr": 168,
+              "lat": 24.3,
+              "lon": -134.7
+            }
+          ]
+        },
+        "deepmind": {
+          "tech": "GDMI",
+          "peakKt": 109,
+          "peakHr": 72,
+          "track": [
+            {
+              "hr": 0,
+              "lat": 13.9,
+              "lon": -115.9
+            },
+            {
+              "hr": 12,
+              "lat": 15,
+              "lon": -117.6
+            },
+            {
+              "hr": 24,
+              "lat": 15.9,
+              "lon": -119.5
+            },
+            {
+              "hr": 36,
+              "lat": 16.5,
+              "lon": -121.3
+            },
+            {
+              "hr": 48,
+              "lat": 16.8,
+              "lon": -123.1
+            },
+            {
+              "hr": 60,
+              "lat": 17,
+              "lon": -124.8
+            },
+            {
+              "hr": 72,
+              "lat": 17.1,
+              "lon": -126.6
+            },
+            {
+              "hr": 84,
+              "lat": 17.5,
+              "lon": -128.5
+            },
+            {
+              "hr": 96,
+              "lat": 18,
+              "lon": -130.2
+            },
+            {
+              "hr": 108,
+              "lat": 18.7,
+              "lon": -131.8
+            },
+            {
+              "hr": 120,
+              "lat": 19.5,
+              "lon": -133.1
+            },
+            {
+              "hr": 132,
+              "lat": 20.5,
+              "lon": -134.1
+            },
+            {
+              "hr": 144,
+              "lat": 21.6,
+              "lon": -135.2
+            },
+            {
+              "hr": 156,
+              "lat": 22.5,
+              "lon": -136.4
+            },
+            {
+              "hr": 168,
+              "lat": 23.3,
+              "lon": -137.7
+            }
+          ]
+        },
+        "official": {
+          "tech": "OFCI",
+          "peakKt": 104,
+          "peakHr": 60
+        },
+        "missing": [],
+        "techsPresent": [
+          "AEMI",
+          "AVNI",
+          "CARQ",
+          "CEM2",
+          "CLP5",
+          "CMC2",
+          "CTCI",
+          "DSHP",
+          "GDMI",
+          "HCCA",
+          "HFAI",
+          "HFBI",
+          "HMNI",
+          "HWFI",
+          "IVCN",
+          "LGEM",
+          "NGX2",
+          "NNIB",
+          "NNIC",
+          "NVG2",
+          "OCD5",
+          "OFCI",
+          "RI25",
+          "RI30",
+          "RI35",
+          "RVCN",
+          "SHF5",
+          "SHIP",
+          "TABD",
+          "TABM",
+          "TABS",
+          "TCLP",
+          "TVCN",
+          "UKX2",
+          "XTRP"
+        ]
+      },
       "recon": null,
       "aircraftFix": null,
       "ships": {
         "ok": true,
         "stormId": "EP112026",
         "name": "KARINA",
-        "cycleIso": "2026-08-28T18:00:00.000Z",
+        "cycleIso": "2026-08-29T00:00:00.000Z",
         "taus": [
           0,
           6,
@@ -748,13 +1149,13 @@
           168
         ],
         "features": {
-          "shearKt": 10,
-          "shearAdjKt": -1,
+          "shearKt": 7,
+          "shearAdjKt": 2,
           "sstC": 29.2,
           "mpiKt": 157,
           "rhMid": 80,
-          "ohc": 30,
-          "landKm": 1191,
+          "ohc": 28,
+          "landKm": 1178,
           "vNoLandKt": 55,
           "vLgemKt": 55
         },
@@ -762,15 +1163,15 @@
           "shearKt": [
             {
               "hr": 0,
-              "v": 10
+              "v": 7
             },
             {
               "hr": 6,
-              "v": 9
+              "v": 3
             },
             {
               "hr": 12,
-              "v": 7
+              "v": 4
             },
             {
               "hr": 18,
@@ -778,97 +1179,97 @@
             },
             {
               "hr": 24,
-              "v": 9
-            },
-            {
-              "hr": 36,
               "v": 5
             },
             {
+              "hr": 36,
+              "v": 4
+            },
+            {
               "hr": 48,
-              "v": 1
+              "v": 7
             },
             {
               "hr": 60,
-              "v": 9
+              "v": 8
             },
             {
               "hr": 72,
-              "v": 6
+              "v": 8
             },
             {
               "hr": 84,
-              "v": 9
+              "v": 8
             },
             {
               "hr": 96,
-              "v": 6
+              "v": 5
             },
             {
               "hr": 108,
-              "v": 7
+              "v": 3
             },
             {
               "hr": 120,
-              "v": 7
+              "v": 3
             },
             {
               "hr": 132,
-              "v": 9
+              "v": 3
             },
             {
               "hr": 144,
-              "v": 11
+              "v": 5
             },
             {
               "hr": 156,
-              "v": 14
+              "v": 17
             },
             {
               "hr": 168,
-              "v": 23
+              "v": 17
             }
           ],
           "shearAdjKt": [
             {
               "hr": 0,
-              "v": -1
+              "v": 2
             },
             {
               "hr": 6,
-              "v": 0
+              "v": 2
             },
             {
               "hr": 12,
-              "v": 0
+              "v": 1
             },
             {
               "hr": 18,
-              "v": 2
+              "v": 4
             },
             {
               "hr": 24,
-              "v": 3
+              "v": 6
             },
             {
               "hr": 36,
-              "v": 3
+              "v": 5
             },
             {
               "hr": 48,
-              "v": 9
-            },
-            {
-              "hr": 60,
-              "v": -4
-            },
-            {
-              "hr": 72,
               "v": 0
             },
             {
+              "hr": 60,
+              "v": -1
+            },
+            {
+              "hr": 72,
+              "v": 1
+            },
+            {
               "hr": 84,
-              "v": 2
+              "v": -3
             },
             {
               "hr": 96,
@@ -876,27 +1277,27 @@
             },
             {
               "hr": 108,
-              "v": 0
+              "v": 4
             },
             {
               "hr": 120,
-              "v": -1
+              "v": 4
             },
             {
               "hr": 132,
-              "v": 0
+              "v": 3
             },
             {
               "hr": 144,
-              "v": 0
+              "v": 12
             },
             {
               "hr": 156,
-              "v": 5
+              "v": 0
             },
             {
               "hr": 168,
-              "v": 1
+              "v": 0
             }
           ],
           "sstC": [
@@ -906,15 +1307,15 @@
             },
             {
               "hr": 6,
-              "v": 29.3
-            },
-            {
-              "hr": 12,
               "v": 29.4
             },
             {
-              "hr": 18,
+              "hr": 12,
               "v": 29.3
+            },
+            {
+              "hr": 18,
+              "v": 29.2
             },
             {
               "hr": 24,
@@ -922,15 +1323,15 @@
             },
             {
               "hr": 36,
-              "v": 28.7
+              "v": 28.6
             },
             {
               "hr": 48,
-              "v": 28.5
+              "v": 28.7
             },
             {
               "hr": 60,
-              "v": 28.5
+              "v": 28.4
             },
             {
               "hr": 72,
@@ -938,31 +1339,31 @@
             },
             {
               "hr": 84,
-              "v": 27.1
-            },
-            {
-              "hr": 96,
-              "v": 26.3
-            },
-            {
-              "hr": 108,
               "v": 26.7
             },
             {
+              "hr": 96,
+              "v": 26.4
+            },
+            {
+              "hr": 108,
+              "v": 27
+            },
+            {
               "hr": 120,
-              "v": 25.6
+              "v": 25.8
             },
             {
               "hr": 132,
-              "v": 25.3
+              "v": 25.4
             },
             {
               "hr": 144,
-              "v": 25
+              "v": 24.8
             },
             {
               "hr": 156,
-              "v": 24.7
+              "v": 24
             },
             {
               "hr": 168,
@@ -976,15 +1377,15 @@
             },
             {
               "hr": 6,
-              "v": 158
-            },
-            {
-              "hr": 12,
               "v": 159
             },
             {
-              "hr": 18,
+              "hr": 12,
               "v": 158
+            },
+            {
+              "hr": 18,
+              "v": 157
             },
             {
               "hr": 24,
@@ -992,47 +1393,47 @@
             },
             {
               "hr": 36,
-              "v": 151
+              "v": 150
             },
             {
               "hr": 48,
-              "v": 149
+              "v": 150
             },
             {
               "hr": 60,
-              "v": 149
+              "v": 148
             },
             {
               "hr": 72,
-              "v": 144
+              "v": 145
             },
             {
               "hr": 84,
-              "v": 134
+              "v": 129
             },
             {
               "hr": 96,
-              "v": 125
+              "v": 126
             },
             {
               "hr": 108,
-              "v": 130
+              "v": 132
             },
             {
               "hr": 120,
-              "v": 117
+              "v": 120
             },
             {
               "hr": 132,
-              "v": 113
+              "v": 116
             },
             {
               "hr": 144,
-              "v": 111
+              "v": 110
             },
             {
               "hr": 156,
-              "v": 109
+              "v": 102
             },
             {
               "hr": 168,
@@ -1046,7 +1447,7 @@
             },
             {
               "hr": 6,
-              "v": 78
+              "v": 79
             },
             {
               "hr": 12,
@@ -1058,65 +1459,65 @@
             },
             {
               "hr": 24,
-              "v": 72
+              "v": 73
             },
             {
               "hr": 36,
-              "v": 70
+              "v": 72
             },
             {
               "hr": 48,
-              "v": 67
+              "v": 66
             },
             {
               "hr": 60,
-              "v": 65
+              "v": 66
             },
             {
               "hr": 72,
-              "v": 61
+              "v": 60
             },
             {
               "hr": 84,
-              "v": 57
+              "v": 53
             },
             {
               "hr": 96,
-              "v": 50
-            },
-            {
-              "hr": 108,
-              "v": 46
-            },
-            {
-              "hr": 120,
               "v": 45
             },
             {
+              "hr": 108,
+              "v": 43
+            },
+            {
+              "hr": 120,
+              "v": 43
+            },
+            {
               "hr": 132,
-              "v": 47
+              "v": 41
             },
             {
               "hr": 144,
-              "v": 50
+              "v": 39
             },
             {
               "hr": 156,
-              "v": 54
+              "v": 38
             },
             {
               "hr": 168,
-              "v": 55
+              "v": 37
             }
           ],
           "ohc": [
             {
               "hr": 0,
-              "v": 30
+              "v": 28
             },
             {
               "hr": 6,
-              "v": 29
+              "v": 31
             },
             {
               "hr": 12,
@@ -1124,7 +1525,7 @@
             },
             {
               "hr": 18,
-              "v": 28
+              "v": 22
             },
             {
               "hr": 24,
@@ -1132,15 +1533,15 @@
             },
             {
               "hr": 36,
-              "v": 11
+              "v": 5
             },
             {
               "hr": 48,
-              "v": 8
+              "v": 11
             },
             {
               "hr": 60,
-              "v": 12
+              "v": 9
             },
             {
               "hr": 72,
@@ -1148,15 +1549,15 @@
             },
             {
               "hr": 84,
-              "v": 5
+              "v": 3
             },
             {
               "hr": 96,
-              "v": 1
+              "v": 2
             },
             {
               "hr": 108,
-              "v": 4
+              "v": 7
             },
             {
               "hr": 120,
@@ -1182,71 +1583,71 @@
           "landKm": [
             {
               "hr": 0,
-              "v": 1191
+              "v": 1178
             },
             {
               "hr": 6,
-              "v": 1158
+              "v": 1172
             },
             {
               "hr": 12,
-              "v": 1139
+              "v": 1177
             },
             {
               "hr": 18,
-              "v": 1151
+              "v": 1193
             },
             {
               "hr": 24,
-              "v": 1175
+              "v": 1205
             },
             {
               "hr": 36,
-              "v": 1214
+              "v": 1274
             },
             {
               "hr": 48,
-              "v": 1295
+              "v": 1373
             },
             {
               "hr": 60,
-              "v": 1393
+              "v": 1437
             },
             {
               "hr": 72,
-              "v": 1489
+              "v": 1558
             },
             {
               "hr": 84,
-              "v": 1575
+              "v": 1638
             },
             {
               "hr": 96,
-              "v": 1661
+              "v": 1694
             },
             {
               "hr": 108,
-              "v": 1733
-            },
-            {
-              "hr": 120,
-              "v": 1803
-            },
-            {
-              "hr": 132,
-              "v": 1837
-            },
-            {
-              "hr": 144,
-              "v": 1807
-            },
-            {
-              "hr": 156,
               "v": 1772
             },
             {
+              "hr": 120,
+              "v": 1858
+            },
+            {
+              "hr": 132,
+              "v": 1879
+            },
+            {
+              "hr": 144,
+              "v": 1800
+            },
+            {
+              "hr": 156,
+              "v": 1774
+            },
+            {
               "hr": 168,
-              "v": 1732
+              "v": 1836
             }
           ],
           "vNoLandKt": [
@@ -1256,23 +1657,23 @@
             },
             {
               "hr": 6,
-              "v": 61
+              "v": 60
             },
             {
               "hr": 12,
-              "v": 67
+              "v": 65
             },
             {
               "hr": 18,
-              "v": 73
+              "v": 69
             },
             {
               "hr": 24,
-              "v": 78
+              "v": 75
             },
             {
               "hr": 36,
-              "v": 84
+              "v": 83
             },
             {
               "hr": 48,
@@ -1280,19 +1681,19 @@
             },
             {
               "hr": 60,
-              "v": 85
+              "v": 89
             },
             {
               "hr": 72,
-              "v": 82
+              "v": 85
             },
             {
               "hr": 84,
-              "v": 81
+              "v": 82
             },
             {
               "hr": 96,
-              "v": 79
+              "v": 78
             },
             {
               "hr": 108,
@@ -1300,11 +1701,11 @@
             },
             {
               "hr": 120,
-              "v": 71
+              "v": 68
             },
             {
               "hr": 132,
-              "v": 66
+              "v": 65
             },
             {
               "hr": 144,
@@ -1316,7 +1717,7 @@
             },
             {
               "hr": 168,
-              "v": 57
+              "v": 54
             }
           ],
           "vLgemKt": [
@@ -1326,23 +1727,23 @@
             },
             {
               "hr": 6,
-              "v": 60
+              "v": 58
             },
             {
               "hr": 12,
-              "v": 64
+              "v": 61
             },
             {
               "hr": 18,
-              "v": 68
+              "v": 63
             },
             {
               "hr": 24,
-              "v": 70
+              "v": 65
             },
             {
               "hr": 36,
-              "v": 75
+              "v": 71
             },
             {
               "hr": 48,
@@ -1350,43 +1751,43 @@
             },
             {
               "hr": 60,
-              "v": 83
+              "v": 87
             },
             {
               "hr": 72,
-              "v": 87
+              "v": 89
             },
             {
               "hr": 84,
-              "v": 87
+              "v": 86
             },
             {
               "hr": 96,
-              "v": 81
+              "v": 79
             },
             {
               "hr": 108,
-              "v": 74
+              "v": 73
             },
             {
               "hr": 120,
-              "v": 69
+              "v": 67
             },
             {
               "hr": 132,
-              "v": 63
+              "v": 60
             },
             {
               "hr": 144,
-              "v": 57
+              "v": 54
             },
             {
               "hr": 156,
-              "v": 52
+              "v": 47
             },
             {
               "hr": 168,
-              "v": 46
+              "v": 40
             }
           ]
         },
@@ -1406,57 +1807,57 @@
             {
               "dvKt": 20,
               "hours": 12,
-              "p": 0.37,
-              "ratioToClimo": 5.8,
+              "p": 0.28,
+              "ratioToClimo": 4.5,
               "climoP": 0.063
             },
             {
               "dvKt": 25,
               "hours": 24,
-              "p": 0.74,
-              "ratioToClimo": 5.9,
+              "p": 0.66,
+              "ratioToClimo": 5.3,
               "climoP": 0.125
             },
             {
               "dvKt": 30,
               "hours": 24,
-              "p": 0.63,
-              "ratioToClimo": 7.3,
+              "p": 0.53,
+              "ratioToClimo": 6.2,
               "climoP": 0.086
             },
             {
               "dvKt": 35,
               "hours": 24,
-              "p": 0.55,
-              "ratioToClimo": 8.9,
+              "p": 0.44,
+              "ratioToClimo": 7.1,
               "climoP": 0.062
             },
             {
               "dvKt": 40,
               "hours": 24,
-              "p": 0.39,
-              "ratioToClimo": 9.4,
+              "p": 0.32,
+              "ratioToClimo": 7.7,
               "climoP": 0.042
             },
             {
               "dvKt": 45,
               "hours": 36,
-              "p": 0.55,
-              "ratioToClimo": 8.2,
+              "p": 0.41,
+              "ratioToClimo": 6.1,
               "climoP": 0.067
             },
             {
               "dvKt": 55,
               "hours": 48,
-              "p": 0.39,
-              "ratioToClimo": 6.6,
+              "p": 0.27,
+              "ratioToClimo": 4.6,
               "climoP": 0.059000000000000004
             },
             {
               "dvKt": 65,
               "hours": 72,
               "p": 0.16,
-              "ratioToClimo": 3.5,
+              "ratioToClimo": 3.4,
               "climoP": 0.047
             }
           ],
@@ -1464,61 +1865,61 @@
             "SHIPS-RII": [
               {
                 "threshold": "20/12",
-                "p": 0.36700000000000005
+                "p": 0.284
               },
               {
                 "threshold": "25/24",
-                "p": 0.736
+                "p": 0.665
               },
               {
                 "threshold": "30/24",
-                "p": 0.627
+                "p": 0.534
               },
               {
                 "threshold": "35/24",
-                "p": 0.55
+                "p": 0.439
               },
               {
                 "threshold": "40/24",
-                "p": 0.395
+                "p": 0.32299999999999995
               },
               {
                 "threshold": "45/36",
-                "p": 0.5479999999999999
+                "p": 0.409
               },
               {
                 "threshold": "55/48",
-                "p": 0.391
+                "p": 0.27399999999999997
               },
               {
                 "threshold": "65/72",
-                "p": 0.163
+                "p": 0.159
               }
             ],
             "Logistic": [
               {
                 "threshold": "20/12",
-                "p": 0.228
+                "p": 0.17300000000000001
               },
               {
                 "threshold": "25/24",
-                "p": 0.551
+                "p": 0.522
               },
               {
                 "threshold": "30/24",
-                "p": 0.319
+                "p": 0.294
               },
               {
                 "threshold": "35/24",
-                "p": 0.287
+                "p": 0.261
               },
               {
                 "threshold": "40/24",
-                "p": 0.083
+                "p": 0.032
               },
               {
                 "threshold": "45/36",
-                "p": 0.153
+                "p": 0.151
               },
               {
                 "threshold": "55/48",
@@ -1526,37 +1927,37 @@
               },
               {
                 "threshold": "65/72",
-                "p": 0.003
+                "p": 0.002
               }
             ],
             "Bayesian": [
               {
                 "threshold": "20/12",
-                "p": 0.27899999999999997
+                "p": 0.063
               },
               {
                 "threshold": "25/24",
-                "p": 0.465
+                "p": 0.217
               },
               {
                 "threshold": "30/24",
-                "p": 0.507
+                "p": 0.29100000000000004
               },
               {
                 "threshold": "35/24",
-                "p": 0.301
+                "p": 0.142
               },
               {
                 "threshold": "40/24",
-                "p": 0.047
+                "p": 0.006999999999999999
               },
               {
                 "threshold": "45/36",
-                "p": 0.155
+                "p": 0.055999999999999994
               },
               {
                 "threshold": "55/48",
-                "p": 0.016
+                "p": 0.006
               },
               {
                 "threshold": "65/72",
@@ -1566,65 +1967,65 @@
             "Consensus": [
               {
                 "threshold": "20/12",
-                "p": 0.29100000000000004
+                "p": 0.17300000000000001
               },
               {
                 "threshold": "25/24",
-                "p": 0.584
+                "p": 0.46799999999999997
               },
               {
                 "threshold": "30/24",
-                "p": 0.484
+                "p": 0.373
               },
               {
                 "threshold": "35/24",
-                "p": 0.379
+                "p": 0.281
               },
               {
                 "threshold": "40/24",
-                "p": 0.175
+                "p": 0.121
               },
               {
                 "threshold": "45/36",
-                "p": 0.285
+                "p": 0.205
               },
               {
                 "threshold": "55/48",
-                "p": 0.142
+                "p": 0.1
               },
               {
                 "threshold": "65/72",
-                "p": 0.055999999999999994
+                "p": 0.054000000000000006
               }
             ],
             "DTOPS": [
               {
                 "threshold": "20/12",
-                "p": 0.31
+                "p": 0.13
               },
               {
                 "threshold": "25/24",
-                "p": 0.53
+                "p": 0.47
               },
               {
                 "threshold": "30/24",
-                "p": 0.36
+                "p": 0.26
               },
               {
                 "threshold": "35/24",
-                "p": 0.18
-              },
-              {
-                "threshold": "40/24",
                 "p": 0.12
               },
               {
+                "threshold": "40/24",
+                "p": 0.09
+              },
+              {
                 "threshold": "45/36",
-                "p": 0.16
+                "p": 0.26
               },
               {
                 "threshold": "55/48",
-                "p": 0.31
+                "p": 0.2
               },
               {
                 "threshold": "65/72",
@@ -1634,70 +2035,70 @@
             "SDCON": [
               {
                 "threshold": "20/12",
-                "p": 0.3
+                "p": 0.151
               },
               {
                 "threshold": "25/24",
-                "p": 0.557
+                "p": 0.469
               },
               {
                 "threshold": "30/24",
-                "p": 0.42200000000000004
+                "p": 0.316
               },
               {
                 "threshold": "35/24",
-                "p": 0.27899999999999997
+                "p": 0.2
               },
               {
                 "threshold": "40/24",
-                "p": 0.147
+                "p": 0.105
               },
               {
                 "threshold": "45/36",
-                "p": 0.222
+                "p": 0.23199999999999998
               },
               {
                 "threshold": "55/48",
-                "p": 0.226
+                "p": 0.15
               },
               {
                 "threshold": "65/72",
-                "p": 0.048
+                "p": 0.047
               }
             ]
           },
           "consensus": [
             {
               "threshold": "20/12",
-              "p": 0.29100000000000004
+              "p": 0.17300000000000001
             },
             {
               "threshold": "25/24",
-              "p": 0.584
+              "p": 0.46799999999999997
             },
             {
               "threshold": "30/24",
-              "p": 0.484
+              "p": 0.373
             },
             {
               "threshold": "35/24",
-              "p": 0.379
+              "p": 0.281
             },
             {
               "threshold": "40/24",
-              "p": 0.175
+              "p": 0.121
             },
             {
               "threshold": "45/36",
-              "p": 0.285
+              "p": 0.205
             },
             {
               "threshold": "55/48",
-              "p": 0.142
+              "p": 0.1
             },
             {
               "threshold": "65/72",
-              "p": 0.055999999999999994
+              "p": 0.054000000000000006
             }
           ],
           "schemes": [
@@ -1711,14 +2112,14 @@
           "prelim": {
             "dvKt": 35,
             "hours": 36,
-            "value": 53.4
+            "value": 50.8
           }
         },
         "availability": {
           "ohc": true,
           "ir": true
         },
-        "basis": "SHIPS KARINA EP112026 2026-08-28T18:00Z · shear 10 kt · OHC 30 kJ/cm2 · MPI 157 kt · mid-level RH 80%"
+        "basis": "SHIPS KARINA EP112026 2026-08-29T00:00Z · shear 7 kt · OHC 28 kJ/cm2 · MPI 157 kt · mid-level RH 80%"
       },
       "ascat": {
         "iso": "2026-08-28T17:45:00.000Z",
@@ -1742,12 +2143,12 @@
         "passes": 4
       },
       "bestTrack": {
-        "time": "2026082818",
-        "iso": "2026-08-28T18:00:00.000Z",
-        "lat": 13.4,
-        "lon": -115.2,
+        "time": "2026082900",
+        "iso": "2026-08-29T00:00:00.000Z",
+        "lat": 13.9,
+        "lon": -115.9,
         "kt": 55,
-        "mslp": 990,
+        "mslp": 988,
         "ty": "TS",
         "radii": {
           "34": {
@@ -1768,53 +2169,53 @@
       },
       "atcfDeck": {
         "cycle": "2026082900",
-        "techCount": 1,
-        "forecastAids": 0
+        "techCount": 35,
+        "forecastAids": 34
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026082900 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 16 records · f-deck 44 fixes",
-        "ships": "2026-08-28T18:00Z · shear 10 kt · OHC 30 · MPI 157 kt · 8 RI thresholds"
+        "atcf": "a-deck cycle 2026082900 · 35 techs · consensus 3 member(s) peak 101.7 kt · b-deck 17 records · f-deck 49 fixes",
+        "ships": "2026-08-29T00:00Z · shear 7 kt · OHC 28 · MPI 157 kt · 8 RI thresholds"
       },
       "riFloor": {
         "dvKt": 20,
         "hours": 12,
-        "p": 0.37,
+        "p": 0.28,
         "climoP": 0.063,
-        "ratioToClimo": 5.8,
-        "consensusP": 0.29100000000000004,
-        "basis": "SHIPS publishes a 37% chance of a 20 kt gain in 12 h (5.8x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike"
+        "ratioToClimo": 4.5,
+        "consensusP": 0.17300000000000001,
+        "basis": "SHIPS publishes a 28% chance of a 20 kt gain in 12 h (4.5x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike"
       },
       "hurricanePCal": {
         "ok": true,
-        "p": 0.99,
+        "p": 0.9869870442420968,
         "pRaw": 0.99,
-        "pLow": 0.9875379221241222,
+        "pLow": 0.9179084198569556,
         "pHigh": 0.99,
-        "pPeak": 0.99,
+        "pPeak": 0.9869870442420968,
         "pNow": 0.06680722872027083,
-        "pWithRi": 0.99,
+        "pWithRi": 0.9869870442420968,
         "drivenBy": "forecast peak",
-        "meanKt": 110,
-        "sigmaKt": 13.2,
+        "meanKt": 106.2,
+        "sigmaKt": 19.6,
         "sigmaInitKt": 5,
         "initSource": "satellite intensity analysis",
-        "tauKt": 0,
+        "tauKt": 14.5,
         "reconDeltaKt": null,
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 405,
+        "ascatAgeMin": 416,
         "ascatUsed": false,
-        "consensusAgeMin": null,
+        "consensusAgeMin": 41,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
           "hours": 12,
-          "p": 0.37,
+          "p": 0.28,
           "climoP": 0.063,
-          "ratioToClimo": 5.8,
-          "consensusP": 0.29100000000000004,
-          "basis": "SHIPS publishes a 37% chance of a 20 kt gain in 12 h (5.8x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike"
+          "ratioToClimo": 4.5,
+          "consensusP": 0.17300000000000001,
+          "basis": "SHIPS publishes a 28% chance of a 20 kt gain in 12 h (4.5x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike"
         },
         "sources": [
           {
@@ -1823,6 +2224,13 @@
             "peakKt": 110,
             "peakHr": 57,
             "sigmaKt": 13.2
+          },
+          {
+            "id": "consensus",
+            "label": "ATCF consensus (HCCA/IVCN/GDMI)",
+            "peakKt": 101.7,
+            "peakHr": 72,
+            "sigmaKt": 14.4
           }
         ],
         "layers": [
@@ -1833,30 +2241,37 @@
             "basis": "official forecast peaks at 110 kt at 57h; NHC's published mean absolute intensity error there is 10.6 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths"
           },
           {
+            "id": "consensus",
+            "label": "ATCF guidance consensus",
+            "p": 0.99,
+            "unavailable": false,
+            "basis": "3 aids in the 2026082900 deck peak at a mean of 101.7 kt near 72h, disagreeing by 14.5 kt"
+          },
+          {
             "id": "ships-ri",
             "label": "SHIPS rapid-intensification floor",
             "p": null,
             "unavailable": true,
-            "basis": "SHIPS publishes a 37% chance of a 20 kt gain in 12 h (5.8x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
+            "basis": "SHIPS publishes a 28% chance of a 20 kt gain in 12 h (4.5x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
           }
         ],
         "notes": [
-          "scatterometer pass is 405 min old, past the 360-min line — band not tightened"
+          "scatterometer pass is 416 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
-          "consensus": false,
+          "consensus": true,
           "recon": false,
           "ascat": false,
           "ships": false
         },
-        "basis": "combined 1 intensity estimate at 110 kt (sigma 13.2 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99%"
+        "basis": "combined 2 intensity estimates at 106 kt (sigma 19.6 kt, of which 14.5 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99%"
       },
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 240 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "official advisory only — no guidance deck and no aircraft",
+          "the advisory under this estimate is 251 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 41 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -1944,11 +2359,11 @@
         "already": false,
         "basis": "official forecast peaks at 95 kt at 117h; NHC's published mean absolute intensity error there is 13.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 97% central, 89-99% across a plausible range of error widths"
       },
-      "advisoryLagMin": 236,
+      "advisoryLagMin": 247,
       "discussion": {
         "forecaster": "Beven",
         "issuedZ": "2026-08-28T20:35:00.000Z",
-        "lagMin": 235,
+        "lagMin": 246,
         "guidance": {
           "intensity": null,
           "track": null
@@ -2212,14 +2627,412 @@
       ],
       "advisoryIssuedZ": "2026-08-28T20:34:00.000Z",
       "advNumFull": "5",
-      "consensus": null,
+      "consensus": {
+        "cycle": "2026082900",
+        "cycleIso": "2026-08-29T00:00:00.000Z",
+        "peakKt": 115.3,
+        "peakHr": 168,
+        "spreadKt": 30.9,
+        "minKt": 97,
+        "maxKt": 151,
+        "n": 3,
+        "members": [
+          {
+            "tech": "HCCA",
+            "label": "HFIP corrected consensus",
+            "peakKt": 151,
+            "peakHr": 168,
+            "initialKt": 40
+          },
+          {
+            "tech": "IVCN",
+            "label": "variable consensus (intensity)",
+            "peakKt": 98,
+            "peakHr": 132,
+            "initialKt": 40
+          },
+          {
+            "tech": "GDMI",
+            "label": "DeepMind (interpolated)",
+            "peakKt": 97,
+            "peakHr": 168,
+            "initialKt": 40
+          }
+        ],
+        "corrected": {
+          "tech": "HCCA",
+          "peakKt": 151,
+          "peakHr": 168,
+          "intensity": [
+            {
+              "hr": 0,
+              "kt": 40,
+              "mslp": null
+            },
+            {
+              "hr": 12,
+              "kt": 46,
+              "mslp": null
+            },
+            {
+              "hr": 24,
+              "kt": 49,
+              "mslp": null
+            },
+            {
+              "hr": 36,
+              "kt": 50,
+              "mslp": null
+            },
+            {
+              "hr": 48,
+              "kt": 52,
+              "mslp": null
+            },
+            {
+              "hr": 60,
+              "kt": 57,
+              "mslp": null
+            },
+            {
+              "hr": 72,
+              "kt": 65,
+              "mslp": null
+            },
+            {
+              "hr": 84,
+              "kt": 75,
+              "mslp": null
+            },
+            {
+              "hr": 96,
+              "kt": 96,
+              "mslp": null
+            },
+            {
+              "hr": 108,
+              "kt": 114,
+              "mslp": null
+            },
+            {
+              "hr": 120,
+              "kt": 122,
+              "mslp": null
+            },
+            {
+              "hr": 132,
+              "kt": 126,
+              "mslp": null
+            },
+            {
+              "hr": 144,
+              "kt": 132,
+              "mslp": null
+            },
+            {
+              "hr": 156,
+              "kt": 140,
+              "mslp": null
+            },
+            {
+              "hr": 168,
+              "kt": 151,
+              "mslp": null
+            }
+          ],
+          "track": [
+            {
+              "hr": 0,
+              "lat": 12.4,
+              "lon": -133.8
+            },
+            {
+              "hr": 12,
+              "lat": 12.5,
+              "lon": -135.3
+            },
+            {
+              "hr": 24,
+              "lat": 12.5,
+              "lon": -137.2
+            },
+            {
+              "hr": 36,
+              "lat": 12.4,
+              "lon": -139.2
+            },
+            {
+              "hr": 48,
+              "lat": 12.4,
+              "lon": -141.1
+            },
+            {
+              "hr": 60,
+              "lat": 12.5,
+              "lon": -143
+            },
+            {
+              "hr": 72,
+              "lat": 12.7,
+              "lon": -144.9
+            },
+            {
+              "hr": 84,
+              "lat": 12.8,
+              "lon": -146.8
+            },
+            {
+              "hr": 96,
+              "lat": 12.8,
+              "lon": -148.5
+            },
+            {
+              "hr": 108,
+              "lat": 12.8,
+              "lon": -150.1
+            },
+            {
+              "hr": 120,
+              "lat": 13,
+              "lon": -151.2
+            },
+            {
+              "hr": 132,
+              "lat": 13.5,
+              "lon": -151.6
+            },
+            {
+              "hr": 144,
+              "lat": 13.8,
+              "lon": -151.4
+            },
+            {
+              "hr": 156,
+              "lat": 14.2,
+              "lon": -152.3
+            },
+            {
+              "hr": 168,
+              "lat": 14.4,
+              "lon": -153.1
+            }
+          ]
+        },
+        "variableIntensity": {
+          "tech": "IVCN",
+          "peakKt": 98,
+          "peakHr": 132
+        },
+        "variableTrack": {
+          "tech": "TVCN",
+          "track": [
+            {
+              "hr": 0,
+              "lat": 12.4,
+              "lon": -133.8
+            },
+            {
+              "hr": 12,
+              "lat": 12.5,
+              "lon": -134.9
+            },
+            {
+              "hr": 24,
+              "lat": 12.6,
+              "lon": -136.3
+            },
+            {
+              "hr": 36,
+              "lat": 12.6,
+              "lon": -137.8
+            },
+            {
+              "hr": 48,
+              "lat": 12.8,
+              "lon": -139.3
+            },
+            {
+              "hr": 60,
+              "lat": 13,
+              "lon": -140.7
+            },
+            {
+              "hr": 72,
+              "lat": 13.2,
+              "lon": -142.1
+            },
+            {
+              "hr": 84,
+              "lat": 13.5,
+              "lon": -143.4
+            },
+            {
+              "hr": 96,
+              "lat": 13.7,
+              "lon": -144.4
+            },
+            {
+              "hr": 108,
+              "lat": 14.1,
+              "lon": -145.4
+            },
+            {
+              "hr": 120,
+              "lat": 14.6,
+              "lon": -146.2
+            },
+            {
+              "hr": 132,
+              "lat": 15.1,
+              "lon": -146.9
+            },
+            {
+              "hr": 144,
+              "lat": 14.5,
+              "lon": -147.1
+            },
+            {
+              "hr": 156,
+              "lat": 15,
+              "lon": -147.2
+            },
+            {
+              "hr": 168,
+              "lat": 15.5,
+              "lon": -147.2
+            }
+          ]
+        },
+        "deepmind": {
+          "tech": "GDMI",
+          "peakKt": 97,
+          "peakHr": 168,
+          "track": [
+            {
+              "hr": 0,
+              "lat": 12.4,
+              "lon": -133.8
+            },
+            {
+              "hr": 12,
+              "lat": 12.6,
+              "lon": -135.4
+            },
+            {
+              "hr": 24,
+              "lat": 12.6,
+              "lon": -137.4
+            },
+            {
+              "hr": 36,
+              "lat": 12.5,
+              "lon": -139.5
+            },
+            {
+              "hr": 48,
+              "lat": 12.4,
+              "lon": -141.5
+            },
+            {
+              "hr": 60,
+              "lat": 12.5,
+              "lon": -143.3
+            },
+            {
+              "hr": 72,
+              "lat": 12.8,
+              "lon": -145.3
+            },
+            {
+              "hr": 84,
+              "lat": 13,
+              "lon": -147.3
+            },
+            {
+              "hr": 96,
+              "lat": 13,
+              "lon": -149.2
+            },
+            {
+              "hr": 108,
+              "lat": 13.1,
+              "lon": -151.1
+            },
+            {
+              "hr": 120,
+              "lat": 13.2,
+              "lon": -152.9
+            },
+            {
+              "hr": 132,
+              "lat": 13.4,
+              "lon": -154.4
+            },
+            {
+              "hr": 144,
+              "lat": 13.6,
+              "lon": -155.6
+            },
+            {
+              "hr": 156,
+              "lat": 13.7,
+              "lon": -156.5
+            },
+            {
+              "hr": 168,
+              "lat": 13.9,
+              "lon": -157.3
+            }
+          ]
+        },
+        "official": {
+          "tech": "OFCI",
+          "peakKt": 95,
+          "peakHr": 120
+        },
+        "missing": [],
+        "techsPresent": [
+          "AEMI",
+          "AVNI",
+          "CARQ",
+          "CEM2",
+          "CLP5",
+          "CMC2",
+          "CTCI",
+          "DSHP",
+          "GDMI",
+          "HCCA",
+          "HFAI",
+          "HFBI",
+          "HMNI",
+          "HWFI",
+          "IVCN",
+          "LGEM",
+          "NGX2",
+          "NNIB",
+          "NNIC",
+          "NVG2",
+          "OCD5",
+          "OFCI",
+          "RVCN",
+          "SHF5",
+          "SHIP",
+          "TABD",
+          "TABM",
+          "TABS",
+          "TCLP",
+          "TVCN",
+          "UKX2",
+          "XTRP"
+        ]
+      },
       "recon": null,
       "aircraftFix": null,
       "ships": {
         "ok": true,
         "stormId": "EP122026",
         "name": "LOWELL",
-        "cycleIso": "2026-08-28T18:00:00.000Z",
+        "cycleIso": "2026-08-29T00:00:00.000Z",
         "taus": [
           0,
           6,
@@ -2240,13 +3053,13 @@
           168
         ],
         "features": {
-          "shearKt": 16,
-          "shearAdjKt": 8,
-          "sstC": 29.2,
-          "mpiKt": 154,
+          "shearKt": 15,
+          "shearAdjKt": 3,
+          "sstC": 29.3,
+          "mpiKt": 156,
           "rhMid": 64,
           "ohc": 22,
-          "landKm": 2449,
+          "landKm": 2378,
           "vNoLandKt": 40,
           "vLgemKt": 40
         },
@@ -2254,7 +3067,7 @@
           "shearKt": [
             {
               "hr": 0,
-              "v": 16
+              "v": 15
             },
             {
               "hr": 6,
@@ -2262,15 +3075,15 @@
             },
             {
               "hr": 12,
-              "v": 11
+              "v": 12
             },
             {
               "hr": 18,
-              "v": 8
+              "v": 11
             },
             {
               "hr": 24,
-              "v": 6
+              "v": 11
             },
             {
               "hr": 36,
@@ -2278,31 +3091,31 @@
             },
             {
               "hr": 48,
-              "v": 10
-            },
-            {
-              "hr": 60,
               "v": 8
             },
             {
+              "hr": 60,
+              "v": 6
+            },
+            {
               "hr": 72,
-              "v": 5
-            },
-            {
-              "hr": 84,
-              "v": 4
-            },
-            {
-              "hr": 96,
-              "v": 0
-            },
-            {
-              "hr": 108,
               "v": 3
             },
             {
+              "hr": 84,
+              "v": 1
+            },
+            {
+              "hr": 96,
+              "v": 6
+            },
+            {
+              "hr": 108,
+              "v": 7
+            },
+            {
               "hr": 120,
-              "v": 4
+              "v": 3
             },
             {
               "hr": 132,
@@ -2310,49 +3123,49 @@
             },
             {
               "hr": 144,
-              "v": 4
+              "v": 5
             },
             {
               "hr": 156,
-              "v": 8
+              "v": 2
             },
             {
               "hr": 168,
-              "v": 6
+              "v": 1
             }
           ],
           "shearAdjKt": [
             {
               "hr": 0,
-              "v": 8
+              "v": 3
             },
             {
               "hr": 6,
-              "v": 2
-            },
-            {
-              "hr": 12,
               "v": -1
             },
             {
-              "hr": 18,
+              "hr": 12,
               "v": 0
+            },
+            {
+              "hr": 18,
+              "v": -1
             },
             {
               "hr": 24,
-              "v": 1
+              "v": 0
             },
             {
               "hr": 36,
-              "v": 0
+              "v": 1
             },
             {
               "hr": 48,
-              "v": 0
+              "v": 4
             },
             {
               "hr": 60,
-              "v": 4
+              "v": 0
             },
             {
               "hr": 72,
@@ -2360,11 +3173,11 @@
             },
             {
               "hr": 84,
-              "v": 4
+              "v": 6
             },
             {
               "hr": 96,
-              "v": 7
+              "v": 5
             },
             {
               "hr": 108,
@@ -2372,37 +3185,37 @@
             },
             {
               "hr": 120,
-              "v": 4
+              "v": 7
             },
             {
               "hr": 132,
-              "v": 2
+              "v": 3
             },
             {
               "hr": 144,
-              "v": 6
+              "v": 5
             },
             {
               "hr": 156,
-              "v": 3
+              "v": 4
             },
             {
               "hr": 168,
-              "v": 3
+              "v": 6
             }
           ],
           "sstC": [
             {
               "hr": 0,
-              "v": 29.2
+              "v": 29.3
             },
             {
               "hr": 6,
-              "v": 29.2
+              "v": 29.3
             },
             {
               "hr": 12,
-              "v": 29.3
+              "v": 29.2
             },
             {
               "hr": 18,
@@ -2410,43 +3223,43 @@
             },
             {
               "hr": 24,
-              "v": 29.2
-            },
-            {
-              "hr": 36,
               "v": 29.3
             },
             {
-              "hr": 48,
+              "hr": 36,
               "v": 29
+            },
+            {
+              "hr": 48,
+              "v": 29.1
             },
             {
               "hr": 60,
-              "v": 29
-            },
-            {
-              "hr": 72,
               "v": 29.2
             },
             {
+              "hr": 72,
+              "v": 28.9
+            },
+            {
               "hr": 84,
-              "v": 28.7
+              "v": 28.8
             },
             {
               "hr": 96,
-              "v": 28.7
+              "v": 28.6
             },
             {
               "hr": 108,
-              "v": 28.4
-            },
-            {
-              "hr": 120,
               "v": 28.5
             },
             {
+              "hr": 120,
+              "v": 28.1
+            },
+            {
               "hr": 132,
-              "v": 28
+              "v": 27.8
             },
             {
               "hr": 144,
@@ -2454,53 +3267,53 @@
             },
             {
               "hr": 156,
-              "v": 27.7
+              "v": 27.8
             },
             {
               "hr": 168,
-              "v": 28
+              "v": 27.9
             }
           ],
           "mpiKt": [
             {
               "hr": 0,
-              "v": 154
-            },
-            {
-              "hr": 6,
-              "v": 155
-            },
-            {
-              "hr": 12,
               "v": 156
             },
             {
-              "hr": 18,
+              "hr": 6,
+              "v": 156
+            },
+            {
+              "hr": 12,
               "v": 155
+            },
+            {
+              "hr": 18,
+              "v": 156
             },
             {
               "hr": 24,
-              "v": 155
+              "v": 157
             },
             {
               "hr": 36,
-              "v": 157
+              "v": 154
             },
             {
               "hr": 48,
-              "v": 154
+              "v": 155
             },
             {
               "hr": 60,
-              "v": 154
+              "v": 156
             },
             {
               "hr": 72,
-              "v": 157
+              "v": 153
             },
             {
               "hr": 84,
-              "v": 150
+              "v": 152
             },
             {
               "hr": 96,
@@ -2508,15 +3321,15 @@
             },
             {
               "hr": 108,
-              "v": 148
-            },
-            {
-              "hr": 120,
               "v": 149
             },
             {
+              "hr": 120,
+              "v": 144
+            },
+            {
               "hr": 132,
-              "v": 142
+              "v": 140
             },
             {
               "hr": 144,
@@ -2528,7 +3341,7 @@
             },
             {
               "hr": 168,
-              "v": 142
+              "v": 140
             }
           ],
           "rhMid": [
@@ -2542,11 +3355,11 @@
             },
             {
               "hr": 12,
-              "v": 67
+              "v": 69
             },
             {
               "hr": 18,
-              "v": 70
+              "v": 68
             },
             {
               "hr": 24,
@@ -2554,15 +3367,15 @@
             },
             {
               "hr": 36,
-              "v": 69
+              "v": 70
             },
             {
               "hr": 48,
-              "v": 66
+              "v": 63
             },
             {
               "hr": 60,
-              "v": 63
+              "v": 61
             },
             {
               "hr": 72,
@@ -2570,35 +3383,35 @@
             },
             {
               "hr": 84,
-              "v": 57
+              "v": 56
             },
             {
               "hr": 96,
-              "v": 52
+              "v": 49
             },
             {
               "hr": 108,
-              "v": 52
+              "v": 45
             },
             {
               "hr": 120,
-              "v": 54
+              "v": 47
             },
             {
               "hr": 132,
-              "v": 58
+              "v": 44
             },
             {
               "hr": 144,
-              "v": 55
+              "v": 40
             },
             {
               "hr": 156,
-              "v": 50
+              "v": 34
             },
             {
               "hr": 168,
-              "v": 43
+              "v": 28
             }
           ],
           "ohc": [
@@ -2608,11 +3421,11 @@
             },
             {
               "hr": 6,
-              "v": 23
+              "v": 19
             },
             {
               "hr": 12,
-              "v": 21
+              "v": 16
             },
             {
               "hr": 18,
@@ -2620,11 +3433,11 @@
             },
             {
               "hr": 24,
-              "v": 19
+              "v": 22
             },
             {
               "hr": 36,
-              "v": 22
+              "v": 20
             },
             {
               "hr": 48,
@@ -2636,15 +3449,15 @@
             },
             {
               "hr": 72,
-              "v": 22
+              "v": 20
             },
             {
               "hr": 84,
-              "v": 23
+              "v": 28
             },
             {
               "hr": 96,
-              "v": 29
+              "v": 23
             },
             {
               "hr": 108,
@@ -2652,7 +3465,7 @@
             },
             {
               "hr": 120,
-              "v": 23
+              "v": 21
             },
             {
               "hr": 132,
@@ -2660,85 +3473,85 @@
             },
             {
               "hr": 144,
-              "v": 17
+              "v": 21
             },
             {
               "hr": 156,
-              "v": 19
+              "v": 22
             },
             {
               "hr": 168,
-              "v": 25
+              "v": 24
             }
           ],
           "landKm": [
             {
               "hr": 0,
-              "v": 2449
+              "v": 2378
             },
             {
               "hr": 6,
-              "v": 2384
+              "v": 2311
             },
             {
               "hr": 12,
-              "v": 2319
+              "v": 2243
             },
             {
               "hr": 18,
-              "v": 2265
+              "v": 2167
             },
             {
               "hr": 24,
-              "v": 2210
+              "v": 2090
             },
             {
               "hr": 36,
-              "v": 2031
+              "v": 1927
             },
             {
               "hr": 48,
-              "v": 1829
+              "v": 1741
             },
             {
               "hr": 60,
-              "v": 1683
+              "v": 1542
             },
             {
               "hr": 72,
-              "v": 1459
+              "v": 1366
             },
             {
               "hr": 84,
-              "v": 1297
+              "v": 1208
             },
             {
               "hr": 96,
-              "v": 1163
+              "v": 1042
             },
             {
               "hr": 108,
-              "v": 1015
+              "v": 877
             },
             {
               "hr": 120,
-              "v": 844
+              "v": 730
             },
             {
               "hr": 132,
-              "v": 735
+              "v": 618
             },
             {
               "hr": 144,
-              "v": 666
+              "v": 546
             },
             {
               "hr": 156,
-              "v": 582
+              "v": 476
             },
             {
               "hr": 168,
-              "v": 486
+              "v": 392
             }
           ],
           "vNoLandKt": [
@@ -2748,67 +3561,67 @@
             },
             {
               "hr": 6,
-              "v": 39
+              "v": 40
             },
             {
               "hr": 12,
-              "v": 39
+              "v": 40
             },
             {
               "hr": 18,
-              "v": 41
+              "v": 40
             },
             {
               "hr": 24,
-              "v": 43
+              "v": 42
             },
             {
               "hr": 36,
-              "v": 51
+              "v": 49
             },
             {
               "hr": 48,
-              "v": 60
+              "v": 57
             },
             {
               "hr": 60,
-              "v": 68
+              "v": 66
             },
             {
               "hr": 72,
-              "v": 80
+              "v": 75
             },
             {
               "hr": 84,
-              "v": 87
+              "v": 84
             },
             {
               "hr": 96,
-              "v": 95
+              "v": 90
             },
             {
               "hr": 108,
-              "v": 98
+              "v": 89
             },
             {
               "hr": 120,
-              "v": 101
+              "v": 93
             },
             {
               "hr": 132,
-              "v": 99
+              "v": 92
             },
             {
               "hr": 144,
-              "v": 99
+              "v": 92
             },
             {
               "hr": 156,
-              "v": 96
+              "v": 90
             },
             {
               "hr": 168,
-              "v": 98
+              "v": 91
             }
           ],
           "vLgemKt": [
@@ -2826,7 +3639,7 @@
             },
             {
               "hr": 18,
-              "v": 41
+              "v": 42
             },
             {
               "hr": 24,
@@ -2834,51 +3647,51 @@
             },
             {
               "hr": 36,
-              "v": 47
+              "v": 48
             },
             {
               "hr": 48,
-              "v": 54
+              "v": 53
             },
             {
               "hr": 60,
-              "v": 63
+              "v": 60
             },
             {
               "hr": 72,
-              "v": 73
+              "v": 68
             },
             {
               "hr": 84,
-              "v": 84
+              "v": 79
             },
             {
               "hr": 96,
-              "v": 92
+              "v": 88
             },
             {
               "hr": 108,
-              "v": 96
-            },
-            {
-              "hr": 120,
-              "v": 95
-            },
-            {
-              "hr": 132,
-              "v": 92
-            },
-            {
-              "hr": 144,
               "v": 89
             },
             {
-              "hr": 156,
+              "hr": 120,
+              "v": 87
+            },
+            {
+              "hr": 132,
               "v": 85
             },
             {
+              "hr": 144,
+              "v": 84
+            },
+            {
+              "hr": 156,
+              "v": 82
+            },
+            {
               "hr": 168,
-              "v": 85
+              "v": 80
             }
           ]
         },
@@ -2905,14 +3718,14 @@
             {
               "dvKt": 25,
               "hours": 24,
-              "p": 0.15,
-              "ratioToClimo": 1.2,
+              "p": 0.14,
+              "ratioToClimo": 1.1,
               "climoP": 0.125
             },
             {
               "dvKt": 30,
               "hours": 24,
-              "p": 0.13,
+              "p": 0.12,
               "ratioToClimo": 1.5,
               "climoP": 0.086
             },
@@ -2933,22 +3746,22 @@
             {
               "dvKt": 45,
               "hours": 36,
-              "p": 0.18,
-              "ratioToClimo": 2.6,
+              "p": 0.17,
+              "ratioToClimo": 2.5,
               "climoP": 0.067
             },
             {
               "dvKt": 55,
               "hours": 48,
-              "p": 0.17,
-              "ratioToClimo": 2.9,
+              "p": 0.16,
+              "ratioToClimo": 2.8,
               "climoP": 0.059000000000000004
             },
             {
               "dvKt": 65,
               "hours": 72,
-              "p": 0.16,
-              "ratioToClimo": 3.5,
+              "p": 0.17,
+              "ratioToClimo": 3.6,
               "climoP": 0.047
             }
           ],
@@ -2960,15 +3773,15 @@
               },
               {
                 "threshold": "25/24",
-                "p": 0.149
+                "p": 0.14300000000000002
               },
               {
                 "threshold": "30/24",
-                "p": 0.131
+                "p": 0.125
               },
               {
                 "threshold": "35/24",
-                "p": 0.11699999999999999
+                "p": 0.115
               },
               {
                 "threshold": "40/24",
@@ -2976,41 +3789,41 @@
               },
               {
                 "threshold": "45/36",
-                "p": 0.177
-              },
-              {
-                "threshold": "55/48",
                 "p": 0.17
               },
               {
-                "threshold": "65/72",
+                "threshold": "55/48",
                 "p": 0.16399999999999998
+              },
+              {
+                "threshold": "65/72",
+                "p": 0.17
               }
             ],
             "Logistic": [
               {
                 "threshold": "20/12",
-                "p": 0.002
+                "p": 0.004
               },
               {
                 "threshold": "25/24",
-                "p": 0.017
+                "p": 0.032
               },
               {
                 "threshold": "30/24",
-                "p": 0.003
+                "p": 0.006
               },
               {
                 "threshold": "35/24",
-                "p": 0.001
+                "p": 0.003
               },
               {
                 "threshold": "40/24",
-                "p": 0
+                "p": 0.001
               },
               {
                 "threshold": "45/36",
-                "p": 0.002
+                "p": 0.003
               },
               {
                 "threshold": "55/48",
@@ -3018,7 +3831,7 @@
               },
               {
                 "threshold": "65/72",
-                "p": 0.004
+                "p": 0.005
               }
             ],
             "Bayesian": [
@@ -3058,19 +3871,19 @@
             "Consensus": [
               {
                 "threshold": "20/12",
-                "p": 0.02
+                "p": 0.021
               },
               {
                 "threshold": "25/24",
-                "p": 0.055
+                "p": 0.057999999999999996
               },
               {
                 "threshold": "30/24",
-                "p": 0.045
+                "p": 0.044000000000000004
               },
               {
                 "threshold": "35/24",
-                "p": 0.04
+                "p": 0.039
               },
               {
                 "threshold": "40/24",
@@ -3078,29 +3891,29 @@
               },
               {
                 "threshold": "45/36",
-                "p": 0.059000000000000004
-              },
-              {
-                "threshold": "55/48",
                 "p": 0.057
               },
               {
-                "threshold": "65/72",
+                "threshold": "55/48",
                 "p": 0.055999999999999994
+              },
+              {
+                "threshold": "65/72",
+                "p": 0.057999999999999996
               }
             ],
             "DTOPS": [
               {
                 "threshold": "20/12",
-                "p": 0
+                "p": 0.01
               },
               {
                 "threshold": "25/24",
-                "p": 0.03
+                "p": 0.07
               },
               {
                 "threshold": "30/24",
-                "p": 0.01
+                "p": 0.02
               },
               {
                 "threshold": "35/24",
@@ -3108,72 +3921,72 @@
               },
               {
                 "threshold": "40/24",
-                "p": 0
-              },
-              {
-                "threshold": "45/36",
                 "p": 0.01
               },
               {
+                "threshold": "45/36",
+                "p": 0.03
+              },
+              {
                 "threshold": "55/48",
-                "p": 0.02
+                "p": 0.03
               },
               {
                 "threshold": "65/72",
-                "p": 0.02
+                "p": 0.55
               }
             ],
             "SDCON": [
               {
                 "threshold": "20/12",
-                "p": 0.01
+                "p": 0.015
               },
               {
                 "threshold": "25/24",
-                "p": 0.042
+                "p": 0.064
               },
               {
                 "threshold": "30/24",
-                "p": 0.027000000000000003
+                "p": 0.032
               },
               {
                 "threshold": "35/24",
-                "p": 0.025
+                "p": 0.024
               },
               {
                 "threshold": "40/24",
-                "p": 0
+                "p": 0.005
               },
               {
                 "threshold": "45/36",
-                "p": 0.034
+                "p": 0.043
               },
               {
                 "threshold": "55/48",
-                "p": 0.038
+                "p": 0.043
               },
               {
                 "threshold": "65/72",
-                "p": 0.038
+                "p": 0.304
               }
             ]
           },
           "consensus": [
             {
               "threshold": "20/12",
-              "p": 0.02
+              "p": 0.021
             },
             {
               "threshold": "25/24",
-              "p": 0.055
+              "p": 0.057999999999999996
             },
             {
               "threshold": "30/24",
-              "p": 0.045
+              "p": 0.044000000000000004
             },
             {
               "threshold": "35/24",
-              "p": 0.04
+              "p": 0.039
             },
             {
               "threshold": "40/24",
@@ -3181,15 +3994,15 @@
             },
             {
               "threshold": "45/36",
-              "p": 0.059000000000000004
-            },
-            {
-              "threshold": "55/48",
               "p": 0.057
             },
             {
-              "threshold": "65/72",
+              "threshold": "55/48",
               "p": 0.055999999999999994
+            },
+            {
+              "threshold": "65/72",
+              "p": 0.057999999999999996
             }
           ],
           "schemes": [
@@ -3203,14 +4016,14 @@
           "prelim": {
             "dvKt": 35,
             "hours": 36,
-            "value": 6.5
+            "value": 4.3
           }
         },
         "availability": {
           "ohc": true,
           "ir": true
         },
-        "basis": "SHIPS LOWELL EP122026 2026-08-28T18:00Z · shear 16 kt · OHC 22 kJ/cm2 · MPI 154 kt · mid-level RH 64%"
+        "basis": "SHIPS LOWELL EP122026 2026-08-29T00:00Z · shear 15 kt · OHC 22 kJ/cm2 · MPI 156 kt · mid-level RH 64%"
       },
       "ascat": {
         "iso": "2026-08-28T17:24:00.000Z",
@@ -3226,10 +4039,10 @@
         "passes": 2
       },
       "bestTrack": {
-        "time": "2026082818",
-        "iso": "2026-08-28T18:00:00.000Z",
+        "time": "2026082900",
+        "iso": "2026-08-29T00:00:00.000Z",
         "lat": 12.4,
-        "lon": -133.1,
+        "lon": -133.8,
         "kt": 40,
         "mslp": 1003,
         "ty": "TS",
@@ -3245,53 +4058,53 @@
       },
       "atcfDeck": {
         "cycle": "2026082900",
-        "techCount": 1,
-        "forecastAids": 0
+        "techCount": 32,
+        "forecastAids": 31
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026082900 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 13 records · f-deck 38 fixes",
-        "ships": "2026-08-28T18:00Z · shear 16 kt · OHC 22 · MPI 154 kt · 8 RI thresholds"
+        "atcf": "a-deck cycle 2026082900 · 32 techs · consensus 3 member(s) peak 115.3 kt · b-deck 14 records · f-deck 42 fixes",
+        "ships": "2026-08-29T00:00Z · shear 15 kt · OHC 22 · MPI 156 kt · 8 RI thresholds"
       },
       "riFloor": {
         "dvKt": 25,
         "hours": 24,
-        "p": 0.15,
+        "p": 0.14,
         "climoP": 0.125,
-        "ratioToClimo": 1.2,
-        "consensusP": 0.055,
-        "basis": "SHIPS publishes a 15% chance of a 25 kt gain in 24 h (1.2x the 13% climatological rate), and 25 kt is enough to clear the 25 kt gap to the strike"
+        "ratioToClimo": 1.1,
+        "consensusP": 0.057999999999999996,
+        "basis": "SHIPS publishes a 14% chance of a 25 kt gain in 24 h (1.1x the 13% climatological rate), and 25 kt is enough to clear the 25 kt gap to the strike"
       },
       "hurricanePCal": {
         "ok": true,
-        "p": 0.9737363024426521,
+        "p": 0.8869648219261058,
         "pRaw": 0.9737363024426521,
-        "pLow": 0.8871940855660483,
-        "pHigh": 0.99,
-        "pPeak": 0.9737363024426521,
+        "pLow": 0.775352298644836,
+        "pHigh": 0.9737363024426521,
+        "pPeak": 0.8869648219261058,
         "pNow": 0.01,
-        "pWithRi": 0.9737363024426521,
+        "pWithRi": 0.8869648219261058,
         "drivenBy": "forecast peak",
-        "meanKt": 95,
-        "sigmaKt": 16.8,
+        "meanKt": 105.1,
+        "sigmaKt": 35.2,
         "sigmaInitKt": 5,
         "initSource": "satellite intensity analysis",
-        "tauKt": 0,
+        "tauKt": 30.9,
         "reconDeltaKt": null,
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": null,
+        "consensusAgeMin": 41,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 25,
           "hours": 24,
-          "p": 0.15,
+          "p": 0.14,
           "climoP": 0.125,
-          "ratioToClimo": 1.2,
-          "consensusP": 0.055,
-          "basis": "SHIPS publishes a 15% chance of a 25 kt gain in 24 h (1.2x the 13% climatological rate), and 25 kt is enough to clear the 25 kt gap to the strike"
+          "ratioToClimo": 1.1,
+          "consensusP": 0.057999999999999996,
+          "basis": "SHIPS publishes a 14% chance of a 25 kt gain in 24 h (1.1x the 13% climatological rate), and 25 kt is enough to clear the 25 kt gap to the strike"
         },
         "sources": [
           {
@@ -3300,6 +4113,13 @@
             "peakKt": 95,
             "peakHr": 117,
             "sigmaKt": 16.8
+          },
+          {
+            "id": "consensus",
+            "label": "ATCF consensus (HCCA/IVCN/GDMI)",
+            "peakKt": 115.3,
+            "peakHr": 168,
+            "sigmaKt": 16.9
           }
         ],
         "layers": [
@@ -3310,28 +4130,35 @@
             "basis": "official forecast peaks at 95 kt at 117h; NHC's published mean absolute intensity error there is 13.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 97% central, 89-99% across a plausible range of error widths"
           },
           {
+            "id": "consensus",
+            "label": "ATCF guidance consensus",
+            "p": 0.99,
+            "unavailable": false,
+            "basis": "3 aids in the 2026082900 deck peak at a mean of 115.3 kt near 168h, disagreeing by 30.9 kt"
+          },
+          {
             "id": "ships-ri",
             "label": "SHIPS rapid-intensification floor",
             "p": null,
             "unavailable": true,
-            "basis": "SHIPS publishes a 15% chance of a 25 kt gain in 24 h (1.2x the 13% climatological rate), and 25 kt is enough to clear the 25 kt gap to the strike — published, not scored"
+            "basis": "SHIPS publishes a 14% chance of a 25 kt gain in 24 h (1.1x the 13% climatological rate), and 25 kt is enough to clear the 25 kt gap to the strike — published, not scored"
           }
         ],
         "notes": [],
         "used": {
           "official": true,
-          "consensus": false,
+          "consensus": true,
           "recon": false,
           "ascat": false,
           "ships": false
         },
-        "basis": "combined 1 intensity estimate at 95 kt (sigma 16.8 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 97%, calibrated 97%"
+        "basis": "combined 2 intensity estimates at 105 kt (sigma 35.2 kt, of which 30.9 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 97%, calibrated 89%"
       },
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 236 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "official advisory only — no guidance deck and no aircraft",
+          "the advisory under this estimate is 247 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 41 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -3345,11 +4172,11 @@
       "storm": "EP122026",
       "subject": null,
       "market": 0.8200000000000001,
-      "model": 0.9737363024426521,
+      "model": 0.8869648219261058,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 40 kt now · combined 1 intensity estimate at 95 kt (sigma 16.8 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 97%, calibrated 97% · official forecast peaks at 95 kt at 117h; NHC's published mean absolute intensity error there is 13.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 97% central, 89-99% across a plausible range of error widths · advisory 236 min old when fetched",
+      "modelBasis": "Lowell is 40 kt now · combined 2 intensity estimates at 105 kt (sigma 35.2 kt, of which 30.9 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 97%, calibrated 89% · official forecast peaks at 95 kt at 117h; NHC's published mean absolute intensity error there is 13.4 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 97% central, 89-99% across a plausible range of error widths · advisory 247 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -3373,16 +4200,23 @@
           "basis": "no watch or warning in effect for this system"
         },
         {
+          "id": "consensus",
+          "label": "ATCF guidance consensus",
+          "p": 0.99,
+          "unavailable": false,
+          "basis": "3 aids in the 2026082900 deck peak at a mean of 115.3 kt near 168h, disagreeing by 30.9 kt"
+        },
+        {
           "id": "ships-ri",
           "label": "SHIPS rapid-intensification floor",
           "p": null,
           "unavailable": true,
-          "basis": "SHIPS publishes a 15% chance of a 25 kt gain in 24 h (1.2x the 13% climatological rate), and 25 kt is enough to clear the 25 kt gap to the strike — published, not scored"
+          "basis": "SHIPS publishes a 14% chance of a 25 kt gain in 24 h (1.1x the 13% climatological rate), and 25 kt is enough to clear the 25 kt gap to the strike — published, not scored"
         }
       ],
-      "modelLow": 0.8871940855660483,
-      "modelHigh": 0.99,
-      "modelLagMin": 236,
+      "modelLow": 0.775352298644836,
+      "modelHigh": 0.9737363024426521,
+      "modelLagMin": 247,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -3390,13 +4224,13 @@
       "modelCalibrated": true,
       "modelQuality": "LOW",
       "modelIntel": {
-        "conKt": null,
-        "conAgeMin": null,
-        "spreadKt": 0,
+        "conKt": 115.3,
+        "conAgeMin": 41,
+        "spreadKt": 30.9,
         "reconAgeMin": null,
         "reconDeltaKt": null,
         "ascatUsed": false,
-        "riFloorP": 0.15,
+        "riFloorP": 0.14,
         "riScored": false,
         "drivenBy": "forecast peak"
       },
@@ -3426,11 +4260,11 @@
       "storm": "EP112026",
       "subject": null,
       "market": 0.975,
-      "model": 0.99,
+      "model": 0.9869870442420968,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Karina is 55 kt now · combined 1 intensity estimate at 110 kt (sigma 13.2 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · official forecast peaks at 110 kt at 57h; NHC's published mean absolute intensity error there is 10.6 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths · advisory 240 min old when fetched",
+      "modelBasis": "Karina is 55 kt now · combined 2 intensity estimates at 106 kt (sigma 19.6 kt, of which 14.5 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · official forecast peaks at 110 kt at 57h; NHC's published mean absolute intensity error there is 10.6 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths · advisory 251 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -3454,16 +4288,23 @@
           "basis": "no watch or warning in effect for this system"
         },
         {
+          "id": "consensus",
+          "label": "ATCF guidance consensus",
+          "p": 0.99,
+          "unavailable": false,
+          "basis": "3 aids in the 2026082900 deck peak at a mean of 101.7 kt near 72h, disagreeing by 14.5 kt"
+        },
+        {
           "id": "ships-ri",
           "label": "SHIPS rapid-intensification floor",
           "p": null,
           "unavailable": true,
-          "basis": "SHIPS publishes a 37% chance of a 20 kt gain in 12 h (5.8x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
+          "basis": "SHIPS publishes a 28% chance of a 20 kt gain in 12 h (4.5x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
         }
       ],
-      "modelLow": 0.9875379221241222,
+      "modelLow": 0.9179084198569556,
       "modelHigh": 0.99,
-      "modelLagMin": 240,
+      "modelLagMin": 251,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -3471,13 +4312,13 @@
       "modelCalibrated": true,
       "modelQuality": "LOW",
       "modelIntel": {
-        "conKt": null,
-        "conAgeMin": null,
-        "spreadKt": 0,
+        "conKt": 101.7,
+        "conAgeMin": 41,
+        "spreadKt": 14.5,
         "reconAgeMin": null,
         "reconDeltaKt": null,
         "ascatUsed": false,
-        "riFloorP": 0.37,
+        "riFloorP": 0.28,
         "riScored": false,
         "drivenBy": "forecast peak"
       },
@@ -4301,7 +5142,7 @@
       "liquidity": 91,
       "spread": 0.020000000000000018,
       "volume": 11753.6,
-      "volume24h": 365.65,
+      "volume24h": 412.22,
       "openInterest": 7217.11,
       "depth": {
         "bidSize": 10,
@@ -5158,7 +5999,7 @@
       "volume24h": 228.74,
       "openInterest": 4147.22,
       "depth": {
-        "bidSize": 12.94,
+        "bidSize": 27,
         "askSize": 74.74,
         "notional": 1
       },
@@ -11313,14 +12154,14 @@
       "yesBid": 0.04,
       "yesAsk": 0.06,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 5,
+      "liquidity": 4,
       "spread": 0.019999999999999997,
-      "volume": 52578.24,
-      "volume24h": 9594.83,
-      "openInterest": 23030.89,
+      "volume": 52589.49,
+      "volume24h": 9594.52,
+      "openInterest": 23037.14,
       "depth": {
         "bidSize": 6.21,
-        "askSize": 75.63,
+        "askSize": 64.38,
         "notional": 1
       },
       "proxy": false,
@@ -11967,7 +12808,7 @@
       "liquidity": 1,
       "spread": 0.039999999999999994,
       "volume": 1999.22,
-      "volume24h": 532.46,
+      "volume24h": 417.46,
       "openInterest": 1380.35,
       "depth": {
         "bidSize": 27,
@@ -11984,7 +12825,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.445,
+      "market": 0.44,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -12005,16 +12846,16 @@
       "horizon": "storm",
       "strike": null,
       "yesBid": 0.38,
-      "yesAsk": 0.51,
+      "yesAsk": 0.5,
       "closeTime": "2026-09-15T03:59:00Z",
-      "liquidity": 256,
-      "spread": 0.13,
-      "volume": 1706.83,
-      "volume24h": 251.73,
-      "openInterest": 768.63,
+      "liquidity": 5,
+      "spread": 0.12,
+      "volume": 1716.38,
+      "volume24h": 261.35,
+      "openInterest": 763.63,
       "depth": {
-        "bidSize": 10,
-        "askSize": 501.28,
+        "bidSize": 0.45,
+        "askSize": 9.55,
         "notional": 1
       },
       "proxy": false,
@@ -19337,6 +20178,46 @@
       "kind": "advisory",
       "label": "Lowell Advisory #005 — Tropical Storm, 40 kt",
       "source": "NHC",
+      "tier": "A",
+      "hot": false
+    },
+    {
+      "tsZ": "2026-08-29T00:00:00.000Z",
+      "kind": "consensus",
+      "stormId": "EP112026",
+      "label": "Karina guidance consensus 00Z — peak 101.7 kt",
+      "detail": "3 aids (HCCA, IVCN, GDMI) disagreeing by 14.5 kt — in the deck before the advisory built on it",
+      "source": "NHC ATCF a-deck",
+      "tier": "A",
+      "hot": false
+    },
+    {
+      "tsZ": "2026-08-29T00:00:00.000Z",
+      "kind": "ships",
+      "stormId": "EP112026",
+      "label": "Karina SHIPS 00Z — shear 7 kt, OHC 28, MPI 157 kt",
+      "detail": "RI 28% for 20 kt in 12h against a 6% base rate — published, scored only under an operator claim",
+      "source": "NHC ATCF SHIPS",
+      "tier": "A",
+      "hot": false
+    },
+    {
+      "tsZ": "2026-08-29T00:00:00.000Z",
+      "kind": "consensus",
+      "stormId": "EP122026",
+      "label": "Lowell guidance consensus 00Z — peak 115.3 kt",
+      "detail": "3 aids (HCCA, IVCN, GDMI) disagreeing by 30.9 kt — in the deck before the advisory built on it",
+      "source": "NHC ATCF a-deck",
+      "tier": "A",
+      "hot": false
+    },
+    {
+      "tsZ": "2026-08-29T00:00:00.000Z",
+      "kind": "ships",
+      "stormId": "EP122026",
+      "label": "Lowell SHIPS 00Z — shear 15 kt, OHC 22, MPI 156 kt",
+      "detail": "RI 6% for 20 kt in 12h against a 6% base rate — published, scored only under an operator claim",
+      "source": "NHC ATCF SHIPS",
       "tier": "A",
       "hot": false
     }
