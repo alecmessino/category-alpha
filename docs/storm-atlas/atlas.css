@@ -1890,15 +1890,85 @@
  * that band is the plate, which is the same answer this file already gives for the comparison
  * column below. 5c's 834 at 1440 and 1180 at 1920 are the clamp's own endpoints and are
  * untouched: the floor binds only where 5c's own measure had already run out. */
+/* THE SHELL IS AS TALL AS THE VIEWPORT OR AS TALL AS ITS CONTENT, WHICHEVER IS MORE.
+ *
+ * WHAT WAS HERE, AND WHY IT COUPLED THE QUESTION TO THE MAP. The shell inherited
+ * `position:fixed; inset:0` from `.atlas-shell`, which makes its height EXACTLY the viewport and
+ * nothing else, and its second row was `minmax(0,1fr)` -- the elastic one. Between them those
+ * two facts say: whatever the head row takes, the plate row gives up. So a question that took a
+ * third line took 37px of head, and the plate paid it. Measured at 1920x1080, toggling
+ * PROVISIONAL SEASONS: the plate lost 24.91px of height, its aspect went 1.670 -> 1.731, and
+ * because the box changed while the view was still AT the aperture, settle() re-derived the
+ * aperture against the new box and moved the CAMERA 4.35 degrees north. UX-1 stopped the LEDGER
+ * from buying width from the plate; this stops the QUESTION from buying height from it.
+ *
+ * WHAT REPLACES IT, IN ONE SENTENCE. The plate row's height is DECLARED from the viewport and
+ * the composition -- `100vh` less the chrome that is not the plate row -- so it is the same
+ * number whatever the question says; the shell is `min-height:100vh` and in normal flow, so when
+ * a question is long enough that the head no longer fits ALONGSIDE that declared row, the SHELL
+ * grows and the DOCUMENT scrolls. The extreme query pays for its own extra document height. The
+ * ordinary ones, which is every state that fits, are bit-identical to what they were.
+ *
+ * WHAT WAS REJECTED, AND WHY THE REJECTIONS MATTER MORE THAN THE CHOICE. Reserving the head at
+ * the height the longest supported question needs is the obvious fix and it is the wrong one:
+ * measured, the grammar's longest reachable sentence is nine lines, and holding nine lines open
+ * costs the resting plate 254px at 1920 and 227px at 1440, and at 1220 and 1024 it drives the
+ * plate onto `--at-plate-ar-max` -- the aspect this file already calls the point where a single
+ * East Pacific track is a horizontal scratch. Every state would pay, permanently, for a state
+ * almost nobody reaches. Scrolling the question inside its own box was rejected for a different
+ * reason: the question is the largest thing on the surface and the one sentence the whole screen
+ * is an answer to, and a sentence with its own scrollbar is a sentence a reader has to operate.
+ * Clamping lines, truncating, ellipsising, shrinking the type for long queries and abbreviating
+ * the grammar were all rejected on the same ground -- they make the question less than complete,
+ * which is the one thing it may never be. See the hierarchy this implements: the aperture first,
+ * the whole question second, the one-screen terminal third, and a document scroll only for the
+ * genuinely oversized query that has already exhausted the other three.
+ *
+ * `position:relative` RATHER THAN `static`, AND IT IS LOAD-BEARING. `.at-sheet` is an absolutely
+ * positioned GRID CHILD that names `grid-row:2 / 3` so that the editor covers the body row and
+ * not the question above it -- and a grid area is an abs-positioned child's containing block
+ * only while the grid container is itself positioned. Dropping to `static` would have sent the
+ * sheet to the initial containing block and quietly restored the full-surface overlay the
+ * `2 / 3` comment below was written to remove. */
 [data-atlas].atlas-shell.atlas-instrument{
   display:grid;
-  grid-template-rows:auto minmax(0,1fr) var(--at-tport) auto;
+  position:relative;inset:auto;min-height:100vh;
+  /* THE PLATE ROW IS STILL THE ELASTIC ONE. WHAT CHANGED IS THAT IT NOW HAS A FLOOR.
+   *
+   * `minmax(0,1fr)` said: take whatever is left, however little that is. That is the coupling --
+   * a question that took a third line left 37px less, and the plate, which had no height of its
+   * own, was 37px shorter. `minmax(auto,1fr)` with `min-height:max-content` on the row (below)
+   * says something different: take whatever is left, but never less than the figure and its
+   * captions actually need. Above the floor the row still gives, which is why the surplus a tall
+   * screen has spare is spent on the question FIRST and most viewports still fit in one screen.
+   * At the floor it stops giving, the shell grows past the viewport, and the DOCUMENT scrolls.
+   *
+   * MEASURED, TOGGLING PROVISIONAL SEASONS -- the three-line question. At 1680x1050, 1440x900 and
+   * 1024x768 the surplus covers it: one screen, no scroll, plate untouched, exactly as before. At
+   * 1920x1080 the document grows 24.91px and at 1220x820 3.14px -- which are, to the pixel, the
+   * amounts the plate used to LOSE at those two viewports and nowhere else. The scroll appears
+   * precisely where the aperture would otherwise have been damaged. */
+  grid-template-rows:auto minmax(auto,1fr) var(--at-tport) auto;
   grid-template-columns:minmax(0,1fr);
   background:var(--chrome);
   --at-pad:40px;
   --at-gap:40px;
   --at-ledger:clamp(486px,33.75vw,620px);
   --at-tport:0px;
+  /* THE CHROME THAT IS NOT THE PLATE ROW, AS ONE MEASURED NUMBER.
+     `.at-head` 135.890625 + `.at-colophon` 53, at rest, identical at every width this composition
+     covers (measured 1920, 1440, 1220, 1024, 960 and 900). It is a frozen measurement and it is
+     meant to be: check-atlas-stability asserts, at every gated viewport, that the resting head,
+     transport and colophon still sum to exactly this and that the resting document therefore does
+     not scroll -- so a type change that moves it fails a gate rather than silently costing the
+     plate a pixel or opening a scrollbar on a screen that fits. The transport is NOT in the
+     number because it is already its own track and its own variable. */
+  --at-chrome-h:188.890625px;
+  /* THE DECLARED SPACE THE FIGURE COLUMN IS ALLOWED, and the only place `100vh` enters the
+     plate's geometry. Viewport height, less the composition's own chrome, less the plate row's
+     own padding -- no term in it can be moved by a query, a cohort, a condition or a sentence.
+     It is what the plate USED to be given by an elastic row, written down. */
+  --at-stage-col-h:calc(100vh - var(--at-chrome-h) - var(--at-tport) - 38px);
   /* The plate's available width: the body row less the page padding, the gutter and the ledger.
      Everything that bounds the plate's shape is computed against THIS rather than against the
      viewport, so a change to the ledger measure moves the plate's bounds with it automatically
@@ -2060,7 +2130,27 @@
 /* ─── the body: plate left, ledger right ──────────────────────────────────────────────── */
 [data-atlas].atlas-instrument .atlas-plate-row{
   display:grid;
-  grid-template-columns:minmax(0,1fr) var(--at-ledger);
+  /* THE PLATE'S COLUMN IS DECLARED AND THE LEDGER TAKES THE REMAINDER, WHICH IS THE SAME LAYOUT
+     UNTIL A SCROLLBAR EXISTS -- AND THEN IT IS THE WHOLE POINT.
+     `1fr var(--at-ledger)` and `var(--at-plate-avail) minmax(0,1fr)` resolve to the same two
+     numbers while the row is exactly `100vw - 2 * --at-pad` wide, which it always was: the shell
+     was fixed to the viewport and the document could not scroll. It can now. A document
+     scrollbar takes its width out of the shell, and under the old order the plate's column was
+     the `1fr` that absorbed the loss -- so a question long enough to need scrolling would have
+     moved the plate's WIDTH by the width of the scrollbar, which is the aperture moving because
+     a scrollbar appeared. Written this way the plate's column is `--at-plate-avail` by
+     construction, viewport-derived and scrollbar-independent, and the ledger absorbs the
+     scrollbar out of the 18px of slack UX-1 measured between its five tracks (468) and its
+     measure (486). That is the "stable gutter or equivalent structural solution": the gutter is
+     paid for by the column that has room, not by the one whose size is the invariant. */
+  grid-template-columns:var(--at-plate-avail) minmax(0,1fr);
+  /* THE ROW'S FLOOR, AND IT IS A KEYWORD RATHER THAN A NUMBER ON PURPOSE. `max-content` here is
+     the figure column's own answer to "how tall would you like to be": the three captions, which
+     are all `flex:none`, plus the plate's declared height, plus this row's padding. The ledger
+     contributes nothing to it -- see `contain:size` below -- because it is meant to scroll. So the
+     floor tracks the composition automatically and there is no second frozen measurement to keep
+     in step with a caption's line count. */
+  min-height:max-content;
   gap:0 var(--at-gap);
   /* THE COLOPHON'S SEPARATION IS THIS ROW'S BOTTOM PADDING, NOT THE COLOPHON'S TOP MARGIN, and
      the difference is measurable. The shell is a grid whose rows must sum to the viewport, and
@@ -2068,11 +2158,33 @@
      in neither box, so 18px of it read as 18px of blank plane at every viewport. Padding on the
      elastic row costs the plate the same 18px and is inside a box the sum can see. */
   padding:20px var(--at-pad) 18px;
-  min-width:0;min-height:0;position:relative;
+  /* `min-height` IS THE FLOOR ABOVE, NOT THE ZERO THAT USED TO BE HERE. Every layout item in this
+     shell carries `min-height:0` so that it may be shorter than its content and scroll; on THIS
+     row that rule was the coupling's last link -- it is what let the elastic track shrink the
+     figure column all the way down as the question grew. */
+  min-width:0;position:relative;
 }
 [data-atlas].atlas-instrument .atlas-stage-col{
   grid-column:1;grid-row:1;
   display:flex;flex-direction:column;min-width:0;min-height:0;
+  /* THE VIEWPORT'S SHARE IS CAPPED HERE, ON THE COLUMN, AND NOT ON THE ROW ABOVE IT.
+   *
+   * This is the one line that lets the plate row be content-sized without a wide, short screen
+   * asking for more map than the screen has. The column holds the figure and its three captions;
+   * capping the COLUMN means the plate is squeezed by exactly the space the captions leave, which
+   * is what an elastic row used to do for it -- and it means neither this file nor the gate has
+   * to name the captions' height anywhere, because flex measures it. Measured against the old
+   * geometry at every viewport in check-plate-aperture's matrix, the resting plate is identical:
+   * 1180x706.58 at 1920x1080, 1180x538.86 at 1920x900, 1820x718.86 at 2560x1080, 2700x1078.86 at
+   * 3440x1440.
+   *
+   * `max-height` AND NOT `height`, WHICH IS THE DIFFERENCE THE WHOLE PASS TURNS ON. A definite
+   * height here would make the plate row definite too, and the row would then hold its full share
+   * of the viewport whether or not the figure needed it -- so a question that grew by 37px would
+   * push the document taller even at the viewports where the column had 37px of slack sitting
+   * unused. A cap lets the row be as tall as the figure actually is, and lets the surplus go to
+   * the elastic track at the foot where a longer question can spend it. */
+  max-height:var(--at-stage-col-h);
 }
 
 /* THE PLATE'S HEIGHT, BOUNDED AT BOTH ENDS AND NOT CAPPED AT 500.
@@ -2096,9 +2208,33 @@
  * plate lands at 587 — within a pixel of 5c's measured 580, from the archive's own frame rather
  * than from a number anybody typed. */
 [data-atlas].atlas-instrument .atlas-stage{
-  flex:1 1 auto;min-width:0;min-height:0;position:relative;
-  max-height:min(calc(var(--at-plate-avail) / var(--at-plate-ar)), 100%);
-  min-height:min(calc(var(--at-plate-avail) / var(--at-plate-ar-max)), 100%);
+  min-width:0;position:relative;
+  /* THE TWO BOUNDS ARE THE SAME TWO BOUNDS. What changed is where the VIEWPORT half of them comes
+   * from, and it is the difference between the plate being given a height and the plate asking
+   * for one.
+   *
+   * WHAT WAS HERE: `flex:1 1 auto` with `max-height:min(avail/ar, 100%)`. The plate had no height
+   * of its own -- `.at-plate` is `position:absolute; inset:0`, so this box's content is zero -- and
+   * every pixel it had came from GROWING into a flex column whose height came from a row whose
+   * height came from the viewport. `100%` was the viewport, laundered through three boxes, and one
+   * of those boxes was the row the question was taking its lines out of.
+   *
+   * WHAT IT IS NOW: a declared height of `avail / ar`, which is the archive's own frame at this
+   * viewport's width, and `flex-shrink` against the column's cap for the wide, short screens where
+   * the frame is taller than the screen can host. Same two numbers, same binding order, and the
+   * plate now asks for a height rather than accepting whatever was left. The captions above and
+   * below it are all `flex:none`, so the plate is the only thing in the column that can give.
+   *
+   * THE FLOOR IS ENFORCED RATHER THAN CAPPED, and that is a deliberate strengthening of a rule
+   * this file already states. `min-height:min(avail/ar-max, 100%)` let the available space
+   * override the floor, so a wide enough and short enough screen would have quietly published a
+   * plate flatter than 3.2 -- the aspect this file calls the point where a single East Pacific
+   * track is a horizontal scratch, and which check-plate-aperture asserts as a bound. It is a
+   * bound now: past it the figure column overflows its cap instead, which is visible and is the
+   * honest failure. */
+  flex:0 1 auto;
+  height:calc(var(--at-plate-avail) / var(--at-plate-ar));
+  min-height:calc(var(--at-plate-avail) / var(--at-plate-ar-max));
 }
 [data-atlas].atlas-instrument .at-plate{position:absolute;inset:0}
 
@@ -2137,6 +2273,23 @@
   min-width:0;min-height:0;overflow-y:auto;overflow-x:auto;overscroll-behavior:contain;
   background:var(--chrome);
   scrollbar-gutter:stable;
+  /* THE LEDGER TAKES THE ROW'S HEIGHT AND MAY NOT SET IT, AND SAYING SO IS NOW STRUCTURAL.
+   *
+   * It never did set it: the row was `minmax(0,1fr)` on the shell, so its height came from the
+   * viewport and this column scrolled whatever did not fit -- which is the behaviour, and it is
+   * unchanged. But the row is content-sized now, so that the figure column can leave its unused
+   * space to the question above it, and a content-sized row asks BOTH of its columns how tall
+   * they would like to be. This one would like to be about 1,900px: it is the whole evidence
+   * deck, and it is meant to scroll. Measured without this line, at 1440x900: the plate row
+   * reported 2,199px and the document 2,389.
+   *
+   * `contain:size` is the one-word way to say "size this box from its box, not from its
+   * contents". The column then stretches to the row the figure asked for, exactly as it did when
+   * the row came from the viewport, and the deck scrolls inside it exactly as it did. Nothing
+   * about what the ledger CONTAINS changes -- the tracks, the sticky heads, the pinned limits and
+   * the horizontal scroll are all still laid out and still work; the only thing withdrawn is its
+   * vote on how tall the row is, which was never a vote it was supposed to have. */
+  contain:size;
 }
 /* THE TIMING COLUMNS ARE TWO MORE TRACKS THAN THIS MEASURE HOLDS, AND THE LEDGER SAYS SO RATHER
    THAN CRUSHING THE TABLE. Folded -- which is the resting state -- the four columns fit the 486
@@ -2238,7 +2391,14 @@
  * captions. */
 @media (max-width:899px){
   [data-atlas].atlas-shell.atlas-instrument{
-    position:fixed;inset:0;overflow-y:auto;overscroll-behavior:contain;
+    position:fixed;inset:0;
+    /* `overflow-x:hidden` IS NOT NEW BEHAVIOUR, IT IS THE OLD BEHAVIOUR WRITTEN DOWN. The shell
+       carried `overflow:hidden` as an INLINE style until the plate row's height was declared, and
+       an inline rule beats this block -- so what this composition actually computed was
+       `overflow-x:hidden; overflow-y:auto`. With the inline style gone, saying only `overflow-y`
+       would leave `overflow-x:visible`, which CSS then resolves to `auto` against a non-visible
+       sibling: a horizontal scrollbar, below 900, on a shell that never had one. */
+    overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;
     grid-template-rows:auto auto var(--at-tport) auto;
     --at-pad:20px;--at-gap:0px;
   }
@@ -2257,9 +2417,21 @@
     grid-template-columns:minmax(0,1fr);
     gap:18px 0;min-height:auto;
   }
-  [data-atlas].atlas-instrument .atlas-stage-col{grid-column:1;grid-row:1;min-height:auto}
+  /* AND THE FIGURE COLUMN'S DECLARED SPACE IS RELEASED WITH THE COLUMN IT WAS DECLARED FOR.
+     Above 900 the figure column is a viewport-derived box beside a ledger and the cap is what
+     keeps a wide, short screen from asking for more map than the screen has. Here the plate is a
+     fixed 392px figure at the top of a shell that already scrolls, and a `100vh - chrome` cap on
+     a column that stacks would cut the figure's own captions off at the fold. */
+  [data-atlas].atlas-instrument .atlas-stage-col{
+    grid-column:1;grid-row:1;min-height:auto;max-height:none;
+  }
   [data-atlas].atlas-instrument .atlas-evidence{
     grid-column:1;grid-row:2;overflow-y:visible;overflow-x:visible;min-height:auto;
+    /* AND HERE IT MUST SIZE FROM ITS CONTENTS, because here it IS the second row of a stack that
+       the page scrolls rather than a column beside the figure. A ledger contained to its box in
+       this composition would be a table drawn at whatever height the figure above it happened to
+       be, with the rest of the archive underneath it and no scroll of its own to reach it. */
+    contain:none;
   }
   [data-atlas].atlas-instrument .at-deck:not([data-timing-folded]){min-width:0}
   [data-atlas].atlas-instrument .atlas-stage{

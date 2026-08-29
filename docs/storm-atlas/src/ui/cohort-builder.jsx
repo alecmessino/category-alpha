@@ -205,7 +205,10 @@ export function CohortBuilder({
           const on = !!(s.months && s.months.includes(i + 1));
           const n = preview ? (preview.months[i + 1] || 0) : null;
           return (
-            <button key={i} type="button" onClick={() => toggleMonth(i + 1)}
+            /* `data-month` FOR THE SAME REASON kit.jsx STAMPS `data-chip`: the visible label is
+               a letter and a live count, so a gate that selected these by their words would
+               break on the first pack that changes a number. */
+            <button key={i} type="button" data-month={i + 1} onClick={() => toggleMonth(i + 1)}
               title={`${MONTH_NAMES[i]}${n === null ? "" : ` — ${n.toLocaleString()} storms of `
                 + `the ${(preview.basisOf.months || 0).toLocaleString()} that satisfy every `
                 + "other condition formed in this month"}`}

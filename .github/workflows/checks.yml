@@ -581,8 +581,20 @@ jobs:
       # the surface is stable this step prints nothing but ok forever, and a detector that quietly
       # stopped detecting would look exactly the same. It seeds a 60px ledger widening -- which is
       # precisely the shape of the defect it was written for -- and fails if that goes unnoticed.
+      # It seeds the SECOND defect too, because that one has a different shape: an elastic plate
+      # row loses HEIGHT and keeps its width, so a run that only ever saw the ledger seed could
+      # lose the reading that made UX-1B provable without anything going red.
+      #
+      # --strict-origin IS THE ONE-WORD PROMOTION THE GATE WAS WRITTEN TO WAIT FOR. It shipped
+      # with the plate's origin tracked rather than blocking, because under the old geometry a
+      # longer question genuinely did push the plate down the page and there was no fix that did
+      # not cost the resting composition something. UX-1B is that fix. The row is declared from the
+      # viewport now, the plate holds its place inside it, and the only movement the tier still
+      # has a cause for is the plate's own caption taking a second line -- which the gate measures
+      # per occurrence rather than assumes. Running without this flag would leave the surface free
+      # to reintroduce the defect and merely mention it.
       - name: Verify the plate's box and camera survive every non-camera state change
-        run: node scripts/check-atlas-stability.mjs --self-test --require-browser
+        run: node scripts/check-atlas-stability.mjs --self-test --strict-origin --require-browser
 
       # THE REAL-STATE MATRIX. Every layout bug this integration produced was invisible in the
       # state it was introduced in and obvious two states later: the plate measured 0x0 only once

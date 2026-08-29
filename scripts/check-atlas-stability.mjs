@@ -41,14 +41,27 @@
  * PRINTS them on failure, because they are the likeliest cause, but it never fails on them. It
  * fails when the plate moved.
  *
- * TWO TIERS, AND THE SPLIT IS BETWEEN TWO CAUSES RATHER THAN TWO STANDARDS. The plate's SIZE and
- * the CAMERA block: they fail on a state-dependent measure moving the box, which is the defect
- * this file was written for and which has a fix with no cost. The plate's ORIGIN is asserted in
- * the same words and printed with its magnitude, but counted apart, because it fails for a
- * different reason -- the question sentence is allowed the lines it needs and the plate row is
- * the elastic one, so a longer question pushes the plate down the page without changing its
- * shape or its view. See `note` below for the trade that keeps it out of the blocking tier, and
- * `--strict-origin` for the one word that promotes it when that trade is settled.
+ * WHAT BLOCKS, AFTER UX-1B. The plate's SIZE, its X, the CAMERA, the DECLARED ROW it sits in and
+ * the USABLE WIDTH of the page. Nothing excuses any of them any more. The first version of this
+ * file excused a size or camera move when the question sentence had taken another line, because
+ * under the geometry it was written against a longer sentence HAD to come out of the map: the
+ * head row was `auto`, the plate row was `minmax(0,1fr)`, and the shell was pinned to exactly one
+ * viewport. UX-1B declared the plate row from the viewport and the composition and let the
+ * document grow instead, so that excuse describes a surface that no longer exists and it has been
+ * deleted rather than loosened.
+ *
+ * THE ONE TIER THAT REMAINS TRACKED IS THE PLATE'S PLACE INSIDE ITS OWN ROW, and it is tracked
+ * for a cause that has nothing to do with the question: `.at-platehead` -- the plate's own caption
+ * -- prints the cohort count and takes a second line at 1220 when a scope condition lengthens it,
+ * and the plate follows it down by exactly that. The cause is measured per occurrence, so a plate
+ * that slides inside a row whose caption did not move still fails. `--strict-origin` promotes it.
+ *
+ * THE PAGE-ABSOLUTE `y` IS DELIBERATELY NOT ASSERTED, and that is not a weakening. A question
+ * long enough to need a fourth line pushes the whole row down a document that is now allowed to
+ * be taller than the screen; that is the design. The invariant that replaced it -- the row's own
+ * height, plus the plate's offset within it -- is strictly stronger, because it fails on a row
+ * that is quietly content-sized again even while the aspect ceiling is still holding the plate's
+ * numbers steady.
  *
  * Run: node scripts/check-atlas-stability.mjs [--require-browser] [--self-test] [--strict-origin]
  */
@@ -70,32 +83,28 @@ const ok = (label, cond, detail = "") => {
 
 /* THE SECOND TIER, AND WHY THERE IS ONE.
  *
- * The plate's SIZE and the CAMERA are the acceptance criterion and they block. The plate's
- * ORIGIN is asserted by the same readings and reported in the same words, but it is counted
- * separately and does not fail the run, because it has a different cause and a different fix.
+ * The aperture -- the plate's size, its column, its declared row and its camera -- is the
+ * acceptance criterion and it blocks. One reading is asserted in the same words and printed with
+ * its magnitude but counted separately, because it has a different cause.
  *
- * The size failures come from `:has(.at-dc-vs)` widening `--at-ledger`, which is a state-
- * dependent measure with no business existing. The origin failures come from the QUESTION
- * SENTENCE taking a second or third line -- `formed within 500 km of 15.5N 106.5W` is longer
- * than `formed anywhere`, the head row is `auto`, and the plate row is the elastic one, so a
- * longer question pushes the plate down by 20 to 58px. That is content changing the aperture and
- * it is the same defect class, but every available fix trades against something the resting
- * composition is measured on: reserving three lines costs the plate ~37px at rest and leaves a
- * gap above a one-line question; capping the question is a typographic decision about the
- * largest thing on the surface.
+ * The blocking readings are about the APERTURE: its shape, its column, its row and its view.
+ * What is left in this tier is the plate's offset inside its declared row, whose one legitimate
+ * cause is the plate's own caption taking a second line -- `.at-platehead` prints the cohort
+ * count, and at 1220 a scope condition takes it from 19px to 35px with the plate following it
+ * down by exactly 16. That is the figure's caption doing its job, not the question buying height
+ * from the map, and the two are told apart by measuring the caption rather than by assuming.
  *
- * So it is TRACKED RATHER THAN SILENT. A known exception that prints every time it happens, with
- * its magnitude, is honest; folding it into the blocking assertion would stall the fix that is
- * ready, and dropping it from the gate entirely would lose the only measurement anyone has of
- * it. `--strict-origin` promotes it to blocking, which is the one-word change the follow-up
- * makes when the question's height stops being elastic. */
+ * So it is TRACKED RATHER THAN SILENT. A known movement that prints every time it happens, with
+ * its magnitude and its measured cause, is honest; and `--strict-origin` makes it blocking, which
+ * is what the workflow runs, so in practice this tier is a way of REPORTING a cause rather than a
+ * way of forgiving one. */
 let advisories = 0;
 const STRICT_ORIGIN = process.argv.includes("--strict-origin");
 const note = (label, cond, detail = "") => {
   if (cond) { console.log("  ok    " + label); return true; }
   if (STRICT_ORIGIN) return ok(label, false, detail);
   advisories++;
-  console.log("  note  " + label + "  [known: the question's line count is elastic]"
+  console.log("  note  " + label + "  [tracked: the plate's own caption sets its offset]"
     + (detail ? "\n        " + String(detail).replace(/\n/g, "\n        ") : ""));
   return false;
 };
@@ -166,9 +175,45 @@ const read = () => page.evaluate(() => {
      that the exception can be PROVEN per occurrence rather than assumed: a plate that changed
      while the question did not is a ledger regression and must block, whatever it looks like. */
   const q = document.querySelector("[data-question]");
+  /* THE DECLARED ROW, AND THE PLATE'S PLACE INSIDE IT. `--at-plate-row-h` is the whole of UX-1B:
+     the plate row's height is `100vh` less the composition's own chrome, so it is the same number
+     whatever the question says, and the plate is positioned WITHIN that row rather than by what
+     is above it. Both are read here because the page-absolute `y` is no longer the invariant --
+     a question that needs a fourth line legitimately pushes the whole row down a document that
+     is allowed to be taller than the screen. What may not change is the row's HEIGHT and the
+     plate's offset inside it. */
+  const row = document.querySelector(".atlas-plate-row");
+  const rb = row ? row.getBoundingClientRect() : null;
+  const ph = document.querySelector(".at-platehead");
+  const head = document.querySelector(".at-head");
+  const colo = document.querySelector(".at-colophon");
+  const tport = document.querySelector(".atlas-transport");
+  const hh = head ? head.getBoundingClientRect().height : null;
+  const ch = colo ? colo.getBoundingClientRect().height : null;
+  const th = tport ? tport.getBoundingClientRect().height : null;
+  const de = document.documentElement;
   return {
     qh: q ? +q.getBoundingClientRect().height.toFixed(2) : null,
+    /* THE QUESTION MUST BE WHOLE AND MUST NOT HAVE ITS OWN SCROLLBAR. `qFull` is the sentence as
+       the grammar wrote it; `qClipped` is true if the element is scrolling its own content, which
+       is the fix this pass explicitly refused. */
+    qText: q ? (q.getAttribute("title") || "") : null,
+    qLen: q ? (q.textContent || "").length : null,
+    qClipped: q ? q.scrollHeight > q.clientHeight + 1 : null,
     x: +b.x.toFixed(2), y: +b.y.toFixed(2), w: +b.width.toFixed(2), h: +b.height.toFixed(2),
+    rowH: rb ? +rb.height.toFixed(2) : null,
+    relY: rb ? +(b.y - rb.y).toFixed(2) : null,
+    phH: ph ? +ph.getBoundingClientRect().height.toFixed(2) : null,
+    headH: hh === null ? null : +hh.toFixed(3),
+    chrome: hh === null || ch === null || th === null ? null : +(hh + ch + th).toFixed(3),
+    declaredChrome: shell
+      ? getComputedStyle(shell).getPropertyValue("--at-chrome-h").trim() : null,
+    docH: de.scrollHeight, clientH: de.clientHeight,
+    clientW: de.clientWidth, scrollW: de.scrollWidth,
+    ledgerW: (() => {
+      const e = document.querySelector(".atlas-evidence");
+      return e ? +e.getBoundingClientRect().width.toFixed(2) : null;
+    })(),
     lat: +c.lat.toFixed(4), lon: +c.lng.toFixed(4), z: +m.getZoom().toFixed(4),
     ledger: shell ? getComputedStyle(shell).getPropertyValue("--at-ledger").trim() : null,
     cols: deck ? getComputedStyle(deck).gridTemplateColumns : null,
@@ -371,94 +416,285 @@ for (const [w, h] of VIEWPORTS) {
     const after = await read();
     if (!after) { ok(`${t.name} — plate still measurable`, false, "the plate went away"); continue; }
 
-    /* WHICH TIER A MOVE BELONGS IN IS DECIDED BY ITS CAUSE, AND THE CAUSE IS MEASURED.
+    /* NOTHING EXCUSES A SIZE OR A CAMERA MOVE ANY MORE, AND THAT IS THE POINT OF UX-1B.
      *
-     * The question sentence is allowed the lines it needs; the head row is `auto` and the plate
-     * row is the elastic one, so a longer question BOTH pushes the plate down and takes height
-     * off it. One cause, two measurable effects -- and the tracked exception has to cover both
-     * or it covers neither honestly. So the test is not "did the height change" but "did the
-     * QUESTION change": if it did not and the plate moved anyway, that is the ledger putting its
-     * measure into the map and it blocks, exactly as before.
+     * WHAT USED TO BE HERE. A question that took another line was allowed to change the plate's
+     * height and its camera, because the head row was `auto`, the plate row was `1fr`, and the
+     * shell was pinned to exactly one viewport -- so a longer sentence HAD to come out of the
+     * map. The excuse was honest about a real trade and it is now obsolete: the plate row's
+     * height is declared from the viewport and the composition, the shell may grow past one
+     * screen, and a wrap costs the plate nothing at any viewport. So the wrap-shaped exemption is
+     * gone rather than loosened, and the two readings that replace it are STRICTER than what they
+     * replace, not weaker.
      *
-     * WIDTH IS NEVER EXCUSED. The question is above the plate, not beside it, so it cannot
-     * explain a width change under any composition. A width move blocks unconditionally. */
-    const wrapped = base.qh !== null && after.qh !== null && Math.abs(after.qh - base.qh) > 0.5;
+     * THE FIVE THAT BLOCK, AND WHY EACH IS ITS OWN READING RATHER THAN ONE `rect` COMPARISON.
+     *
+     *   w, h        the aperture's shape. Never excused, under any cause.
+     *   camera      the view. Never excused except for a transition that IS a camera command.
+     *   x           a horizontal move. The question is above the plate, not beside it, and the
+     *               document scrolls vertically -- nothing in this composition can move the
+     *               plate sideways for a reason a reader asked for.
+     *   clientW     the usable width. A document scrollbar that took its width out of the plate's
+     *               column would move the aperture because scrolling became necessary, which is
+     *               the one thing the long-question state must not do.
+     *
+     * THE PLATE ROW'S OWN HEIGHT IS NOT ONE OF THEM, AND THAT IS THE DESIGN RATHER THAN A GAP.
+     * The row is content-sized on purpose: it is as tall as the figure and its captions actually
+     * are, so that whatever the viewport has left over collects under the colophon where a longer
+     * question can spend it instead of coming out of the map. What is declared is the figure
+     * column's CAP -- `--at-stage-col-h`, viewport less chrome -- and the plate's own height under
+     * it, and both of those are read above. A row that changed height while the plate did not is
+     * the captions rewrapping, which is tracked below with its cause.
+     */
     const widthMoved = Math.abs(after.w - base.w) > RECT_TOL;
     const movedS = sizeMoved(base, after);
     const movedC = !t.cameraExempt && camMoved(base, after);
-    const blockingSize = !t.rectExempt && (widthMoved || (movedS && !wrapped));
-    const blockingCam = !t.rectExempt && movedC && !wrapped;
-    ok(`${t.name}`, !blockingSize && !blockingCam && errors.length === 0,
+    const xMoved = Math.abs(after.x - base.x) > RECT_TOL;
+    const usableMoved = after.clientW !== base.clientW;
+    const blocking = !t.rectExempt && (movedS || xMoved || usableMoved);
+    const blockingCam = !t.rectExempt && movedC;
+    ok(`${t.name}`, !blocking && !blockingCam && errors.length === 0,
        [widthMoved ? "THE PLATE CHANGED WIDTH." : movedS ? "THE PLATE CHANGED SIZE." : null,
+        xMoved ? "THE PLATE MOVED SIDEWAYS." : null,
+        usableMoved ? `THE USABLE WIDTH CHANGED: ${base.clientW} -> ${after.clientW} — a `
+          + `scrollbar is reaching the layout.` : null,
         blockingCam ? "THE CAMERA MOVED and this transition is not a camera command." : null,
         why(base, after), ...errors].filter(Boolean).join("\n"));
-    if (wrapped && (movedS || originMoved(base, after) || movedC)) {
-      note(`${t.name} — and the plate held its box and its view`, false,
-           `the question grew from ${base.qh}px to ${after.qh}px and the plate row is the elastic `
-           + `one, so the plate paid for it\n${why(base, after)}`);
-    } else {
-      note(`${t.name} — and the plate did not move on the page`,
-           !originMoved(base, after), why(base, after));
-    }
+
+    /* THE ORIGIN, RE-AIMED AT WHAT IS STILL AN INVARIANT.
+     *
+     * The plate's PAGE-ABSOLUTE `y` is deliberately no longer asserted: a question long enough to
+     * need a fourth line pushes the whole row down a document that is now allowed to be taller
+     * than the screen, and that is the design rather than a defect. What is still invariant is
+     * the plate's offset INSIDE its declared row -- and the one thing that legitimately changes
+     * it is the plate's own caption, `.at-platehead`, taking a second line when the cohort line
+     * it prints gets longer. Measured at 1220 with PROVISIONAL SEASONS on: the platehead goes
+     * 19 -> 35px and the plate follows it down by exactly 16. So the cause is checked per
+     * occurrence, as everywhere else in this file: a plate that slid inside its row while its own
+     * caption did NOT change height is the coupling coming back by a shorter route, and it is
+     * reported with its magnitude. `--strict-origin` makes it blocking. */
+    const relMoved = base.relY !== null && after.relY !== null
+      && Math.abs(after.relY - base.relY) > RECT_TOL;
+    const capExplains = base.phH !== null && after.phH !== null
+      && Math.abs((after.relY - base.relY) - (after.phH - base.phH)) <= RECT_TOL;
+    note(`${t.name} — and the plate keeps its place inside the declared row`,
+         !relMoved || capExplains,
+         `the plate moved ${(after.relY - base.relY).toFixed(2)}px inside a row that did not `
+         + `change height, and its own caption moved ${((after.phH ?? 0) - (base.phH ?? 0)).toFixed(2)}px`
+         + `\n${why(base, after)}`);
 
     await t.revert();
     const back = await read();
     if (t.cameraExempt) clean = null;
     if (back && !t.cameraExempt) {
-      const backWrapped = base.qh !== null && back.qh !== null && Math.abs(back.qh - base.qh) > 0.5;
-      const rectReturned = !sizeMoved(base, back) && !originMoved(base, back);
-      /* THE ONE CAMERA DRIFT THIS FILE DOES NOT COUNT, AND IT IS COUNTED SOMEWHERE ELSE INSTEAD.
+      /* REVERTING IS NOW REQUIRED TO RETURN THE APERTURE EXACTLY, WITH NO EXEMPTION.
        *
-       * Where the APPLY step wrapped the question and the REVERT brought the rectangle back
-       * exactly, the camera does not come back with it: measured at 1220, lat 37.96455 out,
-       * 37.79956 back, a 0.165 degree residue at zoom 2.75. It is one-shot rather than
-       * cumulative -- a second identical cycle lands on the same value -- and HOME does not
-       * clear it, which places the fault in the home FRAME rather than in the view: the frame is
-       * re-derived when the cohort changes and does not return to its opening value when the
-       * cohort does.
+       * WHAT WAS EXEMPTED HERE, AND WHY IT NO LONGER NEEDS TO BE. Where the apply step wrapped
+       * the question and the revert brought the rectangle back exactly, the CAMERA did not come
+       * back with it: measured at 1220, lat 37.96455 out, 37.79956 back, a 0.165 degree residue
+       * at zoom 2.75, identical on unmodified main. That was tracked here as a second defect
+       * needing its own fix, and the working hypothesis was that it might be downstream of the
+       * first -- the wrap changed the container's size, settle() re-derived the aperture against
+       * the changed box, and the return trip re-derived it again from a different starting view.
        *
-       * IT IS NOT THIS PASS'S. The identical probe against unmodified main gives the identical
-       * numbers -- same 37.96455 out, same 37.79956 back, same -0.16499 residue -- so the ledger
-       * fix neither caused it nor hid it; this gate is simply the first thing that ever measured
-       * it. What the fix DID do is shrink the excursion it is triggered by, because the plate now
-       * gives up 3px to the wrap instead of 8.5.
-       *
-       * So it is tracked with the wrap that triggers it and not counted against a change that
-       * did not cause it. A camera that fails to return WITHOUT the question having wrapped is a
-       * different thing and still blocks. */
-      const wrapResidue = rectReturned && backWrapped === false && camMoved(base, back)
-        && base.qh !== null && wrapped;
+       * IT WAS. With the plate row's height declared, the container is bit-identical throughout
+       * the cycle, and the residue is simply gone: measured across all five viewports, the
+       * PROVISIONAL SEASONS round trip returns lat, lon and zoom to their opening values exactly,
+       * 1220 included. No map code was touched to achieve it -- `applyFrame`, `goHome`,
+       * `coreFrame`, `coreAnchor` and the `wasAtAperture` branch of `settle()` are all unchanged.
+       * One cause, one fix. So the exemption is deleted rather than kept as a safety margin: a
+       * camera that fails to return is a failure again, whatever the question did. */
       ok(`${t.name} — and reverting returns to the same aperture`,
-         !(Math.abs(back.w - base.w) > RECT_TOL)
-         && !(sizeMoved(base, back) && !backWrapped)
-         && !(camMoved(base, back) && !backWrapped && !wrapResidue),
+         !sizeMoved(base, back) && !camMoved(base, back)
+         && !(Math.abs(back.x - base.x) > RECT_TOL),
          why(base, back));
-      /* THE PAGE CARRIES FORWARD ONLY IF THE REVERT ACTUALLY RESTORED IT, rect AND camera. The
-         wrap residue above is exactly the case where it did not: that baseline is spent. */
+      /* THE PAGE CARRIES FORWARD ONLY IF THE REVERT ACTUALLY RESTORED IT, rect AND camera. */
       clean = (!sizeMoved(base, back) && !originMoved(base, back) && !camMoved(base, back))
         ? back : null;
-      if (wrapResidue) {
-        note(`${t.name} — and the camera returns with it`, false,
-             `the rectangle came back exactly and the camera did not: `
-             + `${base.lat},${base.lon} -> ${back.lat},${back.lon}. Pre-existing — the identical `
-             + `probe on unmodified main gives the identical residue.\n${why(base, back)}`);
-      }
     }
   }
 
   /* THE REFUSAL STATE, against this viewport's own opening. Its query also lengthens the
-     question, so the same cause attribution applies: a width change blocks unconditionally, and
-     a height or origin change that the question's own growth accounts for is tracked. */
+     question, and that no longer buys it any latitude: the plate is required back at the same
+     size in the same column of the same declared row. */
   await open(REFUSAL_QUERY, w, h);
   const refused = await read();
   if (refused && base0) {
-    const rWrapped = base0.qh !== null && refused.qh !== null
-      && Math.abs(refused.qh - base0.qh) > 0.5;
     ok(`a refused cohort holds the same plate as the unqueried one`,
-       !(Math.abs(refused.w - base0.w) > RECT_TOL) && !(sizeMoved(base0, refused) && !rWrapped),
+       !sizeMoved(base0, refused) && Math.abs(refused.x - base0.x) <= RECT_TOL,
        ["a refusal appearing must not cost the plate a pixel", why(base0, refused)].join("\n"));
-    note(`a refused cohort does not move the plate on the page`,
-         !originMoved(base0, refused) && !sizeMoved(base0, refused), why(base0, refused));
+    note(`a refused cohort keeps the plate's place inside the declared row`,
+         Math.abs(refused.relY - base0.relY) <= RECT_TOL, why(base0, refused));
+  }
+
+  /* ── the declared chrome, and the one screen it is declared against ────────────────────────
+   *
+   * `--at-chrome-h` is the frozen measurement the whole of UX-1B rests on: the head and the
+   * colophon at rest, which is everything in the shell that is not the plate row or the
+   * transport. If it drifts, nothing looks broken -- the plate keeps its declared height because
+   * the declaration is what moved -- and the surface silently either opens a scrollbar on a
+   * screen that fits or leaves a strip of chrome under the fold. Both are caught here, and they
+   * are caught as two separate readings so a failure says which happened:
+   *
+   *   the sum      the composition still measures what the stylesheet says it does;
+   *   the screen   and therefore the resting instrument is still exactly one screen.
+   *
+   * The second is the one that matters to a reader and the first is the one that explains it. */
+  await open("", w, h);
+  const rest = await read();
+  if (rest) {
+    const declared = parseFloat(rest.declaredChrome);
+    ok(`the resting chrome still measures its declared ${rest.declaredChrome}`,
+       Number.isFinite(declared) && Math.abs(rest.chrome - declared) <= 0.01,
+       `head + transport + colophon measured ${rest.chrome}px against a declared `
+       + `${rest.declaredChrome}. --at-chrome-h is a frozen measurement of this composition; a `
+       + `type or spacing change that moves it has to move this number with it.`);
+    ok(`the resting instrument is still exactly one screen`,
+       rest.docH <= rest.clientH,
+       `the document is ${rest.docH}px tall inside a ${rest.clientH}px viewport. A document `
+       + `scroll is reserved for a question too long to sit beside the declared plate row; the `
+       + `resting archive question is two lines and must never reach one.`);
+    ok(`nothing overflows sideways at rest`, rest.scrollW <= rest.clientW,
+       `scrollWidth ${rest.scrollW} against clientWidth ${rest.clientW}`);
+  }
+
+  /* ── a scrollbar may not reach the plate ───────────────────────────────────────────────────
+   *
+   * THE READING IS SIMULATED BECAUSE THE REAL THING IS NOT PORTABLE. A document scrollbar takes
+   * its width out of the shell's content box and leaves `100vw` alone -- but whether it takes 0
+   * or 15px depends on the platform, and this browser reports 0, so waiting for a real scrollbar
+   * to prove the property would be waiting for a test that passes because nothing happened.
+   * Narrowing the shell's content box by hand is the same event with a number this gate chose:
+   * `body{padding-right}` narrows exactly what a scrollbar narrows and touches nothing else.
+   *
+   * WHAT MUST HOLD. The plate's column is `--at-plate-avail`, viewport-derived, so the plate
+   * keeps its x and its width; the LEDGER is the flexible column and absorbs the loss out of the
+   * 18px of slack UX-1 measured between its five tracks and its measure. If those two ever swap
+   * -- which is one keystroke in `grid-template-columns` -- a long question would move the map
+   * sideways on the way to being read, and this is the reading that says so. */
+  const SBW = 15;
+  await page.addStyleTag({ content: `body{padding-right:${SBW}px}` });
+  await page.waitForTimeout(SETTLE);
+  const squeezed = await read();
+  await page.evaluate((n) => {
+    for (const s of [...document.querySelectorAll("style")]) {
+      if (s.textContent === `body{padding-right:${n}px}`) s.remove();
+    }
+  }, SBW);
+  await page.waitForTimeout(SETTLE);
+  if (rest && squeezed) {
+    ok(`a ${SBW}px scrollbar cannot reach the plate`,
+       Math.abs(squeezed.x - rest.x) <= RECT_TOL && Math.abs(squeezed.w - rest.w) <= RECT_TOL,
+       `the plate's column is meant to be --at-plate-avail and the ledger the flexible one`
+       + `\n${why(rest, squeezed)}`);
+    ok(`and the ledger is what absorbs it`,
+       rest.ledgerW !== null && Math.abs((rest.ledgerW - squeezed.ledgerW) - SBW) <= RECT_TOL,
+       `the ledger went ${rest.ledgerW} -> ${squeezed.ledgerW}, which is `
+       + `${(rest.ledgerW - squeezed.ledgerW).toFixed(2)}px rather than the ${SBW}px taken`);
+  }
+}
+
+/* ── the longest question the grammar can be driven to ───────────────────────────────────────
+ *
+ * WHY A SECOND FIXTURE, WHEN PROVISIONAL SEASONS ALREADY WRAPS THE QUESTION. Because the three-
+ * line fixture is not the hard case and sizing anything against it would have been sizing against
+ * a sample of one. Driving every zone of the editor to its longest reachable value gives a 456-
+ * character, nine-line sentence -- six times the resting question -- and it is the state that
+ * decides whether the declared row is genuinely declared or merely generous. Reserving the head
+ * at that height was the obvious fix and was rejected on measurement: it costs the resting plate
+ * 254px at 1920 and drives it onto `--at-plate-ar-max` at 1220 and 1024. What is asserted instead
+ * is that the plate does not notice.
+ *
+ * DRIVEN THROUGH THE EDITOR'S OWN CONTROLS, like everything else in this file. The months are
+ * chosen non-contiguously on purpose: `monthPhrase` reads runs as spans, so 1-12 is the SHORT
+ * sentence ("January through December") and the alternating set is the long one.
+ *
+ * WHAT IT DOES NOT INCLUDE, and the omission is deliberate rather than an oversight: the genesis
+ * `where` clause, which needs a point on the map and is therefore only reachable through a map
+ * command. Including it would mean a camera move inside a fixture whose whole purpose is to prove
+ * the camera did not move. It adds roughly 35 characters to a sentence that is already past every
+ * threshold this composition has. */
+const LONGEST = {
+  chips: ["basin-NA", "basin-EP", "basin-WP",
+    "entered-NA", "entered-CP", "entered-CS", "entered-GM", "entered-AS",
+    "season-1971+", "intensity-ts", "landfall-conus"],
+  months: [1, 2, 4, 5, 6, 8, 9, 11, 12],
+  toggles: ["NAMED STORMS ONLY", "PROVISIONAL SEASONS"],
+};
+const driveLongest = async () => {
+  await openSheet();
+  for (const k of LONGEST.chips) await click(`[data-chip="${k}"]`);
+  for (const m of LONGEST.months) await click(`[data-month="${m}"]`);
+  for (const t of LONGEST.toggles) await toggle(t);
+  await closeSheet();
+};
+
+console.log("\n  ── the longest question the editor can be driven to ───────");
+for (const [w, h] of VIEWPORTS) {
+  await open("", w, h);
+  const opening = await read();
+  if (!opening) { ok(`${w}x${h} opens with a measurable plate`, false, "no plate"); continue; }
+  await driveLongest();
+  const long = await read();
+  if (!long) { ok(`${w}x${h} — the plate survives the longest question`, false, "no plate"); continue; }
+
+  const label = `${w}x${h} · ${long.qLen} characters, question ${opening.qh}px -> ${long.qh}px`;
+  ok(`${label} — the aperture is untouched`,
+     !sizeMoved(opening, long) && !camMoved(opening, long)
+     && Math.abs(long.x - opening.x) <= RECT_TOL
+     && long.clientW === opening.clientW,
+     why(opening, long));
+  /* THE QUESTION ITSELF IS PART OF THE ACCEPTANCE, not just the plate. The rejected fixes are all
+     invisible in a rectangle: a clamped line count, an ellipsis, a smaller type size for long
+     queries and a scrollbar inside the sentence would every one of them leave the plate perfect.
+     So the sentence is read back and required to be whole and to be scrolling nothing. */
+  ok(`${w}x${h} — and the question is rendered whole, with no scrollbar of its own`,
+     long.qClipped === false && long.qLen === (long.qText || "").length,
+     `the element scrolls ${long.qClipped ? "its own content" : "nothing"} and renders `
+     + `${long.qLen} of the sentence's ${(long.qText || "").length} characters`);
+  ok(`${w}x${h} — and nothing overflows sideways`, long.scrollW <= long.clientW,
+     `scrollWidth ${long.scrollW} against clientWidth ${long.clientW}`);
+  /* THE DOCUMENT IS ALLOWED TO BE TALLER HERE AND ONLY HERE, and it is asserted from both sides.
+   *
+   *   it MUST grow    a question six times the resting one that did not make the document taller
+   *                   would mean the head is being clipped or the row squeezed -- the defect
+   *                   wearing the fix's clothes.
+   *   it may not grow by MORE than the question did. That is the reading that says the growth is
+   *                   the SENTENCE's and nobody else's: the plate, the ledger, the captions and
+   *                   the colophon all have to be exactly where they were, or this number is
+   *                   bigger than the question and something else moved.
+   *
+   * It grows by LESS, and the difference is the surplus the elastic track at the foot gave up
+   * first -- 39px at 1440x900, 24px at 1220x820 -- which is the whole reason a three-line
+   * question still fits in one screen at most viewports. */
+  const grew = long.docH - opening.docH;
+  const asked = long.qh - opening.qh;
+  ok(`${w}x${h} — and the extra height is paid by the document, not by the plate`,
+     long.docH > long.clientH && grew > 0 && grew <= asked + 1,
+     `the document went ${opening.docH} -> ${long.docH} (+${grew}) for a question that grew `
+     + `${asked.toFixed(2)}px`);
+
+  /* RETURNING TO THE ORIGINAL COHORT MUST RESTORE THE OPENING EXACTLY, and then HOME must too.
+     The second is not implied by the first: a HOME that reads a frame re-derived under the long
+     question would land somewhere else even from a camera that had come back. Both were failing
+     at 1220 before the row was declared; both are asserted now. */
+  await click("[data-reset-query]");
+  const backAgain = await read();
+  if (backAgain) {
+    ok(`${w}x${h} — and returning to the archive restores the opening aperture exactly`,
+       !sizeMoved(opening, backAgain) && !originMoved(opening, backAgain)
+       && !camMoved(opening, backAgain)
+       && backAgain.docH === opening.docH,
+       why(opening, backAgain));
+    await click("[data-camera-home]");
+    const homed = await read();
+    if (homed) {
+      ok(`${w}x${h} — and HOME after the round trip is the opening camera`,
+         homed.lat === opening.lat && homed.lon === opening.lon && homed.z === opening.z,
+         `opening ${opening.lat},${opening.lon} z${opening.z} — after HOME `
+         + `${homed.lat},${homed.lon} z${homed.z}. HOME is a pure function of the archive's own `
+         + `frame and the plate's box; if it lands elsewhere, one of the two moved.`);
+    }
   }
 }
 
@@ -480,17 +716,44 @@ if (SELF_TEST) {
   ok("a 60px ledger widening is detected as a plate move",
      !!before && !!after && sizeMoved(before, after),
      "the detector did not fire on a seeded violation — it is no longer checking anything");
+
+  /* THE SECOND SEED IS UX-1B'S OWN DEFECT, AND IT NEEDS ITS OWN BECAUSE IT HAS ITS OWN SHAPE.
+   *
+   * The ledger seed above widens the plate's NEIGHBOUR, which the readings catch as a width move.
+   * The coupling this pass removed is different: the row above the plate takes another line and
+   * the plate row gives the height back, which changes HEIGHT and leaves width alone. A gate that
+   * only ever saw the first seed could lose the second detector without anything going red.
+   *
+   * So the seed is the old geometry, restored exactly: the plate row released from its declared
+   * height and the shell pinned to one viewport again -- which is `height:auto` on the row and
+   * `position:fixed;inset:0` on the shell, the two lines this pass replaced. Then the question is
+   * lengthened for real, through the editor, and the plate must be seen to lose height. */
+  console.log("\n  ── the seed: an elastic plate row must be caught ───────────");
+  await open("", 1920, 1080);
+  const b2 = await read();
+  await page.addStyleTag({ content:
+    "[data-atlas].atlas-shell.atlas-instrument{position:fixed;inset:0;min-height:0;"
+    + "grid-template-rows:auto minmax(0,1fr) var(--at-tport) auto}"
+    + "[data-atlas].atlas-instrument .atlas-plate-row{height:auto}" });
+  await page.waitForTimeout(SETTLE);
+  await openSheet(); await toggle("PROVISIONAL SEASONS"); await closeSheet();
+  const a2 = await read();
+  ok("a question that takes another line out of an elastic row is detected as a plate move",
+     !!b2 && !!a2 && sizeMoved(b2, a2),
+     `the plate went ${b2 && b2.h}px -> ${a2 && a2.h}px under a seeded elastic row and the `
+     + `detector did not fire — the reading that made UX-1B provable is no longer checking `
+     + `anything`);
 }
 
 await browser.close();
 server.close();
 
 if (advisories) {
-  console.log(`\n[stability] ${advisories} tracked exception(s): the plate keeps its size and its `
-    + `camera but translates down the page when the question sentence takes another line.`);
-  console.log("            This is the question's height being elastic, not the ledger's measure, "
-    + "and it has\n            its own fix and its own trade. Run with --strict-origin to make it "
-    + "blocking once that\n            fix lands.");
+  console.log(`\n[stability] ${advisories} tracked movement(s): the plate keeps its size, its `
+    + `column, its row and its camera, and shifts inside that row.`);
+  console.log("            Each one printed its measured cause above. The only cause this tier "
+    + "accepts is the\n            plate's own caption taking another line; run with "
+    + "--strict-origin, as the workflow does,\n            to make every one of them blocking.");
 }
 console.log(failures === 0
   ? "\n[stability] the aperture holds its size and its camera across every state change tested"

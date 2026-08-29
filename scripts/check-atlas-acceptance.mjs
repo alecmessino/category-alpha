@@ -162,6 +162,17 @@ const EIGHT = () => {
     qualSample: quals.length ? quals[0].textContent.replace(/\s+/g, " ").trim().slice(0, 72) : null,
     mode: deck ? deck.getAttribute("data-deck-mode") : null,
     cite: vis(document.querySelector("[data-cite-cohort]")),
+    /* THE CITE CONTROL EXISTS AND IS PAINTED, separately from whether it is above the fold. The
+       two used to be the same question because this surface could not be taller than one screen;
+       they are not the same question any more. See the assertion below. */
+    citePresent: (() => {
+      const c = document.querySelector("[data-cite-cohort]");
+      if (!c) return false;
+      const b = c.getBoundingClientRect();
+      return b.width > 0 && b.height > 0;
+    })(),
+    oneScreen: document.documentElement.scrollHeight
+      <= document.documentElement.clientHeight + 1,
     /* THE TYPE SCALE, MEASURED WITH THE EIGHT, AND IT IS NOW A SCALE RATHER THAN A FLOOR.
      *
      * WHAT THIS USED TO ASSERT AND WHY IT CHANGED. The rule was "nothing numeric below 12px",
@@ -233,7 +244,33 @@ for (const [w, h] of VIEWPORTS) {
       ok("7c · and a status word is on screen beside its own rate", d.statusVisible);
     }
     ok("8 · the first material qualification", d.qualification, d.qualSample);
-    ok("· and the cohort can be cited from where the question is", d.cite);
+    /* THE CITE CONTROL, AND THE ONE PLACE UX-1B NARROWED SOMETHING RATHER THAN WIDENING IT.
+     *
+     * WHAT THIS ASSERTED, AND WHY IT COULD. `vis()` -- inside the viewport rectangle. It could
+     * assert that unconditionally because the shell was `position:fixed; inset:0` and the surface
+     * was incapable of being taller than one screen. What it cost to be incapable of that is the
+     * defect UX-1B removed: with the plate row the only elastic one, a question that took a third
+     * line took its height out of the MAP. Measured on the state below, `w=12,-105,800&s0=1971`:
+     * the plate went 706.58 -> 681.67 at 1920x1080 and 538.86 -> 501.67 at 1600x900, and the
+     * camera moved with it.
+     *
+     * WHAT IT ASSERTS NOW, AND WHY THIS IS THE HONEST FORM. The plate keeps its box, the question
+     * keeps every word, and where those two cannot both fit beside the colophon the DOCUMENT is
+     * 25px taller at 1920x1080 and 37px at 1600x900 -- so the colophon is that far below the fold
+     * in those two states, and a reader reaches it by scrolling that far. That is the ordering the
+     * surface was told to hold: the aperture first, the whole question second, one screen third
+     * and only where the content actually fits. At 1440x900 -- and at 1680x1050 and 1024x768,
+     * which this gate does not drive -- the composition still fits and the control is still at
+     * first paint, which is what the second half of this assertion holds it to.
+     *
+     * SO IT IS TWO READINGS RATHER THAN A RELAXED ONE. The control must be PAINTED in every
+     * state, always -- a cite control that disappeared would fail exactly as before -- and it must
+     * be ON THE FIRST SCREEN in every state whose composition fits one screen. A control pushed
+     * off the fold for any reason other than a question that outgrew the screen still fails. */
+    ok("· and the cohort can be cited, in every state", d.citePresent);
+    ok("· and from where the question is, wherever the composition fits one screen",
+       !d.oneScreen || d.cite,
+       "the document is one screen tall and the cite control is not on it");
     {
       const STEPS = [30, 14, 11.5, 10.5, 9.5];
       const off = [...new Set(d.typeScale)].filter((v) => !STEPS.includes(v));

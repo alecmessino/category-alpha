@@ -388,10 +388,30 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
      bounds.ar === "1.67", `--at-plate-ar is ${bounds.ar}`);
   ok("and the ceiling is where one track stops being the subject of its plate",
      bounds["ar-max"] === "3.2", `--at-plate-ar-max is ${bounds["ar-max"]}`);
+  /* THE SHAPE OF THE TWO DECLARATIONS CHANGED WITH UX-1B AND THE CLAIM DID NOT. They were
+     `max-height:min(calc(avail/ar), 100%)` and `min-height:min(calc(avail/ar-max), 100%)`: the
+     plate had no height of its own and grew into a flex column whose height came from a row whose
+     height came from the viewport -- and that row was the one a longer question took its lines
+     out of. The plate asks for a height now, `avail/ar`, and the viewport's share is capped on
+     the figure COLUMN instead. Both bounds still reach the stage through the pinned tokens and
+     neither is a literal, which is the whole of what this reading is for; what is gone is the
+     `100%` that made the second half of each bound a laundered viewport. */
   ok("both aspect bounds reach the stage as tokens, not as literals",
-     /max-height:min\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css)
-     && /min-height:min\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)/.test(css),
+     /[^-]height:calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css)
+     && /min-height:calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)/.test(css),
      "the stage's height bounds are not reading the pinned tokens");
+  /* AND THE FIGURE COLUMN'S CAP IS A FROZEN MEASUREMENT, PINNED LIKE THE LEDGER MEASURE ABOVE.
+     `--at-chrome-h` is the head plus the colophon at rest -- everything in the shell that is not
+     the plate row or the transport -- and it is what stops a wide, short screen asking for more
+     map than the screen has. If it drifts, nothing looks broken: the plate keeps its declared
+     height because the declaration is what moved, and the surface quietly either opens a
+     scrollbar on a screen that fits or leaves a strip of chrome under the fold.
+     check-atlas-stability catches the drift at runtime, at every gated viewport; this catches the
+     EDIT, so moving it is a change to this file with a number in the diff. */
+  ok("the figure column's cap is the composition's own chrome, measured",
+     /--at-chrome-h:188\.890625px/.test(css)
+     && /--at-stage-col-h:calc\(100vh - var\(--at-chrome-h\) - var\(--at-tport\) - 38px\)/.test(css),
+     "--at-chrome-h or the cap derived from it is not the frozen measurement");
   /* AND THE THREE RETIRED TOKENS MUST STAY RETIRED. A cap re-declared but unread is a bound
      somebody will wire back up on the first aperture failure; a cap re-declared AND read is the
      stacked shell returning by the back door. Either way the argument above stops being true, so

@@ -804,10 +804,20 @@ export function Atlas() {
   const conditions = conditionsOf(cohort);
 
   return (
+    /* THE SHELL'S BOX IS THE STYLESHEET'S, NOT THIS FILE'S.
+       `position:fixed; inset:0; overflow:hidden` used to be written on this element, inline,
+       which beats every rule in atlas.css by construction -- so the shell was pinned to exactly
+       one viewport whatever the stylesheet said, and a question that needed a fourth line had
+       nowhere to take it from but the plate row beside it. The two-column instrument now declares
+       its plate row from the viewport and grows past one screen only for a question too long to
+       sit alongside it; the stacked shell below 900 is still fixed and still scrolls inside
+       itself. Both of those are geometry, both belong in the one file that holds this surface's
+       geometry, and neither can be expressed here at all -- an inline style cannot carry a media
+       query. Only the two colours stay, because they are this component's own tokens, not a
+       shape. */
     <div data-surface="tactical" data-view="tactical" data-atlas data-shell={shell}
       className="atlas-shell atlas-instrument" style={{
-        position: "fixed", inset: 0,
-        background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
+        background: "var(--surface-app)", color: "var(--text-1)",
       }}>
       {/* THE HEAD, AND IT IS THE QUESTION.
           The identity strip that used to open the surface is gone from the top: 5c moves the

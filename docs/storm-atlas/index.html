@@ -14,8 +14,17 @@
 <link rel="preload" href="data/atlas-tracks-v1.bin.gz" as="fetch" crossorigin>
 <link rel="stylesheet" href="atlas.css">
 <style>
-html,body{margin:0;height:100%}
-body{background:var(--stage,#0d131d);color:#eaf0f7;font-family:var(--font-sans);overflow:hidden}
+/* `min-height`, NOT `height`, AND THE DOCUMENT IS ALLOWED TO SCROLL.
+   Both used to be `height:100%` with `overflow:hidden` on the body, which said: this surface is
+   exactly one screen and nothing may ever be taller. That was the last link in the chain that
+   made a long question take its lines out of the map -- with the page unable to grow, a taller
+   head had nowhere to take its height from except the plate row beside it. The instrument
+   declares its plate row from the viewport now and grows past one screen only when a question is
+   too long to fit alongside it; `min-height` is what lets it, and it is still exactly one screen
+   in every state that fits. The stacked shell below 900 and the calibration surface are both
+   still `position:fixed; inset:0` and scroll inside themselves, so neither is affected. */
+html,body{margin:0;min-height:100%}
+body{background:var(--stage,#0d131d);color:#eaf0f7;font-family:var(--font-sans)}
 *{box-sizing:border-box}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#2b3746}

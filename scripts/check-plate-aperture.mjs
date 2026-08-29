@@ -266,9 +266,17 @@ if (process.argv.includes("--self-test")) {
       at: [1440, 2000],
       css: "[data-atlas].atlas-shell.atlas-instrument{--at-plate-ar:1.421!important}",
       broke: (m) => m.ar < FLOOR - 0.002 },
+    /* THE SEED IS THE SAME REGRESSION, WRITTEN AGAINST THE DECLARATION THAT NOW CARRIES THE
+       BOUND. It used to be `max-height:none`, because the plate had no height of its own -- it
+       grew into its column and `max-height` was the only thing stopping it. UX-1B gave it a
+       declared `height:calc(avail/ar)` and moved the viewport's share to a cap on the figure
+       COLUMN, so `max-height:none` now removes nothing and the seed would have passed by doing
+       nothing at all. Handing the plate the column's whole declared height is the same defect in
+       the new shape: the floor gone, and every pixel a tall viewport has going to the map. */
     { name: "the floor removed — the plate takes every pixel a tall viewport has",
       at: [1440, 2000],
-      css: `[data-atlas].atlas-instrument .atlas-stage{max-height:none!important}`,
+      css: `[data-atlas].atlas-instrument .atlas-stage{
+              flex:none!important;height:var(--at-stage-col-h)!important}`,
       broke: (m) => m.ar < FLOOR - 0.002 },
     { name: "the ceiling dropped — a wide, short workstation goes panoramic",
       at: [1920, 900],
