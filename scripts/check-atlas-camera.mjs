@@ -360,6 +360,67 @@ console.log("\n[camera] a query change never steals a camera the reader has move
   }
 }
 
+/* THE SAME RULE, IN THE BRANCH THE BLOCK ABOVE CANNOT REACH.
+ *
+ * WHAT THE DRAG COSTS. The persistence sequence above establishes its premise with a real drag,
+ * and that is right for what it asserts -- a camera the READER moved must not be taken away. But
+ * a pointer-originated `movestart` sets `userMoved` and clears `atAperture` (map.jsx:386-388), so
+ * for the whole of that sequence the `if (wasAtAperture)` branch of `settle()` (map.jsx:449) is
+ * dead. The gate has only ever tested the half of the resize path that was never broken.
+ *
+ * The other half is the state every reader opens in, and it was where the defect lived: at
+ * 1920x1080 a single outcome condition took the plate from 1180x707 to 1100x659 -- the ledger
+ * widens under `:has(.at-dc-vs)`, `--at-plate-avail` shrinks with it, the ResizeObserver fires --
+ * and because the view was still AT the aperture, `settle()` correctly re-derived it against the
+ * new box: zoom 3.75 to 3.50, the centre 3.2 degrees north. Six assertions above passed while
+ * that happened, because every one of them had dragged first.
+ *
+ * THIS DOES NOT ASK settle() TO STOP RE-DERIVING. The re-derivation is right, and the argument
+ * for it at map.jsx:434-441 is sound: an aperture is defined by a frame, a clamp and the plate's
+ * box, and pan-compensating instead once put HOME and the opening view measurably apart. What
+ * this asserts is the consequence of the box not changing -- re-deriving the same aperture
+ * against the same rectangle must produce the same camera. When that holds, the branch is inert
+ * and this block is quiet; when the box moves for a reason the reader did not cause, it is not.
+ * scripts/check-atlas-stability.mjs asserts the rectangle itself; this asserts what the reader
+ * sees through it. */
+console.log("\n[camera] and never steals the opening aperture either — the at-aperture branch");
+{
+  await open("", 1920, 1080);
+  const fresh = await view();
+  ok("the reader has not moved the camera — this IS the at-aperture branch", fresh.moved === false,
+     "movedByReader() is true on a freshly opened surface, so this block is testing the wrong branch");
+
+  const STEPS = [
+    ["an outcome condition added in the builder", async () => {
+      await (await page.$('[data-zone-edit="outcome"]')).click();
+      await page.waitForTimeout(350);
+      const chip = await page.$('[data-chip="intensity-cat3"]')
+        || await page.$('[data-chip="intensity-cat4"]');
+      if (chip) { await chip.click(); await page.waitForTimeout(700); }
+      const close = await page.$("[data-sheet-close]");
+      if (close) { await close.click(); await page.waitForTimeout(400); }
+    }],
+    ["a condition removed by its own ×", async () => {
+      const x = await page.$("[data-condition-clear]");
+      if (x) { await x.click(); await page.waitForTimeout(700); }
+    }],
+    ["RESET QUERY", async () => {
+      const r = await page.$("[data-reset-query]");
+      if (r) { await r.click(); await page.waitForTimeout(700); }
+    }],
+  ];
+
+  let prev = fresh;
+  for (const [name, act] of STEPS) {
+    await act();
+    const v = await view();
+    ok(`${name} leaves the opening aperture alone`, sameCameraWithinPx(prev, v),
+       `camera moved from ${fmt(prev)} to ${fmt(v)} `
+       + `(${centrePxDelta(prev, v).toFixed(2)} px) — the plate's box changed under it`);
+    prev = v;
+  }
+}
+
 console.log("\n[camera] HOME and FIT reframe, and they are not the same control");
 {
   await open("", 1920, 1080);

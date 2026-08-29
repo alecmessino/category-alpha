@@ -119,7 +119,15 @@ const AUDIT = (vw) => {
    * So the exception is drawn as narrowly as it can be: a cell may leave the line only if its
    * own `grid-column` spans every track, and it must then sit BELOW its row's other cells. A
    * status that merely wrapped, drifted or landed beside the wrong row still fails. */
-  const tracks = getComputedStyle(deck).gridTemplateColumns.trim().split(/\s+/).length;
+  /* A TRACK THE DECK DECLARES AS RESERVED IS CLAIMED BY NOTHING, ON PURPOSE.
+     The comparison column's WIDTH is held open before the comparison exists, so the resting
+     columns do not shift when it arrives, while no `.at-dc-vs` cell and no `VS ARCHIVE` heading
+     is rendered -- which is what check-atlas-acceptance requires of a cohort that IS the archive.
+     The rule below is unchanged in strength: every track is still claimed by exactly one cell,
+     less a count the DECK PUBLISHES rather than a tolerance this gate grants. A cell that goes
+     missing still fails, because the offset does not move when it does. */
+  const reserved = Number(deck.getAttribute("data-reserved-tracks") || 0);
+  const tracks = getComputedStyle(deck).gridTemplateColumns.trim().split(/\s+/).length - reserved;
   const spansTheRow = (c) => {
     const cs = getComputedStyle(c);
     return cs.gridColumnStart === "1" && cs.gridColumnEnd === "-1";
@@ -130,12 +138,25 @@ const AUDIT = (vw) => {
     const all = [...row.children].filter((c) => c.classList.contains("at-dc"));
     const label = row.getAttribute("data-outcome") || row.getAttribute("data-deck-group")
       || (row.classList.contains("at-deck-head") ? "HEAD" : "row");
-    if (all.length !== tracks) {
-      bad.push(`${label}: ${all.length} cells against ${tracks} tracks — the last one wraps`);
-      continue;
-    }
     const cells = all.filter((c) => !spansTheRow(c));
     const below = all.filter(spansTheRow);
+    /* THE COUNT IS OF CELLS THAT ARE ON THE LINE, WHICH IS WHAT THE RULE WAS ALWAYS ABOUT.
+     *
+     * This compared EVERY cell against the track count, which was the same number while the
+     * status still occupied a 0px track and spanned it. It no longer does: the status has no
+     * track at any width, so a row emits one more element than the deck has columns and this
+     * read it as the wrap it exists to catch.
+     *
+     * The property is unchanged and so is its sharpness. A cell may leave the line ONLY by
+     * spanning every track, and it must still sit below its row -- both asserted below. What is
+     * counted here is the cells that claim a column: too few and a row is short, too many and one
+     * of them really has wrapped into an implicit row where it detaches from its contract. A
+     * status that merely drifted still fails, because it would not span. */
+    if (cells.length !== tracks) {
+      bad.push(`${label}: ${cells.length} cells on the line against ${tracks} tracks`
+        + `${below.length ? ` (${below.length} spanning below)` : " — the last one wraps"}`);
+      continue;
+    }
     const tops = cells.map((c) => Math.round(rect(c).top));
     /* AND THE SUB-LINE IS UNDER ITS OWN ROW, not above it and not beside it. */
     for (const c of below) {

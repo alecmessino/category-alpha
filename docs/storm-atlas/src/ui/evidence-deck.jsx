@@ -132,10 +132,40 @@ const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
  * `timing` false simply removes the two duration tracks. The control that restores them is a
  * line of its own beneath the rows rather than a ninth column: at a 486px measure a track spent
  * on a fold is a track taken from an outcome name. */
-export function columnsOf({ vs, status, timing }) {
+/* THE DECK'S TRACKS, AND STATUS IS NO LONGER ONE OF THEM.
+ *
+ * TWO THINGS CHANGED HERE AND BOTH EXIST TO STOP THE LEDGER'S MEASURE MOVING THE MAP.
+ *
+ * THE COMPARISON COLUMN IS SUMMONED. ITS WIDTH IS RESERVED. THOSE ARE TWO DIFFERENT THINGS.
+ *
+ * `vs` is pushed into this list only once a comparison exists, and no `.at-dc-vs` cell and no
+ * `VS ARCHIVE` heading is rendered before then -- an empty column under that heading claims a
+ * comparison the deck is not making, which check-atlas-acceptance asserts against in as many
+ * words. But the WIDTH it will need is held open from the start, as a trailing track that no
+ * cell claims (see `deckTemplate`), so the four resting columns land on exactly the same
+ * x-positions whether or not a condition exists.
+ *
+ * WHY BOTH HALVES MATTER. `--at-ledger` used to widen from 33.75vw to 41vw under
+ * `:has(.at-dc-vs)` to make room for the sixth column. That came out of `--at-plate-avail`,
+ * which bounds the plate: measured at 1440, one condition took the plate from 834x499 to 730x437
+ * and the camera from zoom 3.25 to 3.00, three degrees north, with the reader's hands nowhere
+ * near the map. Retiring the status track pays for the comparison inside the measure the ledger
+ * already had; reserving its width stops the ledger's own columns shifting under the reader when
+ * it arrives. scripts/check-atlas-stability.mjs asserts the first, and the deck's own geometry
+ * is what makes the second true rather than approximately true.
+ *
+ * STATUS IS A LINE, NOT A COLUMN, AT EVERY WIDTH. It was already this below 1340 and below 480,
+ * for the reason that applies at every width: a 14-term controlled vocabulary set at 9.5px in
+ * the rightmost, most-droppable track is the least legible thing on the row whose whole content,
+ * when it refuses, IS the qualification. Promoting the narrow treatment is also what pays for
+ * the reserved comparison track -- five tracks and four gutters measure 468 against the 486
+ * measure, where six and five would measure 556 and scroll the ledger sideways at the canonical
+ * width. The CELL is still emitted on every row, the head's included: it is what the DOM gates
+ * read, what check-atlas-published-values captures, and what keeps a status inside the row it
+ * governs. It is emitted OUTSIDE this list and spans the row -- see DataRow. */
+export function columnsOf({ vs, timing }) {
   const cols = ["outcome", "count", "rate", "int"];
   if (vs) cols.push("vs");
-  if (status) cols.push("status");
   if (timing) cols.push("med", "iqr");
   return cols;
 }
@@ -226,9 +256,18 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
    * same three expressions the row itself uses, before anything is rendered. One refusal
    * anywhere brings the column back for the whole deck. */
   const showVs = !!comparison || !!subject;
-  const showStatus = groups.some((g) => g.rows.some((row) => !!statusWordOf(row)));
-  const cols = columnsOf({ vs: showVs, status: showStatus, timing: timingOn });
+  const cols = columnsOf({ vs: showVs, timing: timingOn });
   const shape = { cols, subject, onEvidence };
+  /* THE RESERVATION IS A TRACK IN THE TEMPLATE THAT NO CELL IS EMITTED FOR, and it is DECLARED
+     rather than inferred. `data-reserved-tracks` is what lets check-responsive-matrix keep the
+     rule it has always enforced -- every track is claimed by exactly one cell -- while allowing
+     the one track that is deliberately unclaimed. A cell that genuinely goes missing still fails
+     it, because the offset is a number the deck publishes rather than a tolerance the gate grants.
+     It is a trailing track, so the full-width blocks that span `1/-1` -- every refusal sentence,
+     the preamble, the limits -- keep the whole measure and are unaffected either way. */
+  const reserved = showVs ? 0 : 1;
+  const deckTemplate = cols.map((k) => `var(--at-col-${k})`)
+    .concat(reserved ? ["var(--at-col-vs)"] : []).join(" ");
 
   /* WHICH REFUSAL SENTENCES REPEAT, WHICH IS WHAT THE BOUND IS ACTUALLY FOR.
    *
@@ -263,7 +302,7 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
      has no track and a track with no column cannot exist. The track SIZES stay in atlas.css as
      --at-col-* custom properties: this decides which columns there ARE, the stylesheet decides
      how WIDE each one is, and neither can silently become the other. */
-  const gridStyle = { "--at-deck-cols": cols.map((k) => `var(--at-col-${k})`).join(" ") };
+  const gridStyle = { "--at-deck-cols": deckTemplate };
 
   return (
     /* THE LIMITS ARE A SIBLING OF THE GRID, NOT A CELL IN IT, AND THAT IS A POSITIONING FACT
@@ -274,6 +313,7 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
        grid its containing block is the scrolling column, and it stays against the foot of it. */
     <>
     <div className="at-deck" data-evidence-deck style={gridStyle}
+      data-reserved-tracks={reserved ? String(reserved) : undefined}
       data-deck-mode={showVs ? "cohort" : "archive"}
       data-timing-folded={timingOn ? undefined : ""}>
       <DeckPreamble result={r} spec={spec} />
@@ -434,8 +474,15 @@ function DeckHead({ shape }) {
     med: <span className="at-dc at-dc-med" key="med">MED h</span>,
     iqr: <span className="at-dc at-dc-iqr" key="iqr">P25–P75</span>,
   };
+  /* THE STATUS HEAD IS EMITTED AND HIDDEN RATHER THAN DROPPED, and the distinction is the deck's
+     own: `visibility:hidden` still occupies layout, so the cell stays in the shared
+     auto-placement flow, while `display:none` would take one item out of one row and walk every
+     column after it out of alignment. It is also what `hasStatusColumn` reads in three gates. */
   return (
-    <div className="at-deck-row at-deck-head" role="row">{cols.map((k) => head[k])}</div>
+    <div className="at-deck-row at-deck-head" role="row">
+      {cols.map((k) => head[k])}
+      {head.status}
+    </div>
   );
 }
 
@@ -500,6 +547,7 @@ function GroupRow({ group, shape, collapsed, onExpand }) {
   return (
     <div className="at-deck-row at-deck-group" data-deck-group={group.label} role="row">
       {cols.map((k) => cell[k])}
+      {cell.status}
     </div>
   );
 }
@@ -630,6 +678,13 @@ function DataRow({ row, shape, shared }) {
       data-self-contribution={selfContribution ? "" : undefined} role="row">
 
       {cols.map((k) => out[k])}
+      {/* THE STATUS, ON THE LINE BELOW ITS OWN ROW AND INSIDE ITS OWN ROW ELEMENT. It is emitted
+          after the tracks rather than among them because it no longer HAS a track: it spans every
+          one of them, which is the single exception check-responsive-matrix draws for a cell
+          leaving the line -- "it has not fallen off the end of a line it was meant to be on, it
+          has been GIVEN the whole next line". Empty on a row with nothing to qualify, at zero
+          height, so a resting deck reads exactly as it did. */}
+      {out.status}
 
       {/* THE ARGUMENT, BOUNDED. A statement of at most eighteen words carrying the count that
           produced it; the full reason is behind SEE THE EVIDENCE. It spans every column because
