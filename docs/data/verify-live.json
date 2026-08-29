@@ -1,14 +1,18 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-08-28T22:17:23.522Z",
+  "ranAt": "2026-08-29T00:30:54.060Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "cac315f38aade754ad6cf7ebbd9a06cbdc27891f",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/33216126531",
+  "sha": "3bfe8f78fbe00673d0b7046ee59d7f5560888a7a",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/33223708159",
   "ok": false,
-  "passed": 44,
+  "passed": 43,
   "total": 46,
   "failures": [
+    {
+      "check": "served snapshot is fresh",
+      "detail": "2026-08-28T21:48:13.203Z · 163m old"
+    },
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "detail": "24 frames · newest carries advisory state for 3/3 storm(s) · 15 advisory change(s) · 2 moved P · 4 pinned at the clamp · 15 register row(s) · situation P=99% at adv #5 · DID NOT MOVE: EP122026 #3->#4 peak 95->95 P 0.9574->0.9574"
@@ -18,7 +22,7 @@
       "detail": "300 contracts · 51 series · droppedForCap=18"
     }
   ],
-  "thirdPartyFailures": 26,
+  "thirdPartyFailures": 22,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -37,8 +41,8 @@
     },
     {
       "check": "served snapshot is fresh",
-      "pass": true,
-      "detail": "2026-08-28T21:48:13.203Z · 29m old"
+      "pass": false,
+      "detail": "2026-08-28T21:48:13.203Z · 163m old"
     },
     {
       "check": "renders: Situation",
@@ -193,12 +197,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "64 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "66 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "41 tile(s) served on reload · 64 in cache"
+      "detail": "43 tile(s) served on reload · 66 in cache"
     },
     {
       "check": "all markets carried",
