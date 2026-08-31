@@ -65,7 +65,7 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 .mh-title{font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1.12;
   margin:var(--sp-3) 0 var(--sp-1);letter-spacing:-.2px;max-width:80%}
 .mh-sub{font-size:8px;color:var(--ink-600);max-width:88%;line-height:1.42}
-.mh-rule{display:flex;gap:var(--sp-5);margin-top:var(--sp-3);flex-wrap:wrap}
+.mh-rule{display:flex;gap:var(--sp-4) var(--sp-5);margin-top:var(--sp-2);flex-wrap:wrap}
 .mh-rule .kv{font-family:var(--font-mono);font-size:7.6px;letter-spacing:.5px;color:var(--ink-600);
   text-transform:uppercase}
 .mh-rule .kv b{color:var(--ink-900);font-weight:600}
@@ -170,8 +170,8 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .cmp li{margin-bottom:1px}
 
 /* ---- cards ------------------------------------------------------------------------ */
-.card{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--white);
-  display:flex;flex-direction:column;gap:1.5px}
+.card{border:1px solid var(--line-300);border-radius:4px;padding:4px;background:var(--white);
+  display:flex;flex-direction:column;gap:1px}
 .card.major{border-left:3px solid var(--ink-900)}
 .card.hur{border-left:3px solid var(--ink-600)}
 .card.ts{border-left:3px solid var(--line-300)}
@@ -179,14 +179,12 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .card .yr{font-family:var(--font-mono);font-size:6.3px;color:var(--ink-600);letter-spacing:.4px}
 .card .pk{font-family:var(--font-mono);font-size:10.2px;font-weight:600;letter-spacing:-.2px}
 .card .pk small{font-size:6px;font-weight:400;color:var(--ink-600);letter-spacing:.6px}
-.card dl{margin:1px 0 0;display:grid;grid-template-columns:auto 1fr;gap:0 5px;
-  font-family:var(--font-mono);font-size:6px;line-height:1.28}
-.card dt{color:var(--ink-400);letter-spacing:.4px;text-transform:uppercase}
-.card dd{margin:0;color:var(--ink-700)}
+.card .facts{font-family:var(--font-mono);font-size:5.8px;line-height:1.3;
+  color:var(--ink-700);margin-top:1px;letter-spacing:.1px}
 .card .catline{font-family:var(--font-mono);font-size:5.9px;font-weight:600;letter-spacing:.7px;
   color:var(--ink-900);margin-top:-1px;line-height:1.1}
 .card .lf{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-900);
-  border-top:1px solid var(--line-200);padding-top:2px;margin-top:1px;line-height:1.28}
+  border-top:1px solid var(--line-200);padding-top:1.5px;margin-top:1px;line-height:1.22}
 .card .lf .none{color:var(--ink-400)}
 
 /* ---- stat tiles -------------------------------------------------------------------- */
@@ -247,7 +245,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 table.ledger.sysgrid{table-layout:fixed}
 .ledger.sysgrid th{white-space:normal;line-height:1.25;vertical-align:bottom}
 .ledger.sysgrid .chip{white-space:normal;display:inline-block;max-width:100%}
-.ledger.sysgrid td{vertical-align:top;padding:2px var(--sp-3);overflow-wrap:anywhere}
+.ledger.sysgrid td{vertical-align:top;padding:1.5px var(--sp-3);overflow-wrap:anywhere}
 .ledger td.lft{text-align:left;white-space:normal}
 .ledger .mono6{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);display:block;
   letter-spacing:.3px;line-height:1.3}
@@ -271,7 +269,7 @@ table.ledger.sysgrid{table-layout:fixed}
 .platerow .sec{margin-top:0}
 .tagstack{display:flex;flex-direction:column;gap:var(--sp-2)}
 .ledgerpair{display:grid;grid-template-columns:1fr 1.06fr;gap:var(--sp-6);align-items:start}
-.ledger.compact td{padding:1.2px var(--sp-2);font-size:6.7px}
+.ledger.compact td{padding:0.8px var(--sp-2);font-size:6.7px;line-height:1.2}
 .ledger.compact th{padding:1.5px var(--sp-2);font-size:6px}
 .ledger.compact td:first-child{font-size:6.9px}
 .ledger.compact .rate{font-size:7.3px}
@@ -279,17 +277,17 @@ table.ledger.sysgrid{table-layout:fixed}
 .ledger .ivl{color:var(--ink-600);font-weight:400;font-size:6px;letter-spacing:0}
 .ledger.compact .grp td{font-size:5.8px;padding:1.5px var(--sp-2)}
 .cardrow{display:grid;grid-template-columns:repeat(8,1fr);gap:var(--sp-2)}
-.cardrow .card{padding:4px 4px}
+.cardrow .card{padding:3px}
 .cardrow .card .nm{font-size:7.8px}
 .cardrow .card .pk{font-size:8.7px}
-.cardrow .card dl{font-size:5.6px}
+.cardrow .card .facts{font-size:5.5px}
 .cardrow .card .lf{font-size:5.6px}
 .cardrow .card .yr{font-size:5.6px}
 .cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.26;
   font-family:var(--font-sans);font-size:7px;padding:1.5px var(--sp-3)}
 .cmptable td.q{font-family:var(--font-mono);font-size:6.5px;color:var(--ink-900);font-weight:500}
 .cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
-.cmptable.compact td{font-size:6.6px;padding:1.2px var(--sp-2);line-height:1.24}
+.cmptable.compact td{font-size:6.6px;padding:1px var(--sp-2);line-height:1.2}
 .cmptable.compact td.q{font-size:6px}
 .platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
 .platecol .sec{margin-top:0}
@@ -319,15 +317,15 @@ table.ledger.sysgrid{table-layout:fixed}
 .citelist.two .cite:nth-child(2){border-top:1px solid var(--ink-900);margin-top:0}
 .citelist .cite{margin-top:var(--sp-2);padding-top:2px;border-top:1px solid var(--line-300)}
 .citelist .cite:first-child{border-top:1px solid var(--ink-900);margin-top:0}
-.citelist .v{font-size:6.2px;line-height:1.28}
-.citelist .u{font-size:5.9px}
+.citelist .v{font-size:5.8px;line-height:1.24}
+.citelist .u{font-size:5.5px}
 .citelist .k{font-size:6.4px}
 .ledger .cohortstat{text-align:right;font-family:var(--font-mono);font-size:7px;font-weight:600;
   letter-spacing:.3px}
 .ledger .cohortstat.refused{color:var(--red-600)}
 .qtiles .tiles.grid4{grid-template-columns:1fr 1fr}
 .grid3.tight .sec{margin-top:0}
-.reasons{display:grid;grid-template-columns:1.5fr 1fr;gap:var(--sp-4);font-size:6.4px;line-height:1.28;
+.reasons{display:grid;grid-template-columns:1fr;gap:var(--sp-2);font-size:5.8px;line-height:1.26;
   color:var(--ink-700);margin-top:3px}
 .reasons b{color:var(--red-600)}
 .reasons .why{color:var(--ink-600)}
@@ -343,8 +341,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .stack{display:flex;flex-direction:column;gap:var(--sp-4)}
 
 /* ---- footer ----------------------------------------------------------------------- */
-.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-2)}
-.ft-disclaim{margin:0 0 var(--sp-2)}
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-1)}
+.ft-disclaim{margin:0 0 var(--sp-1)}
 .ft-row{display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
 .ft .l{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);letter-spacing:.5px;
   line-height:1.5;max-width:70%}
@@ -633,12 +631,8 @@ export function repCards(sys, { limit = 8 } = {}) {
       <div class="yr">${m.season} · genesis ${esc((m.genesis_utc || "").slice(0, 10))}</div>
       <div class="pk">${m.peak_vmax_kt}<small> KT PEAK</small></div>
       <div class="catline">${CAT_OF(m.peak_vmax_kt)} AT PEAK</div>
-      <dl>
-        <dt>at</dt><dd>${coord(m.genesis_lat, m.genesis_lon)}</dd>
-        <dt>dist</dt><dd>${m.distance_km === null ? "—" : m.distance_km + " km"}</dd>
-        <dt>→TS</dt><dd>${hrs(m.hours_to_ts)}</dd>
-        <dt>→C1</dt><dd>${hrs(m.hours_to_cat1)}</dd>
-      </dl>
+      <div class="facts">${coord(m.genesis_lat, m.genesis_lon)} · ${
+        m.distance_km === null ? "—" : m.distance_km + " km"} · →TS ${hrs(m.hours_to_ts)} · →C1 ${hrs(m.hours_to_cat1)}</div>
       <div class="lf">${lf}</div>
     </div>`;
   }).join("");
@@ -653,11 +647,10 @@ export function repRule(sys) {
   const r = sys.representatives;
   return `<p class="fn"><b>SELECTION RULE — ${esc(r.rule)}</b> `
     + `Printed ${r.printed} of ${r.with_known_peak} members carrying a peak-wind value`
-    + (r.shortfall ? `; <b>shortfall ${r.shortfall}</b> — the cohort does not hold 8.` : ".")
-    + ` Each landfall line is a fact about that named storm from the archive's landfalls table, `
-    + `sub-region included where one was attributed; <b>a member's landfall is not a rate</b>, and `
-    + `no sub-region on these cards is scored anywhere in this package. ×n marks repeat crossings `
-    + `of the same coast, collapsed to the strongest.</p>`;
+    + (r.shortfall ? `; <b>shortfall ${r.shortfall}</b>.` : ".")
+    + ` A landfall line is a fact about that storm, sub-region included; `
+    + `<b>a member's landfall is not a rate</b> and no sub-region here is scored anywhere in this `
+    + `package. ×n marks repeat crossings of one coast, collapsed to the strongest.</p>`;
 }
 
 /* THE DISCLAIMER LIVES IN THE FOOTER.

@@ -607,10 +607,9 @@ export function artifactC(D, copy) {
 ${masthead({
     doc: "ARTIFACT C · MAJOR-HURRICANE ANALOG BRIEF", sheet: "1 OF 1",
     title: "Hurricane Karina: a live Category 4 beside its own genesis cohort",
-    sub: `Genesis-conditioned outcomes for the cell this storm actually formed in — `
-      + `<b>${esc(s.cohort.cohort_status)}</b>, N = ${s.cohort.n_cases}, ESS `
-      + `${s.cohort.effective_sample_size}, min sample ${s.cohort.min_sample}. `
-      + `The question in full, and the URL that reopens it, are in the cite block.`,
+    sub: `Genesis-conditioned outcomes for the cell this storm actually formed in. `
+      + `<b>${esc(s.cohort.cohort_status)}</b> — N = ${s.cohort.n_cases}, ESS `
+      + `${s.cohort.effective_sample_size}, min sample ${s.cohort.min_sample}.`,
     rule: [["LIVE STATUS", LIVE_STAMP], ["POINT TYPE", "OBSERVED GENESIS"],
       ["GENESIS", "13.2°N 115.0°W · r 250 km · Aug–Sep · floor 1971"],
       ["METHODOLOGY", D.pack.methodology_version], ["PACK", D.pack.archive_stamp]],
@@ -618,11 +617,11 @@ ${masthead({
 
 ${answersRail(C.answers.now || "", C.answers.adds || "", C.answers.commercial || "")}
 
-<section class="sec">${sectionHead("01", "Live — status only, not Atlas output")}
+<section class="sec">
 ${liveTiles}
 <p class="fn"><b>NOT ATLAS OUTPUT.</b> ${rows.KARINA.live} ${rows.KARINA.feed}
-<b>The operational layer never enters a cohort, matches no analog and computes no rate</b> — its
-own source note says so. The two live readings carry their own instants and are not reconciled.</p>
+<b>The operational layer enters no cohort, matches no analog and computes no rate.</b> The two
+live readings carry their own instants and are not reconciled.</p>
 </section>
 
 <section class="sec">${sectionHead("02", "Plate and outcome frequency panel",
@@ -639,11 +638,9 @@ own source note says so. The two live readings carry their own instants and are 
   <div>${ledger([{ label: "LANDFALL CONTRACT ROWS", rows: s.landfall_rows }],
     { showBar: false, compact: true })}</div>
 </div>
-<p class="fn">The red track on the plate is Karina's own operational b-deck. It is <b>not</b> a
-cohort member, contributes to no rate and never enters the archive. <b>No forecast cone is
-drawn.</b> Every landfall row is published even where it is zero or stamped: a zero with an
-interval is a result, and an omitted row is not.</p>
-${citeBlock(s)}
+<p class="fn">The red track is Karina's own operational b-deck: <b>not</b> a cohort member, in no
+rate, never in the archive, and <b>no forecast cone is drawn</b>. Every landfall row is published
+even at zero or stamped — a zero with an interval is a result; an omitted row is not.</p>
 </section>
 
 <section class="sec">${sectionHead("03", "Representative cohort members", "explicit rule · not a similarity ranking")}
@@ -668,6 +665,7 @@ ${repRule(s)}
 
 <section class="sec">${sectionHead("05", "What Storm Atlas adds", "and where it is deliberately silent")}
 ${comparisonStrip({ compact: true })}
+${citeBlock(s)}
 </section>
 
 <div class="spacer"></div>

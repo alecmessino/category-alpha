@@ -45,7 +45,7 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 .mh-title{font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1.12;
   margin:var(--sp-3) 0 var(--sp-1);letter-spacing:-.2px;max-width:80%}
 .mh-sub{font-size:8px;color:var(--ink-600);max-width:88%;line-height:1.42}
-.mh-rule{display:flex;gap:var(--sp-5);margin-top:var(--sp-3);flex-wrap:wrap}
+.mh-rule{display:flex;gap:var(--sp-4) var(--sp-5);margin-top:var(--sp-2);flex-wrap:wrap}
 .mh-rule .kv{font-family:var(--font-mono);font-size:7.6px;letter-spacing:.5px;color:var(--ink-600);
   text-transform:uppercase}
 .mh-rule .kv b{color:var(--ink-900);font-weight:600}
@@ -150,8 +150,8 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .cmp li{margin-bottom:1px}
 
 /* ---- cards ------------------------------------------------------------------------ */
-.card{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--white);
-  display:flex;flex-direction:column;gap:1.5px}
+.card{border:1px solid var(--line-300);border-radius:4px;padding:4px;background:var(--white);
+  display:flex;flex-direction:column;gap:1px}
 .card.major{border-left:3px solid var(--ink-900)}
 .card.hur{border-left:3px solid var(--ink-600)}
 .card.ts{border-left:3px solid var(--line-300)}
@@ -159,14 +159,12 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .card .yr{font-family:var(--font-mono);font-size:6.3px;color:var(--ink-600);letter-spacing:.4px}
 .card .pk{font-family:var(--font-mono);font-size:10.2px;font-weight:600;letter-spacing:-.2px}
 .card .pk small{font-size:6px;font-weight:400;color:var(--ink-600);letter-spacing:.6px}
-.card dl{margin:1px 0 0;display:grid;grid-template-columns:auto 1fr;gap:0 5px;
-  font-family:var(--font-mono);font-size:6px;line-height:1.28}
-.card dt{color:var(--ink-400);letter-spacing:.4px;text-transform:uppercase}
-.card dd{margin:0;color:var(--ink-700)}
+.card .facts{font-family:var(--font-mono);font-size:5.8px;line-height:1.3;
+  color:var(--ink-700);margin-top:1px;letter-spacing:.1px}
 .card .catline{font-family:var(--font-mono);font-size:5.9px;font-weight:600;letter-spacing:.7px;
   color:var(--ink-900);margin-top:-1px;line-height:1.1}
 .card .lf{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-900);
-  border-top:1px solid var(--line-200);padding-top:2px;margin-top:1px;line-height:1.28}
+  border-top:1px solid var(--line-200);padding-top:1.5px;margin-top:1px;line-height:1.22}
 .card .lf .none{color:var(--ink-400)}
 
 /* ---- stat tiles -------------------------------------------------------------------- */
@@ -227,7 +225,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 table.ledger.sysgrid{table-layout:fixed}
 .ledger.sysgrid th{white-space:normal;line-height:1.25;vertical-align:bottom}
 .ledger.sysgrid .chip{white-space:normal;display:inline-block;max-width:100%}
-.ledger.sysgrid td{vertical-align:top;padding:2px var(--sp-3);overflow-wrap:anywhere}
+.ledger.sysgrid td{vertical-align:top;padding:1.5px var(--sp-3);overflow-wrap:anywhere}
 .ledger td.lft{text-align:left;white-space:normal}
 .ledger .mono6{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);display:block;
   letter-spacing:.3px;line-height:1.3}
@@ -251,7 +249,7 @@ table.ledger.sysgrid{table-layout:fixed}
 .platerow .sec{margin-top:0}
 .tagstack{display:flex;flex-direction:column;gap:var(--sp-2)}
 .ledgerpair{display:grid;grid-template-columns:1fr 1.06fr;gap:var(--sp-6);align-items:start}
-.ledger.compact td{padding:1.2px var(--sp-2);font-size:6.7px}
+.ledger.compact td{padding:0.8px var(--sp-2);font-size:6.7px;line-height:1.2}
 .ledger.compact th{padding:1.5px var(--sp-2);font-size:6px}
 .ledger.compact td:first-child{font-size:6.9px}
 .ledger.compact .rate{font-size:7.3px}
@@ -259,17 +257,17 @@ table.ledger.sysgrid{table-layout:fixed}
 .ledger .ivl{color:var(--ink-600);font-weight:400;font-size:6px;letter-spacing:0}
 .ledger.compact .grp td{font-size:5.8px;padding:1.5px var(--sp-2)}
 .cardrow{display:grid;grid-template-columns:repeat(8,1fr);gap:var(--sp-2)}
-.cardrow .card{padding:4px 4px}
+.cardrow .card{padding:3px}
 .cardrow .card .nm{font-size:7.8px}
 .cardrow .card .pk{font-size:8.7px}
-.cardrow .card dl{font-size:5.6px}
+.cardrow .card .facts{font-size:5.5px}
 .cardrow .card .lf{font-size:5.6px}
 .cardrow .card .yr{font-size:5.6px}
 .cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.26;
   font-family:var(--font-sans);font-size:7px;padding:1.5px var(--sp-3)}
 .cmptable td.q{font-family:var(--font-mono);font-size:6.5px;color:var(--ink-900);font-weight:500}
 .cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
-.cmptable.compact td{font-size:6.6px;padding:1.2px var(--sp-2);line-height:1.24}
+.cmptable.compact td{font-size:6.6px;padding:1px var(--sp-2);line-height:1.2}
 .cmptable.compact td.q{font-size:6px}
 .platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
 .platecol .sec{margin-top:0}
@@ -299,15 +297,15 @@ table.ledger.sysgrid{table-layout:fixed}
 .citelist.two .cite:nth-child(2){border-top:1px solid var(--ink-900);margin-top:0}
 .citelist .cite{margin-top:var(--sp-2);padding-top:2px;border-top:1px solid var(--line-300)}
 .citelist .cite:first-child{border-top:1px solid var(--ink-900);margin-top:0}
-.citelist .v{font-size:6.2px;line-height:1.28}
-.citelist .u{font-size:5.9px}
+.citelist .v{font-size:5.8px;line-height:1.24}
+.citelist .u{font-size:5.5px}
 .citelist .k{font-size:6.4px}
 .ledger .cohortstat{text-align:right;font-family:var(--font-mono);font-size:7px;font-weight:600;
   letter-spacing:.3px}
 .ledger .cohortstat.refused{color:var(--red-600)}
 .qtiles .tiles.grid4{grid-template-columns:1fr 1fr}
 .grid3.tight .sec{margin-top:0}
-.reasons{display:grid;grid-template-columns:1.5fr 1fr;gap:var(--sp-4);font-size:6.4px;line-height:1.28;
+.reasons{display:grid;grid-template-columns:1fr;gap:var(--sp-2);font-size:5.8px;line-height:1.26;
   color:var(--ink-700);margin-top:3px}
 .reasons b{color:var(--red-600)}
 .reasons .why{color:var(--ink-600)}
@@ -323,8 +321,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .stack{display:flex;flex-direction:column;gap:var(--sp-4)}
 
 /* ---- footer ----------------------------------------------------------------------- */
-.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-2)}
-.ft-disclaim{margin:0 0 var(--sp-2)}
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-1)}
+.ft-disclaim{margin:0 0 var(--sp-1)}
 .ft-row{display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
 .ft .l{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);letter-spacing:.5px;
   line-height:1.5;max-width:70%}
@@ -473,99 +471,59 @@ table.ledger.sysgrid{table-layout:fixed}
       <div class="yr">1977 · genesis 1977-08-29</div>
       <div class="pk">150<small> KT PEAK</small></div>
       <div class="catline">CAT 5 AT PEAK</div>
-      <dl>
-        <dt>at</dt><dd>26.9°N 88.4°W</dd>
-        <dt>dist</dt><dd>126 km</dd>
-        <dt>→TS</dt><dd>18 h</dd>
-        <dt>→C1</dt><dd>30 h</dd>
-      </dl>
+      <div class="facts">26.9°N 88.4°W · 126 km · →TS 18 h · →C1 30 h</div>
       <div class="lf">MEXICO / Tamaulipas 120 kt ≥64</div>
     </div><div class="card major">
       <div class="nm">ALICIA</div>
       <div class="yr">1983 · genesis 1983-08-15</div>
       <div class="pk">100<small> KT PEAK</small></div>
       <div class="catline">CAT 3 AT PEAK</div>
-      <dl>
-        <dt>at</dt><dd>27.3°N 90.5°W</dd>
-        <dt>dist</dt><dd>194 km</dd>
-        <dt>→TS</dt><dd>6 h</dd>
-        <dt>→C1</dt><dd>36 h</dd>
-      </dl>
+      <div class="facts">27.3°N 90.5°W · 194 km · →TS 6 h · →C1 36 h</div>
       <div class="lf">CONUS / Texas 100 kt ≥64</div>
     </div><div class="card hur">
       <div class="nm">FERN</div>
       <div class="yr">1971 · genesis 1971-09-03</div>
       <div class="pk">80<small> KT PEAK</small></div>
       <div class="catline">CAT 1 AT PEAK</div>
-      <dl>
-        <dt>at</dt><dd>27.5°N 87.5°W</dd>
-        <dt>dist</dt><dd>131 km</dd>
-        <dt>→TS</dt><dd>108 h</dd>
-        <dt>→C1</dt><dd>132 h</dd>
-      </dl>
+      <div class="facts">27.5°N 87.5°W · 131 km · →TS 108 h · →C1 132 h</div>
       <div class="lf">CONUS / Texas 60 kt <span class="none">×7</span><br>CONUS / Louisiana 25 kt <span class="none">×5</span></div>
     </div><div class="card ts">
       <div class="nm">EDOUARD</div>
       <div class="yr">2008 · genesis 2008-08-03</div>
       <div class="pk">55<small> KT PEAK</small></div>
       <div class="catline">TS AT PEAK</div>
-      <dl>
-        <dt>at</dt><dd>28.1°N 87.4°W</dd>
-        <dt>dist</dt><dd>128 km</dd>
-        <dt>→TS</dt><dd>12 h</dd>
-        <dt>→C1</dt><dd>—</dd>
-      </dl>
+      <div class="facts">28.1°N 87.4°W · 128 km · →TS 12 h · →C1 —</div>
       <div class="lf">CONUS / Texas 55 kt</div>
     </div><div class="card ts">
       <div class="nm">MINDY</div>
       <div class="yr">2021 · genesis 2021-09-08</div>
       <div class="pk">50<small> KT PEAK</small></div>
       <div class="catline">TS AT PEAK</div>
-      <dl>
-        <dt>at</dt><dd>28.4°N 86.8°W</dd>
-        <dt>dist</dt><dd>191 km</dd>
-        <dt>→TS</dt><dd>0 h</dd>
-        <dt>→C1</dt><dd>—</dd>
-      </dl>
+      <div class="facts">28.4°N 86.8°W · 191 km · →TS 0 h · →C1 —</div>
       <div class="lf">CONUS / Florida 50 kt</div>
     </div><div class="card ts">
       <div class="nm">HENRI</div>
       <div class="yr">2003 · genesis 2003-09-03</div>
       <div class="pk">50<small> KT PEAK</small></div>
       <div class="catline">TS AT PEAK</div>
-      <dl>
-        <dt>at</dt><dd>27.4°N 87.7°W</dd>
-        <dt>dist</dt><dd>119 km</dd>
-        <dt>→TS</dt><dd>36 h</dd>
-        <dt>→C1</dt><dd>—</dd>
-      </dl>
+      <div class="facts">27.4°N 87.7°W · 119 km · →TS 36 h · →C1 —</div>
       <div class="lf">CONUS / Florida 30 kt</div>
     </div><div class="card ts">
       <div class="nm">BERYL</div>
       <div class="yr">1994 · genesis 1994-08-14</div>
       <div class="pk">50<small> KT PEAK</small></div>
       <div class="catline">TS AT PEAK</div>
-      <dl>
-        <dt>at</dt><dd>28.7°N 87.2°W</dd>
-        <dt>dist</dt><dd>166 km</dd>
-        <dt>→TS</dt><dd>24 h</dd>
-        <dt>→C1</dt><dd>—</dd>
-      </dl>
+      <div class="facts">28.7°N 87.2°W · 166 km · →TS 24 h · →C1 —</div>
       <div class="lf">CONUS / Florida 50 kt</div>
     </div><div class="card ts">
       <div class="nm">DANIELLE</div>
       <div class="yr">1980 · genesis 1980-09-04</div>
       <div class="pk">50<small> KT PEAK</small></div>
       <div class="catline">TS AT PEAK</div>
-      <dl>
-        <dt>at</dt><dd>28.3°N 90.6°W</dd>
-        <dt>dist</dt><dd>189 km</dd>
-        <dt>→TS</dt><dd>24 h</dd>
-        <dt>→C1</dt><dd>—</dd>
-      </dl>
+      <div class="facts">28.3°N 90.6°W · 189 km · →TS 24 h · →C1 —</div>
       <div class="lf">CONUS / Texas 40 kt</div>
     </div></div>
-<p class="fn"><b>SELECTION RULE — up to 8 members — majors (≥96 kt) first, then hurricanes (≥64 kt), then by peak wind descending, ties by season descending. Not a similarity ranking: Storm Atlas implements no closest-analog metric for a filter-defined cohort, and every member is weighted 1.0.</b> Printed 8 of 12 members carrying a peak-wind value. Each landfall line is a fact about that named storm from the archive's landfalls table, sub-region included where one was attributed; <b>a member's landfall is not a rate</b>, and no sub-region on these cards is scored anywhere in this package. ×n marks repeat crossings of the same coast, collapsed to the strongest.</p>
+<p class="fn"><b>SELECTION RULE — up to 8 members — majors (≥96 kt) first, then hurricanes (≥64 kt), then by peak wind descending, ties by season descending. Not a similarity ranking: Storm Atlas implements no closest-analog metric for a filter-defined cohort, and every member is weighted 1.0.</b> Printed 8 of 12 members carrying a peak-wind value. A landfall line is a fact about that storm, sub-region included; <b>a member's landfall is not a rate</b> and no sub-region here is scored anywhere in this package. ×n marks repeat crossings of one coast, collapsed to the strongest.</p>
 </section>
 
 <section class="sec"><div class="sec-hd"><span class="n">08</span><h2>Commercial reading</h2><span class="note">labelled box · never mixed into the rates</span></div>
