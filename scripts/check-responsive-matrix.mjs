@@ -302,10 +302,18 @@ const AUDIT = (vw) => {
          either way. Under the composition the stack is PLATE -> ANSWER -> MATRIX and the
          contract requires the sample and at least two numerical findings to clear the fold at
          1024x768 -- which a 392px figure does not allow. So the height is a CAP read from the
-         viewport, 26vh to 205px and 17vh to 155px on a phone, and what is asserted is the cap
+         viewport, 30vh to 300px and 17vh to 155px on a phone, and what is asserted is the cap
          rather than a constant. check-atlas-contract.mjs asserts the consequence: what actually
-         clears the fold. */
-      const cap = vw <= 480 ? Math.min(0.17 * innerHeight, 155) : Math.min(0.26 * innerHeight, 205);
+         clears the fold.
+
+         30vh, NOT 26. The figure was 26vh capped at 205px, which at 1024x768 made a 639px plate
+         inside a 972px column -- a strip with a 333x220 rectangle of paper beside it, because
+         only the PLATE narrowed while its head, key and caption kept the band's width. The
+         figure is centred as one block now and the share went up with the fold budget that a
+         one-line caption freed. The ceiling is 300 rather than 205 because on a tall stacked
+         viewport the share is not what binds: 768x1024 has the height to give and the aspect
+         floor is what stops the plate, at 716x300. */
+      const cap = vw <= 480 ? Math.min(0.17 * innerHeight, 155) : Math.min(0.30 * innerHeight, 300);
       if (b.height > cap + 2) {
         bad.push(`plate is ${Math.round(b.height)}px, past the ${Math.round(cap)}px cap the `
           + "stack allows it");

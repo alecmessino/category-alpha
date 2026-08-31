@@ -162,12 +162,17 @@
    * is the aspect below which this instrument's own opening view stops holding the geography its
    * caption names. */
   --at-plate-ar:1.6;
-  /* THE FIGURE'S OWN CHROME, AS A BOUND. The plate head, the class key and Figure 1 measure 150
-     to 166px at every supported width once the plate head is reserved two lines (see below);
-     176 is the bound the band's height is composed against, and the contract gate asserts the
-     measurement stays under it rather than trusting it. A bound smaller than the thing it bounds
-     is a band that overflows its own row. */
-  --at-fig-chrome:176px;
+  /* THE FIGURE'S OWN CHROME, AS A RESERVATION -- AND THE PLATE IS THE BAND LESS THIS, NEVER THE
+     BAND LESS WHAT THE CHROME HAPPENED TO MEASURE.
+     The plate head, the class key and Figure 1 measure 81.3px at every supported width from 1280
+     up and 97.3 below it, in every state, now that the caption is one line; it was 150 to 166
+     with the old paragraph and eight lines of it under a runner's fallback fonts. 120 is the
+     reservation: enough headroom that a machine with other metrics still fits inside it, small
+     enough that the slack it banks reads as the figure's own spacing rather than a hole.
+     BEING WRONG IN EITHER DIRECTION IS SURVIVABLE, WHICH IS THE POINT. Too large and the extra
+     is white space above Figure 1, which sits at the column's foot. Too small and the band's
+     `min-height` lets the row grow, taking the answer column with it. Neither moves the map. */
+  --at-fig-chrome:120px;
   /* AND THE HEAD'S, THE SAME WAY. The question and its cohort line measure ~150 at 1920 and 1440
      with a two-line question; 176 is the bound. A longer question shortens the peek rather than
      the band, which is the right direction: what is under the fold is advertised a little less,
@@ -2116,11 +2121,24 @@
   /* THE BAND'S HEIGHT, DECLARED, AND BOUNDED AT BOTH ENDS.
      The viewport decides it, less the head and the peek; the plate's aspect caps it, so that a
      tall monitor shows more of the matrix rather than a taller map with a cropped opening view.
-     `height` rather than `min-height`: both columns are exactly this tall, so they share a
-     baseline by construction and neither can leave paper under it. */
-  height:min(
+     It is a variable rather than a literal because the PLATE is derived from it too -- see the
+     stage's declared height below -- and the two must be the same number by construction and
+     not by two edits staying in step. */
+  --at-band-h:min(
     calc(100vh - var(--at-head-h) - var(--at-peek) - var(--at-tport)),
     calc(var(--at-plate-avail) / var(--at-plate-ar) + var(--at-fig-chrome)));
+  /* `height`, AND IT IS THE ANSWER THAT DECIDES IT RATHER THAN THE CAPTION.
+     `min-height` was tried here, so that chrome overrunning its reservation could grow the row
+     instead of the map. It does -- and it also lets the ANSWER grow it, because eight rows have
+     an intrinsic height and at 1280 that is 90px more than the band the aspect ceiling allows.
+     Measured: the row went to 625.8 where the band declares 505.6, the plate kept its declared
+     height, and the 129px difference was paper under the map. That is the defect this
+     composition was opened to end, arriving from the other side.
+     So the band is exactly the declared number, the answer distributes itself into it as it
+     always did, and the plate is the band less the RESERVATION rather than less the measurement
+     -- which is what makes the caption unable to move it either way. Chrome that overruns 120px
+     overflows the band's foot by the overrun; it does not come out of the map. */
+  height:var(--at-band-h);
 }
 [data-atlas].atlas-instrument .atlas-stage-col{
   grid-column:1;grid-row:1;
@@ -2177,10 +2195,38 @@
  * to end, reintroduced by a rule about aspect. So the plate takes the band, and the surplus is
  * ocean the frame does not fill rather than paper nothing fills. The floor stays: past
  * --at-plate-ar-max a single East Pacific track is a horizontal scratch. */
+/* AND THE PLATE'S HEIGHT IS DECLARED, NOT WHAT IS LEFT OVER.
+ *
+ * THE DEFECT THIS ENDS. `flex:1 1 auto` made the plate the elastic member of the figure column,
+ * so its height was the band less whatever the head, the legend row and the caption happened to
+ * measure. Every one of those three is typeset, and the caption names the cohort count -- so a
+ * condition could change how it wrapped, and the map would resize under a reader whose hands
+ * were nowhere near the camera. It never fired locally because the caption took the same number
+ * of lines in every state on this machine's fonts; CI, on fallback metrics, caught it as
+ * 583x340.13 -> 583x336.13 when a season condition was added. A one-line caption makes that
+ * rarer. Only a declared height makes it impossible.
+ *
+ * SO THE PLATE IS A PURE FUNCTION OF THE VIEWPORT AND THE TOKENS. `--at-band-h` less the chrome
+ * reservation, and nothing in that chain is content: not a caption, not a font, not a cohort
+ * count. `--at-fig-chrome` is a RESERVATION, not a measurement -- if the real chrome is smaller
+ * the slack goes between the plate and the caption, which is pinned to the column's foot so no
+ * paper is left under it; if the real chrome is larger the band grows and takes the answer
+ * column with it. Neither case moves the map by a pixel.
+ *
+ * THE FLOOR IS UNCHANGED AND STILL BINDS FIRST. Past --at-plate-ar-max a single East Pacific
+ * track is a horizontal scratch, so the plate never reads narrower than the frame can carry. */
 [data-atlas].atlas-instrument .atlas-stage{
-  flex:1 1 auto;min-width:0;position:relative;overflow:hidden;
-  min-height:min(calc(var(--at-plate-avail) / var(--at-plate-ar-max)), 100%);
+  flex:none;min-width:0;position:relative;overflow:hidden;
+  height:max(
+    calc(var(--at-band-h) - var(--at-fig-chrome)),
+    calc(var(--at-plate-avail) / var(--at-plate-ar-max)));
 }
+/* THE CAPTION TAKES THE SLACK, AT THE FOOT OF THE COLUMN. The reservation is a bound, so it is
+   usually a little larger than the chrome actually is; banked at the bottom that difference is
+   paper under the figure, which is the beige this composition was opened to remove. Pushed above
+   the caption it is the figure's own white space, between the legend rule and the sentence that
+   describes it, and the column still ends exactly where the answer does. */
+[data-atlas].atlas-instrument .at-plate-figure{margin-top:auto}
 [data-atlas].atlas-instrument .at-plate{position:absolute;inset:0}
 
 /* THE INSPECTOR OVERLAYS THE PLATE RATHER THAN TAKING A COLUMN FROM IT.
@@ -2521,6 +2567,10 @@
 @media (max-width:1180px){
   [data-atlas].atlas-shell.atlas-instrument{
     --at-pad:26px;--at-gap:0px;--at-peek:56px;--at-answer:auto;
+    /* THE STACKED PLATE'S HEIGHT, IN ONE PLACE, BECAUSE THREE RULES READ IT. The column's width
+       is this times the aspect ceiling, the stage's height is this, and the phone overrides it
+       below. Written three times it was three chances to change two of them. */
+    --at-stack-ph:min(30vh,300px);
   }
   [data-atlas].atlas-instrument .atlas-above{min-height:0;display:block}
   /* `min-height:auto` ON BOTH, AND IT IS THE WHOLE OF WHY THE STACK WORKS.
@@ -2540,22 +2590,50 @@
   }
   [data-atlas].atlas-instrument .atlas-stage-col{grid-column:1;grid-row:1;min-height:auto}
   [data-atlas].atlas-instrument .atlas-answer{grid-column:1;grid-row:2;min-height:auto}
-  /* STACKED, THE PLATE IS A BANNER FIGURE AND IT KEEPS ITS APERTURE FLOOR. Capping the height
-     so the answer clears the fold makes a full-width plate 5.5:1 -- past the width at which a
-     single East Pacific track stops being the subject of its own plate. So the cap binds the
-     HEIGHT and the floor binds the WIDTH against it: the figure centres at its own widest legible
-     aspect rather than stretching to a letterbox. */
+  /* STACKED, THE PLATE IS A BANNER FIGURE, AND THE WHOLE FIGURE MOVES WITH IT.
+   *
+   * THE GEOMETRY IS A VICE AND BOTH JAWS ARE REAL. The fold rule says the effective sample and
+   * at least two numerical findings must clear the first screen, which caps the plate's HEIGHT.
+   * The aperture rule says the plate may not read past --at-plate-ar-max, which turns that cap
+   * into a cap on WIDTH. At 1024x768 the two together forbid a full-bleed plate outright: 972px
+   * of band needs 304px of height at the ceiling, and the fold has 261 to give. Measured, not
+   * reasoned -- a full-bleed plate here puts the second finding at 786px on a 768px screen.
+   *
+   * SO THE PLATE IS NARROWER THAN THE BAND, AND WHAT WAS WRONG BEFORE WAS NOT THAT. It was that
+   * only the PLATE narrowed: the head, the legend and the caption kept the band's full width, so
+   * a 639px map sat at the left edge of a 972px column with a 333x220 rectangle of paper beside
+   * it and its own caption wrapping in the half-measure next to the void. That is the defect this
+   * composition was opened to remove, drawn at a different width.
+   *
+   * THE FIGURE IS ONE BLOCK AND IT IS CENTRED AS ONE. The column takes the plate's width, so the
+   * plate head, the class key, the scale bar and Figure 1 are all set to the plate's own edges --
+   * which is what made them read as its caption in the first place -- and the paper that is left
+   * is a symmetric margin around a figure rather than a slab beside a strip. The answer and the
+   * matrix below are unaffected: they are the band's full width, as they were.
+   *
+   * 30vh, AND WHY NOT MORE. Measured at 1024x768: 28vh leaves the second finding 55px clear of
+   * the fold, 30vh leaves 40px, 32vh leaves 24px. The last is the plate a reader would rather
+   * have and the one a machine whose fonts are not this one's would push off the screen -- which
+   * is the exact failure that put the previous revision in front of CI. 30vh is the largest
+   * share with room for that. check-atlas-contract measures the OUTCOME rather than the token,
+   * at 1024 and at 414, so a viewport where this stops being true fails a run rather than
+   * shipping. */
+  [data-atlas].atlas-instrument .atlas-stage-col{
+    width:min(100%, calc(var(--at-stack-ph) * var(--at-plate-ar-max)));
+    margin-inline:auto;
+  }
   [data-atlas].atlas-instrument .atlas-stage{
-    /* `width`, not `max-width` with auto margins: an auto inline margin turns off the flex
+    /* `width:100%`, not `max-width` with auto margins: an auto inline margin turns off the flex
        item's stretch, and a stage whose only child is absolutely positioned then shrinks to zero
        content width. Measured at 1024: a 0x200 plate that every "is it on screen" check passed
-       because it had height. */
-    /* LEFT-ALIGNED, NOT CENTRED. The plate head, the class key and Figure 1 are set to the
-       plate's own left edge -- that is what makes them read as its caption rather than as text
-       floating on the page -- so a centred figure would leave all three hanging off it. */
-    flex:none;height:min(26vh,205px);min-height:0;align-self:flex-start;
-    width:min(100%, calc(min(26vh, 205px) * var(--at-plate-ar-max)));
+       because it had height. The centring is the COLUMN's job now, which is what keeps the
+       captions on the plate's edges. */
+    flex:none;height:var(--at-stack-ph);min-height:0;width:100%;
   }
+  /* AND THE CAPTION IS NOT PUSHED TO A FOOT THERE IS NONE OF. Stacked, the column takes its
+     content and there is no band remainder to bank, so the desktop rule that pins Figure 1 to
+     the column's foot would only add a gap nothing asked for. */
+  [data-atlas].atlas-instrument .at-plate-figure{margin-top:0}
   /* Stacked, the rows take their content: there is no band slack to distribute. */
   [data-atlas] .at-ans-row{flex:none;max-height:none}
   [data-atlas] .at-ans-mid,[data-atlas] .at-ans-rows{flex:none}
@@ -2587,10 +2665,11 @@
   /* A SMALLER FIGURE, NOT A SCALED-DOWN COPY -- and still capped so that the sample and the
      first findings are on the first screen. 300px of plate on an 896px phone left the answer
      entirely below the fold, which is the same failure as the 1024 stack and has the same fix. */
-  [data-atlas].atlas-instrument .atlas-stage{
-    height:min(17vh,155px);max-height:none;min-height:0;
-    width:min(100%, calc(min(17vh, 155px) * var(--at-plate-ar-max)));
-  }
+  /* THE TOKEN, NOT THE RULE. The column's width is derived from --at-stack-ph one media query
+     up, so overriding the token moves the plate and the block that carries it together;
+     overriding the stage's height alone would have left the column sized for a plate three
+     times this one's height. */
+  [data-atlas].atlas-shell.atlas-instrument{--at-stack-ph:min(17vh,155px)}
   /* THE RATE STEPS DOWN ONE PLACE AND NOTHING ELSE DOES. The contract is explicit: a phone may
      reduce the rate, and may not shrink the rest to make a layout fit. */
   [data-atlas] .at-answer{--at-t-rate:25px;gap:6px}

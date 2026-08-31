@@ -476,6 +476,33 @@ for (const [w, h] of VIEWPORTS) {
  * injected a variable nothing reads, the plate did not move, and the gate reported that its own
  * detector had stopped detecting -- which is exactly what this section is for and exactly what it
  * caught. */
+/* ── THE CAPTION MAY GROW; THE APERTURE MAY NOT ──────────────────────────────────────────────
+ *
+ * THE FAILURE THIS IS WRITTEN AGAINST HAPPENED ON CI AND COULD NOT HAPPEN HERE. The plate used
+ * to be `flex:1 1 auto` in the figure column, so its height was the band less whatever the plate
+ * head, the class key and Figure 1 measured. All three are typeset, and the caption named the
+ * cohort count -- so a condition changed how it wrapped, and the map resized. On this machine
+ * the caption took the same number of lines in every state and the gate above stayed silent;
+ * under a runner's fallback fonts it took more, and CI caught 583x340.13 -> 583x336.13 when a
+ * season condition was added.
+ *
+ * A ONE-LINE CAPTION MAKES THAT RARE. A DECLARED STAGE HEIGHT MAKES IT IMPOSSIBLE, and this is
+ * the rule that says so in the only terms that survive a font change: the caption is FORCED to
+ * grow, by a lot, and the plate's box is required not to move. It is not a seed -- there is
+ * nothing to catch -- it is the invariant, asserted at the four widths the composition names. */
+console.log("\n  ── the caption may grow; the aperture may not ───────────");
+for (const [w, h] of [[1920, 1080], [1440, 900], [1280, 800], [1024, 768]]) {
+  await open("w=11.6,-105.4,500", w, h);
+  const before = await read();
+  await page.addStyleTag({ content:
+    `[data-atlas] .at-plate-caption::after{content:"${"caption ".repeat(90)}";display:block}` });
+  await page.waitForTimeout(SETTLE);
+  const after = await read();
+  ok(`${String(w + "x" + h).padEnd(10)} a caption three times its height does not move the plate`,
+     !!before && !!after && !sizeMoved(before, after) && !originMoved(before, after),
+     why(before, after));
+}
+
 if (SELF_TEST) {
   console.log("\n  ── the seed: an answer column that widens must be caught ───────────");
   await open("", 1440, 900);

@@ -204,6 +204,17 @@ for (const [w, h] of WIDTHS) {
       shellGround: lum(getComputedStyle(document.querySelector(".atlas-instrument")).backgroundColor),
       stageHoldsOnlyPlate: [...stage.children].every((c) => c.classList.contains("at-plate")),
       caption: (document.querySelector("[data-plate-caption]") || {}).textContent || "",
+      /* WHERE THE CAPTION'S OLD PARAGRAPH WENT. Read as its own string so the rule below can
+         hold the surface to having MOVED the ink, the regions and the gestures rather than
+         dropped them -- which is the difference between an edit and a deletion. */
+      notes: (document.querySelector("[data-plate-notes]") || {}).textContent || "",
+      captionLines: (() => {
+        const el = document.querySelector("[data-plate-caption]");
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        const lh = parseFloat(getComputedStyle(el).lineHeight);
+        return lh > 0 ? Math.round(r.height / lh) : null;
+      })(),
     };
   });
   const at = `${w}x${h}`;
@@ -222,13 +233,31 @@ for (const [w, h] of WIDTHS) {
   ok(`${at.padEnd(9)} and the caption resolves paper ink, not the plate's`,
      d.captionInk !== null && d.captionInk < 0.3,
      `caption luminance ${d.captionInk} on a ${d.shellGround} ground`);
-  /* FIGURE 1 SAYS WHAT IS DRAWN, which is what turns a map into a figure. */
-  ok(`${at.padEnd(9)} Figure 1 names the ink, the regions and the gestures`,
+  /* FIGURE 1 SAYS WHAT IS DRAWN, which is what turns a map into a figure -- and it says it in
+     ONE LINE, which is what keeps the map a fixed rectangle.
+     The caption used to carry four statements in a paragraph. It set five lines here and eight
+     under a runner's fallback fonts, and because it names the cohort count it re-wrapped when a
+     condition changed -- so the figure's chrome grew and the plate, which was what was left of
+     the band after it, paid for the reflow. So the rule is now in two halves, and both are
+     load-bearing: the caption states the figure and its count in a line, and the ink, the
+     regions and the gestures are still published -- in PLATE NOTES, at more length than the
+     caption ever gave them. A surface that shortened the caption by DELETING them fails the
+     second half. */
+  /* ONE LINE AT ANY MEASURE A DESKTOP HAS; TWO IS ALL A PHONE MAY TAKE. The sentence is fixed,
+     so what varies is the column it is set in -- 390px is not a failure of the caption, it is a
+     phone. The bound still bites: three lines here would mean the sentence had grown again. */
+  const capMax = w >= 768 ? 1 : 2;
+  ok(`${at.padEnd(9)} Figure 1 names the figure and its count, in ${capMax} line or fewer`,
      /^Figure 1\./.test(d.caption.trim())
-     && /coloured by the class/.test(d.caption)
-     && /Five modelled landfall regions|Contextual coastline only/.test(d.caption)
-     && /Click any ocean point/.test(d.caption),
-     d.caption.replace(/\s+/g, " ").slice(0, 120));
+     && /\d[\d,]* storms/.test(d.caption)
+     && d.captionLines !== null && d.captionLines <= capMax,
+     `${d.captionLines} line(s): ${d.caption.replace(/\s+/g, " ").slice(0, 120)}`);
+  ok(`${at.padEnd(9)} and the ink, the regions and the gestures are still published`,
+     /coloured by the class/.test(d.notes)
+     && (/landfall regions are drawn from the/.test(d.notes)
+       || /Contextual coastline only/.test(d.caption))
+     && /Click open water/.test(d.notes),
+     d.notes.replace(/\s+/g, " ").slice(0, 160) || "no PLATE NOTES on the page");
 }
 
 /* ── 3 · THE CLASS KEY ──────────────────────────────────────────────────────────────────── */

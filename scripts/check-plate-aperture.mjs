@@ -145,7 +145,28 @@ const measure = () => page.evaluate(() => {
           : el.getBoundingClientRect().bottom;
       };
       const cb = col.getBoundingClientRect().bottom, ab = answer.getBoundingClientRect().bottom;
+      /* AND PAPER IN THE MIDDLE COUNTS, NOT ONLY PAPER AT THE FOOT. Figure 1 is pinned to the
+         column's foot, so a plate that stops short no longer leaves a remainder UNDER the
+         column -- it opens a hole between the class key and the caption instead. Same defect,
+         one element further up, and a rule that only looked at the foot would have called the
+         hole a pass. The reservation's own slack lives in that gap by design, so what is
+         asserted is a bound on it rather than its absence. */
       return Math.round(Math.max(Math.abs(cb - ab), cb - foot(col), ab - foot(answer)));
+    })(),
+    /* THE HOLE, MEASURED SEPARATELY BECAUSE IT HAS A DIFFERENT BOUND. Figure 1 is pinned to the
+       figure column's foot, so the reservation's slack -- the difference between the chrome the
+       band reserved and the chrome it got -- sits between the class key and the caption instead
+       of under the column. A few pixels of it is the figure's own spacing. A plate capped short
+       of its declared height opens the same gap and keeps going, which is the defect, so this is
+       bounded rather than forbidden. */
+    hole: (() => {
+      if (stacked || !col) return 0;
+      const boxes = [...col.children]
+        .filter((c) => c.getBoundingClientRect().height > 0)
+        .map((c) => c.getBoundingClientRect());
+      let hole = 0;
+      for (let i = 1; i < boxes.length; i++) hole = Math.max(hole, boxes[i].top - boxes[i - 1].bottom);
+      return Math.round(hole);
     })(),
     evidence: ev ? Math.round(ev.getBoundingClientRect().width) : null,
     usable: Math.round(band.getBoundingClientRect().width
@@ -184,6 +205,11 @@ for (const [w, h] of VIEWPORTS) {
      `aspect ${m.ar.toFixed(3)} is above ${CEILING}`);
   ok(`${String(w + "x" + h).padEnd(10)} no blank plane in the band`, m.blank <= 2,
      `the band's columns end ${m.blank}px apart`);
+  /* AND NO HOLE INSIDE THE FIGURE EITHER. 12px is the reservation's slack at the widths where
+     the row's own padding does not already absorb it; measured 8.8px from 1280 to 3440 and 0 at
+     1220. A plate capped below its declared height shows here as tens of pixels. */
+  ok(`${String(w + "x" + h).padEnd(10)} and no hole between the plate and its caption`,
+     m.hole <= 12, `${m.hole}px of paper inside the figure column`);
 }
 
 /* THE TWO FROZEN PLATE BOXES, MEASURED IN THE PAGE.
@@ -324,11 +350,13 @@ if (process.argv.includes("--self-test")) {
        .atlas-plate-row -- and this seed is the difference between the two. */
     { name: "the aspect bound moved from the band to the plate — paper returns under the map",
       at: [1440, 900],
-      css: `[data-atlas].atlas-instrument .atlas-plate-row{height:auto!important;
-              min-height:calc(100vh - 300px)!important}
-            [data-atlas].atlas-instrument .atlas-stage{flex:none!important;
-              height:calc(var(--at-plate-avail) / 2.2)!important}`,
-      broke: (m) => m.blank > 2 },
+      /* THE SEED HAD TO MOVE WITH THE FIX. It used to cap the plate and read the remainder at
+         the column's foot; the caption is pinned there now, so the remainder appears as a hole
+         above it and the old seed measured a column that ended exactly where it should. Same
+         defect, same one line of CSS, read where it now shows. */
+      css: `[data-atlas].atlas-instrument .atlas-stage{
+              height:calc((var(--at-band-h) - var(--at-fig-chrome)) * 0.6)!important}`,
+      broke: (m) => m.hole > 12 },
   ];
 
   for (const seed of SEEDS) {
@@ -337,7 +365,8 @@ if (process.argv.includes("--self-test")) {
     await page.waitForTimeout(400);
     const m = await measure();
     ok(`${seed.name} @ ${seed.at[0]}x${seed.at[1]}`, seed.broke(m),
-       `aspect ${m.ar.toFixed(3)}, blank ${m.blank}px — the seed did not move the property out of `
+       `aspect ${m.ar.toFixed(3)}, blank ${m.blank}px, hole ${m.hole}px — the seed did not move `
+       + `the property out of `
        + "range, so this bound is going unchecked");
   }
 

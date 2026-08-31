@@ -389,17 +389,34 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
   ok("and the ceiling is where one track stops being the subject of its plate",
      bounds["ar-max"] === "3.2", `--at-plate-ar-max is ${bounds["ar-max"]}`);
   ok("the aperture floor reaches the stage as a token, not as a literal",
-     /min-height:min\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)/.test(css),
+     /height:max\(\s*calc\(var\(--at-band-h\) - var\(--at-fig-chrome\)\),\s*calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)\)/
+       .test(css.replace(/\s+/g, " ")),
      "the stage's height floor is not reading the pinned token");
+  /* AND THE PLATE'S HEIGHT IS DECLARED FROM THE BAND, NOT LEFT OVER FROM THE CHROME.
+     `flex:1 1 auto` on the stage made the map the elastic member of the figure column, so a
+     caption that re-wrapped resized the aperture -- measured on CI as 583x340.13 -> 583x336.13
+     when a season condition was added. The declaration above is the fix and this is the rule
+     that keeps it: the stage may not be flexible, because a flexible stage is a map whose height
+     is whatever the prose beneath it left behind. */
+  ok("and the plate is not the elastic member of its own column",
+     !/\.atlas-stage\{[^}]*flex:1 1 auto/.test(css.replace(/\s+/g, "")),
+     "the stage is flexible again — the caption can resize the aperture");
   /* AND THE CEILING BOUNDS THE BAND RATHER THAN THE PLATE, WHICH IS THE WHOLE OF WHY IT COSTS
      NOTHING NOW. Applied to the plate it caps the map inside a column that keeps its height, and
      the difference is paper under the map. Applied to the band it caps both columns together, so
      a tall monitor shows more of the matrix instead of a taller map with a cropped opening view.
      check-atlas-camera is what measures the consequence; this is the declaration. */
   ok("and the aperture ceiling bounds the band, not the plate",
-     /height:min\(\s*calc\(100vh - var\(--at-head-h\) - var\(--at-peek\) - var\(--at-tport\)\),\s*calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\) \+ var\(--at-fig-chrome\)\)\)/
-       .test(css.replace(/\s+/g, " ").replace(/height:min\( /, "height:min(")),
+     /--at-band-h:min\( calc\(100vh - var\(--at-head-h\) - var\(--at-peek\) - var\(--at-tport\)\), calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\) \+ var\(--at-fig-chrome\)\)\)/
+       .test(css.replace(/\s+/g, " ")),
      "the band's height is not composed from the viewport and the aspect bound");
+  /* AND THE BAND IS THE DECLARED NUMBER, WHICH IS WHAT KEEPS THE ANSWER OUT OF THE PLATE'S
+     BUSINESS. Under `min-height` the row grew to the answer's intrinsic height -- 625.8 against
+     a declared 505.6 at 1280 -- and since the plate's height is declared, the difference was
+     paper under the map. The answer distributes itself into the band; it does not set it. */
+  ok("and the band is exactly the height it declares",
+     /\.atlas-plate-row\{[^}]*height:var\(--at-band-h\)/.test(css.replace(/\s+/g, "")),
+     "the band's height is no longer the declared band");
   ok("the ceiling is the aspect the research corridors measured",
      /--at-plate-ar:\s*1\.6\s*;/.test(css), "--at-plate-ar has moved off the measured 1.6");
   /* AND THE THREE RETIRED TOKENS MUST STAY RETIRED. A cap re-declared but unread is a bound
