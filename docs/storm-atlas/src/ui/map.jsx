@@ -740,6 +740,14 @@ export function AtlasMap({
           THE LIVE COORDINATE NOW SITS ON PAPER, which is 5c's one named risk: during a pan the
           numbers change just off the map. Left-aligned to the plate's own edge and immediately
           beneath it so it reads as the plate's footer. */}
+      {/* THE FIGURE'S CHROME IS ONE ELEMENT, WHICH IS WHAT LETS IT MOVE AS ONE.
+          The class key, the measure and Figure 1 are the plate's caption apparatus: under the
+          map on a desktop, beside it on a wide short stack where the plate cannot use the whole
+          band. Wrapped, that is one grid cell either way. Loose, the two of them needed a row
+          each, and a spanning plate then grew both -- measured at 1024 as 79px of paper below
+          the map that no rule could name, because it was inside the grid rather than under
+          anything. */}
+      <div className="at-plate-chrome">
       <div className="at-platefoot">
         <ClassKey />
         <span className="at-plate-measure">
@@ -832,6 +840,7 @@ export function AtlasMap({
             </details>
           ) : null}
         </span>
+      </div>
       </div>
     </>
   );

@@ -202,6 +202,25 @@ const measure = () => page.evaluate(() => {
     refusedRows: document.querySelectorAll("[data-outcome][data-refusal-state]").length,
     allRows: document.querySelectorAll("[data-outcome]").length,
     overflow: Math.max(0, document.documentElement.scrollWidth - document.documentElement.clientWidth),
+    plateAr: plate && plate.getBoundingClientRect().height
+      ? +(plate.getBoundingClientRect().width / plate.getBoundingClientRect().height).toFixed(3)
+      : null,
+    /* THE WIDTH BETWEEN THE PLATE'S RIGHT EDGE AND THE FIGURE COLUMN'S, and whether anything is
+       standing in it. Read against the COLUMN rather than the viewport, because a centred figure
+       block has page margin either side of it which is not the same thing as a hole inside the
+       block. */
+    sideGap: (() => {
+      const col = document.querySelector(".atlas-stage-col");
+      if (!col || !plate) return 0;
+      return Math.round(col.getBoundingClientRect().right - plate.getBoundingClientRect().right);
+    })(),
+    sideOccupied: (() => {
+      const col = document.querySelector(".atlas-stage-col");
+      if (!col || !plate) return true;
+      const pr = plate.getBoundingClientRect().right;
+      return [...col.querySelectorAll(".at-platefoot, .at-plate-figure, .at-plate-caption")]
+        .some((el) => el.getBoundingClientRect().left >= pr - 1);
+    })(),
   };
 });
 
@@ -309,6 +328,20 @@ for (const [w, h] of [[1024, 768], [414, 896]]) {
   ok(`${tag} and at least two numerical findings clear it with the sample`,
      m.numericalAboveFold >= 2, `${m.numericalAboveFold} numerical of ${m.aboveFold} above the fold`);
   ok(`${tag} with no horizontal overflow`, m.overflow === 0, `${m.overflow}px`);
+  /* AND THE PLATE IS A PLATE RATHER THAN A STRIP. 3.2 is where a single East Pacific track stops
+     being the subject of its own plate -- a ceiling, not a landing. A frame that sits on it is a
+     frame whose composition has run out of ideas, which is what a 639x199.7 plate beside a
+     333x220 rectangle of paper was. */
+  ok(`${tag} the plate reads as geography, not a strip`, m.plateAr <= 3.2,
+     `aspect ${m.plateAr}`);
+  /* AND THE PAPER BESIDE IT IS CHROME, NOT A VOID. Where the fold and the aspect ceiling forbid
+     a full-bleed plate, the width left over carries the class key, the scale, Figure 1 and PLATE
+     NOTES -- the figure's own caption apparatus, set to the plate's right edge instead of its
+     bottom one. What is asserted is that the leftover is OCCUPIED: an empty rectangle wider than
+     a third of the block beside the map is the defect this frame was rejected for. */
+  ok(`${tag} and the width beside it carries the figure's chrome`,
+     m.sideGap <= 8 || m.sideOccupied,
+     `${m.sideGap}px beside the plate, occupied=${m.sideOccupied}`);
 }
 
 /* ── the seed ────────────────────────────────────────────────────────────────────────────────
@@ -333,6 +366,27 @@ if (SELF_TEST) {
       css: "[data-atlas].atlas-instrument .at-ans-cmp{font-size:24px}",
       broke: (m) => m.bigCompare.length > 0 || !(m.cmp && m.cmp.size <= 12) },
   ];
+  /* THE STACKED FRAME'S TWO SEEDS RUN AT 1024, because that is the viewport whose composition
+     they are about: the plate put back on the aspect ceiling, and the width beside it emptied. */
+  for (const seed of [
+    { name: "the stacked plate back on the 3.2 ceiling",
+      css: `@media (max-width:1180px){[data-atlas].atlas-instrument .atlas-stage{
+              height:calc((100vw - 2 * var(--at-pad) - var(--at-fig-side)
+                - var(--at-fig-sidegap)) / 3.9)!important}}`,
+      broke: (m) => m.plateAr > 3.2 },
+    { name: "the figure's chrome put back under the map, leaving the width beside it empty",
+      css: `@media (max-width:1180px){[data-atlas].atlas-instrument .at-plate-chrome{
+              grid-column:1!important;grid-row:3!important}}`,
+      broke: (m) => m.sideGap > 8 && !m.sideOccupied },
+  ]) {
+    await open(CONDITIONED, 1024, 768);
+    await page.addStyleTag({ content: seed.css });
+    await page.waitForTimeout(500);
+    const m = await measure();
+    ok(seed.name, seed.broke(m),
+       `aspect ${m.plateAr}, ${m.sideGap}px beside the plate, occupied=${m.sideOccupied} — `
+       + "the rule written for this defect did not fire");
+  }
   for (const seed of seeds) {
     await open(CONDITIONED, 1920, 1080);
     await page.addStyleTag({ content: seed.css });

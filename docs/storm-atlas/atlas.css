@@ -2226,7 +2226,7 @@
    paper under the figure, which is the beige this composition was opened to remove. Pushed above
    the caption it is the figure's own white space, between the legend rule and the sentence that
    describes it, and the column still ends exactly where the answer does. */
-[data-atlas].atlas-instrument .at-plate-figure{margin-top:auto}
+[data-atlas].atlas-instrument .at-plate-chrome{margin-top:auto}
 [data-atlas].atlas-instrument .at-plate{position:absolute;inset:0}
 
 /* THE INSPECTOR OVERLAYS THE PLATE RATHER THAN TAKING A COLUMN FROM IT.
@@ -2633,7 +2633,109 @@
   /* AND THE CAPTION IS NOT PUSHED TO A FOOT THERE IS NONE OF. Stacked, the column takes its
      content and there is no band remainder to bank, so the desktop rule that pins Figure 1 to
      the column's foot would only add a gap nothing asked for. */
-  [data-atlas].atlas-instrument .at-plate-figure{margin-top:0}
+  [data-atlas].atlas-instrument .at-plate-chrome{margin-top:0}
+}
+
+/* ─── THE WIDE, SHORT STACK: THE LEFTOVER IS FIGURE CHROME ─────────────────────────────────
+ *
+ * WHERE THIS APPLIES AND WHY IT IS A RANGE RATHER THAN A BREAKPOINT. Stacked, the plate's height
+ * is capped by the fold and its width by the aspect ceiling against that cap -- so on a viewport
+ * that is WIDE and SHORT the band is wider than any legal plate. At 1024x768 that leftover was
+ * 235px. Centring the figure made it a symmetric margin instead of a slab, which is honest and
+ * still wrong: 117px of empty page either side of a 737x230 plate reads as a thumbnail, and the
+ * aspect sat on the 3.2 ceiling because spending the whole budget on width is the only way to
+ * use it when the leftover has no other job.
+ *
+ * SO THE LEFTOVER IS GIVEN A JOB. The class key, the scale bar, the projection, Figure 1 and
+ * PLATE NOTES move out of the column's vertical flow and into the width beside the plate. They
+ * are the figure's own chrome and they were always set to the plate's edges; here they are set
+ * to its right edge instead of its bottom one. Two things follow, and both are the point:
+ *
+ *   the plate gets the width back    it is no longer competing with a margin for it
+ *   the plate gets the HEIGHT back   the foot and the caption are no longer under it, so the
+ *                                    fold budget they were spending is the plate's to spend
+ *
+ * which together land the aspect near 2.4 rather than on the ceiling. 3.2 is where a plate stops
+ * being a plate; it was never the target.
+ *
+ * IT IS NOT A SECOND LAYOUT SYSTEM. The order is still PLATE -> ANSWER -> MATRIX, the answer and
+ * the matrix are still the band's full width and are not touched by any rule in this block, and
+ * nothing here is a column of evidence -- it is a figure and its caption, which is the same
+ * arrangement the desktop band uses turned through ninety degrees.
+ *
+ * THE RANGE. Wide enough that the leftover can hold a caption (960px), still stacked (1180px),
+ * and short enough that the fold is what caps the plate (900px). Outside it the plate already
+ * fills the band -- 900x900 gives 848px of plate against 848 of band, 768x1024 gives 716 of 716
+ * -- so there is no leftover to place anything in and the vertical caption is correct. */
+@media (min-width:960px) and (max-width:1180px) and (max-height:900px){
+  [data-atlas].atlas-shell.atlas-instrument{
+    /* THE SIDE MEASURE. Wide enough for the seven-class key on two lines and a caption that does
+       not set one word per line; narrow enough to leave the plate the majority of the band. */
+    --at-fig-side:236px;
+    --at-fig-sidegap:18px;
+  }
+  /* THE BLOCK IS FULL WIDTH AGAIN, because the leftover is no longer leftover. */
+  [data-atlas].atlas-instrument .atlas-stage-col{
+    width:100%;margin-inline:0;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) var(--at-fig-side);
+    grid-template-rows:auto auto;
+    column-gap:var(--at-fig-sidegap);
+  }
+  /* THE HEAD STAYS ON TOP OF THE PLATE AND SPANS BOTH, because it is the plate's title bar --
+     it names the plate and prints its cohort counts, and set beside the map it would read as a
+     caption competing with Figure 1. */
+  [data-atlas].atlas-instrument .at-platehead{grid-column:1 / -1;grid-row:1}
+  [data-atlas].atlas-instrument .atlas-stage{grid-column:1;grid-row:2}
+  /* ONE CELL, AND `align-self:start` SO IT PACKS AGAINST THE PLATE'S TOP EDGE. The chrome is
+     shorter than the plate; stretched, the key and the caption would be spread down 290px of
+     column with the space between them growing as the plate does -- the hole this composition
+     removed from under the map, reopened to its right. */
+  [data-atlas].atlas-instrument .at-plate-chrome{
+    grid-column:2;grid-row:2;align-self:start;margin-top:0;min-width:0;
+  }
+  /* THE KEY AND THE MEASURE STACK, because at 236px they are a column rather than a band. The
+     scale bar is still computed from the rendered plate -- nothing here touches what it says. */
+  [data-atlas].atlas-instrument .at-platefoot{
+    flex-direction:column;align-items:flex-start;gap:8px;padding:0 0 10px;
+  }
+  [data-atlas].atlas-instrument .at-platefoot .at-plate-measure{
+    flex-wrap:wrap;gap:6px 10px;margin-left:0;
+  }
+  [data-atlas].atlas-instrument .at-platefoot .at-r{margin-left:0}
+  [data-atlas].atlas-instrument .at-classkey{flex-wrap:wrap;gap:5px 9px}
+  /* AND FIGURE 1 IS A PARAGRAPH HERE RATHER THAN A LINE, which is what a narrow measure is for.
+     The one-line rule was never about the sentence -- it was about the sentence being in the
+     plate's vertical budget. Beside the plate it is not, so it may take the lines it needs and
+     the plate does not move: check-atlas-stability drives that invariant at this viewport. */
+  [data-atlas].atlas-instrument .at-plate-figure{display:block}
+  [data-atlas].atlas-instrument .at-plate-caption{max-width:none}
+  [data-atlas].atlas-instrument .at-plate-acts{display:block;margin-top:8px}
+  /* THE PLATE TAKES THE FOLD BUDGET THE CAPTION USED TO SPEND, AND IT SPENDS IT ON HEIGHT.
+   *
+   * TWO BOUNDS, AND WHICHEVER IS SMALLER WINS. The first is the SHAPE: the plate's width divided
+   * by the aspect this frame is composed at, which is what takes it off the 3.2 ceiling and puts
+   * it at 2.46 -- a rectangle a recurving track reads in, rather than a letterbox. The second is
+   * the FOLD: 38vh, against the 30 the vertical stack allows, because the class key and Figure 1
+   * are no longer under the map spending it. At 1024x768 the shape bound wins at 293 and the
+   * fold bound at 291.8, so they land within a pixel of each other -- which is what it looks
+   * like when a composition is solved rather than clamped. At 1180x800 the fold binds first.
+   *
+   * AND THE WIDTH IS READ FROM THE VIEWPORT, NOT FROM THE COLUMN. `100%` of a grid area is its
+   * height for a height property, so the shape bound is composed from the same terms the column
+   * itself is: the viewport less the page padding, the side measure and the gutter. Nothing in
+   * that chain is content, which is what keeps the caption -- now free to take the lines a
+   * 236px measure needs -- unable to move the plate. */
+  [data-atlas].atlas-shell.atlas-instrument{--at-stack-ph:min(38vh,340px)}
+  [data-atlas].atlas-instrument .atlas-stage{
+    height:min(
+      calc((100vw - 2 * var(--at-pad) - var(--at-fig-side) - var(--at-fig-sidegap)) / 2.45),
+      var(--at-stack-ph));
+  }
+}
+
+@media (max-width:1180px){
+
   /* Stacked, the rows take their content: there is no band slack to distribute. */
   [data-atlas] .at-ans-row{flex:none;max-height:none}
   [data-atlas] .at-ans-mid,[data-atlas] .at-ans-rows{flex:none}
