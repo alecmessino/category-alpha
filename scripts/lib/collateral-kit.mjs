@@ -55,7 +55,7 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
   .sheet:last-child{break-after:auto} }
 
 /* ---- masthead ------------------------------------------------------------------ */
-.mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:var(--sp-3);margin-bottom:var(--sp-4)}
+.mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:var(--sp-2);margin-bottom:var(--sp-3)}
 .mh-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-6)}
 .mh-brand{font-family:var(--font-mono);font-size:8.4px;font-weight:600;letter-spacing:2.2px;
   text-transform:uppercase;color:var(--ink-900)}
@@ -71,7 +71,7 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 .mh-rule .kv b{color:var(--ink-900);font-weight:600}
 
 /* ---- section furniture ---------------------------------------------------------- */
-.sec{margin-top:var(--sp-4)}
+.sec{margin-top:var(--sp-3)}
 .sec-hd{display:flex;align-items:baseline;gap:var(--sp-3);border-left:2.5px solid var(--ink-900);
   padding-left:var(--sp-3);margin-bottom:var(--sp-3)}
 .sec-hd h2{font-family:var(--font-mono);font-size:7.8px;font-weight:600;letter-spacing:1.5px;
@@ -181,6 +181,8 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   font-family:var(--font-mono);font-size:6px;line-height:1.28}
 .card dt{color:var(--ink-400);letter-spacing:.4px;text-transform:uppercase}
 .card dd{margin:0;color:var(--ink-700)}
+.card .catline{font-family:var(--font-mono);font-size:5.9px;font-weight:600;letter-spacing:.7px;
+  color:var(--ink-900);margin-top:-1px;line-height:1.1}
 .card .lf{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-900);
   border-top:1px solid var(--line-200);padding-top:2px;margin-top:1px;line-height:1.28}
 .card .lf .none{color:var(--ink-400)}
@@ -200,24 +202,24 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 /* ---- plate --------------------------------------------------------------------------- */
 .plate{border:1px solid var(--ink-900);border-radius:6px;overflow:hidden;background:#fbfcfe}
 .plate-hd{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-4);
-  padding:2.5px var(--sp-4);border-bottom:1px solid var(--ink-900);background:var(--white)}
+  padding:1.5px var(--sp-4);border-bottom:1px solid var(--ink-900);background:var(--white)}
 .plate-hd .t{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1.2px;text-transform:uppercase;
   font-weight:600}
 .plate-hd .m{font-family:var(--font-mono);font-size:6px;color:var(--ink-600);letter-spacing:.5px}
 .plate svg{display:block;width:100%;height:auto}
-.plate-ft{display:flex;flex-wrap:wrap;gap:1px var(--sp-5);padding:2.5px var(--sp-4);
+.plate-ft{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);padding:1.5px var(--sp-4);
   border-top:1px solid var(--line-200);background:var(--white)}
 .lg{display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:5.8px;
   letter-spacing:.5px;color:var(--ink-700);text-transform:uppercase}
 .lg i{display:block;width:14px;height:0;border-top-width:1.6px;border-top-style:solid;flex:0 0 14px}
 .lg i.dot{height:6px;width:6px;border-radius:50%;border:none;flex:0 0 6px}
 .lg i.sq{height:7px;width:9px;border:1px solid;border-radius:1px;flex:0 0 9px}
-.plate-note{padding:3px var(--sp-4);border-top:1px solid var(--line-200);
-  font-size:6.7px;color:var(--ink-600);line-height:1.35;background:var(--white)}
+.plate-note{padding:2px var(--sp-4);border-top:1px solid var(--line-200);
+  font-size:6.4px;color:var(--ink-600);line-height:1.3;background:var(--white)}
 
 /* ---- answers rail --------------------------------------------------------------------- */
 .rail{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4);border-top:1px solid var(--ink-900);
-  border-bottom:1px solid var(--ink-900);padding:var(--sp-3) 0;margin:var(--sp-4) 0}
+  border-bottom:1px solid var(--ink-900);padding:var(--sp-2) 0;margin:var(--sp-3) 0}
 .rail>div{padding-right:var(--sp-5);border-right:1px solid var(--line-200)}
 .rail>div:last-child{border-right:none;padding-right:0}
 .rail .q{font-family:var(--font-mono);font-size:6.1px;letter-spacing:1px;text-transform:uppercase;
@@ -271,7 +273,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .ledger.compact th{padding:1.5px var(--sp-2);font-size:6px}
 .ledger.compact td:first-child{font-size:6.9px}
 .ledger.compact .rate{font-size:7.3px}
-.ledger.compact .status{font-size:5.8px;max-width:96px}
+.ledger.compact .status{font-size:5.8px;max-width:none;white-space:nowrap}
+.ledger .ivl{color:var(--ink-600);font-weight:400;font-size:6px;letter-spacing:0}
 .ledger.compact .grp td{font-size:5.8px;padding:1.5px var(--sp-2)}
 .cardrow{display:grid;grid-template-columns:repeat(8,1fr);gap:var(--sp-2)}
 .cardrow .card{padding:4px 4px}
@@ -288,7 +291,7 @@ table.ledger.sysgrid{table-layout:fixed}
 .cmptable.compact td.q{font-size:6px}
 .platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
 .platecol .sec{margin-top:0}
-.triband{display:grid;grid-template-columns:1.02fr .78fr 1.3fr;gap:var(--sp-5);align-items:start}
+.triband{display:grid;grid-template-columns:1.28fr .86fr 1.36fr;gap:var(--sp-4);align-items:start}
 .grid3.tight{gap:var(--sp-5);align-items:start}
 .grid4.tight{gap:var(--sp-4);align-items:start}
 .cardsplit{display:grid;grid-template-columns:1.18fr 1fr;gap:var(--sp-6);align-items:start}
@@ -433,19 +436,27 @@ function barCell(row) {
  * The outcome ledger. `groups` is [{ label, rows }]. Nothing is computed here.
  */
 export function ledger(groups, { caption, showBar = true, compact = false } = {}) {
-  const head = `<tr><th>Contract row</th><th>n / N</th><th>Rate</th>`
-    + (showBar ? `<th>95% Wilson</th>` : "")
-    + `<th>Interval</th><th style="text-align:left">Status returned</th></tr>`;
+  /* COMPACT MERGES THE RATE AND ITS INTERVAL INTO ONE CELL. Not to save ink -- to buy the STATUS
+     column the width it needs to print the archive's stamp on one line. A stamp that wraps to
+     three lines in a narrow column costs more page than the interval column it was competing
+     with, and the interval never leaves the number it belongs to. */
+  const cols = compact ? 4 : (showBar ? 6 : 5);
+  const head = compact
+    ? `<tr><th>Contract row</th><th>n / N</th><th>Rate · 95% Wilson</th>`
+      + `<th style="text-align:left">Status returned</th></tr>`
+    : `<tr><th>Contract row</th><th>n / N</th><th>Rate</th>`
+      + (showBar ? `<th>95% Wilson</th>` : "")
+      + `<th>Interval</th><th style="text-align:left">Status returned</th></tr>`;
   const body = groups.map((g) => {
-    const grp = g.label
-      ? `<tr class="grp"><td colspan="${showBar ? 6 : 5}">${esc(g.label)}</td></tr>` : "";
+    const grp = g.label ? `<tr class="grp"><td colspan="${cols}">${esc(g.label)}</td></tr>` : "";
     return grp + g.rows.map((r, i) =>
       `<tr class="${i % 2 ? "band" : ""}">`
       + `<td>${esc(r.label)}</td>`
       + `<td class="frac">${r.count} / ${r.n_storms}</td>`
-      + rateCell(r)
-      + (showBar ? barCell(r) : "")
-      + `<td class="ci">${ci(r.ci95)}</td>`
+      + (compact
+        ? `<td class="rate${r.rate === null ? " refused" : ""}">${r.rate === null ? "REFUSED"
+          : `${pct(r.rate)} <span class="ivl">[${ci(r.ci95)}]</span>`}</td>`
+        : rateCell(r) + (showBar ? barCell(r) : "") + `<td class="ci">${ci(r.ci95)}</td>`)
       + statusCell(r, compact)
       + `</tr>`).join("");
   }).join("");
@@ -553,12 +564,9 @@ export const COMPARISON_ROWS = [
   ["What happened to storms that began here before?",
     "Not answered. No cohort, no denominator, no interval.",
     "<b>Exact n / N with a 95% Wilson interval</b> on every contract row, from a declared genesis point or pre-genesis reference cell, with the analog tracks drawn."],
-  ["How good is the evidence, and where does it run out?",
-    "Not answered.",
-    "<b>Visible refusal.</b> Effective sample size, the min-sample gate, the archive-wide event gate, and the pre-satellite bias warning — printed beside the number, or instead of it."],
-  ["Can a counterparty reproduce it?",
-    "The advisory is public; the reasoning behind a number is not reproducible from it.",
-    "<b>Yes.</b> The cohort is a URL. Same question, same pack stamp, same numbers, by anyone."],
+  ["How good is the evidence, where does it run out, and can a counterparty reproduce it?",
+    "Not answered. The advisory is public; the reasoning behind a number is not reproducible from it.",
+    "<b>Visible refusal</b> — effective sample size, the min-sample gate, the archive-wide event gate and the pre-satellite bias warning, printed beside the number or instead of it. And the cohort is a <b>URL</b>: same question, same pack stamp, same numbers, by anyone."],
 ];
 
 export function comparisonStrip({ note, compact = false } = {}) {

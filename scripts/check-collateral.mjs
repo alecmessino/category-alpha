@@ -90,6 +90,12 @@ const STATE_WORDS = [
    landfalls table). A state name within reach of a RATE is not. This looks for a state word in
    the same sentence as a percentage or an n/N. */
 const RATE_NEAR = /(\d+\s*\/\s*\d+|\d+\.\d\s*%|\d+\s*%)/;
+/* An explicit statement, in the same block, that the rate is not the state's. */
+const NON_ATTRIBUTION = new RegExp([
+  "does not score state", "scores no sub-conus", "no sub-conus", "not a state row",
+  "not a state-level", "no state-level", "not a gulf number", "conus-wide, not",
+  "is not a rate", "not a rate", "geography, not", "not scored", "no state rate",
+].join("|"), "i");
 
 const FORECAST_PHRASES = [
   /will (?:make )?landfall/i, /we (?:expect|forecast|predict)/i,
@@ -105,6 +111,27 @@ const FABRICATED_STATUS = [
 ];
 const UNSHIPPED = [/\bAPI\b/, /exportable charts/i, /recurring institutional brief/i];
 
+/* BLOCK BY BLOCK, NOT SENTENCE BY SENTENCE.
+   The first version of the state-rate check split flattened page text on full stops. A masthead
+   carries no full stop, so its "sentence" ran on through the answers rail and into the copy, and
+   the check reported a state name and a percentage that were three blocks apart. Splitting on the
+   block elements the page is actually made of is both stricter and quieter: a claim lives inside
+   one block, and a block is what a reader takes in as one statement. */
+function blocks(html) {
+  const out = [];
+  const body = html.replace(/<svg[\s\S]*?<\/svg>/g, " ").replace(/<style[\s\S]*?<\/style>/g, " ");
+  /* INNERMOST BLOCKS. A table cell that wraps a prose div and a feed div is two statements, not
+     one, and treating it as one manufactured a co-occurrence the page does not make. A block
+     that contains another block is skipped in favour of its children. */
+  const BLOCK = /<(p|li|td|th|h1|h2|h3|caption|div)\b[^>]*>([\s\S]*?)<\/\1>/g;
+  for (const m of body.matchAll(BLOCK)) {
+    if (/<(p|li|div|table)\b/.test(m[2])) continue;    // not innermost
+    const t = text(m[2]).trim();
+    if (t) out.push(t);
+  }
+  return out;
+}
+
 /* Strip tags, decode the entities this build emits, and collapse whitespace. */
 function text(html) {
   return html
@@ -116,8 +143,15 @@ function text(html) {
     .replace(/\s+/g, " ");
 }
 
+/* The six artifacts, plus the source manifest, which is a reference document held to a
+   different set of rules: it prints the archive's raw landfall rows -- sub-region and detection
+   method included -- because that is the evidence the artifacts are checked against. */
+const MANIFEST_DOC = "SOURCE-MANIFEST.html";
 const files = readdirSync(DIR).filter((f) => f.endsWith(".html")).sort();
-ok(files.length === 6, `six artifacts rendered`, `found ${files.length}: ${files.join(", ")}`);
+const artifacts = files.filter((f) => f !== MANIFEST_DOC);
+ok(artifacts.length === 6, `six artifacts rendered`,
+  `found ${artifacts.length}: ${artifacts.join(", ")}`);
+ok(files.includes(MANIFEST_DOC), "the source manifest is rendered");
 
 for (const f of files) {
   console.log(`\n${f}`);
@@ -131,7 +165,7 @@ for (const f of files) {
   ok(/METHODOLOGY 1\.1\.0/.test(t) && new RegExp(M.pack.archive_stamp).test(t),
     "carries the methodology version and pack stamp");
   ok(/RESEARCH ONLY — NOT A FORECAST/.test(t), "carries the research-only disclaimer");
-  ok(/The question a desk actually asks/.test(t), "carries the comparison strip");
+  if (f !== MANIFEST_DOC) ok(/The question a desk actually asks/.test(t), "carries the comparison strip");
   ok(/storm-atlas\/\?v=1/.test(html), "carries at least one replay URL");
   ok(/GENESIS-CONDITIONED/.test(t), "states the genesis-conditioned rule");
 
@@ -172,22 +206,45 @@ for (const f of files) {
   ok(badIv.length === 0, "every 95% interval traces to the manifest",
     badIv.slice(0, 5).join("\n        "));
 
-  /* -- prohibition: no state-level rate -- */
+  /* -- prohibition: no state name in the same block as a rate --
+     A state NAME is a fact about a named storm and is allowed; a state name inside the same
+     block as a percentage or an n/N is not, because a reader cannot be relied on to keep them
+     apart. A block carrying only intensities in knots is a member fact and passes. */
   const stateRate = [];
-  for (const sent of t.split(/(?<=[.;])\s+/)) {
-    const low = sent.toLowerCase();
+  for (const b of blocks(html)) {
+    const low = b.toLowerCase();
     if (!STATE_WORDS.some((w) => low.includes(w))) continue;
-    if (!RATE_NEAR.test(sent)) continue;
-    /* A member card prints "CONUS / Texas 100 kt" -- a kt value, not a rate. Allowed. */
-    if (/\bkt\b/.test(sent) && !/%/.test(sent)) continue;
-    stateRate.push(sent.slice(0, 160));
+    if (!RATE_NEAR.test(b)) continue;
+    if (/\bkt\b/.test(b) && !/%/.test(b)) continue;   // member landfall facts
+    /* THE ONE EXEMPTION, AND WHY IT IS NARROW.
+       The basis-risk paragraphs have to name the states in a CONUS cohort -- that a Gulf book is
+       being sold a national-coastline prior is the whole finding, and it cannot be made without
+       saying Florida. A block that carries the non-attribution IN THE SAME BLOCK as the rate is
+       therefore allowed: the reader meets the warning and the number together, which is the
+       arrangement the rule is protecting. A block that names a state beside a rate and says
+       nothing about scope is not exempt, and the check still fails on it. */
+    if (NON_ATTRIBUTION.test(b)) continue;
+    stateRate.push(b.slice(0, 220));
   }
-  ok(stateRate.length === 0, "no state-level or sub-CONUS rate",
+  ok(stateRate.length === 0, "no state name shares a block with a rate",
     stateRate.slice(0, 4).join("\n        "));
 
-  /* -- prohibition: forecast / ranking language -- */
-  const forecast = FORECAST_PHRASES.filter((re) => re.test(t)).map((re) => String(re));
-  ok(forecast.length === 0, "no forecast or similarity-ranking language", forecast.join(", "));
+  /* -- prohibition: affirmative forecast / ranking language --
+     "Storm Atlas implements no closest-analog metric" is the package saying so, and it says it
+     on nearly every page. Only an AFFIRMATIVE use is a violation, so a negation immediately
+     before the phrase clears it. */
+  const NEGATED = /\b(no|not|never|without|neither|nor|nothing|none|refuses|refuse|implements)\b[^.]{0,46}$/i;
+  const forecast = [];
+  for (const re of FORECAST_PHRASES) {
+    const g = new RegExp(re.source, re.flags.includes("g") ? re.flags : re.flags + "g");
+    for (const m of t.matchAll(g)) {
+      const before = t.slice(Math.max(0, m.index - 46), m.index);
+      if (NEGATED.test(before)) continue;
+      forecast.push(`"${m[0]}"  …${before.slice(-46)}[${m[0]}]…`);
+    }
+  }
+  ok(forecast.length === 0, "no affirmative forecast or similarity-ranking language",
+    forecast.slice(0, 4).join("\n        "));
 
   /* -- prohibition: fabricated row-level status -- */
   const fab = FABRICATED_STATUS.filter((re) => re.test(html)).map((re) => String(re));

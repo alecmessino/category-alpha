@@ -68,7 +68,7 @@ export function liveRows(D) {
   const L = D.operational.storms.find((s) => s.atcf_id === "EP122026");
   const al97 = D.outlook.find((o) => o.id === "AL97");
   const ep95 = D.outlook.find((o) => o.id === "EP95");
-  const feedTs = (t) => `<div class="feedts">${esc(t)}</div>`;
+  const feedTs = () => "";
   return {
     "97L": {
       name: "Invest 97L", basin: "NORTH ATLANTIC / GULF",
@@ -186,7 +186,7 @@ function timingRows(sys, keys) {
 export function artifactA(D, copy) {
   const C = makeCopy(copy, "A");
   const rows = liveRows(D);
-  const bp = basinPlate(D, { width: 430, height: 178 });
+  const bp = basinPlate(D, { width: 430, height: 162 });
   const order = ["97L", "KARINA", "95E", "LOWELL"];
   const sysOf = { "97L": D.byId["97L"], KARINA: D.byId.KARINA, "95E": D.byId["95E"], LOWELL: D.byId.LOWELL };
   const REL = {
@@ -241,8 +241,13 @@ ${answersRail(C.answers.now || "", C.answers.adds || "", C.answers.commercial ||
 
 <section class="sec">${sectionHead("01", "Active systems", "live columns are timestamped · cohort columns are evergreen")}
 ${table}
-<p class="fn"><b>THE LIVE COLUMN IS NOT ATLAS OUTPUT.</b> It is the desk's own line and the
-archive's operational feeds, each with its instant. The operational layer never enters a cohort,
+<p class="fn"><b>INSTANTS.</b> Desk line ${esc(LIVE_STAMP)}. NHC graphical outlook ingested
+${esc(D.feeds_generated_at)} (Atlantic issued ${esc((D.outlook.find((o) => o.id === "AL97") || {}).issued || "—")};
+Pacific issued ${esc((D.outlook.find((o) => o.id === "EP95") || {}).issued || "—")}). ATCF b-deck
+fixes valid ${esc((D.operational.storms.find((x) => x.atcf_id === "EP112026") || {}).latest_valid_time || "—")},
+operational layer generated ${esc(D.operational.generated_at)}.
+<b>THE LIVE COLUMN IS NOT ATLAS OUTPUT.</b> It is the desk's own line and the archive's
+operational feeds. The operational layer never enters a cohort,
 never matches an analog and never computes a rate — its own source note says so.
 <b>POINT-TYPE RULE:</b> for an Invest that has not reached the archive's genesis definition, the
 supplied coordinate is not an observed formation point. It is a <b>PRE-GENESIS REFERENCE CELL</b>,
@@ -298,7 +303,7 @@ export function artifactB(D, copy) {
   const sAll = D.byId["97L-allmonths"];
   const rows = liveRows(D);
   const cp = cellPlate(D, "97L", {
-    lon0: -99, lon1: -73, lat0: 19.5, lat1: 34.5, width: 424, height: 250,
+    lon0: -99, lon1: -73, lat0: 20, lat1: 34.5, width: 424, height: 228,
     outlookId: "AL97", dLon: 5, dLat: 5, decimate: 1,
     cellAnchor: "start", cellDx: 8, cellDy: -18,
   });
@@ -497,7 +502,7 @@ export function artifactB2(D, copy) {
   const C = makeCopy(copy, "B2");
   const s = D.byId["97L"];
   const cp = cellPlate(D, "97L", {
-    lon0: -98, lon1: -74, lat0: 19, lat1: 34, width: 430, height: 276,
+    lon0: -98, lon1: -74, lat0: 19.5, lat1: 34, width: 430, height: 250,
     outlookId: "AL97", dLon: 5, dLat: 5, decimate: 1,
     cellAnchor: "start", cellDx: 8, cellDy: -20,
   });
@@ -583,7 +588,7 @@ export function artifactC(D, copy) {
   const rows = liveRows(D);
   const K = D.operational.storms.find((x) => x.atcf_id === "EP112026");
   const cp = cellPlate(D, "KARINA", {
-    lon0: -137, lon1: -94, lat0: 6, lat1: 30, width: 336, height: 198,
+    lon0: -137, lon1: -94, lat0: 6, lat1: 30, width: 286, height: 178,
     liveAtcf: "EP112026", dLon: 10, dLat: 10, decimate: 3,
     cellAnchor: "end", cellDx: -6, cellDy: 22,
   });
@@ -628,14 +633,16 @@ own source note says so. The two live readings carry their own instants and are 
     meta: `plate carrée`,
     svg: cp.svg,
     legendItems: [LEGEND.cohortTrack, LEGEND.majorTrack, LEGEND.genesisCell, LEGEND.liveTrack],
-    note: `The red track is Karina's own operational b-deck. It is <b>not</b> a cohort member,
-      contributes to no rate and never enters the archive. <b>No forecast cone is drawn.</b>`,
   })}
   <div>${ledger([{ label: "INTENSITY THRESHOLDS — assume formation", rows: s.intensity_rows }],
     { showBar: false, compact: true })}</div>
   <div>${ledger([{ label: "LANDFALL CONTRACT ROWS", rows: s.landfall_rows }],
     { showBar: false, compact: true })}</div>
 </div>
+<p class="fn">The red track on the plate is Karina's own operational b-deck. It is <b>not</b> a
+cohort member, contributes to no rate and never enters the archive. <b>No forecast cone is
+drawn.</b> Every landfall row is published even where it is zero or stamped: a zero with an
+interval is a result, and an omitted row is not.</p>
 ${citeBlock(s)}
 </section>
 
