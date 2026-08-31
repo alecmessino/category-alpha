@@ -271,8 +271,13 @@ const AUDIT = (REFUSALS) => {
     const rate = row.querySelector(".at-dc-rate");
     const count = row.querySelector(".at-dc-count");
     const interval = row.querySelector(".at-dc-int");
-    const refusalBlock = row.querySelector("[data-refusal]");
-    const refused = !!refusalBlock;
+    /* THE ROW DECLARES ITS OWN STATE. This read `[data-refusal]` INSIDE the row, which was the
+       block that stated the sentence -- and when the sentences moved beneath the matrix, every
+       rule guarded by `refused` went vacuous at once: a refused row could publish a rate, leak a
+       percentage through a title, or lose its status word, and this audit saw an unrefused row.
+       `data-refusal-state` is the state, declared on the row; `data-refusal` stays the hook for
+       the element that EXPLAINS a refusal, which is what the DOM gate holds to naming a way out. */
+    const refused = row.hasAttribute("data-refusal-state");
 
     /* RULE 4 — exactly one status, and it is inside this row.
        THE COLUMN IS CONDITIONAL AND THE RULE IS NOT. Archive-mode allocation drops STATUS when
@@ -322,7 +327,7 @@ const AUDIT = (REFUSALS) => {
     /* THE FIFTH RULE, IN THE SUBJECT COLUMN. A conditioned-on row must not present the selected
        storm's verdict: every member reached that contract by construction, so REACHED there is
        vacuous and reads as evidence. */
-    if (refusalBlock && refusalBlock.getAttribute("data-refusal") === "CONDITIONED_ON") {
+    if (row.getAttribute("data-refusal-state") === "CONDITIONED_ON") {
       const vs = row.querySelector(".at-dc-vs");
       if (vs && /(REACHED|IS THE COUNT|\bNO\b)/.test(vs.textContent || "")) {
         bad.push(`${name}: conditioned on, yet the subject column publishes a verdict `
@@ -369,51 +374,72 @@ const AUDIT = (REFUSALS) => {
    * not exist" from "these events exist somewhere you cannot reach".
    *
    * The problem the bound exists for is REPETITION: below the sample gate twelve contracts
-   * refuse on one sentence. So that is what is asserted. A reason shared by more than one row is
-   * hoisted beneath its group and stated once; a reason unique to its row prints in full. Either
-   * way no row repeats another, and nothing is truncated. */
-  const rowStatements = [];
-  for (const row of document.querySelectorAll("[data-outcome]")) {
-    for (const el of row.querySelectorAll(".at-say-text")) {
-      const t = (el.textContent || "").trim();
-      if (t) rowStatements.push(t);
-    }
-  }
-  const dupes = rowStatements.filter((t, i) => rowStatements.indexOf(t) !== i);
+   * refuse on one sentence. That is what is asserted, and the composition lets it be asserted in
+   * its strongest form. The rule used to compare rows against each other, because a row was
+   * where a sentence was printed; the sentences are now stated beneath the matrix, one block per
+   * governing refusal, so the rule is simply that NO SENTENCE APPEARS TWICE ANYWHERE. A row
+   * printing its own copy, two lines in one block saying the same thing, and two blocks
+   * repeating each other are all the same violation and all fail here -- which the row-against-
+   * row comparison could not see, and which the pointer beside the plate promises: refusals are
+   * explained ONCE, below. */
+  const statements = [...document.querySelectorAll(".at-say-text")]
+    .map((el) => (el.textContent || "").replace(/\s+/g, " ").trim()).filter(Boolean);
+  const dupes = statements.filter((t, i) => statements.indexOf(t) !== i);
   if (dupes.length) {
-    bad.push(`a refusal sentence is repeated across rows instead of hoisted: `
+    bad.push(`a refusal sentence is stated more than once: `
       + `"${dupes[0].slice(0, 60)}…" (${dupes.length} repeats)`);
   }
 
-  /* AND THE UNIT OF REPETITION IS THE WHOLE LINE, NOT HALF OF IT. The rule above reads
-     `.at-say-text` alone, so a hoist that suppressed the REASON and kept the REMEDY satisfied it
-     completely: measured on `?w=25,-80,200&s0=2018`, eleven rows each rendered a line whose
-     entire content was "YOU CAN CHANGE THIS. A wider cohort would carry a rate…", beneath a deck
-     that had already said it once. Every one of those lines was distinct-by-reason -- there was
-     no reason -- and identical in fact.
-
-     Two rows that refuse for genuinely DIFFERENT reasons and happen to share a way out are not
-     repeating each other: six regions each naming their own counts, all reachable by widening
-     the same population, is six findings with one exit. So the comparison is the rendered line. */
-  const rowLines = [];
+  /* AND NO ROW STATES ONE AT ALL. The matrix is a table under the composition: a row carries its
+     mark, its count and its status word, and nothing that reads as prose between two rows of
+     figures. Stated as its own rule rather than left to the duplicate check, because a SINGLE
+     row-level sentence is unique, passes the rule above, and is exactly the shape the deck is
+     composed to not have. */
   for (const row of document.querySelectorAll("[data-outcome]")) {
-    for (const el of row.querySelectorAll(".at-deck-say")) {
-      const t = (el.textContent || "").replace(/\s+/g, " ").trim();
-      if (t) rowLines.push(t);
-    }
+    /* THE SELF-CONTRIBUTION NOTE IS NOT A REFUSAL AND IS EXCLUDED BY NAME. It appears on a row
+       whose rate IS published -- the subject is its whole numerator -- and it says what the
+       reader is looking at rather than why there is nothing to look at. It has no governing
+       refusal to be grouped under, and moving it below the matrix would detach it from the one
+       row it qualifies. */
+    const t = (row.querySelector(":scope :not([data-self-contribution-note]) > .at-say-text")
+      ?.textContent || "").trim();
+    if (t) bad.push(`a matrix row states its own refusal instead of the block below: "${t.slice(0, 60)}…"`);
   }
-  const dupeLines = rowLines.filter((t, i) => rowLines.indexOf(t) !== i);
-  if (dupeLines.length) {
-    bad.push(`a refusal line is repeated verbatim across rows instead of hoisted: `
-      + `"${dupeLines[0].slice(0, 60)}…" (${dupeLines.length} repeats)`);
+
+  /* AND EVERY REFUSED ROW IS SPOKEN FOR, EXACTLY ONCE. The pointer beside the plate counts
+     refused contracts and sends the reader downward for all of them; a refused row named by no
+     block is a promise the surface does not keep, and a row named by two is the repetition this
+     composition exists to end. Read from `data-contracts` rather than from the joined line: a
+     contract label may itself contain the separator -- `Hawaii · ≥64 KT` is one contract, not
+     two -- and splitting the rendered text loses it. */
+  const spokenFor = new Map();
+  for (const line of document.querySelectorAll(".at-limit-line")) {
+    let labels = [];
+    try { labels = JSON.parse(line.getAttribute("data-contracts") || "[]"); } catch { labels = []; }
+    for (const label of labels) spokenFor.set(label, (spokenFor.get(label) || 0) + 1);
+  }
+  for (const row of document.querySelectorAll("[data-outcome][data-refusal-state]")) {
+    const name = row.getAttribute("data-outcome");
+    const n = spokenFor.get(name) || 0;
+    if (n === 0) bad.push(`${name}: refused, and no block below the matrix explains it`);
+    if (n > 1) bad.push(`${name}: explained ${n} times below the matrix, under a stamp saying once`);
+  }
+  const refusedNames = new Set([...document.querySelectorAll("[data-outcome][data-refusal-state]")]
+    .map((r) => r.getAttribute("data-outcome")));
+  for (const [label] of spokenFor) {
+    if (!refusedNames.has(label)) {
+      bad.push(`a limits block speaks for "${label}", which is no refused row in the matrix`);
+    }
   }
 
   /* AND NOTHING ANYWHERE MAY BE LEFT HOLDING ONLY THE WAY OUT. A line naming an exit without
      naming what it is an exit FROM is the one shape this surface must never render -- it is also
      an element carrying `data-refusal` that cannot satisfy the DOM gate's own rule in spirit
-     while satisfying it in letter. Walks every `.at-deck-say`, row-level and hoisted alike. */
-  for (const el of document.querySelectorAll(".at-deck-say")) {
-    const reason = (el.querySelector(".at-say-text")?.textContent || "").trim();
+     while satisfying it in letter. Walks every element that states a refusal: the grouped blocks
+     beneath the matrix, and any `.at-deck-say` the deck still renders on its own account. */
+  for (const el of document.querySelectorAll(".at-deck-say, [data-limit-kind]")) {
+    const reason = [...el.querySelectorAll(".at-say-text")]
+      .map((t) => (t.textContent || "").trim()).filter(Boolean).join(" ");
     const remedy = (el.querySelector(".at-say-remedy")?.textContent || "").trim();
     if (remedy && !reason) {
       bad.push("a refusal line offers a way out without stating what it refuses: "
@@ -422,14 +448,15 @@ const AUDIT = (REFUSALS) => {
   }
 
   /* AND THE WAY OUT MUST BE THE ONE ITS OWN KIND AUTHORISES.
-     Every `.at-deck-say` declares a kind in `data-refusal`; the registry decides, for that kind,
+     Every element that explains a refusal declares its kind in `data-refusal`; the registry
+     decides, for that kind,
      both the kicker and the sentence. Compared against REFUSALS rather than against a copy of
      the prose typed into this file, so the rule cannot drift away from the surface it checks.
      This is the rule the production defect broke: the hoisted line wrote its own remedy with
      RATE_REFUSED hard-coded, so ?i=cat4 declared CONDITIONED_ON and then told the reader to
      widen the radius -- a move that cannot reach a circular contract. Neither half of that is
      visible to a rule that only looks for repetition or for emptiness. */
-  for (const el of document.querySelectorAll(".at-deck-say[data-refusal]")) {
+  for (const el of document.querySelectorAll("[data-refusal]")) {
     const kind = el.getAttribute("data-refusal");
     const r = REFUSALS[kind];
     if (!r) { bad.push(`a refusal line declares an unknown kind: "${kind}"`); continue; }
@@ -451,12 +478,18 @@ const AUDIT = (REFUSALS) => {
      that dropped the triple would delete it from the page entirely. That is also what a hoist key
      blind to the counts would cause: two regions whose sentences match but whose numbers differ
      would collapse onto one line and one region's numbers would be published nowhere. */
-  for (const el of document.querySelectorAll(".at-deck-say[data-refusal]")) {
+  for (const el of document.querySelectorAll("[data-refusal]")) {
     const kind = el.getAttribute("data-refusal");
     if (kind !== "OUT_OF_SCOPE" && kind !== "BASE_RATE_ONLY") continue;
-    const need = (el.querySelector(".at-need")?.textContent || "").trim();
-    if (!/\d+ archive-wide · \d+ needed$/.test(need)) {
-      bad.push(`a ${kind} line does not say what it has against what it needs: "${need}"`);
+    /* PER LINE, NOT PER BLOCK. A block groups every contract governed by one kind, and two
+       regions with different counts are two lines inside it; reading the block's first `.at-need`
+       would check one of them and let the other publish nothing. */
+    const lines = [...el.querySelectorAll(".at-limit-line")];
+    for (const line of (lines.length ? lines : [el])) {
+      const need = (line.querySelector(".at-need")?.textContent || "").trim();
+      if (!/\d+ archive-wide · \d+ needed$/.test(need)) {
+        bad.push(`a ${kind} line does not say what it has against what it needs: "${need}"`);
+      }
     }
   }
   return bad;
@@ -488,52 +521,72 @@ console.log("[deck] the rendered deck, per row");
 }
 {
   const bad = await auditOf(HTML_HOISTED);
-  ok("and so does a below-sample deck, which is the one that hoists", bad.length === 0, bad.join(" | "));
+  ok("and so does a below-sample deck, the one whose contracts share a sentence", bad.length === 0, bad.join(" | "));
 }
 {
   const bad = await auditOf(HTML_CIRC);
   ok("and so does a cohort conditioned on its own outcome", bad.length === 0, bad.join(" | "));
 }
 
-/* ── WHAT THE HOISTED LINE SAYS, ASSERTED DIRECTLY ───────────────────────────────────────
+/* ── WHAT THE BLOCK BENEATH THE MATRIX SAYS, ASSERTED DIRECTLY ───────────────────────────
  *
- * The audit above is a set of prohibitions -- nothing is repeated, nothing is left bare. None of
- * them can state what the line that replaced eleven rows is SUPPOSED to say, and a rule that only
- * forbids is a rule a blank element satisfies. These assert the content.
+ * The audit above is a set of prohibitions -- nothing is repeated, nothing is left bare, no
+ * refused row is unexplained. None of them can state what the block that speaks for eleven rows
+ * is SUPPOSED to say, and a rule that only forbids is a rule a blank element satisfies. These
+ * assert the content.
  *
  * The case that matters most is CONDITIONED_ON, because it is the one that was wrong in
  * production and the one whose remedy is not interchangeable with any other. RATE_REFUSED says
  * to widen the cohort; CONDITIONED_ON says to remove the condition. A circular contract is not
- * reachable by widening anything -- the fifth rule is not a sample-size problem -- so a hoisted
- * line that inherits RATE_REFUSED's sentence sends the reader to three controls, none of which
- * moves the refusal. */
-console.log("\n[deck] the line that speaks for a group says what that group refused, and how to leave it");
-const hoistedLinesOf = async (html) => {
+ * reachable by widening anything -- the fifth rule is not a sample-size problem -- so a block
+ * that inherits RATE_REFUSED's sentence sends the reader to three controls, none of which moves
+ * the refusal.
+ *
+ * WHAT MOVED, AND WHAT DID NOT. These read `[data-limit-kind]` blocks beneath the matrix rather
+ * than `[data-shared-reason]` lines inside it. Every assertion is the same assertion: the block
+ * declares the kind its rows refused with, states the archive's sentence verbatim, carries the
+ * way out that kind authorises, and publishes the scope counts where they exist. */
+console.log("\n[deck] the block that speaks for a governing refusal says what it refused, and how to leave it");
+const limitLinesOf = async (html) => {
   await page.setContent(`<!doctype html><html><body>${html}</body></html>`);
-  return page.evaluate(() => [...document.querySelectorAll("[data-shared-reason]")].map((el) => ({
-    kind: el.getAttribute("data-refusal"),
-    reason: (el.querySelector(".at-say-text")?.textContent || "").trim(),
-    remedy: (el.querySelector(".at-say-remedy")?.textContent || "").trim(),
-    need: (el.querySelector(".at-need")?.textContent || "").trim(),
-  })));
+  return page.evaluate(() => [...document.querySelectorAll("[data-limit-kind]")].flatMap((block) => {
+    const kind = block.getAttribute("data-limit-kind");
+    /* THE REMEDY IS SAID ONCE PER BLOCK, which is the whole point of grouping by kind: the way
+       out belongs to the refusal, not to the contract. So it is read from the block and carried
+       onto every line the block states. */
+    const remedy = (block.querySelector(".at-say-remedy")?.textContent || "").trim();
+    return [...block.querySelectorAll(".at-limit-line")].map((line) => {
+      let contracts = [];
+      try { contracts = JSON.parse(line.getAttribute("data-contracts") || "[]"); } catch { /* */ }
+      return {
+        kind, remedy, contracts,
+        reason: (line.querySelector(".at-say-text")?.textContent || "").trim(),
+        need: (line.querySelector(".at-need")?.textContent || "").trim(),
+      };
+    });
+  }));
 };
 const bareRemedyCount = async (html) => {
   await page.setContent(`<!doctype html><html><body>${html}</body></html>`);
-  return page.evaluate(() => [...document.querySelectorAll(".at-deck-say")].filter((el) =>
-    (el.querySelector(".at-say-remedy")?.textContent || "").trim()
-    && !(el.querySelector(".at-say-text")?.textContent || "").trim()).length);
+  return page.evaluate(() => [...document.querySelectorAll(".at-deck-say, [data-limit-kind]")]
+    .filter((el) => (el.querySelector(".at-say-remedy")?.textContent || "").trim()
+      && ![...el.querySelectorAll(".at-say-text")].some((t) => (t.textContent || "").trim())).length);
 };
 {
-  const lines = await hoistedLinesOf(HTML_CIRC);
+  const lines = (await limitLinesOf(HTML_CIRC)).filter((l) => l.kind === "CONDITIONED_ON");
   /* NON-VACUOUS FIRST. Every assertion below is over `lines`, so an empty list would pass all of
      them -- which is precisely the failure this fixture exists to end. */
-  ok("a circular cohort hoists exactly one line", lines.length === 1,
-     JSON.stringify(lines.map((l) => l.kind)));
+  ok("a circular cohort states its fifth-rule refusal on exactly one line", lines.length === 1,
+     JSON.stringify((await limitLinesOf(HTML_CIRC)).map((l) => l.kind)));
   const l = lines[0] || {};
   ok("it declares the kind its rows actually refused with", l.kind === "CONDITIONED_ON",
-     `data-refusal="${l.kind}"`);
+     `data-limit-kind="${l.kind}"`);
   ok("it states the archive's own reason, verbatim and whole", l.reason === CIRC_REASON,
      `saw "${String(l.reason).slice(0, 90)}…"`);
+  /* AND IT NAMES THE CONTRACTS IT SPEAKS FOR. A sentence stated once is only honest if the
+     reader can tell which rows it governs; the five circular rungs are the ones it replaces. */
+  ok("and it names every contract it speaks for", (l.contracts || []).length >= 2,
+     JSON.stringify(l.contracts));
   /* THE EXACT REGRESSION. Not "does not contain the words RATE REFUSED" -- the failure printed
      RATE_REFUSED's REMEDY, which never names itself. So the sentence is compared to the registry
      entry, both ways: it must BE the one CONDITIONED_ON authorises and must NOT be the one
@@ -550,34 +603,41 @@ const bareRemedyCount = async (html) => {
      rule -- so the line must publish none rather than borrow another row's. */
   ok("it publishes no scope counts, because a circular contract has none", l.need === "",
      `saw "${l.need}"`);
-  ok("and no row it speaks for is left holding a bare way out",
+  ok("and no block is left holding a bare way out",
      (await bareRemedyCount(HTML_CIRC)) === 0);
 }
 {
-  const lines = await hoistedLinesOf(HTML_HOISTED);
-  ok("a below-sample cohort hoists its sample-gate sentence", lines.length >= 1,
-     JSON.stringify(lines.map((l) => l.kind)));
+  const all = await limitLinesOf(HTML_HOISTED);
+  const lines = all.filter((l) => l.kind === "RATE_REFUSED");
+  ok("a below-sample cohort states its sample-gate sentence once", lines.length === 1,
+     JSON.stringify(all.map((l) => l.kind)));
   const l = lines[0] || {};
   ok("under the kind the sample gate actually produces", l.kind === "RATE_REFUSED",
-     `data-refusal="${l.kind}"`);
+     `data-limit-kind="${l.kind}"`);
   ok("stating the engine's sentence in full", l.reason === THIN_REFUSED,
      `saw "${String(l.reason).slice(0, 90)}…"`);
   ok("with the way out RATE_REFUSED authorises",
      l.remedy === `YOU CAN CHANGE THIS. ${REFUSALS.RATE_REFUSED.remedy}`,
      `saw "${String(l.remedy).slice(0, 110)}…"`);
-  ok("and no row it speaks for is left holding a bare way out",
+  ok("and no block is left holding a bare way out",
      (await bareRemedyCount(HTML_HOISTED)) === 0);
   /* TWO OUT OF SCOPE REGIONS DIFFERING ONLY IN THEIR COUNTS ARE TWO FINDINGS, NOT ONE. If the
      key ever loses its counts component these collapse into a single line and one region's
-     numbers stop being published anywhere. */
-  await page.setContent(`<!doctype html><html><body>${HTML_HOISTED}</body></html>`);
-  const oos = await page.evaluate(() => [...document.querySelectorAll('[data-refusal="OUT_OF_SCOPE"]')]
-    .map((el) => (el.querySelector(".at-need")?.textContent || "").trim()));
+     numbers stop being published anywhere. Both live inside ONE block now -- they share a kind,
+     so they share a way out -- which is why the counts are asserted per line. */
+  const oos = all.filter((l) => l.kind === "OUT_OF_SCOPE").map((l) => l.need);
   ok("two out-of-scope regions with different counts keep two lines",
      oos.length === 2 && oos[0] !== oos[1], JSON.stringify(oos));
   ok("and each still publishes its own scope · archive · required triple",
      oos.every((t) => /\d+ in this cohort · \d+ archive-wide · \d+ needed/.test(t)),
      JSON.stringify(oos));
+  /* AND THE TWO OF THEM ARE ONE BLOCK, SAYING THE WAY OUT ONCE. The composition's whole claim
+     about refusals is that the remedy belongs to the kind: six regions refusing OUT_OF_SCOPE
+     used to print six copies of one exit between six rows of a table. */
+  await page.setContent(`<!doctype html><html><body>${HTML_HOISTED}</body></html>`);
+  const remedies = await page.evaluate(() =>
+    [...document.querySelectorAll('[data-limit-kind="OUT_OF_SCOPE"] .at-say-remedy')].length);
+  ok("stated inside one block, whose way out is written once", remedies === 1, String(remedies));
 }
 
 /* THE FOOT NAMES WHAT THE VS ARCHIVE COLUMN IS AGAINST, AND SAYS WHAT IT IS NOT.
@@ -768,8 +828,12 @@ if (process.argv.includes("--self-test")) {
         .replace(/(<i class="at-dc-tick"[^>]*><\/i>)/, '<i class="at-dc-tick">24.7%</i>'),
     },
     {
-      name: "a data-refusal block reduced to a two-word status",
-      mutate: (h) => h.replace(/(<div class="at-deck-say" data-refusal="[A-Z_]+">).*?(<\/div>)/, "$1RATE REFUSED$2"),
+      name: "a limits block reduced to a two-word status",
+      /* The block beneath the matrix emptied of everything it exists to say, leaving the status
+         word a reader has already read on the row. The composition promises one explanation per
+         governing refusal; this is that promise kept in markup and broken in substance. */
+      mutate: (h) => h.replace(/(<div class="at-limit" data-refusal="[A-Z_]+"[^>]*>)[\s\S]*?(<\/div><\/section>)/,
+        "$1RATE REFUSED$2"),
     },
     {
       name: "a conditioned-on row publishing the subject's verdict as evidence",
@@ -778,7 +842,7 @@ if (process.argv.includes("--self-test")) {
         "$1REACHED"),
     },
     {
-      name: "one refusal sentence repeated across rows instead of hoisted",
+      name: "one refusal sentence stated twice instead of once",
       /* Copies the first row-level statement onto a second row, which is exactly what hoisting
          exists to prevent and what a word bound would not have caught. */
       mutate: (h) => {
@@ -792,7 +856,7 @@ if (process.argv.includes("--self-test")) {
       },
     },
     {
-      name: "a hoisted row left holding nothing but the way out",
+      name: "a refusal left holding nothing but the way out",
       source: HTML_HOISTED,
       /* THE DEFECT ITSELF. Empties the reason out of every line while leaving the remedy, which
          is exactly what the surface rendered when the hoist suppressed half a line instead of
@@ -801,21 +865,21 @@ if (process.argv.includes("--self-test")) {
         '<span class="at-say-text"></span>'),
     },
     {
-      name: "a hoisted line wearing another refusal's kind",
+      name: "a limits block wearing another refusal's kind",
       source: HTML_CIRC,
-      /* Relabels the circular cohort's hoisted line RATE_REFUSED while leaving CONDITIONED_ON's
-         remedy beneath it -- the mirror of the production defect, and the reason the assertion
-         above compares the kind and the sentence rather than either alone. */
-      mutate: (h) => h.replace(/data-refusal="CONDITIONED_ON"( data-shared-reason)/,
-        'data-refusal="RATE_REFUSED"$1'),
+      /* Relabels the circular cohort's block RATE_REFUSED while leaving CONDITIONED_ON's remedy
+         inside it -- the mirror of the production defect, and the reason the assertion above
+         compares the kind and the sentence rather than either alone. */
+      mutate: (h) => h.replace(/data-refusal="CONDITIONED_ON" data-limit-kind="CONDITIONED_ON"/,
+        'data-refusal="RATE_REFUSED" data-limit-kind="RATE_REFUSED"'),
     },
     {
-      name: "a hoisted line inheriting the sample gate's way out",
+      name: "a limits block inheriting the sample gate's way out",
       source: HTML_CIRC,
       /* The exact string that shipped: RATE_REFUSED's remedy printed over a circular contract,
          telling a reader to widen a radius that cannot move the fifth rule. */
       mutate: (h) => h.replace(
-        /(<div class="at-deck-say" data-refusal="CONDITIONED_ON" data-shared-reason[^>]*>[\s\S]*?<span class="at-say-remedy"><strong>)[^<]*(<\/strong> )[^<]*/,
+        /(<div class="at-limit" data-refusal="CONDITIONED_ON"[^>]*>[\s\S]*?<span class="at-say-remedy"><strong>)[^<]*(<\/strong> )[^<]*/,
         `$1YOU CAN CHANGE THIS.$2${REFUSALS.RATE_REFUSED.remedy}`),
     },
     {

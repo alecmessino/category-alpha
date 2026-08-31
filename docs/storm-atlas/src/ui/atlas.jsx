@@ -49,6 +49,7 @@ import { EnvLens } from "./env-lens.jsx";
 import { Colophon } from "./shell.jsx";
 import { QueryHead } from "./condition-strip.jsx";
 import { EvidenceDeck, subjectVerdicts } from "./evidence-deck.jsx";
+import { AnswerLadder } from "./answer-ladder.jsx";
 import { Transport } from "./transport.jsx";
 import { ArchiveTransport } from "./archive-transport.jsx";
 import { MONO, TextButton, claimText } from "./kit.jsx";
@@ -804,10 +805,18 @@ export function Atlas() {
   const conditions = conditionsOf(cohort);
 
   return (
+    /* THE SHELL'S BOX IS THE STYLESHEET'S, NOT THIS FILE'S.
+       `position:fixed; inset:0; overflow:hidden` was written here, inline, which beats every
+       rule in atlas.css by construction -- so the surface was exactly one viewport whatever the
+       stylesheet said, and everything that did not fit had to scroll inside a column. The
+       composition needs the opposite: a first band declared from the viewport, and a page that
+       continues under it with the complete matrix at full width. That is geometry, it belongs
+       in the one file that holds this surface's geometry, and it cannot be expressed here at
+       all -- an inline style cannot carry a media query. Only the two colours stay, because
+       they are this component's own tokens rather than a shape. */
     <div data-surface="tactical" data-view="tactical" data-atlas data-shell={shell}
       className="atlas-shell atlas-instrument" style={{
-        position: "fixed", inset: 0,
-        background: "var(--surface-app)", color: "var(--text-1)", overflow: "hidden",
+        background: "var(--surface-app)", color: "var(--text-1)",
       }}>
       {/* THE HEAD, AND IT IS THE QUESTION.
           The identity strip that used to open the surface is gone from the top: 5c moves the
@@ -819,6 +828,9 @@ export function Atlas() {
           THE METHODOLOGY NOTICE SITS WITH THE QUESTION, because a URL written under one
           methodology and opened under another is describing a different question than the one it
           names, and the reader has to be told before they read the answer. */}
+      {/* HEAD AND BAND, IN ONE BOX DECLARED FROM THE VIEWPORT. Everything below this element is
+          the page continuing: the transport, the complete matrix, the limits and the colophon. */}
+      <div className="atlas-above">
       <QueryHead segments={segments} conditions={conditions}
         scope={conditions.filter((c) => c.zone === "scope")}
         kept={result.kept} total={archive.manifest.counts.storms}
@@ -837,46 +849,72 @@ export function Atlas() {
       <div className="atlas-plate-row">
         <div className="atlas-stage-col" style={{ position: "relative", minWidth: 0, minHeight: 0 }}>
           {plate}
+          {/* THE INSPECTOR OVERLAYS THE PLATE RATHER THAN TAKING A COLUMN FROM IT.
+              In the stacked shell the dock was a third of the row's width and the plate spanned
+              what was left. Here the answer already holds the right-hand column, so a resident
+              dock would take the plate to 414px at 1440 -- narrower than a track needs to be
+              judgeable, and bought out of the one element whose job is to be large. Overlaying is
+              the treatment the stacked shell already used below 1180 and it is unchanged here:
+              same panel, same state, same bridge, same close. */}
+          {storm ? (
+            <div className="atlas-dock" data-inspector-dock>
+              <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
+                onReplay={() => setPlaying((v) => !v)} replaying={playing}
+                spec={stormCitation} specUrl={scenarioURL({ withStorm: true })}
+                bridge={bridge} cohortSentence={sentence} result={result}
+                onBridge={() => onBridge(selected)}
+                live={liveBundle}
+                cursorLive={cursorMs !== null || playing
+                  || (mode === "replay" && replayCursorMin !== null)} />
+            </div>
+          ) : null}
         </div>
-        {/* THE INSPECTOR OVERLAYS THE PLATE RATHER THAN TAKING A COLUMN FROM IT.
-            In the stacked shell the dock was a third of the row's width and the plate spanned
-            what was left. Here the ledger already holds the right-hand column, so a resident
-            dock would take the plate to 414px at 1440 -- narrower than a track needs to be
-            judgeable, and bought out of the one element whose job is to be large. Overlaying is
-            the treatment the stacked shell already used below 1180 and it is unchanged here:
-            same panel, same state, same bridge, same close. */}
-        {storm ? (
-          <div className="atlas-dock" data-inspector-dock>
-            <StormPanel storm={storm} archive={archive} onClose={() => setSelected(null)}
-              onReplay={() => setPlaying((v) => !v)} replaying={playing}
-              spec={stormCitation} specUrl={scenarioURL({ withStorm: true })}
-              bridge={bridge} cohortSentence={sentence} result={result}
-              onBridge={() => onBridge(selected)}
-              live={liveBundle}
-              cursorLive={cursorMs !== null || playing
-                || (mode === "replay" && replayCursorMin !== null)} />
-          </div>
-        ) : null}
 
-        {/* THE EVIDENCE LEDGER, BESIDE THE PLATE.
-            A research table: OUTCOME | n / N | RATE | 95% WILSON, 29px rows, hairline rules, no
-            header band and no filled group bands. It scrolls in its own column with its head
-            pinned to the top and the limits pinned to the foot, so the two things that qualify
-            every row -- what the columns are, and what the record does not hold -- are on screen
-            at every scroll position. */}
-        <div className="atlas-evidence" data-evidence-row>
+        {/* THE ANSWER, BESIDE THE PLATE, AND IT IS EIGHT ROWS.
+            What was here was the whole evidence base: every contract this cohort can be asked,
+            inside a 486px measure that scrolled 3,457px of deck through a 673px window at 1440.
+            A reader could not see the finding without scrolling, the plate paid for a table that
+            never fit anyway, and the refusal prose repeated after every row it governed. The
+            selection is declared in answer-ladder.jsx and the rest is one screen below, at page
+            width, with these eight underscored there. */}
+        <div className="atlas-answer" data-answer-col>
+          <AnswerLadder result={result} comparison={comparison} subject={subject}
+            archiveTotal={archive.manifest.counts.storms} />
+        </div>
+      </div>
+      </div>
+
+      <div className="atlas-transport">
+        {mode === "replay" ? (
+          <ArchiveTransport timeline={timeline} cursorMin={replayCursorMin}
+            setCursorMin={setReplayCursorMin} playing={playing} setPlaying={setPlaying} />
+        ) : selected !== null ? (
+          <Transport archive={archive} row={selected} playing={playing} setPlaying={setPlaying}
+            cursorMs={cursorMs} setCursorMs={setCursorMs} operational={operationalTrack} />
+        ) : null}
+      </div>
+
+      {/* THE COMPLETE EVIDENCE, UNDER THE BAND AND AT PAGE WIDTH.
+          Every contract, every column the archive publishes, in one table a reader can read
+          across -- and beneath it the limits, grouped once per governing refusal, then the
+          method, the pathway, the environment and the citation. Nothing is behind a scroller of
+          its own: the page scrolls, which is what a page is for. */}
+      <div className="atlas-evidence" data-evidence-row>
         <EvidenceDeck result={result} comparison={comparison} subject={subject}
           onEvidence={openLedger}
-          /* THE LADDER, CUMULATIVELY. The ledger is a 486px column at the canonical width, so
-             the duration pair folds at every width rather than at a breakpoint -- behind the
-             same control that names how many columns it holds. Nothing is dropped: the fold is
-             counted and named, and one press restores it. */
+          /* THE LADDER, CUMULATIVELY. The matrix runs the page's own width now rather than a
+             486px column, so it is passed `wide` and keeps every track it can fill; the duration
+             pair still folds behind the control that names how many columns it holds, because
+             timing is a second question and not every reader is asking it. Nothing is dropped:
+             the fold is counted and named, and one press restores it. */
+          wide
           foldTiming timingOpen={timingOpen}
           onToggleTiming={() => setTimingOpen((v) => !v)}
           /* AND NOTHING FOLDS ON WIDTH. The landfall fold and the group collapse both existed
-             because the deck ran the width of the screen and a narrower one had to give up
-             ROWS; the ledger is a column that scrolls, at every width, so there is nothing to
-             buy. Both were also folds a refusal could hide behind: the landfall list is ordered
+             because the deck was the first thing on the screen and a narrow one had to give up
+             ROWS to fit; the matrix is below the answer now, in the page's own scroll, so a
+             reader who has reached it has already been answered and there is nothing to buy by
+             hiding rows. Both were also folds a refusal could hide behind: the landfall list is ordered
              by evidence, so the rows a width-keyed fold reaches last are exactly the ones whose
              whole content is the explanation of why there is no evidence -- OUT OF SCOPE and
              BASE RATE ONLY. Order demotes; hiding deletes. */
@@ -897,17 +935,6 @@ export function Atlas() {
           spec={cohort} pathway
           environment={<EnvLens archive={archive} coverage={envCov} lens={envLens}
             loading={envLoading} onLoad={loadEnv} />} />
-        </div>
-      </div>
-
-      <div className="atlas-transport">
-        {mode === "replay" ? (
-          <ArchiveTransport timeline={timeline} cursorMin={replayCursorMin}
-            setCursorMin={setReplayCursorMin} playing={playing} setPlaying={setPlaying} />
-        ) : selected !== null ? (
-          <Transport archive={archive} row={selected} playing={playing} setPlaying={setPlaying}
-            cursorMs={cursorMs} setCursorMs={setCursorMs} operational={operationalTrack} />
-        ) : null}
       </div>
 
       {/* THE BUILDER, SUMMONED. Same component, same state, same costs -- it is the same query
@@ -1030,9 +1057,9 @@ export const NA_EP = [[0, -180], [65, 0]];
  * Atlantic one. That costs nothing while the plate is wide enough to show the whole range, and
  * it costs the Atlantic main development region the moment the plate is not.
  *
- * The instrument's plate is 834px beside its ledger, and the research clamp allows about 133 of
- * the frame's 149 degrees at that shape -- so sixteen degrees are cropped and WHICH sixteen is a
- * decision somebody has to make. Centred on the median it is the sparse ends of both tails;
+ * The instrument's plate is 777px beside the answer at 1440 under the contract's split, and the
+ * research clamp allows about 133 of the frame's 149 degrees at that shape -- so sixteen degrees
+ * are cropped and WHICH sixteen is a decision somebody has to make. Centred on the median it is the sparse ends of both tails;
  * centred on the midpoint it was eight degrees off the east, which is the densest genesis
  * region in the archive.
  *

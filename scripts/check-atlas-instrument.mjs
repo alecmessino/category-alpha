@@ -124,10 +124,26 @@ for (const [w, h] of WIDTHS) {
       below: line.getBoundingClientRect().top >= q.getBoundingClientRect().bottom - 1,
       repeats: ((head.textContent || "").match(new RegExp(count.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "g")) || []).length,
       /* THE QUESTION IS THE FIRST THING ON THE SURFACE. The identity strip that used to open it
-         is the colophon at the foot; anything else above the question is chrome that came back. */
+         is the colophon at the foot; anything else above the question is chrome that came back.
+         WHAT IS SKIPPED, AND WHY THAT IS NOT A LOOSENING. The composition wraps the head and the
+         first band in one box declared from the viewport -- `.atlas-above` -- so that the plate
+         and the answer terminate on a shared baseline. That box carries no text of its own. The
+         walk therefore descends through elements that PRINT NOTHING and stops at the first one
+         that does, which is the rule this assertion always meant: a wrapper is not chrome, and
+         an identity strip would still fail here because it has text. */
       firstText: (() => {
-        const shell = document.querySelector(".atlas-instrument");
-        const first = shell && shell.firstElementChild;
+        let el = document.querySelector(".atlas-instrument");
+        let first = null;
+        /* ONE NAMED WRAPPER IS TRANSPARENT, AND NAMING IT IS THE POINT. `.atlas-above` is the box
+           the head and the first band share so that the plate and the answer end on one
+           baseline; it prints nothing. Any other element that reaches the top of the surface --
+           an identity strip, a banner, a toolbar -- still fails this, because it would have to be
+           added to this list first, which is a decision with a name on it. */
+        for (let i = 0; i < 4 && el; i++) {
+          first = [...el.children].find((c) => (c.textContent || "").trim());
+          if (!first || !first.classList.contains("atlas-above")) break;
+          el = first;
+        }
         return first ? first.className.split(" ")[0] : null;
       })(),
       clauses: document.querySelectorAll("[data-question] [data-zone-edit]").length,
@@ -188,6 +204,17 @@ for (const [w, h] of WIDTHS) {
       shellGround: lum(getComputedStyle(document.querySelector(".atlas-instrument")).backgroundColor),
       stageHoldsOnlyPlate: [...stage.children].every((c) => c.classList.contains("at-plate")),
       caption: (document.querySelector("[data-plate-caption]") || {}).textContent || "",
+      /* WHERE THE CAPTION'S OLD PARAGRAPH WENT. Read as its own string so the rule below can
+         hold the surface to having MOVED the ink, the regions and the gestures rather than
+         dropped them -- which is the difference between an edit and a deletion. */
+      notes: (document.querySelector("[data-plate-notes]") || {}).textContent || "",
+      captionLines: (() => {
+        const el = document.querySelector("[data-plate-caption]");
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        const lh = parseFloat(getComputedStyle(el).lineHeight);
+        return lh > 0 ? Math.round(r.height / lh) : null;
+      })(),
     };
   });
   const at = `${w}x${h}`;
@@ -206,13 +233,31 @@ for (const [w, h] of WIDTHS) {
   ok(`${at.padEnd(9)} and the caption resolves paper ink, not the plate's`,
      d.captionInk !== null && d.captionInk < 0.3,
      `caption luminance ${d.captionInk} on a ${d.shellGround} ground`);
-  /* FIGURE 1 SAYS WHAT IS DRAWN, which is what turns a map into a figure. */
-  ok(`${at.padEnd(9)} Figure 1 names the ink, the regions and the gestures`,
+  /* FIGURE 1 SAYS WHAT IS DRAWN, which is what turns a map into a figure -- and it says it in
+     ONE LINE, which is what keeps the map a fixed rectangle.
+     The caption used to carry four statements in a paragraph. It set five lines here and eight
+     under a runner's fallback fonts, and because it names the cohort count it re-wrapped when a
+     condition changed -- so the figure's chrome grew and the plate, which was what was left of
+     the band after it, paid for the reflow. So the rule is now in two halves, and both are
+     load-bearing: the caption states the figure and its count in a line, and the ink, the
+     regions and the gestures are still published -- in PLATE NOTES, at more length than the
+     caption ever gave them. A surface that shortened the caption by DELETING them fails the
+     second half. */
+  /* ONE LINE AT ANY MEASURE A DESKTOP HAS; TWO IS ALL A PHONE MAY TAKE. The sentence is fixed,
+     so what varies is the column it is set in -- 390px is not a failure of the caption, it is a
+     phone. The bound still bites: three lines here would mean the sentence had grown again. */
+  const capMax = w >= 768 ? 1 : 2;
+  ok(`${at.padEnd(9)} Figure 1 names the figure and its count, in ${capMax} line or fewer`,
      /^Figure 1\./.test(d.caption.trim())
-     && /coloured by the class/.test(d.caption)
-     && /Five modelled landfall regions|Contextual coastline only/.test(d.caption)
-     && /Click any ocean point/.test(d.caption),
-     d.caption.replace(/\s+/g, " ").slice(0, 120));
+     && /\d[\d,]* storms/.test(d.caption)
+     && d.captionLines !== null && d.captionLines <= capMax,
+     `${d.captionLines} line(s): ${d.caption.replace(/\s+/g, " ").slice(0, 120)}`);
+  ok(`${at.padEnd(9)} and the ink, the regions and the gestures are still published`,
+     /coloured by the class/.test(d.notes)
+     && (/landfall regions are drawn from the/.test(d.notes)
+       || /Contextual coastline only/.test(d.caption))
+     && /Click open water/.test(d.notes),
+     d.notes.replace(/\s+/g, " ").slice(0, 160) || "no PLATE NOTES on the page");
 }
 
 /* ── 3 · THE CLASS KEY ──────────────────────────────────────────────────────────────────── */
@@ -265,8 +310,14 @@ for (const [w, h] of WIDTHS) {
      line and the note is the lowest-priority thing on it, so below 1440 it gives way to the
      swatches and the measure -- which is the right order, since the swatches ARE the key. At
      1440 and above there is room for all of it, and 1440 is the width 5c was drawn at. */
-  if (w >= 1440) {
-    ok(`${at.padEnd(9)} and the note is not truncated at the frame's own width`, !d.noteCut);
+  /* 1440 WAS THE WIDTH THE FRAME WAS DRAWN AT AND THE PLATE HELD 834px OF IT. Under the
+     contract's split the plate is 777 there and 1106 at 1920, so the width at which the plate
+     foot has room for all of it moved with the plate. The note is still the lowest-priority item
+     on that line and still gives way to the swatches and the measure, which is the same order
+     this assertion has always kept. */
+  if (w >= 1700) {
+    ok(`${at.padEnd(9)} and the note is not truncated where the plate has room for it`,
+       !d.noteCut);
   } else if (d.noteCut) {
     console.log(`  note  ${at.padEnd(9)} the stroke note gives way to the swatches at this width`);
   }
@@ -358,32 +409,55 @@ for (const [w, h] of WIDTHS) {
   scaleOk("and it is correct at the new zoom", afterZoom);
 }
 
-/* ── 5 · THE LEDGER'S TWO ENDS ──────────────────────────────────────────────────────────── */
-console.log("\n[instrument] the ledger's heads and its limits are pinned, at every scroll");
+/* ── 5 · THE MATRIX IS IN THE PAGE, AND NOTHING PINS IT THERE ───────────────────────────────
+ *
+ * WHAT THIS ASSERTED, AND WHY IT CANNOT ANY MORE. The evidence was a column with its own
+ * scroller, its column heads pinned to the top of it and its limits pinned to the foot, so that
+ * the two things qualifying every row stayed on screen at every scroll position inside it. That
+ * was the right rule for that construction and the construction is gone: at 1440 it was 3,457px
+ * of deck inside a 673px window, which is how the answer to the question ended up three
+ * scroll-lengths inside a rail.
+ *
+ * WHAT REPLACES IT IS STRICTER, NOT LOOSER. The matrix is under the first band at page width and
+ * the PAGE scrolls, so the assertion is that no element between the deck and the document is a
+ * scroller at all -- a pin cannot be missing from a construction that has nowhere to pin -- and
+ * that the reader reaches the heads, the rows and the limits in that order by scrolling the page
+ * they are already scrolling. */
+console.log("\n[instrument] the matrix is in the page, in order, behind no scroller of its own");
 for (const [w, h] of WIDTHS) {
   await open("", w, h);
   const d = await page.evaluate(() => {
-    const scroller = innerWidth >= 900
-      ? document.querySelector("[data-evidence-row]")
-      : document.querySelector(".atlas-instrument");
+    const region = document.querySelector("[data-evidence-row]");
     const limits = document.querySelector("[data-deck-limits]");
     const head = document.querySelector(".at-deck-head .at-dc-outcome");
-    if (!scroller || !limits || !head) return null;
+    if (!region || !limits || !head) return null;
     const vis = (el) => { const r = el.getBoundingClientRect();
       return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight; };
     const before = { head: vis(head), limits: vis(limits) };
-    scroller.scrollTop = scroller.scrollHeight;
+    /* EVERY ELEMENT BETWEEN THE DECK AND THE DOCUMENT, and whether any of them scrolls. One
+       that does is the ledger column returning under another name. */
+    const nested = [];
+    for (let e = region; e && e !== document.body; e = e.parentElement) {
+      const cs = getComputedStyle(e);
+      if (/(auto|scroll)/.test(cs.overflowY) && e.scrollHeight > e.clientHeight + 4) {
+        nested.push(`${(e.className || e.tagName).toString().split(" ")[0]} `
+          + `${e.scrollHeight}/${e.clientHeight}`);
+      }
+    }
+    scrollTo(0, document.documentElement.scrollHeight);
     return new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(() => {
       res({
-        before,
+        before, nested,
+        order: head.getBoundingClientRect().top + scrollY
+          < limits.getBoundingClientRect().top + scrollY,
         after: { head: vis(head), limits: vis(limits) },
-        scrolled: scroller.scrollTop > 0,
+        scrolled: scrollY > 0,
         heads: [...document.querySelectorAll(".at-deck-head .at-dc")].map((e) => e.textContent.trim()),
       });
     })));
   });
   const at = `${w}x${h}`;
-  ok(`${at.padEnd(9)} the ledger renders its heads and its limits`, !!d);
+  ok(`${at.padEnd(9)} the matrix renders its heads and its limits`, !!d);
   if (!d) continue;
   /* THE LOCKED RESEARCH-TABLE HIERARCHY, IN ORDER. The two conditional columns may follow it;
      what may not happen is the first four being reordered or renamed. */
@@ -396,20 +470,14 @@ for (const [w, h] of WIDTHS) {
      stacked reading order working, not a pin that failed. What must hold there is the same
      thing in the place it means something, and that is the assertion below: once the reader has
      scrolled to the ledger, the heads and the limits are both on screen. */
-  if (w >= 900) {
-    ok(`${at.padEnd(9)} both ends are on screen before any scroll`,
-       d.before.head && d.before.limits,
-       `head ${d.before.head}, limits ${d.before.limits}`);
-  } else {
-    ok(`${at.padEnd(9)} the limits are pinned to the viewport before any scroll`,
-       d.before.limits, `limits ${d.before.limits}`);
-  }
+  ok(`${at.padEnd(9)} no element between the matrix and the document scrolls`,
+     d.nested.length === 0, d.nested.join(" | "));
+  ok(`${at.padEnd(9)} and the reader meets the heads before the limits`, d.order);
   if (d.scrolled) {
-    ok(`${at.padEnd(9)} and both are still on screen at the foot of the scroll`,
-       d.after.head && d.after.limits,
-       `head ${d.after.head}, limits ${d.after.limits}`);
+    ok(`${at.padEnd(9)} which the page's own scroll reaches`, d.after.limits,
+       `limits ${d.after.limits}`);
   } else {
-    console.log(`  note  ${at.padEnd(9)} the ledger did not need to scroll at this height`);
+    console.log(`  note  ${at.padEnd(9)} the page did not need to scroll at this height`);
   }
 }
 
@@ -532,10 +600,18 @@ console.log("\n[instrument] identity, provenance and the citation are at the foo
     if (!c) return null;
     const r = c.getBoundingClientRect();
     const shell = document.querySelector(".atlas-instrument");
+    /* THE FOOT OF THE INSTRUMENT IS THE FOOT OF THE PAGE NOW. It used to be the fourth row of a
+       grid pinned to the viewport, so "at the foot" and "on the first screen" were the same
+       claim. Under the composition the complete matrix, the limits and the apparatus are below
+       the first band, so the colophon is reached by scrolling -- which is what a printed plate's
+       colophon has always been. What must still hold is that it is LAST and that the reader
+       actually arrives at it, so the read is taken at the foot of the document. */
+    scrollTo(0, document.documentElement.scrollHeight);
+    const rr = c.getBoundingClientRect();
     return {
       text: (c.textContent || "").replace(/\s+/g, " ").trim(),
       last: shell.lastElementChild === c || [...shell.children].indexOf(c) === shell.children.length - 1,
-      onScreen: r.top >= 0 && r.bottom <= innerHeight + 1,
+      onScreen: rr.top >= 0 && rr.bottom <= innerHeight + 1,
       controls: ["[data-open-ledger]", "[data-cite-cohort]"]
         .map((s) => !!c.querySelector(s)),
       provenance: !!c.querySelector("button[title^='provenance']"),

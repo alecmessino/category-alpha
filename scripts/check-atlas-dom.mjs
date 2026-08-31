@@ -489,11 +489,20 @@ console.log("\n[4b] the six refusals — reachable, distinct, and honest about t
    * carrying [data-refusal], which is the attribute the surface stakes its refusal on, rather
    * than a string two cells apart. The old text form is kept as an alternative so the same gate
    * still recognises the three-column shell while both exist. */
+  /* A REFUSED ROW IS ONE WHOSE STATUS CELL SAYS SO, which is where panel rule 4 always put it.
+     The hook used to be `[data-refusal]` INSIDE the row, because the row carried the refusal's
+     sentence; the sentence is one block per governing refusal under the matrix now, so a row
+     that refuses is detected the way a reader detects it -- by the word in its own status cell.
+     The glyph-and-title text form is kept as an alternative so the same gate still recognises a
+     shell that renders the pair inline. */
   const refusedRows = await page.evaluate(() => {
+    const TITLES = new Set(["RATE REFUSED", "CONDITIONED ON", "BASE RATE ONLY", "OUT OF SCOPE",
+      "NOT EVALUABLE", "— UNKNOWN"]);
     const titles = /⊘ RATE REFUSED|↺ CONDITIONED ON|▤ BASE RATE ONLY|⇱ OUT OF SCOPE/;
     return [...document.querySelectorAll("[data-outcome]")]
       .map((el) => ({ label: el.getAttribute("data-outcome"),
-        hook: !!el.querySelector("[data-refusal]"),
+        hook: TITLES.has((el.querySelector("[data-status]") || {}).getAttribute
+          ? el.querySelector("[data-status]").getAttribute("data-status") : ""),
         text: (el.innerText || "").replace(/\s+/g, " ") }))
       .filter((r) => r.hook || titles.test(r.text));
   });

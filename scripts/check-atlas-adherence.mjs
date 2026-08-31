@@ -388,10 +388,37 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
      bounds.ar === "1.67", `--at-plate-ar is ${bounds.ar}`);
   ok("and the ceiling is where one track stops being the subject of its plate",
      bounds["ar-max"] === "3.2", `--at-plate-ar-max is ${bounds["ar-max"]}`);
-  ok("both aspect bounds reach the stage as tokens, not as literals",
-     /max-height:min\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\)\)/.test(css)
-     && /min-height:min\(calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)/.test(css),
-     "the stage's height bounds are not reading the pinned tokens");
+  ok("the aperture floor reaches the stage as a token, not as a literal",
+     /height:max\(\s*calc\(var\(--at-band-h\) - var\(--at-fig-chrome\)\),\s*calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar-max\)\)\)/
+       .test(css.replace(/\s+/g, " ")),
+     "the stage's height floor is not reading the pinned token");
+  /* AND THE PLATE'S HEIGHT IS DECLARED FROM THE BAND, NOT LEFT OVER FROM THE CHROME.
+     `flex:1 1 auto` on the stage made the map the elastic member of the figure column, so a
+     caption that re-wrapped resized the aperture -- measured on CI as 583x340.13 -> 583x336.13
+     when a season condition was added. The declaration above is the fix and this is the rule
+     that keeps it: the stage may not be flexible, because a flexible stage is a map whose height
+     is whatever the prose beneath it left behind. */
+  ok("and the plate is not the elastic member of its own column",
+     !/\.atlas-stage\{[^}]*flex:1 1 auto/.test(css.replace(/\s+/g, "")),
+     "the stage is flexible again — the caption can resize the aperture");
+  /* AND THE CEILING BOUNDS THE BAND RATHER THAN THE PLATE, WHICH IS THE WHOLE OF WHY IT COSTS
+     NOTHING NOW. Applied to the plate it caps the map inside a column that keeps its height, and
+     the difference is paper under the map. Applied to the band it caps both columns together, so
+     a tall monitor shows more of the matrix instead of a taller map with a cropped opening view.
+     check-atlas-camera is what measures the consequence; this is the declaration. */
+  ok("and the aperture ceiling bounds the band, not the plate",
+     /--at-band-h:min\( calc\(100vh - var\(--at-head-h\) - var\(--at-peek\) - var\(--at-tport\)\), calc\(var\(--at-plate-avail\) \/ var\(--at-plate-ar\) \+ var\(--at-fig-chrome\)\)\)/
+       .test(css.replace(/\s+/g, " ")),
+     "the band's height is not composed from the viewport and the aspect bound");
+  /* AND THE BAND IS THE DECLARED NUMBER, WHICH IS WHAT KEEPS THE ANSWER OUT OF THE PLATE'S
+     BUSINESS. Under `min-height` the row grew to the answer's intrinsic height -- 625.8 against
+     a declared 505.6 at 1280 -- and since the plate's height is declared, the difference was
+     paper under the map. The answer distributes itself into the band; it does not set it. */
+  ok("and the band is exactly the height it declares",
+     /\.atlas-plate-row\{[^}]*height:var\(--at-band-h\)/.test(css.replace(/\s+/g, "")),
+     "the band's height is no longer the declared band");
+  ok("the ceiling is the aspect the research corridors measured",
+     /--at-plate-ar:\s*1\.6\s*;/.test(css), "--at-plate-ar has moved off the measured 1.6");
   /* AND THE THREE RETIRED TOKENS MUST STAY RETIRED. A cap re-declared but unread is a bound
      somebody will wire back up on the first aperture failure; a cap re-declared AND read is the
      stacked shell returning by the back door. Either way the argument above stops being true, so
@@ -405,41 +432,51 @@ for (let i = 0; i < CLASS_ORDER.length - 1; i++) {
        !new RegExp(`${dead}\\s*:`).test(cssCode) && !cssCode.includes(`var(${dead})`),
        `${dead} is still declared or read; the plate's height model has two answers`);
   }
-  /* THE LEDGER MEASURE, WHICH IS NOW THE ONE NUMBER THAT DECIDES HOW MUCH OF A LARGE MONITOR
-     THE MAP TAKES. Read as an expression rather than as three separate numbers, because it is
-     the expression that has to hold: any of the three edited alone moves the plate off both
-     frozen widths. */
-  /* THE FLOOR IS THE FROZEN TABLE'S OWN MEASURE, WHICH IS THE HALF OF THIS EXPRESSION THAT IS
-     EASIEST TO GET WRONG AND HARDEST TO SEE. 33.75vw is 486 at 1440 and less on every narrower
-     screen, and what a percentage-only measure gives up first is the RIGHT-HAND column: at 900
-     it left the deck 304px for a table that needs 468, so a refused row's STATUS sat off the
-     right-hand edge of a horizontal scroll. A refusal a reader has to drag sideways to find has
-     not been published. 486 is not a round number: the five resting tracks and their four 10px
-     gutters measure 474, and 486 is the next step up that is also exactly 33.75vw at 1440 -- so
-     the floor binds ONLY below the width where 5c's own percentage had already run out. */
-  const ledger = (css.match(/--at-ledger:\s*clamp\(([^)]*)\)/) || [])[1];
-  ok("the ledger measure is the frozen clamp",
-     (ledger || "").replace(/\s+/g, "") === "486px,33.75vw,620px",
-     `--at-ledger is clamp(${ledger})`);
+  /* THE SPLIT BETWEEN THE PLATE AND THE ANSWER, WHICH IS THE CONTRACT'S FIRST NUMBER.
+   *
+   * WHAT WAS HERE. `--at-ledger:clamp(486px,33.75vw,620px)` -- one measure for a scrolling
+   * evidence column, floored at the five tracks a refused row needs so that its STATUS could not
+   * sit off the right-hand edge. The column is gone: the evidence is under the band at page
+   * width, and what sits beside the plate is eight rows.
+   *
+   * WHAT REPLACES IT IS A DECLARED MEASURE AT EACH OF THE TWO DESKTOP BANDS, because the contract
+   * fixes the split rather than the column: the plate is 60-62% of the usable width at 1920 and
+   * 57-59% at 1440. The Atlas announces itself as a geographic instrument before it announces
+   * itself as a table, and a percentage that drifts with the viewport cannot hold that. Both
+   * bands are asserted below as PERCENTAGES, which is the form the contract states them in --
+   * scripts/check-atlas-contract.mjs measures the same thing in a browser. */
+  const answer = (css.match(/--at-answer:\s*(\d+)px/) || [])[1];
+  const answerWide = (css.match(/@media \(min-width:1700px\)\{[^}]*--at-answer:\s*(\d+)px/)
+    || [])[1];
+  ok("the answer's measure is declared at both desktop bands",
+     answer === "559" && answerWide === "700",
+     `--at-answer is ${answer}px, ${answerWide}px above 1700`);
   const pad = (css.match(/--at-pad:\s*(\d+)px/) || [])[1];
   const gap = (css.match(/--at-gap:\s*(\d+)px/) || [])[1];
-  ok("with the page padding and gutter it names", pad === "40" && gap === "40",
-     `--at-pad ${pad}px, --at-gap ${gap}px`);
-  /* AND THE ARITHMETIC IS ASSERTED, NOT ASSUMED. 1440 and 1920 are the two widths the frozen
-     design states a plate box for, and this is that statement as a calculation: if any of the
-     three numbers above moves, one of these two stops being true. */
-  const plateAt = (vw) => vw - 2 * Number(pad) - Number(gap)
-    - Math.min(620, Math.max(486, 0.3375 * vw));
-  ok("which puts the plate at 5c's measured 834px at 1440", plateAt(1440) === 834,
-     `${plateAt(1440)}px`);
-  ok("and at turn 4's stated 1180px at 1920", plateAt(1920) === 1180, `${plateAt(1920)}px`);
-  /* AND THE FLOOR IS INERT AT BOTH OF THEM, which is the claim that lets it exist at all: it may
-     only bind below 1440, where 5c states no plate box. If a future edit raised it, this is the
-     assertion that fails before either measured width does. */
-  ok("and the floor binds nowhere 5c states a plate box",
-     0.3375 * 1440 >= 486 && 0.3375 * 1920 >= 620, "the floor has reached a stated width");
+  const gapWide = (css.match(/@media \(min-width:1700px\)\{[^}]*--at-gap:\s*(\d+)px/) || [])[1];
+  ok("with the page padding and gutter it names", pad === "40" && gap === "24" && gapWide === "34",
+     `--at-pad ${pad}px, --at-gap ${gap}px / ${gapWide}px`);
+  /* AND THE ARITHMETIC IS ASSERTED, NOT ASSUMED. If any of the numbers above moves, one of these
+     two bands stops being true before anybody opens a browser. */
+  const usable = (vw) => vw - 2 * Number(pad);
+  const plateAt = (vw, g, a) => vw - 2 * Number(pad) - Number(g) - Number(a);
+  const share = (vw, g, a) => plateAt(vw, g, a) / usable(vw);
+  const at1440 = share(1440, gap, answer);
+  const at1920 = share(1920, gapWide, answerWide);
+  ok("which puts the plate in the contract's band at 1440",
+     at1440 >= 0.57 && at1440 <= 0.59, `${(100 * at1440).toFixed(1)}%`);
+  ok("and in the contract's band at 1920",
+     at1920 >= 0.60 && at1920 <= 0.62, `${(100 * at1920).toFixed(1)}%`);
+  /* AND THE ANSWER'S OWN SHARE, from the other end: a split stated as one bound is a split that
+     can be met by shrinking the page rather than by holding the proportion. */
+  const ans1440 = Number(answer) / usable(1440);
+  const ans1920 = Number(answerWide) / usable(1920);
+  ok("with the answer holding its own share at both",
+     ans1440 >= 0.41 && ans1440 <= 0.43 && ans1920 >= 0.38 && ans1920 <= 0.40,
+     `${(100 * ans1440).toFixed(1)}% at 1440, ${(100 * ans1920).toFixed(1)}% at 1920`);
   ok("the plate's available width is derived from them rather than from the viewport",
-     /--at-plate-avail:calc\(100vw - 2 \* var\(--at-pad\) - var\(--at-gap\) - var\(--at-ledger\)\)/.test(css),
+     /--at-plate-avail:calc\(100vw - 2 \* var\(--at-pad\) - var\(--at-gap\) - var\(--at-answer\)\)/
+       .test(css),
      "--at-plate-avail is not composed from the measure tokens");
 
   /* AND NO RULE MAY NAME AN INK THAT IS NOT A TOKEN.

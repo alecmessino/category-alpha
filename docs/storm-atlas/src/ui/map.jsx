@@ -740,6 +740,14 @@ export function AtlasMap({
           THE LIVE COORDINATE NOW SITS ON PAPER, which is 5c's one named risk: during a pan the
           numbers change just off the map. Left-aligned to the plate's own edge and immediately
           beneath it so it reads as the plate's footer. */}
+      {/* THE FIGURE'S CHROME IS ONE ELEMENT, WHICH IS WHAT LETS IT MOVE AS ONE.
+          The class key, the measure and Figure 1 are the plate's caption apparatus: under the
+          map on a desktop, beside it on a wide short stack where the plate cannot use the whole
+          band. Wrapped, that is one grid cell either way. Loose, the two of them needed a row
+          each, and a spanning plate then grew both -- measured at 1024 as 79px of paper below
+          the map that no rule could name, because it was inside the grid rather than under
+          anything. */}
+      <div className="at-plate-chrome">
       <div className="at-platefoot">
         <ClassKey />
         <span className="at-plate-measure">
@@ -749,38 +757,54 @@ export function AtlasMap({
         </span>
       </div>
 
-      {/* FIGURE 1 — WHAT IS DRAWN, IN A SENTENCE, IN THE SAME SERIF AS THE QUESTION.
-          The one borrowing from 5b. It names what the ink is, that five landfall regions are
-          drawn at full contrast while every other coastline is context, that the landfall rule
-          never consults the basemap, and the two gestures.
-
-          THE COASTLINE STATEMENT IS TWO STATEMENTS WEARING ONE SENTENCE. With the archive's
-          rings loaded it is METHODOLOGY -- which geometry is authoritative -- and the caption
-          carries it in prose with the rest of the argument behind PLATE NOTES. With the rings
-          ABSENT it is a DEGRADED STATE: the plate is drawing a coastline the landfall rule was
-          never written against, and that is not something a reader should have to open anything
-          to discover. So the fallback is stated at full weight, in the caption's own line. */}
+      {/* FIGURE 1 — WHAT IS DRAWN, IN ONE LINE, IN THE SAME SERIF AS THE QUESTION.
+       *
+       * WHY IT IS ONE LINE NOW, AND WHAT THAT BOUGHT. The caption used to carry four statements
+       * in a paragraph: what the ink is, that five landfall regions are drawn at full contrast
+       * while every other coastline is context, that the landfall rule never consults the
+       * basemap, and the two gestures. On this machine that set five lines. Under a runner's
+       * fallback fonts it set eight, and because it names the cohort count it RE-WRAPPED when a
+       * condition changed -- so the figure column's chrome grew, and the plate, which was what
+       * was left of the band after it, paid for the reflow. That is the aperture invariant
+       * broken by prose. At 1024 the same paragraph was eating the fold budget the map needed.
+       *
+       * SO THE CAPTION STATES THE FIGURE AND NOTHING ELSE: how many storms are drawn, and the
+       * one thing about THIS cohort's drawing that a reader cannot get from the plate itself.
+       * Three states, because there are three things a plate here can be -- a cohort inside a
+       * drawn condition, a cohort over the archive behind it, or the archive itself. The third
+       * is `context === kept`, which is the same test the plate head already uses to decide
+       * whether to print a CONTEXT figure at all: with nothing conditioned the cohort IS the
+       * archive, and "over the archive behind them" would be describing a layer that is the
+       * same storms drawn twice.
+       *
+       * NOTHING IS DELETED. The coastline claim, the projection and the gestures are in PLATE
+       * NOTES, one press away, stated at more length than the caption ever gave them.
+       *
+       * THE DEGRADED COASTLINE STAYS IN THE CAPTION, at full weight, and is the one thing that
+       * may take a second line. With the archive's rings absent the plate is drawing a coastline
+       * the landfall rule was never written against; that is not something a reader should have
+       * to open anything to discover, and it is a state the surface should be shouting about
+       * rather than economising on. It cannot move the plate either way -- see the declared
+       * stage height in atlas.css. */}
       <div className="at-plate-figure">
         <p className="at-plate-caption" data-plate-caption>
           <em>Figure 1.</em>{" "}
           {mode === "replay"
-            ? <>Genesis points and tracks of the {kept.toLocaleString()} storms in this run, drawn
-                in the order the archive recorded them and coloured by the class each fix had
-                reached.</>
-            : <>Genesis points and tracks of the {kept.toLocaleString()} storms in this cohort,
-                coloured by the class each fix had reached.</>}{" "}
-          {hasArchiveCoast ? (
-            <>Five modelled landfall regions are drawn at full contrast; every other coastline is
-              context, and the landfall rule never consults it.</>
-          ) : (
-            <b className="at-plate-model" data-coastline-degraded>
-              Contextual coastline only — the archive’s own rings have not loaded, so the line on
-              screen is not the geometry the landfall rule is written against.
-            </b>
-          )}{" "}
-          <span className="at-plate-gesture">
-            Click any ocean point for what formed near there; click a genesis point for one storm.
-          </span>
+            ? <>The {kept.toLocaleString()} storms in this run, in the order the archive recorded
+                them.</>
+            : probe && probe.radiusKm
+              ? <>The {kept.toLocaleString()} storms in this cohort; the dashed circle is
+                  the {Math.round(probe.radiusKm).toLocaleString()} km condition.</>
+              : context && context !== kept
+                ? <>The {kept.toLocaleString()} storms in this cohort, over the archive behind
+                    them.</>
+                : <>The {kept.toLocaleString()} storms in the archive cohort.</>}
+          {hasArchiveCoast ? null : (
+            <>{" "}<b className="at-plate-model" data-coastline-degraded>
+              Contextual coastline only — the archive&rsquo;s own rings have not loaded, so the
+              line on screen is not the geometry the landfall rule is written against.
+            </b></>
+          )}
           {/* THE INSTRUCTION RETIRES ITSELF. It is here for a reader who has not yet discovered
               that the plate answers a click, and it is noise for one who has -- so the shell
               stops passing it after the first probe, selection or condition. */}
@@ -791,6 +815,13 @@ export function AtlasMap({
             <details className="at-plate-notes" data-plate-notes>
               <summary title="what this plate draws, and from which geometry">PLATE NOTES</summary>
               <div className="at-plate-notes-body">
+                {/* WHAT THE CAPTION USED TO SAY, SAID PROPERLY. These three were compressed into
+                    one caption sentence apiece; given their own block they can state the whole
+                    claim, and the reader who wants them presses once. */}
+                <p>
+                  <b>THE INK</b> Genesis points and tracks, coloured by the class each fix had
+                  reached — the same Saffir-Simpson ramp the key beneath the plate names.
+                </p>
                 <p>
                   <b>COASTLINE</b> The five modelled landfall regions are drawn from the
                   archive&rsquo;s own rings at full contrast. Everything else is a contextual
@@ -809,6 +840,7 @@ export function AtlasMap({
             </details>
           ) : null}
         </span>
+      </div>
       </div>
     </>
   );

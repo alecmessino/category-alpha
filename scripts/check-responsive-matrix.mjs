@@ -282,25 +282,41 @@ const AUDIT = (vw) => {
   else {
     const b = rect(plate);
     if (vw >= 900) {
-      /* THE TWO APERTURE BOUNDS. The hard 500px height cap is gone: it existed because the deck
-         sat UNDER the map, so plate height came straight out of visible rows, and beside a
-         ledger with its own full-height column there is no such trade. What bounds the plate now
-         is the aspect floor, derived in atlas.css from the research corridors the opening view
-         has to hold, and the ceiling that keeps one track from being a horizontal scratch. */
+      /* ONE APERTURE BOUND. The hard 500px height cap went with the stacked shell; the 1.67
+         FLOOR -- "the plate may not be taller than the archive's own frame fills" -- went with
+         the declared band, because under it the plate takes the band so that the figure column
+         and the answer end on one baseline, and a ceiling on its height is 150px of paper under
+         the map with the answer running past it. The surplus is ocean rather than blank page.
+         What remains is the bound about legibility rather than surplus: past 3.2 a single East
+         Pacific track stops being the subject of its own plate, and that one holds at every
+         width, including the stacked ones where the plate is capped and centres instead. */
       const ar = b.width / b.height;
-      if (ar < 1.668) bad.push(`plate aspect ${ar.toFixed(3)} below the 1.67 floor`);
       if (b.width <= 2001 && ar > 3.202) {
         bad.push(`plate aspect ${ar.toFixed(3)} above the 3.2 ceiling`);
       }
       note.push("aspect:" + ar.toFixed(3));
     } else {
-      /* THE BOUND IS OFF BY DESIGN HERE, so what is asserted instead is the thing it was
-         switched off in favour of: a STATED FIGURE HEIGHT. Below 900 the instrument stacks and
-         the plate is a fixed 392px figure with both its captions -- a smaller figure, not a
-         scaled copy of the 834px one -- dropping to 300px at 480 and below. */
-      const want = vw <= 480 ? 300 : 392;
-      if (Math.abs(b.height - want) > 2) {
-        bad.push(`plate is ${Math.round(b.height)}px, not the stated ${want}px figure`);
+      /* STACKED, THE FIGURE IS CAPPED SO THAT THE ANSWER IS ON THE FIRST SCREEN.
+         A stated 392px figure was the right rule when the stack put the whole evidence ledger
+         under the map: the figure was the first thing and the reader scrolled to the table
+         either way. Under the composition the stack is PLATE -> ANSWER -> MATRIX and the
+         contract requires the sample and at least two numerical findings to clear the fold at
+         1024x768 -- which a 392px figure does not allow. So the height is a CAP read from the
+         viewport, 30vh to 300px and 17vh to 155px on a phone, and what is asserted is the cap
+         rather than a constant. check-atlas-contract.mjs asserts the consequence: what actually
+         clears the fold.
+
+         30vh, NOT 26. The figure was 26vh capped at 205px, which at 1024x768 made a 639px plate
+         inside a 972px column -- a strip with a 333x220 rectangle of paper beside it, because
+         only the PLATE narrowed while its head, key and caption kept the band's width. The
+         figure is centred as one block now and the share went up with the fold budget that a
+         one-line caption freed. The ceiling is 300 rather than 205 because on a tall stacked
+         viewport the share is not what binds: 768x1024 has the height to give and the aspect
+         floor is what stops the plate, at 716x300. */
+      const cap = vw <= 480 ? Math.min(0.17 * innerHeight, 155) : Math.min(0.30 * innerHeight, 300);
+      if (b.height > cap + 2) {
+        bad.push(`plate is ${Math.round(b.height)}px, past the ${Math.round(cap)}px cap the `
+          + "stack allows it");
       }
       note.push("plate-figure:" + Math.round(b.height));
     }
@@ -419,20 +435,26 @@ for (const [vname, w, h] of VIEWPORTS) {
                     not apply, and the narrow ledger has the measure for them because the bar
                     and the duration columns left.
 
-   WHAT STILL STEPS IS THE SHELL, ONCE, AT 900: plate and ledger side by side above it, stacked
-   below. The inspector is an overlay on both sides of that step -- it never takes a column of
-   the plate row, so the plate's width, and therefore its aperture, is not a function of whether
-   a storm is selected. That is what the frozen 834/1180 plate boxes require, and it is what the
-   `dock` reading below is actually checking. */
+   WHAT STILL STEPS IS THE SHELL, ONCE, AND IT STEPS AT 1180 NOW. Plate and the eight-row answer
+   side by side above it; PLATE -> ANSWER -> MATRIX stacked below. It moved from 900 because the
+   answer is eight rows rather than a scrolling column: two columns at 1024 give it 350px, which
+   is a rate and its outcome name on separate lines.
+
+   THE INSPECTOR IS AN OVERLAY ON BOTH SIDES OF THAT STEP -- it never takes a column of the band,
+   so the plate's width, and therefore its aperture, is not a function of whether a storm is
+   selected. It cannot reach the evidence at any width now, because the evidence is under the
+   band rather than beside it; the reading below still asserts it, because "the overlay does not
+   cover the reader's table" is the property, and a property that holds by construction today is
+   the one worth pinning before a later construction changes. */
 console.log("\n[responsive] the ladder gives up what it says it gives up, where it says it does");
 const LADDER = [
   [1920, 1080, { columns: 2, dock: "over the plate", timing: true, groups: false }],
   [1440, 900,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
   [1320, 860,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
   [1220, 820,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
-  [1024, 768,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
-  [900, 900,   { columns: 2, dock: "over the plate", timing: true, groups: false }],
-  [880, 1180,  { columns: 1, dock: "over the column", timing: true, groups: false }],
+  [1024, 768,  { columns: 1, dock: "over the plate", timing: true, groups: false }],
+  [900, 900,   { columns: 1, dock: "over the plate", timing: true, groups: false }],
+  [880, 1180,  { columns: 1, dock: "over the plate", timing: true, groups: false }],
 ];
 for (const [w, h, want] of LADDER) {
   await open(`i=cat4&storm=${pick}`, w, h);
@@ -447,10 +469,9 @@ for (const [w, h, want] of LADDER) {
     return {
       /* THE ROW'S OWN TRACK LIST, which is the thing the plate's width is computed against. */
       columns: getComputedStyle(row).gridTemplateColumns.trim().split(/\s+/).length,
-      /* AN OVERLAY THAT REACHES THE LEDGER HAS TAKEN THE READER'S TABLE AWAY, not just the map's
-         right-hand margin. Above the step the dock is allowed over the plate and nothing else;
-         below it there is only one column for it to be over. */
-      dock: !dock ? "absent" : hits(d, led) ? "over the column" : "over the plate",
+      /* AN OVERLAY THAT REACHES THE EVIDENCE HAS TAKEN THE READER'S TABLE AWAY, not just the
+         map's right-hand margin. The dock is allowed over the plate and nothing else. */
+      dock: !dock ? "absent" : hits(d, led) ? "over the evidence" : "over the plate",
       timing: deck.hasAttribute("data-timing-folded"),
       groups: !!deck.querySelector("[data-group-fold]"),
     };
@@ -477,17 +498,23 @@ console.log("\n[responsive] answer density at the documented 1280 collapse");
         && b.left >= -1 && b.right <= innerWidth + 1; };
     const cells = (rs, cs) => [...document.querySelectorAll(rs)]
       .map((r) => r.querySelector(cs)).filter(Boolean);
-    const quals = [...document.querySelectorAll(
-      "[data-refusal],[data-archive-gaps],[data-unknown-note],[data-landfall-note]")].filter(vis);
+    /* READ OFF THE ANSWER, WHICH IS WHAT SITS BESIDE THE PLATE NOW. The five were read off the
+       deck when the deck held the right-hand column; it is under the band at page width, and
+       the eight-row answer is what a reader sees without scrolling. Same five things, same
+       viewport, same bar -- the element that has to satisfy them moved. */
+    const rows = [...document.querySelectorAll("[data-finding]")];
+    const quals = rows.map((r) => r.querySelector(".at-ans-st"))
+      .filter((e) => e && vis(e) && e.textContent.trim())
+      .concat([...document.querySelectorAll("[data-limits-pointer]")].filter(vis));
     return {
       question: vis(document.querySelector("[data-question]")),
       cohort: vis(document.querySelector("[data-cohort-size]"))
-        && cells("[data-deck-group]", ".at-dc-outcome").some(vis),
+        && rows.some((r) => vis(r.querySelector(".at-ans-sup") || r)),
       map: vis(document.querySelector(".at-plate")),
-      outcomes: cells("[data-outcome]", ".at-dc-rate").filter(vis).length > 0,
+      outcomes: rows.map((r) => r.querySelector(".at-ans-rate")).filter(vis).length > 0,
       qualification: quals.length > 0,
       smallestType: Math.min(...[...document.querySelectorAll(
-        ".at-dc-name, .at-dc-rate .at-val, .at-question-text")]
+        ".at-ans-label, .at-ans-rate, .at-question-text")]
         .map((e) => parseFloat(getComputedStyle(e).fontSize))),
     };
   });

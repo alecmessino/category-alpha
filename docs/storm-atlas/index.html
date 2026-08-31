@@ -14,8 +14,16 @@
 <link rel="preload" href="data/atlas-tracks-v1.bin.gz" as="fetch" crossorigin>
 <link rel="stylesheet" href="atlas.css">
 <style>
-html,body{margin:0;height:100%}
-body{background:var(--stage,#0d131d);color:#eaf0f7;font-family:var(--font-sans);overflow:hidden}
+/* `min-height`, NOT `height`, AND THE DOCUMENT SCROLLS.
+   Both used to be `height:100%` with `overflow:hidden` on the body, which said: this surface is
+   exactly one screen and nothing may ever be taller. Under that rule everything the instrument
+   could not fit had to scroll inside a column -- which is how the evidence ledger became 3,457px
+   of deck inside a 673px window. The composition puts the complete matrix, the grouped limits
+   and the apparatus BELOW the first band, at page width, so the page is what scrolls. The
+   calibration surface is still `position:fixed; inset:0` and scrolls inside itself, and is
+   unaffected. */
+html,body{margin:0;min-height:100%}
+body{background:var(--stage,#0d131d);color:#eaf0f7;font-family:var(--font-sans)}
 *{box-sizing:border-box}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#2b3746}

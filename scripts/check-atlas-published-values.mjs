@@ -127,6 +127,34 @@ const READ = () => {
      whole ran "2 / 3,885" into "2 archive-wide" and produced the figure 3,8852. The badge is
      captured beside the value instead, where it is pinned on its own terms. */
   const valueOf = (el) => figures(el && el.querySelector(".at-val"));
+  /* THE REFUSAL IS UNDER THE MATRIX NOW, AND IT IS STILL PINNED PER CONTRACT.
+     A row used to carry its own refusal block; the composition states each governing refusal
+     once, beneath the table, with the contracts that share a sentence named on the line with it.
+     So the snapshot indexes those lines BY CONTRACT NAME and looks each row up -- the published
+     values are unchanged, and the assertion is still "this row's refusal says exactly this".
+     A gate that read the sentence off the row would now report a correct surface as a broken
+     one; a gate that stopped reading it at all would let the sentence change unnoticed. */
+  const byContract = new Map();
+  for (const block of document.querySelectorAll("[data-limit-kind]")) {
+    const kind = block.getAttribute("data-limit-kind");
+    const remedy = block.querySelector(".at-say-remedy");
+    const link = block.querySelector("[data-evidence-link]");
+    for (const line of block.querySelectorAll(".at-limit-line")) {
+      const need = txt(line.querySelector(".at-need"));
+      const say = txt(line.querySelector(".at-say-text"));
+      const tail = [say, txt(remedy), link ? txt(link) : ""].filter(Boolean).join("");
+      /* THE LIST IS READ FROM THE ATTRIBUTE, NEVER SPLIT OFF THE RENDERED LINE. `Hawaii · ≥64 KT`
+         is ONE contract whose own label contains the separator the line joins on, so splitting
+         the text produced a phantom `Hawaii` and lost the real contract: this gate reported the
+         Hawaii hurricane row as carrying no refusal and an outcome named `Hawaii` as carrying
+         one. The surface publishes the array for exactly this. */
+      let labels = [];
+      try { labels = JSON.parse(line.getAttribute("data-contracts") || "[]"); } catch { labels = []; }
+      for (const label of labels) {
+        if (label) byContract.set(String(label).trim(), { kind, need, text: tail });
+      }
+    }
+  }
   const rows = [...document.querySelectorAll("[data-outcome]")].map((r) => ({
     outcome: r.getAttribute("data-outcome"),
     contract: r.getAttribute("data-contract-row") || null,
@@ -138,25 +166,19 @@ const READ = () => {
     /* SCOPED TO THE ROW, NOT TO A CELL. The scope/archive-wide/required counts are a published
        figure wherever the layout puts them; pinning the CELL they sat in would make this gate
        an assertion about grid columns, which is the one thing a values snapshot must not be. */
-    need: txt(r.querySelector(".at-need")),
+    need: txt(r.querySelector(".at-need"))
+      || ((byContract.get(r.getAttribute("data-outcome")) || {}).need || null),
     rate: txt(r.querySelector(".at-dc-rate .at-val")),
     /* THE TWO WILSON BOUNDS, IN ORDER. Whatever brackets or unit sign wrap them. */
     interval: valueOf(r.querySelector(".at-dc-int")),
     intervalRaw: txt(r.querySelector(".at-dc-int .at-val")),
     status: txt(r.querySelector(".at-dc-status")),
-    refusalKind: (r.querySelector("[data-refusal]") || {}).getAttribute
-      ? r.querySelector("[data-refusal]").getAttribute("data-refusal") : null,
+    refusalKind: (byContract.get(r.getAttribute("data-outcome")) || {}).kind || null,
     /* THE ARCHIVE'S SENTENCE, WITHOUT THE COUNTS THAT SIT BESIDE IT. `need` is captured on its
        own line above; reading it a second time here, as part of a concatenation, would pin the
        two together and make a change to WHERE the counts sit read as a change to WHAT the
        refusal says. They are different claims and this file keeps them apart. */
-    refusalText: (() => {
-      const el = r.querySelector("[data-refusal]");
-      if (!el) return null;
-      const c = el.cloneNode(true);
-      c.querySelectorAll(".at-need").forEach((n) => n.remove());
-      return (c.textContent || "").replace(/\s+/g, " ").trim() || null;
-    })(),
+    refusalText: (byContract.get(r.getAttribute("data-outcome")) || {}).text || null,
   }));
   const groups = [...document.querySelectorAll("[data-deck-group]")].map((g) => ({
     label: g.getAttribute("data-deck-group"),
