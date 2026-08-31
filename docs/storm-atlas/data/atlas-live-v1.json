@@ -1,6 +1,6 @@
 {
   "schema": "atlas-live-v1",
-  "generated_at": "2026-08-31T15:02:58.027Z",
+  "generated_at": "2026-08-31T20:29:40.199Z",
   "source": {
     "name": "NHC ATCF b-deck (best track)",
     "url": "https://ftp.nhc.noaa.gov/atcf/btk/",
@@ -15,6 +15,7 @@
   "health": {
     "ok": true,
     "active_atcf_ids": [
+      "AL052026",
       "EP112026",
       "EP122026"
     ],
@@ -27,6 +28,7 @@
     ],
     "expected_atcf_ids": [
       "AL042026",
+      "AL052026",
       "CP012026",
       "CP022026",
       "EP092026",
@@ -36,6 +38,7 @@
     ],
     "emitted_atcf_ids": [
       "AL042026",
+      "AL052026",
       "CP012026",
       "CP022026",
       "EP092026",
@@ -45,19 +48,216 @@
     ],
     "missing_atcf_ids": [],
     "stale_atcf_ids": [],
-    "note": "7 operational record(s) emitted"
+    "note": "8 operational record(s) emitted"
   },
   "storms": {
+    "AL052026": {
+      "atcf_id": "AL052026",
+      "season": 2026,
+      "basin": "AL",
+      "name": "FIVE",
+      "fetched_at": "2026-08-31T20:29:40.199Z",
+      "first_valid_time": "2026-08-28T18:00:00.000Z",
+      "latest_valid_time": "2026-08-31T18:00:00.000Z",
+      "age_hours": 2.5,
+      "fix_count": 13,
+      "fixes": [
+        {
+          "t": "2026-08-28T18:00:00.000Z",
+          "lat": 29.6,
+          "lon": -87.3,
+          "kt": 20,
+          "mslp": 1015,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-29T00:00:00.000Z",
+          "lat": 29.4,
+          "lon": -87.3,
+          "kt": 20,
+          "mslp": 1015,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-29T06:00:00.000Z",
+          "lat": 29,
+          "lon": -87.7,
+          "kt": 20,
+          "mslp": 1015,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-29T12:00:00.000Z",
+          "lat": 28.8,
+          "lon": -87.5,
+          "kt": 15,
+          "mslp": 1015,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-29T18:00:00.000Z",
+          "lat": 28.8,
+          "lon": -87.2,
+          "kt": 20,
+          "mslp": 1015,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-30T00:00:00.000Z",
+          "lat": 28.3,
+          "lon": -87.9,
+          "kt": 20,
+          "mslp": 1015,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-30T06:00:00.000Z",
+          "lat": 28,
+          "lon": -88.7,
+          "kt": 20,
+          "mslp": 1014,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-30T12:00:00.000Z",
+          "lat": 27.9,
+          "lon": -89.3,
+          "kt": 20,
+          "mslp": 1013,
+          "stage": "DB"
+        },
+        {
+          "t": "2026-08-30T18:00:00.000Z",
+          "lat": 27.7,
+          "lon": -89.5,
+          "kt": 20,
+          "mslp": 1013,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-31T00:00:00.000Z",
+          "lat": 27.5,
+          "lon": -89.8,
+          "kt": 25,
+          "mslp": 1012,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-31T06:00:00.000Z",
+          "lat": 27.3,
+          "lon": -90.3,
+          "kt": 30,
+          "mslp": 1012,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-31T12:00:00.000Z",
+          "lat": 27.9,
+          "lon": -90.5,
+          "kt": 30,
+          "mslp": 1013,
+          "stage": "LO"
+        },
+        {
+          "t": "2026-08-31T18:00:00.000Z",
+          "lat": 28.1,
+          "lon": -91,
+          "kt": 30,
+          "mslp": 1012,
+          "stage": "TD"
+        }
+      ],
+      "latest": {
+        "t": "2026-08-31T18:00:00.000Z",
+        "lat": 28.1,
+        "lon": -91,
+        "kt": 30,
+        "mslp": 1012,
+        "stage": "TD"
+      },
+      "stage": "TD",
+      "stage_label": "TROPICAL DEPRESSION",
+      "peak_wind_kt": 30,
+      "peak_wind_at": "2026-08-31T06:00:00.000Z",
+      "min_mslp_mb": 1012,
+      "min_mslp_at": "2026-08-31T00:00:00.000Z",
+      "fixes_with_wind": 13,
+      "fixes_with_pressure": 13,
+      "ships_rt": {
+        "source": "ships_rt",
+        "product": "NHC operational SHIPS (stext)",
+        "tau": 0,
+        "valid_time": "2026-08-31T18:00:00.000Z",
+        "fetched_at": "2026-08-31T20:29:40.199Z",
+        "age_hours": 2.5,
+        "lat": null,
+        "lon": null,
+        "availability": {
+          "ohc": true,
+          "ir": true
+        },
+        "fields": {
+          "shearKt": {
+            "value": 11,
+            "label": "850-200 mb deep-layer shear"
+          },
+          "shearAdjKt": {
+            "value": -4,
+            "label": "shear adjusted for storm motion"
+          },
+          "sstC": {
+            "value": 31,
+            "label": "sea-surface temperature"
+          },
+          "mpiKt": {
+            "value": 169,
+            "label": "maximum potential intensity the ocean supports"
+          },
+          "rhMid": {
+            "value": 47,
+            "label": "mid-level relative humidity"
+          },
+          "ohc": {
+            "value": 22,
+            "label": "ocean heat content (kJ/cm2)"
+          },
+          "landKm": {
+            "value": 116,
+            "label": "distance to land"
+          },
+          "vNoLandKt": {
+            "value": 30,
+            "label": "SHIPS intensity forecast, no land interaction"
+          },
+          "vLgemKt": {
+            "value": 30,
+            "label": "LGEM intensity forecast"
+          }
+        },
+        "field_count": 9,
+        "not_comparable_with": "ships_dev",
+        "note": "Operational SHIPS, not the developmental SHIPS archive. The two are sequential eras measured differently and are never pooled, differenced or compared as one instrument."
+      },
+      "source": {
+        "name": "NHC ATCF b-deck (best track)",
+        "kind": "operational",
+        "url": "https://ftp.nhc.noaa.gov/atcf/btk/bal052026.dat",
+        "status": 200,
+        "bytes": 2879,
+        "note": "Operational best track, revised by the forecast office while the storm is live. Not post-analysed and not an archive record."
+      },
+      "active": true
+    },
     "EP112026": {
       "atcf_id": "EP112026",
       "season": 2026,
       "basin": "EP",
       "name": "KARINA",
-      "fetched_at": "2026-08-31T15:02:58.027Z",
+      "fetched_at": "2026-08-31T20:29:40.199Z",
       "first_valid_time": "2026-08-25T00:00:00.000Z",
-      "latest_valid_time": "2026-08-31T12:00:00.000Z",
-      "age_hours": 3,
-      "fix_count": 27,
+      "latest_valid_time": "2026-08-31T18:00:00.000Z",
+      "age_hours": 2.5,
+      "fix_count": 28,
       "fixes": [
         {
           "t": "2026-08-25T00:00:00.000Z",
@@ -274,14 +474,22 @@
           "kt": 120,
           "mslp": 945,
           "stage": "HU"
+        },
+        {
+          "t": "2026-08-31T18:00:00.000Z",
+          "lat": 17.4,
+          "lon": -125.4,
+          "kt": 115,
+          "mslp": 950,
+          "stage": "HU"
         }
       ],
       "latest": {
-        "t": "2026-08-31T12:00:00.000Z",
-        "lat": 17.3,
-        "lon": -124.7,
-        "kt": 120,
-        "mslp": 945,
+        "t": "2026-08-31T18:00:00.000Z",
+        "lat": 17.4,
+        "lon": -125.4,
+        "kt": 115,
+        "mslp": 950,
         "stage": "HU"
       },
       "stage": "HU",
@@ -290,15 +498,15 @@
       "peak_wind_at": "2026-08-31T06:00:00.000Z",
       "min_mslp_mb": 945,
       "min_mslp_at": "2026-08-31T06:00:00.000Z",
-      "fixes_with_wind": 27,
-      "fixes_with_pressure": 27,
+      "fixes_with_wind": 28,
+      "fixes_with_pressure": 28,
       "ships_rt": {
         "source": "ships_rt",
         "product": "NHC operational SHIPS (stext)",
         "tau": 0,
-        "valid_time": "2026-08-31T12:00:00.000Z",
-        "fetched_at": "2026-08-31T15:02:58.027Z",
-        "age_hours": 3,
+        "valid_time": "2026-08-31T18:00:00.000Z",
+        "fetched_at": "2026-08-31T20:29:40.199Z",
+        "age_hours": 2.5,
         "lat": null,
         "lon": null,
         "availability": {
@@ -307,31 +515,31 @@
         },
         "fields": {
           "shearKt": {
-            "value": 10,
+            "value": 7,
             "label": "850-200 mb deep-layer shear"
           },
           "shearAdjKt": {
-            "value": -1,
+            "value": 2,
             "label": "shear adjusted for storm motion"
           },
           "sstC": {
-            "value": 28.3,
+            "value": 28.5,
             "label": "sea-surface temperature"
           },
           "mpiKt": {
-            "value": 147,
+            "value": 149,
             "label": "maximum potential intensity the ocean supports"
           },
           "rhMid": {
-            "value": 63,
+            "value": 59,
             "label": "mid-level relative humidity"
           },
           "ohc": {
-            "value": 7,
+            "value": 8,
             "label": "ocean heat content (kJ/cm2)"
           },
           "landKm": {
-            "value": 1523,
+            "value": 1566,
             "label": "distance to land"
           },
           "vNoLandKt": {
@@ -352,7 +560,7 @@
         "kind": "operational",
         "url": "https://ftp.nhc.noaa.gov/atcf/btk/bep112026.dat",
         "status": 200,
-        "bytes": 10007,
+        "bytes": 10655,
         "note": "Operational best track, revised by the forecast office while the storm is live. Not post-analysed and not an archive record."
       },
       "active": true
@@ -362,11 +570,11 @@
       "season": 2026,
       "basin": "EP",
       "name": "LOWELL",
-      "fetched_at": "2026-08-31T15:02:58.027Z",
+      "fetched_at": "2026-08-31T20:29:40.199Z",
       "first_valid_time": "2026-08-25T18:00:00.000Z",
-      "latest_valid_time": "2026-08-31T12:00:00.000Z",
-      "age_hours": 3,
-      "fix_count": 24,
+      "latest_valid_time": "2026-08-31T18:00:00.000Z",
+      "age_hours": 2.5,
+      "fix_count": 25,
       "fixes": [
         {
           "t": "2026-08-25T18:00:00.000Z",
@@ -559,12 +767,20 @@
           "kt": 55,
           "mslp": 995,
           "stage": "TS"
+        },
+        {
+          "t": "2026-08-31T18:00:00.000Z",
+          "lat": 12.8,
+          "lon": -146,
+          "kt": 55,
+          "mslp": 995,
+          "stage": "TS"
         }
       ],
       "latest": {
-        "t": "2026-08-31T12:00:00.000Z",
+        "t": "2026-08-31T18:00:00.000Z",
         "lat": 12.8,
-        "lon": -145.2,
+        "lon": -146,
         "kt": 55,
         "mslp": 995,
         "stage": "TS"
@@ -575,15 +791,15 @@
       "peak_wind_at": "2026-08-31T12:00:00.000Z",
       "min_mslp_mb": 995,
       "min_mslp_at": "2026-08-31T12:00:00.000Z",
-      "fixes_with_wind": 24,
-      "fixes_with_pressure": 20,
+      "fixes_with_wind": 25,
+      "fixes_with_pressure": 21,
       "ships_rt": {
         "source": "ships_rt",
         "product": "NHC operational SHIPS (stext)",
         "tau": 0,
-        "valid_time": "2026-08-31T12:00:00.000Z",
-        "fetched_at": "2026-08-31T15:02:58.027Z",
-        "age_hours": 3,
+        "valid_time": "2026-08-31T18:00:00.000Z",
+        "fetched_at": "2026-08-31T20:29:40.199Z",
+        "age_hours": 2.5,
         "lat": null,
         "lon": null,
         "availability": {
@@ -592,19 +808,19 @@
         },
         "fields": {
           "shearKt": {
-            "value": 11,
+            "value": 8,
             "label": "850-200 mb deep-layer shear"
           },
           "shearAdjKt": {
-            "value": 3,
+            "value": 0,
             "label": "shear adjusted for storm motion"
           },
           "sstC": {
-            "value": 28.8,
+            "value": 29.1,
             "label": "sea-surface temperature"
           },
           "mpiKt": {
-            "value": 153,
+            "value": 156,
             "label": "maximum potential intensity the ocean supports"
           },
           "rhMid": {
@@ -612,11 +828,11 @@
             "label": "mid-level relative humidity"
           },
           "ohc": {
-            "value": 25,
+            "value": 28,
             "label": "ocean heat content (kJ/cm2)"
           },
           "landKm": {
-            "value": 1265,
+            "value": 1197,
             "label": "distance to land"
           },
           "vNoLandKt": {
@@ -637,7 +853,7 @@
         "kind": "operational",
         "url": "https://ftp.nhc.noaa.gov/atcf/btk/bep122026.dat",
         "status": 200,
-        "bytes": 5687,
+        "bytes": 6119,
         "note": "Operational best track, revised by the forecast office while the storm is live. Not post-analysed and not an archive record."
       },
       "active": true
@@ -650,7 +866,7 @@
       "fetched_at": "2026-08-28T21:48:13.203Z",
       "first_valid_time": "2026-08-24T00:00:00.000Z",
       "latest_valid_time": "2026-08-28T18:00:00.000Z",
-      "age_hours": 69,
+      "age_hours": 74.5,
       "fix_count": 20,
       "fixes": [
         {
@@ -903,7 +1119,7 @@
       "fetched_at": "2026-08-28T15:48:18.264Z",
       "first_valid_time": "2026-08-10T00:00:00.000Z",
       "latest_valid_time": "2026-08-28T06:00:00.000Z",
-      "age_hours": 81,
+      "age_hours": 86.5,
       "fix_count": 74,
       "fixes": [
         {
@@ -1588,7 +1804,7 @@
       "fetched_at": "2026-08-27T03:10:09.299Z",
       "first_valid_time": "2026-08-21T12:00:00.000Z",
       "latest_valid_time": "2026-08-27T00:00:00.000Z",
-      "age_hours": 111,
+      "age_hours": 116.5,
       "fix_count": 23,
       "fixes": [
         {
@@ -1865,7 +2081,7 @@
       "fetched_at": "2026-08-26T05:17:22.975Z",
       "first_valid_time": "2026-08-20T00:00:00.000Z",
       "latest_valid_time": "2026-08-25T18:00:00.000Z",
-      "age_hours": 141,
+      "age_hours": 146.5,
       "fix_count": 24,
       "fixes": [
         {
@@ -2150,7 +2366,7 @@
       "fetched_at": "2026-08-25T15:43:45.983Z",
       "first_valid_time": "2026-08-18T12:00:00.000Z",
       "latest_valid_time": "2026-08-25T06:00:00.000Z",
-      "age_hours": 153,
+      "age_hours": 158.5,
       "fix_count": 28,
       "fixes": [
         {
