@@ -7,6 +7,7 @@ import { ROOT } from "./lib/atlas-verify.mjs";
 import {
   artifactA, artifactB, artifactB1, artifactB2, artifactC, artifactD, sourceManifestDoc,
 } from "./lib/collateral-artifacts.mjs";
+import { LEGIBILITY_CUTS } from "./lib/collateral-cuts.mjs";
 
 const OUT = join(ROOT, "docs/collateral");
 mkdirSync(OUT, { recursive: true });
@@ -29,3 +30,18 @@ for (const [name, html] of files) {
   console.log(`${name.padEnd(46)} ${(html.length / 1024).toFixed(0)} KB` +
     (missing ? `   ${missing} COPY SLOT(S) MISSING` : ""));
 }
+
+/* THE CUT REGISTER, PUBLISHED WITH THE ARTIFACTS. A block removed to meet the type gate is part
+   of the record of what these pages are, so it ships beside them rather than living only in the
+   source. scripts/check-collateral.mjs reads the same table. */
+writeFileSync(join(OUT, "legibility-cuts.json"), JSON.stringify({
+  schema: "storm-atlas-collateral-legibility-cuts/1",
+  gate: {
+    body_pt: 8.5, detail_pt: 7.5, legal_pt: 7,
+    page: "US Letter, 10 mm margin — a 196 x 259 mm content box, 740 x 979 px at 96 dpi",
+    rule: "Cut content before shrinking type. Nothing substantive prints below 7.5 pt.",
+  },
+  cuts: LEGIBILITY_CUTS,
+}, null, 2));
+console.log(`legibility-cuts.json                           ${
+  Object.values(LEGIBILITY_CUTS).reduce((n, a) => n + a.length, 0)} recorded cut(s)`);

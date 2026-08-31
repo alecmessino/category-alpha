@@ -2,7 +2,34 @@ STORM ATLAS COLLATERAL — SOURCE MANIFEST
 METHODOLOGY 1.1.0 · PACK 134661125525f27a · ARCHIVE BUILT 2026-08-18T05:18:57Z
 ARCHIVE 3959 storms / 224153 track points / 3379 landfall rows
 
-## 97L — Invest 97L
+## GENESIS DETERMINATION — the archive's own rule, applied to each live system
+   RULE            first OBSERVED track point with a tropical status; TROPICAL_STATUS = TD, TS, HU, TY, ST, TC, HR; explicitly non-tropical = DB, LO, EX, SD, SS, WV, MD, IN, DS, ET, NR, PT
+   RULE SOURCE     scripts/genesis/build/genesis_events.py + scripts/genesis/schema.py
+   ENGINE ACCEPTS THE OPERATIONAL LAYER AS A GENESIS SOURCE: no
+   AL052026 FIVE
+     stages in operational record: DB, LO, TD
+     first tropical fix (operational, NOT a cohort source): 2026-08-31T18:00:00.000Z 28.1N 91W TD 30 kt 1012 mb
+     present in archive pack 134661125525f27a: no
+     VERDICT: NO OBSERVED GENESIS POINT — the operational record is not a cohort source and this storm is absent from the archive pack
+   EP112026 KARINA
+     stages in operational record: DB, TS, HU
+     first tropical fix (operational, NOT a cohort source): 2026-08-27T18:00:00.000Z 10.8N 111.5W TS 40 kt 1001 mb
+     present in archive pack 134661125525f27a: no
+     VERDICT: NO OBSERVED GENESIS POINT — the operational record is not a cohort source and this storm is absent from the archive pack
+   EP122026 LOWELL
+     stages in operational record: DB, LO, TS
+     first tropical fix (operational, NOT a cohort source): 2026-08-27T18:00:00.000Z 11.2N 134W TS 35 kt 1006 mb
+     present in archive pack 134661125525f27a: no
+     VERDICT: NO OBSERVED GENESIS POINT — the operational record is not a cohort source and this storm is absent from the archive pack
+
+## NHC PUBLIC ADVISORIES (live desk line, ingested 2026-08-31T21:14:40.041Z)
+   AL052026 Five — Tropical Depression, 28.2N 91.5W, 30 kt / 1011 mb, WNW 6 mph, advisory 002 at 2026-08-31T21:00:00.000Z; highest watch/warning Tropical Storm Warning
+     Tropical Storm Warning: Port Bolivar to the Vermilion/Iberia Parish Line
+     Storm Surge Watch: High Island to the Vermilion/Cameron Parish Line
+   EP112026 Karina — Cat 4 Hurricane, 17.5N 125.8W, 115 kt / 950 mb, WNW 9 mph, advisory 018 at 2026-08-31T21:00:00.000Z
+   EP122026 Lowell — Tropical Storm, 12.9N 146.5W, 55 kt / 995 mb, W 13 mph, advisory 017 at 2026-08-31T21:00:00.000Z
+
+## 97L — 97L / TD Five
    POINT TYPE      PRE-GENESIS REFERENCE CELL
    COORDS QUERIED  28N 88.7W
    RADIUS          250 km
@@ -50,7 +77,7 @@ ARCHIVE 3959 storms / 224153 track points / 3379 landfall rows
    CITE: STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 12 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a
    URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=28%2C-88.7%2C250&s0=1971&mo=8.9&b=NA&m=1.1.0
 
-## 97L-r150 — Invest 97L — 150 km variant
+## 97L-r150 — 97L cell — 150 km variant
    POINT TYPE      PRE-GENESIS REFERENCE CELL
    COORDS QUERIED  28N 88.7W
    RADIUS          150 km
@@ -95,7 +122,7 @@ ARCHIVE 3959 storms / 224153 track points / 3379 landfall rows
    CITE: STORM ATLAS · North Atlantic storms that formed within 150 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 5 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a
    URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=28%2C-88.7%2C150&s0=1971&mo=8.9&b=NA&m=1.1.0
 
-## 97L-allmonths — Invest 97L — season-wide variant
+## 97L-allmonths — 97L cell — season-wide variant
    POINT TYPE      PRE-GENESIS REFERENCE CELL
    COORDS QUERIED  28N 88.7W
    RADIUS          250 km
@@ -144,7 +171,7 @@ ARCHIVE 3959 storms / 224153 track points / 3379 landfall rows
    URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=28%2C-88.7%2C250&s0=1971&b=NA&m=1.1.0
 
 ## KARINA — Hurricane Karina
-   POINT TYPE      OBSERVED GENESIS
+   POINT TYPE      DECLARED GENESIS POINT
    COORDS QUERIED  13.2N 115W
    RADIUS          250 km
    SEASON WINDOW   floor 1971, August–September
@@ -254,7 +281,7 @@ ARCHIVE 3959 storms / 224153 track points / 3379 landfall rows
    URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=12%2C-107.5%2C250&s0=1971&mo=8.9&b=EP&m=1.1.0
 
 ## LOWELL — Tropical Storm Lowell
-   POINT TYPE      OBSERVED GENESIS
+   POINT TYPE      DECLARED GENESIS POINT
    COORDS QUERIED  11.3N 133.8W
    RADIUS          250 km
    SEASON WINDOW   floor 1971, August–September
@@ -306,17 +333,16 @@ ARCHIVE 3959 storms / 224153 track points / 3379 landfall rows
    CITE: STORM ATLAS · East Pacific storms that formed within 250 km of 11.3°N 133.8°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 6 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a
    URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=11.3%2C-133.8%2C250&s0=1971&mo=8.9&b=EP&m=1.1.0
 
-## OPERATIONAL LAYER (atlas-live-v1) — generated 2026-08-31T07:10:04.497Z
-   EP112026 KARINA — HURRICANE, latest fix 2026-08-31T06:00:00.000Z: 17.2N 124W 120 kt 945 mb; peak 120 kt; age 1.2 h; active true
-   EP122026 LOWELL — TROPICAL STORM, latest fix 2026-08-31T06:00:00.000Z: 13N 143.7W 50 kt 997 mb; peak 50 kt; age 1.2 h; active true
-   AL042026 DOLLY — DISTURBANCE, latest fix 2026-08-28T18:00:00.000Z: 15.6N 48.5W 35 kt 1008 mb; peak 35 kt; age 61.2 h; active false
-   CP012026 LALA — LOW, latest fix 2026-08-28T06:00:00.000Z: 38.1N 179.1W 35 kt 1003 mb; peak 115 kt; age 73.2 h; active false
-   EP092026 ISELLE — TROPICAL DEPRESSION, latest fix 2026-08-27T00:00:00.000Z: 22.8N 125.5W 30 kt 1002 mb; peak 60 kt; age 103.2 h; active false
-   EP102026 JULIO — DISTURBANCE, latest fix 2026-08-25T18:00:00.000Z: 19.5N 118.8W 40 kt 1003 mb; peak 45 kt; age 133.2 h; active false
-   CP022026 MOKE — TROPICAL DEPRESSION, latest fix 2026-08-25T06:00:00.000Z: 16.2N 163.5W 30 kt 1006 mb; peak 45 kt; age 145.2 h; active false
+## OPERATIONAL LAYER (atlas-live-v1) — generated 2026-08-31T21:14:40.041Z
+   AL052026 FIVE — TROPICAL DEPRESSION, latest fix 2026-08-31T18:00:00.000Z: 28.1N 91W 30 kt 1012 mb; peak 30 kt; age 3.2 h; active true
+   EP112026 KARINA — HURRICANE, latest fix 2026-08-31T18:00:00.000Z: 17.4N 125.4W 115 kt 950 mb; peak 120 kt; age 3.2 h; active true
+   EP122026 LOWELL — TROPICAL STORM, latest fix 2026-08-31T18:00:00.000Z: 12.8N 146W 55 kt 995 mb; peak 55 kt; age 3.2 h; active true
+   AL042026 DOLLY — DISTURBANCE, latest fix 2026-08-28T18:00:00.000Z: 15.6N 48.5W 35 kt 1008 mb; peak 35 kt; age 75.2 h; active false
+   CP012026 LALA — LOW, latest fix 2026-08-28T06:00:00.000Z: 38.1N 179.1W 35 kt 1003 mb; peak 115 kt; age 87.2 h; active false
+   EP092026 ISELLE — TROPICAL DEPRESSION, latest fix 2026-08-27T00:00:00.000Z: 22.8N 125.5W 30 kt 1002 mb; peak 60 kt; age 117.2 h; active false
+   EP102026 JULIO — DISTURBANCE, latest fix 2026-08-25T18:00:00.000Z: 19.5N 118.8W 40 kt 1003 mb; peak 45 kt; age 147.2 h; active false
+   CP022026 MOKE — TROPICAL DEPRESSION, latest fix 2026-08-25T06:00:00.000Z: 16.2N 163.5W 30 kt 1006 mb; peak 45 kt; age 159.2 h; active false
 
-## NHC GRAPHICAL OUTLOOK (live, ingested 2026-08-31T07:10:04.497Z)
-   AL97 atlantic — Northern Gulf of America: 48h 70%, 7d 70% · issued 200 AM EDT Mon Aug 31 2026
-   (no id) atlantic — Near Puerto Rico and the Virgin Islands (Remnants of Dolly): 48h n/a, 7d 20% · issued 200 AM EDT Mon Aug 31 2026
-   EP95 pacific — Well Offshore of Southwestern Mexico: 48h 90%, 7d 90% · issued 1100 PM PDT Sun Aug 30 2026
-   (no id) pacific — Central Pacific: 48h n/a, 7d 30% · issued 1100 PM PDT Sun Aug 30 2026
+## NHC GRAPHICAL OUTLOOK (live, ingested 2026-08-31T21:14:40.041Z)
+   EP95 pacific — Well Offshore of Southwestern Mexico: 48h 90%, 7d 90% · issued 1100 AM PDT Mon Aug 31 2026
+   (no id) pacific — Central Pacific: 48h n/a, 7d 20% · issued 1100 AM PDT Mon Aug 31 2026

@@ -15,6 +15,7 @@
  * Run: node scripts/check-collateral.mjs
  */
 import { join } from "node:path";
+import { cutRecorded } from "./lib/collateral-cuts.mjs";
 import { readFileSync, readdirSync } from "node:fs";
 import { ROOT } from "./lib/atlas-verify.mjs";
 
@@ -161,13 +162,59 @@ for (const f of files) {
   /* -- completeness -- */
   ok(!/COPY SLOT "[^"]+" NOT SUPPLIED/.test(html), "every copy slot supplied",
     (html.match(/COPY SLOT "[^"]+" NOT SUPPLIED/g) || []).slice(0, 6).join(", "));
-  ok(/CITE THIS COHORT/.test(t), "carries a CITE THIS COHORT block");
+  /* THE CITE BLOCK, OR A RECORDED REASON IT IS NOT HERE. The type gate forced blocks off some
+     sheets; scripts/lib/collateral-cuts.mjs is where each removal is named, costed and given the
+     thing that carries its content instead. A missing block with no entry there still fails. */
+  ok(/CITE THIS COHORT/.test(t) || cutRecorded(f, /citation strings/i),
+    "carries a CITE THIS COHORT block, or a recorded cut in its place",
+    "no cite block and no entry in scripts/lib/collateral-cuts.mjs");
   ok(/METHODOLOGY 1\.1\.0/.test(t) && new RegExp(M.pack.archive_stamp).test(t),
     "carries the methodology version and pack stamp");
   ok(/RESEARCH ONLY — NOT A FORECAST/.test(t), "carries the research-only disclaimer");
-  if (f !== MANIFEST_DOC) ok(/The question a desk actually asks/.test(t), "carries the comparison strip");
+  if (f !== MANIFEST_DOC) {
+    ok(/The question a desk actually asks/.test(t) || cutRecorded(f, /comparison strip/i),
+      "carries the comparison strip, or a recorded cut in its place",
+      "no comparison strip and no entry in scripts/lib/collateral-cuts.mjs");
+  }
   ok(/storm-atlas\/\?v=1/.test(html), "carries at least one replay URL");
   ok(/GENESIS-CONDITIONED/.test(t), "states the genesis-conditioned rule");
+
+  /* -- GATE 1: THE QUESTION TEXT MATCHES THE POINT TYPE ------------------------------------
+     A cohort keyed to a declared point may not be described as an observed one. The manifest
+     settles which it is: `genesis_determinations` runs the archive's own rule against the
+     operational record, and `point_type` on each system records the answer. No page may print a
+     label the manifest does not carry, and while no live system has an archive genesis row,
+     "OBSERVED GENESIS" may not appear on any of them at all. */
+  const archiveGenesis = new Set(M.genesis_determinations
+    .filter((g) => g.present_in_archive_pack).map((g) => g.atcf_id));
+  ok(!/OBSERVED GENESIS/.test(t) || archiveGenesis.size > 0,
+    "no cohort is labelled OBSERVED GENESIS while the archive holds no genesis row for it",
+    (t.match(/[^.]*OBSERVED GENESIS[^.]*/g) || []).slice(0, 3).join(" | "));
+  for (const sy of M.systems.filter((x) => html.includes(x.replay_url))) {
+    if (sy.point_type === "PRE-GENESIS REFERENCE CELL") continue;
+    ok(!new RegExp(`${sy.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[^.]{0,80}observed genesis`, "i").test(t),
+      `${sy.id}: the page does not call its declared point an observed one`);
+  }
+  /* A live system that the archive has no genesis row for may not be described as having
+     formed for cohort purposes. NHC's own classification is quoted as NHC's, with its instant. */
+  ok(!/\b(97L|AL052026|Invest 97L)\b[^.]{0,60}\bhas formed\b/i.test(t),
+    "no page asserts that a live system has formed in the archive's sense",
+    (t.match(/[^.]*has formed[^.]*/g) || []).slice(0, 2).join(" | "));
+
+  /* -- GATE 2: NO COMPOSITION OF AN OUTLOOK PROBABILITY WITH AN ATLAS ROW -------------------
+     The correction is specific: an unconditional probability needs an external formation
+     probability on the SAME formation event and conditioning set, and none is computed here. The
+     sentence must be present, and no sentence may claim the two multiply. */
+  ok(/unconditional intensity probability/i.test(t)
+    && /same formation event and conditioning set/i.test(t),
+    "carries the formation-probability composition rule");
+  const multiplyClaims = (t.match(/[^.]*\bmultipl(?:y|ied|ication)\b[^.]*\./gi) || [])
+    /* Negation-aware, and "no X is multiplied" is negation just as much as "is not multiplied":
+       every sentence in this package that names multiplication does so to forbid it. */
+    .filter((sent) => !/\bnot\b|\bno\b|\bnever\b|\bunless\b|\bwould\b|\brequires?\b/i.test(sent));
+  ok(multiplyClaims.length === 0,
+    "no sentence composes an outlook probability with an Atlas row",
+    multiplyClaims.slice(0, 2).join(" | "));
 
   /* -- traceability: every printed n/N -- */
   const badFractions = [];
@@ -264,7 +311,8 @@ for (const f of files) {
   const outcomeTables = (html.match(/<table class="ledger[^"]*"/g) || [])
     .filter((tag) => !/sysgrid|cmptable/.test(tag)).length;
   if (outcomeTables) {
-    const statusHeads = (html.match(/>Status returned</g) || []).length;
+    const statusHeads = (html.match(/>Status returned</g) || []).length
+      + (html.match(/>Status</g) || []).length;
     ok(statusHeads > 0, "every outcome ledger keeps a STATUS column",
       `${outcomeTables} ledger table(s), ${statusHeads} STATUS heading(s)`);
   }

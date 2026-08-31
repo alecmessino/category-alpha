@@ -135,13 +135,13 @@ export function graticule(P, { dLon = 10, dLat = 10 } = {}) {
     const [x1, y1] = P(lo, lat0);
     const [x2, y2] = P(lo, lat1);
     lines.push(`M${f2(x1)} ${f2(y1)}L${f2(x2)} ${f2(y2)}`);
-    labels.push({ x: f2(x1), y: f2(y1) + 12, text: `${Math.abs(lo)}°W`, anchor: "middle" });
+    labels.push({ x: f2(x1), y: f2(y1) + 13, text: `${Math.abs(lo)}°W`, anchor: "middle" });
   }
   for (let la = Math.ceil(lat0 / dLat) * dLat; la <= lat1; la += dLat) {
     const [x1, y1] = P(lon0, la);
     const [x2, y2] = P(lon1, la);
     lines.push(`M${f2(x1)} ${f2(y1)}L${f2(x2)} ${f2(y2)}`);
-    labels.push({ x: f2(x1) + 4, y: f2(y1) - 3, text: `${la}°N`, anchor: "start" });
+    labels.push({ x: f2(x1) + 5, y: f2(y1) - 4, text: `${la}°N`, anchor: "start" });
   }
   return { lines, labels };
 }

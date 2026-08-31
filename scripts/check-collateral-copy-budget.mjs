@@ -18,13 +18,18 @@ import { readFileSync } from "node:fs";
 import { ROOT } from "./lib/atlas-verify.mjs";
 
 export const BUDGETS = {
-  A: { "answers.now": 44, "answers.adds": 42, "answers.commercial": 43, lede: 32, "tag-97L": 20, "tag-KARINA": 20, "tag-95E": 21, "tag-LOWELL": 21, "atlas-value-97L": 71, "atlas-value-KARINA": 43, "atlas-value-95E": 37, "atlas-value-LOWELL": 34, "plate-note": 38, "refusal-note": 62 },
-  B: { "answers.now": 54, "answers.adds": 44, "answers.commercial": 54, lede: 49, "cell-rationale": 119, "reading-the-ledger": 129, "radius-sensitivity": 152, "seasonal-timing": 135, "analog-plate-note": 92, commercial: 323, hole: 157 },
-  B1: { "answers.now": 46, "answers.adds": 42, "answers.commercial": 48, lede: 45, "trigger-explainability": 85, "near-miss": 165, "basis-risk": 130, "how-used": 36 },
-  B2: { "answers.now": 43, "answers.adds": 40, "answers.commercial": 48, lede: 59, "geography-not-probability": 128, "exposure-map": 166, "frequency-bands": 92, "not-this": 66 },
-  C: { "answers.now": 49, "answers.adds": 44, "answers.commercial": 49, lede: 47, "live-vs-history": 100, rarity: 60, "land-rows": 80, "so-what": 37 },
-  D: { "answers.now": 63, "answers.adds": 50, "answers.commercial": 56, "one-sentence": 58, "users-can": 286, moat: 158, delivery: 66, pilot: 22, "sample-note": 101 },
+  A: { "answers.now": 44, "answers.adds": 30, "answers.commercial": 33, "lede": 34, "tag-97L": 22, "tag-KARINA": 21, "tag-95E": 22, "tag-LOWELL": 22, "atlas-value-97L": 37, "atlas-value-KARINA": 35, "atlas-value-95E": 35, "atlas-value-LOWELL": 27, "refusal-note": 51 },
+  B: { "answers.now": 74, "answers.adds": 45, "answers.commercial": 57, "lede": 46, "cell-rationale": 65, "reading-the-ledger": 49, "radius-sensitivity": 32, "seasonal-timing": 45, "analog-plate-note": 29, "commercial": 142, "hole": 89 },
+  B1: { "answers.now": 29, "answers.adds": 43, "answers.commercial": 30, "lede": 45, "trigger-explainability": 60, "near-miss": 81, "basis-risk": 83, "how-used": 13 },
+  B2: { "answers.now": 44, "answers.adds": 33, "answers.commercial": 23, "lede": 45, "geography-not-probability": 64, "exposure-map": 68, "frequency-bands": 36, "not-this": 60 },
+  C: { "answers.now": 49, "answers.adds": 45, "answers.commercial": 51, "lede": 68, "live-vs-history": 86, "land-rows": 39, "so-what": 36 },
+  D: { "answers.now": 81, "answers.adds": 52, "answers.commercial": 58, "one-sentence": 59, "users-can": 140, "moat": 91, "delivery": 41, "pilot": 23, "sample-note": 41 },
 };
+
+/* SLOTS NO LONGER RENDERED. The type-gate pass cut the blocks these fed; the copy stays in
+   copy.json so the cut is reversible, and it is listed here so an unused slot reads as retired
+   rather than as an unbudgeted surprise. scripts/lib/collateral-cuts.mjs records why. */
+export const RETIRED = {"A": ["plate-note"], "C": ["rarity"]};
 
 export const words = (html) => String(html || "").replace(/<[^>]+>/g, " ")
   .replace(/\s+/g, " ").trim().split(" ").filter(Boolean).length;
@@ -53,7 +58,9 @@ for (const [art, budget] of Object.entries(BUDGETS)) {
     if (w > cap) { artOver++; over++; lines.push(`    OVER  ${slot.padEnd(26)} ${w} / ${cap}`); }
   }
   for (const [slot] of got) {
-    if (!(slot in budget)) lines.push(`    extra slot "${slot}" (no budget set)`);
+    if (slot in budget) continue;
+    if ((RETIRED[art] || []).includes(slot)) lines.push(`    retired slot "${slot}" — block cut for the type gate`);
+    else lines.push(`    extra slot "${slot}" (no budget set)`);
   }
   const cap = Object.values(budget).reduce((a, b) => a + b, 0);
   console.log(`${artOver || missing ? "  FAIL " : "  ok   "} ${art} — ${total} words of ${cap} budgeted`

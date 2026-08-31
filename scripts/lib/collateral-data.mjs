@@ -22,6 +22,7 @@ import { openArchive, openLive } from "../../docs/storm-atlas/src/engine/node-io
 import { cohortResult, toQuery } from "../../docs/storm-atlas/src/engine/cohort.js";
 import { openQuestion } from "../../docs/storm-atlas/src/engine/cohort-language.js";
 import { decodeCoastlines } from "../../docs/storm-atlas/src/engine/coastlines.js";
+import { haversineKm } from "../../docs/storm-atlas/src/engine/geo.js";
 import { ROOT } from "./atlas-verify.mjs";
 
 export const SITE = "https://alecmessino.github.io/category-alpha/storm-atlas/";
@@ -146,6 +147,96 @@ export async function build() {
     return `${SITE}?${p.toString()}`;
   };
 
+  const liveStorms = live && live.artifact ? (live.artifact.storms || {}) : {};
+
+  /* ---- THE GENESIS DETERMINATION, RUN RATHER THAN ASSERTED --------------------------------
+   *
+   * NHC initiating advisories is not automatic OBSERVED GENESIS. The archive's own definition
+   * (scripts/genesis/build/genesis_events.py) is: the FIRST OBSERVED TRACK POINT whose status is
+   * tropical, where tropical means one of TROPICAL_STATUS in scripts/genesis/schema.py. DB, LO,
+   * EX, SD, SS, WV and the rest are explicitly not.
+   *
+   * That rule is applied here to the operational record, and then the SECOND question is asked,
+   * which is the one that decides whether a cohort may be keyed to it: does the engine ACCEPT
+   * the operational record as a genesis source? The operational layer answers that itself, in
+   * its own source note -- it "never enters" the archive and "no value in it is used to build a
+   * cohort, match an analog, compute a rate or an interval". So a first tropical fix in the
+   * b-deck is a live observation, not an archive genesis point, and the check below proves the
+   * consequence rather than trusting the prose: the storm is looked for in the pack.
+   */
+  const TROPICAL_STATUS = ["TD", "TS", "HU", "TY", "ST", "TC", "HR"];
+  const NONTROPICAL_STATUS = ["DB", "LO", "EX", "SD", "SS", "WV", "MD", "IN", "DS", "ET", "NR", "PT"];
+
+  function genesisDetermination(atcfId) {
+    const rec = liveStorms[atcfId];
+    if (!rec) {
+      return { atcf_id: atcfId, operational_record: false,
+        verdict: "NO OPERATIONAL RECORD", genesis_point: null };
+    }
+    const fixes = (rec.fixes || []).map((f) => ({ t: f.t, lat: f.lat, lon: f.lon, kt: f.kt,
+      mslp: f.mslp, stage: f.stage, tropical: TROPICAL_STATUS.includes(f.stage) }));
+    const firstTropical = fixes.find((f) => f.tropical) || null;
+
+    /* Is this storm in the archive the cohorts are drawn from? Asked of the pack, not assumed. */
+    let inArchive = false;
+    for (let i = 0; i < archive.nStorms; i++) {
+      if (archive.storms.str("atcf_id", i) === atcfId) { inArchive = true; break; }
+    }
+    return {
+      atcf_id: atcfId,
+      name: rec.name,
+      operational_record: true,
+      rule: "first OBSERVED track point with a tropical status; TROPICAL_STATUS = "
+        + TROPICAL_STATUS.join(", ") + "; explicitly non-tropical = " + NONTROPICAL_STATUS.join(", "),
+      rule_source: "scripts/genesis/build/genesis_events.py + scripts/genesis/schema.py",
+      fixes,
+      stages_present: [...new Set(fixes.map((f) => f.stage))],
+      first_tropical_fix_in_operational_record: firstTropical,
+      present_in_archive_pack: inArchive,
+      archive_pack_stamp: STAMP,
+      archive_built_utc: M.provenance.archive_built_utc,
+      /* THE VERDICT. Both conditions must hold for an observed genesis point to exist for
+         cohort purposes: a qualifying tropical fix, AND a source the engine accepts. */
+      engine_accepts_operational_as_genesis: false,
+      engine_accepts_reason: (live && live.artifact && live.artifact.source
+        && live.artifact.source.note) || "operational layer source note unavailable",
+      verdict: inArchive
+        ? "OBSERVED GENESIS AVAILABLE FROM THE ARCHIVE"
+        : "NO OBSERVED GENESIS POINT — the operational record is not a cohort source and this "
+          + "storm is absent from the archive pack",
+      cohort_keyed_to_it: false,
+    };
+  }
+
+  const genesis_determinations = ["AL052026", "EP112026", "EP122026"]
+    .map(genesisDetermination);
+
+  /* WHAT KIND OF POINT THIS COHORT IS KEYED TO, and on whose authority.
+     Three kinds exist in this package and only one of them would be the archive's own:
+       PRE-GENESIS REFERENCE CELL   a declared cell for a system that has not formed
+       DECLARED GENESIS POINT       an operator-declared formation point, not an archive row
+       ARCHIVE GENESIS POINT        genesis_events.genesis_lat/lon for a storm IN the pack
+     No live system in this package is the third kind: the pack holds none of them. The basis is
+     attached to each system so a reader never has to infer it from a label. */
+  function basisFor(atcfId, lat, lon) {
+    const g = genesis_determinations.find((x) => x.atcf_id === atcfId);
+    if (!g || !g.first_tropical_fix_in_operational_record) {
+      return { atcf_id: atcfId || null, archive_genesis: false,
+        operational_first_tropical_fix: null, separation_km: null,
+        note: "No operational record; the point is a declared cell." };
+    }
+    const f = g.first_tropical_fix_in_operational_record;
+    return {
+      atcf_id: atcfId,
+      archive_genesis: g.present_in_archive_pack,
+      operational_first_tropical_fix: f,
+      separation_km: Math.round(haversineKm(lat, lon, f.lat, f.lon)),
+      note: "The archive pack holds no genesis row for this storm, so the point this cohort is "
+        + "keyed to is declared, not observed by the archive. The operational record's first "
+        + "tropical fix is shown for comparison and is not a cohort source.",
+    };
+  }
+
   function run(id, meta, spec) {
     const r = cohortResult(archive, spec, { regions: CONTRACT_REGIONS });
     const intensity = LADDER.map(([k, label]) => rowOf(label, k, r.intensity[k], null));
@@ -186,6 +277,9 @@ export async function build() {
         storm_id: c.storm_id, name: c.name || "UNNAMED", season: c.season,
         peak_vmax_kt: c.peak_vmax_kt, points: trackOf(archive, c.row),
       })),
+      genesis_basis: meta.atcf_id !== undefined
+        ? basisFor(meta.atcf_id, meta.coordinates_queried.lat, meta.coordinates_queried.lon)
+        : null,
       cite: cite(spec, r),
       replay_url: url(spec),
     };
@@ -193,43 +287,43 @@ export async function build() {
 
   const systems = [
     run("97L", {
-      name: "Invest 97L", basin: "NA", basin_label: "NORTH ATLANTIC",
+      name: "97L / TD Five", basin: "NA", basin_label: "NORTH ATLANTIC", atcf_id: "AL052026",
       point_type: "PRE-GENESIS REFERENCE CELL",
       coordinates_queried: { lat: 28.0, lon: -88.7 },
       radius_km: 250, season_floor: 1971, month_window: "August–September",
     }, { where: { lat: 28.0, lon: -88.7, radiusKm: 250 }, seasonFrom: 1971, months: [8, 9], basins: ["NA"] }),
 
     run("97L-r150", {
-      name: "Invest 97L — 150 km variant", basin: "NA", basin_label: "NORTH ATLANTIC",
+      name: "97L cell — 150 km variant", basin: "NA", basin_label: "NORTH ATLANTIC", atcf_id: "AL052026",
       point_type: "PRE-GENESIS REFERENCE CELL",
       coordinates_queried: { lat: 28.0, lon: -88.7 },
       radius_km: 150, season_floor: 1971, month_window: "August–September",
     }, { where: { lat: 28.0, lon: -88.7, radiusKm: 150 }, seasonFrom: 1971, months: [8, 9], basins: ["NA"] }),
 
     run("97L-allmonths", {
-      name: "Invest 97L — season-wide variant", basin: "NA", basin_label: "NORTH ATLANTIC",
+      name: "97L cell — season-wide variant", basin: "NA", basin_label: "NORTH ATLANTIC", atcf_id: "AL052026",
       point_type: "PRE-GENESIS REFERENCE CELL",
       coordinates_queried: { lat: 28.0, lon: -88.7 },
       radius_km: 250, season_floor: 1971, month_window: "all months",
     }, { where: { lat: 28.0, lon: -88.7, radiusKm: 250 }, seasonFrom: 1971, basins: ["NA"] }),
 
     run("KARINA", {
-      name: "Hurricane Karina", basin: "EP", basin_label: "EAST PACIFIC",
-      point_type: "OBSERVED GENESIS",
+      name: "Hurricane Karina", basin: "EP", basin_label: "EAST PACIFIC", atcf_id: "EP112026",
+      point_type: "DECLARED GENESIS POINT",
       coordinates_queried: { lat: 13.2, lon: -115.0 },
       radius_km: 250, season_floor: 1971, month_window: "August–September",
     }, { where: { lat: 13.2, lon: -115.0, radiusKm: 250 }, seasonFrom: 1971, months: [8, 9], basins: ["EP"] }),
 
     run("95E", {
-      name: "Invest 95E", basin: "EP", basin_label: "EAST PACIFIC",
+      name: "Invest 95E", basin: "EP", basin_label: "EAST PACIFIC", atcf_id: null,
       point_type: "PRE-GENESIS REFERENCE CELL",
       coordinates_queried: { lat: 12.0, lon: -107.5 },
       radius_km: 250, season_floor: 1971, month_window: "August–September",
     }, { where: { lat: 12.0, lon: -107.5, radiusKm: 250 }, seasonFrom: 1971, months: [8, 9], basins: ["EP"] }),
 
     run("LOWELL", {
-      name: "Tropical Storm Lowell", basin: "EP", basin_label: "EAST PACIFIC",
-      point_type: "OBSERVED GENESIS",
+      name: "Tropical Storm Lowell", basin: "EP", basin_label: "EAST PACIFIC", atcf_id: "EP122026",
+      point_type: "DECLARED GENESIS POINT",
       coordinates_queried: { lat: 11.3, lon: -133.8 },
       radius_km: 250, season_floor: 1971, month_window: "August–September",
     }, { where: { lat: 11.3, lon: -133.8, radiusKm: 250 }, seasonFrom: 1971, months: [8, 9], basins: ["EP"] }),
@@ -240,7 +334,6 @@ export async function build() {
   /* The operational layer, verbatim. This is what the ARCHIVE holds about a live storm; it is
      not the same thing as the desk's own live-status line, and where the two differ the
      collateral prints both with their instants rather than reconciling them. */
-  const liveStorms = live && live.artifact ? (live.artifact.storms || {}) : {};
   const operational = {
     available: !!(live && live.ok),
     schema: live && live.artifact ? live.artifact.schema : null,
@@ -269,8 +362,10 @@ export async function build() {
     rings: (o.rings || []).map((r) => r.map(([la, lo]) => [lo, la])),
   }));
 
+
   return {
     schema: "storm-atlas-collateral-manifest/1",
+    genesis_determinations,
     pack: {
       methodology_version: METHOD,
       pack_format: M.pack_format,
@@ -287,6 +382,17 @@ export async function build() {
     systems, byId,
     operational,
     outlook,
+    /* THE DESK LINE, TRACEABLE. NHC's own public-advisory values for each active storm, carried
+       verbatim so no live figure printed on a page is hand-typed. This is operational status,
+       not an Atlas result: nothing here builds a cohort, matches an analog or computes a rate. */
+    nhc_advisories: (latest.storms || []).map((s) => ({
+      atcf_id: s.id, name: s.name, cls: s.cls, cls_label: s.full_cls,
+      lat: s.center ? s.center[0] : null, lon: s.center ? s.center[1] : null,
+      wind_kt: s.wind, mslp_mb: s.pressure, movement: s.movement,
+      advisory: s.advNum, advisory_time_utc: s.advTimeZ,
+      watches_highest: s.watches ? s.watches.highest : null,
+      watches_in_effect: s.watches ? (s.watches.inEffect || []) : [],
+    })),
     feeds_generated_at: latest.generatedAt,
     coast,
     archive,

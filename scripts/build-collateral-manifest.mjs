@@ -48,6 +48,34 @@ lines.push(`STORM ATLAS COLLATERAL — SOURCE MANIFEST`);
 lines.push(`METHODOLOGY ${D.pack.methodology_version} · PACK ${D.pack.archive_stamp} · ARCHIVE BUILT ${D.pack.archive_built_utc}`);
 lines.push(`ARCHIVE ${D.pack.counts.storms} storms / ${D.pack.counts.track_points} track points / ${D.pack.counts.landfalls} landfall rows`);
 lines.push("");
+
+/* THE GENESIS DETERMINATION, FIRST. Every point type printed downstream depends on it, so it is
+   settled here, by running the archive's own rule against the operational record, before a single
+   cohort is described. */
+lines.push(`## GENESIS DETERMINATION — the archive's own rule, applied to each live system`);
+lines.push(`   RULE            ${D.genesis_determinations[0] ? D.genesis_determinations[0].rule : "—"}`);
+lines.push(`   RULE SOURCE     ${D.genesis_determinations[0] ? D.genesis_determinations[0].rule_source : "—"}`);
+lines.push(`   ENGINE ACCEPTS THE OPERATIONAL LAYER AS A GENESIS SOURCE: no`);
+for (const g of D.genesis_determinations) {
+  lines.push(`   ${g.atcf_id} ${g.name || ""}`);
+  if (!g.operational_record) { lines.push(`     ${g.verdict}`); continue; }
+  const f = g.first_tropical_fix_in_operational_record;
+  lines.push(`     stages in operational record: ${g.stages_present.join(", ")}`);
+  lines.push(`     first tropical fix (operational, NOT a cohort source): ${f
+    ? `${f.t} ${f.lat}N ${Math.abs(f.lon)}W ${f.stage} ${f.kt} kt ${f.mslp === null ? "—" : f.mslp + " mb"}`
+    : "none — no tropical stage in the record"}`);
+  lines.push(`     present in archive pack ${g.archive_pack_stamp}: ${g.present_in_archive_pack ? "yes" : "no"}`);
+  lines.push(`     VERDICT: ${g.verdict}`);
+}
+lines.push("");
+lines.push(`## NHC PUBLIC ADVISORIES (live desk line, ingested ${D.feeds_generated_at})`);
+for (const a of D.nhc_advisories) {
+  lines.push(`   ${a.atcf_id} ${a.name} — ${a.cls_label}, ${a.lat}N ${Math.abs(a.lon)}W, `
+    + `${a.wind_kt} kt / ${a.mslp_mb} mb, ${a.movement}, advisory ${a.advisory} at ${a.advisory_time_utc}`
+    + (a.watches_highest ? `; highest watch/warning ${a.watches_highest}` : ""));
+  for (const w of a.watches_in_effect) lines.push(`     ${w.kind}: ${w.areas.join("; ")}`);
+}
+lines.push("");
 for (const s of D.systems) {
   lines.push(`## ${s.id} — ${s.name}`);
   lines.push(`   POINT TYPE      ${s.point_type}`);
