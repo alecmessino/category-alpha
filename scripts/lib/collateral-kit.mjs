@@ -78,7 +78,9 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
   text-transform:uppercase;margin:0;color:var(--ink-900)}
 .sec-hd .n{font-family:var(--font-mono);font-size:7.4px;color:var(--ink-400);letter-spacing:1px}
 .sec-hd .note{font-size:8px;color:var(--ink-600);margin-left:auto;font-style:italic}
-.lede{font-size:8.2px;line-height:1.4;color:var(--ink-700);margin:0 0 var(--sp-3)}
+.lede{font-size:7.6px;line-height:1.32;color:var(--ink-700);margin:0 0 var(--sp-2)}
+.lede p{margin:0 0 var(--sp-2)}
+.lede p:last-child{margin-bottom:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4)}
@@ -139,16 +141,16 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .chip.ok{color:var(--green-600);border-color:var(--green-600)}
 
 /* ---- boxes ----------------------------------------------------------------------- */
-.box{border:1px solid var(--line-300);border-radius:5px;padding:var(--sp-4);background:var(--white)}
+.box{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--white)}
 .box.sunken{background:var(--paper-50)}
 .box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
 .box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
 .box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
 .box h3{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1px;text-transform:uppercase;
   margin:0 0 var(--sp-2);color:var(--ink-900)}
-.box p{margin:0 0 var(--sp-2);font-size:7.6px;line-height:1.38;color:var(--ink-700)}
+.box p{margin:0 0 var(--sp-2);font-size:7.3px;line-height:1.3;color:var(--ink-700)}
 .box p:last-child{margin-bottom:0}
-.box ul{margin:0;padding-left:11px;font-size:7.6px;line-height:1.32;color:var(--ink-700)}
+.box ul{margin:0;padding-left:10px;font-size:7.3px;line-height:1.28;color:var(--ink-700)}
 .box li{margin-bottom:1.5px}
 .box li:last-child{margin-bottom:0}
 .box li b{color:var(--ink-900)}
@@ -224,7 +226,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .rail>div:last-child{border-right:none;padding-right:0}
 .rail .q{font-family:var(--font-mono);font-size:6.1px;letter-spacing:1px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:3px}
-.rail .a{font-size:7.3px;line-height:1.34;color:var(--ink-900)}
+.rail .a{font-size:7.1px;line-height:1.26;color:var(--ink-900)}
 .rail .a b{font-weight:600}
 
 /* ---- live strip -------------------------------------------------------------------- */
@@ -283,11 +285,11 @@ table.ledger.sysgrid{table-layout:fixed}
 .cardrow .card dl{font-size:5.6px}
 .cardrow .card .lf{font-size:5.6px}
 .cardrow .card .yr{font-size:5.6px}
-.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.3;
-  font-family:var(--font-sans);font-size:7.1px;padding:2.5px var(--sp-3)}
+.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.26;
+  font-family:var(--font-sans);font-size:7px;padding:1.5px var(--sp-3)}
 .cmptable td.q{font-family:var(--font-mono);font-size:6.5px;color:var(--ink-900);font-weight:500}
 .cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
-.cmptable.compact td{font-size:6.5px;padding:2px var(--sp-2)}
+.cmptable.compact td{font-size:6.6px;padding:1.2px var(--sp-2);line-height:1.24}
 .cmptable.compact td.q{font-size:6px}
 .platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
 .platecol .sec{margin-top:0}
@@ -295,6 +297,9 @@ table.ledger.sysgrid{table-layout:fixed}
 .grid3.tight{gap:var(--sp-5);align-items:start}
 .grid4.tight{gap:var(--sp-4);align-items:start}
 .cardsplit{display:grid;grid-template-columns:1.18fr 1fr;gap:var(--sp-6);align-items:start}
+.cardcmp{display:grid;grid-template-columns:1fr 1.15fr;gap:var(--sp-6);align-items:start}
+.cardcmp .sec{margin-top:0}
+.cardcmp .grid4{gap:var(--sp-2)}
 .cardsplit .sec{margin-top:0}
 .cardsplit .grid4{gap:var(--sp-2)}
 /* The manifest is a reference document, not a one-page sheet: it may run as long as the
@@ -305,6 +310,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .fnrow{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5)}
 .fnrow .fn{margin-top:var(--sp-2)}
 .citepair{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
+.citecmp{display:grid;grid-template-columns:1.55fr 1fr;gap:var(--sp-6);align-items:start}
+.citecmp .cite:first-child{margin-top:0}
 .citepair .cite{margin-top:var(--sp-3)}
 .qline{margin-top:var(--sp-3);padding:var(--sp-3) var(--sp-4)}
 .qline p{font-size:8px;line-height:1.35}
@@ -336,15 +343,16 @@ table.ledger.sysgrid{table-layout:fixed}
 .stack{display:flex;flex-direction:column;gap:var(--sp-4)}
 
 /* ---- footer ----------------------------------------------------------------------- */
-.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-3);
-  display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-2)}
+.ft-disclaim{margin:0 0 var(--sp-2)}
+.ft-row{display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
 .ft .l{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);letter-spacing:.5px;
   line-height:1.5;max-width:70%}
 .ft .l b{color:var(--ink-900)}
 .ft .r{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-400);letter-spacing:.9px;
   text-align:right;white-space:nowrap;text-transform:uppercase}
-.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.4;
-  margin-top:var(--sp-2)}
+.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.32;
+  margin-top:var(--sp-1)}
 .fn b{color:var(--ink-900)}
 `;
 
@@ -474,7 +482,7 @@ export function ledger(groups, { caption, showBar = true, compact = false } = {}
  */
 export function ledgerPair(sys, { compact = true } = {}) {
   return `<div class="ledgerpair">
-    <div>${ledger([{ label: "INTENSITY THRESHOLDS — genesis-conditioned, assume formation", rows: sys.intensity_rows }],
+    <div>${ledger([{ label: "INTENSITY THRESHOLDS — genesis-conditioned · reached TD is definitional", rows: sys.intensity_rows }],
       { showBar: false, compact })}</div>
     <div>${ledger([{ label: "LANDFALL CONTRACT ROWS — the regions this archive scores", rows: sys.landfall_rows }],
       { showBar: false, compact })}</div>
@@ -652,8 +660,15 @@ export function repRule(sys) {
     + `of the same coast, collapsed to the strongest.</p>`;
 }
 
-export function footer({ left, right }) {
-  return `<footer class="ft"><div class="l">${left}</div><div class="r">${right}</div></footer>`;
+/* THE DISCLAIMER LIVES IN THE FOOTER.
+   It was a block of its own, which cost every sheet 25 px to say something that belongs with the
+   provenance rather than above it. It is still on every page, still in full, still before the
+   pack stamps a reader would check it against. */
+export function footer({ left, right, disclaimer = true }) {
+  return `<footer class="ft">
+    ${disclaimer ? `<p class="disclaim ft-disclaim">${esc(DISCLAIMER)}</p>` : ""}
+    <div class="ft-row"><div class="l">${left}</div><div class="r">${right}</div></div>
+  </footer>`;
 }
 
 export function disclaimerLine() {

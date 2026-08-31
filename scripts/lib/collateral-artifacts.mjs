@@ -135,7 +135,7 @@ function questionBlock(sys, { conditional = false } = {}) {
 }
 
 function groupsFor(sys, { landfall = true } = {}) {
-  const g = [{ label: "INTENSITY THRESHOLDS — genesis-conditioned, assume formation", rows: sys.intensity_rows }];
+  const g = [{ label: "INTENSITY THRESHOLDS — genesis-conditioned · reached TD is definitional", rows: sys.intensity_rows }];
   if (landfall) g.push({ label: "LANDFALL CONTRACT ROWS — the regions this archive actually scores", rows: sys.landfall_rows });
   return g;
 }
@@ -289,7 +289,6 @@ ${comparisonStrip({ compact: true })}
 </section>
 
 <div class="spacer"></div>
-${disclaimerLine()}
 ${packFoot(D)}
 </div>`;
   return page({ title: "Storm Atlas — Active Systems Overview", body });
@@ -362,7 +361,6 @@ ${sensRow(sAll, "250 km · all months · floor 1971")}
 </section>
 
 <div class="spacer"></div>
-${disclaimerLine()}
 ${packFoot(D)}
 </div>`;
 
@@ -417,7 +415,6 @@ ${comparisonStrip({ compact: true })}
 </section>
 
 <div class="spacer"></div>
-${disclaimerLine()}
 ${packFoot(D)}
 </div>`;
 
@@ -461,13 +458,12 @@ ${answersRail(C.answers.now || "", C.answers.adds || "", C.answers.commercial ||
 
 <section class="sec">${sectionHead("01", "Contract-row frequencies", headline)}
 ${ledgerPair(s)}
-<div class="citepair">${citeBlock(s)}${citeBlock(s150, { label: "CITE THE REFUSAL — 150 KM VARIANT" })}</div>
 </section>
 
 <section class="sec">${sectionHead("02", "Trigger explainability", "and the refusal a counterparty can check")}
-<div class="grid4 tight">
-  <div class="box"><h3>WHY A REPLAYABLE COHORT IS THE ARTEFACT</h3>${C.get("trigger-explainability")}</div>
-  <div class="box"><h3>WHERE THIS SITS — RESEARCH, NOT LIVE PRICING</h3>${C.get("how-used")}</div>
+<div class="grid3 tight">
+  <div class="box"><h3>WHY A REPLAYABLE COHORT IS THE ARTEFACT</h3>${C.get("trigger-explainability")}
+    <h3 style="margin-top:5px">WHERE THIS SITS — RESEARCH, NOT LIVE PRICING</h3>${C.get("how-used")}</div>
   <div class="box refusal"><h3>THE REFUSAL A COUNTERPARTY CAN CHECK</h3>
     <p>Tighten the same question from 250 km to <b>150 km</b> and the cohort falls to
     <b>N = ${s150.cohort.n_cases}</b>. Every rate then <b>REFUSES</b>: the engine returns
@@ -486,12 +482,15 @@ ${repRule(s)}
 <p class="fn">${C.get("near-miss").replace(/^<p>|<\/p>$/g, "")}</p>
 </section>
 
-<section class="sec">${sectionHead("05", "What Storm Atlas adds", "and where it is deliberately silent")}
-${comparisonStrip({ compact: true })}
+<section class="sec">${sectionHead("04", "What Storm Atlas adds, and the two cohorts to cite",
+    "the scored one, and the one that refuses")}
+<div class="citecmp">
+  ${comparisonStrip({ compact: true })}
+  <div>${citeBlock(s)}${citeBlock(s150, { label: "CITE THE REFUSAL — 150 KM VARIANT" })}</div>
+</div>
 </section>
 
 <div class="spacer"></div>
-${disclaimerLine()}
 ${packFoot(D)}
 </div>`;
   return page({ title: "Storm Atlas — 97L for Reinsurance / ILS / Parametric", body });
@@ -569,7 +568,6 @@ ${comparisonStrip({ compact: true })}
 </section>
 
 <div class="spacer"></div>
-${disclaimerLine()}
 ${packFoot(D)}
 </div>`;
   return page({ title: "Storm Atlas — 97L for Energy / Weather Trading", body });
@@ -608,9 +606,11 @@ export function artifactC(D, copy) {
   const body = `<div class="sheet">
 ${masthead({
     doc: "ARTIFACT C · MAJOR-HURRICANE ANALOG BRIEF", sheet: "1 OF 1",
-    title: "Hurricane Karina: an observed genesis point, and a live Category 4 beside its cohort's threshold frequencies",
-    sub: `<b>THE PUBLISHED QUESTION —</b> ${esc(s.question)} `
-      + `<b>${esc(s.cohort.cohort_status)}</b>, N = ${s.cohort.n_cases}, ESS ${s.cohort.effective_sample_size}, min sample ${s.cohort.min_sample}.`,
+    title: "Hurricane Karina: a live Category 4 beside its own genesis cohort",
+    sub: `Genesis-conditioned outcomes for the cell this storm actually formed in — `
+      + `<b>${esc(s.cohort.cohort_status)}</b>, N = ${s.cohort.n_cases}, ESS `
+      + `${s.cohort.effective_sample_size}, min sample ${s.cohort.min_sample}. `
+      + `The question in full, and the URL that reopens it, are in the cite block.`,
     rule: [["LIVE STATUS", LIVE_STAMP], ["POINT TYPE", "OBSERVED GENESIS"],
       ["GENESIS", "13.2°N 115.0°W · r 250 km · Aug–Sep · floor 1971"],
       ["METHODOLOGY", D.pack.methodology_version], ["PACK", D.pack.archive_stamp]],
@@ -634,7 +634,7 @@ own source note says so. The two live readings carry their own instants and are 
     svg: cp.svg,
     legendItems: [LEGEND.cohortTrack, LEGEND.majorTrack, LEGEND.genesisCell, LEGEND.liveTrack],
   })}
-  <div>${ledger([{ label: "INTENSITY THRESHOLDS — assume formation", rows: s.intensity_rows }],
+  <div>${ledger([{ label: "INTENSITY — assume formation · TD is definitional", rows: s.intensity_rows }],
     { showBar: false, compact: true })}</div>
   <div>${ledger([{ label: "LANDFALL CONTRACT ROWS", rows: s.landfall_rows }],
     { showBar: false, compact: true })}</div>
@@ -651,22 +651,26 @@ ${repCardRow(s)}
 ${repRule(s)}
 </section>
 
-<div class="grid4 tight">
-  <div class="box"><h3>THE LIVE OBSERVATION BESIDE THE HISTORICAL FREQUENCIES</h3>${C.get("live-vs-history")}</div>
-  <div class="box"><h3>WHAT RARITY THE ARCHIVE SUPPORTS</h3>${C.get("rarity")}</div>
-  <div class="box"><h3>THE LAND ROWS, PUBLISHED ANYWAY</h3>${C.get("land-rows")}</div>
-  <div class="box commercial"><h3>SO WHAT — RESEARCH USE, NOT THREAT MONITORING</h3>${C.get("so-what")}</div>
+<section class="sec">${sectionHead("04", "Reading the live storm against its cohort, and the refusals",
+    "labelled interpretation · and the archive's own refusal strings, verbatim")}
+<div class="grid3 tight">
+  <div>
+    <div class="box"><h3>THE LIVE OBSERVATION BESIDE THE HISTORICAL FREQUENCIES</h3>${C.get("live-vs-history")}</div>
+    <div class="box" style="margin-top:5px"><h3>WHAT RARITY THE ARCHIVE SUPPORTS</h3>${C.get("rarity")}</div>
+  </div>
+  <div>
+    <div class="box"><h3>THE LAND ROWS, PUBLISHED ANYWAY</h3>${C.get("land-rows")}</div>
+    <div class="box commercial" style="margin-top:5px"><h3>SO WHAT — RESEARCH USE, NOT THREAT MONITORING</h3>${C.get("so-what")}</div>
+  </div>
+  <div>${unscoreableNote(s)}${gapsBlock(s)}</div>
 </div>
+</section>
 
-<section class="sec">${sectionHead("05", "The refusals on this cohort, and what Storm Atlas adds",
-    "the archive's own strings, verbatim · and where the instrument is deliberately silent")}
-${unscoreableNote(s)}
-${gapsBlock(s)}
+<section class="sec">${sectionHead("05", "What Storm Atlas adds", "and where it is deliberately silent")}
 ${comparisonStrip({ compact: true })}
 </section>
 
 <div class="spacer"></div>
-${disclaimerLine()}
 ${packFoot(D)}
 </div>`;
   return page({ title: "Storm Atlas — Karina Major-Hurricane Analog Brief", body });
@@ -733,7 +737,7 @@ ${colophon}
 </section>
 
 <section class="sec">${sectionHead("03", "Two worked samples", "97L and Karina · every figure replayable")}
-<p class="fn">${C.get("sample-note").replace(/^<p>|<\/p>$/g, "")}</p>
+<div class="lede">${C.get("sample-note")}</div>
 <div class="grid2">
 ${sample(g, [["ts", "reached TS"], ["cat1", "reached Cat 1"], ["cat3", "reached Cat 3"],
     ["conus:any", "CONUS — any"], ["conus:hurricane", "CONUS — ≥64 kt"],
@@ -766,7 +770,6 @@ ${comparisonStrip({ compact: true })}
 </section>
 
 <div class="spacer"></div>
-${disclaimerLine()}
 ${packFoot(D)}
 </div>`;
   return page({ title: "Storm Atlas — Tear Sheet", body });
@@ -887,12 +890,12 @@ export function sourceManifestDoc(D) {
       <td>${esc({ "97L": "A, B, B1, B2, D", "97L-r150": "B, B1, D", "97L-allmonths": "B",
       KARINA: "A, C, D", "95E": "A", LOWELL: "A, D" }[sy.id] || "—")}</td></tr>`).join("")}
     </tbody></table></section>
-    <div class="spacer"></div>${disclaimerLine()}${packFoot(D)}</div>`);
+    <div class="spacer"></div>${packFoot(D)}</div>`);
 
   perPage.forEach(([a, b], i) => {
     sheets.push(`<div class="sheet manifest">${head(i + 2, total)}
       ${D.systems.slice(a, b).map((sy, j) => cohortBlock(sy, a + j + 1)).join("")}
-      <div class="spacer"></div>${disclaimerLine()}${packFoot(D)}</div>`);
+      <div class="spacer"></div>${packFoot(D)}</div>`);
   });
 
   return page({ title: "Storm Atlas collateral — source manifest", body: sheets.join("\n") });

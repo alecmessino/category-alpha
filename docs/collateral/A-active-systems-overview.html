@@ -58,7 +58,9 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
   text-transform:uppercase;margin:0;color:var(--ink-900)}
 .sec-hd .n{font-family:var(--font-mono);font-size:7.4px;color:var(--ink-400);letter-spacing:1px}
 .sec-hd .note{font-size:8px;color:var(--ink-600);margin-left:auto;font-style:italic}
-.lede{font-size:8.2px;line-height:1.4;color:var(--ink-700);margin:0 0 var(--sp-3)}
+.lede{font-size:7.6px;line-height:1.32;color:var(--ink-700);margin:0 0 var(--sp-2)}
+.lede p{margin:0 0 var(--sp-2)}
+.lede p:last-child{margin-bottom:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4)}
@@ -119,16 +121,16 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .chip.ok{color:var(--green-600);border-color:var(--green-600)}
 
 /* ---- boxes ----------------------------------------------------------------------- */
-.box{border:1px solid var(--line-300);border-radius:5px;padding:var(--sp-4);background:var(--white)}
+.box{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--white)}
 .box.sunken{background:var(--paper-50)}
 .box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
 .box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
 .box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
 .box h3{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1px;text-transform:uppercase;
   margin:0 0 var(--sp-2);color:var(--ink-900)}
-.box p{margin:0 0 var(--sp-2);font-size:7.6px;line-height:1.38;color:var(--ink-700)}
+.box p{margin:0 0 var(--sp-2);font-size:7.3px;line-height:1.3;color:var(--ink-700)}
 .box p:last-child{margin-bottom:0}
-.box ul{margin:0;padding-left:11px;font-size:7.6px;line-height:1.32;color:var(--ink-700)}
+.box ul{margin:0;padding-left:10px;font-size:7.3px;line-height:1.28;color:var(--ink-700)}
 .box li{margin-bottom:1.5px}
 .box li:last-child{margin-bottom:0}
 .box li b{color:var(--ink-900)}
@@ -204,7 +206,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .rail>div:last-child{border-right:none;padding-right:0}
 .rail .q{font-family:var(--font-mono);font-size:6.1px;letter-spacing:1px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:3px}
-.rail .a{font-size:7.3px;line-height:1.34;color:var(--ink-900)}
+.rail .a{font-size:7.1px;line-height:1.26;color:var(--ink-900)}
 .rail .a b{font-weight:600}
 
 /* ---- live strip -------------------------------------------------------------------- */
@@ -263,11 +265,11 @@ table.ledger.sysgrid{table-layout:fixed}
 .cardrow .card dl{font-size:5.6px}
 .cardrow .card .lf{font-size:5.6px}
 .cardrow .card .yr{font-size:5.6px}
-.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.3;
-  font-family:var(--font-sans);font-size:7.1px;padding:2.5px var(--sp-3)}
+.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.26;
+  font-family:var(--font-sans);font-size:7px;padding:1.5px var(--sp-3)}
 .cmptable td.q{font-family:var(--font-mono);font-size:6.5px;color:var(--ink-900);font-weight:500}
 .cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
-.cmptable.compact td{font-size:6.5px;padding:2px var(--sp-2)}
+.cmptable.compact td{font-size:6.6px;padding:1.2px var(--sp-2);line-height:1.24}
 .cmptable.compact td.q{font-size:6px}
 .platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
 .platecol .sec{margin-top:0}
@@ -275,6 +277,9 @@ table.ledger.sysgrid{table-layout:fixed}
 .grid3.tight{gap:var(--sp-5);align-items:start}
 .grid4.tight{gap:var(--sp-4);align-items:start}
 .cardsplit{display:grid;grid-template-columns:1.18fr 1fr;gap:var(--sp-6);align-items:start}
+.cardcmp{display:grid;grid-template-columns:1fr 1.15fr;gap:var(--sp-6);align-items:start}
+.cardcmp .sec{margin-top:0}
+.cardcmp .grid4{gap:var(--sp-2)}
 .cardsplit .sec{margin-top:0}
 .cardsplit .grid4{gap:var(--sp-2)}
 /* The manifest is a reference document, not a one-page sheet: it may run as long as the
@@ -285,6 +290,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .fnrow{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5)}
 .fnrow .fn{margin-top:var(--sp-2)}
 .citepair{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
+.citecmp{display:grid;grid-template-columns:1.55fr 1fr;gap:var(--sp-6);align-items:start}
+.citecmp .cite:first-child{margin-top:0}
 .citepair .cite{margin-top:var(--sp-3)}
 .qline{margin-top:var(--sp-3);padding:var(--sp-3) var(--sp-4)}
 .qline p{font-size:8px;line-height:1.35}
@@ -316,15 +323,16 @@ table.ledger.sysgrid{table-layout:fixed}
 .stack{display:flex;flex-direction:column;gap:var(--sp-4)}
 
 /* ---- footer ----------------------------------------------------------------------- */
-.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-3);
-  display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-2)}
+.ft-disclaim{margin:0 0 var(--sp-2)}
+.ft-row{display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
 .ft .l{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);letter-spacing:.5px;
   line-height:1.5;max-width:70%}
 .ft .l b{color:var(--ink-900)}
 .ft .r{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-400);letter-spacing:.9px;
   text-align:right;white-space:nowrap;text-transform:uppercase}
-.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.4;
-  margin-top:var(--sp-2)}
+.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.32;
+  margin-top:var(--sp-1)}
 .fn b{color:var(--ink-900)}
 </style>
 </head><body>
@@ -335,14 +343,14 @@ table.ledger.sysgrid{table-layout:fixed}
     <div class="mh-doc">ARTIFACT A · ACTIVE SYSTEMS OVERVIEW &nbsp;·&nbsp; 1 OF 1</div>
   </div>
   <h1 class="mh-title">Four live systems, four declared points, and exactly what the historical record supports from each</h1>
-  <p class="mh-sub">Four active systems, four declared points: 97L and 95E as pre-genesis reference cells, Karina and Lowell as observed genesis points. Three return a cohort deep enough to score. The fourth, Lowell, refuses every rate and shows its six storms anyway. Rates are genesis-conditioned and assume formation; scope and conditioning are stated in the footer and apply to every row below.</p>
+  <p class="mh-sub">Four active systems, four declared points: 97L and 95E as pre-genesis reference cells, Karina and Lowell as observed genesis points. Three return a cohort</p>
   <div class="mh-rule"><span class="kv">LIVE STATUS <b>31 AUG 2026 · 08:25 CT / 13:25 UTC</b></span><span class="kv">CAMERA <b>NORTH ATLANTIC + EAST PACIFIC</b></span><span class="kv">METHODOLOGY <b>1.1.0</b></span><span class="kv">PACK <b>134661125525f27a</b></span></div>
 </header>
 
 <div class="rail">
-  <div><span class="q">01 · What is happening now?</span><div class="a"><b>LIVE STATUS AS OF 31 AUG 2026, 08:25 CT / 13:25 UTC.</b> Four systems, positions and feeds carried in the ledger: Invest 97L, a north-central Gulf disturbance at 27.4N 90.7W, NHC graphical outlook 70% / 70% (48h / 7d) issued 200 AM EDT Mon 31 Aug 2026; Hurricane Karina, Cat 4 at 17.2N 124.4W, 125 kt / 942 mb; Invest 95E, a broad disturbance WSW of Acapulco, NHC outlook 90% / 90% issued 1100 PM PDT Sun 30 Aug 2026; Tropical Storm Lowell at 13.0N 144W, 50 kt. The 97L live centre is not the query cell — it sits west and south of the declared pre-genesis reference cell at 28.0N 88.7W, and the cell is where the Storm Atlas query is run. The desk line is not the archive's record either: atlas-live-v1, generated 2026-08-31T07:10Z, holds Karina's 06:00Z b-deck fix at 17.2N 124.0W 120 kt 945 mb and Lowell's at 13.0N 143.7W 50 kt 997 mb, and holds nothing for 97L or 95E because both are pre-genesis; both instants are printed, neither is reconciled to the other, and no rate on this page is computed from either.</div></div>
-  <div><span class="q">02 · What does Storm Atlas add?</span><div class="a">Historical tracks near a point are already public — NOAA will draw them from the same IBTrACS this archive is built on. What is not public is the answer returned as a scored contract: a declared cell and radius, an exact n/N, the 95% Wilson interval the engine returned, the named cohort, a citation string and a replayable URL. Where the record is short the row comes back stamped — OUT OF SCOPE, BASE RATE ONLY, or RATE REFUSED — so the refusal arrives as an output rather than as a gap.</div></div>
-  <div><span class="q">03 · How does this help price, hedge, structure, explain, distribute?</span><div class="a">For 97L's declared cell, conditioned on formation having already occurred and not combinable with the 70% development outlook — landfall is counted jointly, never as a product of marginals: CONUS — any is 10 of 12 (83.3%, 95% Wilson 55-95%), a forty-point interval around something a Gulf underwriter already assumes; the row carrying information is CONUS ≥64 kt, 1 of 12 (8.3%, 95% Wilson 1-35%), one event. Both are 250 km results — tighten the same cell to 150 km and the cohort falls to 5 against a minimum of 10 and every rate refuses, CONUS included. A desk sets the n/N and its interval beside a broker's or a counterparty's landfall assumption and reads whether that assumption sits inside the interval, cites the URL in the pricing note so the query is replayable, requeries once a centre is fixed, and where a row is stamped says stamped rather than substituting judgement; genesis-to-TS at median 21 h (n=10, p25 7.5 h, p75 33 h) is a cohort clock, not an addition to the 48h outlook. What ships today is the query, the cohort, the refusal stamp and the citation string — on this page the stamp fires on one system entirely and on ten of twelve landfall contracts for two others; exportable charts, an API and recurring institutional briefs are PROPOSED / PILOT.</div></div>
+  <div><span class="q">01 · What is happening now?</span><div class="a">LIVE STATUS AS OF 31 AUG 2026, 08:25 CT / 13:25 UTC. Four systems, positions and feeds carried in the ledger: Invest 97L, a north-central Gulf disturbance at 27.4N 90.7W, NHC graphical outlook</div></div>
+  <div><span class="q">02 · What does Storm Atlas add?</span><div class="a">Historical tracks near a point are already public — NOAA will draw them from the same IBTrACS this archive is built on. What is not public is</div></div>
+  <div><span class="q">03 · How does this help price, hedge, structure, explain, distribute?</span><div class="a">For 97L's declared cell, conditioned on formation having already occurred and not combinable with the 70% development outlook — landfall is counted jointly, never as a product of marginals: CONUS — any is</div></div>
 </div>
 
 <section class="sec"><div class="sec-hd"><span class="n">01</span><h2>Active systems</h2><span class="note">live columns are timestamped · cohort columns are evergreen</span></div>
@@ -364,7 +372,7 @@ table.ledger.sysgrid{table-layout:fixed}
       <td class="lft"><div class="prose">Insured US Gulf coastline; offshore energy corridor.</div></td>
       <td class="lft"><span class="chip ok">SUFFICIENT</span>
         <span class="chip">N = 12</span>
-        <div class="prose"><p>Cohort available and sufficient: 12 North Atlantic storms formed within 250 km of the declared cell, August–September, seasons from 1971, against a minimum sample of 10. The cell is a declared query point and the live centre now sits west and south of it. Sensitivity is declared, not hidden: hold the cell and tighten to 150 km and the cohort falls to 5, COHORT STATUS reads BELOW MIN SAMPLE — rates refused, and every row including CONUS — any and CONUS ≥64 kt reads RATE REFUSED; open the window to all months and the cohort rises to 17. The 12-storm answer is the 250 km August–September answer and nothing else.</p><p>At 250 km, intensity rows TD through Cat 5 and the CONUS, Mexico, Caribbean, Central America and unattributed landfall pairs are usable. Hawaii — any is stamped OUT OF SCOPE -- unscoreable here (0 in scope, 11 archive-wide) and Hawaii ≥64 kt BASE RATE ONLY -- unscoreable (0 in scope, 2 archive-wide, against the 10 required).</p><p>There is no Texas or Louisiana rate at any radius — landfall is scored at CONUS, not by state. The state is recorded on every landfall row: Alicia 1983 into Texas at 100 kt, Fern 1971 into Louisiana, Anita 1977 into Tamaulipas at 120 kt. The named history is state-level; the rate is not.</p></div></td></tr><tr class="band">
+        <div class="prose"><p>Cohort available and sufficient: 12 North Atlantic storms formed within 250 km of the declared cell, August–September, seasons from 1971, against a minimum sample of 10. The cell is a declared query point and the live centre now sits west and south of it. Sensitivity is declared, not hidden: hold the</p></div></td></tr><tr class="band">
       <td><b>Hurricane Karina</b><br><span class="mono6">EAST PACIFIC</span></td>
       <td class="lft"><span class="chip obs">OBSERVED GENESIS</span><br>
         <span class="mono8">13.2°N 115.0°W</span>
@@ -374,7 +382,7 @@ table.ledger.sysgrid{table-layout:fixed}
       <td class="lft"><div class="prose">No modelled coastline reached at ≥64 kt in the cohort.</div></td>
       <td class="lft"><span class="chip ok">SUFFICIENT</span>
         <span class="chip">N = 14</span>
-        <div class="prose"><p>Cohort available and sufficient: 14 East Pacific storms formed within 250 km of the observed genesis point, August–September, since 1971. The intensity answer in full: TS 13 of 14 (92.9%, [69-99%]), Cat 1 7 of 14 (50.0%, [27-73%]), Cat 3 4 of 14 (28.6%, [12-55%]), Cat 4 1 of 14 (7.1%, [1-31%]), Cat 5 0 of 14 (0.0%, [0-22%]).</p><p>Mexico — any is 1 of 14 (7.1%, [1-31%]) and Mexico ≥64 kt is 0 of 14 (0.0%, [0-22%]). Those two are the only scored landfall rows. The other ten contracts return a stamp: nine OUT OF SCOPE -- unscoreable here, and Hawaii ≥64 kt BASE RATE ONLY -- unscoreable. The nine are refused on event counts, not on geography — each carries fewer than the 10 distinct in-scope events (EP basin, 1971 onwards) a score requires. CONUS — any has 2 in scope against 699 archive-wide, and the archive will not borrow the wider number.</p></div></td></tr><tr class="">
+        <div class="prose"><p>Cohort available and sufficient: 14 East Pacific storms formed within 250 km of the observed genesis point, August–September, since 1971. The intensity answer in full: TS 13 of 14 (92.9%, [69-99%]), Cat 1 7 of 14 (50.0%, [27-73%]), Cat</p></div></td></tr><tr class="">
       <td><b>Invest 95E</b><br><span class="mono6">EAST PACIFIC</span></td>
       <td class="lft"><span class="chip pre">PRE-GENESIS CELL</span><br>
         <span class="mono8">12.0°N 107.5°W</span>
@@ -384,7 +392,7 @@ table.ledger.sysgrid{table-layout:fixed}
       <td class="lft"><div class="prose">Mexican Pacific coast adjacency.</div></td>
       <td class="lft"><span class="chip ok">SUFFICIENT</span>
         <span class="chip">N = 24</span>
-        <div class="prose"><p>Cohort available and sufficient: 24 East Pacific storms formed within 250 km of the declared reference cell, August–September, since 1971 — deep enough to read the ladder all the way down. TS 24 of 24 (100.0%, [86-100%]), Cat 1 15 of 24 (62.5%, [43-79%]), Cat 3 12 of 24 (50.0%, [31-69%]), Cat 4 6 of 24 (25.0%, [12-45%]), Cat 5 0 of 24 (0.0%, [0-14%]).</p><p>Landfall is a single storm. Mexico — any and Mexico ≥64 kt are both 1 of 24 (4.2%, [1-20%]), and the storm is Liza 1976 into Sonora at 90 kt. The stamps match Karina's — nine landfall contracts OUT OF SCOPE -- unscoreable here on in-scope event counts, Hawaii ≥64 kt BASE RATE ONLY -- unscoreable — and they are printed in the ledger.</p></div></td></tr><tr class="band">
+        <div class="prose"><p>Cohort available and sufficient: 24 East Pacific storms formed within 250 km of the declared reference cell, August–September, since 1971 — deep enough to read the ladder all the way down. TS 24</p></div></td></tr><tr class="band">
       <td><b>Tropical Storm Lowell</b><br><span class="mono6">EAST PACIFIC</span></td>
       <td class="lft"><span class="chip obs">OBSERVED GENESIS</span><br>
         <span class="mono8">11.3°N 133.8°W</span>
@@ -394,7 +402,7 @@ table.ledger.sysgrid{table-layout:fixed}
       <td class="lft"><div class="prose">Open ocean, west of every modelled coastline.</div></td>
       <td class="lft"><span class="chip refuse">BELOW MIN SAMPLE — rates refused</span>
         <span class="chip">N = 6</span>
-        <div class="prose"><p>Cohort below minimum sample — rates refused. Six East Pacific storms match the observed genesis point against a minimum of 10, so Storm Atlas refuses every rate on this row, intensity and landfall alike. The six stay visible as named history, Iniki 1992 among them. Widening is available and declared, never silent: the same pack ships a 97L variant opened to all months at N=17, published as its own query with its own citation string. Nothing was widened here, and the row is left empty.</p></div></td></tr></tbody></table>
+        <div class="prose"><p>Cohort below minimum sample — rates refused. Six East Pacific storms match the observed genesis point against a minimum of 10, so Storm Atlas refuses every rate on this row,</p></div></td></tr></tbody></table>
 <p class="fn"><b>INSTANTS.</b> Desk line 31 AUG 2026 · 08:25 CT / 13:25 UTC. NHC graphical outlook ingested
 2026-08-31T07:10:04.497Z (Atlantic issued 200 AM EDT Mon Aug 31 2026;
 Pacific issued 1100 PM PDT Sun Aug 30 2026). ATCF b-deck
@@ -425,20 +433,20 @@ point exists, the reference cell is replaced by it.</p>
   <div class="plate-ft"><span class="lg"><i class="sq" style="border-color:#7c3aed;background:rgba(124,58,237,.12)"></i>pre-genesis reference cell + query radius</span><span class="lg"><i class="sq" style="border-color:#0f172a;background:rgba(15,23,42,.08)"></i>observed genesis + query radius</span><span class="lg"><i class="dot" style="background:#dc2626"></i>LIVE — operational b-deck position</span><span class="lg"><i class="sq" style="border-color:#dc2626;background:rgba(220,38,38,.10)"></i>LIVE — NHC graphical outlook area</span></div>
   
 </div>
-  <p class="fn">The legend carries the mark types. What it cannot show: the two reference cells — 97L at 28.0°N 88.7°W and 95E at 12.0°N 107.5°W — are declared query points, not observed formations, and 97L's live centre and outlook area sit west and south of the cell its cohort is anchored on. Karina at 13.2°N 115.0°W and Lowell at 11.3°N 133.8°W are observed genesis points. All four rings are the same 250 km query radius, and the geometry says nothing about the result: three enclose scoring cohorts of 12, 14 and 24, while Lowell's encloses 6 and every rate inside it is refused. Live marks are 13:25 UTC 31 Aug 2026 and are not cohort geometry.</p>
+  <p class="fn">The legend carries the mark types. What it cannot show: the two reference cells — 97L at 28.0°N 88.7°W and 95E at 12.0°N 107.5°W — are declared</p>
   </section>
   <section class="sec"><div class="sec-hd"><span class="n">03</span><h2>Commercial tags</h2><span class="note">interpretation, never a rate</span></div>
   <div class="tagstack"><div class="box commercial tag">
     <h3>INVEST 97L</h3>
-    <div class="tagbody"><p>Highest commercial relevance. The cohort is anchored on the declared cell at 28.0°N 88.7°W, not on the disturbance, which now sits west and south of it. Alicia 1983 and Fern 1971 are in that cohort; so is Anita 1977, which came ashore in Tamaulipas rather than the US.</p></div></div><div class="box commercial tag">
+    <div class="tagbody"><p>Highest commercial relevance. The cohort is anchored on the declared cell at 28.0°N</p></div></div><div class="box commercial tag">
     <h3>HURRICANE KARINA</h3>
-    <div class="tagbody"><p>An intensity case, not an exposure case. Ten of twelve landfall contracts return a refusal stamp — nine OUT OF SCOPE, one BASE RATE ONLY — leaving the Mexico pair, any and ≥64 kt, as the only scored landfall rows. The eight printed cohort members, Kenneth 2017 and Guillermo 2009 among them, record no modelled landfall.</p></div></div><div class="box commercial tag">
+    <div class="tagbody"><p>An intensity case, not an exposure case. Ten of twelve landfall contracts return</p></div></div><div class="box commercial tag">
     <h3>INVEST 95E</h3>
-    <div class="tagbody"><p>Watch candidate, and the deepest cohort on the page at 24 — the only one here that can be read down the full intensity ladder. No live archive record exists: 95E is pre-genesis and has no b-deck.</p></div></div><div class="box commercial tag">
+    <div class="tagbody"><p>Watch candidate, and the deepest cohort on the page at 24 — the</p></div></div><div class="box commercial tag">
     <h3>TROPICAL STORM LOWELL</h3>
-    <div class="tagbody"><p>Nothing to price here. Every rate refused: six East Pacific storms against a minimum of 10, Hawaii included, where one of the six made landfall. Lowell is the control — the same query that returns 24 for 95E returns 6 here and the rates disappear. The refusal is about sample, not distance from land.</p></div></div></div>
+    <div class="tagbody"><p>Nothing to price here. Every rate refused: six East Pacific storms against a</p></div></div></div>
   <div class="box refusal" style="margin-top:5px"><h3>THE REFUSALS HERE — THE MOST VALUABLE ROWS ON THE PAGE</h3>
-    <p>Lowell returns 6 against a minimum of 10, so every rate on that row refuses. Iniki 1992 is in that cohort with a Kauai landfall and it still does not become a percentage. The same rule empties 97L at 150 km, N=5. Hawaii ≥64 kt carries a BASE RATE ONLY stamp wherever it appears, on 2 events archive-wide against the 10 required. The thresholds are fixed and published; they are not adjusted to produce a row.</p><p>This is a sample-size floor and nothing more. It does not vouch for the track attribution, the landfall geocoding or the basin assignment. Those live in METHODOLOGY 1.1.0 / PACK 134661125525f27a, and they are what to audit.</p>
+    <p>Lowell returns 6 against a minimum of 10, so every rate on that row refuses. Iniki 1992 is in that cohort with a Kauai landfall and it still does not become a percentage. The same rule empties 97L at 150 km, N=5. Hawaii ≥64 kt</p>
     <p style="margin-top:3px"><b>THE CONTRACT, AND ITS EDGE.</b> The scored landfall regions are
     CONUS, Mexico, Caribbean, Central America, Hawaii and Unattributed, each with an <b>any</b>
     and a <b>≥64 kt</b> pair. <b>The archive does not score state-level landfall</b>, so no TX, LA
@@ -481,7 +489,9 @@ point exists, the reference cell is replaced by it.</p>
 </section>
 
 <div class="spacer"></div>
-<p class="disclaim">RESEARCH ONLY — NOT A FORECAST. Storm Atlas is a historical genesis/outcome engine. Every rate on this page is GENESIS-CONDITIONED: it assumes a tropical cyclone forms and describes what the historical record did next. It is not P(forms), not a live feed, and not a forecast cone. To combine with a formation probability: P(reaches X) = P(forms) × P(reaches X | forms). Landfall does not decompose that way and is counted jointly, never as a product of marginals.</p>
-<footer class="ft"><div class="l"><b>ARCHIVE</b> 3,959 storms · 224,153 track points · 3,379 landfall rows · 33,054 environment records<br><b>METHODOLOGY</b> 1.1.0 &nbsp; <b>PACK</b> 134661125525f27a &nbsp; <b>ARCHIVE BUILT</b> 2026-08-18T05:18:57Z<br><b>SOURCES</b> ibtracs.EP.csv · ibtracs.NA.csv · ships.EP.txt · ships.CP.txt · ships.AL.txt · hurdat2.nepac.txt · hurdat2.atl.txt</div><div class="r">RESEARCH ONLY<br>NOT A FORECAST<br>MILLIBAR / STORM ATLAS</div></footer>
+<footer class="ft">
+    <p class="disclaim ft-disclaim">RESEARCH ONLY — NOT A FORECAST. Storm Atlas is a historical genesis/outcome engine. Every rate on this page is GENESIS-CONDITIONED: it assumes a tropical cyclone forms and describes what the historical record did next. It is not P(forms), not a live feed, and not a forecast cone. To combine with a formation probability: P(reaches X) = P(forms) × P(reaches X | forms). Landfall does not decompose that way and is counted jointly, never as a product of marginals.</p>
+    <div class="ft-row"><div class="l"><b>ARCHIVE</b> 3,959 storms · 224,153 track points · 3,379 landfall rows · 33,054 environment records<br><b>METHODOLOGY</b> 1.1.0 &nbsp; <b>PACK</b> 134661125525f27a &nbsp; <b>ARCHIVE BUILT</b> 2026-08-18T05:18:57Z<br><b>SOURCES</b> ibtracs.EP.csv · ibtracs.NA.csv · ships.EP.txt · ships.CP.txt · ships.AL.txt · hurdat2.nepac.txt · hurdat2.atl.txt</div><div class="r">RESEARCH ONLY<br>NOT A FORECAST<br>MILLIBAR / STORM ATLAS</div></div>
+  </footer>
 </div>
 </body></html>

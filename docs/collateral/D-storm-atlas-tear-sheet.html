@@ -58,7 +58,9 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
   text-transform:uppercase;margin:0;color:var(--ink-900)}
 .sec-hd .n{font-family:var(--font-mono);font-size:7.4px;color:var(--ink-400);letter-spacing:1px}
 .sec-hd .note{font-size:8px;color:var(--ink-600);margin-left:auto;font-style:italic}
-.lede{font-size:8.2px;line-height:1.4;color:var(--ink-700);margin:0 0 var(--sp-3)}
+.lede{font-size:7.6px;line-height:1.32;color:var(--ink-700);margin:0 0 var(--sp-2)}
+.lede p{margin:0 0 var(--sp-2)}
+.lede p:last-child{margin-bottom:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4)}
@@ -119,16 +121,16 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .chip.ok{color:var(--green-600);border-color:var(--green-600)}
 
 /* ---- boxes ----------------------------------------------------------------------- */
-.box{border:1px solid var(--line-300);border-radius:5px;padding:var(--sp-4);background:var(--white)}
+.box{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--white)}
 .box.sunken{background:var(--paper-50)}
 .box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
 .box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
 .box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
 .box h3{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1px;text-transform:uppercase;
   margin:0 0 var(--sp-2);color:var(--ink-900)}
-.box p{margin:0 0 var(--sp-2);font-size:7.6px;line-height:1.38;color:var(--ink-700)}
+.box p{margin:0 0 var(--sp-2);font-size:7.3px;line-height:1.3;color:var(--ink-700)}
 .box p:last-child{margin-bottom:0}
-.box ul{margin:0;padding-left:11px;font-size:7.6px;line-height:1.32;color:var(--ink-700)}
+.box ul{margin:0;padding-left:10px;font-size:7.3px;line-height:1.28;color:var(--ink-700)}
 .box li{margin-bottom:1.5px}
 .box li:last-child{margin-bottom:0}
 .box li b{color:var(--ink-900)}
@@ -204,7 +206,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .rail>div:last-child{border-right:none;padding-right:0}
 .rail .q{font-family:var(--font-mono);font-size:6.1px;letter-spacing:1px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:3px}
-.rail .a{font-size:7.3px;line-height:1.34;color:var(--ink-900)}
+.rail .a{font-size:7.1px;line-height:1.26;color:var(--ink-900)}
 .rail .a b{font-weight:600}
 
 /* ---- live strip -------------------------------------------------------------------- */
@@ -263,11 +265,11 @@ table.ledger.sysgrid{table-layout:fixed}
 .cardrow .card dl{font-size:5.6px}
 .cardrow .card .lf{font-size:5.6px}
 .cardrow .card .yr{font-size:5.6px}
-.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.3;
-  font-family:var(--font-sans);font-size:7.1px;padding:2.5px var(--sp-3)}
+.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.26;
+  font-family:var(--font-sans);font-size:7px;padding:1.5px var(--sp-3)}
 .cmptable td.q{font-family:var(--font-mono);font-size:6.5px;color:var(--ink-900);font-weight:500}
 .cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
-.cmptable.compact td{font-size:6.5px;padding:2px var(--sp-2)}
+.cmptable.compact td{font-size:6.6px;padding:1.2px var(--sp-2);line-height:1.24}
 .cmptable.compact td.q{font-size:6px}
 .platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
 .platecol .sec{margin-top:0}
@@ -275,6 +277,9 @@ table.ledger.sysgrid{table-layout:fixed}
 .grid3.tight{gap:var(--sp-5);align-items:start}
 .grid4.tight{gap:var(--sp-4);align-items:start}
 .cardsplit{display:grid;grid-template-columns:1.18fr 1fr;gap:var(--sp-6);align-items:start}
+.cardcmp{display:grid;grid-template-columns:1fr 1.15fr;gap:var(--sp-6);align-items:start}
+.cardcmp .sec{margin-top:0}
+.cardcmp .grid4{gap:var(--sp-2)}
 .cardsplit .sec{margin-top:0}
 .cardsplit .grid4{gap:var(--sp-2)}
 /* The manifest is a reference document, not a one-page sheet: it may run as long as the
@@ -285,6 +290,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .fnrow{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5)}
 .fnrow .fn{margin-top:var(--sp-2)}
 .citepair{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
+.citecmp{display:grid;grid-template-columns:1.55fr 1fr;gap:var(--sp-6);align-items:start}
+.citecmp .cite:first-child{margin-top:0}
 .citepair .cite{margin-top:var(--sp-3)}
 .qline{margin-top:var(--sp-3);padding:var(--sp-3) var(--sp-4)}
 .qline p{font-size:8px;line-height:1.35}
@@ -316,15 +323,16 @@ table.ledger.sysgrid{table-layout:fixed}
 .stack{display:flex;flex-direction:column;gap:var(--sp-4)}
 
 /* ---- footer ----------------------------------------------------------------------- */
-.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-3);
-  display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-2)}
+.ft-disclaim{margin:0 0 var(--sp-2)}
+.ft-row{display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
 .ft .l{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);letter-spacing:.5px;
   line-height:1.5;max-width:70%}
 .ft .l b{color:var(--ink-900)}
 .ft .r{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-400);letter-spacing:.9px;
   text-align:right;white-space:nowrap;text-transform:uppercase}
-.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.4;
-  margin-top:var(--sp-2)}
+.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.32;
+  margin-top:var(--sp-1)}
 .fn b{color:var(--ink-900)}
 </style>
 </head><body>
@@ -335,14 +343,14 @@ table.ledger.sysgrid{table-layout:fixed}
     <div class="mh-doc">ARTIFACT D · TEAR SHEET &nbsp;·&nbsp; 1 OF 1</div>
   </div>
   <h1 class="mh-title">Storm Atlas</h1>
-  <p class="mh-sub">Storm Atlas is a research-only historical genesis/outcome engine for the North Atlantic and East Pacific. Give it an observed genesis point or a declared pre-genesis reference cell; it returns what the record did next as exact n/N with a 95% Wilson interval, names every storm in the denominator, and refuses the rate where the record cannot carry one.</p>
+  <p class="mh-sub">Storm Atlas is a research-only historical genesis/outcome engine for the North Atlantic and East Pacific. Give it an observed genesis point</p>
   <div class="mh-rule"><span class="kv">CAMERA <b>NORTH ATLANTIC + EAST PACIFIC</b></span><span class="kv">METHODOLOGY <b>1.1.0</b></span><span class="kv">PACK <b>134661125525f27a</b></span><span class="kv">STATUS <b>RESEARCH ONLY</b></span></div>
 </header>
 
 <section class="sec"><div class="sec-hd"><span class="n">01</span><h2>What a user can do</h2></div>
 <div class="grid2">
-  <div class="box"><ul><li><b>Condition on a point.</b> An observed genesis position, or a declared pre-genesis reference cell, with a stated radius and month window. The season floor is a declared boundary, not a preference: an observing-bias gap before 1971 is why the floor sits at 1971, and a cohort reaching behind it is warned rather than pooled silently. Rates are genesis-conditioned and assume formation — not P(forms), not a live feed, not a forecast cone.</li><li><b>Retrieve the analog tracks.</b> Every storm in the cohort, with representative members printed under a stated rule — name, season, genesis date, distance from the cell, lifetime peak, and its own landfalls as recorded. Storm Atlas implements no similarity metric, so nothing is ranked as a closest or best analog.</li><li><b>Compare contract-row frequencies.</b> Reached TD, TS and Cat 1 through Cat 5, each as exact n/N with its 95% Wilson interval. Time-to-threshold medians with p25 and p75 sit alongside and carry their own n: the min-sample gate governs rates, not medians, so a median can be printed on an n of one or two. Read the n before the median.</li><li><b>Inspect the landfall contract rows.</b> conus, mexico, caribbean, central_america, hawaii and unattributed, each with an "any" and a ≥64 kt pair — but which of the twelve score is a property of the cohort, not of the archive: the Karina panel scores the mexico pair and refuses the other ten. State-level and sub-CONUS landfall is not scored at all. Sub-region is carried in the archive and can be read off a named storm's own landfall record; it is not a contract row, and no state-level rate exists.</li><li><b>Read the refusals as first-class output.</b> Three gates, all printed. A cohort below min sample publishes counts and no rates at all — no rate column, no interval. A contract out of scope for the basin, or an outcome too rare archive-wide to score, prints its status beside a figure the status voids: where the status column is set, the 0.0% and the interval on that row are not results and must not be read as a zero. Hawaii ≥64 kt is base rate only — 2 archive-wide against the 10 required — and is never a scored probability.</li><li><b>Carry it into the work.</b> Set a candidate intensity or landfall threshold and count the cohort members that cross it; they are named, so the count is checkable. Stress the cell before quoting anything — move it, and watch N and the refusal state move with it. Hand a reviewer the URL instead of a number. Environment — shear, mid-level RH, SST, OHC — is displayed against the cohort you already chose; it never changes who is in it.</li></ul></div>
-  <div class="box sunken"><h3>THE MOAT — SANITATION, REFUSAL, PROVENANCE</h3><p>An interpolated fix is never allowed to establish a threshold crossing, so time-to-hurricane is never dated off a wind nobody measured. A segment crossing publishes no Saffir-Simpson class where the two bracketing fixes disagree on it — the interpolated wind stays on the row, labelled by detection method; the class derived from it does not. A cohort's defining variable is not reported back as a scored outcome, with one exception left in the open: every cohort returns reached TD at 100%, because a cohort is storms that formed. That row is definitional and carries no information; the panels here start at reached TS. Below min sample a rate is refused rather than estimated — the same 97L cell read at 150 km instead of 250 km returns 5 storms against a min sample of 10, and every rate on that panel reads RATE REFUSED. A cohort reaching behind 1971 carries the observing-bias warning instead of pooling the record silently. An absent outcome is not a zero: an unrecorded intensity leaves the denominator and is counted on its own, so an n/N row can carry a smaller N than its cohort — no sample on this sheet exercises it, and every row runs on 12, on 14 and on 6. Every figure, refusals included, carries METHODOLOGY 1.1.0, PACK 134661125525f27a and a URL that reproduces it.</p></div>
+  <div class="box"><p>Condition on a point. An observed genesis position, or a declared pre-genesis reference cell, with a stated radius and month window. The season floor is a declared boundary, not a preference: an observing-bias gap before 1971 is why the floor sits at 1971, and a cohort reaching behind it is warned rather than pooled silently. Rates are genesis-conditioned and assume formation — not P(forms), not a live feed, not a forecast cone. Retrieve the analog tracks. Every storm in the cohort, with representative members printed under a stated rule — name, season, genesis date, distance from the cell, lifetime peak, and its own landfalls as recorded. Storm Atlas implements no similarity metric, so nothing is ranked as a closest or best analog. Compare contract-row frequencies. Reached TD, TS and Cat 1 through Cat 5, each as exact n/N with its 95% Wilson interval. Time-to-threshold medians with p25 and p75 sit alongside and carry their own n: the min-sample gate governs rates, not medians, so a median can be printed on an n of one or two. Read the n before</p></div>
+  <div class="box sunken"><h3>THE MOAT — SANITATION, REFUSAL, PROVENANCE</h3><p>An interpolated fix is never allowed to establish a threshold crossing, so time-to-hurricane is never dated off a wind nobody measured. A segment crossing publishes no Saffir-Simpson class where the two bracketing fixes disagree on it — the interpolated wind stays on the row, labelled by detection method; the class derived from it does not. A cohort's defining variable is not reported back as a scored outcome, with one exception left in the open: every cohort returns reached TD at 100%, because a cohort is storms that formed. That row is definitional and carries no information; the panels here start at reached TS. Below min sample a rate</p></div>
 </div>
 </section>
 
@@ -369,7 +377,7 @@ table.ledger.sysgrid{table-layout:fixed}
 </section>
 
 <section class="sec"><div class="sec-hd"><span class="n">03</span><h2>Two worked samples</h2><span class="note">97L and Karina · every figure replayable</span></div>
-<p class="fn">Three cohorts follow, printed as the engine returned them. The cell is an input, not an observation: 97L is read at a desk-declared pre-genesis reference cell, 28.0°N 88.7°W — not the disturbance's current position, not the outlook area. Storm Atlas does not choose the cell and does not defend it; the URL records what was chosen, so a reviewer can move it and watch the answer move. Cohort N 12 at 250 km; the same cell read at 150 km returns 5, below the min sample of 10, every rate refused — which is why the radius is printed with the number. Karina is read at its observed genesis, 13.2°N 115.0°W, a datum rather than a choice, cohort N 14. It is the harder sample and it is here for that reason: the cohort returns reached Cat 4 at 1/14 [1–31%] and reached Cat 5 at 0/14 [0–22%], and Karina is already Cat 4. That is what a genesis-conditioned rate is — the record's frequency at the moment of formation. The cohort does not know Karina intensified and will not be revised because it did. Sample 3 is TS Lowell, read at its observed genesis 11.3°N 133.8°W: cohort N 6, below min sample, counts published and every rate refused — including the Hawaii rows, 1 of 6, where the one is Iniki 1992. A six-storm Hawaii rate is the number a desk would most want and the one the engine will not print. Scored rows carry exact n/N and the 95% Wilson interval; a status voids the figure beside it; a cohort below min sample returns no rate and no interval at all. Every figure replays from the URL beneath its table.</p>
+<div class="lede"><p>Three cohorts follow, printed as the engine returned them. The cell is an input, not an observation: 97L is read at a desk-declared pre-genesis reference cell, 28.0°N 88.7°W — not the disturbance's current position, not the outlook area. Storm Atlas does not choose the cell and does not defend it; the URL records what</p></div>
 <div class="grid2">
 <div class="box"><h3>SAMPLE 1 — INVEST 97L · PRE-GENESIS REFERENCE CELL 28.0°N 88.7°W</h3>
     <p class="disclaim" style="margin-bottom:6px">North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
@@ -451,8 +459,8 @@ table.ledger.sysgrid{table-layout:fixed}
 
 <section class="sec"><div class="sec-hd"><span class="n">04</span><h2>Delivery</h2></div>
 <div class="grid2">
-  <div class="box"><h3>CURRENT — SHIPPING TODAY</h3><p>Delivery today is a browser and replayable cohort URLs. A URL carries the cell, radius, season floor, month window, basin and methodology version, so a colleague, a client or a reviewer opens the same cohort and reads the same counts, the same rates and intervals where the engine scored them, and the same refusals where it did not. It reproduces under the same pack stamp: the pack is a hash of every table it was built from, so a rebuilt archive changes the stamp, and a figure whose stamp does not match is not the same figure.</p></div>
-  <div class="box hole"><h3>PROPOSED / PILOT — NOT SHIPPING</h3><p><b>PROPOSED / PILOT — not available today.</b> Exportable charts. An API. Recurring institutional briefs. None of the three exists yet.</p></div>
+  <div class="box"><h3>CURRENT — SHIPPING TODAY</h3><p>Delivery today is a browser and replayable cohort URLs. A URL carries the cell, radius, season floor, month window, basin and methodology version, so a colleague, a client or a reviewer opens the same cohort and</p></div>
+  <div class="box hole"><h3>PROPOSED / PILOT — NOT SHIPPING</h3><p>PROPOSED / PILOT — not available today. Exportable charts. An API. Recurring institutional briefs. None of the three exists yet.</p></div>
 </div>
 </section>
 
@@ -471,7 +479,9 @@ table.ledger.sysgrid{table-layout:fixed}
 </section>
 
 <div class="spacer"></div>
-<p class="disclaim">RESEARCH ONLY — NOT A FORECAST. Storm Atlas is a historical genesis/outcome engine. Every rate on this page is GENESIS-CONDITIONED: it assumes a tropical cyclone forms and describes what the historical record did next. It is not P(forms), not a live feed, and not a forecast cone. To combine with a formation probability: P(reaches X) = P(forms) × P(reaches X | forms). Landfall does not decompose that way and is counted jointly, never as a product of marginals.</p>
-<footer class="ft"><div class="l"><b>ARCHIVE</b> 3,959 storms · 224,153 track points · 3,379 landfall rows · 33,054 environment records<br><b>METHODOLOGY</b> 1.1.0 &nbsp; <b>PACK</b> 134661125525f27a &nbsp; <b>ARCHIVE BUILT</b> 2026-08-18T05:18:57Z<br><b>SOURCES</b> ibtracs.EP.csv · ibtracs.NA.csv · ships.EP.txt · ships.CP.txt · ships.AL.txt · hurdat2.nepac.txt · hurdat2.atl.txt</div><div class="r">RESEARCH ONLY<br>NOT A FORECAST<br>MILLIBAR / STORM ATLAS</div></footer>
+<footer class="ft">
+    <p class="disclaim ft-disclaim">RESEARCH ONLY — NOT A FORECAST. Storm Atlas is a historical genesis/outcome engine. Every rate on this page is GENESIS-CONDITIONED: it assumes a tropical cyclone forms and describes what the historical record did next. It is not P(forms), not a live feed, and not a forecast cone. To combine with a formation probability: P(reaches X) = P(forms) × P(reaches X | forms). Landfall does not decompose that way and is counted jointly, never as a product of marginals.</p>
+    <div class="ft-row"><div class="l"><b>ARCHIVE</b> 3,959 storms · 224,153 track points · 3,379 landfall rows · 33,054 environment records<br><b>METHODOLOGY</b> 1.1.0 &nbsp; <b>PACK</b> 134661125525f27a &nbsp; <b>ARCHIVE BUILT</b> 2026-08-18T05:18:57Z<br><b>SOURCES</b> ibtracs.EP.csv · ibtracs.NA.csv · ships.EP.txt · ships.CP.txt · ships.AL.txt · hurdat2.nepac.txt · hurdat2.atl.txt</div><div class="r">RESEARCH ONLY<br>NOT A FORECAST<br>MILLIBAR / STORM ATLAS</div></div>
+  </footer>
 </div>
 </body></html>

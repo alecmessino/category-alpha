@@ -58,7 +58,9 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
   text-transform:uppercase;margin:0;color:var(--ink-900)}
 .sec-hd .n{font-family:var(--font-mono);font-size:7.4px;color:var(--ink-400);letter-spacing:1px}
 .sec-hd .note{font-size:8px;color:var(--ink-600);margin-left:auto;font-style:italic}
-.lede{font-size:8.2px;line-height:1.4;color:var(--ink-700);margin:0 0 var(--sp-3)}
+.lede{font-size:7.6px;line-height:1.32;color:var(--ink-700);margin:0 0 var(--sp-2)}
+.lede p{margin:0 0 var(--sp-2)}
+.lede p:last-child{margin-bottom:0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4)}
@@ -119,16 +121,16 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .chip.ok{color:var(--green-600);border-color:var(--green-600)}
 
 /* ---- boxes ----------------------------------------------------------------------- */
-.box{border:1px solid var(--line-300);border-radius:5px;padding:var(--sp-4);background:var(--white)}
+.box{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--white)}
 .box.sunken{background:var(--paper-50)}
 .box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
 .box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
 .box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
 .box h3{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1px;text-transform:uppercase;
   margin:0 0 var(--sp-2);color:var(--ink-900)}
-.box p{margin:0 0 var(--sp-2);font-size:7.6px;line-height:1.38;color:var(--ink-700)}
+.box p{margin:0 0 var(--sp-2);font-size:7.3px;line-height:1.3;color:var(--ink-700)}
 .box p:last-child{margin-bottom:0}
-.box ul{margin:0;padding-left:11px;font-size:7.6px;line-height:1.32;color:var(--ink-700)}
+.box ul{margin:0;padding-left:10px;font-size:7.3px;line-height:1.28;color:var(--ink-700)}
 .box li{margin-bottom:1.5px}
 .box li:last-child{margin-bottom:0}
 .box li b{color:var(--ink-900)}
@@ -204,7 +206,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .rail>div:last-child{border-right:none;padding-right:0}
 .rail .q{font-family:var(--font-mono);font-size:6.1px;letter-spacing:1px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:3px}
-.rail .a{font-size:7.3px;line-height:1.34;color:var(--ink-900)}
+.rail .a{font-size:7.1px;line-height:1.26;color:var(--ink-900)}
 .rail .a b{font-weight:600}
 
 /* ---- live strip -------------------------------------------------------------------- */
@@ -263,11 +265,11 @@ table.ledger.sysgrid{table-layout:fixed}
 .cardrow .card dl{font-size:5.6px}
 .cardrow .card .lf{font-size:5.6px}
 .cardrow .card .yr{font-size:5.6px}
-.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.3;
-  font-family:var(--font-sans);font-size:7.1px;padding:2.5px var(--sp-3)}
+.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.26;
+  font-family:var(--font-sans);font-size:7px;padding:1.5px var(--sp-3)}
 .cmptable td.q{font-family:var(--font-mono);font-size:6.5px;color:var(--ink-900);font-weight:500}
 .cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
-.cmptable.compact td{font-size:6.5px;padding:2px var(--sp-2)}
+.cmptable.compact td{font-size:6.6px;padding:1.2px var(--sp-2);line-height:1.24}
 .cmptable.compact td.q{font-size:6px}
 .platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
 .platecol .sec{margin-top:0}
@@ -275,6 +277,9 @@ table.ledger.sysgrid{table-layout:fixed}
 .grid3.tight{gap:var(--sp-5);align-items:start}
 .grid4.tight{gap:var(--sp-4);align-items:start}
 .cardsplit{display:grid;grid-template-columns:1.18fr 1fr;gap:var(--sp-6);align-items:start}
+.cardcmp{display:grid;grid-template-columns:1fr 1.15fr;gap:var(--sp-6);align-items:start}
+.cardcmp .sec{margin-top:0}
+.cardcmp .grid4{gap:var(--sp-2)}
 .cardsplit .sec{margin-top:0}
 .cardsplit .grid4{gap:var(--sp-2)}
 /* The manifest is a reference document, not a one-page sheet: it may run as long as the
@@ -285,6 +290,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .fnrow{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5)}
 .fnrow .fn{margin-top:var(--sp-2)}
 .citepair{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
+.citecmp{display:grid;grid-template-columns:1.55fr 1fr;gap:var(--sp-6);align-items:start}
+.citecmp .cite:first-child{margin-top:0}
 .citepair .cite{margin-top:var(--sp-3)}
 .qline{margin-top:var(--sp-3);padding:var(--sp-3) var(--sp-4)}
 .qline p{font-size:8px;line-height:1.35}
@@ -316,15 +323,16 @@ table.ledger.sysgrid{table-layout:fixed}
 .stack{display:flex;flex-direction:column;gap:var(--sp-4)}
 
 /* ---- footer ----------------------------------------------------------------------- */
-.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-3);
-  display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-2)}
+.ft-disclaim{margin:0 0 var(--sp-2)}
+.ft-row{display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
 .ft .l{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);letter-spacing:.5px;
   line-height:1.5;max-width:70%}
 .ft .l b{color:var(--ink-900)}
 .ft .r{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-400);letter-spacing:.9px;
   text-align:right;white-space:nowrap;text-transform:uppercase}
-.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.4;
-  margin-top:var(--sp-2)}
+.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.32;
+  margin-top:var(--sp-1)}
 .fn b{color:var(--ink-900)}
 </style>
 </head><body>
@@ -335,14 +343,14 @@ table.ledger.sysgrid{table-layout:fixed}
     <div class="mh-doc">ARTIFACT B2 · ENERGY / WEATHER TRADING &nbsp;·&nbsp; 1 OF 1</div>
   </div>
   <h1 class="mh-title">Gulf genesis cohort: frequency bands from contract rows, and analog paths as geography</h1>
-  <p class="mh-sub">As of <b>31 Aug 2026, 08:25 CT / 13:25 UTC</b>, the desk has Invest 97L as a north-central Gulf disturbance at 27.4°N 90.7°W; the NHC outlook ingested at 07:10Z carries AL97 at 70% / 70% (48h / 7d). Storm Atlas does not forecast that system and makes no claim about where it goes. It scores what North Atlantic storms did from a declared pre-genesis reference cell at 28.0°N 88.7°W, within 250 km, in August or September, in seasons from 1971 onwards — assuming formation.</p><p>That cell is not 97L's position. It sits north and east of the desk fix, it is a fixed query point, and every row on this page is scored from it rather than from the live system. The 250 km aperture is what makes the cohort scoreable at all: the same cell at 150 km returns N=5 against min sample 10, and every rate there is refused. This page prints the cohort, the intervals, and the status the archive returned on each row — including the rows it refuses to score.</p>
+  <p class="mh-sub">As of 31 Aug 2026, 08:25 CT / 13:25 UTC , the desk has Invest 97L as a north-central Gulf disturbance at 27.4°N 90.7°W; the NHC outlook ingested at 07:10Z carries AL97 at</p>
   <div class="mh-rule"><span class="kv">LIVE STATUS <b>31 AUG 2026 · 08:25 CT / 13:25 UTC</b></span><span class="kv">CELL <b>28.0°N 88.7°W · r 250 km · Aug–Sep · floor 1971</b></span><span class="kv">METHODOLOGY <b>1.1.0</b></span><span class="kv">PACK <b>134661125525f27a</b></span></div>
 </header>
 
 <div class="rail">
-  <div><span class="q">01 · What is happening now?</span><div class="a"><b>31 Aug 2026, 08:25 CT / 13:25 UTC.</b> Desk line: Invest 97L is a north-central Gulf disturbance, desk position 27.4°N 90.7°W — a desk plot, not an archive row. The NHC graphical outlook the terminal ingested at 2026-08-31T07:10Z carries AL97, Northern Gulf of America, at 70% / 70% (48h / 7d); the archive's operational layer, generated at the same instant, holds no b-deck for AL97, which is pre-genesis and undesignated.</div></div>
-  <div><span class="q">02 · What does Storm Atlas add?</span><div class="a">Storm Atlas states what the North Atlantic record supports from a declared pre-genesis reference cell at 28.0°N 88.7°W, within 250 km: a cohort of 12 storms, each scored outcome row as exact n/N with its 95% Wilson interval, named cohort members, and the status the archive returned on every row — including the two Hawaii rows it refuses to score on this cohort. Zoom Earth and the NHC outlook show the current field and the chance of development; neither shows the cohort, the interval, or the refusal.</div></div>
-  <div><span class="q">03 · How does this help price, hedge, structure, explain, distribute?</span><div class="a">Every row comes from one printed query — North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards; 12 of 3,959 storms; METHODOLOGY 1.1.0; PACK 134661125525f27a — so a desk can re-run the same string, get the same rows, and set them beside the NHC advisory in a research note, a committee pack or a client explanation. What it supplies is frequency bands with their cohorts and refusals open to inspection. It prices nothing, forecasts nothing and recommends nothing.</div></div>
+  <div><span class="q">01 · What is happening now?</span><div class="a">31 Aug 2026, 08:25 CT / 13:25 UTC. Desk line: Invest 97L is a north-central Gulf disturbance, desk position 27.4°N 90.7°W — a desk plot, not an</div></div>
+  <div><span class="q">02 · What does Storm Atlas add?</span><div class="a">Storm Atlas states what the North Atlantic record supports from a declared pre-genesis reference cell at 28.0°N 88.7°W, within 250 km: a cohort of</div></div>
+  <div><span class="q">03 · How does this help price, hedge, structure, explain, distribute?</span><div class="a">Every row comes from one printed query — North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971</div></div>
 </div>
 
 <section class="sec"><div class="sec-hd"><span class="n">01</span><h2>Analog paths are geography</h2><span class="note">not scored state probabilities</span></div>
@@ -367,7 +375,7 @@ table.ledger.sysgrid{table-layout:fixed}
       in the panel below, and nothing finer exists in this archive.</div>
 </div>
 <div class="box refusal"><h3>READ THIS BEFORE THE PLATE</h3>
-<p>Landfall resolves to region, not state. The archive scores CONUS, Mexico, Caribbean, Central America, Hawaii and unattributed, each in an "any" and a "&gt;=64 kt" form — and of those it refuses both Hawaii rows on this cohort. There is no Texas row, no Louisiana row and no Gulf-state row to quote: the archive does not score states at all, so CONUS and CONUS &gt;=64 kt are the rows that bear on a Gulf question.</p><p>The paths on the plate are drawn tracks of named cohort members — the 8 representatives the query prints, out of the cohort of 12 the rates are scored on — exactly as the archive holds them. Where a track runs is geography read off the archive. It is not a scored state probability, and nothing on this page counts or tallies tracks by state.</p><p>Genesis-conditioned, assuming formation: <b>CONUS — any 10 of 12 (83.3%, 95% Wilson 55-95%)</b> and <b>CONUS — &gt;=64 kt 1 of 12 (8.3%, 95% Wilson 1-35%)</b>. A member's own landfall stays a fact about that storm — ALICIA 1983 came ashore in Texas at 100 kt — and is never aggregated into a rate.</p></div>
+<p>Landfall resolves to region, not state. The archive scores CONUS, Mexico, Caribbean, Central America, Hawaii and unattributed, each in an "any" and a "&gt;=64 kt" form — and of those it refuses both Hawaii rows on this cohort. There is no Texas row, no Louisiana row and no Gulf-state row to quote: the archive does not score states at all, so CONUS and CONUS &gt;=64 kt are the rows that bear on a Gulf question. The paths on the plate are drawn tracks of named cohort members — the 8</p></div>
 </div>
 </section>
 
@@ -394,14 +402,14 @@ table.ledger.sysgrid{table-layout:fixed}
       <td class="rate">8.3%</td><td class="ci">1–35%</td>
       <td class="status none">—</td></tr>
 </tbody></table>
-<p class="fn">Every scored row is a band. CONUS — &gt;=64 kt on this cohort is 1 of 12 (8.3%, 95% Wilson 1-35%), and the interval, not the 8.3%, is the research input. Twelve members makes it wide by construction: one member moves the answer by a twelfth.</p><p>Tightening the aperture does not buy precision — it removes the answer. The same cell at 150 km returns N=5 against min sample 10, and the archive refuses every rate and every interval on that cohort: CONUS — any stands at 4 of 5 and CONUS — &gt;=64 kt at 0 of 5, with RATE REFUSED printed in place of both the rate and the interval. Replay it: <b>?v=1&amp;w=28,-88.7,150&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0</b>.</p><p>Widening moves the answer little. The same cell across all months returns N=17, CONUS — any 13 of 17 (76.5%, 95% Wilson 53-90%), CONUS — &gt;=64 kt 2 of 17 (11.8%, 95% Wilson 3-34%). Three apertures, one refused and two overlapping. That is the whole robustness the record supports on this cell. A 1-35% band bounds the question and shows the cohort behind it; it does not support a point estimate, a load factor or a spread, and no aperture here will make it tighter. If a note needs a number tighter than that band, this cohort is not the source.</p>
+<p class="fn">Every scored row is a band. CONUS — &gt;=64 kt on this cohort is 1 of 12 (8.3%, 95% Wilson 1-35%), and the interval, not the 8.3%, is the research input. Twelve members makes it wide by construction: one member moves the answer by a twelfth. Tightening the aperture does not buy precision — it removes the answer. The same cell at 150 km returns N=5 against min sample 10, and the archive refuses every rate and every</p>
 <div class="cite"><span class="k">CITE THIS COHORT</span><div class="v">STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 12 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div><a class="u" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0</a></div>
 </section>
 
 <section class="sec"><div class="sec-hd"><span class="n">03</span><h2>Exposure adjacency</h2><span class="note">labelled box · adjacency, never impact</span></div>
 <div class="grid2">
-  <div class="box commercial"><h3>EXPOSURE CLASSES ADJACENT TO THIS COHORT</h3><ul><li><b>Two hurricane landfalls, opposite sides of the basin.</b> The cohort's scored hurricane rows are CONUS — &gt;=64 kt at 1 of 12 (8.3%, 95% Wilson 1-35%) and MEXICO — &gt;=64 kt at 1 of 12 (8.3%, 95% Wilson 1-35%). ANITA 1977 is the Mexican one, ashore in Tamaulipas at 120 kt; ALICIA 1983 is the CONUS one, ashore in Texas at 100 kt. Both rows are regions. Neither is a terminal, a platform or a refinery.</li><li><b>Severity resolution.</b> The intensity ladder is all the archive publishes: reached TS 10 of 12 (83.3%, 95% Wilson 55-95%), Cat 1 3 of 12 (25.0%, 9-53%), Cat 3 2 of 12 (16.7%, 5-45%), Cat 5 1 of 12 (8.3%, 1-35%). Cat 3 is the severity step most energy exposure is written around; on this cohort that row is two members wide.</li><li><b>Timing.</b> Both timing rows are clocked from genesis and count events, not storms. TIME TO ts: n=10, median 21 h (p25 7.5, p75 33). TIME TO landfall_conus: n=22, median 65.5 h (p25 36.75, p75 176.25) — 22 landfall crossings, not 22 storms; members that came ashore more than once contribute more than once, and only 10 of the 12 reached CONUS at all. 97L has no genesis clock running, so neither row is a lead time for it.</li><li><b>Geography, not assets.</b> The reference cell sits in the north-central Gulf. The archive holds track points and landfall rows — not lease blocks, terminals, refineries or grid nodes — so proximity to the drawn geography is the whole of what can be said. CONUS is the finest landfall resolution the archive scores; state resolution does not exist as a row, so there is no state row to refuse.</li><li><b>Not scored.</b> Production, throughput, liquefaction windows, outage counts, restoration. No proxy for any of them is published here, and none should be constructed from the rows above.</li></ul></div>
-  <div class="box refusal"><h3>WHAT THIS PAGE IS NOT</h3><p>No prices, no trades, no view on gas, power, refined products or freight. No state rates — the archive does not score states, and no named member's landfall is converted into one. Rows are genesis-conditioned and assume formation: not P(forms), not a cone, not a track for 97L. The NHC advisory is the forecast; this is the record standing behind it, and no forecast skill is claimed.</p><p>Two rows this archive holds are not scored here at all. On this cohort <b>hawaii:any</b> returns <b>OUT OF SCOPE -- unscoreable here</b> — 0 in scope in the North Atlantic since 1971, 11 archive-wide against the 10 required — and <b>hawaii:hurricane</b> returns <b>BASE RATE ONLY -- unscoreable</b> — 0 in scope, 2 archive-wide against the 10 required. Those are the archive's refusals, not ours.</p></div>
+  <div class="box commercial"><h3>EXPOSURE CLASSES ADJACENT TO THIS COHORT</h3><p>Two hurricane landfalls, opposite sides of the basin. The cohort's scored hurricane rows are CONUS — &gt;=64 kt at 1 of 12 (8.3%, 95% Wilson 1-35%) and MEXICO — &gt;=64 kt at 1 of 12 (8.3%, 95% Wilson 1-35%). ANITA 1977 is the Mexican one, ashore in Tamaulipas at 120 kt; ALICIA 1983 is the CONUS one, ashore in Texas at 100 kt. Both rows are regions. Neither is a terminal, a platform or a refinery. Severity resolution. The intensity ladder is all the archive publishes: reached TS 10 of 12 (83.3%, 95% Wilson 55-95%), Cat 1 3 of 12 (25.0%, 9-53%), Cat 3 2 of 12 (16.7%, 5-45%), Cat 5 1 of 12 (8.3%, 1-35%). Cat 3 is the</p></div>
+  <div class="box refusal"><h3>WHAT THIS PAGE IS NOT</h3><p>No prices, no trades, no view on gas, power, refined products or freight. No state rates — the archive does not score states, and no named member's landfall is converted into one. Rows are genesis-conditioned and assume formation: not P(forms), not a cone, not a track for 97L. The NHC advisory is the forecast; this is the record standing behind</p></div>
 </div>
 </section>
 
@@ -420,7 +428,9 @@ table.ledger.sysgrid{table-layout:fixed}
 </section>
 
 <div class="spacer"></div>
-<p class="disclaim">RESEARCH ONLY — NOT A FORECAST. Storm Atlas is a historical genesis/outcome engine. Every rate on this page is GENESIS-CONDITIONED: it assumes a tropical cyclone forms and describes what the historical record did next. It is not P(forms), not a live feed, and not a forecast cone. To combine with a formation probability: P(reaches X) = P(forms) × P(reaches X | forms). Landfall does not decompose that way and is counted jointly, never as a product of marginals.</p>
-<footer class="ft"><div class="l"><b>ARCHIVE</b> 3,959 storms · 224,153 track points · 3,379 landfall rows · 33,054 environment records<br><b>METHODOLOGY</b> 1.1.0 &nbsp; <b>PACK</b> 134661125525f27a &nbsp; <b>ARCHIVE BUILT</b> 2026-08-18T05:18:57Z<br><b>SOURCES</b> ibtracs.EP.csv · ibtracs.NA.csv · ships.EP.txt · ships.CP.txt · ships.AL.txt · hurdat2.nepac.txt · hurdat2.atl.txt</div><div class="r">RESEARCH ONLY<br>NOT A FORECAST<br>MILLIBAR / STORM ATLAS</div></footer>
+<footer class="ft">
+    <p class="disclaim ft-disclaim">RESEARCH ONLY — NOT A FORECAST. Storm Atlas is a historical genesis/outcome engine. Every rate on this page is GENESIS-CONDITIONED: it assumes a tropical cyclone forms and describes what the historical record did next. It is not P(forms), not a live feed, and not a forecast cone. To combine with a formation probability: P(reaches X) = P(forms) × P(reaches X | forms). Landfall does not decompose that way and is counted jointly, never as a product of marginals.</p>
+    <div class="ft-row"><div class="l"><b>ARCHIVE</b> 3,959 storms · 224,153 track points · 3,379 landfall rows · 33,054 environment records<br><b>METHODOLOGY</b> 1.1.0 &nbsp; <b>PACK</b> 134661125525f27a &nbsp; <b>ARCHIVE BUILT</b> 2026-08-18T05:18:57Z<br><b>SOURCES</b> ibtracs.EP.csv · ibtracs.NA.csv · ships.EP.txt · ships.CP.txt · ships.AL.txt · hurdat2.nepac.txt · hurdat2.atl.txt</div><div class="r">RESEARCH ONLY<br>NOT A FORECAST<br>MILLIBAR / STORM ATLAS</div></div>
+  </footer>
 </div>
 </body></html>
