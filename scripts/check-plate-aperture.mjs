@@ -3,7 +3,8 @@
  *
  * TWO ASPECT BOUNDS, AND THEY FAIL AT DIFFERENT VIEWPORTS.
  *
- *   FLOOR 1.67    Derived, not chosen, and derived from the APERTURE rather than from empty
+ *   FLOOR 1.67    RETIRED with the composition -- see the note beside the ceiling below. It was
+ *                 derived from the APERTURE rather than from empty
  *                 ocean: the opening view must contain the four research corridors, which span
  *                 120 degrees of longitude; the clamp allows 61.37 world-units of latitude; and
  *                 Leaflet CEILS the clamp fit to a quarter zoom step, costing up to a factor of
@@ -51,7 +52,6 @@ const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dir, "..");
 const DOCS = resolve(ROOT, "docs");
 
-const FLOOR = 1.67;
 const CEILING = 3.2;
 
 let failures = 0;
@@ -107,19 +107,49 @@ const open = async (query, w, h) => {
   await page.waitForTimeout(900);
 };
 
-/* The plate's own box, the shell's row sum, and whether the deck gave up any height. */
+/* The plate's own box, the declared band it fills, and the width the matrix got below it.
+ *
+ * `blank` USED TO BE THE VIEWPORT LESS THE SHELL'S FOUR ROWS, because the shell was four rows
+ * summing to the viewport. It is a page now: the matrix, the limits and the apparatus are under
+ * the first band, so the document is taller than the screen by design and that subtraction would
+ * measure the composition rather than a defect. What it MEANT -- no paper on the first screen
+ * that nothing is using -- is measured where it still means that: inside the band, as the gap
+ * between the two columns' feet. A column that stops short of the other is the beige remainder,
+ * on whichever side of the gutter it appears. */
 const measure = () => page.evaluate(() => {
-  const shell = document.querySelector(".atlas-instrument");
   const plate = document.querySelector(".at-plate");
-  if (!shell || !plate) return null;
+  const above = document.querySelector(".atlas-above");
+  const band = document.querySelector(".atlas-plate-row");
+  const col = document.querySelector(".atlas-stage-col");
+  const answer = document.querySelector("[data-answer-col]");
+  if (!plate || !band || !col) return null;
   const b = plate.getBoundingClientRect();
-  const used = [...shell.children].reduce((a, c) => a + c.getBoundingClientRect().height, 0);
   const ev = document.querySelector("[data-evidence-row]");
+  const stacked = getComputedStyle(band).gridTemplateColumns.trim().split(/\s+/).length === 1;
   return {
     w: Math.round(b.width), h: Math.round(b.height),
     ar: b.height ? b.width / b.height : null,
-    blank: Math.round(window.innerHeight - used),
-    evidence: ev ? Math.round(ev.getBoundingClientRect().height) : null,
+    stacked,
+    band: Math.round(band.getBoundingClientRect().height),
+    above: above ? Math.round(above.getBoundingClientRect().height) : null,
+    /* THE PAPER ON THE FIRST SCREEN THAT NOTHING IS USING, and it can appear in three places:
+       between the two columns' feet, under the last thing in the figure column, or under the
+       last thing in the answer. The first is a column that stopped short of the other; the other
+       two are a column whose own content stopped short of the box it was given -- which is what
+       an aspect ceiling on the plate produces, and the reason it is retired. */
+    blank: (() => {
+      if (stacked || !answer) return 0;
+      const foot = (el) => {
+        const kids = [...el.children].filter((c) => c.getBoundingClientRect().height > 0);
+        return kids.length ? kids[kids.length - 1].getBoundingClientRect().bottom
+          : el.getBoundingClientRect().bottom;
+      };
+      const cb = col.getBoundingClientRect().bottom, ab = answer.getBoundingClientRect().bottom;
+      return Math.round(Math.max(Math.abs(cb - ab), cb - foot(col), ab - foot(answer)));
+    })(),
+    evidence: ev ? Math.round(ev.getBoundingClientRect().width) : null,
+    usable: Math.round(band.getBoundingClientRect().width
+      - 2 * parseFloat(getComputedStyle(band).paddingLeft)),
     docked: !!document.querySelector(".atlas-dock"),
   };
 });
@@ -142,11 +172,18 @@ for (const [w, h] of VIEWPORTS) {
   const wide = w >= h * 1.9 ? "  (wide/short — the ceiling's case)" : "";
   const tall = h >= w ? "  (tall — the floor's case)" : "";
   const label = `${String(w + "x" + h).padEnd(10)} plate ${m.w}x${m.h}, aspect ${m.ar.toFixed(3)}`;
-  ok(`${label} — at or above the ${FLOOR} floor${tall}`, m.ar >= FLOOR - 0.002,
-     `aspect ${m.ar.toFixed(3)} is below ${FLOOR}: the opening view loses a research corridor`);
-  ok(`${label} — at or below the ${CEILING} ceiling${wide}`, m.ar <= CEILING + 0.002,
+  /* THE FLOOR IS RETIRED WITH THE COMPOSITION, AND IT IS THE ONLY BOUND THAT WENT.
+     "The plate may not be taller than the archive's own frame fills" was a rule about SURPLUS:
+     past 1.67 the extra height is latitude with nothing in it. Under a declared band the plate
+     takes the band so that the figure column and the answer end on one baseline, and the
+     alternative to that surplus is not a shorter plate -- it is 150px of blank page under the
+     map with the answer running past it, measured at 1920. Ocean the frame does not fill beats
+     paper nothing fills. The CEILING is untouched: past 3.2 a single East Pacific track stops
+     being the subject of its own plate, and that is about legibility rather than surplus. */
+  ok(`${label} — at or below the ${CEILING} ceiling${wide}${tall}`, m.ar <= CEILING + 0.002,
      `aspect ${m.ar.toFixed(3)} is above ${CEILING}`);
-  ok(`${String(w + "x" + h).padEnd(10)} no blank plane`, m.blank === 0, `${m.blank}px unaccounted`);
+  ok(`${String(w + "x" + h).padEnd(10)} no blank plane in the band`, m.blank <= 2,
+     `the band's columns end ${m.blank}px apart`);
 }
 
 /* THE TWO FROZEN PLATE BOXES, MEASURED IN THE PAGE.
@@ -157,34 +194,40 @@ for (const [w, h] of VIEWPORTS) {
  * this asserts what they actually produce, which is the half a token check cannot see. A ledger
  * widened to make a cramped table fit moves both of these, and that is exactly the change that
  * should have to be argued for rather than merged. */
-console.log("\n[aperture] and the plate is the frozen box at the two widths the design states");
-for (const [w, h, want] of [[1440, 900, 834], [1920, 1080, 1180]]) {
+console.log("\n[aperture] and the plate holds the contract's share at the two stated widths");
+for (const [w, h, lo, hi] of [[1440, 900, 0.57, 0.59], [1920, 1080, 0.60, 0.62]]) {
   await open("", w, h);
   const m = await measure();
-  ok(`${String(w + "x" + h).padEnd(10)} plate is ${want}px wide`, m && m.w === want,
-     m ? `${m.w}px — the ledger measure, the page padding or the gutter has moved` : "no plate");
+  const share = m ? m.w / m.usable : 0;
+  ok(`${String(w + "x" + h).padEnd(10)} plate is ${(100 * share).toFixed(1)}% of the usable width`,
+     !!m && share >= lo && share <= hi,
+     m ? `${m.w}px of ${m.usable}px — the answer measure, the page padding or the gutter has moved`
+       : "no plate");
 }
 
-/* THE FOUR VIEWPORT TARGETS, AS RANGES. Every bound above can be satisfied by a plate that is
-   still taking two thirds of the screen, which is the state this pass replaced. These are what
-   was actually asked for, and the deck's height is asserted with each of them -- a plate inside
-   its range that got there by squeezing the answer would be the same failure wearing a
-   different number. */
-console.log("\n[aperture] and it lands inside the stated range at each target viewport");
-const TARGETS = [
-  [1440, 900, 490, 510],
-  [1600, 900, 530, 550],
-  [1920, 1080, 700, 715],
-  [2560, 1080, 710, 730],
-  [3440, 1440, 1070, 1090],
-];
-for (const [w, h, lo, hi] of TARGETS) {
+/* THE PLATE FILLS THE BAND, AND THE MATRIX GETS THE PAGE.
+ *
+ * WHAT THIS ASSERTED. Four frozen plate heights per viewport, each paired with "the deck got at
+ * least 292px" -- because plate height and deck height came out of the same 1fr row and a plate
+ * inside its range that got there by squeezing the answer was the same failure wearing a
+ * different number.
+ *
+ * THEY NO LONGER COMPETE, WHICH IS THE POINT OF THE COMPOSITION. The band is declared from the
+ * viewport and the plate takes what the figure column has after its own captions; the matrix is
+ * under the band at page width and takes as much page as it needs. So the two assertions are the
+ * two halves of that: the plate is most of the band rather than a figure floating in it, and the
+ * matrix is the full measure rather than a column. A plate that shrank to make room for
+ * something in its own column still fails the first; a matrix pushed back into a rail fails the
+ * second. */
+console.log("\n[aperture] the plate fills the band, and the matrix gets the page");
+for (const [w, h] of [[1440, 900], [1600, 900], [1920, 1080], [2560, 1080], [3440, 1440]]) {
   await open("", w, h);
   const m = await measure();
-  ok(`${String(w + "x" + h).padEnd(10)} plate ${m.h}px, wanted ${lo || "≤"}–${hi}`,
-     m.h >= lo - 1 && m.h <= hi + 1, `${m.h}px is outside [${lo}, ${hi}]`);
-  ok(`${String(w + "x" + h).padEnd(10)} the deck got the rest — ${m.evidence}px`,
-     m.evidence >= 292, `evidence fell to ${m.evidence}px`);
+  const share = m.h / m.band;
+  ok(`${String(w + "x" + h).padEnd(10)} the plate is ${(100 * share).toFixed(0)}% of the band`,
+     share >= 0.6, `${m.h}px of a ${m.band}px band`);
+  ok(`${String(w + "x" + h).padEnd(10)} and the matrix has the page's own measure`,
+     m.evidence >= m.usable - 1, `matrix ${m.evidence}px against ${m.usable}px of usable width`);
 }
 
 /* THE STATES THAT MOVE BOTH TERMS. A docked inspector narrows the plate; a transport shortens
@@ -211,8 +254,8 @@ console.log("\n[aperture] and through the states that change the plate's box");
          bought out of the one element whose job is to be large. So the aperture is unchanged by
          a selection, and that is asserted rather than assumed. */
       ok(`${String(w + "x" + h).padEnd(10)} selected storm — plate ${m.w}x${m.h}, aspect ${m.ar.toFixed(3)}`,
-         m.docked && m.ar >= FLOOR - 0.002 && m.ar <= CEILING + 0.002,
-         m.docked ? `aspect ${m.ar.toFixed(3)} outside [${FLOOR}, ${CEILING}]` : "the inspector did not dock");
+         m.docked && m.ar <= CEILING + 0.002,
+         m.docked ? `aspect ${m.ar.toFixed(3)} above ${CEILING}` : "the inspector did not dock");
       ok(`${String(w + "x" + h).padEnd(10)} selected storm — no blank plane`, m.blank === 0, `${m.blank}px`);
       /* THE RULE THE ROW MODEL RESTS ON, STATED AS IT ACTUALLY HOLDS.
        *
@@ -259,33 +302,33 @@ if (process.argv.includes("--self-test")) {
      term is what holds the bound. A seed that does not actually move the aspect out of range is
      reported as unchecked rather than counted as a pass. */
   const SEEDS = [
-    /* THE FLOOR IS THE ONE THE APERTURE DEPENDS ON, so it is seeded two ways: dropped to the
-       value it used to hold, and removed outright. The first is the exact regression a reader of
-       the old file would introduce by "restoring" a number they remembered. */
-    { name: "the floor dropped back to 1.421 — a tall workstation crops a research corridor",
-      at: [1440, 2000],
-      css: "[data-atlas].atlas-shell.atlas-instrument{--at-plate-ar:1.421!important}",
-      broke: (m) => m.ar < FLOOR - 0.002 },
-    { name: "the floor removed — the plate takes every pixel a tall viewport has",
-      at: [1440, 2000],
-      css: `[data-atlas].atlas-instrument .atlas-stage{max-height:none!important}`,
-      broke: (m) => m.ar < FLOOR - 0.002 },
+    /* THE CEILING IS THE BOUND THE APERTURE STILL DEPENDS ON, and the two seeds below are the
+       two ways a reader would reach past it: a stage told to be short, and a plate told to fill
+       a band it should have been capped in. */
     { name: "the ceiling dropped — a wide, short workstation goes panoramic",
       at: [1920, 900],
       css: `[data-atlas].atlas-instrument .atlas-stage{
               min-height:0!important;max-height:200px!important}`,
       broke: (m) => m.ar > CEILING + 0.002 },
-    /* THE LEDGER MEASURE IS A BOUND ON THE PLATE NOW, and this is the seed that says so: a
-       ledger widened to make a cramped table fit takes the plate off the frozen box, and nothing
-       in the aspect envelope notices, because the aspect is a shape and this is a width. */
-    { name: "the ledger widened — the plate leaves the frozen 834px box",
+    /* THE ANSWER'S MEASURE IS A BOUND ON THE PLATE, and this is the seed that says so: an answer
+       widened to make a cramped ladder fit takes the plate out of the contract's share, and
+       nothing in the aspect envelope notices, because the aspect is a shape and this is a width. */
+    { name: "the answer widened — the plate falls out of the contract's share",
       at: [1440, 900],
-      css: "[data-atlas].atlas-shell.atlas-instrument{--at-ledger:640px!important}",
-      broke: (m) => m.w !== 834 },
-    { name: "the instrument capped and centred — the aspect holds but blank plane returns",
-      at: [1440, 1600],
-      css: `[data-atlas].atlas-shell.atlas-instrument{padding-block:120px!important}`,
-      broke: (m) => m.blank !== 0 },
+      css: "[data-atlas].atlas-shell.atlas-instrument{--at-answer:700px!important}",
+      broke: (m) => m.w / m.usable < 0.57 },
+    /* AND THE BLANK PLANE, WHICH IS NOW PAPER INSIDE THE BAND RATHER THAN A ROW SUM. The way it
+       comes back is a bound applied to the PLATE instead of to the band: the map stops filling
+       the figure column, and the paper under it is the remainder the composition exists to end.
+       The band's own cap is the same bound applied where it costs nothing -- see the height on
+       .atlas-plate-row -- and this seed is the difference between the two. */
+    { name: "the aspect bound moved from the band to the plate — paper returns under the map",
+      at: [1440, 900],
+      css: `[data-atlas].atlas-instrument .atlas-plate-row{height:auto!important;
+              min-height:calc(100vh - 300px)!important}
+            [data-atlas].atlas-instrument .atlas-stage{flex:none!important;
+              height:calc(var(--at-plate-avail) / 2.2)!important}`,
+      broke: (m) => m.blank > 2 },
   ];
 
   for (const seed of SEEDS) {
@@ -305,7 +348,7 @@ if (process.argv.includes("--self-test")) {
     await page.waitForTimeout(300);
     const m = await measure();
     ok("an unrelated style change leaves the bound intact",
-       m.ar >= FLOOR - 0.002 && m.ar <= CEILING + 0.002 && m.blank === 0,
+       m.ar <= CEILING + 0.002 && m.blank <= 2,
        `aspect ${m.ar.toFixed(3)}, blank ${m.blank}`);
   }
 }

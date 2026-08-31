@@ -170,7 +170,7 @@ const read = () => page.evaluate(() => {
     qh: q ? +q.getBoundingClientRect().height.toFixed(2) : null,
     x: +b.x.toFixed(2), y: +b.y.toFixed(2), w: +b.width.toFixed(2), h: +b.height.toFixed(2),
     lat: +c.lat.toFixed(4), lon: +c.lng.toFixed(4), z: +m.getZoom().toFixed(4),
-    ledger: shell ? getComputedStyle(shell).getPropertyValue("--at-ledger").trim() : null,
+    ledger: shell ? getComputedStyle(shell).getPropertyValue("--at-answer").trim() : null,
     cols: deck ? getComputedStyle(deck).gridTemplateColumns : null,
     hasVs: !!document.querySelector(".at-dc-vs"),
     hasRefusal: !!document.querySelector("[data-refusal]"),
@@ -204,7 +204,7 @@ const why = (a, b) => {
   out.push(`  after   ${fmt(b)}`);
   const d = ["x", "y", "w", "h"].map((k) => `${k}${(b[k] - a[k] >= 0 ? "+" : "")}${(b[k] - a[k]).toFixed(2)}`);
   out.push(`  delta   ${d.join(" ")} · lat${(b.lat - a.lat).toFixed(3)} lon${(b.lon - a.lon).toFixed(3)} z${(b.z - a.z).toFixed(3)}`);
-  if (a.ledger !== b.ledger) out.push(`  cause?  --at-ledger ${a.ledger}  ->  ${b.ledger}`);
+  if (a.ledger !== b.ledger) out.push(`  cause?  --at-answer ${a.ledger}  ->  ${b.ledger}`);
   if (a.cols !== b.cols) out.push(`  ledger-internal (not itself a failure): deck tracks ${a.cols}  ->  ${b.cols}`);
   return out.join("\n");
 };
@@ -469,15 +469,21 @@ for (const [w, h] of VIEWPORTS) {
  * exactly the same. So the violation is MANUFACTURED and the gate is required to catch it: the
  * ledger is widened by 60px from a stylesheet injected at runtime, which is precisely the shape
  * of the defect this gate was written for -- a state-dependent measure moving the plate -- and
- * the run fails if that goes unnoticed. */
+ * the run fails if that goes unnoticed.
+ *
+ * THE MEASURE IT WIDENS IS `--at-answer` NOW. The right-hand column was a scrolling ledger and is
+ * an eight-row answer; the token changed name with it. Left pointing at `--at-ledger` the seed
+ * injected a variable nothing reads, the plate did not move, and the gate reported that its own
+ * detector had stopped detecting -- which is exactly what this section is for and exactly what it
+ * caught. */
 if (SELF_TEST) {
-  console.log("\n  ── the seed: a ledger that widens must be caught ───────────");
+  console.log("\n  ── the seed: an answer column that widens must be caught ───────────");
   await open("", 1440, 900);
   const before = await read();
-  await page.addStyleTag({ content: "[data-atlas].atlas-shell.atlas-instrument{--at-ledger:546px}" });
+  await page.addStyleTag({ content: "[data-atlas].atlas-shell.atlas-instrument{--at-answer:619px}" });
   await page.waitForTimeout(SETTLE);
   const after = await read();
-  ok("a 60px ledger widening is detected as a plate move",
+  ok("a 60px answer-column widening is detected as a plate move",
      !!before && !!after && sizeMoved(before, after),
      "the detector did not fire on a seeded violation — it is no longer checking anything");
 }

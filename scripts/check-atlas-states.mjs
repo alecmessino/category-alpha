@@ -97,27 +97,53 @@ const AUDIT = () => {
   const shell = document.querySelector(".atlas-instrument");
   if (!shell) { bad.push("the instrument did not render"); return { bad, seen }; }
 
-  /* THE FOUR ROWS, IN ORDER. The question and its cohort line, then the body -- plate left,
-     ledger right -- then the transport, then the colophon. The identity strip and the condition
-     strip are gone from the top: identity is the colophon at the foot and the query is the
-     sentence itself, so the first thing on the surface is the question and the second is what
-     it is asked of. */
+  /* THE READING ORDER, AND IT IS THE COMPOSITION. The declared first band -- the question, then
+     plate left and the eight-row answer right -- then the transport, then the complete matrix at
+     page width with the limits and the apparatus under it, then the colophon. The identity strip
+     and the condition strip are gone from the top: identity is the colophon at the foot and the
+     query is the sentence itself, so the first thing on the surface is the question and the
+     second is what it is asked of.
+     `.atlas-above` is the box the head and the band share so that the plate and the answer end
+     on one baseline; its own two children are asserted below, because a wrapper that could hold
+     anything in any order would make this check say nothing. */
   const order = [...shell.children].map((c) => c.className.split(" ")[0]);
-  const want = ["at-head", "atlas-plate-row", "atlas-transport", "at-colophon"];
+  const want = ["atlas-above", "atlas-transport", "atlas-evidence", "at-colophon"];
+  const above = shell.querySelector(".atlas-above");
+  const inner = above ? [...above.children].map((c) => c.className.split(" ")[0]) : [];
+  if (JSON.stringify(inner) !== JSON.stringify(["at-head", "atlas-plate-row"])) {
+    bad.push(`the declared band holds ${JSON.stringify(inner)}`);
+  }
   if (JSON.stringify(order.slice(0, 4)) !== JSON.stringify(want)) {
     bad.push(`row order is ${JSON.stringify(order.slice(0, 4))}`);
   }
-  /* AND THE PLATE AND THE LEDGER ARE SIMULTANEOUS, which is the whole architecture: the plate
-     takes the left column of the body row and the ledger the right, so a reader reads a rate
-     while looking at what is drawn. Asserted as geometry rather than as class names -- side by
-     side means their boxes overlap vertically and not horizontally. */
+  /* AND THE PLATE AND THE ANSWER ARE SIMULTANEOUS, which is still the whole architecture: a
+     reader reads a rate while looking at what is drawn. What changed is WHICH evidence sits
+     beside the plate -- eight rows rather than the entire matrix -- so the box this is asserted
+     against is the answer, and the matrix below is asserted separately, as a full-width block
+     that starts under the band rather than beside it. Side by side means their boxes overlap
+     vertically and not horizontally; under means the reverse. */
   const stage = document.querySelector(".atlas-stage");
-  const ledger = document.querySelector("[data-evidence-row]");
-  if (stage && ledger && innerWidth >= 900) {
-    const a = stage.getBoundingClientRect(); const b = ledger.getBoundingClientRect();
+  const answer = document.querySelector("[data-answer-col]");
+  const matrix = document.querySelector("[data-evidence-row]");
+  if (stage && answer && innerWidth > 1180) {
+    const a = stage.getBoundingClientRect(); const b = answer.getBoundingClientRect();
     if (!(a.right <= b.left + 1 && a.top < b.bottom && b.top < a.bottom)) {
-      bad.push(`the plate and the ledger are not side by side: plate ${Math.round(a.left)}..`
-        + `${Math.round(a.right)}, ledger ${Math.round(b.left)}..${Math.round(b.right)}`);
+      bad.push(`the plate and the answer are not side by side: plate ${Math.round(a.left)}..`
+        + `${Math.round(a.right)}, answer ${Math.round(b.left)}..${Math.round(b.right)}`);
+    }
+    /* AND THE TWO END TOGETHER. A column that stops short of the other is the beige remainder
+       the composition exists to end, on whichever side of the gutter it appears. */
+    const col = stage.closest(".atlas-stage-col");
+    if (col && Math.abs(col.getBoundingClientRect().bottom - b.bottom) > 2) {
+      bad.push(`the band's columns do not share a baseline: figure ends at `
+        + `${Math.round(col.getBoundingClientRect().bottom)}, answer at ${Math.round(b.bottom)}`);
+    }
+  }
+  if (stage && matrix && innerWidth > 1180) {
+    const a = stage.getBoundingClientRect(); const m = matrix.getBoundingClientRect();
+    if (!(m.top >= a.bottom - 1)) {
+      bad.push(`the matrix is not under the band: plate ends at ${Math.round(a.bottom)}, `
+        + `matrix starts at ${Math.round(m.top)}`);
     }
   }
 
@@ -132,12 +158,14 @@ const AUDIT = () => {
     const b = plate.getBoundingClientRect();
     const ar = b.width / b.height;
     const docked = !!document.querySelector("[data-inspector-dock]");
-    /* THE TWO APERTURE BOUNDS, AND THE HARD HEIGHT CAP IS NOT ONE OF THEM ANY MORE. 500px
-       existed because the deck sat UNDER the map and every pixel of plate height came out of
-       visible rows. Beside a ledger with its own full-height column there is no such trade, and
-       the bound that replaced it is the aspect floor -- derived in atlas.css from the research
-       corridors the opening view has to hold. check-plate-aperture owns that derivation. */
-    if (ar < 1.668) bad.push(`plate aspect ${ar.toFixed(3)} below the 1.67 floor`);
+    /* ONE APERTURE BOUND NOW, AND IT IS THE ONE ABOUT LEGIBILITY RATHER THAN SURPLUS.
+       The 1.67 floor said the plate may not be TALLER than the archive's own frame fills,
+       because the surplus is empty latitude. Under a declared band the plate takes the band, so
+       that both of its columns end on one baseline, and the surplus is ocean rather than paper:
+       measured at 1440 the ceiling would leave 150px of blank page under the map with the answer
+       running past it. The ceiling is retired in atlas.css and check-atlas-adherence asserts it
+       stays retired. The floor is untouched -- past 3.2 a single East Pacific track is a
+       horizontal scratch -- and check-plate-aperture owns its derivation. */
     if (b.width <= 2001 && ar > 3.202) {
       bad.push(`plate aspect ${ar.toFixed(3)} above the 3.2 ceiling`);
     }
@@ -172,14 +200,21 @@ const AUDIT = () => {
   const hasStatusColumn = !!document.querySelector(".at-deck-head .at-dc-status");
   for (const row of document.querySelectorAll("[data-outcome]")) {
     const name = row.getAttribute("data-outcome");
-    const refusal = row.querySelector("[data-refusal]");
+    /* THE ROW DECLARES ITS OWN STATE; THE EXPLANATION IS ELSEWHERE. This read `[data-refusal]`
+       INSIDE the row, which worked only while every refused row carried its own sentence. The
+       sentences moved to one grouped block per governing refusal beneath the matrix, and this
+       audit then saw zero refusals on a surface that refuses exactly as many contracts as
+       before -- every rule below went vacuous and the coverage ledger lost every `refusal:KIND`.
+       The row now says so itself, and that is the thing this loop is about. */
+    const refusalKind = row.getAttribute("data-refusal-state");
+    const refusal = refusalKind !== null;
     const status = row.querySelector(".at-dc-status");
     if (hasStatusColumn && !status) bad.push(`${name}: no status cell in the row`);
     if (refusal && !status) {
       bad.push(`${name}: refused, and the deck is rendering no status column at all`);
     }
     if (refusal) {
-      seen.push("refusal:" + refusal.getAttribute("data-refusal"));
+      if (refusalKind) seen.push("refusal:" + refusalKind);
       /* THE CELLS, NOT THE PROSE. A conditioned-on row's reason legitimately contains "100%" --
          "a rate would be 100% because of how the question was asked, not because of anything the
          record says" -- and that sentence is the refusal, not a published rate. Scanning the
@@ -289,7 +324,13 @@ for (const [name, query, w, h] of STATES) {
 
 /* ANSWER DENSITY, AT THE VIEWPORT THE ACCEPTANCE TEST NAMES. Five things, all fully on screen
    with nothing scrolled: the question, the cohort and its denominator, the map, the outcome
-   rates, and something qualifying them. */
+   rates, and something qualifying them.
+
+   WHERE THEY ARE READ FROM CHANGED WITH THE COMPOSITION. These used to be read off the deck,
+   because the deck was what sat beside the plate. It is under the band now, at page width, and
+   what is beside the plate is the eight-row answer -- so the rates this counts are the answer's,
+   and "0px of scroll" means the whole ladder, not the last rung of a table that goes on below
+   the fold. The rule did not move; the element that has to satisfy it did. */
 console.log("\n[states] answer density at 1440x900 — the acceptance target");
 {
   await open("", 1440, 900);
@@ -297,21 +338,24 @@ console.log("\n[states] answer density at 1440x900 — the acceptance target");
     const vis = (el) => { if (!el) return false; const b = el.getBoundingClientRect();
       return b.width > 0 && b.height > 0 && b.top >= -1 && b.bottom <= innerHeight + 1
         && b.left >= -1 && b.right <= innerWidth + 1; };
-    const cells = (rs, cs) => [...document.querySelectorAll(rs)].map((r) => r.querySelector(cs)).filter(Boolean);
-    const quals = [...document.querySelectorAll("[data-refusal],[data-archive-gaps],[data-unknown-note],[data-landfall-note]")]
-      .filter(vis).concat(cells(".at-deck-data", ".at-dc-status").filter((e) => vis(e) && e.textContent.trim()));
-    const rates = cells("[data-outcome]", ".at-dc-rate");
-    const intensity = [...document.querySelectorAll("[data-outcome]")]
-      .filter((r) => /CATEGORY|TROPICAL/.test(r.getAttribute("data-outcome") || ""));
-    const last = intensity[intensity.length - 1];
+    const rows = [...document.querySelectorAll("[data-finding]")];
+    const rates = rows.map((r) => r.querySelector(".at-ans-rate")).filter(Boolean);
+    const quals = rows.map((r) => r.querySelector(".at-ans-st"))
+      .filter((e) => e && vis(e) && e.textContent.trim())
+      .concat([...document.querySelectorAll("[data-limits-pointer]")].filter(vis));
     return {
       question: vis(document.querySelector("[data-question]")),
+      /* THE DENOMINATOR TRAVELS WITH THE NUMERATOR ON EVERY ROW, so the cohort is stated both as
+         the effective sample above the ladder and as `n / N` on each finding. */
       cohort: vis(document.querySelector("[data-cohort-size]"))
-        && cells("[data-deck-group]", ".at-dc-outcome").some(vis),
+        && rows.some((r) => vis(r.querySelector(".at-ans-sup") || r)),
       map: vis(document.querySelector(".at-plate")),
       outcomes: rates.filter(vis).length > 0,
       qualification: quals.length > 0,
-      lastIntensityRate: last ? vis(last.querySelector(".at-dc-rate")) : false,
+      /* THE WHOLE LADDER, NOT ITS FIRST RUNG. Eight findings is the contract's number and every
+         one of them is above the fold at this viewport. */
+      allEight: rows.length === 8 && rows.every(vis),
+      rows: rows.length, visible: rows.filter(vis).length,
     };
   });
   const names = { question: "1 · the question", cohort: "2 · the cohort and its denominator",
@@ -320,7 +364,8 @@ console.log("\n[states] answer density at 1440x900 — the acceptance target");
   let hits = 0;
   for (const k of Object.keys(names)) { if (d[k]) hits++; ok(names[k], d[k]); }
   ok(`answer density is ${hits} of 5`, hits === 5, `${hits} of 5`);
-  ok("and the last intensity rate needs 0px of scroll", d.lastIntensityRate);
+  ok("and the whole eight-row answer needs 0px of scroll", d.allEight,
+     `${d.visible} of ${d.rows} findings on screen`);
 }
 
 /* WHAT THE MATRIX ACTUALLY REACHED. Printed rather than asserted where the archive decides, and

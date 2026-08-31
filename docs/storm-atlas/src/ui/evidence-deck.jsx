@@ -110,7 +110,7 @@ function statusOfScoreable(delta) {
   return delta.overlap ? "MIXED" : "SUPPORTED";
 }
 
-const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
+export const pct1 = (x) => `${(100 * x).toFixed(1)}%`;
 
 /* THE COLUMN LIST. Every consumer of the grid reads this and nothing else.
  *
@@ -280,23 +280,10 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
    * exactly that distinction; a bound that erases it would undo the split on screen.
    *
    * The repetition the bound exists to prevent is real, though: below the sample gate every
-   * contract refuses on the SAME sentence, twelve times over. So the two rules are reconciled
-   * the way the panel already reconciled them -- by HOISTING rather than truncating. A refusal
-   * line shared by more than one row is stated once beneath the group and the rows it speaks for
-   * print no line at all; a line unique to its row is printed in full, where it is the finding
-   * rather than noise. Either way every row keeps its mark, its status word and its rate slot,
-   * so what is hoisted is the SENTENCE and never the refusal.
-   *
-   * WHAT COUNTS AS THE SAME LINE IS THE WHOLE LINE -- kind, counts and sentence, see hoistKeyOf.
-   * Keyed on the sentence alone, one line came to speak for rows it does not describe. */
-  const hoistCounts = new Map();
-  for (const g of groups) {
-    for (const row of g.rows) {
-      const key = hoistKeyOf(row);
-      if (key) hoistCounts.set(key, (hoistCounts.get(key) || 0) + 1);
-    }
-  }
-  const shared = new Set([...hoistCounts].filter(([, n]) => n > 1).map(([k]) => k));
+   * contract refuses on the SAME sentence, twelve times over. The deck answers that below the
+   * matrix now rather than inside it -- one block per governing refusal, each distinct sentence
+   * printed once with the contracts it speaks for -- so no row prints a sentence at all and
+   * there is nothing left in the table for a truncation bound to clip. See GroupedLimits. */
 
   /* THE TEMPLATE IS COMPOSED FROM THE SAME LIST THE CELLS ARE, so a column that is not emitted
      has no track and a track with no column cannot exist. The track SIZES stay in atlas.css as
@@ -338,15 +325,15 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
               <div className="at-deck-groupnote" data-group-note={g.key}>{g.note}</div>
             ) : null}
             {collapsed ? null : g.rows.map((row) => (
-              <DataRow key={row.key} row={row} shape={shape} shared={shared} />
+              <DataRow key={row.key} row={row} shape={shape} />
             ))}
-            {collapsed ? null : <SharedReason group={g} shared={shared} />}
             {collapsed ? null : <GroupQualification which={g.key} result={r} />}
           </React.Fragment>
         );
       })}
 
       <TimingFold open={timingOn} onToggle={onToggleTiming} />
+      <GroupedLimits groups={groups} onEvidence={onEvidence} />
 
 
 
@@ -436,16 +423,24 @@ export function EvidenceDeck({ result, comparison, subject, onEvidence, foldTimi
    the row that renders it, and the deck deciding whether the column exists at all. Two
    expressions that had to agree would eventually not, and the day they disagreed a refusal
    would lose its word. */
-function statusWordOf(row) {
-  const { cell, unscoreable, delta, selfContribution } = row;
-  const refused = !!unscoreable || (cell && (cell.status === CIRCULAR || cell.rate === null));
+/* THE THREE TESTS, ONCE. Every reading of "is this row refused" on this surface -- the deck's
+   own cells, the answer ladder beside the plate, the grouped limits below the matrix -- goes
+   through this, so a row cannot be refused in one place and scoreable in another. */
+export function isRefusedRow(row) {
+  const { cell, unscoreable } = row;
+  return !!unscoreable || !!(cell && (cell.status === CIRCULAR || cell.rate === null));
+}
+
+export function statusWordOf(row) {
+  const { delta, selfContribution } = row;
+  const refused = isRefusedRow(row);
   if (refused) return REFUSALS[refusalKindOfRow(row)].title;
   if (selfContribution) return "SELF-CONTRIBUTION";
   return statusOfScoreable(delta);
 }
 
 /* The refusal kind, from the same three tests, for the same reason. */
-function refusalKindOfRow(row) {
+export function refusalKindOfRow(row) {
   const { cell, unscoreable } = row;
   if (unscoreable) return refusalKindOf(unscoreable);
   if (cell && cell.status === CIRCULAR) return "CONDITIONED_ON";
@@ -559,7 +554,7 @@ function GroupRow({ group, shape, collapsed, onExpand }) {
  * which is what makes "a status detached from its row" unreachable rather than merely unlikely.
  * A refused row takes the refused branch for the rate cell AND the status cell in the same
  * expression; there is no arrangement of props that produces one without the other. */
-function DataRow({ row, shape, shared }) {
+function DataRow({ row, shape }) {
   const { cols, subject, onEvidence } = shape;
   const { label, tone, cell, unscoreable, delta, timing, contractKey, selfContribution } = row;
   const refused = !!unscoreable || (cell && (cell.status === CIRCULAR || cell.rate === null));
@@ -620,13 +615,13 @@ function DataRow({ row, shape, shared }) {
             {cell.n_storms ? <> / {cell.n_storms.toLocaleString()}</> : null}
           </span>
         ) : null}
-        {/* THE SCOPE COUNTS ARE NOT IN THIS CELL ANY MORE -- see RowRefusal. They are one
+        {/* THE SCOPE COUNTS ARE NOT IN THIS CELL ANY MORE -- see LimitBlock. They are one
             measured sentence, `8 in the NA basin since 2022 · 181 archive-wide · 10 needed`,
             and an 84px numeric track cannot hold it: set `nowrap` it ran 350px across the
             ledger and painted over three other rows' outcome names; set to wrap it was five
             lines of prose in the column that exists to carry `n / N`. It belongs with the
             refusal it qualifies, which is where a reader is already reading why this row has
-            no rate. The string itself is unchanged and so is the row it is on. */}
+            no rate. The string itself is unchanged. */}
       </span>
     ),
     /* VS ARCHIVE, OR THE SUBJECT. With no storm selected the column compares this cohort with
@@ -675,6 +670,14 @@ function DataRow({ row, shape, shared }) {
   return (
     <div className={"at-deck-row at-deck-data" + (selfContribution ? " at-deck-self" : "")}
       data-outcome={label} data-contract-row={contractKey || undefined}
+      /* THE ROW STILL DECLARES THAT IT IS REFUSED, AND WHICH REFUSAL GOVERNS IT. It used to
+         declare that by CONTAINING a `data-refusal` block, so removing the prose from the row
+         removed the fact with it -- and the state audit, which reads refusal coverage off the
+         rows, went quiet on a surface that refuses exactly as much as it did. `data-refusal-state`
+         is the state, not the explanation: the explanation is one block below the matrix, and
+         `data-refusal` stays reserved for it, because check-atlas-dom holds everything carrying
+         that attribute to naming the way out. Same hook the answer ladder's rows use. */
+      data-refusal-state={refused ? (kind || "") : undefined}
       data-self-contribution={selfContribution ? "" : undefined} role="row">
 
       {cols.map((k) => out[k])}
@@ -699,10 +702,15 @@ function DataRow({ row, shape, shared }) {
           CHANGE THIS. A wider cohort would carry a rate…". It also put `data-refusal` on an
           element naming an exit and nothing to exit FROM, which is the one thing that attribute
           must never mean. */}
-      {refused && !(shared && shared.has(hoistKeyOf(row))) ? (
-        <RowRefusal kind={kind} cell={cell} unscoreable={unscoreable}
-          onEvidence={onEvidence && contractKey ? () => onEvidence(contractKey) : undefined} />
-      ) : null}
+      {/* AND NO ROW CARRIES ITS OWN SENTENCE ANY MORE. Hoisting stated a shared line once per
+          GROUP, which was the right answer while the deck was a scrolling column: it took twelve
+          identical paragraphs down to one. It still left every UNSHARED refusal printing its own
+          block between two rows of a table -- six of them on a conditioned East Pacific cohort,
+          each four lines of prose in the middle of the matrix -- and a reader scanning rates read
+          them as the answer's texture. Under the composition the matrix is a table and the
+          limits are a section beneath it: one block per governing refusal, every distinct
+          sentence stated once with the contracts that share it, and the remedy said once rather
+          than once per row. See GroupedLimits. */}
       {selfContribution ? <SelfContribution row={row} subject={subject} /> : null}
     </div>
   );
@@ -749,69 +757,120 @@ function RemedyLine({ kind }) {
   );
 }
 
-/* AT MOST EIGHTEEN WORDS, CARRYING THE COUNT. Never an alert box, never a tint, never a coloured
-   background -- a refusal is part of the argument, not an error in it. */
-function RowRefusal({ kind, cell, unscoreable, onEvidence }) {
-  const r = REFUSALS[kind];
-  const statement = unscoreable ? unscoreable.reason
-    : kind === "CONDITIONED_ON" ? cell.reason
-      : cell.refused_reason;
+
+/* ── LIMITS & EXCLUSIONS: ONE BLOCK PER GOVERNING REFUSAL ──────────────────────────────────
+ *
+ * WHAT THIS REPLACES. A refusal used to be stated on the row it governed -- the archive's own
+ * sentence, its counts and its way out, between two rows of the table -- with identical lines
+ * hoisted to one per group. Measured on a conditioned East Pacific cohort: six OUT OF SCOPE
+ * blocks, each four lines, interleaved through a sixteen-row matrix, and the reader scanning
+ * rates read the prose as the table's texture rather than as its qualification.
+ *
+ * WHAT IS PRESERVED, EXACTLY. Every row keeps its mark, its state word and its counts -- panel
+ * rule 4 is untouched, and a refused row still says so where it is. What moves is the SENTENCE.
+ * Each governing refusal gets one block; inside it, every DISTINCT sentence the engine wrote is
+ * printed once, verbatim, with the contracts that share it named beside it and their own counts
+ * with them. Nothing is summarised, nothing is truncated and no reason speaks for a row it does
+ * not describe -- which is the same rule the group-level hoist enforced, applied across the
+ * matrix instead of inside one group.
+ *
+ * THE WAY OUT IS SAID ONCE PER KIND, and that is the whole economy: the remedy is a fact about
+ * the REFUSAL, not about the contract, so twelve rows sharing a kind shared twelve copies of it.
+ */
+function GroupedLimits({ groups, onEvidence }) {
+  const byKind = new Map();
+  for (const g of groups) {
+    for (const row of g.rows) {
+      const kind = refusalKindOfRow(row);
+      if (!kind) continue;
+      if (!byKind.has(kind)) byKind.set(kind, []);
+      byKind.get(kind).push(row);
+    }
+  }
+  if (!byKind.size) return null;
   return (
-    <div className="at-deck-say" data-refusal={r.kind}>
-      {/* WHAT THE ARCHIVE DOES PUBLISH HERE, ON THE LINE THAT SAYS WHY IT PUBLISHES NO RATE.
-          Both counts, because their difference IS the finding: `8 in the NA basin since 2022`
-          against `181 archive-wide` says "your population cannot reach these", which is a
-          different statement from "they do not exist". Same string, same title, same row -- it
-          has moved out of a numeric cell that could not hold it and onto the sentence it
-          qualifies, which is the slot the panel's own Refusal has always put it in. */}
-      {unscoreable ? (
-        <span className="at-need" title="events in scope · archive-wide · required">
-          {countsOf(unscoreable)}
+    <section className="at-deck-limitgroups" data-limit-groups>
+      <div className="at-limitgroups-head">
+        <span className="at-foot-k">LIMITS &amp; EXCLUSIONS</span>
+        <span className="at-limitgroups-note">
+          one explanation per governing refusal — every row above carries its own state and count
         </span>
-      ) : null}
-      {/* VERBATIM: this row is the only place the sentence is said. A row whose whole line is
-          shared with another renders no line at all -- see DataRow. Never truncated: see the
-          note in EvidenceDeck. */}
-      <span className="at-say-text">{statement}</span>
-      {/* THE LINE THAT SEPARATES A REFUSAL A READER CAN ACT ON FROM ONE NOBODY CAN. */}
+      </div>
+      {[...byKind].map(([kind, rows]) => (
+        <LimitBlock key={kind} kind={kind} rows={rows} onEvidence={onEvidence} />
+      ))}
+    </section>
+  );
+}
+
+function LimitBlock({ kind, rows, onEvidence }) {
+  const r = REFUSALS[kind];
+  /* DISTINCT SENTENCES, IN THE ORDER THE ROWS APPEAR, each with the contracts it speaks for.
+   *
+   * ONE LINE REPLACES N, SO THE KEY IS EVERYTHING THOSE N LINES WOULD HAVE PRINTED -- and this
+   * line prints three things, of which the block already fixes one:
+   *
+   *   kind    which way out there is. It is the BLOCK, so every line inside one is already
+   *           agreed on it. Keyed on the sentence alone and grouped across kinds, the shared
+   *           line hard-coded RATE_REFUSED -- so ?i=cat4, where five contracts refuse
+   *           CONDITIONED_ON because the cohort was defined by the outcome, was told "a wider
+   *           cohort would carry a rate: drop a condition, widen the radius, or extend the
+   *           seasons". None of those three moves a circular contract.
+   *   counts  the scope/archive/required triple, published on this line and not derivable from
+   *           the sentence. A BASE RATE ONLY reason names only the ARCHIVE-WIDE total, so two
+   *           regions with the same total and different in-scope counts write the same sentence
+   *           and publish different numbers. Not reachable in today's archive -- hawaii:hurricane
+   *           is the only contract under the archive-wide gate -- which is exactly why it belongs
+   *           in the key rather than in a comment about why it cannot happen yet.
+   *   reason  the sentence itself, which is what grouping was always about.
+   *
+   * Joined on NUL, the one character neither can contain, so no two distinct pairs collide. */
+  const byReason = new Map();
+  for (const row of rows) {
+    const counts = countsOf(row.unscoreable) || "";
+    const reason = reasonOf(row) || "";
+    const key = `${counts}\u0000${reason}`;
+    if (!byReason.has(key)) byReason.set(key, { counts, reason, labels: [] });
+    byReason.get(key).labels.push(row.label);
+  }
+  const first = rows.find((row) => row.contractKey);
+  return (
+    <div className="at-limit" data-refusal={r.kind} data-limit-kind={r.kind}>
+      <div className="at-limit-head">
+        <span className="at-mark" data-mark={markGroupOf(kind)} aria-hidden="true">
+          {MARKS[markGroupOf(kind)].glyph}
+        </span>
+        <span className="at-limit-title">{r.title}</span>
+        <span className="at-limit-count">
+          {rows.length} CONTRACT{rows.length === 1 ? "" : "S"}
+        </span>
+      </div>
+      {[...byReason.values()].map((b, i) => (
+        /* THE LABELS ARE PUBLISHED TWICE: joined for the reader, enumerated for a machine.
+           A contract label can itself contain the separator -- `Hawaii · ≥64 KT` is one
+           contract, not two -- so anything that needs the list back has to read the array
+           rather than split the rendered line. check-atlas-published-values did split it,
+           and reported the Hawaii hurricane contract as unrefused and a phantom `Hawaii`
+           as refused. */
+        <div className="at-limit-line" key={i} data-contracts={JSON.stringify(b.labels)}>
+          <span className="at-limit-which">{b.labels.join(" · ")}</span>
+          {b.counts ? (
+            <span className="at-need" title="events in scope · archive-wide · required">
+              {b.counts}
+            </span>
+          ) : null}
+          <span className="at-say-text">{b.reason}</span>
+        </div>
+      ))}
       <RemedyLine kind={kind} />
-      {onEvidence ? (
-        <button type="button" className="at-say-link" data-evidence-link onClick={onEvidence}>
-          SEE THE EVIDENCE →
-        </button>
+      {onEvidence && first ? (
+        <button type="button" className="at-say-link" data-evidence-link
+          onClick={() => onEvidence(first.contractKey)}>SEE THE EVIDENCE →</button>
       ) : null}
     </div>
   );
 }
 
-/* THE WHOLE OF WHAT A ROW'S REFUSAL LINE WOULD SAY, AS ONE KEY.
- *
- * Hoisting replaces N lines with one, so the key has to be everything those N lines would have
- * printed. All three parts are load-bearing and each was reached by a different route:
- *
- *   kind    A hoisted line names a way out, and which way out there is IS the kind. Keyed on the
- *           sentence alone, the hoisted line hard-coded RATE_REFUSED -- so ?i=cat4, where five
- *           contracts refuse CONDITIONED_ON because the cohort was defined by the outcome, was
- *           told "a wider cohort would carry a rate: drop a condition, widen the radius, or
- *           extend the seasons". None of those three moves a circular contract; the fifth rule
- *           is escaped by removing the CONDITION, which is what CONDITIONED_ON's own remedy says.
- *   counts  The scope/archive/required triple is published on this line and it is not derivable
- *           from the sentence. A BASE RATE ONLY reason names only the ARCHIVE-WIDE total, so two
- *           regions with the same total and different in-scope counts write the same sentence
- *           and publish different numbers. Not reachable in today's archive -- hawaii:hurricane
- *           is the only contract under the archive-wide gate -- which is exactly why it belongs
- *           in the key rather than in a comment about why it cannot happen yet.
- *   reason  The sentence itself, which is what hoisting was always about.
- *
- * Two rows may be spoken for by one line only when all three agree. Joined on NUL, the one
- * character none of the three can contain, so no two distinct triples can collide. */
-function hoistKeyOf(row) {
-  const reason = reasonOf(row);
-  if (!reason) return null;
-  const kind = refusalKindOfRow(row);
-  if (!kind) return null;
-  return [kind, countsOf(row.unscoreable) || "", reason].join("\u0000");
-}
 
 /* WHICH SENTENCE A ROW WOULD PRINT, so repetition can be counted before anything is rendered. */
 function reasonOf(row) {
@@ -822,43 +881,6 @@ function reasonOf(row) {
   return c.rate === null ? (c.refused_reason || null) : null;
 }
 
-/* ONE SENTENCE, ONCE, UNDER THE GROUP THAT SHARES IT. Below the sample gate every contract in a
-   group refuses on the same words -- twelve lines of one fact. Hoisted here, the rows keep their
-   marks and their status words and the reason is stated in full exactly once. */
-function SharedReason({ group, shared }) {
-  /* ONE LINE PER HOISTED KEY, IN THE ORDER THE ROWS APPEAR. A group can hoist more than one: its
-     contracts share the sample-gate sentence while its out-of-scope regions share another, and
-     folding those into a single element would put one kind's way out under the other kind's
-     refusal -- which is the shape this whole function existed in before. */
-  const seen = new Set();
-  const lines = [];
-  for (const row of group.rows) {
-    const key = hoistKeyOf(row);
-    if (!key || !shared.has(key) || seen.has(key)) continue;
-    seen.add(key);
-    lines.push({ key, kind: refusalKindOfRow(row), reason: reasonOf(row),
-      need: countsOf(row.unscoreable) });
-  }
-  if (!lines.length) return null;
-  return (
-    <>
-      {lines.map((l) => (
-        /* EVERYTHING THE ROWS WOULD HAVE PUBLISHED, ON THE LINE THAT NOW SPEAKS FOR THEM: the
-           counts, the sentence, and the way out OF THIS KIND. The rows it replaces render
-           nothing, so anything missing here is published nowhere. */
-        <div className="at-deck-say" data-refusal={l.kind} data-shared-reason key={l.key}>
-          {l.need ? (
-            <span className="at-need" title="events in scope · archive-wide · required">
-              {l.need}
-            </span>
-          ) : null}
-          <span className="at-say-text">{l.reason}</span>
-          <RemedyLine kind={l.kind} />
-        </div>
-      ))}
-    </>
-  );
-}
 
 /* THE BOUND IS ON THE STATEMENT, NOT ON THE ARGUMENT. Eighteen words is what fits in the deck
    without pushing the next row off the screen; the whole reason is one click away and is never
@@ -1130,7 +1152,7 @@ function unknownOf(r) {
  * group the archive's own ladder order is the default; landfall regions order by evidence, which
  * is what the panel already did -- alphabetical order buried the one region these storms reached
  * under four they did not. */
-function buildGroups(r, comparison, subject) {
+export function buildGroups(r, comparison, subject) {
   const groups = [];
   const tte = r.time_to_event || {};
 

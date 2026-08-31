@@ -610,6 +610,17 @@ jobs:
       - name: Verify all eight are on screen at first paint
         run: node scripts/check-atlas-acceptance.mjs --require-browser
 
+      # THE APPROVED VISUAL CONTRACT, MEASURED FRAME BY FRAME. Six frames fixed the composition --
+      # the split between plate and answer at 1920 and 1440, one declared band both columns
+      # terminate in, eight findings above the fold, the matrix in the page's own scroll, the
+      # comparison as stamp-size copy rather than a second masthead, and a pointer line carrying
+      # one fact -- and the instruction that came with them was that the gates follow the frames.
+      # Every number in this gate is read off one; where the surface and a frame disagree, the
+      # frame is what fails the run. Seeded, so a rule that stops measuring is caught rather than
+      # reported as another silent pass.
+      - name: Verify the surface holds the approved visual contract
+        run: node scripts/check-atlas-contract.mjs --self-test --require-browser
+
       # THE VISUAL RESPONSIVE MATRIX. The state matrix above drives many states at ONE width and
       # asserts what must be true of the ANSWER. This one drives five states at EVERY width the
       # ladder names and asserts what must be true of the SURFACE -- nothing clipped without a

@@ -98,11 +98,19 @@ const EIGHT = () => {
       && b.left >= -1 && b.right <= innerWidth + 1;
   };
   const deck = document.querySelector("[data-evidence-deck]");
+  /* THE EIGHT ARE READ OFF THE ANSWER, WHICH IS WHAT SITS BESIDE THE PLATE.
+     They were read off the deck because the deck held the right-hand column. Under the
+     composition it is under the band at page width and the eight-row answer is what a reader
+     has without scrolling -- so "the complete intensity ladder, every rung with its rate" is a
+     claim about the answer, and the matrix below is where the remaining contracts are. The bar
+     did not move: the whole ladder, on screen, at first paint. */
+  const ansRows = [...document.querySelectorAll("[data-finding]")];
   const rows = [...document.querySelectorAll("[data-outcome]")];
-  const intensity = rows.filter((r) => /CATEGORY|TROPICAL/.test(r.getAttribute("data-outcome") || ""));
+  const nameOf = (r) => (r.querySelector(".at-ans-label") || {}).textContent || "";
+  const intensity = ansRows.filter((r) => /CATEGORY|TROPICAL/.test(nameOf(r)));
   const LADDER = ["TROPICAL STORM", "CATEGORY 1", "CATEGORY 2", "CATEGORY 3", "CATEGORY 4",
     "CATEGORY 5"];
-  const named = intensity.map((r) => r.getAttribute("data-outcome"));
+  const named = intensity.map(nameOf);
 
   /* A RATE AND ITS INTERVAL ON THE SAME ROW. Read off the first row that publishes a rate at
      all: the pair is what must be visible, not merely a percentage.
@@ -114,16 +122,22 @@ const EIGHT = () => {
      `.at-dc-int` is still the element every gate finds it through. What must not happen -- a
      percentage published with its bounds a hover, a fold or a scroll away -- is what is
      asserted, and it is asserted at the row. */
-  const rated = rows.find((r) => {
-    const c = r.querySelector(".at-dc-rate");
+  const rated = ansRows.find((r) => {
+    const c = r.querySelector(".at-ans-rate");
     return c && /\d[\d,.]*\s*%/.test(c.textContent || "");
   });
-  const rateCell = rated && rated.querySelector(".at-dc-rate");
-  const ciInCell = rated && rated.querySelector(".at-dc-int");
+  const rateCell = rated && rated.querySelector(".at-ans-rate");
+  const ciInCell = rated && rated.querySelector(".at-ans-sup");
 
+  /* THE FIRST MATERIAL QUALIFICATION, WHERE A READER MEETS ONE. Beside the plate that is the
+     state word on a row and the line pointing at the grouped limits; in the matrix below it is
+     the refusal blocks themselves. Both count: what may not happen is a rate published on the
+     first screen with nothing qualifying it. */
   const quals = [...document.querySelectorAll(
-    "[data-refusal],[data-archive-gaps],[data-unknown-note],[data-landfall-note],[data-group-note]")]
-    .filter(vis);
+    "[data-refusal],[data-archive-gaps],[data-unknown-note],[data-landfall-note],[data-group-note],"
+    + "[data-limits-pointer]")].filter(vis)
+    .concat([...document.querySelectorAll("[data-finding] .at-ans-st")]
+      .filter((e) => vis(e) && (e.textContent || "").trim()));
 
   return {
     question: vis(document.querySelector("[data-question]")),
@@ -140,28 +154,37 @@ const EIGHT = () => {
     map: vis(document.querySelector(".at-plate")),
     cohortSize: vis(document.querySelector("[data-cohort-size]")),
     ladderComplete: LADDER.every((k) => named.includes(k))
-      && intensity.every((r) => vis(r.querySelector(".at-dc-rate"))),
+      && intensity.every((r) => vis(r.querySelector(".at-ans-rate"))),
     ladderNamed: named.join(", "),
     rateAndCi: !!(rateCell && vis(rateCell) && ciInCell && vis(ciInCell)
       && /\d[\d,.]*\s*%/.test(rateCell.textContent || "")
       && /\d/.test(ciInCell.textContent || "")),
     rateSample: rated ? `${rateCell.textContent.trim()}  ${ciInCell ? ciInCell.textContent.trim() : "(no interval)"}` : null,
+    /* THE COMPARISON IS A CELL ON EVERY ANSWER ROW AND A COLUMN IN THE MATRIX BELOW; the
+       structural claim is asserted on the matrix, the first-paint one on the answer. */
     vsColumn: !!(deck && deck.querySelector(".at-deck-head .at-dc-vs"))
-      && rows.some((r) => vis(r.querySelector(".at-dc-vs"))),
+      && ansRows.some((r) => {
+        const c = r.querySelector(".at-ans-vs");
+        return c && vis(c) && (c.textContent || "").trim();
+      }),
     statusColumn: !!(deck && deck.querySelector(".at-deck-head .at-dc-status")),
-    statusVisible: rows.some((r) => {
-      const c = r.querySelector(".at-dc-status");
+    statusVisible: ansRows.some((r) => {
+      const c = r.querySelector(".at-ans-st");
       return c && vis(c) && (c.textContent || "").trim();
     }),
     /* A ROW THAT REFUSES, ANYWHERE IN THE DECK -- above the fold or below it. The column's
        existence is a structural claim about the deck; whether one particular word is on screen
        is a claim about scroll position, and conflating the two is how the first draft of this
        gate reported a correct archive-mode deck as a broken one. */
-    refusalRows: rows.filter((r) => r.querySelector("[data-refusal]")).length,
+    refusalRows: rows.filter((r) => r.querySelector("[data-refusal]")).length
+      + ansRows.filter((r) => r.hasAttribute("data-refusal-state")).length,
     qualification: quals.length > 0,
     qualSample: quals.length ? quals[0].textContent.replace(/\s+/g, " ").trim().slice(0, 72) : null,
     mode: deck ? deck.getAttribute("data-deck-mode") : null,
     cite: vis(document.querySelector("[data-cite-cohort]")),
+    citeInPage: !!document.querySelector("[data-cite-cohort]"),
+    citeText: ((document.querySelector("[data-cite-cohort]") || {}).textContent || "")
+      .replace(/\s+/g, " ").trim().slice(0, 60),
     /* THE TYPE SCALE, MEASURED WITH THE EIGHT, AND IT IS NOW A SCALE RATHER THAN A FLOOR.
      *
      * WHAT THIS USED TO ASSERT AND WHY IT CHANGED. The rule was "nothing numeric below 12px",
@@ -179,16 +202,18 @@ const EIGHT = () => {
      * shells, and every one clears AA. Nothing is bought by shrinking type here, because
      * nothing shrinks. */
     typeScale: [...document.querySelectorAll(
-      ".at-dc-name, .at-dc-rate .at-val, .at-dc-int .at-val, .at-dc-count .at-val, .at-question-text")]
+      ".at-ans-label, .at-ans-rate, .at-ans-sup, .at-ans-st, .at-question-text")]
       .map((e) => parseFloat(getComputedStyle(e).fontSize)),
     findingType: Math.min(...[...document.querySelectorAll(
-      ".at-dc-name, .at-dc-rate .at-val")].map((e) => parseFloat(getComputedStyle(e).fontSize))),
-    /* AND NOTHING SCROLLS. A deck that answers eight of eight because the reader is looking at
-       the top of a scrolled column has answered none of them at first paint. */
-    deckScrolled: (() => {
+      ".at-ans-label, .at-ans-rate")].map((e) => parseFloat(getComputedStyle(e).fontSize))),
+    /* AND NOTHING IS SCROLLED. An answer that is complete because the reader is already part
+       way down the page has answered none of it at first paint. The evidence region is checked
+       too, and the number it reports should be structurally impossible now: it is in the page,
+       behind no scroller of its own. */
+    deckScrolled: Math.max(scrollY, (() => {
       const row = document.querySelector("[data-evidence-row]");
       return row ? row.scrollTop : 0;
-    })(),
+    })()),
     sideways: document.documentElement.scrollWidth > innerWidth + 1,
   };
 };
@@ -233,14 +258,24 @@ for (const [w, h] of VIEWPORTS) {
       ok("7c · and a status word is on screen beside its own rate", d.statusVisible);
     }
     ok("8 · the first material qualification", d.qualification, d.qualSample);
-    ok("· and the cohort can be cited from where the question is", d.cite);
+    /* THE CITATION IS AT THE FOOT OF THE PAGE, NOT ON THE FIRST SCREEN, and that is the
+       composition rather than a loss: the apparatus -- method, pathway, environment, the cohort
+       spec -- is collapsed below the matrix, and the colophon carries a citation control at the
+       foot of every page. What must hold is that it is REACHABLE and states this cohort, which
+       is asserted against the document rather than the viewport. */
+    ok("· and the cohort can be cited from the page", d.citeInPage, d.citeText);
     {
-      const STEPS = [30, 14, 11.5, 10.5, 9.5];
+      /* THE ANSWER'S FIVE STEPS. The frame's own scale -- 30 · 14 · 11.5 · 10.5 · 9.5 -- still
+         governs the matrix below and is asserted where it applies; these are the contract's, for
+         the eight rows beside the plate: a rate at 27 over a name at 17 over its arithmetic at
+         12, with the question unchanged at 30. A phone steps the rate down to 25 and nothing
+         else, which is why 25 is on the list and 16 and 15.5 are not. */
+      const STEPS = [30, 27, 25, 24, 17, 12, 10.5];
       const off = [...new Set(d.typeScale)].filter((v) => !STEPS.includes(v));
-      ok("· every element is on one of the frame's five steps", off.length === 0,
+      ok("· every element is on one of the answer's steps", off.length === 0,
          `${off.join(", ")}px is not one of ${STEPS.join(" · ")}`);
       ok("· and nothing that carries a finding is below the finding step",
-         d.findingType >= 14, `smallest finding type is ${d.findingType}px`);
+         d.findingType >= 17, `smallest finding type is ${d.findingType}px`);
     }
     ok("· nothing is scrolled at first paint", d.deckScrolled === 0, `${d.deckScrolled}px`);
     ok("· and the page does not scroll sideways", !d.sideways);
