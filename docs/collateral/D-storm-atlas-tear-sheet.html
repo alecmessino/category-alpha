@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Storm Atlas — Tear Sheet</title>
+<style>
+@page { size: Letter; margin: 10mm; }
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --ink-900:#0f172a; --ink-700:#334155; --ink-600:#475569; --ink-400:#94a3b8;
+  --line-300:#cbd5e1; --line-200:#e2e8f0; --paper-50:#f8fafc; --paper-100:#f4f5f8; --white:#fff;
+  --cyan-500:#0ea5e9; --green-600:#16a34a; --red-600:#dc2626; --amber-700:#b45309;
+  --violet-600:#7c3aed; --blue-600:#0066ff;
+  --font-display:'Source Serif 4',Georgia,serif;
+  --font-sans:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --sp-1:2px; --sp-2:3px; --sp-3:5px; --sp-4:7px; --sp-5:9px; --sp-6:11px; --sp-7:14px; --sp-8:18px;
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:var(--paper-100);color:var(--ink-900);
+  font-family:var(--font-sans);font-size:8px;line-height:1.32;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+/* THE SCREEN BOX IS THE PRINT BOX, EXACTLY.
+   @page is Letter with a 10 mm margin, so the printed content area is 196 x 259 mm. The
+   on-screen sheet is that box and nothing else -- no padding of its own -- with the paper
+   margin drawn by a border instead, so a block that would paginate on paper overflows visibly
+   here. Measured against the PDF: an on-screen sheet that fits is a printed page that fits. */
+.sheet{width:216mm;height:279mm;margin:0 auto;background:var(--white);
+  padding:0;position:relative;border:10mm solid var(--white);
+  box-shadow:0 1px 10px rgba(15,23,42,.14);
+  display:flex;flex-direction:column;overflow:hidden}
+@media print{ body{background:#fff}
+  .sheet{box-shadow:none;margin:0;border:0;width:auto;height:auto;padding:0;
+    break-after:page;overflow:visible}
+  .sheet:last-child{break-after:auto} }
+
+/* ---- masthead ------------------------------------------------------------------ */
+.mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:var(--sp-3);margin-bottom:var(--sp-4)}
+.mh-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-6)}
+.mh-brand{font-family:var(--font-mono);font-size:8.4px;font-weight:600;letter-spacing:2.2px;
+  text-transform:uppercase;color:var(--ink-900)}
+.mh-brand .sep{color:var(--ink-400);margin:0 6px}
+.mh-doc{font-family:var(--font-mono);font-size:7.8px;letter-spacing:.7px;color:var(--ink-600);
+  text-transform:uppercase;text-align:right;white-space:nowrap}
+.mh-title{font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1.12;
+  margin:var(--sp-3) 0 var(--sp-1);letter-spacing:-.2px;max-width:80%}
+.mh-sub{font-size:8px;color:var(--ink-600);max-width:88%;line-height:1.42}
+.mh-rule{display:flex;gap:var(--sp-5);margin-top:var(--sp-3);flex-wrap:wrap}
+.mh-rule .kv{font-family:var(--font-mono);font-size:7.6px;letter-spacing:.5px;color:var(--ink-600);
+  text-transform:uppercase}
+.mh-rule .kv b{color:var(--ink-900);font-weight:600}
+
+/* ---- section furniture ---------------------------------------------------------- */
+.sec{margin-top:var(--sp-4)}
+.sec-hd{display:flex;align-items:baseline;gap:var(--sp-3);border-left:2.5px solid var(--ink-900);
+  padding-left:var(--sp-3);margin-bottom:var(--sp-3)}
+.sec-hd h2{font-family:var(--font-mono);font-size:7.8px;font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;margin:0;color:var(--ink-900)}
+.sec-hd .n{font-family:var(--font-mono);font-size:7.4px;color:var(--ink-400);letter-spacing:1px}
+.sec-hd .note{font-size:8px;color:var(--ink-600);margin-left:auto;font-style:italic}
+.lede{font-size:8.2px;line-height:1.4;color:var(--ink-700);margin:0 0 var(--sp-3)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4)}
+.spacer{flex:1 1 auto;min-height:var(--sp-4)}
+
+/* ---- ledger --------------------------------------------------------------------- */
+table.ledger{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:7.1px}
+table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mono);font-size:6.1px;
+  letter-spacing:.9px;text-transform:uppercase;color:var(--ink-600);padding-bottom:2px}
+.ledger th{text-align:right;font-weight:600;font-size:6.3px;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--ink-600);border-bottom:1px solid var(--ink-900);
+  padding:2px var(--sp-3);white-space:nowrap}
+.ledger th:first-child{text-align:left}
+.ledger td{text-align:right;padding:1.8px var(--sp-3);border-bottom:1px solid var(--line-200);
+  white-space:nowrap}
+.ledger td:first-child{text-align:left;font-family:var(--font-sans);font-size:7.4px;font-weight:500}
+.ledger tr.band td{background:var(--paper-50)}
+.ledger tr.rule-top td{border-top:1px solid var(--line-300)}
+.ledger .grp td{background:var(--ink-900);color:#fff;font-family:var(--font-mono);font-size:6.1px;
+  letter-spacing:1px;text-transform:uppercase;padding:2px var(--sp-3);text-align:left}
+.ledger .frac{color:var(--ink-900);font-weight:500}
+.ledger .rate{font-weight:600;font-size:7.8px}
+.ledger .rate.refused{color:var(--red-600);font-weight:600;font-size:7.4px;letter-spacing:.4px}
+.ledger .ci{color:var(--ink-600)}
+.ledger .status{text-align:left;font-size:6px;letter-spacing:.3px;white-space:normal;
+  max-width:130px;line-height:1.25}
+.ledger .status.none{color:var(--ink-400);text-align:center}
+.ledger .status.refused{color:var(--red-600);font-weight:600}
+.ledger .status.gate{color:var(--amber-700);font-weight:600}
+.bar{display:inline-block;height:5px;background:var(--ink-900);vertical-align:middle;
+  margin-right:5px;min-width:0}
+.bar.zero{background:var(--line-300);width:1px}
+.barwrap{display:flex;align-items:center;gap:4px;justify-content:flex-end}
+.barbed{width:54px;height:5px;background:var(--line-200);position:relative;flex:0 0 54px}
+.barbed i{position:absolute;left:0;top:0;bottom:0;background:var(--ink-900)}
+.barbed u{position:absolute;top:-1.5px;bottom:-1.5px;background:rgba(14,165,233,.34);
+  border-left:1px solid var(--cyan-500);border-right:1px solid var(--cyan-500)}
+
+/* ---- cite ----------------------------------------------------------------------- */
+.cite{border-top:1px solid var(--ink-900);margin-top:var(--sp-3);padding-top:var(--sp-2)}
+.cite .k{font-family:var(--font-mono);font-size:6.9px;letter-spacing:1.3px;text-transform:uppercase;
+  color:var(--ink-600);display:block;margin-bottom:2px}
+.cite .v{font-family:var(--font-mono);font-size:6.3px;line-height:1.35;color:var(--ink-900);
+  word-break:break-word}
+.cite .u{font-family:var(--font-mono);font-size:5.8px;color:var(--blue-600);word-break:break-all;
+  display:block;margin-top:3px}
+
+/* ---- chips / badges -------------------------------------------------------------- */
+.chip{display:inline-block;font-family:var(--font-mono);font-size:6px;letter-spacing:.7px;
+  text-transform:uppercase;padding:1px 4px;border:1px solid var(--line-300);border-radius:3px;
+  color:var(--ink-700);background:var(--white);white-space:nowrap}
+.chip.solid{background:var(--ink-900);color:#fff;border-color:var(--ink-900)}
+.chip.live{background:var(--red-600);color:#fff;border-color:var(--red-600)}
+.chip.obs{background:var(--ink-900);color:#fff;border-color:var(--ink-900)}
+.chip.pre{background:var(--white);color:var(--violet-600);border-color:var(--violet-600)}
+.chip.warn{color:var(--amber-700);border-color:var(--amber-700)}
+.chip.refuse{color:var(--red-600);border-color:var(--red-600)}
+.chip.ok{color:var(--green-600);border-color:var(--green-600)}
+
+/* ---- boxes ----------------------------------------------------------------------- */
+.box{border:1px solid var(--line-300);border-radius:5px;padding:var(--sp-4);background:var(--white)}
+.box.sunken{background:var(--paper-50)}
+.box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
+.box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
+.box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
+.box h3{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1px;text-transform:uppercase;
+  margin:0 0 var(--sp-2);color:var(--ink-900)}
+.box p{margin:0 0 var(--sp-2);font-size:7.6px;line-height:1.38;color:var(--ink-700)}
+.box p:last-child{margin-bottom:0}
+.box ul{margin:0;padding-left:11px;font-size:7.6px;line-height:1.32;color:var(--ink-700)}
+.box li{margin-bottom:1.5px}
+.box li:last-child{margin-bottom:0}
+.box li b{color:var(--ink-900)}
+.disclaim{font-family:var(--font-mono);font-size:6px;letter-spacing:.3px;color:var(--ink-600);
+  line-height:1.38}
+
+/* ---- comparison strip ------------------------------------------------------------- */
+.cmp{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink-900);border-radius:6px;
+  overflow:hidden}
+.cmp>div{padding:var(--sp-3) var(--sp-4)}
+.cmp>div:first-child{border-right:1px solid var(--ink-900);background:var(--paper-50)}
+.cmp h4{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1.2px;text-transform:uppercase;
+  margin:0 0 var(--sp-3);display:flex;align-items:center;gap:5px}
+.cmp h4 .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-400);flex:0 0 6px}
+.cmp>div:last-child h4 .dot{background:var(--cyan-500)}
+.cmp ul{margin:0;padding-left:11px;font-size:7.1px;line-height:1.34;color:var(--ink-700)}
+.cmp li{margin-bottom:1px}
+
+/* ---- cards ------------------------------------------------------------------------ */
+.card{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--white);
+  display:flex;flex-direction:column;gap:1.5px}
+.card.major{border-left:3px solid var(--ink-900)}
+.card.hur{border-left:3px solid var(--ink-600)}
+.card.ts{border-left:3px solid var(--line-300)}
+.card .nm{font-family:var(--font-display);font-size:9.3px;font-weight:700;line-height:1.02}
+.card .yr{font-family:var(--font-mono);font-size:6.3px;color:var(--ink-600);letter-spacing:.4px}
+.card .pk{font-family:var(--font-mono);font-size:10.2px;font-weight:600;letter-spacing:-.2px}
+.card .pk small{font-size:6px;font-weight:400;color:var(--ink-600);letter-spacing:.6px}
+.card dl{margin:1px 0 0;display:grid;grid-template-columns:auto 1fr;gap:0 5px;
+  font-family:var(--font-mono);font-size:6px;line-height:1.28}
+.card dt{color:var(--ink-400);letter-spacing:.4px;text-transform:uppercase}
+.card dd{margin:0;color:var(--ink-700)}
+.card .lf{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-900);
+  border-top:1px solid var(--line-200);padding-top:2px;margin-top:1px;line-height:1.28}
+.card .lf .none{color:var(--ink-400)}
+
+/* ---- stat tiles -------------------------------------------------------------------- */
+.tiles{display:grid;gap:var(--sp-4)}
+.tile{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--paper-50)}
+.tile .k{font-family:var(--font-mono);font-size:6px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--ink-600);display:block;margin-bottom:2px}
+.tile .v{font-family:var(--font-mono);font-size:13px;font-weight:600;line-height:1.02;
+  letter-spacing:-.4px}
+.tile .v small{font-size:7.4px;font-weight:400;color:var(--ink-600);letter-spacing:.5px}
+.tile .s{font-family:var(--font-mono);font-size:6px;color:var(--ink-600);margin-top:2px;
+  display:block;line-height:1.35}
+.tile.refused .v{font-size:8.7px;color:var(--red-600)}
+
+/* ---- plate --------------------------------------------------------------------------- */
+.plate{border:1px solid var(--ink-900);border-radius:6px;overflow:hidden;background:#fbfcfe}
+.plate-hd{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-4);
+  padding:2.5px var(--sp-4);border-bottom:1px solid var(--ink-900);background:var(--white)}
+.plate-hd .t{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1.2px;text-transform:uppercase;
+  font-weight:600}
+.plate-hd .m{font-family:var(--font-mono);font-size:6px;color:var(--ink-600);letter-spacing:.5px}
+.plate svg{display:block;width:100%;height:auto}
+.plate-ft{display:flex;flex-wrap:wrap;gap:1px var(--sp-5);padding:2.5px var(--sp-4);
+  border-top:1px solid var(--line-200);background:var(--white)}
+.lg{display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:5.8px;
+  letter-spacing:.5px;color:var(--ink-700);text-transform:uppercase}
+.lg i{display:block;width:14px;height:0;border-top-width:1.6px;border-top-style:solid;flex:0 0 14px}
+.lg i.dot{height:6px;width:6px;border-radius:50%;border:none;flex:0 0 6px}
+.lg i.sq{height:7px;width:9px;border:1px solid;border-radius:1px;flex:0 0 9px}
+.plate-note{padding:3px var(--sp-4);border-top:1px solid var(--line-200);
+  font-size:6.7px;color:var(--ink-600);line-height:1.35;background:var(--white)}
+
+/* ---- answers rail --------------------------------------------------------------------- */
+.rail{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4);border-top:1px solid var(--ink-900);
+  border-bottom:1px solid var(--ink-900);padding:var(--sp-3) 0;margin:var(--sp-4) 0}
+.rail>div{padding-right:var(--sp-5);border-right:1px solid var(--line-200)}
+.rail>div:last-child{border-right:none;padding-right:0}
+.rail .q{font-family:var(--font-mono);font-size:6.1px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--ink-600);display:block;margin-bottom:3px}
+.rail .a{font-size:7.3px;line-height:1.34;color:var(--ink-900)}
+.rail .a b{font-weight:600}
+
+/* ---- live strip -------------------------------------------------------------------- */
+.live{border:1px solid var(--red-600);border-radius:6px;overflow:hidden}
+.live-hd{display:flex;align-items:center;gap:var(--sp-3);padding:2.5px var(--sp-4);
+  background:var(--red-600);color:#fff;font-family:var(--font-mono);font-size:6.3px;
+  letter-spacing:1.2px;text-transform:uppercase;font-weight:600}
+.live-hd .ts{margin-left:auto;letter-spacing:.6px;font-weight:400;opacity:.94}
+.live table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:6.5px}
+.live th{text-align:left;font-size:6px;letter-spacing:.8px;text-transform:uppercase;
+  color:var(--ink-600);padding:3px var(--sp-4);border-bottom:1px solid var(--line-200);font-weight:600}
+.live td{padding:2px var(--sp-4);border-bottom:1px solid var(--line-200);vertical-align:top;line-height:1.3}
+.live tr:last-child td{border-bottom:none}
+.live .nm{font-family:var(--font-sans);font-weight:600;font-size:7.3px}
+.live .sub{color:var(--ink-600);font-size:5.8px;display:block;letter-spacing:.3px}
+
+/* ---- artifact A: the merged system grid ------------------------------------------- */
+table.ledger.sysgrid{table-layout:fixed}
+.ledger.sysgrid th{white-space:normal;line-height:1.25;vertical-align:bottom}
+.ledger.sysgrid .chip{white-space:normal;display:inline-block;max-width:100%}
+.ledger.sysgrid td{vertical-align:top;padding:2px var(--sp-3);overflow-wrap:anywhere}
+.ledger td.lft{text-align:left;white-space:normal}
+.ledger .mono6{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);display:block;
+  letter-spacing:.3px;line-height:1.3}
+.ledger .mono8{font-family:var(--font-mono);font-size:6.7px;display:inline-block;margin-top:1px}
+.ledger .prose{font-family:var(--font-sans);font-size:6.9px;line-height:1.28;color:var(--ink-700);
+  margin-top:1.5px}
+.ledger .prose p{margin:0 0 2px}
+.ledger .prose p:last-child{margin-bottom:0}
+.ledger .feed{font-family:var(--font-mono);font-size:5.8px;line-height:1.3;color:var(--ink-600);
+  border-top:1px dotted var(--line-300);margin-top:2.5px;padding-top:2px}
+.feedts{color:var(--ink-400);margin-top:1.5px;letter-spacing:.2px}
+.ledger th.livecol,.ledger td.livecol{border-left:2px solid var(--red-600);
+  border-right:2px solid var(--red-600)}
+.ledger th.livecol{color:var(--red-600)}
+.box.tag{padding:6px 7px}
+.box.tag h3{font-size:6.3px;margin-bottom:2px}
+.tagbody{font-size:6.9px;line-height:1.32;color:#334155}
+.tagbody p{margin:0}
+.grid2.tight{gap:var(--sp-5);align-items:start}
+.platerow{display:grid;grid-template-columns:1.42fr 1fr;gap:var(--sp-6);align-items:start}
+.platerow .sec{margin-top:0}
+.tagstack{display:flex;flex-direction:column;gap:var(--sp-2)}
+.ledgerpair{display:grid;grid-template-columns:1fr 1.06fr;gap:var(--sp-6);align-items:start}
+.ledger.compact td{padding:1.2px var(--sp-2);font-size:6.7px}
+.ledger.compact th{padding:1.5px var(--sp-2);font-size:6px}
+.ledger.compact td:first-child{font-size:6.9px}
+.ledger.compact .rate{font-size:7.3px}
+.ledger.compact .status{font-size:5.8px;max-width:96px}
+.ledger.compact .grp td{font-size:5.8px;padding:1.5px var(--sp-2)}
+.cardrow{display:grid;grid-template-columns:repeat(8,1fr);gap:var(--sp-2)}
+.cardrow .card{padding:4px 4px}
+.cardrow .card .nm{font-size:7.8px}
+.cardrow .card .pk{font-size:8.7px}
+.cardrow .card dl{font-size:5.6px}
+.cardrow .card .lf{font-size:5.6px}
+.cardrow .card .yr{font-size:5.6px}
+.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.3;
+  font-family:var(--font-sans);font-size:7.1px;padding:2.5px var(--sp-3)}
+.cmptable td.q{font-family:var(--font-mono);font-size:6.5px;color:var(--ink-900);font-weight:500}
+.cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
+.cmptable.compact td{font-size:6.5px;padding:2px var(--sp-2)}
+.cmptable.compact td.q{font-size:6px}
+.platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
+.platecol .sec{margin-top:0}
+.triband{display:grid;grid-template-columns:1.02fr .78fr 1.3fr;gap:var(--sp-5);align-items:start}
+.grid3.tight{gap:var(--sp-5);align-items:start}
+.grid4.tight{gap:var(--sp-4);align-items:start}
+.cardsplit{display:grid;grid-template-columns:1.18fr 1fr;gap:var(--sp-6);align-items:start}
+.cardsplit .sec{margin-top:0}
+.cardsplit .grid4{gap:var(--sp-2)}
+/* The manifest is a reference document, not a one-page sheet: it may run as long as the
+   evidence does, and it paginates rather than clipping. */
+.sheet.manifest{height:auto;min-height:279mm;overflow:visible}
+.qtiles{display:grid;grid-template-columns:1.25fr 1fr;gap:var(--sp-5);align-items:start}
+.workflowrow{display:grid;grid-template-columns:.72fr 2fr;gap:var(--sp-5);align-items:start}
+.fnrow{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-5)}
+.fnrow .fn{margin-top:var(--sp-2)}
+.citepair{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
+.citepair .cite{margin-top:var(--sp-3)}
+.qline{margin-top:var(--sp-3);padding:var(--sp-3) var(--sp-4)}
+.qline p{font-size:8px;line-height:1.35}
+.citelist.two{display:grid;grid-template-columns:1fr 1fr;gap:0 var(--sp-6)}
+.citelist.two .cite:nth-child(2){border-top:1px solid var(--ink-900);margin-top:0}
+.citelist .cite{margin-top:var(--sp-2);padding-top:2px;border-top:1px solid var(--line-300)}
+.citelist .cite:first-child{border-top:1px solid var(--ink-900);margin-top:0}
+.citelist .v{font-size:6.2px;line-height:1.28}
+.citelist .u{font-size:5.9px}
+.citelist .k{font-size:6.4px}
+.ledger .cohortstat{text-align:right;font-family:var(--font-mono);font-size:7px;font-weight:600;
+  letter-spacing:.3px}
+.ledger .cohortstat.refused{color:var(--red-600)}
+.qtiles .tiles.grid4{grid-template-columns:1fr 1fr}
+.grid3.tight .sec{margin-top:0}
+.reasons{display:grid;grid-template-columns:1.5fr 1fr;gap:var(--sp-4);font-size:6.4px;line-height:1.28;
+  color:var(--ink-700);margin-top:3px}
+.reasons b{color:var(--red-600)}
+.reasons .why{color:var(--ink-600)}
+
+/* ---- two-column body flow ---------------------------------------------------------
+   A Letter page is 192 mm of usable width. One column of that at 8 px type is a very long
+   measure and a very short page; two columns roughly double the vertical budget without
+   shrinking the type further, which is the trade the density of this material actually needs. */
+.cols{column-count:2;column-gap:var(--sp-6);column-rule:1px solid var(--line-200)}
+.cols>*{break-inside:avoid;margin-top:0}
+.cols .sec{margin-top:0;margin-bottom:var(--sp-5)}
+.wide{grid-column:1/-1}
+.stack{display:flex;flex-direction:column;gap:var(--sp-4)}
+
+/* ---- footer ----------------------------------------------------------------------- */
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-3);
+  display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
+.ft .l{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);letter-spacing:.5px;
+  line-height:1.5;max-width:70%}
+.ft .l b{color:var(--ink-900)}
+.ft .r{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-400);letter-spacing:.9px;
+  text-align:right;white-space:nowrap;text-transform:uppercase}
+.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.4;
+  margin-top:var(--sp-2)}
+.fn b{color:var(--ink-900)}
+</style>
+</head><body>
+<div class="sheet">
+<header class="mh">
+  <div class="mh-top">
+    <div class="mh-brand">MILLIBAR<span class="sep">/</span>STORM ATLAS</div>
+    <div class="mh-doc">ARTIFACT D · TEAR SHEET &nbsp;·&nbsp; 1 OF 1</div>
+  </div>
+  <h1 class="mh-title">Storm Atlas</h1>
+  <p class="mh-sub"><p style="color:#dc2626;font-family:var(--font-mono);font-size:8px">[COPY SLOT "one-sentence" NOT SUPPLIED]</p>
+  <div class="mh-rule"><span class="kv">CAMERA <b>NORTH ATLANTIC + EAST PACIFIC</b></span><span class="kv">METHODOLOGY <b>1.1.0</b></span><span class="kv">PACK <b>134661125525f27a</b></span><span class="kv">STATUS <b>RESEARCH ONLY</b></span></div>
+</header>
+
+<section class="sec"><div class="sec-hd"><span class="n">01</span><h2>What a user can do</h2></div>
+<div class="grid2">
+  <div class="box"><p style="color:#dc2626;font-family:var(--font-mono);font-size:8px">[COPY SLOT "users-can" NOT SUPPLIED]</p></div>
+  <div class="box sunken"><h3>THE MOAT — SANITATION, REFUSAL, PROVENANCE</h3><p style="color:#dc2626;font-family:var(--font-mono);font-size:8px">[COPY SLOT "moat" NOT SUPPLIED]</p></div>
+</div>
+</section>
+
+<section class="sec"><div class="sec-hd"><span class="n">02</span><h2>Archive scale</h2></div>
+<table class="ledger"><caption>COLOPHON — ARCHIVE SCALE, AS BUILT</caption>
+  <thead><tr><th>Table</th><th>Rows</th><th style="text-align:left">What it holds</th></tr></thead><tbody>
+  <tr class=""><td style="font-family:var(--font-mono)">storms</td>
+      <td class="frac">3,959</td>
+      <td style="text-align:left;white-space:normal;font-family:var(--font-sans);font-size:8.6px">one row per storm: id, basin, name, season, genesis time and place, lifetime peak</td></tr><tr class="band"><td style="font-family:var(--font-mono)">track_points</td>
+      <td class="frac">224,153</td>
+      <td style="text-align:left;white-space:normal;font-family:var(--font-sans);font-size:8.6px">every fix: time, position, intensity, stage, and a quality column</td></tr><tr class=""><td style="font-family:var(--font-mono)">genesis_events</td>
+      <td class="frac">3,959</td>
+      <td style="text-align:left;white-space:normal;font-family:var(--font-sans);font-size:8.6px">first fix, first tropical fix, every threshold crossing, time-to-event</td></tr><tr class="band"><td style="font-family:var(--font-mono)">landfalls</td>
+      <td class="frac">3,379</td>
+      <td style="text-align:left;white-space:normal;font-family:var(--font-sans);font-size:8.6px">one row per crossing: region, sub-region, time, intensity, how it was detected</td></tr><tr class=""><td style="font-family:var(--font-mono)">environment</td>
+      <td class="frac">33,054</td>
+      <td style="text-align:left;white-space:normal;font-family:var(--font-sans);font-size:8.6px">fix-aligned shear, mid-level RH, 850 vorticity, potential intensity, SST, OHC, GPI</td></tr>
+  </tbody></table>
+  <p class="fn"><b>CAMERA</b> North Atlantic + East Pacific. <b>METHODOLOGY</b> 1.1.0.
+  <b>PACK</b> 134661125525f27a — a hash of every table this pack was built from, so an
+  unchanged archive produces an unchanged pack. <b>ARCHIVE BUILT</b> 2026-08-18T05:18:57Z.
+  <b>SOURCES</b> ibtracs.EP.csv, ibtracs.NA.csv, ships.EP.txt, ships.CP.txt, ships.AL.txt, hurdat2.nepac.txt, hurdat2.atl.txt. Environment coverage over genesis events:
+  see manifest — environment is a lens, not a filter.</p>
+</section>
+
+<section class="sec"><div class="sec-hd"><span class="n">03</span><h2>Two worked samples</h2><span class="note">97L and Karina · every figure replayable</span></div>
+<p class="fn"><p style="color:#dc2626;font-family:var(--font-mono);font-size:8px">[COPY SLOT "sample-note" NOT SUPPLIED]</p>
+<div class="grid2">
+<div class="box"><h3>SAMPLE 1 — INVEST 97L · PRE-GENESIS REFERENCE CELL 28.0°N 88.7°W</h3>
+    <p class="disclaim" style="margin-bottom:6px">North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
+    <table class="ledger compact"><thead><tr><th>Row</th><th>n / N</th><th>Rate</th><th>95% Wilson</th>
+      <th style="text-align:left">Status returned</th></tr></thead><tbody>
+    <tr><td>reached TS</td>
+      <td class="frac">10 / 12</td>
+      <td class="rate ">83.3%</td>
+      <td class="ci">55–95%</td>
+      <td class="status none">—</td></tr><tr><td>reached Cat 1</td>
+      <td class="frac">3 / 12</td>
+      <td class="rate ">25.0%</td>
+      <td class="ci">9–53%</td>
+      <td class="status none">—</td></tr><tr><td>reached Cat 3</td>
+      <td class="frac">2 / 12</td>
+      <td class="rate ">16.7%</td>
+      <td class="ci">5–45%</td>
+      <td class="status none">—</td></tr><tr><td>CONUS — any</td>
+      <td class="frac">10 / 12</td>
+      <td class="rate ">83.3%</td>
+      <td class="ci">55–95%</td>
+      <td class="status none">—</td></tr><tr><td>CONUS — ≥64 kt</td>
+      <td class="frac">1 / 12</td>
+      <td class="rate ">8.3%</td>
+      <td class="ci">1–35%</td>
+      <td class="status none">—</td></tr><tr><td>HAWAII — ≥64 kt</td>
+      <td class="frac">0 / 12</td>
+      <td class="rate ">0.0%</td>
+      <td class="ci">0–24%</td>
+      <td class="status gate">BASE RATE ONLY -- unscoreable</td></tr>
+    </tbody></table>
+    <div class="cite" style="margin-top:8px"><span class="k">CITE THIS COHORT</span>
+      <div class="v">STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 12 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div>
+      <a class="u" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0</a></div></div>
+<div class="box"><h3>SAMPLE 2 — HURRICANE KARINA · OBSERVED GENESIS 13.2°N 115.0°W</h3>
+    <p class="disclaim" style="margin-bottom:6px">East Pacific storms that formed within 250 km of 13.2°N 115.0°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
+    <table class="ledger compact"><thead><tr><th>Row</th><th>n / N</th><th>Rate</th><th>95% Wilson</th>
+      <th style="text-align:left">Status returned</th></tr></thead><tbody>
+    <tr><td>reached Cat 1</td>
+      <td class="frac">7 / 14</td>
+      <td class="rate ">50.0%</td>
+      <td class="ci">27–73%</td>
+      <td class="status none">—</td></tr><tr><td>reached Cat 3 (major)</td>
+      <td class="frac">4 / 14</td>
+      <td class="rate ">28.6%</td>
+      <td class="ci">12–55%</td>
+      <td class="status none">—</td></tr><tr><td>reached Cat 4</td>
+      <td class="frac">1 / 14</td>
+      <td class="rate ">7.1%</td>
+      <td class="ci">1–31%</td>
+      <td class="status none">—</td></tr><tr><td>reached Cat 5</td>
+      <td class="frac">0 / 14</td>
+      <td class="rate ">0.0%</td>
+      <td class="ci">0–22%</td>
+      <td class="status none">—</td></tr><tr><td>MEXICO — any</td>
+      <td class="frac">1 / 14</td>
+      <td class="rate ">7.1%</td>
+      <td class="ci">1–31%</td>
+      <td class="status none">—</td></tr><tr><td>CONUS — any</td>
+      <td class="frac">0 / 14</td>
+      <td class="rate ">0.0%</td>
+      <td class="ci">0–22%</td>
+      <td class="status gate">OUT OF SCOPE -- unscoreable here</td></tr>
+    </tbody></table>
+    <div class="cite" style="margin-top:8px"><span class="k">CITE THIS COHORT</span>
+      <div class="v">STORM ATLAS · East Pacific storms that formed within 250 km of 13.2°N 115.0°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 14 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div>
+      <a class="u" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=13.2%2C-115%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=13.2%2C-115%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0</a></div></div>
+</div>
+<div class="box refusal" style="margin-top:11px"><h3>SAMPLE 3 — THE REFUSAL</h3>
+  <p class="disclaim" style="margin-bottom:6px">East Pacific storms that formed within 250 km of 11.3°N 133.8°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
+  <p><b>N = 6</b>. BELOW MIN SAMPLE — rates refused. The engine returns
+  “6 storms with a known outcome &lt; min_sample=10” on every row. Counts are still published — TS
+  5 of 6, Cat 3
+  2 of 6 — because a
+  count is a fact and a rate over six storms is not one.</p>
+  <a class="u" style="font-family:var(--font-mono);font-size:7.2px;color:#0066ff;word-break:break-all"
+    href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=11.3%2C-133.8%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=11.3%2C-133.8%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0</a></div>
+</section>
+
+<section class="sec"><div class="sec-hd"><span class="n">04</span><h2>Delivery</h2></div>
+<div class="grid2">
+  <div class="box"><h3>CURRENT — SHIPPING TODAY</h3><p style="color:#dc2626;font-family:var(--font-mono);font-size:8px">[COPY SLOT "delivery" NOT SUPPLIED]</p></div>
+  <div class="box hole"><h3>PROPOSED / PILOT — NOT SHIPPING</h3><p style="color:#dc2626;font-family:var(--font-mono);font-size:8px">[COPY SLOT "pilot" NOT SUPPLIED]</p></div>
+</div>
+</section>
+
+<section class="sec"><div class="sec-hd"><span class="n">05</span><h2>What Storm Atlas adds</h2></div>
+<table class="ledger cmptable compact">
+  <thead><tr><th style="text-align:left;width:26%">The question a desk actually asks</th>
+    <th style="text-align:left;width:33%">NHC / Zoom Earth / public maps</th>
+    <th style="text-align:left;width:41%">Storm Atlas</th></tr></thead>
+  <tbody><tr class="">
+    <td class="q">Where is it now, and how strong?</td><td class="lft">The observation: position, intensity, pressure, motion — now.</td><td class="lft atlas">Silent. Storm Atlas holds no live view and makes none.</td></tr><tr class="band">
+    <td class="q">Where will it go?</td><td class="lft">The forecast cone and official track guidance, 5 days.</td><td class="lft atlas">Silent, by construction. No cone, no track forecast, no skill claim.</td></tr><tr class="">
+    <td class="q">Will it form at all?</td><td class="lft"><b>P(forms)</b> — the graphical outlook's 48 h and 7 d chance.</td><td class="lft atlas">Silent. Every rate here is conditional on formation and says nothing about it.</td></tr><tr class="band">
+    <td class="q">What happened to storms that began here before?</td><td class="lft">Not answered. No cohort, no denominator, no interval.</td><td class="lft atlas"><b>Exact n / N with a 95% Wilson interval</b> on every contract row, from a declared genesis point or pre-genesis reference cell, with the analog tracks drawn.</td></tr><tr class="">
+    <td class="q">How good is the evidence, and where does it run out?</td><td class="lft">Not answered.</td><td class="lft atlas"><b>Visible refusal.</b> Effective sample size, the min-sample gate, the archive-wide event gate, and the pre-satellite bias warning — printed beside the number, or instead of it.</td></tr><tr class="band">
+    <td class="q">Can a counterparty reproduce it?</td><td class="lft">The advisory is public; the reasoning behind a number is not reproducible from it.</td><td class="lft atlas"><b>Yes.</b> The cohort is a URL. Same question, same pack stamp, same numbers, by anyone.</td></tr>
+  </tbody></table>
+</section>
+
+<div class="spacer"></div>
+<p class="disclaim">RESEARCH ONLY — NOT A FORECAST. Storm Atlas is a historical genesis/outcome engine. Every rate on this page is GENESIS-CONDITIONED: it assumes a tropical cyclone forms and describes what the historical record did next. It is not P(forms), not a live feed, and not a forecast cone. To combine with a formation probability: P(reaches X) = P(forms) × P(reaches X | forms). Landfall does not decompose that way and is counted jointly, never as a product of marginals.</p>
+<footer class="ft"><div class="l"><b>ARCHIVE</b> 3,959 storms · 224,153 track points · 3,379 landfall rows · 33,054 environment records<br><b>METHODOLOGY</b> 1.1.0 &nbsp; <b>PACK</b> 134661125525f27a &nbsp; <b>ARCHIVE BUILT</b> 2026-08-18T05:18:57Z<br><b>SOURCES</b> ibtracs.EP.csv · ibtracs.NA.csv · ships.EP.txt · ships.CP.txt · ships.AL.txt · hurdat2.nepac.txt · hurdat2.atl.txt</div><div class="r">RESEARCH ONLY<br>NOT A FORECAST<br>MILLIBAR / STORM ATLAS</div></footer>
+</div>
+</body></html>
