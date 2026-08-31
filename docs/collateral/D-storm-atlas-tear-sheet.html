@@ -35,14 +35,14 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
   .sheet:last-child{break-after:auto} }
 
 /* ---- masthead ------------------------------------------------------------------ */
-.mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:var(--sp-2);margin-bottom:var(--sp-3)}
+.mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:var(--sp-1);margin-bottom:var(--sp-2)}
 .mh-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-6)}
 .mh-brand{font-family:var(--font-mono);font-size:8.4px;font-weight:600;letter-spacing:2.2px;
   text-transform:uppercase;color:var(--ink-900)}
 .mh-brand .sep{color:var(--ink-400);margin:0 6px}
 .mh-doc{font-family:var(--font-mono);font-size:7.8px;letter-spacing:.7px;color:var(--ink-600);
   text-transform:uppercase;text-align:right;white-space:nowrap}
-.mh-title{font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1.12;
+.mh-title{font-family:var(--font-display);font-size:12.4px;font-weight:700;line-height:1.1;
   margin:var(--sp-3) 0 var(--sp-1);letter-spacing:-.2px;max-width:80%}
 .mh-sub{font-size:8px;color:var(--ink-600);max-width:88%;line-height:1.42}
 .mh-rule{display:flex;gap:var(--sp-4) var(--sp-5);margin-top:var(--sp-2);flex-wrap:wrap}
@@ -51,10 +51,10 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 .mh-rule .kv b{color:var(--ink-900);font-weight:600}
 
 /* ---- section furniture ---------------------------------------------------------- */
-.sec{margin-top:var(--sp-3)}
+.sec{margin-top:var(--sp-2)}
 .sec-hd{display:flex;align-items:baseline;gap:var(--sp-3);border-left:2.5px solid var(--ink-900);
-  padding-left:var(--sp-3);margin-bottom:var(--sp-3)}
-.sec-hd h2{font-family:var(--font-mono);font-size:7.8px;font-weight:600;letter-spacing:1.5px;
+  padding-left:var(--sp-3);margin-bottom:var(--sp-2)}
+.sec-hd h2{font-family:var(--font-mono);font-size:7.5px;font-weight:600;letter-spacing:1.5px;
   text-transform:uppercase;margin:0;color:var(--ink-900)}
 .sec-hd .n{font-family:var(--font-mono);font-size:7.4px;color:var(--ink-400);letter-spacing:1px}
 .sec-hd .note{font-size:8px;color:var(--ink-600);margin-left:auto;font-style:italic}
@@ -64,7 +64,7 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4)}
-.spacer{flex:1 1 auto;min-height:var(--sp-4)}
+.spacer{flex:1 1 auto;min-height:0}
 
 /* ---- ledger --------------------------------------------------------------------- */
 table.ledger{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:7.1px}
@@ -74,7 +74,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   text-transform:uppercase;color:var(--ink-600);border-bottom:1px solid var(--ink-900);
   padding:2px var(--sp-3);white-space:nowrap}
 .ledger th:first-child{text-align:left}
-.ledger td{text-align:right;padding:1.8px var(--sp-3);border-bottom:1px solid var(--line-200);
+.ledger td{text-align:right;padding:1.4px var(--sp-3);border-bottom:1px solid var(--line-200);
   white-space:nowrap}
 .ledger td:first-child{text-align:left;font-family:var(--font-sans);font-size:7.4px;font-weight:500}
 .ledger tr.band td{background:var(--paper-50)}
@@ -100,7 +100,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   border-left:1px solid var(--cyan-500);border-right:1px solid var(--cyan-500)}
 
 /* ---- cite ----------------------------------------------------------------------- */
-.cite{border-top:1px solid var(--ink-900);margin-top:var(--sp-3);padding-top:var(--sp-2)}
+.cite{border-top:1px solid var(--ink-900);margin-top:var(--sp-2);padding-top:var(--sp-1)}
 .cite .k{font-family:var(--font-mono);font-size:6.9px;letter-spacing:1.3px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:2px}
 .cite .v{font-family:var(--font-mono);font-size:6.3px;line-height:1.35;color:var(--ink-900);
@@ -121,16 +121,16 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .chip.ok{color:var(--green-600);border-color:var(--green-600)}
 
 /* ---- boxes ----------------------------------------------------------------------- */
-.box{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--white)}
+.box{border:1px solid var(--line-300);border-radius:4px;padding:4px 5px;background:var(--white)}
 .box.sunken{background:var(--paper-50)}
 .box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
 .box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
 .box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
-.box h3{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1px;text-transform:uppercase;
-  margin:0 0 var(--sp-2);color:var(--ink-900)}
-.box p{margin:0 0 var(--sp-2);font-size:7.3px;line-height:1.3;color:var(--ink-700)}
+.box h3{font-family:var(--font-mono);font-size:6.5px;letter-spacing:.9px;text-transform:uppercase;
+  margin:0 0 var(--sp-1);color:var(--ink-900)}
+.box p{margin:0 0 var(--sp-1);font-size:7.2px;line-height:1.26;color:var(--ink-700)}
 .box p:last-child{margin-bottom:0}
-.box ul{margin:0;padding-left:10px;font-size:7.3px;line-height:1.28;color:var(--ink-700)}
+.box ul{margin:0;padding-left:9px;font-size:7.2px;line-height:1.24;color:var(--ink-700)}
 .box li{margin-bottom:1.5px}
 .box li:last-child{margin-bottom:0}
 .box li b{color:var(--ink-900)}
@@ -163,13 +163,13 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   color:var(--ink-700);margin-top:1px;letter-spacing:.1px}
 .card .catline{font-family:var(--font-mono);font-size:5.9px;font-weight:600;letter-spacing:.7px;
   color:var(--ink-900);margin-top:-1px;line-height:1.1}
-.card .lf{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-900);
+.card .lf{font-family:var(--font-mono);font-size:5.6px;color:var(--ink-900);
   border-top:1px solid var(--line-200);padding-top:1.5px;margin-top:1px;line-height:1.22}
 .card .lf .none{color:var(--ink-400)}
 
 /* ---- stat tiles -------------------------------------------------------------------- */
 .tiles{display:grid;gap:var(--sp-4)}
-.tile{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--paper-50)}
+.tile{border:1px solid var(--line-300);border-radius:4px;padding:4px 5px;background:var(--paper-50)}
 .tile .k{font-family:var(--font-mono);font-size:6px;letter-spacing:1px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:2px}
 .tile .v{font-family:var(--font-mono);font-size:13px;font-weight:600;line-height:1.02;
@@ -187,7 +187,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   font-weight:600}
 .plate-hd .m{font-family:var(--font-mono);font-size:6px;color:var(--ink-600);letter-spacing:.5px}
 .plate svg{display:block;width:100%;height:auto}
-.plate-ft{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);padding:1.5px var(--sp-4);
+.plate-ft{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);padding:1px var(--sp-4);
   border-top:1px solid var(--line-200);background:var(--white)}
 .lg{display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:5.8px;
   letter-spacing:.5px;color:var(--ink-700);text-transform:uppercase}
@@ -199,7 +199,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 
 /* ---- answers rail --------------------------------------------------------------------- */
 .rail{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4);border-top:1px solid var(--ink-900);
-  border-bottom:1px solid var(--ink-900);padding:var(--sp-2) 0;margin:var(--sp-3) 0}
+  border-bottom:1px solid var(--ink-900);padding:var(--sp-1) 0;margin:var(--sp-2) 0}
 .rail>div{padding-right:var(--sp-5);border-right:1px solid var(--line-200)}
 .rail>div:last-child{border-right:none;padding-right:0}
 .rail .q{font-family:var(--font-mono);font-size:6.1px;letter-spacing:1px;text-transform:uppercase;
@@ -225,12 +225,12 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 table.ledger.sysgrid{table-layout:fixed}
 .ledger.sysgrid th{white-space:normal;line-height:1.25;vertical-align:bottom}
 .ledger.sysgrid .chip{white-space:normal;display:inline-block;max-width:100%}
-.ledger.sysgrid td{vertical-align:top;padding:1.5px var(--sp-3);overflow-wrap:anywhere}
+.ledger.sysgrid td{vertical-align:top;padding:1.2px var(--sp-3);overflow-wrap:anywhere}
 .ledger td.lft{text-align:left;white-space:normal}
 .ledger .mono6{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);display:block;
   letter-spacing:.3px;line-height:1.3}
 .ledger .mono8{font-family:var(--font-mono);font-size:6.7px;display:inline-block;margin-top:1px}
-.ledger .prose{font-family:var(--font-sans);font-size:6.9px;line-height:1.28;color:var(--ink-700);
+.ledger .prose{font-family:var(--font-sans);font-size:6.8px;line-height:1.22;color:var(--ink-700);
   margin-top:1.5px}
 .ledger .prose p{margin:0 0 2px}
 .ledger .prose p:last-child{margin-bottom:0}
@@ -249,8 +249,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .platerow .sec{margin-top:0}
 .tagstack{display:flex;flex-direction:column;gap:var(--sp-2)}
 .ledgerpair{display:grid;grid-template-columns:1fr 1.06fr;gap:var(--sp-6);align-items:start}
-.ledger.compact td{padding:0.8px var(--sp-2);font-size:6.7px;line-height:1.2}
-.ledger.compact th{padding:1.5px var(--sp-2);font-size:6px}
+.ledger.compact td{padding:0.6px var(--sp-2);font-size:6.6px;line-height:1.18}
+.ledger.compact th{padding:1px var(--sp-2);font-size:5.9px}
 .ledger.compact td:first-child{font-size:6.9px}
 .ledger.compact .rate{font-size:7.3px}
 .ledger.compact .status{font-size:5.8px;max-width:none;white-space:nowrap}
@@ -263,11 +263,11 @@ table.ledger.sysgrid{table-layout:fixed}
 .cardrow .card .facts{font-size:5.5px}
 .cardrow .card .lf{font-size:5.6px}
 .cardrow .card .yr{font-size:5.6px}
-.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.26;
-  font-family:var(--font-sans);font-size:7px;padding:1.5px var(--sp-3)}
+.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.22;
+  font-family:var(--font-sans);font-size:6.9px;padding:1px var(--sp-3)}
 .cmptable td.q{font-family:var(--font-mono);font-size:6.5px;color:var(--ink-900);font-weight:500}
 .cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
-.cmptable.compact td{font-size:6.6px;padding:1px var(--sp-2);line-height:1.2}
+.cmptable.compact td{font-size:6.5px;padding:0.8px var(--sp-2);line-height:1.18}
 .cmptable.compact td.q{font-size:6px}
 .platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
 .platecol .sec{margin-top:0}
@@ -297,9 +297,9 @@ table.ledger.sysgrid{table-layout:fixed}
 .citelist.two .cite:nth-child(2){border-top:1px solid var(--ink-900);margin-top:0}
 .citelist .cite{margin-top:var(--sp-2);padding-top:2px;border-top:1px solid var(--line-300)}
 .citelist .cite:first-child{border-top:1px solid var(--ink-900);margin-top:0}
-.citelist .v{font-size:5.8px;line-height:1.24}
-.citelist .u{font-size:5.5px}
-.citelist .k{font-size:6.4px}
+.citelist .v{font-size:5.2px;line-height:1.18}
+.citelist .u{font-size:5.1px}
+.citelist .k{font-size:6px}
 .ledger .cohortstat{text-align:right;font-family:var(--font-mono);font-size:7px;font-weight:600;
   letter-spacing:.3px}
 .ledger .cohortstat.refused{color:var(--red-600)}
@@ -321,15 +321,15 @@ table.ledger.sysgrid{table-layout:fixed}
 .stack{display:flex;flex-direction:column;gap:var(--sp-4)}
 
 /* ---- footer ----------------------------------------------------------------------- */
-.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-1)}
-.ft-disclaim{margin:0 0 var(--sp-1)}
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:2px}
+.ft-disclaim{margin:0 0 1px}
 .ft-row{display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
-.ft .l{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);letter-spacing:.5px;
+.ft .l{font-family:var(--font-mono);font-size:5.4px;color:var(--ink-600);letter-spacing:.5px;
   line-height:1.5;max-width:70%}
 .ft .l b{color:var(--ink-900)}
 .ft .r{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-400);letter-spacing:.9px;
   text-align:right;white-space:nowrap;text-transform:uppercase}
-.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.32;
+.fn{font-family:var(--font-mono);font-size:6px;color:var(--ink-600);line-height:1.26;
   margin-top:var(--sp-1)}
 .fn b{color:var(--ink-900)}
 </style>
@@ -341,14 +341,14 @@ table.ledger.sysgrid{table-layout:fixed}
     <div class="mh-doc">ARTIFACT D · TEAR SHEET &nbsp;·&nbsp; 1 OF 1</div>
   </div>
   <h1 class="mh-title">Storm Atlas</h1>
-  <p class="mh-sub">Storm Atlas is a research-only historical genesis/outcome engine for the North Atlantic and East Pacific. Give it an observed genesis point</p>
+  <p class="mh-sub">A research-only historical genesis/outcome engine for the North Atlantic and East Pacific: give it an observed genesis point or a declared pre-genesis reference cell and it returns what the record did next as exact n/N with a 95% Wilson interval, names every storm in the denominator, and refuses what the record cannot carry.</p>
   <div class="mh-rule"><span class="kv">CAMERA <b>NORTH ATLANTIC + EAST PACIFIC</b></span><span class="kv">METHODOLOGY <b>1.1.0</b></span><span class="kv">PACK <b>134661125525f27a</b></span><span class="kv">STATUS <b>RESEARCH ONLY</b></span></div>
 </header>
 
 <section class="sec"><div class="sec-hd"><span class="n">01</span><h2>What a user can do</h2></div>
 <div class="grid2">
-  <div class="box"><p>Condition on a point. An observed genesis position, or a declared pre-genesis reference cell, with a stated radius and month window. The season floor is a declared boundary, not a preference: an observing-bias gap before 1971 is why the floor sits at 1971, and a cohort reaching behind it is warned rather than pooled silently. Rates are genesis-conditioned and assume formation — not P(forms), not a live feed, not a forecast cone. Retrieve the analog tracks. Every storm in the cohort, with representative members printed under a stated rule — name, season, genesis date, distance from the cell, lifetime peak, and its own landfalls as recorded. Storm Atlas implements no similarity metric, so nothing is ranked as a closest or best analog. Compare contract-row frequencies. Reached TD, TS and Cat 1 through Cat 5, each as exact n/N with its 95% Wilson interval. Time-to-threshold medians with p25 and p75 sit alongside and carry their own n: the min-sample gate governs rates, not medians, so a median can be printed on an n of one or two. Read the n before</p></div>
-  <div class="box sunken"><h3>THE MOAT — SANITATION, REFUSAL, PROVENANCE</h3><p>An interpolated fix is never allowed to establish a threshold crossing, so time-to-hurricane is never dated off a wind nobody measured. A segment crossing publishes no Saffir-Simpson class where the two bracketing fixes disagree on it — the interpolated wind stays on the row, labelled by detection method; the class derived from it does not. A cohort's defining variable is not reported back as a scored outcome, with one exception left in the open: every cohort returns reached TD at 100%, because a cohort is storms that formed. That row is definitional and carries no information; the panels here start at reached TS. Below min sample a rate</p></div>
+  <div class="box"><ul><li><b>Condition on a point.</b> An observed genesis position or a declared pre-genesis reference cell, with a stated radius and month window. The 1971 season floor is declared, not preferred: East Pacific majors were under-observed before it, and a cohort reaching behind it is warned rather than pooled silently. Rates assume formation — not P(forms), not a live feed, not a cone.</li><li><b>Retrieve the analog tracks.</b> Every storm in the cohort; representative members under a stated rule, with genesis date, distance from the cell, peak and their own recorded landfalls. No similarity metric exists, so nothing is ranked a closest or best analog.</li><li><b>Compare contract-row frequencies.</b> Reached TD, TS and Cat 1 through Cat 5, each exact n/N with its 95% Wilson interval. Time-to-threshold medians carry their own n: the min-sample gate governs rates, not medians.</li><li><b>Inspect the landfall rows.</b> conus, mexico, caribbean, central_america, hawaii, unattributed — each an “any” and a ≥64 kt pair. Which of the twelve score is a property of the cohort. State-level landfall is not scored; a sub-region is a fact about a named storm, never a rate.</li><li><b>Read the refusals as output.</b> Below min sample: counts, no rate, no interval. Out of scope, or too rare archive-wide: a status beside a figure it voids. Hawaii ≥64 kt is base rate only, 2 events archive-wide against 10.</li><li><b>Carry it into the work.</b> Set a threshold and count the members that cross it; they are named, so the count is checkable. Move the cell and watch N and the refusal move with it. Hand a reviewer the URL, not a number.</li></ul></div>
+  <div class="box sunken"><h3>THE MOAT — SANITATION, REFUSAL, PROVENANCE</h3><p>An interpolated fix never establishes a threshold crossing, so time-to-hurricane is never dated off a wind nobody measured. A segment crossing publishes no Saffir-Simpson class where the bracketing fixes disagree — the interpolated wind stays on the row, labelled by detection method; the class does not. A cohort’s defining variable is not reported back as an outcome of it, with one exception left in the open: every cohort returns reached TD at 100%, because a cohort is storms that formed. Below min sample a rate is refused rather than estimated: the same 97L cell at 150 km returns 5 storms against a minimum of 10, and every rate reads RATE REFUSED. An absent outcome is not a zero — an unrecorded intensity leaves the denominator and is counted on its own. Every figure, refusals included, carries METHODOLOGY 1.1.0, PACK 134661125525f27a and a URL that reproduces it.</p></div>
 </div>
 </section>
 
@@ -375,9 +375,9 @@ table.ledger.sysgrid{table-layout:fixed}
 </section>
 
 <section class="sec"><div class="sec-hd"><span class="n">03</span><h2>Two worked samples</h2><span class="note">97L and Karina · every figure replayable</span></div>
-<div class="lede"><p>Three cohorts follow, printed as the engine returned them. The cell is an input, not an observation: 97L is read at a desk-declared pre-genesis reference cell, 28.0°N 88.7°W — not the disturbance's current position, not the outlook area. Storm Atlas does not choose the cell and does not defend it; the URL records what</p></div>
-<div class="grid2">
-<div class="box"><h3>SAMPLE 1 — INVEST 97L · PRE-GENESIS REFERENCE CELL 28.0°N 88.7°W</h3>
+<div class="lede"><p>Three cohorts, as the engine returned them. The cell is an input, not an observation: 97L is read at a desk-declared reference cell, 28.0°N 88.7°W — not the disturbance’s position — and the URL records the choice, so a reviewer can move it and watch the answer move. Karina is read at its observed genesis: reached Cat 4 is 1 of 14 [1-31%], reached Cat 5 is 0 of 14 [0-22%], and Karina is already Cat 4. That is the record’s frequency at the moment of formation, not revised because this storm intensified.</p></div>
+<div class="grid3 tight">
+<div class="box"><h3>SAMPLE 1 — 97L · PRE-GENESIS CELL 28.0°N 88.7°W</h3>
     <p class="disclaim" style="margin-bottom:6px">North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
     <table class="ledger compact"><thead><tr><th>Row</th><th>n / N</th><th>Rate</th><th>95% Wilson</th>
       <th style="text-align:left">Status returned</th></tr></thead><tbody>
@@ -410,7 +410,7 @@ table.ledger.sysgrid{table-layout:fixed}
     <div class="cite" style="margin-top:8px"><span class="k">CITE THIS COHORT</span>
       <div class="v">STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 12 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div>
       <a class="u" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0</a></div></div>
-<div class="box"><h3>SAMPLE 2 — HURRICANE KARINA · OBSERVED GENESIS 13.2°N 115.0°W</h3>
+<div class="box"><h3>SAMPLE 2 — KARINA · OBSERVED GENESIS 13.2°N 115.0°W</h3>
     <p class="disclaim" style="margin-bottom:6px">East Pacific storms that formed within 250 km of 13.2°N 115.0°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
     <table class="ledger compact"><thead><tr><th>Row</th><th>n / N</th><th>Rate</th><th>95% Wilson</th>
       <th style="text-align:left">Status returned</th></tr></thead><tbody>
@@ -443,22 +443,22 @@ table.ledger.sysgrid{table-layout:fixed}
     <div class="cite" style="margin-top:8px"><span class="k">CITE THIS COHORT</span>
       <div class="v">STORM ATLAS · East Pacific storms that formed within 250 km of 13.2°N 115.0°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 14 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div>
       <a class="u" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=13.2%2C-115%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=13.2%2C-115%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0</a></div></div>
-</div>
-<div class="box refusal" style="margin-top:11px"><h3>SAMPLE 3 — THE REFUSAL</h3>
+<div class="box refusal"><h3>SAMPLE 3 — THE REFUSAL</h3>
   <p class="disclaim" style="margin-bottom:6px">East Pacific storms that formed within 250 km of 11.3°N 133.8°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
   <p><b>N = 6</b>. BELOW MIN SAMPLE — rates refused. The engine returns
   “6 storms with a known outcome &lt; min_sample=10” on every row. Counts are still published — TS
   5 of 6, Cat 3
   2 of 6 — because a
   count is a fact and a rate over six storms is not one.</p>
-  <a class="u" style="font-family:var(--font-mono);font-size:7.2px;color:#0066ff;word-break:break-all"
+  <a class="u" style="font-family:var(--font-mono);font-size:5.8px;color:#0066ff;word-break:break-all"
     href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=11.3%2C-133.8%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=11.3%2C-133.8%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0</a></div>
+</div>
 </section>
 
 <section class="sec"><div class="sec-hd"><span class="n">04</span><h2>Delivery</h2></div>
 <div class="grid2">
-  <div class="box"><h3>CURRENT — SHIPPING TODAY</h3><p>Delivery today is a browser and replayable cohort URLs. A URL carries the cell, radius, season floor, month window, basin and methodology version, so a colleague, a client or a reviewer opens the same cohort and</p></div>
-  <div class="box hole"><h3>PROPOSED / PILOT — NOT SHIPPING</h3><p>PROPOSED / PILOT — not available today. Exportable charts. An API. Recurring institutional briefs. None of the three exists yet.</p></div>
+  <div class="box"><h3>CURRENT — SHIPPING TODAY</h3><p>A browser and replayable cohort URLs. A URL carries the cell, radius, season floor, month window, basin and methodology version, so a reviewer opens the same cohort and reads the same counts, rates, intervals and refusals. The pack stamp is a hash of every table it was built from: a figure whose stamp does not match is not the same figure.</p></div>
+  <div class="box hole"><h3>PROPOSED / PILOT — NOT SHIPPING</h3><p><b>PROPOSED / PILOT — not available today.</b> Exportable charts. An API. Recurring institutional briefs. None of the three exists yet.</p></div>
 </div>
 </section>
 

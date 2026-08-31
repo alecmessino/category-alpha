@@ -35,14 +35,14 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
   .sheet:last-child{break-after:auto} }
 
 /* ---- masthead ------------------------------------------------------------------ */
-.mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:var(--sp-2);margin-bottom:var(--sp-3)}
+.mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:var(--sp-1);margin-bottom:var(--sp-2)}
 .mh-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-6)}
 .mh-brand{font-family:var(--font-mono);font-size:8.4px;font-weight:600;letter-spacing:2.2px;
   text-transform:uppercase;color:var(--ink-900)}
 .mh-brand .sep{color:var(--ink-400);margin:0 6px}
 .mh-doc{font-family:var(--font-mono);font-size:7.8px;letter-spacing:.7px;color:var(--ink-600);
   text-transform:uppercase;text-align:right;white-space:nowrap}
-.mh-title{font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1.12;
+.mh-title{font-family:var(--font-display);font-size:12.4px;font-weight:700;line-height:1.1;
   margin:var(--sp-3) 0 var(--sp-1);letter-spacing:-.2px;max-width:80%}
 .mh-sub{font-size:8px;color:var(--ink-600);max-width:88%;line-height:1.42}
 .mh-rule{display:flex;gap:var(--sp-4) var(--sp-5);margin-top:var(--sp-2);flex-wrap:wrap}
@@ -51,10 +51,10 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 .mh-rule .kv b{color:var(--ink-900);font-weight:600}
 
 /* ---- section furniture ---------------------------------------------------------- */
-.sec{margin-top:var(--sp-3)}
+.sec{margin-top:var(--sp-2)}
 .sec-hd{display:flex;align-items:baseline;gap:var(--sp-3);border-left:2.5px solid var(--ink-900);
-  padding-left:var(--sp-3);margin-bottom:var(--sp-3)}
-.sec-hd h2{font-family:var(--font-mono);font-size:7.8px;font-weight:600;letter-spacing:1.5px;
+  padding-left:var(--sp-3);margin-bottom:var(--sp-2)}
+.sec-hd h2{font-family:var(--font-mono);font-size:7.5px;font-weight:600;letter-spacing:1.5px;
   text-transform:uppercase;margin:0;color:var(--ink-900)}
 .sec-hd .n{font-family:var(--font-mono);font-size:7.4px;color:var(--ink-400);letter-spacing:1px}
 .sec-hd .note{font-size:8px;color:var(--ink-600);margin-left:auto;font-style:italic}
@@ -64,7 +64,7 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-6)}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-4)}
-.spacer{flex:1 1 auto;min-height:var(--sp-4)}
+.spacer{flex:1 1 auto;min-height:0}
 
 /* ---- ledger --------------------------------------------------------------------- */
 table.ledger{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:7.1px}
@@ -74,7 +74,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   text-transform:uppercase;color:var(--ink-600);border-bottom:1px solid var(--ink-900);
   padding:2px var(--sp-3);white-space:nowrap}
 .ledger th:first-child{text-align:left}
-.ledger td{text-align:right;padding:1.8px var(--sp-3);border-bottom:1px solid var(--line-200);
+.ledger td{text-align:right;padding:1.4px var(--sp-3);border-bottom:1px solid var(--line-200);
   white-space:nowrap}
 .ledger td:first-child{text-align:left;font-family:var(--font-sans);font-size:7.4px;font-weight:500}
 .ledger tr.band td{background:var(--paper-50)}
@@ -100,7 +100,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   border-left:1px solid var(--cyan-500);border-right:1px solid var(--cyan-500)}
 
 /* ---- cite ----------------------------------------------------------------------- */
-.cite{border-top:1px solid var(--ink-900);margin-top:var(--sp-3);padding-top:var(--sp-2)}
+.cite{border-top:1px solid var(--ink-900);margin-top:var(--sp-2);padding-top:var(--sp-1)}
 .cite .k{font-family:var(--font-mono);font-size:6.9px;letter-spacing:1.3px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:2px}
 .cite .v{font-family:var(--font-mono);font-size:6.3px;line-height:1.35;color:var(--ink-900);
@@ -121,16 +121,16 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .chip.ok{color:var(--green-600);border-color:var(--green-600)}
 
 /* ---- boxes ----------------------------------------------------------------------- */
-.box{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--white)}
+.box{border:1px solid var(--line-300);border-radius:4px;padding:4px 5px;background:var(--white)}
 .box.sunken{background:var(--paper-50)}
 .box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
 .box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
 .box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
-.box h3{font-family:var(--font-mono);font-size:6.7px;letter-spacing:1px;text-transform:uppercase;
-  margin:0 0 var(--sp-2);color:var(--ink-900)}
-.box p{margin:0 0 var(--sp-2);font-size:7.3px;line-height:1.3;color:var(--ink-700)}
+.box h3{font-family:var(--font-mono);font-size:6.5px;letter-spacing:.9px;text-transform:uppercase;
+  margin:0 0 var(--sp-1);color:var(--ink-900)}
+.box p{margin:0 0 var(--sp-1);font-size:7.2px;line-height:1.26;color:var(--ink-700)}
 .box p:last-child{margin-bottom:0}
-.box ul{margin:0;padding-left:10px;font-size:7.3px;line-height:1.28;color:var(--ink-700)}
+.box ul{margin:0;padding-left:9px;font-size:7.2px;line-height:1.24;color:var(--ink-700)}
 .box li{margin-bottom:1.5px}
 .box li:last-child{margin-bottom:0}
 .box li b{color:var(--ink-900)}
@@ -163,13 +163,13 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   color:var(--ink-700);margin-top:1px;letter-spacing:.1px}
 .card .catline{font-family:var(--font-mono);font-size:5.9px;font-weight:600;letter-spacing:.7px;
   color:var(--ink-900);margin-top:-1px;line-height:1.1}
-.card .lf{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-900);
+.card .lf{font-family:var(--font-mono);font-size:5.6px;color:var(--ink-900);
   border-top:1px solid var(--line-200);padding-top:1.5px;margin-top:1px;line-height:1.22}
 .card .lf .none{color:var(--ink-400)}
 
 /* ---- stat tiles -------------------------------------------------------------------- */
 .tiles{display:grid;gap:var(--sp-4)}
-.tile{border:1px solid var(--line-300);border-radius:4px;padding:var(--sp-3);background:var(--paper-50)}
+.tile{border:1px solid var(--line-300);border-radius:4px;padding:4px 5px;background:var(--paper-50)}
 .tile .k{font-family:var(--font-mono);font-size:6px;letter-spacing:1px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:2px}
 .tile .v{font-family:var(--font-mono);font-size:13px;font-weight:600;line-height:1.02;
@@ -187,7 +187,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   font-weight:600}
 .plate-hd .m{font-family:var(--font-mono);font-size:6px;color:var(--ink-600);letter-spacing:.5px}
 .plate svg{display:block;width:100%;height:auto}
-.plate-ft{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);padding:1.5px var(--sp-4);
+.plate-ft{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);padding:1px var(--sp-4);
   border-top:1px solid var(--line-200);background:var(--white)}
 .lg{display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:5.8px;
   letter-spacing:.5px;color:var(--ink-700);text-transform:uppercase}
@@ -199,7 +199,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 
 /* ---- answers rail --------------------------------------------------------------------- */
 .rail{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4);border-top:1px solid var(--ink-900);
-  border-bottom:1px solid var(--ink-900);padding:var(--sp-2) 0;margin:var(--sp-3) 0}
+  border-bottom:1px solid var(--ink-900);padding:var(--sp-1) 0;margin:var(--sp-2) 0}
 .rail>div{padding-right:var(--sp-5);border-right:1px solid var(--line-200)}
 .rail>div:last-child{border-right:none;padding-right:0}
 .rail .q{font-family:var(--font-mono);font-size:6.1px;letter-spacing:1px;text-transform:uppercase;
@@ -225,12 +225,12 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 table.ledger.sysgrid{table-layout:fixed}
 .ledger.sysgrid th{white-space:normal;line-height:1.25;vertical-align:bottom}
 .ledger.sysgrid .chip{white-space:normal;display:inline-block;max-width:100%}
-.ledger.sysgrid td{vertical-align:top;padding:1.5px var(--sp-3);overflow-wrap:anywhere}
+.ledger.sysgrid td{vertical-align:top;padding:1.2px var(--sp-3);overflow-wrap:anywhere}
 .ledger td.lft{text-align:left;white-space:normal}
 .ledger .mono6{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);display:block;
   letter-spacing:.3px;line-height:1.3}
 .ledger .mono8{font-family:var(--font-mono);font-size:6.7px;display:inline-block;margin-top:1px}
-.ledger .prose{font-family:var(--font-sans);font-size:6.9px;line-height:1.28;color:var(--ink-700);
+.ledger .prose{font-family:var(--font-sans);font-size:6.8px;line-height:1.22;color:var(--ink-700);
   margin-top:1.5px}
 .ledger .prose p{margin:0 0 2px}
 .ledger .prose p:last-child{margin-bottom:0}
@@ -249,8 +249,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .platerow .sec{margin-top:0}
 .tagstack{display:flex;flex-direction:column;gap:var(--sp-2)}
 .ledgerpair{display:grid;grid-template-columns:1fr 1.06fr;gap:var(--sp-6);align-items:start}
-.ledger.compact td{padding:0.8px var(--sp-2);font-size:6.7px;line-height:1.2}
-.ledger.compact th{padding:1.5px var(--sp-2);font-size:6px}
+.ledger.compact td{padding:0.6px var(--sp-2);font-size:6.6px;line-height:1.18}
+.ledger.compact th{padding:1px var(--sp-2);font-size:5.9px}
 .ledger.compact td:first-child{font-size:6.9px}
 .ledger.compact .rate{font-size:7.3px}
 .ledger.compact .status{font-size:5.8px;max-width:none;white-space:nowrap}
@@ -263,11 +263,11 @@ table.ledger.sysgrid{table-layout:fixed}
 .cardrow .card .facts{font-size:5.5px}
 .cardrow .card .lf{font-size:5.6px}
 .cardrow .card .yr{font-size:5.6px}
-.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.26;
-  font-family:var(--font-sans);font-size:7px;padding:1.5px var(--sp-3)}
+.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.22;
+  font-family:var(--font-sans);font-size:6.9px;padding:1px var(--sp-3)}
 .cmptable td.q{font-family:var(--font-mono);font-size:6.5px;color:var(--ink-900);font-weight:500}
 .cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
-.cmptable.compact td{font-size:6.6px;padding:1px var(--sp-2);line-height:1.2}
+.cmptable.compact td{font-size:6.5px;padding:0.8px var(--sp-2);line-height:1.18}
 .cmptable.compact td.q{font-size:6px}
 .platecol{display:grid;grid-template-columns:1.3fr 1fr;gap:var(--sp-6);align-items:start}
 .platecol .sec{margin-top:0}
@@ -297,9 +297,9 @@ table.ledger.sysgrid{table-layout:fixed}
 .citelist.two .cite:nth-child(2){border-top:1px solid var(--ink-900);margin-top:0}
 .citelist .cite{margin-top:var(--sp-2);padding-top:2px;border-top:1px solid var(--line-300)}
 .citelist .cite:first-child{border-top:1px solid var(--ink-900);margin-top:0}
-.citelist .v{font-size:5.8px;line-height:1.24}
-.citelist .u{font-size:5.5px}
-.citelist .k{font-size:6.4px}
+.citelist .v{font-size:5.2px;line-height:1.18}
+.citelist .u{font-size:5.1px}
+.citelist .k{font-size:6px}
 .ledger .cohortstat{text-align:right;font-family:var(--font-mono);font-size:7px;font-weight:600;
   letter-spacing:.3px}
 .ledger .cohortstat.refused{color:var(--red-600)}
@@ -321,15 +321,15 @@ table.ledger.sysgrid{table-layout:fixed}
 .stack{display:flex;flex-direction:column;gap:var(--sp-4)}
 
 /* ---- footer ----------------------------------------------------------------------- */
-.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:var(--sp-1)}
-.ft-disclaim{margin:0 0 var(--sp-1)}
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:2px}
+.ft-disclaim{margin:0 0 1px}
 .ft-row{display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
-.ft .l{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-600);letter-spacing:.5px;
+.ft .l{font-family:var(--font-mono);font-size:5.4px;color:var(--ink-600);letter-spacing:.5px;
   line-height:1.5;max-width:70%}
 .ft .l b{color:var(--ink-900)}
 .ft .r{font-family:var(--font-mono);font-size:5.8px;color:var(--ink-400);letter-spacing:.9px;
   text-align:right;white-space:nowrap;text-transform:uppercase}
-.fn{font-family:var(--font-mono);font-size:6.1px;color:var(--ink-600);line-height:1.32;
+.fn{font-family:var(--font-mono);font-size:6px;color:var(--ink-600);line-height:1.26;
   margin-top:var(--sp-1)}
 .fn b{color:var(--ink-900)}
 </style>
@@ -341,7 +341,7 @@ table.ledger.sysgrid{table-layout:fixed}
     <div class="mh-doc">ARTIFACT B1 · REINSURANCE / ILS / PARAMETRIC &nbsp;·&nbsp; 1 OF 1</div>
   </div>
   <h1 class="mh-title">Contract-row frequencies, trigger explainability and basis risk from a declared pre-genesis cell</h1>
-  <p class="mh-sub">Storm Atlas is a research-only historical engine. It answers one fixed question — from this declared genesis condition, in this season window, what did the record go</p>
+  <p class="mh-sub">Storm Atlas is a research-only historical engine. It answers one fixed question: from this declared genesis condition, in this season window, what did the record go on to do? N = 12, ESS 12, SUFFICIENT against a minimum sample of 10.</p>
   <div class="mh-rule"><span class="kv">LIVE STATUS <b>31 AUG 2026 · 08:25 CT / 13:25 UTC</b></span><span class="kv">CELL <b>28.0°N 88.7°W · r 250 km · Aug–Sep · floor 1971</b></span><span class="kv">METHODOLOGY <b>1.1.0</b></span><span class="kv">PACK <b>134661125525f27a</b></span></div>
 </header>
 
@@ -355,9 +355,9 @@ Storm Atlas's; the two compose by multiplication for intensity thresholds and do
 all for landfall, which the archive counts jointly.</p></div>
 
 <div class="rail">
-  <div><span class="q">01 · What is happening now?</span><div class="a">Live status as of 31 Aug 2026, 08:25 CT / 13:25 UTC. Desk line at that instant: Invest 97L is a north-central Gulf disturbance near 27.4N 90.7W,</div></div>
-  <div><span class="q">02 · What does Storm Atlas add?</span><div class="a">The alternative is not a public map — it is your own IBTrACS or HURDAT2 query, which a cat modelling team can write. What</div></div>
-  <div><span class="q">03 · How does this help price, hedge, structure, explain, distribute?</span><div class="a">It gives a basis-risk file one component that can be tested: a cohort the counterparty reopens from a URL and reproduces line for line, misses included. It</div></div>
+  <div><span class="q">01 · What is happening now?</span><div class="a">As of 31 Aug 2026, 08:25 CT / 13:25 UTC: Invest 97L is a north-central Gulf disturbance near 27.4N 90.7W. NHC's 07:10Z outlook carries AL97 at 70% for both 48 h and 7 d. That P(forms) is NHC's number, not Storm Atlas's.</div></div>
+  <div><span class="q">02 · What does Storm Atlas add?</span><div class="a">The alternative is not a public map but your own IBTrACS or HURDAT2 query, which a cat modelling team can write. Storm Atlas adds the declared cohort, exact n/N with 95% Wilson intervals, printed refusals, a replay URL.</div></div>
+  <div><span class="q">03 · How does this help price, hedge, structure, explain, distribute?</span><div class="a">It gives a basis-risk file one component that can be tested: a cohort the counterparty reopens from a URL and reproduces line for line, misses included. Use it upstream of pricing, for trigger design and counterparty explanation. It sets no price and forecasts nothing.</div></div>
 </div>
 
 <section class="sec"><div class="sec-hd"><span class="n">01</span><h2>Contract-row frequencies</h2><span class="note">CONUS any 10 / 12 = 83.3% [55–95%] · CONUS ≥64 kt 1 / 12 = 8.3% [1–35%] · no state-level row exists in this archive</span></div>
@@ -369,8 +369,8 @@ all for landfall, which the archive counts jointly.</p></div>
 
 <section class="sec"><div class="sec-hd"><span class="n">02</span><h2>Trigger explainability</h2><span class="note">and the refusal a counterparty can check</span></div>
 <div class="grid3 tight">
-  <div class="box"><h3>WHY A REPLAYABLE COHORT IS THE ARTEFACT</h3><p>The cohort is a declared judgement, not a hidden one. Five choices set it and each one moves the answer: basin, centre, radius, season floor, month window. Here — North Atlantic, 28.0°N 88.7°W, 250 km, August–September, seasons from 1971 onwards — a pre-genesis reference cell , declared in advance of the query and distinct from the live centre. Attack the choices: all five are on the page and each variant has its own URL. Every published rate is exact n/N and the 95% Wilson interval the engine returned. Nothing is</p>
-    <h3 style="margin-top:5px">WHERE THIS SITS — RESEARCH, NOT LIVE PRICING</h3><p>Upstream of pricing: cohort research, trigger design, and counterparty explanation, where a replay URL lets the other side reproduce the number instead of taking it on trust. What the record supports here, stated plainly: A trigger keyed to any CONUS crossing sits on 10 of 12 — 83.3%, 55-95%. One keyed to hurricane force</p></div>
+  <div class="box"><h3>WHY A REPLAYABLE COHORT IS THE ARTEFACT</h3><p>A parametric trigger’s basis-risk file needs a prior a counterparty can reopen, not a number in a deck. The cohort is a URL: cell, radius, month window, season floor and methodology version travel in it, so the same query returns the same n/N, the same interval and the same stamps on any desk.</p><p>The denominator is named. Twelve storms, each listed, each with its own recorded landfalls — a reviewer can check the count rather than accept it.</p>
+    <h3 style="margin-top:5px">WHERE THIS SITS — RESEARCH, NOT LIVE PRICING</h3><p>Cohort research, trigger-threshold design and counterparty explanation. Not live pricing of a running event: Storm Atlas holds no live view, and every rate here is conditional on a formation it does not forecast.</p></div>
   <div class="box refusal"><h3>THE REFUSAL A COUNTERPARTY CAN CHECK</h3>
     <p>Tighten the same question from 250 km to <b>150 km</b> and the cohort falls to
     <b>N = 5</b>. Every rate then <b>REFUSES</b>: the engine returns
@@ -379,7 +379,7 @@ all for landfall, which the archive counts jointly.</p></div>
     4 of 5 —
     because a count is a fact and a rate over 5 storms is not one.
     That refusal has its own replay URL, cited below.</p></div>
-  <div class="box commercial"><h3>BASIS RISK — READ BEFORE USING ANY ROW ABOVE</h3><p>Same genesis cell is not the same landfall. Anita 1977 and Alicia 1983 both formed inside this cell in this window. Anita's landfall was Tamaulipas, Mexico at 120 kt; Alicia's was Texas at 100 kt. The cell constrains where a storm started, nothing else. Same class is not the same local outcome. CONUS — any is 10 of 12 (83.3%, 95% Wilson 55-95%). CONUS — ≥64 kt is 1 of 12 (8.3%, 95% Wilson 1-35%), and that single member is Alicia 1983. A coastal crossing is common in this cohort; a crossing at hurricane force is not, and a trigger keyed to intensity at the coast sits on the second number and on one storm. The CONUS row is not</p></div>
+  <div class="box commercial"><h3>BASIS RISK — READ BEFORE USING ANY ROW ABOVE</h3><ul><li><b>Same genesis cell ≠ same landfall.</b> Twelve storms formed inside one 250 km circle and went to Texas, Louisiana, Florida and Tamaulipas.</li><li><b>Same class ≠ same local outcome.</b> The archive scores a crossing and its intensity, not a footprint, a surge or a loss.</li><li><b>A CONUS row is not a state row.</b> No state-level landfall is scored, at any radius or sample size. None is supplied here.</li><li><b>The interval is the precision.</b> 1 of 12 is 8.3% with a 95% Wilson band of 1-35%. The band is the finding; the point estimate is not.</li><li><b>A refused row is not a zero.</b> At 150 km the same question returns RATE REFUSED, and a stamped row’s 0.0% is voided by its stamp.</li></ul></div>
 </div>
 </section>
 
@@ -442,7 +442,7 @@ all for landfall, which the archive counts jointly.</p></div>
       <div class="lf">CONUS / Texas 40 kt</div>
     </div></div>
 <p class="fn"><b>SELECTION RULE — up to 8 members — majors (≥96 kt) first, then hurricanes (≥64 kt), then by peak wind descending, ties by season descending. Not a similarity ranking: Storm Atlas implements no closest-analog metric for a filter-defined cohort, and every member is weighted 1.0.</b> Printed 8 of 12 members carrying a peak-wind value. A landfall line is a fact about that storm, sub-region included; <b>a member's landfall is not a rate</b> and no sub-region here is scored anywhere in this package. ×n marks repeat crossings of one coast, collapsed to the strongest.</p>
-<p class="fn">A near-miss is a cohort member that satisfies the genesis rule and then fails the condition a trigger would be written on. In the cohort — Anita 1977. Formed 126 km from the cell; came ashore in Tamaulipas, Mexico at 120 kt. Inside the cohort, outside the CONUS row. In the cohort — Fern 1971. Formed 131 km out and peaked at 80 kt, but its landfall rows are Louisiana at 25 kt and Texas topping out at 60 kt. In the cohort — Alicia 1983. Formed 194 km out and came ashore in Texas at 100 kt — the single member standing behind CONUS — ≥64 kt at 1 of 12 (8.3%, 95%</p>
+<p class="fn">A near-miss is a cohort member that satisfies the genesis rule and then fails the condition a trigger would be written on.</p><ul><li><b>Anita 1977.</b> Formed 126 km from the cell; ashore in Tamaulipas, Mexico at 120 kt. Inside the cohort, outside the CONUS row.</li><li><b>Alicia 1983.</b> Formed 194 km out, ashore in Texas at 100 kt — the single member behind CONUS — ≥64 kt at 1 of 12 (8.3%, 95% Wilson 1-35%). That is a <b>CONUS row, not a Texas one</b>: the archive does not score state-level landfall. At 150 km Alicia is not a member at all, and every rate refuses.</li><li><b>Barry 2019.</b> Formed 110 km from the cell with a 65 kt Louisiana landfall, but its 11 July genesis falls outside August–September: not in this cohort. It is the closest thing in the record to the event a trigger here would be written for. Read the misses first.</li></ul></p>
 </section>
 
 <section class="sec"><div class="sec-hd"><span class="n">04</span><h2>What Storm Atlas adds, and the two cohorts to cite</h2><span class="note">the scored one, and the one that refuses</span></div>

@@ -92,20 +92,24 @@ export function plate({ title, meta, svg, legendItems, note }) {
 
 /* ---- PLATE 1: the NA + EP camera, four marks --------------------------------------------- */
 export function basinPlate(D, { width = 700, height = 300 } = {}) {
-  const P = projector({ lon0: -160, lon1: -55, lat0: 5, lat1: 42, width, height, pad: 6 });
+  /* The camera reaches to 168°W so the westernmost live mark has room for its label on the left
+     rather than against the frame; it also brings Hawaii into the plate, which is one of the six
+     coastlines the landfall contract scores. */
+  const P = projector({ lon0: -168, lon1: -55, lat0: 5, lat1: 42, width, height, pad: 6 });
+  /* SHORT LABELS, NO COORDINATES, ALL ABOVE THE MARK.
+     Five marks sit inside one small stretch of the east Pacific here, and a two-line label on
+     each of them collided with its neighbours whatever the offsets. The coordinates are printed
+     on the system table two blocks up and in the citation string, so the plate carries the name
+     only and leans on the leader line for the association. */
   const marks = [
     { id: "97L", lat: 28.0, lon: -88.7, kind: "cell", color: INK.cell,
-      label: "97L", sub: "28.0N 88.7W · r250",
-      anchor: "start", dx: 4, dy: -11, leader: true },
+      label: "97L", anchor: "start", dx: 5, dy: -11, leader: true },
     { id: "KARINA", lat: 13.2, lon: -115.0, kind: "genesis", color: INK.genesis,
-      label: "KARINA", sub: "13.2N 115.0W · r250",
-      anchor: "end", dx: -4, dy: 20, leader: true },
+      label: "KARINA", anchor: "end", dx: -6, dy: 20, leader: true },
     { id: "95E", lat: 12.0, lon: -107.5, kind: "cell", color: INK.cell,
-      label: "95E", sub: "12.0N 107.5W · r250",
-      anchor: "start", dx: 3, dy: 24, leader: true },
+      label: "95E", anchor: "start", dx: 5, dy: 24, leader: true },
     { id: "LOWELL", lat: 11.3, lon: -133.8, kind: "genesis", color: INK.genesis,
-      label: "LOWELL", sub: "11.3N 133.8W · r250",
-      anchor: "end", dx: -4, dy: 18, leader: true },
+      label: "LOWELL", anchor: "end", dx: -5, dy: 20, leader: true },
   ];
   const rings = marks.map((m) =>
     `<path d="${radiusRing(m.lat, m.lon, 250, P)}" fill="${m.kind === "cell"
@@ -117,11 +121,11 @@ export function basinPlate(D, { width = 700, height = 300 } = {}) {
   const K = D.operational.storms.find((s) => s.atcf_id === "EP112026");
   const L = D.operational.storms.find((s) => s.atcf_id === "EP122026");
   if (K) liveMarks.push(mark(P, K.latest.lat, K.latest.lon, { color: INK.live, kind: "live",
-    label: `LIVE KARINA ${K.latest.kt} KT`, sub: `b-deck ${K.latest_valid_time.slice(5, 16).replace("T", " ")}Z`,
-    anchor: "end", dx: -3, dy: -13, leader: true }));
+    label: `LIVE KARINA ${K.latest.kt} KT`,
+    anchor: "start", dx: 4, dy: -12, leader: true }));
   if (L) liveMarks.push(mark(P, L.latest.lat, L.latest.lon, { color: INK.live, kind: "live",
-    label: `LIVE LOWELL ${L.latest.kt} KT`, sub: `b-deck ${L.latest_valid_time.slice(5, 16).replace("T", " ")}Z`,
-    anchor: "start", dx: 3, dy: -13, leader: true }));
+    label: `LIVE LOWELL ${L.latest.kt} KT`,
+    anchor: "end", dx: -5, dy: -13, leader: true }));
 
   const al97 = D.outlook.find((o) => o.id === "AL97");
   const ep95 = D.outlook.find((o) => o.id === "EP95");

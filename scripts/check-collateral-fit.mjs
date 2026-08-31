@@ -43,11 +43,21 @@ let failed = 0;
 
 for (const f of readdirSync(DIR).filter((x) => x.endsWith(".html")).sort()) {
   await page.goto(`file://${DIR}/${f}`, { waitUntil: "networkidle" });
-  const sheets = await page.evaluate(() => [...document.querySelectorAll(".sheet")].map((s) => ({
-    over: s.scrollHeight - s.clientHeight,
-    budget: s.clientHeight,
-    manifest: s.classList.contains("manifest"),
-  })));
+  /* MEASURE THE CONTENT, NOT THE CLAMP. The sheet is a fixed box with overflow:hidden, so
+     scrollHeight can never report less than the box -- a sheet with room to spare and one filled
+     to the millimetre both read zero. Releasing the height for the measurement gives the real
+     content height, which is the only number that predicts the printed page. */
+  const sheets = await page.evaluate(() => [...document.querySelectorAll(".sheet")].map((s) => {
+    const budget = s.clientHeight;
+    const h = s.style.height;
+    const o = s.style.overflow;
+    s.style.height = "auto";
+    s.style.overflow = "visible";
+    const content = s.clientHeight;
+    s.style.height = h;
+    s.style.overflow = o;
+    return { over: content - budget, budget, manifest: s.classList.contains("manifest") };
+  }));
   const expected = EXPECTED[f];
   if (expected === undefined) {
     console.log(`  ok    ${f} — reference document, ${sheets.length} sheet(s), paginates by design`);
@@ -57,13 +67,19 @@ for (const f of readdirSync(DIR).filter((x) => x.endsWith(".html")).sort()) {
     failed++;
     console.log(`  FAIL  ${f} — ${sheets.length} sheet(s), expected ${expected}`);
   }
+  /* A SAFETY MARGIN, BECAUSE THE PDF IS THE GROUND TRUTH AND THE SCREEN IS THE PROXY.
+     Print lays the same CSS out with its own font metrics and rounding, and a sheet measured at
+     exactly 0 px of headroom printed as two pages. Eight pixels is what that discrepancy
+     measured; the gate now demands it, so "fits on screen" means "prints on one page". */
+  const HEADROOM = 8;
   sheets.forEach((s, i) => {
-    if (s.over > 0) {
+    if (s.over > -HEADROOM) {
       failed++;
-      console.log(`  FAIL  ${f} sheet ${i + 1} overflows its page by ${s.over}px `
-        + `(budget ${s.budget}px). It will print as two pages.`);
+      console.log(`  FAIL  ${f} sheet ${i + 1} is ${s.over > 0 ? `${s.over}px over` : `within ${-s.over}px of`} `
+        + `its ${s.budget}px page — needs ${HEADROOM}px of headroom to print as one.`);
     } else {
-      console.log(`  ok    ${f} sheet ${i + 1} fits — ${s.budget + s.over}px of ${s.budget}px used`);
+      console.log(`  ok    ${f} sheet ${i + 1} fits — ${s.budget + s.over}px of ${s.budget}px used, `
+        + `${-s.over}px spare`);
     }
   });
 }

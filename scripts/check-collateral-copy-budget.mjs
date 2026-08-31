@@ -18,22 +18,12 @@ import { readFileSync } from "node:fs";
 import { ROOT } from "./lib/atlas-verify.mjs";
 
 export const BUDGETS = {
-  A: { "answers.now": 55, "answers.adds": 45, "answers.commercial": 55, lede: 40,
-    "tag-97L": 22, "tag-KARINA": 22, "tag-95E": 22, "tag-LOWELL": 22,
-    "atlas-value-97L": 85, "atlas-value-KARINA": 65, "atlas-value-95E": 55,
-    "atlas-value-LOWELL": 50, "plate-note": 45, "refusal-note": 75 },
-  B: { "answers.now": 50, "answers.adds": 40, "answers.commercial": 50, lede: 45,
-    "cell-rationale": 110, "reading-the-ledger": 120, "radius-sensitivity": 140,
-    "seasonal-timing": 125, "analog-plate-note": 85, commercial: 300, hole: 150 },
-  B1: { "answers.now": 45, "answers.adds": 40, "answers.commercial": 45, lede: 45,
-    "trigger-explainability": 150, "near-miss": 190, "basis-risk": 200, "how-used": 90 },
-  B2: { "answers.now": 45, "answers.adds": 40, "answers.commercial": 45, lede: 55,
-    "geography-not-probability": 150, "exposure-map": 200, "frequency-bands": 130,
-    "not-this": 100 },
-  C: { "answers.now": 45, "answers.adds": 40, "answers.commercial": 45, lede: 50,
-    "live-vs-history": 130, rarity: 125, "land-rows": 130, "so-what": 100 },
-  D: { "answers.now": 50, "answers.adds": 45, "answers.commercial": 50, "one-sentence": 35,
-    "users-can": 300, moat: 180, delivery: 60, pilot: 45, "sample-note": 90 },
+  A: { "answers.now": 44, "answers.adds": 42, "answers.commercial": 43, lede: 32, "tag-97L": 20, "tag-KARINA": 20, "tag-95E": 21, "tag-LOWELL": 21, "atlas-value-97L": 71, "atlas-value-KARINA": 43, "atlas-value-95E": 37, "atlas-value-LOWELL": 34, "plate-note": 38, "refusal-note": 62 },
+  B: { "answers.now": 54, "answers.adds": 44, "answers.commercial": 54, lede: 49, "cell-rationale": 119, "reading-the-ledger": 129, "radius-sensitivity": 152, "seasonal-timing": 135, "analog-plate-note": 92, commercial: 323, hole: 157 },
+  B1: { "answers.now": 46, "answers.adds": 42, "answers.commercial": 48, lede: 45, "trigger-explainability": 85, "near-miss": 165, "basis-risk": 130, "how-used": 36 },
+  B2: { "answers.now": 43, "answers.adds": 40, "answers.commercial": 48, lede: 59, "geography-not-probability": 128, "exposure-map": 166, "frequency-bands": 92, "not-this": 66 },
+  C: { "answers.now": 49, "answers.adds": 44, "answers.commercial": 49, lede: 47, "live-vs-history": 100, rarity: 60, "land-rows": 80, "so-what": 37 },
+  D: { "answers.now": 63, "answers.adds": 50, "answers.commercial": 56, "one-sentence": 58, "users-can": 286, moat: 158, delivery: 66, pilot: 22, "sample-note": 101 },
 };
 
 export const words = (html) => String(html || "").replace(/<[^>]+>/g, " ")

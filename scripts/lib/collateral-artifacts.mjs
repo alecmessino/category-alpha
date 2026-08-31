@@ -241,13 +241,10 @@ ${answersRail(C.answers.now || "", C.answers.adds || "", C.answers.commercial ||
 
 <section class="sec">${sectionHead("01", "Active systems", "live columns are timestamped · cohort columns are evergreen")}
 ${table}
-<p class="fn"><b>INSTANTS.</b> Desk line ${esc(LIVE_STAMP)}. NHC graphical outlook ingested
-${esc(D.feeds_generated_at)} (Atlantic issued ${esc((D.outlook.find((o) => o.id === "AL97") || {}).issued || "—")};
-Pacific issued ${esc((D.outlook.find((o) => o.id === "EP95") || {}).issued || "—")}). ATCF b-deck
-fixes valid ${esc((D.operational.storms.find((x) => x.atcf_id === "EP112026") || {}).latest_valid_time || "—")},
+<p class="fn"><b>INSTANTS.</b> Desk line ${esc(LIVE_STAMP)}. Outlook ingested
+${esc(D.feeds_generated_at)}; b-deck fixes valid ${esc((D.operational.storms.find((x) => x.atcf_id === "EP112026") || {}).latest_valid_time || "—")};
 operational layer generated ${esc(D.operational.generated_at)}.
-<b>THE LIVE COLUMN IS NOT ATLAS OUTPUT.</b> It is the desk's own line and the archive's
-operational feeds. The operational layer never enters a cohort,
+<b>THE LIVE COLUMN IS NOT ATLAS OUTPUT</b> — it is the desk's line and the archive's feeds. The operational layer never enters a cohort,
 never matches an analog and never computes a rate — its own source note says so.
 <b>POINT-TYPE RULE:</b> for an Invest that has not reached the archive's genesis definition, the
 supplied coordinate is not an observed formation point. It is a <b>PRE-GENESIS REFERENCE CELL</b>,
@@ -269,18 +266,15 @@ point exists, the reference cell is replaced by it.</p>
   ${tags}
   <div class="box refusal" style="margin-top:5px"><h3>THE REFUSALS HERE — THE MOST VALUABLE ROWS ON THE PAGE</h3>
     ${C.get("refusal-note")}
-    <p style="margin-top:3px"><b>THE CONTRACT, AND ITS EDGE.</b> The scored landfall regions are
-    CONUS, Mexico, Caribbean, Central America, Hawaii and Unattributed, each with an <b>any</b>
-    and a <b>≥64 kt</b> pair. <b>The archive does not score state-level landfall</b>, so no TX, LA
-    or Gulf-state rate appears anywhere in this package — none exists to publish.</p></div>
+    <p style="margin-top:3px"><b>THE CONTRACT.</b> Six scored landfall regions, each with an
+    <b>any</b> and a <b>≥64 kt</b> pair. <b>No state-level landfall is scored</b>, so no TX, LA or
+    Gulf-state rate appears anywhere in this package.</p></div>
   </section>
 </div>
 
-<section class="sec">${sectionHead("04", "What Storm Atlas adds", "and where it is deliberately silent")}
+<section class="sec">${sectionHead("04", "What Storm Atlas adds, and the cohorts to cite",
+    "where the instrument is silent · and the exact string plus URL for each of the four")}
 ${comparisonStrip({ compact: true })}
-</section>
-
-<section class="sec">${sectionHead("05", "Cite these cohorts", "the exact string, and the URL that reopens each one")}
 <div class="citelist two">${order.map((k) => `<div class="cite">
   <span class="k">CITE THIS COHORT — ${esc(sysOf[k].name.toUpperCase())}</span>
   <div class="v">${esc(sysOf[k].cite)}</div>
@@ -736,24 +730,24 @@ ${colophon}
 
 <section class="sec">${sectionHead("03", "Two worked samples", "97L and Karina · every figure replayable")}
 <div class="lede">${C.get("sample-note")}</div>
-<div class="grid2">
+<div class="grid3 tight">
 ${sample(g, [["ts", "reached TS"], ["cat1", "reached Cat 1"], ["cat3", "reached Cat 3"],
     ["conus:any", "CONUS — any"], ["conus:hurricane", "CONUS — ≥64 kt"],
     ["hawaii:hurricane", "HAWAII — ≥64 kt"]],
-  "SAMPLE 1 — INVEST 97L · PRE-GENESIS REFERENCE CELL 28.0°N 88.7°W")}
+  "SAMPLE 1 — 97L · PRE-GENESIS CELL 28.0°N 88.7°W")}
 ${sample(k, [["cat1", "reached Cat 1"], ["cat3", "reached Cat 3 (major)"], ["cat4", "reached Cat 4"],
     ["cat5", "reached Cat 5"], ["mexico:any", "MEXICO — any"], ["conus:any", "CONUS — any"]],
-  "SAMPLE 2 — HURRICANE KARINA · OBSERVED GENESIS 13.2°N 115.0°W")}
-</div>
-<div class="box refusal" style="margin-top:11px"><h3>SAMPLE 3 — THE REFUSAL</h3>
+  "SAMPLE 2 — KARINA · OBSERVED GENESIS 13.2°N 115.0°W")}
+<div class="box refusal"><h3>SAMPLE 3 — THE REFUSAL</h3>
   <p class="disclaim" style="margin-bottom:6px">${esc(l.question)}</p>
   <p><b>N = ${l.cohort.n_cases}</b>. ${esc(l.cohort.cohort_status)}. The engine returns
   “${esc(l.intensity_rows[0].refused_reason)}” on every row. Counts are still published — TS
   ${l.intensity_rows.find((r) => r.key === "ts").count} of ${l.cohort.n_cases}, Cat 3
   ${l.intensity_rows.find((r) => r.key === "cat3").count} of ${l.cohort.n_cases} — because a
   count is a fact and a rate over six storms is not one.</p>
-  <a class="u" style="font-family:var(--font-mono);font-size:7.2px;color:#0066ff;word-break:break-all"
+  <a class="u" style="font-family:var(--font-mono);font-size:5.8px;color:#0066ff;word-break:break-all"
     href="${esc(l.replay_url)}">${esc(l.replay_url)}</a></div>
+</div>
 </section>
 
 <section class="sec">${sectionHead("04", "Delivery")}
