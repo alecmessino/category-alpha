@@ -37,6 +37,7 @@ const PROSPECT = [
   "B2-97L-energy-weather-trading.html",
   "C-karina-major-hurricane-analog-brief.html",
   "D-storm-atlas-tear-sheet.html",
+  "E-discrete-event-contract-evidence.html",
 ];
 
 /* The floors, in points. 1 pt = 4/3 px at 96 dpi. */

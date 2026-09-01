@@ -5,7 +5,7 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { build } from "./lib/collateral-data.mjs";
 import { ROOT } from "./lib/atlas-verify.mjs";
 import {
-  artifactA, artifactB, artifactB1, artifactB2, artifactC, artifactD, sourceManifestDoc,
+  artifactA, artifactB, artifactB1, artifactB2, artifactC, artifactD, artifactE, sourceManifestDoc,
 } from "./lib/collateral-artifacts.mjs";
 import { LEGIBILITY_CUTS, PROTECTED } from "./lib/collateral-cuts.mjs";
 
@@ -22,6 +22,7 @@ const files = [
   ["B2-97L-energy-weather-trading.html", artifactB2(D, copy)],
   ["C-karina-major-hurricane-analog-brief.html", artifactC(D, copy)],
   ["D-storm-atlas-tear-sheet.html", artifactD(D, copy)],
+  ["E-discrete-event-contract-evidence.html", artifactE(D, copy)],
   ["SOURCE-MANIFEST.html", sourceManifestDoc(D)],
 ];
 for (const [name, html] of files) {

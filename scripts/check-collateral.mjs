@@ -155,14 +155,50 @@ const artifacts = files.filter((f) => f !== MANIFEST_DOC);
    should refuse rather than publish. */
 for (const [file, entries] of Object.entries(LEGIBILITY_CUTS)) {
   for (const e of entries) {
-    const claimsProtected = e.kind === "cut"
-      && /\bplate\b|\bcite\b|citation string|replay url|provenance/i.test(e.block);
+    /* PROTECTED is read as written, not as a keyword list. Provenance -- a cite block and its
+       replay URL -- is protected on every prospect-facing sheet. The PLATE clause names one
+       plate on one artifact: the four-mark NA + EP plate on A, which is that page's hero visual.
+       A different artifact dropping a map to buy room for evidence is a layout decision the
+       brief invites, so the plate half of this check is scoped to A. */
+    const everywhere = /\bcite\b|citation string|replay url|provenance/i.test(e.block);
+    const plateOnA = /^A-/.test(file) && /\bplate\b/i.test(e.block);
+    const claimsProtected = e.kind === "cut" && (everywhere || plateOnA);
     ok(!claimsProtected, `cut register: ${file} does not claim to have cut a protected element`,
       `"${e.block}" — see PROTECTED in scripts/lib/collateral-cuts.mjs`);
   }
 }
 
-ok(artifacts.length === 6, `six artifacts rendered`,
+/* ---- THE TRIGGER LOCK, PREMISE ------------------------------------------------------------
+   Artifact E prints EXACT TRIGGER NOT SCORED. That is a claim about the archive, so it is
+   checked against the archive rather than trusted: the landfall contract registry must carry
+   exactly two intensity forms -- `any` and `hurricane` (>= 64 kt) -- over whole regions, with no
+   sub-CONUS region and no key that joins an intensity to a region beyond hurricane. If a future
+   pack ever DID hold a Cat 4-at-landfall row, this assertion fails first and the refusal comes
+   off the page before anyone has to notice it went stale. */
+const LF_KEYS = new Set(M.systems.flatMap((sy) => sy.landfall_rows.map((r) => r.key)));
+const badForm = [...LF_KEYS].filter((k) => !/^[a-z_]+:(any|hurricane)$/.test(k));
+ok(badForm.length === 0,
+  "landfall registry holds only the `any` and `hurricane` forms — no Cat 4 landfall row exists",
+  badForm.join(", "));
+const SUB_CONUS = /gulf|florida|texas|louisiana|mississippi|alabama|carolina|atlantic_coast/i;
+const subConus = [...LF_KEYS].filter((k) => SUB_CONUS.test(k));
+ok(subConus.length === 0, "landfall registry holds no sub-CONUS region", subConus.join(", "));
+/* The joint products the page must never print: every intensity rate multiplied by every
+   landfall rate, on each cohort, at the precisions a page could round them to. */
+const FORBIDDEN_PRODUCTS = new Map();
+for (const sy of M.systems) {
+  for (const a of sy.intensity_rows) {
+    for (const b of sy.landfall_rows) {
+      if (a.rate === null || b.rate === null) continue;
+      const v = a.rate * b.rate * 100;
+      for (const p of [v.toFixed(1), String(Math.round(v))]) {
+        if (!FORBIDDEN_PRODUCTS.has(p)) FORBIDDEN_PRODUCTS.set(p, `${sy.id} ${a.key} x ${b.key}`);
+      }
+    }
+  }
+}
+
+ok(artifacts.length === 7, `seven artifacts rendered`,
   `found ${artifacts.length}: ${artifacts.join(", ")}`);
 ok(files.includes(MANIFEST_DOC), "the source manifest is rendered");
 
@@ -245,6 +281,53 @@ for (const f of files) {
   ok(multiplyClaims.length === 0,
     "no sentence composes an outlook probability with an Atlas row",
     multiplyClaims.slice(0, 2).join(" | "));
+
+  /* -- GATE 6/7/8: THE DISCRETE TRIGGER LOCK ------------------------------------------------
+     These three run on every artifact, and bite on any page that names a JOINT trigger -- an
+     intensity condition evaluated AT a landfall. The archive scores intensity attainment over a
+     storm's life and landfall over a region; it does not score their conjunction, and the whole
+     point of the page that names one is that the conjunction is where the evidence stops. */
+  const JOINT = /cat(?:egory)?\s*4\+?\s*(?:hurricane\s*)?(?:at|makes?|making)\s*(?:us|conus|contiguous)?[^.;]{0,32}landfall|cat\s*4\+\s*at\s*conus\s*landfall|at\s*(?:cat|category)\s*4\s*or\s*higher/i;
+  if (JOINT.test(t)) {
+    /* 6 -- THE EXACT TRIGGER IS NOT SCORED, AND THE PAGE SAYS SO. */
+    ok(/EXACT TRIGGER NOT SCORED/.test(t),
+      "names the joint trigger and prints EXACT TRIGGER NOT SCORED");
+    const scored = blocks(html).filter((b) => JOINT.test(b) && RATE_NEAR.test(b));
+    ok(scored.length === 0,
+      "no rate, count or interval shares a block with the joint trigger",
+      scored.slice(0, 3).map((b) => b.slice(0, 160)).join("\n        "));
+
+    /* 7 -- NO MARGINAL MULTIPLICATION, IN WORDS OR IN ARITHMETIC.
+       The language check is negation-aware for the same reason as GATE 2: the only sentences in
+       this package that name a product name it to refuse it. The arithmetic check needs no
+       language at all -- it recomputes every intensity x landfall product the manifest makes
+       possible and fails if the page prints one, whatever it is called. */
+    const PRODUCT = /\bx\b|\u00d7|\btimes\b|multiplied by|product of|joint (?:probability|rate|likelihood)|combined (?:probability|rate)/i;
+    const products = blocks(html).filter((b) => PRODUCT.test(b) && RATE_NEAR.test(b)
+      && !/\bnot\b|\bno\b|\bnever\b|\bneither\b|\bnor\b/i.test(b));
+    ok(products.length === 0,
+      "no block multiplies an intensity row by a landfall row",
+      products.slice(0, 3).map((b) => b.slice(0, 160)).join("\n        "));
+    const printed = [];
+    for (const m of t.matchAll(/(\d+(?:\.\d)?)\s*%/g)) {
+      /* A value the manifest itself publishes is a manifest rate, not a product -- a collision
+         between a real row and an arithmetic coincidence resolves in favour of the row. */
+      if (PERCENTS.has(m[1]) || PERCENTS.has(Number(m[1]).toFixed(1))) continue;
+      if (FORBIDDEN_PRODUCTS.has(m[1])) printed.push(`${m[1]}% = ${FORBIDDEN_PRODUCTS.get(m[1])}`);
+    }
+    ok(printed.length === 0, "no printed percentage equals a marginal product",
+      printed.slice(0, 3).join(", "));
+
+    /* 8 -- NO REGIONAL-VARIANT FABRICATION. A sub-CONUS place name may appear as a fact about a
+       named storm; it may never appear beside a rate, and there is no disclaimer that buys an
+       exemption here. The registry has no sub-CONUS row, so any such number would be invented. */
+    const REGIONAL = /\bgulf\b|\bflorida\b|\btexas\b|\blouisiana\b|\bmississippi\b|\balabama\b|\bcarolina\b/i;
+    const regional = blocks(html).filter((b) => REGIONAL.test(b)
+      && (RATE_NEAR.test(b) || /\[\s*\d+\s*[-\u2013]\s*\d+\s*%/.test(b)));
+    ok(regional.length === 0,
+      "no sub-CONUS region shares a block with a rate or an interval",
+      regional.slice(0, 3).map((b) => b.slice(0, 160)).join("\n        "));
+  }
 
   /* -- traceability: every printed n/N -- */
   const badFractions = [];

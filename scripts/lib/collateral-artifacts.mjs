@@ -772,6 +772,129 @@ ${packFoot(D)}
    its exact n/N, interval and returned status, the refusals, the gaps, the representative
    members, the CITE THIS COHORT string and the replay URL. If a figure appears on an artifact
    and not here, the artifact is wrong. */
+/* ============ E — DISCRETE EVENT-CONTRACT EVIDENCE ======================================== */
+/* WHAT THIS PAGE IS, AND THE ONE THING IT MUST NOT BECOME.
+ *
+ * It is a proof of utility for one prospect, and the proof is a BOUNDARY: here is the historical
+ * evidence Storm Atlas can support from a declared genesis condition, and here -- named, itemised
+ * and refused -- is where that evidence stops short of the trigger a structurer would actually
+ * have to price. It is not an energy page, not a forecast, not a pricing model, and not a claim
+ * that Atlas scores anybody's contract.
+ *
+ * THE TRIGGER LOCK. Atlas landfall and Discrete's trigger are different objects, and the page
+ * exists to say so. Atlas publishes a lifetime intensity ladder (did the storm ever reach Cat 4?)
+ * and a landfall contract with exactly two intensity forms per region (`any`, and `>=64 kt`).
+ * Discrete's published trigger is a single JOINT event -- NHC-determined centre crossing of the
+ * contiguous-US coastline, at Cat 4+ AS DETERMINED AT LANDFALL -- with Gulf-only and Florida-only
+ * variants. There is no vetted Atlas row for that conjunction, and this file does not make one:
+ *   1. the joint row is printed as EXACT TRIGGER NOT SCORED and left uncomputed;
+ *   2. no marginal is multiplied by another, and CONUS >=64 kt is never offered as a stand-in;
+ *   3. no sub-CONUS rate is fabricated -- a member's Texas or Florida crossing stays a fact about
+ *      that named storm, which is the only form the archive holds it in.
+ *
+ * The cohort is the already-validated pre-genesis reference cell. It is NOT moved to AL052026's
+ * operational tropical fix, and nothing here implies the cell is where Five formed.
+ */
+export function artifactE(D, copy) {
+  const C = makeCopy(copy, "E");
+  const s = D.byId["97L"];
+  const rows = liveRows(D);
+  const pick = (k) => [...s.intensity_rows, ...s.landfall_rows].find((r) => r.key === k);
+  /* The six rows the brief asks for, in the archive's own order, straight off the manifest. */
+  const shown = [["cat1", "reached Cat 1 (64 kt)"], ["cat3", "reached Cat 3 (96 kt)"],
+    ["cat4", "reached Cat 4 (113 kt)"], ["cat5", "reached Cat 5 (137 kt)"],
+    ["conus:any", "CONUS landfall — any intensity"], ["conus:hurricane", "CONUS landfall — ≥64 kt"]]
+    .map(([k, label]) => ({ ...pick(k), label }));
+
+  /* THE EVIDENCE BRIDGE. The intellectual centre of the page: what the contract needs in the left
+     column, what the archive actually holds in the middle, and the archive's own verdict on the
+     distance between them on the right. Every STATUS here is a refusal, not a result. */
+  const BRIDGE = [
+    ["Cat 4+ <b>at</b> CONUS landfall — one joint event",
+      "two separate rows: <b>reached Cat 4</b> and <b>CONUS landfall</b>. No row exists for "
+      + "their conjunction.",
+      "EXACT TRIGGER NOT SCORED", "no"],
+    ["Intensity determined <b>at the crossing</b>, 130 mph",
+      "the ladder is <b>lifetime peak attainment</b>; the landfall contract has two intensity "
+      + "forms, <b>any</b> and <b>≥64 kt</b>.",
+      "NO ≥113 kt LANDFALL ROW", "no"],
+    ["Landfall and its category determined by <b>NHC</b>",
+      "Atlas modelled landfall geometry — <b>hurdat2_L_record</b>, <b>bracketing_fix</b> or "
+      + "<b>segment_crossing</b>.",
+      "DIFFERENT CONTRACT DEFINITION", "no"],
+    ["Gulf Coast-only and Florida-only regions",
+      "<b>CONUS scored as one region.</b> No sub-CONUS row at any radius or sample size.",
+      "NO VETTED SUB-CONUS ROW", "no"],
+    ["Which storms did this before, and where they went",
+      "the named <b>${N}-member</b> cohort, each member's recorded crossings, and the tracks.",
+      "SUPPORTED AS HISTORY, NOT A RATE", "yes"],
+  ];
+
+  const bridge = `<table class="ledger bridge"><thead><tr>
+    <th style="width:29%;text-align:left">Discrete needs</th>
+    <th style="width:48%;text-align:left">Atlas currently supports</th>
+    <th style="width:23%;text-align:left">Status</th>
+  </tr></thead><tbody>${BRIDGE.map(([need, has, status, ok], i) => `<tr class="${i % 2 ? "band" : ""}">
+    <td class="lft">${need}</td>
+    <td class="lft">${has.replace("${N}", String(s.cohort.n_cases))}</td>
+    <td class="status ${ok === "yes" ? "gate" : "refused"}">${esc(status)}</td></tr>`).join("")}
+  </tbody></table>`;
+
+  const body = `<div class="sheet">
+${masthead({
+    doc: "ARTIFACT E · DISCRETE EVENT-CONTRACT EVIDENCE", sheet: "1 OF 1",
+    title: "A published Cat 4+ CONUS landfall trigger — and where the archive stops",
+    sub: C.get("lede").replace(/^<p>|<\/p>$/g, ""),
+    rule: [["LIVE STATUS", LIVE_STAMP], ["POINT TYPE", "PRE-GENESIS REFERENCE CELL"],
+      ["PACK", D.pack.archive_stamp]],
+  })}
+
+<section class="sec sechd-tight">${sectionHead("01", "The contract question, and the declared cohort")}
+<div class="box"><h3>DISCRETE — PUBLIC TERMS, AS PUBLISHED · VERIFIED 31 AUG 2026</h3>
+  ${C.get("discrete-terms")}</div>
+<div class="grid2" style="margin-top:3px">
+  <div class="box refusal"><h3>LIVE STATUS, AND WHAT IT IS NOT</h3>
+    <p>${opFormation(D, "AL052026")}</p>
+    <p style="margin-top:2px"><b>NOT ATLAS GENESIS.</b> The pack does not hold AL052026 and does
+    not accept the operational layer as a genesis source. The cohort beside remains the declared
+    <b>PRE-GENESIS REFERENCE CELL</b> at <b>28.0°N 88.7°W</b> — <b>not where Five formed</b>, and
+    not moved to Five's fix.</p></div>
+  <div>${ledger([{ rows: shown }], { showBar: false, compact: true,
+    caption: `DECLARED COHORT · 28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+ · `
+      + `${s.cohort.cohort_status} · N = ${s.cohort.n_cases} · ESS ${s.cohort.effective_sample_size}` })}</div>
+</div>
+<p class="fn">${C.get("cohort-note").replace(/^<p>|<\/p>$/g, "")}</p>
+</section>
+
+<section class="sec sechd-tight">${sectionHead("02", "Evidence bridge, evidence gap",
+    "the centre of this page · every status on the right is a refusal")}
+${bridge}
+
+<p class="fn">${C.get("history-note").replace(/^<p>|<\/p>$/g, "")}</p>
+</section>
+
+<section class="sec sechd-tight">${sectionHead("03", "The three holes, and what a desk could do with this")}
+<div class="box refusal"><h3>THE THREE HOLES, NAMED</h3>
+  <p><b>1 · EXACT TRIGGER NOT SCORED.</b> No vetted Atlas row exists for <b>Cat 4+ at CONUS
+  landfall</b>; none was created here.</p>
+  <p><b>2 · NO MARGINAL MULTIPLICATION.</b> The joint trigger is <b>not</b> estimated as
+  reached-Cat-4 × CONUS-landfall — two marginals on one cohort are not a joint event — and
+  <b>CONUS — ≥64 kt is not a substitute</b>. No such product is computed here.</p>
+  <p><b>3 · NO REGIONAL-VARIANT FABRICATION.</b> Atlas holds <b>no vetted Gulf Coast-only or
+  Florida-only row</b>. Cohort tracks reach Texas, Louisiana and Florida — facts about named
+  storms and geography, <b>not</b> a Gulf, Florida, Texas or Louisiana rate.</p></div>
+<div class="box commercial" style="margin-top:3px"><h3>WHAT A STRUCTURER COULD USE THIS FOR — AND WHAT THIS PAGE DOES NOT DO</h3>
+  ${C.get("desk-use")}
+  ${C.get("desk-not")}</div>
+${citeBlock(s)}
+</section>
+
+<div class="spacer"></div>
+${packFoot(D)}
+</div>`;
+  return page({ title: "Storm Atlas — Discrete Event-Contract Evidence", body });
+}
+
 export function sourceManifestDoc(D) {
   const sheets = [];
   const head = (n, of) => masthead({

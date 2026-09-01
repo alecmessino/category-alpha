@@ -34,6 +34,7 @@ statement, and visibly refuse what the record cannot support.
 | `B2-97L-energy-weather-trading.html` | Frequency bands from contract rows; analog paths as geography, not scored state probabilities | 1 |
 | `C-karina-major-hurricane-analog-brief.html` | A live major hurricane beside the cohort for its declared genesis cell | 1 |
 | `D-storm-atlas-tear-sheet.html` | What the instrument is, what it refuses, what ships today and what does not | 1 |
+| `E-discrete-event-contract-evidence.html` | A published Cat 4+ CONUS landfall trigger, the declared cohort beside it, and the three places the archive stops short of scoring it | 1 |
 | `SOURCE-MANIFEST.html` | The evidence gate as a printable reference document | 8 |
 | `source-manifest.json` / `.txt` | Every cohort, contract row, interval, stamp, gap, representative member, cite string and URL | — |
 | `replay-urls.json` | The six cohorts and the URL that reopens each | — |
@@ -104,8 +105,27 @@ node scripts/check-collateral-fit.mjs        # every sheet fits its printed page
 node scripts/check-collateral-legibility.mjs # measured type sizes clear the gate (needs a browser)
 ```
 
-Current: 143/143 content, 42/42 replay, every slot inside budget and printed somewhere, every
+Current: 172/172 content, 42/42 replay, every slot inside budget and printed somewhere, every
 sheet fits, every semantic class clears its own type floor.
+
+### The trigger lock
+
+Artifact E names a joint trigger — an intensity condition evaluated **at** a landfall — that the
+archive does not score. Three checks in `check-collateral.mjs` hold that boundary, and they run
+on any artifact that names such a trigger, not on E by name:
+
+- **exact trigger** — the page must print `EXACT TRIGGER NOT SCORED`, and no rate, count or
+  interval may share a block with the joint trigger. The claim is checked against the archive
+  before it is checked on the page: every landfall row key must be `region:any` or
+  `region:hurricane`, so if a future pack ever holds a Cat 4-at-landfall row the assertion fails
+  first and the refusal comes off the page before a reader has to notice it went stale.
+- **marginal product** — no block may multiply an intensity row by a landfall row, and no printed
+  percentage may equal any such product. The second half needs no language at all: it recomputes
+  every intensity × landfall product the manifest makes possible and fails if one appears,
+  whatever it is called. A value the manifest itself publishes is read as that row, not a product.
+- **regional inference** — no sub-CONUS region name may share a block with a rate or an interval.
+  The registry has no sub-CONUS row, so any such number would be invented, and unlike the
+  package-wide state-name rule there is no disclaimer that buys an exemption.
 
 ## Measured type, per prospect-facing sheet
 
@@ -115,17 +135,17 @@ and `.disclaim` legal text, which is allowed down to 7 pt.
 Minimum and character-weighted median, in points, per class per artifact. The median is weighted
 by character count so a three-character chip does not count the same as a paragraph.
 
-| class | floor | A | B | B1 | B2 | C | D |
-|---|---|---|---|---|---|---|---|
-| body | 8.5 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 |
-| callout | 8.5 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 |
-| headline | 8.5 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 |
-| table | 7.5 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 |
-| citation | 7.5 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 |
-| detail | 7.5 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 |
-| map label | 7.5 | 7.54 / 7.54 | 7.58 / 7.58 | — | 7.58 / 7.58 | 7.58 / 7.58 | — |
-| footer/legal | 7.0 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 |
+| class | floor | A | B | B1 | B2 | C | D | E |
+|---|---|---|---|---|---|---|---|---|
+| body | 8.5 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 |
+| callout | 8.5 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 |
+| headline | 8.5 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 |
+| table | 7.5 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 |
+| citation | 7.5 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 |
+| detail | 7.5 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 |
+| map label | 7.5 | 7.54 / 7.54 | 7.58 / 7.58 | — | 7.58 / 7.58 | 7.58 / 7.58 | — | — |
+| footer/legal | 7.0 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 |
 
-Substantive minimum (every class but footer/legal): 7.54 pt on A, 7.57 pt on the rest. `detail` is
+Substantive minimum (every class but footer/legal): 7.54 pt on A, 7.57 pt on the rest, E included. `detail` is
 the footnote, chip, plate-furniture and refusal-reason class; it carries real text — 1.7k
 characters on A, 2.4k on B — and sits at the 7.5 pt detail floor, not at body size.

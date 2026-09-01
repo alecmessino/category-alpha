@@ -24,6 +24,7 @@ export const BUDGETS = {
   B2: { "answers.now": 44, "answers.adds": 33, "answers.commercial": 23, "lede": 45, "geography-not-probability": 64, "exposure-map": 68, "frequency-bands": 36, "not-this": 60 },
   C: { "live-vs-history": 80, "land-rows": 39, "so-what": 36 },
   D: { "one-sentence": 59, "users-can": 140, "moat": 91, "delivery": 41, "pilot": 23, "sample-note": 41 },
+  E: { "lede": 45, "discrete-terms": 84, "cohort-note": 41, "history-note": 46, "desk-use": 55, "desk-not": 64 },
 };
 
 /* SLOTS NO LONGER RENDERED. The type-gate pass cut the blocks these fed; the copy stays in
@@ -35,6 +36,9 @@ export const RETIRED = {
   "B1": ["lede", "answers.adds", "answers.commercial"],
   "C": ["lede", "rarity", "answers.now", "answers.adds", "answers.commercial"],
   "D": ["answers.now", "answers.adds", "answers.commercial"],
+  /* E was drawn without an answers rail at all -- the evidence-bridge table does that work --
+     so its three rail slots are absent by design rather than by cut. */
+  "E": ["answers.now", "answers.adds", "answers.commercial"],
 };
 
 export const words = (html) => String(html || "").replace(/<[^>]+>/g, " ")
@@ -61,6 +65,7 @@ const FILES = {
   B2: "B2-97L-energy-weather-trading.html",
   C: "C-karina-major-hurricane-analog-brief.html",
   D: "D-storm-atlas-tear-sheet.html",
+  E: "E-discrete-event-contract-evidence.html",
 };
 const flat = (h) => String(h || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 const rendered = {};

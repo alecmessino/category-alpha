@@ -293,6 +293,12 @@ table.ledger.sysgrid{table-layout:fixed}
 .platerow .sec{margin-top:0}
 .tagstack{display:flex;flex-direction:column;gap:var(--sp-2)}
 .ledgerpair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.06fr);gap:var(--sp-6);align-items:start}
+/* THE EVIDENCE BRIDGE. Three columns of prose, not figures: the left cell is what a contract
+   needs, the middle is what the archive holds, and the right is the archive's verdict on the
+   distance. It borrows the ledger's rules and banding and carries no contract rows at all. */
+.bridge td{white-space:normal;vertical-align:top;line-height:1.16;padding:1.2px var(--sp-3)}
+.bridge td.status{font-weight:600;letter-spacing:.2px;max-width:none}
+.bridge th{white-space:normal}
 .ledgertrio{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.04fr) minmax(0,1.04fr);
   gap:var(--sp-4);align-items:start}
 .ledger.compact td{padding:0.6px var(--sp-2);font-size:var(--t-detail);line-height:1.18}
@@ -303,6 +309,8 @@ table.ledger.sysgrid{table-layout:fixed}
 .ledger .ivl{color:var(--ink-600);font-weight:400;font-size:var(--t-detail);letter-spacing:0}
 .ledger.compact .grp td{font-size:var(--t-detail);padding:1.5px var(--sp-2)}
 .cardrow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:var(--sp-2)}
+.cardrow-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cardrow-3{grid-template-columns:repeat(3,minmax(0,1fr))}
 .cardrow-4{grid-template-columns:repeat(4,minmax(0,1fr))}
 .cardrow-5{grid-template-columns:repeat(5,minmax(0,1fr))}
 .cardrow-6{grid-template-columns:repeat(6,minmax(0,1fr))}

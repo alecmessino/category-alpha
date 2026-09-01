@@ -27,6 +27,7 @@ const EXPECTED = {
   "B2-97L-energy-weather-trading.html": 1,
   "C-karina-major-hurricane-analog-brief.html": 1,
   "D-storm-atlas-tear-sheet.html": 1,
+  "E-discrete-event-contract-evidence.html": 1,
 };
 
 let chromium;
