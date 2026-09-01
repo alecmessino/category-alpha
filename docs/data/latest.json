@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-01T00:33:07.485Z",
+  "generatedAt": "2026-09-01T00:43:25.039Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,19 +9,19 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 242,
+      "latencyMs": 266,
       "count": 3,
       "note": "3 active",
       "raw": "{\"id\":\"al052026\",\"binNumber\":\"AT5\",\"name\":\"Edouard\",\"classification\":\"TS\",\"intensity\":\"35\",\"pressure\":\"1010\",\"latitude\":\"28.4N\",\"longitude\":\"91.6W\",\"latitudeNumeric\":28.4,\"longitudeNumeric\":-91.6,\"movementDir\":300,\"movementSpeed\":6,\"lastUpdate\":\"2026-09-01T00:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"002a\",\"issuance\":\"2026-09-01T00:00:00.000Z\",\"fileUpdateTime\":\"2026-08-31T23:50:19.326Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPAT5.shtml\"},\"forecastAdvisory\":{\"advNum\":\"002\",\"issuance\":\"2026-08-31",
-      "forecast": "Edouard: 5 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 4% · Tropical Storm Warning · forecast undefined guidance · advisory -1397m old | Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory -1206m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory -1205m old",
-      "advisoryLagMin": -1205
+      "forecast": "Edouard: 5 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 4% · Tropical Storm Warning · forecast undefined guidance · advisory -1387m old | Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory -1196m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory -1195m old",
+      "advisoryLagMin": -1195
     },
     "markets": {
       "ok": true,
       "status": 200,
       "source": "kalshi",
       "count": 300,
-      "note": "300 hurricane markets across 51 series (112 anchored) from 319 series-markets(62s·62ok/0fail) · dropped 0kw/0sport/0px · 19 BEYOND THE 300-CONTRACT CEILING",
+      "note": "300 hurricane markets across 51 series (111 anchored) from 319 series-markets(62s·62ok/0fail) · dropped 0kw/0sport/0px · 19 BEYOND THE 300-CONTRACT CEILING",
       "seriesKept": 51,
       "droppedForCap": 19,
       "attempts": [
@@ -30,7 +30,7 @@
           "ok": true,
           "status": 200,
           "count": 300,
-          "note": "300 hurricane markets across 51 series (112 anchored) from 319 series-markets(62s·62ok/0fail) · dropped 0kw/0sport/0px · 19 BEYOND THE 300-CONTRACT CEILING",
+          "note": "300 hurricane markets across 51 series (111 anchored) from 319 series-markets(62s·62ok/0fail) · dropped 0kw/0sport/0px · 19 BEYOND THE 300-CONTRACT CEILING",
           "hosts": [
             {
               "host": "https://api.elections.kalshi.com/trade-api/v2",
@@ -47,14 +47,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 7 major Atlantic | Above 7 | px=0.005",
-            "Will there be more than 6 major Atlantic | Above 6 | px=0.005",
-            "Will there be more than 5 major Atlantic | Above 5 | px=0.010",
-            "Will there be more than 4 major Atlantic | Above 4 | px=0.025",
-            "Will there be more than 3 major Atlantic | Above 3 | px=0.080",
-            "Will there be more than 2 major Atlantic | Above 2 | px=0.115"
+            "Will a hurricane make landfall in Hawaii | Before 2027 | px=0.125",
+            "Will there be more than 26 named storms  | Above 26 | px=0.460",
+            "Will there be more than 24 named storms  | Above 24 | px=0.415",
+            "Will there be more than 22 named storms  | Above 22 | px=0.295",
+            "Will there be more than 20 named storms  | Above 20 | px=0.445",
+            "Will there be more than 19 named storms  | Above 19 | px=0.730"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2544.01\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"3555.78\"},\"px\":{\"last_price_dollars\":\"0.0200\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0200\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"139.00\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"11094.48\",\"volume_24h_fp\":\"510.95\",\"volume_fp\":\"28132.98\"},\"px\":{\"last_price_dollars\":\"0.1500\",\"no_ask_dollars\":\"0.8900\",\"no_bid_dollars\":\"0.8600\",\"previous_price_dollars\":\"0.1000\",\"previous_yes_ask_dollars\":\"0.1400\",\"previous_yes_bid_dollars\":\"0.0800\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.1400\",\"yes_ask_size_fp\":\"11.00\",\"yes_bid_dollars\":\"0.1100\",\"yes_bid_size_fp\":\"47.00\"}}"
         }
       ]
     },
@@ -207,7 +207,7 @@
       "counts": {
         "atlantic": {
           "systems": 7,
-          "namedstorms": 4,
+          "namedstorms": 5,
           "hurricanes": 0,
           "major": 0,
           "peakKt": 50
@@ -227,7 +227,7 @@
           "peakKt": 115
         }
       },
-      "note": "2026 season to date (named/hurricanes/major): Atlantic 4/0/0 · eastern Pacific 12/3/2 · central Pacific 4/2/1"
+      "note": "2026 season to date (named/hurricanes/major): Atlantic 5/0/0 · eastern Pacific 12/3/2 · central Pacific 4/2/1"
     },
     "satellite": {
       "ok": true,
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 138,
+      "latencyMs": 149,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 3mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 2,
       "note": "2 area(s) under watch · 0 Atlantic",
-      "latencyMs": 131,
+      "latencyMs": 128,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -280,7 +280,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 9,
+      "latencyMs": 8,
       "source": "NHC graphical TWO",
       "count": 2,
       "note": "2 of 2 area(s) with geometry"
@@ -290,15 +290,15 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 349,
+      "latencyMs": 356,
       "count": 3,
-      "note": "3/3 storm decks read · AL052026: a-deck cycle 2026083118 · 33 techs · consensus 3 member(s) peak 35.7 kt · b-deck 13 records · f-deck 29 fixes | EP112026: a-deck cycle 2026083118 · 33 techs · consensus 3 member(s) peak 115 kt · b-deck 28 records · f-deck 130 fixes | EP122026: a-deck cycle 2026083118 · 33 techs · consensus 3 member(s) peak 129.3 kt · b-deck 26 records · f-deck 133 fixes",
+      "note": "3/3 storm decks read · AL052026: a-deck cycle 2026090100 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 14 records · f-deck 32 fixes | EP112026: a-deck cycle 2026083118 · 33 techs · consensus 3 member(s) peak 115 kt · b-deck 28 records · f-deck 130 fixes | EP122026: a-deck cycle 2026090100 · 32 techs · consensus 3 member(s) peak 129.7 kt · b-deck 26 records · f-deck 133 fixes",
       "attempts": [
         {
           "source": "AL052026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026083118 · 33 techs · consensus 3 member(s) peak 35.7 kt · b-deck 13 records · f-deck 29 fixes"
+          "note": "a-deck cycle 2026090100 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 14 records · f-deck 32 fixes"
         },
         {
           "source": "EP112026",
@@ -310,7 +310,7 @@
           "source": "EP122026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026083118 · 33 techs · consensus 3 member(s) peak 129.3 kt · b-deck 26 records · f-deck 133 fixes"
+          "note": "a-deck cycle 2026090100 · 32 techs · consensus 3 member(s) peak 129.7 kt · b-deck 26 records · f-deck 133 fixes"
         }
       ]
     },
@@ -319,7 +319,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 271,
+      "latencyMs": 283,
       "count": 2,
       "note": "2 vortex data message(s): AL022026 11:36Z, CP022026 08:53Z",
       "attempts": [
@@ -354,9 +354,9 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 19,
+      "latencyMs": 32,
       "count": 3,
-      "note": "3/3 storms · AL052026: 2026-08-31T18:00Z · shear 11 kt · OHC 22 · MPI 169 kt · 8 RI thresholds | EP112026: 2026-08-31T18:00Z · shear 7 kt · OHC 8 · MPI 149 kt · 8 RI thresholds | EP122026: 2026-08-31T18:00Z · shear 8 kt · OHC 28 · MPI 156 kt · 8 RI thresholds",
+      "note": "3/3 storms · AL052026: 2026-08-31T18:00Z · shear 11 kt · OHC 22 · MPI 169 kt · 8 RI thresholds | EP112026: 2026-08-31T18:00Z · shear 7 kt · OHC 8 · MPI 149 kt · 8 RI thresholds | EP122026: 2026-09-01T00:00Z · shear 7 kt · OHC 23 · MPI 158 kt · 8 RI thresholds",
       "attempts": [
         {
           "source": "AL052026",
@@ -374,7 +374,7 @@
           "source": "EP122026",
           "ok": true,
           "status": 200,
-          "note": "2026-08-31T18:00Z · shear 8 kt · OHC 28 · MPI 156 kt · 8 RI thresholds"
+          "note": "2026-09-01T00:00Z · shear 7 kt · OHC 23 · MPI 158 kt · 8 RI thresholds"
         }
       ]
     },
@@ -470,11 +470,11 @@
         "already": false,
         "basis": "official forecast peaks at 50 kt at 18h; NHC's published mean absolute intensity error there is 6.5 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 4% central, 2-14% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 1.6 kt lower (6% unadjusted)"
       },
-      "advisoryLagMin": -1397,
+      "advisoryLagMin": -1387,
       "discussion": {
         "forecaster": "Reinhart",
         "issuedZ": "2026-09-01T20:54:00.000Z",
-        "lagMin": -1221,
+        "lagMin": -1211,
         "guidance": {
           "intensity": {
             "position": "above",
@@ -649,261 +649,7 @@
       ],
       "advisoryIssuedZ": "2026-09-01T23:50:00.000Z",
       "advNumFull": "2A",
-      "consensus": {
-        "cycle": "2026083118",
-        "cycleIso": "2026-08-31T18:00:00.000Z",
-        "peakKt": 35.7,
-        "peakHr": 24,
-        "spreadKt": 2.1,
-        "minKt": 34,
-        "maxKt": 38,
-        "n": 3,
-        "members": [
-          {
-            "tech": "HCCA",
-            "label": "HFIP corrected consensus",
-            "peakKt": 34,
-            "peakHr": 24,
-            "initialKt": 30
-          },
-          {
-            "tech": "IVCN",
-            "label": "variable consensus (intensity)",
-            "peakKt": 35,
-            "peakHr": 24,
-            "initialKt": 30
-          },
-          {
-            "tech": "GDM2",
-            "label": "DeepMind (2-cycle)",
-            "peakKt": 38,
-            "peakHr": 24,
-            "initialKt": 30
-          }
-        ],
-        "corrected": {
-          "tech": "HCCA",
-          "peakKt": 34,
-          "peakHr": 24,
-          "intensity": [
-            {
-              "hr": 0,
-              "kt": 30,
-              "mslp": null
-            },
-            {
-              "hr": 12,
-              "kt": 33,
-              "mslp": null
-            },
-            {
-              "hr": 24,
-              "kt": 34,
-              "mslp": null
-            },
-            {
-              "hr": 36,
-              "kt": 24,
-              "mslp": null
-            },
-            {
-              "hr": 48,
-              "kt": 21,
-              "mslp": null
-            },
-            {
-              "hr": 60,
-              "kt": 19,
-              "mslp": null
-            },
-            {
-              "hr": 72,
-              "kt": 19,
-              "mslp": null
-            },
-            {
-              "hr": 84,
-              "kt": 21,
-              "mslp": null
-            }
-          ],
-          "track": [
-            {
-              "hr": 0,
-              "lat": 28.1,
-              "lon": -91
-            },
-            {
-              "hr": 12,
-              "lat": 28.6,
-              "lon": -92.3
-            },
-            {
-              "hr": 24,
-              "lat": 29.3,
-              "lon": -93.6
-            },
-            {
-              "hr": 36,
-              "lat": 30.2,
-              "lon": -94.8
-            },
-            {
-              "hr": 48,
-              "lat": 31.2,
-              "lon": -95.8
-            },
-            {
-              "hr": 60,
-              "lat": 32.2,
-              "lon": -96.6
-            },
-            {
-              "hr": 72,
-              "lat": 33.3,
-              "lon": -97.2
-            },
-            {
-              "hr": 84,
-              "lat": 34.5,
-              "lon": -98.2
-            }
-          ]
-        },
-        "variableIntensity": {
-          "tech": "IVCN",
-          "peakKt": 35,
-          "peakHr": 24
-        },
-        "variableTrack": {
-          "tech": "TVCN",
-          "track": [
-            {
-              "hr": 0,
-              "lat": 28.1,
-              "lon": -91
-            },
-            {
-              "hr": 12,
-              "lat": 28.7,
-              "lon": -92.4
-            },
-            {
-              "hr": 24,
-              "lat": 29.5,
-              "lon": -93.8
-            },
-            {
-              "hr": 36,
-              "lat": 30.4,
-              "lon": -95
-            },
-            {
-              "hr": 48,
-              "lat": 31.5,
-              "lon": -95.8
-            },
-            {
-              "hr": 60,
-              "lat": 32.5,
-              "lon": -96.6
-            },
-            {
-              "hr": 72,
-              "lat": 33.5,
-              "lon": -97.5
-            },
-            {
-              "hr": 84,
-              "lat": 34.2,
-              "lon": -98.8
-            },
-            {
-              "hr": 96,
-              "lat": 34.5,
-              "lon": -100
-            }
-          ]
-        },
-        "deepmind": {
-          "tech": "GDM2",
-          "peakKt": 38,
-          "peakHr": 24,
-          "track": [
-            {
-              "hr": 0,
-              "lat": 28.1,
-              "lon": -91
-            },
-            {
-              "hr": 12,
-              "lat": 28.8,
-              "lon": -92.2
-            },
-            {
-              "hr": 24,
-              "lat": 29.7,
-              "lon": -93.6
-            },
-            {
-              "hr": 36,
-              "lat": 30.6,
-              "lon": -94.6
-            },
-            {
-              "hr": 48,
-              "lat": 31.8,
-              "lon": -95.2
-            },
-            {
-              "hr": 60,
-              "lat": 33,
-              "lon": -95.7
-            }
-          ]
-        },
-        "official": {
-          "tech": "OFCL",
-          "peakKt": 50,
-          "peakHr": 24
-        },
-        "missing": [],
-        "techsPresent": [
-          "AEMI",
-          "AVNI",
-          "CARQ",
-          "CEMI",
-          "CLP5",
-          "CMCI",
-          "CTCI",
-          "DRCL",
-          "DSHP",
-          "GDM2",
-          "HCCA",
-          "HFAI",
-          "HFBI",
-          "HMNI",
-          "HWFI",
-          "IVCN",
-          "LGEM",
-          "NNIB",
-          "NNIC",
-          "NVGI",
-          "OCD5",
-          "OFCI",
-          "OFCL",
-          "RVCN",
-          "SHF5",
-          "SHIP",
-          "TABD",
-          "TABM",
-          "TABS",
-          "TCLP",
-          "TVCN",
-          "UKXI",
-          "XTRP"
-        ]
-      },
+      "consensus": null,
       "recon": null,
       "aircraftFix": null,
       "ships": {
@@ -1917,30 +1663,30 @@
         "passes": 6
       },
       "bestTrack": {
-        "time": "2026083118",
-        "iso": "2026-08-31T18:00:00.000Z",
-        "lat": 28.1,
-        "lon": -91,
-        "kt": 30,
-        "mslp": 1012,
-        "ty": "TD",
+        "time": "2026090100",
+        "iso": "2026-09-01T00:00:00.000Z",
+        "lat": 28.4,
+        "lon": -91.6,
+        "kt": 35,
+        "mslp": 1010,
+        "ty": "TS",
         "radii": {
           "34": {
             "code": "NEQ",
-            "ne": 0,
+            "ne": 20,
             "se": 0,
             "sw": 0,
-            "nw": 0
+            "nw": 20
           }
         }
       },
       "atcfDeck": {
-        "cycle": "2026083118",
-        "techCount": 33,
-        "forecastAids": 32
+        "cycle": "2026090100",
+        "techCount": 1,
+        "forecastAids": 0
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026083118 · 33 techs · consensus 3 member(s) peak 35.7 kt · b-deck 13 records · f-deck 29 fixes",
+        "atcf": "a-deck cycle 2026090100 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 14 records · f-deck 32 fixes",
         "ships": "2026-08-31T18:00Z · shear 11 kt · OHC 22 · MPI 169 kt · 8 RI thresholds"
       },
       "riFloor": {
@@ -1954,26 +1700,26 @@
       },
       "hurricanePCal": {
         "ok": true,
-        "p": 0.028733153737415775,
+        "p": 0.04174406219835367,
         "pRaw": 0.04147102209221173,
-        "pLow": 0.01,
-        "pHigh": 0.11754656343552704,
-        "pPeak": 0.028733153737415775,
+        "pLow": 0.015251521779438571,
+        "pHigh": 0.13968244128264312,
+        "pPeak": 0.04174406219835367,
         "pNow": 0.01,
         "pWithRi": 0.12,
         "drivenBy": "forecast peak",
-        "meanKt": 43,
-        "sigmaKt": 10.3,
+        "meanKt": 48.4,
+        "sigmaKt": 8.1,
         "sigmaInitKt": 5,
         "initSource": "satellite intensity analysis",
-        "tauKt": 6.3,
+        "tauKt": 0,
         "reconDeltaKt": null,
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 1320,
+        "ascatAgeMin": 1330,
         "ascatUsed": false,
-        "consensusAgeMin": 393,
+        "consensusAgeMin": null,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 30,
@@ -1991,13 +1737,6 @@
             "peakKt": 48.4,
             "peakHr": 18,
             "sigmaKt": 8.1
-          },
-          {
-            "id": "consensus",
-            "label": "ATCF consensus (HCCA/IVCN/GDM2)",
-            "peakKt": 35.7,
-            "peakHr": 24,
-            "sigmaKt": 9.4
           }
         ],
         "layers": [
@@ -2008,13 +1747,6 @@
             "basis": "official forecast peaks at 50 kt at 18h; NHC's published mean absolute intensity error there is 6.5 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 4% central, 2-14% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 1.6 kt lower (6% unadjusted)"
           },
           {
-            "id": "consensus",
-            "label": "ATCF guidance consensus",
-            "p": 0.01,
-            "unavailable": false,
-            "basis": "3 aids in the 2026083118 deck peak at a mean of 35.7 kt near 24h, disagreeing by 2.1 kt"
-          },
-          {
             "id": "ships-ri",
             "label": "SHIPS rapid-intensification floor",
             "p": null,
@@ -2023,22 +1755,22 @@
           }
         ],
         "notes": [
-          "scatterometer pass is 1320 min old, past the 360-min line — band not tightened",
+          "scatterometer pass is 1330 min old, past the 360-min line — band not tightened",
           "SHIPS RI implies a floor of 12% — published, NOT scored (no operator claim)"
         ],
         "used": {
           "official": true,
-          "consensus": true,
+          "consensus": false,
           "recon": false,
           "ascat": false,
           "ships": false
         },
-        "basis": "combined 2 intensity estimates at 43 kt (sigma 10.3 kt, of which 6.3 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 4%, calibrated 3%"
+        "basis": "combined 1 intensity estimate at 48 kt (sigma 8.1 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 4%, calibrated 4%"
       },
       "evidenceQuality": {
-        "tier": "MEDIUM",
+        "tier": "LOW",
         "reasons": [
-          "ATCF consensus 393 min old, no aircraft in the storm",
+          "official advisory only — no guidance deck and no aircraft",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -2123,11 +1855,11 @@
         "already": true,
         "basis": "already carried at 115 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": -1206,
+      "advisoryLagMin": -1196,
       "discussion": {
         "forecaster": "Katz/Roberts",
         "issuedZ": "2026-09-01T20:40:00.000Z",
-        "lagMin": -1207,
+        "lagMin": -1197,
         "guidance": {
           "intensity": {
             "position": "above",
@@ -3880,7 +3612,7 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 393,
+        "consensusAgeMin": 403,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
@@ -3927,7 +3659,7 @@
       "evidenceQuality": {
         "tier": "MEDIUM",
         "reasons": [
-          "ATCF consensus 393 min old, no aircraft in the storm"
+          "ATCF consensus 403 min old, no aircraft in the storm"
         ]
       }
     },
@@ -4014,11 +3746,11 @@
         "already": false,
         "basis": "official forecast peaks at 105 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths"
       },
-      "advisoryLagMin": -1205,
+      "advisoryLagMin": -1195,
       "discussion": {
         "forecaster": "Hagen",
         "issuedZ": "2026-09-01T20:39:00.000Z",
-        "lagMin": -1206,
+        "lagMin": -1196,
         "guidance": {
           "intensity": null,
           "track": null
@@ -4279,40 +4011,40 @@
       "advisoryIssuedZ": "2026-09-01T20:38:00.000Z",
       "advNumFull": "17",
       "consensus": {
-        "cycle": "2026083118",
-        "cycleIso": "2026-08-31T18:00:00.000Z",
-        "peakKt": 129.3,
-        "peakHr": 144,
-        "spreadKt": 37.8,
-        "minKt": 100,
-        "maxKt": 172,
+        "cycle": "2026090100",
+        "cycleIso": "2026-09-01T00:00:00.000Z",
+        "peakKt": 129.7,
+        "peakHr": 120,
+        "spreadKt": 36.3,
+        "minKt": 103,
+        "maxKt": 171,
         "n": 3,
         "members": [
           {
             "tech": "HCCA",
             "label": "HFIP corrected consensus",
-            "peakKt": 172,
+            "peakKt": 171,
             "peakHr": 144,
             "initialKt": 55
           },
           {
             "tech": "IVCN",
             "label": "variable consensus (intensity)",
-            "peakKt": 100,
-            "peakHr": 144,
+            "peakKt": 103,
+            "peakHr": 108,
             "initialKt": 55
           },
           {
             "tech": "GDMI",
             "label": "DeepMind (interpolated)",
-            "peakKt": 116,
-            "peakHr": 132,
+            "peakKt": 115,
+            "peakHr": 120,
             "initialKt": 55
           }
         ],
         "corrected": {
           "tech": "HCCA",
-          "peakKt": 172,
+          "peakKt": 171,
           "peakHr": 144,
           "intensity": [
             {
@@ -4322,277 +4054,277 @@
             },
             {
               "hr": 12,
-              "kt": 65,
+              "kt": 73,
               "mslp": null
             },
             {
               "hr": 24,
-              "kt": 89,
+              "kt": 97,
               "mslp": null
             },
             {
               "hr": 36,
-              "kt": 106,
+              "kt": 108,
               "mslp": null
             },
             {
               "hr": 48,
-              "kt": 114,
+              "kt": 118,
               "mslp": null
             },
             {
               "hr": 60,
-              "kt": 125,
-              "mslp": null
-            },
-            {
-              "hr": 72,
-              "kt": 128,
-              "mslp": null
-            },
-            {
-              "hr": 84,
               "kt": 126,
               "mslp": null
             },
             {
+              "hr": 72,
+              "kt": 129,
+              "mslp": null
+            },
+            {
+              "hr": 84,
+              "kt": 127,
+              "mslp": null
+            },
+            {
               "hr": 96,
-              "kt": 132,
+              "kt": 135,
               "mslp": null
             },
             {
               "hr": 108,
-              "kt": 139,
+              "kt": 148,
               "mslp": null
             },
             {
               "hr": 120,
-              "kt": 141,
+              "kt": 157,
               "mslp": null
             },
             {
               "hr": 132,
-              "kt": 164,
-              "mslp": null
-            },
-            {
-              "hr": 144,
-              "kt": 172,
-              "mslp": null
-            },
-            {
-              "hr": 156,
               "kt": 168,
               "mslp": null
             },
             {
+              "hr": 144,
+              "kt": 171,
+              "mslp": null
+            },
+            {
+              "hr": 156,
+              "kt": 163,
+              "mslp": null
+            },
+            {
               "hr": 168,
-              "kt": 158,
+              "kt": 151,
               "mslp": null
             }
           ],
           "track": [
             {
               "hr": 0,
-              "lat": 12.8,
-              "lon": -146
+              "lat": 12.9,
+              "lon": -147
             },
             {
               "hr": 12,
-              "lat": 13,
-              "lon": -148
+              "lat": 13.1,
+              "lon": -148.9
             },
             {
               "hr": 24,
-              "lat": 13.2,
-              "lon": -149.9
+              "lat": 13.3,
+              "lon": -150.7
             },
             {
               "hr": 36,
-              "lat": 13.4,
-              "lon": -151.7
+              "lat": 13.5,
+              "lon": -152.6
             },
             {
               "hr": 48,
-              "lat": 13.4,
-              "lon": -153.9
+              "lat": 13.6,
+              "lon": -154.8
             },
             {
               "hr": 60,
-              "lat": 13.8,
-              "lon": -156.1
+              "lat": 13.9,
+              "lon": -156.9
             },
             {
               "hr": 72,
-              "lat": 14.3,
-              "lon": -158
+              "lat": 14.2,
+              "lon": -158.6
             },
             {
               "hr": 84,
-              "lat": 14.6,
-              "lon": -159.6
+              "lat": 14.3,
+              "lon": -160.2
             },
             {
               "hr": 96,
-              "lat": 14.6,
-              "lon": -161.1
+              "lat": 14.3,
+              "lon": -161.5
             },
             {
               "hr": 108,
               "lat": 14.4,
-              "lon": -162.2
+              "lon": -162.7
             },
             {
               "hr": 120,
-              "lat": 14.5,
-              "lon": -163.2
+              "lat": 14.7,
+              "lon": -163.6
             },
             {
               "hr": 132,
-              "lat": 14.7,
-              "lon": -163.7
+              "lat": 15,
+              "lon": -164.1
             },
             {
               "hr": 144,
-              "lat": 15.4,
-              "lon": -163.9
+              "lat": 15.6,
+              "lon": -164.8
             },
             {
               "hr": 156,
-              "lat": 16.2,
-              "lon": -163.9
+              "lat": 16.4,
+              "lon": -164.5
             },
             {
               "hr": 168,
-              "lat": 16.8,
-              "lon": -163.4
+              "lat": 18,
+              "lon": -163.5
             }
           ]
         },
         "variableIntensity": {
           "tech": "IVCN",
-          "peakKt": 100,
-          "peakHr": 144
+          "peakKt": 103,
+          "peakHr": 108
         },
         "variableTrack": {
           "tech": "TVCN",
           "track": [
             {
               "hr": 0,
-              "lat": 12.8,
-              "lon": -146
+              "lat": 12.9,
+              "lon": -147
             },
             {
               "hr": 12,
-              "lat": 13.1,
-              "lon": -147.6
+              "lat": 13.3,
+              "lon": -148.7
             },
             {
               "hr": 24,
-              "lat": 13.4,
-              "lon": -149.2
+              "lat": 13.6,
+              "lon": -150.5
             },
             {
               "hr": 36,
-              "lat": 13.6,
-              "lon": -150.9
+              "lat": 13.8,
+              "lon": -152.3
             },
             {
               "hr": 48,
-              "lat": 13.8,
-              "lon": -152.7
+              "lat": 14.1,
+              "lon": -154.2
             },
             {
               "hr": 60,
-              "lat": 14.2,
-              "lon": -154.6
+              "lat": 14.5,
+              "lon": -156.1
             },
             {
               "hr": 72,
-              "lat": 14.5,
-              "lon": -156.3
-            },
-            {
-              "hr": 84,
-              "lat": 14.8,
+              "lat": 14.9,
               "lon": -157.8
             },
             {
+              "hr": 84,
+              "lat": 15.2,
+              "lon": -159.4
+            },
+            {
               "hr": 96,
-              "lat": 15,
-              "lon": -159.2
+              "lat": 15.3,
+              "lon": -160.9
             },
             {
               "hr": 108,
-              "lat": 15.1,
-              "lon": -160.5
+              "lat": 15.5,
+              "lon": -162.3
             },
             {
               "hr": 120,
-              "lat": 15.4,
-              "lon": -161.6
+              "lat": 15.7,
+              "lon": -163.6
             },
             {
               "hr": 132,
-              "lat": 15.8,
-              "lon": -162.7
+              "lat": 16.1,
+              "lon": -164.8
             },
             {
               "hr": 144,
-              "lat": 16.1,
-              "lon": -164.6
+              "lat": 16.2,
+              "lon": -165.1
             },
             {
               "hr": 156,
-              "lat": 16.9,
-              "lon": -165.4
+              "lat": 17,
+              "lon": -165.8
             },
             {
               "hr": 168,
-              "lat": 17.9,
-              "lon": -166.2
+              "lat": 18.1,
+              "lon": -166.5
             }
           ]
         },
         "deepmind": {
           "tech": "GDMI",
-          "peakKt": 116,
-          "peakHr": 132,
+          "peakKt": 115,
+          "peakHr": 120,
           "track": [
             {
               "hr": 0,
-              "lat": 12.8,
-              "lon": -146
+              "lat": 12.9,
+              "lon": -147
             },
             {
               "hr": 12,
-              "lat": 13,
-              "lon": -148.1
+              "lat": 13.1,
+              "lon": -148.9
             },
             {
               "hr": 24,
-              "lat": 13.2,
-              "lon": -150
+              "lat": 13.4,
+              "lon": -150.7
             },
             {
               "hr": 36,
-              "lat": 13.4,
-              "lon": -151.9
+              "lat": 13.5,
+              "lon": -152.6
             },
             {
               "hr": 48,
-              "lat": 13.5,
-              "lon": -154
+              "lat": 13.7,
+              "lon": -154.6
             },
             {
               "hr": 60,
-              "lat": 13.8,
-              "lon": -156.1
+              "lat": 13.9,
+              "lon": -156.5
             },
             {
               "hr": 72,
               "lat": 14.1,
-              "lon": -158
+              "lon": -158.2
             },
             {
               "hr": 84,
@@ -4606,39 +4338,39 @@
             },
             {
               "hr": 108,
-              "lat": 14.1,
-              "lon": -162.6
+              "lat": 14.3,
+              "lon": -162.5
             },
             {
               "hr": 120,
-              "lat": 14.1,
-              "lon": -163.7
+              "lat": 14.4,
+              "lon": -163.4
             },
             {
               "hr": 132,
-              "lat": 14.4,
-              "lon": -164.4
+              "lat": 14.9,
+              "lon": -163.9
             },
             {
               "hr": 144,
-              "lat": 15.1,
-              "lon": -164.7
+              "lat": 15.8,
+              "lon": -164
             },
             {
               "hr": 156,
-              "lat": 16.2,
-              "lon": -164.7
+              "lat": 17,
+              "lon": -163.8
             },
             {
               "hr": 168,
-              "lat": 17.8,
-              "lon": -164.6
+              "lat": 18.8,
+              "lon": -163.6
             }
           ]
         },
         "official": {
-          "tech": "OFCL",
-          "peakKt": 105,
+          "tech": "OFCI",
+          "peakKt": 99,
           "peakHr": 48
         },
         "missing": [],
@@ -4646,11 +4378,10 @@
           "AEMI",
           "AVNI",
           "CARQ",
-          "CEMI",
+          "CEM2",
           "CLP5",
-          "CMCI",
+          "CMC2",
           "CTCI",
-          "DRCL",
           "DSHP",
           "GDMI",
           "HCCA",
@@ -4660,12 +4391,12 @@
           "HWFI",
           "IVCN",
           "LGEM",
+          "NGX2",
           "NNIB",
           "NNIC",
-          "NVGI",
+          "NVG2",
           "OCD5",
           "OFCI",
-          "OFCL",
           "RVCN",
           "SHF5",
           "SHIP",
@@ -4674,7 +4405,7 @@
           "TABS",
           "TCLP",
           "TVCN",
-          "UKXI",
+          "UKX2",
           "XTRP"
         ]
       },
@@ -4684,7 +4415,7 @@
         "ok": true,
         "stormId": "EP122026",
         "name": "LOWELL",
-        "cycleIso": "2026-08-31T18:00:00.000Z",
+        "cycleIso": "2026-09-01T00:00:00.000Z",
         "taus": [
           0,
           6,
@@ -4705,13 +4436,13 @@
           168
         ],
         "features": {
-          "shearKt": 8,
-          "shearAdjKt": 0,
-          "sstC": 29.1,
-          "mpiKt": 156,
-          "rhMid": 56,
-          "ohc": 28,
-          "landKm": 1197,
+          "shearKt": 7,
+          "shearAdjKt": 1,
+          "sstC": 29.3,
+          "mpiKt": 158,
+          "rhMid": 57,
+          "ohc": 23,
+          "landKm": 1108,
           "vNoLandKt": 55,
           "vLgemKt": 55
         },
@@ -4719,7 +4450,7 @@
           "shearKt": [
             {
               "hr": 0,
-              "v": 8
+              "v": 7
             },
             {
               "hr": 6,
@@ -4727,47 +4458,47 @@
             },
             {
               "hr": 12,
-              "v": 8
+              "v": 2
             },
             {
               "hr": 18,
-              "v": 4
-            },
-            {
-              "hr": 24,
               "v": 8
             },
             {
+              "hr": 24,
+              "v": 11
+            },
+            {
               "hr": 36,
-              "v": 10
-            },
-            {
-              "hr": 48,
-              "v": 7
-            },
-            {
-              "hr": 60,
-              "v": 9
-            },
-            {
-              "hr": 72,
               "v": 6
             },
             {
-              "hr": 84,
-              "v": 12
+              "hr": 48,
+              "v": 9
             },
             {
-              "hr": 96,
-              "v": 1
-            },
-            {
-              "hr": 108,
+              "hr": 60,
               "v": 4
             },
             {
+              "hr": 72,
+              "v": 8
+            },
+            {
+              "hr": 84,
+              "v": 8
+            },
+            {
+              "hr": 96,
+              "v": 3
+            },
+            {
+              "hr": 108,
+              "v": 5
+            },
+            {
               "hr": 120,
-              "v": 7
+              "v": 3
             },
             {
               "hr": 132,
@@ -4775,41 +4506,41 @@
             },
             {
               "hr": 144,
-              "v": 12
+              "v": 13
             },
             {
               "hr": 156,
-              "v": 15
+              "v": 21
             },
             {
               "hr": 168,
-              "v": 17
+              "v": 20
             }
           ],
           "shearAdjKt": [
             {
               "hr": 0,
-              "v": 0
-            },
-            {
-              "hr": 6,
-              "v": 2
-            },
-            {
-              "hr": 12,
               "v": 1
             },
             {
+              "hr": 6,
+              "v": 1
+            },
+            {
+              "hr": 12,
+              "v": 6
+            },
+            {
               "hr": 18,
-              "v": 2
+              "v": 6
             },
             {
               "hr": 24,
-              "v": 5
+              "v": 3
             },
             {
               "hr": 36,
-              "v": 7
+              "v": 5
             },
             {
               "hr": 48,
@@ -4817,53 +4548,53 @@
             },
             {
               "hr": 60,
-              "v": 2
-            },
-            {
-              "hr": 72,
-              "v": 6
-            },
-            {
-              "hr": 84,
               "v": 3
             },
             {
+              "hr": 72,
+              "v": 2
+            },
+            {
+              "hr": 84,
+              "v": -2
+            },
+            {
               "hr": 96,
-              "v": 0
+              "v": -2
             },
             {
               "hr": 108,
-              "v": 1
+              "v": 0
             },
             {
               "hr": 120,
-              "v": 1
+              "v": 0
             },
             {
               "hr": 132,
-              "v": 0
+              "v": -2
             },
             {
               "hr": 144,
-              "v": 0
+              "v": -2
             },
             {
               "hr": 156,
-              "v": 6
+              "v": 2
             },
             {
               "hr": 168,
-              "v": 2
+              "v": 0
             }
           ],
           "sstC": [
             {
               "hr": 0,
-              "v": 29.1
+              "v": 29.3
             },
             {
               "hr": 6,
-              "v": 29.3
+              "v": 29.2
             },
             {
               "hr": 12,
@@ -4871,15 +4602,15 @@
             },
             {
               "hr": 18,
-              "v": 29.2
-            },
-            {
-              "hr": 24,
               "v": 29.3
             },
             {
+              "hr": 24,
+              "v": 28.9
+            },
+            {
               "hr": 36,
-              "v": 29
+              "v": 28.9
             },
             {
               "hr": 48,
@@ -4887,11 +4618,11 @@
             },
             {
               "hr": 60,
-              "v": 28.6
+              "v": 28.7
             },
             {
               "hr": 72,
-              "v": 28.7
+              "v": 28.8
             },
             {
               "hr": 84,
@@ -4903,37 +4634,37 @@
             },
             {
               "hr": 108,
-              "v": 28.6
+              "v": 28.4
             },
             {
               "hr": 120,
-              "v": 28.4
-            },
-            {
-              "hr": 132,
-              "v": 28.4
-            },
-            {
-              "hr": 144,
-              "v": 28.4
-            },
-            {
-              "hr": 156,
               "v": 28.3
             },
             {
+              "hr": 132,
+              "v": 28.5
+            },
+            {
+              "hr": 144,
+              "v": 28.3
+            },
+            {
+              "hr": 156,
+              "v": 28.2
+            },
+            {
               "hr": 168,
-              "v": 27.8
+              "v": 27.9
             }
           ],
           "mpiKt": [
             {
               "hr": 0,
-              "v": 156
+              "v": 158
             },
             {
               "hr": 6,
-              "v": 157
+              "v": 156
             },
             {
               "hr": 12,
@@ -4941,15 +4672,15 @@
             },
             {
               "hr": 18,
-              "v": 157
-            },
-            {
-              "hr": 24,
               "v": 158
             },
             {
+              "hr": 24,
+              "v": 153
+            },
+            {
               "hr": 36,
-              "v": 154
+              "v": 153
             },
             {
               "hr": 48,
@@ -4957,11 +4688,11 @@
             },
             {
               "hr": 60,
-              "v": 150
+              "v": 151
             },
             {
               "hr": 72,
-              "v": 150
+              "v": 152
             },
             {
               "hr": 84,
@@ -4973,11 +4704,11 @@
             },
             {
               "hr": 108,
-              "v": 148
+              "v": 146
             },
             {
               "hr": 120,
-              "v": 146
+              "v": 145
             },
             {
               "hr": 132,
@@ -4985,11 +4716,11 @@
             },
             {
               "hr": 144,
-              "v": 146
+              "v": 145
             },
             {
               "hr": 156,
-              "v": 146
+              "v": 144
             },
             {
               "hr": 168,
@@ -4999,7 +4730,7 @@
           "rhMid": [
             {
               "hr": 0,
-              "v": 56
+              "v": 57
             },
             {
               "hr": 6,
@@ -5007,203 +4738,203 @@
             },
             {
               "hr": 12,
-              "v": 55
+              "v": 58
             },
             {
               "hr": 18,
-              "v": 57
+              "v": 58
             },
             {
               "hr": 24,
-              "v": 57
+              "v": 58
             },
             {
               "hr": 36,
-              "v": 56
-            },
-            {
-              "hr": 48,
-              "v": 58
-            },
-            {
-              "hr": 60,
               "v": 59
             },
             {
-              "hr": 72,
+              "hr": 48,
               "v": 60
+            },
+            {
+              "hr": 60,
+              "v": 61
+            },
+            {
+              "hr": 72,
+              "v": 62
             },
             {
               "hr": 84,
-              "v": 58
-            },
-            {
-              "hr": 96,
-              "v": 52
-            },
-            {
-              "hr": 108,
-              "v": 50
-            },
-            {
-              "hr": 120,
-              "v": 53
-            },
-            {
-              "hr": 132,
-              "v": 55
-            },
-            {
-              "hr": 144,
-              "v": 56
-            },
-            {
-              "hr": 156,
               "v": 60
             },
             {
-              "hr": 168,
+              "hr": 96,
+              "v": 54
+            },
+            {
+              "hr": 108,
+              "v": 54
+            },
+            {
+              "hr": 120,
+              "v": 54
+            },
+            {
+              "hr": 132,
               "v": 56
+            },
+            {
+              "hr": 144,
+              "v": 58
+            },
+            {
+              "hr": 156,
+              "v": 62
+            },
+            {
+              "hr": 168,
+              "v": 62
             }
           ],
           "ohc": [
             {
               "hr": 0,
-              "v": 28
-            },
-            {
-              "hr": 6,
               "v": 23
             },
             {
-              "hr": 12,
-              "v": 22
+              "hr": 6,
+              "v": 21
             },
             {
-              "hr": 18,
+              "hr": 12,
               "v": 25
             },
             {
-              "hr": 24,
+              "hr": 18,
               "v": 28
             },
             {
+              "hr": 24,
+              "v": 29
+            },
+            {
               "hr": 36,
-              "v": 31
+              "v": 29
             },
             {
               "hr": 48,
-              "v": 30
+              "v": 31
             },
             {
               "hr": 60,
-              "v": 30
+              "v": 33
             },
             {
               "hr": 72,
-              "v": 33
+              "v": 37
             },
             {
               "hr": 84,
-              "v": 35
+              "v": 34
             },
             {
               "hr": 96,
-              "v": 35
+              "v": 37
             },
             {
               "hr": 108,
-              "v": 37
+              "v": 38
             },
             {
               "hr": 120,
-              "v": 37
-            },
-            {
-              "hr": 132,
               "v": 35
             },
             {
+              "hr": 132,
+              "v": 39
+            },
+            {
               "hr": 144,
-              "v": 33
+              "v": 31
             },
             {
               "hr": 156,
-              "v": 30
+              "v": 29
             },
             {
               "hr": 168,
-              "v": 18
+              "v": 25
             }
           ],
           "landKm": [
             {
               "hr": 0,
-              "v": 1197
+              "v": 1108
             },
             {
               "hr": 6,
-              "v": 1120
+              "v": 1029
             },
             {
               "hr": 12,
-              "v": 1045
+              "v": 955
             },
             {
               "hr": 18,
-              "v": 959
+              "v": 872
             },
             {
               "hr": 24,
-              "v": 878
+              "v": 794
             },
             {
               "hr": 36,
-              "v": 751
+              "v": 676
             },
             {
               "hr": 48,
-              "v": 624
+              "v": 572
             },
             {
               "hr": 60,
-              "v": 525
+              "v": 519
             },
             {
               "hr": 72,
-              "v": 522
+              "v": 559
             },
             {
               "hr": 84,
-              "v": 555
+              "v": 614
             },
             {
               "hr": 96,
-              "v": 619
+              "v": 681
             },
             {
               "hr": 108,
-              "v": 691
+              "v": 743
             },
             {
               "hr": 120,
-              "v": 735
+              "v": 773
             },
             {
               "hr": 132,
-              "v": 727
+              "v": 761
             },
             {
               "hr": 144,
-              "v": 710
+              "v": 713
             },
             {
               "hr": 156,
-              "v": 661
+              "v": 668
             },
             {
               "hr": 168,
-              "v": 574
+              "v": 642
             }
           ],
           "vNoLandKt": [
@@ -5213,55 +4944,55 @@
             },
             {
               "hr": 6,
-              "v": 56
+              "v": 57
             },
             {
               "hr": 12,
-              "v": 58
+              "v": 60
             },
             {
               "hr": 18,
-              "v": 61
-            },
-            {
-              "hr": 24,
               "v": 64
             },
             {
-              "hr": 36,
+              "hr": 24,
               "v": 68
             },
             {
+              "hr": 36,
+              "v": 75
+            },
+            {
               "hr": 48,
-              "v": 76
+              "v": 83
             },
             {
               "hr": 60,
-              "v": 82
+              "v": 87
             },
             {
               "hr": 72,
-              "v": 86
+              "v": 89
             },
             {
               "hr": 84,
-              "v": 88
+              "v": 92
             },
             {
               "hr": 96,
-              "v": 89
+              "v": 93
             },
             {
               "hr": 108,
-              "v": 89
+              "v": 92
             },
             {
               "hr": 120,
-              "v": 90
+              "v": 91
             },
             {
               "hr": 132,
-              "v": 91
+              "v": 93
             },
             {
               "hr": 144,
@@ -5269,11 +5000,11 @@
             },
             {
               "hr": 156,
-              "v": 93
+              "v": 92
             },
             {
               "hr": 168,
-              "v": 93
+              "v": 90
             }
           ],
           "vLgemKt": [
@@ -5283,23 +5014,23 @@
             },
             {
               "hr": 6,
-              "v": 58
+              "v": 57
             },
             {
               "hr": 12,
-              "v": 61
+              "v": 59
             },
             {
               "hr": 18,
-              "v": 64
+              "v": 63
             },
             {
               "hr": 24,
-              "v": 67
+              "v": 66
             },
             {
               "hr": 36,
-              "v": 74
+              "v": 75
             },
             {
               "hr": 48,
@@ -5307,43 +5038,43 @@
             },
             {
               "hr": 60,
-              "v": 90
+              "v": 88
             },
             {
               "hr": 72,
-              "v": 92
-            },
-            {
-              "hr": 84,
-              "v": 92
-            },
-            {
-              "hr": 96,
-              "v": 90
-            },
-            {
-              "hr": 108,
-              "v": 89
-            },
-            {
-              "hr": 120,
               "v": 91
             },
             {
-              "hr": 132,
-              "v": 94
-            },
-            {
-              "hr": 144,
-              "v": 94
-            },
-            {
-              "hr": 156,
+              "hr": 84,
               "v": 93
             },
             {
+              "hr": 96,
+              "v": 94
+            },
+            {
+              "hr": 108,
+              "v": 94
+            },
+            {
+              "hr": 120,
+              "v": 95
+            },
+            {
+              "hr": 132,
+              "v": 96
+            },
+            {
+              "hr": 144,
+              "v": 97
+            },
+            {
+              "hr": 156,
+              "v": 96
+            },
+            {
               "hr": 168,
-              "v": 89
+              "v": 90
             }
           ]
         },
@@ -5364,7 +5095,7 @@
               "dvKt": 20,
               "hours": 12,
               "p": 0.12,
-              "ratioToClimo": 2,
+              "ratioToClimo": 1.9,
               "climoP": 0.063
             },
             {
@@ -5377,29 +5108,29 @@
             {
               "dvKt": 30,
               "hours": 24,
-              "p": 0.23,
-              "ratioToClimo": 2.6,
+              "p": 0.21,
+              "ratioToClimo": 2.4,
               "climoP": 0.086
             },
             {
               "dvKt": 35,
               "hours": 24,
-              "p": 0.21,
-              "ratioToClimo": 3.7,
+              "p": 0.19,
+              "ratioToClimo": 3.1,
               "climoP": 0.062
             },
             {
               "dvKt": 40,
               "hours": 24,
               "p": 0.15,
-              "ratioToClimo": 3.6,
+              "ratioToClimo": 3.5,
               "climoP": 0.042
             },
             {
               "dvKt": 45,
               "hours": 36,
-              "p": 0.23,
-              "ratioToClimo": 3.4,
+              "p": 0.22,
+              "ratioToClimo": 3.3,
               "climoP": 0.067
             },
             {
@@ -5421,61 +5152,61 @@
             "SHIPS-RII": [
               {
                 "threshold": "20/12",
-                "p": 0.125
+                "p": 0.11900000000000001
               },
               {
                 "threshold": "25/24",
-                "p": 0.237
+                "p": 0.239
               },
               {
                 "threshold": "30/24",
-                "p": 0.22699999999999998
+                "p": 0.209
               },
               {
                 "threshold": "35/24",
-                "p": 0.20800000000000002
+                "p": 0.19399999999999998
               },
               {
                 "threshold": "40/24",
-                "p": 0.15
+                "p": 0.145
               },
               {
                 "threshold": "45/36",
-                "p": 0.228
+                "p": 0.22399999999999998
               },
               {
                 "threshold": "55/48",
-                "p": 0.179
+                "p": 0.17600000000000002
               },
               {
                 "threshold": "65/72",
-                "p": 0.15
+                "p": 0.151
               }
             ],
             "Logistic": [
               {
                 "threshold": "20/12",
-                "p": 0.038
+                "p": 0.047
               },
               {
                 "threshold": "25/24",
-                "p": 0.142
+                "p": 0.155
               },
               {
                 "threshold": "30/24",
-                "p": 0.057999999999999996
+                "p": 0.055
               },
               {
                 "threshold": "35/24",
-                "p": 0.04
+                "p": 0.039
               },
               {
                 "threshold": "40/24",
-                "p": 0.006999999999999999
+                "p": 0.006
               },
               {
                 "threshold": "45/36",
-                "p": 0.006999999999999999
+                "p": 0.008
               },
               {
                 "threshold": "55/48",
@@ -5489,15 +5220,15 @@
             "Bayesian": [
               {
                 "threshold": "20/12",
-                "p": 0.017
+                "p": 0.005
               },
               {
                 "threshold": "25/24",
-                "p": 0.006
+                "p": 0.012
               },
               {
                 "threshold": "30/24",
-                "p": 0
+                "p": 0.002
               },
               {
                 "threshold": "35/24",
@@ -5509,11 +5240,11 @@
               },
               {
                 "threshold": "45/36",
-                "p": 0
+                "p": 0.002
               },
               {
                 "threshold": "55/48",
-                "p": 0.004
+                "p": 0.002
               },
               {
                 "threshold": "65/72",
@@ -5523,23 +5254,23 @@
             "Consensus": [
               {
                 "threshold": "20/12",
-                "p": 0.06
+                "p": 0.057
               },
               {
                 "threshold": "25/24",
-                "p": 0.129
+                "p": 0.135
               },
               {
                 "threshold": "30/24",
-                "p": 0.095
+                "p": 0.08800000000000001
               },
               {
                 "threshold": "35/24",
-                "p": 0.083
+                "p": 0.078
               },
               {
                 "threshold": "40/24",
-                "p": 0.052000000000000005
+                "p": 0.05
               },
               {
                 "threshold": "45/36",
@@ -5547,7 +5278,7 @@
               },
               {
                 "threshold": "55/48",
-                "p": 0.061
+                "p": 0.06
               },
               {
                 "threshold": "65/72",
@@ -5557,92 +5288,92 @@
             "DTOPS": [
               {
                 "threshold": "20/12",
-                "p": 0.12
+                "p": 0.5
               },
               {
                 "threshold": "25/24",
-                "p": 0.66
+                "p": 0.95
               },
               {
                 "threshold": "30/24",
-                "p": 0.67
+                "p": 0.89
               },
               {
                 "threshold": "35/24",
-                "p": 0.7
+                "p": 0.87
               },
               {
                 "threshold": "40/24",
-                "p": 0.55
+                "p": 0.76
               },
               {
                 "threshold": "45/36",
-                "p": 0.8
+                "p": 0.89
               },
               {
                 "threshold": "55/48",
-                "p": 0.62
+                "p": 0.72
               },
               {
                 "threshold": "65/72",
-                "p": 0.85
+                "p": 0.75
               }
             ],
             "SDCON": [
               {
                 "threshold": "20/12",
-                "p": 0.09
+                "p": 0.278
               },
               {
                 "threshold": "25/24",
-                "p": 0.39399999999999996
+                "p": 0.542
               },
               {
                 "threshold": "30/24",
-                "p": 0.382
+                "p": 0.489
               },
               {
                 "threshold": "35/24",
-                "p": 0.391
+                "p": 0.474
               },
               {
                 "threshold": "40/24",
-                "p": 0.301
+                "p": 0.405
               },
               {
                 "threshold": "45/36",
-                "p": 0.439
+                "p": 0.484
               },
               {
                 "threshold": "55/48",
-                "p": 0.34
+                "p": 0.39
               },
               {
                 "threshold": "65/72",
-                "p": 0.45
+                "p": 0.4
               }
             ]
           },
           "consensus": [
             {
               "threshold": "20/12",
-              "p": 0.06
+              "p": 0.057
             },
             {
               "threshold": "25/24",
-              "p": 0.129
+              "p": 0.135
             },
             {
               "threshold": "30/24",
-              "p": 0.095
+              "p": 0.08800000000000001
             },
             {
               "threshold": "35/24",
-              "p": 0.083
+              "p": 0.078
             },
             {
               "threshold": "40/24",
-              "p": 0.052000000000000005
+              "p": 0.05
             },
             {
               "threshold": "45/36",
@@ -5650,7 +5381,7 @@
             },
             {
               "threshold": "55/48",
-              "p": 0.061
+              "p": 0.06
             },
             {
               "threshold": "65/72",
@@ -5668,14 +5399,14 @@
           "prelim": {
             "dvKt": 35,
             "hours": 36,
-            "value": 12.6
+            "value": 26.2
           }
         },
         "availability": {
           "ohc": true,
           "ir": true
         },
-        "basis": "SHIPS LOWELL EP122026 2026-08-31T18:00Z · shear 8 kt · OHC 28 kJ/cm2 · MPI 156 kt · mid-level RH 56%"
+        "basis": "SHIPS LOWELL EP122026 2026-09-01T00:00Z · shear 7 kt · OHC 23 kJ/cm2 · MPI 158 kt · mid-level RH 57%"
       },
       "ascat": {
         "iso": "2026-08-30T18:45:00.000Z",
@@ -5716,54 +5447,54 @@
         }
       },
       "atcfDeck": {
-        "cycle": "2026083118",
-        "techCount": 33,
-        "forecastAids": 32
+        "cycle": "2026090100",
+        "techCount": 32,
+        "forecastAids": 31
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026083118 · 33 techs · consensus 3 member(s) peak 129.3 kt · b-deck 26 records · f-deck 133 fixes",
-        "ships": "2026-08-31T18:00Z · shear 8 kt · OHC 28 · MPI 156 kt · 8 RI thresholds"
+        "atcf": "a-deck cycle 2026090100 · 32 techs · consensus 3 member(s) peak 129.7 kt · b-deck 26 records · f-deck 133 fixes",
+        "ships": "2026-09-01T00:00Z · shear 7 kt · OHC 23 · MPI 158 kt · 8 RI thresholds"
       },
       "riFloor": {
         "dvKt": 20,
         "hours": 12,
         "p": 0.12,
         "climoP": 0.063,
-        "ratioToClimo": 2,
-        "consensusP": 0.06,
-        "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (2x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike"
+        "ratioToClimo": 1.9,
+        "consensusP": 0.057,
+        "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (1.9x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike"
       },
       "hurricanePCal": {
         "ok": true,
-        "p": 0.8996414626702482,
+        "p": 0.9083525376262416,
         "pRaw": 0.99,
-        "pLow": 0.7880562343424088,
+        "pLow": 0.797203595369183,
         "pHigh": 0.99,
-        "pPeak": 0.8996414626702482,
+        "pPeak": 0.9083525376262416,
         "pNow": 0.06680722872027083,
-        "pWithRi": 0.8996414626702482,
+        "pWithRi": 0.9083525376262416,
         "drivenBy": "forecast peak",
-        "meanKt": 113.3,
-        "sigmaKt": 39.7,
+        "meanKt": 113.5,
+        "sigmaKt": 38.3,
         "sigmaInitKt": 5,
         "initSource": "satellite intensity analysis",
-        "tauKt": 37.8,
+        "tauKt": 36.3,
         "reconDeltaKt": null,
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 1788,
+        "ascatAgeMin": 1798,
         "ascatUsed": false,
-        "consensusAgeMin": 393,
+        "consensusAgeMin": 43,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
           "hours": 12,
           "p": 0.12,
           "climoP": 0.063,
-          "ratioToClimo": 2,
-          "consensusP": 0.06,
-          "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (2x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike"
+          "ratioToClimo": 1.9,
+          "consensusP": 0.057,
+          "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (1.9x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike"
         },
         "sources": [
           {
@@ -5776,8 +5507,8 @@
           {
             "id": "consensus",
             "label": "ATCF consensus (HCCA/IVCN/GDMI)",
-            "peakKt": 129.3,
-            "peakHr": 144,
+            "peakKt": 129.7,
+            "peakHr": 120,
             "sigmaKt": 16.9
           }
         ],
@@ -5793,18 +5524,18 @@
             "label": "ATCF guidance consensus",
             "p": 0.99,
             "unavailable": false,
-            "basis": "3 aids in the 2026083118 deck peak at a mean of 129.3 kt near 144h, disagreeing by 37.8 kt"
+            "basis": "3 aids in the 2026090100 deck peak at a mean of 129.7 kt near 120h, disagreeing by 36.3 kt"
           },
           {
             "id": "ships-ri",
             "label": "SHIPS rapid-intensification floor",
             "p": null,
             "unavailable": true,
-            "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (2x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
+            "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (1.9x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
           }
         ],
         "notes": [
-          "scatterometer pass is 1788 min old, past the 360-min line — band not tightened"
+          "scatterometer pass is 1798 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
@@ -5813,12 +5544,12 @@
           "ascat": false,
           "ships": false
         },
-        "basis": "combined 2 intensity estimates at 113 kt (sigma 39.7 kt, of which 37.8 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 90%"
+        "basis": "combined 2 intensity estimates at 113 kt (sigma 38.3 kt, of which 36.3 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 91%"
       },
       "evidenceQuality": {
         "tier": "MEDIUM",
         "reasons": [
-          "ATCF consensus 393 min old, no aircraft in the storm",
+          "ATCF consensus 43 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -5826,73 +5557,17 @@
   ],
   "contracts": [
     {
-      "id": "KXFIRSTHURRICANE-26DEC01ATL-EDO",
-      "label": "Will Edouard be the first named hurricane in the Atlantic in 2026?",
-      "short": "Will Edouard be the first named hurricane in…",
-      "storm": "AL052026",
-      "subject": null,
-      "market": 0.225,
-      "model": 0.5211417443494859,
-      "modelQuantity": "firsthurricane",
-      "modelBasin": "atlantic",
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Edouard is name #5 on the Atlantic list and 4 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 63% of seasons · 52% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.625,
-      "modelLayers": [
-        {
-          "id": "ordinal",
-          "label": "Ordinal climatology",
-          "p": 0.625,
-          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form was the season's FIRST hurricane in 63% of seasons"
-        },
-        {
-          "id": "onisim",
-          "label": "ONI-similarity weighted",
-          "p": 0.5211417443494859,
-          "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
-        }
-      ],
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": 0.22,
-      "yesAsk": 0.23,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 9,
-      "spread": 0.010000000000000009,
-      "volume": 29409.2,
-      "volume24h": 15561.38,
-      "openInterest": 11871.41,
-      "depth": {
-        "bidSize": 27,
-        "askSize": 37.51,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
-    },
-    {
       "id": "KXHURRICANENAMES-26DEC01EPAC-LOW",
       "label": "Will Lowell be categorized as a hurricane in the Eastern Pacific in 2026?",
       "short": "Will Lowell be categorized as a hurricane in…",
       "storm": "EP122026",
       "subject": null,
       "market": 0.015,
-      "model": 0.8996414626702482,
+      "model": 0.9083525376262416,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 55 kt now · combined 2 intensity estimates at 113 kt (sigma 39.7 kt, of which 37.8 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 90% · official forecast peaks at 105 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths · advisory -1205 min old when fetched",
+      "modelBasis": "Lowell is 55 kt now · combined 2 intensity estimates at 113 kt (sigma 38.3 kt, of which 36.3 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 91% · official forecast peaks at 105 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths · advisory -1195 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -5920,19 +5595,19 @@
           "label": "ATCF guidance consensus",
           "p": 0.99,
           "unavailable": false,
-          "basis": "3 aids in the 2026083118 deck peak at a mean of 129.3 kt near 144h, disagreeing by 37.8 kt"
+          "basis": "3 aids in the 2026090100 deck peak at a mean of 129.7 kt near 120h, disagreeing by 36.3 kt"
         },
         {
           "id": "ships-ri",
           "label": "SHIPS rapid-intensification floor",
           "p": null,
           "unavailable": true,
-          "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (2x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
+          "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (1.9x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
         }
       ],
-      "modelLow": 0.7880562343424088,
+      "modelLow": 0.797203595369183,
       "modelHigh": 0.99,
-      "modelLagMin": -1205,
+      "modelLagMin": -1195,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -5940,9 +5615,9 @@
       "modelCalibrated": true,
       "modelQuality": "MEDIUM",
       "modelIntel": {
-        "conKt": 129.3,
-        "conAgeMin": 393,
-        "spreadKt": 37.8,
+        "conKt": 129.7,
+        "conAgeMin": 43,
+        "spreadKt": 36.3,
         "reconAgeMin": null,
         "reconDeltaKt": null,
         "ascatUsed": false,
@@ -5958,7 +5633,7 @@
       "liquidity": 13,
       "spread": 0.01,
       "volume": 9992.05,
-      "volume24h": 2166.97,
+      "volume24h": 2061.97,
       "openInterest": 4753.07,
       "depth": {
         "bidSize": 2434.34,
@@ -5976,11 +5651,11 @@
       "storm": "AL052026",
       "subject": null,
       "market": 0.19,
-      "model": 0.028733153737415775,
+      "model": 0.04174406219835367,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Edouard is 35 kt now · combined 2 intensity estimates at 43 kt (sigma 10.3 kt, of which 6.3 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 4%, calibrated 3% · official forecast peaks at 50 kt at 18h; NHC's published mean absolute intensity error there is 6.5 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 4% central, 2-14% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 1.6 kt lower (6% unadjusted) · Tropical Storm Warning in effect · advisory -1397 min old when fetched",
+      "modelBasis": "Edouard is 35 kt now · combined 1 intensity estimate at 48 kt (sigma 8.1 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 4%, calibrated 4% · official forecast peaks at 50 kt at 18h; NHC's published mean absolute intensity error there is 6.5 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 4% central, 2-14% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 1.6 kt lower (6% unadjusted) · Tropical Storm Warning in effect · advisory -1387 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -6004,13 +5679,6 @@
           "basis": "Tropical Storm Warning in effect for Port Bolivar to the Vermilion/Iberia Parish Line — advisories are running on the 3-hourly intermediate cycle"
         },
         {
-          "id": "consensus",
-          "label": "ATCF guidance consensus",
-          "p": 0.01,
-          "unavailable": false,
-          "basis": "3 aids in the 2026083118 deck peak at a mean of 35.7 kt near 24h, disagreeing by 2.1 kt"
-        },
-        {
           "id": "ships-ri",
           "label": "SHIPS rapid-intensification floor",
           "p": null,
@@ -6018,19 +5686,19 @@
           "basis": "SHIPS publishes a 12% chance of a 30 kt gain in 24 h (1.8x the 7% climatological rate), and 30 kt is enough to clear the 30 kt gap to the strike — published, not scored"
         }
       ],
-      "modelLow": 0.01,
-      "modelHigh": 0.11754656343552704,
-      "modelLagMin": -1397,
+      "modelLow": 0.015251521779438571,
+      "modelHigh": 0.13968244128264312,
+      "modelLagMin": -1387,
       "modelMaxLagMin": 360,
       "modelGuidance": "above",
       "modelRawP": 0.0624664693388316,
       "modelOfficialP": 0.04147102209221173,
       "modelCalibrated": true,
-      "modelQuality": "MEDIUM",
+      "modelQuality": "LOW",
       "modelIntel": {
-        "conKt": 35.7,
-        "conAgeMin": 393,
-        "spreadKt": 6.3,
+        "conKt": null,
+        "conAgeMin": null,
+        "spreadKt": 0,
         "reconAgeMin": null,
         "reconDeltaKt": null,
         "ascatUsed": false,
@@ -6068,7 +5736,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Karina is 115 kt now · combined 2 intensity estimates at 115 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 115 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory -1206 min old when fetched",
+      "modelBasis": "Karina is 115 kt now · combined 2 intensity estimates at 115 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 115 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory -1196 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -6101,7 +5769,7 @@
       ],
       "modelLow": 0.99,
       "modelHigh": 0.99,
-      "modelLagMin": -1206,
+      "modelLagMin": -1196,
       "modelMaxLagMin": 360,
       "modelGuidance": "above",
       "modelRawP": null,
@@ -6110,7 +5778,7 @@
       "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 115,
-        "conAgeMin": 393,
+        "conAgeMin": 403,
         "spreadKt": 0,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -6145,11 +5813,11 @@
       "storm": "EP122026",
       "subject": null,
       "market": 0.5,
-      "model": 0.8996414626702482,
+      "model": 0.9083525376262416,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 55 kt now · combined 2 intensity estimates at 113 kt (sigma 39.7 kt, of which 37.8 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 90% · official forecast peaks at 105 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths · advisory -1205 min old when fetched",
+      "modelBasis": "Lowell is 55 kt now · combined 2 intensity estimates at 113 kt (sigma 38.3 kt, of which 36.3 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 91% · official forecast peaks at 105 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 99-99% across a plausible range of error widths · advisory -1195 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -6177,19 +5845,19 @@
           "label": "ATCF guidance consensus",
           "p": 0.99,
           "unavailable": false,
-          "basis": "3 aids in the 2026083118 deck peak at a mean of 129.3 kt near 144h, disagreeing by 37.8 kt"
+          "basis": "3 aids in the 2026090100 deck peak at a mean of 129.7 kt near 120h, disagreeing by 36.3 kt"
         },
         {
           "id": "ships-ri",
           "label": "SHIPS rapid-intensification floor",
           "p": null,
           "unavailable": true,
-          "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (2x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
+          "basis": "SHIPS publishes a 12% chance of a 20 kt gain in 12 h (1.9x the 6% climatological rate), and 20 kt is enough to clear the 10 kt gap to the strike — published, not scored"
         }
       ],
-      "modelLow": 0.7880562343424088,
+      "modelLow": 0.797203595369183,
       "modelHigh": 0.99,
-      "modelLagMin": -1205,
+      "modelLagMin": -1195,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -6197,9 +5865,9 @@
       "modelCalibrated": true,
       "modelQuality": "MEDIUM",
       "modelIntel": {
-        "conKt": 129.3,
-        "conAgeMin": 393,
-        "spreadKt": 37.8,
+        "conKt": 129.7,
+        "conAgeMin": 43,
+        "spreadKt": 36.3,
         "reconAgeMin": null,
         "reconDeltaKt": null,
         "ascatUsed": false,
@@ -6225,6 +5893,49 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01CPAC"
+    },
+    {
+      "id": "KXFIRSTHURRICANE-26DEC01ATL-EDO",
+      "label": "Will Edouard be the first named hurricane in the Atlantic in 2026?",
+      "short": "Will Edouard be the first named hurricane in…",
+      "storm": "AL052026",
+      "subject": null,
+      "market": 0.18,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": 0.16,
+      "yesAsk": 0.2,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": 9,
+      "spread": 0.04000000000000001,
+      "volume": 30622.82,
+      "volume24h": 15561.38,
+      "openInterest": 11603.61,
+      "depth": {
+        "bidSize": 30,
+        "askSize": 44,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
     },
     {
       "id": "KXHURCAT-26LOWELL-T1",
@@ -6261,7 +5972,7 @@
       "liquidity": 2,
       "spread": 0.07999999999999996,
       "volume": 8951,
-      "volume24h": 2602.99,
+      "volume24h": 2311.99,
       "openInterest": 5551.3,
       "depth": {
         "bidSize": 25,
@@ -6419,7 +6130,7 @@
         "subject": "Edouard",
         "active": true
       },
-      "market": 0.03,
+      "market": 0.045,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6440,16 +6151,16 @@
       "horizon": "storm",
       "strike": 2,
       "yesBid": null,
-      "yesAsk": 0.06,
+      "yesAsk": 0.09,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 6,
-      "spread": 0.06,
+      "liquidity": 5,
+      "spread": 0.09,
       "volume": 1230,
       "volume24h": 1230,
       "openInterest": 1230,
       "depth": {
         "bidSize": 0,
-        "askSize": 100,
+        "askSize": 50,
         "notional": 1
       },
       "proxy": false,
@@ -6503,6 +6214,52 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26LOWELL"
     },
     {
+      "id": "KXHURCAT-26KARINA-T2",
+      "label": "Will Karina become a Category 2 hurricane?",
+      "short": "Will Karina become a Category 2 hurricane…",
+      "storm": "EP112026",
+      "subject": {
+        "subject": "Karina",
+        "active": true
+      },
+      "market": 0.99,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 2,
+      "yesBid": 0.99,
+      "yesAsk": 1,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": null,
+      "spread": 0.010000000000000009,
+      "volume": 506.72,
+      "volume24h": 325.48,
+      "openInterest": 231.24,
+      "depth": {
+        "bidSize": 33856.76,
+        "askSize": 0,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26KARINA"
+    },
+    {
       "id": "KXHURCAT-26EDOUARD-T4",
       "label": "Will Edouard become a Category 4 hurricane?",
       "short": "Will Edouard become a Category 4 hurricane…",
@@ -6547,52 +6304,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26EDOUARD"
-    },
-    {
-      "id": "KXHURCAT-26KARINA-T2",
-      "label": "Will Karina become a Category 2 hurricane?",
-      "short": "Will Karina become a Category 2 hurricane…",
-      "storm": "EP112026",
-      "subject": {
-        "subject": "Karina",
-        "active": true
-      },
-      "market": 0.99,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 2,
-      "yesBid": 0.99,
-      "yesAsk": 1,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": null,
-      "spread": 0.010000000000000009,
-      "volume": 392.72,
-      "volume24h": 211.48,
-      "openInterest": 231.24,
-      "depth": {
-        "bidSize": 33970.76,
-        "askSize": 0,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26KARINA"
     },
     {
       "id": "KXHURCAT-26EDOUARD-T5",
@@ -6787,7 +6498,7 @@
         "subject": "Edouard",
         "active": true
       },
-      "market": 0.03,
+      "market": 0.045,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -6808,16 +6519,16 @@
       "horizon": "storm",
       "strike": 3,
       "yesBid": null,
-      "yesAsk": 0.06,
+      "yesAsk": 0.09,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 6,
-      "spread": 0.06,
+      "liquidity": 5,
+      "spread": 0.09,
       "volume": 70,
       "volume24h": 70,
       "openInterest": 70,
       "depth": {
         "bidSize": 0,
-        "askSize": 100,
+        "askSize": 50,
         "notional": 1
       },
       "proxy": false,
@@ -7458,13 +7169,13 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.06944444444444445,
-          "basis": "named storms forming on/after day 244 in each past season; needs >14 more"
+          "basis": "named storms forming on/after day 244 in each past season; needs >13 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
           "p": 0.06944444444444445,
-          "basis": "4 already recorded in 2026"
+          "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
@@ -7519,14 +7230,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Omar is name #15 on the Atlantic list and 4 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 14%",
+      "modelBasis": "Omar is name #15 on the Atlantic list and 5 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 21%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #11 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #10 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -7575,14 +7286,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Nana is name #14 on the Atlantic list and 4 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 21%",
+      "modelBasis": "Nana is name #14 on the Atlantic list and 5 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 34%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #10 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #9 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -7626,24 +7337,24 @@
       "short": "Will Fay be the first named hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.3,
-      "model": 0.26345932917424847,
+      "market": 0.29500000000000004,
+      "model": 0.5211417443494859,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Fay is name #6 on the Atlantic list and 4 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 21% of seasons · 26% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.20833333333333334,
+      "modelBasis": "Fay is name #6 on the Atlantic list and 5 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 63% of seasons · 52% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.625,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.20833333333333334,
-          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form was the season's FIRST hurricane in 20% of seasons"
+          "p": 0.625,
+          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form was the season's FIRST hurricane in 63% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.26345932917424847,
+          "p": 0.5211417443494859,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -7659,16 +7370,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.29,
+      "yesBid": 0.28,
       "yesAsk": 0.31,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 8,
-      "spread": 0.020000000000000018,
+      "spread": 0.02999999999999997,
       "volume": 8465.44,
       "volume24h": 767.78,
       "openInterest": 4726.73,
       "depth": {
-        "bidSize": 166.12,
+        "bidSize": 9,
         "askSize": 26.44,
         "notional": 1
       },
@@ -7683,23 +7394,23 @@
       "storm": null,
       "subject": null,
       "market": 0.17,
-      "model": 0.18075565072326671,
+      "model": 0.26345932917424847,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 4 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 15% of seasons · 18% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.1527777777777778,
+      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 5 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 21% of seasons · 26% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.20833333333333334,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.1527777777777778,
-          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form was the season's FIRST hurricane in 14% of seasons"
+          "p": 0.20833333333333334,
+          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form was the season's FIRST hurricane in 20% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.18075565072326671,
+          "p": 0.26345932917424847,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -7739,7 +7450,7 @@
       "storm": null,
       "subject": null,
       "market": 0.46499999999999997,
-      "model": 0.57956731825192,
+      "model": 0.6508943452849307,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -7755,26 +7466,26 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.7083333333333334,
-          "basis": "named storms forming on/after day 244 in each past season; needs >6 more"
+          "p": 0.7638888888888888,
+          "basis": "named storms forming on/after day 244 in each past season; needs >5 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.7083333333333334,
-          "basis": "4 already recorded in 2026"
+          "p": 0.7638888888888888,
+          "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.5715686274509805,
-          "basis": "9 El Niño seasons → 45% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.6506535947712417,
+          "basis": "9 El Niño seasons → 55% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.57956731825192,
-          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 50% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
+          "p": 0.6508943452849307,
+          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 58% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
       "modelLow": null,
@@ -7817,14 +7528,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Josephine is name #10 on the Atlantic list and 4 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 65%",
+      "modelBasis": "Josephine is name #10 on the Atlantic list and 5 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 81%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #6 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -7886,13 +7597,13 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.1527777777777778,
-          "basis": "named storms forming on/after day 244 in each past season; needs >12 more"
+          "basis": "named storms forming on/after day 244 in each past season; needs >11 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
           "p": 0.1527777777777778,
-          "basis": "4 already recorded in 2026"
+          "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
@@ -8017,7 +7728,7 @@
       "storm": null,
       "subject": null,
       "market": 0.165,
-      "model": 0.1439017093861284,
+      "model": 0.207867793633885,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -8033,26 +7744,26 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.2361111111111111,
-          "basis": "named storms forming on/after day 244 in each past season; needs >10 more"
+          "p": 0.3194444444444444,
+          "basis": "named storms forming on/after day 244 in each past season; needs >9 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.2361111111111111,
-          "basis": "4 already recorded in 2026"
+          "p": 0.3194444444444444,
+          "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.13758169934640524,
-          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.22973856209150326,
+          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.1439017093861284,
-          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 9% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
+          "p": 0.207867793633885,
+          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 14% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
       "modelLow": null,
@@ -8095,14 +7806,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Marco is name #13 on the Atlantic list and 4 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 34%",
+      "modelBasis": "Marco is name #13 on the Atlantic list and 5 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 47%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #9 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #8 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -8147,11 +7858,67 @@
       "storm": null,
       "subject": null,
       "market": 0.085,
+      "model": 0.18075565072326671,
+      "modelQuantity": "firsthurricane",
+      "modelBasin": "atlantic",
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Hanna is name #8 on the Atlantic list and 5 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 15% of seasons · 18% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.1527777777777778,
+      "modelLayers": [
+        {
+          "id": "ordinal",
+          "label": "Ordinal climatology",
+          "p": 0.1527777777777778,
+          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form was the season's FIRST hurricane in 14% of seasons"
+        },
+        {
+          "id": "onisim",
+          "label": "ONI-similarity weighted",
+          "p": 0.18075565072326671,
+          "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
+        }
+      ],
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": 0.03,
+      "yesAsk": 0.14,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": 11,
+      "spread": 0.11000000000000001,
+      "volume": 7111.1,
+      "volume24h": 448.78,
+      "openInterest": 4386.81,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 76,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
+    },
+    {
+      "id": "KXFIRSTHURRICANE-26DEC01ATL-ISA",
+      "label": "Will Isaias be the first named hurricane in the Atlantic in 2026?",
+      "short": "Will Isaias be the first named hurricane in…",
+      "storm": null,
+      "subject": null,
+      "market": 0.13,
       "model": 0.09029164707413347,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Hanna is name #8 on the Atlantic list and 4 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 4% of seasons · 9% once seasons are weighted by ONI similarity · used at all in 89%",
+      "modelBasis": "Isaias is name #9 on the Atlantic list and 5 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 4% of seasons · 9% once seasons are weighted by ONI similarity · used at all in 89%",
       "modelUncond": 0.041666666666666664,
       "modelLayers": [
         {
@@ -8179,73 +7946,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.03,
-      "yesAsk": 0.14,
+      "yesBid": 0.02,
+      "yesAsk": 0.24,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 11,
-      "spread": 0.11000000000000001,
-      "volume": 7111.1,
-      "volume24h": 493.16,
-      "openInterest": 4386.81,
-      "depth": {
-        "bidSize": 5,
-        "askSize": 76,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
-    },
-    {
-      "id": "KXFIRSTHURRICANE-26DEC01ATL-ISA",
-      "label": "Will Isaias be the first named hurricane in the Atlantic in 2026?",
-      "short": "Will Isaias be the first named hurricane in…",
-      "storm": null,
-      "subject": null,
-      "market": 0.075,
-      "model": 0.02782418566056733,
-      "modelQuantity": "firsthurricane",
-      "modelBasin": "atlantic",
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Isaias is name #9 on the Atlantic list and 4 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 81%",
-      "modelUncond": 0.013888888888888888,
-      "modelLayers": [
-        {
-          "id": "ordinal",
-          "label": "Ordinal climatology",
-          "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form was the season's FIRST hurricane in 0% of seasons"
-        },
-        {
-          "id": "onisim",
-          "label": "ONI-similarity weighted",
-          "p": 0.02782418566056733,
-          "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
-        }
-      ],
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": null,
-      "yesAsk": 0.15,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 15,
-      "spread": 0.15,
+      "liquidity": 1,
+      "spread": 0.22,
       "volume": 5742.99,
       "volume24h": 197.37,
       "openInterest": 3603.84,
       "depth": {
-        "bidSize": 0,
-        "askSize": 100,
+        "bidSize": 5,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -8259,7 +7970,7 @@
       "storm": null,
       "subject": null,
       "market": 0.25,
-      "model": 0.342263549546337,
+      "model": 0.4674836765940205,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -8275,26 +7986,26 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.4027777777777778,
-          "basis": "named storms forming on/after day 244 in each past season; needs >8 more"
+          "p": 0.5694444444444444,
+          "basis": "named storms forming on/after day 244 in each past season; needs >7 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.4027777777777778,
-          "basis": "4 already recorded in 2026"
+          "p": 0.5694444444444444,
+          "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.3218954248366013,
-          "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.4532679738562091,
+          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.342263549546337,
-          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 30% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
+          "p": 0.4674836765940205,
+          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 40% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
       "modelLow": null,
@@ -8411,14 +8122,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Kyle is name #11 on the Atlantic list and 4 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 58%",
+      "modelBasis": "Kyle is name #11 on the Atlantic list and 5 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 65%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #6 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -8541,14 +8252,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Vicky is name #20 on the Atlantic list and 4 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 5%",
+      "modelBasis": "Vicky is name #20 on the Atlantic list and 5 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 5%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #16 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #15 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -8597,14 +8308,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Leah is name #12 on the Atlantic list and 4 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 47%",
+      "modelBasis": "Leah is name #12 on the Atlantic list and 5 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 58%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #8 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -8727,14 +8438,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Rene is name #17 on the Atlantic list and 4 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 11%",
+      "modelBasis": "Rene is name #17 on the Atlantic list and 5 have been used, so this is the #12 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 11%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #13 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #12 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -8857,14 +8568,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Wilfred is name #21 on the Atlantic list and 4 have been used, so this is the #17 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 4%",
+      "modelBasis": "Wilfred is name #21 on the Atlantic list and 5 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 5%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #17 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #16 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -8987,14 +8698,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Sally is name #18 on the Atlantic list and 4 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 5%",
+      "modelBasis": "Sally is name #18 on the Atlantic list and 5 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 11%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #14 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #13 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -9043,14 +8754,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Paulette is name #16 on the Atlantic list and 4 have been used, so this is the #12 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 11%",
+      "modelBasis": "Paulette is name #16 on the Atlantic list and 5 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 14%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #12 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #11 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -9099,14 +8810,14 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Teddy is name #19 on the Atlantic list and 4 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 5%",
+      "modelBasis": "Teddy is name #19 on the Atlantic list and 5 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 5%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
           "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #15 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "basis": "1991–2025 (n=35), unweighted — the #14 storm still to form was the season's FIRST hurricane in 0% of seasons"
         },
         {
           "id": "onisim",
@@ -9447,23 +9158,23 @@
       "storm": null,
       "subject": null,
       "market": 0.345,
-      "model": 0.47264542106185514,
+      "model": 0.5097410640637854,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Isaias is name #9 on the Atlantic list and 4 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · 47% once seasons are weighted by ONI similarity · used at all in 81%",
-      "modelUncond": 0.5138888888888888,
+      "modelBasis": "Isaias is name #9 on the Atlantic list and 5 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 46% of seasons · 51% once seasons are weighted by ONI similarity · used at all in 89%",
+      "modelUncond": 0.4583333333333333,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.5138888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form reached hurricane strength in 51% of seasons"
+          "p": 0.4583333333333333,
+          "basis": "1991–2025 (n=35), unweighted — the #4 storm still to form reached hurricane strength in 46% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.47264542106185514,
+          "p": 0.5097410640637854,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -9873,23 +9584,23 @@
       "storm": null,
       "subject": null,
       "market": 0.44000000000000006,
-      "model": 0.6448445819355413,
+      "model": 0.5218159503786423,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 4 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 71% of seasons · 64% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.7083333333333334,
+      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 5 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · 52% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.5694444444444444,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.7083333333333334,
-          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form reached hurricane strength in 71% of seasons"
+          "p": 0.5694444444444444,
+          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form reached hurricane strength in 57% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.6448445819355413,
+          "p": 0.5218159503786423,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -10390,13 +10101,13 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "named storms forming on/after day 244 in each past season; needs >26 more"
+          "basis": "named storms forming on/after day 244 in each past season; needs >25 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
           "p": 0.013888888888888888,
-          "basis": "4 already recorded in 2026"
+          "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
@@ -10447,23 +10158,23 @@
       "storm": null,
       "subject": null,
       "market": 0.165,
-      "model": 0.18417792031506092,
+      "model": 0.3154234076162666,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Leah is name #12 on the Atlantic list and 4 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 18% of seasons · 18% once seasons are weighted by ONI similarity · used at all in 47%",
-      "modelUncond": 0.18055555555555555,
+      "modelBasis": "Leah is name #12 on the Atlantic list and 5 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 46% of seasons · 32% once seasons are weighted by ONI similarity · used at all in 58%",
+      "modelUncond": 0.4583333333333333,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.18055555555555555,
-          "basis": "1991–2025 (n=35), unweighted — the #8 storm still to form reached hurricane strength in 17% of seasons"
+          "p": 0.4583333333333333,
+          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form reached hurricane strength in 46% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.18417792031506092,
+          "p": 0.3154234076162666,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -10947,7 +10658,7 @@
       "storm": null,
       "subject": null,
       "market": 0.04,
-      "model": 0.038725011063111034,
+      "model": 0.05343061187863182,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
@@ -10963,25 +10674,25 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.041666666666666664,
-          "basis": "named storms forming on/after day 244 in each past season; needs >16 more"
+          "p": 0.06944444444444445,
+          "basis": "named storms forming on/after day 244 in each past season; needs >15 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.041666666666666664,
-          "basis": "4 already recorded in 2026"
+          "p": 0.06944444444444445,
+          "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.04607843137254902,
+          "p": 0.059150326797385626,
           "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.038725011063111034,
+          "p": 0.05343061187863182,
           "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 4% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
@@ -11021,23 +10732,23 @@
       "storm": null,
       "subject": null,
       "market": 0.255,
-      "model": 0.3154234076162666,
+      "model": 0.26183692621583887,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Kyle is name #11 on the Atlantic list and 4 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 46% of seasons · 32% once seasons are weighted by ONI similarity · used at all in 58%",
-      "modelUncond": 0.4583333333333333,
+      "modelBasis": "Kyle is name #11 on the Atlantic list and 5 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 40% of seasons · 26% once seasons are weighted by ONI similarity · used at all in 65%",
+      "modelUncond": 0.4027777777777778,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.4583333333333333,
-          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form reached hurricane strength in 46% of seasons"
+          "p": 0.4027777777777778,
+          "basis": "1991–2025 (n=35), unweighted — the #6 storm still to form reached hurricane strength in 40% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.3154234076162666,
+          "p": 0.26183692621583887,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -11077,23 +10788,23 @@
       "storm": null,
       "subject": null,
       "market": 0.095,
-      "model": 0.21051039167050112,
+      "model": 0.18417792031506092,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Marco is name #13 on the Atlantic list and 4 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 24% of seasons · 21% once seasons are weighted by ONI similarity · used at all in 34%",
-      "modelUncond": 0.2361111111111111,
+      "modelBasis": "Marco is name #13 on the Atlantic list and 5 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 18% of seasons · 18% once seasons are weighted by ONI similarity · used at all in 47%",
+      "modelUncond": 0.18055555555555555,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.2361111111111111,
-          "basis": "1991–2025 (n=35), unweighted — the #9 storm still to form reached hurricane strength in 23% of seasons"
+          "p": 0.18055555555555555,
+          "basis": "1991–2025 (n=35), unweighted — the #8 storm still to form reached hurricane strength in 17% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.21051039167050112,
+          "p": 0.18417792031506092,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -12077,23 +11788,23 @@
       "storm": null,
       "subject": null,
       "market": 0.095,
-      "model": 0.1348926714302518,
+      "model": 0.21051039167050112,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Nana is name #14 on the Atlantic list and 4 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 18% of seasons · 13% once seasons are weighted by ONI similarity · used at all in 21%",
-      "modelUncond": 0.18055555555555555,
+      "modelBasis": "Nana is name #14 on the Atlantic list and 5 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 24% of seasons · 21% once seasons are weighted by ONI similarity · used at all in 34%",
+      "modelUncond": 0.2361111111111111,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.18055555555555555,
-          "basis": "1991–2025 (n=35), unweighted — the #10 storm still to form reached hurricane strength in 17% of seasons"
+          "p": 0.2361111111111111,
+          "basis": "1991–2025 (n=35), unweighted — the #9 storm still to form reached hurricane strength in 23% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.1348926714302518,
+          "p": 0.21051039167050112,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -12150,13 +11861,13 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "named storms forming on/after day 244 in each past season; needs >21 more"
+          "basis": "named storms forming on/after day 244 in each past season; needs >20 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
           "p": 0.013888888888888888,
-          "basis": "4 already recorded in 2026"
+          "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
@@ -12411,23 +12122,23 @@
       "storm": null,
       "subject": null,
       "market": 0.32,
-      "model": 0.5218159503786423,
+      "model": 0.5211417443494859,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Fay is name #6 on the Atlantic list and 4 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · 52% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.5694444444444444,
+      "modelBasis": "Fay is name #6 on the Atlantic list and 5 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 63% of seasons · 52% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.625,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.5694444444444444,
-          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form reached hurricane strength in 57% of seasons"
+          "p": 0.625,
+          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form reached hurricane strength in 63% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.5218159503786423,
+          "p": 0.5211417443494859,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -12541,23 +12252,23 @@
       "storm": null,
       "subject": null,
       "market": 0.345,
-      "model": 0.26183692621583887,
+      "model": 0.47264542106185514,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Josephine is name #10 on the Atlantic list and 4 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 40% of seasons · 26% once seasons are weighted by ONI similarity · used at all in 65%",
-      "modelUncond": 0.4027777777777778,
+      "modelBasis": "Josephine is name #10 on the Atlantic list and 5 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · 47% once seasons are weighted by ONI similarity · used at all in 81%",
+      "modelUncond": 0.5138888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.4027777777777778,
-          "basis": "1991–2025 (n=35), unweighted — the #6 storm still to form reached hurricane strength in 40% of seasons"
+          "p": 0.5138888888888888,
+          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form reached hurricane strength in 51% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.26183692621583887,
+          "p": 0.47264542106185514,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -12745,23 +12456,23 @@
       "storm": null,
       "subject": null,
       "market": 0.45499999999999996,
-      "model": 0.5097410640637854,
+      "model": 0.6448445819355413,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Hanna is name #8 on the Atlantic list and 4 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 46% of seasons · 51% once seasons are weighted by ONI similarity · used at all in 89%",
-      "modelUncond": 0.4583333333333333,
+      "modelBasis": "Hanna is name #8 on the Atlantic list and 5 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 71% of seasons · 64% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.7083333333333334,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.4583333333333333,
-          "basis": "1991–2025 (n=35), unweighted — the #4 storm still to form reached hurricane strength in 46% of seasons"
+          "p": 0.7083333333333334,
+          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form reached hurricane strength in 71% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.5097410640637854,
+          "p": 0.6448445819355413,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -12801,23 +12512,23 @@
       "storm": null,
       "subject": null,
       "market": 0.01,
-      "model": 0.049489642366421255,
+      "model": 0.0787394272504443,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Rene is name #17 on the Atlantic list and 4 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · 5% once seasons are weighted by ONI similarity · used at all in 11%",
-      "modelUncond": 0.06944444444444445,
+      "modelBasis": "Rene is name #17 on the Atlantic list and 5 have been used, so this is the #12 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 13% of seasons · 8% once seasons are weighted by ONI similarity · used at all in 11%",
+      "modelUncond": 0.125,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.06944444444444445,
-          "basis": "1991–2025 (n=35), unweighted — the #13 storm still to form reached hurricane strength in 6% of seasons"
+          "p": 0.125,
+          "basis": "1991–2025 (n=35), unweighted — the #12 storm still to form reached hurricane strength in 11% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.049489642366421255,
+          "p": 0.0787394272504443,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -12931,23 +12642,23 @@
       "storm": null,
       "subject": null,
       "market": 0.060000000000000005,
-      "model": 0.0787394272504443,
+      "model": 0.10294067646744909,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Paulette is name #16 on the Atlantic list and 4 have been used, so this is the #12 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 13% of seasons · 8% once seasons are weighted by ONI similarity · used at all in 11%",
-      "modelUncond": 0.125,
+      "modelBasis": "Paulette is name #16 on the Atlantic list and 5 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 15% of seasons · 10% once seasons are weighted by ONI similarity · used at all in 14%",
+      "modelUncond": 0.1527777777777778,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.125,
-          "basis": "1991–2025 (n=35), unweighted — the #12 storm still to form reached hurricane strength in 11% of seasons"
+          "p": 0.1527777777777778,
+          "basis": "1991–2025 (n=35), unweighted — the #11 storm still to form reached hurricane strength in 14% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.0787394272504443,
+          "p": 0.10294067646744909,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -13099,23 +12810,23 @@
       "storm": null,
       "subject": null,
       "market": 0.045,
-      "model": 0.038725011063111034,
+      "model": 0.02782418566056733,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Wilfred is name #21 on the Atlantic list and 4 have been used, so this is the #17 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 4% of seasons · 4% once seasons are weighted by ONI similarity · used at all in 4%",
-      "modelUncond": 0.041666666666666664,
+      "modelBasis": "Wilfred is name #21 on the Atlantic list and 5 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 5%",
+      "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.041666666666666664,
-          "basis": "1991–2025 (n=35), unweighted — the #17 storm still to form reached hurricane strength in 3% of seasons"
+          "p": 0.013888888888888888,
+          "basis": "1991–2025 (n=35), unweighted — the #16 storm still to form reached hurricane strength in 0% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.038725011063111034,
+          "p": 0.02782418566056733,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -13155,23 +12866,23 @@
       "storm": null,
       "subject": null,
       "market": 0.05,
-      "model": 0.038725011063111034,
+      "model": 0.049489642366421255,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Sally is name #18 on the Atlantic list and 4 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 4% of seasons · 4% once seasons are weighted by ONI similarity · used at all in 5%",
-      "modelUncond": 0.041666666666666664,
+      "modelBasis": "Sally is name #18 on the Atlantic list and 5 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · 5% once seasons are weighted by ONI similarity · used at all in 11%",
+      "modelUncond": 0.06944444444444445,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.041666666666666664,
-          "basis": "1991–2025 (n=35), unweighted — the #14 storm still to form reached hurricane strength in 3% of seasons"
+          "p": 0.06944444444444445,
+          "basis": "1991–2025 (n=35), unweighted — the #13 storm still to form reached hurricane strength in 6% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.038725011063111034,
+          "p": 0.049489642366421255,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -13695,23 +13406,23 @@
       "storm": null,
       "subject": null,
       "market": 0.065,
-      "model": 0.10294067646744909,
+      "model": 0.1348926714302518,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Omar is name #15 on the Atlantic list and 4 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 15% of seasons · 10% once seasons are weighted by ONI similarity · used at all in 14%",
-      "modelUncond": 0.1527777777777778,
+      "modelBasis": "Omar is name #15 on the Atlantic list and 5 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 18% of seasons · 13% once seasons are weighted by ONI similarity · used at all in 21%",
+      "modelUncond": 0.18055555555555555,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.1527777777777778,
-          "basis": "1991–2025 (n=35), unweighted — the #11 storm still to form reached hurricane strength in 14% of seasons"
+          "p": 0.18055555555555555,
+          "basis": "1991–2025 (n=35), unweighted — the #10 storm still to form reached hurricane strength in 17% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.10294067646744909,
+          "p": 0.1348926714302518,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -13751,23 +13462,23 @@
       "storm": null,
       "subject": null,
       "market": 0.495,
-      "model": 0.05343061187863182,
+      "model": 0.038725011063111034,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Teddy is name #19 on the Atlantic list and 4 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · 5% once seasons are weighted by ONI similarity · used at all in 5%",
-      "modelUncond": 0.06944444444444445,
+      "modelBasis": "Teddy is name #19 on the Atlantic list and 5 have been used, so this is the #14 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 4% of seasons · 4% once seasons are weighted by ONI similarity · used at all in 5%",
+      "modelUncond": 0.041666666666666664,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.06944444444444445,
-          "basis": "1991–2025 (n=35), unweighted — the #15 storm still to form reached hurricane strength in 6% of seasons"
+          "p": 0.041666666666666664,
+          "basis": "1991–2025 (n=35), unweighted — the #14 storm still to form reached hurricane strength in 3% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.05343061187863182,
+          "p": 0.038725011063111034,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -13807,23 +13518,23 @@
       "storm": null,
       "subject": null,
       "market": 0.055,
-      "model": 0.02782418566056733,
+      "model": 0.05343061187863182,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Vicky is name #20 on the Atlantic list and 4 have been used, so this is the #16 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 5%",
-      "modelUncond": 0.013888888888888888,
+      "modelBasis": "Vicky is name #20 on the Atlantic list and 5 have been used, so this is the #15 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · 5% once seasons are weighted by ONI similarity · used at all in 5%",
+      "modelUncond": 0.06944444444444445,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #16 storm still to form reached hurricane strength in 0% of seasons"
+          "p": 0.06944444444444445,
+          "basis": "1991–2025 (n=35), unweighted — the #15 storm still to form reached hurricane strength in 6% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.02782418566056733,
+          "p": 0.05343061187863182,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -14197,17 +13908,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.1,
-      "yesAsk": 0.15,
+      "yesBid": 0.11,
+      "yesAsk": 0.14,
       "closeTime": "2027-01-01T04:59:00Z",
-      "liquidity": 67,
-      "spread": 0.04999999999999999,
+      "liquidity": 2,
+      "spread": 0.030000000000000013,
       "volume": 28132.98,
       "volume24h": 510.95,
       "openInterest": 11094.48,
       "depth": {
-        "bidSize": 25,
-        "askSize": 446.58,
+        "bidSize": 47,
+        "askSize": 11,
         "notional": 1
       },
       "proxy": false,
@@ -14263,7 +13974,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.02,
+      "market": 0.01,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -14284,16 +13995,16 @@
       "horizon": "storm",
       "strike": null,
       "yesBid": null,
-      "yesAsk": 0.04,
+      "yesAsk": 0.01,
       "closeTime": "2026-09-01T03:59:00Z",
-      "liquidity": 2,
-      "spread": 0.04,
+      "liquidity": 46,
+      "spread": 0.01,
       "volume": 15020.99,
       "volume24h": 4560.91,
       "openInterest": 9405.62,
       "depth": {
         "bidSize": 0,
-        "askSize": 56,
+        "askSize": 4559.18,
         "notional": 1
       },
       "proxy": false,
@@ -14923,7 +14634,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.405,
+      "market": 0.4,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -14943,17 +14654,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.33,
-      "yesAsk": 0.48,
+      "yesBid": 0.31,
+      "yesAsk": 0.49,
       "closeTime": "2026-09-15T03:59:00Z",
-      "liquidity": 5,
-      "spread": 0.14999999999999997,
+      "liquidity": 12,
+      "spread": 0.18,
       "volume": 2173.83,
       "volume24h": 285.96,
       "openInterest": 878.45,
       "depth": {
         "bidSize": 10,
-        "askSize": 10,
+        "askSize": 25,
         "notional": 1
       },
       "proxy": false,
@@ -16066,6 +15777,52 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26PAULETTE"
     },
     {
+      "id": "KXHURCAT-26JULIO-T2",
+      "label": "Will Julio become a Category 2 hurricane?",
+      "short": "Will Julio become a Category 2 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Julio",
+        "active": false
+      },
+      "market": 0.01,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 2,
+      "yesBid": null,
+      "yesAsk": 0.01,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 4,
+      "spread": 0.01,
+      "volume": 160,
+      "volume24h": 55,
+      "openInterest": 105,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 445,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
+    },
+    {
       "id": "KXHURCAT-26RENE-T1",
       "label": "Will Rene become a Category 1 hurricane?",
       "short": "Will Rene become a Category 1 hurricane…",
@@ -16112,6 +15869,98 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26RENE"
     },
     {
+      "id": "KXHURCAT-26JULIO-T1",
+      "label": "Will Julio become a Category 1 hurricane?",
+      "short": "Will Julio become a Category 1 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Julio",
+        "active": false
+      },
+      "market": 0.01,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 1,
+      "yesBid": null,
+      "yesAsk": 0.01,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 2,
+      "spread": 0.01,
+      "volume": 150,
+      "volume24h": 50,
+      "openInterest": 100,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 150,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
+    },
+    {
+      "id": "KXHURCAT-26JULIO-T3",
+      "label": "Will Julio become a Category 3 hurricane?",
+      "short": "Will Julio become a Category 3 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Julio",
+        "active": false
+      },
+      "market": 0.01,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 3,
+      "yesBid": null,
+      "yesAsk": 0.01,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 10,
+      "spread": 0.01,
+      "volume": 146,
+      "volume24h": 45,
+      "openInterest": 101,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 955,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
+    },
+    {
       "id": "KXHURCAT-26DOLLY-T5",
       "label": "Will Dolly become a Category 5 hurricane?",
       "short": "Will Dolly become a Category 5 hurricane…",
@@ -16156,6 +16005,52 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26DOLLY"
+    },
+    {
+      "id": "KXHURCAT-26JULIO-T5",
+      "label": "Will Julio become a Category 5 hurricane?",
+      "short": "Will Julio become a Category 5 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Julio",
+        "active": false
+      },
+      "market": 0.01,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 5,
+      "yesBid": null,
+      "yesAsk": 0.01,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 50,
+      "spread": 0.01,
+      "volume": 145,
+      "volume24h": 45,
+      "openInterest": 100,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 4955,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
     },
     {
       "id": "KXNEXTHURDATE-26DEC01-26NOV01",
@@ -16247,6 +16142,52 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26WILFRED"
     },
     {
+      "id": "KXHURCAT-26JULIO-T4",
+      "label": "Will Julio become a Category 4 hurricane?",
+      "short": "Will Julio become a Category 4 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Julio",
+        "active": false
+      },
+      "market": 0.01,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 4,
+      "yesBid": null,
+      "yesAsk": 0.01,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 20,
+      "spread": 0.01,
+      "volume": 125,
+      "volume24h": 25,
+      "openInterest": 100,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 1975,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
+    },
+    {
       "id": "KXHURRICANENAMES-26DEC01CPAC-OLA",
       "label": "Will Olana be categorized as a hurricane in the Central Pacific in 2026?",
       "short": "Will Olana be categorized as a hurricane in…",
@@ -16290,52 +16231,6 @@
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01CPAC"
     },
     {
-      "id": "KXHURCAT-26JULIO-T2",
-      "label": "Will Julio become a Category 2 hurricane?",
-      "short": "Will Julio become a Category 2 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Julio",
-        "active": false
-      },
-      "market": 0.01,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 2,
-      "yesBid": null,
-      "yesAsk": 0.01,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 5,
-      "spread": 0.01,
-      "volume": 105,
-      "volume24h": 0,
-      "openInterest": 105,
-      "depth": {
-        "bidSize": 0,
-        "askSize": 500,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
-    },
-    {
       "id": "KXHURRICANENAMES-26DEC01CPAC-PEN",
       "label": "Will Pena be categorized as a hurricane in the Central Pacific in 2026?",
       "short": "Will Pena be categorized as a hurricane in…",
@@ -16377,190 +16272,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01CPAC"
-    },
-    {
-      "id": "KXHURCAT-26JULIO-T3",
-      "label": "Will Julio become a Category 3 hurricane?",
-      "short": "Will Julio become a Category 3 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Julio",
-        "active": false
-      },
-      "market": 0.01,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 3,
-      "yesBid": null,
-      "yesAsk": 0.01,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 10,
-      "spread": 0.01,
-      "volume": 101,
-      "volume24h": 0,
-      "openInterest": 101,
-      "depth": {
-        "bidSize": 0,
-        "askSize": 1000,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
-    },
-    {
-      "id": "KXHURCAT-26JULIO-T5",
-      "label": "Will Julio become a Category 5 hurricane?",
-      "short": "Will Julio become a Category 5 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Julio",
-        "active": false
-      },
-      "market": 0.01,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 5,
-      "yesBid": null,
-      "yesAsk": 0.01,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 50,
-      "spread": 0.01,
-      "volume": 100,
-      "volume24h": 0,
-      "openInterest": 100,
-      "depth": {
-        "bidSize": 0,
-        "askSize": 5000,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
-    },
-    {
-      "id": "KXHURCAT-26JULIO-T4",
-      "label": "Will Julio become a Category 4 hurricane?",
-      "short": "Will Julio become a Category 4 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Julio",
-        "active": false
-      },
-      "market": 0.01,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 4,
-      "yesBid": null,
-      "yesAsk": 0.01,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 20,
-      "spread": 0.01,
-      "volume": 100,
-      "volume24h": 0,
-      "openInterest": 100,
-      "depth": {
-        "bidSize": 0,
-        "askSize": 2000,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
-    },
-    {
-      "id": "KXHURCAT-26JULIO-T1",
-      "label": "Will Julio become a Category 1 hurricane?",
-      "short": "Will Julio become a Category 1 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Julio",
-        "active": false
-      },
-      "market": 0.01,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 1,
-      "yesBid": null,
-      "yesAsk": 0.01,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 2,
-      "spread": 0.01,
-      "volume": 100,
-      "volume24h": 0,
-      "openInterest": 100,
-      "depth": {
-        "bidSize": 0,
-        "askSize": 200,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26JULIO"
     },
     {
       "id": "KXHURCAT-26ISELLE-T5",
@@ -17620,7 +17331,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.335,
+      "market": 0.45,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -17640,16 +17351,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 1,
-      "yesBid": 0.17,
+      "yesBid": 0.4,
       "yesAsk": 0.5,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.32999999999999996,
+      "spread": 0.09999999999999998,
       "volume": 6.62,
       "volume24h": 0,
       "openInterest": 6.62,
       "depth": {
-        "bidSize": 9,
+        "bidSize": 1,
         "askSize": 1,
         "notional": 1
       },
@@ -17666,7 +17377,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.31,
+      "market": 0.375,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -17687,10 +17398,10 @@
       "horizon": "storm",
       "strike": 3,
       "yesBid": 0.05,
-      "yesAsk": 0.57,
+      "yesAsk": 0.7,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.5199999999999999,
+      "spread": 0.6499999999999999,
       "volume": 6,
       "volume24h": 0,
       "openInterest": 6,
@@ -17758,7 +17469,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.105,
+      "market": 0.155,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -17779,10 +17490,10 @@
       "horizon": "storm",
       "strike": 2,
       "yesBid": 0.06,
-      "yesAsk": 0.15,
+      "yesAsk": 0.25,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 0,
-      "spread": 0.09,
+      "spread": 0.19,
       "volume": 4,
       "volume24h": 0,
       "openInterest": 4,
@@ -21913,6 +21624,26 @@
       "kind": "advisory",
       "label": "Lowell Advisory #017 — Tropical Storm, 55 kt",
       "source": "NHC",
+      "tier": "A",
+      "hot": false
+    },
+    {
+      "tsZ": "2026-09-01T00:00:00.000Z",
+      "kind": "consensus",
+      "stormId": "EP122026",
+      "label": "Lowell guidance consensus 00Z — peak 129.7 kt",
+      "detail": "3 aids (HCCA, IVCN, GDMI) disagreeing by 36.3 kt — in the deck before the advisory built on it",
+      "source": "NHC ATCF a-deck",
+      "tier": "A",
+      "hot": false
+    },
+    {
+      "tsZ": "2026-09-01T00:00:00.000Z",
+      "kind": "ships",
+      "stormId": "EP122026",
+      "label": "Lowell SHIPS 00Z — shear 7 kt, OHC 23, MPI 158 kt",
+      "detail": "RI 12% for 20 kt in 12h against a 6% base rate — published, scored only under an operator claim",
+      "source": "NHC ATCF SHIPS",
       "tier": "A",
       "hot": false
     }
