@@ -79,9 +79,15 @@ const NON_COHORT = new Set([
   ...M.operational.storms.flatMap((s) => [s.latest.kt, s.latest.mslp, s.peak_wind_kt,
     s.fix_count, Math.abs(s.latest.lat), Math.abs(s.latest.lon)].map(String)),
   ...M.outlook.flatMap((o) => [o.pct48, o.pct7d].filter((x) => x !== null).map(String)),
-  "125", "942", "27.4", "90.7", "100", "17.2", "124.4", "13.0", "144", "28.0", "88.7",
-  "13.2", "115.0", "12.0", "107.5", "11.3", "133.8", "250", "150", "1971", "2026", "31",
-  "1", "0", "10", "8", "5", "1.1.0", "64", "34", "96", "113", "137", "83",
+  /* NHC advisory values and the operational first-tropical fix, read off the manifest each
+     build -- never a typed list, which went stale the first time an advisory was reissued. */
+  ...(M.nhc_advisories || []).flatMap((a) => [a.lat, Math.abs(a.lon), a.wind_kt, a.mslp_mb,
+    Number(a.advisory), a.lat.toFixed(1), Math.abs(a.lon).toFixed(1)].map(String)),
+  ...(M.genesis_determinations || []).flatMap((g) => g.first_tropical_fix_in_operational_record
+    ? [g.first_tropical_fix_in_operational_record.lat, Math.abs(g.first_tropical_fix_in_operational_record.lon),
+      g.first_tropical_fix_in_operational_record.kt, g.first_tropical_fix_in_operational_record.mslp].map(String) : []),
+  "100", "28.0", "88.7", "13.2", "115.0", "12.0", "107.5", "11.3", "133.8", "250", "150",
+  "1971", "2026", "31", "1", "0", "10", "8", "5", "1.1.0", "64", "34", "96", "113", "137", "83",
 ]);
 
 /* ---- 2. the prohibitions ----------------------------------------------------------------- */
@@ -207,6 +213,46 @@ for (const f of files) {
   console.log(`\n${f}`);
   const html = readFileSync(join(DIR, f), "utf8");
   const t = text(html);
+
+  /* -- FRESHNESS: THE STAMP IS THE INGEST, AND NO LIVE LINE IS DATED ANYWHERE ELSE ------------
+     liveStamp() renders operational.generated_at, so the printed stamp cannot drift from the
+     feeds by construction; this checks the rendered text anyway, and then that no sentence on
+     the page dates a LIVE reading to a different day than the ingest. A refreshed feed under a
+     stale hand-written sentence is exactly the failure this catches. */
+  const gen = new Date(M.operational.generated_at);
+  const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const stampDay = `${String(gen.getUTCDate()).padStart(2, "0")} ${MON[gen.getUTCMonth()]} ${gen.getUTCFullYear()}`;
+  /* A sheet that prints a live reading must carry the ingest's stamp; a sheet that prints none
+     -- D is cohorts and delivery only -- owes no stamp, and must not be dated to another day. */
+  const printsLive = /\bLIVE\b|\badv(?:isory)? \d{3}\b|\bb-deck\b/.test(t);
+  if (f !== MANIFEST_DOC) {
+    if (printsLive) ok(t.includes(stampDay), `live stamp is the ingest's own day (${stampDay})`);
+    else pass("no live reading printed; no stamp owed");
+    const dated = [...t.matchAll(/\b(\d{2}) (JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{4})(?:,| ·| at)? ?\d{2}:\d{2}/g)]
+      .map((m) => `${m[1]} ${m[2].toUpperCase()} ${m[3]}`).filter((d) => d !== stampDay);
+    ok(dated.length === 0, "no LIVE reading is dated to a day other than the ingest",
+      [...new Set(dated)].join(", "));
+    /* EVERY PRINTED COORDINATE IS ONE THE MANIFEST HOLDS. Declared cells, member genesis fixes,
+       operational latest fixes, advisory centres and first-tropical fixes are all in the
+       manifest; a position typed into a sentence is not, and it is exactly what an advisory
+       reissue leaves behind. Matched at the precision the sheet prints (0.1 deg or whole). */
+    const coordSet = new Set();
+    const put = (lat, lon) => { if (lat === null || lat === undefined || lon === null || lon === undefined) return;
+      for (const f of [1, 0]) coordSet.add(`${Math.abs(lat).toFixed(f)}|${Math.abs(lon).toFixed(f)}`); };
+    for (const sy of M.systems) { put(sy.coordinates_queried.lat, sy.coordinates_queried.lon);
+      for (const m of (sy.representatives || {}).members || []) put(m.genesis_lat, m.genesis_lon); }
+    for (const st of M.operational.storms) put(st.latest.lat, st.latest.lon);
+    for (const a of M.nhc_advisories || []) put(a.lat, a.lon);
+    for (const g of M.genesis_determinations || []) { const x = g.first_tropical_fix_in_operational_record; if (x) put(x.lat, x.lon); }
+    const printed = [...t.matchAll(/\b(\d{1,2}(?:\.\d)?)°?N,? (\d{2,3}(?:\.\d)?)°?W\b/g)];
+    const unknown = printed.filter(([, la, lo]) => !coordSet.has(`${Number(la).toFixed(1)}|${Number(lo).toFixed(1)}`)
+      && !coordSet.has(`${Number(la).toFixed(0)}|${Number(lo).toFixed(0)}`)).map((m) => m[0]);
+    ok(unknown.length === 0, "every printed coordinate is a manifest coordinate (no stale position)",
+      [...new Set(unknown)].join(", "));
+    ok(M.operational.health && M.operational.health.ok
+      && (M.operational.health.stale_atcf_ids || []).length === 0,
+      "operational artifact is healthy with no stale active storm");
+  }
 
   /* -- completeness -- */
   ok(!/COPY SLOT "[^"]+" NOT SUPPLIED/.test(html), "every copy slot supplied",

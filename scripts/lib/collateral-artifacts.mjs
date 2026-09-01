@@ -13,7 +13,21 @@ import { basinPlate, cellPlate, plate, LEGEND } from "./collateral-plates.mjs";
 
 /* THE ONE LIVE INSTANT this package is stamped to. Every live line carries it; no historical
    cohort page does, because a cohort is evergreen and stamping it would imply otherwise. */
-export const LIVE_STAMP = "31 AUG 2026 · 16:14 CT / 21:14 UTC";
+/* THE LIVE STAMP IS THE INGEST'S OWN INSTANT, NOT A STRING SOMEONE TYPED. It is read off the
+   manifest's operational.generated_at -- the tick that fetched every live line on the page -- so
+   a sheet cannot carry a stamp newer than its feeds or feeds newer than its stamp. Central Time
+   is America/Chicago, which decides CDT/CST itself. */
+export function liveStamp(D) {
+  const iso = D.operational && D.operational.generated_at;
+  if (!iso) return "LIVE FEED UNAVAILABLE";
+  const d = new Date(iso);
+  const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  const utc = `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`;
+  const ct = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour12: false,
+    hour: "2-digit", minute: "2-digit" }).format(d).replace(/^24/, "00");
+  return `${String(d.getUTCDate()).padStart(2, "0")} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`
+    + ` · ${ct} CT / ${utc} UTC`;
+}
 export const LIVE_ISO = "2026-08-31T13:25Z";
 
 const SLOT_MISS = (id) =>
@@ -50,7 +64,7 @@ function packFoot(D, extra = "") {
 function liveStrip(D, rows) {
   return `<div class="live">
   <div class="live-hd"><span>LIVE SYSTEM STATUS — STATUS ONLY, NOT ATLAS OUTPUT</span>
-    <span class="ts">AS OF ${esc(LIVE_STAMP)}</span></div>
+    <span class="ts">AS OF ${esc(liveStamp(D))}</span></div>
   <table><thead><tr>
     <th style="width:16%">System / basin</th><th style="width:14%">Point type</th>
     <th style="width:35%">Live status (NHC advisory)</th>
@@ -71,7 +85,10 @@ export function liveRows(D) {
   const F = D.operational.storms.find((s) => s.atcf_id === "AL052026");
   const adv = (id) => D.nhc_advisories.find((a) => a.atcf_id === id) || null;
   const aF = adv("AL052026"), aK = adv("EP112026"), aL = adv("EP122026");
-  const ep95 = D.outlook.find((o) => o.id === "EP95");
+  /* THE 95E ROW IS A DECLARED CELL WITH NO ATCF RECORD IN THE ARTIFACT. Whatever the Pacific
+     outlook carries on this tick is printed as the outlook's own statement; no area is assumed to
+     be "95E", and no operational fix is typed in from a source the manifest does not hold. */
+  const pacAreas = D.outlook.filter((o) => o.basin === "pacific");
   /* THE GENESIS DETERMINATION, PRINTED. Not asserted here -- read off the manifest block that
      applied the archive's own rule to the operational record. If it ever flips to an archive
      genesis row, this line changes because the manifest changed, not because a page was edited. */
@@ -90,14 +107,15 @@ export function liveRows(D) {
     : "No NHC advisory in this ingest.";
   return {
     "97L": {
-      name: "TD Five (AL052026) — declared as Invest 97L", basin: "NORTH ATLANTIC / GULF",
+      name: `${aF ? esc(aF.cls_label) + " " + esc(aF.name) : "AL052026"} (AL052026) — declared as Invest 97L`,
+      basin: "NORTH ATLANTIC / GULF",
       pre: true, pointType: "PRE-GENESIS REFERENCE CELL", point: "28.0N 88.7W",
       live: `${line(aF)}${aF && aF.watches_highest ? ` <b>${esc(aF.watches_highest)}</b> `
         + `in effect.` : ""} <b>Query cell ≠ this centre.</b>`,
       feed: `b-deck <b>AL052026</b> ${deck(F)}. ${genesisNote("AL052026")}`,
     },
     KARINA: {
-      name: "Hurricane Karina", basin: "EAST PACIFIC",
+      name: `${aK ? esc(aK.cls_label) : "Hurricane"} Karina`, basin: "EAST PACIFIC",
       pre: false, pointType: "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED", point: "13.2N 115.0W",
       live: `${line(aK)} No land in the package.`,
       feed: `b-deck <b>EP112026</b> ${deck(K)}. ${genesisNote("EP112026")}`,
@@ -105,14 +123,19 @@ export function liveRows(D) {
     "95E": {
       name: "Invest 95E", basin: "EAST PACIFIC",
       pre: true, pointType: "PRE-GENESIS REFERENCE CELL", point: "12.0N 107.5W",
-      live: `Broad low offshore of SW Mexico; no ATCF id, no advisory. `
+      live: `No advisory or b-deck under EP95 in this ingest. `
         + `<b>Pre-genesis: no formation point to query.</b>`,
-      feed: `GTWO <b>${esc(ep95 ? ep95.id : "EP95")}</b> ${ep95 ? ep95.pct48 : "—"}% / `
-        + `${ep95 ? ep95.pct7d : "—"}% (48 h / 7 d), issued ${esc(ep95 ? ep95.issued : "—")}. No `
-        + `b-deck. <b>NHC's number; never multiplied by an Atlas row.</b>`,
+      /* The issuance line is NHC's own string minus its weekday and year -- the stamp above the
+         table already dates the ingest -- so the row holds to six lines beside its neighbours. */
+      feed: pacAreas.length
+        ? `NHC Pacific outlook: ${pacAreas.map((o) => `<b>${esc(o.title)}</b>`
+          + `${o.pct48 === null ? "" : ` ${o.pct48}% / 48 h`}${o.pct7d === null ? "" : ` ${o.pct7d}% / 7 d`}`)
+          .join("; ")}, issued ${esc(String(pacAreas[0].issued).replace(/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+/, "").replace(/\s+\d{4}$/, ""))}. `
+          + `<b>Never multiplied by an Atlas row.</b>`
+        : `No Pacific outlook area in this ingest. <b>NHC's outlook; never multiplied by an Atlas row.</b>`,
     },
     LOWELL: {
-      name: "TS Lowell", basin: "EAST PACIFIC / CENTRAL PACIFIC",
+      name: `${aL ? esc(aL.cls_label) : ""} Lowell`.trim(), basin: "EAST PACIFIC / CENTRAL PACIFIC",
       pre: false, pointType: "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED", point: "11.3N 133.8W",
       live: `${line(aL)} Far from land.`,
       feed: `b-deck <b>EP122026</b> ${deck(L)}. ${genesisNote("EP122026")}`,
@@ -222,7 +245,7 @@ export function artifactA(D, copy) {
   const table = `<table class="ledger sysgrid">
   <thead><tr>
     <th style="width:23%;text-align:left">System · point · coords</th>
-    <th style="width:40%;text-align:left" class="livecol">Live status &amp; feeds, ${esc(LIVE_STAMP)}</th>
+    <th style="width:40%;text-align:left" class="livecol">Live status &amp; feeds · ${esc(liveStamp(D).replace(/ · .* \/ /, " · "))}</th>
     <th style="width:37%;text-align:left">What the archive can answer</th>
   </tr></thead>
   <tbody>${order.map((k, i) => {
@@ -246,7 +269,7 @@ ${masthead({
     title: "Four live systems, four declared points, what the record supports",
     sub: C.get("lede").replace(/^<p>|<\/p>$/g, ""),
     rule: [
-      ["LIVE STATUS", LIVE_STAMP],
+      ["LIVE STATUS", liveStamp(D)],
       ["METHODOLOGY", D.pack.methodology_version],
       ["PACK", D.pack.archive_stamp],
     ],
@@ -328,7 +351,7 @@ export function artifactB(D, copy) {
        and to the right of its mark and the live label below and to the left, and the sheet
        pays 26 px for a plate a reader can actually read. */
     lon0: -99, lon1: -73, lat0: 20, lat1: 34.5, width: 460, height: 96, renderWidth: 354,
-    liveAtcf: "AL052026", liveLabel: "LIVE TD FIVE", dLon: 5, dLat: 5, decimate: 1,
+    liveAtcf: "AL052026", dLon: 5, dLat: 5, decimate: 1,
     cellAnchor: "start", cellDx: 6, cellDy: -13, liveAnchor: "end", liveDx: -6, liveDy: 12,
     liveLeader: true,
   });
@@ -347,7 +370,7 @@ ${masthead({
     title: "AL052026 (97L): genesis-conditioned outcomes, declared Gulf cell",
     sub: C.get("lede").replace(/^<p>|<\/p>$/g, ""),
     rule: [
-      ["LIVE STATUS", LIVE_STAMP],
+      ["LIVE STATUS", liveStamp(D)],
       ["POINT TYPE", "PRE-GENESIS REFERENCE CELL"],
       ["CELL", "28.0°N 88.7°W · r 250 km"],
       ["PACK", D.pack.archive_stamp],
@@ -364,7 +387,11 @@ ${liveStrip(D, [rows["97L"]])}
 <section class="sec sechd-tight">${sectionHead("02", "The cell, and why the query is not run at the centre")}
 <div class="grid2">
   <div>${questionBlock(s, { conditional: true })}</div>
-  <div>${C.get("cell-rationale")}</div>
+  ${/* The live centre is the advisory's, substituted at render time: a coordinate typed into
+       the copy went stale on the next advisory. */""}
+  <div>${C.get("cell-rationale").replace(/\{\{LIVE_CENTRE\}\}/g, (() => {
+    const a = (D.nhc_advisories || []).find((x) => x.atcf_id === "AL052026");
+    return a ? `${a.lat.toFixed(1)}°N ${Math.abs(a.lon).toFixed(1)}°W` : "the advisory centre"; })())}</div>
 </div>
 </section>
 
@@ -479,7 +506,7 @@ ${masthead({
       + `in <b>August or September</b>, in seasons from <b>1971</b> onwards, what happened to `
       + `storms that formed there? <b>${esc(s.cohort.cohort_status)}</b>, N = ${s.cohort.n_cases}, `
       + `ESS ${s.cohort.effective_sample_size}, min ${s.cohort.min_sample}.`,
-    rule: [["LIVE STATUS", LIVE_STAMP], ["CELL", "28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+"],
+    rule: [["LIVE STATUS", liveStamp(D)], ["CELL", "28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+"],
       ["PACK", D.pack.archive_stamp]],
   })}
 
@@ -490,7 +517,7 @@ ${/* THE QUESTION BOX, FOLDED INTO THE MASTHEAD. It stood as its own sunken pane
 probability would require an external formation probability on the <b>same formation event and
 conditioning set</b>; none is computed here, and an NHC outlook probability is not multiplied by
 these rows unless the conditioning events are demonstrably aligned. <b>LIVE,
-${esc(LIVE_STAMP)}:</b> ${C.answers.now || ""}
+${esc(liveStamp(D))}:</b> ${C.answers.now || ""}
 ${/* ROW = STATE TOKEN, PANEL NOTE = EXPLANATION. Printed immediately above the panel because
      this page has no UNSCOREABLE box to carry it; the stamps are the archive's own strings. */""}
 <b>TD is definitional.</b> Status tokens: ${stampList(s)}.</p>
@@ -547,7 +574,7 @@ export function artifactB2(D, copy) {
   const s = D.byId["97L"];
   const cp = cellPlate(D, "97L", {
     lon0: -98, lon1: -74, lat0: 19.5, lat1: 34, width: 400, height: 150, renderWidth: 354,
-    liveAtcf: "AL052026", liveLabel: "LIVE TD FIVE", dLon: 5, dLat: 5, decimate: 1,
+    liveAtcf: "AL052026", dLon: 5, dLat: 5, decimate: 1,
     cellAnchor: "start", cellDx: 8, cellDy: -20,
   });
   const band = (key, label) => {
@@ -562,7 +589,7 @@ ${masthead({
     doc: "ARTIFACT B2 · ENERGY / WEATHER TRADING", sheet: "1 OF 1",
     title: "Gulf genesis cohort: contract-row frequency bands, and analog paths as geography",
     sub: C.get("lede").replace(/^<p>|<\/p>$/g, ""),
-    rule: [["LIVE STATUS", LIVE_STAMP], ["CELL", "28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+"],
+    rule: [["LIVE STATUS", liveStamp(D)], ["CELL", "28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+"],
       ["PACK", D.pack.archive_stamp]],
   })}
 
@@ -664,7 +691,7 @@ ${masthead({
     sub: `Outcomes for the point this cohort is keyed to — declared, not an archive row. `
       + `<b>${esc(s.cohort.cohort_status)}</b>, N = ${s.cohort.n_cases}, ESS `
       + `${s.cohort.effective_sample_size}, min sample ${s.cohort.min_sample}.`,
-    rule: [["LIVE STATUS", LIVE_STAMP], ["POINT TYPE", "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED"],
+    rule: [["LIVE STATUS", liveStamp(D)], ["POINT TYPE", "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED"],
       ["GENESIS", "13.2°N 115.0°W · r 250 km · Aug–Sep · 1971+"], ["PACK", D.pack.archive_stamp]],
   })}
 
@@ -884,6 +911,8 @@ function contractSourceLine(sources) {
 
 export function artifactE(D, copy, contractSources = []) {
   const C = makeCopy(copy, "E");
+  const aE = (D.nhc_advisories || []).find((a) => a.atcf_id === "AL052026");
+  const liveName = aE ? aE.name : "AL052026";
   const s = D.byId["97L"];
   const rows = liveRows(D);
   const pick = (k) => [...s.intensity_rows, ...s.landfall_rows].find((r) => r.key === k);
@@ -932,7 +961,7 @@ ${masthead({
     doc: "ARTIFACT E · DISCRETE EVENT-CONTRACT EVIDENCE", sheet: "1 OF 1",
     title: "A published Cat 4+ CONUS landfall trigger — and where the archive stops",
     sub: C.get("lede").replace(/^<p>|<\/p>$/g, ""),
-    rule: [["LIVE STATUS", LIVE_STAMP], ["POINT TYPE", "PRE-GENESIS REFERENCE CELL"],
+    rule: [["LIVE STATUS", liveStamp(D)], ["POINT TYPE", "PRE-GENESIS REFERENCE CELL"],
       ["PACK", D.pack.archive_stamp]],
   })}
 
@@ -947,13 +976,13 @@ ${contractSourceLine(contractSources)}
     <p>${opFormation(D, "AL052026")}</p>
     <p style="margin-top:2px"><b>NOT ATLAS GENESIS.</b> The pack does not hold AL052026 and does
     not accept the operational layer as a genesis source. The cohort beside remains the declared
-    <b>PRE-GENESIS REFERENCE CELL</b> at <b>28.0°N 88.7°W</b> — <b>not where Five formed</b>, and
-    not moved to Five's fix.</p></div>
+    <b>PRE-GENESIS REFERENCE CELL</b> at <b>28.0°N 88.7°W</b> — <b>not where ${esc(liveName)} formed</b>, and
+    not moved to ${esc(liveName)}'s fix.</p></div>
   <div>${ledger([{ rows: shown }], { showBar: false, compact: true, statusHead: "Status",
     caption: `DECLARED COHORT · 28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+ · `
       + `${s.cohort.cohort_status} · N = ${s.cohort.n_cases} · ESS ${s.cohort.effective_sample_size}` })}</div>
 </div>
-<p class="fn">${C.get("cohort-note").replace(/^<p>|<\/p>$/g, "")}</p>
+<p class="fn">${C.get("cohort-note").replace(/^<p>|<\/p>$/g, "").replace(/\{\{LIVE\}\}/g, esc(liveName))}</p>
 </section>
 
 <section class="sec sechd-tight">${sectionHead("02", "Evidence bridge, evidence gap",
@@ -975,7 +1004,7 @@ ${bridge}
   storms and geography, <b>not</b> a Gulf, Florida, Texas or Louisiana rate.</p></div>
 <div class="box commercial" style="margin-top:3px"><h3>WHAT A STRUCTURER COULD USE THIS FOR — AND WHAT THIS PAGE DOES NOT DO</h3>
   ${C.get("desk-use")}
-  ${C.get("desk-not")}</div>
+  ${C.get("desk-not").replace(/\{\{LIVE\}\}/g, esc(liveName))}</div>
 ${citeBlock(s)}
 </section>
 

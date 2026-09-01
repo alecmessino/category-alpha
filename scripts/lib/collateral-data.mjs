@@ -135,6 +135,17 @@ export async function build() {
     coastRaw.buffer.slice(coastRaw.byteOffset, coastRaw.byteOffset + coastRaw.byteLength));
 
   const latest = JSON.parse(await readFile(join(ROOT, "docs/data/latest.json"), "utf8"));
+  /* A SYSTEM'S DISPLAY NAME FOLLOWS THE ADVISORY. "TD Five" became "Tropical Storm Edouard" on
+     advisory 003 and a typed name would have said Five until someone noticed. The short class
+     word is the NHC classification on the current advisory; the fallback is the id or the last
+     known name, never a guessed status. */
+  const liveShort = (atcfId, fallback) => {
+    const a = (latest.storms || []).find((x) => x.id === atcfId);
+    if (!a) return fallback;
+    const cls = { TD: "TD", TS: "TS", HU: "Hurricane", SS: "Subtropical Storm", SD: "Subtropical Depression",
+      PTC: "Potential TC" }[a.cls] || a.cls;
+    return `${cls} ${a.name}`;
+  };
 
   const cite = (spec, r) =>
     `STORM ATLAS · ${openQuestion(spec).replace(/ — what happened next\?$/, "")} · `
@@ -292,7 +303,7 @@ export async function build() {
 
   const systems = [
     run("97L", {
-      name: "97L / TD Five", basin: "NA", basin_label: "NORTH ATLANTIC", atcf_id: "AL052026",
+      name: `97L / ${liveShort("AL052026", "AL052026")}`, basin: "NA", basin_label: "NORTH ATLANTIC", atcf_id: "AL052026",
       point_type: "PRE-GENESIS REFERENCE CELL",
       coordinates_queried: { lat: 28.0, lon: -88.7 },
       radius_km: 250, season_floor: 1971, month_window: "August–September",
@@ -313,7 +324,7 @@ export async function build() {
     }, { where: { lat: 28.0, lon: -88.7, radiusKm: 250 }, seasonFrom: 1971, basins: ["NA"] }),
 
     run("KARINA", {
-      name: "Hurricane Karina", basin: "EP", basin_label: "EAST PACIFIC", atcf_id: "EP112026",
+      name: liveShort("EP112026", "Karina"), basin: "EP", basin_label: "EAST PACIFIC", atcf_id: "EP112026",
       point_type: "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED",
       coordinates_queried: { lat: 13.2, lon: -115.0 },
       radius_km: 250, season_floor: 1971, month_window: "August–September",
@@ -327,7 +338,7 @@ export async function build() {
     }, { where: { lat: 12.0, lon: -107.5, radiusKm: 250 }, seasonFrom: 1971, months: [8, 9], basins: ["EP"] }),
 
     run("LOWELL", {
-      name: "Tropical Storm Lowell", basin: "EP", basin_label: "EAST PACIFIC", atcf_id: "EP122026",
+      name: liveShort("EP122026", "Lowell"), basin: "EP", basin_label: "EAST PACIFIC", atcf_id: "EP122026",
       point_type: "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED",
       coordinates_queried: { lat: 11.3, lon: -133.8 },
       radius_km: 250, season_floor: 1971, month_window: "August–September",

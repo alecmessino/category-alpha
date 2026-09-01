@@ -87,6 +87,15 @@ for (const f of readdirSync(DIR).filter((x) => x.endsWith(".html")).sort()) {
       const past = Math.round(tr.right - cr.right);
       if (past > 1) wide.push({ past, what: `table.${t.className} over its ${Math.round(cr.width)}px column`, track: true });
     }
+    /* AND TEXT AGAINST ITS OWN CELL. A nowrap heading longer than its column prints over the
+       next heading without any box overrunning any other box; scrollWidth is the width the text
+       wanted, clientWidth the width it got. */
+    for (const e of s.querySelectorAll("th, td, .nm, .rt, .l2, .sec-hd .n, .sec-hd .sub, .mh-rule span")) {
+      if (e.ownerSVGElement) continue;
+      const over = e.scrollWidth - e.clientWidth;
+      if (over > 1 && getComputedStyle(e).whiteSpace === "nowrap")
+        wide.push({ past: over, what: `${e.tagName.toLowerCase()}.${(typeof e.className === "string" ? e.className : "")} text "${(e.textContent || "").trim().slice(0, 40)}" over its own cell`, track: true });
+    }
     wide.sort((a, b) => b.past - a.past);
     return { over: content - budget, budget, manifest: s.classList.contains("manifest"),
       widest: wide[0] || null, wideCount: wide.length };

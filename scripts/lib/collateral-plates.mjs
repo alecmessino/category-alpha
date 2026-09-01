@@ -135,13 +135,15 @@ export function basinPlate(D, { width = 700, height = 300, renderWidth = null } 
   if (K) liveMarks.push(mark(P, K.latest.lat, K.latest.lon, { color: INK.live, kind: "live",
     label: `LIVE KARINA ${K.latest.kt} KT`,
     anchor: "start", dx: 4, dy: -12, leader: true, fs }));
+  /* Lowell has crossed 150W: an end-anchored label now runs off the frame, so it sits to the
+     right of the mark, one band below Karina's live label and well above both cohort labels. */
   if (L) liveMarks.push(mark(P, L.latest.lat, L.latest.lon, { color: INK.live, kind: "live",
     label: `LIVE LOWELL ${L.latest.kt} KT`,
-    anchor: "end", dx: -5, dy: -13, leader: true, fs }));
+    anchor: "start", dx: 4, dy: -13, leader: true, fs }));
 
   const F = D.operational.storms.find((s) => s.atcf_id === "AL052026");
   if (F) liveMarks.unshift(mark(P, F.latest.lat, F.latest.lon, { color: INK.live, kind: "live",
-    label: `LIVE TD FIVE ${F.latest.kt} KT`,
+    label: `LIVE ${F.name} ${F.latest.kt} KT`,
     anchor: "start", dx: 4, dy: -12, leader: true, fs }));
 
   /* Whatever outlook areas this ingest carries, drawn as NHC's own and never as a cohort. The
