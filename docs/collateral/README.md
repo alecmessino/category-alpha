@@ -37,6 +37,7 @@ statement, and visibly refuse what the record cannot support.
 | `E-discrete-event-contract-evidence.html` | A published Cat 4+ CONUS landfall trigger, the declared cohort beside it, and the three places the archive stops short of scoring it | 1 |
 | `SOURCE-MANIFEST.html` | The evidence gate as a printable reference document | 8 |
 | `source-manifest.json` / `.txt` | Every cohort, contract row, interval, stamp, gap, representative member, cite string and URL | — |
+| `contract-sources.json` | Public sources for the contract terms printed on E: publisher, document, what it is the source of, date read, URL. A null URL is a gap the sheet prints. | — |
 | `replay-urls.json` | The six cohorts and the URL that reopens each | — |
 | `copy.json` | The prose, with `_edits` recording every hand change and why | — |
 | `legibility-cuts.json` | Every block removed to meet the type gate: what it was, what it cost, what carries its content instead | — |
@@ -105,8 +106,24 @@ node scripts/check-collateral-fit.mjs        # every sheet fits its printed page
 node scripts/check-collateral-legibility.mjs # measured type sizes clear the gate (needs a browser)
 ```
 
-Current: 172/172 content, 42/42 replay, every slot inside budget and printed somewhere, every
+Current: 183/183 content, 42/42 replay, every slot inside budget and printed somewhere, every
 sheet fits, every semantic class clears its own type floor.
+
+### The contract's own provenance
+
+The Atlas cohort on E carries a cite string and a replay URL. The contract terms printed beside it
+are **not** Atlas output and do not travel on that cite, so they carry their own sources, read from
+`contract-sources.json` and printed as a SOURCES line under the terms. Two checks hold it: every
+entry must appear on the sheet — with its URL, or, where this build holds no citable public
+document, as a named `SOURCE URL NOT HELD` gap — and no URL may appear anywhere a reader could
+follow it unless it is the Atlas replay URL or one of those declared sources, so a citation cannot
+be invented on the page.
+
+This build holds NOAA/NHC sources for the Category 4 = 130 mph definition and for the landfall and
+intensity determination authority. It holds no citable public document for Discrete's own published
+terms — the reference event, the deadline, the trigger wording and the regional variants — so the
+sheet prints that gap. Supplying the URL in `contract-sources.json` is the only change needed to
+close it.
 
 ### The trigger lock
 

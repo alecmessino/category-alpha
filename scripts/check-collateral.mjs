@@ -21,6 +21,7 @@ import { ROOT } from "./lib/atlas-verify.mjs";
 
 const DIR = join(ROOT, "docs/collateral");
 const M = JSON.parse(readFileSync(join(DIR, "source-manifest.json"), "utf8"));
+const CONTRACT_SOURCES = JSON.parse(readFileSync(join(DIR, "contract-sources.json"), "utf8")).sources;
 
 let fails = 0;
 let checks = 0;
@@ -317,6 +318,36 @@ for (const f of files) {
     }
     ok(printed.length === 0, "no printed percentage equals a marginal product",
       printed.slice(0, 3).join(", "));
+
+    /* THE CONTRACT'S OWN PROVENANCE. The terms beside the cohort are not Atlas output and do
+       not travel on the Atlas cite string, so each one needs a public source printed on the
+       sheet -- or, where this build holds no citable document, the gap printed instead. Both
+       halves are checked: every entry must appear, and no URL may appear that is not either the
+       Atlas replay URL or one of these sources, so a citation cannot be invented on the page. */
+    const srcLine = blocks(html).find((b) => /^SOURCES\b/.test(b)) || "";
+    ok(srcLine !== "", "the contract terms carry a SOURCES line");
+    for (const src of CONTRACT_SOURCES) {
+      const shown = src.url
+        ? srcLine.includes(src.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))
+        : /SOURCE URL NOT HELD/.test(srcLine);
+      ok(shown, `contract source printed: ${src.label} (${src.url ? "url" : "gap"})`,
+        src.url || `${src.publisher}, ${src.accessed}`);
+      /* The label is checked INSIDE the sources line, not anywhere on the sheet: "Determination"
+         also appears in the printed terms, and a source that lost its label would have passed a
+         page-wide search on that coincidence. */
+      ok(srcLine.includes(src.label), `contract source labelled: ${src.label}`, srcLine.slice(0, 160));
+    }
+    const allowedHosts = new Set(CONTRACT_SOURCES.filter((x) => x.url)
+      .map((x) => new URL(x.url).host));
+    for (const sy of M.systems) allowedHosts.add(new URL(sy.replay_url).host);
+    /* CITATIONS, NOT ASSETS. A URL a reader can follow is either printed in the text or sits in
+       an anchor; the font stylesheet in <head> is neither, and is not a claim about anything. */
+    const cited = [...t.matchAll(/https?:\/\/[^\s"'<>)]+/g)].map((m) => m[0])
+      .concat([...html.matchAll(/<a[^>]+href="(https?:\/\/[^"]+)"/g)].map((m) => m[1]));
+    const foreign = cited.filter((u) => { try { return !allowedHosts.has(new URL(u).host); }
+      catch { return true; } });
+    ok(foreign.length === 0, "every URL on the sheet is the replay URL or a declared source",
+      [...new Set(foreign)].slice(0, 3).join(", "));
 
     /* 8 -- NO REGIONAL-VARIANT FABRICATION. A sub-CONUS place name may appear as a fact about a
        named storm; it may never appear beside a rate, and there is no disclaimer that buys an

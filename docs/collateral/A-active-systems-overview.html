@@ -353,6 +353,9 @@ table.ledger.sysgrid{table-layout:fixed}
 .citelist.urls .cite{margin-top:1px}
 .citelist.urls .k{margin-bottom:0}
 .citelist .u{font-size:var(--t-detail)}
+/* A source URL printed in a footnote line. Same treatment as a replay URL: house blue, no
+   underline, and it may break mid-string rather than push the line over the sheet. */
+.fn .u{color:var(--blue-600);text-decoration:none;word-break:break-all}
 .citelist .k{font-size:var(--t-detail)}
 .ledger .cohortstat{text-align:right;font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;
   letter-spacing:.3px}

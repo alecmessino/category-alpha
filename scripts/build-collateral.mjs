@@ -13,6 +13,14 @@ const OUT = join(ROOT, "docs/collateral");
 mkdirSync(OUT, { recursive: true });
 const copyPath = join(OUT, "copy.json");
 const copy = existsSync(copyPath) ? JSON.parse(readFileSync(copyPath, "utf8")) : {};
+/* THE CONTRACT TERMS ARE NOT ATLAS OUTPUT, SO THEY DO NOT TRAVEL ON THE ATLAS CITE. Artifact E
+   prints a published contract beside a declared cohort; the cohort carries its own cite string
+   and replay URL, and the contract needs its own public sources or it is an unsourced assertion
+   sitting next to sourced ones. This file holds them, and a null `url` is a gap the sheet
+   prints rather than a gap the sheet hides. */
+const sourcesPath = join(OUT, "contract-sources.json");
+const contractSources = existsSync(sourcesPath)
+  ? JSON.parse(readFileSync(sourcesPath, "utf8")).sources : [];
 
 const D = await build();
 const files = [
@@ -22,7 +30,7 @@ const files = [
   ["B2-97L-energy-weather-trading.html", artifactB2(D, copy)],
   ["C-karina-major-hurricane-analog-brief.html", artifactC(D, copy)],
   ["D-storm-atlas-tear-sheet.html", artifactD(D, copy)],
-  ["E-discrete-event-contract-evidence.html", artifactE(D, copy)],
+  ["E-discrete-event-contract-evidence.html", artifactE(D, copy, contractSources)],
   ["SOURCE-MANIFEST.html", sourceManifestDoc(D)],
 ];
 for (const [name, html] of files) {

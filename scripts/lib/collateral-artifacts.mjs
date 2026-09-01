@@ -795,7 +795,27 @@ ${packFoot(D)}
  * The cohort is the already-validated pre-genesis reference cell. It is NOT moved to AL052026's
  * operational tropical fix, and nothing here implies the cell is where Five formed.
  */
-export function artifactE(D, copy) {
+/* THE CONTRACT'S OWN PROVENANCE. The cohort beside it carries a cite string and a replay URL;
+   these terms are not Atlas output and cannot ride on that. Each entry prints as
+   "<what it is the source of>: <publisher>, <bare url>" -- or, where this build holds no citable
+   public document, as a named gap. A source is either shown or its absence is, and
+   scripts/check-collateral.mjs fails the sheet if it does neither. */
+function contractSourceLine(sources) {
+  if (!sources || !sources.length) return "";
+  const bare = (u) => u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+  const day = (d) => {
+    const [y, m, dd] = d.split("-");
+    return `${Number(dd)} ${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep",
+      "Oct", "Nov", "Dec"][Number(m) - 1]} ${y}`;
+  };
+  const bits = sources.map((x) => x.url
+    ? `${esc(x.label || x.short)}: ${esc(x.short)}, <a class="u" href="${esc(x.url)}">${esc(bare(x.url))}</a>`
+    : `${esc(x.label || x.short)}: ${esc(x.publisher)}, read ${day(x.accessed)} — `
+      + `<b>SOURCE URL NOT HELD</b>`);
+  return `<p class="fn"><b>SOURCES —</b> ${bits.join(". ")}.</p>`;
+}
+
+export function artifactE(D, copy, contractSources = []) {
   const C = makeCopy(copy, "E");
   const s = D.byId["97L"];
   const rows = liveRows(D);
@@ -852,6 +872,9 @@ ${masthead({
 <section class="sec sechd-tight">${sectionHead("01", "The contract question, and the declared cohort")}
 <div class="box"><h3>DISCRETE — PUBLIC TERMS, AS PUBLISHED · VERIFIED 31 AUG 2026</h3>
   ${C.get("discrete-terms")}</div>
+${/* FULL SHEET WIDTH, NOT INSIDE THE BOX. The box's padding costs 12 px, which is exactly
+     enough to tip this line from two rendered lines to three -- 18 px for nothing. */""}
+${contractSourceLine(contractSources)}
 <div class="grid2" style="margin-top:3px">
   <div class="box refusal"><h3>LIVE STATUS, AND WHAT IT IS NOT</h3>
     <p>${opFormation(D, "AL052026")}</p>
