@@ -1,10 +1,10 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-01T11:36:45.518Z",
+  "ranAt": "2026-09-01T16:38:03.427Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "1615638e19f6e758938e1c1348c1e6677347cc1b",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/33503282211",
+  "sha": "84dba3488c45ab702346830bd31a330fef96e5d5",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/33532819931",
   "ok": false,
   "passed": 44,
   "total": 46,
@@ -38,7 +38,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-09-01T11:32:04.171Z · 5m old"
+      "detail": "2026-09-01T16:03:41.235Z · 34m old"
     },
     {
       "check": "renders: Situation",
@@ -98,12 +98,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "2 ranked of 4 candidates · 111/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "6 ranked of 11 candidates · 111/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 20 displayed-only · unverifiable=0"
+      "detail": "0 executable · 12 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -128,7 +128,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 1.9 screens tall (2618px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 711px · ▾ 698px · + 648px"
+      "detail": "3 tabs · Situation is 2 screens tall (2802px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 895px · BANKROLL 801px · ▾ 698px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -148,7 +148,7 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": true,
-      "detail": "24 frames · newest carries advisory state for 4/4 storm(s) · 17 advisory change(s) · 5 moved P · 6 pinned at the clamp · 17 register row(s) · situation P=99% at adv #20"
+      "detail": "24 frames · newest carries advisory state for 4/4 storm(s) · 20 advisory change(s) · 8 moved P · 5 pinned at the clamp · 20 register row(s) · situation P=99% at adv #21"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
@@ -158,7 +158,7 @@
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "4/4 frames carry a calibrated P · 4 carry the raw one · 4 carry an evidence tier · contracts: 5 calibrated, 5 with the official estimate beside it · strip: quality=MEDIUM lag=174m raw=99%"
+      "detail": "4/4 frames carry a calibrated P · 4 carry the raw one · 4 carry an evidence tier · contracts: 5 calibrated, 5 with the official estimate beside it · strip: quality=MEDIUM lag=90m raw=99%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -168,12 +168,12 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "11 guidance cycle(s) turned over → 11 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 4 P-update row(s) · 1 SHIPS · 2 pass · strip arrivals=4"
+      "detail": "15 guidance cycle(s) turned over → 15 row(s) · 1 aircraft fix(es) arrived → 1 row(s) · 7 P-update row(s) · 3 SHIPS · 3 pass · strip arrivals=15"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: no storm past the 180-min line · forced: 5 anchored row(s) pushed past it → 1 HOLD, 4 SUSPECT, 0 ACTIONABLE · 12 stale-crossing row(s) in the register"
+      "detail": "live: no storm past the 180-min line · forced: 5 anchored row(s) pushed past it → 1 HOLD, 4 SUSPECT, 0 ACTIONABLE · 11 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
