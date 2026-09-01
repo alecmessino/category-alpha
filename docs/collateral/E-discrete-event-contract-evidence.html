@@ -308,8 +308,44 @@ table.ledger.sysgrid{table-layout:fixed}
 .evidence .rt.refused{font-size:var(--t-detail);font-weight:600;color:var(--red-600)}
 .evidence .l2{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);
   line-height:1.14;white-space:nowrap}
+.evidence .l2.slotted{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3)}
+.evidence .l2 .slot{flex:0 0 84px;width:84px;display:flex;justify-content:flex-end;align-items:center;min-height:9px}
 .evidence .l2 .ivl{color:var(--ink-600)}
-.evidence .l2 .st{color:var(--red-600);font-weight:600;letter-spacing:.2px}
+.evidence .l2 .st{color:var(--red-600);font-weight:600;letter-spacing:.2px;white-space:nowrap}
+.ivl-glyph,.tr-glyph{display:block;overflow:visible}
+/* THE TIMING RANGE COLUMN. Head text is the axis; the glyph rows carry their own data-* values. */
+.ledger.timing th.rng{font-weight:500;letter-spacing:.2px;text-transform:none;white-space:normal;color:var(--ink-600)}
+.ledger.timing td.rng{padding:0 var(--sp-2);vertical-align:middle}
+/* THE RULE FLOW. Chips joined by arrows; the colours are the package's status colours. */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:3px 5px;margin:2px 0 1px}
+.fstep{display:inline-block;font-family:var(--font-sans);font-size:var(--t-detail);font-weight:500;letter-spacing:0;
+  padding:1px 5px;border:1px solid var(--ink-700);border-radius:3px;color:var(--ink-900);line-height:1.25;
+  background:var(--white);white-space:nowrap}
+.fstep .n{font-family:var(--font-mono);font-weight:600}
+.fstep .tok{font-family:var(--font-mono);font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.flowrow{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin-top:3px}
+.flowlead{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-600);white-space:nowrap}
+.bridge th .harrow{font-family:var(--font-mono);color:var(--ink-600);margin-right:5px;font-weight:400}
+.bridge td .flow{margin:0}
+.ledger th.rng{text-align:left;font-weight:500;text-transform:none;letter-spacing:.2px;color:var(--ink-600)}
+.ledger td.rng{padding:0 var(--sp-2);vertical-align:middle}
+.fstep b{font-weight:700}
+.fstep.gate{border-style:dashed;color:var(--ink-700)}
+.fstep.refused{border-color:var(--red-600);color:var(--red-600);font-weight:600;background:#fff5f5}
+.fstep.ok{border-color:var(--green-600);color:var(--green-600);font-weight:600;background:#f3fbf5}
+.fstep.absent{border-color:var(--red-600);color:var(--red-600);border-style:dashed;font-weight:600}
+.farrow{font-family:var(--font-mono);color:var(--ink-600);font-size:var(--t-body);line-height:1}
+/* THE REPLAY LINK. A label a reader can act on; the exact URL is the target and the title. */
+a.replay{display:inline-block;font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.25px;
+  text-transform:uppercase;color:var(--blue-600);border:1px solid var(--blue-600);border-radius:3px;
+  padding:1px 6px;text-decoration:none;white-space:nowrap;line-height:1.3}
+.replayrow{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:3px}
+.cite .khead{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin-bottom:1px}
+.cite .khead .k{margin:0}
+.cite .raw b{color:var(--ink-600);font-weight:600;letter-spacing:.4px}
+/* The raw replay string, kept in the provenance block for print at the legal size. */
+.cite .raw{display:block;font-family:var(--font-mono);font-size:var(--t-legal);color:var(--ink-400);
+  word-break:break-all;line-height:1.25;margin-top:1px}
 .ledgertrio{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.04fr) minmax(0,1.04fr);
   gap:var(--sp-4);align-items:start}
 .ledger.compact td{padding:0.6px var(--sp-2);font-size:var(--t-detail);line-height:1.18}
@@ -464,11 +500,11 @@ table.ledger.sysgrid{table-layout:fixed}
 <section class="sec sechd-tight"><div class="sec-hd"><span class="n">02</span><h2>Evidence bridge, evidence gap</h2><span class="note">the centre of this page · every status on the right is a refusal</span></div>
 <table class="ledger bridge"><thead><tr>
     <th style="width:29%;text-align:left">Discrete needs</th>
-    <th style="width:48%;text-align:left">Atlas currently supports</th>
-    <th style="width:23%;text-align:left">Status</th>
+    <th style="width:48%;text-align:left"><span class="harrow">→</span>Atlas currently supports</th>
+    <th style="width:23%;text-align:left"><span class="harrow">→</span>Status</th>
   </tr></thead><tbody><tr class="">
     <td class="lft">Cat 4+ <b>at</b> CONUS landfall — one joint event</td>
-    <td class="lft">two separate rows: <b>reached Cat 4</b> and <b>CONUS landfall</b>. No row exists for their conjunction.</td>
+    <td class="lft"><div class="flow"><span class="fstep ">reached Cat 4 <span class="n">1/12</span></span><span class="farrow">+</span><span class="fstep ">CONUS ≥64 kt <span class="n">1/12</span></span><span class="farrow">→</span><span class="fstep absent"><b class="tok">NO JOINT ROW</b></span></div></td>
     <td class="status refused">EXACT TRIGGER NOT SCORED</td></tr><tr class="band">
     <td class="lft">Intensity determined <b>at the crossing</b>, 130 mph</td>
     <td class="lft">the ladder is <b>lifetime peak attainment</b>; the landfall contract has two intensity forms, <b>any</b> and <b>≥64 kt</b>.</td>
@@ -500,7 +536,7 @@ table.ledger.sysgrid{table-layout:fixed}
 <div class="box commercial" style="margin-top:3px"><h3>WHAT A STRUCTURER COULD USE THIS FOR — AND WHAT THIS PAGE DOES NOT DO</h3>
   <ul><li><b>An auditable historical denominator</b> — twelve named storms behind one declared condition, with an interval on each row.</li><li><b>A replayable cohort</b> for counterparty review, and research input upstream of contract design — not where it is priced.</li></ul>
   <p>This page does <b>not</b> price the contract, estimate fair value, predict landfall, estimate the chance Edouard triggers anything, replace the NHC, or supply settlement data. <b>WHAT ATLAS ADDS:</b> a declared cohort, exact n / N with a 95% Wilson interval, a visible refusal, a replay URL.</p></div>
-<div class="cite"><span class="k">CITE THIS COHORT</span><div class="v">STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 12 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div><a class="u" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0</a></div>
+<div class="cite"><div class="khead"><span class="k">CITE THIS COHORT</span><a class="replay" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0" title="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0">REPLAY PUBLISHED COHORT · N=12 ↗</a></div><div class="v">STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 12 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div><span class="raw">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0</span></div>
 </section>
 
 <div class="spacer"></div>

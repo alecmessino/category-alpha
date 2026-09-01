@@ -74,7 +74,13 @@ for (const f of PROSPECT) {
          still a chip. What is NOT in that list is callout prose (.box p, .box ul), which stays at
          the body floor, so nothing that reads as a sentence can be demoted by living in a box. */
       if (el.closest(".ft") || el.closest(".disclaim")) return "legal";
+      /* The exact replay query string beneath a labelled replay link: a print fallback for a
+         link whose visible form is the label at citation size, kept at the legal size. */
+      if (el.classList.contains("raw") || (el.parentElement && el.parentElement.classList.contains("raw"))) return "legal";
       if (el.ownerSVGElement) return "map";
+      /* Rule-flow chips are detail wherever they sit, a refusal box included: the sentence they
+         compress is printed beside them at the body size. */
+      if (el.closest(".flow") || el.closest(".flowlead")) return "detail";
       if (el.closest(".cite") || el.closest(".citelist") || el.closest(".citerows")
         || el.classList.contains("u")) return "citation";
       if (el.closest(".card") || el.closest(".tile")) {

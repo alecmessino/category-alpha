@@ -15,7 +15,43 @@ const INK = {
   genesis: "#0f172a",
   live: "#dc2626",
   outlook: "#dc2626",
+  /* THE OPERATIONAL INK, WHERE A SHEET HAS TAKEN THE SEMANTIC PALETTE: blue is live and current,
+     red is refusal. Plates that have not taken it keep the red above. */
+  liveBlue: "#0066ff",
 };
+
+/* THRESHOLD SEGMENTS. Every fix in a member track carries its wind, so the segment leaving a fix
+   is coloured by the class that fix was in: below 64 kt, hurricane (64-95), major (96+). One hue,
+   light to dark, weakest to strongest -- a sequential ramp for a magnitude, never a category
+   palette. Nothing is interpolated: a segment takes the class of the fix it leaves. */
+const SEG = [
+  { min: 0, ink: "#b9c3d1", w: .75, op: .75 },
+  { min: 64, ink: "#5b6b80", w: 1.0, op: .9 },
+  { min: 96, ink: "#0f172a", w: 1.25, op: .95 },
+];
+const segClass = (kt) => (kt >= 96 ? 2 : kt >= 64 ? 1 : 0);
+
+/** A member track as threshold-coloured runs; `heavy` doubles the weight for a carded member. */
+function segmentedTrack(points, P, { heavy = false } = {}) {
+  const runs = [];
+  let cur = null;
+  for (let i = 0; i < points.length; i++) {
+    const [lon, lat, kt] = points[i];
+    const c = segClass(kt || 0);
+    if (!cur || cur.c !== c) {
+      /* The boundary fix belongs to both runs so the line stays continuous at the crossing. */
+      if (cur) cur.pts.push([lon, lat]);
+      cur = { c, pts: [[lon, lat]] };
+      runs.push(cur);
+    } else cur.pts.push([lon, lat]);
+  }
+  return runs.filter((r) => r.pts.length > 1).map((r) => {
+    const S = SEG[r.c];
+    return trackPath(r.pts, P).map((d) => `<path d="${d}" fill="none" stroke="${S.ink}" `
+      + `stroke-width="${heavy ? (S.w * 1.9).toFixed(2) : S.w}" stroke-opacity="${heavy ? 1 : S.op}" `
+      + `stroke-linejoin="round" stroke-linecap="round"/>`).join("");
+  }).join("");
+}
 
 function frame(P) {
   const { lon0, lon1, lat0, lat1 } = P.bounds;
@@ -174,17 +210,49 @@ export function cellPlate(D, sysId, opts = {}) {
     liveLabel = null, cellAnchor = "start", cellDx = 0, cellDy = 0, cellLeader = true,
     liveAnchor = "start", liveDx = 0, liveDy = 0, liveLeader = false,
     renderWidth = null,
+    /* The visual-layer options. Off, the plate is the one c86ea6e drew. */
+    segments = false, heavy = [], heavyLabels = false, liveInk = INK.live,
   } = opts;
   const P = projector({ lon0, lon1, lat0, lat1, width, height, pad: 6 });
   const fs = labelSize(P, renderWidth);
 
-  const tracks = sys.all_member_tracks.map((t) => {
+  const heavySet = new Set(heavy);
+  /* Carded members draw last, so their heavier line sits over the rest of the cohort. */
+  const ordered = segments
+    ? [...sys.all_member_tracks.filter((t) => !heavySet.has(t.storm_id)),
+      ...sys.all_member_tracks.filter((t) => heavySet.has(t.storm_id))]
+    : sys.all_member_tracks;
+  const tracks = ordered.map((t) => {
+    if (segments) return segmentedTrack(t.points, P, { heavy: heavySet.has(t.storm_id) });
     const major = t.peak_vmax_kt >= 96;
     return trackPath(t.points, P).map((d) =>
       `<path d="${d}" fill="none" stroke="${major ? INK.trackMajor : INK.track}" `
       + `stroke-width="${major ? 1.15 : .8}" stroke-opacity="${major ? .85 : .55}" `
       + `stroke-linejoin="round" stroke-linecap="round"/>`).join("");
   }).join("");
+  /* A carded member's name at its last fix -- the same name the card row prints, so the plate
+     and the cards read as one selection. Only where a caller asks; a crowded frame drops it. */
+  const heavyNames = heavyLabels && segments ? ordered.filter((t) => heavySet.has(t.storm_id)).map((t) => {
+    /* The name sits at the last fix INSIDE the frame -- a track that leaves the plate (Alicia's
+       remnants ran to the Midwest) is named where it leaves -- and is kept inside the frame's
+       edges, since a label off the plate names nothing. */
+    const inside = t.points.filter((q) => q[0] >= lon0 && q[0] <= lon1 && q[1] >= lat0 && q[1] <= lat1);
+    const p = inside[inside.length - 1];
+    if (!p) return "";
+    const [x, y] = P(p[0], p[1]);
+    const lab = typeof heavyLabels === "object"
+      ? (heavyLabels[t.storm_id] || heavyLabels[`${t.name} ${t.season}`] || {}) : {};
+    const text = `${t.name} ${t.season}`;
+    const est = text.length * fs * 0.62;
+    let anchor = lab.anchor || "start";
+    let lx = x + (lab.dx ?? 3);
+    if (anchor === "start" && lx + est > width - 6) { anchor = "end"; lx = x - 3; }
+    const ly = Math.min(Math.max(y + (lab.dy ?? -3), fs + 4), height - 4);
+    return `<text x="${f2(lx)}" y="${f2(ly)}" `
+      + `text-anchor="${anchor}" font-family="IBM Plex Mono,monospace" `
+      + `font-size="${fs}" font-weight="600" fill="${INK.trackMajor}" letter-spacing=".3">`
+      + `${esc(text)}</text>`;
+  }).join("") : "";
 
   const genesisDots = sys.all_member_tracks.map((t) => {
     const p = t.points[0];
@@ -213,10 +281,10 @@ export function cellPlate(D, sysId, opts = {}) {
     const s = D.operational.storms.find((x) => x.atcf_id === liveAtcf);
     if (s) {
       const path = trackPath(s.fixes.map((f) => [f[0], f[1]]), P).map((d) =>
-        `<path d="${d}" fill="none" stroke="${INK.live}" stroke-width="1.7" `
+        `<path d="${d}" fill="none" stroke="${liveInk}" stroke-width="1.7" `
         + `stroke-linejoin="round" stroke-linecap="round"/>`).join("");
       liveLayer = path + mark(P, s.latest.lat, s.latest.lon, {
-        color: INK.live, kind: "live",
+        color: liveInk, kind: "live",
         label: liveLabel || `LIVE ${s.name} ${s.latest.kt} KT`,
         sub: `b-deck ${s.latest_valid_time.slice(0, 16).replace("T", " ")}Z`,
         /* The live mark and the query mark are a few degrees apart -- a few pixels at plate
@@ -233,6 +301,7 @@ export function cellPlate(D, sysId, opts = {}) {
   ${coastLayer(D.coast, P, decimate)}
   ${tracks}
   ${genesisDots}
+  ${heavyNames}
   ${outlookPaths}
   ${ring}
   ${mark(P, sys.coordinates_queried.lat, sys.coordinates_queried.lon, {
@@ -255,6 +324,13 @@ export const LEGEND = {
   genesisCell: { kind: "sq", color: INK.genesis, fill: "rgba(15,23,42,.08)", label: "declared genesis point + query radius" },
   live: { kind: "dot", color: INK.live, label: "LIVE — operational b-deck position" },
   liveTrack: { kind: "line", color: INK.live, w: "2px", label: "LIVE — operational b-deck track" },
+  /* The visual-layer legend: threshold segments, the carded members, and live in blue. */
+  segLo: { kind: "line", color: SEG[0].ink, label: "member track < 64 kt" },
+  segMid: { kind: "line", color: SEG[1].ink, w: "2px", label: "64–95 kt" },
+  segHi: { kind: "line", color: SEG[2].ink, w: "2px", label: "≥ 96 kt" },
+  repTrack: { kind: "line", color: SEG[2].ink, w: "3px", label: "carded member, sheet 2 (heavier line)" },
+  namedTrack: { kind: "line", color: SEG[2].ink, w: "3px", label: "named member (heavier, labelled)" },
+  liveBlue: { kind: "line", color: INK.liveBlue, w: "2px", label: "LIVE — operational b-deck track · NOT COHORT" },
   outlook: { kind: "sq", color: INK.outlook, fill: "rgba(220,38,38,.10)", label: "LIVE — NHC graphical outlook area" },
   coast: { kind: "sq", color: "#c3ccd8", fill: "#eef2f7", label: "archive coastline (the landfall rule's own geometry)" },
 };

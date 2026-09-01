@@ -527,6 +527,52 @@ for (const f of files) {
   const tokens = [...new Set([...html.matchAll(/<span class="st">([^<]+)<\/span>/g)].map((m) => m[1]))];
   const orphan = tokens.filter((tok) => !heads.has(tok));
   ok(orphan.length === 0, "no state token is printed that no rendered row carries", orphan.join(", "));
+  /* -- THE DRAWN VALUES ARE THE PRINTED VALUES ----------------------------------------------
+     Every interval glyph and timing range stamps the numbers it encodes as data-*. Each is
+     checked against the manifest row it names -- the same row the printed n / N, rate and
+     interval come from -- and every mark position is recomputed from those numbers. A glyph on
+     a stamped or refused row, or a picture that disagrees with its row, fails the sheet. */
+  const byId = Object.fromEntries(M.systems.map((sy) => [sy.id, sy]));
+  const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/data-([a-z0-9]+)="([^"]*)"/g)].map((a) => [a[1], a[2]]));
+  const pos = (v, w) => (1.5 + v * (w - 3)).toFixed(2);
+  const badGlyph = [];
+  let glyphs = 0;
+  for (const m of html.matchAll(/<svg class="ivl-glyph"([^>]*)>([\s\S]*?)<\/svg>/g)) {
+    glyphs++;
+    const a = attrsOf(m[1]);
+    const sy = byId[a.cohort];
+    const row = sy && [...sy.intensity_rows, ...sy.landfall_rows].find((r) => r.key === a.key);
+    if (!row) { badGlyph.push(`${a.cohort}/${a.key}: no such manifest row`); continue; }
+    if (row.status || row.rate === null) { badGlyph.push(`${a.cohort}/${a.key}: glyph on a stamped or refused row`); continue; }
+    const w = Number(a.w);
+    const cx = (m[2].match(/<circle[^>]*\scx="([^"]+)"/) || [])[1];
+    const wh = m[2].match(/class="whisker" x1="([^"]+)" x2="([^"]+)"/);
+    const values = String(row.rate) === a.rate && String(row.ci95[0]) === a.lo && String(row.ci95[1]) === a.hi;
+    const marks = cx === pos(row.rate, w) && !!wh && wh[1] === pos(row.ci95[0], w) && wh[2] === pos(row.ci95[1], w);
+    if (!values || !marks) badGlyph.push(`${a.cohort}/${a.key}:${values ? "" : " values"}${marks ? "" : " positions"}`);
+  }
+  if (glyphs) ok(badGlyph.length === 0, `every interval glyph draws its own manifest row (${glyphs})`, badGlyph.slice(0, 4).join("; "));
+  const badRange = [];
+  let ranges = 0;
+  for (const m of html.matchAll(/<svg class="tr-glyph"([^>]*)>([\s\S]*?)<\/svg>/g)) {
+    ranges++;
+    const a = attrsOf(m[1]);
+    const sy = byId[a.cohort];
+    const d = sy && sy.time_to_event && sy.time_to_event[a.key];
+    if (!d || !d.n) { badRange.push(`${a.cohort}/${a.key}: no such timing row`); continue; }
+    const w = Number(a.w), max = Number(a.max);
+    const x = (v) => pos(v / max, w);
+    const values = ["p10", "p25", "median", "p75", "p90"].every((k) => String(d[k]) === a[k]);
+    const axis = max % 10 === 0 && max >= d.p90;
+    const outer = m[2].match(/class="outer" x1="([^"]+)" x2="([^"]+)"/);
+    const inner = m[2].match(/class="inner" x1="([^"]+)" x2="([^"]+)"/);
+    const med = m[2].match(/class="med" x1="([^"]+)"/);
+    const marks = !!outer && !!inner && !!med && outer[1] === x(d.p10) && outer[2] === x(d.p90)
+      && inner[1] === x(d.p25) && inner[2] === x(d.p75) && med[1] === x(d.median);
+    if (!values || !axis || !marks) badRange.push(`${a.cohort}/${a.key}:${values ? "" : " values"}${axis ? "" : " axis"}${marks ? "" : " positions"}`);
+  }
+  if (ranges) ok(badRange.length === 0, `every timing range draws its own manifest quantiles (${ranges})`, badRange.slice(0, 4).join("; "));
+
   /* And the STATUS column survives on any column-model outcome ledger -- the house style has one
      and its absence would mean a renderer dropped it. Evidence tables carry state in the row. */
   const columnTables = (html.match(/<table class="ledger(?! compact evidence)[^"]*"/g) || [])

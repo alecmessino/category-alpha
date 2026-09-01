@@ -328,8 +328,44 @@ table.ledger.sysgrid{table-layout:fixed}
 .evidence .rt.refused{font-size:var(--t-detail);font-weight:600;color:var(--red-600)}
 .evidence .l2{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);
   line-height:1.14;white-space:nowrap}
+.evidence .l2.slotted{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3)}
+.evidence .l2 .slot{flex:0 0 84px;width:84px;display:flex;justify-content:flex-end;align-items:center;min-height:9px}
 .evidence .l2 .ivl{color:var(--ink-600)}
-.evidence .l2 .st{color:var(--red-600);font-weight:600;letter-spacing:.2px}
+.evidence .l2 .st{color:var(--red-600);font-weight:600;letter-spacing:.2px;white-space:nowrap}
+.ivl-glyph,.tr-glyph{display:block;overflow:visible}
+/* THE TIMING RANGE COLUMN. Head text is the axis; the glyph rows carry their own data-* values. */
+.ledger.timing th.rng{font-weight:500;letter-spacing:.2px;text-transform:none;white-space:normal;color:var(--ink-600)}
+.ledger.timing td.rng{padding:0 var(--sp-2);vertical-align:middle}
+/* THE RULE FLOW. Chips joined by arrows; the colours are the package's status colours. */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:3px 5px;margin:2px 0 1px}
+.fstep{display:inline-block;font-family:var(--font-sans);font-size:var(--t-detail);font-weight:500;letter-spacing:0;
+  padding:1px 5px;border:1px solid var(--ink-700);border-radius:3px;color:var(--ink-900);line-height:1.25;
+  background:var(--white);white-space:nowrap}
+.fstep .n{font-family:var(--font-mono);font-weight:600}
+.fstep .tok{font-family:var(--font-mono);font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.flowrow{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin-top:3px}
+.flowlead{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-600);white-space:nowrap}
+.bridge th .harrow{font-family:var(--font-mono);color:var(--ink-600);margin-right:5px;font-weight:400}
+.bridge td .flow{margin:0}
+.ledger th.rng{text-align:left;font-weight:500;text-transform:none;letter-spacing:.2px;color:var(--ink-600)}
+.ledger td.rng{padding:0 var(--sp-2);vertical-align:middle}
+.fstep b{font-weight:700}
+.fstep.gate{border-style:dashed;color:var(--ink-700)}
+.fstep.refused{border-color:var(--red-600);color:var(--red-600);font-weight:600;background:#fff5f5}
+.fstep.ok{border-color:var(--green-600);color:var(--green-600);font-weight:600;background:#f3fbf5}
+.fstep.absent{border-color:var(--red-600);color:var(--red-600);border-style:dashed;font-weight:600}
+.farrow{font-family:var(--font-mono);color:var(--ink-600);font-size:var(--t-body);line-height:1}
+/* THE REPLAY LINK. A label a reader can act on; the exact URL is the target and the title. */
+a.replay{display:inline-block;font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.25px;
+  text-transform:uppercase;color:var(--blue-600);border:1px solid var(--blue-600);border-radius:3px;
+  padding:1px 6px;text-decoration:none;white-space:nowrap;line-height:1.3}
+.replayrow{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:3px}
+.cite .khead{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin-bottom:1px}
+.cite .khead .k{margin:0}
+.cite .raw b{color:var(--ink-600);font-weight:600;letter-spacing:.4px}
+/* The raw replay string, kept in the provenance block for print at the legal size. */
+.cite .raw{display:block;font-family:var(--font-mono);font-size:var(--t-legal);color:var(--ink-400);
+  word-break:break-all;line-height:1.25;margin-top:1px}
 .ledgertrio{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.04fr) minmax(0,1.04fr);
   gap:var(--sp-4);align-items:start}
 .ledger.compact td{padding:0.6px var(--sp-2);font-size:var(--t-detail);line-height:1.18}
@@ -626,27 +662,119 @@ export function ledger(groups, { caption, showBar = true, compact = false, token
  *
  * The width this needs is max(name + rate, the line-two string) rather than their sum, which is
  * what lets three groups stay side by side. */
-export function evidenceLedger(groups, { wilson = false } = {}) {
+export function evidenceLedger(groups, { wilson = false, cohort = "", glyph = false } = {}) {
   const body = groups.map((g) => {
     const grp = g.label ? `<tr class="grp"><td>${esc(g.label)}</td></tr>` : "";
     return grp + g.rows.map((r, i) => {
       const token = r.status ? statusToken(r.status) : "";
       const refused = r.rate === null;
-      const l2 = refused
-        ? `${r.count} / ${r.n_storms} · <span class="st">${esc(token || "RATE REFUSED")}</span>`
-        : `${r.count} / ${r.n_storms} · ${wilson ? "95% Wilson " : ""}`
-          + `<span class="ivl">[${ci(r.ci95)}]</span>`
-          + (token ? ` · <span class="st">${esc(token)}</span>` : "");
       /* data-status carries the archive's FULL stamp on every row that has one, whatever the row
          prints. scripts/check-collateral.mjs reads it: a stamp a row carries must be visible
          somewhere on the sheet -- in the row, in the panel note, or in UNSCOREABLE. */
+      /* Line two is text on the left and a fixed-width slot on the right: the interval glyph
+         for a scoreable row, the state token for a stamped or refused one, never both. */
+      let l2;
+      if (glyph) {
+        const g = intervalGlyph(r, { cohort });
+        const meta = refused
+          ? `${r.count} / ${r.n_storms}`
+          : `${r.count} / ${r.n_storms} · ${wilson ? "95% Wilson " : ""}<span class="ivl">[${ci(r.ci95)}]</span>`;
+        const slot = g || (token ? `<span class="st">${esc(token)}</span>` : (refused ? `<span class="st">RATE REFUSED</span>` : ""));
+        l2 = `<div class="l2 slotted"><span class="meta">${meta}</span><span class="slot">${slot}</span></div>`;
+      } else {
+        /* The pre-glyph row, unchanged: a sheet that has not taken the visual layer prints
+           exactly what it printed. */
+        const inner = refused
+          ? `${r.count} / ${r.n_storms} · <span class="st">${esc(token || "RATE REFUSED")}</span>`
+          : `${r.count} / ${r.n_storms} · ${wilson ? "95% Wilson " : ""}`
+            + `<span class="ivl">[${ci(r.ci95)}]</span>`
+            + (token ? ` · <span class="st">${esc(token)}</span>` : "");
+        l2 = `<div class="l2">${inner}</div>`;
+      }
       return `<tr class="ev ${i % 2 ? "band" : ""}"${r.status ? ` data-status="${esc(r.status)}"` : ""}><td>`
         + `<div class="l1"><span class="nm">${esc(r.label)}</span>`
         + (refused ? `<span class="rt refused">REFUSED</span>` : `<span class="rt">${pct(r.rate)}</span>`)
-        + `</div><div class="l2">${l2}</div></td></tr>`;
+        + `</div>${l2}</td></tr>`;
     }).join("");
   }).join("");
   return `<table class="ledger compact evidence"><tbody>${body}</tbody></table>`;
+}
+
+/* ---- THE INTERVAL GLYPH ---------------------------------------------------------------------
+ *
+ * One horizontal axis, 0 to 100 percent, the same 84 px in every row of a group so the eye can
+ * read down a ladder. The 95 percent Wilson interval is a thin whisker; the observed rate is the
+ * one heavy mark on it. There is no bar: a bar from zero would draw the point estimate as an
+ * area and make 8.3 percent look like a quantity rather than a position inside [1-35].
+ *
+ * A stamped or refused row gets NO glyph. Its slot holds the state token instead, so the absence
+ * of a mark is itself the reading: the archive returned no point estimate it stands behind.
+ *
+ * Every number the glyph encodes is stamped on it as data-* so scripts/check-collateral.mjs can
+ * recompute the mark's position from the manifest row and fail the sheet if the picture and the
+ * printed value ever disagree. */
+export const GLYPH_W = 84;
+export function intervalGlyph(row, { cohort = "", w = GLYPH_W, h = 9 } = {}) {
+  if (row.rate === null || row.rate === undefined || row.status || !row.ci95) return "";
+  const x = (v) => (1.5 + v * (w - 3)).toFixed(2);
+  const [lo, hi] = row.ci95;
+  return `<svg class="ivl-glyph" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" `
+    + `data-cohort="${esc(cohort)}" data-key="${esc(row.key)}" data-rate="${row.rate}" `
+    + `data-lo="${lo}" data-hi="${hi}" data-w="${w}" aria-label="${pct(row.rate)}, 95% Wilson ${ci(row.ci95)}">`
+    + `<line x1="1.5" x2="${w - 1.5}" y1="${h / 2}" y2="${h / 2}" stroke="var(--line-300)" stroke-width=".7"/>`
+    + `<line class="whisker" x1="${x(lo)}" x2="${x(hi)}" y1="${h / 2}" y2="${h / 2}" stroke="var(--ink-600)" stroke-width="1.3" stroke-linecap="butt"/>`
+    + `<circle class="pt" cx="${x(row.rate)}" cy="${h / 2}" r="2.3" fill="var(--ink-900)"/></svg>`;
+}
+
+/* ---- THE TIMING RANGE ------------------------------------------------------------------------
+ *
+ * The published quantiles, drawn: p10-p90 as the outer whisker, p25-p75 as the heavier inner
+ * range, the median as a tick. One shared hours axis across the rows so "hurricane at 36 h,
+ * major at 72 h" is a distance the eye measures. Nothing is smoothed and nothing is interpolated:
+ * five printed numbers become five x-positions. The axis maximum is the largest p90 in the set,
+ * rounded up to the next 10 h, and it is printed in the column head. */
+export function timingRange(d, { max, w = 150, h = 11, cohort = "", key = "" } = {}) {
+  if (!d || !d.n || d.median === null) return "";
+  const x = (v) => (1.5 + (v / max) * (w - 3)).toFixed(2);
+  return `<svg class="tr-glyph" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" data-max="${max}" data-w="${w}" `
+    + `data-cohort="${esc(cohort)}" data-key="${esc(key)}" `
+    + `data-p10="${d.p10}" data-p25="${d.p25}" data-median="${d.median}" data-p75="${d.p75}" data-p90="${d.p90}" `
+    + `aria-label="median ${hrs(d.median)}, p25-p75 ${hrs(d.p25)}-${hrs(d.p75)}, p10-p90 ${hrs(d.p10)}-${hrs(d.p90)}">`
+    + `<line x1="1.5" x2="${w - 1.5}" y1="${h / 2}" y2="${h / 2}" stroke="var(--line-200)" stroke-width=".7"/>`
+    + `<line class="outer" x1="${x(d.p10)}" x2="${x(d.p90)}" y1="${h / 2}" y2="${h / 2}" stroke="var(--ink-600)" stroke-width="1"/>`
+    + `<line class="inner" x1="${x(d.p25)}" x2="${x(d.p75)}" y1="${h / 2}" y2="${h / 2}" stroke="var(--ink-700)" stroke-width="3.2"/>`
+    + `<line class="med" x1="${x(d.median)}" x2="${x(d.median)}" y1="1" y2="${h - 1}" stroke="var(--ink-900)" stroke-width="1.6"/></svg>`;
+}
+
+/** Hours, as the timing tables print them. */
+
+/** The timing table with its range column. `keys` = [[time_to_event key, label], ...]. */
+export function timingTable(sys, keys, { w = 150, caption = "TIME TO EVENT — hours from genesis", cohort = sys.id } = {}) {
+  const t = sys.time_to_event;
+  const rows = keys.map(([k, label]) => [k, label, t[k]]).filter(([, , d]) => d && d.n);
+  if (!rows.length) return "";
+  const max = Math.ceil(Math.max(...rows.map(([, , d]) => d.p90)) / 10) * 10;
+  return `<table class="ledger timing"><caption>${esc(caption)}</caption>
+    <thead><tr><th>Event</th><th>n</th><th>Median</th><th>p25 – p75</th><th>p10 – p90</th>
+      <th class="rng" style="text-align:left">0 – ${max} h · p10–p90 whisker · p25–p75 band · median tick</th></tr></thead>
+    <tbody>${rows.map(([k, label, d]) => `<tr data-timing="${esc(k)}"><td>${esc(label)}</td><td class="frac">n = ${d.n}</td>`
+      + `<td class="rate">${hrs(d.median)}</td><td class="ci">${hrs(d.p25)} – ${hrs(d.p75)}</td>`
+      + `<td class="ci">${hrs(d.p10)} – ${hrs(d.p90)}</td><td class="rng">${timingRange(d, { max, w, cohort, key: k })}</td></tr>`).join("")}
+    </tbody></table>`;
+}
+
+/* ---- THE RULE FLOW ---------------------------------------------------------------------------
+ * INPUT -> GATE -> RESULT, as chips. The refusal's full sentence stays nearby; this is the same
+ * rule read in one glance. Colour is semantic: a refused result is red, a sufficient one green,
+ * the gate itself is neutral ink. */
+export function ruleFlow(steps) {
+  return `<div class="flow">${steps.map((st, i) => (i ? `<span class="farrow">${esc(st.sep || "→")}</span>` : "")
+    + `<span class="fstep ${esc(st.kind || "")}">${st.html || esc(st.text)}</span>`).join("")}</div>`;
+}
+
+/** A descriptive replay link: the label is what a reader sees, the exact URL is the target. */
+export function replayLink(sys, label) {
+  return `<a class="replay" href="${esc(sys.replay_url)}" title="${esc(sys.replay_url)}">${esc(label)} ↗</a>`;
 }
 
 /* CHROME, NOT EVIDENCE, IS WHAT SETS THESE TABLES' MINIMUM WIDTH. Every cell is nowrap, so the
@@ -663,12 +791,12 @@ const CHROME = {
     continued: "LANDFALL · CONTINUED" },
 };
 
-export function ledgerPair(sys, { compact = true, chrome = "full" } = {}) {
+export function ledgerPair(sys, { compact = true, chrome = "full", glyph = false } = {}) {
   const lf = sys.landfall_rows;
   const half = Math.ceil(lf.length / 4) * 2;
   const L = CHROME[chrome] || CHROME.full;
   const render = chrome === "short"
-    ? (label, rows) => evidenceLedger([{ label, rows }])
+    ? (label, rows) => evidenceLedger([{ label, rows }], { cohort: sys.id, glyph })
     : (label, rows) => ledger([{ label, rows }], { showBar: false, compact });
   return `<div class="ledgertrio">
     <div>${render(L.intensity, sys.intensity_rows)}</div>
@@ -750,10 +878,31 @@ export function unscoreableNote(sys) {
     `<div><b>${esc(st)}</b> — ${esc(v.keys.join("; "))}. <span class="why">${esc(v.reason)}</span></div>`).join("")}</div></div>`;
 }
 
-export function citeBlock(sys, { label = "CITE THIS COHORT" } = {}) {
-  return `<div class="cite"><span class="k">${esc(label)}</span>`
+/* THE PROVENANCE BLOCK. The citation string, a replay link a reader can act on -- labelled, not
+   a 106-character query string -- and, beneath it at the legal size, the exact query string
+   for print, where a label alone would be a dead link. The URL is the href, the title and the
+   raw line; scripts/check-collateral-replay.mjs re-executes it from the manifest. */
+export function citeBlock(sys, { label = "CITE THIS COHORT", replay = null, link = "raw" } = {}) {
+  if (link === "raw") {
+    return `<div class="cite"><span class="k">${esc(label)}</span>`
+      + `<div class="v">${esc(sys.cite)}</div>`
+      + `<a class="u" href="${esc(sys.replay_url)}">${esc(sys.replay_url)}</a></div>`;
+  }
+  const what = replay || `REPLAY THIS COHORT · N=${sys.cohort.n_cases}`;
+  return `<div class="cite"><div class="khead"><span class="k">${esc(label)}</span>${replayLink(sys, what)}</div>`
     + `<div class="v">${esc(sys.cite)}</div>`
-    + `<a class="u" href="${esc(sys.replay_url)}">${esc(sys.replay_url)}</a></div>`;
+    + `<span class="raw">${esc(sys.replay_url)}</span></div>`;
+}
+
+/* ONE CITE STRING, SEVERAL LABELLED REPLAYS. The lead cohort's citation prints in full; each
+   cohort the page tests it against gets a labelled link on the same head line and its exact
+   query string beneath, tagged, for print. `links` = [[sys, label, tag], ...], lead first. */
+export function citeLinks(lead, links, { label = "CITE THIS COHORT" } = {}) {
+  return `<div class="cite"><div class="khead"><span class="k">${esc(label)}</span>`
+    + links.map(([sy, what]) => replayLink(sy, what)).join("")
+    + `</div><div class="v">${esc(lead.cite)}</div>`
+    + links.map(([sy, , tag]) => `<span class="raw"><b>${esc(tag)}</b> ${esc(sy.replay_url)}</span>`).join("")
+    + `</div>`;
 }
 
 /* THE COMPARISON, AS A TABLE RATHER THAN TWO LISTS.
