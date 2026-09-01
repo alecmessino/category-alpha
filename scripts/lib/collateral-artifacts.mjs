@@ -3,7 +3,7 @@
  * silence, so an unwritten section cannot ship looking finished.
  */
 import {
-  page, masthead, sectionHead, cohortLine, ledger, ledgerPair, stampList,
+  page, masthead, sectionHead, cohortLine, ledger, ledgerPair, evidenceLedger, stampList,
   unscoreableTable, unscoreableNote, citeBlock,
   comparisonStrip, answersRail, repCardRow, repRule, footer, disclaimerLine,
   esc, pct, ci, hrs, coord, DISCLAIMER,
@@ -651,10 +651,8 @@ ${liveTiles}
     svg: cp.svg,
     legendItems: [LEGEND.cohortTrack, LEGEND.majorTrack, LEGEND.genesisCell, LEGEND.liveTrack],
   })}
-  <div>${ledger([{ label: "INTENSITY · GENESIS-CONDITIONED", rows: s.intensity_rows }],
-    { showBar: false, compact: true, tokens: true, statusHead: "Status" })}</div>
-  <div>${ledger([{ label: "LANDFALL · SCORED REGIONS", rows: s.landfall_rows }],
-    { showBar: false, compact: true, tokens: true, statusHead: "Status" })}</div>
+  <div>${evidenceLedger([{ label: "INTENSITY · GENESIS-CONDITIONED", rows: s.intensity_rows }])}</div>
+  <div>${evidenceLedger([{ label: "LANDFALL · SCORED REGIONS", rows: s.landfall_rows }])}</div>
 </div>
 ${/* ROW = STATE TOKEN, PANEL NOTE = EXPLANATION. The stamps and their event-gate reasons are in
      UNSCOREABLE directly below; what the group labels carried is added here. */""}

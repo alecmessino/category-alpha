@@ -305,6 +305,28 @@ table.ledger.sysgrid{table-layout:fixed}
 .ledgertrio.stack{grid-template-columns:minmax(0,1fr);gap:var(--sp-3)}
 /* A reference-document table that may grow downwards but not sideways. */
 .ledger.reflow th,.ledger.reflow td{white-space:normal}
+/* THE EVIDENCE ROW. Two lines: the contract row and its rate, then the arithmetic under it. The
+   rate is the darkest, heaviest thing in the band because it is what a reader scans for; the
+   denominator and interval sit directly beneath it in mono so the precision never leaves the
+   number; the state token is the only coloured thing in line two, present where the archive
+   stamped the row and absent where it did not. No cards, no rules between the two lines, no
+   repeated prose -- the tokens are glossed once in the panel note. */
+.ledger.evidence{table-layout:auto}
+.ledger.evidence td{padding:0.6px var(--sp-2) 1.2px;border-bottom:1px solid var(--line-200);
+  white-space:normal;text-align:left}
+.ledger.evidence tr.grp td{background:var(--ink-900);color:#fff;font-family:var(--font-mono);
+  font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;padding:1.5px var(--sp-2);
+  white-space:nowrap}
+.evidence .l1{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
+.evidence .nm{font-family:var(--font-sans);font-size:var(--t-detail);font-weight:500;
+  color:var(--ink-900);line-height:1.14;white-space:nowrap}
+.evidence .rt{font-family:var(--font-mono);font-size:var(--t-body);font-weight:700;
+  color:var(--ink-900);font-variant-numeric:tabular-nums;line-height:1.04;white-space:nowrap}
+.evidence .rt.refused{font-size:var(--t-detail);font-weight:600;color:var(--red-600)}
+.evidence .l2{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);
+  line-height:1.14;white-space:nowrap}
+.evidence .l2 .ivl{color:var(--ink-600)}
+.evidence .l2 .st{color:var(--red-600);font-weight:600;letter-spacing:.2px}
 .ledgertrio{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.04fr) minmax(0,1.04fr);
   gap:var(--sp-4);align-items:start}
 .ledger.compact td{padding:0.6px var(--sp-2);font-size:var(--t-detail);line-height:1.18}
@@ -342,6 +364,11 @@ table.ledger.sysgrid{table-layout:fixed}
    needs and the plate takes the remainder. */
 .platecol.cites{grid-template-columns:minmax(0,.62fr) minmax(0,1fr)}
 .platecol .sec{margin-top:0}
+/* THE MIDDLE TRACK HOLDS A GROUP BAR, AND A GROUP BAR DOES NOT WRAP: at .86fr it is 179 px and
+   INTENSITY · GENESIS-CONDITIONED is 213. Taking the 34 px from the plate was tried and reverted
+   -- the plate's SVG labels paint at their declared size times the rendered width, so a narrower
+   plate drops them to 6.6 pt, under the 7.5 pt map floor. The ratios stay as they were and C's
+   middle table overruns its column; that is reported, not hidden. */
 .triband{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(0,.86fr) minmax(0,1.36fr);
   gap:var(--sp-4);align-items:start}
 .grid3.tight{gap:var(--sp-5);align-items:start}
@@ -566,6 +593,51 @@ export function ledger(groups, { caption, showBar = true, compact = false, token
    difference twice. Split at the region boundary the archive itself uses -- every region keeps its
    `any` and `>=64 kt` pair in the same column -- and the band is as tall as its tallest column,
    not as tall as the sum. No row is dropped and no row is reordered. */
+/* THE EVIDENCE ROW — TWO LINES, NOT FOUR COLUMNS.
+ *
+ * A four-column spreadsheet row cannot be narrower than the sum of its widest cells, and in a
+ * 224-253 px track that sum was 294-397 px however hard the chrome was compressed: a contract-row
+ * label and a rate with its interval are evidence, and evidence does not shrink. The columns were
+ * the wrong model, not the numbers.
+ *
+ * So the row folds:
+ *
+ *     reached Cat 1                          25.0%
+ *     3 / 12 · [9-53%]
+ *
+ * The words "95% Wilson" are not repeated down nineteen rows: at 67 px a row they were the widest
+ * thing on line two and would have put the band back over its track. The interval itself never
+ * leaves the number it belongs to, and which interval it is stands once in the panel note.
+ *
+ * Line one is the question and its answer, the rate set as the darkest thing in the band. Line two
+ * is the arithmetic behind it -- the exact denominator the rate came from, the interval that is
+ * its precision, and, where the archive stamped the row, the state token. Where the engine refuses
+ * a rate there is no rate on line one and line two carries the refusal, exactly as the registry
+ * returned it. Nothing is computed, rounded, suppressed or manufactured here: pct(), ci() and the
+ * status strings are the same ones the column model printed.
+ *
+ * The width this needs is max(name + rate, the line-two string) rather than their sum, which is
+ * what lets three groups stay side by side. */
+export function evidenceLedger(groups, { wilson = false } = {}) {
+  const body = groups.map((g) => {
+    const grp = g.label ? `<tr class="grp"><td>${esc(g.label)}</td></tr>` : "";
+    return grp + g.rows.map((r, i) => {
+      const token = r.status ? statusToken(r.status) : "";
+      const refused = r.rate === null;
+      const l2 = refused
+        ? `${r.count} / ${r.n_storms} · <span class="st">${esc(token || "RATE REFUSED")}</span>`
+        : `${r.count} / ${r.n_storms} · ${wilson ? "95% Wilson " : ""}`
+          + `<span class="ivl">[${ci(r.ci95)}]</span>`
+          + (token ? ` · <span class="st">${esc(token)}</span>` : "");
+      return `<tr class="ev ${i % 2 ? "band" : ""}"><td>`
+        + `<div class="l1"><span class="nm">${esc(r.label)}</span>`
+        + (refused ? `<span class="rt refused">REFUSED</span>` : `<span class="rt">${pct(r.rate)}</span>`)
+        + `</div><div class="l2">${l2}</div></td></tr>`;
+    }).join("");
+  }).join("");
+  return `<table class="ledger compact evidence"><tbody>${body}</tbody></table>`;
+}
+
 /* CHROME, NOT EVIDENCE, IS WHAT SETS THESE TABLES' MINIMUM WIDTH. Every cell is nowrap, so the
    widest string in a column is a floor the table cannot go below -- and in a three-up band the
    widest strings were the group labels and the repeated event-gate stamps, not a single number.
@@ -584,13 +656,13 @@ export function ledgerPair(sys, { compact = true, chrome = "full" } = {}) {
   const lf = sys.landfall_rows;
   const half = Math.ceil(lf.length / 4) * 2;
   const L = CHROME[chrome] || CHROME.full;
-  const o = chrome === "short"
-    ? { showBar: false, compact, tokens: true, statusHead: "Status" }
-    : { showBar: false, compact };
+  const render = chrome === "short"
+    ? (label, rows) => evidenceLedger([{ label, rows }])
+    : (label, rows) => ledger([{ label, rows }], { showBar: false, compact });
   return `<div class="ledgertrio">
-    <div>${ledger([{ label: L.intensity, rows: sys.intensity_rows }], o)}</div>
-    <div>${ledger([{ label: L.landfall, rows: lf.slice(0, half) }], o)}</div>
-    <div>${ledger([{ label: L.continued, rows: lf.slice(half) }], o)}</div>
+    <div>${render(L.intensity, sys.intensity_rows)}</div>
+    <div>${render(L.landfall, lf.slice(0, half))}</div>
+    <div>${render(L.continued, lf.slice(half))}</div>
   </div>`;
 }
 

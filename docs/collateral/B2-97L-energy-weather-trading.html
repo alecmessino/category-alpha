@@ -285,6 +285,28 @@ table.ledger.sysgrid{table-layout:fixed}
 .ledgertrio.stack{grid-template-columns:minmax(0,1fr);gap:var(--sp-3)}
 /* A reference-document table that may grow downwards but not sideways. */
 .ledger.reflow th,.ledger.reflow td{white-space:normal}
+/* THE EVIDENCE ROW. Two lines: the contract row and its rate, then the arithmetic under it. The
+   rate is the darkest, heaviest thing in the band because it is what a reader scans for; the
+   denominator and interval sit directly beneath it in mono so the precision never leaves the
+   number; the state token is the only coloured thing in line two, present where the archive
+   stamped the row and absent where it did not. No cards, no rules between the two lines, no
+   repeated prose -- the tokens are glossed once in the panel note. */
+.ledger.evidence{table-layout:auto}
+.ledger.evidence td{padding:0.6px var(--sp-2) 1.2px;border-bottom:1px solid var(--line-200);
+  white-space:normal;text-align:left}
+.ledger.evidence tr.grp td{background:var(--ink-900);color:#fff;font-family:var(--font-mono);
+  font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;padding:1.5px var(--sp-2);
+  white-space:nowrap}
+.evidence .l1{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
+.evidence .nm{font-family:var(--font-sans);font-size:var(--t-detail);font-weight:500;
+  color:var(--ink-900);line-height:1.14;white-space:nowrap}
+.evidence .rt{font-family:var(--font-mono);font-size:var(--t-body);font-weight:700;
+  color:var(--ink-900);font-variant-numeric:tabular-nums;line-height:1.04;white-space:nowrap}
+.evidence .rt.refused{font-size:var(--t-detail);font-weight:600;color:var(--red-600)}
+.evidence .l2{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);
+  line-height:1.14;white-space:nowrap}
+.evidence .l2 .ivl{color:var(--ink-600)}
+.evidence .l2 .st{color:var(--red-600);font-weight:600;letter-spacing:.2px}
 .ledgertrio{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.04fr) minmax(0,1.04fr);
   gap:var(--sp-4);align-items:start}
 .ledger.compact td{padding:0.6px var(--sp-2);font-size:var(--t-detail);line-height:1.18}
@@ -322,6 +344,11 @@ table.ledger.sysgrid{table-layout:fixed}
    needs and the plate takes the remainder. */
 .platecol.cites{grid-template-columns:minmax(0,.62fr) minmax(0,1fr)}
 .platecol .sec{margin-top:0}
+/* THE MIDDLE TRACK HOLDS A GROUP BAR, AND A GROUP BAR DOES NOT WRAP: at .86fr it is 179 px and
+   INTENSITY · GENESIS-CONDITIONED is 213. Taking the 34 px from the plate was tried and reverted
+   -- the plate's SVG labels paint at their declared size times the rendered width, so a narrower
+   plate drops them to 6.6 pt, under the 7.5 pt map floor. The ratios stay as they were and C's
+   middle table overruns its column; that is reported, not hidden. */
 .triband{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(0,.86fr) minmax(0,1.36fr);
   gap:var(--sp-4);align-items:start}
 .grid3.tight{gap:var(--sp-5);align-items:start}

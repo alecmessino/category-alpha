@@ -466,14 +466,43 @@ for (const f of files) {
      table that actually prints outcome rows needs the STATUS column. */
   const outcomeTables = (html.match(/<table class="ledger[^"]*"/g) || [])
     .filter((tag) => !/sysgrid|cmptable/.test(tag)).length;
-  if (outcomeTables) {
+  const evidenceTables = (html.match(/<table class="ledger compact evidence"/g) || []).length;
+  if (evidenceTables) {
+    /* THE EVIDENCE ANATOMY CARRIES THE STATE IN THE ROW, NOT IN A COLUMN. There is no STATUS
+       heading to find, so the rule is checked against the archive instead of against the markup:
+       the number of state tokens printed must equal the number of rows the manifest stamps for
+       the cohorts this page renders, and every distinct stamp must be represented. A dropped
+       stamp fails, and so does an invented one. */
+    /* THE COHORT WHOSE ROWS ARE ACTUALLY IN THE PANEL, not every cohort the page links. B and B1
+       print sensitivity replay URLs for cohorts they do not tabulate; the panel's own denominator
+       says which cohort is on the page. */
+    const cited = M.systems.filter((sy) => t.includes(sy.replay_url))
+      .filter((sy) => new RegExp(`/ ${sy.cohort.n_cases} ·`).test(t));
+    const expected = cited.reduce((n, sy) => n + Object.keys(sy.unscoreable).length, 0);
+    const printed = (html.match(/<span class="st">/g) || []).length;
+    ok(printed === expected, "every stamped row keeps its state token",
+      `${printed} token(s) printed, ${expected} stamped row(s) in the manifest`);
+    for (const sy of cited) {
+      for (const st of new Set(Object.values(sy.unscoreable).map((u) => u.status))) {
+        const tok = st.split(/\s+--\s+/)[0];
+        ok(html.includes(`<span class="st">${tok}</span>`),
+          `state token printed for ${sy.id}: "${tok}"`);
+      }
+    }
+  } else if (outcomeTables) {
     const statusHeads = (html.match(/>Status returned</g) || []).length
       + (html.match(/>Status</g) || []).length;
     ok(statusHeads > 0, "every outcome ledger keeps a STATUS column",
       `${outcomeTables} ledger table(s), ${statusHeads} STATUS heading(s)`);
   }
 
-  /* -- refusals the manifest holds for a cohort this artifact cites must appear -- */
+  /* -- refusals the manifest holds for a cohort this artifact cites must appear --
+     KNOWN DORMANT, DELIBERATELY LEFT AS IT IS. A replay URL is printed through esc(), so its
+     ampersands are &amp; in the markup and this raw-string search never matches: the loop below
+     has checked nothing since it was written. Repairing it is a one-word change (t.includes),
+     but it then demands that every artifact printing a cohort's URL also print that cohort's
+     stamps -- which A, B2, D and E do not, and which is a rule about what each sheet owes a
+     reader, not a bug to fix in passing. Reported for a decision rather than changed here. */
   const cited = M.systems.filter((sy) => html.includes(sy.replay_url));
   for (const sy of cited) {
     const stamps = new Set(Object.values(sy.unscoreable).map((u) => u.status));

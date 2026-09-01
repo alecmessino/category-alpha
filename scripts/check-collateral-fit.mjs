@@ -62,9 +62,12 @@ for (const f of readdirSync(DIR).filter((x) => x.endsWith(".html")).sort()) {
        track it silently runs past the track, over its neighbour and off the sheet, where
        overflow:hidden clips it. Height gates cannot see that -- the sheet still fits -- so it
        reached print. Measure the widest painted node against the sheet's content box. */
+    /* THE CONTENT BOX IS INSIDE A 10 mm BORDER, NOT A PADDING. getBoundingClientRect() on the
+       sheet returns the BORDER box -- 816 px -- while everything on the page lays out inside the
+       742 px padding box. Measuring against the former quietly forgave 37.8 px of bleed on each
+       side, which is a margin a printer will not honour. clientLeft is that border width. */
     const box = s.getBoundingClientRect();
-    const pad = parseFloat(getComputedStyle(s).paddingLeft) || 0;
-    const inner = { left: box.left + pad, right: box.right - pad };
+    const inner = { left: box.left + s.clientLeft, right: box.left + s.clientLeft + s.clientWidth };
     const wide = [];
     for (const e of s.querySelectorAll("*")) {
       if (e.ownerSVGElement || e.tagName === "svg") continue;
@@ -72,6 +75,17 @@ for (const f of readdirSync(DIR).filter((x) => x.endsWith(".html")).sort()) {
       if (!r.width) continue;
       const past = Math.round(Math.max(r.right - inner.right, inner.left - r.left));
       if (past > 1) wide.push({ past, what: `${e.tagName.toLowerCase()}.${(typeof e.className === "string" ? e.className : "")}`.trim() });
+    }
+    /* AND EACH TABLE AGAINST ITS OWN COLUMN. A table can overrun its grid track, print over its
+       neighbour, and still stop short of the sheet edge -- overlap without overflow. The sheet
+       check above cannot see that; this one can, and overlap is the defect a reader meets. */
+    for (const t of s.querySelectorAll("table")) {
+      const cell = t.parentElement;
+      if (!cell) continue;
+      const cr = cell.getBoundingClientRect();
+      const tr = t.getBoundingClientRect();
+      const past = Math.round(tr.right - cr.right);
+      if (past > 1) wide.push({ past, what: `table.${t.className} over its ${Math.round(cr.width)}px column`, track: true });
     }
     wide.sort((a, b) => b.past - a.past);
     return { over: content - budget, budget, manifest: s.classList.contains("manifest"),
@@ -102,7 +116,8 @@ for (const f of readdirSync(DIR).filter((x) => x.endsWith(".html")).sort()) {
     }
     if (s.widest) {
       failed++;
-      console.log(`  FAIL  ${f} sheet ${i + 1} runs ${s.widest.past}px past the content box `
+      console.log(`  FAIL  ${f} sheet ${i + 1} runs ${s.widest.past}px past `
+        + `${s.widest.track ? "its column" : "the content box"} `
         + `(${s.wideCount} node(s), widest ${s.widest.what}) — it is clipped, not laid out.`);
     }
   });
