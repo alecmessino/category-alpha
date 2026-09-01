@@ -299,6 +299,12 @@ table.ledger.sysgrid{table-layout:fixed}
 .bridge td{white-space:normal;vertical-align:top;line-height:1.16;padding:1.2px var(--sp-3)}
 .bridge td.status{font-weight:600;letter-spacing:.2px;max-width:none}
 .bridge th{white-space:normal}
+/* THE REFERENCE DOCUMENT STACKS INSTEAD OF COMPRESSING. It paginates by design and is not page-
+   count constrained, so it keeps the full group labels and the full event-gate stamps and simply
+   gives each ledger the sheet's whole width. */
+.ledgertrio.stack{grid-template-columns:minmax(0,1fr);gap:var(--sp-3)}
+/* A reference-document table that may grow downwards but not sideways. */
+.ledger.reflow th,.ledger.reflow td{white-space:normal}
 .ledgertrio{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.04fr) minmax(0,1.04fr);
   gap:var(--sp-4);align-items:start}
 .ledger.compact td{padding:0.6px var(--sp-2);font-size:var(--t-detail);line-height:1.18}
@@ -468,7 +474,17 @@ export function cohortLine(sys) {
    row, and a table that invents one is claiming the instrument said something it did not.
    In compact mode the gate's counts move to the unscoreable table on the same page, which
    prints them in full -- the STAMP itself is never abbreviated or paraphrased. */
-function statusCell(row, compact) {
+/* THE STATE TOKEN INSIDE A STAMP. The archive stamps a row "OUT OF SCOPE -- unscoreable here";
+   the part before the dash is the state, and the part after is the explanation of the state. In a
+   narrow column the explanation, repeated down twelve rows, is what sets the table's minimum
+   width -- 210 px of chrome carrying one bit of information twelve times. The token goes in the
+   row; the stamp and its reason go once into the panel note beside it. Nothing is dropped and no
+   new state is invented: the token is read out of the archive's own string, never authored. */
+export function statusToken(status) {
+  return String(status || "").split(/\s+--\s+/)[0].trim();
+}
+
+function statusCell(row, compact, tokens) {
   if (row.status === "RATE REFUSED") {
     return compact
       ? `<td class="status refused">RATE REFUSED</td>`
@@ -476,6 +492,7 @@ function statusCell(row, compact) {
   }
   if (row.status) {
     const g = row.gate;
+    if (tokens) return `<td class="status gate">${esc(statusToken(row.status))}</td>`;
     if (compact) return `<td class="status gate">${esc(row.status)}</td>`;
     return `<td class="status gate">${esc(row.status)}<br>${g ? esc(
       `${g.scope_events} in scope / ${g.archive_events} archive-wide; ${g.required} needed`) : ""}</td>`;
@@ -501,7 +518,7 @@ function barCell(row) {
 /**
  * The outcome ledger. `groups` is [{ label, rows }]. Nothing is computed here.
  */
-export function ledger(groups, { caption, showBar = true, compact = false,
+export function ledger(groups, { caption, showBar = true, compact = false, tokens = false,
   statusHead = "Status returned" } = {}) {
   /* COMPACT MERGES THE RATE AND ITS INTERVAL INTO ONE CELL. Not to save ink -- to buy the STATUS
      column the width it needs to print the archive's stamp on one line. A stamp that wraps to
@@ -529,7 +546,7 @@ export function ledger(groups, { caption, showBar = true, compact = false,
         ? `<td class="rate${r.rate === null ? " refused" : ""}">${r.rate === null ? "REFUSED"
           : `${pct(r.rate)} <span class="ivl">[${ci(r.ci95)}]</span>`}</td>`
         : rateCell(r) + (showBar ? barCell(r) : "") + `<td class="ci">${ci(r.ci95)}</td>`)
-      + statusCell(r, compact)
+      + statusCell(r, compact, tokens)
       + `</tr>`).join("");
   }).join("");
   return `<table class="ledger${compact ? " compact" : ""}">${caption ? `<caption>${esc(caption)}</caption>` : ""}`
@@ -549,17 +566,46 @@ export function ledger(groups, { caption, showBar = true, compact = false,
    difference twice. Split at the region boundary the archive itself uses -- every region keeps its
    `any` and `>=64 kt` pair in the same column -- and the band is as tall as its tallest column,
    not as tall as the sum. No row is dropped and no row is reordered. */
-export function ledgerPair(sys, { compact = true } = {}) {
+/* CHROME, NOT EVIDENCE, IS WHAT SETS THESE TABLES' MINIMUM WIDTH. Every cell is nowrap, so the
+   widest string in a column is a floor the table cannot go below -- and in a three-up band the
+   widest strings were the group labels and the repeated event-gate stamps, not a single number.
+   `chrome: "short"` prints the state and leaves the explanation to the panel note; the default
+   keeps the full labels for documents that have the width for them. No row, order, count, rate,
+   interval or refusal changes between the two: only the chrome around them. */
+const CHROME = {
+  full: { intensity: "INTENSITY THRESHOLDS — genesis-conditioned · TD is definitional",
+    landfall: "LANDFALL CONTRACT ROWS — the regions this archive scores",
+    continued: "LANDFALL CONTRACT ROWS — continued" },
+  short: { intensity: "INTENSITY · GENESIS-CONDITIONED", landfall: "LANDFALL · SCORED REGIONS",
+    continued: "LANDFALL · CONTINUED" },
+};
+
+export function ledgerPair(sys, { compact = true, chrome = "full" } = {}) {
   const lf = sys.landfall_rows;
   const half = Math.ceil(lf.length / 4) * 2;
+  const L = CHROME[chrome] || CHROME.full;
+  const o = chrome === "short"
+    ? { showBar: false, compact, tokens: true, statusHead: "Status" }
+    : { showBar: false, compact };
   return `<div class="ledgertrio">
-    <div>${ledger([{ label: "INTENSITY THRESHOLDS — genesis-conditioned · TD is definitional", rows: sys.intensity_rows }],
-      { showBar: false, compact })}</div>
-    <div>${ledger([{ label: "LANDFALL CONTRACT ROWS — the regions this archive scores", rows: lf.slice(0, half) }],
-      { showBar: false, compact })}</div>
-    <div>${ledger([{ label: "LANDFALL CONTRACT ROWS — continued", rows: lf.slice(half) }],
-      { showBar: false, compact })}</div>
+    <div>${ledger([{ label: L.intensity, rows: sys.intensity_rows }], o)}</div>
+    <div>${ledger([{ label: L.landfall, rows: lf.slice(0, half) }], o)}</div>
+    <div>${ledger([{ label: L.continued, rows: lf.slice(half) }], o)}</div>
   </div>`;
+}
+
+/* THE MEANING THE ROWS STOPPED REPEATING, PRINTED ONCE. Read off the cohort's own unscoreable
+   block, so every stamp on the panel note is the archive's own string and the token in each row
+   above is literally its head. Nothing here is authored copy. */
+export function statusStamps(sys) {
+  const out = [];
+  for (const u of Object.values(sys.unscoreable || {})) if (!out.includes(u.status)) out.push(u.status);
+  return out;
+}
+
+/** "OUT OF SCOPE -- unscoreable here; BASE RATE ONLY -- unscoreable", bolded, or "" if none. */
+export function stampList(sys) {
+  return statusStamps(sys).map((st) => `<b>${esc(st)}</b>`).join("; ");
 }
 
 /**

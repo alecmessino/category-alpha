@@ -3,7 +3,8 @@
  * silence, so an unwritten section cannot ship looking finished.
  */
 import {
-  page, masthead, sectionHead, cohortLine, ledger, ledgerPair, unscoreableTable, unscoreableNote, citeBlock,
+  page, masthead, sectionHead, cohortLine, ledger, ledgerPair, stampList,
+  unscoreableTable, unscoreableNote, citeBlock,
   comparisonStrip, answersRail, repCardRow, repRule, footer, disclaimerLine,
   esc, pct, ci, hrs, coord, DISCLAIMER,
 } from "./collateral-kit.mjs";
@@ -347,8 +348,14 @@ ${liveStrip(D, [rows["97L"]])}
 </section>
 
 <section class="sec sechd-tight">${sectionHead("03", "Outcome frequency panel", `exact n / N · 95% Wilson · N = ${s.cohort.n_cases} · ${s.cohort.cohort_status}`)}
-${ledgerPair(s)}
-<p class="fn">${C.get("reading-the-ledger").replace(/^<p>|<\/p>$/g, "")}</p>
+${ledgerPair(s, { chrome: "short" })}
+${/* ROW = STATE TOKEN, PANEL NOTE = EXPLANATION. The group labels and the status cells were the
+     two widest strings in this band and neither was evidence; compressed, they leave the table
+     the width its rows need. What they carried is printed here once, and the archive's full
+     stamp with its event-gate reason is in UNSCOREABLE on sheet 2. */""}
+<p class="fn">${C.get("reading-the-ledger").replace(/^<p>|<\/p>$/g, "")}
+<b>Rates are genesis-conditioned; TD is definitional.</b> Tokens: ${stampList(s)} — reasons in
+UNSCOREABLE, sheet 2.</p>
 ${citeBlock(s)}
 </section>
 
@@ -461,14 +468,17 @@ ${/* THE QUESTION BOX, FOLDED INTO THE MASTHEAD. It stood as its own sunken pane
 probability would require an external formation probability on the <b>same formation event and
 conditioning set</b>; none is computed here, and an NHC outlook probability is not multiplied by
 these rows unless the conditioning events are demonstrably aligned. <b>LIVE,
-${esc(LIVE_STAMP)}:</b> ${C.answers.now || ""}</p>
+${esc(LIVE_STAMP)}:</b> ${C.answers.now || ""}
+${/* ROW = STATE TOKEN, PANEL NOTE = EXPLANATION. Printed immediately above the panel because
+     this page has no UNSCOREABLE box to carry it; the stamps are the archive's own strings. */""}
+<b>TD is definitional.</b> Status tokens: ${stampList(s)}.</p>
 
 ${/* THE ANSWERS RAIL THAT IS NOT HERE. 133 px of three columns — what is happening now, what
      Storm Atlas adds, how it helps — on a page that already opens with the published question in
      full and closes with the basis-risk box and two replay URLs. The live line it carried now
      sits under the question box in one sentence. Cut content before shrinking type. */""}
 <section class="sec sechd-tight">${sectionHead("01", "Contract-row frequencies", headline)}
-${ledgerPair(s)}
+${ledgerPair(s, { chrome: "short" })}
 </section>
 
 <section class="sec">${sectionHead("02", "Trigger explainability, refusal, near misses")}
@@ -641,13 +651,16 @@ ${liveTiles}
     svg: cp.svg,
     legendItems: [LEGEND.cohortTrack, LEGEND.majorTrack, LEGEND.genesisCell, LEGEND.liveTrack],
   })}
-  <div>${ledger([{ label: "INTENSITY — assumes formation · TD is definitional", rows: s.intensity_rows }],
-    { showBar: false, compact: true })}</div>
-  <div>${ledger([{ label: "LANDFALL CONTRACT ROWS", rows: s.landfall_rows }],
-    { showBar: false, compact: true })}</div>
+  <div>${ledger([{ label: "INTENSITY · GENESIS-CONDITIONED", rows: s.intensity_rows }],
+    { showBar: false, compact: true, tokens: true, statusHead: "Status" })}</div>
+  <div>${ledger([{ label: "LANDFALL · SCORED REGIONS", rows: s.landfall_rows }],
+    { showBar: false, compact: true, tokens: true, statusHead: "Status" })}</div>
 </div>
+${/* ROW = STATE TOKEN, PANEL NOTE = EXPLANATION. The stamps and their event-gate reasons are in
+     UNSCOREABLE directly below; what the group labels carried is added here. */""}
 <p class="fn">The red track is Karina's operational b-deck: <b>not</b> a cohort member, in no rate,
-and no cone is drawn. Every landfall row is published even at zero or stamped.</p>
+and no cone is drawn. Every landfall row is published even at zero or stamped.
+<b>Rates assume formation; TD is definitional.</b> Tokens only; stamps below.</p>
 </section>
 
 ${/* THE MEMBER-CARD ROW THAT IS NOT HERE. Eight cards naming cohort members with their genesis
@@ -1002,7 +1015,7 @@ export function sourceManifestDoc(D) {
         provisional: "provisional (2025–26, excluded by default)",
         unnamed: "unnamed", noGenesis: "no genesis point in the archive" }[k] || k}`)
       .join(" · "))} — leaving <b>${sy.cohort.kept}</b> of ${D.pack.counts.storms.toLocaleString()}.</p>
-    ${ledgerPair(sy)}
+    ${ledgerPair(sy).replace('class="ledgertrio"', 'class="ledgertrio stack"')}
     ${Object.keys(sy.unscoreable).length ? unscoreableNote(sy) : ""}
     ${sy.gaps.length ? `<div class="box hole" style="margin-top:5px"><h3>GAPS REPORTED</h3>
       <ul>${sy.gaps.map((g) => `<li>${esc(g)}</li>`).join("")}</ul></div>` : ""}
@@ -1028,7 +1041,10 @@ export function sourceManifestDoc(D) {
   const total = 1 + perPage.length;
   sheets.push(`<div class="sheet manifest">${head(1, total)}${provenance}${feeds}
     <section class="sec">${sectionHead("00c", "Cohorts in this package")}
-    <table class="ledger compact"><thead><tr><th style="text-align:left">ID</th>
+    ${/* THE REFERENCE DOCUMENT REFLOWS RATHER THAN COMPRESSES. Eight nowrap columns put this
+         index 208 px past the sheet; it is not page-count constrained, so the cells wrap and the
+         table gets taller instead of wider. Every string stays exactly as the manifest holds it. */""}
+    <table class="ledger compact reflow"><thead><tr><th style="text-align:left">ID</th>
       <th style="text-align:left">Point type</th><th style="text-align:left">Coordinates</th>
       <th>Radius</th><th style="text-align:left">Window</th><th>N</th>
       <th style="text-align:left">Cohort status</th><th style="text-align:left">Used by</th></tr></thead><tbody>

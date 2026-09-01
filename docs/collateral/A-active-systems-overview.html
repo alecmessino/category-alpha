@@ -279,6 +279,12 @@ table.ledger.sysgrid{table-layout:fixed}
 .bridge td{white-space:normal;vertical-align:top;line-height:1.16;padding:1.2px var(--sp-3)}
 .bridge td.status{font-weight:600;letter-spacing:.2px;max-width:none}
 .bridge th{white-space:normal}
+/* THE REFERENCE DOCUMENT STACKS INSTEAD OF COMPRESSING. It paginates by design and is not page-
+   count constrained, so it keeps the full group labels and the full event-gate stamps and simply
+   gives each ledger the sheet's whole width. */
+.ledgertrio.stack{grid-template-columns:minmax(0,1fr);gap:var(--sp-3)}
+/* A reference-document table that may grow downwards but not sideways. */
+.ledger.reflow th,.ledger.reflow td{white-space:normal}
 .ledgertrio{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.04fr) minmax(0,1.04fr);
   gap:var(--sp-4);align-items:start}
 .ledger.compact td{padding:0.6px var(--sp-2);font-size:var(--t-detail);line-height:1.18}
