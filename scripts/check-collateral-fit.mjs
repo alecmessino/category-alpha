@@ -25,7 +25,7 @@ const EXPECTED = {
   "B-97L-gulf-event-dossier.html": 2,
   "B1-97L-reinsurance-ils-parametric.html": 1,
   "B2-97L-energy-weather-trading.html": 1,
-  "C-karina-major-hurricane-analog-brief.html": 1,
+  "C-karina-major-hurricane-analog-brief.html": 2,
   "D-storm-atlas-tear-sheet.html": 1,
   "E-discrete-event-contract-evidence.html": 1,
 };

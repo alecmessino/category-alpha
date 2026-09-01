@@ -97,6 +97,9 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
    unbroken URL refuses to shrink below it, and the other columns collapse to make room --
    which is how one 100 px column ended up carrying 692 px of stacked text. */
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-6)}
+/* Two prose boxes of unequal length: the longer one takes the wider track, so the row is as tall
+   as it needs to be and not as tall as the shorter box would be at half width. */
+.grid2.wideleft{grid-template-columns:minmax(0,1.22fr) minmax(0,.78fr)}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-5)}
 .grid3.tight{gap:var(--sp-4);align-items:start}
 .grid3.lastwide{grid-template-columns:minmax(0,1fr) minmax(0,.92fr) minmax(0,1.3fr)}
@@ -363,6 +366,11 @@ table.ledger.sysgrid{table-layout:fixed}
    the page. Where a plate shares the band with a cite list, the cite side gets the width it
    needs and the plate takes the remainder. */
 .platecol.cites{grid-template-columns:minmax(0,.62fr) minmax(0,1fr)}
+/* A plate beside a prose box: the plate takes the width its declared renderWidth expects, so its
+   labels paint at the size they were set at, and the box takes the rest. */
+.platecol.plateleft{grid-template-columns:minmax(0,.92fr) minmax(0,1fr)}
+/* The timing ledger is 376 px at its narrowest; give it the wider track. */
+.platecol.timingleft{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr)}
 .platecol .sec{margin-top:0}
 /* THE MIDDLE TRACK HOLDS A GROUP BAR, AND A GROUP BAR DOES NOT WRAP: at .86fr it is 179 px and
    INTENSITY · GENESIS-CONDITIONED is 213. Taking the 34 px from the plate was tried and reverted
@@ -566,7 +574,7 @@ export function ledger(groups, { caption, showBar = true, compact = false, token
   const body = groups.map((g) => {
     const grp = g.label ? `<tr class="grp"><td colspan="${cols}">${esc(g.label)}</td></tr>` : "";
     return grp + g.rows.map((r, i) =>
-      `<tr class="${i % 2 ? "band" : ""}">`
+      `<tr class="${i % 2 ? "band" : ""}"${r.status ? ` data-status="${esc(r.status)}"` : ""}>`
       + `<td>${esc(r.label)}</td>`
       + `<td class="frac">${r.count} / ${r.n_storms}</td>`
       + (compact
@@ -629,7 +637,10 @@ export function evidenceLedger(groups, { wilson = false } = {}) {
         : `${r.count} / ${r.n_storms} · ${wilson ? "95% Wilson " : ""}`
           + `<span class="ivl">[${ci(r.ci95)}]</span>`
           + (token ? ` · <span class="st">${esc(token)}</span>` : "");
-      return `<tr class="ev ${i % 2 ? "band" : ""}"><td>`
+      /* data-status carries the archive's FULL stamp on every row that has one, whatever the row
+         prints. scripts/check-collateral.mjs reads it: a stamp a row carries must be visible
+         somewhere on the sheet -- in the row, in the panel note, or in UNSCOREABLE. */
+      return `<tr class="ev ${i % 2 ? "band" : ""}"${r.status ? ` data-status="${esc(r.status)}"` : ""}><td>`
         + `<div class="l1"><span class="nm">${esc(r.label)}</span>`
         + (refused ? `<span class="rt refused">REFUSED</span>` : `<span class="rt">${pct(r.rate)}</span>`)
         + `</div><div class="l2">${l2}</div></td></tr>`;
@@ -763,6 +774,16 @@ export const COMPARISON_ROWS = [
     "Not answered. The advisory is public; the reasoning behind a number is not.",
     "<b>Visible refusal</b> — effective sample size, the min-sample gate and the archive-wide event gate, printed beside the number or instead of it. And the cohort is a <b>URL</b>: same question, same pack stamp, same numbers."],
 ];
+
+/* THE COMPARISON IN ONE SENTENCE. The strip says three things a desk asks and what each side
+   answers; where a sheet cannot give it three rows, this is the same claim in one line -- the
+   form PROTECTED allows -- and it is written once here so every sheet that compresses it says
+   exactly the same thing. */
+export function whatAtlasAdds() {
+  return `<b>WHAT ATLAS ADDS.</b> A public map gives position, P(forms) and a cone; Atlas gives `
+    + `exact n / N with a 95% Wilson interval on every contract row, a visible refusal where the `
+    + `record runs out, and a URL that reproduces both.`;
+}
 
 export function comparisonStrip({ note, compact = false } = {}) {
   return `<table class="ledger cmptable${compact ? " compact" : ""}">

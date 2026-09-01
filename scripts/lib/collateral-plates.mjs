@@ -170,6 +170,7 @@ export function cellPlate(D, sysId, opts = {}) {
     lon0, lon1, lat0, lat1, width = 700, height = 330,
     liveAtcf = null, outlookId = null, dLon = 10, dLat = 10, decimate = 2,
     liveLabel = null, cellAnchor = "start", cellDx = 0, cellDy = 0, cellLeader = true,
+    liveAnchor = "start", liveDx = 0, liveDy = 0, liveLeader = false,
     renderWidth = null,
   } = opts;
   const P = projector({ lon0, lon1, lat0, lat1, width, height, pad: 6 });
@@ -216,7 +217,10 @@ export function cellPlate(D, sysId, opts = {}) {
         color: INK.live, kind: "live",
         label: liveLabel || `LIVE ${s.name} ${s.latest.kt} KT`,
         sub: `b-deck ${s.latest_valid_time.slice(0, 16).replace("T", " ")}Z`,
-        anchor: "start", fs,
+        /* The live mark and the query mark are a few degrees apart -- a few pixels at plate
+           scale -- and two two-line labels anchored the same way print over each other. Callers
+           put one label on each side of the pair. */
+        anchor: liveAnchor, dx: liveDx, dy: liveDy, leader: liveLeader, fs,
       });
     }
   }

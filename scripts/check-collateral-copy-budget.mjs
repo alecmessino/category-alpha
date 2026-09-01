@@ -19,10 +19,10 @@ import { ROOT } from "./lib/atlas-verify.mjs";
 
 export const BUDGETS = {
   A: { "answers.adds": 30, "answers.commercial": 26, "lede": 34, "atlas-value-97L": 31, "atlas-value-KARINA": 32, "atlas-value-95E": 32, "atlas-value-LOWELL": 27, "plate-note": 42, "refusal-note": 37 },
-  B: { "lede": 46, "cell-rationale": 65, "reading-the-ledger": 40, "radius-sensitivity": 32, "seasonal-timing": 45, "analog-plate-note": 29, "commercial": 142, "hole": 89 },
+  B: { "lede": 46, "cell-rationale": 65, "reading-the-ledger": 40, "radius-sensitivity": 32, "seasonal-timing": 45, "commercial": 142, "hole": 89 },
   B1: { "answers.now": 29, "trigger-explainability": 60, "near-miss": 81, "basis-risk": 83, "how-used": 13 },
   B2: { "answers.now": 44, "answers.adds": 33, "answers.commercial": 23, "lede": 45, "geography-not-probability": 64, "exposure-map": 68, "frequency-bands": 36, "not-this": 60 },
-  C: { "live-vs-history": 80, "land-rows": 39, "so-what": 36 },
+  C: { "live-vs-history": 80, "rarity": 56, "land-rows": 39, "so-what": 36 },
   D: { "one-sentence": 59, "users-can": 140, "moat": 91, "delivery": 41, "pilot": 23, "sample-note": 41 },
   E: { "lede": 25, "discrete-terms": 84, "cohort-note": 21, "history-note": 61, "desk-use": 39, "desk-not": 49 },
 };
@@ -32,9 +32,9 @@ export const BUDGETS = {
    rather than as an unbudgeted surprise. scripts/lib/collateral-cuts.mjs records why. */
 export const RETIRED = {
   "A": ["tag-97L", "tag-KARINA", "tag-95E", "tag-LOWELL", "answers.now"],
-  "B": ["answers.now", "answers.adds", "answers.commercial"],
+  "B": ["answers.now", "answers.adds", "answers.commercial", "analog-plate-note"],
   "B1": ["lede", "answers.adds", "answers.commercial"],
-  "C": ["lede", "rarity", "answers.now", "answers.adds", "answers.commercial"],
+  "C": ["lede", "answers.now", "answers.adds", "answers.commercial"],
   "D": ["answers.now", "answers.adds", "answers.commercial"],
   /* E was drawn without an answers rail at all -- the evidence-bridge table does that work --
      so its three rail slots are absent by design rather than by cut. */

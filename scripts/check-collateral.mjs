@@ -459,59 +459,38 @@ for (const f of files) {
       "unshipped delivery is labelled PROPOSED / PILOT");
   } else pass("no unshipped delivery claimed");
 
-  /* -- the STATUS column is present on every OUTCOME ledger (the system grid on artifact A is
-        not one: it carries no contract rows) -- */
-  /* `.ledger` is the house table style, not a claim about content: the system grid on artifact A
-     and the comparison strip on every artifact borrow it and carry no contract rows. Only a
-     table that actually prints outcome rows needs the STATUS column. */
-  const outcomeTables = (html.match(/<table class="ledger[^"]*"/g) || [])
-    .filter((tag) => !/sysgrid|cmptable/.test(tag)).length;
-  const evidenceTables = (html.match(/<table class="ledger compact evidence"/g) || []).length;
-  if (evidenceTables) {
-    /* THE EVIDENCE ANATOMY CARRIES THE STATE IN THE ROW, NOT IN A COLUMN. There is no STATUS
-       heading to find, so the rule is checked against the archive instead of against the markup:
-       the number of state tokens printed must equal the number of rows the manifest stamps for
-       the cohorts this page renders, and every distinct stamp must be represented. A dropped
-       stamp fails, and so does an invented one. */
-    /* THE COHORT WHOSE ROWS ARE ACTUALLY IN THE PANEL, not every cohort the page links. B and B1
-       print sensitivity replay URLs for cohorts they do not tabulate; the panel's own denominator
-       says which cohort is on the page. */
-    const cited = M.systems.filter((sy) => t.includes(sy.replay_url))
-      .filter((sy) => new RegExp(`/ ${sy.cohort.n_cases} ·`).test(t));
-    const expected = cited.reduce((n, sy) => n + Object.keys(sy.unscoreable).length, 0);
-    const printed = (html.match(/<span class="st">/g) || []).length;
-    ok(printed === expected, "every stamped row keeps its state token",
-      `${printed} token(s) printed, ${expected} stamped row(s) in the manifest`);
-    for (const sy of cited) {
-      for (const st of new Set(Object.values(sy.unscoreable).map((u) => u.status))) {
-        const tok = st.split(/\s+--\s+/)[0];
-        ok(html.includes(`<span class="st">${tok}</span>`),
-          `state token printed for ${sy.id}: "${tok}"`);
-      }
-    }
-  } else if (outcomeTables) {
-    const statusHeads = (html.match(/>Status returned</g) || []).length
-      + (html.match(/>Status</g) || []).length;
-    ok(statusHeads > 0, "every outcome ledger keeps a STATUS column",
-      `${outcomeTables} ledger table(s), ${statusHeads} STATUS heading(s)`);
+  /* -- THE REFUSAL INVARIANT: A STAMP A ROW CARRIES IS A STAMP THE READER CAN SEE ----------
+     Not "every cohort this page links must print its refusals" -- a replay URL is a pointer, and
+     A, D and E point at cohorts whose stamped rows they never tabulate. Not "every outcome table
+     has a STATUS column" either -- the evidence row carries its state in the row. The rule that
+     is actually owed: every outcome row RENDERED on this sheet that the archive stamped must have
+     that stamp visible somewhere on the sheet, in full -- in the row itself (column model), or
+     once in the panel note or the UNSCOREABLE box (token model). The renderers put the archive's
+     full stamp on each such row as data-status, so this reads what was rendered, not what was
+     linked, and needs no inference about which cohort a table belongs to.
+     The previous version of this loop matched a raw replay URL against markup where & is &amp;
+     and had never fired; it is replaced, not repaired, because its predicate was wrong. */
+  const carried = [...new Set([...html.matchAll(/data-status="([^"]+)"/g)].map((m) => m[1]
+    .replace(/&amp;/g, "&").replace(/&quot;/g, '"')))];
+  for (const st of carried) {
+    ok(t.includes(st), `stamp visible for every rendered row that carries it: "${st}"`);
   }
-
-  /* -- refusals the manifest holds for a cohort this artifact cites must appear --
-     KNOWN DORMANT, DELIBERATELY LEFT AS IT IS. A replay URL is printed through esc(), so its
-     ampersands are &amp; in the markup and this raw-string search never matches: the loop below
-     has checked nothing since it was written. Repairing it is a one-word change (t.includes),
-     but it then demands that every artifact printing a cohort's URL also print that cohort's
-     stamps -- which A, B2, D and E do not, and which is a rule about what each sheet owes a
-     reader, not a bug to fix in passing. Reported for a decision rather than changed here. */
-  const cited = M.systems.filter((sy) => html.includes(sy.replay_url));
-  for (const sy of cited) {
-    const stamps = new Set(Object.values(sy.unscoreable).map((u) => u.status));
-    for (const st of stamps) {
-      ok(t.includes(st), `refusal shown for ${sy.id}: "${st}"`);
-    }
-    if (!sy.cohort.sufficient) {
-      ok(/REFUSED/.test(t), `refusal shown for ${sy.id}: below min sample`);
-    }
+  /* A state token in a row must be the head of a stamp some rendered row actually carries: no
+     token may be printed that the archive did not return for this sheet. */
+  const heads = new Set(carried.map((st) => st.split(/\s+--\s+/)[0]));
+  const tokens = [...new Set([...html.matchAll(/<span class="st">([^<]+)<\/span>/g)].map((m) => m[1]))];
+  const orphan = tokens.filter((tok) => !heads.has(tok));
+  ok(orphan.length === 0, "no state token is printed that no rendered row carries", orphan.join(", "));
+  /* And the STATUS column survives on any column-model outcome ledger -- the house style has one
+     and its absence would mean a renderer dropped it. Evidence tables carry state in the row. */
+  const columnTables = (html.match(/<table class="ledger(?! compact evidence)[^"]*"/g) || [])
+    .filter((tag) => !/sysgrid|cmptable|reflow|timing|sens/.test(tag)).length;
+  if (columnTables) {
+    const statusHeads = (html.match(/>Status returned</g) || []).length
+      + (html.match(/>Status</g) || []).length
+      + (html.match(/>Cohort status</g) || []).length;
+    ok(statusHeads > 0, "every column-model outcome ledger keeps a STATUS column",
+      `${columnTables} ledger table(s), ${statusHeads} STATUS heading(s)`);
   }
 }
 

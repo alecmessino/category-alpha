@@ -77,6 +77,9 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
    unbroken URL refuses to shrink below it, and the other columns collapse to make room --
    which is how one 100 px column ended up carrying 692 px of stacked text. */
 .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-6)}
+/* Two prose boxes of unequal length: the longer one takes the wider track, so the row is as tall
+   as it needs to be and not as tall as the shorter box would be at half width. */
+.grid2.wideleft{grid-template-columns:minmax(0,1.22fr) minmax(0,.78fr)}
 .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-5)}
 .grid3.tight{gap:var(--sp-4);align-items:start}
 .grid3.lastwide{grid-template-columns:minmax(0,1fr) minmax(0,.92fr) minmax(0,1.3fr)}
@@ -343,6 +346,11 @@ table.ledger.sysgrid{table-layout:fixed}
    the page. Where a plate shares the band with a cite list, the cite side gets the width it
    needs and the plate takes the remainder. */
 .platecol.cites{grid-template-columns:minmax(0,.62fr) minmax(0,1fr)}
+/* A plate beside a prose box: the plate takes the width its declared renderWidth expects, so its
+   labels paint at the size they were set at, and the box takes the rest. */
+.platecol.plateleft{grid-template-columns:minmax(0,.92fr) minmax(0,1fr)}
+/* The timing ledger is 376 px at its narrowest; give it the wider track. */
+.platecol.timingleft{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr)}
 .platecol .sec{margin-top:0}
 /* THE MIDDLE TRACK HOLDS A GROUP BAR, AND A GROUP BAR DOES NOT WRAP: at .86fr it is 179 px and
    INTENSITY · GENESIS-CONDITIONED is 213. Taking the 34 px from the plate was tried and reverted

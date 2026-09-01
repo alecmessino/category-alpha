@@ -32,7 +32,7 @@ statement, and visibly refuse what the record cannot support.
 | `B-97L-gulf-event-dossier.html` | AL052026 (97L): genesis-conditioned outcomes for a declared Gulf cell, with the analog paths | 2 |
 | `B1-97L-reinsurance-ils-parametric.html` | Contract-row frequencies, trigger explainability, near-miss members, basis risk | 1 |
 | `B2-97L-energy-weather-trading.html` | Frequency bands from contract rows; analog paths as geography, not scored state probabilities | 1 |
-| `C-karina-major-hurricane-analog-brief.html` | A live major hurricane beside the cohort for its declared genesis cell | 1 |
+| `C-karina-major-hurricane-analog-brief.html` | A live major hurricane beside the cohort for its declared genesis cell | 2 |
 | `D-storm-atlas-tear-sheet.html` | What the instrument is, what it refuses, what ships today and what does not | 1 |
 | `E-discrete-event-contract-evidence.html` | A published Cat 4+ CONUS landfall trigger, the declared cohort beside it, and the three places the archive stops short of scoring it | 1 |
 | `SOURCE-MANIFEST.html` | The evidence gate as a printable reference document | 8 |
@@ -136,6 +136,48 @@ a half-width grid track it runs past the track, over its neighbour, and off the 
 `overflow:hidden` clips it. Height gates cannot see that — the sheet still fits — so it reached
 print. Callers in narrow columns pass a short `statusHead` to `ledger()`; the heading, not the
 data, is what sets a compact ledger's minimum width.
+
+### The evidence row
+
+The frequency panels on B, B1 and C, and the worked samples on D, print each contract row as two
+lines rather than four columns:
+
+```
+reached Cat 1                          25.0%
+3 / 12 · [9–53%]
+
+HAWAII — ≥64 kt                         0.0%
+0 / 12 · [0–24%] · BASE RATE ONLY
+```
+
+The rate is the darkest, heaviest element on the sheet; the exact denominator and the Wilson
+interval sit directly under it; a state token appears only where the archive stamped the row. A
+four-column row cannot be narrower than the sum of its widest cells, and at the type floors that
+sum ran 107–222 px past a three-up track and printed over the table beside it. The folded row is as
+wide as its widest line, so the three groups — `INTENSITY · GENESIS-CONDITIONED`, `LANDFALL ·
+SCORED REGIONS`, `LANDFALL · CONTINUED` — stay side by side. Rows, order, n/N, rates, intervals and
+stamps are the column model's exactly; `pct()`, `ci()` and the status strings are the same code.
+
+**Row = state token, panel note = explanation.** Rows print `OUT OF SCOPE`, `BASE RATE ONLY` or
+`RATE REFUSED`; the archive's full stamp — `OUT OF SCOPE -- unscoreable here` — is printed once per
+sheet, in the note under the panel or in the UNSCOREABLE box, never twelve times down a column.
+
+### The refusal invariant
+
+Every rendered outcome row that the archive stamped carries that stamp as `data-status`, whatever
+the row prints. `check-collateral.mjs` requires each such stamp to be visible in full somewhere on
+the sheet, and requires every state token printed to be the head of a stamp some rendered row
+carries. That is the rule actually owed: a sheet that *tabulates* a stamped row owes the reader the
+stamp; a sheet that merely *links* a cohort — A's four replay URLs, D's samples, E's six rows — owes
+the pointer. The earlier check matched a raw replay URL against markup where `&` is `&amp;` and had
+never fired; it was replaced, not repaired, because its predicate ("cites the URL") was wrong.
+
+### Width is a fit question too
+
+`check-collateral-fit.mjs` measures the widest painted node against the sheet's **content box**
+(`.sheet` insets with a 10 mm border, not padding — measuring the border box had forgiven 37.8 px
+of bleed per side) and measures every table against its own grid track, since a table can print over
+its neighbour without reaching the sheet edge. Both failures are reported as clipping.
 
 ### The trigger lock
 
