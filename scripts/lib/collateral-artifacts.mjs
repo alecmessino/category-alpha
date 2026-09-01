@@ -795,6 +795,16 @@ ${packFoot(D)}
  * The cohort is the already-validated pre-genesis reference cell. It is NOT moved to AL052026's
  * operational tropical fix, and nothing here implies the cell is where Five formed.
  */
+/* THE HEADING FOLLOWS THE SOURCE RECORD. AS PUBLISHED and VERIFIED are claims about a document
+   a reader can re-open; while this build holds no URL for Discrete's own terms they are a
+   transcription, and the heading says so. Supplying the URL in contract-sources.json restores
+   the stronger heading and the citation together -- neither is written by hand on the page. */
+function termsHeading(sources) {
+  const d = (sources || []).find((x) => x.id === "discrete-terms");
+  if (!d) return "DISCRETE — PUBLIC TERMS TRANSCRIBED 31 AUG 2026 · SOURCE RECORD INCOMPLETE";
+  return d.url ? d.heading_when_held : d.heading_when_missing;
+}
+
 /* THE CONTRACT'S OWN PROVENANCE. The cohort beside it carries a cite string and a replay URL;
    these terms are not Atlas output and cannot ride on that. Each entry prints as
    "<what it is the source of>: <publisher>, <bare url>" -- or, where this build holds no citable
@@ -810,9 +820,13 @@ function contractSourceLine(sources) {
   };
   const bits = sources.map((x) => x.url
     ? `${esc(x.label || x.short)}: ${esc(x.short)}, <a class="u" href="${esc(x.url)}">${esc(bare(x.url))}</a>`
-    : `${esc(x.label || x.short)}: ${esc(x.publisher)}, read ${day(x.accessed)} — `
-      + `<b>SOURCE URL NOT HELD</b>`);
-  return `<p class="fn"><b>SOURCES —</b> ${bits.join(". ")}.</p>`;
+    /* The gap sentence is data, not prose written here: the record states what is missing, and
+       that same string is what scripts/check-collateral.mjs looks for on the sheet. */
+    : `${esc(x.label || x.short)}: ${esc(x.gap_note
+      || `${x.publisher}, read ${day(x.accessed)} — SOURCE URL NOT HELD`)}`);
+  /* A gap sentence from the record already ends in a full stop; do not add a second one. */
+  const line = bits.join(". ");
+  return `<p class="fn"><b>SOURCES —</b> ${line}${/[.?!]$/.test(line) ? "" : "."}</p>`;
 }
 
 export function artifactE(D, copy, contractSources = []) {
@@ -870,7 +884,7 @@ ${masthead({
   })}
 
 <section class="sec sechd-tight">${sectionHead("01", "The contract question, and the declared cohort")}
-<div class="box"><h3>DISCRETE — PUBLIC TERMS, AS PUBLISHED · VERIFIED 31 AUG 2026</h3>
+<div class="box"><h3>${esc(termsHeading(contractSources))}</h3>
   ${C.get("discrete-terms")}</div>
 ${/* FULL SHEET WIDTH, NOT INSIDE THE BOX. The box's padding costs 12 px, which is exactly
      enough to tip this line from two rendered lines to three -- 18 px for nothing. */""}
@@ -882,7 +896,7 @@ ${contractSourceLine(contractSources)}
     not accept the operational layer as a genesis source. The cohort beside remains the declared
     <b>PRE-GENESIS REFERENCE CELL</b> at <b>28.0°N 88.7°W</b> — <b>not where Five formed</b>, and
     not moved to Five's fix.</p></div>
-  <div>${ledger([{ rows: shown }], { showBar: false, compact: true,
+  <div>${ledger([{ rows: shown }], { showBar: false, compact: true, statusHead: "Status",
     caption: `DECLARED COHORT · 28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+ · `
       + `${s.cohort.cohort_status} · N = ${s.cohort.n_cases} · ESS ${s.cohort.effective_sample_size}` })}</div>
 </div>

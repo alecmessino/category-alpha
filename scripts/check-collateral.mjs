@@ -324,12 +324,24 @@ for (const f of files) {
        sheet -- or, where this build holds no citable document, the gap printed instead. Both
        halves are checked: every entry must appear, and no URL may appear that is not either the
        Atlas replay URL or one of these sources, so a citation cannot be invented on the page. */
+    /* THE HEADING MAY NOT OUTRUN THE RECORD. AS PUBLISHED / VERIFIED asserts a document a reader
+       can re-open; while a source is held only as a transcription the block must be headed as
+       one. Both directions are checked, so restoring the URL without restoring the heading -- or
+       the reverse -- fails here rather than on the sheet. */
+    const dsrc = CONTRACT_SOURCES.find((x) => x.id === "discrete-terms");
+    if (dsrc) {
+      const wanted = dsrc.url ? dsrc.heading_when_held : dsrc.heading_when_missing;
+      const unwanted = dsrc.url ? dsrc.heading_when_missing : dsrc.heading_when_held;
+      ok(t.includes(wanted) && !t.includes(unwanted),
+        `terms heading matches the source record (${dsrc.url ? "held" : "transcribed"})`, wanted);
+    }
+
     const srcLine = blocks(html).find((b) => /^SOURCES\b/.test(b)) || "";
     ok(srcLine !== "", "the contract terms carry a SOURCES line");
     for (const src of CONTRACT_SOURCES) {
       const shown = src.url
         ? srcLine.includes(src.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""))
-        : /SOURCE URL NOT HELD/.test(srcLine);
+        : srcLine.includes(src.gap_note || "SOURCE URL NOT HELD");
       ok(shown, `contract source printed: ${src.label} (${src.url ? "url" : "gap"})`,
         src.url || `${src.publisher}, ${src.accessed}`);
       /* The label is checked INSIDE the sources line, not anywhere on the sheet: "Determination"

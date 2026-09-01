@@ -57,7 +57,25 @@ for (const f of readdirSync(DIR).filter((x) => x.endsWith(".html")).sort()) {
     const content = s.clientHeight;
     s.style.height = h;
     s.style.overflow = o;
-    return { over: content - budget, budget, manifest: s.classList.contains("manifest") };
+    /* WIDTH IS A FIT QUESTION TOO, AND NOTHING WAS ASKING IT. A ledger whose cells are all
+       nowrap cannot shrink below its own min-content width; dropped into a half-width grid
+       track it silently runs past the track, over its neighbour and off the sheet, where
+       overflow:hidden clips it. Height gates cannot see that -- the sheet still fits -- so it
+       reached print. Measure the widest painted node against the sheet's content box. */
+    const box = s.getBoundingClientRect();
+    const pad = parseFloat(getComputedStyle(s).paddingLeft) || 0;
+    const inner = { left: box.left + pad, right: box.right - pad };
+    const wide = [];
+    for (const e of s.querySelectorAll("*")) {
+      if (e.ownerSVGElement || e.tagName === "svg") continue;
+      const r = e.getBoundingClientRect();
+      if (!r.width) continue;
+      const past = Math.round(Math.max(r.right - inner.right, inner.left - r.left));
+      if (past > 1) wide.push({ past, what: `${e.tagName.toLowerCase()}.${(typeof e.className === "string" ? e.className : "")}`.trim() });
+    }
+    wide.sort((a, b) => b.past - a.past);
+    return { over: content - budget, budget, manifest: s.classList.contains("manifest"),
+      widest: wide[0] || null, wideCount: wide.length };
   }));
   const expected = EXPECTED[f];
   if (expected === undefined) {
@@ -82,8 +100,13 @@ for (const f of readdirSync(DIR).filter((x) => x.endsWith(".html")).sort()) {
       console.log(`  ok    ${f} sheet ${i + 1} fits — ${s.budget + s.over}px of ${s.budget}px used, `
         + `${-s.over}px spare`);
     }
+    if (s.widest) {
+      failed++;
+      console.log(`  FAIL  ${f} sheet ${i + 1} runs ${s.widest.past}px past the content box `
+        + `(${s.wideCount} node(s), widest ${s.widest.what}) — it is clipped, not laid out.`);
+    }
   });
 }
 await browser.close();
-if (failed) { console.log(`\n${failed} sheet(s) do not fit`); process.exit(1); }
+if (failed) { console.log(`\n${failed} sheet failure(s)`); process.exit(1); }
 console.log("\nevery sheet fits its page");

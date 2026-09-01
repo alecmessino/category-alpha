@@ -1,5 +1,5 @@
 {
-  "_note": "PUBLIC SOURCES FOR THE CONTRACT TERMS PRINTED ON ARTIFACT E. The Atlas cohort has its own cite string and replay URL; the contract terms beside it are not Atlas output and need their own provenance. Each entry names a publisher, the document, what that document is the source of, the date it was read, and the URL. A `url` of null means this build does not hold a citable public document for that entry: the sheet then prints the gap rather than a source, and scripts/check-collateral.mjs fails if it prints neither. Supplying the URL here is the only change needed to close it.",
+  "_note": "PUBLIC SOURCES FOR THE CONTRACT TERMS PRINTED ON ARTIFACT E. The Atlas cohort has its own cite string and replay URL; the contract terms beside it are not Atlas output and need their own provenance. Each entry names a publisher, the document, what that document is the source of, the date it was read, and the URL. A `url` of null means this build does not hold a citable public document for that entry: the sheet then prints `gap_note` instead of a source, and the terms block is headed `heading_when_missing` rather than `heading_when_held` — TRANSCRIBED and SOURCE RECORD INCOMPLETE, not AS PUBLISHED and VERIFIED, because a transcription nobody can re-open is not a verified citation. Supplying the URL here restores the stronger heading and prints the citation; nothing else changes. scripts/check-collateral.mjs fails the sheet if it prints neither a source nor its gap.",
   "sources": [
     {
       "id": "sshws",
@@ -25,11 +25,15 @@
       "id": "discrete-terms",
       "publisher": "Discrete",
       "document": "published contract terms",
-      "short": "Discrete",
+      "short": "Discrete public terms",
       "covers": "the reference event, the 30 Nov 2026 deadline, the trigger wording, the CONUS reference region and the Gulf-only and Florida-only variants",
       "accessed": "2026-08-31",
       "url": null,
-      "label": "Trigger, deadline, variants"
+      "label": "Trigger, deadline, variants",
+      "transcribed": "2026-08-31",
+      "gap_note": "Discrete public terms, transcribed 31 Aug 2026. Original source URL/document not presently held; independently re-verifiable citation pending.",
+      "heading_when_held": "DISCRETE — PUBLIC TERMS, AS PUBLISHED · VERIFIED 31 AUG 2026",
+      "heading_when_missing": "DISCRETE — PUBLIC TERMS TRANSCRIBED 31 AUG 2026 · SOURCE RECORD INCOMPLETE"
     }
   ]
 }

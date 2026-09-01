@@ -501,15 +501,21 @@ function barCell(row) {
 /**
  * The outcome ledger. `groups` is [{ label, rows }]. Nothing is computed here.
  */
-export function ledger(groups, { caption, showBar = true, compact = false } = {}) {
+export function ledger(groups, { caption, showBar = true, compact = false,
+  statusHead = "Status returned" } = {}) {
   /* COMPACT MERGES THE RATE AND ITS INTERVAL INTO ONE CELL. Not to save ink -- to buy the STATUS
      column the width it needs to print the archive's stamp on one line. A stamp that wraps to
      three lines in a narrow column costs more page than the interval column it was competing
      with, and the interval never leaves the number it belongs to. */
   const cols = compact ? 4 : (showBar ? 6 : 5);
+  /* THE STATUS HEADING SETS THE TABLE'S MINIMUM WIDTH. Every cell in this table is nowrap, so
+     the widest heading is what the table cannot shrink below -- and "Status returned" is 103 px
+     of heading over cells that hold an em dash. In a half-width column that pushed the table
+     51 px past its grid track and clipped the column at the sheet edge. Callers that live in a
+     narrow column pass the short form; the default is unchanged. */
   const head = compact
     ? `<tr><th>Contract row</th><th>n / N</th><th>Rate · 95% Wilson</th>`
-      + `<th style="text-align:left">Status returned</th></tr>`
+      + `<th style="text-align:left">${esc(statusHead)}</th></tr>`
     : `<tr><th>Contract row</th><th>n / N</th><th>Rate</th>`
       + (showBar ? `<th>95% Wilson</th>` : "")
       + `<th>Interval</th><th style="text-align:left">Status returned</th></tr>`;

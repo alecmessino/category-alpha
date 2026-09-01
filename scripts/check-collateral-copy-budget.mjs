@@ -24,7 +24,7 @@ export const BUDGETS = {
   B2: { "answers.now": 44, "answers.adds": 33, "answers.commercial": 23, "lede": 45, "geography-not-probability": 64, "exposure-map": 68, "frequency-bands": 36, "not-this": 60 },
   C: { "live-vs-history": 80, "land-rows": 39, "so-what": 36 },
   D: { "one-sentence": 59, "users-can": 140, "moat": 91, "delivery": 41, "pilot": 23, "sample-note": 41 },
-  E: { "lede": 25, "discrete-terms": 84, "cohort-note": 21, "history-note": 61, "desk-use": 39, "desk-not": 64 },
+  E: { "lede": 25, "discrete-terms": 84, "cohort-note": 21, "history-note": 61, "desk-use": 39, "desk-not": 49 },
 };
 
 /* SLOTS NO LONGER RENDERED. The type-gate pass cut the blocks these fed; the copy stays in

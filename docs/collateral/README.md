@@ -106,7 +106,7 @@ node scripts/check-collateral-fit.mjs        # every sheet fits its printed page
 node scripts/check-collateral-legibility.mjs # measured type sizes clear the gate (needs a browser)
 ```
 
-Current: 183/183 content, 42/42 replay, every slot inside budget and printed somewhere, every
+Current: 184/184 content, 42/42 replay, every slot inside budget and printed somewhere, every
 sheet fits, every semantic class clears its own type floor.
 
 ### The contract's own provenance
@@ -122,8 +122,20 @@ be invented on the page.
 This build holds NOAA/NHC sources for the Category 4 = 130 mph definition and for the landfall and
 intensity determination authority. It holds no citable public document for Discrete's own published
 terms — the reference event, the deadline, the trigger wording and the regional variants — so the
-sheet prints that gap. Supplying the URL in `contract-sources.json` is the only change needed to
-close it.
+sheet prints that gap, and the terms block is headed **PUBLIC TERMS TRANSCRIBED 31 AUG 2026 ·
+SOURCE RECORD INCOMPLETE** rather than AS PUBLISHED · VERIFIED: a transcription nobody can re-open
+is not a verified citation. Both headings live in `contract-sources.json` and the sheet picks
+between them from whether the URL is held, so supplying the URL restores the stronger heading and
+prints the citation in one edit — and a check fails the sheet if heading and record ever disagree.
+
+### Width is a fit question too
+
+`check-collateral-fit.mjs` also measures the widest painted node against the sheet's content box.
+A ledger whose cells are all `white-space:nowrap` cannot shrink below its own min-content width; in
+a half-width grid track it runs past the track, over its neighbour, and off the sheet, where
+`overflow:hidden` clips it. Height gates cannot see that — the sheet still fits — so it reached
+print. Callers in narrow columns pass a short `statusHead` to `ledger()`; the heading, not the
+data, is what sets a compact ledger's minimum width.
 
 ### The trigger lock
 
