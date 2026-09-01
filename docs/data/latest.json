@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-01T22:24:18.807Z",
+  "generatedAt": "2026-09-01T23:40:56.163Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 200,
+      "latencyMs": 230,
       "count": 4,
       "note": "4 active",
       "raw": "{\"id\":\"al052026\",\"binNumber\":\"AT5\",\"name\":\"Edouard\",\"classification\":\"TS\",\"intensity\":\"45\",\"pressure\":\"998\",\"latitude\":\"29.9N\",\"longitude\":\"94.0W\",\"latitudeNumeric\":29.9,\"longitudeNumeric\":-94,\"movementDir\":305,\"movementSpeed\":7,\"lastUpdate\":\"2026-09-01T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"006\",\"issuance\":\"2026-09-01T21:00:00.000Z\",\"fileUpdateTime\":\"2026-09-01T20:37:23.435Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPAT5.shtml\"},\"forecastAdvisory\":{\"advNum\":\"006\",\"issuance\":\"2026-09-01T21:",
-      "forecast": "Edouard: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · Tropical Storm Warning · forecast undefined guidance · advisory 107m old | Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 113m old | Marie: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 113m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 113m old",
-      "advisoryLagMin": 113
+      "forecast": "Edouard: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · Tropical Storm Warning · forecast undefined guidance · advisory 184m old | Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 190m old | Marie: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 190m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 20m old",
+      "advisoryLagMin": 190
     },
     "markets": {
       "ok": true,
@@ -47,14 +47,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 9  Atlantic hurr | Above 9 | px=0.025",
-            "Will there be more than 8  Atlantic hurr | Above 8 | px=0.045",
-            "Will there be more than 7  Atlantic hurr | Above 7 | px=0.050",
-            "Will there be more than 6  Atlantic hurr | Above 6 | px=0.070",
-            "Will there be more than 5  Atlantic hurr | Above 5 | px=0.150",
-            "Will there be more than 4  Atlantic hurr | Above 4 | px=0.220"
+            "Will Lowell be categorized as a hurrican | Lowell | px=0.945",
+            "Will Wale be categorized as a hurricane  | Wale | px=0.120",
+            "Will Ulana be categorized as a hurricane | Ulana | px=0.320",
+            "Will Pena be categorized as a hurricane  | Pena | px=0.415",
+            "Will Olana be categorized as a hurricane | Olana | px=0.545",
+            "Will Nolo be categorized as a hurricane  | Nolo | px=0.240"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2520.75\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"3319.24\"},\"px\":{\"last_price_dollars\":\"0.0400\",\"no_ask_dollars\":\"0.9800\",\"no_bid_dollars\":\"0.9700\",\"previous_price_dollars\":\"0.0400\",\"previous_yes_ask_dollars\":\"0.0300\",\"previous_yes_bid_dollars\":\"0.0200\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0300\",\"yes_ask_size_fp\":\"2300.00\",\"yes_bid_dollars\":\"0.0200\",\"yes_bid_size_fp\":\"285.23\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"0.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"0.00\"},\"px\":{\"last_price_dollars\":\"0.0000\",\"no_ask_dollars\":\"0.0600\",\"no_bid_dollars\":\"0.0500\",\"previous_price_dollars\":\"0.0000\",\"previous_yes_ask_dollars\":\"0.9900\",\"previous_yes_bid_dollars\":\"0.0100\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.9500\",\"yes_ask_size_fp\":\"5.00\",\"yes_bid_dollars\":\"0.9400\",\"yes_bid_size_fp\":\"1.00\"}}"
         }
       ]
     },
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 164,
+      "latencyMs": 306,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 3mo old)"
@@ -249,21 +249,21 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 1,
       "note": "1 area(s) under watch · 0 Atlantic",
-      "latencyMs": 141,
+      "latencyMs": 142,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
           "ok": true,
           "status": 200,
           "count": 0,
-          "note": "0 area(s) · issued 200 PM EDT Tue Sep 1 2026",
+          "note": "0 area(s) · issued 800 PM EDT Tue Sep 1 2026",
           "quietOrUnparsed": "quiet basin — product says formation not expected",
           "diag": {
-            "bytes": 479,
+            "bytes": 413,
             "hasFormationChance": false,
             "hasNotExpected": true,
             "headingsVisibleToSplit": 0,
-            "window": "For the North Atlantic...Caribbean Sea and the Gulf of America: ⏎ ⏎ Active Systems: ⏎ The National Hurricane Center is issuing advisories on Tropical ⏎ Storm Edouard, located over the northwestern Gulf of America. ⏎ ⏎ Tropical cyclone formation is not expected during the next 7 days. ⏎ ⏎ $$ ⏎ Forecaster Bann ⏎ "
+            "window": "For the North Atlantic...Caribbean Sea and the Gulf of America: ⏎ ⏎ Active Systems: ⏎ The National Hurricane Center is issuing advisories on Tropical ⏎ Storm Edouard, located inland over southeastern Texas. ⏎ ⏎ Tropical cyclone formation is not expected during the next 7 days. ⏎ ⏎ $$ ⏎ Forecaster Kelly ⏎ "
           }
         },
         {
@@ -271,7 +271,7 @@
           "ok": true,
           "status": 200,
           "count": 1,
-          "note": "1 area(s) · issued 1100 AM PDT Tue Sep 1 2026",
+          "note": "1 area(s) · issued 500 PM PDT Tue Sep 1 2026",
           "quietOrUnparsed": null,
           "diag": null
         }
@@ -280,7 +280,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 12,
+      "latencyMs": 31,
       "source": "NHC graphical TWO",
       "count": 1,
       "note": "1 of 1 area(s) with geometry"
@@ -290,9 +290,9 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 273,
+      "latencyMs": 701,
       "count": 4,
-      "note": "4/4 storm decks read · AL052026: a-deck cycle 2026090118 · 32 techs · consensus 3 member(s) peak 45 kt · b-deck 17 records · f-deck 66 fixes | EP112026: a-deck cycle 2026090118 · 33 techs · consensus 3 member(s) peak 117 kt · b-deck 32 records · f-deck 157 fixes | EP132026: a-deck cycle 2026090118 · 34 techs · consensus 3 member(s) peak 85 kt · b-deck 13 records · f-deck 33 fixes | EP122026: a-deck cycle 2026090118 · 36 techs · consensus 3 member(s) peak 132.3 kt · b-deck 29 records · f-deck 157 fixes",
+      "note": "4/4 storm decks read · AL052026: a-deck cycle 2026090118 · 32 techs · consensus 3 member(s) peak 45 kt · b-deck 17 records · f-deck 66 fixes | EP112026: a-deck cycle 2026090118 · 33 techs · consensus 3 member(s) peak 117 kt · b-deck 32 records · f-deck 157 fixes | EP132026: a-deck cycle 2026090118 · 34 techs · consensus 3 member(s) peak 85 kt · b-deck 13 records · f-deck 33 fixes | EP122026: a-deck cycle 2026090118 · 36 techs · consensus 3 member(s) peak 132.3 kt · b-deck 29 records · f-deck 160 fixes",
       "attempts": [
         {
           "source": "AL052026",
@@ -316,7 +316,7 @@
           "source": "EP122026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026090118 · 36 techs · consensus 3 member(s) peak 132.3 kt · b-deck 29 records · f-deck 157 fixes"
+          "note": "a-deck cycle 2026090118 · 36 techs · consensus 3 member(s) peak 132.3 kt · b-deck 29 records · f-deck 160 fixes"
         }
       ]
     },
@@ -325,7 +325,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 163,
+      "latencyMs": 453,
       "count": 2,
       "note": "2 vortex data message(s): AL052026 13:04Z, CP022026 08:53Z",
       "attempts": [
@@ -360,7 +360,7 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 231,
+      "latencyMs": 565,
       "count": 4,
       "note": "4/4 storms · AL052026: 2026-09-01T18:00Z · shear 1 kt · OHC 6 · MPI 170 kt · 8 RI thresholds | EP112026: 2026-09-01T18:00Z · shear 9 kt · OHC 10 · MPI 140 kt · 8 RI thresholds | EP132026: 2026-09-01T18:00Z · shear 3 kt · OHC 35 · MPI 161 kt · 8 RI thresholds | EP122026: 2026-09-01T18:00Z · shear 12 kt · OHC 30 · MPI 156 kt · 8 RI thresholds",
       "attempts": [
@@ -459,11 +459,11 @@
         "already": false,
         "basis": "official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 107,
+      "advisoryLagMin": 184,
       "discussion": {
         "forecaster": "Reinhart",
         "issuedZ": "2026-09-01T20:37:00.000Z",
-        "lagMin": 107,
+        "lagMin": 184,
         "guidance": {
           "intensity": null,
           "track": null
@@ -1916,12 +1916,12 @@
         "initSource": "satellite intensity analysis",
         "tauKt": 0,
         "reconDeltaKt": null,
-        "reconAgeMin": 560,
+        "reconAgeMin": 637,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 390,
+        "ascatAgeMin": 467,
         "ascatUsed": false,
-        "consensusAgeMin": 264,
+        "consensusAgeMin": 341,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
@@ -1967,7 +1967,7 @@
             "label": "Aircraft reconnaissance",
             "p": null,
             "unavailable": true,
-            "basis": "recon fix present but not applied: the fix is 560 min old, past the 180-min line"
+            "basis": "recon fix present but not applied: the fix is 637 min old, past the 180-min line"
           },
           {
             "id": "ships-ri",
@@ -1978,8 +1978,8 @@
           }
         ],
         "notes": [
-          "recon fix not applied: the fix is 560 min old, past the 180-min line",
-          "scatterometer pass is 390 min old, past the 360-min line — band not tightened",
+          "recon fix not applied: the fix is 637 min old, past the 180-min line",
+          "scatterometer pass is 467 min old, past the 360-min line — band not tightened",
           "SHIPS RI implies a floor of 6% — published, NOT scored (no operator claim)"
         ],
         "used": {
@@ -1992,9 +1992,10 @@
         "basis": "combined 2 intensity estimates at 45 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 1%, calibrated 1%"
       },
       "evidenceQuality": {
-        "tier": "MEDIUM",
+        "tier": "LOW",
         "reasons": [
-          "ATCF consensus 264 min old, no aircraft in the storm",
+          "the advisory under this estimate is 184 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 341 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -2079,11 +2080,11 @@
         "already": true,
         "basis": "already carried at 115 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 113,
+      "advisoryLagMin": 190,
       "discussion": {
         "forecaster": "Cangialosi",
         "issuedZ": "2026-09-01T20:31:00.000Z",
-        "lagMin": 113,
+        "lagMin": 190,
         "guidance": {
           "intensity": {
             "position": "above",
@@ -3838,7 +3839,7 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 264,
+        "consensusAgeMin": 341,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
@@ -3883,9 +3884,10 @@
         "basis": "combined 2 intensity estimates at 116 kt (sigma 2.6 kt, of which 2.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99%"
       },
       "evidenceQuality": {
-        "tier": "MEDIUM",
+        "tier": "LOW",
         "reasons": [
-          "ATCF consensus 264 min old, no aircraft in the storm"
+          "the advisory under this estimate is 190 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 341 min old, no aircraft in the storm"
         ]
       }
     },
@@ -3972,11 +3974,11 @@
         "already": false,
         "basis": "official forecast peaks at 90 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 92-99% across a plausible range of error widths"
       },
-      "advisoryLagMin": 113,
+      "advisoryLagMin": 190,
       "discussion": {
         "forecaster": "Brown",
         "issuedZ": "2026-09-01T20:32:00.000Z",
-        "lagMin": 112,
+        "lagMin": 189,
         "guidance": {
           "intensity": null,
           "track": null
@@ -5723,9 +5725,9 @@
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 385,
+        "ascatAgeMin": 462,
         "ascatUsed": false,
-        "consensusAgeMin": 264,
+        "consensusAgeMin": 341,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
@@ -5775,7 +5777,7 @@
           }
         ],
         "notes": [
-          "scatterometer pass is 385 min old, past the 360-min line — band not tightened"
+          "scatterometer pass is 462 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
@@ -5787,9 +5789,10 @@
         "basis": "combined 2 intensity estimates at 88 kt (sigma 12.7 kt, of which 3.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 98%"
       },
       "evidenceQuality": {
-        "tier": "MEDIUM",
+        "tier": "LOW",
         "reasons": [
-          "ATCF consensus 264 min old, no aircraft in the storm",
+          "the advisory under this estimate is 190 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 341 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -5798,17 +5801,17 @@
       "id": "EP122026",
       "name": "Lowell",
       "cls": "HU",
-      "full_cls": "Cat 1 Hurricane",
+      "full_cls": "Cat 3 Hurricane",
       "basin": "west",
       "center": [
         13.5,
-        -150.3
+        -150.7
       ],
-      "movement": "WNW 10 mph",
-      "wind": 80,
-      "pressure": 977,
-      "advNum": "021",
-      "advTimeZ": "2026-09-01T21:00:00.000Z",
+      "movement": "W 10 mph",
+      "wind": 110,
+      "pressure": 957,
+      "advNum": "022",
+      "advTimeZ": "2026-09-02T00:00:00.000Z",
       "watches": {
         "inEffect": [],
         "changes": null,
@@ -5820,70 +5823,67 @@
       "forecastKt": [
         {
           "hr": 0,
-          "kt": 80,
-          "gustKt": 100
-        },
-        {
-          "hr": 9,
-          "kt": 95,
-          "gustKt": 115
-        },
-        {
-          "hr": 21,
-          "kt": 105,
-          "gustKt": 130
-        },
-        {
-          "hr": 33,
           "kt": 110,
           "gustKt": 135
         },
         {
-          "hr": 45,
-          "kt": 110,
-          "gustKt": 135
+          "hr": 6,
+          "kt": 125,
+          "gustKt": 150
         },
         {
-          "hr": 57,
-          "kt": 110,
-          "gustKt": 135
+          "hr": 18,
+          "kt": 130,
+          "gustKt": 160
         },
         {
-          "hr": 69,
-          "kt": 110,
-          "gustKt": 135
+          "hr": 30,
+          "kt": 130,
+          "gustKt": 160
         },
         {
-          "hr": 93,
-          "kt": 110,
-          "gustKt": 135
+          "hr": 42,
+          "kt": 125,
+          "gustKt": 150
         },
         {
-          "hr": 117,
-          "kt": 110,
-          "gustKt": 135
+          "hr": 54,
+          "kt": 120,
+          "gustKt": 145
+        },
+        {
+          "hr": 66,
+          "kt": 120,
+          "gustKt": 145
+        },
+        {
+          "hr": 90,
+          "kt": 120,
+          "gustKt": 145
+        },
+        {
+          "hr": 114,
+          "kt": 120,
+          "gustKt": 145
         }
       ],
       "hurricaneP": {
         "p": 0.99,
         "pLow": 0.99,
         "pHigh": 0.99,
-        "peakKt": 80,
+        "peakKt": 110,
         "peakHr": 0,
         "sigma": 5,
         "already": true,
-        "basis": "already carried at 80 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
+        "basis": "already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 113,
+      "advisoryLagMin": 20,
       "discussion": {
-        "forecaster": "Hagen",
-        "issuedZ": "2026-09-01T20:34:00.000Z",
-        "lagMin": 110,
+        "forecaster": "Kelly",
+        "issuedZ": "2026-09-01T23:22:00.000Z",
+        "lagMin": 19,
         "guidance": {
-          "intensity": {
-            "position": "above",
-            "quote": "Very little change has been made to the previous NHC intensity forecast, which lies between the middle and upper end of the guidance envelope."
-          },
+          "intensity": null,
           "track": null
         },
         "cues": [
@@ -5896,7 +5896,7 @@
       "track": [
         [
           13.5,
-          -150.3
+          -150.7
         ],
         [
           13.7,
@@ -5934,103 +5934,103 @@
       "cone": [
         [
           13.5,
-          -150.3
+          -150.7
         ],
         [
-          13.998770382808662,
-          -151.6720713234903
+          13.898948918606788,
+          -151.67892284169594
         ],
         [
-          14.373292878702292,
-          -153.6544089870509
+          14.315132731587566,
+          -153.65903416227764
         ],
         [
-          14.791424194420156,
-          -155.61378229266063
+          14.73755762621355,
+          -155.61965051357902
         ],
         [
-          15.205536875883261,
-          -157.47772341940953
+          15.151742722029425,
+          -157.4842649648732
         ],
         [
-          15.622667586992307,
-          -159.0696729484581
+          15.568787320446884,
+          -159.07541617445824
         ],
         [
-          15.941721607278907,
-          -160.48745255955532
+          15.887708982222348,
+          -160.4916690342694
         ],
         [
-          16.602625276286172,
-          -162.9216607706885
+          16.541250267373716,
+          -162.9338652619566
         ],
         [
-          17.571845445281106,
-          -163.98429859742336
+          17.513592997966207,
+          -164.00777812056634
         ],
         [
-          13.539092325297524,
-          -166.6473413389904
+          13.58424380413605,
+          -166.60253771491372
         ],
         [
-          14.318112326681785,
-          -167.2129643962315
+          14.343288933689944,
+          -167.15365761684097
         ],
         [
-          15.246615825494821,
-          -167.42645959122086
+          15.247984650482135,
+          -167.36167857606137
         ],
         [
-          16.183246580947525,
-          -167.25532421586004
+          16.160599232718102,
+          -167.19493128724827
         ],
         [
-          16.98541105110116,
-          -166.72561207970173
+          16.942195383124208,
+          -166.67880151355553
         ],
         [
-          17.53098696701387,
-          -165.91796705362356
+          17.473782172987875,
+          -165.89186533429987
         ],
         [
-          17.736915341145934,
-          -164.9553457715255
+          17.674430332398604,
+          -164.9539266491787
         ],
         [
-          13.028154554718894,
-          -165.81570140257665
+          13.086407002033795,
+          -165.79222187943367
         ],
         [
-          12.797374723713826,
-          -163.67833922931152
+          12.858749732626285,
+          -163.6661347380434
         ],
         [
-          13.058278392721093,
-          -160.71254744044467
+          13.112291017777652,
+          -160.7083309657306
         ],
         [
-          13.177332413007694,
-          -159.33032705154187
+          13.231212679553117,
+          -159.32458382554174
         ],
         [
-          13.194463124116737,
-          -157.72227658059046
+          13.248257277970573,
+          -157.71573503512678
         ],
         [
-          13.208575805579844,
-          -155.78621770733935
+          13.26244237378645,
+          -155.78034948642096
         ],
         [
-          13.226707121297709,
-          -153.74559101294906
+          13.284867268412436,
+          -153.74096583772234
         ],
         [
-          13.401229617191337,
-          -151.7279286765097
+          13.50105108139321,
+          -151.72107715830404
         ],
         [
           13.5,
-          -150.3
+          -150.7
         ]
       ],
       "reconTracks": null,
@@ -6042,12 +6042,12 @@
         {
           "at": [
             13.5,
-            -150.3
+            -150.7
           ],
           "hr": 0,
-          "validZ": "2026-09-01T21:00:00.000Z",
-          "kt": 80,
-          "gustKt": 100,
+          "validZ": "2026-09-02T00:00:00.000Z",
+          "kt": 110,
+          "gustKt": 135,
           "ktFrom": "forecast advisory"
         },
         {
@@ -6055,10 +6055,10 @@
             13.7,
             -151.7
           ],
-          "hr": 9,
+          "hr": 6,
           "validZ": "2026-09-02T06:00:00.000Z",
-          "kt": 95,
-          "gustKt": 115,
+          "kt": 125,
+          "gustKt": 150,
           "ktFrom": null
         },
         {
@@ -6066,10 +6066,10 @@
             13.8,
             -153.7
           ],
-          "hr": 21,
+          "hr": 18,
           "validZ": "2026-09-02T18:00:00.000Z",
-          "kt": 105,
-          "gustKt": 130,
+          "kt": 130,
+          "gustKt": 160,
           "ktFrom": null
         },
         {
@@ -6077,10 +6077,10 @@
             14,
             -155.7
           ],
-          "hr": 33,
+          "hr": 30,
           "validZ": "2026-09-03T06:00:00.000Z",
-          "kt": 110,
-          "gustKt": 135,
+          "kt": 130,
+          "gustKt": 160,
           "ktFrom": null
         },
         {
@@ -6088,10 +6088,10 @@
             14.2,
             -157.6
           ],
-          "hr": 45,
+          "hr": 42,
           "validZ": "2026-09-03T18:00:00.000Z",
-          "kt": 110,
-          "gustKt": 135,
+          "kt": 125,
+          "gustKt": 150,
           "ktFrom": null
         },
         {
@@ -6099,10 +6099,10 @@
             14.4,
             -159.2
           ],
-          "hr": 57,
+          "hr": 54,
           "validZ": "2026-09-04T06:00:00.000Z",
-          "kt": 110,
-          "gustKt": 135,
+          "kt": 120,
+          "gustKt": 145,
           "ktFrom": null
         },
         {
@@ -6110,10 +6110,10 @@
             14.5,
             -160.6
           ],
-          "hr": 69,
+          "hr": 66,
           "validZ": "2026-09-04T18:00:00.000Z",
-          "kt": 110,
-          "gustKt": 135,
+          "kt": 120,
+          "gustKt": 145,
           "ktFrom": null
         },
         {
@@ -6121,10 +6121,10 @@
             14.7,
             -163.3
           ],
-          "hr": 93,
+          "hr": 90,
           "validZ": "2026-09-05T18:00:00.000Z",
-          "kt": 110,
-          "gustKt": 135,
+          "kt": 120,
+          "gustKt": 145,
           "ktFrom": null
         },
         {
@@ -6132,15 +6132,15 @@
             15.3,
             -164.9
           ],
-          "hr": 117,
+          "hr": 114,
           "validZ": "2026-09-06T18:00:00.000Z",
-          "kt": 110,
-          "gustKt": 135,
+          "kt": 120,
+          "gustKt": 145,
           "ktFrom": null
         }
       ],
-      "advisoryIssuedZ": "2026-09-01T20:31:00.000Z",
-      "advNumFull": "21",
+      "advisoryIssuedZ": "2026-09-01T23:21:00.000Z",
+      "advNumFull": "22",
       "consensus": {
         "cycle": "2026090118",
         "cycleIso": "2026-09-01T18:00:00.000Z",
@@ -6501,8 +6501,8 @@
         },
         "official": {
           "tech": "OFCL",
-          "peakKt": 110,
-          "peakHr": 36
+          "peakKt": 130,
+          "peakHr": 24
         },
         "missing": [],
         "techsPresent": [
@@ -7616,7 +7616,7 @@
         "forecastAids": 35
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026090118 · 36 techs · consensus 3 member(s) peak 132.3 kt · b-deck 29 records · f-deck 157 fixes",
+        "atcf": "a-deck cycle 2026090118 · 36 techs · consensus 3 member(s) peak 132.3 kt · b-deck 29 records · f-deck 160 fixes",
         "ships": "2026-09-01T18:00Z · shear 12 kt · OHC 30 · MPI 156 kt · 8 RI thresholds"
       },
       "riFloor": null,
@@ -7624,13 +7624,13 @@
         "ok": true,
         "p": 0.99,
         "pRaw": 0.99,
-        "pLow": 0.6171577125923693,
+        "pLow": 0.7907205466846539,
         "pHigh": 0.99,
-        "pPeak": 0.6832616923596013,
+        "pPeak": 0.9022152163098307,
         "pNow": 0.99,
         "pWithRi": 0.99,
         "drivenBy": "current intensity",
-        "meanKt": 80,
+        "meanKt": 110,
         "sigmaKt": 36.7,
         "sigmaInitKt": 5,
         "initSource": "satellite intensity analysis",
@@ -7641,14 +7641,14 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 264,
+        "consensusAgeMin": 341,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
           {
             "id": "official",
             "label": "NHC official forecast intensity",
-            "peakKt": 80,
+            "peakKt": 110,
             "peakHr": 0,
             "sigmaKt": 0
           },
@@ -7665,7 +7665,7 @@
             "id": "official",
             "label": "Official forecast intensity",
             "p": 0.99,
-            "basis": "already carried at 80 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
+            "basis": "already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
           },
           {
             "id": "consensus",
@@ -7683,12 +7683,12 @@
           "ascat": false,
           "ships": false
         },
-        "basis": "combined 2 intensity estimates at 80 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99%"
+        "basis": "combined 2 intensity estimates at 110 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99%"
       },
       "evidenceQuality": {
         "tier": "MEDIUM",
         "reasons": [
-          "ATCF consensus 264 min old, no aircraft in the storm"
+          "ATCF consensus 341 min old, no aircraft in the storm"
         ]
       }
     }
@@ -7705,21 +7705,21 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 80 kt now · combined 2 intensity estimates at 80 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99% · already carried at 80 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 113 min old when fetched",
+      "modelBasis": "Lowell is 110 kt now · combined 2 intensity estimates at 110 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99% · already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 20 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
           "id": "official",
           "label": "Official forecast intensity",
           "p": 0.99,
-          "basis": "already carried at 80 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
+          "basis": "already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
         },
         {
           "id": "guidance",
           "label": "Position in the guidance envelope",
           "p": null,
-          "unavailable": false,
-          "basis": "NHC places its own intensity forecast above the guidance envelope"
+          "unavailable": true,
+          "basis": "the discussion states no position for the intensity forecast"
         },
         {
           "id": "watch",
@@ -7736,18 +7736,18 @@
           "basis": "3 aids in the 2026090118 deck peak at a mean of 132.3 kt near 108h, disagreeing by 36.7 kt"
         }
       ],
-      "modelLow": 0.6171577125923693,
+      "modelLow": 0.7907205466846539,
       "modelHigh": 0.99,
-      "modelLagMin": 113,
+      "modelLagMin": 20,
       "modelMaxLagMin": 360,
-      "modelGuidance": "above",
+      "modelGuidance": null,
       "modelRawP": null,
       "modelOfficialP": 0.99,
       "modelCalibrated": true,
       "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 132.3,
-        "conAgeMin": 264,
+        "conAgeMin": 341,
         "spreadKt": 36.7,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -7786,7 +7786,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Edouard is 45 kt now · combined 2 intensity estimates at 45 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · Tropical Storm Warning in effect · advisory 107 min old when fetched",
+      "modelBasis": "Edouard is 45 kt now · combined 2 intensity estimates at 45 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · Tropical Storm Warning in effect · advisory 184 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -7821,7 +7821,7 @@
           "label": "Aircraft reconnaissance",
           "p": null,
           "unavailable": true,
-          "basis": "recon fix present but not applied: the fix is 560 min old, past the 180-min line"
+          "basis": "recon fix present but not applied: the fix is 637 min old, past the 180-min line"
         },
         {
           "id": "ships-ri",
@@ -7833,18 +7833,18 @@
       ],
       "modelLow": 0.01,
       "modelHigh": 0.01,
-      "modelLagMin": 107,
+      "modelLagMin": 184,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
       "modelOfficialP": 0.01,
       "modelCalibrated": true,
-      "modelQuality": "MEDIUM",
+      "modelQuality": "LOW",
       "modelIntel": {
         "conKt": 45,
-        "conAgeMin": 264,
+        "conAgeMin": 341,
         "spreadKt": 0,
-        "reconAgeMin": 560,
+        "reconAgeMin": 637,
         "reconDeltaKt": null,
         "ascatUsed": false,
         "riFloorP": 0.06,
@@ -7859,7 +7859,7 @@
       "liquidity": 5,
       "spread": 0.03,
       "volume": 3703.01,
-      "volume24h": 2857.92,
+      "volume24h": 1701.92,
       "openInterest": 1264.68,
       "depth": {
         "bidSize": 0,
@@ -7881,7 +7881,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Karina is 115 kt now · combined 2 intensity estimates at 116 kt (sigma 2.6 kt, of which 2.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 115 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 113 min old when fetched",
+      "modelBasis": "Karina is 115 kt now · combined 2 intensity estimates at 116 kt (sigma 2.6 kt, of which 2.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 115 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 190 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -7914,16 +7914,16 @@
       ],
       "modelLow": 0.99,
       "modelHigh": 0.99,
-      "modelLagMin": 113,
+      "modelLagMin": 190,
       "modelMaxLagMin": 360,
       "modelGuidance": "above",
       "modelRawP": null,
       "modelOfficialP": 0.99,
       "modelCalibrated": true,
-      "modelQuality": "MEDIUM",
+      "modelQuality": "LOW",
       "modelIntel": {
         "conKt": 117,
-        "conAgeMin": 264,
+        "conAgeMin": 341,
         "spreadKt": 2.6,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -7962,7 +7962,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Marie is 50 kt now · combined 2 intensity estimates at 88 kt (sigma 12.7 kt, of which 3.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 98% · official forecast peaks at 90 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 92-99% across a plausible range of error widths · advisory 113 min old when fetched",
+      "modelBasis": "Marie is 50 kt now · combined 2 intensity estimates at 88 kt (sigma 12.7 kt, of which 3.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 98% · official forecast peaks at 90 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 92-99% across a plausible range of error widths · advisory 190 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -8002,16 +8002,16 @@
       ],
       "modelLow": 0.8922308330222765,
       "modelHigh": 0.99,
-      "modelLagMin": 113,
+      "modelLagMin": 190,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
       "modelOfficialP": 0.9877896402429739,
       "modelCalibrated": true,
-      "modelQuality": "MEDIUM",
+      "modelQuality": "LOW",
       "modelIntel": {
         "conKt": 85,
-        "conAgeMin": 264,
+        "conAgeMin": 341,
         "spreadKt": 3.6,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -8050,21 +8050,21 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 80 kt now · combined 2 intensity estimates at 80 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99% · already carried at 80 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 113 min old when fetched",
+      "modelBasis": "Lowell is 110 kt now · combined 2 intensity estimates at 110 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99% · already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 20 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
           "id": "official",
           "label": "Official forecast intensity",
           "p": 0.99,
-          "basis": "already carried at 80 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
+          "basis": "already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
         },
         {
           "id": "guidance",
           "label": "Position in the guidance envelope",
           "p": null,
-          "unavailable": false,
-          "basis": "NHC places its own intensity forecast above the guidance envelope"
+          "unavailable": true,
+          "basis": "the discussion states no position for the intensity forecast"
         },
         {
           "id": "watch",
@@ -8081,18 +8081,18 @@
           "basis": "3 aids in the 2026090118 deck peak at a mean of 132.3 kt near 108h, disagreeing by 36.7 kt"
         }
       ],
-      "modelLow": 0.6171577125923693,
+      "modelLow": 0.7907205466846539,
       "modelHigh": 0.99,
-      "modelLagMin": 113,
+      "modelLagMin": 20,
       "modelMaxLagMin": 360,
-      "modelGuidance": "above",
+      "modelGuidance": null,
       "modelRawP": null,
       "modelOfficialP": 0.99,
       "modelCalibrated": true,
       "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 132.3,
-        "conAgeMin": 264,
+        "conAgeMin": 341,
         "spreadKt": 36.7,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -8151,12 +8151,12 @@
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 18,
       "spread": 0.01,
-      "volume": 67765.02,
-      "volume24h": 44517.99,
+      "volume": 67766.41,
+      "volume24h": 40194.5,
       "openInterest": 14637.61,
       "depth": {
         "bidSize": 0,
-        "askSize": 1807.57,
+        "askSize": 1806.18,
         "notional": 1
       },
       "proxy": false,
@@ -8195,14 +8195,14 @@
       "yesBid": null,
       "yesAsk": 0.01,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 120,
+      "liquidity": 115,
       "spread": 0.01,
-      "volume": 14473.74,
-      "volume24h": 12473.74,
-      "openInterest": 8179.3,
+      "volume": 14973.74,
+      "volume24h": 12947.74,
+      "openInterest": 7679.3,
       "depth": {
         "bidSize": 0,
-        "askSize": 12028.71,
+        "askSize": 11528.71,
         "notional": 1
       },
       "proxy": false,
@@ -8290,7 +8290,7 @@
       "liquidity": null,
       "spread": 0.010000000000000009,
       "volume": 1726.68,
-      "volume24h": 40.62,
+      "volume24h": 5.2,
       "openInterest": 668.21,
       "depth": {
         "bidSize": 32664.79,
@@ -8382,7 +8382,7 @@
       "liquidity": 106,
       "spread": 0.01,
       "volume": 1308.79,
-      "volume24h": 1308.79,
+      "volume24h": 78.79,
       "openInterest": 1308.79,
       "depth": {
         "bidSize": 0,
@@ -8612,7 +8612,7 @@
       "liquidity": 6,
       "spread": 0.10999999999999999,
       "volume": 335.7,
-      "volume24h": 6.7,
+      "volume24h": 1.13,
       "openInterest": 330.7,
       "depth": {
         "bidSize": 2,
@@ -8750,7 +8750,7 @@
       "liquidity": 108,
       "spread": 0.01,
       "volume": 70,
-      "volume24h": 50,
+      "volume24h": 0,
       "openInterest": 70,
       "depth": {
         "bidSize": 0,
@@ -8888,7 +8888,7 @@
       "liquidity": 1,
       "spread": 0.12000000000000001,
       "volume": 27.05,
-      "volume24h": 27.05,
+      "volume24h": 7.05,
       "openInterest": 27.05,
       "depth": {
         "bidSize": 50,
@@ -9163,7 +9163,7 @@
       "short": "Will there be more than 3 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.08,
+      "market": 0.085,
       "model": 0.11850812027911928,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -9215,16 +9215,16 @@
       "horizon": "seasonal",
       "strike": 3,
       "yesBid": 0.07,
-      "yesAsk": 0.09,
+      "yesAsk": 0.1,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 10,
-      "spread": 0.01999999999999999,
+      "liquidity": 31,
+      "spread": 0.03,
       "volume": 16932.52,
       "volume24h": 12.48,
       "openInterest": 6219.27,
       "depth": {
         "bidSize": 0.95,
-        "askSize": 113,
+        "askSize": 309.03,
         "notional": 1
       },
       "proxy": false,
@@ -9365,14 +9365,14 @@
       "yesBid": 0.24,
       "yesAsk": 0.25,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 27,
+      "liquidity": 26,
       "spread": 0.010000000000000009,
-      "volume": 13056.24,
-      "volume24h": 224.37,
-      "openInterest": 7364.98,
+      "volume": 13063.32,
+      "volume24h": 228.33,
+      "openInterest": 7361.7,
       "depth": {
-        "bidSize": 56,
-        "askSize": 106.23,
+        "bidSize": 103.72,
+        "askSize": 102.43,
         "notional": 1
       },
       "proxy": false,
@@ -9533,7 +9533,7 @@
       "short": "Will there be more than 4 Atlantic hurricanes…",
       "storm": null,
       "subject": null,
-      "market": 0.22,
+      "market": 0.21000000000000002,
       "model": 0.26958573852120604,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
@@ -9584,17 +9584,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.21,
+      "yesBid": 0.19,
       "yesAsk": 0.23,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 8,
-      "spread": 0.020000000000000018,
-      "volume": 11444.38,
-      "volume24h": 159.97,
-      "openInterest": 6583.64,
+      "liquidity": 36,
+      "spread": 0.04000000000000001,
+      "volume": 11487.34,
+      "volume24h": 201.93,
+      "openInterest": 6626.6,
       "depth": {
-        "bidSize": 40.69,
-        "askSize": 35,
+        "bidSize": 1.47,
+        "askSize": 156.13,
         "notional": 1
       },
       "proxy": false,
@@ -9681,7 +9681,7 @@
       "short": "Will Fay be the first named hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.35,
+      "market": 0.365,
       "model": 0.5211417443494859,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -9714,17 +9714,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.34,
-      "yesAsk": 0.36,
+      "yesBid": 0.35,
+      "yesAsk": 0.38,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 3,
-      "spread": 0.019999999999999962,
-      "volume": 9296.7,
-      "volume24h": 959.91,
-      "openInterest": 4976.82,
+      "liquidity": 6,
+      "spread": 0.030000000000000027,
+      "volume": 9305.43,
+      "volume24h": 901.18,
+      "openInterest": 4969.38,
       "depth": {
-        "bidSize": 245.52,
-        "askSize": 7.81,
+        "bidSize": 355.07,
+        "askSize": 16.71,
         "notional": 1
       },
       "proxy": false,
@@ -9849,7 +9849,7 @@
       "short": "Will Gonzalo be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.17,
+      "market": 0.22,
       "model": 0.26345932917424847,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -9882,17 +9882,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.14,
-      "yesAsk": 0.2,
+      "yesBid": 0.2,
+      "yesAsk": 0.24,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 73,
-      "spread": 0.06,
-      "volume": 8436.47,
-      "volume24h": 182.23,
-      "openInterest": 4312.34,
+      "liquidity": 59,
+      "spread": 0.03999999999999998,
+      "volume": 8799.58,
+      "volume24h": 536.04,
+      "openInterest": 4565,
       "depth": {
-        "bidSize": 15,
-        "askSize": 367.14,
+        "bidSize": 36.89,
+        "askSize": 245.57,
         "notional": 1
       },
       "proxy": false,
@@ -9959,14 +9959,14 @@
       "yesBid": 0.45,
       "yesAsk": 0.48,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 5,
+      "liquidity": 7,
       "spread": 0.02999999999999997,
       "volume": 8251.22,
-      "volume24h": 300.15,
+      "volume24h": 0.15,
       "openInterest": 3059.21,
       "depth": {
-        "bidSize": 31,
-        "askSize": 10,
+        "bidSize": 28,
+        "askSize": 15,
         "notional": 1
       },
       "proxy": false,
@@ -10163,14 +10163,14 @@
       "yesBid": 0.52,
       "yesAsk": 0.53,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 3,
+      "liquidity": 2,
       "spread": 0.010000000000000009,
-      "volume": 7656.46,
-      "volume24h": 174.08,
+      "volume": 7706.46,
+      "volume24h": 224.08,
       "openInterest": 4624.88,
       "depth": {
         "bidSize": 16,
-        "askSize": 5,
+        "askSize": 3,
         "notional": 1
       },
       "proxy": false,
@@ -10420,6 +10420,80 @@
       "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
     },
     {
+      "id": "KXHURCTOTMAJ-26DEC01-T5",
+      "label": "Will there be more than 5 major Atlantic hurricanes in 2026?",
+      "short": "Will there be more than 5 major Atlantic…",
+      "storm": null,
+      "subject": null,
+      "market": 0.01,
+      "model": 0.038725011063111034,
+      "modelQuantity": "major",
+      "modelBasin": "atlantic",
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
+      "modelUncond": 0.14285714285714285,
+      "modelLayers": [
+        {
+          "id": "base",
+          "label": "Historical climatology",
+          "p": 0.1527777777777778,
+          "basis": "1991–2025 full seasons (n=35)"
+        },
+        {
+          "id": "doy",
+          "label": "Day-of-year conditional",
+          "p": 0.041666666666666664,
+          "basis": "major hurricanes forming on/after day 244 in each past season; needs >5 more"
+        },
+        {
+          "id": "std",
+          "label": "Season-to-date state",
+          "p": 0.041666666666666664,
+          "basis": "0 already recorded in 2026"
+        },
+        {
+          "id": "enso",
+          "label": "ENSO-stratified",
+          "p": 0.04607843137254902,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+        },
+        {
+          "id": "onisim",
+          "label": "ONI-similarity weighted",
+          "p": 0.038725011063111034,
+          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 4% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
+        }
+      ],
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": 5,
+      "yesBid": null,
+      "yesAsk": 0.02,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 2,
+      "spread": 0.02,
+      "volume": 5421.23,
+      "volume24h": 200,
+      "openInterest": 2497.01,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 79.48,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
+    },
+    {
       "id": "KXTROPSTORM-26DEC01-T12",
       "label": "Will there be more than 12  Atlantic hurricanes in 2026?",
       "short": "Will there be more than 12 Atlantic…",
@@ -10548,80 +10622,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
-    },
-    {
-      "id": "KXHURCTOTMAJ-26DEC01-T5",
-      "label": "Will there be more than 5 major Atlantic hurricanes in 2026?",
-      "short": "Will there be more than 5 major Atlantic…",
-      "storm": null,
-      "subject": null,
-      "market": 0.01,
-      "model": 0.038725011063111034,
-      "modelQuantity": "major",
-      "modelBasin": "atlantic",
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
-      "modelUncond": 0.14285714285714285,
-      "modelLayers": [
-        {
-          "id": "base",
-          "label": "Historical climatology",
-          "p": 0.1527777777777778,
-          "basis": "1991–2025 full seasons (n=35)"
-        },
-        {
-          "id": "doy",
-          "label": "Day-of-year conditional",
-          "p": 0.041666666666666664,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >5 more"
-        },
-        {
-          "id": "std",
-          "label": "Season-to-date state",
-          "p": 0.041666666666666664,
-          "basis": "0 already recorded in 2026"
-        },
-        {
-          "id": "enso",
-          "label": "ENSO-stratified",
-          "p": 0.04607843137254902,
-          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
-        },
-        {
-          "id": "onisim",
-          "label": "ONI-similarity weighted",
-          "p": 0.038725011063111034,
-          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 4% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
-        }
-      ],
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "seasonal",
-      "strike": 5,
-      "yesBid": null,
-      "yesAsk": 0.02,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 5,
-      "spread": 0.02,
-      "volume": 5221.23,
-      "volume24h": 0,
-      "openInterest": 2497.01,
-      "depth": {
-        "bidSize": 0,
-        "askSize": 240.48,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCTOTMAJ-26DEC01"
     },
     {
       "id": "KXHURCTOT-26DEC01-T7",
@@ -11129,14 +11129,14 @@
       "yesBid": 0.97,
       "yesAsk": 0.98,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 86,
+      "liquidity": 98,
       "spread": 0.010000000000000009,
       "volume": 2595.97,
       "volume24h": 405,
       "openInterest": 1575.57,
       "depth": {
         "bidSize": 155,
-        "askSize": 87.53,
+        "askSize": 100,
         "notional": 1
       },
       "proxy": false,
@@ -11669,7 +11669,7 @@
       "short": "Will there be more than 5 named storms in the…",
       "storm": null,
       "subject": null,
-      "market": 0.915,
+      "market": 0.9199999999999999,
       "model": 0.37812632138203134,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
@@ -11720,16 +11720,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 5,
-      "yesBid": 0.86,
+      "yesBid": 0.87,
       "yesAsk": 0.97,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 29,
-      "spread": 0.10999999999999999,
+      "spread": 0.09999999999999998,
       "volume": 1773.01,
       "volume24h": 0,
       "openInterest": 1146.13,
       "depth": {
-        "bidSize": 67.11,
+        "bidSize": 5,
         "askSize": 30,
         "notional": 1
       },
@@ -11803,7 +11803,7 @@
       "volume24h": 0,
       "openInterest": 511.18,
       "depth": {
-        "bidSize": 26.3,
+        "bidSize": 36.23,
         "askSize": 100,
         "notional": 1
       },
@@ -11945,14 +11945,14 @@
       "yesBid": 0.93,
       "yesAsk": 0.98,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 96,
+      "liquidity": 108,
       "spread": 0.04999999999999993,
       "volume": 1485.8,
       "volume24h": 0,
       "openInterest": 986.33,
       "depth": {
-        "bidSize": 26.3,
-        "askSize": 97.53,
+        "bidSize": 36.23,
+        "askSize": 110,
         "notional": 1
       },
       "proxy": false,
@@ -12169,7 +12169,7 @@
       "short": "Will there be more than 4 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.485,
+      "market": 0.49,
       "model": 0.22187501536300736,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
@@ -12220,16 +12220,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.41,
+      "yesBid": 0.42,
       "yesAsk": 0.56,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 7,
-      "spread": 0.15000000000000008,
+      "spread": 0.14000000000000007,
       "volume": 1082.71,
       "volume24h": 0,
       "openInterest": 604.91,
       "depth": {
-        "bidSize": 100,
+        "bidSize": 71,
         "askSize": 13,
         "notional": 1
       },
@@ -12317,7 +12317,7 @@
       "short": "Will there be more than 7 named storms in the…",
       "storm": null,
       "subject": null,
-      "market": 0.48000000000000004,
+      "market": 0.49,
       "model": 0.10438460940297674,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
@@ -12369,16 +12369,16 @@
       "horizon": "seasonal",
       "strike": 7,
       "yesBid": 0.4,
-      "yesAsk": 0.56,
+      "yesAsk": 0.58,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 3,
-      "spread": 0.16000000000000003,
-      "volume": 1000.24,
-      "volume24h": 0,
+      "liquidity": 4,
+      "spread": 0.17999999999999994,
+      "volume": 1008.77,
+      "volume24h": 8.53,
       "openInterest": 441.58,
       "depth": {
         "bidSize": 5,
-        "askSize": 5,
+        "askSize": 6.47,
         "notional": 1
       },
       "proxy": false,
@@ -12465,7 +12465,7 @@
       "short": "Will there be more than 18 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.6950000000000001,
+      "market": 0.69,
       "model": 0.7347630064820712,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
@@ -12517,10 +12517,10 @@
       "horizon": "seasonal",
       "strike": 18,
       "yesBid": 0.64,
-      "yesAsk": 0.75,
+      "yesAsk": 0.74,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 0,
-      "spread": 0.10999999999999999,
+      "spread": 0.09999999999999998,
       "volume": 796.88,
       "volume24h": 0,
       "openInterest": 252.89,
@@ -12743,7 +12743,7 @@
       "short": "Will there be more than 3 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.36,
+      "market": 0.365,
       "model": 0.04191714798941059,
       "modelQuantity": "major",
       "modelBasin": "cpac",
@@ -12794,16 +12794,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 3,
-      "yesBid": 0.27,
+      "yesBid": 0.28,
       "yesAsk": 0.45,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 2,
-      "spread": 0.18,
+      "spread": 0.16999999999999998,
       "volume": 669.3,
       "volume24h": 0,
       "openInterest": 530.3,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 100,
         "askSize": 5,
         "notional": 1
       },
@@ -13039,7 +13039,7 @@
       "short": "Will there be more than 2 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.485,
+      "market": 0.51,
       "model": 0.15940755394944117,
       "modelQuantity": "major",
       "modelBasin": "cpac",
@@ -13090,16 +13090,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 2,
-      "yesBid": 0.39,
-      "yesAsk": 0.58,
+      "yesBid": 0.41,
+      "yesAsk": 0.61,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 58,
-      "spread": 0.18999999999999995,
+      "liquidity": 61,
+      "spread": 0.2,
       "volume": 577.48,
       "volume24h": 0,
       "openInterest": 569.96,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 100,
         "askSize": 100,
         "notional": 1
       },
@@ -13355,7 +13355,7 @@
       "short": "Will there be more than 1 hurricane of…",
       "storm": null,
       "subject": null,
-      "market": 0.9099999999999999,
+      "market": 0.9199999999999999,
       "model": 0.5228480685633007,
       "modelQuantity": "major",
       "modelBasin": "cpac",
@@ -13406,16 +13406,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 1,
-      "yesBid": 0.88,
-      "yesAsk": 0.94,
+      "yesBid": 0.89,
+      "yesAsk": 0.95,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 94,
+      "liquidity": 95,
       "spread": 0.05999999999999994,
       "volume": 393.26,
       "volume24h": 14,
       "openInterest": 347.7,
       "depth": {
-        "bidSize": 7,
+        "bidSize": 37,
         "askSize": 100,
         "notional": 1
       },
@@ -13725,7 +13725,7 @@
       "short": "Will there be more than 19 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.6,
+      "market": 0.595,
       "model": 0.5185476791412558,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
@@ -13777,16 +13777,16 @@
       "horizon": "seasonal",
       "strike": 19,
       "yesBid": 0.5,
-      "yesAsk": 0.7,
+      "yesAsk": 0.69,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 70,
-      "spread": 0.19999999999999996,
+      "liquidity": 3,
+      "spread": 0.18999999999999995,
       "volume": 294.14,
       "volume24h": 0,
       "openInterest": 246.4,
       "depth": {
         "bidSize": 100,
-        "askSize": 100,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -13799,7 +13799,7 @@
       "short": "Will there be more than 20 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.44,
+      "market": 0.42,
       "model": 0.342583208131057,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
@@ -13851,10 +13851,10 @@
       "horizon": "seasonal",
       "strike": 20,
       "yesBid": 0.36,
-      "yesAsk": 0.52,
+      "yesAsk": 0.48,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 1,
-      "spread": 0.16000000000000003,
+      "liquidity": 0,
+      "spread": 0.12,
       "volume": 254.41,
       "volume24h": 0,
       "openInterest": 105.82,
@@ -14001,14 +14001,14 @@
       "yesBid": 0.88,
       "yesAsk": 0.99,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 50,
+      "liquidity": 79,
       "spread": 0.10999999999999999,
       "volume": 231.69,
       "volume24h": 0,
       "openInterest": 231.69,
       "depth": {
         "bidSize": 10,
-        "askSize": 50,
+        "askSize": 79.55,
         "notional": 1
       },
       "proxy": false,
@@ -14095,7 +14095,7 @@
       "short": "Will there be more than 17 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.8999999999999999,
+      "market": 0.895,
       "model": 0.81799104597033,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
@@ -14147,16 +14147,16 @@
       "horizon": "seasonal",
       "strike": 17,
       "yesBid": 0.82,
-      "yesAsk": 0.98,
+      "yesAsk": 0.97,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 49,
-      "spread": 0.16000000000000003,
+      "liquidity": 24,
+      "spread": 0.15000000000000002,
       "volume": 225,
       "volume24h": 0,
       "openInterest": 225,
       "depth": {
         "bidSize": 100,
-        "askSize": 50,
+        "askSize": 25,
         "notional": 1
       },
       "proxy": false,
@@ -14169,7 +14169,7 @@
       "short": "Will there be more than 22 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.305,
+      "market": 0.295,
       "model": 0.04191714798941059,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
@@ -14221,10 +14221,10 @@
       "horizon": "seasonal",
       "strike": 22,
       "yesBid": 0.22,
-      "yesAsk": 0.39,
+      "yesAsk": 0.37,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 10,
-      "spread": 0.17,
+      "liquidity": 9,
+      "spread": 0.15,
       "volume": 220.21,
       "volume24h": 0,
       "openInterest": 209.95,
@@ -14819,7 +14819,7 @@
       "short": "Will there be more than 0 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.975,
+      "market": 0.98,
       "model": 0.9721758143394328,
       "modelQuantity": "major",
       "modelBasin": "cpac",
@@ -14870,16 +14870,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 0,
-      "yesBid": 0.95,
+      "yesBid": 0.96,
       "yesAsk": 1,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": null,
-      "spread": 0.050000000000000044,
+      "spread": 0.040000000000000036,
       "volume": 104,
       "volume24h": 0,
       "openInterest": 102,
       "depth": {
-        "bidSize": 186,
+        "bidSize": 150,
         "askSize": 0,
         "notional": 1
       },
@@ -16189,7 +16189,7 @@
       "openInterest": 97685.59,
       "depth": {
         "bidSize": 0,
-        "askSize": 78911.4,
+        "askSize": 78910.4,
         "notional": 1
       },
       "proxy": false,
@@ -16271,7 +16271,7 @@
       "liquidity": 14,
       "spread": 0.02,
       "volume": 100517.46,
-      "volume24h": 17544.92,
+      "volume24h": 9368.73,
       "openInterest": 27351.22,
       "depth": {
         "bidSize": 0,
@@ -16288,7 +16288,7 @@
       "short": "Will a hurricane make landfall in Hawaii…",
       "storm": null,
       "subject": null,
-      "market": 0.13,
+      "market": 0.135,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -16308,17 +16308,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.11,
+      "yesBid": 0.12,
       "yesAsk": 0.15,
       "closeTime": "2027-01-01T04:59:00Z",
-      "liquidity": 51,
-      "spread": 0.039999999999999994,
+      "liquidity": 50,
+      "spread": 0.03,
       "volume": 28303.43,
-      "volume24h": 233.99,
+      "volume24h": 170.45,
       "openInterest": 11189.23,
       "depth": {
-        "bidSize": 30.44,
-        "askSize": 340.39,
+        "bidSize": 15,
+        "askSize": 332.29,
         "notional": 1
       },
       "proxy": false,
@@ -16443,14 +16443,14 @@
       "yesBid": null,
       "yesAsk": 0.01,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 2,
+      "liquidity": 9,
       "spread": 0.01,
       "volume": 10510.79,
       "volume24h": 2289.88,
       "openInterest": 6088.43,
       "depth": {
         "bidSize": 0,
-        "askSize": 200,
+        "askSize": 946,
         "notional": 1
       },
       "proxy": false,
@@ -16532,14 +16532,14 @@
       "yesBid": null,
       "yesAsk": 0.01,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 18,
+      "liquidity": 43,
       "spread": 0.01,
       "volume": 4372.36,
       "volume24h": 1941.64,
       "openInterest": 4325.02,
       "depth": {
         "bidSize": 0,
-        "askSize": 1813.99,
+        "askSize": 4313.99,
         "notional": 1
       },
       "proxy": false,
@@ -16751,16 +16751,16 @@
       "horizon": "storm",
       "strike": 2,
       "yesBid": null,
-      "yesAsk": 0.02,
+      "yesAsk": 0.01,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 6,
-      "spread": 0.02,
+      "liquidity": 25,
+      "spread": 0.01,
       "volume": 3709.15,
       "volume24h": 443.89,
       "openInterest": 3258.88,
       "depth": {
         "bidSize": 0,
-        "askSize": 300,
+        "askSize": 2500,
         "notional": 1
       },
       "proxy": false,
@@ -16859,7 +16859,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.275,
+      "market": 0.27,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -16880,16 +16880,16 @@
       "horizon": "storm",
       "strike": null,
       "yesBid": 0.22,
-      "yesAsk": 0.33,
+      "yesAsk": 0.32,
       "closeTime": "2026-09-15T03:59:00Z",
-      "liquidity": 2,
-      "spread": 0.11000000000000001,
-      "volume": 3201.68,
-      "volume24h": 1030.57,
-      "openInterest": 1555.32,
+      "liquidity": 4,
+      "spread": 0.1,
+      "volume": 3223.9,
+      "volume24h": 1050.91,
+      "openInterest": 1550.32,
       "depth": {
         "bidSize": 20,
-        "askSize": 5,
+        "askSize": 11,
         "notional": 1
       },
       "proxy": false,
@@ -17235,14 +17235,14 @@
       "yesBid": null,
       "yesAsk": 0.01,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 62,
+      "liquidity": 87,
       "spread": 0.01,
       "volume": 907.48,
       "volume24h": 561.1,
       "openInterest": 857.46,
       "depth": {
         "bidSize": 0,
-        "askSize": 6192.52,
+        "askSize": 8692.52,
         "notional": 1
       },
       "proxy": false,
@@ -17370,7 +17370,7 @@
       "liquidity": 23,
       "spread": 0.21000000000000002,
       "volume": 731.83,
-      "volume24h": 3.84,
+      "volume24h": 0,
       "openInterest": 626.53,
       "depth": {
         "bidSize": 5,
@@ -17413,7 +17413,7 @@
       "liquidity": 4,
       "spread": 0.33000000000000007,
       "volume": 679.96,
-      "volume24h": 25.78,
+      "volume24h": 10,
       "openInterest": 655.86,
       "depth": {
         "bidSize": 4,
@@ -17559,7 +17559,7 @@
       "short": "Will a hurricane make landfall in North…",
       "storm": null,
       "subject": null,
-      "market": 0.12000000000000001,
+      "market": 0.115,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -17579,11 +17579,11 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.04,
+      "yesBid": 0.03,
       "yesAsk": 0.2,
       "closeTime": "2027-01-01T04:59:00Z",
       "liquidity": 18,
-      "spread": 0.16,
+      "spread": 0.17,
       "volume": 456.28,
       "volume24h": 0,
       "openInterest": 452.35,
@@ -17760,7 +17760,7 @@
       "liquidity": 2,
       "spread": 0.29,
       "volume": 350.58,
-      "volume24h": 1,
+      "volume24h": 0,
       "openInterest": 222.38,
       "depth": {
         "bidSize": 5,
@@ -18168,7 +18168,7 @@
       "liquidity": 2,
       "spread": 0.35,
       "volume": 204.68,
-      "volume24h": 113.69,
+      "volume24h": 111.52,
       "openInterest": 168.68,
       "depth": {
         "bidSize": 5,
@@ -23804,12 +23804,12 @@
       "hot": false
     },
     {
-      "tsZ": "2026-09-01T21:00:00.000Z",
+      "tsZ": "2026-09-02T00:00:00.000Z",
       "kind": "advisory",
-      "label": "Lowell Advisory #021 — Cat 1 Hurricane, 80 kt",
+      "label": "Lowell Advisory #022 — Cat 3 Hurricane, 110 kt",
       "source": "NHC",
       "tier": "A",
-      "hot": false
+      "hot": true
     }
   ],
   "sstAnomalyC": null,
@@ -23821,1218 +23821,1218 @@
       "title": "Offshore of Southwestern Mexico",
       "pct48": null,
       "pct7d": 20,
-      "summary": "An area of low pressure could form well offshore of Mexico over the weekend. Gradual development is possible early next week as the system moves west-northwestward at 10 to 15 mph, likely remaining well offshore of Mexico.",
-      "issued": "1100 AM PDT Tue Sep 1 2026",
+      "summary": "An area of low pressure could form well offshore of Mexico over the weekend. Gradual development is possible early next week as the system moves west-northwestward at 10 to 15 mph, and is likely to remain well offshore of Mexico.",
+      "issued": "500 PM PDT Tue Sep 1 2026",
       "url": "https://api.weather.gov/products/types/ABPZ20/locations/NHC",
       "rings": [
         [
           [
-            11.317707001395119,
-            -103.72656204654645
+            11.748312440384577,
+            -104.59013544643948
           ],
           [
-            11.411508644281213,
-            -103.7333493141153
+            11.834741504474323,
+            -104.59154391421106
           ],
           [
-            11.505401646467623,
-            -103.74173787984459
+            11.920949068875291,
+            -104.594452219309
           ],
           [
-            11.599365183405876,
-            -103.75175790772838
+            12.00694131497415,
+            -104.59888696857159
           ],
           [
-            11.693378430547503,
-            -103.76343956176066
+            12.092724424157563,
+            -104.60487476883702
           ],
           [
-            11.787420563344023,
-            -103.77681300593547
+            12.178304577812188,
+            -104.6124422269436
           ],
           [
-            11.881470757246968,
-            -103.79190840424681
+            12.263687957324695,
+            -104.62161594972952
           ],
           [
-            11.97550818770786,
-            -103.80875592068875
+            12.348880744081743,
+            -104.63242254403305
           ],
           [
-            12.06951203017823,
-            -103.82738571925529
+            12.433889119469999,
+            -104.64488861669247
           ],
           [
-            12.163461460109605,
-            -103.84782796394046
+            12.518719264876124,
+            -104.65904077454597
           ],
           [
-            12.257335652953513,
-            -103.87011281873828
+            12.603377361686782,
+            -104.67490562443183
           ],
           [
-            12.351113784161479,
-            -103.8942704476428
+            12.687869591288635,
+            -104.69250977318829
           ],
           [
-            12.444775029185024,
-            -103.92033101464801
+            12.772202135068351,
+            -104.71187982765359
           ],
           [
-            12.538298563475683,
-            -103.94832468374797
+            12.85638117441259,
+            -104.73304239466599
           ],
           [
-            12.631663562484981,
-            -103.97828161893668
+            12.940412890708014,
+            -104.75602408106374
           ],
           [
-            12.724849201664442,
-            -104.01023198420818
+            13.024303465341292,
+            -104.78085149368506
           ],
           [
-            12.817834656465596,
-            -104.04420594355649
+            13.108059079699082,
+            -104.80755123936824
           ],
           [
-            12.910599102339967,
-            -104.08023366097565
+            13.19168591516805,
+            -104.83614992495151
           ],
           [
-            13.003121714739082,
-            -104.11834530045965
+            13.275190153134858,
+            -104.86667415727308
           ],
           [
-            13.095381669114472,
-            -104.15857102600256
+            13.358577974986172,
+            -104.89915054317125
           ],
           [
-            13.18735814091766,
-            -104.2009410015984
+            13.441855562108652,
+            -104.93360568948422
           ],
           [
-            13.279030305600172,
-            -104.24548539124116
+            13.525029095888966,
+            -104.9700662030503
           ],
           [
-            13.370377338613535,
-            -104.2922343589249
+            13.608104757713772,
+            -105.00855869070766
           ],
           [
-            13.46137841540928,
-            -104.34121806864363
+            13.691088728969738,
+            -105.04910975929461
           ],
           [
-            13.552012711438929,
-            -104.3924666843914
+            13.773987191043526,
+            -105.09174601564938
           ],
           [
-            13.642259402154012,
-            -104.4460103701622
+            13.8568063253218,
+            -105.1364940666102
           ],
           [
-            13.732097663006055,
-            -104.50187928995008
+            13.939552313191221,
+            -105.18338051901532
           ],
           [
-            13.821506669446581,
-            -104.56010360774904
+            14.022231336038457,
+            -105.232431979703
           ],
           [
-            13.910465596927121,
-            -104.62071348755315
+            14.104849575250167,
+            -105.28367505551148
           ],
           [
-            13.998953620899204,
-            -104.68373909335641
+            14.187413212213016,
+            -105.337136353279
           ],
           [
-            14.086949916814351,
-            -104.74921058915282
+            14.269928428313667,
+            -105.39284247984384
           ],
           [
-            14.174433660124095,
-            -104.81715813893648
+            14.352401404938787,
+            -105.45082004204421
           ],
           [
-            14.261384026279954,
-            -104.88761190670134
+            14.434838323475034,
+            -105.51109564671839
           ],
           [
-            14.347780190733463,
-            -104.96060205644147
+            14.517245365309076,
+            -105.57369590070458
           ],
           [
-            14.433601328936145,
-            -105.03615875215087
+            14.599628711827574,
+            -105.63864741084106
           ],
           [
-            14.518826616339526,
-            -105.11431215782358
+            14.681994544417194,
+            -105.7059767839661
           ],
           [
-            14.603435228395139,
-            -105.19509243745361
+            14.764349044464595,
+            -105.77571062691787
           ],
           [
-            14.687406340554503,
-            -105.27852975503502
+            14.846698393356444,
+            -105.8478755465347
           ],
           [
-            14.770719128269148,
-            -105.36465427456183
+            14.929048772479403,
+            -105.92249814965479
           ],
           [
-            14.853352766990602,
-            -105.45349616002802
+            15.011406363220138,
+            -105.99960504311642
           ],
           [
-            14.935286432170388,
-            -105.54508557542768
+            15.093777346965307,
+            -106.07922283375781
           ],
           [
-            15.016499299260039,
-            -105.63945268475479
+            15.176167905101579,
+            -106.16137812841721
           ],
           [
-            15.096970543711077,
-            -105.73662765200338
+            15.258584219015617,
+            -106.24609753393287
           ],
           [
-            15.176679340975028,
-            -105.8366406411675
+            15.341032470094081,
+            -106.33340765714304
           ],
           [
-            15.255604866503424,
-            -105.93952181624115
+            15.423518839723638,
+            -106.42333510488596
           ],
           [
-            15.333726295747784,
-            -106.04530134121838
+            15.506049509290948,
+            -106.51590648399988
           ],
           [
-            15.411022804159645,
-            -106.1540093800932
+            15.588630660182677,
+            -106.61114840132308
           ],
           [
-            15.487473567190523,
-            -106.26567609685964
+            15.671268473785489,
+            -106.70908746369375
           ],
           [
-            15.563057760291954,
-            -106.38033165551172
+            15.753969131486047,
+            -106.80975027795017
           ],
           [
-            15.637754558915459,
-            -106.4980062200435
+            15.836738814671012,
+            -106.9131634509306
           ],
           [
-            15.71154310973842,
-            -106.6187298410195
+            15.919583621570311,
+            -107.01935350984185
           ],
           [
-            15.784392805002806,
-            -106.74249411642333
+            16.002481460279625,
+            -107.12831998684956
           ],
           [
-            15.856249125635449,
-            -106.86919638437169
+            16.085341135645187,
+            -107.23999624043402
           ],
           [
-            15.927053955794968,
-            -106.99871980430102
+            16.16806105792097,
+            -107.3543056751518
           ],
           [
-            15.99674917963997,
-            -107.13094753564775
+            16.25053963736093,
+            -107.4711716955595
           ],
           [
-            16.06527668132907,
-            -107.26576273784828
+            16.33267528421904,
+            -107.59051770621363
           ],
           [
-            16.132578345020892,
-            -107.40304857033902
+            16.41436640874926,
+            -107.71226711167078
           ],
           [
-            16.198596054874038,
-            -107.54268819255644
+            16.495511421205563,
+            -107.83634331648749
           ],
           [
-            16.263271695047134,
-            -107.6845647639369
+            16.576008731841917,
+            -107.96266972522034
           ],
           [
-            16.326547149698783,
-            -107.82856144391688
+            16.655756750912268,
+            -108.09116974242589
           ],
           [
-            16.388364302987604,
-            -107.97456139193278
+            16.734653888670596,
+            -108.22176677266067
           ],
           [
-            16.448665039072218,
-            -108.122447767421
+            16.81259855537087,
+            -108.35438422048132
           ],
           [
-            16.507391242111225,
-            -108.27210372981797
+            16.889489161267047,
+            -108.48894549044431
           ],
           [
-            16.564484796263248,
-            -108.42341243856012
+            16.9652241166131,
+            -108.62537398710624
           ],
           [
-            16.619887585686907,
-            -108.57625705308386
+            17.03970183166299,
+            -108.7635931150237
           ],
           [
-            16.673541494540807,
-            -108.73052073282564
+            17.112820716670672,
+            -108.90352627875319
           ],
           [
-            16.72538840698356,
-            -108.88608663722185
+            17.18447918189013,
+            -109.04509688285133
           ],
           [
-            16.775370207173786,
-            -109.04283792570892
+            17.254575637575318,
+            -109.18822833187464
           ],
           [
-            16.823428779270106,
-            -109.20065775772329
+            17.323008493980208,
+            -109.3328440303797
           ],
           [
-            16.86950600743112,
-            -109.35942929270135
+            17.38967616135876,
+            -109.47886738292307
           ],
           [
-            16.913543775815448,
-            -109.51903569007953
+            17.454477049964943,
+            -109.6262217940613
           ],
           [
-            16.95548396858171,
-            -109.67936010929427
+            17.517309570052717,
+            -109.77483066835096
           ],
           [
-            16.995268469888515,
-            -109.84028570978197
+            17.578072131876056,
+            -109.92461741034862
           ],
           [
-            17.032839163894472,
-            -110.00169565097904
+            17.636663145688917,
+            -110.07550542461084
           ],
           [
-            17.068137934758212,
-            -110.16347309232194
+            17.692981021745272,
+            -110.22741811569418
           ],
           [
-            17.10110666663833,
-            -110.32550119324706
+            17.74692417029908,
+            -110.38027888815516
           ],
           [
-            17.13168724369345,
-            -110.48766311319086
+            17.798391001604315,
+            -110.5340111465504
           ],
           [
-            17.159821550082185,
-            -110.6498420115897
+            17.847279925914936,
+            -110.68853829543643
           ],
           [
-            17.18545146996315,
-            -110.81192104788005
+            17.893489353484906,
+            -110.84378373936983
           ],
           [
-            17.208518887494957,
-            -110.9737833814983
+            17.936917694568198,
+            -110.99967088290715
           ],
           [
-            17.228965686836222,
-            -111.1353121718809
+            17.977463359418778,
+            -111.15612313060494
           ],
           [
-            17.246733752145563,
-            -111.29639057846424
+            18.0150247582906,
+            -111.31306388701978
           ],
           [
-            17.261764967581588,
-            -111.45690176068477
+            18.049500301437636,
+            -111.47041655670822
           ],
           [
-            17.274001217302906,
-            -111.6167288779789
+            18.080788399113853,
+            -111.62810454422683
           ],
           [
-            17.283384385468146,
-            -111.77575508978305
+            18.108787461573225,
+            -111.78605125413215
           ],
           [
-            17.28985635623592,
-            -111.93386355553363
+            18.133395899069697,
+            -111.9441800909808
           ],
           [
-            17.29335901376483,
-            -112.09093743466708
+            18.15451212185725,
+            -112.10241445932925
           ],
           [
-            17.293834242213496,
-            -112.24685988661983
+            18.172034540189845,
+            -112.26067776373414
           ],
           [
-            17.29122392574054,
-            -112.40151407082826
+            18.18586156432145,
+            -112.41889340875198
           ],
           [
-            17.285469948504566,
-            -112.55478314672882
+            18.19589160450602,
+            -112.57698479893936
           ],
           [
-            17.27651419466419,
-            -112.70655027375793
+            18.202023070997537,
+            -112.73487533885286
           ],
           [
-            17.264298548378036,
-            -112.85669861135202
+            18.20415437404995,
+            -112.892488433049
           ],
           [
-            17.248764893804704,
-            -113.00511131894748
+            18.20218392391724,
+            -113.04974748608433
           ],
           [
-            17.22985511510282,
-            -113.15167155598077
+            18.196010130853356,
+            -113.20657590251545
           ],
           [
-            17.207511096430995,
-            -113.29626248188826
+            18.185531405112275,
+            -113.36289708689893
           ],
           [
-            17.181674721947832,
-            -113.43876725610643
+            18.170646156947964,
+            -113.5186344437913
           ],
           [
-            17.152287875811965,
-            -113.57906903807165
+            18.15125279661438,
+            -113.67371137774913
           ],
           [
-            17.119292442181994,
-            -113.71705098722039
+            18.127249734365492,
+            -113.82805129332897
           ],
           [
-            17.082630305216536,
-            -113.85259626298902
+            18.098535380455267,
+            -113.98157759508742
           ],
           [
-            17.04224334907421,
-            -113.98558802481399
+            18.065008145137668,
+            -114.13421368758098
           ],
           [
-            16.99807452912399,
-            -114.11591010861866
+            18.02656789359852,
+            -114.28588303508981
           ],
           [
-            16.950131073356854,
-            -114.24348693954195
+            17.983201786935144,
+            -114.43651268530657
           ],
           [
-            16.89851983232785,
-            -114.36830585600703
+            17.935032294907675,
+            -114.58603524021333
           ],
           [
-            16.843356226274963,
-            -114.49035960833235
+            17.88219352673112,
+            -114.73438377958064
           ],
           [
-            16.78475567543618,
-            -114.60964094683655
+            17.824819591620468,
+            -114.8814913831789
           ],
           [
-            16.72283360004949,
-            -114.72614262183811
+            17.763044598790742,
+            -115.02729113077861
           ],
           [
-            16.657705420352872,
-            -114.8398573836556
+            17.697002657456935,
+            -115.17171610215024
           ],
           [
-            16.589486556584312,
-            -114.95077798260753
+            17.626827876834053,
+            -115.31469937706426
           ],
           [
-            16.51829242898181,
-            -115.05889716901245
+            17.552654366137094,
+            -115.45617403529111
           ],
           [
-            16.444238457783328,
-            -115.16420769318894
+            17.47461623458107,
+            -115.5960731566013
           ],
           [
-            16.36744006322687,
-            -115.26670230545548
+            17.392847591380978,
+            -115.73432982076531
           ],
           [
-            16.28801266555041,
-            -115.36637375613066
+            17.30748254575182,
+            -115.87087710755355
           ],
           [
-            16.206071684991944,
-            -115.46321479553296
+            17.218655206908604,
+            -116.00564809673655
           ],
           [
-            16.121732541789445,
-            -115.55721817398098
+            17.126499684066335,
+            -116.13857586808474
           ],
           [
-            16.035110656180915,
-            -115.64837664179323
+            17.031150086440007,
+            -116.26959350136862
           ],
           [
-            15.946321448404323,
-            -115.73668294928828
+            16.932740523244636,
+            -116.3986340763586
           ],
           [
-            15.855480338697664,
-            -115.82212984678462
+            16.83140510369521,
+            -116.5256306728252
           ],
           [
-            15.76270274729892,
-            -115.90471008460082
+            16.72727793700675,
+            -116.65051637053891
           ],
           [
-            15.66810409444608,
-            -115.98441641305543
+            16.620493132394245,
+            -116.77322424927014
           ],
           [
-            15.571799800377125,
-            -116.06124158246695
+            16.5111847990727,
+            -116.8936873887894
           ],
           [
-            15.473905285330044,
-            -116.13517834315395
+            16.39948704625713,
+            -117.01183886886713
           ],
           [
-            15.37453596954282,
-            -116.20621944543498
+            16.285533983162527,
+            -117.12761176927381
           ],
           [
-            15.273807273253443,
-            -116.27435763962858
+            16.169459719003893,
+            -117.24093916977994
           ],
           [
-            15.171834616699893,
-            -116.33958567605323
+            16.05139836299624,
+            -117.35175415015597
           ],
           [
-            15.068733420120155,
-            -116.40189630502755
+            15.931484024354566,
+            -117.45998979017236
           ],
           [
-            14.964619103752222,
-            -116.46128227687002
+            15.809850812293872,
+            -117.56557916959957
           ],
           [
-            14.859607087834075,
-            -116.51773634189922
+            15.686632836029167,
+            -117.66845536820809
           ],
           [
-            14.753812792603696,
-            -116.57125125043368
+            15.56196420477545,
+            -117.76855146576838
           ],
           [
-            14.647351638299076,
-            -116.62181975279191
+            15.435979027747731,
+            -117.86580054205092
           ],
           [
-            14.540339045158198,
-            -116.66943459929249
+            15.308811414161003,
+            -117.96013567682616
           ],
           [
-            14.432890433419049,
-            -116.71408854025394
+            15.180595473230275,
+            -118.05148994986457
           ],
           [
-            14.325121223319613,
-            -116.75577432599482
+            15.051465314170551,
+            -118.13979644093665
           ],
           [
-            14.217146835097875,
-            -116.79448470683363
+            14.921555046196836,
+            -118.22498822981284
           ],
           [
-            14.109082688991823,
-            -116.83021243308895
+            14.790998778524127,
+            -118.30699839626361
           ],
           [
-            14.00104420523944,
-            -116.86295025507928
+            14.659930620367431,
+            -118.38576002005944
           ],
           [
-            13.893146804078713,
-            -116.89269092312321
+            14.528484680941755,
+            -118.46120618097082
           ],
           [
-            13.785505905747627,
-            -116.91942718753923
+            14.396795069462096,
+            -118.53326995876817
           ],
           [
-            13.678236930484166,
-            -116.9431517986459
+            14.264995895143459,
+            -118.601884433222
           ],
           [
-            13.57145529852632,
-            -116.96385750676178
+            14.133221267200845,
+            -118.66698268410275
           ],
           [
-            13.465276430112072,
-            -116.98153706220539
+            14.001605294849266,
+            -118.7284977911809
           ],
           [
-            13.359815745479406,
-            -116.99618321529528
+            13.870282087303718,
+            -118.78636283422695
           ],
           [
-            13.255188664866308,
-            -117.00778871634996
+            13.739385753779201,
+            -118.84051089301131
           ],
           [
-            13.151510608510765,
-            -117.01634631568801
+            13.609050403490727,
+            -118.8908750473045
           ],
           [
-            13.048896996650761,
-            -117.02184876362794
+            13.479410145653297,
+            -118.93738837687697
           ],
           [
-            12.947463249524285,
-            -117.02428881048831
+            13.35059908948191,
+            -118.97998396149919
           ],
           [
-            12.847324787369319,
-            -117.02365920658765
+            13.222751344191574,
+            -119.01859488094162
           ],
           [
-            12.74859703042385,
-            -117.01995270224451
+            13.096001018997288,
+            -119.05315421497477
           ],
           [
-            12.65139539892586,
-            -117.0131620477774
+            12.970482223114061,
+            -119.08359504336903
           ],
           [
-            12.555835313113342,
-            -117.00327999350489
+            12.84632906575689,
+            -119.10985044589495
           ],
           [
-            12.462032193224273,
-            -116.99029928974554
+            12.723675656140783,
+            -119.13185350232295
           ],
           [
-            12.37009816241832,
-            -116.97421342807641
+            12.602653124769052,
+            -119.14953947606554
           ],
           [
-            12.280069511053604,
-            -116.955032949022
+            12.483324091776158,
+            -119.16289385430188
           ],
           [
-            12.191906696686733,
-            -116.93278544205414
+            12.365682666927707,
+            -119.17195234797774
           ],
           [
-            12.10556687979598,
-            -116.90749923790322
+            12.24971998127762,
+            -119.17675285168089
           ],
           [
-            12.02100722085962,
-            -116.87920266729965
+            12.135427165879808,
+            -119.17733325999916
           ],
           [
-            11.938184880355927,
-            -116.84792406097384
+            12.022795351788192,
+            -119.17373146752038
           ],
           [
-            11.857057018763175,
-            -116.81369174965619
+            11.911815670056694,
+            -119.16598536883234
           ],
           [
-            11.777580796559644,
-            -116.77653406407707
+            11.802479251739225,
+            -119.15413285852284
           ],
           [
-            11.699713374223602,
-            -116.73647933496693
+            11.694777227889706,
+            -119.13821183117967
           ],
           [
-            11.623411912233326,
-            -116.69355589305613
+            11.588700729562053,
+            -119.11826018139067
           ],
           [
-            11.548633571067091,
-            -116.6477920690751
+            11.484240887810186,
+            -119.09431580374363
           ],
           [
-            11.475335511203173,
-            -116.59921619375424
+            11.38138883368802,
+            -119.06641659282637
           ],
           [
-            11.403474893119846,
-            -116.54785659782392
+            11.280135698249474,
+            -119.03460044322667
           ],
           [
-            11.333008877295383,
-            -116.49374161201459
+            11.180472612548467,
+            -118.99890524953236
           ],
           [
-            11.263894624208062,
-            -116.43689956705663
+            11.082390707638913,
+            -118.95936890633124
           ],
           [
-            11.196089294336154,
-            -116.37735879368041
+            10.985881114574733,
+            -118.91602930821112
           ],
           [
-            11.129550048157936,
-            -116.31514762261641
+            10.890934964409842,
+            -118.86892434975978
           ],
           [
-            11.064234046151682,
-            -116.25029438459497
+            10.79754338819816,
+            -118.81809192556507
           ],
           [
-            11.000098448795667,
-            -116.18282741034649
+            10.705697516993604,
+            -118.76356993021477
           ],
           [
-            10.937100416568166,
-            -116.11277503060141
+            10.615388481850088,
+            -118.7053962582967
           ],
           [
-            10.875197109947456,
-            -116.04016557609012
+            10.526607413821536,
+            -118.64360880439862
           ],
           [
-            10.814345689411804,
-            -115.96502737754298
+            10.439345443961862,
+            -118.57824546310842
           ],
           [
-            10.754503315439491,
-            -115.88738876569045
+            10.353593703324982,
+            -118.50934412901384
           ],
           [
-            10.695627148508795,
-            -115.80727807126291
+            10.269343322964819,
+            -118.43694269670272
           ],
           [
-            10.637674349097981,
-            -115.72472362499076
+            10.186585433935285,
+            -118.36107906076285
           ],
           [
-            10.580602077685333,
-            -115.63975375760441
+            10.1053111672903,
+            -118.28179111578203
           ],
           [
-            10.524367494749118,
-            -115.55239679983423
+            10.02551165408378,
+            -118.19911675634808
           ],
           [
-            10.468927760767617,
-            -115.46268108241067
+            9.947178025369645,
+            -118.11309387704881
           ],
           [
-            10.414240036219102,
-            -115.37063493606409
+            9.870301412201812,
+            -118.02376037247201
           ],
           [
-            10.360261481581846,
-            -115.27628669152492
+            9.794872945634198,
+            -117.93115413720551
           ],
           [
-            10.306949257334125,
-            -115.17966467952357
+            9.720883756720719,
+            -117.8353130658371
           ],
           [
-            10.254260523954216,
-            -115.0807972307904
+            9.648324976515296,
+            -117.73627505295458
           ],
           [
-            10.202152441920392,
-            -114.97971267605587
+            9.577187736071847,
+            -117.63407799314578
           ],
           [
-            10.150582171710928,
-            -114.87643934605032
+            9.507463166444287,
+            -117.52875978099848
           ],
           [
-            10.099506873804096,
-            -114.7710055715042
+            9.439142398686533,
+            -117.42035831110051
           ],
           [
-            10.04888370867818,
-            -114.66343968314789
+            9.372216563852506,
+            -117.30891147803968
           ],
           [
-            9.998669836811441,
-            -114.55377001171179
+            9.306676792996122,
+            -117.19445717640376
           ],
           [
-            9.948822418682164,
-            -114.44202488792631
+            9.242514217171296,
+            -117.07703330078058
           ],
           [
-            9.89929861476862,
-            -114.32823264252185
+            9.17971996743195,
+            -116.95667774575796
           ],
           [
-            9.850055585549082,
-            -114.21242160622882
+            9.118285174831998,
+            -116.83342840592368
           ],
           [
-            9.801050491501826,
-            -114.09462010977761
+            9.058200970425359,
+            -116.70732317586557
           ],
           [
-            9.75224049310513,
-            -113.97485648389863
+            8.99945848526595,
+            -116.57839995017142
           ],
           [
-            9.703582750837267,
-            -113.8531590593223
+            8.942048850407692,
+            -116.44669662342903
           ],
           [
-            9.65503442517651,
-            -113.72955616677898
+            8.885963196904498,
+            -116.31225109022624
           ],
           [
-            9.606552676601135,
-            -113.60407613699908
+            8.83119265581029,
+            -116.17510124515083
           ],
           [
-            9.558094665589415,
-            -113.47674730071304
+            8.77772835817898,
+            -116.0352849827906
           ],
           [
-            9.509617552619627,
-            -113.34759798865123
+            8.725561435064488,
+            -115.89284019773338
           ],
           [
-            9.461078498170046,
-            -113.21665653154405
+            8.674683017520737,
+            -115.74780478456697
           ],
           [
-            9.412434662718944,
-            -113.08395126012192
+            8.625084236601635,
+            -115.60021663787914
           ],
           [
-            9.363643206744596,
-            -112.94951050511523
+            8.576756223361109,
+            -115.45011365225774
           ],
           [
-            9.314666492546202,
-            -112.81336576429054
+            8.529691449314805,
+            -115.29753782330717
           ],
           [
-            9.265527353591164,
-            -112.67558535220952
+            8.483897968846046,
+            -115.14257882094975
           ],
           [
-            9.216287637003797,
-            -112.53626133620494
+            8.439393889801162,
+            -114.98535707273221
           ],
           [
-            9.16700984013603,
-            -112.39548617948907
+            8.396197487584203,
+            -114.82599351882845
           ],
           [
-            9.117756460339796,
-            -112.25335234527418
+            8.354327037599218,
+            -114.6646090994123
           ],
           [
-            9.068589994967024,
-            -112.10995229677255
+            8.313800815250252,
+            -114.5013247546576
           ],
           [
-            9.01957294136964,
-            -111.96537849719643
+            8.27463709594136,
+            -114.33626142473824
           ],
           [
-            8.970767796899581,
-            -111.81972340975811
+            8.236854155076584,
+            -114.16954004982803
           ],
           [
-            8.922237058908772,
-            -111.67307949766986
+            8.200470268059977,
+            -114.00128157010083
           ],
           [
-            8.874043224749142,
-            -111.52553922414394
+            8.165503710295583,
+            -113.83160692573051
           ],
           [
-            8.826248791772624,
-            -111.37719505239266
+            8.131972757187457,
+            -113.66063705689088
           ],
           [
-            8.778916257331147,
-            -111.22813944562827
+            8.099895684139643,
+            -113.48849290375584
           ],
           [
-            8.73210811877664,
-            -111.07846486706303
+            8.06929076655619,
+            -113.31529540649922
           ],
           [
-            8.685886873461037,
-            -110.92826377990923
+            8.040176279841146,
+            -113.14116550529485
           ],
           [
-            8.640315018736263,
-            -110.77762864737912
+            8.012570499398562,
+            -112.9662241403166
           ],
           [
-            8.595455051954248,
-            -110.626651932685
+            7.986491700632485,
+            -112.79059225173833
           ],
           [
-            8.551369470466925,
-            -110.47542609903913
+            7.961958158946963,
+            -112.61439077973388
           ],
           [
-            8.508120771626222,
-            -110.32404360965378
+            7.938988149746045,
+            -112.43774066447709
           ],
           [
-            8.46577145278407,
-            -110.17259692774122
+            7.917599948433781,
+            -112.26076284614183
           ],
           [
-            8.4243840112924,
-            -110.02117851651376
+            7.897811830414218,
+            -112.08357826490194
           ],
           [
-            8.384020944503138,
-            -109.86988083918361
+            7.879642071091404,
+            -111.90630786093128
           ],
           [
-            8.344744749768216,
-            -109.71879635896308
+            7.8631089458693895,
+            -111.7290725744037
           ],
           [
-            8.306617924439566,
-            -109.56801753906446
+            7.848230730152222,
+            -111.55199334549302
           ],
           [
-            8.269702965869115,
-            -109.41763684269996
+            7.835025699343949,
+            -111.37519111437314
           ],
           [
-            8.234062371408791,
-            -109.26774673308192
+            7.823512128848621,
+            -111.19878682121787
           ],
           [
-            8.19975863841053,
-            -109.11843967342257
+            7.8137082940702856,
+            -111.02290140620107
           ],
           [
-            8.166854264226263,
-            -108.96980812693421
+            7.8056324704129905,
+            -110.84765580949663
           ],
           [
-            8.135411746207911,
-            -108.82194455682908
+            7.799302933280785,
+            -110.67317097127832
           ],
           [
-            8.105493581707409,
-            -108.6749414263195
+            7.794737958077719,
+            -110.49956783172007
           ],
           [
-            8.077162268076687,
-            -108.5288911986177
+            7.791955820207838,
+            -110.3269673309957
           ],
           [
-            8.050480302667676,
-            -108.38388633693596
+            7.790974795075193,
+            -110.15549040927905
           ],
           [
-            8.025510182832303,
-            -108.24001930448655
+            7.791813158083833,
+            -109.98525800674396
           ],
           [
-            8.002314405922501,
-            -108.09738256448179
+            7.794489184637804,
+            -109.81639106356434
           ],
           [
-            7.9809554692901985,
-            -107.95606858013387
+            7.799021150141156,
+            -109.64901051991399
           ],
           [
-            7.961495870287325,
-            -107.81616981465514
+            7.805427329997939,
+            -109.48323731596676
           ],
           [
-            7.94399810626581,
-            -107.67777873125785
+            7.813725999612199,
+            -109.31919239189652
           ],
           [
-            7.928524674577586,
-            -107.54098779315423
+            7.823935434387985,
+            -109.15699668787713
           ],
           [
-            7.915138072574581,
-            -107.4058894635566
+            7.836073909729348,
+            -108.99677114408239
           ],
           [
-            7.903900797608725,
-            -107.27257620567721
+            7.850159701040332,
+            -108.8386367006862
           ],
           [
-            7.894875347031948,
-            -107.14114048272836
+            7.8662110837249895,
+            -108.6827142978624
           ],
           [
-            7.88812421819618,
-            -107.0116747579223
+            7.884246333187368,
+            -108.52912487578483
           ],
           [
-            7.88370990845335,
-            -106.88427149447128
+            7.904283724831515,
+            -108.37798937462736
           ],
           [
-            7.881694915155389,
-            -106.75902315558763
+            7.926341534061481,
+            -108.22942873456383
           ],
           [
-            7.88214173565423,
-            -106.63602220448357
+            7.950438036281313,
+            -108.08356389576807
           ],
           [
-            7.885112867301798,
-            -106.51536110437141
+            7.976591506895059,
+            -107.94051579841395
           ],
           [
-            7.890670807450023,
-            -106.39713231846338
+            8.004820221306769,
+            -107.80040538267534
           ],
           [
-            7.898878053450838,
-            -106.2814283099718
+            8.035142454920493,
+            -107.66335358872605
           ],
           [
-            7.909797102656173,
-            -106.1683415421089
+            8.067576483140275,
+            -107.52948135673996
           ],
           [
-            7.923490452417954,
-            -106.057964478087
+            8.102140581370167,
+            -107.3989096268909
           ],
           [
-            7.940020600088115,
-            -105.95038958111833
+            8.138853025014217,
+            -107.27175933935276
           ],
           [
-            7.959438600596685,
-            -105.84569780487585
+            8.177725686822379,
+            -107.14813572576338
           ],
           [
-            7.981719439652899,
-            -105.74389358761489
+            8.21872787470019,
+            -107.02803958741366
           ],
           [
-            8.006807071117803,
-            -105.6449501537201
+            8.261811532555285,
+            -106.91142912404496
           ],
           [
-            8.034645357313066,
-            -105.54884063549987
+            8.306928553074068,
+            -106.7982624097303
           ],
           [
-            8.065178160560356,
-            -105.45553816526248
+            8.354030828942934,
+            -106.68849751854279
           ],
           [
-            8.09834934318134,
-            -105.36501587531629
+            8.403070252848293,
+            -106.58209252455549
           ],
           [
-            8.13410276749769,
-            -105.27724689796963
+            8.453998717476539,
+            -106.47900550184143
           ],
           [
-            8.172382295831072,
-            -105.19220436553086
+            8.50676811551408,
+            -106.37919452447372
           ],
           [
-            8.213131790503157,
-            -105.10986141030828
+            8.561330339647313,
+            -106.2826176665254
           ],
           [
-            8.256295113835613,
-            -105.03019116461027
+            8.61763728256264,
+            -106.18923300206953
           ],
           [
-            8.301816128150108,
-            -104.95316676074516
+            8.675640836946467,
+            -106.09899860517919
           ],
           [
-            8.349638695768311,
-            -104.87876133102127
+            8.73529289548519,
+            -106.01187254992745
           ],
           [
-            8.399706679011892,
-            -104.80694800774695
+            8.796545350865214,
+            -105.92781291038735
           ],
           [
-            8.451963940202518,
-            -104.73769992323052
+            8.85935009577294,
+            -105.84677776063198
           ],
           [
-            8.50635434166186,
-            -104.67099020978036
+            8.92365902289477,
+            -105.7687251747344
           ],
           [
-            8.562821745711583,
-            -104.60679199970475
+            8.989424024917104,
+            -105.69361322676765
           ],
           [
-            8.621310014673357,
-            -104.5450784253121
+            9.056596994526343,
+            -105.62139999080483
           ],
           [
-            8.681763010868856,
-            -104.48582261891069
+            9.125129824408893,
+            -105.552043540919
           ],
           [
-            8.744124596619741,
-            -104.42899771280887
+            9.194974407251154,
+            -105.4855019511832
           ],
           [
-            8.808338634247685,
-            -104.37457683931498
+            9.266082635739526,
+            -105.4217332956705
           ],
           [
-            8.874348986074358,
-            -104.32253313073738
+            9.338406402560409,
+            -105.36069564845401
           ],
           [
-            8.942099514421425,
-            -104.2728397193844
+            9.411897600400208,
+            -105.30234708360673
           ],
           [
-            9.011534081610556,
-            -104.22546973756434
+            9.486508121945322,
+            -105.24664567520178
           ],
           [
-            9.082596549963421,
-            -104.1803963175856
+            9.562189859882157,
+            -105.19354949731219
           ],
           [
-            9.155230781801688,
-            -104.13759259175647
+            9.63889470689711,
+            -105.14301662401103
           ],
           [
-            9.229380639447026,
-            -104.09703169238529
+            9.716574555676582,
+            -105.09500512937139
           ],
           [
-            9.304989985221102,
-            -104.05868675178044
+            9.79518129890698,
+            -105.04947308746628
           ],
           [
-            9.382002681445588,
-            -104.02253090225022
+            9.874666829274702,
+            -105.00637857236885
           ],
           [
-            9.46036259044215,
-            -103.98853727610299
+            9.95498303946615,
+            -104.9656796581521
           ],
           [
-            9.540013574532459,
-            -103.95667900564706
+            10.036081822167725,
+            -104.92733441888909
           ],
           [
-            9.62089949603818,
-            -103.9269292231908
+            10.117915070065829,
+            -104.89130092865292
           ],
           [
-            9.70296421728099,
-            -103.89926106104254
+            10.200434675846866,
+            -104.85753726151665
           ],
           [
-            9.78615160058255,
-            -103.8736476515106
+            10.28359253219724,
+            -104.82600149155333
           ],
           [
-            9.870405508264527,
-            -103.85006212690332
+            10.367340531803341,
+            -104.79665169283604
           ],
           [
-            9.955669802648597,
-            -103.82847761952908
+            10.45163056735158,
+            -104.76944593943782
           ],
           [
-            10.041888346056425,
-            -103.80886726169618
+            10.536414531528356,
+            -104.74434230543177
           ],
           [
-            10.129005000809675,
-            -103.79120418571296
+            10.621644317020072,
+            -104.72129886489094
           ],
           [
-            10.216963629230028,
-            -103.77546152388776
+            10.70727181651313,
+            -104.70027369188837
           ],
           [
-            10.30570809363914,
-            -103.76161240852893
+            10.793248922693929,
+            -104.68122486049717
           ],
           [
-            10.395182256358687,
-            -103.74962997194478
+            10.879527528248872,
+            -104.6641104447904
           ],
           [
-            10.485329979710338,
-            -103.7394873464437
+            10.966059525864358,
+            -104.64888851884105
           ],
           [
-            10.576095126015758,
-            -103.73115766433398
+            11.052796808226795,
+            -104.6355171567223
           ],
           [
-            10.667421557596617,
-            -103.72461405792399
+            11.13969126802258,
+            -104.62395443250713
           ],
           [
-            10.759253136774586,
-            -103.71982965952203
+            11.226694797938114,
+            -104.61415842026862
           ],
           [
-            10.851533725871333,
-            -103.71677760143648
+            11.313759290659801,
+            -104.60608719407989
           ],
           [
-            10.944207187208523,
-            -103.71543101597565
+            11.400836638874043,
+            -104.59969882801393
           ],
           [
-            11.037217383107826,
-            -103.7157630354479
+            11.487878735267241,
+            -104.59495139614386
           ],
           [
-            11.130508175890915,
-            -103.71774679216156
+            11.574837472525791,
+            -104.59180297254271
           ],
           [
-            11.224023427879459,
-            -103.72135541842495
+            11.661664743336104,
+            -104.59021163128357
           ],
           [
-            11.317707001395119,
-            -103.72656204654645
+            11.748312440384577,
+            -104.59013544643948
           ]
         ]
       ],
       "bbox": [
-        -117.02428881048831,
-        7.881694915155389,
-        -103.71543101597565,
-        17.293834242213496
+        -119.17733325999916,
+        7.790974795075193,
+        -104.59013544643948,
+        18.20415437404995
       ]
     }
   ],
