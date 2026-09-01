@@ -7,14 +7,16 @@ Six artifacts, a source manifest and a replay index. Built from the Storm Atlas 
 ingested. Every live line carries it. The cohort pages do not: a cohort is evergreen, and stamping
 it would imply otherwise.
 
-**Genesis determination, settled before anything else.** NHC has opened advisory packages on
-AL052026 (Tropical Depression Five, declared as Invest 97L), and Karina and Lowell are named
-storms. None of that is the archive's genesis definition, which is the first OBSERVED track point
-carrying a tropical status *for a storm the pack holds*. The manifest applies that rule to the
-operational record and returns **NO OBSERVED GENESIS POINT** for all three: AL052026, EP112026 and
-EP122026 are absent from pack `134661125525f27a`, and the operational layer is not a cohort source.
-Every cohort here is therefore keyed to a **declared** point, labelled as declared, and no
-coordinate on any page is an observed formation point.
+**Operational formation is a fact and is stated; Atlas genesis is a different thing.** NHC/ATCF
+classifies Tropical Depression Five (AL052026, declared as Invest 97L), and the operational record
+carries a first tropical-status fix at 2026-08-31T18:00Z, 28.1°N 91.0°W. Both are printed, with
+their sources and instants. Neither is an Atlas **OBSERVED GENESIS** point: the archive's rule is
+the first observed tropical-status fix *for a storm the pack holds*, and the engine does not accept
+the operational layer as a genesis source. AL052026, EP112026 and EP122026 are all absent from pack
+`134661125525f27a`, so every cohort here is keyed to a **declared** point and no cohort is run from
+an operational fix. Karina's and Lowell's points carry the full label
+**DECLARED GENESIS POINT · NOT ATLAS-OBSERVED** — Atlas did not establish them and does not vouch
+for them. Nothing here says a storm formed "where Atlas observed it".
 
 ## The claim these artifacts make
 
@@ -48,9 +50,9 @@ sheet that fits on screen prints as one page — `scripts/check-collateral-fit.m
 | 97L | PRE-GENESIS REFERENCE CELL | 28.0°N 88.7°W | 250 km | Aug–Sep, 1971+ | 12 | SUFFICIENT |
 | 97L-r150 | PRE-GENESIS REFERENCE CELL | 28.0°N 88.7°W | 150 km | Aug–Sep, 1971+ | 5 | BELOW MIN SAMPLE — rates refused |
 | 97L-allmonths | PRE-GENESIS REFERENCE CELL | 28.0°N 88.7°W | 250 km | all months, 1971+ | 17 | SUFFICIENT |
-| KARINA | DECLARED GENESIS POINT | 13.2°N 115.0°W | 250 km | Aug–Sep, 1971+ | 14 | SUFFICIENT |
+| KARINA | DECLARED GENESIS POINT · NOT ATLAS-OBSERVED | 13.2°N 115.0°W | 250 km | Aug–Sep, 1971+ | 14 | SUFFICIENT |
 | 95E | PRE-GENESIS REFERENCE CELL | 12.0°N 107.5°W | 250 km | Aug–Sep, 1971+ | 24 | SUFFICIENT |
-| LOWELL | DECLARED GENESIS POINT | 11.3°N 133.8°W | 250 km | Aug–Sep, 1971+ | 6 | BELOW MIN SAMPLE — rates refused |
+| LOWELL | DECLARED GENESIS POINT · NOT ATLAS-OBSERVED | 11.3°N 133.8°W | 250 km | Aug–Sep, 1971+ | 6 | BELOW MIN SAMPLE — rates refused |
 
 Karina's and Lowell's points are operator-declared, not archive rows: the pack holds no genesis
 event for EP112026 or EP122026. The manifest prints each one's separation from the first tropical
@@ -76,11 +78,19 @@ METHODOLOGY 1.1.0 · PACK `134661125525f27a` · archive built 2026-08-18T05:18:5
   counted jointly and is never decomposed into path/intensity marginals.
 - **NHC opening an advisory package is not observed genesis.** The point-type label on every page
   comes from the manifest's genesis determination, not from a wire classification.
-- **The type gate is measured, not asserted.** Body and callout copy at 8.5 pt or larger, table,
-  citation and detail at 7.5 pt or larger, footer and legal no smaller than 7 pt — including text
-  inside the SVG plates, where the painted size is the label size times the plate's render scale.
-  Where a page could not hold its content at those sizes, content was cut and the cut is recorded
-  in `legibility-cuts.json`; type was never reduced to make something fit.
+- **The type gate is measured per semantic class, not globally.** A single page-wide minimum
+  proves nothing about body copy, so `check-collateral-legibility.mjs` classifies every painting
+  text node by the role it plays — body, callout, headline, table, citation, detail, map label,
+  footer/legal — and measures each class against its own floor: 8.5 pt for body, callout and
+  subhead; 7.5 pt for table, citation, detail and map label; 7 pt for footer and legal only. The
+  gate is green only when every class clears its own floor on every sheet. Classification is
+  conservative — an unrecognised node falls to `body`, the strictest class.
+- **The cut register records; it never waives.** `legibility-cuts.json` names every block removed
+  or compressed for the type gate, with what it cost and what carries its content instead. It
+  carries no authority: the four-mark plate on A, a `CITE THIS COHORT` block and its replay URL on
+  every prospect-facing artifact, and the comparison in full or compressed form are checked
+  directly against the rendered page, and a register entry claiming to have cut one is itself a
+  gate failure.
 
 ## Gates
 
@@ -94,22 +104,28 @@ node scripts/check-collateral-fit.mjs        # every sheet fits its printed page
 node scripts/check-collateral-legibility.mjs # measured type sizes clear the gate (needs a browser)
 ```
 
-Current: 133/133 content, 42/42 replay, every slot inside budget, every sheet fits, every
-prospect-facing sheet clears the type gate.
+Current: 143/143 content, 42/42 replay, every slot inside budget and printed somewhere, every
+sheet fits, every semantic class clears its own type floor.
 
 ## Measured type, per prospect-facing sheet
 
 Computed font size of every painting text node, in points. "Min substantive" excludes the footer
 and `.disclaim` legal text, which is allowed down to 7 pt.
 
-| artifact | text nodes | min | min substantive | median | weighted median | max |
-|---|---|---|---|---|---|---|
-| A | 145 | 7.05 | 7.57 | 7.57 | 7.57 | 14.25 |
-| B | 385 | 7.05 | 7.57 | 7.57 | 7.57 | 14.25 |
-| B1 | 211 | 7.05 | 7.57 | 7.57 | 7.57 | 14.25 |
-| B2 | 129 | 7.05 | 7.57 | 7.57 | 7.57 | 14.25 |
-| C | 203 | 7.05 | 7.57 | 7.57 | 7.57 | 14.25 |
-| D | 128 | 7.05 | 7.57 | 7.57 | 8.55 | 14.25 |
+Minimum and character-weighted median, in points, per class per artifact. The median is weighted
+by character count so a three-character chip does not count the same as a paragraph.
 
-The weighted median weights each node by its character count, so a three-character chip does not
-count the same as a paragraph.
+| class | floor | A | B | B1 | B2 | C | D |
+|---|---|---|---|---|---|---|---|
+| body | 8.5 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 |
+| callout | 8.5 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 |
+| headline | 8.5 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 | 8.55 / 8.55 |
+| table | 7.5 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 |
+| citation | 7.5 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 |
+| detail | 7.5 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 | 7.57 / 7.57 |
+| map label | 7.5 | 7.54 / 7.54 | 7.58 / 7.58 | — | 7.58 / 7.58 | 7.58 / 7.58 | — |
+| footer/legal | 7.0 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 | 7.05 / 7.05 |
+
+Substantive minimum (every class but footer/legal): 7.54 pt on A, 7.57 pt on the rest. `detail` is
+the footnote, chip, plate-furniture and refusal-reason class; it carries real text — 1.7k
+characters on A, 2.4k on B — and sits at the 7.5 pt detail floor, not at body size.

@@ -213,8 +213,13 @@ export async function build() {
 
   /* WHAT KIND OF POINT THIS COHORT IS KEYED TO, and on whose authority.
      Three kinds exist in this package and only one of them would be the archive's own:
-       PRE-GENESIS REFERENCE CELL   a declared cell for a system that has not formed
-       DECLARED GENESIS POINT       an operator-declared formation point, not an archive row
+       PRE-GENESIS REFERENCE CELL   a declared cell, keyed to no formation point at all
+       DECLARED GENESIS POINT · NOT ATLAS-OBSERVED
+                                    an operator-declared formation point. The operational record
+                                    may well carry a tropical-status fix for this storm, and that
+                                    fix is a fact with a source and an instant -- but the engine
+                                    does not accept the operational layer as a genesis source, so
+                                    ATLAS did not establish this point and does not vouch for it.
        ARCHIVE GENESIS POINT        genesis_events.genesis_lat/lon for a storm IN the pack
      No live system in this package is the third kind: the pack holds none of them. The basis is
      attached to each system so a reader never has to infer it from a label. */
@@ -309,7 +314,7 @@ export async function build() {
 
     run("KARINA", {
       name: "Hurricane Karina", basin: "EP", basin_label: "EAST PACIFIC", atcf_id: "EP112026",
-      point_type: "DECLARED GENESIS POINT",
+      point_type: "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED",
       coordinates_queried: { lat: 13.2, lon: -115.0 },
       radius_km: 250, season_floor: 1971, month_window: "August–September",
     }, { where: { lat: 13.2, lon: -115.0, radiusKm: 250 }, seasonFrom: 1971, months: [8, 9], basins: ["EP"] }),
@@ -323,7 +328,7 @@ export async function build() {
 
     run("LOWELL", {
       name: "Tropical Storm Lowell", basin: "EP", basin_label: "EAST PACIFIC", atcf_id: "EP122026",
-      point_type: "DECLARED GENESIS POINT",
+      point_type: "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED",
       coordinates_queried: { lat: 11.3, lon: -133.8 },
       radius_km: 250, season_floor: 1971, month_window: "August–September",
     }, { where: { lat: 11.3, lon: -133.8, radiusKm: 250 }, seasonFrom: 1971, months: [8, 9], basins: ["EP"] }),

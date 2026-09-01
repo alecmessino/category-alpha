@@ -47,11 +47,11 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 
 /* ---- masthead ------------------------------------------------------------------ */
 .mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:1px;margin-bottom:var(--sp-1)}
-.mh-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-6)}
-.mh-brand{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;letter-spacing:2.2px;
+.mh-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-6);line-height:1.1}
+.mh-brand{font-family:var(--font-mono);font-size:var(--t-body);font-weight:600;letter-spacing:1.6px;
   text-transform:uppercase;color:var(--ink-900)}
 .mh-brand .sep{color:var(--ink-400);margin:0 6px}
-.mh-doc{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.7px;color:var(--ink-600);
+.mh-doc{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.4px;color:var(--ink-600);
   text-transform:uppercase;text-align:right;white-space:nowrap}
 .mh-title{font-family:var(--font-display);font-size:19px;font-weight:700;line-height:1.1;
   margin:var(--sp-2) 0 var(--sp-1);letter-spacing:-.3px;max-width:94%}
@@ -68,7 +68,7 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 .sec.sechd-tight>.sec-hd{margin-bottom:0}
 .sec-hd h2{font-family:var(--font-mono);font-size:var(--t-body);font-weight:600;letter-spacing:1.5px;
   text-transform:uppercase;margin:0;color:var(--ink-900)}
-.sec-hd .n{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-400);letter-spacing:1px}
+.sec-hd .n{font-family:var(--font-mono);font-size:var(--t-body);color:var(--ink-400);letter-spacing:.6px}
 .sec-hd .note{font-size:var(--t-body);color:var(--ink-600);margin-left:auto;font-style:italic}
 .lede{font-size:var(--t-body);line-height:1.26;color:var(--ink-700);margin:0 0 var(--sp-2)}
 .lede p{margin:0 0 var(--sp-2)}
@@ -143,8 +143,8 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
 .box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
 .box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
-.box h3{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.5px;text-transform:uppercase;
-  margin:0 0 1px;color:var(--ink-900);line-height:1.15}
+.box h3{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.1px;text-transform:uppercase;
+  margin:0 0 0.5px;color:var(--ink-900);line-height:1.08}
 .box p{margin:0 0 var(--sp-1);font-size:var(--t-body);line-height:1.22;color:var(--ink-700)}
 .box p:last-child{margin-bottom:0}
 .box ul{margin:0;padding-left:9px;font-size:var(--t-body);line-height:1.2;color:var(--ink-700)}
@@ -187,7 +187,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 /* ---- stat tiles -------------------------------------------------------------------- */
 .tiles{display:grid;gap:var(--sp-4)}
 .tile{border:1px solid var(--line-300);border-radius:4px;padding:3px 5px;background:var(--paper-50)}
-.tile .k{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:1px;text-transform:uppercase;
+.tile .k{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:2px}
 .tile .v{font-family:var(--font-mono);font-size:19px;font-weight:600;line-height:1.02;
   letter-spacing:-.4px}
@@ -200,8 +200,8 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .plate{border:1px solid var(--ink-900);border-radius:6px;overflow:hidden;background:#fbfcfe}
 .plate-hd{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-4);
   padding:1px var(--sp-4);border-bottom:1px solid var(--ink-900);background:var(--white)}
-.plate-hd .t{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:1.2px;text-transform:uppercase;
-  font-weight:600}
+.plate-hd .t{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.2px;text-transform:uppercase;
+  font-weight:600;line-height:1.1}
 .plate-hd .m{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);letter-spacing:.5px}
 .plate svg{display:block;width:100%;height:auto}
 .plate-ft{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);padding:0 var(--sp-4);
@@ -219,7 +219,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   border-bottom:1px solid var(--ink-900);padding:var(--sp-1) 0;margin:var(--sp-1) 0}
 .rail>div{padding-right:var(--sp-5);border-right:1px solid var(--line-200)}
 .rail>div:last-child{border-right:none;padding-right:0}
-.rail .q{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:1px;text-transform:uppercase;
+.rail .q{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.5px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:1px}
 .rail .a{font-size:var(--t-body);line-height:1.24;color:var(--ink-900)}
 .rail .a b{font-weight:600}
@@ -227,8 +227,8 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 /* ---- live strip -------------------------------------------------------------------- */
 .live{border:1px solid var(--red-600);border-radius:6px;overflow:hidden}
 .live-hd{display:flex;align-items:center;gap:var(--sp-3);padding:1.5px var(--sp-4);
-  background:var(--red-600);color:#fff;font-family:var(--font-mono);font-size:var(--t-detail);
-  letter-spacing:1.2px;text-transform:uppercase;font-weight:600}
+  background:var(--red-600);color:#fff;font-family:var(--font-mono);font-size:var(--t-body);
+  letter-spacing:.4px;text-transform:uppercase;font-weight:600;line-height:1.15}
 .live-hd .ts{margin-left:auto;letter-spacing:.6px;font-weight:400;opacity:.94}
 .live table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:var(--t-detail)}
 .live th{text-align:left;font-size:var(--t-detail);letter-spacing:.2px;text-transform:uppercase;
@@ -241,7 +241,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 
 /* ---- artifact A: the merged system grid ------------------------------------------- */
 table.ledger.sysgrid{table-layout:fixed}
-.ledger.sysgrid th{white-space:normal;line-height:1.25;vertical-align:bottom}
+.ledger.sysgrid th{white-space:nowrap;line-height:1.2;vertical-align:bottom;letter-spacing:.1px}
 .ledger.sysgrid .chip{white-space:normal;display:inline-block;max-width:100%;line-height:1.1;margin-top:1px}
 .ledger.sysgrid td{vertical-align:top;padding:1.2px var(--sp-3);overflow-wrap:anywhere}
 .ledger td.lft{text-align:left;white-space:normal}
@@ -302,6 +302,11 @@ table.ledger.sysgrid{table-layout:fixed}
 .cmptable.compact td{font-size:var(--t-detail);padding:0.5px var(--sp-2);line-height:1.18}
 .cmptable.compact td.q{font-size:var(--t-detail)}
 .platecol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.06fr);gap:var(--sp-5);align-items:start}
+/* A REPLAY URL IS 78 CHARACTERS AND MAY NOT SHRINK. At the 7.5 pt citation floor it needs about
+   440 px to sit on one line, and a column narrower than that costs a second line on every URL on
+   the page. Where a plate shares the band with a cite list, the cite side gets the width it
+   needs and the plate takes the remainder. */
+.platecol.cites{grid-template-columns:minmax(0,.62fr) minmax(0,1fr)}
 .platecol .sec{margin-top:0}
 .triband{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(0,.86fr) minmax(0,1.36fr);
   gap:var(--sp-4);align-items:start}
@@ -331,6 +336,12 @@ table.ledger.sysgrid{table-layout:fixed}
 .citelist .cite{margin-top:var(--sp-1);padding-top:1px;border-top:1px solid var(--line-300)}
 .citelist .cite:first-child{border-top:1px solid var(--ink-900);margin-top:0}
 .citelist .v{font-size:var(--t-detail);line-height:1.18}
+.citerows{margin-top:1px}
+.citerows>div{border-top:1px dotted var(--line-300);padding-top:0.5px;margin-top:0.5px}
+.citerows .nm{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;
+  letter-spacing:.2px;color:var(--ink-900);display:block;line-height:1.15}
+.citerows .u{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--blue-600);
+  word-break:break-all;display:block;line-height:1.12}
 .citelist.urls .cite{margin-top:1px}
 .citelist.urls .k{margin-bottom:0}
 .citelist .u{font-size:var(--t-detail)}
@@ -469,7 +480,7 @@ table.ledger.sysgrid{table-layout:fixed}
       <td class="frac">17</td>
       <td class="cohortstat ">SUFFICIENT</td>
       <td>B</td></tr><tr class="band"><td>KARINA</td>
-      <td>DECLARED GENESIS POINT</td><td>13.2°N 115.0°W</td>
+      <td>DECLARED GENESIS POINT · NOT ATLAS-OBSERVED</td><td>13.2°N 115.0°W</td>
       <td class="frac">250 km</td><td>August–September · 1971+</td>
       <td class="frac">14</td>
       <td class="cohortstat ">SUFFICIENT</td>
@@ -479,7 +490,7 @@ table.ledger.sysgrid{table-layout:fixed}
       <td class="frac">24</td>
       <td class="cohortstat ">SUFFICIENT</td>
       <td>A</td></tr><tr class="band"><td>LOWELL</td>
-      <td>DECLARED GENESIS POINT</td><td>11.3°N 133.8°W</td>
+      <td>DECLARED GENESIS POINT · NOT ATLAS-OBSERVED</td><td>11.3°N 133.8°W</td>
       <td class="frac">250 km</td><td>August–September · 1971+</td>
       <td class="frac">6</td>
       <td class="cohortstat refused">BELOW MIN SAMPLE — rates refused</td>
@@ -695,7 +706,7 @@ table.ledger.sysgrid{table-layout:fixed}
       <td class="ci" style="text-align:left;white-space:normal">conus/Florida 30 kt [hurdat2_L_record]</td></tr>
     </tbody></table>
     <div class="cite"><span class="k">CITE THIS COHORT</span><div class="v">STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in seasons from 1971 onwards, that went on to any outcome · 17 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div><a class="u" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;b=NA&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;b=NA&amp;m=1.1.0</a></div>
-    </section><section class="sec"><div class="sec-hd"><span class="n">04</span><h2>Hurricane Karina — KARINA</h2><span class="note">DECLARED GENESIS POINT · 13.2°N 115.0°W · r 250 km · August–September · floor 1971</span></div>
+    </section><section class="sec"><div class="sec-hd"><span class="n">04</span><h2>Hurricane Karina — KARINA</h2><span class="note">DECLARED GENESIS POINT · NOT ATLAS-OBSERVED · 13.2°N 115.0°W · r 250 km · August–September · floor 1971</span></div>
     <p class="disclaim"><b>QUESTION:</b> East Pacific storms that formed within 250 km of 13.2°N 115.0°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
     <p style="margin:3px 0"><span class="chip ok">SUFFICIENT</span><span class="chip">N = 14</span><span class="chip">ESS 14</span><span class="chip">MIN SAMPLE 10</span><span class="chip">EAST PACIFIC</span>
       <span class="chip">UNDECIDABLE 0</span></p>
@@ -841,7 +852,7 @@ table.ledger.sysgrid{table-layout:fixed}
       <td class="ci" style="text-align:left;white-space:normal">none in any modelled region</td></tr>
     </tbody></table>
     <div class="cite"><span class="k">CITE THIS COHORT</span><div class="v">STORM ATLAS · East Pacific storms that formed within 250 km of 12.0°N 107.5°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 24 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div><a class="u" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=12%2C-107.5%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=12%2C-107.5%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0</a></div>
-    </section><section class="sec"><div class="sec-hd"><span class="n">06</span><h2>Tropical Storm Lowell — LOWELL</h2><span class="note">DECLARED GENESIS POINT · 11.3°N 133.8°W · r 250 km · August–September · floor 1971</span></div>
+    </section><section class="sec"><div class="sec-hd"><span class="n">06</span><h2>Tropical Storm Lowell — LOWELL</h2><span class="note">DECLARED GENESIS POINT · NOT ATLAS-OBSERVED · 11.3°N 133.8°W · r 250 km · August–September · floor 1971</span></div>
     <p class="disclaim"><b>QUESTION:</b> East Pacific storms that formed within 250 km of 11.3°N 133.8°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
     <p style="margin:3px 0"><span class="chip refuse">BELOW MIN SAMPLE — rates refused</span><span class="chip">N = 6</span><span class="chip">ESS 6</span><span class="chip">MIN SAMPLE 10</span><span class="chip">EAST PACIFIC</span>
       <span class="chip">UNDECIDABLE 0</span></p>

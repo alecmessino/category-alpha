@@ -102,11 +102,12 @@ export function plate({ title, meta, svg, legendItems, note }) {
 }
 
 /* ---- PLATE 1: the NA + EP camera, four marks --------------------------------------------- */
-export function basinPlate(D, { width = 700, height = 300 } = {}) {
+export function basinPlate(D, { width = 700, height = 300, renderWidth = null } = {}) {
   /* The camera reaches to 168°W so the westernmost live mark has room for its label on the left
      rather than against the frame; it also brings Hawaii into the plate, which is one of the six
      coastlines the landfall contract scores. */
   const P = projector({ lon0: -168, lon1: -55, lat0: 5, lat1: 42, width, height, pad: 6 });
+  const fs = labelSize(P, renderWidth);
   /* SHORT LABELS, NO COORDINATES, ALL ABOVE THE MARK.
      Five marks sit inside one small stretch of the east Pacific here, and a two-line label on
      each of them collided with its neighbours whatever the offsets. The coordinates are printed
@@ -133,15 +134,15 @@ export function basinPlate(D, { width = 700, height = 300 } = {}) {
   const L = D.operational.storms.find((s) => s.atcf_id === "EP122026");
   if (K) liveMarks.push(mark(P, K.latest.lat, K.latest.lon, { color: INK.live, kind: "live",
     label: `LIVE KARINA ${K.latest.kt} KT`,
-    anchor: "start", dx: 4, dy: -12, leader: true }));
+    anchor: "start", dx: 4, dy: -12, leader: true, fs }));
   if (L) liveMarks.push(mark(P, L.latest.lat, L.latest.lon, { color: INK.live, kind: "live",
     label: `LIVE LOWELL ${L.latest.kt} KT`,
-    anchor: "end", dx: -5, dy: -13, leader: true }));
+    anchor: "end", dx: -5, dy: -13, leader: true, fs }));
 
   const F = D.operational.storms.find((s) => s.atcf_id === "AL052026");
   if (F) liveMarks.unshift(mark(P, F.latest.lat, F.latest.lon, { color: INK.live, kind: "live",
     label: `LIVE TD FIVE ${F.latest.kt} KT`,
-    anchor: "start", dx: 4, dy: -12, leader: true }));
+    anchor: "start", dx: 4, dy: -12, leader: true, fs }));
 
   /* Whatever outlook areas this ingest carries, drawn as NHC's own and never as a cohort. The
      list is read from the feed rather than named here: a system that reaches an ATCF identifier
@@ -152,11 +153,11 @@ export function basinPlate(D, { width = 700, height = 300 } = {}) {
 
   const svg = `<svg viewBox="0 0 ${width} ${height}" role="img" aria-label="North Atlantic and East Pacific plate, four marks">
   <rect width="${width}" height="${height}" fill="#fbfcfe"/>
-  ${gratLayer(P, { dLon: 20, dLat: 10 })}
+  ${gratLayer(P, { dLon: 20, dLat: 10 }, fs)}
   ${coastLayer(D.coast, P, 3)}
   ${outlookPaths}
   ${rings}
-  ${marks.map((m) => mark(P, m.lat, m.lon, m)).join("")}
+  ${marks.map((m) => mark(P, m.lat, m.lon, { ...m, fs })).join("")}
   ${liveMarks.join("")}
 </svg>`;
   return { svg, P };

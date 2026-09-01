@@ -1,94 +1,93 @@
-/* THE LEGIBILITY CUT REGISTER.
+/* THE LEGIBILITY CUT REGISTER — AND WHAT IT MAY NOT DO.
  *
- * The type gate fixes three sizes -- 8.5 pt body and callout, 7.5 pt table, citation and detail,
- * 7 pt footer and legal -- and the instruction that produced it was explicit: cut content before
- * shrinking type, and if a sheet still cannot hold one page, report the conflict rather than
- * resolve it with a smaller point size. At the old scale these artifacts carried roughly twice
- * what a Letter page holds at the gate, so blocks came out. This file is where they are recorded.
+ * The type gate fixes the sizes: 8.5 pt body, callout and subhead; 7.5 pt table, citation, detail
+ * and map label; 7 pt footer and legal. Cut content before shrinking type. At the old scale these
+ * artifacts carried roughly twice what a Letter page holds at those sizes, so blocks came out or
+ * came down, and this file is where each one is named, costed, and given the thing that carries
+ * its content instead.
  *
- * It is not a changelog. It is a gate input: scripts/check-collateral.mjs requires the cite block
- * and the comparison strip on every artifact, and the only way an artifact may be missing one is
- * to name it here with what it cost and what carries the same content instead. A block can be
- * dropped, but it cannot be dropped silently.
+ * IT IS A RECORD, NOT A WAIVER. Recording a removal explains it; it does not make a required
+ * element optional. PROTECTED below lists what may never be cut on a prospect-facing sheet, and
+ * scripts/check-collateral.mjs enforces those directly against the rendered page -- no entry in
+ * this file is consulted, so nothing written here can buy an exemption. A register entry naming a
+ * protected element is itself a failure.
+ *
+ * `kind` is "cut" when a block left the page and "compressed" when it stayed in a smaller form.
  */
+export const PROTECTED = [
+  { what: "the four-mark NA + EP plate on artifact A",
+    why: "the hero visual; the one place a reader sees all four queried points against a coastline" },
+  { what: "a CITE THIS COHORT block on every prospect-facing artifact",
+    why: "provenance is the product; a cohort a counterparty cannot reopen is a number in a deck" },
+  { what: "the replay URL beside it",
+    why: "the URL is what reproduces the cite string, the counts, the intervals and the refusals" },
+  { what: "the comparison — the full strip or a compressed WHAT ATLAS ADDS line",
+    why: "compressing it ranks above sacrificing core evidence, the plate or provenance" },
+];
+
 export const LEGIBILITY_CUTS = {
   "A-active-systems-overview.html": [
-    { block: "basin plate — four queried points",
-      px: 327,
-      instead: "the four-system table states each point type and coordinate; B and B2 keep their plates",
-      why: "a second view of four points the table already states, on the page with the least room" },
-    { block: "commercial tag stack (four boxes)",
-      px: 299,
-      instead: "the Atlas value-add column of the same table",
+    { kind: "cut", block: "commercial tag stack (four boxes)", px: 299,
+      instead: "the Atlas value-add column of the four-system table, and the COMMERCIAL RELEVANCE box",
       why: "one interpretation per system, printed twice on one sheet" },
-    { block: "comparison strip",
-      px: 173,
-      instead: "the answers rail at the head of this page; B, B1, B2 and D carry the full strip",
-      why: "the mandated scan order needed every remaining pixel" },
-    { block: "full citation strings in the cohort list",
-      px: 105,
-      instead: "the replay URL for each of the four cohorts, plus the source manifest",
-      why: "four four-line cite strings; the URL reproduces the string and every number behind it" },
+    { kind: "cut", block: "answers rail (three columns)", px: 102,
+      instead: "the table's own timestamped LIVE column, and a COMMERCIAL RELEVANCE box beside the refusal",
+      why: "the rail restated the page above it; unrolled, the same content sits where the scan order wants it, and the space buys the plate and the cite panel" },
+    { kind: "compressed", block: "comparison strip → a WHAT ATLAS ADDS line", px: 173,
+      instead: "one sentence inside the COMMERCIAL RELEVANCE box",
+      why: "the strip's argument survives; its three-row table did not fit beside four cohorts" },
+    { kind: "compressed", block: "four separately headed cite blocks → one CITE THIS COHORT panel", px: 105,
+      instead: "one label, four cohorts named beside their own replay URLs, and a line pointing at the manifest for the full strings",
+      why: "a replay URL is 106 characters and wraps to two lines at any width this page can give it, so four repeated labels spent height on labels rather than evidence. The block and every URL stay." },
   ],
   "B-97L-gulf-event-dossier.html": [
-    { block: "answers rail",
-      px: 161,
-      instead: "the live strip directly below it, the cell rationale beside that, and the commercial box on sheet 2",
+    { kind: "cut", block: "answers rail", px: 161,
+      instead: "the live strip below it, the cell rationale beside that, and the commercial box on sheet 2",
       why: "three columns restating what the sheet says at length" },
-    { block: "representative members, cut from eight to four",
-      px: 113,
+    { kind: "compressed", block: "representative members, eight cards → four", px: 113,
       instead: "the four printed members and the replay URL, which names all twelve",
       why: "eight cards at 92 px wide wrap to five lines each" },
-    { block: "Replay column in the radius-sensitivity table",
-      px: 60,
+    { kind: "compressed", block: "Replay column in the radius-sensitivity table → two URLs below it", px: 60,
       instead: "the two variant replay URLs printed under the table",
-      why: "a 78-character URL inside a six-column table wraps to four lines per row" },
+      why: "a 106-character URL inside a six-column table wraps to four lines per row" },
   ],
   "B1-97L-reinsurance-ils-parametric.html": [
-    { block: "answers rail",
-      px: 133,
+    { kind: "cut", block: "answers rail", px: 133,
       instead: "the published question in the masthead and the live line beneath it",
       why: "the page opens with the question in full and closes with basis risk and two replay URLs" },
-    { block: "member-card row (eight cards)",
-      px: 135,
+    { kind: "cut", block: "member-card row (eight cards)", px: 135,
       instead: "the near-miss note, which names Anita, Alicia and Barry with the facts a trigger turns on",
       why: "cards repeat members the near-miss note already names" },
-    { block: "the published-question panel, folded into the masthead",
-      px: 104,
+    { kind: "compressed", block: "the published-question panel → the masthead sub-line", px: 104,
       instead: "the masthead sub-line, which carries the same sentence",
       why: "a sunken panel for one sentence" },
   ],
   "C-karina-major-hurricane-analog-brief.html": [
-    { block: "answers rail",
-      px: 130,
+    { kind: "cut", block: "answers rail", px: 130,
       instead: "the live tiles and the SO WHAT box",
       why: "the tiles carry the live status and the box carries the commercial read" },
-    { block: "member-card row",
-      px: 163,
+    { kind: "cut", block: "member-card row", px: 163,
       instead: "the replay URL, which reopens the cohort and names all fourteen members",
-      why: "the live tiles, nineteen contract rows and the refusal table fill the sheet" },
-    { block: "comparison strip",
-      px: 147,
-      instead: "B, B1, B2 and D carry the full strip",
-      why: "this page's argument is a live major hurricane beside its own cohort" },
-    { block: "coverage-gaps note and the rarity box",
-      px: 133,
+      why: "the live tiles, nineteen contract rows and the refusal table fill the sheet. The brief permits reducing this row to two or three members or omitting it; it is omitted." },
+    { kind: "compressed", block: "comparison strip → a WHAT ATLAS ADDS line", px: 147,
+      instead: "one sentence inside the SO WHAT box",
+      why: "compressing the strip ranks above sacrificing the plate, the contract rows or provenance" },
+    { kind: "cut", block: "coverage-gaps note and the rarity box", px: 133,
       instead: "the rarity statement folded into the live-vs-history box; gaps are in the source manifest",
       why: "the refusal table is the load-bearing half of that section and needed the width" },
   ],
   "D-storm-atlas-tear-sheet.html": [
-    { block: "colophon — archive scale, as built",
-      px: 182,
+    { kind: "cut", block: "colophon — archive scale, as built", px: 182,
       instead: "the page footer, which prints every count, the methodology version, the pack hash, the build time and the sources",
       why: "a five-row table restating the footer" },
-    { block: "full citation strings in the three worked samples",
-      px: 132,
-      instead: "each sample's replay URL",
-      why: "three four-line cite strings on a one-page tear sheet" },
+    { kind: "compressed", block: "citation strings in the three worked samples → CITE THIS COHORT + URL", px: 132,
+      instead: "each sample's labelled cite block and its replay URL",
+      why: "three four-line cite strings on a one-page tear sheet. The block and the URL stay on all three." },
   ],
 };
 
-/** Does this artifact have a recorded cut whose block name matches? */
+/** Does this artifact have a recorded entry whose block name matches? Informational only --
+ *  no gate consults it to excuse a missing element. */
 export function cutRecorded(file, pattern) {
   return (LEGIBILITY_CUTS[file] || []).some((c) => pattern.test(c.block));
 }

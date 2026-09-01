@@ -7,7 +7,7 @@ import { ROOT } from "./lib/atlas-verify.mjs";
 import {
   artifactA, artifactB, artifactB1, artifactB2, artifactC, artifactD, sourceManifestDoc,
 } from "./lib/collateral-artifacts.mjs";
-import { LEGIBILITY_CUTS } from "./lib/collateral-cuts.mjs";
+import { LEGIBILITY_CUTS, PROTECTED } from "./lib/collateral-cuts.mjs";
 
 const OUT = join(ROOT, "docs/collateral");
 mkdirSync(OUT, { recursive: true });
@@ -41,6 +41,7 @@ writeFileSync(join(OUT, "legibility-cuts.json"), JSON.stringify({
     page: "US Letter, 10 mm margin — a 196 x 259 mm content box, 740 x 979 px at 96 dpi",
     rule: "Cut content before shrinking type. Nothing substantive prints below 7.5 pt.",
   },
+  protected: PROTECTED,
   cuts: LEGIBILITY_CUTS,
 }, null, 2));
 console.log(`legibility-cuts.json                           ${

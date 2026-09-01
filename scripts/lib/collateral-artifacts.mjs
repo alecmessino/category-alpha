@@ -7,7 +7,7 @@ import {
   comparisonStrip, answersRail, repCardRow, repRule, footer, disclaimerLine,
   esc, pct, ci, hrs, coord, DISCLAIMER,
 } from "./collateral-kit.mjs";
-import { cellPlate, plate, LEGEND } from "./collateral-plates.mjs";
+import { basinPlate, cellPlate, plate, LEGEND } from "./collateral-plates.mjs";
 
 /* THE ONE LIVE INSTANT this package is stamped to. Every live line carries it; no historical
    cohort page does, because a cohort is evergreen and stamping it would imply otherwise. */
@@ -81,11 +81,10 @@ export function liveRows(D) {
       + `${g.present_in_archive_pack ? "in" : "absent from"} the pack.`;
   };
   const z = (t) => (t ? String(t).slice(5, 16).replace("T", " ") + "Z" : "—");
-  const deck = (S) => S ? `<b>${S.latest.kt} kt / ${S.latest.mslp === null ? "—" : S.latest.mslp} mb</b>`
-    + ` at ${S.latest.lat}N ${Math.abs(S.latest.lon)}W, ${S.fix_count} fixes to ${z(S.latest_valid_time)}`
+  const deck = (S) => S ? `<b>${S.latest.kt} kt</b>, ${S.fix_count} fixes to ${z(S.latest_valid_time)}`
     : "unavailable";
-  const line = (a) => a ? `<b>${esc(a.cls_label)}</b> ${a.lat}N ${Math.abs(a.lon)}W, `
-    + `<b>${a.wind_kt} kt / ${a.mslp_mb} mb</b>, ${esc(a.movement)}; adv ${esc(a.advisory)} ${z(a.advisory_time_utc)}.`
+  const line = (a) => a ? `NHC <b>${esc(a.cls_label)}</b> ${a.lat}N ${Math.abs(a.lon)}W, `
+    + `<b>${a.wind_kt} kt / ${a.mslp_mb} mb</b>; adv ${esc(a.advisory)} ${z(a.advisory_time_utc)}.`
     : "No NHC advisory in this ingest.";
   return {
     "97L": {
@@ -93,12 +92,12 @@ export function liveRows(D) {
       pre: true, pointType: "PRE-GENESIS REFERENCE CELL", point: "28.0N 88.7W",
       live: `${line(aF)}${aF && aF.watches_highest ? ` <b>${esc(aF.watches_highest)}</b> `
         + `in effect.` : ""} <b>Query cell ≠ this centre.</b>`,
-      feed: `b-deck <b>AL052026</b> ${deck(F)}. ${genesisNote("AL052026")} No GTWO row.`,
+      feed: `b-deck <b>AL052026</b> ${deck(F)}. ${genesisNote("AL052026")}`,
     },
     KARINA: {
       name: "Hurricane Karina", basin: "EAST PACIFIC",
-      pre: false, pointType: "DECLARED GENESIS POINT", point: "13.2N 115.0W (~27 Aug)",
-      live: `${line(aK)} No land in the advisory package.`,
+      pre: false, pointType: "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED", point: "13.2N 115.0W",
+      live: `${line(aK)} No land in the package.`,
       feed: `b-deck <b>EP112026</b> ${deck(K)}. ${genesisNote("EP112026")}`,
     },
     "95E": {
@@ -112,11 +111,31 @@ export function liveRows(D) {
     },
     LOWELL: {
       name: "TS Lowell", basin: "EAST PACIFIC / CENTRAL PACIFIC",
-      pre: false, pointType: "DECLARED GENESIS POINT", point: "11.3N 133.8W (~27 Aug)",
+      pre: false, pointType: "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED", point: "11.3N 133.8W",
       live: `${line(aL)} Far from land.`,
       feed: `b-deck <b>EP122026</b> ${deck(L)}. ${genesisNote("EP122026")}`,
     },
   };
+}
+
+/** OPERATIONAL FORMATION, WITH ITS SOURCE ON IT.
+ *
+ * Two facts, both real and both attributable: NHC/ATCF has classified the system, and the
+ * operational record carries a first fix at tropical status. A page may print either. What it may
+ * not do is call the result an Atlas OBSERVED GENESIS point or run a cohort from it -- the engine
+ * does not accept the operational layer as a genesis source, and the manifest's genesis
+ * determination is where that is settled. Both halves are read off the manifest, never typed. */
+function opFormation(D, atcfId) {
+  const g = (D.genesis_determinations || []).find((x) => x.atcf_id === atcfId);
+  const a = (D.nhc_advisories || []).find((x) => x.atcf_id === atcfId);
+  const bits = [];
+  if (a) bits.push(`NHC/ATCF classifies <b>${esc(a.cls_label)} ${esc(a.name)}</b> (${esc(atcfId)})`);
+  const f = g && g.first_tropical_fix_in_operational_record;
+  if (f) {
+    bits.push(`the operational record's first tropical-status fix is <b>${esc(f.t)}</b>, `
+      + `<b>${f.lat}N ${Math.abs(f.lon)}W</b>, ${esc(f.stage)} ${f.kt} kt`);
+  }
+  return bits.length ? `${bits.join("; ")}.` : "No operational record in this ingest.";
 }
 
 /** The published question, spelled out with its declared radius and window. This is the thing a
@@ -178,24 +197,24 @@ function timingRows(sys, keys) {
 export function artifactA(D, copy) {
   const C = makeCopy(copy, "A");
   const rows = liveRows(D);
+  const bp = basinPlate(D, { width: 430, height: 114, renderWidth: 356 });
   const order = ["97L", "KARINA", "95E", "LOWELL"];
   const sysOf = { "97L": D.byId["97L"], KARINA: D.byId.KARINA, "95E": D.byId["95E"], LOWELL: D.byId.LOWELL };
 
   const table = `<table class="ledger sysgrid">
   <thead><tr>
-    <th style="width:20%;text-align:left">System · point type · coordinates</th>
-    <th style="width:42%;text-align:left" class="livecol">Live status &amp; feeds, ${esc(LIVE_STAMP)}</th>
-    <th style="width:38%;text-align:left">What the archive can answer</th>
+    <th style="width:23%;text-align:left">System · point · coords</th>
+    <th style="width:40%;text-align:left" class="livecol">Live status &amp; feeds, ${esc(LIVE_STAMP)}</th>
+    <th style="width:37%;text-align:left">What the archive can answer</th>
   </tr></thead>
   <tbody>${order.map((k, i) => {
     const sy = sysOf[k];
     const r = rows[k];
     return `<tr class="${i % 2 ? "band" : ""}">
       <td class="lft"><b>${esc(sy.name)}</b>
-        <span class="mono6">${esc(sy.basin_label)}</span>
-        <span class="chip ${r.pre ? "pre" : "obs"}">${r.pre ? "PRE-GENESIS CELL" : "DECLARED GENESIS"}</span>
+        <span class="chip ${r.pre ? "pre" : "obs"}">${r.pre ? "PRE-GENESIS CELL" : "DECLARED · NOT ATLAS-OBSERVED"}</span>
         <span class="mono8">${coord(sy.coordinates_queried.lat, sy.coordinates_queried.lon)}</span>
-        <span class="mono6">r ${sy.radius_km} km · ${esc(sy.month_window.replace("August–September", "Aug–Sep"))} · ${sy.season_floor}+</span></td>
+        <span class="mono6">${esc(sy.basin_label)} · r ${sy.radius_km} km · ${esc(sy.month_window.replace("August–September", "Aug–Sep"))} · ${sy.season_floor}+</span></td>
       <td class="lft livecol"><div class="prose">${r.live}</div>
         <div class="feed">${r.feed}</div></td>
       <td class="lft"><span class="chip ${sy.cohort.sufficient ? "ok" : "refuse"}">${esc(sy.cohort.cohort_status)}</span>
@@ -206,7 +225,7 @@ export function artifactA(D, copy) {
   const body = `<div class="sheet">
 ${masthead({
     doc: "ARTIFACT A · ACTIVE SYSTEMS OVERVIEW", sheet: "1 OF 1",
-    title: "Four live systems, four declared points, and what the record supports",
+    title: "Four live systems, four declared points, what the record supports",
     sub: C.get("lede").replace(/^<p>|<\/p>$/g, ""),
     rule: [
       ["LIVE STATUS", LIVE_STAMP],
@@ -215,46 +234,62 @@ ${masthead({
     ],
   })}
 
-${answersRail(C.answers.now || "", C.answers.adds || "", C.answers.commercial || "")}
-
-<section class="sec">${sectionHead("01", "Active systems",
+${/* THE ANSWERS RAIL, UNROLLED INTO THE PAGE. Three stacked columns cost 102 px and restated
+     what the sheet already shows: the live line is the table's own LIVE column, timestamped, and
+     the commercial read now sits in a labelled box beside the refusal where a reader meets it in
+     the scan order rather than above it. The hero plate and the four cite blocks are what that
+     space buys. Cut content before shrinking type. */""}
+<section class="sec sechd-tight">${sectionHead("01", "Active systems",
     "point type · live status (timestamped) · what the archive can answer")}
 ${table}
-<p class="fn"><b>THE LIVE COLUMN IS NOT ATLAS OUTPUT</b> — feeds ingested
-${esc(D.feeds_generated_at)}; the operational layer never enters a cohort or computes a rate.
-<b>POINT-TYPE RULE:</b> genesis is the archive's own — the first observed track point with a
-tropical status, for a storm the pack holds. <b>An NHC advisory package is not that</b>, and no
-system here has an archive genesis row.</p>
+<p class="fn"><b>THE LIVE COLUMN IS NOT ATLAS OUTPUT. OPERATIONAL FORMATION, ATTRIBUTED:</b>
+${opFormation(D, "AL052026")} NHC's classification and the ATCF record's own fix — not an Atlas
+result. <b>ATLAS GENESIS:</b> the archive's rule is the first observed tropical-status fix <i>for a
+storm the pack holds</i>; the engine does not accept the operational layer as a source, so no
+cohort here is run from one.</p>
 </section>
 
-${/* THE PLATE THAT IS NOT HERE. A four-mark basin plate stood in this slot and cost 327 px of a
-     980 px page. At the type gate -- 8.5 pt body, 7.5 pt detail -- the page could carry the plate
-     or the four cite blocks and the refusal panel, not both, and the plate was the one showing a
-     second view of points the table already states. It survives on B and B2, where the cell and
-     the live track are the argument. Cut content before shrinking type. */""}
-<section class="sec">${sectionHead("02", "The refusals", "the most valuable rows here")}
-<div class="box refusal"><h3>WHAT THIS PACKAGE WILL NOT RETURN</h3>
-  ${C.get("refusal-note")}
-  <p style="margin-top:2px"><b>THE CONTRACT.</b> Six scored landfall regions, each an <b>any</b>
-  and a <b>≥64 kt</b> pair. <b>No state-level landfall is scored</b> — no TX, LA or Gulf-state rate
-  appears here.</p></div>
+<section class="sec sechd-tight">${sectionHead("02", "The refusals, and the commercial read",
+    "the refusal is the most valuable half")}
+<div class="grid2">
+  <div class="box refusal"><h3>WHAT THIS PACKAGE WILL NOT RETURN</h3>
+    ${C.get("refusal-note")}
+    <p style="margin-top:2px"><b>THE CONTRACT.</b> Six landfall regions, each an <b>any</b> and a
+    <b>≥64 kt</b> pair. <b>No state-level landfall is scored.</b></p></div>
+  <div class="box commercial"><h3>COMMERCIAL RELEVANCE — NOT MEASUREMENT</h3>
+    <p>${C.answers.commercial || ""} <b>WHAT ATLAS ADDS:</b> ${C.answers.adds || ""}</p></div>
+</div>
 </section>
 
 ${/* THE COMPARISON STRIP THAT IS NOT HERE. Three rows, 173 px, on a page whose mandated scan
      order -- question, live status, core evidence, refusal, commercial relevance, replay URL --
      already needs every pixel at the type gate. The strip says what Storm Atlas adds over a
      public map; the answers rail at the head of this page says it in three sentences, and B, B1,
-     B2, C and D all carry the full strip. Cut content before shrinking type. */""}${/* THE CITATION STRINGS THAT ARE NOT HERE. Each of the four runs to four printed lines, and
-     four of them cost 105 px this page does not have at the type gate. What a reader needs to
-     reopen a cohort is the URL, which reproduces the cite string along with every number; the
-     strings themselves are printed in full in the source manifest and on each cohort's own
-     artifact. Cut content before shrinking type. */""}
-<section class="sec sechd-tight">${sectionHead("03", "Replay these cohorts",
-    "one URL each · full citation strings are in the source manifest")}
-<div class="citelist two urls">${order.map((k) => `<div class="cite">
-  <span class="k">${esc(sysOf[k].name.toUpperCase())} · N = ${sysOf[k].cohort.n_cases}</span>
-  <a class="u" href="${esc(sysOf[k].replay_url)}">${esc(sysOf[k].replay_url)}</a>
-</div>`).join("")}</div>
+     B2, C and D all carry the full strip. Cut content before shrinking type. */""}<section class="sec sechd-tight">${sectionHead("03", "The camera, and the cohorts to cite",
+    "four queried points · and the replay URL for each")}
+<div class="platecol">
+  <div>${plate({
+    title: "NA + EP · FOUR QUERIED POINTS",
+    meta: `plate carrée · archive coastline`,
+    svg: bp.svg,
+    legendItems: [LEGEND.cell, LEGEND.genesisCell, LEGEND.live],
+    note: C.get("plate-note").replace(/^<p>|<\/p>$/g, ""),
+  })}</div>
+  ${/* ONE CITE BLOCK, FOUR COHORTS. A replay URL is 106 characters and wraps to two lines at any
+       column width this page can give it, so four separately headed cite blocks spend their height
+       on four repeated labels rather than on evidence. The label stands once, the published cite
+       string prints in full for the cohort this page leads with, and every cohort keeps its own
+       name beside its own URL. */""}
+  <div class="cite">
+    <span class="k">CITE THIS COHORT</span>
+    <div class="citerows">${order.map((k) => `<div>
+      <span class="nm">${esc(sysOf[k].name.toUpperCase())} · N = ${sysOf[k].cohort.n_cases}</span>
+      <a class="u" href="${esc(sysOf[k].replay_url)}">${esc(sysOf[k].replay_url)}</a></div>`).join("")}
+    </div>
+    <p class="disclaim" style="margin-top:1px">Each URL reproduces its cohort's published citation
+    string; all four are in the source manifest.</p>
+  </div>
+</div>
 </section>
 
 <div class="spacer"></div>
@@ -583,7 +618,7 @@ ${masthead({
     sub: `Outcomes for the point this cohort is keyed to — declared, not an archive row. `
       + `<b>${esc(s.cohort.cohort_status)}</b>, N = ${s.cohort.n_cases}, ESS `
       + `${s.cohort.effective_sample_size}, min sample ${s.cohort.min_sample}.`,
-    rule: [["LIVE STATUS", LIVE_STAMP], ["POINT TYPE", "DECLARED GENESIS POINT"],
+    rule: [["LIVE STATUS", LIVE_STAMP], ["POINT TYPE", "DECLARED GENESIS POINT · NOT ATLAS-OBSERVED"],
       ["GENESIS", "13.2°N 115.0°W · r 250 km · Aug–Sep · 1971+"], ["PACK", D.pack.archive_stamp]],
   })}
 
@@ -634,7 +669,10 @@ ${/* THE COVERAGE-GAPS BLOCK THAT IS NOT HERE, AND THE RARITY BOX WITH IT. Secti
 <div class="grid2">
   <div class="box"><h3>THE LIVE OBSERVATION BESIDE THE HISTORICAL FREQUENCIES</h3>${C.get("live-vs-history")}</div>
   <div class="box commercial"><h3>SO WHAT — RESEARCH USE, NOT THREAT MONITORING</h3>${C.get("so-what")}
-    ${C.get("land-rows")}</div>
+    ${C.get("land-rows")}
+    <p style="margin-top:2px"><b>WHAT ATLAS ADDS.</b> A public map gives position, P(forms) and a
+    cone; Atlas gives exact n / N with a 95% Wilson interval on every contract row, a visible
+    refusal, and a URL that reproduces both.</p></div>
 </div>
 ${unscoreableNote(s)}
 </section>
@@ -669,8 +707,8 @@ export function artifactD(D, copy) {
       <td class="ci">${ci(r.ci95)}</td>
       <td class="status ${r.status ? (r.status === "RATE REFUSED" ? "refused" : "gate") : "none"}">${r.status ? esc(r.status) : "—"}</td></tr>`; }).join("")}
     </tbody></table>
-    <div class="cite" style="margin-top:3px"><a class="u" style="margin-top:0"
-      href="${esc(sys.replay_url)}">${esc(sys.replay_url)}</a></div></div>`;
+    <div class="cite" style="margin-top:3px"><span class="k">CITE THIS COHORT</span><a class="u"
+      style="margin-top:0" href="${esc(sys.replay_url)}">${esc(sys.replay_url)}</a></div></div>`;
 
   const body = `<div class="sheet">
 ${masthead({
@@ -700,7 +738,7 @@ ${sample(g, [["ts", "reached TS"], ["cat3", "reached Cat 3"],
   "SAMPLE 1 — GULF CELL, PRE-GENESIS")}
 ${sample(k, [["cat3", "reached Cat 3 (major)"], ["cat4", "reached Cat 4"],
     ["cat5", "reached Cat 5"], ["mexico:any", "MEXICO — any"]],
-  "SAMPLE 2 — KARINA, DECLARED POINT")}
+  "SAMPLE 2 — KARINA, DECLARED · NOT ATLAS-OBSERVED")}
 <div class="box refusal"><h3>SAMPLE 3 — THE REFUSAL</h3>
   <p class="disclaim" style="margin-bottom:6px">${esc(l.question)}</p>
   <p><b>N = ${l.cohort.n_cases}</b>. ${esc(l.cohort.cohort_status)}. The engine returns
@@ -708,8 +746,8 @@ ${sample(k, [["cat3", "reached Cat 3 (major)"], ["cat4", "reached Cat 4"],
   ${l.intensity_rows.find((r) => r.key === "ts").count} of ${l.cohort.n_cases}, Cat 3
   ${l.intensity_rows.find((r) => r.key === "cat3").count} of ${l.cohort.n_cases} — because a
   count is a fact and a rate over six storms is not one.</p>
-  <a class="u" style="font-family:var(--font-mono);font-size:var(--t-detail);color:#0066ff;word-break:break-all"
-    href="${esc(l.replay_url)}">${esc(l.replay_url)}</a></div>
+  <div class="cite" style="margin-top:3px"><span class="k">CITE THIS COHORT</span><a class="u"
+    style="margin-top:0" href="${esc(l.replay_url)}">${esc(l.replay_url)}</a></div></div>
 </div>
 </section>
 

@@ -47,11 +47,11 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 
 /* ---- masthead ------------------------------------------------------------------ */
 .mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:1px;margin-bottom:var(--sp-1)}
-.mh-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-6)}
-.mh-brand{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;letter-spacing:2.2px;
+.mh-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-6);line-height:1.1}
+.mh-brand{font-family:var(--font-mono);font-size:var(--t-body);font-weight:600;letter-spacing:1.6px;
   text-transform:uppercase;color:var(--ink-900)}
 .mh-brand .sep{color:var(--ink-400);margin:0 6px}
-.mh-doc{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.7px;color:var(--ink-600);
+.mh-doc{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.4px;color:var(--ink-600);
   text-transform:uppercase;text-align:right;white-space:nowrap}
 .mh-title{font-family:var(--font-display);font-size:19px;font-weight:700;line-height:1.1;
   margin:var(--sp-2) 0 var(--sp-1);letter-spacing:-.3px;max-width:94%}
@@ -68,7 +68,7 @@ body{margin:0;background:var(--paper-100);color:var(--ink-900);
 .sec.sechd-tight>.sec-hd{margin-bottom:0}
 .sec-hd h2{font-family:var(--font-mono);font-size:var(--t-body);font-weight:600;letter-spacing:1.5px;
   text-transform:uppercase;margin:0;color:var(--ink-900)}
-.sec-hd .n{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-400);letter-spacing:1px}
+.sec-hd .n{font-family:var(--font-mono);font-size:var(--t-body);color:var(--ink-400);letter-spacing:.6px}
 .sec-hd .note{font-size:var(--t-body);color:var(--ink-600);margin-left:auto;font-style:italic}
 .lede{font-size:var(--t-body);line-height:1.26;color:var(--ink-700);margin:0 0 var(--sp-2)}
 .lede p{margin:0 0 var(--sp-2)}
@@ -143,8 +143,8 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
 .box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
 .box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
-.box h3{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.5px;text-transform:uppercase;
-  margin:0 0 1px;color:var(--ink-900);line-height:1.15}
+.box h3{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.1px;text-transform:uppercase;
+  margin:0 0 0.5px;color:var(--ink-900);line-height:1.08}
 .box p{margin:0 0 var(--sp-1);font-size:var(--t-body);line-height:1.22;color:var(--ink-700)}
 .box p:last-child{margin-bottom:0}
 .box ul{margin:0;padding-left:9px;font-size:var(--t-body);line-height:1.2;color:var(--ink-700)}
@@ -187,7 +187,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 /* ---- stat tiles -------------------------------------------------------------------- */
 .tiles{display:grid;gap:var(--sp-4)}
 .tile{border:1px solid var(--line-300);border-radius:4px;padding:3px 5px;background:var(--paper-50)}
-.tile .k{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:1px;text-transform:uppercase;
+.tile .k{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:2px}
 .tile .v{font-family:var(--font-mono);font-size:19px;font-weight:600;line-height:1.02;
   letter-spacing:-.4px}
@@ -200,8 +200,8 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 .plate{border:1px solid var(--ink-900);border-radius:6px;overflow:hidden;background:#fbfcfe}
 .plate-hd{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-4);
   padding:1px var(--sp-4);border-bottom:1px solid var(--ink-900);background:var(--white)}
-.plate-hd .t{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:1.2px;text-transform:uppercase;
-  font-weight:600}
+.plate-hd .t{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.2px;text-transform:uppercase;
+  font-weight:600;line-height:1.1}
 .plate-hd .m{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);letter-spacing:.5px}
 .plate svg{display:block;width:100%;height:auto}
 .plate-ft{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);padding:0 var(--sp-4);
@@ -219,7 +219,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
   border-bottom:1px solid var(--ink-900);padding:var(--sp-1) 0;margin:var(--sp-1) 0}
 .rail>div{padding-right:var(--sp-5);border-right:1px solid var(--line-200)}
 .rail>div:last-child{border-right:none;padding-right:0}
-.rail .q{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:1px;text-transform:uppercase;
+.rail .q{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.5px;text-transform:uppercase;
   color:var(--ink-600);display:block;margin-bottom:1px}
 .rail .a{font-size:var(--t-body);line-height:1.24;color:var(--ink-900)}
 .rail .a b{font-weight:600}
@@ -227,8 +227,8 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 /* ---- live strip -------------------------------------------------------------------- */
 .live{border:1px solid var(--red-600);border-radius:6px;overflow:hidden}
 .live-hd{display:flex;align-items:center;gap:var(--sp-3);padding:1.5px var(--sp-4);
-  background:var(--red-600);color:#fff;font-family:var(--font-mono);font-size:var(--t-detail);
-  letter-spacing:1.2px;text-transform:uppercase;font-weight:600}
+  background:var(--red-600);color:#fff;font-family:var(--font-mono);font-size:var(--t-body);
+  letter-spacing:.4px;text-transform:uppercase;font-weight:600;line-height:1.15}
 .live-hd .ts{margin-left:auto;letter-spacing:.6px;font-weight:400;opacity:.94}
 .live table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:var(--t-detail)}
 .live th{text-align:left;font-size:var(--t-detail);letter-spacing:.2px;text-transform:uppercase;
@@ -241,7 +241,7 @@ table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mon
 
 /* ---- artifact A: the merged system grid ------------------------------------------- */
 table.ledger.sysgrid{table-layout:fixed}
-.ledger.sysgrid th{white-space:normal;line-height:1.25;vertical-align:bottom}
+.ledger.sysgrid th{white-space:nowrap;line-height:1.2;vertical-align:bottom;letter-spacing:.1px}
 .ledger.sysgrid .chip{white-space:normal;display:inline-block;max-width:100%;line-height:1.1;margin-top:1px}
 .ledger.sysgrid td{vertical-align:top;padding:1.2px var(--sp-3);overflow-wrap:anywhere}
 .ledger td.lft{text-align:left;white-space:normal}
@@ -302,6 +302,11 @@ table.ledger.sysgrid{table-layout:fixed}
 .cmptable.compact td{font-size:var(--t-detail);padding:0.5px var(--sp-2);line-height:1.18}
 .cmptable.compact td.q{font-size:var(--t-detail)}
 .platecol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.06fr);gap:var(--sp-5);align-items:start}
+/* A REPLAY URL IS 78 CHARACTERS AND MAY NOT SHRINK. At the 7.5 pt citation floor it needs about
+   440 px to sit on one line, and a column narrower than that costs a second line on every URL on
+   the page. Where a plate shares the band with a cite list, the cite side gets the width it
+   needs and the plate takes the remainder. */
+.platecol.cites{grid-template-columns:minmax(0,.62fr) minmax(0,1fr)}
 .platecol .sec{margin-top:0}
 .triband{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(0,.86fr) minmax(0,1.36fr);
   gap:var(--sp-4);align-items:start}
@@ -331,6 +336,12 @@ table.ledger.sysgrid{table-layout:fixed}
 .citelist .cite{margin-top:var(--sp-1);padding-top:1px;border-top:1px solid var(--line-300)}
 .citelist .cite:first-child{border-top:1px solid var(--ink-900);margin-top:0}
 .citelist .v{font-size:var(--t-detail);line-height:1.18}
+.citerows{margin-top:1px}
+.citerows>div{border-top:1px dotted var(--line-300);padding-top:0.5px;margin-top:0.5px}
+.citerows .nm{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;
+  letter-spacing:.2px;color:var(--ink-900);display:block;line-height:1.15}
+.citerows .u{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--blue-600);
+  word-break:break-all;display:block;line-height:1.12}
 .citelist.urls .cite{margin-top:1px}
 .citelist.urls .k{margin-bottom:0}
 .citelist .u{font-size:var(--t-detail)}
@@ -378,7 +389,7 @@ table.ledger.sysgrid{table-layout:fixed}
   </div>
   <h1 class="mh-title">Hurricane Karina, beside her declared genesis cohort</h1>
   <p class="mh-sub">Outcomes for the point this cohort is keyed to — declared, not an archive row. <b>SUFFICIENT</b>, N = 14, ESS 14, min sample 10.</p>
-  <div class="mh-rule"><span class="kv">LIVE STATUS <b>31 AUG 2026 · 16:14 CT / 21:14 UTC</b></span><span class="kv">POINT TYPE <b>DECLARED GENESIS POINT</b></span><span class="kv">GENESIS <b>13.2°N 115.0°W · r 250 km · Aug–Sep · 1971+</b></span><span class="kv">PACK <b>134661125525f27a</b></span></div>
+  <div class="mh-rule"><span class="kv">LIVE STATUS <b>31 AUG 2026 · 16:14 CT / 21:14 UTC</b></span><span class="kv">POINT TYPE <b>DECLARED GENESIS POINT · NOT ATLAS-OBSERVED</b></span><span class="kv">GENESIS <b>13.2°N 115.0°W · r 250 km · Aug–Sep · 1971+</b></span><span class="kv">PACK <b>134661125525f27a</b></span></div>
 </header>
 
 
@@ -392,7 +403,7 @@ table.ledger.sysgrid{table-layout:fixed}
     <div class="tile"><span class="k">COHORT — REACHED CAT 4</span><div class="v">1 / 14</div>
       <span class="s">7.1% · 95% Wilson 1–31%</span></div>
   </div>
-<p class="fn"><b>NOT ATLAS OUTPUT.</b> <b>Cat 4 Hurricane</b> 17.5N 125.8W, <b>115 kt / 950 mb</b>, WNW 9 mph; adv 018 08-31 21:00Z. No land in the advisory package. b-deck <b>EP112026</b> <b>115 kt / 950 mb</b> at 17.4N 125.4W, 28 fixes to 08-31 18:00Z. Atlas genesis <b>NONE</b> — absent from the pack.
+<p class="fn"><b>NOT ATLAS OUTPUT.</b> NHC <b>Cat 4 Hurricane</b> 17.5N 125.8W, <b>115 kt / 950 mb</b>; adv 018 08-31 21:00Z. No land in the package. b-deck <b>EP112026</b> <b>115 kt</b>, 28 fixes to 08-31 18:00Z. Atlas genesis <b>NONE</b> — absent from the pack.
 <b>No cohort, no analog and no rate comes from it.</b></p>
 </section>
 
@@ -426,9 +437,12 @@ and no cone is drawn. Every landfall row is published even at zero or stamped.</
 
 <section class="sec"><div class="sec-hd"><span class="n">02</span><h2>Reading the live storm, and the refusals</h2></div>
 <div class="grid2">
-  <div class="box"><h3>THE LIVE OBSERVATION BESIDE THE HISTORICAL FREQUENCIES</h3><p>Two live readings, both above the 113 kt Cat 4 line: 115 kt / 950 mb on NHC advisory 018 at 21:00Z, and the same on the 18:00Z b-deck fix. Each carries its own instant.</p><p>Beside them, the cohort: Cat 4 is 1 of 14 (7.1%, 1-31%); Cat 5 is 0 of 14 (0.0%, 0-22%). Neither moves because Karina intensified — a genesis-conditioned rate is the record’s frequency at formation, <b>not this storm’s event probability</b>.</p></div>
+  <div class="box"><h3>THE LIVE OBSERVATION BESIDE THE HISTORICAL FREQUENCIES</h3><p>Two live readings, both above the 113 kt Cat 4 line: 115 kt / 950 mb on NHC advisory 018 at 21:00Z, and the same on the 18:00Z b-deck fix.</p><p>Beside them, the cohort: Cat 4 is 1 of 14 (7.1%, 1-31%); Cat 5 is 0 of 14 (0.0%, 0-22%). Neither moves because Karina intensified — a genesis-conditioned rate is the record’s frequency at formation, <b>not this storm’s event probability</b>.</p></div>
   <div class="box commercial"><h3>SO WHAT — RESEARCH USE, NOT THREAT MONITORING</h3><p>Rarity and pathway context for research or a client conversation — not threat monitoring. The cohort says how often storms that began here climbed this far, and nothing about where Karina goes.</p>
-    <p>Every land row is published, zeros and stamps included: Mexico — any 1 of 14 (7.1%, 1-31%), ≥64 kt 0 of 14 (0.0%, 0-22%). The rest return OUT OF SCOPE or BASE RATE ONLY.</p></div>
+    <p>Every land row is published, zeros and stamps included: Mexico — any 1 of 14 (7.1%, 1-31%), ≥64 kt 0 of 14 (0.0%, 0-22%). The rest return OUT OF SCOPE or BASE RATE ONLY.</p>
+    <p style="margin-top:2px"><b>WHAT ATLAS ADDS.</b> A public map gives position, P(forms) and a
+    cone; Atlas gives exact n / N with a 95% Wilson interval on every contract row, a visible
+    refusal, and a URL that reproduces both.</p></div>
 </div>
 <div class="box refusal"><h3>UNSCOREABLE — 10 OF 12 LANDFALL ROWS CARRY AN EVENT-GATE STAMP</h3>
   <p class="disclaim">Scope <b>in the EP basin since 1971</b>;

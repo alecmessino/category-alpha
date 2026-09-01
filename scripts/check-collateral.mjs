@@ -15,7 +15,7 @@
  * Run: node scripts/check-collateral.mjs
  */
 import { join } from "node:path";
-import { cutRecorded } from "./lib/collateral-cuts.mjs";
+import { LEGIBILITY_CUTS } from "./lib/collateral-cuts.mjs";
 import { readFileSync, readdirSync } from "node:fs";
 import { ROOT } from "./lib/atlas-verify.mjs";
 
@@ -150,6 +150,18 @@ function text(html) {
 const MANIFEST_DOC = "SOURCE-MANIFEST.html";
 const files = readdirSync(DIR).filter((f) => f.endsWith(".html")).sort();
 const artifacts = files.filter((f) => f !== MANIFEST_DOC);
+/* THE REGISTER MAY NOT NAME A PROTECTED ELEMENT. Recording a cut explains it; it never makes a
+   required element optional, and an entry claiming to have cut one is a contradiction the build
+   should refuse rather than publish. */
+for (const [file, entries] of Object.entries(LEGIBILITY_CUTS)) {
+  for (const e of entries) {
+    const claimsProtected = e.kind === "cut"
+      && /\bplate\b|\bcite\b|citation string|replay url|provenance/i.test(e.block);
+    ok(!claimsProtected, `cut register: ${file} does not claim to have cut a protected element`,
+      `"${e.block}" — see PROTECTED in scripts/lib/collateral-cuts.mjs`);
+  }
+}
+
 ok(artifacts.length === 6, `six artifacts rendered`,
   `found ${artifacts.length}: ${artifacts.join(", ")}`);
 ok(files.includes(MANIFEST_DOC), "the source manifest is rendered");
@@ -162,21 +174,30 @@ for (const f of files) {
   /* -- completeness -- */
   ok(!/COPY SLOT "[^"]+" NOT SUPPLIED/.test(html), "every copy slot supplied",
     (html.match(/COPY SLOT "[^"]+" NOT SUPPLIED/g) || []).slice(0, 6).join(", "));
-  /* THE CITE BLOCK, OR A RECORDED REASON IT IS NOT HERE. The type gate forced blocks off some
-     sheets; scripts/lib/collateral-cuts.mjs is where each removal is named, costed and given the
-     thing that carries its content instead. A missing block with no entry there still fails. */
-  ok(/CITE THIS COHORT/.test(t) || cutRecorded(f, /citation strings/i),
-    "carries a CITE THIS COHORT block, or a recorded cut in its place",
-    "no cite block and no entry in scripts/lib/collateral-cuts.mjs");
+  /* PROVENANCE IS NOT CUTTABLE. Recording a removal explains it; it does not make a required
+     element optional. The cite block and its replay URL are the thing a counterparty reopens, so
+     no entry in scripts/lib/collateral-cuts.mjs can excuse their absence -- this check takes no
+     register argument at all. */
+  ok(/CITE THIS COHORT/.test(t), "carries a CITE THIS COHORT block");
+  ok(/storm-atlas\/\?v=1/.test(html), "carries a replay URL beside it");
+  /* THE HERO PLATE ON A. Named non-negotiable in the brief, so it is checked against the rendered
+     page rather than left to a layout decision. */
+  if (f === "A-active-systems-overview.html") {
+    ok(/North Atlantic and East Pacific plate, four marks/.test(html),
+      "carries the four-mark NA + EP plate");
+  }
   ok(/METHODOLOGY 1\.1\.0/.test(t) && new RegExp(M.pack.archive_stamp).test(t),
     "carries the methodology version and pack stamp");
   ok(/RESEARCH ONLY — NOT A FORECAST/.test(t), "carries the research-only disclaimer");
+  /* THE COMPARISON, FULL OR COMPRESSED. What Storm Atlas adds over a public map has to be on the
+     page; whether it takes a three-row table or a single sentence is a layout decision, and the
+     brief ranks compressing it above sacrificing core evidence, the plate or provenance. Either
+     form satisfies this; neither being present does not, register entry or no. */
   if (f !== MANIFEST_DOC) {
-    ok(/The question a desk actually asks/.test(t) || cutRecorded(f, /comparison strip/i),
-      "carries the comparison strip, or a recorded cut in its place",
-      "no comparison strip and no entry in scripts/lib/collateral-cuts.mjs");
+    ok(/The question a desk actually asks/.test(t) || /WHAT ATLAS ADDS/i.test(t),
+      "carries the comparison — full strip or compressed line",
+      "neither the strip nor a WHAT ATLAS ADDS line is present");
   }
-  ok(/storm-atlas\/\?v=1/.test(html), "carries at least one replay URL");
   ok(/GENESIS-CONDITIONED/.test(t), "states the genesis-conditioned rule");
 
   /* -- GATE 1: THE QUESTION TEXT MATCHES THE POINT TYPE ------------------------------------
@@ -187,19 +208,28 @@ for (const f of files) {
      "OBSERVED GENESIS" may not appear on any of them at all. */
   const archiveGenesis = new Set(M.genesis_determinations
     .filter((g) => g.present_in_archive_pack).map((g) => g.atcf_id));
-  ok(!/OBSERVED GENESIS/.test(t) || archiveGenesis.size > 0,
+  /* Sentence-scoped and negation-aware, because the correct pages say the phrase constantly --
+     "no system here has an Atlas OBSERVED GENESIS point", "DECLARED · NOT ATLAS-OBSERVED". A page
+     denying that it has one is the behaviour this check exists to produce, not to punish; what
+     fails is an affirmative claim to a point the manifest says the archive does not hold. */
+  const genesisClaims = (t.match(/[^.]*OBSERVED GENESIS[^.]*\.?/g) || [])
+    .filter((sent) => !/\bnot\b|\bno\b|\bnever\b|\bwithout\b|\bNOT ATLAS-OBSERVED\b/i.test(sent));
+  ok(archiveGenesis.size > 0 || genesisClaims.length === 0,
     "no cohort is labelled OBSERVED GENESIS while the archive holds no genesis row for it",
-    (t.match(/[^.]*OBSERVED GENESIS[^.]*/g) || []).slice(0, 3).join(" | "));
+    genesisClaims.slice(0, 3).join(" | "));
   for (const sy of M.systems.filter((x) => html.includes(x.replay_url))) {
     if (sy.point_type === "PRE-GENESIS REFERENCE CELL") continue;
     ok(!new RegExp(`${sy.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}[^.]{0,80}observed genesis`, "i").test(t),
       `${sy.id}: the page does not call its declared point an observed one`);
   }
-  /* A live system that the archive has no genesis row for may not be described as having
-     formed for cohort purposes. NHC's own classification is quoted as NHC's, with its instant. */
-  ok(!/\b(97L|AL052026|Invest 97L)\b[^.]{0,60}\bhas formed\b/i.test(t),
-    "no page asserts that a live system has formed in the archive's sense",
-    (t.match(/[^.]*has formed[^.]*/g) || []).slice(0, 2).join(" | "));
+  /* OPERATIONAL FORMATION IS A FACT, AND MAY BE STATED. NHC/ATCF classifying a system, and the
+     operational record carrying a first tropical-status fix, are observations with sources and
+     instants; a page may print either with attribution. What is prohibited is the CONVERSION:
+     neither may be presented as an Atlas OBSERVED GENESIS point, and no cohort may be run from
+     one. The two checks above police that conversion -- the point-type label must match the
+     manifest, and no declared point may be called observed. There is deliberately no check here
+     against the words "has formed": suppressing a sourced operational fact would make the pages
+     less accurate, not more careful. */
 
   /* -- GATE 2: NO COMPOSITION OF AN OUTLOOK PROBABILITY WITH AN ATLAS ROW -------------------
      The correction is specific: an unconditional probability needs an external formation

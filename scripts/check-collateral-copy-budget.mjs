@@ -18,18 +18,24 @@ import { readFileSync } from "node:fs";
 import { ROOT } from "./lib/atlas-verify.mjs";
 
 export const BUDGETS = {
-  A: { "answers.now": 44, "answers.adds": 30, "answers.commercial": 33, "lede": 34, "tag-97L": 22, "tag-KARINA": 21, "tag-95E": 22, "tag-LOWELL": 22, "atlas-value-97L": 37, "atlas-value-KARINA": 35, "atlas-value-95E": 35, "atlas-value-LOWELL": 27, "refusal-note": 51 },
-  B: { "answers.now": 74, "answers.adds": 45, "answers.commercial": 57, "lede": 46, "cell-rationale": 65, "reading-the-ledger": 49, "radius-sensitivity": 32, "seasonal-timing": 45, "analog-plate-note": 29, "commercial": 142, "hole": 89 },
-  B1: { "answers.now": 29, "answers.adds": 43, "answers.commercial": 30, "lede": 45, "trigger-explainability": 60, "near-miss": 81, "basis-risk": 83, "how-used": 13 },
+  A: { "answers.adds": 30, "answers.commercial": 26, "lede": 34, "atlas-value-97L": 31, "atlas-value-KARINA": 32, "atlas-value-95E": 32, "atlas-value-LOWELL": 27, "plate-note": 42, "refusal-note": 37 },
+  B: { "lede": 46, "cell-rationale": 65, "reading-the-ledger": 40, "radius-sensitivity": 32, "seasonal-timing": 45, "analog-plate-note": 29, "commercial": 142, "hole": 89 },
+  B1: { "answers.now": 29, "trigger-explainability": 60, "near-miss": 81, "basis-risk": 83, "how-used": 13 },
   B2: { "answers.now": 44, "answers.adds": 33, "answers.commercial": 23, "lede": 45, "geography-not-probability": 64, "exposure-map": 68, "frequency-bands": 36, "not-this": 60 },
-  C: { "answers.now": 49, "answers.adds": 45, "answers.commercial": 51, "lede": 68, "live-vs-history": 86, "land-rows": 39, "so-what": 36 },
-  D: { "answers.now": 81, "answers.adds": 52, "answers.commercial": 58, "one-sentence": 59, "users-can": 140, "moat": 91, "delivery": 41, "pilot": 23, "sample-note": 41 },
+  C: { "live-vs-history": 80, "land-rows": 39, "so-what": 36 },
+  D: { "one-sentence": 59, "users-can": 140, "moat": 91, "delivery": 41, "pilot": 23, "sample-note": 41 },
 };
 
 /* SLOTS NO LONGER RENDERED. The type-gate pass cut the blocks these fed; the copy stays in
    copy.json so the cut is reversible, and it is listed here so an unused slot reads as retired
    rather than as an unbudgeted surprise. scripts/lib/collateral-cuts.mjs records why. */
-export const RETIRED = {"A": ["plate-note"], "C": ["rarity"]};
+export const RETIRED = {
+  "A": ["tag-97L", "tag-KARINA", "tag-95E", "tag-LOWELL", "answers.now"],
+  "B": ["answers.now", "answers.adds", "answers.commercial"],
+  "B1": ["lede", "answers.adds", "answers.commercial"],
+  "C": ["lede", "rarity", "answers.now", "answers.adds", "answers.commercial"],
+  "D": ["answers.now", "answers.adds", "answers.commercial"],
+};
 
 export const words = (html) => String(html || "").replace(/<[^>]+>/g, " ")
   .replace(/\s+/g, " ").trim().split(" ").filter(Boolean).length;
@@ -42,6 +48,26 @@ if (!RUN_DIRECTLY) { /* imported for BUDGETS only */ } else {
 const copy = JSON.parse(readFileSync(join(ROOT, "docs/collateral/copy.json"), "utf8"));
 let over = 0;
 let missing = 0;
+let dead = 0;
+
+/* DOES THE COPY ACTUALLY REACH THE PAGE? A slot can pass a word budget and still print nowhere --
+   which is what happened when the answers rails came off four artifacts and their prose stayed in
+   copy.json unreferenced. A budgeted slot whose text is absent from the rendered artifact is a
+   failure; a slot listed in RETIRED is exempt, and is expected to be absent. */
+const FILES = {
+  A: "A-active-systems-overview.html",
+  B: "B-97L-gulf-event-dossier.html",
+  B1: "B1-97L-reinsurance-ils-parametric.html",
+  B2: "B2-97L-energy-weather-trading.html",
+  C: "C-karina-major-hurricane-analog-brief.html",
+  D: "D-storm-atlas-tear-sheet.html",
+};
+const flat = (h) => String(h || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const rendered = {};
+for (const [art, f] of Object.entries(FILES)) {
+  try { rendered[art] = flat(readFileSync(join(ROOT, "docs/collateral", f), "utf8")); }
+  catch { rendered[art] = ""; }
+}
 
 for (const [art, budget] of Object.entries(BUDGETS)) {
   const c = copy[art] && copy[art].copy;
@@ -56,20 +82,30 @@ for (const [art, budget] of Object.entries(BUDGETS)) {
     const w = got.get(slot);
     total += w;
     if (w > cap) { artOver++; over++; lines.push(`    OVER  ${slot.padEnd(26)} ${w} / ${cap}`); }
+    /* A seven-word probe from the middle of the slot: long enough not to collide with boilerplate,
+       short enough to survive a template that wraps or re-punctuates around it. */
+    const src = slot.startsWith("answers.")
+      ? c.answers[slot.split(".")[1]]
+      : (c.sections.find((x) => x.slot === slot) || {}).body;
+    const probe = flat(src).split(" ").slice(2, 9).join(" ");
+    if (probe && rendered[art] && !rendered[art].includes(probe)) {
+      dead++;
+      lines.push(`    DEAD  ${slot.padEnd(26)} budgeted but printed nowhere in ${FILES[art]}`);
+    }
   }
   for (const [slot] of got) {
     if (slot in budget) continue;
-    if ((RETIRED[art] || []).includes(slot)) lines.push(`    retired slot "${slot}" — block cut for the type gate`);
+    if ((RETIRED[art] || []).includes(slot)) lines.push(`    retired  ${slot.padEnd(26)} block cut or compressed — see scripts/lib/collateral-cuts.mjs`);
     else lines.push(`    extra slot "${slot}" (no budget set)`);
   }
   const cap = Object.values(budget).reduce((a, b) => a + b, 0);
-  console.log(`${artOver || missing ? "  FAIL " : "  ok   "} ${art} — ${total} words of ${cap} budgeted`
+  console.log(`${artOver || missing || lines.some((l) => l.includes("DEAD")) ? "  FAIL " : "  ok   "} ${art} — ${total} words of ${cap} budgeted`
     + (artOver ? `, ${artOver} slot(s) over` : ""));
   lines.forEach((l) => console.log(l));
 }
 
-if (over || missing) {
-  console.log(`\n${over} slot(s) over budget, ${missing} missing`);
+if (over || missing || dead) {
+  console.log(`\n${over} slot(s) over budget, ${missing} missing, ${dead} budgeted but never printed`);
   process.exit(1);
 }
 console.log("\nevery slot is inside its budget");
