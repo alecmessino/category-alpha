@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-01T23:51:19.445Z",
+  "generatedAt": "2026-09-02T00:01:42.789Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 143,
+      "latencyMs": 144,
       "count": 4,
       "note": "4 active",
       "raw": "{\"id\":\"al052026\",\"binNumber\":\"AT5\",\"name\":\"Edouard\",\"classification\":\"TS\",\"intensity\":\"45\",\"pressure\":\"998\",\"latitude\":\"29.9N\",\"longitude\":\"94.0W\",\"latitudeNumeric\":29.9,\"longitudeNumeric\":-94,\"movementDir\":305,\"movementSpeed\":7,\"lastUpdate\":\"2026-09-01T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"006\",\"issuance\":\"2026-09-01T21:00:00.000Z\",\"fileUpdateTime\":\"2026-09-01T20:37:23.435Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPAT5.shtml\"},\"forecastAdvisory\":{\"advNum\":\"006\",\"issuance\":\"2026-09-01T21:",
-      "forecast": "Edouard: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · Tropical Storm Warning · forecast undefined guidance · advisory 194m old | Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 200m old | Marie: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 200m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 30m old",
-      "advisoryLagMin": 200
+      "forecast": "Edouard: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · Tropical Storm Warning · forecast undefined guidance · advisory 6m old | Karina: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 211m old | Marie: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 211m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 41m old",
+      "advisoryLagMin": 211
     },
     "markets": {
       "ok": true,
@@ -47,14 +47,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 26 named storms  | Above 26 | px=0.100",
-            "Will there be more than 24 named storms  | Above 24 | px=0.185",
-            "Will there be more than 22 named storms  | Above 22 | px=0.295",
-            "Will there be more than 20 named storms  | Above 20 | px=0.420",
-            "Will there be more than 19 named storms  | Above 19 | px=0.595",
-            "Will there be more than 18 named storms  | Above 18 | px=0.690"
+            "When will the next Category 5 hurricane  | Before Oct 1,  | px=0.125",
+            "When will the next Category 5 hurricane  | Before Nov 1,  | px=0.235",
+            "When will the next Category 5 hurricane  | Before Dec 1,  | px=0.265",
+            "Will there be more than 7 major Atlantic | Above 7 | px=0.005",
+            "Will there be more than 6 major Atlantic | Above 6 | px=0.005",
+            "Will there be more than 5 major Atlantic | Above 5 | px=0.010"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"245.99\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"246.99\"},\"px\":{\"last_price_dollars\":\"0.1500\",\"no_ask_dollars\":\"0.9800\",\"no_bid_dollars\":\"0.8200\",\"previous_price_dollars\":\"0.1500\",\"previous_yes_ask_dollars\":\"0.8800\",\"previous_yes_bid_dollars\":\"0.0400\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.1800\",\"yes_ask_size_fp\":\"100.00\",\"yes_bid_dollars\":\"0.0200\",\"yes_bid_size_fp\":\"5.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"626.53\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"731.83\"},\"px\":{\"last_price_dollars\":\"0.2400\",\"no_ask_dollars\":\"0.9800\",\"no_bid_dollars\":\"0.7700\",\"previous_price_dollars\":\"0.2400\",\"previous_yes_ask_dollars\":\"0.2400\",\"previous_yes_bid_dollars\":\"0.0400\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.2300\",\"yes_ask_size_fp\":\"100.00\",\"yes_bid_dollars\":\"0.0200\",\"yes_bid_size_fp\":\"5.00\"}}"
         }
       ]
     },
@@ -202,7 +202,7 @@
       "ok": true,
       "source": "NHC ATCF b-decks",
       "status": 200,
-      "files": 24,
+      "files": 22,
       "truncated": 0,
       "counts": {
         "atlantic": {
@@ -213,7 +213,7 @@
           "peakKt": 50
         },
         "epac": {
-          "systems": 16,
+          "systems": 14,
           "namedstorms": 13,
           "hurricanes": 4,
           "major": 2,
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 302,
+      "latencyMs": 301,
       "count": 76,
       "attempts": [],
       "note": "El Niño · MJJ 2026 ONI +1.39 (peak-season ASO not yet observed — carried forward, 3mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 1,
       "note": "1 area(s) under watch · 0 Atlantic",
-      "latencyMs": 148,
+      "latencyMs": 161,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -280,7 +280,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 122,
+      "latencyMs": 29,
       "source": "NHC graphical TWO",
       "count": 1,
       "note": "1 of 1 area(s) with geometry"
@@ -290,7 +290,7 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 688,
+      "latencyMs": 692,
       "count": 4,
       "note": "4/4 storm decks read · AL052026: a-deck cycle 2026090118 · 32 techs · consensus 3 member(s) peak 45 kt · b-deck 17 records · f-deck 66 fixes | EP112026: a-deck cycle 2026090118 · 33 techs · consensus 3 member(s) peak 117 kt · b-deck 32 records · f-deck 157 fixes | EP132026: a-deck cycle 2026090118 · 34 techs · consensus 3 member(s) peak 85 kt · b-deck 13 records · f-deck 33 fixes | EP122026: a-deck cycle 2026090118 · 36 techs · consensus 3 member(s) peak 132.3 kt · b-deck 29 records · f-deck 160 fixes",
       "attempts": [
@@ -325,7 +325,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 461,
+      "latencyMs": 451,
       "count": 2,
       "note": "2 vortex data message(s): AL052026 13:04Z, CP022026 08:53Z",
       "attempts": [
@@ -360,7 +360,7 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 565,
+      "latencyMs": 69,
       "count": 4,
       "note": "4/4 storms · AL052026: 2026-09-01T18:00Z · shear 1 kt · OHC 6 · MPI 170 kt · 8 RI thresholds | EP112026: 2026-09-01T18:00Z · shear 9 kt · OHC 10 · MPI 140 kt · 8 RI thresholds | EP132026: 2026-09-01T18:00Z · shear 3 kt · OHC 35 · MPI 161 kt · 8 RI thresholds | EP122026: 2026-09-01T18:00Z · shear 12 kt · OHC 30 · MPI 156 kt · 8 RI thresholds",
       "attempts": [
@@ -419,11 +419,11 @@
           {
             "kind": "Tropical Storm Warning",
             "areas": [
-              "Port Bolivar, Texas to the Vermilion/Cameron Parish Line"
+              "High Island, Texas to Cameron, Louisiana"
             ]
           }
         ],
-        "changes": "The Tropical Storm Warning east of the Vermilion/Cameron Parish\nLine in Louisiana has been discontinued.",
+        "changes": "The Tropical Storm Warning has been discontinued east of Cameron, \nLouisiana and west of High Island, Texas.",
         "changed": true,
         "highest": "Tropical Storm Warning",
         "highestRank": 2,
@@ -459,11 +459,11 @@
         "already": false,
         "basis": "official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 194,
+      "advisoryLagMin": 6,
       "discussion": {
         "forecaster": "Reinhart",
         "issuedZ": "2026-09-01T20:37:00.000Z",
-        "lagMin": 194,
+        "lagMin": 205,
         "guidance": {
           "intensity": null,
           "track": null
@@ -587,8 +587,8 @@
           "ktFrom": null
         }
       ],
-      "advisoryIssuedZ": "2026-09-01T20:37:00.000Z",
-      "advNumFull": "6",
+      "advisoryIssuedZ": "2026-09-01T23:56:00.000Z",
+      "advNumFull": "6A",
       "consensus": {
         "cycle": "2026090118",
         "cycleIso": "2026-09-01T18:00:00.000Z",
@@ -1916,12 +1916,12 @@
         "initSource": "satellite intensity analysis",
         "tauKt": 0,
         "reconDeltaKt": null,
-        "reconAgeMin": 647,
+        "reconAgeMin": 657,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 477,
+        "ascatAgeMin": 488,
         "ascatUsed": false,
-        "consensusAgeMin": 351,
+        "consensusAgeMin": 362,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
@@ -1967,7 +1967,7 @@
             "label": "Aircraft reconnaissance",
             "p": null,
             "unavailable": true,
-            "basis": "recon fix present but not applied: the fix is 647 min old, past the 180-min line"
+            "basis": "recon fix present but not applied: the fix is 657 min old, past the 180-min line"
           },
           {
             "id": "ships-ri",
@@ -1978,8 +1978,8 @@
           }
         ],
         "notes": [
-          "recon fix not applied: the fix is 647 min old, past the 180-min line",
-          "scatterometer pass is 477 min old, past the 360-min line — band not tightened",
+          "recon fix not applied: the fix is 657 min old, past the 180-min line",
+          "scatterometer pass is 488 min old, past the 360-min line — band not tightened",
           "SHIPS RI implies a floor of 6% — published, NOT scored (no operator claim)"
         ],
         "used": {
@@ -1992,10 +1992,9 @@
         "basis": "combined 2 intensity estimates at 45 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 1%, calibrated 1%"
       },
       "evidenceQuality": {
-        "tier": "LOW",
+        "tier": "MEDIUM",
         "reasons": [
-          "the advisory under this estimate is 194 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "ATCF consensus 351 min old, no aircraft in the storm",
+          "ATCF consensus 362 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -2080,11 +2079,11 @@
         "already": true,
         "basis": "already carried at 115 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 200,
+      "advisoryLagMin": 211,
       "discussion": {
         "forecaster": "Cangialosi",
         "issuedZ": "2026-09-01T20:31:00.000Z",
-        "lagMin": 200,
+        "lagMin": 211,
         "guidance": {
           "intensity": {
             "position": "above",
@@ -3839,7 +3838,7 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 351,
+        "consensusAgeMin": 362,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
@@ -3886,8 +3885,8 @@
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 200 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "ATCF consensus 351 min old, no aircraft in the storm"
+          "the advisory under this estimate is 211 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 362 min old, no aircraft in the storm"
         ]
       }
     },
@@ -3974,11 +3973,11 @@
         "already": false,
         "basis": "official forecast peaks at 90 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 92-99% across a plausible range of error widths"
       },
-      "advisoryLagMin": 200,
+      "advisoryLagMin": 211,
       "discussion": {
         "forecaster": "Brown",
         "issuedZ": "2026-09-01T20:32:00.000Z",
-        "lagMin": 199,
+        "lagMin": 210,
         "guidance": {
           "intensity": null,
           "track": null
@@ -5725,9 +5724,9 @@
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 472,
+        "ascatAgeMin": 483,
         "ascatUsed": false,
-        "consensusAgeMin": 351,
+        "consensusAgeMin": 362,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
@@ -5777,7 +5776,7 @@
           }
         ],
         "notes": [
-          "scatterometer pass is 472 min old, past the 360-min line — band not tightened"
+          "scatterometer pass is 483 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
@@ -5791,8 +5790,8 @@
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 200 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "ATCF consensus 351 min old, no aircraft in the storm",
+          "the advisory under this estimate is 211 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 362 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -5877,11 +5876,11 @@
         "already": true,
         "basis": "already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 30,
+      "advisoryLagMin": 41,
       "discussion": {
         "forecaster": "Kelly",
         "issuedZ": "2026-09-01T23:22:00.000Z",
-        "lagMin": 29,
+        "lagMin": 40,
         "guidance": {
           "intensity": null,
           "track": null
@@ -7641,7 +7640,7 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 351,
+        "consensusAgeMin": 362,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
@@ -7688,7 +7687,7 @@
       "evidenceQuality": {
         "tier": "MEDIUM",
         "reasons": [
-          "ATCF consensus 351 min old, no aircraft in the storm"
+          "ATCF consensus 362 min old, no aircraft in the storm"
         ]
       }
     }
@@ -7705,7 +7704,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 110 kt now · combined 2 intensity estimates at 110 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99% · already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 30 min old when fetched",
+      "modelBasis": "Lowell is 110 kt now · combined 2 intensity estimates at 110 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99% · already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 41 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -7738,7 +7737,7 @@
       ],
       "modelLow": 0.7907205466846539,
       "modelHigh": 0.99,
-      "modelLagMin": 30,
+      "modelLagMin": 41,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -7747,7 +7746,7 @@
       "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 132.3,
-        "conAgeMin": 351,
+        "conAgeMin": 362,
         "spreadKt": 36.7,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -7786,7 +7785,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Edouard is 45 kt now · combined 2 intensity estimates at 45 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · Tropical Storm Warning in effect · advisory 194 min old when fetched",
+      "modelBasis": "Edouard is 45 kt now · combined 2 intensity estimates at 45 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · Tropical Storm Warning in effect · advisory 6 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -7807,7 +7806,7 @@
           "label": "Watches and warnings",
           "p": null,
           "unavailable": false,
-          "basis": "Tropical Storm Warning in effect for Port Bolivar, Texas to the Vermilion/Cameron Parish Line — advisories are running on the 3-hourly intermediate cycle"
+          "basis": "Tropical Storm Warning in effect for High Island, Texas to Cameron, Louisiana — advisories are running on the 3-hourly intermediate cycle"
         },
         {
           "id": "consensus",
@@ -7821,7 +7820,7 @@
           "label": "Aircraft reconnaissance",
           "p": null,
           "unavailable": true,
-          "basis": "recon fix present but not applied: the fix is 647 min old, past the 180-min line"
+          "basis": "recon fix present but not applied: the fix is 657 min old, past the 180-min line"
         },
         {
           "id": "ships-ri",
@@ -7833,18 +7832,18 @@
       ],
       "modelLow": 0.01,
       "modelHigh": 0.01,
-      "modelLagMin": 194,
+      "modelLagMin": 6,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
       "modelOfficialP": 0.01,
       "modelCalibrated": true,
-      "modelQuality": "LOW",
+      "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 45,
-        "conAgeMin": 351,
+        "conAgeMin": 362,
         "spreadKt": 0,
-        "reconAgeMin": 647,
+        "reconAgeMin": 657,
         "reconDeltaKt": null,
         "ascatUsed": false,
         "riFloorP": 0.06,
@@ -7859,7 +7858,7 @@
       "liquidity": 5,
       "spread": 0.03,
       "volume": 3703.01,
-      "volume24h": 1701.92,
+      "volume24h": 1663.27,
       "openInterest": 1264.68,
       "depth": {
         "bidSize": 0,
@@ -7881,7 +7880,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Karina is 115 kt now · combined 2 intensity estimates at 116 kt (sigma 2.6 kt, of which 2.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 115 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 200 min old when fetched",
+      "modelBasis": "Karina is 115 kt now · combined 2 intensity estimates at 116 kt (sigma 2.6 kt, of which 2.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 115 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 211 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -7914,7 +7913,7 @@
       ],
       "modelLow": 0.99,
       "modelHigh": 0.99,
-      "modelLagMin": 200,
+      "modelLagMin": 211,
       "modelMaxLagMin": 360,
       "modelGuidance": "above",
       "modelRawP": null,
@@ -7923,7 +7922,7 @@
       "modelQuality": "LOW",
       "modelIntel": {
         "conKt": 117,
-        "conAgeMin": 351,
+        "conAgeMin": 362,
         "spreadKt": 2.6,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -7962,7 +7961,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Marie is 50 kt now · combined 2 intensity estimates at 88 kt (sigma 12.7 kt, of which 3.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 98% · official forecast peaks at 90 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 92-99% across a plausible range of error widths · advisory 200 min old when fetched",
+      "modelBasis": "Marie is 50 kt now · combined 2 intensity estimates at 88 kt (sigma 12.7 kt, of which 3.6 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 98% · official forecast peaks at 90 kt at 45h; NHC's published mean absolute intensity error there is 9.8 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 99% central, 92-99% across a plausible range of error widths · advisory 211 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -8002,7 +8001,7 @@
       ],
       "modelLow": 0.8922308330222765,
       "modelHigh": 0.99,
-      "modelLagMin": 200,
+      "modelLagMin": 211,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -8011,7 +8010,7 @@
       "modelQuality": "LOW",
       "modelIntel": {
         "conKt": 85,
-        "conAgeMin": 351,
+        "conAgeMin": 362,
         "spreadKt": 3.6,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -8050,7 +8049,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 110 kt now · combined 2 intensity estimates at 110 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99% · already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 30 min old when fetched",
+      "modelBasis": "Lowell is 110 kt now · combined 2 intensity estimates at 110 kt (sigma 36.7 kt, of which 36.7 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 99%, calibrated 99% · already carried at 110 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 41 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -8083,7 +8082,7 @@
       ],
       "modelLow": 0.7907205466846539,
       "modelHigh": 0.99,
-      "modelLagMin": 30,
+      "modelLagMin": 41,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -8092,7 +8091,7 @@
       "modelQuality": "MEDIUM",
       "modelIntel": {
         "conKt": 132.3,
-        "conAgeMin": 351,
+        "conAgeMin": 362,
         "spreadKt": 36.7,
         "reconAgeMin": null,
         "reconDeltaKt": null,
@@ -8152,7 +8151,7 @@
       "liquidity": 18,
       "spread": 0.01,
       "volume": 67766.41,
-      "volume24h": 40194.5,
+      "volume24h": 39343.71,
       "openInterest": 14637.61,
       "depth": {
         "bidSize": 0,
@@ -8658,7 +8657,7 @@
       "liquidity": 64,
       "spread": 0.06000000000000005,
       "volume": 238.5,
-      "volume24h": 33.23,
+      "volume24h": 111.78,
       "openInterest": 238.5,
       "depth": {
         "bidSize": 143,
@@ -8716,6 +8715,52 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26LOWELL"
     },
     {
+      "id": "KXHURCAT-26MARIE-T2",
+      "label": "Will Marie become a Category 2 hurricane?",
+      "short": "Will Marie become a Category 2 hurricane…",
+      "storm": "EP132026",
+      "subject": {
+        "subject": "Marie",
+        "active": true
+      },
+      "market": 0.62,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 2,
+      "yesBid": 0.59,
+      "yesAsk": 0.65,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 73,
+      "spread": 0.06000000000000005,
+      "volume": 74.58,
+      "volume24h": 72.53,
+      "openInterest": 74.58,
+      "depth": {
+        "bidSize": 117,
+        "askSize": 113,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26MARIE"
+    },
+    {
       "id": "KXHURCAT-26MARIE-T3",
       "label": "Will Marie become a Category 3 hurricane?",
       "short": "Will Marie become a Category 3 hurricane…",
@@ -8724,7 +8769,7 @@
         "subject": "Marie",
         "active": true
       },
-      "market": 0.33999999999999997,
+      "market": 0.35,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -8744,17 +8789,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 3,
-      "yesBid": 0.31,
-      "yesAsk": 0.37,
+      "yesBid": 0.32,
+      "yesAsk": 0.38,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 44,
       "spread": 0.06,
       "volume": 70.45,
-      "volume24h": 24.69,
+      "volume24h": 70.45,
       "openInterest": 70.45,
       "depth": {
         "bidSize": 122,
-        "askSize": 118,
+        "askSize": 117,
         "notional": 1
       },
       "proxy": false,
@@ -8852,52 +8897,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26KARINA"
-    },
-    {
-      "id": "KXHURCAT-26MARIE-T2",
-      "label": "Will Marie become a Category 2 hurricane?",
-      "short": "Will Marie become a Category 2 hurricane…",
-      "storm": "EP132026",
-      "subject": {
-        "subject": "Marie",
-        "active": true
-      },
-      "market": 0.6,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 2,
-      "yesBid": 0.5,
-      "yesAsk": 0.7,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 70,
-      "spread": 0.19999999999999996,
-      "volume": 39.61,
-      "volume24h": 37.56,
-      "openInterest": 39.61,
-      "depth": {
-        "bidSize": 100,
-        "askSize": 100,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26MARIE"
     },
     {
       "id": "KXHURCAT-26KARINA-T5",
@@ -9029,7 +9028,7 @@
       "volume24h": 0,
       "openInterest": 0,
       "depth": {
-        "bidSize": 50,
+        "bidSize": 150,
         "askSize": 100,
         "notional": 1
       },
@@ -9046,7 +9045,7 @@
         "subject": "Marie",
         "active": true
       },
-      "market": 0.06,
+      "market": 0.065,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -9067,10 +9066,10 @@
       "horizon": "storm",
       "strike": 5,
       "yesBid": 0.01,
-      "yesAsk": 0.11,
+      "yesAsk": 0.12,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 11,
-      "spread": 0.1,
+      "liquidity": 12,
+      "spread": 0.11,
       "volume": 0,
       "volume24h": 0,
       "openInterest": 0,
@@ -9094,7 +9093,7 @@
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 245",
       "modelUncond": 0.6,
       "modelLayers": [
         {
@@ -9107,7 +9106,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.4027777777777778,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >2 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >2 more"
         },
         {
           "id": "std",
@@ -9164,11 +9163,11 @@
       "storm": null,
       "subject": null,
       "market": 0.085,
-      "model": 0.11850812027911928,
+      "model": 0.10763690090945012,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 245",
       "modelUncond": 0.42857142857142855,
       "modelLayers": [
         {
@@ -9180,25 +9179,25 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.20833333333333334,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >3 more"
+          "p": 0.18055555555555555,
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >3 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.20833333333333334,
+          "p": 0.18055555555555555,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.12450980392156863,
+          "p": 0.11143790849673203,
           "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.11850812027911928,
+          "p": 0.10763690090945012,
           "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 6% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
@@ -9242,7 +9241,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 245",
       "modelUncond": 0.6,
       "modelLayers": [
         {
@@ -9255,7 +9254,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.20833333333333334,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >6 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -9316,7 +9315,7 @@
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 245",
       "modelUncond": 0.8571428571428571,
       "modelLayers": [
         {
@@ -9329,7 +9328,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.7083333333333334,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >1 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >1 more"
         },
         {
           "id": "std",
@@ -9367,11 +9366,11 @@
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 26,
       "spread": 0.010000000000000009,
-      "volume": 13063.32,
-      "volume24h": 228.33,
-      "openInterest": 7361.7,
+      "volume": 13076.55,
+      "volume24h": 241.56,
+      "openInterest": 7348.47,
       "depth": {
-        "bidSize": 103.72,
+        "bidSize": 136.49,
         "askSize": 102.43,
         "notional": 1
       },
@@ -9386,11 +9385,11 @@
       "storm": null,
       "subject": null,
       "market": 0.02,
-      "model": 0.05183204879881225,
+      "model": 0.038725011063111034,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 245",
       "modelUncond": 0.2857142857142857,
       "modelLayers": [
         {
@@ -9402,25 +9401,25 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.06944444444444445,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >4 more"
+          "p": 0.041666666666666664,
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.06944444444444445,
+          "p": 0.041666666666666664,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.059150326797385626,
+          "p": 0.04607843137254902,
           "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.05183204879881225,
+          "p": 0.038725011063111034,
           "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 4% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
@@ -9460,11 +9459,11 @@
       "storm": null,
       "subject": null,
       "market": 0.15000000000000002,
-      "model": 0.19231245212228093,
+      "model": 0.18140313665052887,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 245",
       "modelUncond": 0.6857142857142857,
       "modelLayers": [
         {
@@ -9476,25 +9475,25 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.3194444444444444,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >5 more"
+          "p": 0.2916666666666667,
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >5 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.3194444444444444,
+          "p": 0.2916666666666667,
           "basis": "0 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.22973856209150326,
+          "p": 0.21666666666666667,
           "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.19231245212228093,
+          "p": 0.18140313665052887,
           "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 11% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
@@ -9538,7 +9537,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 245",
       "modelUncond": 0.7428571428571429,
       "modelLayers": [
         {
@@ -9551,7 +9550,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.4583333333333333,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >4 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >4 more"
         },
         {
           "id": "std",
@@ -9612,7 +9611,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 245",
       "modelUncond": 0.22857142857142856,
       "modelLayers": [
         {
@@ -9625,7 +9624,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.06944444444444445,
-          "basis": "named storms forming on/after day 244 in each past season; needs >13 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >13 more"
         },
         {
           "id": "std",
@@ -9682,23 +9681,23 @@
       "storm": null,
       "subject": null,
       "market": 0.365,
-      "model": 0.5211417443494859,
+      "model": 0.4990324575969609,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Fay is name #6 on the Atlantic list and 5 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 63% of seasons · 52% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.625,
+      "modelBasis": "Fay is name #6 on the Atlantic list and 5 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 54% of seasons · 50% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.5416666666666666,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.625,
-          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form was the season's FIRST hurricane in 63% of seasons"
+          "p": 0.5416666666666666,
+          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form was the season's FIRST hurricane in 54% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.5211417443494859,
+          "p": 0.4990324575969609,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -9720,7 +9719,7 @@
       "liquidity": 2,
       "spread": 0.030000000000000027,
       "volume": 9318.04,
-      "volume24h": 901.18,
+      "volume24h": 898.82,
       "openInterest": 4969.38,
       "depth": {
         "bidSize": 355.07,
@@ -9742,7 +9741,7 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Omar is name #15 on the Atlantic list and 5 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 21%",
+      "modelBasis": "Omar is name #15 on the Atlantic list and 5 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 14%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
@@ -9850,23 +9849,23 @@
       "storm": null,
       "subject": null,
       "market": 0.22,
-      "model": 0.26345932917424847,
+      "model": 0.2955313146671794,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 5 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 21% of seasons · 26% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.20833333333333334,
+      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 5 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 32% of seasons · 30% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.3194444444444444,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.20833333333333334,
-          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form was the season's FIRST hurricane in 20% of seasons"
+          "p": 0.3194444444444444,
+          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form was the season's FIRST hurricane in 31% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.26345932917424847,
+          "p": 0.2955313146671794,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -9910,7 +9909,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 245",
       "modelUncond": 0.7714285714285715,
       "modelLayers": [
         {
@@ -9923,7 +9922,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.7638888888888888,
-          "basis": "named storms forming on/after day 244 in each past season; needs >5 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -9980,23 +9979,23 @@
       "storm": null,
       "subject": null,
       "market": 0.04,
-      "model": 0.02782418566056733,
+      "model": 0.039535433695223596,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Josephine is name #10 on the Atlantic list and 5 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 81%",
-      "modelUncond": 0.013888888888888888,
+      "modelBasis": "Josephine is name #10 on the Atlantic list and 5 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 4% of seasons · 4% once seasons are weighted by ONI similarity · used at all in 75%",
+      "modelUncond": 0.041666666666666664,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form was the season's FIRST hurricane in 0% of seasons"
+          "p": 0.041666666666666664,
+          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form was the season's FIRST hurricane in 3% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.02782418566056733,
+          "p": 0.039535433695223596,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -10040,7 +10039,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 245",
       "modelUncond": 0.3142857142857143,
       "modelLayers": [
         {
@@ -10053,7 +10052,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.1527777777777778,
-          "basis": "named storms forming on/after day 244 in each past season; needs >11 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >11 more"
         },
         {
           "id": "std",
@@ -10114,7 +10113,7 @@
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 245",
       "modelUncond": 0.9428571428571428,
       "modelLayers": [
         {
@@ -10127,7 +10126,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.875,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >0 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >0 more"
         },
         {
           "id": "std",
@@ -10184,11 +10183,11 @@
       "storm": null,
       "subject": null,
       "market": 0.165,
-      "model": 0.207867793633885,
+      "model": 0.1439017093861284,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 245",
       "modelUncond": 0.5428571428571428,
       "modelLayers": [
         {
@@ -10200,26 +10199,26 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.3194444444444444,
-          "basis": "named storms forming on/after day 244 in each past season; needs >9 more"
+          "p": 0.2361111111111111,
+          "basis": "named storms forming on/after day 245 in each past season; needs >9 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.3194444444444444,
+          "p": 0.2361111111111111,
           "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.22973856209150326,
-          "basis": "9 El Niño seasons → 15% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.13758169934640524,
+          "basis": "9 El Niño seasons → 5% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.207867793633885,
-          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 14% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
+          "p": 0.1439017093861284,
+          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 9% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
       "modelLow": null,
@@ -10262,7 +10261,7 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Marco is name #13 on the Atlantic list and 5 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 47%",
+      "modelBasis": "Marco is name #13 on the Atlantic list and 5 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 44%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
@@ -10314,23 +10313,23 @@
       "storm": null,
       "subject": null,
       "market": 0.2,
-      "model": 0.18075565072326671,
+      "model": 0.1590817039482044,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Hanna is name #8 on the Atlantic list and 5 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 15% of seasons · 18% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.1527777777777778,
+      "modelBasis": "Hanna is name #8 on the Atlantic list and 5 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 10% of seasons · 16% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.09722222222222222,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.1527777777777778,
-          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form was the season's FIRST hurricane in 14% of seasons"
+          "p": 0.09722222222222222,
+          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form was the season's FIRST hurricane in 9% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.18075565072326671,
+          "p": 0.1590817039482044,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -10352,7 +10351,7 @@
       "liquidity": 1,
       "spread": 0.1,
       "volume": 7226.27,
-      "volume24h": 95.59,
+      "volume24h": 115.17,
       "openInterest": 4450.53,
       "depth": {
         "bidSize": 0.82,
@@ -10430,7 +10429,7 @@
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 245",
       "modelUncond": 0.14285714285714285,
       "modelLayers": [
         {
@@ -10443,7 +10442,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.041666666666666664,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >5 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -10500,11 +10499,11 @@
       "storm": null,
       "subject": null,
       "market": 0.255,
-      "model": 0.4674836765940205,
+      "model": 0.44486311308761217,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 245",
       "modelUncond": 0.6857142857142857,
       "modelLayers": [
         {
@@ -10516,25 +10515,25 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.5694444444444444,
-          "basis": "named storms forming on/after day 244 in each past season; needs >7 more"
+          "p": 0.5138888888888888,
+          "basis": "named storms forming on/after day 245 in each past season; needs >7 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.5694444444444444,
+          "p": 0.5138888888888888,
           "basis": "5 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.4532679738562091,
+          "p": 0.4271241830065359,
           "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.4674836765940205,
+          "p": 0.44486311308761217,
           "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 40% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
@@ -10634,7 +10633,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 245",
       "modelUncond": 0.45714285714285713,
       "modelLayers": [
         {
@@ -10647,7 +10646,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.20833333333333334,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >7 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >7 more"
         },
         {
           "id": "std",
@@ -10820,7 +10819,7 @@
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 245",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -10833,7 +10832,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >7 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >7 more"
         },
         {
           "id": "std",
@@ -10950,7 +10949,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 245",
       "modelUncond": 0.22857142857142856,
       "modelLayers": [
         {
@@ -10963,7 +10962,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.06944444444444445,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >9 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >9 more"
         },
         {
           "id": "std",
@@ -11080,7 +11079,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.45714285714285713,
       "modelLayers": [
         {
@@ -11093,7 +11092,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.4861111111111111,
-          "basis": "named storms forming on/after day 244 in each past season; needs >0 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >0 more"
         },
         {
           "id": "std",
@@ -11154,7 +11153,7 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Sally is name #18 on the Atlantic list and 5 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 11%",
+      "modelBasis": "Sally is name #18 on the Atlantic list and 5 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 10%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
@@ -11210,7 +11209,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 245",
       "modelUncond": 0.34285714285714286,
       "modelLayers": [
         {
@@ -11223,7 +11222,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.125,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >8 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >8 more"
         },
         {
           "id": "std",
@@ -11284,7 +11283,7 @@
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Paulette is name #16 on the Atlantic list and 5 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 14%",
+      "modelBasis": "Paulette is name #16 on the Atlantic list and 5 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 3% once seasons are weighted by ONI similarity · used at all in 13%",
       "modelUncond": 0.013888888888888888,
       "modelLayers": [
         {
@@ -11396,7 +11395,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 245",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
@@ -11409,7 +11408,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >12 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >12 more"
         },
         {
           "id": "std",
@@ -11470,7 +11469,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 245",
       "modelUncond": 0.14285714285714285,
       "modelLayers": [
         {
@@ -11483,7 +11482,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >10 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >10 more"
         },
         {
           "id": "std",
@@ -11544,7 +11543,7 @@
       "modelQuantity": "major",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic major-hurricane seasons (n=35), day 245",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
@@ -11557,7 +11556,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >6 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -11614,11 +11613,11 @@
       "storm": null,
       "subject": null,
       "market": 0.33999999999999997,
-      "model": 0.5097410640637854,
+      "model": 0.5211856903494974,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Isaias is name #9 on the Atlantic list and 5 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 46% of seasons · 51% once seasons are weighted by ONI similarity · used at all in 89%",
+      "modelBasis": "Isaias is name #9 on the Atlantic list and 5 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 46% of seasons · 52% once seasons are weighted by ONI similarity · used at all in 89%",
       "modelUncond": 0.4583333333333333,
       "modelLayers": [
         {
@@ -11630,7 +11629,7 @@
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.5097410640637854,
+          "p": 0.5211856903494974,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -11674,7 +11673,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.2857142857142857,
       "modelLayers": [
         {
@@ -11687,7 +11686,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.2916666666666667,
-          "basis": "named storms forming on/after day 244 in each past season; needs >1 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >1 more"
         },
         {
           "id": "std",
@@ -11748,7 +11747,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.6857142857142857,
       "modelLayers": [
         {
@@ -11761,7 +11760,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.9861111111111112,
-          "basis": "named storms forming on/after day 244 in each past season; needs >-2 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >-2 more"
         },
         {
           "id": "std",
@@ -11822,7 +11821,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.5142857142857142,
       "modelLayers": [
         {
@@ -11835,7 +11834,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.9861111111111112,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >-1 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >-1 more"
         },
         {
           "id": "std",
@@ -11896,7 +11895,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.5714285714285714,
       "modelLayers": [
         {
@@ -11909,7 +11908,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.9861111111111112,
-          "basis": "named storms forming on/after day 244 in each past season; needs >-1 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >-1 more"
         },
         {
           "id": "std",
@@ -11970,7 +11969,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.17142857142857143,
       "modelLayers": [
         {
@@ -11983,7 +11982,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.125,
-          "basis": "named storms forming on/after day 244 in each past season; needs >2 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >2 more"
         },
         {
           "id": "std",
@@ -12044,7 +12043,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.2,
       "modelLayers": [
         {
@@ -12057,7 +12056,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.041666666666666664,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >2 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >2 more"
         },
         {
           "id": "std",
@@ -12114,23 +12113,23 @@
       "storm": null,
       "subject": null,
       "market": 0.44000000000000006,
-      "model": 0.5218159503786423,
+      "model": 0.5538879358715731,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 5 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · 52% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.5694444444444444,
+      "modelBasis": "Gonzalo is name #7 on the Atlantic list and 5 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 68% of seasons · 55% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.6805555555555556,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.5694444444444444,
-          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form reached hurricane strength in 57% of seasons"
+          "p": 0.6805555555555556,
+          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form reached hurricane strength in 69% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.5218159503786423,
+          "p": 0.5538879358715731,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -12174,7 +12173,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.22857142857142856,
       "modelLayers": [
         {
@@ -12187,7 +12186,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.1527777777777778,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >1 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >1 more"
         },
         {
           "id": "std",
@@ -12248,7 +12247,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic hurricane seasons (n=35), day 245",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -12261,7 +12260,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >15 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >15 more"
         },
         {
           "id": "std",
@@ -12322,7 +12321,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.11428571428571428,
       "modelLayers": [
         {
@@ -12335,7 +12334,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.06944444444444445,
-          "basis": "named storms forming on/after day 244 in each past season; needs >3 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >3 more"
         },
         {
           "id": "std",
@@ -12396,7 +12395,7 @@
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.22857142857142856,
       "modelLayers": [
         {
@@ -12409,7 +12408,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.041666666666666664,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >4 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >4 more"
         },
         {
           "id": "std",
@@ -12470,7 +12469,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.2,
       "modelLayers": [
         {
@@ -12483,7 +12482,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.6527777777777778,
-          "basis": "named storms forming on/after day 244 in each past season; needs >5 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -12544,7 +12543,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 245",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -12557,7 +12556,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "named storms forming on/after day 244 in each past season; needs >25 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >25 more"
         },
         {
           "id": "std",
@@ -12614,23 +12613,23 @@
       "storm": null,
       "subject": null,
       "market": 0.16,
-      "model": 0.3154234076162666,
+      "model": 0.2718337391316022,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Leah is name #12 on the Atlantic list and 5 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 46% of seasons · 32% once seasons are weighted by ONI similarity · used at all in 58%",
-      "modelUncond": 0.4583333333333333,
+      "modelBasis": "Leah is name #12 on the Atlantic list and 5 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 35% of seasons · 27% once seasons are weighted by ONI similarity · used at all in 58%",
+      "modelUncond": 0.3472222222222222,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.4583333333333333,
-          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form reached hurricane strength in 46% of seasons"
+          "p": 0.3472222222222222,
+          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form reached hurricane strength in 34% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.3154234076162666,
+          "p": 0.2718337391316022,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -12674,7 +12673,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.11428571428571428,
       "modelLayers": [
         {
@@ -12687,7 +12686,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >8 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >8 more"
         },
         {
           "id": "std",
@@ -12748,7 +12747,7 @@
       "modelQuantity": "major",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.2571428571428571,
       "modelLayers": [
         {
@@ -12761,7 +12760,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.041666666666666664,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >2 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >2 more"
         },
         {
           "id": "std",
@@ -12822,7 +12821,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.34285714285714286,
       "modelLayers": [
         {
@@ -12835,7 +12834,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.4861111111111111,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >0 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >0 more"
         },
         {
           "id": "std",
@@ -12892,11 +12891,11 @@
       "storm": null,
       "subject": null,
       "market": 0.7150000000000001,
-      "model": 0.42431595227889124,
+      "model": 0.4009994398987217,
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.42857142857142855,
       "modelLayers": [
         {
@@ -12908,26 +12907,26 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.2638888888888889,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >2 more"
+          "p": 0.2361111111111111,
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >2 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.2638888888888889,
+          "p": 0.2361111111111111,
           "basis": "2 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.41535947712418303,
+          "p": 0.4022875816993464,
           "basis": "9 El Niño seasons → 55% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.42431595227889124,
-          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 53% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
+          "p": 0.4009994398987217,
+          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 51% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
       "modelLow": null,
@@ -12970,7 +12969,7 @@
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.2857142857142857,
       "modelLayers": [
         {
@@ -12983,7 +12982,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.125,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >3 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >3 more"
         },
         {
           "id": "std",
@@ -13044,7 +13043,7 @@
       "modelQuantity": "major",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.34285714285714286,
       "modelLayers": [
         {
@@ -13057,7 +13056,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.125,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >1 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >1 more"
         },
         {
           "id": "std",
@@ -13118,7 +13117,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 245",
       "modelUncond": 0.08571428571428572,
       "modelLayers": [
         {
@@ -13131,7 +13130,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.06944444444444445,
-          "basis": "named storms forming on/after day 244 in each past season; needs >15 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >15 more"
         },
         {
           "id": "std",
@@ -13188,23 +13187,23 @@
       "storm": null,
       "subject": null,
       "market": 0.255,
-      "model": 0.26183692621583887,
+      "model": 0.30425217679949235,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Kyle is name #11 on the Atlantic list and 5 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 40% of seasons · 26% once seasons are weighted by ONI similarity · used at all in 65%",
-      "modelUncond": 0.4027777777777778,
+      "modelBasis": "Kyle is name #11 on the Atlantic list and 5 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 43% of seasons · 30% once seasons are weighted by ONI similarity · used at all in 65%",
+      "modelUncond": 0.4305555555555556,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.4027777777777778,
-          "basis": "1991–2025 (n=35), unweighted — the #6 storm still to form reached hurricane strength in 40% of seasons"
+          "p": 0.4305555555555556,
+          "basis": "1991–2025 (n=35), unweighted — the #6 storm still to form reached hurricane strength in 43% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.26183692621583887,
+          "p": 0.30425217679949235,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -13244,23 +13243,23 @@
       "storm": null,
       "subject": null,
       "market": 0.095,
-      "model": 0.18417792031506092,
+      "model": 0.16273177470966346,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Marco is name #13 on the Atlantic list and 5 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 18% of seasons · 18% once seasons are weighted by ONI similarity · used at all in 47%",
-      "modelUncond": 0.18055555555555555,
+      "modelBasis": "Marco is name #13 on the Atlantic list and 5 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 21% of seasons · 16% once seasons are weighted by ONI similarity · used at all in 44%",
+      "modelUncond": 0.20833333333333334,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.18055555555555555,
-          "basis": "1991–2025 (n=35), unweighted — the #8 storm still to form reached hurricane strength in 17% of seasons"
+          "p": 0.20833333333333334,
+          "basis": "1991–2025 (n=35), unweighted — the #8 storm still to form reached hurricane strength in 20% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.18417792031506092,
+          "p": 0.16273177470966346,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -13300,23 +13299,23 @@
       "storm": null,
       "subject": null,
       "market": 0.675,
-      "model": 0.14102650777580808,
+      "model": 0.07855904636224192,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Winnie is name #21 on the eastern Pacific list and 13 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 15% of seasons · 14% once seasons are weighted by ONI similarity · used at all in 34%",
-      "modelUncond": 0.1527777777777778,
+      "modelBasis": "Winnie is name #21 on the eastern Pacific list and 13 have been used, so this is the #8 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 13% of seasons · 8% once seasons are weighted by ONI similarity · used at all in 28%",
+      "modelUncond": 0.125,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.1527777777777778,
-          "basis": "1991–2025 (n=35), unweighted — the #8 storm still to form reached hurricane strength in 14% of seasons"
+          "p": 0.125,
+          "basis": "1991–2025 (n=35), unweighted — the #8 storm still to form reached hurricane strength in 11% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.14102650777580808,
+          "p": 0.07855904636224192,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -13355,12 +13354,12 @@
       "short": "Will there be more than 1 hurricane of…",
       "storm": null,
       "subject": null,
-      "market": 0.9199999999999999,
+      "market": 0.925,
       "model": 0.5228480685633007,
       "modelQuantity": "major",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.5714285714285714,
       "modelLayers": [
         {
@@ -13373,7 +13372,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.3472222222222222,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >0 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >0 more"
         },
         {
           "id": "std",
@@ -13406,16 +13405,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 1,
-      "yesBid": 0.89,
+      "yesBid": 0.9,
       "yesAsk": 0.95,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 95,
-      "spread": 0.05999999999999994,
+      "spread": 0.04999999999999993,
       "volume": 393.26,
       "volume24h": 14,
       "openInterest": 347.7,
       "depth": {
-        "bidSize": 37,
+        "bidSize": 7,
         "askSize": 100,
         "notional": 1
       },
@@ -13434,7 +13433,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
@@ -13447,7 +13446,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >9 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >9 more"
         },
         {
           "id": "std",
@@ -13508,7 +13507,7 @@
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.17142857142857143,
       "modelLayers": [
         {
@@ -13521,7 +13520,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >5 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -13582,7 +13581,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.7428571428571429,
       "modelLayers": [
         {
@@ -13595,7 +13594,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.9861111111111112,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >-2 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >-2 more"
         },
         {
           "id": "std",
@@ -13656,7 +13655,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.14285714285714285,
       "modelLayers": [
         {
@@ -13669,7 +13668,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.041666666666666664,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >7 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >7 more"
         },
         {
           "id": "std",
@@ -13730,7 +13729,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.11428571428571428,
       "modelLayers": [
         {
@@ -13743,7 +13742,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.4583333333333333,
-          "basis": "named storms forming on/after day 244 in each past season; needs >6 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -13800,11 +13799,11 @@
       "storm": null,
       "subject": null,
       "market": 0.42,
-      "model": 0.342583208131057,
+      "model": 0.28011574671749084,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.08571428571428572,
       "modelLayers": [
         {
@@ -13816,26 +13815,26 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.2638888888888889,
-          "basis": "named storms forming on/after day 244 in each past season; needs >7 more"
+          "p": 0.2361111111111111,
+          "basis": "named storms forming on/after day 245 in each past season; needs >7 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.2638888888888889,
+          "p": 0.2361111111111111,
           "basis": "13 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.30947712418300655,
-          "basis": "9 El Niño seasons → 35% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.2434640522875817,
+          "basis": "9 El Niño seasons → 25% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.342583208131057,
-          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 39% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
+          "p": 0.28011574671749084,
+          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 31% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
       "modelLow": null,
@@ -13878,7 +13877,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0,
       "modelLayers": [
         {
@@ -13891,7 +13890,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "named storms forming on/after day 244 in each past season; needs >13 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >13 more"
         },
         {
           "id": "std",
@@ -13952,7 +13951,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.5428571428571428,
       "modelLayers": [
         {
@@ -13965,7 +13964,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.875,
-          "basis": "named storms forming on/after day 244 in each past season; needs >3 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >3 more"
         },
         {
           "id": "std",
@@ -14026,7 +14025,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.4,
       "modelLayers": [
         {
@@ -14039,7 +14038,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.09722222222222222,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >5 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >5 more"
         },
         {
           "id": "std",
@@ -14096,11 +14095,11 @@
       "storm": null,
       "subject": null,
       "market": 0.895,
-      "model": 0.81799104597033,
+      "model": 0.7603636531933611,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.4,
       "modelLayers": [
         {
@@ -14112,26 +14111,26 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.7638888888888888,
-          "basis": "named storms forming on/after day 244 in each past season; needs >4 more"
+          "p": 0.7083333333333334,
+          "basis": "named storms forming on/after day 245 in each past season; needs >4 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.7638888888888888,
+          "p": 0.7083333333333334,
           "basis": "13 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.8094771241830065,
-          "basis": "9 El Niño seasons → 85% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
+          "p": 0.7303921568627452,
+          "basis": "9 El Niño seasons → 75% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.81799104597033,
-          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 85% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
+          "p": 0.7603636531933611,
+          "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 79% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
       "modelLow": null,
@@ -14174,7 +14173,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.02857142857142857,
       "modelLayers": [
         {
@@ -14187,7 +14186,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.041666666666666664,
-          "basis": "named storms forming on/after day 244 in each past season; needs >9 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >9 more"
         },
         {
           "id": "std",
@@ -14244,11 +14243,11 @@
       "storm": null,
       "subject": null,
       "market": 0.095,
-      "model": 0.21051039167050112,
+      "model": 0.2418476085538843,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Nana is name #14 on the Atlantic list and 5 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 24% of seasons · 21% once seasons are weighted by ONI similarity · used at all in 34%",
+      "modelBasis": "Nana is name #14 on the Atlantic list and 5 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 24% of seasons · 24% once seasons are weighted by ONI similarity · used at all in 34%",
       "modelUncond": 0.2361111111111111,
       "modelLayers": [
         {
@@ -14260,7 +14259,7 @@
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.21051039167050112,
+          "p": 0.2418476085538843,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -14304,7 +14303,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 244",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 Atlantic named-storm seasons (n=35), day 245",
       "modelUncond": 0.05714285714285714,
       "modelLayers": [
         {
@@ -14317,7 +14316,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "named storms forming on/after day 244 in each past season; needs >20 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >20 more"
         },
         {
           "id": "std",
@@ -14378,7 +14377,7 @@
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.11428571428571428,
       "modelLayers": [
         {
@@ -14391,7 +14390,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >6 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -14452,7 +14451,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.5142857142857142,
       "modelLayers": [
         {
@@ -14465,7 +14464,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.2361111111111111,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >4 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >4 more"
         },
         {
           "id": "std",
@@ -14522,11 +14521,11 @@
       "storm": null,
       "subject": null,
       "market": 0.495,
-      "model": 0.46510360950346674,
+      "model": 0.4990506871541802,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Rachel is name #17 on the eastern Pacific list and 13 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · 47% once seasons are weighted by ONI similarity · used at all in 93%",
+      "modelBasis": "Rachel is name #17 on the eastern Pacific list and 13 have been used, so this is the #4 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · 50% once seasons are weighted by ONI similarity · used at all in 93%",
       "modelUncond": 0.5138888888888888,
       "modelLayers": [
         {
@@ -14538,7 +14537,7 @@
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.46510360950346674,
+          "p": 0.4990506871541802,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -14578,23 +14577,23 @@
       "storm": null,
       "subject": null,
       "market": 0.47,
-      "model": 0.6448445819355413,
+      "model": 0.6121642289226291,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Hanna is name #8 on the Atlantic list and 5 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 71% of seasons · 64% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.7083333333333334,
+      "modelBasis": "Hanna is name #8 on the Atlantic list and 5 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 63% of seasons · 61% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.625,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.7083333333333334,
-          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form reached hurricane strength in 71% of seasons"
+          "p": 0.625,
+          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form reached hurricane strength in 63% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.6448445819355413,
+          "p": 0.6121642289226291,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -14634,23 +14633,23 @@
       "storm": null,
       "subject": null,
       "market": 0.315,
-      "model": 0.5211417443494859,
+      "model": 0.4990324575969609,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Fay is name #6 on the Atlantic list and 5 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 63% of seasons · 52% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.625,
+      "modelBasis": "Fay is name #6 on the Atlantic list and 5 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 54% of seasons · 50% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.5416666666666666,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.625,
-          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form reached hurricane strength in 63% of seasons"
+          "p": 0.5416666666666666,
+          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form reached hurricane strength in 54% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.5211417443494859,
+          "p": 0.4990324575969609,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -14690,11 +14689,11 @@
       "storm": null,
       "subject": null,
       "market": 0.86,
-      "model": 0.7361431612239152,
+      "model": 0.7238341646781243,
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.7428571428571429,
       "modelLayers": [
         {
@@ -14706,25 +14705,25 @@
         {
           "id": "doy",
           "label": "Day-of-year conditional",
-          "p": 0.6805555555555556,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >2 more"
+          "p": 0.6527777777777778,
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >2 more"
         },
         {
           "id": "std",
           "label": "Season-to-date state",
-          "p": 0.6805555555555556,
+          "p": 0.6527777777777778,
           "basis": "4 already recorded in 2026"
         },
         {
           "id": "enso",
           "label": "ENSO-stratified",
-          "p": 0.7173202614379086,
+          "p": 0.704248366013072,
           "basis": "9 El Niño seasons → 75% raw, shrunk 47% toward the unstratified estimate (k=8) · phase from MJJ 2026 ONI +1.39 (ASO 2026 not yet observed — persistence assumed)"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.7361431612239152,
+          "p": 0.7238341646781243,
           "basis": "35 seasons weighted by ONI distance from +1.39 (Gaussian, h=0.6) → 77% at an effective 12.6 seasons, shrunk 39% toward the unstratified estimate"
         }
       ],
@@ -14764,23 +14763,23 @@
       "storm": null,
       "subject": null,
       "market": 0.33999999999999997,
-      "model": 0.47264542106185514,
+      "model": 0.4524125139367482,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Josephine is name #10 on the Atlantic list and 5 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 51% of seasons · 47% once seasons are weighted by ONI similarity · used at all in 81%",
-      "modelUncond": 0.5138888888888888,
+      "modelBasis": "Josephine is name #10 on the Atlantic list and 5 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · 45% once seasons are weighted by ONI similarity · used at all in 75%",
+      "modelUncond": 0.5694444444444444,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.5138888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form reached hurricane strength in 51% of seasons"
+          "p": 0.5694444444444444,
+          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form reached hurricane strength in 57% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.47264542106185514,
+          "p": 0.4524125139367482,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -14824,7 +14823,7 @@
       "modelQuantity": "major",
       "modelBasin": "cpac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 central Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's · central Pacific counted by track through 140°W–180°, so systems that formed east and crossed in are included",
       "modelUncond": 0.8571428571428571,
       "modelLayers": [
         {
@@ -14837,7 +14836,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.9861111111111112,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >-1 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >-1 more"
         },
         {
           "id": "std",
@@ -14898,7 +14897,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.17142857142857143,
       "modelLayers": [
         {
@@ -14911,7 +14910,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.041666666666666664,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >6 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >6 more"
         },
         {
           "id": "std",
@@ -15028,7 +15027,7 @@
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific named-storm seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.02857142857142857,
       "modelLayers": [
         {
@@ -15041,7 +15040,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.013888888888888888,
-          "basis": "named storms forming on/after day 244 in each past season; needs >11 more"
+          "basis": "named storms forming on/after day 245 in each past season; needs >11 more"
         },
         {
           "id": "std",
@@ -15098,23 +15097,23 @@
       "storm": null,
       "subject": null,
       "market": 0.060000000000000005,
-      "model": 0.10294067646744909,
+      "model": 0.09210298845811728,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Paulette is name #16 on the Atlantic list and 5 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 15% of seasons · 10% once seasons are weighted by ONI similarity · used at all in 14%",
-      "modelUncond": 0.1527777777777778,
+      "modelBasis": "Paulette is name #16 on the Atlantic list and 5 have been used, so this is the #11 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 13% of seasons · 9% once seasons are weighted by ONI similarity · used at all in 13%",
+      "modelUncond": 0.125,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.1527777777777778,
-          "basis": "1991–2025 (n=35), unweighted — the #11 storm still to form reached hurricane strength in 14% of seasons"
+          "p": 0.125,
+          "basis": "1991–2025 (n=35), unweighted — the #11 storm still to form reached hurricane strength in 11% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.10294067646744909,
+          "p": 0.09210298845811728,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -15210,23 +15209,23 @@
       "storm": null,
       "subject": null,
       "market": 0.445,
-      "model": 0.40383151294104147,
+      "model": 0.39304015889366556,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Simon is name #18 on the eastern Pacific list and 13 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 32% of seasons · 40% once seasons are weighted by ONI similarity · used at all in 82%",
-      "modelUncond": 0.3194444444444444,
+      "modelBasis": "Simon is name #18 on the eastern Pacific list and 13 have been used, so this is the #5 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 29% of seasons · 39% once seasons are weighted by ONI similarity · used at all in 76%",
+      "modelUncond": 0.2916666666666667,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.3194444444444444,
-          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form reached hurricane strength in 31% of seasons"
+          "p": 0.2916666666666667,
+          "basis": "1991–2025 (n=35), unweighted — the #5 storm still to form reached hurricane strength in 29% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.40383151294104147,
+          "p": 0.39304015889366556,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -15322,23 +15321,23 @@
       "storm": null,
       "subject": null,
       "market": 0.045,
-      "model": 0.049489642366421255,
+      "model": 0.038725011063111034,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Sally is name #18 on the Atlantic list and 5 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · 5% once seasons are weighted by ONI similarity · used at all in 11%",
-      "modelUncond": 0.06944444444444445,
+      "modelBasis": "Sally is name #18 on the Atlantic list and 5 have been used, so this is the #13 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 4% of seasons · 4% once seasons are weighted by ONI similarity · used at all in 10%",
+      "modelUncond": 0.041666666666666664,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.06944444444444445,
-          "basis": "1991–2025 (n=35), unweighted — the #13 storm still to form reached hurricane strength in 6% of seasons"
+          "p": 0.041666666666666664,
+          "basis": "1991–2025 (n=35), unweighted — the #13 storm still to form reached hurricane strength in 3% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.049489642366421255,
+          "p": 0.038725011063111034,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -15382,7 +15381,7 @@
       "modelQuantity": "major",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific major-hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.5714285714285714,
       "modelLayers": [
         {
@@ -15395,7 +15394,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.5138888888888888,
-          "basis": "major hurricanes forming on/after day 244 in each past season; needs >1 more"
+          "basis": "major hurricanes forming on/after day 245 in each past season; needs >1 more"
         },
         {
           "id": "std",
@@ -15456,7 +15455,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.5714285714285714,
       "modelLayers": [
         {
@@ -15469,7 +15468,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.4305555555555556,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >3 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >3 more"
         },
         {
           "id": "std",
@@ -15526,23 +15525,23 @@
       "storm": null,
       "subject": null,
       "market": 0.47,
-      "model": 0.24533571105649193,
+      "model": 0.3078031724700582,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Vance is name #20 on the eastern Pacific list and 13 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 18% of seasons · 25% once seasons are weighted by ONI similarity · used at all in 52%",
-      "modelUncond": 0.18055555555555555,
+      "modelBasis": "Vance is name #20 on the eastern Pacific list and 13 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 21% of seasons · 31% once seasons are weighted by ONI similarity · used at all in 52%",
+      "modelUncond": 0.20833333333333334,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.18055555555555555,
-          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form reached hurricane strength in 17% of seasons"
+          "p": 0.20833333333333334,
+          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form reached hurricane strength in 20% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.24533571105649193,
+          "p": 0.3078031724700582,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -15586,7 +15585,7 @@
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Xavier is name #22 on the eastern Pacific list and 13 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · 5% once seasons are weighted by ONI similarity · used at all in 10%",
+      "modelBasis": "Xavier is name #22 on the eastern Pacific list and 13 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 7% of seasons · 5% once seasons are weighted by ONI similarity · used at all in 7%",
       "modelUncond": 0.06944444444444445,
       "modelLayers": [
         {
@@ -15694,23 +15693,23 @@
       "storm": null,
       "subject": null,
       "market": 0.49,
-      "model": 0.572944576375513,
+      "model": 0.5961002999788504,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Norbert is name #14 on the eastern Pacific list and 13 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 60% of seasons · 57% once seasons are weighted by ONI similarity · used at all in 97%",
-      "modelUncond": 0.5972222222222222,
+      "modelBasis": "Norbert is name #14 on the eastern Pacific list and 13 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · 60% once seasons are weighted by ONI similarity · used at all in 97%",
+      "modelUncond": 0.5694444444444444,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.5972222222222222,
-          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form reached hurricane strength in 60% of seasons"
+          "p": 0.5694444444444444,
+          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form reached hurricane strength in 57% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.572944576375513,
+          "p": 0.5961002999788504,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -15750,23 +15749,23 @@
       "storm": null,
       "subject": null,
       "market": 0.355,
-      "model": 0.6186042240163179,
+      "model": 0.5093007238731586,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Polo is name #16 on the eastern Pacific list and 13 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 54% of seasons · 62% once seasons are weighted by ONI similarity · used at all in 96%",
-      "modelUncond": 0.5416666666666666,
+      "modelBasis": "Polo is name #16 on the eastern Pacific list and 13 have been used, so this is the #3 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 49% of seasons · 51% once seasons are weighted by ONI similarity · used at all in 96%",
+      "modelUncond": 0.4861111111111111,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.5416666666666666,
-          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form reached hurricane strength in 54% of seasons"
+          "p": 0.4861111111111111,
+          "basis": "1991–2025 (n=35), unweighted — the #3 storm still to form reached hurricane strength in 49% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.6186042240163179,
+          "p": 0.5093007238731586,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -15806,23 +15805,23 @@
       "storm": null,
       "subject": null,
       "market": 0.06,
-      "model": 0.1348926714302518,
+      "model": 0.09276925218607568,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Omar is name #15 on the Atlantic list and 5 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 18% of seasons · 13% once seasons are weighted by ONI similarity · used at all in 21%",
-      "modelUncond": 0.18055555555555555,
+      "modelBasis": "Omar is name #15 on the Atlantic list and 5 have been used, so this is the #10 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 15% of seasons · 9% once seasons are weighted by ONI similarity · used at all in 14%",
+      "modelUncond": 0.1527777777777778,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.18055555555555555,
-          "basis": "1991–2025 (n=35), unweighted — the #10 storm still to form reached hurricane strength in 17% of seasons"
+          "p": 0.1527777777777778,
+          "basis": "1991–2025 (n=35), unweighted — the #10 storm still to form reached hurricane strength in 14% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.1348926714302518,
+          "p": 0.09276925218607568,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -15922,7 +15921,7 @@
       "modelQuantity": "hurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 244 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
+      "modelBasis": "Historical climatology → Day-of-year conditional → Season-to-date state → ENSO-stratified → ONI-similarity weighted · 1991–2025 eastern Pacific hurricane seasons (n=35), day 245 · ENSO phase taken from the ASO window, which is the Atlantic peak season, not this basin's",
       "modelUncond": 0.8571428571428571,
       "modelLayers": [
         {
@@ -15935,7 +15934,7 @@
           "id": "doy",
           "label": "Day-of-year conditional",
           "p": 0.875,
-          "basis": "hurricanes forming on/after day 244 in each past season; needs >1 more"
+          "basis": "hurricanes forming on/after day 245 in each past season; needs >1 more"
         },
         {
           "id": "std",
@@ -16048,23 +16047,23 @@
       "storm": null,
       "subject": null,
       "market": 0.5,
-      "model": 0.4891046200560605,
+      "model": 0.4266371586424943,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Trudy is name #19 on the eastern Pacific list and 13 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 35% of seasons · 49% once seasons are weighted by ONI similarity · used at all in 73%",
-      "modelUncond": 0.3472222222222222,
+      "modelBasis": "Trudy is name #19 on the eastern Pacific list and 13 have been used, so this is the #6 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 32% of seasons · 43% once seasons are weighted by ONI similarity · used at all in 73%",
+      "modelUncond": 0.3194444444444444,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.3472222222222222,
-          "basis": "1991–2025 (n=35), unweighted — the #6 storm still to form reached hurricane strength in 34% of seasons"
+          "p": 0.3194444444444444,
+          "basis": "1991–2025 (n=35), unweighted — the #6 storm still to form reached hurricane strength in 31% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.4891046200560605,
+          "p": 0.4266371586424943,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -16104,23 +16103,23 @@
       "storm": null,
       "subject": null,
       "market": 0.55,
-      "model": 0.4887510954416667,
+      "model": 0.5280628332518954,
       "modelQuantity": "namedhurricane",
       "modelBasin": "epac",
       "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Odalys is name #15 on the eastern Pacific list and 13 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 57% of seasons · 49% once seasons are weighted by ONI similarity · used at all in 96%",
-      "modelUncond": 0.5694444444444444,
+      "modelBasis": "Odalys is name #15 on the eastern Pacific list and 13 have been used, so this is the #2 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 63% of seasons · 53% once seasons are weighted by ONI similarity · used at all in 96%",
+      "modelUncond": 0.625,
       "modelLayers": [
         {
           "id": "ordinal",
           "label": "Ordinal climatology",
-          "p": 0.5694444444444444,
-          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form reached hurricane strength in 57% of seasons"
+          "p": 0.625,
+          "basis": "1991–2025 (n=35), unweighted — the #2 storm still to form reached hurricane strength in 63% of seasons"
         },
         {
           "id": "onisim",
           "label": "ONI-similarity weighted",
-          "p": 0.4887510954416667,
+          "p": 0.5280628332518954,
           "basis": "same seasons weighted by ONI distance from +1.39 (effective 12.6 seasons, shrunk 39% toward unweighted)"
         }
       ],
@@ -16859,7 +16858,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.27,
+      "market": 0.265,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -16880,16 +16879,16 @@
       "horizon": "storm",
       "strike": null,
       "yesBid": 0.22,
-      "yesAsk": 0.32,
+      "yesAsk": 0.31,
       "closeTime": "2026-09-15T03:59:00Z",
-      "liquidity": 4,
-      "spread": 0.1,
+      "liquidity": 1,
+      "spread": 0.09,
       "volume": 3223.9,
       "volume24h": 1050.91,
       "openInterest": 1550.32,
       "depth": {
         "bidSize": 20,
-        "askSize": 11,
+        "askSize": 4,
         "notional": 1
       },
       "proxy": false,
