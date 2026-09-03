@@ -18,3 +18,8 @@ plugins/**/.build/
 # here: a run killed part-way left .strip-build-XXXXXX/ sitting in `git status` as untracked
 # build output. Same mechanism, same hazard, same rule.
 .strip-build-*/
+
+# scripts/shoot-atlas.mjs writes the six review frames here. Build output, not the site: they are
+# reproducible from the script at any commit, and 2x frames of a 1440x900 instrument are several
+# megabytes docs/ would otherwise publish to every reader.
+.atlas-shots/

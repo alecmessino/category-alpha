@@ -435,7 +435,7 @@ const MIN_SAMPLE = 10;
  * @returns {{spec, rows, kept, undecidable, excluded, cases, intensity, landfall,
  *            time_to_event, unscoreable, gaps, n_cases}}
  */
-export function cohortResult(archive, spec, { regions = ALL_REGIONS } = {}) {
+export function cohortResult(archive, spec, { regions = ALL_REGIONS, members = false } = {}) {
   const s = normalise(spec);
   const filtered = filterStorms(archive, toFilters(s));
   const gaps = [];
@@ -497,6 +497,9 @@ export function cohortResult(archive, spec, { regions = ALL_REGIONS } = {}) {
     wsum: cases.length,           // uniform weights: the sum IS the count
     gaps,
     scope: { basins: scopeBasins, minSeason: s.seasonFrom, maxSeason: s.seasonTo },
+    /* THE LENS'S MEMBERSHIP, WHEN THE SURFACE ASKS FOR IT. Off for every other caller, so the
+       parity harness, the gates and the bench score exactly the object they scored before. */
+    collectMembers: members,
   });
 
   /* THE PRE-SATELLITE INTENSITY BIAS -- the same warning getAnalogs emits (analogs.js), and the

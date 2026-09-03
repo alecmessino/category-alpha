@@ -27,7 +27,7 @@
  * Limits & exclusions below the matrix.
  */
 import React from "react";
-import { buildGroups, statusWordOf, refusalKindOfRow, isRefusedRow, pct1 }
+import { buildGroups, statusWordOf, refusalKindOfRow, isRefusedRow, pct1, subjectReached }
   from "./evidence-deck.jsx";
 
 /* ── the selection ──────────────────────────────────────────────────────────────────────── */
@@ -114,10 +114,17 @@ const signed = (pp) => `${pp > 0 ? "+" : pp < 0 ? "−" : ""}${Math.abs(pp).toFi
  * @param {object}   [props.subject]    the selected storm's membership, when one is selected
  * @param {number}   props.archiveTotal the archive's own storm count, for the sample line
  */
-export function AnswerLadder({ result, comparison, subject, archiveTotal }) {
+export function AnswerLadder({ result, comparison, subject, archiveTotal, lensKey = null,
+  onLens = null }) {
   if (!result || !result.n_cases) return null;
   const groups = buildGroups(result, comparison, subject);
   const { intensity, landfall, denomL } = primaryEight(groups);
+  /* THE TWO DENOMINATORS THE COHORT LINE CANNOT CARRY. The cohort is one number -- 514 storms --
+     and the rates below are taken over two different populations: the storms whose PEAK the
+     archive recorded, and every storm in the cohort for landfall. Handoff B states both beside
+     the answer, and it is the one thing about this ladder a reader cannot otherwise reconstruct
+     without reading a row's n / N. Neither figure is new: both are printed on the rows. */
+  const denomI = intensity.length && intensity[0].cell ? intensity[0].cell.n_storms : null;
 
   /* THE POINTER'S TWO NUMBERS ARE COUNTED HERE, over the same groups the matrix below renders,
      so the line cannot promise a different number of refusals than the reader finds. */
@@ -135,7 +142,17 @@ export function AnswerLadder({ result, comparison, subject, archiveTotal }) {
         <div className="at-ans-head">
           <span className="at-ans-n">{result.kept.toLocaleString()}</span>
           <span className="at-ans-l">EFFECTIVE SAMPLE<br />
-            OF {archiveTotal.toLocaleString()} ARCHIVE STORMS</span>
+            OF {archiveTotal.toLocaleString()} ARCHIVE STORMS
+            {denomI !== null || denomL !== null ? (
+              <>{" · "}
+                <span className="at-ans-denoms" data-outcome-denominators
+                  title="the rates below are taken over two populations: the storms whose peak the archive recorded, and every storm in the cohort">
+                  {denomI !== null ? <>{denomI.toLocaleString()} INTENSITY</> : null}
+                  {denomI !== null && denomL !== null ? " · " : null}
+                  {denomL !== null ? <>{denomL.toLocaleString()} LANDFALL</> : null}
+                </span>
+              </>
+            ) : null}</span>
           <span className="at-ans-state" data-sample-state>
             {result.sufficient ? "SUFFICIENT" : "BELOW SAMPLE"}
           </span>
@@ -153,13 +170,19 @@ export function AnswerLadder({ result, comparison, subject, archiveTotal }) {
           <span>OUTCOME</span><span>{keyLine}</span>
         </div>
         <div className="at-ans-rows">
-          {intensity.map((row) => <AnswerRow key={row.key} row={row} comparison={comparison} />)}
+          {intensity.map((row) => (
+            <AnswerRow key={row.key} row={row} comparison={comparison} subject={subject}
+              lensKey={lensKey} onLens={onLens} />
+          ))}
           {landfall.length ? (
             <div className="at-ans-lf">
               LANDFALL{denomL ? ` · of ${denomL.toLocaleString()}` : ""}
             </div>
           ) : null}
-          {landfall.map((row) => <AnswerRow key={row.key} row={row} comparison={comparison} />)}
+          {landfall.map((row) => (
+            <AnswerRow key={row.key} row={row} comparison={comparison} subject={subject}
+              lensKey={lensKey} onLens={onLens} />
+          ))}
         </div>
       </div>
 
@@ -195,11 +218,53 @@ export function AnswerLadder({ result, comparison, subject, archiveTotal }) {
   );
 }
 
-function AnswerRow({ row, comparison }) {
+/* THE INTERVAL, AS A MARK, ON A COMMON 0-100 TRACK.
+ *
+ * WHAT IT IS AND WHAT IT IS NOT. A hairline whisker from the Wilson lower bound to the upper, a
+ * dot at the point estimate, and -- where a comparison exists -- a tick at the archive base
+ * rate. It is NOT a bar: a filled bar encodes magnitude as area and competes with the rate set
+ * at 27px two cells along, which is the reading 5c removed and B does not ask back. The track is
+ * the same width and the same 0-100 scale on every row, which is the whole of what makes two
+ * rows comparable by eye; a track sized to the space left over by an outcome name is not a scale.
+ *
+ * IT PUBLISHES NOTHING NEW. Every number it draws -- lo, hi, the rate, the baseline -- is printed
+ * in type on the same row, which is the canonical rendering; this is those figures placed on a
+ * ruler. Marked aria-hidden for exactly that reason: a screen reader gets the sentence, not the
+ * picture of it. */
+function IntervalMark({ cell, delta, tone, nonmember }) {
+  if (!cell || cell.rate === null || !cell.ci95) return <span className="at-ans-int" aria-hidden="true" />;
+  const pct = (v) => `${Math.max(0, Math.min(100, 100 * v))}%`;
+  const base = delta && delta.baseRate !== null && delta.baseRate !== undefined
+    ? delta.baseRate : null;
+  return (
+    <span className="at-ans-int" aria-hidden="true" data-interval-mark
+      data-bar-class={tone} data-nonmember={nonmember ? "" : undefined}>
+      <i className="at-ans-track" />
+      <i className="at-ans-whisk" style={{ left: pct(cell.ci95[0]), right: `${100 - Math.max(0, Math.min(100, 100 * cell.ci95[1]))}%` }} />
+      {base !== null ? <i className="at-ans-base" style={{ left: pct(base) }} /> : null}
+      <i className="at-ans-dot" style={{ left: pct(cell.rate) }} />
+    </span>
+  );
+}
+
+function AnswerRow({ row, comparison, subject = null, lensKey = null, onLens = null }) {
   const { label, cell, delta } = row;
   const refused = isRefusedRow(row);
   const status = statusWordOf(row);
   const kind = refusalKindOfRow(row);
+  /* THE LENS IS OFFERED ONLY WHERE THERE IS SOMETHING TO LIFT. A contract with no members --
+     nothing in the cohort reached it -- would lift an empty plate, which is not an inspection.
+     The row stays exactly as legible; it simply is not a control. */
+  const members = row.memberRows;
+  const canLens = !!(onLens && members && members.length);
+  const held = canLens && lensKey === row.key;
+  /* SUBJECT DE-COLOURING, AND IT IS COLOUR ONLY. With a storm selected, a contract that storm did
+     not reach keeps its rate, its interval, its status and its full text contrast, and loses the
+     class ink on its mark. Nonmember context loses colour, never contrast. */
+  const nonmember = !!(subject && subjectReached(subject, row.contractKey) === false);
+  const press = canLens ? () => onLens(held ? null : row.key) : undefined;
+  const lift = canLens ? () => onLens(row.key, { transient: true }) : undefined;
+  const drop = canLens ? () => onLens(null, { transient: true }) : undefined;
   return (
     /* `data-refusal-state`, NOT `data-refusal`. The second is this surface's hook for a place a
        refusal is EXPLAINED, and check-atlas-dom holds every one of them to naming the way out.
@@ -207,14 +272,34 @@ function AnswerRow({ row, comparison }) {
        is written once, per governing refusal, below the matrix. Marking it `data-refusal` would
        have made the gate demand the remedy prose on a row the contract forbids prose on -- and
        the gate would have been right. */
+    /* A REAL BUTTON WHERE IT IS ONE. The row is the control that lifts its own storms onto the
+       plate, so it is in the tab order, answers Enter and Space, and carries aria-pressed --
+       which is also what makes the hold legible to a screen reader as a state rather than as a
+       colour. Where there is nothing to lift it is a plain div and not a dead button. */
     <div className="at-ans-row" data-finding data-refused={refused ? "" : undefined}
-      data-refusal-state={kind || undefined}>
+      data-refusal-state={kind || undefined}
+      data-nonmember={nonmember ? "" : undefined}
+      data-lens-row={canLens ? row.key : undefined}
+      data-held={held ? "" : undefined}
+      role={canLens ? "button" : undefined} tabIndex={canLens ? 0 : undefined}
+      aria-pressed={canLens ? (held ? "true" : "false") : undefined}
+      title={canLens
+        ? `${held ? "release" : "hold"} — draw the ${members.length.toLocaleString()} storms of this contract on the plate. The question, the rates and the URL do not change.`
+        : undefined}
+      onClick={press}
+      onMouseEnter={lift} onMouseLeave={drop}
+      onFocus={lift} onBlur={drop}
+      onKeyDown={canLens ? (e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); press(); }
+        if (e.key === "Escape" && held) { e.preventDefault(); onLens(null); }
+      } : undefined}>
       <span className="at-ans-name">
         <span className="at-ans-label" title={label}>{label}</span>
         {/* A LEADER, THE WAY A PRINTED TABLE CARRIES ONE. At this measure the eye has to travel
             from an outcome name to a figure set hard right; the dotted rule is what keeps it on
             the line. It carries no meaning and no text. */}
         <i className="at-ans-ld" aria-hidden="true" />
+        <IntervalMark cell={cell} delta={delta} tone={row.tone} nonmember={nonmember} />
       </span>
       <span className="at-ans-rate">
         {refused ? (

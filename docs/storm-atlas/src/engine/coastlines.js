@@ -106,3 +106,84 @@ export async function fetchCoastlines(url, { signal } = {}) {
   const stream = res.body.pipeThrough(new DecompressionStream("gzip"));
   return decodeCoastlines(await new Response(stream).arrayBuffer());
 }
+
+/* ── THE CONTEXT TIER ─────────────────────────────────────────────────────────────────────
+ *
+ * Natural Earth 1:110m land, packed by scripts/build-atlas-context.mjs and drawn UNDER the
+ * archive's own rings at contextual ink. It replaces the third-party tile service the plate
+ * used to fetch for South America, Africa and Canada, so the plate is drawn entirely from bytes
+ * on this origin. It is context and only context: no landfall, membership, count, rate or
+ * refusal consults it, and scripts/test-atlas-context.mjs asserts the pack is the vendored
+ * TopoJSON vertex for vertex.
+ *
+ * Decoded into the same shape as the coastline pack -- unit-square Float32 positions, ring
+ * offsets, per-ring boxes -- so the layer culls and fills it with the same two loops. */
+const CONTEXT_MAGIC = "MBCONTX1";
+
+export function decodeContext(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let magic = "";
+  for (let i = 0; i < 8; i++) magic += String.fromCharCode(bytes[i]);
+  if (magic !== CONTEXT_MAGIC) {
+    throw new Error(`not an atlas context pack (magic ${JSON.stringify(magic)})`);
+  }
+  const hdrLen = new DataView(buffer).getUint32(8, true);
+  const header = JSON.parse(new TextDecoder().decode(bytes.subarray(12, 12 + hdrLen)).trim());
+  const base = 12 + hdrLen;
+  const s = header.sections;
+  const delta = new Int32Array(buffer, base + s.delta.offset, s.delta.length);
+  const ringOffset = new Uint32Array(buffer, base + s.ring_offset.offset, s.ring_offset.length);
+  const [kx, ky] = header.transform.scale;
+  const [dx, dy] = header.transform.translate;
+
+  const n = delta.length / 2;
+  const lon = new Float64Array(n);
+  const lat = new Float64Array(n);
+  const wx = new Float32Array(n);
+  const wy = new Float32Array(n);
+  let ix = 0;
+  let iy = 0;
+  for (let k = 0; k < n; k++) {
+    ix += delta[k * 2];
+    iy += delta[k * 2 + 1];
+    /* topojson-client's own transform, in the same order of operations, so the decoded
+       coordinate is the source's to the bit. */
+    const lo = ix * kx + dx;
+    let la = iy * ky + dy;
+    lon[k] = lo;
+    lat[k] = la;
+    if (la > MAX_LAT) la = MAX_LAT;
+    else if (la < -MAX_LAT) la = -MAX_LAT;
+    wx[k] = (lo + 180) / 360;
+    wy[k] = 0.5 - Math.log(Math.tan(Math.PI / 4 + (la * DEG) / 2)) / (2 * Math.PI);
+  }
+  const nRings = ringOffset.length - 1;
+  const minX = new Float32Array(nRings);
+  const maxX = new Float32Array(nRings);
+  const minY = new Float32Array(nRings);
+  const maxY = new Float32Array(nRings);
+  for (let r = 0; r < nRings; r++) {
+    let x0 = Infinity;
+    let x1 = -Infinity;
+    let y0 = Infinity;
+    let y1 = -Infinity;
+    for (let k = ringOffset[r]; k < ringOffset[r + 1]; k++) {
+      if (wx[k] < x0) x0 = wx[k];
+      if (wx[k] > x1) x1 = wx[k];
+      if (wy[k] < y0) y0 = wy[k];
+      if (wy[k] > y1) y1 = wy[k];
+    }
+    minX[r] = x0; maxX[r] = x1; minY[r] = y0; maxY[r] = y1;
+  }
+  return { header, lon, lat, wx, wy, ringOffset, minX, maxX, minY, maxY, nRings, nVertices: n };
+}
+
+export async function fetchContext(url, { signal } = {}) {
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw new Error(`${url}: HTTP ${res.status}`);
+  if (typeof DecompressionStream === "undefined") {
+    throw new Error("this browser has no DecompressionStream; the context pack cannot be read");
+  }
+  const stream = res.body.pipeThrough(new DecompressionStream("gzip"));
+  return decodeContext(await new Response(stream).arrayBuffer());
+}

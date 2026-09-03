@@ -153,8 +153,10 @@ for (const [w, h] of WIDTHS) {
   ok(`${at.padEnd(9)} the head renders a question and a cohort line`, !!d);
   if (!d) continue;
   const wantQ = w <= 480 ? 24 : 30;
-  ok(`${at.padEnd(9)} the question is ${wantQ}px serif`,
-     d.question === wantQ && /Source Serif/.test(d.family), `${d.question}px ${d.family}`);
+  /* PLEX SANS, NOT SERIF. 5c set the question in Source Serif 4; the product skin (Handoff B)
+     sets it in IBM Plex Sans at the same 30px step. The size is 5c's and the family is B's. */
+  ok(`${at.padEnd(9)} the question is ${wantQ}px Plex Sans`,
+     d.question === wantQ && /IBM Plex Sans/.test(d.family), `${d.question}px ${d.family}`);
   ok(`${at.padEnd(9)} and dominates the line beneath it`, d.question >= 2 * d.cohort,
      `question ${d.question}px against cohort ${d.cohort}px`);
   ok(`${at.padEnd(9)} which sits below it`, d.below);
@@ -225,13 +227,16 @@ for (const [w, h] of WIDTHS) {
      `head above ${d.headAbove}, measure below ${d.footBelow}, figure below ${d.figBelow}`);
   ok(`${at.padEnd(9)} and every one is aligned to the plate's edge`, d.aligned);
   ok(`${at.padEnd(9)} the stage wraps the rectangle and nothing else`, d.stageHoldsOnlyPlate);
-  /* THE PLATE IS DARK IN BOTH SHELLS AND THE SHELL IT SITS IN IS PAPER: the two grounds must be
-     on opposite sides of the middle, and the caption must be readable on the paper one. */
-  ok(`${at.padEnd(9)} the plate is dark inside a paper shell`,
-     d.plateGround < 0.2 && d.shellGround > 0.6,
+  /* THE PLATE IS THE DARKEST PLANE AND THE SHELL AROUND IT IS CHARCOAL, ONE STEP LIGHTER. The
+     paper shell is retired (the product skin is Handoff B's charcoal), so what this holds is the
+     tonal lock itself: the plate's ground is below the shell's, both are dark, and the caption
+     set on the shell resolves a LIGHT ink -- readable on the charcoal, and demonstrably not the
+     plate's own near-black ground leaking into the caption line. */
+  ok(`${at.padEnd(9)} the plate is the darkest plane, inside a charcoal shell`,
+     d.plateGround < 0.02 && d.shellGround < 0.05 && d.plateGround < d.shellGround,
      `plate luminance ${d.plateGround}, shell ${d.shellGround}`);
-  ok(`${at.padEnd(9)} and the caption resolves paper ink, not the plate's`,
-     d.captionInk !== null && d.captionInk < 0.3,
+  ok(`${at.padEnd(9)} and the caption resolves a light ink on the charcoal`,
+     d.captionInk !== null && d.captionInk > 0.2,
      `caption luminance ${d.captionInk} on a ${d.shellGround} ground`);
   /* FIGURE 1 SAYS WHAT IS DRAWN, which is what turns a map into a figure -- and it says it in
      ONE LINE, which is what keeps the map a fixed rectangle.

@@ -13,8 +13,10 @@
 
 import React from "react";
 import { loadArchive } from "../engine/archive.js";
-import { fetchCoastlines } from "../engine/coastlines.js";
+import { fetchCoastlines, fetchContext } from "../engine/coastlines.js";
 import { genesisDensity, getAnalogs, pathwayDensity } from "../engine/analogs.js";
+import { brushMembers, buildCellIndex, cellAt, cellIndex, genesisMembers, keyOfCell, maskOf,
+  pathwayMembers } from "../engine/cells.js";
 import { filterStorms, genesisBounds, seasonRange } from "../engine/query.js";
 import {
   EMPTY_COHORT, cohortResult, conditionsOf, normalise, parentOf, parseQuery, sameCohort,
@@ -48,7 +50,7 @@ import { EnvLens } from "./env-lens.jsx";
 /* THE INSTRUMENT'S OWN PARTS. */
 import { Colophon } from "./shell.jsx";
 import { QueryHead } from "./condition-strip.jsx";
-import { EvidenceDeck, subjectVerdicts } from "./evidence-deck.jsx";
+import { EvidenceDeck, buildGroups, subjectVerdicts } from "./evidence-deck.jsx";
 import { AnswerLadder } from "./answer-ladder.jsx";
 import { Transport } from "./transport.jsx";
 import { ArchiveTransport } from "./archive-transport.jsx";
@@ -82,6 +84,9 @@ export function Atlas() {
   const [error, setError] = React.useState(null);
   const [world, setWorld] = React.useState(null);
   const [coast, setCoast] = React.useState(null);
+  /* The context tier: Natural Earth 110m land, 20 KB, fetched after the archive's own rings.
+     It replaces the tile service the plate used to draw South America, Africa and Canada from. */
+  const [contextLand, setContextLand] = React.useState(null);
 
   /* THE SINGLE SOURCE OF TRUTH. One object decides which storms are drawn, which are counted,
      what the outcome cards say, what the URL carries and what a saved scenario is. The rail
@@ -156,11 +161,16 @@ export function Atlas() {
   const [urlStorm] = React.useState(
     () => new URLSearchParams(location.search).get("storm"));
   const [urlStormResolved, setUrlStormResolved] = React.useState(false);
-  /* Off by default. The individual trajectories are the hero -- the density surface is the
-     same storms counted, and stacking both means neither reads. Turning it on dims the tracks
-     so the surface can be seen. */
-  const [showPathway, setShowPathway] = React.useState(false);
-  const [showGenesisDensity, setShowGenesisDensity] = React.useState(false);
+  /* THE PLATE'S MODE, AND IT RESTS ON PATHWAY COUNTS. Three readings of the same storms:
+     PATHWAY counts the distinct storms through each 2-degree cell, GENESIS counts the storms that
+     formed in each, TRACKS is the trajectories alone -- the reading the plate used to rest on,
+     kept whole. The tracks stay under either density surface at a reduced alpha (see
+     population-layer.js), because the surface IS those storms counted and a reader must be able
+     to see that the shading sits on real trajectories. A map-dependent control, so it lives on
+     the plate head rather than in the clause editor. */
+  const [plateMode, setPlateMode] = React.useState("pathway");
+  const showPathway = plateMode === "pathway";
+  const showGenesisDensity = plateMode === "genesis";
   const [playing, setPlaying] = React.useState(false);
   const [cursorMs, setCursorMs] = React.useState(null);
   /* "explore" is the map as a finished record; "replay" unfolds it in time. The filters drive
@@ -171,9 +181,52 @@ export function Atlas() {
   const [provOpen, setProvOpen] = React.useState(false);
   const [view, setView] = React.useState(null);
 
+  /* THE LENS. One row of the answer, held or hovered, and the storms it counted drawn on the
+     plate. HOLDS ARE VIEW STATE: they never write a rate, the cohort, the citation or the URL --
+     the two states are kept apart so a hover cannot outlive the pointer and a hold cannot be
+     cleared by one. Inspection changes the view; commit changes the answer. */
+  const [heldRow, setHeldRow] = React.useState(null);
+  const [hoverRow, setHoverRow] = React.useState(null);
+  /* THE BRUSHED AREA. Geographic inspection: which storms of this cohort went through here. It
+     is view state in exactly the sense a held row is -- no rate, no denominator, no condition
+     and no URL -- and it is deliberately NOT a cohort condition: the canonical spec conditions
+     on GENESIS within a radius, and a rectangle that published would be answering a question the
+     engine cannot be asked. */
+  const [brush, setBrush] = React.useState(null);
+  const onLens = React.useCallback((key, { transient = false } = {}) => {
+    if (transient) setHoverRow(key);
+    else { setHeldRow(key); setHoverRow(null); }
+  }, []);
+
 
   /* The builder is a summoned sheet in the stacked shell rather than a resident rail. */
+  /* WHICH ZONE IS BEING EDITED, AND WHERE THE CLAUSE THAT OPENED IT SITS. The anchor is
+     measured at press time, in the shell's own coordinates, so the popover can be placed under
+     the words it edits without becoming part of the layout -- it is absolutely positioned, so
+     the plate's rectangle is a function of the viewport and the composition and of nothing else,
+     which scripts/check-atlas-stability.mjs measures through this exact transition. */
   const [sheetZone, setSheetZone] = React.useState(null);
+  const [sheetAt, setSheetAt] = React.useState(null);
+  const shellRef = React.useRef(null);
+  const anchorRef = React.useRef(null);
+  const openEditor = React.useCallback((zone, el) => {
+    anchorRef.current = el || null;
+    const shell = shellRef.current;
+    if (el && shell) {
+      const a = el.getBoundingClientRect();
+      const b = shell.getBoundingClientRect();
+      setSheetAt({ left: Math.round(a.left - b.left), top: Math.round(a.bottom - b.top + 8) });
+    } else setSheetAt(null);
+    setSheetZone(zone);
+  }, []);
+  /* CLOSING RETURNS THE READER TO THE CLAUSE THEY PRESSED. A dialog that drops focus at the top
+     of the document costs a keyboard reader their place in the sentence. */
+  const closeEditor = React.useCallback(() => {
+    setSheetZone(null);
+    const el = anchorRef.current;
+    anchorRef.current = null;
+    if (el && el.isConnected) el.focus();
+  }, []);
 
   /* THE TWO DURATION COLUMNS FOLD BELOW 1440, and the fold is measured rather than assumed:
      the deck asks the viewport directly instead of a breakpoint guess, because the columns it
@@ -185,14 +238,6 @@ export function Atlas() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
   const [timingOpen, setTimingOpen] = React.useState(false);
-
-  /* WHICH INK SET. Paper is the default and the dark plate is unaffected either way -- see the
-     light-shell block in atlas.css, where --stage is declared once and the stage re-declares the
-     dark ramp for its own subtree. Stored per reader; absent means paper. */
-  const [shell] = React.useState(() => {
-    try { return localStorage.getItem("atlas.shell") === "dark" ? "dark" : "light"; }
-    catch { return "light"; }
-  });
 
 
   /* The manifest lands first so the scale line can paint while the 972 KB track block is still
@@ -207,6 +252,9 @@ export function Atlas() {
       setWorld(w);
       setArchive(a);
       globalThis.__ATLAS = { archive: a, world: w, getAnalogs, pathwayDensity, genesisDensity };
+      /* The cell index and its readers, for the cell-semantics and lens gates and the bench. */
+      globalThis.__ATLAS_CELLS = { cellIndex, buildCellIndex, cellAt, keyOfCell, maskOf,
+        pathwayMembers, genesisMembers, brushMembers };
       globalThis.__ATLAS_QUERY = { filterStorms, seasonRange, genesisBounds };
       globalThis.__ATLAS_COHORT = { cohortResult, previewCounts, normalise, parentOf, toQuery,
         whyMatched, contributionOf, bridgeSpec };
@@ -226,6 +274,14 @@ export function Atlas() {
            and says so in the foot band rather than claiming a contrast it does not have. */
         if (!cancelled) setCoast({ failed: String(e && e.message ? e.message : e) });
       });
+      /* THE CONTEXT LAND, LAST. It is the least of the three geometries -- context and only
+         context -- so it queues behind the rings the landfall rule tested against. A failure
+         here costs the plate its silhouette of South America and nothing else. */
+      fetchContext(`${DATA_BASE}/atlas-context-v1.bin.gz`).then((c) => {
+        if (cancelled) return;
+        setContextLand(c);
+        globalThis.__ATLAS_CONTEXT = c;
+      }).catch(() => { /* the plate draws without context rather than from a third party */ });
     }).catch((e) => { if (!cancelled) setError(e); });
 
     /* THE OPERATIONAL ARTIFACT, IN PARALLEL AND OFF THE CRITICAL PATH.
@@ -268,8 +324,11 @@ export function Atlas() {
      drawn on the map ARE the storms in every denominator. Until 3.2 these were two calls -- one
      deciding what was drawn, another deciding what was scored -- and keeping them from
      disagreeing was the shell's job rather than the engine's. */
+  /* MEMBERS ARE ASKED FOR HERE AND NOWHERE ELSE. The lens draws the storms of one published
+     contract, and the only honest source for that set is the loop that counted the numerator --
+     see scoreCases. Measured at 6.8 ms on a 2,181-storm cohort against 6.0 without. */
   const result = React.useMemo(
-    () => (archive ? cohortResult(archive, cohort) : null), [archive, cohort]);
+    () => (archive ? cohortResult(archive, cohort, { members: true }) : null), [archive, cohort]);
 
   /* THE BASELINE IS ONE OBJECT, USED TWICE. It is the population drawn behind the cohort on the
      map AND the reference every delta is measured against -- and those must be the same thing,
@@ -353,6 +412,39 @@ export function Atlas() {
 
   const contextRows = context ? context.rows : (result ? result.rows : null);
   const emphasis = context ? result.rows : null;
+
+  /* WHAT IS HELD, AND WHAT IT PUBLISHES: nothing. The label and the two figures below are the
+     row's OWN already-published values, read back out of the same result the ladder printed
+     them from -- the plate echoes them, it does not compute them. */
+  /* THE BRUSH'S MEMBERS, FROM THE CELL INDEX -- the same index the hover readout counts with,
+     so the number stated on the foot is the number of storms in those cells and nothing else. */
+  const brushLens = React.useMemo(() => {
+    if (!brush || !archive || !result) return null;
+    const index = cellIndex(archive, 2.0);
+    const { rows, cells } = brushMembers(index, maskOf(archive.nStorms, result.rows), brush);
+    return { key: "__brush__", label: "BRUSHED AREA", rows, count: rows.length,
+      denom: result.kept, held: true, cells };
+  }, [brush, archive, result]);
+
+  const lens = React.useMemo(() => {
+    const key = hoverRow || heldRow;
+    if (!key || !result) return brushLens;
+    for (const g of buildGroups(result, comparison, null)) {
+      for (const row of g.rows) {
+        if (row.key !== key) continue;
+        if (!row.memberRows || !row.memberRows.length) return null;
+        return { key, label: row.label, rows: row.memberRows,
+          count: row.cell ? row.cell.count : row.memberRows.length,
+          denom: row.cell ? row.cell.n_storms : null, held: key === heldRow };
+      }
+    }
+    return brushLens;
+  }, [hoverRow, heldRow, result, comparison, brushLens]);
+
+  /* A COHORT EDIT RELEASES THE HOLD. The row a reader held is a row of the previous answer; a new
+     cohort re-publishes every contract, and keeping the key would lift a set the ladder is no
+     longer showing. The camera, the selection and the mode are untouched. */
+  React.useEffect(() => { setHeldRow(null); setHoverRow(null); setBrush(null); }, [cohort]);
 
   /* MEMOISED, and that is not a micro-optimisation. `Archive.storm(i)` allocates -- it is marked
      "not for hot loops" where it is defined -- and everything the operational join derives hangs
@@ -604,6 +696,13 @@ export function Atlas() {
     globalThis.__ATLAS_DRAWN_ROWS = emphasis || contextRows || [];
   }, [emphasis, contextRows]);
   React.useEffect(() => { globalThis.__ATLAS_SET_CURSOR = setCursorMs; }, []);
+  /* The lens's own handle, for the coordination gate: what is lifted, and from which row. */
+  React.useEffect(() => {
+    globalThis.__ATLAS_LENS = lens
+      ? { key: lens.key, label: lens.label, count: lens.count, denom: lens.denom,
+          rows: lens.rows, held: lens.held }
+      : null;
+  }, [lens]);
 
   /* THE BRIDGE: build the cohort around where THIS storm formed, and keep the storm.
    *
@@ -669,7 +768,12 @@ export function Atlas() {
        * not in the chain at all: a condition is removed by its own ✕ or by RESET, both of which
        * are visible, deliberate and next to the thing they remove. */
       if (e.key === "Escape") {
+        if (sheetZone) { closeEditor(); return; }
         if (provOpen) { setProvOpen(false); return; }
+        /* THE HOLD IS DISMISSED BEFORE THE SELECTION, on the same most-recent-first rule the
+           drawer and the inspector already follow, and the cohort is still not in the chain. */
+        if (heldRow) { setHeldRow(null); setHoverRow(null); return; }
+        if (brush) { setBrush(null); return; }
         if (selected !== null) { setSelected(null); return; }
       }
       if (e.key === "p" || e.key === "P") setProvOpen((v) => !v);
@@ -683,7 +787,7 @@ export function Atlas() {
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [selected, mode, provOpen]);
+  }, [selected, mode, provOpen, heldRow, brush, sheetZone, closeEditor]);
 
   if (error) return <BootError error={error} />;
   if (!archive || !world || !result) return <Boot manifest={manifest} />;
@@ -697,14 +801,19 @@ export function Atlas() {
    * two mount points. */
   const plate = (
     <AtlasMap
-      archive={archive} world={world} coast={coast} rows={contextRows} emphasis={emphasis}
+      archive={archive} world={world} coast={coast} contextLand={contextLand} rows={contextRows}
+      emphasis={emphasis}
       selected={selected} home={home} homeClamp={NA_EP} homeAnchor={homeAnchor}
       evidenceFrame={evidenceFrame} subjectFrame={subjectFrame} cameraApi={cameraRef}
       onSelect={selectStorm} onProbe={onProbe} probe={cohort.where}
       operationalTrack={operationalTrack}
       replayMs={selected !== null && cursorMs !== null ? cursorMs : undefined}
       colorBy={layers.colorBy} dimPopulation={selected !== null}
-      softenEmphasis={showPathway}
+      softenEmphasis={showPathway || showGenesisDensity}
+      underDensity={showPathway || showGenesisDensity}
+      lens={lens}
+      brush={brush} onBrush={setBrush}
+      plateMode={plateMode} onPlateMode={(m) => { setPlateMode(m); setInteracted(true); }}
       showGenesis={layers.genesis} showLandfalls={layers.landfalls}
       showPathway={showPathway} pathway={pathway}
       showGenesisDensity={showGenesisDensity} genesisDensity={genesisGrid}
@@ -740,7 +849,7 @@ export function Atlas() {
           band. No tutorial, no dismissal to remember, and nothing that has to be earned --
           the two states are just the two things that are true. */}
       {mode === "explore" && !interacted && !conditionsOf(cohort).length && selected === null
-        ? <Invitation /> : null}
+        ? <Invitation clear={showPathway || showGenesisDensity} /> : null}
       <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
         showGenesisDensity={showGenesisDensity} />
     </AtlasMap>
@@ -814,7 +923,7 @@ export function Atlas() {
        in the one file that holds this surface's geometry, and it cannot be expressed here at
        all -- an inline style cannot carry a media query. Only the two colours stay, because
        they are this component's own tokens rather than a shape. */
-    <div data-surface="tactical" data-view="tactical" data-atlas data-shell={shell}
+    <div data-surface="tactical" data-view="tactical" data-atlas ref={shellRef}
       className="atlas-shell atlas-instrument" style={{
         background: "var(--surface-app)", color: "var(--text-1)",
       }}>
@@ -838,7 +947,7 @@ export function Atlas() {
         lastEdit={lastEdit}
         notice={<MethodologyMoved was={urlMethodology}
           now={archive.manifest.methodology_version} />}
-        onEdit={(zone) => { setInteracted(true); setSheetZone(zone); }}
+        onEdit={(zone, el) => { setInteracted(true); openEditor(zone, el); }}
         onClear={(key) => setCohort(clearCondition(cohort, key))}
         onReset={onResetQuery} />
 
@@ -879,7 +988,8 @@ export function Atlas() {
             width, with these eight underscored there. */}
         <div className="atlas-answer" data-answer-col>
           <AnswerLadder result={result} comparison={comparison} subject={subject}
-            archiveTotal={archive.manifest.counts.storms} />
+            archiveTotal={archive.manifest.counts.storms}
+            lensKey={heldRow} onLens={onLens} />
         </div>
       </div>
       </div>
@@ -940,11 +1050,14 @@ export function Atlas() {
       {/* THE BUILDER, SUMMONED. Same component, same state, same costs -- it is the same query
           surface the rail held, moved behind the zone label that opens it. */}
       {sheetZone ? (
-        <div className="at-sheet" data-builder-sheet role="dialog" aria-label="edit conditions">
+        <div className="at-sheet" data-builder-sheet data-sheet-anchored={sheetAt ? "" : undefined}
+          role="dialog" aria-label="edit conditions" aria-modal="false"
+          style={sheetAt ? { left: sheetAt.left, top: sheetAt.top } : undefined}
+          onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); closeEditor(); } }}>
           <div className="at-sheet-hd">
             <span>EDIT CONDITIONS</span>
             <button type="button" className="at-sheet-x" data-sheet-close
-              onClick={() => setSheetZone(null)} aria-label="close">×</button>
+              onClick={closeEditor} aria-label="close">×</button>
           </div>
           <div className="at-sheet-body">
             <CohortBuilder archive={archive} cohort={cohort}
@@ -952,8 +1065,6 @@ export function Atlas() {
               result={result} preview={preview}
               layers={layers} setLayers={setLayers} bounds={bounds}
               mode={mode} setMode={setMode}
-              showPathway={showPathway} setShowPathway={setShowPathway}
-              showGenesisDensity={showGenesisDensity} setShowGenesisDensity={setShowGenesisDensity}
               timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
               envCoverage={envCov}
               onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
@@ -1337,10 +1448,16 @@ function Header({ archive, onProvenance, onLedger }) {
 }
 
 /* The one instruction the surface gives, placed where the gesture happens. */
-function Invitation() {
+function Invitation({ clear = false }) {
   return (
     <div style={{
-      position: "absolute", left: "50%", bottom: 26, transform: "translateX(-50%)",
+      /* ABOVE THE DENSITY LEGEND WHEN THERE IS ONE, and the measurement is why the number is 96
+         rather than a guess: at 1440 the legend's two lines run from 38px to 98px off the plate's
+         foot and reach the middle of its width, so a centred instruction at the old 26px sat
+         underneath it. 112 clears the legend's own top with a line's gap. The legend is the sentence that stops the shading being read as a
+         forecast; the instruction retires itself on the first gesture, so it is the one that
+         moves. */
+      position: "absolute", left: "50%", bottom: clear ? 112 : 26, transform: "translateX(-50%)",
       pointerEvents: "none", zIndex: 450, textAlign: "center",
     }}>
       <div style={{
@@ -1361,14 +1478,17 @@ function Legend({ colorBy, showPathway, showGenesisDensity, probe }) {
   const items = [["ts", "TS"], ["cat1", "1"], ["cat2", "2"], ["cat3", "3"], ["cat4", "4"],
     ["cat5", "5"]];
   const surfaces = [];
+  /* THE LABELS ARE THE MODE'S OWN: Pathway counts, Genesis counts. A count of distinct storms
+     per cell, deduped by storm id, and never a probability -- said beside the shading, because a
+     shaded ocean is read as a forecast cone unless it says otherwise. */
   if (showPathway) {
-    surfaces.push(["56, 189, 248", "HISTORICAL PATHWAY FREQUENCY",
-      probe ? "storms of the matched pool through each 2° cell — not a forecast"
-        : "storms of the current filter through each 2° cell — not a forecast"]);
+    surfaces.push(["79, 195, 247", "PATHWAY COUNTS",
+      probe ? "distinct storms of the matched pool through each 2° cell — not a forecast"
+        : "distinct storms of the cohort through each 2° cell — not a forecast"]);
   }
   if (showGenesisDensity) {
-    surfaces.push(["167, 139, 250", "GENESIS COUNT",
-      "storms that formed in each 2° cell — a count, not a rate"]);
+    surfaces.push(["155, 123, 240", "GENESIS COUNTS",
+      "storms that formed in each 2° cell, one per storm — a count, not a rate"]);
   }
   if (colorBy !== "intensity" && !surfaces.length) return null;
   /* THE STYLESHEET ALREADY HAD THIS, AND IT WAS UNREACHABLE.

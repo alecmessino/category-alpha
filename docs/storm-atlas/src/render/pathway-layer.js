@@ -47,12 +47,22 @@ export const PathwayLayer = AtlasLayer.extend({
     return this._peak || 0;
   },
 
+  /** The cell under the pointer or the keyboard reticle, as a "lat,lon" key, or null. Drawn as
+      an outline so the literal count in the foot band is visibly THIS cell's. */
+  setHover(key) {
+    if (this._hover === key) return this;
+    this._hover = key || null;
+    this.redraw();
+    return this;
+  },
+
   draw(ctx, view) {
     const d = this._density;
-    if (!d || !d.size) return;
     const { scale, ox, oy, width, height } = view;
     const step = this.options.stepDeg;
     const peak = this._peak || 1;
+    if (this._hover && d) this._outline(ctx, view, this._hover, step);
+    if (!d || !d.size) return;
 
     for (const [key, n] of d) {
       const c = key.indexOf(",");
@@ -72,6 +82,21 @@ export const PathwayLayer = AtlasLayer.extend({
     }
   },
 });
+
+PathwayLayer.prototype._outline = function outline(ctx, view, key, step) {
+  const { scale, ox, oy } = view;
+  const c = key.indexOf(",");
+  const lat0 = Number(key.slice(0, c));
+  const lon0 = Number(key.slice(c + 1));
+  const a = world(lat0 + step, lon0);
+  const b = world(lat0, lon0 + step);
+  ctx.save();
+  ctx.strokeStyle = `rgba(${this.options.hue}, 0.95)`;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(Math.round(a.wx * scale - ox) + 0.5, Math.round(a.wy * scale - oy) + 0.5,
+    Math.round((b.wx - a.wx) * scale) - 1, Math.round((b.wy - a.wy) * scale) - 1);
+  ctx.restore();
+};
 
 function world(lat, lon) {
   let la = lat;

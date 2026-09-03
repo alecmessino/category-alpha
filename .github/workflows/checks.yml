@@ -235,6 +235,36 @@ jobs:
       - name: Verify the browser computes what the archive computes
         run: node scripts/test-atlas-parity.mjs
 
+      # THE PLATE'S CONTEXT LAND, AND THE PROOF THAT IT IS THE ONLY THING BEHIND THE ARCHIVE'S
+      # OWN GEOMETRY. The surface used to fetch its context -- South America, Africa, Canada --
+      # from a third-party tile service, which every browser gate in this file ABORTS to stay
+      # hermetic: the gates were measuring a plate with no context, and so was any reader behind
+      # a firewall. Natural Earth 110m is packed with the archive now, and this asserts the pack
+      # is the vendored TopoJSON vertex for vertex, that the committed bytes are what a fresh
+      # build produces, and -- the part that keeps it true -- that no source on the plate reaches
+      # for a tile host or a font CDN again.
+      - name: Verify the plate's context land is vendored, and nothing fetches a tile
+        run: node scripts/test-atlas-context.mjs
+
+      # WHAT THE SHADING COUNTS, AS A NUMBER RATHER THAN AS A LABEL. Pathway counts and Genesis
+      # counts are the two surfaces a shaded ocean can be read as a forecast from, so their
+      # semantics are asserted against a BRUTE-FORCE count over the real archive, for the whole
+      # record and for two conditioned cohorts: a storm counted once per cell it crosses and once
+      # for the cell it formed in, never once per fix. It also pins the cached cell index the
+      # hover readout and the brush read -- a second path to the same number, which is how a
+      # readout stops being literal -- and that the renderer smooths nothing.
+      - name: Verify every cell count is a literal, deduped count of storms
+        run: node scripts/test-atlas-cells.mjs
+
+      # THE PROTOTYPE'S DEMONSTRATION DATA, KEPT OUT BY NAME. This surface was redesigned against
+      # a prototype carrying a hand-written table of base rates, a conditioned cohort typed as a
+      # literal and a seeded random walk standing in for tracks. Every one of them renders exactly
+      # like the real thing. This asserts, over the source AND the shipped bundle, that none of
+      # them arrived: no demo constant, no generated population, no second refusal resolver, no
+      # component dividing a count by a denominator, and no published figure as a literal.
+      - name: Verify every number on the surface is the archive's
+        run: node scripts/check-atlas-canonical.mjs
+
       # The plate draws its authoritative coastline from the archive's OWN landfall geometry, so
       # the line a reader sees is the line every landfall row was decided against. That holds only
       # while the packed copy IS that geometry: this decodes it through the browser's accessor and
@@ -644,6 +674,27 @@ jobs:
 
       - name: Verify every state holds at every breakpoint the ladder names
         run: node scripts/check-responsive-matrix.mjs --require-browser
+
+      # MAP ↔ EVIDENCE, AS ONE CLAIM. Holding a row of the answer draws THAT ROW'S storms on the
+      # plate, and the lens is the one place a published NUMBER and a set of drawn TRACKS claim to
+      # be the same thing. Three ways that can be false and a screenshot shows none of them: the
+      # set could be re-derived by the renderer (asserted numerically, row by row, against the
+      # numerator the ladder printed), the hold could publish (the URL, the question, the cohort
+      # and every figure are captured either side and required identical), or it could fail to
+      # come back (release is asserted as an exact restore of the plate, the camera and the
+      # drawn population).
+      - name: Verify the plate lifts exactly what the answer counted
+        run: node scripts/check-atlas-lens.mjs --require-browser
+
+      # AND THAT THE INSTRUMENT ANSWERS WITHOUT A POINTER. The primary gesture of this surface is
+      # a click on the ocean; every word on the page was already reachable by keyboard and the one
+      # thing the page is FOR was not. The reticle turns the arrows into a crosshair -- Leaflet's
+      # pan is given back on Escape -- and this drives it with keys alone: Tab reaches every
+      # control and each is named, aria-pressed tracks every held state, the arrows move the
+      # crosshair while the map stays still, the literal cell count follows it, a polite live
+      # region says what is under it, and Enter does exactly what a click does.
+      - name: Verify the instrument answers the keyboard
+        run: node scripts/check-atlas-a11y.mjs --require-browser
 
       - name: Verify the terminal's panels refuse on screen, not just in the engine
         run: node scripts/check-panel-dom.mjs --require-browser

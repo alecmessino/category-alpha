@@ -1,9 +1,11 @@
 /* The plate's cartographic ink: the archive's own coastline, and the graticule under it.
  *
- * TWO TIERS, AND THE DIFFERENCE IS A STATEMENT. Everything the tile layer draws is context --
- * South America, Africa, Canada, the detail this archive's landfall rule never looks at. The
- * five modelled regions are drawn HERE, from the archive's own rings, at full contrast. That
- * contrast difference is not decoration: it says where a landfall can be detected at all.
+ * TWO TIERS, AND THE DIFFERENCE IS A STATEMENT. The CONTEXT tier is Natural Earth 1:110m land
+ * -- South America, Africa, Canada, the detail this archive's landfall rule never looks at --
+ * packed with the archive (scripts/build-atlas-context.mjs) and drawn here at contextual ink,
+ * in place of the third-party tile service the plate used to fetch. The five modelled regions
+ * are drawn over it, from the archive's own rings, at full contrast. That contrast difference
+ * is not decoration: it says where a landfall can be detected at all.
  *
  * COAST AND BORDER ARE DIFFERENT LINES. The source is admin-1, so Texas and Louisiana share an
  * edge and California meets the Pacific along one. An edge in two rings is interior to the land
@@ -32,6 +34,11 @@ export const PLATE_INK = {
   borderWidth: 0.5,
   coast: "#7590a6",
   coastWidth: 1.25,
+  /* The context tier sits one tone above the plate and its coast is a hairline: legible as a
+     silhouette, never mistakable for the modelled rings drawn over it. */
+  contextLand: "#161c23",
+  contextCoast: "#2c3744",
+  contextCoastWidth: 0.7,
 };
 
 export const CoastlineLayer = AtlasLayer.extend({
@@ -50,15 +57,23 @@ export const CoastlineLayer = AtlasLayer.extend({
     return this;
   },
 
+  /** The decoded context pack (Natural Earth 110m land), or null while it is still arriving.
+      NAMED `_land`, NOT `_ctx`: the base layer keeps the canvas 2D context on `this._ctx`, and a
+      pack stored there replaces it -- every subsequent _paint throws on ctx.setTransform and the
+      whole plate stops re-measuring. */
+  setContext(pack) {
+    this._land = pack;
+    this.redraw();
+    return this;
+  },
+
   loaded() {
     return !!this._c;
   },
 
   draw(ctx, view) {
     this._graticule(ctx, view);
-    const c = this._c;
-    if (!c) return;
-    const { scale, ox, oy, width, height } = view;
+    const { scale, ox, width } = view;
 
     /* Which world copies are on screen. Every ring here sits well inside one world, so this is
        a cull and a wrap rather than the tracks' antimeridian unwrapping. */
@@ -67,6 +82,24 @@ export const CoastlineLayer = AtlasLayer.extend({
       if ((0 + o) * scale - ox <= width + 32 && (1 + o) * scale - ox >= -32) offsets.push(o);
     }
 
+    /* THE CONTEXT TIER, UNDER EVERYTHING BUT THE GRATICULE. A silhouette fill and a hairline
+       coast, at inks one tone above the plate: enough to place the Gulf against Central America
+       and a recurving track against Newfoundland, too little to compete with the modelled rings
+       that follow. Where the two tiers overlap the modelled fill is opaque and wins. */
+    const x = this._land;
+    if (x) {
+      for (const o of offsets) {
+        const shift = o * scale;
+        const visible = this._visibleRings(view, shift, x);
+        if (!visible.length) continue;
+        this._fill(ctx, view, shift, visible, x, PLATE_INK.contextLand);
+        this._strokeRings(ctx, view, shift, visible, x, PLATE_INK.contextCoast,
+          PLATE_INK.contextCoastWidth);
+      }
+    }
+
+    const c = this._c;
+    if (!c) return;
     for (const o of offsets) {
       const shift = o * scale;
       const visible = this._visibleRings(view, shift);
@@ -83,8 +116,8 @@ export const CoastlineLayer = AtlasLayer.extend({
   },
 
   /** Ring indexes whose world-space box intersects the canvas at this world offset. */
-  _visibleRings(view, shift) {
-    const c = this._c;
+  _visibleRings(view, shift, pack = this._c) {
+    const c = pack;
     const { scale, ox, oy, width, height } = view;
     const out = [];
     const pad = 8;
@@ -100,11 +133,11 @@ export const CoastlineLayer = AtlasLayer.extend({
     return out;
   },
 
-  _fill(ctx, view, shift, rings) {
-    const c = this._c;
+  _fill(ctx, view, shift, rings, pack = this._c, ink = PLATE_INK.land) {
+    const c = pack;
     const { scale, ox, oy } = view;
     ctx.save();
-    ctx.fillStyle = PLATE_INK.land;
+    ctx.fillStyle = ink;
     ctx.beginPath();
     for (const r of rings) {
       const s = c.ringOffset[r];
@@ -119,6 +152,26 @@ export const CoastlineLayer = AtlasLayer.extend({
     /* Even-odd, because a lake or a lagoon arrives as a ring inside another ring and is water.
        Filling it as land would put coastline on the wrong side of the crossing rule. */
     ctx.fill("evenodd");
+    ctx.restore();
+  },
+
+  /* Every ring of a pack as one stroked path -- the context tier's coast, which carries no
+     coastal/border split because it has no interior borders to split from. */
+  _strokeRings(ctx, view, shift, rings, pack, ink, lineWidth) {
+    const c = pack;
+    const { scale, ox, oy } = view;
+    ctx.save();
+    ctx.strokeStyle = ink;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    for (const r of rings) {
+      const s = c.ringOffset[r];
+      const e = c.ringOffset[r + 1];
+      if (e - s < 2) continue;
+      ctx.moveTo(c.wx[s] * scale - ox + shift, c.wy[s] * scale - oy);
+      for (let k = s + 1; k < e; k++) ctx.lineTo(c.wx[k] * scale - ox + shift, c.wy[k] * scale - oy);
+    }
+    ctx.stroke();
     ctx.restore();
   },
 

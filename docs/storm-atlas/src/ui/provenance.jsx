@@ -164,9 +164,9 @@ export function ProvenanceDrawer({ archive, coast, open, onClose, frame }) {
                 ))}
               </div>
               <Note style={{ marginTop: 9 }}>
-                Everything outside these five regions is contextual basemap, held at a lower
-                contrast on purpose. That difference is a statement about where a landfall can be
-                detected at all.
+                Everything outside these five regions is Natural Earth 1:110m context, packed
+                with the archive and drawn from this origin, held at a lower contrast on purpose.
+                That difference is a statement about where a landfall can be detected at all.
               </Note>
             </>
           ) : (

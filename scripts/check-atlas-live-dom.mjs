@@ -184,6 +184,13 @@ const open = async () => {
   }, row);
   await page.evaluate((i) => globalThis.__ATLAS_SELECT(i), row);
   await page.waitForTimeout(1200);
+  /* THE STRIP IS THE PANEL'S DEFAULT AND THE RECORD IS ONE PRESS AWAY. A selected storm opens on
+     the minimum strip the locked rules ask for -- which record is speaking, what it recorded, and
+     the bridge -- and OPEN RECORD shows the track, landfall, environment and quality blocks this
+     gate reads. Pressed here so every assertion below is made against the same content it always
+     was; what changed is which screen a reader meets first, not what the panel holds. */
+  const open = await page.$("[data-open-record]");
+  if (open) { await open.click(); await page.waitForTimeout(500); }
   return { row, ...info };
 };
 

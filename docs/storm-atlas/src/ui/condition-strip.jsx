@@ -93,7 +93,11 @@ export function QuestionSentence({ segments = [], onEdit, onClear }) {
 function Clause({ seg, onEdit, onClear }) {
   const zone = ZONE_BY_KEY.get(seg.zone) || ZONES[0];
   const set = !!seg.key;
-  const open = onEdit ? () => onEdit(seg.zone) : undefined;
+  /* THE EDITOR OPENS ON THE CLAUSE THAT ASKED FOR IT. The element is handed up so the sheet can
+     anchor itself under the words it edits -- a map-independent control belongs to the question,
+     not to the plate, and an editor that opens in a fixed corner makes the reader find the
+     connection between what they pressed and what appeared. */
+  const open = onEdit ? (e) => onEdit(seg.zone, e.currentTarget) : undefined;
   return (
     <>
       <button type="button"
@@ -168,7 +172,7 @@ export function CohortLine({ kept, total, sufficient, minSample, conditions = []
         data-zone="scope" data-zone-edit="scope"
         data-zone-empty={scope.length ? undefined : ""}
         data-zone-hint={scope.length ? undefined : ""}
-        onClick={onEdit ? () => onEdit("scope") : undefined}
+        onClick={onEdit ? (e) => onEdit("scope", e.currentTarget) : undefined}
         title={`edit the record scope — ${scope.length ? scopeWords : ZONE_BY_KEY.get("scope").empty}`}>
         scope · {scopeWords}
       </button>
@@ -194,7 +198,7 @@ export function CohortLine({ kept, total, sufficient, minSample, conditions = []
             sheet, the same state and the same costs — one more door, not one more control. */}
         {onEdit ? (
           <button type="button" className="at-cohort-add" data-add-condition
-            onClick={() => onEdit("given")}
+            onClick={(e) => onEdit("given", e.currentTarget)}
             title="add a condition — the same editor every clause above opens">
             + condition
           </button>
