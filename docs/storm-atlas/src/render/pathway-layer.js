@@ -31,6 +31,9 @@ export const PathwayLayer = AtlasLayer.extend({
     alphaFloor: 0.11,
     alphaSpan: 0.46,
     alphaGamma: 0.55,
+    /* With a storm selected the surface is context under a subject: every cell's alpha is
+       multiplied by this, and nothing about the counts or the ramp changes. */
+    dimScale: 0.42,
   },
 
   /** density: Map of "lat,lon" (cell south-west corner) -> distinct storms through that cell */
@@ -45,6 +48,14 @@ export const PathwayLayer = AtlasLayer.extend({
 
   peak() {
     return this._peak || 0;
+  },
+
+  setDimmed(on) {
+    const v = !!on;
+    if (this._dim === v) return this;
+    this._dim = v;
+    this.redraw();
+    return this;
   },
 
   /** The cell under the pointer or the keyboard reticle, as a "lat,lon" key, or null. Drawn as
@@ -76,7 +87,8 @@ export const PathwayLayer = AtlasLayer.extend({
       const y1 = b.wy * scale - oy;
       if (x1 < 0 || y1 < 0 || x0 > width || y0 > height) continue;
       const o = this.options;
-      const alpha = o.alphaFloor + o.alphaSpan * Math.pow(n / peak, o.alphaGamma);
+      const alpha = (o.alphaFloor + o.alphaSpan * Math.pow(n / peak, o.alphaGamma))
+        * (this._dim ? o.dimScale : 1);
       ctx.fillStyle = `rgba(${this.options.hue}, ${alpha.toFixed(4)})`;
       ctx.fillRect(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
     }

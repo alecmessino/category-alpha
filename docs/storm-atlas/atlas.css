@@ -739,6 +739,8 @@
   border-bottom:1px solid var(--rule-2);
 }
 [data-atlas] .at-mapnav a:last-child{border-bottom:0}
+/* RETICLE, PRESSED: the plate's own accent as a rule on the control's map-facing edge. */
+[data-atlas] .at-mapnav a[aria-pressed="true"]{color:var(--t1);box-shadow:inset 2px 0 0 var(--plate-accent)}
 /* ON-PLATE, DARK IN BOTH SHELLS -- see the exemption list in check-atlas-adherence.mjs. */
 [data-atlas] .at-mapnav a:hover{background:#1d2836;color:#fff}
 [data-atlas] .at-mapnav a:focus-visible{outline:1px solid var(--accent);outline-offset:1px}
@@ -783,7 +785,7 @@
   position:absolute;right:12px;bottom:calc(var(--at-plate-gutter) + 22px);
   max-width:376px;z-index:450;pointer-events:none;
   display:flex;flex-direction:column;gap:6px;
-  background:rgba(15,21,31,.94);border:1px solid var(--rule-2);padding:8px 10px;
+  background:rgba(15,21,31,.94);padding:8px 10px;
 }
 [data-atlas] .at-legend .at-lrow{
   display:flex;gap:8px;align-items:center;font-family:var(--font-mono);font-size:9.5px;
@@ -799,11 +801,15 @@
    Atlantic, above the band -- and the rule mirrors to the edge facing the map so the ribbon
    still reads as hanging off the frame. The gutter each side keeps it clear of the zoom
    control at every supported plate width. */
+/* AT THE PLATE'S LEFT, PAST THE GRATICULE'S LABEL COLUMN, NOT CENTRED. Centred it set three
+   ragged lines over the top of the Atlantic; ranged left it sets two, like the caption under
+   the plate, the latitude labels keep their own margin, and the camera controls at the opposite
+   corner are never in its way. */
 [data-atlas] .at-invite{
-  position:absolute;left:50%;top:14px;transform:translateX(-50%);text-align:center;z-index:450;
+  position:absolute;left:56px;top:12px;text-align:left;z-index:450;
   pointer-events:none;font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.1px;
-  color:var(--t2);text-transform:uppercase;background:rgba(14,20,30,.9);padding:6px 14px;
-  border-bottom:1px solid var(--rule-3);max-width:calc(100% - 96px);
+  line-height:1.5;color:var(--t2);text-transform:uppercase;background:rgba(14,20,30,.9);
+  padding:6px 12px 7px;border-bottom:1px solid var(--rule-3);max-width:min(58%,430px);
 }
 /* ON-PLATE, DARK IN BOTH SHELLS. */
 [data-atlas] .at-invite em{font-style:normal;color:#fff}
@@ -1140,9 +1146,18 @@
 @container plate (max-width:1100px){
   [data-atlas] .at-plate-hint{display:none}
 }
-@container plate (max-width:910px){
+@container plate (max-width:600px){
   [data-atlas] .at-plate-proj{display:none}
 }
+/* THE STROKE NOTE IS THE FOOT'S LOWEST-PRIORITY ITEM, and it goes whole rather than to an
+   ellipsis: swatches 285, note 175, the measure 190 and two gaps ask 676; with the echo or the
+   cell readout in the slot between them the note yields to it, since both are the same line's
+   reading aid for what the plate is showing. */
+@container plate (max-width:690px){
+  [data-atlas] .at-classkey-major{display:none}
+}
+[data-atlas] .at-platefoot:has(.at-plate-lens) .at-classkey-major,
+[data-atlas] .at-platefoot:has(.at-plate-cellread:not(:empty)) .at-classkey-major{display:none}
 /* PLATE NOTES SURVIVES WHERE THE PROSE IT REPLACED DID NOT, and that is the point of folding it:
    a 370px sentence had to be dropped at 680 to keep the scale bar, whereas an 11-character
    summary costs almost nothing and the sentence behind it is reachable at every width. What is
@@ -1154,7 +1169,7 @@
 @container plate (max-width:600px){
   [data-atlas] .at-plate-notes{display:none}
 }
-@container plate (max-width:690px){
+@container plate (max-width:600px){
   [data-atlas] .at-plate-title{display:none}
 }
 /* THE LIVE FIGURE OUTLIVES THE CONSTANTS. The head band carried a plate title, the drawn/lifted
@@ -1162,9 +1177,11 @@
    query, and the number a reader uses to check that the map and the panel are describing the
    same cohort -- were the part that clipped, while two fixed strings survived intact. The mode
    is also stated on the rail's own EXPLORE / REPLAY control, so it is the recoverable one. */
-@container plate (max-width:780px){
+@container plate (max-width:770px){
   [data-atlas] .at-platehead .at-r{display:none}
-  [data-atlas] .at-plate-cellread{display:none}
+}
+@container plate (max-width:700px){
+  [data-atlas] .at-plate-cellread,[data-atlas] .at-plate-lens{display:none}
 }
 
 @media (max-width:1040px){
@@ -2150,10 +2167,18 @@
 [data-atlas].atlas-instrument .atlas-stage-col{
   grid-column:1;grid-row:1;
   display:flex;flex-direction:column;min-width:0;min-height:0;
+  /* THE CAPTION APPARATUS QUERIES THE COLUMN IT IS SET IN. The head, the foot and Figure 1 are
+     the stage's SIBLINGS -- the stage wraps exactly the plate -- so a `@container plate` query
+     written on any of them resolved to no container at all and never matched: the aperture and
+     the stroke note were not giving way at the widths the ladder names, they were being clipped.
+     The column is the plate's width wherever the two share a row, which is every layout the
+     ladder measures, and the on-plate rules keep resolving to the stage, their nearer container. */
+  container:plate / inline-size;
 }
 /* THE PLATE HEAD IS RESERVED TWO LINES, AND THAT RESERVATION IS THE APERTURE INVARIANT.
-   It prints the cohort count and the context count -- "306 COHORT · 3,885 CONTEXT" -- so a
-   condition lengthens it, and below 1280 it takes a second line. The plate is what is left of
+   It used to print the cohort count and the context count -- "306 COHORT · 3,885 CONTEXT" -- so a
+   condition lengthened it, and below 1280 it took a second line; the counts have since moved to
+   the cohort line and the caption, but the reservation is kept, because it is the invariant. The plate is what is left of
    the band after the figure's chrome, so an unreserved head means a CONDITION CHANGES THE MAP'S
    HEIGHT: measured at 1220, 288px of plate unconditioned against 272px with a genesis radius
    set, with the reader's hands nowhere near the camera. check-atlas-stability is what caught it.
@@ -2378,9 +2403,12 @@
   font-family:var(--font-mono);font-size:var(--at-t-stamp);letter-spacing:1.2px;
   color:var(--t3);padding-bottom:3px;line-height:1.45;
 }
+/* A WORD, NOT A PILL. The sample gate is a registry state and it is printed in the registry's
+   one ink at stamp size; a border around it made it the only boxed word on the answer, and a
+   box on a line that already ends in a 2px rule is chrome saying what the rule says. */
 [data-atlas] .at-ans-state{
   margin-left:auto;font-family:var(--font-mono);font-size:var(--at-t-stamp);letter-spacing:1.2px;
-  color:var(--t1);border:1px solid var(--rule-2);padding:3px 6px;white-space:nowrap;
+  color:var(--t1);padding-bottom:3px;white-space:nowrap;
 }
 /* TWO OR THREE LINES, AND EVERY CLAUSE IN THEM IS COUNTED. See synthesise() -- this is the one
    place on the surface that says something ABOUT the rows rather than printing them. */
@@ -3025,7 +3053,12 @@
   min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;
 }
 [data-atlas] .at-platehead em,[data-atlas] .at-platefoot em{font-style:normal;color:var(--t2)}
-[data-atlas] .at-plate-title{color:var(--t1);flex:none}
+/* THE HEAD'S THREE ITEMS DO NOT SHRINK; THEY GIVE WAY WHOLE, BELOW. `.at-platehead > span`
+   lets a span ellipsise, which is right for a count and wrong for a control: the third mode was
+   losing its last letters. Measured with Plex Mono at the head's step: title 277, modes 287,
+   aperture 178, two gaps -- 768 with everything, 590 without the aperture. */
+[data-atlas] .at-platehead > .at-plate-title{color:var(--t1);flex:none}
+[data-atlas] .at-platehead > .at-plate-modes{flex:none;margin-left:0}
 [data-atlas] .at-plate-counts{flex:0 1 auto;min-width:0}
 [data-atlas] .at-plate-mode{color:var(--flag);flex:none}
 
@@ -3067,24 +3100,25 @@
 /* WHAT IS HELD, ON THE PLATE'S OWN FOOT. The held row's already-published figures, echoed --
    the plate computes nothing here. It sits with the class key because it is a reading aid for
    the ink above it, and it gives up its own words before the key does. */
+/* IT IS NEVER CUT: an echo that ellipsises inside a figure has echoed a different figure. It
+   gives way whole -- to the cell readout while the pointer is on a cell, and below the width
+   at which it fits beside the key and the measure. */
 [data-atlas] .at-plate-lens{
   font-family:var(--at-mono);font-size:var(--at-t5);letter-spacing:1px;color:var(--t2);
-  flex:0 1 auto;min-width:0;max-width:34%;overflow:hidden;text-overflow:ellipsis;
+  flex:none;white-space:nowrap;
 }
+/* THE SLOT'S PRIORITY: a held row or a brushed rectangle is a deliberate gesture and its count
+   is the result of it, so it outranks the cell under a pointer that merely happens to be on the
+   plate; a row that is only hovered does not. */
+[data-atlas] .at-platefoot:has(.at-plate-cellread:not(:empty)) .at-plate-lens:not([data-lens-held]){display:none}
+[data-atlas] .at-platefoot:has(.at-plate-lens[data-lens-held]) .at-plate-cellread{display:none}
 [data-atlas] .at-plate-lens em{font-style:normal;color:var(--t1)}
 
 /* ─── the keyboard's hands on the plate ───────────────────────────────────────────────────
  *
  * The map's primary gesture is a click on the ocean, and a control only a pointer can reach is
  * not a control. RETICLE turns the arrow keys into a crosshair; Enter does what a click does.
- * It is a button on the plate's own foot, in the tab order, with a pressed state. */
-[data-atlas] .at-reticle-btn{
-  font-family:var(--at-mono);font-size:var(--at-t5);letter-spacing:1.1px;color:var(--t3);
-  background:transparent;border:1px solid var(--rule-2);padding:2px 7px;cursor:pointer;flex:none;
-}
-[data-atlas] .at-reticle-btn:hover{color:var(--t2);border-color:var(--rule-3)}
-[data-atlas] .at-reticle-btn[aria-pressed="true"]{color:var(--t1);border-color:var(--accent)}
-[data-atlas] .at-reticle-btn:focus-visible{outline:1px solid var(--accent);outline-offset:1px}
+ * The control itself is the third item of the camera bar (`.at-mapnav`, above). */
 /* THE CROSSHAIR ITSELF, on the plate, where the pointer's cursor would be. Drawn in the plate's
    own accent so it reads as an instrument's reticle rather than as a finding. */
 [data-atlas] .at-reticle{
@@ -3147,7 +3181,7 @@
    echo is a reading aid for a row whose figures are already published two feet to the right; it
    ellipsises, and the key stays whole. The stroke NOTE beside it keeps its own truncation,
    because a note is prose and a swatch is a class. */
-[data-atlas] .at-classkey{
+[data-atlas] .at-classkey,[data-atlas] .at-platefoot > .at-classkey{
   display:flex;align-items:center;gap:9px;flex:none;min-width:0;overflow:hidden;
 }
 [data-atlas] .at-classkey-item{display:flex;align-items:center;gap:5px;flex:none;color:var(--t3)}

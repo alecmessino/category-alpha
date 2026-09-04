@@ -849,7 +849,7 @@ export function Atlas() {
           band. No tutorial, no dismissal to remember, and nothing that has to be earned --
           the two states are just the two things that are true. */}
       {mode === "explore" && !interacted && !conditionsOf(cohort).length && selected === null
-        ? <Invitation clear={showPathway || showGenesisDensity} /> : null}
+        ? <Invitation /> : null}
       <Legend colorBy={layers.colorBy} showPathway={showPathway} probe={!!cohort.where}
         showGenesisDensity={showGenesisDensity} />
     </AtlasMap>
@@ -1448,26 +1448,18 @@ function Header({ archive, onProvenance, onLedger }) {
 }
 
 /* The one instruction the surface gives, placed where the gesture happens. */
-function Invitation({ clear = false }) {
+function Invitation() {
+  /* THE STYLESHEET'S OWN PLACEMENT, AT THE HEAD OF THE PLATE. atlas.css declares `.at-invite`
+     -- top-centred, hanging off the head rule, with the gutter that keeps it clear of the
+     camera controls -- and records why: at the foot the instruction landed on the longitude
+     labels, the attribution and the density legend, and centred over the band it sat on the
+     Gulf of Mexico, which is the one stretch of water a reader of this plate looks at first.
+     The head of the plate is empty at rest. The component used to restate all of this inline,
+     as a bordered, rounded box, and the rule sat dead beside it. */
   return (
-    <div style={{
-      /* ABOVE THE DENSITY LEGEND WHEN THERE IS ONE, and the measurement is why the number is 96
-         rather than a guess: at 1440 the legend's two lines run from 38px to 98px off the plate's
-         foot and reach the middle of its width, so a centred instruction at the old 26px sat
-         underneath it. 112 clears the legend's own top with a line's gap. The legend is the sentence that stops the shading being read as a
-         forecast; the instruction retires itself on the first gesture, so it is the one that
-         moves. */
-      position: "absolute", left: "50%", bottom: clear ? 112 : 26, transform: "translateX(-50%)",
-      pointerEvents: "none", zIndex: 450, textAlign: "center",
-    }}>
-      <div style={{
-        ...MONO, fontSize: "var(--fs-mono-sm)", color: "var(--text-1)",
-        background: "rgba(7,12,22,.82)", border: "1px solid var(--border-strong)",
-        borderRadius: "var(--radius-sm)", padding: "7px 14px",
-        letterSpacing: "var(--track-label)",
-      }}>
-CLICK ANY OCEAN POINT — what formed there, and where it went · CLICK A GENESIS POINT for one storm
-      </div>
+    <div className="at-invite" data-invitation>
+      <em>Click any ocean point</em> — what formed there, and where it went ·{" "}
+      <em>click a genesis point</em> for one storm
     </div>
   );
 }

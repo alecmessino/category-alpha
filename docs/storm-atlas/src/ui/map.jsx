@@ -257,6 +257,11 @@ export function AtlasMap({
    *
    * Held in container pixels, because that is what both the hit test and the projection take. */
   const [reticle, setReticle] = React.useState(null);
+  const reticleBtn = React.useRef(null);
+  /* The control is Leaflet's DOM, not React's, so its pressed state is written to it. */
+  React.useEffect(() => {
+    if (reticleBtn.current) reticleBtn.current.setAttribute("aria-pressed", reticle ? "true" : "false");
+  }, [reticle]);
   const [dragBox, setDragBox] = React.useState(null);
 
   /* THE CAMERA'S TWO BITS OF MEMORY.
@@ -374,6 +379,20 @@ export function AtlasMap({
       mk("HOME", "the canonical North Atlantic + East Pacific aperture (H)",
         "data-camera-home", () => goHome());
       mk("FIT", "frame the evidence currently drawn (F)", "data-camera-fit", () => goFit());
+      /* THE KEYBOARD'S WAY ONTO THE PLATE, WITH THE OTHER TWO WAYS OF DRIVING IT. The gesture
+         this surface is built on is a click on the map; without this the keyboard could reach
+         every word on the page and not the one thing it is for. It is a real control in the
+         tab order, it carries aria-pressed, and it sits with HOME and FIT rather than on the
+         foot, because it drives the plate and the foot reads it. */
+      const ret = mk("RETICLE",
+        "move a crosshair with the arrow keys; Enter does what a click does — opens a storm under it, or asks what formed at that point. Escape gives the arrows back to the map.",
+        "data-reticle-toggle", () => setReticle((r) => {
+          if (r) return null;
+          const s = map.current ? map.current.getSize() : { x: 400, y: 300 };
+          return { x: Math.round(s.x / 2), y: Math.round(s.y / 2) };
+        }));
+      ret.setAttribute("aria-pressed", "false");
+      reticleBtn.current = ret;
       L.DomEvent.disableClickPropagation(box);
       return box;
     };
@@ -623,6 +642,17 @@ export function AtlasMap({
     layers.current.population.setEmphasis(emphasis);
   }, [ready, emphasis]);
 
+  /* WITH A STORM SELECTED THE COUNTS BECOME CONTEXT, LIKE THE TRACKS UNDER THEM. The subject is
+     one dashed line over a shaded ocean; at the zoom the camera takes to frame it a 2° cell is
+     a slab, and the cohort's own cells are its brightest. The layer's alpha is scaled -- the
+     counts, the peak and the ramp are untouched -- so the reading stays literal and the subject
+     is the thing the eye finds first. */
+  React.useEffect(() => {
+    if (!ready) return;
+    layers.current.pathwayLayer.setDimmed(!!dimPopulation);
+    layers.current.genesisLayer.setDimmed(!!dimPopulation);
+  }, [ready, dimPopulation]);
+
   /* THE HELD ROW'S OWN STORMS. The rows arrive from the engine through the shell; this layer is
      told which to lift and never asks what the contract means. */
   React.useEffect(() => {
@@ -866,18 +896,17 @@ export function AtlasMap({
           first drag. */}
       <div className="at-platehead">
         <span className="at-plate-title">PLATE 1 · NORTH ATLANTIC + EAST PACIFIC</span>
-        <span className="at-plate-counts">
-          {mode === "replay" ? (
-            <><em>{kept.toLocaleString()}</em> IN THIS RUN</>
-          ) : (
-            <>
-              <em>{kept.toLocaleString()}</em> COHORT
-              {context && context !== kept
-                ? <> · <em>{context.toLocaleString()}</em> CONTEXT</> : null}
-              {selectedCount ? <> · <em>{selectedCount}</em> SELECTED</> : null}
-            </>
-          )}
-        </span>
+        {/* THE HEAD NAMES THE PLATE, ITS READING AND ITS APERTURE -- AND NOTHING THE PAGE HAS
+            ALREADY SAID. The cohort count used to sit here too, and with the mode segment
+            beside it the line clipped at 1440: the region name lost its second basin and the
+            third mode fell off the end. The count is the cohort line's, thirty pixels above,
+            and Figure 1's, directly below; the context count now travels with the caption,
+            which is the sentence that explains what the fainter ink is. Replay is the one state
+            the head still counts, because there the number is the run's and nothing else on the
+            page states it. */}
+        {mode === "replay" ? (
+          <span className="at-plate-counts"><em>{kept.toLocaleString()}</em> IN THIS RUN</span>
+        ) : null}
         {/* THE ONE STATE THE LINE STILL NAMES, and it is not atmosphere: in replay the static
             population is deliberately withheld, so a plate that looks empty is correct and a
             reader has to be told which of the two things they are looking at. */}
@@ -946,21 +975,6 @@ export function AtlasMap({
             row's ALREADY-PUBLISHED figures and computes nothing: the label, the numerator and
             the denominator here are the ones the ladder printed, carried across. It is the one
             line that says, in human words, what the lifted ink is. */}
-        {/* THE KEYBOARD'S WAY ONTO THE PLATE, AND IT IS A REAL BUTTON IN THE TAB ORDER. The
-            gesture this surface is built on is a click on the map; without this the keyboard
-            could reach every word on the page and not the one thing it is for. */}
-        {onProbe ? (
-          <button type="button" className="at-reticle-btn" data-reticle-toggle
-            aria-pressed={reticle ? "true" : "false"}
-            title="move a crosshair with the arrow keys; Enter does what a click does — opens a storm under it, or asks what formed at that point. Escape gives the arrows back to the map."
-            onClick={() => setReticle((r) => {
-              if (r) return null;
-              const s = map.current ? map.current.getSize() : { x: 400, y: 300 };
-              return { x: Math.round(s.x / 2), y: Math.round(s.y / 2) };
-            })}>
-            RETICLE
-          </button>
-        ) : null}
         {/* WHAT THE CROSSHAIR IS OVER, FOR A READER WHO CANNOT SEE THE BAND CHANGE. Polite, and
             written only when the reticle itself moves. */}
         <span className="at-sr-only" id="at-plate-live" data-plate-live aria-live="polite" />
@@ -974,15 +988,16 @@ export function AtlasMap({
             {lens.held ? " · HELD" : null}
           </span>
         ) : null}
+        {/* THE CELL UNDER THE POINTER, AS A LITERAL COUNT. The density surface shades by
+            pow(c/max) so the eye can read structure across a cohort; what a reader must be able
+            to check is the COUNT itself, and this prints it -- "CELL 12°N 40°W · 37 of 514
+            through" -- for whichever cell the pointer or the keyboard reticle is on. A shaded
+            cell whose count cannot be read is a probability surface wearing a legend. It shares
+            the foot's one readout slot with the echo above: while the pointer is on a cell the
+            cell is what is being read, and the held row is still lit in the ladder. */}
+        <span className="at-plate-cellread" id="at-cell" data-cell-readout></span>
         <span className="at-plate-measure">
           <ScaleBar frame={frame} />
-          <span className="at-plate-proj">MERCATOR · TICKS 10° / 5°</span>
-          {/* THE CELL UNDER THE POINTER, AS A LITERAL COUNT. The density surface shades by
-              pow(c/max) so the eye can read structure across a cohort; what a reader must be able
-              to check is the COUNT itself, and this prints it -- "12°N 40°W · 37 of 514 storms"
-              -- for whichever cell the pointer or the keyboard reticle is on. A shaded cell
-              whose count cannot be read is a probability surface wearing a legend. */}
-          <span className="at-plate-cellread" id="at-cell" data-cell-readout>—</span>
           <span className="at-r"><em id="at-coords">—</em></span>
         </span>
       </div>
@@ -1026,8 +1041,8 @@ export function AtlasMap({
               ? <>The {kept.toLocaleString()} storms in this cohort; the dashed circle is
                   the {Math.round(probe.radiusKm).toLocaleString()} km condition.</>
               : context && context !== kept
-                ? <>The {kept.toLocaleString()} storms in this cohort, over the archive behind
-                    them.</>
+                ? <>The {kept.toLocaleString()} storms in this cohort, over
+                    the {context.toLocaleString()} of the archive drawn behind them.</>
                 : <>The {kept.toLocaleString()} storms in the archive cohort.</>}
           {hasArchiveCoast ? null : (
             <>{" "}<b className="at-plate-model" data-coastline-degraded>
@@ -1041,6 +1056,10 @@ export function AtlasMap({
           {hint ? <span className="at-plate-hint">{" "}{hint}</span> : null}
         </p>
         <span className="at-plate-acts">
+          {/* THE PROJECTION IS A FACT ABOUT THE FIGURE, NOT A READING OF IT, so it sits on the
+              figure line with PLATE NOTES rather than on the foot with the key and the measure.
+              On the foot it was the item that pushed the stroke note off the line at 1440. */}
+          <span className="at-plate-proj">MERCATOR · GRATICULE 10° / 5°</span>
           {hasArchiveCoast ? (
             <details className="at-plate-notes" data-plate-notes>
               <summary title="what this plate draws, and from which geometry">PLATE NOTES</summary>
@@ -1126,7 +1145,10 @@ function readCell(lat, lon, cells, layers) {
   const layer = cells.kind === "pathway" ? layers.pathwayLayer
     : cells.kind === "genesis" ? layers.genesisLayer : null;
   if (lat === null || !cells.density || !layer) {
-    if (node) node.textContent = "—";
+    /* NOTHING UNDER THE POINTER PRINTS NOTHING. The coordinate beside it keeps its dash --
+       that is the geometry rule's own sign for "outside the aperture" -- and a second dash for
+       a cell that is not being asked about was two placeholders where the line needed none. */
+    if (node) node.textContent = "";
     if (layers.pathwayLayer) layers.pathwayLayer.setHover(null);
     if (layers.genesisLayer) layers.genesisLayer.setHover(null);
     return;

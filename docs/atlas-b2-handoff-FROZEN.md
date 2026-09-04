@@ -117,6 +117,20 @@
 >    takes `#8ea3b8` so nothing outside the plate competes with it, and the probe ring keeps the
 >    cyan as `--plate-accent`.
 >
+> **An editorial pass followed the correctness pass**, reviewed at 1440×900 and at US Letter
+> landscape (1056×816), both at 100%, against one question: with the branding removed, would
+> this still read as an art-directed research publication? What it changed, none of it a number:
+> the plate head names the plate, its reading and its aperture and nothing the cohort line
+> above it already says (the context count moved into Figure 1's sentence); the projection
+> moved from the foot to the figure line beside PLATE NOTES; RETICLE joined HOME and FIT on the
+> camera bar, since it drives the plate and the foot reads it; the foot keeps one readout slot,
+> the cell under the pointer or the row that is held, and neither is ever ellipsised inside a
+> figure; the caption apparatus now actually queries the plate's width (its container rules had
+> been resolving to nothing, so items were clipped where they should have given way); the
+> invitation uses the stylesheet's own placement at the head of the plate rather than an inline
+> box over the Gulf; the sample gate is a word rather than a pill; the density legend lost its
+> border; and with a storm selected the count surfaces dim under it the way the tracks do.
+
 > **PR 2 onward of the design document below has not been started.**
 
 ## Two authorities

@@ -6,7 +6,12 @@
  * canonical 1440x900. A screenshot taken by hand is a screenshot of whatever happened to be on
  * screen that afternoon.
  *
- * Run: node scripts/shoot-atlas.mjs [--out docs/storm-atlas/shots]
+ * Run: node scripts/shoot-atlas.mjs [--out DIR] [--viewport 1440x900] [--scale 2]
+ *
+ * `--scale 1` photographs the surface at 100%: every pixel in the file is one CSS pixel, so type
+ * and rule weights are judged at the size a reader actually meets them, not at a 2x that
+ * flatters both. `--viewport 1056x816` is US Letter landscape at 96 dpi, the frame the renders
+ * are reviewed against on paper.
  */
 import { createServer } from "node:http";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -20,6 +25,9 @@ const DOCS = join(ROOT, "docs");
    from this script at any commit, ignored by git, and handed to a reviewer directly. */
 const outArg = process.argv.indexOf("--out");
 const OUT = outArg > 0 ? resolve(process.argv[outArg + 1]) : join(ROOT, ".atlas-shots");
+const argOf = (flag, dflt) => { const i = process.argv.indexOf(flag); return i > 0 ? process.argv[i + 1] : dflt; };
+const [VW, VH] = argOf("--viewport", "1440x900").split("x").map(Number);
+const SCALE = Number(argOf("--scale", "2"));
 
 const { chromium } = await import("playwright");
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".css": "text/css",
@@ -39,8 +47,8 @@ const server = await new Promise((r) => {
 });
 const port = server.address().port;
 const browser = await chromium.launch();
-const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 },
-  deviceScaleFactor: 2, serviceWorkers: "block" });
+const ctx = await browser.newContext({ viewport: { width: VW, height: VH },
+  deviceScaleFactor: SCALE, serviceWorkers: "block" });
 /* Hermetic, like every gate: the surface is drawn from this origin alone, and a shot that
    depended on a font CDN would be a shot of a page nobody serves. */
 for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**", "**basemaps.cartocdn.com**"]) {
@@ -60,7 +68,7 @@ const shot = async (name) => {
   console.log(`  ${name.padEnd(22)} ${file}`);
 };
 
-console.log("\n[shots] the six states, at 1440x900");
+console.log(`\n[shots] the six states, at ${VW}x${VH} @${SCALE}x`);
 
 /* 1 · RESTING. Pathway counts over the archive, which is what the plate now rests on. */
 await open();
