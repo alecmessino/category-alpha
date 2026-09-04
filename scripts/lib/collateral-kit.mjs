@@ -363,6 +363,65 @@ a.replay{display:inline-block;font-family:var(--font-mono);font-size:var(--t-det
 .cite .khead{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin-bottom:1px}
 .cite .khead .k{margin:0}
 .cite .raw b{color:var(--ink-600);font-weight:600;letter-spacing:.4px}
+/* THE MEMBER TIMELINE. A figure set between two rules, not a box: it reads as a table would. */
+.tl-fig{border-top:1px solid var(--ink-900);border-bottom:1px solid var(--line-300);padding:2px 0 1px;margin:2px 0 0}
+.tl-fig svg{display:block}
+.tl-legend{display:flex;flex-wrap:wrap;gap:1px var(--sp-4);padding:1px 0 0;font-family:var(--font-mono);font-size:var(--t-detail);
+  letter-spacing:.3px;color:var(--ink-600);line-height:1.3}
+.tl-legend i{display:inline-block;vertical-align:-1px;margin-right:4px}
+.tl-legend .o{width:7px;height:7px;border-radius:50%;background:#fff;border:1.2px solid var(--ink-900)}
+.tl-legend .f{width:7px;height:7px;border-radius:50%;background:#5b6b80}
+.tl-legend .d{width:6px;height:6px;background:var(--ink-900);transform:rotate(45deg);margin-right:5px}
+.tl-legend .up{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid #5b6b80}
+.tl-legend .dn{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:7px solid #5b6b80}
+.tl-legend .sw{width:9px;height:7px;border-radius:1px}
+.figcap{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-600);margin:0 0 1px}
+/* THE JOINT MATRIX. Margins carry the published rows; the interior is drawn as what it is. */
+.joint{display:grid;grid-template-columns:148px minmax(0,1fr) minmax(0,1fr);gap:1.5px;margin-top:1px}
+.joint .jc{font-family:var(--font-mono);font-size:var(--t-detail);line-height:1.2;color:var(--ink-600)}
+.joint .head{padding:1px 3px 2px;display:flex;flex-direction:column;justify-content:flex-end}
+.joint .head.col{text-align:center;align-items:center;border-bottom:1px solid var(--ink-900)}
+.joint .head.row{text-align:right;align-items:flex-end;border-right:1px solid var(--ink-900);justify-content:center}
+.joint .head .t{font-family:var(--font-sans);font-weight:600;color:var(--ink-900);font-size:var(--t-detail);line-height:1.15}
+.joint .head .s{color:var(--ink-400)}
+.joint .head .m{margin-top:1px}
+.joint .head .m b{color:var(--ink-900)}
+.joint .head .ivl-glyph{margin-top:1px}
+.joint .head.not .t{color:var(--ink-400);font-weight:500}
+.joint .cell{min-height:22px;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px 5px;
+  border:1px dotted var(--line-300);border-radius:2px;color:var(--ink-400);letter-spacing:.2px}
+.joint .cell.void{border:1.5px dashed var(--red-600);color:var(--red-600);font-weight:700;letter-spacing:.3px;
+  background:repeating-linear-gradient(135deg,#fff5f5 0 4px,#fde7e7 4px 6px)}
+.jointnote{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);line-height:1.28;margin-top:3px}
+.jointnote b{color:var(--ink-900)}
+/* THE WIND AXIS beneath the matrix: the archive's two landfall cuts against the contract's. */
+.axis{margin-top:2px}
+.grid2.matrixleft{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr)}
+.axis svg{display:block}
+/* THE BRIDGE, AS RULES. Three columns, hairlines between rows, a verdict that is a coloured
+   word with a rule beside it -- not nine boxes. */
+.bridge2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,.86fr);column-gap:var(--sp-5);margin-top:2px}
+.bridge2 .col-h{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.9px;text-transform:uppercase;color:var(--ink-600);
+  padding-bottom:2px;border-bottom:1px solid var(--ink-900)}
+.bridge2 .col-h .ar{color:var(--ink-400);margin-right:6px}
+.bridge2 .need,.bridge2 .hold,.bridge2 .verdict{padding:2px 0 3px;border-bottom:1px solid var(--line-200)}
+.bridge2 .need,.bridge2 .hold{font-size:var(--t-body);line-height:1.2;color:var(--ink-700)}
+.bridge2 .need b,.bridge2 .hold b{color:var(--ink-900)}
+.bridge2 .ref{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);margin-top:1px;line-height:1.2}
+.bridge2 .ref b{color:var(--ink-900)}
+.bridge2 .verdict{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+  color:var(--red-600);line-height:1.22;display:flex;align-items:flex-start}
+.bridge2 .verdict span{border-left:2px solid currentColor;padding-left:6px;display:block;margin-top:1px}
+.bridge2 .verdict.ok{color:var(--green-600)}
+/* One refusal box carrying two statements, each with its own lead. */
+.box .lead{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;color:var(--red-600);font-weight:600;margin-right:4px}
+.liveline{border-left:3px solid var(--blue-600);padding-left:6px}
+/* Three short statements read as three, not as one column of prose: two columns inside the box. */
+.box.cols2{column-count:2;column-gap:var(--sp-6)}
+.box.cols2 h3{column-span:all}
+.box.cols2 p{margin-bottom:2px}
+.box .src{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);line-height:1.25;margin-top:2px;border-top:1px dotted var(--line-300);padding-top:1px}
+.box .src b{color:var(--ink-900)}
 /* The raw replay string, kept in the provenance block for print at the legal size. */
 .cite .raw{display:block;font-family:var(--font-mono);font-size:var(--t-legal);color:var(--ink-400);
   word-break:break-all;line-height:1.25;margin-top:1px}
@@ -775,6 +834,197 @@ export function ruleFlow(steps) {
 /** A descriptive replay link: the label is what a reader sees, the exact URL is the target. */
 export function replayLink(sys, label) {
   return `<a class="replay" href="${esc(sys.replay_url)}" title="${esc(sys.replay_url)}">${esc(label)} ↗</a>`;
+}
+
+/* ---- THE MEMBER TIMELINE ----------------------------------------------------------------
+ *
+ * Twelve members on one hours-from-genesis axis. Three zones and no floating text: the member
+ * and its lifetime peak on the left; the plot; on the right, on the same line, what it did.
+ * Every mark is a value the manifest holds for that member -- hours_to_ts, hours_to_cat1,
+ * hours_to_cat3, and each recorded crossing at hours_from_genesis -- and a crossing is filled
+ * by the wind the archive holds for it. Beneath, on the same axis, the published quantiles,
+ * drawn as the five numbers they are. Nothing is smoothed and nothing is summed: a member with
+ * twelve recorded crossings shows twelve marks on one row, which is what a crossings-not-storms
+ * quantile counts. Every number a mark encodes is stamped on it as data-* for the gate. */
+const TLINK = { lo: "#b9c3d1", mid: "#5b6b80", hi: "#0f172a", none: "#94a3b8" };
+const CAT_SHORT = { td: "TD", ts: "TS", cat1: "Cat 1", cat2: "Cat 2", cat3: "Cat 3", cat4: "Cat 4", cat5: "Cat 5" };
+const SUB_ABBR = { Louisiana: "LA", Texas: "TX", Florida: "FL", Mississippi: "MS", Alabama: "AL", Tamaulipas: "TAM", Veracruz: "VER" };
+const ktInk = (kt) => (kt === null || kt === undefined ? TLINK.none : kt >= 96 ? TLINK.hi : kt >= 64 ? TLINK.mid : TLINK.lo);
+const stx = (x, y, txt, { anchor = "start", b = false, ink = "#475569", mono = true, fs = 10.1 } = {}) =>
+  `<text x="${(+x).toFixed(2)}" y="${(+y).toFixed(2)}" text-anchor="${anchor}" font-family="${mono
+    ? "IBM Plex Mono,monospace" : "IBM Plex Sans,Helvetica,Arial,sans-serif"}" font-size="${fs}"${b ? ' font-weight="600"' : ""} fill="${ink}">${esc(txt)}</text>`;
+
+/** The one line a member's crossings print, sized for the timeline's gutter. */
+export function crossingText(m) {
+  const K = m.crossings;
+  if (!K.length) return { text: "no recorded crossing", strong: false };
+  if (K.length === 1) {
+    const k = K[0];
+    const place = k.region === "conus" ? k.sub_region : `${k.sub_region}, ${k.region === "mexico" ? "MX" : k.region}`;
+    const kt = k.category === null ? "kt unrecorded" : `${Math.round(k.vmax_kt)} kt`;
+    return { text: `${place} · ${kt} · +${Math.round(k.hours_from_genesis)} h`, strong: k.hurricane || (k.category || "").startsWith("cat") };
+  }
+  const subs = [...new Set(K.map((k) => k.sub_region))].map((x) => SUB_ABBR[x] || x.slice(0, 3).toUpperCase());
+  const kts = K.map((k) => k.vmax_kt).filter((v) => v !== null && v !== undefined).map(Math.round);
+  return { text: `${K.length} crossings · ${subs.join(" → ")} · ${Math.min(...kts)}–${Math.max(...kts)} kt`, strong: Math.max(...kts) >= 64 };
+}
+
+/* ROW HEIGHT IS LEADING, NOT DECORATION. At 11 px a 10.1 px label fills its own row edge to
+   edge and the twelve members read as one block; 12 px gives each row the leading a table row
+   has, and the page has the space. */
+export function memberTimeline(sys, { w = 742, rowH = 12, quantiles = [] } = {}) {
+  const M = sys.members || [];
+  const T = sys.time_to_event || {};
+  const held = [];
+  for (const m of M) for (const v of [m.hours_to_ts, m.hours_to_cat1, m.hours_to_cat3, ...m.crossings.map((k) => k.hours_from_genesis)]) if (v !== null && v !== undefined) held.push(v);
+  for (const [k] of quantiles) if (T[k] && T[k].n) held.push(T[k].p90);
+  const hmax = Math.max(48, Math.ceil(Math.max(...held) / 24) * 24);
+  const nameX = 4, peakX = 158, x0 = 166, gut = w - 214, x1 = gut - 10;
+  const x = (h) => (x0 + (h / hmax) * (x1 - x0)).toFixed(2);
+  const out = [];
+  let y = 14;
+  for (let h = 0; h <= hmax; h += 24) {
+    out.push(`<line x1="${x(h)}" x2="${x(h)}" y1="${y - 2}" y2="${y + rowH * M.length + 3}" stroke="${h % 48 ? "#eef1f5" : "#e2e7ee"}" stroke-width=".7"/>`);
+    if (h % 48 === 0) out.push(stx(x(h), y - 4, `${h} h`, { anchor: "middle", ink: "#64748b" }));
+  }
+  out.push(stx(nameX, y - 4, "MEMBER · LIFETIME PEAK", { b: true, ink: "#0f172a" }));
+  out.push(stx(gut, y - 4, "RECORDED CROSSINGS", { b: true, ink: "#0f172a" }));
+  y += 6;
+  const tri = (cx, cy, up, ink, hollow) => up
+    ? `M${(cx - 3.3).toFixed(2)} ${(cy + 2.9).toFixed(2)}L${cx} ${(cy - 3.5).toFixed(2)}L${(cx + 3.3).toFixed(2)} ${(cy + 2.9).toFixed(2)}Z`
+    : `M${(cx - 3.3).toFixed(2)} ${(cy - 2.9).toFixed(2)}L${cx} ${(cy + 3.5).toFixed(2)}L${(cx + 3.3).toFixed(2)} ${(cy - 2.9).toFixed(2)}Z`;
+  for (const m of M) {
+    const cy = y + rowH / 2;
+    const last = Math.max(0, ...[m.hours_to_ts, m.hours_to_cat1, m.hours_to_cat3, ...m.crossings.map((k) => k.hours_from_genesis)].filter((v) => v !== null && v !== undefined));
+    const cross = crossingText(m);
+    out.push(`<g class="tl-row" data-storm="${esc(m.storm_id)}" data-crossings="${m.crossings.length}">`);
+    out.push(`<line x1="${x0}" x2="${x1}" y1="${cy}" y2="${cy}" stroke="#e2e7ee" stroke-width=".7"/>`);
+    out.push(stx(nameX, cy + 3.5, `${m.name} ${m.season}`, { b: true, ink: "#0f172a", mono: false }));
+    out.push(stx(peakX, cy + 3.5, `${m.peak_vmax_kt} kt · ${CAT_SHORT[m.max_category] || m.max_category}`, { anchor: "end" }));
+    if (last > 0) out.push(`<line x1="${x0}" x2="${x(last)}" y1="${cy}" y2="${cy}" stroke="#94a3b8" stroke-width="1"/>`);
+    if (m.hours_to_ts != null) out.push(`<circle class="m-ts" data-h="${m.hours_to_ts}" cx="${x(m.hours_to_ts)}" cy="${cy}" r="2.5" fill="#fff" stroke="#0f172a" stroke-width="1.1"/>`);
+    if (m.hours_to_cat1 != null) out.push(`<circle class="m-cat1" data-h="${m.hours_to_cat1}" cx="${x(m.hours_to_cat1)}" cy="${cy}" r="2.9" fill="${TLINK.mid}"/>`);
+    if (m.hours_to_cat3 != null) out.push(`<rect class="m-cat3" data-h="${m.hours_to_cat3}" x="${(+x(m.hours_to_cat3) - 3).toFixed(2)}" y="${cy - 3}" width="6" height="6" transform="rotate(45 ${x(m.hours_to_cat3)} ${cy})" fill="${TLINK.hi}"/>`);
+    for (const k of m.crossings) {
+      const kt = k.category === null ? null : k.vmax_kt;
+      out.push(`<path class="m-cross" data-h="${k.hours_from_genesis}" data-kt="${kt === null ? "" : kt}" data-region="${esc(k.region)}" d="${tri(+x(k.hours_from_genesis), cy, k.region === "conus", ktInk(kt))}" fill="${kt === null ? "#fff" : ktInk(kt)}" stroke="${ktInk(kt)}" stroke-width="1"/>`);
+    }
+    out.push(stx(gut, cy + 3.5, cross.text, { b: cross.strong, ink: !m.crossings.length ? "#94a3b8" : cross.strong ? "#0f172a" : "#475569" }));
+    out.push(`</g>`);
+    y += rowH;
+  }
+  if (quantiles.length) {
+    y += 6;
+    out.push(`<line x1="0" x2="${w}" y1="${y - 5}" y2="${y - 5}" stroke="#0f172a" stroke-width=".8"/>`);
+    out.push(stx(nameX, y + 4, "PUBLISHED QUANTILES · HOURS FROM GENESIS", { b: true, ink: "#0f172a" }));
+    out.push(stx(gut, y + 4, "median · p25–p75 · p10–p90", { ink: "#64748b" }));
+    y += 10;
+    for (const [k, label] of quantiles) {
+      const d = T[k];
+      if (!d || !d.n) continue;
+      const cy = y + rowH / 2;
+      out.push(`<g class="tl-q" data-key="${esc(k)}" data-n="${d.n}" data-p10="${d.p10}" data-p25="${d.p25}" data-median="${d.median}" data-p75="${d.p75}" data-p90="${d.p90}">`);
+      out.push(stx(nameX, cy + 3.5, label, { ink: "#0f172a", mono: false }));
+      out.push(stx(peakX, cy + 3.5, `n = ${d.n}`, { anchor: "end" }));
+      out.push(`<line class="outer" x1="${x(d.p10)}" x2="${x(d.p90)}" y1="${cy}" y2="${cy}" stroke="#475569" stroke-width="1"/>`);
+      out.push(`<line class="inner" x1="${x(d.p25)}" x2="${x(d.p75)}" y1="${cy}" y2="${cy}" stroke="#334155" stroke-width="3.4"/>`);
+      out.push(`<line class="med" x1="${x(d.median)}" x2="${x(d.median)}" y1="${cy - 5}" y2="${cy + 5}" stroke="#0f172a" stroke-width="1.8"/>`);
+      out.push(stx(gut, cy + 3.5, `${hrs(d.median)} · ${hrs(d.p25)}–${hrs(d.p75)} · ${hrs(d.p10)}–${hrs(d.p90)}`, { ink: "#0f172a" }));
+      out.push(`</g>`);
+      y += rowH;
+    }
+  }
+  const H = y + 2;
+  const svg = `<svg class="tl" viewBox="0 0 ${w} ${H}" width="${w}" height="${H}" data-cohort="${esc(sys.id)}" data-x0="${x0}" data-x1="${x1}" data-hmax="${hmax}" role="img" aria-label="member timeline">${out.join("")}</svg>`;
+  const legend = `<div class="tl-legend">
+    <span><i class="o"></i>TS 34 kt</span><span><i class="f"></i>Cat 1 64 kt</span><span><i class="d"></i>Cat 3 96 kt</span>
+    <span><i class="up"></i>CONUS crossing</span><span><i class="dn"></i>Mexico</span>
+    <span>at the crossing <i class="sw" style="background:${TLINK.lo}"></i>&lt;64 <i class="sw" style="background:${TLINK.mid}"></i>64–95 <i class="sw" style="background:${TLINK.hi}"></i>≥96 kt</span>
+  </div>`;
+  return `<figure class="tl-fig">${svg}${legend}</figure>`;
+}
+
+/* ---- THE JOINT MATRIX -------------------------------------------------------------------
+ *
+ * The contract's own event, as the 2 x 2 the archive would have to hold to score it. Both
+ * margins are published rows and print with their n / N, rate, interval and glyph. The interior
+ * is the joint event; the archive holds no cell of it, so the cells are drawn empty and the
+ * contract's cell is drawn as a refusal. No interior number is generated, and the margins are
+ * not multiplied. */
+export function jointMatrix(sys, { row, col, rowLabel, rowSub = "", colLabel, notRow, notCol, voidText = "THE CONTRACT'S EVENT<br>NO ROW · NOT SCORED" }) {
+  const R = [...sys.intensity_rows, ...sys.landfall_rows].find((r) => r.key === row);
+  const C = [...sys.intensity_rows, ...sys.landfall_rows].find((r) => r.key === col);
+  const margin = (r) => `<span class="m"><b>${r.count} / ${r.n_storms}</b> · ${pct(r.rate)}</span><span class="m">[${ci(r.ci95)}]</span>${intervalGlyph(r, { cohort: sys.id })}`;
+  const attrs = (r) => `data-key="${esc(r.key)}" data-count="${r.count}" data-n="${r.n_storms}" data-rate="${r.rate}" data-lo="${r.ci95[0]}" data-hi="${r.ci95[1]}"`;
+  return `<div class="joint" data-row-key="${esc(row)}" data-col-key="${esc(col)}">
+  <div class="jc"></div>
+  <div class="jc head col" ${attrs(C)}><span class="t">${colLabel}</span>${margin(C)}</div>
+  <div class="jc head col not"><span class="t">${notCol}</span></div>
+  <div class="jc head row" ${attrs(R)}><span class="t">${rowLabel}</span>${rowSub ? `<span class="s">${rowSub}</span>` : ""}${margin(R)}</div>
+  <div class="jc cell void">${voidText}</div>
+  <div class="jc cell">no joint row</div>
+  <div class="jc head row not"><span class="t">${notRow}</span></div>
+  <div class="jc cell">no joint row</div>
+  <div class="jc cell">no joint row</div>
+</div>`;
+}
+
+/* ---- THE WIND AXIS ----------------------------------------------------------------------
+ * The archive's landfall intensity forms -- any, and ≥64 kt -- as spans on one wind axis, with
+ * the contract's line on the same axis. Thresholds are the pack's. The gap between the red
+ * line and the archive's rightmost cut is the finding, drawn. */
+export function windAxis(pack, { w = 340, h = 60, contractKt = 113, contractLabel = "CONTRACT · ≥113 KT AT THE CROSSING", cutLabels = ["ARCHIVE SCORES A CROSSING AT ANY WIND", "AND AT ≥64 KT"], cuts = [0, 64], compact = false } = {}) {
+  const th = pack.thresholds_kt || {};
+  if (compact) return windAxisCompact(pack, { w, contractKt });
+  const steps = [["TD", th.td ?? 0], ["TS", th.ts ?? 34], ["Cat 1", th.cat1 ?? 64], ["Cat 2", th.cat2 ?? 83], ["Cat 3", th.cat3 ?? 96], ["Cat 4", th.cat4 ?? 113], ["Cat 5", th.cat5 ?? 137]];
+  const ktMax = 155, x0 = 8, x1 = w - 8, axY = 28;
+  const x = (kt) => (x0 + (kt / ktMax) * (x1 - x0)).toFixed(2);
+  const out = [];
+  out.push(`<rect x="${x(contractKt)}" y="2" width="${(x1 - x(contractKt)).toFixed(2)}" height="${axY - 2}" fill="rgba(220,38,38,.06)"/>`);
+  steps.forEach(([lb, kt], i) => {
+    out.push(`<line x1="${x(kt)}" x2="${x(kt)}" y1="${axY - 3}" y2="${axY + 3}" stroke="#0f172a" stroke-width=".8"/>`);
+    out.push(stx(x(kt), axY + (i % 2 ? 22 : 12), `${lb} ${kt}`, { anchor: i === 0 ? "start" : i === steps.length - 1 ? "end" : "middle", ink: "#475569" }));
+  });
+  out.push(`<line x1="${x0}" x2="${x1}" y1="${axY}" y2="${axY}" stroke="#0f172a" stroke-width="1"/>`);
+  cuts.forEach((kt0, i) => {
+    const yy = axY - 8 - i * 9;
+    out.push(`<path class="span" data-kt0="${kt0}" data-kt1="${ktMax}" d="M${x(kt0)} ${yy - 3}V${yy}H${x1}" fill="none" stroke="#16a34a" stroke-width="1.5"/>`);
+    out.push(stx(+x(kt0) + 4, yy - 1.5, cutLabels[i] || "", { b: true, ink: "#16a34a", fs: 10.1 }));
+  });
+  out.push(`<line class="contract" data-kt="${contractKt}" x1="${x(contractKt)}" x2="${x(contractKt)}" y1="1" y2="${axY + 3}" stroke="#dc2626" stroke-width="1.6" stroke-dasharray="4 2.5"/>`);
+  out.push(stx(x1, h - 2, contractLabel, { anchor: "end", b: true, ink: "#dc2626" }));
+  return `<div class="axis"><svg class="axis" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" data-contract-kt="${contractKt}" role="img" aria-label="wind axis">${out.join("")}</svg></div>`;
+}
+
+/* The same axis on one line: where the archive cuts a landfall row (any wind; 64 kt) against
+   where the contract cuts (113 kt). Sits under the matrix's column margin, whose cut it is. */
+function windAxisCompact(pack, { w = 340, contractKt = 113 } = {}) {
+  const th = pack.thresholds_kt || {};
+  const any = th.td ?? 0, hur = th.cat1 ?? 64, ktMax = 155;
+  const h = 28, x0 = 6, x1 = w - 6, axY = 13;
+  const x = (kt) => (x0 + (kt / ktMax) * (x1 - x0)).toFixed(2);
+  const out = [];
+  out.push(`<rect x="${x(contractKt)}" y="${axY - 12}" width="${(x1 - x(contractKt)).toFixed(2)}" height="12" fill="rgba(220,38,38,.06)"/>`);
+  out.push(`<line x1="${x0}" x2="${x1}" y1="${axY}" y2="${axY}" stroke="#0f172a" stroke-width=".8"/>`);
+  out.push(`<path class="span" data-kt0="${any}" data-kt1="${ktMax}" d="M${x(any)} ${axY + 1}V${axY + 4}H${x1}V${axY + 1}" fill="none" stroke="#16a34a" stroke-width="1.3"/>`);
+  out.push(`<path class="span" data-kt0="${hur}" data-kt1="${ktMax}" d="M${x(hur)} ${axY + 4}V${axY + 7}H${x1}V${axY + 4}" fill="none" stroke="#16a34a" stroke-width="1.3"/>`);
+  out.push(`<line class="contract" data-kt="${contractKt}" x1="${x(contractKt)}" x2="${x(contractKt)}" y1="${axY - 12}" y2="${axY + 4}" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3.5 2"/>`);
+  out.push(stx(x0, axY + 13, `ARCHIVE ROW · ANY WIND`, { ink: "#16a34a", b: true }));
+  out.push(stx(x1, axY + 13, `ARCHIVE ROW · ≥${hur} KT`, { anchor: "end", ink: "#16a34a", b: true }));
+  /* THE LABEL MAY NOT SIT WHERE THE TICK IS DRAWN. The contract's dashed rule rises through the
+     upper band at 113 kt; a label long enough to reach back past that x was struck through by
+     its own tick. The axis is named once on the left, so the right label carries the cut alone. */
+  out.push(stx(x1, axY - 4, `CONTRACT · ≥${contractKt} KT`, { anchor: "end", ink: "#dc2626", b: true }));
+  out.push(stx(x0, axY - 4, `WIND AT THE CROSSING`, { ink: "#475569" }));
+  return `<div class="axis"><svg class="axis" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" data-contract-kt="${contractKt}" role="img" aria-label="wind axis">${out.join("")}</svg></div>`;
+}
+
+/* ---- THE BRIDGE, AS RULES ---------------------------------------------------------------- */
+export function bridge(rows, { heads = ["Discrete needs", "Atlas currently holds", "The archive's verdict"] } = {}) {
+  return `<div class="bridge2">
+  ${heads.map((h, i) => `<div class="col-h">${i ? `<span class="ar">→</span>` : ""}${esc(h)}</div>`).join("")}
+  ${rows.map((r) => `<div class="need">${r.need}</div><div class="hold">${r.hold}${(r.refs || []).map((x) => `<div class="ref">${x}</div>`).join("")}</div><div class="verdict${r.ok ? " ok" : ""}"><span>${esc(r.verdict)}</span></div>`).join("")}
+</div>`;
 }
 
 /* CHROME, NOT EVIDENCE, IS WHAT SETS THESE TABLES' MINIMUM WIDTH. Every cell is nowrap, so the

@@ -9,6 +9,7 @@ import {
   comparisonStrip, answersRail, repCardRow, repRule, footer, disclaimerLine,
   esc, pct, ci, hrs, coord, DISCLAIMER,
   intervalGlyph, timingTable, ruleFlow, citeLinks,
+  memberTimeline, jointMatrix, windAxis, bridge,
 } from "./collateral-kit.mjs";
 import { basinPlate, cellPlate, plate, LEGEND } from "./collateral-plates.mjs";
 
@@ -590,75 +591,47 @@ ${packFoot(D)}
 /* ============================ B2 — ENERGY / WEATHER TRADING ============================== */
 export function artifactB2(D, copy) {
   const C = makeCopy(copy, "B2");
-  const CB = makeCopy(copy, "B");
   const s = D.byId["97L"];
-  /* THE TWO MEMBERS THIS PAGE NAMES. The exposure box cites the cohort's two hurricane
-     landfalls by name; the plate draws those two heavier and labels them, so the line and the
-     sentence are the same storm. Selected by the record -- a landfall the archive scored at
-     hurricane strength -- not by a typed list. */
-  const named = s.representatives.members
-    .filter((m) => (m.landfalls || []).some((l) => l.hurricane)).map((m) => m.storm_id);
-  const cp = cellPlate(D, "97L", {
-    /* The c86ea6e frame at the c86ea6e width. A drawn-interval column was tried in the rows
-       table beside this plate; it cost the plate a fifth of its width, and at that width the
-       plate could not carry its labels at the type floor. Five printed intervals did not need
-       the picture; the plate needed the width. The live mark sits two degrees north-west of
-       the cell, so its label goes one band above on a leader and the cell label stays beside
-       its own mark -- at c86ea6e the two labels printed over each other. */
-    lon0: -98, lon1: -74, lat0: 19.5, lat1: 34, width: 400, height: 150, renderWidth: 354,
-    liveAtcf: "AL052026", dLon: 5, dLat: 5, decimate: 1,
-    cellAnchor: "start", cellDx: 6, cellDy: 0,
-    liveAnchor: "start", liveDx: 2, liveDy: -16, liveLeader: true,
-    /* The visual layer: segments coloured at the archive's own thresholds, the named members
-       heavier and labelled, the operational track in the live ink. */
-    segments: true, heavy: named, heavyLabels: true, liveInk: "#0066ff",
-  });
+  const rows = liveRows(D);
   const band = (key, label) => {
     const r = [...s.intensity_rows, ...s.landfall_rows].find((x) => x.key === key);
     return `<tr><td>${esc(label)}</td><td class="frac">${r.count} / ${r.n_storms}</td>
       <td class="rate">${pct(r.rate)}</td><td class="ci">${ci(r.ci95)}</td>
       <td class="status ${r.status ? "gate" : "none"}">${r.status ? esc(r.status) : "—"}</td></tr>`;
   };
+  /* The two figures the timeline's caption names, read off the roll rather than typed. */
+  const tc = s.time_to_event.landfall_conus;
+  const busiest = [...s.members].sort((a, b) => b.crossings.length - a.crossings.length)[0];
 
+  /* THE PAGE, TOP TO BOTTOM: the finding, the rows it is counted over, the refusals, the
+     provenance. The answers rail that stood at the top restated the masthead and pushed the
+     finding below the fold; the analog plate answered only where, and the quantile table hid
+     that its CONUS n counts crossings. One figure now carries the members, their timing and
+     their outcomes, and the quantiles sit under it on the axis they were computed on. */
   const body = `<div class="sheet">
 ${masthead({
     doc: "ARTIFACT B2 · ENERGY / WEATHER TRADING", sheet: "1 OF 1",
-    title: "Gulf genesis cohort: contract-row frequency bands, and analog paths as geography",
+    title: "Gulf genesis cohort: twelve storms, hour by hour — and the only scored rows",
     sub: C.get("lede").replace(/^<p>|<\/p>$/g, ""),
     rule: [["LIVE STATUS", liveStamp(D)], ["CELL", "28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+"],
+      ["COHORT", `N = ${s.cohort.n_cases} · ${s.cohort.cohort_status} · ESS ${s.cohort.effective_sample_size}`],
       ["PACK", D.pack.archive_stamp]],
   })}
+<p class="fn liveline"><b>LIVE, ${esc(liveStamp(D))} — STATUS ONLY, NOT ATLAS OUTPUT.</b> ${rows["97L"].live}</p>
 
-${answersRail(C.answers.now || "", C.answers.adds || "", C.answers.commercial || "")}
-
-${/* THE TIMING RANGE AS THE HERO. The quantiles B prints on its second sheet, drawn on one hours
-     axis: how long the members took to reach each threshold and the CONUS coast. It is the
-     page's largest figure because an hours-from-genesis distribution is what a weather desk
-     reads first; the exact hours stay printed beside it. The comparison strip that stood at the
-     foot of this page is now the one-line form, which paid for it. */""}
-<section class="sec">${sectionHead("01", "Seasonal timing — the hours the cohort took",
-    "historical transit from the declared cell · never a lead time")}
-${timingTable(s, [["ts", "→ tropical storm (34 kt)"], ["cat1", "→ hurricane (64 kt)"],
-    ["cat3", "→ major (96 kt)"], ["landfall_conus", "→ CONUS crossing"]], { w: 300, cohort: s.id })}
-<p class="fn">${CB.get("seasonal-timing").replace(/^<p>|<\/p>$/g, "")}</p>
+<section class="sec sechd-tight">${sectionHead("01", "The cohort, member by member",
+    "every mark is a held value · hours from each member's own genesis · nothing smoothed")}
+${memberTimeline(s, { quantiles: [["ts", "→ tropical storm"], ["cat1", "→ hurricane"],
+    ["cat3", "→ major"], ["landfall_conus", "→ CONUS crossing"], ["landfall_mexico", "→ Mexico crossing"]] })}
+<p class="fn">Quantiles sit outside the minimum-sample rule, unstamped at any n; only TS clears the 10-case threshold.
+<b>The CONUS row counts crossings, not storms</b> — ${esc(busiest.name)} ${busiest.season} supplies ${busiest.crossings.length}
+of its ${tc.n}. A crossing is <b>modelled landfall geometry</b>, never an NHC determination; a sub-region is a fact
+about one storm, and <b>no row exists for it</b>.</p>
 </section>
 
-<section class="sec">${sectionHead("02", "Analog paths, and the only scored rows",
-    "geometry on the left · contract rows on the right · neither is a state probability")}
-<div class="platecol">
-<div>
-${plate({
-    title: "GULF CELL · COHORT MEMBER TRACKS",
-    meta: `plate carrée`,
-    svg: cp.svg,
-    legendItems: [LEGEND.segLo, LEGEND.segMid, LEGEND.segHi, LEGEND.namedTrack, LEGEND.liveBlue],
-    /* One line at the plate's width: "not a forecast, not a state rate" is the section note
-       and the first box beside it. */
-    note: `<b>Where ${s.cohort.n_cases} storms went.</b> Not a probability surface.`,
-  })}
-</div>
-<div>
-<table class="ledger"><caption>THE ONLY SCORED ROWS ON THIS PAGE</caption>
+<section class="sec sechd-tight">${sectionHead("02", "The only scored rows",
+    `the ${s.cohort.n_cases} rows above are the sample these rates are counted over`)}
+<table class="ledger">
 <thead><tr><th>Contract row</th><th>n / N</th><th>Rate</th><th>95% Wilson</th><th style="text-align:left">Status</th></tr></thead>
 <tbody>
 ${band("ts", "reached tropical storm (34 kt)")}
@@ -666,26 +639,19 @@ ${band("cat1", "reached hurricane (64 kt)")}
 ${band("cat3", "reached major (96 kt)")}
 ${band("conus:any", "CONUS landfall — any")}
 ${band("conus:hurricane", "CONUS landfall — ≥64 kt")}
+${band("mexico:hurricane", "Mexico landfall — ≥64 kt")}
 </tbody></table>
-${citeBlock(s, { link: "label", replay: `REPLAY PUBLISHED COHORT · N=${s.cohort.n_cases}` })}
-</div>
-</div>
-${/* Full width, not inside the rows column: there it ran to three lines and set the height of
-     the whole band; here it is two. */""}
-<p class="fn">${C.get("frequency-bands").replace(/^<p>|<\/p>$/g, "")}</p>
+<p class="fn">${C.get("frequency-bands").replace(/^<p>|<\/p>$/g, "")} ${whatAtlasAdds()}</p>
 </section>
 
-<section class="sec">${sectionHead("03", "Geography, exposure and the refusals",
-    "adjacency, never impact")}
-<div class="grid3 tight">
-  <div class="box refusal"><h3>READ THIS BEFORE THE PLATE</h3>${C.get("geography-not-probability")}</div>
-  <div class="box commercial"><h3>EXPOSURE CLASSES ADJACENT TO THIS COHORT</h3>${C.get("exposure-map")}</div>
-  <div class="box refusal"><h3>WHAT THIS PAGE IS NOT</h3>${C.get("not-this")}</div>
+<section class="sec sechd-tight">${sectionHead("03", "Before these rows are quoted", "adjacency, never impact")}
+${/* ONE REFUSAL BOX, TWO STATEMENTS. Two identical red boxes side by side read as furniture;
+     one box with two leads reads as the two things it says. */""}
+<div class="box refusal">
+  <p><span class="lead">Geography is not a probability.</span> ${C.get("geography-not-probability").replace(/^<p>|<\/p>$/g, "")}</p>
+  <p style="margin-top:2px"><span class="lead">What this page is not.</span> ${C.get("not-this").replace(/^<p>|<\/p>$/g, "")}</p>
 </div>
-${/* THE STRIP, COMPRESSED. Three rows became one sentence -- the form PROTECTED allows -- so the
-     timing range could take the top of the page; it closes the refusals rather than heading a
-     section of its own, as it does on B. D carries the strip in full. */""}
-<p class="fn">${whatAtlasAdds()}</p>
+${citeBlock(s, { link: "label", replay: `REPLAY PUBLISHED COHORT · N=${s.cohort.n_cases}` })}
 </section>
 
 <div class="spacer"></div>
@@ -976,90 +942,54 @@ export function artifactE(D, copy, contractSources = []) {
     ["cat4", "reached Cat 4 (113 kt)"], ["cat5", "reached Cat 5 (137 kt)"],
     ["conus:any", "CONUS landfall — any intensity"], ["conus:hurricane", "CONUS landfall — ≥64 kt"]]
     .map(([k, label]) => ({ ...pick(k), label }));
-
-  /* THE EVIDENCE BRIDGE. The intellectual centre of the page: what the contract needs in the left
-     column, what the archive actually holds in the middle, and the archive's own verdict on the
-     distance between them on the right. Every STATUS here is a refusal, not a result. */
+  /* THE PAGE, TOP TO BOTTOM: the question and the cohort it is asked of; the finding -- the
+     contract's own 2 x 2, with its margins published and its interior empty; the evidence for
+     the other gaps, as needs -> holds -> verdict; then what a desk could do, the citation, and
+     the live status as context. The five-row bridge table this replaces said in its first row
+     that the joint row does not exist; the matrix shows it. */
+  /* Two rows, not five: the joint event is the matrix above, and the sub-CONUS variants are
+     the third hole beside it. What is left is what only the bridge says -- the definition the
+     contract settles on against the one the archive scores, and the one thing the archive does
+     support. */
   const BRIDGE = [
-    ["Cat 4+ <b>at</b> CONUS landfall — one joint event",
-      "two separate rows: <b>reached Cat 4</b> and <b>CONUS landfall</b>. No row exists for "
-      + "their conjunction.",
-      "EXACT TRIGGER NOT SCORED", "no"],
-    ["Intensity determined <b>at the crossing</b>, 130 mph",
-      "the ladder is <b>lifetime peak attainment</b>; the landfall contract has two intensity "
-      + "forms, <b>any</b> and <b>≥64 kt</b>.",
-      "NO ≥113 kt LANDFALL ROW", "no"],
-    ["Landfall and its category determined by <b>NHC</b>",
-      "Atlas modelled landfall geometry — <b>hurdat2_L_record</b>, <b>bracketing_fix</b> or "
-      + "<b>segment_crossing</b>.",
-      "DIFFERENT CONTRACT DEFINITION", "no"],
-    ["Gulf Coast-only and Florida-only regions",
-      "<b>CONUS scored as one region.</b> No sub-CONUS row at any radius or sample size.",
-      "NO VETTED SUB-CONUS ROW", "no"],
-    ["Which storms did this before, and where they went",
-      "the named <b>${N}-member</b> cohort, each member's recorded crossings, and the tracks.",
-      "SUPPORTED AS HISTORY, NOT A RATE", "yes"],
+    { need: `<b>Intensity at the crossing,</b> 130 mph, determined by the NHC at landfall.`,
+      hold: `The ladder scores <b>lifetime peak</b>, not intensity at the crossing, and the landfall contract has two forms, <b>any</b> and <b>≥64 kt</b> — modelled geometry, not an NHC determination.`,
+      verdict: "No ≥113 kt landfall row · a different definition", ok: false },
+    { need: `<b>Which storms did this before,</b> and where they went.`,
+      hold: `The named <b>${s.cohort.n_cases}-member</b> cohort, each member's recorded crossings and its track.`,
+      verdict: "Supported as history, never as a rate", ok: true },
   ];
-
-  /* THE JOIN THAT IS ABSENT, DRAWN. Row one's middle cell is the two marginals the archive does
-     hold, as chips with their own n / N, and the joint row that does not exist between them.
-     The counts are the ledger's own rows above; nothing is multiplied and no product is shown.
-     The header carries the reading direction: what is needed, what is held, the verdict. */
-  const c4 = pick("cat4");
-  const ch = pick("conus:hurricane");
-  const rowOne = ruleFlow([
-    { html: `reached Cat 4 <span class="n">${c4.count}/${c4.n_storms}</span>` },
-    { sep: "+", html: `CONUS ≥64 kt <span class="n">${ch.count}/${ch.n_storms}</span>` },
-    { kind: "absent", html: `<b class="tok">NO JOINT ROW</b>` },
-  ]);
-  const bridge = `<table class="ledger bridge"><thead><tr>
-    <th style="width:29%;text-align:left">Discrete needs</th>
-    <th style="width:48%;text-align:left"><span class="harrow">→</span>Atlas currently supports</th>
-    <th style="width:23%;text-align:left"><span class="harrow">→</span>Status</th>
-  </tr></thead><tbody>${BRIDGE.map(([need, has, status, ok], i) => `<tr class="${i % 2 ? "band" : ""}">
-    <td class="lft">${need}</td>
-    <td class="lft">${i === 0 ? rowOne : has.replace("${N}", String(s.cohort.n_cases))}</td>
-    <td class="status ${ok === "yes" ? "gate" : "refused"}">${esc(status)}</td></tr>`).join("")}
-  </tbody></table>`;
 
   const body = `<div class="sheet">
 ${masthead({
     doc: "ARTIFACT E · DISCRETE EVENT-CONTRACT EVIDENCE", sheet: "1 OF 1",
-    title: "A published Cat 4+ CONUS landfall trigger — and where the archive stops",
-    sub: C.get("lede").replace(/^<p>|<\/p>$/g, ""),
+    title: "A published Cat 4+ CONUS landfall trigger — and the cell of evidence that does not exist",
+    /* No lede: the title is the lede, and the slot is retired in the cut register. */
+    sub: "",
     rule: [["LIVE STATUS", liveStamp(D)], ["POINT TYPE", "PRE-GENESIS REFERENCE CELL"],
       ["PACK", D.pack.archive_stamp]],
   })}
 
-<section class="sec sechd-tight">${sectionHead("01", "The contract question, and the declared cohort")}
-<div class="box"><h3>${esc(termsHeading(contractSources))}</h3>
-  ${C.get("discrete-terms")}</div>
-${/* FULL SHEET WIDTH, NOT INSIDE THE BOX. The box's padding costs 12 px, which is exactly
-     enough to tip this line from two rendered lines to three -- 18 px for nothing. */""}
-${contractSourceLine(contractSources)}
-<div class="grid2" style="margin-top:3px">
-  <div class="box refusal"><h3>LIVE STATUS, AND WHAT IT IS NOT</h3>
-    <p>${opFormation(D, "AL052026")}</p>
-    <p style="margin-top:2px"><b>NOT ATLAS GENESIS.</b> The pack does not hold AL052026 and does
-    not accept the operational layer as a genesis source. The cohort beside remains the declared
-    <b>PRE-GENESIS REFERENCE CELL</b> at <b>28.0°N 88.7°W</b> — <b>not where ${esc(liveName)} formed</b>, and
-    not moved to ${esc(liveName)}'s fix.</p></div>
-  <div>${ledger([{ rows: shown }], { showBar: false, compact: true, statusHead: "Status",
-    caption: `DECLARED COHORT · 28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+ · `
-      + `${s.cohort.cohort_status} · N = ${s.cohort.n_cases} · ESS ${s.cohort.effective_sample_size}` })}</div>
+<section class="sec sechd-tight">${sectionHead("01", "The contract question")}
+<div class="box"><h3>${esc(termsHeading(contractSources))}</h3>${C.get("discrete-terms")}
+${contractSourceLine(contractSources).replace('<p class="fn">', '<p class="src">')}</div>
+</section>
+
+<section class="sec sechd-tight">${sectionHead("02", "The join that is absent",
+    "the contract's event as the table the archive would hold · margins published · interior empty")}
+<div class="grid2 matrixleft">
+  <div>
+    ${jointMatrix(s, { row: "cat4", col: "conus:hurricane",
+    rowLabel: "reached Cat 4", rowSub: "lifetime peak", notRow: "did not reach Cat 4",
+    colLabel: "≥64 kt at a CONUS crossing", notCol: "no ≥64 kt CONUS crossing" })}
+    ${windAxis(D.pack, { w: 428, compact: true })}
+  </div>
+  ${/* The six published rows, beside the matrix whose margins are two of them. The evidence-row
+       form fits the column the column model overran. */""}
+  <div>${evidenceLedger([{ label: `DECLARED COHORT · N = ${s.cohort.n_cases} · ${s.cohort.cohort_status}`, rows: shown }],
+    { cohort: s.id, glyph: true })}</div>
 </div>
-<p class="fn">${C.get("cohort-note").replace(/^<p>|<\/p>$/g, "").replace(/\{\{LIVE\}\}/g, esc(liveName))}</p>
-</section>
-
-<section class="sec sechd-tight">${sectionHead("02", "Evidence bridge, evidence gap",
-    "the centre of this page · every status on the right is a refusal")}
-${bridge}
-
-<p class="fn">${C.get("history-note").replace(/^<p>|<\/p>$/g, "")}</p>
-</section>
-
-<section class="sec sechd-tight">${sectionHead("03", "The three holes, and what a desk could do with this")}
-<div class="box refusal"><h3>THE THREE HOLES, NAMED</h3>
+<div class="box refusal cols2" style="margin-top:3px"><h3>THE THREE HOLES, NAMED</h3>
   <p><b>1 · EXACT TRIGGER NOT SCORED.</b> No vetted Atlas row exists for <b>Cat 4+ at CONUS
   landfall</b>; none was created here.</p>
   <p><b>2 · NO MARGINAL MULTIPLICATION.</b> The joint trigger is <b>not</b> estimated as
@@ -1068,10 +998,20 @@ ${bridge}
   <p><b>3 · NO REGIONAL-VARIANT FABRICATION.</b> Atlas holds <b>no vetted Gulf Coast-only or
   Florida-only row</b>. Cohort tracks reach Texas, Louisiana and Florida — facts about named
   storms and geography, <b>not</b> a Gulf, Florida, Texas or Louisiana rate.</p></div>
+</section>
+
+<section class="sec sechd-tight">${sectionHead("03", "Evidence bridge, evidence gap",
+    "what is needed · what is held · the archive's verdict")}
+${bridge(BRIDGE)}
+<p class="fn">${C.get("history-note").replace(/^<p>|<\/p>$/g, "")}
+${C.get("cohort-note").replace(/^<p>|<\/p>$/g, "").replace(/\{\{LIVE\}\}/g, esc(liveName))}</p>
 <div class="box commercial" style="margin-top:3px"><h3>WHAT A STRUCTURER COULD USE THIS FOR — AND WHAT THIS PAGE DOES NOT DO</h3>
   ${C.get("desk-use")}
   ${C.get("desk-not").replace(/\{\{LIVE\}\}/g, esc(liveName))}</div>
 ${citeBlock(s, { link: "label", replay: `REPLAY PUBLISHED COHORT · N=${s.cohort.n_cases}` })}
+<p class="fn liveline"><b>LIVE STATUS, AND WHAT IT IS NOT.</b> ${opFormation(D, "AL052026")}
+<b>NOT ATLAS GENESIS:</b> the pack does not hold AL052026 and takes no genesis from the operational layer; the cohort
+remains the declared cell at <b>28.0°N 88.7°W</b>, <b>not where ${esc(liveName)} formed</b>.</p>
 </section>
 
 <div class="spacer"></div>

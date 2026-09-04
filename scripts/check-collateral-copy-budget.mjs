@@ -21,10 +21,10 @@ export const BUDGETS = {
   A: { "answers.adds": 30, "answers.commercial": 26, "lede": 34, "atlas-value-97L": 31, "atlas-value-KARINA": 32, "atlas-value-95E": 32, "atlas-value-LOWELL": 27, "plate-note": 42, "refusal-note": 37 },
   B: { "lede": 46, "cell-rationale": 65, "reading-the-ledger": 40, "radius-sensitivity": 32, "seasonal-timing": 45, "commercial": 142, "hole": 89 },
   B1: { "answers.now": 29, "trigger-explainability": 60, "near-miss": 81, "basis-risk": 83, "how-used": 13 },
-  B2: { "answers.now": 44, "answers.adds": 33, "answers.commercial": 23, "lede": 45, "geography-not-probability": 64, "exposure-map": 68, "frequency-bands": 36, "not-this": 60 },
+  B2: { "lede": 45, "geography-not-probability": 64, "frequency-bands": 36, "not-this": 60 },
   C: { "live-vs-history": 80, "rarity": 56, "land-rows": 39, "so-what": 36 },
   D: { "one-sentence": 59, "users-can": 140, "moat": 91, "delivery": 41, "pilot": 23, "sample-note": 41 },
-  E: { "lede": 25, "discrete-terms": 84, "cohort-note": 21, "history-note": 61, "desk-use": 39, "desk-not": 49 },
+  E: { "discrete-terms": 84, "cohort-note": 21, "history-note": 61, "desk-use": 39, "desk-not": 49 },
 };
 
 /* SLOTS NO LONGER RENDERED. The type-gate pass cut the blocks these fed; the copy stays in
@@ -34,11 +34,15 @@ export const RETIRED = {
   "A": ["tag-97L", "tag-KARINA", "tag-95E", "tag-LOWELL", "answers.now"],
   "B": ["answers.now", "answers.adds", "answers.commercial", "analog-plate-note"],
   "B1": ["lede", "answers.adds", "answers.commercial"],
+  /* B2's rail came off when the member timeline took the top of the page; the exposure-map
+     paragraph's two named landfalls are now rows of the timeline and its Mexico rate is a row
+     of the scored table. */
+  "B2": ["answers.now", "answers.adds", "answers.commercial", "exposure-map"],
   "C": ["lede", "answers.now", "answers.adds", "answers.commercial"],
   "D": ["answers.now", "answers.adds", "answers.commercial"],
   /* E was drawn without an answers rail at all -- the evidence-bridge table does that work --
      so its three rail slots are absent by design rather than by cut. */
-  "E": ["answers.now", "answers.adds", "answers.commercial"],
+  "E": ["answers.now", "answers.adds", "answers.commercial", "lede"],
 };
 
 export const words = (html) => String(html || "").replace(/<[^>]+>/g, " ")

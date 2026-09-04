@@ -343,6 +343,65 @@ a.replay{display:inline-block;font-family:var(--font-mono);font-size:var(--t-det
 .cite .khead{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin-bottom:1px}
 .cite .khead .k{margin:0}
 .cite .raw b{color:var(--ink-600);font-weight:600;letter-spacing:.4px}
+/* THE MEMBER TIMELINE. A figure set between two rules, not a box: it reads as a table would. */
+.tl-fig{border-top:1px solid var(--ink-900);border-bottom:1px solid var(--line-300);padding:2px 0 1px;margin:2px 0 0}
+.tl-fig svg{display:block}
+.tl-legend{display:flex;flex-wrap:wrap;gap:1px var(--sp-4);padding:1px 0 0;font-family:var(--font-mono);font-size:var(--t-detail);
+  letter-spacing:.3px;color:var(--ink-600);line-height:1.3}
+.tl-legend i{display:inline-block;vertical-align:-1px;margin-right:4px}
+.tl-legend .o{width:7px;height:7px;border-radius:50%;background:#fff;border:1.2px solid var(--ink-900)}
+.tl-legend .f{width:7px;height:7px;border-radius:50%;background:#5b6b80}
+.tl-legend .d{width:6px;height:6px;background:var(--ink-900);transform:rotate(45deg);margin-right:5px}
+.tl-legend .up{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid #5b6b80}
+.tl-legend .dn{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:7px solid #5b6b80}
+.tl-legend .sw{width:9px;height:7px;border-radius:1px}
+.figcap{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-600);margin:0 0 1px}
+/* THE JOINT MATRIX. Margins carry the published rows; the interior is drawn as what it is. */
+.joint{display:grid;grid-template-columns:148px minmax(0,1fr) minmax(0,1fr);gap:1.5px;margin-top:1px}
+.joint .jc{font-family:var(--font-mono);font-size:var(--t-detail);line-height:1.2;color:var(--ink-600)}
+.joint .head{padding:1px 3px 2px;display:flex;flex-direction:column;justify-content:flex-end}
+.joint .head.col{text-align:center;align-items:center;border-bottom:1px solid var(--ink-900)}
+.joint .head.row{text-align:right;align-items:flex-end;border-right:1px solid var(--ink-900);justify-content:center}
+.joint .head .t{font-family:var(--font-sans);font-weight:600;color:var(--ink-900);font-size:var(--t-detail);line-height:1.15}
+.joint .head .s{color:var(--ink-400)}
+.joint .head .m{margin-top:1px}
+.joint .head .m b{color:var(--ink-900)}
+.joint .head .ivl-glyph{margin-top:1px}
+.joint .head.not .t{color:var(--ink-400);font-weight:500}
+.joint .cell{min-height:22px;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px 5px;
+  border:1px dotted var(--line-300);border-radius:2px;color:var(--ink-400);letter-spacing:.2px}
+.joint .cell.void{border:1.5px dashed var(--red-600);color:var(--red-600);font-weight:700;letter-spacing:.3px;
+  background:repeating-linear-gradient(135deg,#fff5f5 0 4px,#fde7e7 4px 6px)}
+.jointnote{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);line-height:1.28;margin-top:3px}
+.jointnote b{color:var(--ink-900)}
+/* THE WIND AXIS beneath the matrix: the archive's two landfall cuts against the contract's. */
+.axis{margin-top:2px}
+.grid2.matrixleft{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr)}
+.axis svg{display:block}
+/* THE BRIDGE, AS RULES. Three columns, hairlines between rows, a verdict that is a coloured
+   word with a rule beside it -- not nine boxes. */
+.bridge2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,.86fr);column-gap:var(--sp-5);margin-top:2px}
+.bridge2 .col-h{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.9px;text-transform:uppercase;color:var(--ink-600);
+  padding-bottom:2px;border-bottom:1px solid var(--ink-900)}
+.bridge2 .col-h .ar{color:var(--ink-400);margin-right:6px}
+.bridge2 .need,.bridge2 .hold,.bridge2 .verdict{padding:2px 0 3px;border-bottom:1px solid var(--line-200)}
+.bridge2 .need,.bridge2 .hold{font-size:var(--t-body);line-height:1.2;color:var(--ink-700)}
+.bridge2 .need b,.bridge2 .hold b{color:var(--ink-900)}
+.bridge2 .ref{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);margin-top:1px;line-height:1.2}
+.bridge2 .ref b{color:var(--ink-900)}
+.bridge2 .verdict{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+  color:var(--red-600);line-height:1.22;display:flex;align-items:flex-start}
+.bridge2 .verdict span{border-left:2px solid currentColor;padding-left:6px;display:block;margin-top:1px}
+.bridge2 .verdict.ok{color:var(--green-600)}
+/* One refusal box carrying two statements, each with its own lead. */
+.box .lead{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;color:var(--red-600);font-weight:600;margin-right:4px}
+.liveline{border-left:3px solid var(--blue-600);padding-left:6px}
+/* Three short statements read as three, not as one column of prose: two columns inside the box. */
+.box.cols2{column-count:2;column-gap:var(--sp-6)}
+.box.cols2 h3{column-span:all}
+.box.cols2 p{margin-bottom:2px}
+.box .src{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);line-height:1.25;margin-top:2px;border-top:1px dotted var(--line-300);padding-top:1px}
+.box .src b{color:var(--ink-900)}
 /* The raw replay string, kept in the provenance block for print at the legal size. */
 .cite .raw{display:block;font-family:var(--font-mono);font-size:var(--t-legal);color:var(--ink-400);
   word-break:break-all;line-height:1.25;margin-top:1px}
@@ -475,56 +534,36 @@ a.replay{display:inline-block;font-family:var(--font-mono);font-size:var(--t-det
     <div class="mh-brand">MILLIBAR<span class="sep">/</span>STORM ATLAS</div>
     <div class="mh-doc">ARTIFACT E · DISCRETE EVENT-CONTRACT EVIDENCE &nbsp;·&nbsp; 1 OF 1</div>
   </div>
-  <h1 class="mh-title">A published Cat 4+ CONUS landfall trigger — and where the archive stops</h1>
-  <p class="mh-sub">What the archive supports from a declared Gulf cell — and where it stops short of a published Cat 4+ CONUS landfall trigger.</p>
+  <h1 class="mh-title">A published Cat 4+ CONUS landfall trigger — and the cell of evidence that does not exist</h1>
+  
   <div class="mh-rule"><span class="kv">LIVE STATUS <b>01 SEP 2026 · 16:08 CT / 21:08 UTC</b></span><span class="kv">POINT TYPE <b>PRE-GENESIS REFERENCE CELL</b></span><span class="kv">PACK <b>134661125525f27a</b></span></div>
 </header>
 
-<section class="sec sechd-tight"><div class="sec-hd"><span class="n">01</span><h2>The contract question, and the declared cohort</h2></div>
-<div class="box"><h3>DISCRETE — PUBLIC TERMS TRANSCRIBED 31 AUG 2026 · SOURCE RECORD INCOMPLETE</h3>
-  <p><b>Reference event</b> — a Category 4+ hurricane makes US landfall before 30 Nov 2026. <b>Cat 4</b> 130 mph sustained. <b>Trigger</b> — the hurricane centre crosses the contiguous-US coastline at Cat 4 or higher. <b>Determination</b> — landfall and intensity by the NHC, <b>at landfall</b>. <b>Region</b> — the lower 48, plus stated Gulf-only and Florida-only variants. <b>PUBLIC FACTS ONLY</b> — no access to any Discrete transaction, pricing process, client or methodology is implied, and Storm Atlas neither prices nor scores this contract.</p></div>
+<section class="sec sechd-tight"><div class="sec-hd"><span class="n">01</span><h2>The contract question</h2></div>
+<div class="box"><h3>DISCRETE — PUBLIC TERMS TRANSCRIBED 31 AUG 2026 · SOURCE RECORD INCOMPLETE</h3><p><b>Reference event</b> — a Category 4+ hurricane makes US landfall before 30 Nov 2026. <b>Cat 4</b> 130 mph sustained. <b>Trigger</b> — the hurricane centre crosses the contiguous-US coastline at Cat 4 or higher. <b>Determination</b> — landfall and intensity by the NHC, <b>at landfall</b>. <b>Region</b> — the lower 48, plus stated Gulf-only and Florida-only variants. <b>PUBLIC FACTS ONLY</b> — no access to any Discrete transaction, pricing process, client or methodology is implied, and Storm Atlas neither prices nor scores this contract.</p>
+<p class="src"><b>SOURCES —</b> 130 mph Cat 4: NHC Saffir–Simpson scale, <a class="u" href="https://www.nhc.noaa.gov/aboutsshws.php">nhc.noaa.gov/aboutsshws.php</a>. Determination: NHC Tropical Cyclone Reports, <a class="u" href="https://www.nhc.noaa.gov/data/tcr/">nhc.noaa.gov/data/tcr</a>. Trigger, deadline, variants: Discrete public terms, transcribed 31 Aug 2026. Original source URL/document not presently held; independently re-verifiable citation pending.</p></div>
+</section>
 
-<p class="fn"><b>SOURCES —</b> 130 mph Cat 4: NHC Saffir–Simpson scale, <a class="u" href="https://www.nhc.noaa.gov/aboutsshws.php">nhc.noaa.gov/aboutsshws.php</a>. Determination: NHC Tropical Cyclone Reports, <a class="u" href="https://www.nhc.noaa.gov/data/tcr/">nhc.noaa.gov/data/tcr</a>. Trigger, deadline, variants: Discrete public terms, transcribed 31 Aug 2026. Original source URL/document not presently held; independently re-verifiable citation pending.</p>
-<div class="grid2" style="margin-top:3px">
-  <div class="box refusal"><h3>LIVE STATUS, AND WHAT IT IS NOT</h3>
-    <p>NHC/ATCF classifies <b>Tropical Storm Edouard</b> (AL052026); the operational record's first tropical-status fix is <b>2026-08-31T18:00:00.000Z</b>, <b>28.1N 91W</b>, TD 30 kt.</p>
-    <p style="margin-top:2px"><b>NOT ATLAS GENESIS.</b> The pack does not hold AL052026 and does
-    not accept the operational layer as a genesis source. The cohort beside remains the declared
-    <b>PRE-GENESIS REFERENCE CELL</b> at <b>28.0°N 88.7°W</b> — <b>not where Edouard formed</b>, and
-    not moved to Edouard's fix.</p></div>
-  <div><table class="ledger compact"><caption>DECLARED COHORT · 28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+ · SUFFICIENT · N = 12 · ESS 12</caption><thead><tr><th>Contract row</th><th>n / N</th><th>Rate · 95% Wilson</th><th style="text-align:left">Status</th></tr></thead><tbody><tr class=""><td>reached Cat 1 (64 kt)</td><td class="frac">3 / 12</td><td class="rate">25.0% <span class="ivl">[9–53%]</span></td><td class="status none">—</td></tr><tr class="band"><td>reached Cat 3 (96 kt)</td><td class="frac">2 / 12</td><td class="rate">16.7% <span class="ivl">[5–45%]</span></td><td class="status none">—</td></tr><tr class=""><td>reached Cat 4 (113 kt)</td><td class="frac">1 / 12</td><td class="rate">8.3% <span class="ivl">[1–35%]</span></td><td class="status none">—</td></tr><tr class="band"><td>reached Cat 5 (137 kt)</td><td class="frac">1 / 12</td><td class="rate">8.3% <span class="ivl">[1–35%]</span></td><td class="status none">—</td></tr><tr class=""><td>CONUS landfall — any intensity</td><td class="frac">10 / 12</td><td class="rate">83.3% <span class="ivl">[55–95%]</span></td><td class="status none">—</td></tr><tr class="band"><td>CONUS landfall — ≥64 kt</td><td class="frac">1 / 12</td><td class="rate">8.3% <span class="ivl">[1–35%]</span></td><td class="status none">—</td></tr></tbody></table></div>
+<section class="sec sechd-tight"><div class="sec-hd"><span class="n">02</span><h2>The join that is absent</h2><span class="note">the contract's event as the table the archive would hold · margins published · interior empty</span></div>
+<div class="grid2 matrixleft">
+  <div>
+    <div class="joint" data-row-key="cat4" data-col-key="conus:hurricane">
+  <div class="jc"></div>
+  <div class="jc head col" data-key="conus:hurricane" data-count="1" data-n="12" data-rate="0.08333333333333333" data-lo="0.014864709450773478" data-hi="0.35388592179859524"><span class="t">≥64 kt at a CONUS crossing</span><span class="m"><b>1 / 12</b> · 8.3%</span><span class="m">[1–35%]</span><svg class="ivl-glyph" viewBox="0 0 84 9" width="84" height="9" data-cohort="97L" data-key="conus:hurricane" data-rate="0.08333333333333333" data-lo="0.014864709450773478" data-hi="0.35388592179859524" data-w="84" aria-label="8.3%, 95% Wilson 1–35%"><line x1="1.5" x2="82.5" y1="4.5" y2="4.5" stroke="var(--line-300)" stroke-width=".7"/><line class="whisker" x1="2.70" x2="30.16" y1="4.5" y2="4.5" stroke="var(--ink-600)" stroke-width="1.3" stroke-linecap="butt"/><circle class="pt" cx="8.25" cy="4.5" r="2.3" fill="var(--ink-900)"/></svg></div>
+  <div class="jc head col not"><span class="t">no ≥64 kt CONUS crossing</span></div>
+  <div class="jc head row" data-key="cat4" data-count="1" data-n="12" data-rate="0.08333333333333333" data-lo="0.014864709450773478" data-hi="0.35388592179859524"><span class="t">reached Cat 4</span><span class="s">lifetime peak</span><span class="m"><b>1 / 12</b> · 8.3%</span><span class="m">[1–35%]</span><svg class="ivl-glyph" viewBox="0 0 84 9" width="84" height="9" data-cohort="97L" data-key="cat4" data-rate="0.08333333333333333" data-lo="0.014864709450773478" data-hi="0.35388592179859524" data-w="84" aria-label="8.3%, 95% Wilson 1–35%"><line x1="1.5" x2="82.5" y1="4.5" y2="4.5" stroke="var(--line-300)" stroke-width=".7"/><line class="whisker" x1="2.70" x2="30.16" y1="4.5" y2="4.5" stroke="var(--ink-600)" stroke-width="1.3" stroke-linecap="butt"/><circle class="pt" cx="8.25" cy="4.5" r="2.3" fill="var(--ink-900)"/></svg></div>
+  <div class="jc cell void">THE CONTRACT'S EVENT<br>NO ROW · NOT SCORED</div>
+  <div class="jc cell">no joint row</div>
+  <div class="jc head row not"><span class="t">did not reach Cat 4</span></div>
+  <div class="jc cell">no joint row</div>
+  <div class="jc cell">no joint row</div>
 </div>
-<p class="fn">Conditional on formation in the declared cell — <b>none is a probability for Edouard</b> or for Discrete's contract.</p>
-</section>
-
-<section class="sec sechd-tight"><div class="sec-hd"><span class="n">02</span><h2>Evidence bridge, evidence gap</h2><span class="note">the centre of this page · every status on the right is a refusal</span></div>
-<table class="ledger bridge"><thead><tr>
-    <th style="width:29%;text-align:left">Discrete needs</th>
-    <th style="width:48%;text-align:left"><span class="harrow">→</span>Atlas currently supports</th>
-    <th style="width:23%;text-align:left"><span class="harrow">→</span>Status</th>
-  </tr></thead><tbody><tr class="">
-    <td class="lft">Cat 4+ <b>at</b> CONUS landfall — one joint event</td>
-    <td class="lft"><div class="flow"><span class="fstep ">reached Cat 4 <span class="n">1/12</span></span><span class="farrow">+</span><span class="fstep ">CONUS ≥64 kt <span class="n">1/12</span></span><span class="farrow">→</span><span class="fstep absent"><b class="tok">NO JOINT ROW</b></span></div></td>
-    <td class="status refused">EXACT TRIGGER NOT SCORED</td></tr><tr class="band">
-    <td class="lft">Intensity determined <b>at the crossing</b>, 130 mph</td>
-    <td class="lft">the ladder is <b>lifetime peak attainment</b>; the landfall contract has two intensity forms, <b>any</b> and <b>≥64 kt</b>.</td>
-    <td class="status refused">NO ≥113 kt LANDFALL ROW</td></tr><tr class="">
-    <td class="lft">Landfall and its category determined by <b>NHC</b></td>
-    <td class="lft">Atlas modelled landfall geometry — <b>hurdat2_L_record</b>, <b>bracketing_fix</b> or <b>segment_crossing</b>.</td>
-    <td class="status refused">DIFFERENT CONTRACT DEFINITION</td></tr><tr class="band">
-    <td class="lft">Gulf Coast-only and Florida-only regions</td>
-    <td class="lft"><b>CONUS scored as one region.</b> No sub-CONUS row at any radius or sample size.</td>
-    <td class="status refused">NO VETTED SUB-CONUS ROW</td></tr><tr class="">
-    <td class="lft">Which storms did this before, and where they went</td>
-    <td class="lft">the named <b>12-member</b> cohort, each member's recorded crossings, and the tracks.</td>
-    <td class="status gate">SUPPORTED AS HISTORY, NOT A RATE</td></tr>
-  </tbody></table>
-
-<p class="fn"><b>NAMED HISTORY — ATLAS MODELLED RECORDS, NOT NHC SETTLEMENT DETERMINATIONS.</b> By the archive's rule (majors first, then peak descending; never similarity): <b>ANITA 1977</b>, the one Cat 4, has its Cat 4 crossing recorded in <b>Tamaulipas, Mexico</b>; <b>ALICIA 1983</b>, the one CONUS ≥64 kt crossing, at <b>Cat 3</b> in <b>Texas</b>. Neither is evidence for Discrete's trigger.</p>
-</section>
-
-<section class="sec sechd-tight"><div class="sec-hd"><span class="n">03</span><h2>The three holes, and what a desk could do with this</h2></div>
-<div class="box refusal"><h3>THE THREE HOLES, NAMED</h3>
+    <div class="axis"><svg class="axis" viewBox="0 0 428 28" width="428" height="28" data-contract-kt="113" role="img" aria-label="wind axis"><rect x="309.28" y="1" width="112.72" height="12" fill="rgba(220,38,38,.06)"/><line x1="6" x2="422" y1="13" y2="13" stroke="#0f172a" stroke-width=".8"/><path class="span" data-kt0="0" data-kt1="155" d="M6.00 14V17H422V14" fill="none" stroke="#16a34a" stroke-width="1.3"/><path class="span" data-kt0="64" data-kt1="155" d="M177.77 17V20H422V17" fill="none" stroke="#16a34a" stroke-width="1.3"/><line class="contract" data-kt="113" x1="309.28" x2="309.28" y1="1" y2="17" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3.5 2"/><text x="6.00" y="26.00" text-anchor="start" font-family="IBM Plex Mono,monospace" font-size="10.1" font-weight="600" fill="#16a34a">ARCHIVE ROW · ANY WIND</text><text x="422.00" y="26.00" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="10.1" font-weight="600" fill="#16a34a">ARCHIVE ROW · ≥64 KT</text><text x="422.00" y="9.00" text-anchor="end" font-family="IBM Plex Mono,monospace" font-size="10.1" font-weight="600" fill="#dc2626">CONTRACT · ≥113 KT</text><text x="6.00" y="9.00" text-anchor="start" font-family="IBM Plex Mono,monospace" font-size="10.1" fill="#475569">WIND AT THE CROSSING</text></svg></div>
+  </div>
+  
+  <div><table class="ledger compact evidence"><tbody><tr class="grp"><td>DECLARED COHORT · N = 12 · SUFFICIENT</td></tr><tr class="ev "><td><div class="l1"><span class="nm">reached Cat 1 (64 kt)</span><span class="rt">25.0%</span></div><div class="l2 slotted"><span class="meta">3 / 12 · <span class="ivl">[9–53%]</span></span><span class="slot"><svg class="ivl-glyph" viewBox="0 0 84 9" width="84" height="9" data-cohort="97L" data-key="cat1" data-rate="0.25" data-lo="0.08894003962896138" data-hi="0.53231033912066" data-w="84" aria-label="25.0%, 95% Wilson 9–53%"><line x1="1.5" x2="82.5" y1="4.5" y2="4.5" stroke="var(--line-300)" stroke-width=".7"/><line class="whisker" x1="8.70" x2="44.62" y1="4.5" y2="4.5" stroke="var(--ink-600)" stroke-width="1.3" stroke-linecap="butt"/><circle class="pt" cx="21.75" cy="4.5" r="2.3" fill="var(--ink-900)"/></svg></span></div></td></tr><tr class="ev band"><td><div class="l1"><span class="nm">reached Cat 3 (96 kt)</span><span class="rt">16.7%</span></div><div class="l2 slotted"><span class="meta">2 / 12 · <span class="ivl">[5–45%]</span></span><span class="slot"><svg class="ivl-glyph" viewBox="0 0 84 9" width="84" height="9" data-cohort="97L" data-key="cat3" data-rate="0.16666666666666666" data-lo="0.04696414761482223" data-hi="0.44803635738467273" data-w="84" aria-label="16.7%, 95% Wilson 5–45%"><line x1="1.5" x2="82.5" y1="4.5" y2="4.5" stroke="var(--line-300)" stroke-width=".7"/><line class="whisker" x1="5.30" x2="37.79" y1="4.5" y2="4.5" stroke="var(--ink-600)" stroke-width="1.3" stroke-linecap="butt"/><circle class="pt" cx="15.00" cy="4.5" r="2.3" fill="var(--ink-900)"/></svg></span></div></td></tr><tr class="ev "><td><div class="l1"><span class="nm">reached Cat 4 (113 kt)</span><span class="rt">8.3%</span></div><div class="l2 slotted"><span class="meta">1 / 12 · <span class="ivl">[1–35%]</span></span><span class="slot"><svg class="ivl-glyph" viewBox="0 0 84 9" width="84" height="9" data-cohort="97L" data-key="cat4" data-rate="0.08333333333333333" data-lo="0.014864709450773478" data-hi="0.35388592179859524" data-w="84" aria-label="8.3%, 95% Wilson 1–35%"><line x1="1.5" x2="82.5" y1="4.5" y2="4.5" stroke="var(--line-300)" stroke-width=".7"/><line class="whisker" x1="2.70" x2="30.16" y1="4.5" y2="4.5" stroke="var(--ink-600)" stroke-width="1.3" stroke-linecap="butt"/><circle class="pt" cx="8.25" cy="4.5" r="2.3" fill="var(--ink-900)"/></svg></span></div></td></tr><tr class="ev band"><td><div class="l1"><span class="nm">reached Cat 5 (137 kt)</span><span class="rt">8.3%</span></div><div class="l2 slotted"><span class="meta">1 / 12 · <span class="ivl">[1–35%]</span></span><span class="slot"><svg class="ivl-glyph" viewBox="0 0 84 9" width="84" height="9" data-cohort="97L" data-key="cat5" data-rate="0.08333333333333333" data-lo="0.014864709450773478" data-hi="0.35388592179859524" data-w="84" aria-label="8.3%, 95% Wilson 1–35%"><line x1="1.5" x2="82.5" y1="4.5" y2="4.5" stroke="var(--line-300)" stroke-width=".7"/><line class="whisker" x1="2.70" x2="30.16" y1="4.5" y2="4.5" stroke="var(--ink-600)" stroke-width="1.3" stroke-linecap="butt"/><circle class="pt" cx="8.25" cy="4.5" r="2.3" fill="var(--ink-900)"/></svg></span></div></td></tr><tr class="ev "><td><div class="l1"><span class="nm">CONUS landfall — any intensity</span><span class="rt">83.3%</span></div><div class="l2 slotted"><span class="meta">10 / 12 · <span class="ivl">[55–95%]</span></span><span class="slot"><svg class="ivl-glyph" viewBox="0 0 84 9" width="84" height="9" data-cohort="97L" data-key="conus:any" data-rate="0.8333333333333334" data-lo="0.5519636426153274" data-hi="0.9530358523851776" data-w="84" aria-label="83.3%, 95% Wilson 55–95%"><line x1="1.5" x2="82.5" y1="4.5" y2="4.5" stroke="var(--line-300)" stroke-width=".7"/><line class="whisker" x1="46.21" x2="78.70" y1="4.5" y2="4.5" stroke="var(--ink-600)" stroke-width="1.3" stroke-linecap="butt"/><circle class="pt" cx="69.00" cy="4.5" r="2.3" fill="var(--ink-900)"/></svg></span></div></td></tr><tr class="ev band"><td><div class="l1"><span class="nm">CONUS landfall — ≥64 kt</span><span class="rt">8.3%</span></div><div class="l2 slotted"><span class="meta">1 / 12 · <span class="ivl">[1–35%]</span></span><span class="slot"><svg class="ivl-glyph" viewBox="0 0 84 9" width="84" height="9" data-cohort="97L" data-key="conus:hurricane" data-rate="0.08333333333333333" data-lo="0.014864709450773478" data-hi="0.35388592179859524" data-w="84" aria-label="8.3%, 95% Wilson 1–35%"><line x1="1.5" x2="82.5" y1="4.5" y2="4.5" stroke="var(--line-300)" stroke-width=".7"/><line class="whisker" x1="2.70" x2="30.16" y1="4.5" y2="4.5" stroke="var(--ink-600)" stroke-width="1.3" stroke-linecap="butt"/><circle class="pt" cx="8.25" cy="4.5" r="2.3" fill="var(--ink-900)"/></svg></span></div></td></tr></tbody></table></div>
+</div>
+<div class="box refusal cols2" style="margin-top:3px"><h3>THE THREE HOLES, NAMED</h3>
   <p><b>1 · EXACT TRIGGER NOT SCORED.</b> No vetted Atlas row exists for <b>Cat 4+ at CONUS
   landfall</b>; none was created here.</p>
   <p><b>2 · NO MARGINAL MULTIPLICATION.</b> The joint trigger is <b>not</b> estimated as
@@ -533,10 +572,22 @@ a.replay{display:inline-block;font-family:var(--font-mono);font-size:var(--t-det
   <p><b>3 · NO REGIONAL-VARIANT FABRICATION.</b> Atlas holds <b>no vetted Gulf Coast-only or
   Florida-only row</b>. Cohort tracks reach Texas, Louisiana and Florida — facts about named
   storms and geography, <b>not</b> a Gulf, Florida, Texas or Louisiana rate.</p></div>
+</section>
+
+<section class="sec sechd-tight"><div class="sec-hd"><span class="n">03</span><h2>Evidence bridge, evidence gap</h2><span class="note">what is needed · what is held · the archive's verdict</span></div>
+<div class="bridge2">
+  <div class="col-h">Discrete needs</div><div class="col-h"><span class="ar">→</span>Atlas currently holds</div><div class="col-h"><span class="ar">→</span>The archive's verdict</div>
+  <div class="need"><b>Intensity at the crossing,</b> 130 mph, determined by the NHC at landfall.</div><div class="hold">The ladder scores <b>lifetime peak</b>, not intensity at the crossing, and the landfall contract has two forms, <b>any</b> and <b>≥64 kt</b> — modelled geometry, not an NHC determination.</div><div class="verdict"><span>No ≥113 kt landfall row · a different definition</span></div><div class="need"><b>Which storms did this before,</b> and where they went.</div><div class="hold">The named <b>12-member</b> cohort, each member's recorded crossings and its track.</div><div class="verdict ok"><span>Supported as history, never as a rate</span></div>
+</div>
+<p class="fn"><b>NAMED HISTORY — ATLAS MODELLED RECORDS, NOT NHC SETTLEMENT DETERMINATIONS.</b> By the archive's rule (majors first, then peak descending; never similarity): <b>ANITA 1977</b>, the one Cat 4, has its Cat 4 crossing recorded in <b>Tamaulipas, Mexico</b>; <b>ALICIA 1983</b>, the one CONUS ≥64 kt crossing, at <b>Cat 3</b> in <b>Texas</b>. Neither is evidence for Discrete's trigger.
+Conditional on formation in the declared cell — <b>none is a probability for Edouard</b> or for Discrete's contract.</p>
 <div class="box commercial" style="margin-top:3px"><h3>WHAT A STRUCTURER COULD USE THIS FOR — AND WHAT THIS PAGE DOES NOT DO</h3>
   <ul><li><b>An auditable historical denominator</b> — twelve named storms behind one declared condition, with an interval on each row.</li><li><b>A replayable cohort</b> for counterparty review, and research input upstream of contract design — not where it is priced.</li></ul>
   <p>This page does <b>not</b> price the contract, estimate fair value, predict landfall, estimate the chance Edouard triggers anything, replace the NHC, or supply settlement data. <b>WHAT ATLAS ADDS:</b> a declared cohort, exact n / N with a 95% Wilson interval, a visible refusal, a replay URL.</p></div>
 <div class="cite"><div class="khead"><span class="k">CITE THIS COHORT</span><a class="replay" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0" title="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0">REPLAY PUBLISHED COHORT · N=12 ↗</a></div><div class="v">STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 12 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a</div><span class="raw">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0</span></div>
+<p class="fn liveline"><b>LIVE STATUS, AND WHAT IT IS NOT.</b> NHC/ATCF classifies <b>Tropical Storm Edouard</b> (AL052026); the operational record's first tropical-status fix is <b>2026-08-31T18:00:00.000Z</b>, <b>28.1N 91W</b>, TD 30 kt.
+<b>NOT ATLAS GENESIS:</b> the pack does not hold AL052026 and takes no genesis from the operational layer; the cohort
+remains the declared cell at <b>28.0°N 88.7°W</b>, <b>not where Edouard formed</b>.</p>
 </section>
 
 <div class="spacer"></div>

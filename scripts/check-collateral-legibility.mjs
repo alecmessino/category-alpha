@@ -81,6 +81,11 @@ for (const f of PROSPECT) {
       /* Rule-flow chips are detail wherever they sit, a refusal box included: the sentence they
          compress is printed beside them at the body size. */
       if (el.closest(".flow") || el.closest(".flowlead")) return "detail";
+      /* The joint matrix, the bridge's verdicts and references, and figure captions are
+         detail furniture; the bridge's need/hold prose stays at the body floor. */
+      if (el.closest(".joint") || el.closest(".jointnote") || el.closest(".verdict") || el.closest(".ref")
+        || el.closest(".col-h") || el.closest(".tl-cap") || el.closest(".tl-legend") || el.closest(".figcap")
+        || el.closest(".src") || el.classList.contains("lead")) return "detail";
       if (el.closest(".cite") || el.closest(".citelist") || el.closest(".citerows")
         || el.classList.contains("u")) return "citation";
       if (el.closest(".card") || el.closest(".tile")) {

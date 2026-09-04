@@ -131,9 +131,12 @@ function blocks(html) {
   /* INNERMOST BLOCKS. A table cell that wraps a prose div and a feed div is two statements, not
      one, and treating it as one manufactured a co-occurrence the page does not make. A block
      that contains another block is skipped in favour of its children. */
-  const BLOCK = /<(p|li|td|th|h1|h2|h3|caption|div)\b[^>]*>([\s\S]*?)<\/\1>/g;
+  /* The body of a match may not open another block: a <div class="box"> that wraps an <h3> and
+     two <p>s is therefore never matched as one block -- the scan fails at the div, advances, and
+     matches each child on its own. (An unguarded non-greedy match consumed the children with the
+     wrapper, so a statement printed inside a box was never checked at all.) */
+  const BLOCK = /<(p|li|td|th|h1|h2|h3|caption|div)\b[^>]*>((?:(?!<(?:p|li|td|th|h1|h2|h3|caption|div|table)\b)[\s\S])*?)<\/\1>/g;
   for (const m of body.matchAll(BLOCK)) {
-    if (/<(p|li|div|table)\b/.test(m[2])) continue;    // not innermost
     const t = text(m[2]).trim();
     if (t) out.push(t);
   }
@@ -533,7 +536,7 @@ for (const f of files) {
      interval come from -- and every mark position is recomputed from those numbers. A glyph on
      a stamped or refused row, or a picture that disagrees with its row, fails the sheet. */
   const byId = Object.fromEntries(M.systems.map((sy) => [sy.id, sy]));
-  const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/data-([a-z0-9]+)="([^"]*)"/g)].map((a) => [a[1], a[2]]));
+  const attrsOf = (tag) => Object.fromEntries([...tag.matchAll(/data-([a-z0-9-]+)="([^"]*)"/g)].map((a) => [a[1], a[2]]));
   const pos = (v, w) => (1.5 + v * (w - 3)).toFixed(2);
   const badGlyph = [];
   let glyphs = 0;
@@ -572,6 +575,106 @@ for (const f of files) {
     if (!values || !axis || !marks) badRange.push(`${a.cohort}/${a.key}:${values ? "" : " values"}${axis ? "" : " axis"}${marks ? "" : " positions"}`);
   }
   if (ranges) ok(badRange.length === 0, `every timing range draws its own manifest quantiles (${ranges})`, badRange.slice(0, 4).join("; "));
+
+  /* -- THE MEMBER TIMELINE DRAWS THE MEMBER ROLL, AND NOTHING ELSE ------------------------
+     Every row is a member of the manifest's roll, every mark's data-h is that member's held
+     hour and sits where the axis puts it, every crossing is one the landfall table recorded
+     with the wind it holds, and the CONUS quantile's n is the number of CONUS crossings drawn
+     -- more than the members that cross, which is the crossings-not-storms fact the figure has
+     to show. No live content may sit inside the figure. */
+  for (const m of html.matchAll(/<svg class="tl"([^>]*)>([\s\S]*?)<\/svg>/g)) {
+    const a = attrsOf(m[1]);
+    const sy = byId[a.cohort];
+    const bad = [];
+    if (!sy || !sy.members) { ok(false, "member timeline names a cohort with a member roll", a.cohort); continue; }
+    const x0 = Number(a.x0), x1 = Number(a.x1), hmax = Number(a.hmax);
+    const X = (h) => (x0 + (h / hmax) * (x1 - x0)).toFixed(2);
+    const rowsM = [...m[2].matchAll(/<g class="tl-row"([^>]*)>([\s\S]*?)<\/g>/g)];
+    if (rowsM.length !== sy.members.length) bad.push(`${rowsM.length} rows for ${sy.members.length} members`);
+    let conusDrawn = 0;
+    for (const rm of rowsM) {
+      const ra = attrsOf(rm[1]);
+      const mem = sy.members.find((x) => x.storm_id === ra.storm);
+      if (!mem) { bad.push(`row for unknown member ${ra.storm}`); continue; }
+      const body = rm[2];
+      const mark = (cls, held, pos) => {
+        const mm = body.match(new RegExp(`<[a-z]+ class="${cls}" data-h="([^"]*)"([^>]*)>`));
+        if (held === null || held === undefined) { if (mm) bad.push(`${mem.name}: ${cls} drawn with no held value`); return; }
+        if (!mm) { bad.push(`${mem.name}: ${cls} not drawn`); return; }
+        if (mm[1] !== String(held)) bad.push(`${mem.name}: ${cls} value ${mm[1]} vs held ${held}`);
+        if (!pos(mm[2], X(held))) bad.push(`${mem.name}: ${cls} position`);
+      };
+      mark("m-ts", mem.hours_to_ts, (at, px) => at.includes(`cx="${px}"`));
+      mark("m-cat1", mem.hours_to_cat1, (at, px) => at.includes(`cx="${px}"`));
+      mark("m-cat3", mem.hours_to_cat3, (at, px) => at.includes(`rotate(45 ${px} `));
+      const crosses = [...body.matchAll(/<path class="m-cross" data-h="([^"]*)" data-kt="([^"]*)" data-region="([^"]*)" d="M([0-9.]+) /g)];
+      if (crosses.length !== mem.crossings.length || Number(ra.crossings) !== mem.crossings.length) bad.push(`${mem.name}: ${crosses.length} crossings drawn, ${mem.crossings.length} held`);
+      crosses.forEach((c, i) => {
+        const k = mem.crossings[i];
+        if (!k) return;
+        const kt = k.category === null ? "" : String(k.vmax_kt);
+        if (c[1] !== String(k.hours_from_genesis) || c[2] !== kt || c[3] !== k.region) bad.push(`${mem.name}: crossing ${i + 1} values`);
+        if (Math.abs(Number(c[4]) - (Number(X(k.hours_from_genesis)) - 3.3)) > 0.02) bad.push(`${mem.name}: crossing ${i + 1} position`);
+      });
+      conusDrawn += mem.crossings.filter((k) => k.region === "conus").length;
+    }
+    const tc = sy.time_to_event && sy.time_to_event.landfall_conus;
+    if (tc && tc.n !== conusDrawn) bad.push(`${conusDrawn} CONUS crossings drawn, quantile n = ${tc.n}`);
+    for (const q of m[2].matchAll(/<g class="tl-q"([^>]*)>([\s\S]*?)<\/g>/g)) {
+      const qa = attrsOf(q[1]);
+      const d = sy.time_to_event[qa.key];
+      if (!d) { bad.push(`quantile row ${qa.key} has no held quantiles`); continue; }
+      if (!["p10", "p25", "median", "p75", "p90"].every((k) => String(d[k]) === qa[k]) || String(d.n) !== qa.n) bad.push(`quantile ${qa.key} values`);
+      const outer = q[2].match(/class="outer" x1="([^"]+)" x2="([^"]+)"/), inner = q[2].match(/class="inner" x1="([^"]+)" x2="([^"]+)"/), med = q[2].match(/class="med" x1="([^"]+)"/);
+      if (!outer || !inner || !med || outer[1] !== X(d.p10) || outer[2] !== X(d.p90) || inner[1] !== X(d.p25) || inner[2] !== X(d.p75) || med[1] !== X(d.median)) bad.push(`quantile ${qa.key} positions`);
+    }
+    if (/live|b-deck|AL05|advisory/i.test(m[2])) bad.push("live content inside the member timeline");
+    ok(bad.length === 0, `the member timeline draws the member roll (${rowsM.length} members)`, bad.slice(0, 4).join("; "));
+    if (tc) {
+      const crossingMembers = sy.members.filter((x) => x.crossings.some((k) => k.region === "conus")).length;
+      const busiest = Math.max(...sy.members.map((x) => x.crossings.length));
+      ok(tc.n > crossingMembers && busiest > 1,
+        `crossings, not storms, is visible: ${tc.n} CONUS crossings over ${crossingMembers} members, one member drawing ${busiest}`);
+    }
+  }
+
+  /* -- THE JOINT MATRIX: MARGINS ARE PUBLISHED ROWS, THE INTERIOR HOLDS NO NUMBER ----------
+     Both margins must equal the manifest rows they name, exactly. No interior cell may carry a
+     count, a fraction, a percentage or a decimal; the contract's cell must say NOT SCORED; and
+     the product of the two marginal rates must appear nowhere on the sheet. */
+  for (const m of html.matchAll(/<div class="joint"([^>]*)>([\s\S]*?)\n<\/div>/g)) {
+    const a = attrsOf(m[1]);
+    const bad = [];
+    const sy = M.systems.find((x) => [...x.intensity_rows, ...x.landfall_rows].some((r) => r.key === a["row-key"]));
+    const rowOf = (key) => sy && [...sy.intensity_rows, ...sy.landfall_rows].find((r) => r.key === key);
+    for (const h of m[2].matchAll(/<div class="jc head (?:col|row)" data-key="([^"]+)" data-count="([^"]+)" data-n="([^"]+)" data-rate="([^"]+)" data-lo="([^"]+)" data-hi="([^"]+)"/g)) {
+      const r = rowOf(h[1]);
+      if (!r) { bad.push(`margin ${h[1]} is not a manifest row`); continue; }
+      if (String(r.count) !== h[2] || String(r.n_storms) !== h[3] || String(r.rate) !== h[4] || String(r.ci95[0]) !== h[5] || String(r.ci95[1]) !== h[6]) bad.push(`margin ${h[1]} differs from its row`);
+      if (!m[2].includes(`<b>${r.count} / ${r.n_storms}</b>`)) bad.push(`margin ${h[1]} does not print its n / N`);
+    }
+    const cells = [...m[2].matchAll(/<div class="jc cell[^"]*">([\s\S]*?)<\/div>/g)].map((c) => c[1].replace(/<[^>]+>/g, " "));
+    if (cells.length !== 4) bad.push(`${cells.length} interior cells`);
+    for (const c of cells) if (/\d\s*\/\s*\d|%|\d+\.\d/.test(c)) bad.push(`interior cell carries a number: "${c.trim().slice(0, 40)}"`);
+    if (!/NOT SCORED/.test(cells[0] || "")) bad.push("the contract's cell does not say NOT SCORED");
+    const R = rowOf(a["row-key"]), Cc = rowOf(a["col-key"]);
+    if (R && Cc) {
+      const product = `${(R.rate * Cc.rate * 100).toFixed(1)}%`;
+      if (t.includes(product)) bad.push(`the product of the margins (${product}) appears on the sheet`);
+    }
+    ok(bad.length === 0, `the joint matrix publishes its margins and generates no interior number`, bad.slice(0, 4).join("; "));
+  }
+
+  /* -- THE WIND AXIS: the archive's cuts and the contract's line are the pack's thresholds -- */
+  for (const m of html.matchAll(/<svg class="axis"([^>]*)>([\s\S]*?)<\/svg>/g)) {
+    const a = attrsOf(m[1]);
+    const th = M.pack.thresholds_kt || {};
+    const bad = [];
+    if (String(th.cat4) !== a["contract-kt"]) bad.push(`contract line at ${a["contract-kt"]}, Cat 4 is ${th.cat4}`);
+    const spans = [...m[2].matchAll(/class="span" data-kt0="([^"]+)"/g)].map((x) => Number(x[1]));
+    if (spans.length !== 2 || spans[0] !== (th.td ?? 0) || spans[1] !== th.cat1) bad.push(`archive spans ${spans.join(",")} vs any=${th.td ?? 0}, ≥64=${th.cat1}`);
+    ok(bad.length === 0, "the wind axis draws the pack's thresholds", bad.join("; "));
+  }
 
   /* And the STATUS column survives on any column-model outcome ledger -- the house style has one
      and its absence would mean a renderer dropped it. Evidence tables carry state in the row. */

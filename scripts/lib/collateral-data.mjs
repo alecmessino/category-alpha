@@ -80,11 +80,12 @@ export const REP_RULE =
   + "descending, ties by season descending. Not a similarity ranking: Storm Atlas implements "
   + "no closest-analog metric for a filter-defined cohort, and every member is weighted 1.0.";
 
+const tierOf = (c) => (c.peak_vmax_kt >= 96 ? 0 : c.peak_vmax_kt >= 64 ? 1 : 2);
+const repOrder = (a, b) => tierOf(a) - tierOf(b) || (b.peak_vmax_kt - a.peak_vmax_kt) || (b.season - a.season);
+
 function representatives(result, limit = 8) {
-  const tier = (c) => (c.peak_vmax_kt >= 96 ? 0 : c.peak_vmax_kt >= 64 ? 1 : 2);
   const known = result.cases.filter((c) => c.peak_vmax_kt !== null && c.peak_vmax_kt !== undefined);
-  const sorted = [...known].sort((a, b) =>
-    tier(a) - tier(b) || (b.peak_vmax_kt - a.peak_vmax_kt) || (b.season - a.season));
+  const sorted = [...known].sort(repOrder);
   return {
     rule: REP_RULE,
     cohort_n: result.n_cases,
@@ -107,6 +108,29 @@ function representatives(result, limit = 8) {
         })),
     })),
   };
+}
+
+/* THE MEMBER ROLL. Every case in the cohort -- not the eight the card row prints -- with the
+   engine's own hours to each threshold and every crossing the landfall table recorded for it,
+   in the archive's representative order. This is what the member timeline draws: each mark on
+   it is one of these numbers, and hours_from_genesis is (landfall_utc - genesis_utc) and
+   nothing else. A crossing here is modelled landfall geometry, never an NHC determination;
+   twelve crossings on one member are twelve rows for one storm, which is exactly what the
+   CONUS time-to-crossing quantile counts. Nothing is aggregated by sub-region. */
+function memberRoll(result) {
+  return [...result.cases].sort(repOrder).map((c) => {
+    const g = new Date(c.genesis_utc).getTime();
+    return {
+      storm_id: c.storm_id, name: c.name || "UNNAMED", season: c.season,
+      peak_vmax_kt: c.peak_vmax_kt, max_category: c.max_category, genesis_utc: c.genesis_utc,
+      hours_to_ts: c.hours_to_ts, hours_to_cat1: c.hours_to_cat1, hours_to_cat3: c.hours_to_cat3,
+      crossings: (c.landfalls || []).filter((l) => !l.suspect_relocation).map((l) => ({
+        region: l.region, sub_region: l.sub_region, vmax_kt: l.vmax_kt, category: l.category,
+        detection: l.detection, landfall_utc: l.landfall_utc,
+        hours_from_genesis: Math.round(((new Date(l.landfall_utc).getTime() - g) / 36e5) * 100) / 100,
+      })),
+    };
+  });
 }
 
 /** Track polyline for one storm row, from the pack. Drawn geometry, never a rate. */
@@ -283,6 +307,7 @@ export async function build() {
       time_to_event: r.time_to_event,
       gaps: r.gaps,
       representatives: reps,
+      members: memberRoll(r),
       /* Drawn geometry for the analog plate. Tracks are not rates and are carried in their own
          field so no template can reach for one while meaning the other. */
       tracks: reps.members.map((m) => ({

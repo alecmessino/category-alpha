@@ -343,6 +343,65 @@ a.replay{display:inline-block;font-family:var(--font-mono);font-size:var(--t-det
 .cite .khead{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin-bottom:1px}
 .cite .khead .k{margin:0}
 .cite .raw b{color:var(--ink-600);font-weight:600;letter-spacing:.4px}
+/* THE MEMBER TIMELINE. A figure set between two rules, not a box: it reads as a table would. */
+.tl-fig{border-top:1px solid var(--ink-900);border-bottom:1px solid var(--line-300);padding:2px 0 1px;margin:2px 0 0}
+.tl-fig svg{display:block}
+.tl-legend{display:flex;flex-wrap:wrap;gap:1px var(--sp-4);padding:1px 0 0;font-family:var(--font-mono);font-size:var(--t-detail);
+  letter-spacing:.3px;color:var(--ink-600);line-height:1.3}
+.tl-legend i{display:inline-block;vertical-align:-1px;margin-right:4px}
+.tl-legend .o{width:7px;height:7px;border-radius:50%;background:#fff;border:1.2px solid var(--ink-900)}
+.tl-legend .f{width:7px;height:7px;border-radius:50%;background:#5b6b80}
+.tl-legend .d{width:6px;height:6px;background:var(--ink-900);transform:rotate(45deg);margin-right:5px}
+.tl-legend .up{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid #5b6b80}
+.tl-legend .dn{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:7px solid #5b6b80}
+.tl-legend .sw{width:9px;height:7px;border-radius:1px}
+.figcap{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-600);margin:0 0 1px}
+/* THE JOINT MATRIX. Margins carry the published rows; the interior is drawn as what it is. */
+.joint{display:grid;grid-template-columns:148px minmax(0,1fr) minmax(0,1fr);gap:1.5px;margin-top:1px}
+.joint .jc{font-family:var(--font-mono);font-size:var(--t-detail);line-height:1.2;color:var(--ink-600)}
+.joint .head{padding:1px 3px 2px;display:flex;flex-direction:column;justify-content:flex-end}
+.joint .head.col{text-align:center;align-items:center;border-bottom:1px solid var(--ink-900)}
+.joint .head.row{text-align:right;align-items:flex-end;border-right:1px solid var(--ink-900);justify-content:center}
+.joint .head .t{font-family:var(--font-sans);font-weight:600;color:var(--ink-900);font-size:var(--t-detail);line-height:1.15}
+.joint .head .s{color:var(--ink-400)}
+.joint .head .m{margin-top:1px}
+.joint .head .m b{color:var(--ink-900)}
+.joint .head .ivl-glyph{margin-top:1px}
+.joint .head.not .t{color:var(--ink-400);font-weight:500}
+.joint .cell{min-height:22px;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px 5px;
+  border:1px dotted var(--line-300);border-radius:2px;color:var(--ink-400);letter-spacing:.2px}
+.joint .cell.void{border:1.5px dashed var(--red-600);color:var(--red-600);font-weight:700;letter-spacing:.3px;
+  background:repeating-linear-gradient(135deg,#fff5f5 0 4px,#fde7e7 4px 6px)}
+.jointnote{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);line-height:1.28;margin-top:3px}
+.jointnote b{color:var(--ink-900)}
+/* THE WIND AXIS beneath the matrix: the archive's two landfall cuts against the contract's. */
+.axis{margin-top:2px}
+.grid2.matrixleft{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr)}
+.axis svg{display:block}
+/* THE BRIDGE, AS RULES. Three columns, hairlines between rows, a verdict that is a coloured
+   word with a rule beside it -- not nine boxes. */
+.bridge2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,.86fr);column-gap:var(--sp-5);margin-top:2px}
+.bridge2 .col-h{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.9px;text-transform:uppercase;color:var(--ink-600);
+  padding-bottom:2px;border-bottom:1px solid var(--ink-900)}
+.bridge2 .col-h .ar{color:var(--ink-400);margin-right:6px}
+.bridge2 .need,.bridge2 .hold,.bridge2 .verdict{padding:2px 0 3px;border-bottom:1px solid var(--line-200)}
+.bridge2 .need,.bridge2 .hold{font-size:var(--t-body);line-height:1.2;color:var(--ink-700)}
+.bridge2 .need b,.bridge2 .hold b{color:var(--ink-900)}
+.bridge2 .ref{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);margin-top:1px;line-height:1.2}
+.bridge2 .ref b{color:var(--ink-900)}
+.bridge2 .verdict{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+  color:var(--red-600);line-height:1.22;display:flex;align-items:flex-start}
+.bridge2 .verdict span{border-left:2px solid currentColor;padding-left:6px;display:block;margin-top:1px}
+.bridge2 .verdict.ok{color:var(--green-600)}
+/* One refusal box carrying two statements, each with its own lead. */
+.box .lead{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;color:var(--red-600);font-weight:600;margin-right:4px}
+.liveline{border-left:3px solid var(--blue-600);padding-left:6px}
+/* Three short statements read as three, not as one column of prose: two columns inside the box. */
+.box.cols2{column-count:2;column-gap:var(--sp-6)}
+.box.cols2 h3{column-span:all}
+.box.cols2 p{margin-bottom:2px}
+.box .src{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);line-height:1.25;margin-top:2px;border-top:1px dotted var(--line-300);padding-top:1px}
+.box .src b{color:var(--ink-900)}
 /* The raw replay string, kept in the provenance block for print at the legal size. */
 .cite .raw{display:block;font-family:var(--font-mono);font-size:var(--t-legal);color:var(--ink-400);
   word-break:break-all;line-height:1.25;margin-top:1px}
