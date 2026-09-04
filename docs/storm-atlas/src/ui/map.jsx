@@ -16,11 +16,13 @@
  * says what is drawn and the foot band says at what scale, in what projection, and against
  * which coastline. An overlay would have been easier and would sit on top of the Gulf.
  *
- * TWO TIERS OF COASTLINE, AND THE DIFFERENCE IS THE POINT. The tile layer is CONTEXT -- South
- * America, Africa, Canada, everything the landfall rule never looks at -- and is held back to
- * that role. The five modelled regions are drawn over it from the archive's own rings, at full
- * contrast, by coastline-layer.js. A reader can see, without being told, where this archive can
- * detect a landfall at all.
+ * TWO TIERS OF COASTLINE, AND THE DIFFERENCE IS THE POINT. The context tier -- South America,
+ * Africa, Canada, everything the landfall rule never looks at -- is Natural Earth 1:110m land,
+ * packed with the archive and drawn from this origin, held back to that role. The five modelled
+ * regions are drawn over it from the archive's own rings, at full contrast, by
+ * coastline-layer.js. A reader can see, without being told, where this archive can detect a
+ * landfall at all. Nothing on the plate is fetched from a third party: the tile service the
+ * plate used to draw its context from is gone, and scripts/test-atlas-context.mjs keeps it gone.
  */
 
 import React from "react";
@@ -32,7 +34,9 @@ import { CoastlineLayer } from "../render/coastline-layer.js";
 import { ReplayHeadsLayer, ReplayLayer } from "../render/replay-layer.js";
 import { hitGenesis } from "../render/hit-test.js";
 import { CATEGORY_COLOR, MAJOR_FROM } from "../render/palette.js";
-import { formatPosition } from "../engine/geo.js";
+import { formatPosition, wrap180 } from "../engine/geo.js";
+import { cellGrid, cellOf, fmt1 } from "../engine/analogs.js";
+import { claimText } from "./kit.jsx";
 
 const L = globalThis.L;
 
@@ -46,6 +50,12 @@ const EMPTY_ROWS = new Uint32Array(0);
 /* The scale bar snaps to one of these rather than printing whatever 100 px happens to be.
    A bar labelled "1,143 KM" is a measurement of the viewport, not of the map. */
 const SCALE_STEPS = [100, 200, 250, 500, 1000, 2000, 4000];
+
+/* THE RETICLE'S HIT TOLERANCE, STATED ONCE AND READ TWICE. The crosshair announces what Enter
+   will do and then Enter does it; two tolerances would let the announcement promise a storm the
+   press does not open. Slightly wider than the pointer's 9px because a crosshair is aimed in
+   whole key presses rather than swept. */
+const RETICLE_TOLERANCE = 12;
 
 /* ── THE CAMERA ────────────────────────────────────────────────────────────────────────────
  *
@@ -217,13 +227,16 @@ export function applyFrame(m, frame, { clamp = null, mode = "cover", padPx = 0, 
 }
 
 export function AtlasMap({
-  archive, world, coast, rows, emphasis, selected, onSelect, onProbe, probe, replayMs, home,
+  archive, world, coast, contextLand = null, rows, emphasis, selected, onSelect, onProbe, probe,
+  replayMs, home,
   operationalTrack = null,
   homeClamp = null, homeAnchor = null, evidenceFrame = null, subjectFrame = null,
   colorBy, showPathway, pathway, pathwayStep, dimPopulation, softenEmphasis, onViewChange,
   onHover, showGenesis = true, showLandfalls = true,
   showGenesisDensity, genesisDensity, mode = "explore", timeline, replayCursorMin,
   kept = 0, context = 0, selectedCount = 0, hint, onGesture, cameraApi = null, children,
+  underDensity = false, plateMode = "pathway", onPlateMode = null, lens = null,
+  onBrush = null, brush = null,
 }) {
   const el = React.useRef(null);
   const plate = React.useRef(null);
@@ -232,6 +245,24 @@ export function AtlasMap({
   const [ready, setReady] = React.useState(false);
   const [hover, setHover] = React.useState(null);
   const [frame, setFrame] = React.useState(null);
+  /* THE RETICLE: the plate's keyboard hands.
+   *
+   * The map answers a POINTER -- click open water to ask the question, click a genesis point to
+   * open that storm -- and until now that gesture had no keyboard equivalent, so the primary
+   * interaction of this surface was unreachable without a mouse. Arrow keys could not simply be
+   * taken: they are Leaflet's own pan, and stealing them would break the one map gesture that
+   * already worked from the keyboard. So the reticle is a MODE, entered from a real button on
+   * the plate's foot: while it is on, the arrows move a crosshair rather than the map, Enter does
+   * exactly what a click at that point does, and Escape gives the arrows back.
+   *
+   * Held in container pixels, because that is what both the hit test and the projection take. */
+  const [reticle, setReticle] = React.useState(null);
+  const reticleBtn = React.useRef(null);
+  /* The control is Leaflet's DOM, not React's, so its pressed state is written to it. */
+  React.useEffect(() => {
+    if (reticleBtn.current) reticleBtn.current.setAttribute("aria-pressed", reticle ? "true" : "false");
+  }, [reticle]);
+  const [dragBox, setDragBox] = React.useState(null);
 
   /* THE CAMERA'S TWO BITS OF MEMORY.
      `moving` counts the re-frames this component is itself performing, so the move events they
@@ -239,6 +270,7 @@ export function AtlasMap({
      only thing that clears it is an explicit HOME or FIT. */
   const moving = React.useRef(0);
   const userMoved = React.useRef(false);
+  const brushing = React.useRef(false);
   const fittedSubject = React.useRef(null);
   /* WHETHER THE CAMERA IS STILL SHOWING THE CANONICAL APERTURE AND NOTHING ELSE HAS CLAIMED IT.
      Separate from `userMoved`, which records only whether the READER moved: FIT and the subject
@@ -247,7 +279,17 @@ export function AtlasMap({
 
   // Callers change identity every render; keep them in a ref so the map is built once.
   const cb = React.useRef({});
-  cb.current = { onSelect, onProbe, onViewChange, onHover, onGesture };
+  cb.current = { onSelect, onProbe, onViewChange, onHover, onGesture, onBrush };
+  /* WHAT THE CELL UNDER THE POINTER COUNTS. The active density Map and the cohort size, read by
+     the mousemove handler through a ref so the readout costs no render: the literal count for
+     the cell is one Map lookup on the same "lat,lon" key the engine emitted, never a value the
+     renderer computed for itself. */
+  const cellsRef = React.useRef({});
+  cellsRef.current = {
+    density: showPathway ? pathway : showGenesisDensity ? genesisDensity : null,
+    kind: showPathway ? "pathway" : showGenesisDensity ? "genesis" : null,
+    step: pathwayStep || 2.0, kept,
+  };
   /* The frames change identity on every cohort edit; the controls read them from here so that
      wiring HOME and FIT does not rebuild the map. */
   const frames = React.useRef({});
@@ -337,21 +379,31 @@ export function AtlasMap({
       mk("HOME", "the canonical North Atlantic + East Pacific aperture (H)",
         "data-camera-home", () => goHome());
       mk("FIT", "frame the evidence currently drawn (F)", "data-camera-fit", () => goFit());
+      /* THE KEYBOARD'S WAY ONTO THE PLATE, WITH THE OTHER TWO WAYS OF DRIVING IT. The gesture
+         this surface is built on is a click on the map; without this the keyboard could reach
+         every word on the page and not the one thing it is for. It is a real control in the
+         tab order, it carries aria-pressed, and it sits with HOME and FIT rather than on the
+         foot, because it drives the plate and the foot reads it. */
+      const ret = mk("RETICLE",
+        "move a crosshair with the arrow keys; Enter does what a click does — opens a storm under it, or asks what formed at that point. Escape gives the arrows back to the map.",
+        "data-reticle-toggle", () => setReticle((r) => {
+          if (r) return null;
+          const s = map.current ? map.current.getSize() : { x: 400, y: 300 };
+          return { x: Math.round(s.x / 2), y: Math.round(s.y / 2) };
+        }));
+      ret.setAttribute("aria-pressed", "false");
+      reticleBtn.current = ret;
       L.DomEvent.disableClickPropagation(box);
       return box;
     };
     nav.addTo(m);
     L.control.zoom({ position: "topright" }).addTo(m);
-    /* CONTEXT, AND ONLY CONTEXT. This is the same tile endpoint the terminal draws, backed off
-       from 0.62 to 0.42 so it sits at the contextual ink level against the plate's own
-       background rather than competing with the archive geometry laid over it. It earns its
-       place by drawing the land this archive holds no rings for -- South America, Africa,
-       Canada -- and by carrying detail at high zoom outside the modelled regions. */
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      subdomains: "abcd", maxZoom: 9, opacity: 0.42,
-      attribution: "© OpenStreetMap · CARTO",
-    }).addTo(m);
-    m.attributionControl.addAttribution("IBTrACS · HURDAT2 · Natural Earth 10m");
+    /* NO TILE LAYER. The context land is the Natural Earth 1:110m pack, drawn by the coastline
+       layer beneath the archive's own rings; see setContext below. The attribution names both
+       Natural Earth scales because two are on the plate: 10m admin-1 for the landfall rings the
+       archive tested against, 110m for the context around them. */
+    m.attributionControl.addAttribution(
+      "IBTrACS · HURDAT2 · Natural Earth 10m (landfall rings) · 110m (context)");
 
     const coastline = new CoastlineLayer().addTo(m);
     const pathwayLayer = new PathwayLayer().addTo(m);
@@ -387,10 +439,59 @@ export function AtlasMap({
       if (!moving.current) { userMoved.current = true; atAperture.current = false; }
     });
     m.on("click", (e) => {
+      /* A SHIFT-DRAG IS A BRUSH, NOT A CLICK. Leaflet fires a click at the end of one, and
+         letting it through would move the reader's probe to wherever they released the mouse --
+         a condition they never asked for, on a gesture whose whole point is that it asks
+         nothing. */
+      if (brushing.current) { brushing.current = false; return; }
       const hit = hitGenesis(archiveRef.current, m, e.containerPoint,
         { rows: rowSetRef.current });
       if (hit) cb.current.onSelect && cb.current.onSelect(hit.row);
       else cb.current.onProbe && cb.current.onProbe(e.latlng.lat, e.latlng.lng);
+    });
+
+    /* ── THE GEOGRAPHIC BRUSH ────────────────────────────────────────────────────────────
+     *
+     * Shift-drag a rectangle and the storms that pass through it are lifted, with the count
+     * stated on the foot. IT IS AN INSPECTION AND NOTHING ELSE: no rate is computed, no
+     * denominator changes, the cohort is untouched and the URL is not written. A rectangle is
+     * not a condition this archive can be asked -- the canonical spec conditions on GENESIS
+     * within a radius -- so offering one that published would be inventing a question the engine
+     * cannot answer. What it answers is "which of these storms went through here", which is a
+     * membership question the cell index already holds.
+     *
+     * Leaflet's own box-zoom is on shift-drag too, so it is disabled while this exists; the two
+     * cannot share the gesture and the reader's rectangle is the more useful of the two. */
+    m.boxZoom.disable();
+    const container = m.getContainer();
+    container.addEventListener("mousedown", (ev) => {
+      if (!ev.shiftKey || ev.button !== 0 || !cb.current.onBrush) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const start = m.mouseEventToContainerPoint(ev);
+      brushing.current = true;
+      let box = { x0: start.x, y0: start.y, x1: start.x, y1: start.y };
+      setDragBox(box);
+      const move = (e2) => {
+        const p = m.mouseEventToContainerPoint(e2);
+        box = { ...box, x1: p.x, y1: p.y };
+        setDragBox(box);
+      };
+      const up = () => {
+        window.removeEventListener("mousemove", move);
+        window.removeEventListener("mouseup", up);
+        setDragBox(null);
+        const w = Math.abs(box.x1 - box.x0);
+        const h = Math.abs(box.y1 - box.y0);
+        /* A stray shift-click is not a brush. Under a few pixels there is no rectangle to speak
+           of, and clearing is the honest answer to one. */
+        if (w < 6 || h < 6) { cb.current.onBrush(null); return; }
+        const a = m.containerPointToLatLng([Math.min(box.x0, box.x1), Math.min(box.y0, box.y1)]);
+        const b = m.containerPointToLatLng([Math.max(box.x0, box.x1), Math.max(box.y0, box.y1)]);
+        cb.current.onBrush({ north: a.lat, west: a.lng, south: b.lat, east: b.lng });
+      };
+      window.addEventListener("mousemove", move);
+      window.addEventListener("mouseup", up);
     });
     m.on("mousemove", (e) => {
       // Hover tests exactly what a click will do, so the pointer never promises a selection
@@ -410,11 +511,13 @@ export function AtlasMap({
          changes on every mouse move would re-render the whole plate sixty times a second to
          update eleven characters. */
       writeCoords(formatPosition(e.latlng.lat, e.latlng.lng));
+      readCell(e.latlng.lat, e.latlng.lng, cellsRef.current, layers.current);
       if (cb.current.onHover) cb.current.onHover(next);
     });
     m.on("mouseout", () => {
       setHover(null);
       writeCoords("—");
+      readCell(null, null, cellsRef.current, layers.current);
       if (cb.current.onHover) cb.current.onHover(null);
     });
 
@@ -504,6 +607,13 @@ export function AtlasMap({
     layers.current.coastline.setCoastlines(coast && coast.wx ? coast : null);
   }, [ready, coast]);
 
+  /* The context tier, when it arrives. Until then the plate is graticule and the archive's own
+     rings -- an absent context is shown as an absent one, never substituted. */
+  React.useEffect(() => {
+    if (!ready) return;
+    layers.current.coastline.setContext(contextLand && contextLand.wx ? contextLand : null);
+  }, [ready, contextLand]);
+
   React.useEffect(() => {
     if (!ready) return;
     rowSetRef.current = rows ? new Set(rows) : null;
@@ -515,15 +625,40 @@ export function AtlasMap({
   React.useEffect(() => {
     if (!ready) return;
     layers.current.population.setStyle({
-      colorBy, dimmed: dimPopulation, softenEmphasis, showGenesis, showLandfalls,
+      colorBy, dimmed: dimPopulation, softenEmphasis, showGenesis, showLandfalls, underDensity,
     });
     layers.current.replay.setStyle({ colorBy, showMarks: showGenesis || showLandfalls });
-  }, [ready, colorBy, dimPopulation, softenEmphasis, showGenesis, showLandfalls]);
+  }, [ready, colorBy, dimPopulation, softenEmphasis, showGenesis, showLandfalls, underDensity]);
+
+  /* A mode change clears the cell readout and the hovered outline: the count on the foot band
+     was a count of the mode that is gone. */
+  React.useEffect(() => {
+    if (!ready) return;
+    readCell(null, null, cellsRef.current, layers.current);
+  }, [ready, plateMode]);
 
   React.useEffect(() => {
     if (!ready) return;
     layers.current.population.setEmphasis(emphasis);
   }, [ready, emphasis]);
+
+  /* WITH A STORM SELECTED THE COUNTS BECOME CONTEXT, LIKE THE TRACKS UNDER THEM. The subject is
+     one dashed line over a shaded ocean; at the zoom the camera takes to frame it a 2° cell is
+     a slab, and the cohort's own cells are its brightest. The layer's alpha is scaled -- the
+     counts, the peak and the ramp are untouched -- so the reading stays literal and the subject
+     is the thing the eye finds first. */
+  React.useEffect(() => {
+    if (!ready) return;
+    layers.current.pathwayLayer.setDimmed(!!dimPopulation);
+    layers.current.genesisLayer.setDimmed(!!dimPopulation);
+  }, [ready, dimPopulation]);
+
+  /* THE HELD ROW'S OWN STORMS. The rows arrive from the engine through the shell; this layer is
+     told which to lift and never asks what the contract means. */
+  React.useEffect(() => {
+    if (!ready) return;
+    layers.current.population.setLens(lens ? lens.rows : null);
+  }, [ready, lens]);
 
   /* WHAT THE LAYER ACTUALLY DREW, REPORTED AFTER IT DREW IT.
    *
@@ -660,7 +795,7 @@ export function AtlasMap({
     /* Leaflet options do not accept CSS custom properties, so the token is resolved to a
        computed value first -- off the map's own container, because the accent is declared on
        the Atlas surface and not on :root. */
-    const accent = cssVar(m.getContainer(), "--accent", "#4fc3f7");
+    const accent = cssVar(m.getContainer(), "--plate-accent", "#4fc3f7");
     const ring = L.circle([probe.lat, probe.lon], {
       radius: probe.radiusKm * 1000, color: accent, weight: 1.2, opacity: 0.9,
       fill: true, fillColor: accent, fillOpacity: 0.04, dashArray: "3,4", interactive: false,
@@ -669,6 +804,74 @@ export function AtlasMap({
     ring.addTo(m);
     layers.current.probeRing = ring;
   }, [ready, probe && probe.lat, probe && probe.lon, probe && probe.radiusKm]);
+
+  /* THE RETICLE'S KEYS. Bound to the window while the mode is on and released with it, with
+     capture so Leaflet's own pan does not also fire: while the crosshair is up the arrows belong
+     to it. Every other key on this surface -- H, F, P, space, Escape -- keeps its meaning. */
+  React.useEffect(() => {
+    if (!ready || !reticle) return undefined;
+    const m = map.current;
+    const step = (e) => (e.shiftKey ? 40 : e.altKey ? 2 : 12);
+    const onKey = (e) => {
+      if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+      const size = m.getSize();
+      const clamp = (p) => ({ x: Math.max(0, Math.min(size.x - 1, p.x)),
+        y: Math.max(0, Math.min(size.y - 1, p.y)) });
+      let next = null;
+      if (e.key === "ArrowLeft") next = { x: reticle.x - step(e), y: reticle.y };
+      else if (e.key === "ArrowRight") next = { x: reticle.x + step(e), y: reticle.y };
+      else if (e.key === "ArrowUp") next = { x: reticle.x, y: reticle.y - step(e) };
+      else if (e.key === "ArrowDown") next = { x: reticle.x, y: reticle.y + step(e) };
+      else if (e.key === "Enter") {
+        e.preventDefault();
+        e.stopPropagation();
+        const pt = L.point(reticle.x, reticle.y);
+        const hit = hitGenesis(archiveRef.current, m, pt,
+          { rows: rowSetRef.current, tolerance: RETICLE_TOLERANCE });
+        const ll = m.containerPointToLatLng(pt);
+        /* EXACTLY WHAT A CLICK DOES, through the same two callbacks and the same hit test: a
+           genesis point under the crosshair opens that storm, open water asks the question. */
+        if (hit) cb.current.onSelect && cb.current.onSelect(hit.row);
+        else cb.current.onProbe && cb.current.onProbe(ll.lat, ll.lng);
+        return;
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        setReticle(null);
+        const btn = document.querySelector("[data-reticle-toggle]");
+        if (btn) btn.focus();
+        return;
+      } else return;
+      if (!next) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setReticle(clamp(next));
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [ready, reticle]);
+
+  /* WHAT IS UNDER THE CROSSHAIR, SAID ONCE PER MOVE. The same two readouts a pointer writes --
+     the position and the cell's literal count -- plus a polite live region, because a reader
+     using the keyboard cannot see the foot band change. Announced on the reticle's own moves
+     only: a live region updated on every mousemove would speak sixty times a second. */
+  React.useEffect(() => {
+    if (!ready || !reticle) return;
+    const m = map.current;
+    const pt = L.point(reticle.x, reticle.y);
+    const ll = m.containerPointToLatLng(pt);
+    writeCoords(formatPosition(ll.lat, ll.lng));
+    readCell(ll.lat, ll.lng, cellsRef.current, layers.current);
+    const hit = hitGenesis(archiveRef.current, m, pt,
+      { rows: rowSetRef.current, tolerance: RETICLE_TOLERANCE });
+    const a = archiveRef.current;
+    const node = document.getElementById("at-plate-live");
+    if (!node) return;
+    const cell = (document.getElementById("at-cell") || {}).textContent || "";
+    node.textContent = hit
+      ? `${a.storms.str("name", hit.row) || "UNNAMED"} ${a.storms.num("season", hit.row)} under the reticle. Enter opens this storm.`
+      : `${formatPosition(ll.lat, ll.lng)}${cell && cell !== "—" ? `. ${cell}` : ""}. Enter asks what formed near here.`;
+  }, [ready, reticle, plateMode, kept]);
 
   const hasArchiveCoast = !!(coast && coast.wx);
 
@@ -693,22 +896,26 @@ export function AtlasMap({
           first drag. */}
       <div className="at-platehead">
         <span className="at-plate-title">PLATE 1 · NORTH ATLANTIC + EAST PACIFIC</span>
-        <span className="at-plate-counts">
-          {mode === "replay" ? (
-            <><em>{kept.toLocaleString()}</em> IN THIS RUN</>
-          ) : (
-            <>
-              <em>{kept.toLocaleString()}</em> COHORT
-              {context && context !== kept
-                ? <> · <em>{context.toLocaleString()}</em> CONTEXT</> : null}
-              {selectedCount ? <> · <em>{selectedCount}</em> SELECTED</> : null}
-            </>
-          )}
-        </span>
+        {/* THE HEAD NAMES THE PLATE, ITS READING AND ITS APERTURE -- AND NOTHING THE PAGE HAS
+            ALREADY SAID. The cohort count used to sit here too, and with the mode segment
+            beside it the line clipped at 1440: the region name lost its second basin and the
+            third mode fell off the end. The count is the cohort line's, thirty pixels above,
+            and Figure 1's, directly below; the context count now travels with the caption,
+            which is the sentence that explains what the fainter ink is. Replay is the one state
+            the head still counts, because there the number is the run's and nothing else on the
+            page states it. */}
+        {mode === "replay" ? (
+          <span className="at-plate-counts"><em>{kept.toLocaleString()}</em> IN THIS RUN</span>
+        ) : null}
         {/* THE ONE STATE THE LINE STILL NAMES, and it is not atmosphere: in replay the static
             population is deliberately withheld, so a plate that looks empty is correct and a
             reader has to be told which of the two things they are looking at. */}
         {mode === "replay" ? <span className="at-plate-mode">REPLAY</span> : null}
+        {/* THE PLATE'S MODE, ON THE PLATE. Pathway counts / Genesis counts / Tracks: three
+            readings of the same storms, a map-dependent control, so it sits on the plate head
+            beside the aperture it changes the reading of -- never in the clause editor, which
+            changes the QUESTION. The plate rests on Pathway counts (Handoff B). */}
+        {onPlateMode ? <PlateModes mode={plateMode} onMode={onPlateMode} /> : null}
         <span className="at-r at-plate-aperture" data-plate-aperture>{apertureOf(frame)}</span>
       </div>
 
@@ -722,6 +929,20 @@ export function AtlasMap({
           <div ref={el} style={{ position: "absolute", inset: 0 }} />
           <PlateFrame frame={frame} />
           {children}
+          {/* THE BRUSHED RECTANGLE, WHILE IT IS BEING DRAWN. It is drawn in the DOM rather than
+              on a canvas because it is a gesture and not evidence: it belongs to the pointer,
+              it is gone on release, and nothing about it is part of the picture. */}
+          {dragBox ? (
+            <div className="at-brushbox" data-brush-box style={{
+              left: Math.min(dragBox.x0, dragBox.x1), top: Math.min(dragBox.y0, dragBox.y1),
+              width: Math.abs(dragBox.x1 - dragBox.x0), height: Math.abs(dragBox.y1 - dragBox.y0),
+            }} />
+          ) : null}
+          {brush ? <BrushOutline brush={brush} map={map.current} /> : null}
+          {reticle ? (
+            <div className="at-reticle" data-reticle style={{ left: reticle.x, top: reticle.y }}
+              aria-hidden="true" />
+          ) : null}
           {hover ? <HoverChip hover={hover} frame={frame} /> : null}
         </div>
       </div>
@@ -750,9 +971,33 @@ export function AtlasMap({
       <div className="at-plate-chrome">
       <div className="at-platefoot">
         <ClassKey />
+        {/* WHAT IS HELD, ECHOED. The locked rule is that the plate's footer may echo the held
+            row's ALREADY-PUBLISHED figures and computes nothing: the label, the numerator and
+            the denominator here are the ones the ladder printed, carried across. It is the one
+            line that says, in human words, what the lifted ink is. */}
+        {/* WHAT THE CROSSHAIR IS OVER, FOR A READER WHO CANNOT SEE THE BAND CHANGE. Polite, and
+            written only when the reticle itself moves. */}
+        <span className="at-sr-only" id="at-plate-live" data-plate-live aria-live="polite" />
+        {lens ? (
+          <span className="at-plate-lens" data-lens-echo data-lens-held={lens.held ? "" : undefined}>
+            LOOKING AT {lens.label}
+            {lens.count !== null && lens.count !== undefined
+              ? <> · <em>{lens.count.toLocaleString()}</em>{lens.denom
+                ? <> OF {lens.denom.toLocaleString()}</> : null}</>
+              : null}
+            {lens.held ? " · HELD" : null}
+          </span>
+        ) : null}
+        {/* THE CELL UNDER THE POINTER, AS A LITERAL COUNT. The density surface shades by
+            pow(c/max) so the eye can read structure across a cohort; what a reader must be able
+            to check is the COUNT itself, and this prints it -- "CELL 12°N 40°W · 37 of 514
+            through" -- for whichever cell the pointer or the keyboard reticle is on. A shaded
+            cell whose count cannot be read is a probability surface wearing a legend. It shares
+            the foot's one readout slot with the echo above: while the pointer is on a cell the
+            cell is what is being read, and the held row is still lit in the ladder. */}
+        <span className="at-plate-cellread" id="at-cell" data-cell-readout></span>
         <span className="at-plate-measure">
           <ScaleBar frame={frame} />
-          <span className="at-plate-proj">MERCATOR · TICKS 10° / 5°</span>
           <span className="at-r"><em id="at-coords">—</em></span>
         </span>
       </div>
@@ -796,8 +1041,8 @@ export function AtlasMap({
               ? <>The {kept.toLocaleString()} storms in this cohort; the dashed circle is
                   the {Math.round(probe.radiusKm).toLocaleString()} km condition.</>
               : context && context !== kept
-                ? <>The {kept.toLocaleString()} storms in this cohort, over the archive behind
-                    them.</>
+                ? <>The {kept.toLocaleString()} storms in this cohort, over
+                    the {context.toLocaleString()} of the archive drawn behind them.</>
                 : <>The {kept.toLocaleString()} storms in the archive cohort.</>}
           {hasArchiveCoast ? null : (
             <>{" "}<b className="at-plate-model" data-coastline-degraded>
@@ -811,6 +1056,10 @@ export function AtlasMap({
           {hint ? <span className="at-plate-hint">{" "}{hint}</span> : null}
         </p>
         <span className="at-plate-acts">
+          {/* THE PROJECTION IS A FACT ABOUT THE FIGURE, NOT A READING OF IT, so it sits on the
+              figure line with PLATE NOTES rather than on the foot with the key and the measure.
+              On the foot it was the item that pushed the stroke note off the line at 1440. */}
+          <span className="at-plate-proj">MERCATOR · GRATICULE 10° / 5°</span>
           {hasArchiveCoast ? (
             <details className="at-plate-notes" data-plate-notes>
               <summary title="what this plate draws, and from which geometry">PLATE NOTES</summary>
@@ -824,8 +1073,8 @@ export function AtlasMap({
                 </p>
                 <p>
                   <b>COASTLINE</b> The five modelled landfall regions are drawn from the
-                  archive&rsquo;s own rings at full contrast. Everything else is a contextual
-                  basemap and the landfall rule never consults it.
+                  archive&rsquo;s own rings at full contrast. Everything else is Natural Earth
+                  1:110m context, packed with the archive, and the landfall rule never consults it.
                 </p>
                 <p>
                   <b>PROJECTION</b> Web Mercator. The graticule is ruled on the plate&rsquo;s
@@ -844,6 +1093,75 @@ export function AtlasMap({
       </div>
     </>
   );
+}
+
+/* THE MODE SEGMENT. Three real buttons with aria-pressed, in the plate head's own mono step,
+   so the reading of the plate is keyboard-reachable and announced. Each carries the registered
+   claim for its surface as its title, so the sentence that stops a shaded ocean being read as a
+   forecast travels with the control that turns the shading on. */
+/* THE CLAIM IDS ARE STRING LITERALS, ONE PER MODE, AND THAT IS A RULE RATHER THAN A STYLE:
+   scripts/audit-claims.mjs requires every claim id under docs/storm-atlas/src to be a literal,
+   so a build step can prove the statement a control carries is one the registry actually holds.
+   Reading the id out of a table would have been shorter and unprovable. */
+function modeTitle(key) {
+  if (key === "pathway") return claimText("atlas.pathway");
+  if (key === "genesis") return claimText("atlas.genesis_density");
+  return "the trajectories alone, coloured by the class each fix had reached";
+}
+const PLATE_MODES = [
+  ["pathway", "PATHWAY COUNTS"],
+  ["genesis", "GENESIS COUNTS"],
+  ["tracks", "TRACKS"],
+];
+function PlateModes({ mode, onMode }) {
+  return (
+    <span className="at-plate-modes" role="group" aria-label="what the plate counts" data-plate-modes>
+      {PLATE_MODES.map(([key, label]) => (
+        <button type="button" key={key} className="at-plate-modebtn" data-plate-mode={key}
+          aria-pressed={mode === key ? "true" : "false"}
+          onClick={() => onMode(key)} title={modeTitle(key)}>
+          {label}
+        </button>
+      ))}
+    </span>
+  );
+}
+
+/* THE CELL READOUT, WRITTEN STRAIGHT TO THE DOM like the coordinates: a mousemove that
+   re-rendered the plate to update eleven characters would be paid sixty times a second.
+   The key is the engine's own -- cellGrid / cellOf / fmt1 from analogs.js -- so the count printed
+   is exactly the count the density Map holds for that cell, and the outline drawn on the layer
+   is the cell the count belongs to. */
+const GRID2 = cellGrid(2.0);
+export function cellKeyAt(lat, lon, step = 2.0) {
+  const g = step === 2.0 ? GRID2 : cellGrid(step);
+  const cell = cellOf(g, lat, wrap180(lon), step);
+  const cy = ((cell / g.cols) | 0) - g.oy;
+  const cx = (cell % g.cols) - g.ox;
+  return { key: `${fmt1(cy * step)},${fmt1(cx * step)}`, lat0: cy * step, lon0: cx * step };
+}
+function readCell(lat, lon, cells, layers) {
+  const node = document.getElementById("at-cell");
+  const layer = cells.kind === "pathway" ? layers.pathwayLayer
+    : cells.kind === "genesis" ? layers.genesisLayer : null;
+  if (lat === null || !cells.density || !layer) {
+    /* NOTHING UNDER THE POINTER PRINTS NOTHING. The coordinate beside it keeps its dash --
+       that is the geometry rule's own sign for "outside the aperture" -- and a second dash for
+       a cell that is not being asked about was two placeholders where the line needed none. */
+    if (node) node.textContent = "";
+    if (layers.pathwayLayer) layers.pathwayLayer.setHover(null);
+    if (layers.genesisLayer) layers.genesisLayer.setHover(null);
+    return;
+  }
+  const { key, lat0, lon0 } = cellKeyAt(lat, lon, cells.step);
+  const n = cells.density.get(key) || 0;
+  const la = `${Math.abs(lat0)}°${lat0 < 0 ? "S" : "N"}`;
+  const lo = `${Math.abs(lon0)}°${lon0 < 0 ? "W" : "E"}`;
+  const noun = cells.kind === "pathway" ? "through" : "formed in";
+  if (node) {
+    node.textContent = `CELL ${la} ${lo} · ${n.toLocaleString()} of ${cells.kept.toLocaleString()} ${noun}`;
+  }
+  layer.setHover(key);
 }
 
 /* THE SAFFIR-SIMPSON KEY, AT THE SMALLEST STEP THE FRAME HAS.
@@ -955,6 +1273,20 @@ function ScaleBar({ frame }) {
       <i style={{ width: `${px}px` }} />
       <em>{km.toLocaleString()} KM</em>
     </span>
+  );
+}
+
+/* THE BRUSHED AREA, ONCE IT IS SET. Projected on every settled view rather than stored in
+   pixels, so it stays over the same water when the reader pans or zooms. */
+function BrushOutline({ brush, map }) {
+  if (!map) return null;
+  const a = map.latLngToContainerPoint([brush.north, brush.west]);
+  const b = map.latLngToContainerPoint([brush.south, brush.east]);
+  return (
+    <div className="at-brushbox at-brushbox-set" data-brush-set aria-hidden="true" style={{
+      left: Math.min(a.x, b.x), top: Math.min(a.y, b.y),
+      width: Math.abs(b.x - a.x), height: Math.abs(b.y - a.y),
+    }} />
   );
 }
 

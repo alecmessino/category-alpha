@@ -16,50 +16,50 @@
  * document and short names collide; a prefix makes the boundary structural.
  */
 
-/* Erode at 400 and 500. The repo self-hosts Erode 700 for the terminal's wordmark; the Atlas
-   sets one editorial lede per panel state and the drawer's heading, which are book and medium
-   weights. Declared here rather than in docs/tokens/fonts.css so the terminal's font manifest
-   does not grow two faces it never renders. */
-@font-face{font-family:'Erode';font-style:normal;font-weight:400;font-display:swap;
-  src:url('../assets/fonts/erode-400.woff2') format('woff2')}
-@font-face{font-family:'Erode';font-style:normal;font-weight:500;font-display:swap;
-  src:url('../assets/fonts/erode-500.woff2') format('woff2')}
+/* IBM PLEX SANS, SELF-HOSTED, AND DECLARED HERE RATHER THAN IN docs/tokens/fonts.css.
+   The terminal renders no Plex Sans and its font manifest should not grow four faces it never
+   uses; IBM Plex Mono IS shared, so its faces live in the shared manifest. Both families are
+   the latin subsets from the fontsource distribution of IBM's own release (OFL 1.1).
 
-/* SOURCE SANS 3 AND SOURCE SERIF 4, SELF-HOSTED, AND DECLARED HERE RATHER THAN IN
-   docs/tokens/fonts.css -- the same reason Erode 400/500 are declared here: the terminal
-   renders neither face and its font manifest should not grow two it never uses.
-
-   SELF-HOSTED RATHER THAN LINKED, WHICH IS NOT THE PROTOTYPE'S CHOICE. The design file pulls
-   both from fonts.googleapis.com, and every browser gate in this repository ABORTS that host
-   to stay hermetic (see scripts/lib/browser-harness.mjs). A linked face would therefore fall
-   back to a system font in every check that measures this surface -- the type scale, the fit
-   at each breakpoint, the answer-density count -- so the gates would be measuring a design
-   nobody ships. Both files are the latin subset, variable-weight, straight from Google's own
-   CDN; Source Sans 3 covers 400-700 in 28 KB and Source Serif 4 carries the one 400 the
-   question line asks for.
-
-   IBM Plex Mono is untouched: it is already declared in docs/tokens/fonts.css, shared with the
-   terminal, and has a real monospace fallback stack behind it. */
-@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 700;font-display:swap;
-  src:url('../assets/fonts/source-sans-3-latin.woff2') format('woff2')}
-@font-face{font-family:'Source Serif 4';font-style:normal;font-weight:400;font-display:swap;
-  src:url('../assets/fonts/source-serif-4-latin.woff2') format('woff2')}
+   SELF-HOSTED RATHER THAN LINKED. The design file pulls both from fonts.googleapis.com, and every
+   browser gate in this repository ABORTS that host to stay hermetic (see
+   scripts/lib/browser-harness.mjs) -- a linked face would fall back to a system font in every
+   check that measures this surface, so the gates would be measuring a design nobody ships. The
+   product skin (Handoff B) is two families: Plex Sans for words, Plex Mono for figures. */
+@font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:400;font-display:swap;
+  src:url('../assets/fonts/ibm-plex-sans-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:500;font-display:swap;
+  src:url('../assets/fonts/ibm-plex-sans-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:600;font-display:swap;
+  src:url('../assets/fonts/ibm-plex-sans-latin-600-normal.woff2') format('woff2')}
+@font-face{font-family:'IBM Plex Sans';font-style:normal;font-weight:700;font-display:swap;
+  src:url('../assets/fonts/ibm-plex-sans-latin-700-normal.woff2') format('woff2')}
 
 /* ─── tokens ──────────────────────────────────────────────────────────────────────────── */
 
 [data-atlas]{
   /* the three planes, plus the sunken one inputs sit in */
-  --chrome-hi:#18212f;   /* header, transport, plate caption bands — lightest */
-  --chrome:#131b27;      /* rail, panel */
-  --sunken:#0e151f;      /* year inputs */
-  --stage:#0d131d;       /* the plate — darkest, one step off black */
+  /* THE B SKIN -- INSTITUTIONAL CARTOGRAPHIC, ONE SHELL. Charcoal #13171c is the page and the
+     chrome; the raised planes step up from it the way Handoff B's surface/panel tokens do; the
+     plate steps DOWN from it, one tone, because the plate is the darkest plane on this surface
+     and the chrome around it is lighter (the tonal lock above). There is no second shell: the
+     paper tokens further down are retained for Direction C export and nothing selects them. */
+  --chrome-hi:#1a1f26;   /* header, transport, plate caption bands — one step up from the page */
+  --chrome:#13171c;      /* the page, the rail, the panel */
+  --chrome-raised:#202830; /* inspector, popover, drawer — the raised plane */
+  --sunken:#0f1317;      /* year inputs */
+  --stage:#0f1317;       /* the plate — darkest, one step below the page */
 
-  --rule:#222d3c; --rule-2:#2e3a4a; --rule-3:#405064; --rule-4:#56687d;
-  --t1:#eaf0f7; --t2:#a2b2c6; --t3:#7d8fa5; --t4:#63758b;
+  --rule:#2a3440; --rule-2:#313e4d; --rule-3:#3a4d5f; --rule-4:#4c5f73;
+  /* The text tiers are Handoff B's slate ramp, with the tertiary tier lifted from #6b7a8d to
+     #8a98aa: B's own value measures 3.4:1 on the raised plane, and --t3 is this surface's
+     secondary TEXT ink (--text-2), which needs 4.5. --t4 is a MARK ink and carries no text. */
+  --t1:#e6e8eb; --t2:#8f9bb0; --t3:#8a98aa; --t4:#505d6e;
+  color-scheme:dark;
 
   /* A 45° hatch, reused by the refused mark. Declared once so the mark and the key cannot
      drift apart. */
-  --hatch:repeating-linear-gradient(45deg,#3a4a60 0 1.5px,transparent 1.5px 5px);
+  --hatch:repeating-linear-gradient(45deg,#2b3d53 0 1.5px,transparent 1.5px 5px);
 
   /* The design-system aliases every component already reads, remapped for this surface. This
      is what lets the panels adopt the ladder without every inline style being rewritten. */
@@ -70,17 +70,23 @@
   --border-strong:var(--rule-2);
   --text-1:var(--t1);
   --text-2:var(--t3);
-  --accent:#4fc3f7;
-  --accent-bright:#4fc3f7;
-  --accent-2:#2b6f92;
+  /* THE CHROME ACCENT IS SLATE, NOT CYAN. Handoff B reserves the cyan for the cartography --
+     the class ramp's Category 1 and the pathway cells -- and inks its controls in a muted slate
+     so nothing in the chrome competes with the plate. B's #7a8fa3 measures 4.47:1 on the raised
+     plane, so the text accent is lifted one step to #8ea3b8 and B's value keeps the borders. */
+  --accent:#8ea3b8;
+  --accent-bright:#9ab0c3;
+  --accent-2:#7a8fa3;
+  /* The one cyan the chrome may reach for, and only to draw ON the plate: the probe ring. */
+  --plate-accent:#4fc3f7;
   --border-accent:var(--accent);
   --text-link:var(--accent);
   --pos:#3ddc97;
-  --neg:#ef5350;
+  --neg:#f4746f;
   /* `--warn` is the archive's own epistemic flag on this surface and nothing else's. */
-  --warn:#f0b429;
-  --flag:#f0b429;
-  --special:#9b7bf0;
+  --warn:#f2b233;
+  --flag:#f2b233;
+  --special:#b09af5;
 
   /* Radius 0 everywhere. The terminal keeps 6/8/12 px; a research plate has square corners. */
   --radius-sm:0; --radius-md:0; --radius-lg:0; --radius-pill:0;
@@ -281,15 +287,20 @@
      hash, build time, URL echo -- and nothing else may use it. No italics anywhere, no
      letter-spacing on the sans, uppercase only at label and stamp size, and sentence case for
      every sentence including the refusal statements printed verbatim from the engine. */
-  --at-serif:'Source Serif 4',Georgia,serif;
-  --at-sans:'Source Sans 3',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --at-sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --at-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  /* Every sans and every display face on this surface resolves to Plex Sans: the design
+     system's Satoshi and Erode tokens are re-pointed inside [data-atlas], so no component has
+     to know which family it is set in. Two families, and the second is the mono. */
+  --font-sans:var(--at-sans);
+  --font-display:var(--at-sans);
 
   /* ─── THE INSTRUMENT'S FIVE STEPS ──────────────────────────────────────────────────────
    *
    * TWO FAMILIES, FIVE SIZES, AND EVERY ELEMENT OF THE RESTING FRAME ASSIGNED TO ONE OF THEM.
-   * Source Serif 4 carries the question and every outcome name; IBM Plex Mono carries every
-   * figure. There is no sans in the frame at all. What this replaces used eleven sizes and three
+   * IBM Plex Sans carries the question and every outcome name; IBM Plex Mono carries every
+   * figure. (5c set the words in Source Serif 4; Handoff B, the product skin, sets them in Plex
+   * Sans at the same five steps. The scale is 5c's, the family is B's.) What this replaces used eleven sizes and three
    * families, and the cost of that was not ugliness -- it was that SIZE STOPPED MEANING
    * ANYTHING: a reader could not tell, from type alone, whether a number was a finding or a
    * stamp, because eleven steps have no order a reader can hold.
@@ -323,7 +334,7 @@
      provenance drawer, the calibration ledger. A five-size frame is a claim about the RESTING
      SCREEN; imposing it on a 2,500px scrolling drawer would be a different design decision, and
      not one 5c makes. */
-  --at-fs-question:var(--at-t1); /* serif 400 · the research question                          */
+  --at-fs-question:var(--at-t1); /* sans 400 · the research question                           */
   --at-fs-subject:26px;    /* sans 700 · the storm's name in the inspector                    */
   --at-fs-figure:26px;     /* mono 400 · refusal counts, the empty pool. One per screen, maximum */
   --at-fs-cohort:var(--at-t3); /* the cohort line, Figure 1, the wordmark                     */
@@ -728,6 +739,8 @@
   border-bottom:1px solid var(--rule-2);
 }
 [data-atlas] .at-mapnav a:last-child{border-bottom:0}
+/* RETICLE, PRESSED: the plate's own accent as a rule on the control's map-facing edge. */
+[data-atlas] .at-mapnav a[aria-pressed="true"]{color:var(--t1);box-shadow:inset 2px 0 0 var(--plate-accent)}
 /* ON-PLATE, DARK IN BOTH SHELLS -- see the exemption list in check-atlas-adherence.mjs. */
 [data-atlas] .at-mapnav a:hover{background:#1d2836;color:#fff}
 [data-atlas] .at-mapnav a:focus-visible{outline:1px solid var(--accent);outline-offset:1px}
@@ -772,7 +785,7 @@
   position:absolute;right:12px;bottom:calc(var(--at-plate-gutter) + 22px);
   max-width:376px;z-index:450;pointer-events:none;
   display:flex;flex-direction:column;gap:6px;
-  background:rgba(15,21,31,.94);border:1px solid var(--rule-2);padding:8px 10px;
+  background:rgba(15,21,31,.94);padding:8px 10px;
 }
 [data-atlas] .at-legend .at-lrow{
   display:flex;gap:8px;align-items:center;font-family:var(--font-mono);font-size:9.5px;
@@ -788,11 +801,15 @@
    Atlantic, above the band -- and the rule mirrors to the edge facing the map so the ribbon
    still reads as hanging off the frame. The gutter each side keeps it clear of the zoom
    control at every supported plate width. */
+/* AT THE PLATE'S LEFT, PAST THE GRATICULE'S LABEL COLUMN, NOT CENTRED. Centred it set three
+   ragged lines over the top of the Atlantic; ranged left it sets two, like the caption under
+   the plate, the latitude labels keep their own margin, and the camera controls at the opposite
+   corner are never in its way. */
 [data-atlas] .at-invite{
-  position:absolute;left:50%;top:14px;transform:translateX(-50%);text-align:center;z-index:450;
+  position:absolute;left:56px;top:12px;text-align:left;z-index:450;
   pointer-events:none;font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.1px;
-  color:var(--t2);text-transform:uppercase;background:rgba(14,20,30,.9);padding:6px 14px;
-  border-bottom:1px solid var(--rule-3);max-width:calc(100% - 96px);
+  line-height:1.5;color:var(--t2);text-transform:uppercase;background:rgba(14,20,30,.9);
+  padding:6px 12px 7px;border-bottom:1px solid var(--rule-3);max-width:min(58%,430px);
 }
 /* ON-PLATE, DARK IN BOTH SHELLS. */
 [data-atlas] .at-invite em{font-style:normal;color:#fff}
@@ -1129,9 +1146,18 @@
 @container plate (max-width:1100px){
   [data-atlas] .at-plate-hint{display:none}
 }
-@container plate (max-width:910px){
+@container plate (max-width:600px){
   [data-atlas] .at-plate-proj{display:none}
 }
+/* THE STROKE NOTE IS THE FOOT'S LOWEST-PRIORITY ITEM, and it goes whole rather than to an
+   ellipsis: swatches 285, note 175, the measure 190 and two gaps ask 676; with the echo or the
+   cell readout in the slot between them the note yields to it, since both are the same line's
+   reading aid for what the plate is showing. */
+@container plate (max-width:690px){
+  [data-atlas] .at-classkey-major{display:none}
+}
+[data-atlas] .at-platefoot:has(.at-plate-lens) .at-classkey-major,
+[data-atlas] .at-platefoot:has(.at-plate-cellread:not(:empty)) .at-classkey-major{display:none}
 /* PLATE NOTES SURVIVES WHERE THE PROSE IT REPLACED DID NOT, and that is the point of folding it:
    a 370px sentence had to be dropped at 680 to keep the scale bar, whereas an 11-character
    summary costs almost nothing and the sentence behind it is reachable at every width. What is
@@ -1143,7 +1169,7 @@
 @container plate (max-width:600px){
   [data-atlas] .at-plate-notes{display:none}
 }
-@container plate (max-width:690px){
+@container plate (max-width:600px){
   [data-atlas] .at-plate-title{display:none}
 }
 /* THE LIVE FIGURE OUTLIVES THE CONSTANTS. The head band carried a plate title, the drawn/lifted
@@ -1151,8 +1177,11 @@
    query, and the number a reader uses to check that the map and the panel are describing the
    same cohort -- were the part that clipped, while two fixed strings survived intact. The mode
    is also stated on the rail's own EXPLORE / REPLAY control, so it is the recoverable one. */
-@container plate (max-width:780px){
+@container plate (max-width:770px){
   [data-atlas] .at-platehead .at-r{display:none}
+}
+@container plate (max-width:700px){
+  [data-atlas] .at-plate-cellread,[data-atlas] .at-plate-lens{display:none}
 }
 
 @media (max-width:1040px){
@@ -1273,7 +1302,7 @@
   gap:0 10px;
   padding:0;
   align-content:start;
-  font-family:var(--at-serif);
+  font-family:var(--at-sans);
 }
 /* ─── THE LEDGER'S OWN TYPE, ON THE FIVE STEPS ───────────────────────────────────────────
  *
@@ -1331,7 +1360,7 @@
    step: it is a sentence about what these rates are rates OF, and the frame has no sans in it. */
 [data-atlas] .at-deck-groupnote{
   grid-column:1/-1;padding:0 0 6px;
-  font-family:var(--at-serif);font-style:italic;font-size:var(--at-t3);color:var(--t3);
+  font-family:var(--at-sans);font-style:italic;font-size:var(--at-t3);color:var(--t3);
 }
 
 /* ─── the fold line and the pinned limits ───────────────────────────────────────────────── */
@@ -1349,7 +1378,7 @@
   font-family:var(--at-mono);font-size:var(--at-t5);letter-spacing:1.1px;color:var(--t3);
 }
 [data-atlas] .at-deck-limits .at-foot-line{
-  font-family:var(--at-serif);font-size:var(--at-t3);line-height:1.45;color:var(--t2);
+  font-family:var(--at-sans);font-size:var(--at-t3);line-height:1.45;color:var(--t2);
 }
 /* NO SIZE OVERRIDE ON THE FIGURES INSIDE THESE SENTENCES. The frozen frame sets a limit's count
    at the finding step, and it would be right to -- but the archive publishes each limit as one
@@ -1410,7 +1439,7 @@
   border-bottom:0;
 }
 [data-atlas] .at-deck-group > .at-dc-count{
-  font-family:var(--at-serif);font-style:italic;font-size:var(--at-t3);
+  font-family:var(--at-sans);font-style:italic;font-size:var(--at-t3);
   letter-spacing:0;text-transform:none;color:var(--t3);
 }
 [data-atlas] .at-deck-data > .at-dc{min-height:29px;border-bottom:1px solid var(--rule)}
@@ -1426,7 +1455,7 @@
    question and every outcome name; mono carries every figure. Two families, and a reader can
    tell which of the two kinds of thing they are reading without reading it. */
 [data-atlas] .at-dc-outcome{
-  font-family:var(--at-serif);font-size:var(--at-t2);color:var(--t1);gap:var(--at-s2);
+  font-family:var(--at-sans);font-size:var(--at-t2);color:var(--t1);gap:var(--at-s2);
   justify-content:flex-start;
 }
 [data-atlas] .at-dc-outcome .at-mark{
@@ -1528,11 +1557,6 @@
   --barink-td:#9aabbf; --barink-ts:#8cbdea; --barink-cat1:#4fc3f7; --barink-cat2:#f2c14e;
   --barink-cat3:#ee7a1f; --barink-cat4:#ef5350; --barink-cat5:#9b7bf0;
 }
-[data-atlas][data-shell="light"]{
-  --barink-td:var(--at-bar-td); --barink-ts:var(--at-bar-ts); --barink-cat1:var(--at-bar-cat1);
-  --barink-cat2:var(--at-bar-cat2); --barink-cat3:var(--at-bar-cat3);
-  --barink-cat4:var(--at-bar-cat4); --barink-cat5:var(--at-bar-cat5);
-}
 /* THE CLASS INK IS RESOLVED ONCE, BY CLASS, AND THE HAIRLINE READS IT. `data-bar-class` is the
    same attribute the bar carried and it still names the same seven classes; what changed is the
    MARK that resolves it -- a 3px tick inside the outcome cell rather than a 110px track of its
@@ -1616,7 +1640,7 @@
 /* THE ARCHIVE'S OWN SENTENCE AND THE REMEDY ARE ONE VOICE, in the serif the rest of the
    instrument reads in, at the step the pinned limits use. */
 [data-atlas] .at-ref-detail,[data-atlas] .at-ref-remedy{
-  font-family:var(--at-serif);font-size:var(--at-t3);line-height:1.45;color:var(--t2);
+  font-family:var(--at-sans);font-size:var(--at-t3);line-height:1.45;color:var(--t2);
   margin-top:5px;
 }
 [data-atlas] .at-ref-link{margin-top:6px}
@@ -2007,7 +2031,7 @@
  * so the line length stays readable at every viewport and the wrap point moves with the type. */
 [data-atlas] .at-question-text{
   margin:0;min-width:0;max-width:58ch;
-  font-family:var(--at-serif);font-size:var(--at-fs-question);font-weight:400;
+  font-family:var(--at-sans);font-size:var(--at-fs-question);font-weight:400;
   line-height:1.24;color:var(--t1);letter-spacing:-.25px;
   white-space:normal;overflow:visible;text-overflow:clip;text-wrap:pretty;
 }
@@ -2143,10 +2167,18 @@
 [data-atlas].atlas-instrument .atlas-stage-col{
   grid-column:1;grid-row:1;
   display:flex;flex-direction:column;min-width:0;min-height:0;
+  /* THE CAPTION APPARATUS QUERIES THE COLUMN IT IS SET IN. The head, the foot and Figure 1 are
+     the stage's SIBLINGS -- the stage wraps exactly the plate -- so a `@container plate` query
+     written on any of them resolved to no container at all and never matched: the aperture and
+     the stroke note were not giving way at the widths the ladder names, they were being clipped.
+     The column is the plate's width wherever the two share a row, which is every layout the
+     ladder measures, and the on-plate rules keep resolving to the stage, their nearer container. */
+  container:plate / inline-size;
 }
 /* THE PLATE HEAD IS RESERVED TWO LINES, AND THAT RESERVATION IS THE APERTURE INVARIANT.
-   It prints the cohort count and the context count -- "306 COHORT · 3,885 CONTEXT" -- so a
-   condition lengthens it, and below 1280 it takes a second line. The plate is what is left of
+   It used to print the cohort count and the context count -- "306 COHORT · 3,885 CONTEXT" -- so a
+   condition lengthened it, and below 1280 it took a second line; the counts have since moved to
+   the cohort line and the caption, but the reservation is kept, because it is the invariant. The plate is what is left of
    the band after the figure's chrome, so an unreserved head means a CONDITION CHANGES THE MAP'S
    HEIGHT: measured at 1220, 288px of plate unconditioned against 272px with a genesis radius
    set, with the reader's hands nowhere near the camera. check-atlas-stability is what caught it.
@@ -2322,10 +2354,10 @@
 }
 [data-atlas] .at-limit-line{padding:4px 0;display:flex;flex-wrap:wrap;gap:4px 10px;align-items:baseline}
 [data-atlas] .at-limit-which{
-  font-family:var(--at-serif);font-size:var(--at-t3);color:var(--t1);flex:none;max-width:100%;
+  font-family:var(--at-sans);font-size:var(--at-t3);color:var(--t1);flex:none;max-width:100%;
 }
 [data-atlas] .at-limit-line .at-say-text{
-  font-family:var(--at-serif);font-size:var(--at-t3);line-height:1.5;color:var(--t2);
+  font-family:var(--at-sans);font-size:var(--at-t3);line-height:1.5;color:var(--t2);
   flex:1 1 24ch;min-width:0;
 }
 
@@ -2371,20 +2403,26 @@
   font-family:var(--font-mono);font-size:var(--at-t-stamp);letter-spacing:1.2px;
   color:var(--t3);padding-bottom:3px;line-height:1.45;
 }
+/* A WORD, NOT A PILL. The sample gate is a registry state and it is printed in the registry's
+   one ink at stamp size; a border around it made it the only boxed word on the answer, and a
+   box on a line that already ends in a 2px rule is chrome saying what the rule says. */
 [data-atlas] .at-ans-state{
   margin-left:auto;font-family:var(--font-mono);font-size:var(--at-t-stamp);letter-spacing:1.2px;
-  color:var(--t1);border:1px solid var(--rule-2);padding:3px 6px;white-space:nowrap;
+  color:var(--t1);padding-bottom:3px;white-space:nowrap;
 }
 /* TWO OR THREE LINES, AND EVERY CLAUSE IN THEM IS COUNTED. See synthesise() -- this is the one
    place on the surface that says something ABOUT the rows rather than printing them. */
+/* THE TWO DENOMINATORS, AT STAMP SIZE, UNDER THE HEAD. Not a headline: a statement of what the
+   rates below are rates OF, in the one place a reader meets before reading them. */
+[data-atlas] .at-ans-denoms{color:var(--t2)}
 [data-atlas] .at-ans-syn{
-  margin:0;padding:9px 0 11px;font-size:var(--at-t-syn);line-height:1.42;color:var(--t1);
+  margin:0;padding:6px 0 7px;font-size:var(--at-t-syn);line-height:1.34;color:var(--t1);
 }
 [data-atlas] .at-ans-mid{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 [data-atlas] .at-ans-key{
   display:flex;justify-content:space-between;gap:12px;
   font-family:var(--font-mono);font-size:var(--at-t-stamp);letter-spacing:1.4px;color:var(--t3);
-  border-bottom:1px solid var(--t1);padding-bottom:5px;
+  border-bottom:1px solid var(--t1);padding-bottom:2px;line-height:1.25;
 }
 [data-atlas] .at-ans-key span:first-child{color:var(--t1);font-weight:600}
 [data-atlas] .at-ans-rows{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
@@ -2393,22 +2431,92 @@
    that from the row above. */
 [data-atlas] .at-ans-lf{
   flex:none;font-family:var(--font-mono);font-size:var(--at-t-stamp);letter-spacing:1.6px;
-  color:var(--t3);border-bottom:1px solid var(--rule-3);padding:9px 0 4px;
+  color:var(--t3);border-bottom:1px solid var(--rule-3);padding:3px 0 1px;line-height:1.25;
 }
 /* THE ROWS GROW INTO THE BAND'S SLACK, AND ONLY SO FAR. Distributed, the ledger reads as a
    printed table set to its measure; banked at the foot it is a void under the answer. Past 92px
    a row stops being a line in a table and starts being a panel. */
 [data-atlas] .at-ans-row{
   display:grid;grid-template-columns:1fr auto auto;grid-template-rows:auto auto;
-  column-gap:14px;padding:8px 0 7px;border-bottom:1px solid var(--rule-3);
+  column-gap:14px;padding:6px 0 5px;border-bottom:1px solid var(--rule-3);
   flex:1 1 auto;align-content:center;max-height:118px;
 }
 [data-atlas] .at-ans-row > *{min-width:0}
 [data-atlas] .at-ans-name{
   grid-column:1;grid-row:1;align-self:end;display:flex;align-items:baseline;gap:12px;
-  font-family:var(--at-serif);font-size:var(--at-t-name);line-height:1.1;color:var(--t1);
+  font-family:var(--at-sans);font-size:var(--at-t-name);line-height:1.05;color:var(--t1);
 }
 [data-atlas] .at-ans-label{flex:none}
+
+/* ─── the interval, as a mark on a common track ───────────────────────────────────────────
+ *
+ * A HAIRLINE WHISKER, A DOT, AND THE ARCHIVE'S TICK -- NOT A BAR. The canonical rendering of an
+ * interval on this surface is TYPE, and it is one cell to the right on the same row; this is
+ * those same figures placed on a ruler so two rows can be compared by eye. A filled bar was
+ * tried and is what 5c removed: it encodes magnitude as area, at four times the width, competing
+ * with the rate set at 27px beside it.
+ *
+ * THE TRACK IS THE SAME WIDTH AND THE SAME 0-100 SCALE ON EVERY ROW. A track sized to whatever
+ * space an outcome name left over is not a scale, and two rows measured on different rulers are
+ * not comparable -- which is the entire job of the mark.
+ *
+ * THE INKS: the whisker and the dot carry the row's own class ink, the base tick is a hairline in
+ * the rule ink. Nothing here carries text, which is what lets the mark use the mark tokens. */
+[data-atlas] .at-ans-int{
+  position:relative;flex:none;width:96px;height:11px;align-self:center;
+}
+[data-atlas] .at-ans-track{
+  position:absolute;left:0;right:0;top:5px;height:1px;background:var(--rule-3);
+}
+[data-atlas] .at-ans-whisk{
+  position:absolute;top:5px;height:1px;background:var(--barink-cat1);
+}
+[data-atlas] .at-ans-int[data-bar-class="ts"] .at-ans-whisk,
+[data-atlas] .at-ans-int[data-bar-class="ts"] .at-ans-dot{background:var(--barink-ts)}
+[data-atlas] .at-ans-int[data-bar-class="cat2"] .at-ans-whisk,
+[data-atlas] .at-ans-int[data-bar-class="cat2"] .at-ans-dot{background:var(--barink-cat2)}
+[data-atlas] .at-ans-int[data-bar-class="cat3"] .at-ans-whisk,
+[data-atlas] .at-ans-int[data-bar-class="cat3"] .at-ans-dot{background:var(--barink-cat3)}
+[data-atlas] .at-ans-int[data-bar-class="cat4"] .at-ans-whisk,
+[data-atlas] .at-ans-int[data-bar-class="cat4"] .at-ans-dot{background:var(--barink-cat4)}
+[data-atlas] .at-ans-int[data-bar-class="cat5"] .at-ans-whisk,
+[data-atlas] .at-ans-int[data-bar-class="cat5"] .at-ans-dot{background:var(--barink-cat5)}
+/* THE WHISKER'S ENDS ARE DRAWN, so a narrow interval is still visibly an interval rather than a
+   dot with a smudge. */
+[data-atlas] .at-ans-whisk::before,[data-atlas] .at-ans-whisk::after{
+  content:"";position:absolute;top:-3px;width:1px;height:7px;background:inherit;
+}
+[data-atlas] .at-ans-whisk::before{left:0}
+[data-atlas] .at-ans-whisk::after{right:0}
+[data-atlas] .at-ans-dot{
+  position:absolute;top:2.5px;width:6px;height:6px;margin-left:-3px;border-radius:50%;
+  background:var(--barink-cat1);box-shadow:0 0 0 1.5px var(--chrome);
+}
+/* THE ARCHIVE'S OWN RATE, WHERE THERE IS A COMPARISON TO MAKE. A hairline the height of the
+   track, in the rule ink: it says where the baseline sits without claiming a second answer. */
+[data-atlas] .at-ans-base{
+  position:absolute;top:1px;width:1px;height:9px;background:var(--rule-4);
+}
+/* NONMEMBER CONTEXT LOSES COLOUR, NEVER CONTRAST. With a storm selected, a contract it did not
+   reach keeps every figure and every word at full contrast and gives up only the class ink on
+   its mark -- which is the one thing on the row that was carrying identity rather than meaning. */
+[data-atlas] .at-ans-int[data-nonmember] .at-ans-whisk,
+[data-atlas] .at-ans-int[data-nonmember] .at-ans-dot{background:var(--t4)}
+
+/* ─── the row as the lens's control ───────────────────────────────────────────────────────
+ *
+ * HOVER LIFTS, A PRESS HOLDS, AND NEITHER PUBLISHES ANYTHING. The row is the control that draws
+ * its own storms on the plate, so it gets a pointer, a focus ring and a held state -- drawn as a
+ * rule in the left margin rather than as a fill, because a filled row in a research table reads
+ * as a value rather than as a state. */
+[data-atlas] .at-ans-row[data-lens-row]{cursor:pointer}
+[data-atlas] .at-ans-row[data-lens-row]:hover{background:rgba(255,255,255,.022)}
+[data-atlas] .at-ans-row[data-lens-row]:focus-visible{
+  outline:1px solid var(--accent);outline-offset:-1px;
+}
+[data-atlas] .at-ans-row[data-held]{
+  background:rgba(255,255,255,.03);box-shadow:inset 2px 0 0 var(--accent);
+}
 [data-atlas] .at-ans-ld{
   flex:1 1 auto;min-width:10px;border-bottom:1px dotted var(--rule-2);
   transform:translateY(-4px);
@@ -2427,11 +2535,11 @@
   font-family:var(--font-mono);font-size:var(--at-t-sup);color:var(--t1);white-space:nowrap;
 }
 [data-atlas] .at-ans-sup{
-  grid-column:1;grid-row:2;padding-top:3px;
+  grid-column:1;grid-row:2;padding-top:1px;line-height:1.1;
   font-family:var(--font-mono);font-size:var(--at-t-sup);color:var(--t2);
 }
 [data-atlas] .at-ans-st{
-  grid-column:2/4;grid-row:2;text-align:right;padding-top:3px;
+  grid-column:2/4;grid-row:2;text-align:right;padding-top:1px;line-height:1.1;
   font-family:var(--font-mono);font-size:var(--at-t-sup);letter-spacing:.9px;color:var(--t3);
   white-space:nowrap;
 }
@@ -2476,7 +2584,7 @@
 }
 [data-atlas] .at-colophon > *{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
 [data-atlas] .at-colophon-brand{
-  font-family:var(--at-serif);font-size:var(--at-fs-cohort);line-height:1;
+  font-family:var(--at-sans);font-size:var(--at-fs-cohort);line-height:1;
   letter-spacing:.3px;text-transform:none;color:var(--t2);flex:none;
 }
 [data-atlas] .at-colophon-back{color:var(--t3);text-decoration:none}
@@ -2541,7 +2649,7 @@
    where the band is 584px and the answer wanted 711. */
 @media (min-width:1181px) and (max-width:1699px){
   [data-atlas] .at-answer{gap:6px}
-  [data-atlas] .at-ans-row{padding:2px 0 1px;max-height:58px}
+  [data-atlas] .at-ans-row{padding:1px 0 0;max-height:58px}
   [data-atlas] .at-ans-syn{padding:7px 0 8px}
   [data-atlas] .at-ans-cmp{padding-top:6px;line-height:1.5}
   [data-atlas] .at-ans-pointer{padding-top:5px}
@@ -2736,6 +2844,12 @@
 
 @media (max-width:1180px){
 
+  /* THE INTERVAL MARK IS THE FIRST WHOLE ITEM THE ROW GIVES UP. Stacked, the answer runs the
+     page's width and the row's measure is spent on the outcome name and the figures; a 96px
+     ruler is the one thing on the line that states nothing the type does not already state --
+     the interval is printed in full, in type, one cell along. A strip gives up whole items. */
+  [data-atlas] .at-ans-int{display:none}
+
   /* Stacked, the rows take their content: there is no band slack to distribute. */
   [data-atlas] .at-ans-row{flex:none;max-height:none}
   [data-atlas] .at-ans-mid,[data-atlas] .at-ans-rows{flex:none}
@@ -2777,6 +2891,10 @@
   [data-atlas] .at-answer{--at-t-rate:25px;gap:6px}
   [data-atlas] .at-ans-syn{padding:7px 0 8px}
   [data-atlas] .at-ans-row{padding:7px 0 6px}
+  /* AND THE DENOMINATOR LINE GOES WITH IT AT 390. It is a convenience -- both figures are on
+     every row as n / N -- and at this width one line above the ladder is one finding below the
+     fold, which check-atlas-contract measures as the first screen answering less. */
+  [data-atlas] .at-ans-denoms{display:none}
 
   /* THE STATUS GIVES UP ITS COLUMN HERE, AND KEEPS ITS ROW.
    *
@@ -2865,6 +2983,27 @@
   z-index:900;display:flex;flex-direction:column;
   background:var(--chrome);border-right:1px solid var(--rule-2);
 }
+/* ANCHORED TO THE CLAUSE THAT OPENED IT.
+ *
+ * A map-independent control belongs to the QUESTION: the editor edits words in the sentence, so
+ * it opens under the words it edits rather than in a corner of the plate, and a reader never has
+ * to work out what they pressed to make it appear. Map-dependent controls stay on the plate --
+ * the mode segment, HOME, FIT, the reticle -- which is the other half of the same rule.
+ *
+ * IT MAY OVERLAP THE PLATE AND IT MAY NOT MOVE IT. Absolutely positioned against the grid area
+ * it names, so it is out of flow: the plate's box is unchanged whether this is open or closed,
+ * and check-atlas-stability drives the transition and measures the rectangle either side. It
+ * never occupies the ledger column and it hides no row -- the answer stays on screen beside it.
+ *
+ * The inset reset is what lets the inline left/top place it: the base rule stretches the sheet
+ * over the whole plate row, the right shape for a sheet and the wrong one for a popover. */
+[data-atlas] .at-sheet[data-sheet-anchored]{
+  grid-row:1 / -1;grid-column:1 / -1;
+  inset:auto;right:auto;bottom:auto;
+  max-height:min(62vh,540px);
+  border:1px solid var(--rule-3);border-radius:0;
+  box-shadow:0 18px 44px rgba(0,0,0,.55);
+}
 [data-atlas] .at-sheet-hd{
   flex:none;display:flex;align-items:center;justify-content:space-between;
   padding:0 var(--at-s5);height:var(--at-row-head-h);
@@ -2878,6 +3017,27 @@
 }
 [data-atlas] .at-sheet-x:hover{color:var(--t1)}
 [data-atlas] .at-sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
+
+/* THE SELECTED STORM'S STRIP. The minimum the locked rules ask for -- what the archive recorded,
+   how much of the evidence this storm is in, and the way to a cohort -- with the whole record one
+   press away. It is the panel's first screen, not a replacement for it. */
+/* THE STRIP TAKES ITS CONTENT'S HEIGHT, NOT THE COLUMN'S SLACK.
+ *
+ * At `flex:1 1 auto` it absorbed everything the head and the bridge did not want, and since the
+ * bridge is the last block in the column that slack landed BETWEEN them: measured with Carlotta
+ * selected, 71px at 1440x900, 251 at 1920x1080 and 339 stacked at 1056x816, as a void bounded
+ * above by the OPEN RECORD control and below by the bridge's accent rule. Two blocks of equal
+ * weight held apart by nothing reads as a layout that failed rather than as a column that ended.
+ *
+ * Sized to its content the five facts and their control close up under the identity, the bridge
+ * follows immediately beneath them, and the same empty pixels fall at the FOOT of the column,
+ * where a column ending is what they look like. Nothing is added, removed, or made denser.
+ *
+ * ONLY IN THIS STATE. With the record open the strip is not rendered at all and the BODY is the
+ * elastic block -- the one the design nominates as the one that scrolls -- so the bridge is
+ * pinned by a full-height sibling exactly as before, which is what check-inspector-bridge
+ * asserts by driving that body to its full scroll extent. */
+[data-atlas] .at-insp-strip{flex:0 1 auto;min-height:0;overflow-y:auto}
 
 
 /* ─── the paper set, above and below the plate ────────────────────────────────────────────
@@ -2909,9 +3069,97 @@
   min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto;
 }
 [data-atlas] .at-platehead em,[data-atlas] .at-platefoot em{font-style:normal;color:var(--t2)}
-[data-atlas] .at-plate-title{color:var(--t1);flex:none}
+/* THE HEAD'S THREE ITEMS DO NOT SHRINK; THEY GIVE WAY WHOLE, BELOW. `.at-platehead > span`
+   lets a span ellipsise, which is right for a count and wrong for a control: the third mode was
+   losing its last letters. Measured with Plex Mono at the head's step: title 277, modes 287,
+   aperture 178, two gaps -- 768 with everything, 590 without the aperture. */
+[data-atlas] .at-platehead > .at-plate-title{color:var(--t1);flex:none}
+[data-atlas] .at-platehead > .at-plate-modes{flex:none;margin-left:0}
 [data-atlas] .at-plate-counts{flex:0 1 auto;min-width:0}
 [data-atlas] .at-plate-mode{color:var(--flag);flex:none}
+
+/* ─── the plate's mode segment ────────────────────────────────────────────────────────────
+ *
+ * WHAT THE PLATE COUNTS, ON THE PLATE. Pathway counts / Genesis counts / Tracks -- three
+ * readings of the same storms, and a map-dependent control, so it sits on the plate's own head
+ * beside the aperture rather than in the clause editor, which changes the QUESTION. Three real
+ * buttons: in the tab order, pressable by Enter and Space, and carrying aria-pressed, so the
+ * reading of the plate is reachable and announced without a pointer.
+ *
+ * IT IS APPARATUS, AT THE APPARATUS STEP. 9.5px mono, the plate head's own size, in the head's
+ * own ink -- the pressed one takes the surface's text ink and a hairline under it rather than a
+ * fill, because a filled pill on a caption line reads as a second heading. */
+[data-atlas] .at-plate-modes{
+  display:flex;align-items:center;gap:2px;flex:none;margin-left:var(--at-s3);
+}
+[data-atlas] .at-plate-modebtn{
+  font-family:var(--at-mono);font-size:var(--at-t5);letter-spacing:1.1px;text-transform:uppercase;
+  color:var(--t3);background:transparent;border:0;border-bottom:1px solid transparent;
+  padding:2px var(--at-s2) 1px;cursor:pointer;white-space:nowrap;
+}
+[data-atlas] .at-plate-modebtn:hover{color:var(--t2)}
+[data-atlas] .at-plate-modebtn[aria-pressed="true"]{
+  color:var(--t1);border-bottom-color:var(--rule-4);
+}
+
+/* THE CELL UNDER THE POINTER, AS A LITERAL COUNT. The density surface shades by pow(c/max) so
+   structure reads across a cohort; this is the count itself, for the cell the pointer or the
+   keyboard reticle is on. A shaded cell whose count cannot be read is a probability surface
+   wearing a legend. It sits with the measure, and it is the first thing that line gives up when
+   the plate narrows -- the shading is still legible without it, and the readout is a hover
+   affordance a narrow plate has no room for anyway. */
+[data-atlas] .at-plate-cellread{
+  font-family:var(--at-mono);font-size:var(--at-t5);letter-spacing:1px;color:var(--t2);
+  flex:none;white-space:nowrap;
+}
+
+/* WHAT IS HELD, ON THE PLATE'S OWN FOOT. The held row's already-published figures, echoed --
+   the plate computes nothing here. It sits with the class key because it is a reading aid for
+   the ink above it, and it gives up its own words before the key does. */
+/* IT IS NEVER CUT: an echo that ellipsises inside a figure has echoed a different figure. It
+   gives way whole -- to the cell readout while the pointer is on a cell, and below the width
+   at which it fits beside the key and the measure. */
+[data-atlas] .at-plate-lens{
+  font-family:var(--at-mono);font-size:var(--at-t5);letter-spacing:1px;color:var(--t2);
+  flex:none;white-space:nowrap;
+}
+/* THE SLOT'S PRIORITY: a held row or a brushed rectangle is a deliberate gesture and its count
+   is the result of it, so it outranks the cell under a pointer that merely happens to be on the
+   plate; a row that is only hovered does not. */
+[data-atlas] .at-platefoot:has(.at-plate-cellread:not(:empty)) .at-plate-lens:not([data-lens-held]){display:none}
+[data-atlas] .at-platefoot:has(.at-plate-lens[data-lens-held]) .at-plate-cellread{display:none}
+[data-atlas] .at-plate-lens em{font-style:normal;color:var(--t1)}
+
+/* ─── the keyboard's hands on the plate ───────────────────────────────────────────────────
+ *
+ * The map's primary gesture is a click on the ocean, and a control only a pointer can reach is
+ * not a control. RETICLE turns the arrow keys into a crosshair; Enter does what a click does.
+ * The control itself is the third item of the camera bar (`.at-mapnav`, above). */
+/* THE CROSSHAIR ITSELF, on the plate, where the pointer's cursor would be. Drawn in the plate's
+   own accent so it reads as an instrument's reticle rather than as a finding. */
+[data-atlas] .at-reticle{
+  position:absolute;width:23px;height:23px;margin:-12px 0 0 -12px;pointer-events:none;z-index:460;
+}
+[data-atlas] .at-reticle::before,[data-atlas] .at-reticle::after{
+  content:"";position:absolute;background:var(--plate-accent);
+}
+[data-atlas] .at-reticle::before{left:11px;top:0;width:1px;height:23px}
+[data-atlas] .at-reticle::after{top:11px;left:0;height:1px;width:23px}
+
+/* THE BRUSH. A dashed rectangle while it is dragged, a quieter one once it is set: the first is
+   a gesture and the second is a statement about which water is being asked about. Neither is
+   evidence -- nothing is published from either -- so both are drawn in chrome ink. */
+[data-atlas] .at-brushbox{
+  position:absolute;z-index:455;pointer-events:none;
+  border:1px dashed var(--plate-accent);background:rgba(79,195,247,.07);
+}
+[data-atlas] .at-brushbox-set{border-style:solid;background:rgba(79,195,247,.05)}
+
+/* The one thing on this surface that is spoken and not shown. */
+[data-atlas] .at-sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
 [data-atlas] .at-platehead .at-r,[data-atlas] .at-platefoot .at-r{
   margin-left:auto;text-align:right;flex:none;color:var(--t3);
 }
@@ -2942,8 +3190,15 @@
  * stroke inside it — a two-millimetre sample of the plate rather than a colour chip. The
  * identity ink is unchanged, the contrast is the one the reader sees on the map itself, and the
  * sample says what it is a sample OF. */
-[data-atlas] .at-classkey{
-  display:flex;align-items:center;gap:9px;flex:0 1 auto;min-width:0;overflow:hidden;
+/* THE KEY DOES NOT SHRINK, AND THE ECHO DOES. Both sit on the plate's foot, and with a row
+   held there was more on that line than it could hold -- so the key gave up Category 4 and 5,
+   which is the one thing this file has always said it may not do: a coloured map with no key is
+   a map that cannot be read, and half a key is worse than none because it looks complete. The
+   echo is a reading aid for a row whose figures are already published two feet to the right; it
+   ellipsises, and the key stays whole. The stroke NOTE beside it keeps its own truncation,
+   because a note is prose and a swatch is a class. */
+[data-atlas] .at-classkey,[data-atlas] .at-platefoot > .at-classkey{
+  display:flex;align-items:center;gap:9px;flex:none;min-width:0;overflow:hidden;
 }
 [data-atlas] .at-classkey-item{display:flex;align-items:center;gap:5px;flex:none;color:var(--t3)}
 [data-atlas] .at-classkey-sw{
@@ -2964,7 +3219,7 @@
 }
 [data-atlas] .at-plate-caption{
   margin:0;min-width:0;max-width:78ch;
-  font-family:var(--at-serif);font-size:var(--at-fs-cohort);line-height:1.5;
+  font-family:var(--at-sans);font-size:var(--at-fs-cohort);line-height:1.5;
   color:var(--t2);text-wrap:pretty;
 }
 [data-atlas] .at-plate-caption em{font-style:italic;color:var(--t1)}
@@ -3104,73 +3359,12 @@
   background:var(--chrome-hi);
 }
 
-/* ─── the light shell ─────────────────────────────────────────────────────────────────────
+/* ─── one shell ─────────────────────────────────────────────────────────────────────────
  *
- * THE DEFAULT SURFACE IS PAPER; THE DARK ONE IS A STORED PREFERENCE. Both shells are the same
- * architecture with the same components -- what changes is which ink the semantic tokens resolve
- * to, and nothing else. No component knows which shell it is in.
- *
- * THE PLATE IS EXCLUDED FROM THE SWAP BY CONSTRUCTION, and "by construction" is doing real work
- * here. The cartographic plate is dark in BOTH shells: it is a canvas set into an instrument, not
- * a panel of the page. But its furniture -- the title line, the scale bar, the coastline
- * statement, the graticule labels -- inherits the surface's text tokens, so remapping --t1..--t4
- * to paper inks would paint dark ink on a dark plate and make every one of them unreadable.
- *
- * So the stage RE-DECLARES the dark set for its own subtree. The values are not repeated: the
- * dark ramp is named once as --d-*, the default shell points the semantic tokens at it, the
- * light shell points them at the paper tokens, and the stage points them back. One set of hexes,
- * three references, no drift.
- *
- * EVERY SEMANTIC INK IS CHOSEN FOR THE GROUND IT LANDS ON. green-600 measures 2.67:1 on paper and
- * red-600 3.92:1 -- both below AA for a 10px status word -- so the light shell takes green-800 at
- * 5.79 and red-700 at 5.25. Asserted in scripts/check-atlas-adherence.mjs rather than eyeballed. */
-[data-atlas]{
-  --d-chrome:#131b27; --d-chrome-hi:#18212f; --d-sunken:#0e151f;
-  --d-t1:#eaf0f7; --d-t2:#a2b2c6; --d-t3:#7d8fa5; --d-t4:#63758b;
-  --d-rule:#222d3c; --d-rule-2:#2e3a4a; --d-rule-3:#405064; --d-rule-4:#56687d;
-  --d-accent:#4fc3f7; --d-accent-2:#2b6f92; --d-flag:#f0b429;
-  --d-pos:#3ddc97; --d-neg:#ef5350; --d-special:#9b7bf0;
-  --d-hatch:repeating-linear-gradient(45deg,#3a4a60 0 1.5px,transparent 1.5px 5px);
-}
-
-/* THE LIGHT SHELL, AND IT IS THE DEFAULT: `:not([data-shell="dark"])` rather than
-   `[data-shell="light"]`, so a surface that has never stored a preference is paper. */
-[data-atlas]:not([data-shell="dark"]){
-  --chrome:var(--at-paper);
-  --chrome-hi:var(--at-paper-raised);
-  --sunken:var(--at-paper-sunken);
-  --t1:var(--at-ink-1); --t2:var(--at-ink-2); --t3:var(--at-ink-3); --t4:var(--at-ink-4);
-  --rule:var(--at-paper-rule); --rule-2:var(--at-paper-hair);
-  --rule-3:var(--at-paper-strong); --rule-4:var(--at-paper-strong);
-  --accent:var(--at-paper-accent); --accent-2:#4a7d92;
-  --flag:var(--at-paper-flag);
-  --pos:#166534; --neg:#b91c1c; --special:#6d28d9;
-  --hatch:repeating-linear-gradient(45deg,#a9a196 0 1.5px,transparent 1.5px 5px);
-  --surface-app:var(--chrome); --surface-card:var(--chrome); --surface-sunken:var(--sunken);
-  --border-dim:var(--rule); --border-strong:var(--rule-2);
-  --text-1:var(--t1); --text-2:var(--t3); --text-link:var(--accent);
-  --accent-bright:var(--accent); --border-accent:var(--accent);
-  /* `--warn` IS `--flag` UNDER AN OLDER NAME, and leaving it out of this table shipped an amber
-     written for a near-black chrome onto paper: #f0b429 measures 1.68:1 on --at-paper, against
-     an AA bar of 4.5. It is not a decorative token -- it is the ink on the methodology notice,
-     the builder's outcome-side warnings, the environment lens's era boundary and the
-     inspector's replay guard, so on the light shell the four places the archive raises its hand
-     were the four hardest things on the surface to read. Same role, same table, one ink. */
-  --warn:var(--at-paper-flag);
-  color-scheme:light;
-}
-
-/* AND THE PLATE STAYS DARK, IN BOTH SHELLS, INCLUDING EVERYTHING DRAWN OVER IT. */
-[data-atlas]:not([data-shell="dark"]) .atlas-stage{
-  --chrome:var(--d-chrome); --chrome-hi:var(--d-chrome-hi); --sunken:var(--d-sunken);
-  --t1:var(--d-t1); --t2:var(--d-t2); --t3:var(--d-t3); --t4:var(--d-t4);
-  --rule:var(--d-rule); --rule-2:var(--d-rule-2);
-  --rule-3:var(--d-rule-3); --rule-4:var(--d-rule-4);
-  --accent:var(--d-accent); --accent-2:var(--d-accent-2); --flag:var(--d-flag);
-  --warn:var(--d-flag);
-  --pos:var(--d-pos); --neg:var(--d-neg); --special:var(--d-special);
-  --hatch:var(--d-hatch);
-  --text-1:var(--t1); --text-2:var(--t3); --text-link:var(--accent);
-  --border-dim:var(--rule); --border-strong:var(--rule-2);
-  color-scheme:dark;
-}
+ * THE PAPER SHELL IS RETIRED AS A SELECTABLE SURFACE. The Atlas ships one skin -- Handoff B's
+ * charcoal, declared at the top of the token block -- and there is no `data-shell` attribute,
+ * no stored preference and no selector that remaps the semantic inks. The `--at-paper-*` and
+ * `--at-bar-*` tokens above are RETAINED, unread, for Direction C (the CITE / export treatment,
+ * which is the one place a paper plate belongs); scripts/check-atlas-adherence.mjs still pins
+ * their values so the export direction inherits a verified ramp rather than a stale one, and it
+ * asserts that no shell selector has come back. */

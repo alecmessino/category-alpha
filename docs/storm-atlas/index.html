@@ -12,6 +12,8 @@
 <link rel="preload" href="data/atlas-manifest.json" as="fetch" crossorigin>
 <link rel="preload" href="data/atlas-core-v1.bin.gz" as="fetch" crossorigin>
 <link rel="preload" href="data/atlas-tracks-v1.bin.gz" as="fetch" crossorigin>
+<link rel="preload" href="../assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="atlas.css">
 <style>
 /* `min-height`, NOT `height`, AND THE DOCUMENT SCROLLS.
@@ -23,7 +25,7 @@
    calibration surface is still `position:fixed; inset:0` and scrolls inside itself, and is
    unaffected. */
 html,body{margin:0;min-height:100%}
-body{background:var(--stage,#0d131d);color:#eaf0f7;font-family:var(--font-sans)}
+body{background:#13171c;color:#e6e8eb;font-family:var(--font-sans)}
 *{box-sizing:border-box}
 ::-webkit-scrollbar{width:9px;height:9px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#2b3746}
@@ -33,7 +35,7 @@ body{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;-webkit-fo
 /* Leaflet containment, inlined. The stylesheet above is vendored, but if it ever fails to
    load, absolutely-positioned tiles spill out of the map and across the layout. These are the
    minimum rules that keep the map inside its box regardless. */
-.leaflet-container{overflow:hidden;position:relative;-webkit-tap-highlight-color:transparent;background:#0d131d;font-family:var(--font-sans)}
+.leaflet-container{overflow:hidden;position:relative;-webkit-tap-highlight-color:transparent;background:#0f1317;font-family:var(--font-sans)}
 .leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,
 .leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0}
 .leaflet-container img.leaflet-tile{max-width:none!important;max-height:none!important;width:256px;height:256px;border:0}

@@ -141,47 +141,10 @@ export function Capt({ children }) {
   return <div className="at-capt">{children}</div>;
 }
 
-/** A measure, not a meter: one fill and one tick at the same place, so the eye can read a
- *  proportion without the bar implying a target. */
-export function Bar({ pct, tone }) {
-  const w = Math.max(0, Math.min(100, pct));
-  return (
-    <div className="at-bar">
-      <i style={{ width: `${w.toFixed(2)}%`, background: tone || "var(--accent)" }} />
-      <u style={{ left: `${w.toFixed(2)}%`, background: tone || "var(--accent)" }} />
-    </div>
-  );
-}
-
-/* `hook`, like TextButton's, stamps a stable `data-*` attribute. A Note is prose, and prose is
-   rewritten; a gate that asserted a note's presence by matching its sentence would be a gate
-   that fails the first time the sentence is improved. */
 export function Note({ children, style, hook }) {
   return <div className="at-note" style={style} {...(hook ? { [hook]: "" } : {})}>{children}</div>;
 }
 
-export function Prose({ children, style }) {
-  return <div className="at-prose" style={style}>{children}</div>;
-}
-
-export function Lede({ children, style }) {
-  return <div className="at-lede" style={style}>{children}</div>;
-}
-
-/* `chipKey` stamps a stable `data-chip` hook. The DOM gate used to select a chip by its
-   visible text, which broke the moment 3.3 put live counts inside the labels -- the selector
-   was matching the wording of the thing it was checking. The hook is the identity; the label
-   is free to change. */
-/* THE CATEGORY RAMP, AS CHROME INK RATHER THAN CARTOGRAPHIC INK.
- *
- * `CATEGORY_COLOR` is the plate's own table and must stay exactly what the plate draws with --
- * the plate is dark in both shells, so those values are always right THERE. They are not right
- * anywhere else: on paper, Cat 2's #f2c14e measures 1.5:1, which is a category nobody can read.
- *
- * atlas.css already resolves both ramps per shell as `--barink-*` -- the plate's own inks on the
- * dark chrome, the contrast-verified paper echo on the light one. Anything in the CHROME that
- * wants a category ink takes it from there, so the two surfaces can never drift and neither can
- * borrow the other's table. */
 export const CATEGORY_INK = {
   td: "var(--barink-td)", ts: "var(--barink-ts)", cat1: "var(--barink-cat1)",
   cat2: "var(--barink-cat2)", cat3: "var(--barink-cat3)", cat4: "var(--barink-cat4)",

@@ -102,7 +102,7 @@ console.log("\n[3] the panels use no mark the key does not define");
 
   /* Every panel that can print a refusal, named explicitly. A glob would quietly stop covering
      a panel the day someone renamed one, which is the failure this is meant to catch. */
-  const PANELS = ["evidence-deck.jsx", "cohort-builder.jsx", "outcome-card.jsx", "env-lens.jsx",
+  const PANELS = ["evidence-deck.jsx", "cohort-builder.jsx", "env-lens.jsx",
                   "calibration.jsx", "storm-panel.jsx", "atlas.jsx", "kit.jsx"];
   const byKind = new Map(states.map((st) => [st.kind, st]));
   const seen = new Set();
@@ -127,8 +127,33 @@ console.log("\n[3] the panels use no mark the key does not define");
     }
   }
   ok("every rendered state is one refusal.jsx defines", bad.length === 0, bad.join(", "));
-  ok("the surface actually uses more than one", seen.size >= 3,
-    `only ${[...seen].join(", ")} reach a panel`);
+
+  /* AND EVERY STATE IS REACHABLE, WHICH IS THE STRONGER CLAIM AND THE ONE WORTH MAKING.
+   *
+   * This used to assert only that more than one kind reached a panel, and it was satisfied by
+   * `outcome-card.jsx` -- a ladder and a rate line that no surface has rendered since the deck
+   * replaced them. Dead JSX that still names refusal kinds is exactly the code that goes on
+   * satisfying a coverage rule while nothing renders it, so the file was removed and the rule
+   * had to say what it actually meant.
+   *
+   * The four ROW refusals do not reach the screen as literal <Refusal> tags at all: a refused row
+   * carries a mark and a status word, and its sentence is printed once per governing refusal in
+   * the deck's limits block, through `REFUSALS[kind]` with the kind computed from the cell. The
+   * table that decides which mark each kind takes -- MARK_OF_KIND in evidence-deck.jsx -- is
+   * therefore the honest place to read the row kinds from, and between it and the literal call
+   * sites every one of the six states must be accounted for. check-atlas-dom.mjs is the other
+   * half: it drives the real states onto a real screen and reads the words back. */
+  const deck = await readFile(join(UI, "evidence-deck.jsx"), "utf8");
+  const markTable = deck.slice(deck.indexOf("const MARK_OF_KIND"), deck.indexOf("export function markGroupOf"));
+  const marked = new Set([...markTable.matchAll(/^\s*([A-Z_]+):/gm)].map((m) => m[1]));
+  ok("the deck's mark table names a mark for every row refusal",
+    ["RATE_REFUSED", "BASE_RATE_ONLY", "OUT_OF_SCOPE", "CONDITIONED_ON", "NOT_EVALUABLE", "UNKNOWN"]
+      .every((k) => marked.has(k)),
+    `mark table holds ${[...marked].join(", ")}`);
+  const reachable = new Set([...seen, ...marked]);
+  const unreachable = states.filter((st) => !reachable.has(st.kind)).map((st) => st.kind);
+  ok("every state refusal.jsx defines can reach the surface", unreachable.length === 0,
+    `${unreachable.join(", ")} is defined and nothing on the surface can print it`);
 }
 
 console.log(failures

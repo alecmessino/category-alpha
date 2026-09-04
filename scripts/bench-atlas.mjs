@@ -37,6 +37,7 @@ const BUDGET = {
   hitTestMs: 2,               // pointer feedback that lags reads as a broken map
   shellPaintMs: 700,          // the scale line and map frame, with the font CDN discounted
   densityMs: 16,              // archive-wide pathway grid: one frame, so a filter change is live
+  cellIndexMs: 60,            // cell -> storms index, built once per archive on first inspection
   genesisDensityMs: 4,        // 3,959 genesis points; anything slower means it is doing too much
   replayTickMs: 8,            // the incremental tick, 20/s -- past this the head visibly stutters
   replayRepaintMs: 200,       // rebuilding the whole revealed prefix after a pan or a zoom
@@ -304,6 +305,10 @@ console.log("\n[3] the work the Atlas actually does");
       ? time(6, () => A.pathwayDensity(archive, cases, 2.0)) : null;
     const genesisDensityMs = A.genesisDensity && rows
       ? time(8, () => A.genesisDensity(archive, rows, 2.0)) : null;
+    /* The cell index is built lazily on the first hover or brush and cached; what is timed is the
+       uncached build, because that is the one a reader waits for. */
+    const CL = globalThis.__ATLAS_CELLS || {};
+    const cellIndexMs = CL.buildCellIndex ? time(3, () => CL.buildCellIndex(archive, 2.0)) : null;
 
     const T = globalThis.__ATLAS_TIMELINE || {};
     const timelineBuildMs = T.buildTimeline && rows
@@ -359,7 +364,7 @@ console.log("\n[3] the work the Atlas actually does");
       ? time(8, (i) => C.whyMatched(archive, heavy, heavyRows[i % heavyRows.length])) : null;
 
     return { decodeAndIndex, filterMs, queryMs, drawMs, hitMs,
-             densityMs, genesisDensityMs, timelineBuildMs, replayTickMs, replayRepaintMs,
+             densityMs, genesisDensityMs, cellIndexMs, timelineBuildMs, replayTickMs, replayRepaintMs,
              cohortMs, cohortWideMs, previewMs, bridgeWhyMs,
              storms: archive.nStorms, points: archive.nPoints };
   });
@@ -371,6 +376,7 @@ console.log("\n[3] the work the Atlas actually does");
   if (m.decodeAndIndex) gate("re-project 224k points", m.decodeAndIndex, BUDGET.decodeAndIndexMs, "ms");
   if (m.densityMs !== null) gate("pathway density, whole archive", m.densityMs, BUDGET.densityMs, "ms");
   if (m.genesisDensityMs !== null) gate("genesis density, whole archive", m.genesisDensityMs, BUDGET.genesisDensityMs, "ms");
+  if (m.cellIndexMs !== null) gate("cell index (cell -> storms), whole archive", m.cellIndexMs, BUDGET.cellIndexMs, "ms");
   if (m.timelineBuildMs !== null) gate("build the replay clock", m.timelineBuildMs, BUDGET.timelineBuildMs, "ms");
   if (m.replayTickMs !== null) gate("replay tick (incremental)", m.replayTickMs, BUDGET.replayTickMs, "ms");
   if (m.replayRepaintMs !== null) gate("replay repaint to cursor (after a pan)", m.replayRepaintMs, BUDGET.replayRepaintMs, "ms");

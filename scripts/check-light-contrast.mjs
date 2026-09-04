@@ -177,23 +177,19 @@ const SURFACES = [
   }],
 ];
 
-for (const shell of ["light", "dark"]) {
-  console.log(`\n[contrast] the ${shell} shell, every surface, every word`);
-  for (const [name, query, after] of SURFACES) {
-    await boot(query);
-    await page.evaluate((s) => {
-      if (s === "dark") localStorage.setItem("atlas.shell", "dark");
-      else localStorage.removeItem("atlas.shell");
-    }, shell);
-    await boot(query);
-    if (after) await after();
-    const bad = await page.evaluate(SWEEP);
-    ok(`${name.padEnd(28)}`, bad.length === 0,
-       bad.map((o) => `${String(o.cr).padStart(5)}:1 (needs ${o.need})  ${o.size}px  `
-         + `${o.color}  .${o.cls}  "${o.text}"`).join("\n"));
-  }
+/* ONE SHELL. The paper shell is retired as a selectable surface (the product skin is Handoff
+   B's charcoal, and there is no stored preference any more), so the sweep runs once -- against
+   every surface, every word, on the ground it actually lands on. The paper tokens remain in the
+   stylesheet for Direction C export and are measured there, when that direction ships. */
+console.log("\n[contrast] the charcoal shell, every surface, every word");
+for (const [name, query, after] of SURFACES) {
+  await boot(query);
+  if (after) await after();
+  const bad = await page.evaluate(SWEEP);
+  ok(`${name.padEnd(28)}`, bad.length === 0,
+     bad.map((o) => `${String(o.cr).padStart(5)}:1 (needs ${o.need})  ${o.size}px  `
+       + `${o.color}  .${o.cls}  "${o.text}"`).join("\n"));
 }
-await page.evaluate(() => localStorage.removeItem("atlas.shell"));
 
 await browser.close();
 server.close();

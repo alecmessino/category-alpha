@@ -50,7 +50,7 @@ const ENV_FALLBACK = { storms_any_source: null, storms_total: null };
 export function CohortBuilder({
   archive, cohort, setCohort, result, preview, sentence, conditions,
   layers, setLayers, bounds, onReset, mode, setMode,
-  showPathway, setShowPathway, showGenesisDensity, setShowGenesisDensity, timeline, envCoverage,
+  timeline, envCoverage,
 }) {
   const total = archive.manifest.counts.storms;
   const s = cohort;
@@ -458,15 +458,11 @@ export function CohortBuilder({
           ▸ HOW IT IS DRAWN
         </summary>
 
-        <SubLabel>DENSITY SURFACES</SubLabel>
-        {/* The notes are the registered claims themselves, not a paraphrase. A surface that can
-            be turned on from here has to carry the same statement it carries beside the
-            numbers, and prose written twice drifts. */}
-        <Toggle label="PATHWAY FREQUENCY" on={!!showPathway} onChange={setShowPathway}
-          note={claimText("atlas.pathway")} />
-        <Toggle label="GENESIS COUNT" on={!!showGenesisDensity} onChange={setShowGenesisDensity}
-          note={claimText("atlas.genesis_density")} />
-
+        {/* THE DENSITY SURFACES ARE NOT HERE ANY MORE. Pathway counts / Genesis counts / Tracks
+            is the plate's own mode control, on the plate head: it changes what is DRAWN and
+            nothing about the question, and a map-dependent control belongs on the map. The
+            registered claims that named the two surfaces travel with them -- see PlateModes in
+            map.jsx. */}
         <SubLabel>LAYERS</SubLabel>
         <Toggle label="COLOUR BY INTENSITY" on={layers.colorBy === "intensity"}
           onChange={(v) => setLayers({ ...layers, colorBy: v ? "intensity" : "uniform" })}
