@@ -415,6 +415,45 @@ jobs:
       - name: Verify the committed dossier is byte-identical to a fresh build
         run: node scripts/check-dossier-lala.mjs
 
+      # ---- THE COLLATERAL PACKAGE ----------------------------------------------------------
+      #
+      # Seven prospect-facing sheets and the manifest they are counted from. These three gates
+      # are OFFLINE and read only committed bytes, so they answer the same question on any branch
+      # and in five years: does every figure on a sheet trace to the manifest, does every replay
+      # URL reopen the cohort it claims, and is every copy slot inside the budget its sheet was
+      # laid out against.
+      #
+      # THE COLLATERAL IS NOT REBUILT HERE, DELIBERATELY, and that is the difference from the
+      # dossier two steps above. build-collateral.mjs reads docs/data/latest.json, which the
+      # refresh loop rewrites every ten minutes, so a byte-identity gate of the kind
+      # check-dossier-lala.mjs runs would restamp the live line and fail on the next ingest. The
+      # committed sheets are a point-in-time render corrected by an EXPLICIT freshness commit;
+      # these gates check that render against its own manifest, which is a question the feed
+      # cannot move. The cost is the one thing they cannot see: a source edit nobody rebuilt.
+      - name: Verify every collateral figure traces to the manifest
+        run: node scripts/check-collateral.mjs
+
+      # THE LOAD-BEARING CLAIM OF THE PACKAGE IS THAT THE COHORT IS A URL, and this is the only
+      # gate that tests it. Every printed replay URL is parsed back through the Atlas's own
+      # parseQuery, re-executed through cohortResult against the committed pack, and compared
+      # figure by figure with the row the sheet printed.
+      #
+      # IT IS THE ONE COLLATERAL GATE WITH A MOVING INPUT, and that is deliberate. The pack is
+      # rebuilt about four times a day, so a frozen manifest is measured against a live archive
+      # and a red can arrive with no pull request behind it. What bounds it is `includeProvisional`
+      # defaulting to false with no collateral spec setting it: the running season cannot enter a
+      # cohort, so the exposure is season FINALISATION -- when a newly non-provisional storm joins
+      # a declared cell and moves an N. That failure is correct and must not be pinned away: it
+      # means the printed n / N no longer reproduces, and the fix is a freshness rebuild of the
+      # collateral, not a frozen copy of the archive for the gate to agree with.
+      - name: Verify every replay URL reopens the cohort it claims
+        run: node scripts/check-collateral-replay.mjs
+
+      # Length was the failure mode that overflowed a sheet by 802 px with every word on it
+      # correct. The budget is per slot, and a slot retired to make a sheet fit must stay retired.
+      - name: Verify the collateral copy is inside its budget
+        run: node scripts/check-collateral-copy-budget.mjs
+
   # ---- THE BROWSER GATES, IN THEIR OWN JOB -----------------------------------------------
   #
   # THEY USED TO LIVE AT THE BOTTOM OF `checks`, AND THAT IS WHY THEY STOPPED RUNNING.
@@ -705,6 +744,29 @@ jobs:
       # quietly loosened until it catches nothing. A 10x regression still trips a 3x budget.
       - name: Verify the Atlas still meets its performance budgets
         run: node scripts/bench-atlas.mjs --ci --require-browser
+
+      # ---- THE COLLATERAL SHEETS, MEASURED -------------------------------------------------
+      #
+      # A sheet that overflows its page or drops a label below its type floor is a print defect
+      # nothing static can see: the markup is valid, every number is right, and the PDF is two
+      # pages. The fit gate releases each sheet's clamped height to measure the real content
+      # against the page, and demands 8 px of headroom because a sheet measured at exactly zero
+      # printed as two; the type gate classifies every node by what it IS -- legal, citation,
+      # table, body -- and holds each class to its own floor, so a sheet cannot be made to fit by
+      # shrinking the sentence that qualifies it.
+      #
+      # THEY ARE HERE AND NOT IN `checks` FOR THE REASON STATED AT THE TOP OF THIS JOB: only this
+      # job runs `playwright install`, so only this job has a Chromium to drive. They reuse the
+      # one installed above and add no second browser.
+      #
+      # --require-browser is not decoration here either. Both scripts print a skip and exit 0
+      # when playwright is absent, which is right on a laptop and would be a step green forever
+      # while measuring nothing. The flag turns that skip into an exit 2.
+      - name: Verify every collateral sheet fits its page
+        run: node scripts/check-collateral-fit.mjs --require-browser
+
+      - name: Verify every collateral class clears its type floor
+        run: node scripts/check-collateral-legibility.mjs --require-browser
 
   # ---- THE ONE REQUIRED CHECK ------------------------------------------------------------
   #

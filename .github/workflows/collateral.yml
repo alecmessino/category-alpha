@@ -1,0 +1,77 @@
+name: Collateral
+
+# WHY THIS FILE EXISTS, WHEN checks.yml ALREADY RUNS THESE GATES.
+#
+# checks.yml runs the collateral gates on every pull request, on every push to every branch
+# EXCEPT main, and once a day on main. That is the right shape for the suite it belongs to and
+# it leaves exactly one hole: a MERGE INTO main is never gated by the collateral gates, and a
+# merge is the one moment a broken sheet can arrive on the permanent URL.
+#
+# The one-line fix — dropping `branches-ignore: [main]` in checks.yml — was rejected on purpose.
+# It would put the whole terminal, archive and Atlas suite on every push to main, which is a
+# decision that file argues against at length and which nothing here needs. This workflow closes
+# the hole and changes no existing trigger, no existing job and no required check.
+#
+# THE DATA REFRESH DOES NOT REACH THIS, AND MUST NOT. The refresh loop commits to main roughly
+# every ten minutes and every one of those commits carries [skip ci], so GitHub never starts a
+# push run for them. What is left is what this is for: merges, and a hand-pushed correction.
+#
+# AND THE DRIFT THIS CANNOT SEE IS THE SCHEDULE'S JOB. The replay gate re-executes each printed
+# cohort against the live pack, so the failure that matters most here — a frozen n / N that stops
+# reproducing because the archive moved under it — arrives on a [skip ci] refresh commit that no
+# push run will ever see. checks.yml's daily 06:17 run on main is what catches that. The two are
+# complementary and neither is redundant: this one gates what a merge introduces, the schedule
+# gates what the feed erodes.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+# A newer merge supersedes a run still in flight. Its own group, so it cannot cancel a checks run.
+concurrency:
+  group: millibar-collateral-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only. Nothing here commits, deploys or fetches; every gate reads committed bytes.
+permissions:
+  contents: read
+
+jobs:
+  collateral:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # ONE npm INSTALL, for the same reason checks.yml states: a second `npm i --no-save` prunes
+      # what the first installed. Only the two browser gates need anything at all; the other three
+      # read committed bytes with the standard library.
+      - name: Install dev dependencies
+        run: npm i --silent --no-fund --no-audit --no-save playwright@1.49.1
+
+      - name: Install Chromium for the two measured gates
+        run: npx playwright install --with-deps chromium
+
+      # The same five gates checks.yml runs, in the same order, on the commit that actually
+      # landed on main rather than on the branch that proposed it.
+      - name: Verify every collateral figure traces to the manifest
+        run: node scripts/check-collateral.mjs
+
+      - name: Verify every replay URL reopens the cohort it claims
+        run: node scripts/check-collateral-replay.mjs
+
+      - name: Verify the collateral copy is inside its budget
+        run: node scripts/check-collateral-copy-budget.mjs
+
+      # --require-browser for the reason it is on every browser gate in this repository: both
+      # scripts print a skip and exit 0 when playwright is absent, and a step that goes green
+      # while measuring nothing is worse than no step at all.
+      - name: Verify every collateral sheet fits its page
+        run: node scripts/check-collateral-fit.mjs --require-browser
+
+      - name: Verify every collateral class clears its type floor
+        run: node scripts/check-collateral-legibility.mjs --require-browser
