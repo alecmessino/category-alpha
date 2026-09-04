@@ -1,0 +1,348 @@
+STORM ATLAS COLLATERAL — SOURCE MANIFEST
+METHODOLOGY 1.1.0 · PACK 134661125525f27a · ARCHIVE BUILT 2026-08-18T05:18:57Z
+ARCHIVE 3959 storms / 224153 track points / 3379 landfall rows
+
+## GENESIS DETERMINATION — the archive's own rule, applied to each live system
+   RULE            first OBSERVED track point with a tropical status; TROPICAL_STATUS = TD, TS, HU, TY, ST, TC, HR; explicitly non-tropical = DB, LO, EX, SD, SS, WV, MD, IN, DS, ET, NR, PT
+   RULE SOURCE     scripts/genesis/build/genesis_events.py + scripts/genesis/schema.py
+   ENGINE ACCEPTS THE OPERATIONAL LAYER AS A GENESIS SOURCE: no
+   AL052026 EDOUARD
+     stages in operational record: DB, LO, TD, TS
+     first tropical fix (operational, NOT a cohort source): 2026-08-31T18:00:00.000Z 28.1N 91W TD 30 kt 1012 mb
+     present in archive pack 134661125525f27a: no
+     VERDICT: NO OBSERVED GENESIS POINT — the operational record is not a cohort source and this storm is absent from the archive pack
+   EP112026 KARINA
+     stages in operational record: DB, TS, HU
+     first tropical fix (operational, NOT a cohort source): 2026-08-27T18:00:00.000Z 10.8N 111.5W TS 40 kt 1001 mb
+     present in archive pack 134661125525f27a: no
+     VERDICT: NO OBSERVED GENESIS POINT — the operational record is not a cohort source and this storm is absent from the archive pack
+   EP122026 LOWELL
+     stages in operational record: DB, LO, TS, HU
+     first tropical fix (operational, NOT a cohort source): 2026-08-27T18:00:00.000Z 11.2N 134W TS 35 kt 1006 mb
+     present in archive pack 134661125525f27a: no
+     VERDICT: NO OBSERVED GENESIS POINT — the operational record is not a cohort source and this storm is absent from the archive pack
+
+## NHC PUBLIC ADVISORIES (live desk line, ingested 2026-09-01T21:08:02.476Z)
+   AL052026 Edouard — Tropical Storm, 29.9N 94W, 45 kt / 998 mb, NW 7 mph, advisory 006 at 2026-09-01T21:00:00.000Z; highest watch/warning Tropical Storm Warning
+     Tropical Storm Warning: Port Bolivar, Texas to the Vermilion/Cameron Parish Line
+   EP112026 Karina — Cat 4 Hurricane, 18.2N 129.9W, 115 kt / 949 mb, W 12 mph, advisory 022 at 2026-09-01T21:00:00.000Z
+   EP132026 Marie — Tropical Storm, 15.5N 109.5W, 50 kt / 997 mb, NW 8 mph, advisory 003 at 2026-09-01T21:00:00.000Z
+   EP122026 Lowell — Cat 1 Hurricane, 13.5N 150.3W, 80 kt / 977 mb, WNW 10 mph, advisory 021 at 2026-09-01T21:00:00.000Z
+
+## 97L — 97L / TS Edouard
+   POINT TYPE      PRE-GENESIS REFERENCE CELL
+   COORDS QUERIED  28N 88.7W
+   RADIUS          250 km
+   SEASON WINDOW   floor 1971, August–September
+   COHORT N        12  (ESS 12, min sample 10)
+   COHORT STATUS   SUFFICIENT
+   QUESTION        North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?
+   ROWS:
+     reached TD              12/12   100.0%  [76-100%]            (no row status returned)
+     reached TS              10/12   83.3%  [55-95%]              (no row status returned)
+     reached Cat 1            3/12   25.0%  [9-53%]               (no row status returned)
+     reached Cat 2            2/12   16.7%  [5-45%]               (no row status returned)
+     reached Cat 3            2/12   16.7%  [5-45%]               (no row status returned)
+     reached Cat 4            1/12   8.3%  [1-35%]                (no row status returned)
+     reached Cat 5            1/12   8.3%  [1-35%]                (no row status returned)
+     CONUS — any             10/12   83.3%  [55-95%]              (no row status returned)
+     CONUS — ≥64 kt           1/12   8.3%  [1-35%]                (no row status returned)
+     MEXICO — any             1/12   8.3%  [1-35%]                (no row status returned)
+     MEXICO — ≥64 kt          1/12   8.3%  [1-35%]                (no row status returned)
+     CARIBBEAN — any          0/12   0.0%  [0-24%]                (no row status returned)
+     CARIBBEAN — ≥64 kt       0/12   0.0%  [0-24%]                (no row status returned)
+     CENTRAL AMERICA — any    0/12   0.0%  [0-24%]                (no row status returned)
+     CENTRAL AMERICA — ≥64 kt   0/12   0.0%  [0-24%]                (no row status returned)
+     HAWAII — any             0/12   0.0%  [0-24%]                OUT OF SCOPE -- unscoreable here
+     HAWAII — ≥64 kt          0/12   0.0%  [0-24%]                BASE RATE ONLY -- unscoreable
+     UNATTRIBUTED — any       0/12   0.0%  [0-24%]                (no row status returned)
+     UNATTRIBUTED — ≥64 kt    0/12   0.0%  [0-24%]                (no row status returned)
+   UNSCOREABLE CONTRACTS:
+     hawaii:any: OUT OF SCOPE -- unscoreable here — 0 in scope (in the NA basin since 1971) / 11 archive-wide, 10 required
+     hawaii:hurricane: BASE RATE ONLY -- unscoreable — 0 in scope (in the NA basin since 1971) / 2 archive-wide, 10 required
+   TIME TO ts: n=10 median 21 h  p25 7.5  p75 33
+   TIME TO cat1: n=3 median 36 h  p25 33  p75 84
+   TIME TO cat3: n=2 median 72 h  p25 69  p75 75
+   TIME TO landfall_conus: n=22 median 65.5 h  p25 36.75  p75 176.25
+   TIME TO landfall_mexico: n=1 median 96 h  p25 96  p75 96
+   REPRESENTATIVES (8 printed, shortfall 0):
+     ANITA 1977 — 150 kt, genesis 1977-08-29, 126 km from cell, landfall: mexico/Tamaulipas 120 kt
+     ALICIA 1983 — 100 kt, genesis 1983-08-15, 194 km from cell, landfall: conus/Texas 100 kt
+     FERN 1971 — 80 kt, genesis 1971-09-03, 131 km from cell, landfall: conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Texas 60 kt; conus/Texas 58 kt; conus/Texas 56.081329874656 kt; conus/Texas 55 kt; conus/Texas 55 kt; conus/Texas 55 kt; conus/Texas 43 kt
+     EDOUARD 2008 — 55 kt, genesis 2008-08-03, 128 km from cell, landfall: conus/Texas 55 kt
+     MINDY 2021 — 50 kt, genesis 2021-09-08, 191 km from cell, landfall: conus/Florida 50 kt
+     HENRI 2003 — 50 kt, genesis 2003-09-03, 119 km from cell, landfall: conus/Florida 30 kt
+     BERYL 1994 — 50 kt, genesis 1994-08-14, 166 km from cell, landfall: conus/Florida 50 kt
+     DANIELLE 1980 — 50 kt, genesis 1980-09-04, 189 km from cell, landfall: conus/Texas 40 kt
+   CITE: STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 12 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a
+   URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=28%2C-88.7%2C250&s0=1971&mo=8.9&b=NA&m=1.1.0
+
+## 97L-r150 — 97L cell — 150 km variant
+   POINT TYPE      PRE-GENESIS REFERENCE CELL
+   COORDS QUERIED  28N 88.7W
+   RADIUS          150 km
+   SEASON WINDOW   floor 1971, August–September
+   COHORT N        5  (ESS 5, min sample 10)
+   COHORT STATUS   BELOW MIN SAMPLE — rates refused
+   QUESTION        North Atlantic storms that formed within 150 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?
+   ROWS:
+     reached TD               5/5    RATE REFUSED                 RATE REFUSED
+     reached TS               5/5    RATE REFUSED                 RATE REFUSED
+     reached Cat 1            2/5    RATE REFUSED                 RATE REFUSED
+     reached Cat 2            1/5    RATE REFUSED                 RATE REFUSED
+     reached Cat 3            1/5    RATE REFUSED                 RATE REFUSED
+     reached Cat 4            1/5    RATE REFUSED                 RATE REFUSED
+     reached Cat 5            1/5    RATE REFUSED                 RATE REFUSED
+     CONUS — any              4/5    RATE REFUSED                 RATE REFUSED
+     CONUS — ≥64 kt           0/5    RATE REFUSED                 RATE REFUSED
+     MEXICO — any             1/5    RATE REFUSED                 RATE REFUSED
+     MEXICO — ≥64 kt          1/5    RATE REFUSED                 RATE REFUSED
+     CARIBBEAN — any          0/5    RATE REFUSED                 RATE REFUSED
+     CARIBBEAN — ≥64 kt       0/5    RATE REFUSED                 RATE REFUSED
+     CENTRAL AMERICA — any    0/5    RATE REFUSED                 RATE REFUSED
+     CENTRAL AMERICA — ≥64 kt   0/5    RATE REFUSED                 RATE REFUSED
+     HAWAII — any             0/5    RATE REFUSED                 RATE REFUSED
+     HAWAII — ≥64 kt          0/5    RATE REFUSED                 RATE REFUSED
+     UNATTRIBUTED — any       0/5    RATE REFUSED                 RATE REFUSED
+     UNATTRIBUTED — ≥64 kt    0/5    RATE REFUSED                 RATE REFUSED
+   UNSCOREABLE CONTRACTS:
+     hawaii:any: OUT OF SCOPE -- unscoreable here — 0 in scope (in the NA basin since 1971) / 11 archive-wide, 10 required
+     hawaii:hurricane: BASE RATE ONLY -- unscoreable — 0 in scope (in the NA basin since 1971) / 2 archive-wide, 10 required
+   TIME TO ts: n=5 median 18 h  p25 12  p75 36
+   TIME TO cat1: n=2 median 81 h  p25 55.5  p75 106.5
+   TIME TO cat3: n=1 median 78 h  p25 78  p75 78
+   TIME TO landfall_conus: n=16 median 93.69791666666666 h  p25 46.65263888888889  p75 179.67138888888888
+   TIME TO landfall_mexico: n=1 median 96 h  p25 96  p75 96
+   REPRESENTATIVES (5 printed, shortfall 3):
+     ANITA 1977 — 150 kt, genesis 1977-08-29, 126 km from cell, landfall: mexico/Tamaulipas 120 kt
+     FERN 1971 — 80 kt, genesis 1971-09-03, 131 km from cell, landfall: conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Texas 60 kt; conus/Texas 58 kt; conus/Texas 56.081329874656 kt; conus/Texas 55 kt; conus/Texas 55 kt; conus/Texas 55 kt; conus/Texas 43 kt
+     EDOUARD 2008 — 55 kt, genesis 2008-08-03, 128 km from cell, landfall: conus/Texas 55 kt
+     HENRI 2003 — 50 kt, genesis 2003-09-03, 119 km from cell, landfall: conus/Florida 30 kt
+     BERTHA 2002 — 35 kt, genesis 2002-08-04, 113 km from cell, landfall: conus/Louisiana 35 kt; conus/Texas 20 kt
+   CITE: STORM ATLAS · North Atlantic storms that formed within 150 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 5 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a
+   URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=28%2C-88.7%2C150&s0=1971&mo=8.9&b=NA&m=1.1.0
+
+## 97L-allmonths — 97L cell — season-wide variant
+   POINT TYPE      PRE-GENESIS REFERENCE CELL
+   COORDS QUERIED  28N 88.7W
+   RADIUS          250 km
+   SEASON WINDOW   floor 1971, all months
+   COHORT N        17  (ESS 17, min sample 10)
+   COHORT STATUS   SUFFICIENT
+   QUESTION        North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in seasons from 1971 onwards, that went on to any outcome — what happened next?
+   ROWS:
+     reached TD              17/17   100.0%  [82-100%]            (no row status returned)
+     reached TS              14/17   82.4%  [59-94%]              (no row status returned)
+     reached Cat 1            4/17   23.5%  [10-47%]              (no row status returned)
+     reached Cat 2            2/17   11.8%  [3-34%]               (no row status returned)
+     reached Cat 3            2/17   11.8%  [3-34%]               (no row status returned)
+     reached Cat 4            1/17   5.9%  [1-27%]                (no row status returned)
+     reached Cat 5            1/17   5.9%  [1-27%]                (no row status returned)
+     CONUS — any             13/17   76.5%  [53-90%]              (no row status returned)
+     CONUS — ≥64 kt           2/17   11.8%  [3-34%]               (no row status returned)
+     MEXICO — any             1/17   5.9%  [1-27%]                (no row status returned)
+     MEXICO — ≥64 kt          1/17   5.9%  [1-27%]                (no row status returned)
+     CARIBBEAN — any          0/17   0.0%  [0-18%]                (no row status returned)
+     CARIBBEAN — ≥64 kt       0/17   0.0%  [0-18%]                (no row status returned)
+     CENTRAL AMERICA — any    0/17   0.0%  [0-18%]                (no row status returned)
+     CENTRAL AMERICA — ≥64 kt   0/17   0.0%  [0-18%]                (no row status returned)
+     HAWAII — any             0/17   0.0%  [0-18%]                OUT OF SCOPE -- unscoreable here
+     HAWAII — ≥64 kt          0/17   0.0%  [0-18%]                BASE RATE ONLY -- unscoreable
+     UNATTRIBUTED — any       0/17   0.0%  [0-18%]                (no row status returned)
+     UNATTRIBUTED — ≥64 kt    0/17   0.0%  [0-18%]                (no row status returned)
+   UNSCOREABLE CONTRACTS:
+     hawaii:any: OUT OF SCOPE -- unscoreable here — 0 in scope (in the NA basin since 1971) / 11 archive-wide, 10 required
+     hawaii:hurricane: BASE RATE ONLY -- unscoreable — 0 in scope (in the NA basin since 1971) / 2 archive-wide, 10 required
+   TIME TO ts: n=14 median 15 h  p25 6  p75 24
+   TIME TO cat1: n=4 median 48 h  p25 34.5  p75 78
+   TIME TO cat3: n=2 median 72 h  p25 69  p75 75
+   TIME TO landfall_conus: n=26 median 63 h  p25 33.75  p75 158
+   TIME TO landfall_mexico: n=1 median 96 h  p25 96  p75 96
+   REPRESENTATIVES (8 printed, shortfall 0):
+     ANITA 1977 — 150 kt, genesis 1977-08-29, 126 km from cell, landfall: mexico/Tamaulipas 120 kt
+     ALICIA 1983 — 100 kt, genesis 1983-08-15, 194 km from cell, landfall: conus/Texas 100 kt
+     FERN 1971 — 80 kt, genesis 1971-09-03, 131 km from cell, landfall: conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Louisiana 25 kt; conus/Texas 60 kt; conus/Texas 58 kt; conus/Texas 56.081329874656 kt; conus/Texas 55 kt; conus/Texas 55 kt; conus/Texas 55 kt; conus/Texas 43 kt
+     BARRY 2019 — 65 kt, genesis 2019-07-11, 110 km from cell, landfall: conus/Louisiana 65 kt
+     EDOUARD 2008 — 55 kt, genesis 2008-08-03, 128 km from cell, landfall: conus/Texas 55 kt
+     MINDY 2021 — 50 kt, genesis 2021-09-08, 191 km from cell, landfall: conus/Florida 50 kt
+     NESTOR 2019 — 50 kt, genesis 2019-10-18, 191 km from cell, landfall: conus/Florida 40 kt; conus/Virginia 40 kt
+     HENRI 2003 — 50 kt, genesis 2003-09-03, 119 km from cell, landfall: conus/Florida 30 kt
+   CITE: STORM ATLAS · North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in seasons from 1971 onwards, that went on to any outcome · 17 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a
+   URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=28%2C-88.7%2C250&s0=1971&b=NA&m=1.1.0
+
+## KARINA — Hurricane Karina
+   POINT TYPE      DECLARED GENESIS POINT · NOT ATLAS-OBSERVED
+   COORDS QUERIED  13.2N 115W
+   RADIUS          250 km
+   SEASON WINDOW   floor 1971, August–September
+   COHORT N        14  (ESS 14, min sample 10)
+   COHORT STATUS   SUFFICIENT
+   QUESTION        East Pacific storms that formed within 250 km of 13.2°N 115.0°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?
+   ROWS:
+     reached TD              14/14   100.0%  [78-100%]            (no row status returned)
+     reached TS              13/14   92.9%  [69-99%]              (no row status returned)
+     reached Cat 1            7/14   50.0%  [27-73%]              (no row status returned)
+     reached Cat 2            6/14   42.9%  [21-67%]              (no row status returned)
+     reached Cat 3            4/14   28.6%  [12-55%]              (no row status returned)
+     reached Cat 4            1/14   7.1%  [1-31%]                (no row status returned)
+     reached Cat 5            0/14   0.0%  [0-22%]                (no row status returned)
+     CONUS — any              0/14   0.0%  [0-22%]                OUT OF SCOPE -- unscoreable here
+     CONUS — ≥64 kt           0/14   0.0%  [0-22%]                OUT OF SCOPE -- unscoreable here
+     MEXICO — any             1/14   7.1%  [1-31%]                (no row status returned)
+     MEXICO — ≥64 kt          0/14   0.0%  [0-22%]                (no row status returned)
+     CARIBBEAN — any          0/14   0.0%  [0-22%]                OUT OF SCOPE -- unscoreable here
+     CARIBBEAN — ≥64 kt       0/14   0.0%  [0-22%]                OUT OF SCOPE -- unscoreable here
+     CENTRAL AMERICA — any    0/14   0.0%  [0-22%]                OUT OF SCOPE -- unscoreable here
+     CENTRAL AMERICA — ≥64 kt   0/14   0.0%  [0-22%]                OUT OF SCOPE -- unscoreable here
+     HAWAII — any             0/14   0.0%  [0-22%]                OUT OF SCOPE -- unscoreable here
+     HAWAII — ≥64 kt          0/14   0.0%  [0-22%]                BASE RATE ONLY -- unscoreable
+     UNATTRIBUTED — any       0/14   0.0%  [0-22%]                OUT OF SCOPE -- unscoreable here
+     UNATTRIBUTED — ≥64 kt    0/14   0.0%  [0-22%]                OUT OF SCOPE -- unscoreable here
+   UNSCOREABLE CONTRACTS:
+     caribbean:any: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 503 archive-wide, 10 required
+     caribbean:hurricane: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 181 archive-wide, 10 required
+     central_america:any: OUT OF SCOPE -- unscoreable here — 8 in scope (in the EP basin since 1971) / 145 archive-wide, 10 required
+     central_america:hurricane: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 36 archive-wide, 10 required
+     conus:any: OUT OF SCOPE -- unscoreable here — 2 in scope (in the EP basin since 1971) / 699 archive-wide, 10 required
+     conus:hurricane: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 292 archive-wide, 10 required
+     hawaii:any: OUT OF SCOPE -- unscoreable here — 8 in scope (in the EP basin since 1971) / 11 archive-wide, 10 required
+     hawaii:hurricane: BASE RATE ONLY -- unscoreable — 1 in scope (in the EP basin since 1971) / 2 archive-wide, 10 required
+     unattributed:any: OUT OF SCOPE -- unscoreable here — 4 in scope (in the EP basin since 1971) / 49 archive-wide, 10 required
+     unattributed:hurricane: OUT OF SCOPE -- unscoreable here — 3 in scope (in the EP basin since 1971) / 28 archive-wide, 10 required
+   TIME TO ts: n=13 median 12 h  p25 6  p75 36
+   TIME TO cat1: n=7 median 42 h  p25 39  p75 54
+   TIME TO cat3: n=4 median 84 h  p25 70.5  p75 117
+   TIME TO landfall_mexico: n=1 median 99 h  p25 99  p75 99
+   REPRESENTATIVES (8 printed, shortfall 0):
+     KENNETH 2017 — 115 kt, genesis 2017-08-18, 119 km from cell, no modelled landfall
+     GUILLERMO 2009 — 110 kt, genesis 2009-08-12, 210 km from cell, no modelled landfall
+     JOVA 2005 — 110 kt, genesis 2005-09-12, 186 km from cell, no modelled landfall
+     JULIO 2014 — 105 kt, genesis 2014-08-04, 176 km from cell, no modelled landfall
+     ORLENE 2016 — 95 kt, genesis 2016-09-11, 78 km from cell, no modelled landfall
+     HECTOR 2006 — 95 kt, genesis 2006-08-15, 166 km from cell, no modelled landfall
+     FERNANDA 2005 — 75 kt, genesis 2005-08-09, 157 km from cell, no modelled landfall
+     FERNANDA 1999 — 55 kt, genesis 1999-08-17, 220 km from cell, no modelled landfall
+   CITE: STORM ATLAS · East Pacific storms that formed within 250 km of 13.2°N 115.0°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 14 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a
+   URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=13.2%2C-115%2C250&s0=1971&mo=8.9&b=EP&m=1.1.0
+
+## 95E — Invest 95E
+   POINT TYPE      PRE-GENESIS REFERENCE CELL
+   COORDS QUERIED  12N 107.5W
+   RADIUS          250 km
+   SEASON WINDOW   floor 1971, August–September
+   COHORT N        24  (ESS 24, min sample 10)
+   COHORT STATUS   SUFFICIENT
+   QUESTION        East Pacific storms that formed within 250 km of 12.0°N 107.5°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?
+   ROWS:
+     reached TD              24/24   100.0%  [86-100%]            (no row status returned)
+     reached TS              24/24   100.0%  [86-100%]            (no row status returned)
+     reached Cat 1           15/24   62.5%  [43-79%]              (no row status returned)
+     reached Cat 2           13/24   54.2%  [35-72%]              (no row status returned)
+     reached Cat 3           12/24   50.0%  [31-69%]              (no row status returned)
+     reached Cat 4            6/24   25.0%  [12-45%]              (no row status returned)
+     reached Cat 5            0/24   0.0%  [0-14%]                (no row status returned)
+     CONUS — any              0/24   0.0%  [0-14%]                OUT OF SCOPE -- unscoreable here
+     CONUS — ≥64 kt           0/24   0.0%  [0-14%]                OUT OF SCOPE -- unscoreable here
+     MEXICO — any             1/24   4.2%  [1-20%]                (no row status returned)
+     MEXICO — ≥64 kt          1/24   4.2%  [1-20%]                (no row status returned)
+     CARIBBEAN — any          0/24   0.0%  [0-14%]                OUT OF SCOPE -- unscoreable here
+     CARIBBEAN — ≥64 kt       0/24   0.0%  [0-14%]                OUT OF SCOPE -- unscoreable here
+     CENTRAL AMERICA — any    0/24   0.0%  [0-14%]                OUT OF SCOPE -- unscoreable here
+     CENTRAL AMERICA — ≥64 kt   0/24   0.0%  [0-14%]                OUT OF SCOPE -- unscoreable here
+     HAWAII — any             0/24   0.0%  [0-14%]                OUT OF SCOPE -- unscoreable here
+     HAWAII — ≥64 kt          0/24   0.0%  [0-14%]                BASE RATE ONLY -- unscoreable
+     UNATTRIBUTED — any       0/24   0.0%  [0-14%]                OUT OF SCOPE -- unscoreable here
+     UNATTRIBUTED — ≥64 kt    0/24   0.0%  [0-14%]                OUT OF SCOPE -- unscoreable here
+   UNSCOREABLE CONTRACTS:
+     caribbean:any: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 503 archive-wide, 10 required
+     caribbean:hurricane: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 181 archive-wide, 10 required
+     central_america:any: OUT OF SCOPE -- unscoreable here — 8 in scope (in the EP basin since 1971) / 145 archive-wide, 10 required
+     central_america:hurricane: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 36 archive-wide, 10 required
+     conus:any: OUT OF SCOPE -- unscoreable here — 2 in scope (in the EP basin since 1971) / 699 archive-wide, 10 required
+     conus:hurricane: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 292 archive-wide, 10 required
+     hawaii:any: OUT OF SCOPE -- unscoreable here — 8 in scope (in the EP basin since 1971) / 11 archive-wide, 10 required
+     hawaii:hurricane: BASE RATE ONLY -- unscoreable — 1 in scope (in the EP basin since 1971) / 2 archive-wide, 10 required
+     unattributed:any: OUT OF SCOPE -- unscoreable here — 4 in scope (in the EP basin since 1971) / 49 archive-wide, 10 required
+     unattributed:hurricane: OUT OF SCOPE -- unscoreable here — 3 in scope (in the EP basin since 1971) / 28 archive-wide, 10 required
+   TIME TO ts: n=24 median 18 h  p25 12  p75 18
+   TIME TO cat1: n=15 median 48 h  p25 42  p75 51
+   TIME TO cat3: n=12 median 66 h  p25 64.5  p75 79.5
+   TIME TO landfall_mexico: n=1 median 141 h  p25 141  p75 141
+   REPRESENTATIVES (8 printed, shortfall 0):
+     OLIVIA 1994 — 130 kt, genesis 1994-09-22, 152 km from cell, no modelled landfall
+     KENNETH 1993 — 130 kt, genesis 1993-09-05, 39 km from cell, no modelled landfall
+     FAUSTO 2002 — 125 kt, genesis 2002-08-21, 110 km from cell, no modelled landfall
+     ODILE 1990 — 125 kt, genesis 1990-09-23, 122 km from cell, no modelled landfall
+     MARIE 2020 — 120 kt, genesis 2020-09-29, 175 km from cell, no modelled landfall
+     LIZA 1976 — 120 kt, genesis 1976-09-25, 124 km from cell, landfall: mexico/Sonora 90 kt
+     JULIETTE 2019 — 110 kt, genesis 2019-09-01, 84 km from cell, no modelled landfall
+     LINDA 2015 — 110 kt, genesis 2015-09-05, 131 km from cell, no modelled landfall
+   CITE: STORM ATLAS · East Pacific storms that formed within 250 km of 12.0°N 107.5°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 24 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a
+   URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=12%2C-107.5%2C250&s0=1971&mo=8.9&b=EP&m=1.1.0
+
+## LOWELL — Hurricane Lowell
+   POINT TYPE      DECLARED GENESIS POINT · NOT ATLAS-OBSERVED
+   COORDS QUERIED  11.3N 133.8W
+   RADIUS          250 km
+   SEASON WINDOW   floor 1971, August–September
+   COHORT N        6  (ESS 6, min sample 10)
+   COHORT STATUS   BELOW MIN SAMPLE — rates refused
+   QUESTION        East Pacific storms that formed within 250 km of 11.3°N 133.8°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?
+   ROWS:
+     reached TD               6/6    RATE REFUSED                 RATE REFUSED
+     reached TS               5/6    RATE REFUSED                 RATE REFUSED
+     reached Cat 1            2/6    RATE REFUSED                 RATE REFUSED
+     reached Cat 2            2/6    RATE REFUSED                 RATE REFUSED
+     reached Cat 3            2/6    RATE REFUSED                 RATE REFUSED
+     reached Cat 4            2/6    RATE REFUSED                 RATE REFUSED
+     reached Cat 5            0/6    RATE REFUSED                 RATE REFUSED
+     CONUS — any              0/6    RATE REFUSED                 RATE REFUSED
+     CONUS — ≥64 kt           0/6    RATE REFUSED                 RATE REFUSED
+     MEXICO — any             0/6    RATE REFUSED                 RATE REFUSED
+     MEXICO — ≥64 kt          0/6    RATE REFUSED                 RATE REFUSED
+     CARIBBEAN — any          0/6    RATE REFUSED                 RATE REFUSED
+     CARIBBEAN — ≥64 kt       0/6    RATE REFUSED                 RATE REFUSED
+     CENTRAL AMERICA — any    0/6    RATE REFUSED                 RATE REFUSED
+     CENTRAL AMERICA — ≥64 kt   0/6    RATE REFUSED                 RATE REFUSED
+     HAWAII — any             1/6    RATE REFUSED                 RATE REFUSED
+     HAWAII — ≥64 kt          1/6    RATE REFUSED                 RATE REFUSED
+     UNATTRIBUTED — any       0/6    RATE REFUSED                 RATE REFUSED
+     UNATTRIBUTED — ≥64 kt    0/6    RATE REFUSED                 RATE REFUSED
+   UNSCOREABLE CONTRACTS:
+     caribbean:any: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 503 archive-wide, 10 required
+     caribbean:hurricane: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 181 archive-wide, 10 required
+     central_america:any: OUT OF SCOPE -- unscoreable here — 8 in scope (in the EP basin since 1971) / 145 archive-wide, 10 required
+     central_america:hurricane: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 36 archive-wide, 10 required
+     conus:any: OUT OF SCOPE -- unscoreable here — 2 in scope (in the EP basin since 1971) / 699 archive-wide, 10 required
+     conus:hurricane: OUT OF SCOPE -- unscoreable here — 0 in scope (in the EP basin since 1971) / 292 archive-wide, 10 required
+     hawaii:any: OUT OF SCOPE -- unscoreable here — 8 in scope (in the EP basin since 1971) / 11 archive-wide, 10 required
+     hawaii:hurricane: BASE RATE ONLY -- unscoreable — 1 in scope (in the EP basin since 1971) / 2 archive-wide, 10 required
+     unattributed:any: OUT OF SCOPE -- unscoreable here — 4 in scope (in the EP basin since 1971) / 49 archive-wide, 10 required
+     unattributed:hurricane: OUT OF SCOPE -- unscoreable here — 3 in scope (in the EP basin since 1971) / 28 archive-wide, 10 required
+   TIME TO ts: n=5 median 12 h  p25 12  p75 24
+   TIME TO cat1: n=2 median 60 h  p25 48  p75 72
+   TIME TO cat3: n=2 median 78 h  p25 60  p75 96
+   TIME TO landfall_hawaii: n=1 median 151.27027777777778 h  p25 151.27027777777778  p75 151.27027777777778
+   REPRESENTATIVES (6 printed, shortfall 2):
+     INIKI 1992 — 125 kt, genesis 1992-09-05, 60 km from cell, landfall: hawaii/Kauai 112.035542724549 kt
+     JIMENA 1997 — 120 kt, genesis 1997-08-25, 88 km from cell, no modelled landfall
+     FERNANDA 2011 — 60 kt, genesis 2011-08-15, 235 km from cell, no modelled landfall
+     ESTELLE 2004 — 60 kt, genesis 2004-08-19, 221 km from cell, no modelled landfall
+     KENNA 1984 — 50 kt, genesis 1984-08-16, 134 km from cell, no modelled landfall
+     UNNAMED 1974 — 30 kt, genesis 1974-08-06, 79 km from cell, no modelled landfall
+   CITE: STORM ATLAS · East Pacific storms that formed within 250 km of 11.3°N 133.8°W, in August or September, in seasons from 1971 onwards, that went on to any outcome · 6 of 3,959 storms · METHODOLOGY 1.1.0 · PACK 134661125525f27a
+   URL:  https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&w=11.3%2C-133.8%2C250&s0=1971&mo=8.9&b=EP&m=1.1.0
+
+## OPERATIONAL LAYER (atlas-live-v1) — generated 2026-09-01T21:08:02.476Z
+   AL052026 EDOUARD — TROPICAL STORM, latest fix 2026-09-01T18:00:00.000Z: 29.7N 93.6W 50 kt 998 mb; peak 50 kt; age 3.1 h; active true
+   EP112026 KARINA — HURRICANE, latest fix 2026-09-01T18:00:00.000Z: 18.1N 129.4W 115 kt 949 mb; peak 120 kt; age 3.1 h; active true
+   EP132026 MARIE — TROPICAL STORM, latest fix 2026-09-01T18:00:00.000Z: 15.3N 109.3W 50 kt 997 mb; peak 50 kt; age 3.1 h; active true
+   EP122026 LOWELL — HURRICANE, latest fix 2026-09-01T18:00:00.000Z: 13.5N 149.9W 80 kt 977 mb; peak 80 kt; age 3.1 h; active true
+   AL042026 DOLLY — DISTURBANCE, latest fix 2026-08-28T18:00:00.000Z: 15.6N 48.5W 35 kt 1008 mb; peak 35 kt; age 99.1 h; active false
+   CP012026 LALA — LOW, latest fix 2026-08-28T06:00:00.000Z: 38.1N 179.1W 35 kt 1003 mb; peak 115 kt; age 111.1 h; active false
+   EP092026 ISELLE — TROPICAL DEPRESSION, latest fix 2026-08-27T00:00:00.000Z: 22.8N 125.5W 30 kt 1002 mb; peak 60 kt; age 141.1 h; active false
+   EP102026 JULIO — DISTURBANCE, latest fix 2026-08-25T18:00:00.000Z: 19.5N 118.8W 40 kt 1003 mb; peak 45 kt; age 171.1 h; active false
+   CP022026 MOKE — TROPICAL DEPRESSION, latest fix 2026-08-25T06:00:00.000Z: 16.2N 163.5W 30 kt 1006 mb; peak 45 kt; age 183.1 h; active false
+
+## NHC GRAPHICAL OUTLOOK (live, ingested 2026-09-01T21:08:02.476Z)
+   (no id) pacific — Offshore of Southwestern Mexico: 48h n/a, 7d 20% · issued 1100 AM PDT Tue Sep 1 2026
