@@ -31,6 +31,9 @@ export const PathwayLayer = AtlasLayer.extend({
     alphaFloor: 0.11,
     alphaSpan: 0.46,
     alphaGamma: 0.55,
+    /* With a storm selected the surface is context under a subject: every cell's alpha is
+       multiplied by this, and nothing about the counts or the ramp changes. */
+    dimScale: 0.42,
   },
 
   /** density: Map of "lat,lon" (cell south-west corner) -> distinct storms through that cell */
@@ -47,12 +50,30 @@ export const PathwayLayer = AtlasLayer.extend({
     return this._peak || 0;
   },
 
+  setDimmed(on) {
+    const v = !!on;
+    if (this._dim === v) return this;
+    this._dim = v;
+    this.redraw();
+    return this;
+  },
+
+  /** The cell under the pointer or the keyboard reticle, as a "lat,lon" key, or null. Drawn as
+      an outline so the literal count in the foot band is visibly THIS cell's. */
+  setHover(key) {
+    if (this._hover === key) return this;
+    this._hover = key || null;
+    this.redraw();
+    return this;
+  },
+
   draw(ctx, view) {
     const d = this._density;
-    if (!d || !d.size) return;
     const { scale, ox, oy, width, height } = view;
     const step = this.options.stepDeg;
     const peak = this._peak || 1;
+    if (this._hover && d) this._outline(ctx, view, this._hover, step);
+    if (!d || !d.size) return;
 
     for (const [key, n] of d) {
       const c = key.indexOf(",");
@@ -66,12 +87,28 @@ export const PathwayLayer = AtlasLayer.extend({
       const y1 = b.wy * scale - oy;
       if (x1 < 0 || y1 < 0 || x0 > width || y0 > height) continue;
       const o = this.options;
-      const alpha = o.alphaFloor + o.alphaSpan * Math.pow(n / peak, o.alphaGamma);
+      const alpha = (o.alphaFloor + o.alphaSpan * Math.pow(n / peak, o.alphaGamma))
+        * (this._dim ? o.dimScale : 1);
       ctx.fillStyle = `rgba(${this.options.hue}, ${alpha.toFixed(4)})`;
       ctx.fillRect(x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0));
     }
   },
 });
+
+PathwayLayer.prototype._outline = function outline(ctx, view, key, step) {
+  const { scale, ox, oy } = view;
+  const c = key.indexOf(",");
+  const lat0 = Number(key.slice(0, c));
+  const lon0 = Number(key.slice(c + 1));
+  const a = world(lat0 + step, lon0);
+  const b = world(lat0, lon0 + step);
+  ctx.save();
+  ctx.strokeStyle = `rgba(${this.options.hue}, 0.95)`;
+  ctx.lineWidth = 1;
+  ctx.strokeRect(Math.round(a.wx * scale - ox) + 0.5, Math.round(a.wy * scale - oy) + 0.5,
+    Math.round((b.wx - a.wx) * scale) - 1, Math.round((b.wy - a.wy) * scale) - 1);
+  ctx.restore();
+};
 
 function world(lat, lon) {
   let la = lat;

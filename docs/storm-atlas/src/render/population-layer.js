@@ -71,6 +71,16 @@ export const PopulationLayer = AtlasLayer.extend({
     colorBy: "uniform", // "uniform" | "intensity"
     dimmed: false, // true when a storm is selected and the population is context
     softenEmphasis: false, // true when the density surface is shown and should read through
+    /* UNDER A DENSITY SURFACE THE TRACKS STEP BACK. The resting plate is Pathway counts (Handoff
+       B); the tracks stay under it -- the density is those same storms counted, and a reader
+       must be able to see that the shading sits on real trajectories -- at an alpha tuned on the
+       real archive rather than the prototype's 88 synthetic tracks. 0.085 over 3,885 tracks
+       still accumulates to a readable mat; 0.34 outshines the cells it is meant to sit under. */
+    underDensity: false,
+    densityAlpha: 0.085,
+    /* The cohort, while one of its contracts is held. Below the lifted pool and above the rest
+       of the record: still legible as the population the held rows came out of. */
+    lensRestAlpha: 0.16,
   },
 
   /* The rows to draw BRIGHT, with everything else receding to context.
@@ -81,6 +91,21 @@ export const PopulationLayer = AtlasLayer.extend({
    * nothing about whether 194 is many or few. */
   setEmphasis(rows) {
     this._emph = rows && rows.length ? new Set(rows) : null;
+    this.redraw();
+    return this;
+  },
+
+  /* THE LENS: the storms of ONE published contract, lifted out of the cohort.
+   *
+   * A FOURTH STANDING, not a fifth query. The rows come from the engine -- scoreCases collects
+   * them in the same loop that counts the numerator -- so the lifted set and the published n are
+   * the same set by construction, and this layer never asks what a contract means. It is view
+   * state: it writes no rate, no cohort and no URL, and releasing it restores the frame exactly.
+   *
+   * The rest of the cohort stays visible and loses only INK, never contrast: "which of these
+   * reached Category 4" is a comparison, and hiding the others answers a different question. */
+  setLens(rows) {
+    this._lens = rows && rows.length ? new Set(rows) : null;
     this.redraw();
     return this;
   },
@@ -124,21 +149,31 @@ export const PopulationLayer = AtlasLayer.extend({
     /* A query is active whenever something has been asked of the map -- a probe that lifted a
        pool, or a storm selected out of it. Either way the population becomes context. */
     const querying = !!emph || o.dimmed;
-    const base = querying ? o.queryAlpha : o.trackAlpha;
+    const base = querying ? o.queryAlpha : o.underDensity ? o.densityAlpha : o.trackAlpha;
 
     ctx.lineWidth = o.trackWidth;
     let segments = 0;
 
     /* Two passes when a pool is emphasised: the rest of the record first, pushed well back, then
        the pool over it at full weight. Same geometry, different standing. */
-    const passes = emph
-      ? [{ rows: rows.filter((i) => !emph.has(i)), alpha: base, width: o.trackWidth,
-           ink: POPULATION_INK },
-         { rows: rows.filter((i) => emph.has(i)),
-           alpha: o.dimmed ? o.liftedDimAlpha
-             : o.softenEmphasis ? o.liftedSoftAlpha : o.liftedAlpha,
-           width: o.liftedWidth, ink: EMPHASIS_INK }]
-      : [{ rows, alpha: base, width: o.trackWidth, ink: POPULATION_INK }];
+    const lens = this._lens;
+    const liftedAlpha = o.dimmed ? o.liftedDimAlpha
+      : o.softenEmphasis ? o.liftedSoftAlpha : o.liftedAlpha;
+    /* THREE STANDINGS WHILE A ROW IS HELD, and the middle one is the point: the cohort is still
+       there, still drawn, still the thing the lifted storms are a fraction OF. */
+    const passes = lens
+      ? [{ rows: rows.filter((i) => !lens.has(i) && !(emph && emph.has(i))),
+           alpha: base, width: o.trackWidth, ink: POPULATION_INK },
+         { rows: rows.filter((i) => !lens.has(i) && emph && emph.has(i)),
+           alpha: o.lensRestAlpha, width: o.trackWidth, ink: POPULATION_INK },
+         { rows: rows.filter((i) => lens.has(i)),
+           alpha: liftedAlpha, width: o.liftedWidth, ink: EMPHASIS_INK }]
+      : emph
+        ? [{ rows: rows.filter((i) => !emph.has(i)), alpha: base, width: o.trackWidth,
+             ink: POPULATION_INK },
+           { rows: rows.filter((i) => emph.has(i)),
+             alpha: liftedAlpha, width: o.liftedWidth, ink: EMPHASIS_INK }]
+        : [{ rows, alpha: base, width: o.trackWidth, ink: POPULATION_INK }];
 
     for (const pass of passes) {
       if (!pass.rows.length) continue;
@@ -179,6 +214,7 @@ export const PopulationLayer = AtlasLayer.extend({
     this._stats = {
       storms: rows.length,
       emphasised: emph ? emph.size : 0,
+      lensed: lens ? lens.size : 0,
       segments,
       stride,
       decimated: stride > 1,

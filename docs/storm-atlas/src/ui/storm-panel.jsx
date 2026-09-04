@@ -96,6 +96,27 @@ function throughLine(view) {
 
 export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec, specUrl,
   bridge, cohortSentence, result, onBridge, cursorLive, live }) {
+  /* THE STRIP IS THE DEFAULT AND THE RECORD IS ONE PRESS AWAY.
+   *
+   * WHAT THIS CHANGES AND WHAT IT DOES NOT. The locked rules ask a selected storm for a MINIMUM
+   * STRIP -- name, id, season, basin, archive peak, minimum pressure, how many rows it is
+   * counted in, and the way back to a cohort -- and say it must not replace the ledger. What the
+   * dock held instead was seven sections of track geometry, landfalls, environment and data
+   * quality, opened in full every time a reader clicked a genesis point to ask one question.
+   *
+   * NOTHING IS REMOVED. Every block is still here, in the same order, in the same words, with
+   * the same hooks; OPEN RECORD shows them. What changes is which one the reader meets first.
+   * The bridge stays pinned in BOTH states -- it is the control the panel exists for -- and the
+   * source badge, the freshness line and the fail-closed refusal are in the strip rather than
+   * behind the press, because "which record is speaking" is not a detail a reader should have to
+   * open something to learn.
+   *
+   * The state resets with the storm: opening one record does not commit a reader to opening the
+   * next. Keyed rather than tracked, so the reset cannot be forgotten. */
+  const [openRecord, setOpenRecord] = React.useState(false);
+  const key = storm ? storm.storm_id : null;
+  const lastKey = React.useRef(key);
+  if (lastKey.current !== key) { lastKey.current = key; if (openRecord) setOpenRecord(false); }
   if (!storm) return null;
   const s = storm;
   const q = s.quality;
@@ -113,6 +134,32 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec,
      that is the DERIVED class of the operational peak, not the archive's. The FIGURE's own tint
      is chosen inside each block, from the same value. */
   const headCategory = view ? view.peak_category : s.max_category;
+
+  /* HOW MANY OF THE PUBLISHED ROWS THIS STORM IS COUNTED IN -- the locked rules' own line for
+     the strip, and it is read from the ENGINE'S MEMBER ARRAYS rather than recomputed here.
+     `scoreCases` collects the rows behind every numerator in the same loop that counts it, so
+     asking whether this storm is in a contract is a lookup in the set the archive published,
+     and this file never tests an intensity against a threshold.
+     NOT `contributionOf`: that answers a narrower question -- which LANDFALL contracts this
+     storm supplies -- and reading it as "the published rows" printed 0 for every storm that
+     came ashore nowhere the archive models, including one that reached Category 1. The bridge
+     still uses it, for the question it does answer. */
+  const counted = React.useMemo(() => {
+    const m = result && result.members;
+    if (!m || !s || s.row === undefined || s.row === null) return null;
+    let inRows = 0;
+    let total = 0;
+    for (const [cat, rows] of Object.entries(m.intensity || {})) {
+      if (cat === "td") continue;          // the ladder starts where the archive's thresholds do
+      total += 1;
+      if (rows && rows.includes(s.row)) inRows += 1;
+    }
+    for (const rows of Object.values(m.landfall || {})) {
+      total += 1;
+      if (rows && rows.includes(s.row)) inRows += 1;
+    }
+    return total ? `${inRows} of ${total} published rows` : null;
+  }, [result, s]);
 
   const loc = (
     <>
@@ -175,8 +222,44 @@ export function StormPanel({ storm, archive, onClose, onReplay, replaying, spec,
       </Masthead>
       </div>
 
-      <div className="at-insp-body">
+      {/* THE STRIP. Three facts and a control: what the archive recorded, how much of the
+          evidence below this storm is in, and the way into the whole record. Every figure here is
+          printed again in the record; none is computed for this line. */}
+      {!openRecord ? (
+        <div className="at-insp-strip" data-storm-strip>
+          <div className="at-pad">
+            {state === LIVE_UNAVAILABLE ? (
+              <Refusal kind="unk"
+                status={`LIVE CONTINUATION UNAVAILABLE — ARCHIVE REPRESENTATION ENDS ${fmtUTC(s.end_t) || "AT AN UNRECORDED TIME"}`}>
+                {(live && live.reason) || "The operational record could not be read."} Everything
+                below is the provisional archive record and stops where it stops. It is <b>not</b> a
+                statement about where this storm is now.
+              </Refusal>
+            ) : null}
+            <Row k={view ? "operational peak" : "archive peak"}
+              v={<Num value={view ? view.peak_vmax_kt : s.max_vmax_kt} unit="kt" />} />
+            <Row k="minimum pressure"
+              v={<Num value={view ? view.min_mslp_mb : s.min_mslp_mb} unit="mb" />} />
+            <Row k="class" v={<Txt value={CAT_LABEL[headCategory] || headCategory} />} />
+            <Row k="genesis" v={<Txt value={formatPosition(s.genesis_lat, s.genesis_lon)} />} />
+            {counted ? <Row k="counted in" v={<Txt value={counted} />} /> : null}
+            <button type="button" className="at-tbtn at-wide" data-open-record
+              style={{ marginTop: 9, width: "100%" }}
+              onClick={() => setOpenRecord(true)}>
+              OPEN RECORD — TRACK, LANDFALLS, ENVIRONMENT, QUALITY →
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="at-insp-body" style={openRecord ? undefined : { display: "none" }}>
       <div className="at-pad">
+        {openRecord ? (
+          <button type="button" className="at-tbtn" data-close-record
+            style={{ marginBottom: 9 }} onClick={() => setOpenRecord(false)}>
+            ← BACK TO THE STRIP
+          </button>
+        ) : null}
         {/* FAIL CLOSED. The archive representation is shown -- it is what exists -- and it is
             shown under a refusal naming the instant it stops. A stale archive-only state must
             never be able to read as current truth, and this is where that is enforced on screen.

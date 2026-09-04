@@ -208,7 +208,20 @@ const clickLatLng = async (lat, lng) => {
   await page.mouse.click(p.x, p.y);
   await page.waitForTimeout(600);
 };
-const selectRow = (row) => page.evaluate((r) => globalThis.__ATLAS_SELECT(r), row);
+/* SELECT, THEN OPEN THE RECORD.
+ *
+ * A selected storm opens on the minimum strip the locked rules ask for -- which record is
+ * speaking, what it recorded, and the bridge to a cohort -- with the track, landfall, environment
+ * and quality blocks one press behind OPEN RECORD. Every assertion in this file is about those
+ * blocks and is unchanged; what changed is which screen a reader meets first, so the gate presses
+ * the control a reader would. The press is conditional because the panel is already open in the
+ * states this file re-enters without re-selecting. */
+const selectRow = async (row) => {
+  await page.evaluate((r) => globalThis.__ATLAS_SELECT(r), row);
+  await page.waitForTimeout(250);
+  const open = await page.$("[data-open-record]");
+  if (open) { await open.click(); await page.waitForTimeout(250); }
+};
 
 console.log("\n[1] the archive's scale, from the pack that was actually loaded");
 {
@@ -1053,24 +1066,31 @@ console.log("\n[8c] the density surfaces say what they count");
 {
   await chip("mode-explore");
   await page.waitForTimeout(400);
-  /* The layer and density toggles sit under a disclosure now. The query is the product; how the
-     cohort is DRAWN is a preference, and putting it behind one triangle is what keeps the
-     builder from reading as a control panel. Opened here so the checks can still reach it. */
-  await page.evaluate(() => {
-    const d = document.querySelector("details[data-drawn]");
-    if (d) d.open = true;
-  });
-  await page.waitForTimeout(200);
-  await page.getByText("PATHWAY FREQUENCY", { exact: true }).click();
+  /* AND THE EDITOR IS CLOSED FIRST. It opens as a popover anchored to the clause it edits, which
+     may overlap the plate -- that is the composition, not a defect -- so a reader reaching for
+     the plate's own controls closes it, and so does this. */
+  await closeBuilder();
+  /* THE DENSITY SURFACES ARE THE PLATE'S OWN MODE CONTROL NOW -- Pathway counts / Genesis counts
+     / Tracks on the plate head -- and the plate rests on Pathway counts. A map-dependent control
+     lives on the map; the builder keeps the question. */
+  await page.click('[data-plate-mode="pathway"]');
   await page.waitForTimeout(900);
   let t = await text();
-  ok("the pathway surface names itself", /HISTORICAL PATHWAY FREQUENCY/i.test(t));
+  ok("the pathway surface names itself", /HISTORICAL PATHWAY FREQUENCY|PATHWAY COUNTS/i.test(t));
   ok("and denies being a forecast", /not a forecast/i.test(t));
-  await page.getByText("GENESIS COUNT", { exact: true }).click();
+  ok("the plate says it rests on pathway counts",
+    await page.evaluate(() => document.querySelector('[data-plate-mode="pathway"]').getAttribute("aria-pressed") === "true"));
+  await page.click('[data-plate-mode="genesis"]');
   await page.waitForTimeout(900);
   t = await text();
   ok("the genesis surface names itself a count", /GENESIS COUNT/i.test(t));
   ok("and says a count is not a rate", /not (a|the) rate|a count, not/i.test(t));
+  await page.click('[data-plate-mode="tracks"]');
+  await page.waitForTimeout(600);
+  ok("and the tracks-only reading is still one press away",
+    await page.evaluate(() => document.querySelector('[data-plate-mode="tracks"]').getAttribute("aria-pressed") === "true"));
+  await page.click('[data-plate-mode="pathway"]');
+  await page.waitForTimeout(400);
   /* Naming a surface is not the same as drawing one. The archive-wide pathway grid holds 2,934
      cells and the genesis grid 869, so a peak of zero means the layer is a caption over an
      empty canvas -- which is precisely how a density surface fails quietly. */
@@ -1159,7 +1179,14 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
       !(await has("[data-bridge-replay-guard]")));
   }
 
-  /* RUN THE STORM FORWARD, so the cursor is demonstrably not the genesis point. */
+  /* RUN THE STORM FORWARD, so the cursor is demonstrably not the genesis point.
+     The panel's replay control lives in the record rather than in the strip -- the page's own
+     transport carries the same play control whenever a storm is selected, which is why this one
+     was always described as the second way in -- so the record is opened to reach it. */
+  {
+    const open = await page.$("[data-open-record]");
+    if (open) { await open.click(); await page.waitForTimeout(300); }
+  }
   await page.click("[data-storm-replay]");
   await page.waitForTimeout(1600);
   {

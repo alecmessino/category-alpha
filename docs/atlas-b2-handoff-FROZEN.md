@@ -51,7 +51,87 @@
 > redesign is still PR-later work.
 >
 > Everything else in this document is still design, still unimplemented, and still the authority.
-> **PR 2 onward has not been started.**
+>
+> ---
+>
+> **HANDOFF B IS IMPLEMENTED. Appended, not part of the frozen design.**
+>
+> The approved Storm Atlas redesign (Handoff B · Institutional Cartographic) is built into
+> `docs/storm-atlas/`. 5c remains the resting-screen authority for COMPOSITION and Turn 4 / 3j for
+> INTERACTION; B supplies the visual language, the evidence hierarchy and the interaction model,
+> and where the two disagreed the composition locks won. Nothing analytical came from the
+> prototype: `DEMO_MDR`, `COND`, `genStorms`, `mulberry32`, its `BASE` table and its
+> `resolveRefusal` are absent from the source and the bundle, which
+> `scripts/check-atlas-canonical.mjs` asserts by name over both.
+>
+> **What changed, and what each is bound by:**
+>
+> 1. **One shell, B's charcoal.** `#13171c` with the plate one tone below it at `#0f1317`; the
+>    paper shell is retired as a selectable surface and its tokens remain, unread, for Direction
+>    C. There is no `data-shell` attribute and no stored preference, and the adherence gate fails
+>    if a shell selector returns. The contrast gate now sweeps every word on the one shell.
+> 2. **Two families, five sizes — B's families on 5c's scale.** IBM Plex Sans carries the question
+>    and every outcome name where Source Serif 4 did; IBM Plex Mono carries every figure. Both are
+>    self-hosted, and Plex Mono stopped loading from Google Fonts for the terminal as well.
+> 3. **The plate rests on Pathway counts.** Three readings of the same storms — PATHWAY COUNTS /
+>    GENESIS COUNTS / TRACKS — as a mode segment on the plate's own head, with the tracks kept
+>    under either surface at a reduced alpha. The counts are literal and deduped by storm id;
+>    `scripts/test-atlas-cells.mjs` proves both against a brute-force count over the real archive,
+>    and the cell under the pointer or the reticle prints its own count on the plate's foot.
+> 4. **The interval is a mark as well as a sentence.** A hairline whisker, a dot at the point
+>    estimate and a tick at the archive base rate, on a common 0–100 track, beside the interval
+>    still printed in type. No filled bar: 5c removed that reading and B does not ask it back.
+> 5. **The lens.** Hovering or holding a row of the answer draws that row's own storms on the
+>    plate and echoes its already-published figures on the foot. The member rows come from
+>    `scoreCases`, collected in the same loop that counts the numerator, so the lifted set and the
+>    published n are the same set by construction. Holds publish nothing —
+>    `scripts/check-atlas-lens.mjs` captures the URL, the question, the cohort and every figure
+>    either side of one.
+> 6. **The brush.** A shift-drag lifts the storms of the cohort that passed through that water and
+>    states the count. It is an inspection only: a rectangle is not a condition this archive can
+>    be asked, so it writes no URL and no cohort. A rectangle genesis condition was DEFERRED.
+> 7. **The keyboard.** RETICLE turns the arrows into a crosshair on the plate; Enter does what a
+>    click does, Escape gives the arrows back to Leaflet, and a polite live region says what is
+>    under it. `scripts/check-atlas-a11y.mjs` drives the whole path with keys alone.
+> 8. **The selected storm opens on the minimum strip** the locked rules ask for, with the record
+>    one press behind OPEN RECORD. Nothing was removed; the bridge stays pinned in both states.
+> 9. **The editor is anchored to the clause that opened it.** It may overlap the plate and it may
+>    not move it: absolutely positioned, so the plate's rectangle stays a function of the viewport
+>    and the composition — `check-atlas-stability` drives that transition and measures both sides.
+> 10. **The plate is self-contained.** The third-party tile service is gone; Natural Earth 110m
+>    land is packed with the archive as the context tier under the archive's own landfall rings.
+>
+> **Measured divergences from Handoff B, each forced by a lock this repository already had:**
+>
+> 1. **No tabs and no REFUSAL column.** B folds the matrix behind All / Intensity / Landfall and
+>    puts the refusal in a column; the locked rules keep STATUS a row-line at every width and
+>    forbid a fold that can hide a refusal.
+> 2. **No KPI headline.** B's chartboard leads with a 17px rate and its interval; 5c forbids KPI
+>    cards, so the synthesis sentence keeps the position and the two outcome denominators are
+>    stated on the answer's own head instead.
+> 3. **The status vocabulary is the registry's.** B prints OK / TRUE 0% / BELOW MIN in coloured
+>    pills; the refusal registry's closed vocabulary and single ink stand, and a true 0/N still
+>    publishes as 0.0% with its Wilson interval.
+> 4. **The interval is a whisker, not a bar** (see above).
+> 5. **The chrome accent is slate, not cyan.** B reserves the cyan for cartography; the chrome
+>    takes `#8ea3b8` so nothing outside the plate competes with it, and the probe ring keeps the
+>    cyan as `--plate-accent`.
+>
+> **An editorial pass followed the correctness pass**, reviewed at 1440×900 and at US Letter
+> landscape (1056×816), both at 100%, against one question: with the branding removed, would
+> this still read as an art-directed research publication? What it changed, none of it a number:
+> the plate head names the plate, its reading and its aperture and nothing the cohort line
+> above it already says (the context count moved into Figure 1's sentence); the projection
+> moved from the foot to the figure line beside PLATE NOTES; RETICLE joined HOME and FIT on the
+> camera bar, since it drives the plate and the foot reads it; the foot keeps one readout slot,
+> the cell under the pointer or the row that is held, and neither is ever ellipsised inside a
+> figure; the caption apparatus now actually queries the plate's width (its container rules had
+> been resolving to nothing, so items were clipped where they should have given way); the
+> invitation uses the stylesheet's own placement at the head of the plate rather than an inline
+> box over the Gulf; the sample gate is a word rather than a pill; the density legend lost its
+> border; and with a storm selected the count surfaces dim under it the way the tracks do.
+
+> **PR 2 onward of the design document below has not been started.**
 
 ## Two authorities
 

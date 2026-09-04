@@ -1155,6 +1155,11 @@ function unknownOf(r) {
 export function buildGroups(r, comparison, subject) {
   const groups = [];
   const tte = r.time_to_event || {};
+  /* THE MEMBERS ARE THE ENGINE'S, OR THERE ARE NONE. `result.members` is present only when the
+     surface asked cohortResult for it; every other consumer of buildGroups -- the deck's own
+     fixtures, the gates -- gets rows with `memberRows: null` and behaves exactly as before. The
+     renderer never derives membership: a row's lifted set is the set the engine counted. */
+  const mem = r.members || null;
 
   /* INTENSITY. TD is not a rung: the ladder starts where the archive's own thresholds start. */
   const intensityRows = CATEGORY_ORDER.filter((c) => c !== "td").map((cat) => {
@@ -1169,6 +1174,7 @@ export function buildGroups(r, comparison, subject) {
       delta: comparison ? comparison.intensity[cat] : null,
       timing: tte[cat],
       contractKey: key,
+      memberRows: mem && mem.intensity ? mem.intensity[cat] || null : null,
       selfContribution: isSelfContribution(cell, subject, key, r.min_sample),
     };
   });
@@ -1229,6 +1235,7 @@ export function buildGroups(r, comparison, subject) {
           delta: comparison ? comparison.landfall[region][kind] : null,
           timing: tte[`landfall_${region}`],
           contractKey: key,
+          memberRows: mem && mem.landfall ? mem.landfall[`${region}:${kind}`] || null : null,
           selfContribution: isSelfContribution(cell, subject, key, r.min_sample),
         });
       }

@@ -437,19 +437,25 @@ export function genesisDensity(archive, rows, step = 2.0) {
   return density;
 }
 
+/** One member row appended to a contract's list, creating the list on first use. */
+function memberPush(bag, key, row) {
+  const list = bag[key] || (bag[key] = []);
+  list.push(row);
+}
+
 /* One cell convention, shared by both surfaces so the two grids line up exactly on screen.
    Sized with a margin so a fix at a pole or hard on the antimeridian cannot land out of range. */
-function cellGrid(step) {
+export function cellGrid(step) {
   const rows = Math.ceil(180 / step) + 2;
   const cols = Math.ceil(360 / step) + 2;
   return { rows, cols, cells: rows * cols, oy: Math.ceil(90 / step) + 1, ox: Math.ceil(180 / step) + 1 };
 }
-function cellOf(g, lat, lon180, step) {
+export function cellOf(g, lat, lon180, step) {
   const cy = Math.floor(lat / step) + g.oy;
   const cx = Math.floor(lon180 / step) + g.ox;
   return cy * g.cols + cx;
 }
-function emitCells(density, counts, g, step) {
+export function emitCells(density, counts, g, step) {
   for (let cell = 0; cell < counts.length; cell++) {
     const n = counts[cell];
     if (!n) continue;
@@ -460,7 +466,7 @@ function emitCells(density, counts, g, step) {
 }
 
 /** Python's f"{x:.1f}" -- which prints negative zero as "-0.0" where JS toFixed prints "0.0". */
-function fmt1(x) {
+export function fmt1(x) {
   const s = Math.abs(x).toFixed(1);
   return (x < 0 || Object.is(x, -0)) ? "-" + s : s;
 }
@@ -607,8 +613,23 @@ export function scoreCases(A, cases, {
      has to arrive -- and until methodology 1.1.0 it arrived nowhere, which is exactly how the
      gate came to count a population no query could reach. */
   scope = null,
+  /* PER-CONTRACT MEMBER ROWS, OFF BY DEFAULT.
+   *
+   * The lens -- hold a row, see those storms on the plate -- needs to know WHICH storms are in
+   * each contract's numerator, and the locked rule is that the renderer never reproduces a
+   * statistical predicate: membership is the engine's to decide, here, in the same loop that
+   * counts it. Collecting it here rather than re-deriving it in the UI is what makes the lifted
+   * set and the published count the same set by construction, which scripts/check-atlas-lens.mjs
+   * asserts row by row.
+   *
+   * OPT-IN, because this function is also the parity seam. Every existing caller -- the parity
+   * harness, the gates, the bench -- gets exactly the object it got before, with no extra key
+   * and no extra work; the surface asks for members and pays for them. */
+  collectMembers = false,
 } = {}) {
   const circular = circularOutcomes(conditionedOn);
+  /* row arrays, in case order, so a member list is in the archive's own row order. */
+  const members = collectMembers ? { intensity: {}, landfall: {} } : null;
   const becamePeak = conditionedOn && conditionedOn.minPeak
     ? `a peak intensity of ${conditionedOn.minPeak} or above` : null;
   // ---- 4. landfalls for the matched storms ------------------------------------------
@@ -647,8 +668,9 @@ export function scoreCases(A, cases, {
       if (v === null || v === undefined || Number.isNaN(v)) { unknown++; continue; }
       known++;
       wden += c.weight;
-      if (v >= thr) { count++; wnum += c.weight; }
+      if (v >= thr) { count++; wnum += c.weight; if (members) memberPush(members.intensity, cat, c.row); }
     }
+    if (members && !members.intensity[cat]) members.intensity[cat] = [];
     intensity[cat] = circular.intensity.has(cat)
       ? circularRefusal(count, known, unknown, becamePeak)
       : rateResult(count, known, unknown, minSample, wnum, wden);
@@ -674,8 +696,20 @@ export function scoreCases(A, cases, {
     let wHur = 0;
     for (const c of cases) {
       const hits = c.landfalls.filter((l) => l.region === region && !l.suspect_relocation);
-      if (hits.length) { any++; wAny += c.weight; }
-      if (hits.some((h) => h.hurricane)) { hur++; wHur += c.weight; }
+      if (hits.length) {
+        any++;
+        wAny += c.weight;
+        if (members) memberPush(members.landfall, `${region}:any`, c.row);
+      }
+      if (hits.some((h) => h.hurricane)) {
+        hur++;
+        wHur += c.weight;
+        if (members) memberPush(members.landfall, `${region}:hurricane`, c.row);
+      }
+    }
+    if (members) {
+      if (!members.landfall[`${region}:any`]) members.landfall[`${region}:any`] = [];
+      if (!members.landfall[`${region}:hurricane`]) members.landfall[`${region}:hurricane`] = [];
     }
     const because = conditionedOn && conditionedOn.landfallRegion === region
       ? `a landfall in ${region}` +
@@ -779,6 +813,16 @@ export function scoreCases(A, cases, {
       }
     }
   }
+  /* MEMBERS ARE FROZEN INTO TYPED ARRAYS ON THE WAY OUT, so nothing downstream can push a row
+     into a published numerator's membership after the fact. Absent entirely unless asked for. */
+  if (members) {
+    for (const k of Object.keys(members.intensity)) {
+      members.intensity[k] = Uint32Array.from(members.intensity[k]);
+    }
+    for (const k of Object.keys(members.landfall)) {
+      members.landfall[k] = Uint32Array.from(members.landfall[k]);
+    }
+  }
   return { intensity, landfall, time_to_event: timeToEvent, unscoreable, reportRegions,
-           landfall_note: landfallNote };
+           landfall_note: landfallNote, ...(members ? { members } : {}) };
 }
