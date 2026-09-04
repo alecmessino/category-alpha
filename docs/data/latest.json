@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-04T02:33:49.076Z",
+  "generatedAt": "2026-09-04T02:44:11.719Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,19 +9,19 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 126,
+      "latencyMs": 144,
       "count": 3,
       "note": "3 active",
       "raw": "{\"id\":\"ep112026\",\"binNumber\":\"EP1\",\"name\":\"Karina\",\"classification\":\"HU\",\"intensity\":\"90\",\"pressure\":\"969\",\"latitude\":\"19.8N\",\"longitude\":\"137.6W\",\"latitudeNumeric\":19.8,\"longitudeNumeric\":-137.6,\"movementDir\":275,\"movementSpeed\":10,\"lastUpdate\":\"2026-09-03T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"030\",\"issuance\":\"2026-09-03T21:00:00.000Z\",\"fileUpdateTime\":\"2026-09-03T20:32:53.195Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP1.shtml\"},\"forecastAdvisory\":{\"advNum\":\"030\",\"issuance\":\"2026-09-03",
-      "forecast": "Karina: 8 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 362m old | Marie: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 352m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 358m old",
-      "advisoryLagMin": 362
+      "forecast": "Karina: 8 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 372m old | Marie: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 362m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · forecast undefined guidance · advisory 368m old",
+      "advisoryLagMin": 372
     },
     "markets": {
       "ok": true,
       "status": 200,
       "source": "kalshi",
       "count": 300,
-      "note": "300 hurricane markets across 51 series (109 anchored) from 317 series-markets(62s·62ok/0fail) · dropped 0kw/0sport/0px · 17 BEYOND THE 300-CONTRACT CEILING",
+      "note": "300 hurricane markets across 51 series (106 anchored) from 317 series-markets(62s·62ok/0fail) · dropped 0kw/0sport/0px · 17 BEYOND THE 300-CONTRACT CEILING",
       "seriesKept": 51,
       "droppedForCap": 17,
       "attempts": [
@@ -30,7 +30,7 @@
           "ok": true,
           "status": 200,
           "count": 300,
-          "note": "300 hurricane markets across 51 series (109 anchored) from 317 series-markets(62s·62ok/0fail) · dropped 0kw/0sport/0px · 17 BEYOND THE 300-CONTRACT CEILING",
+          "note": "300 hurricane markets across 51 series (106 anchored) from 317 series-markets(62s·62ok/0fail) · dropped 0kw/0sport/0px · 17 BEYOND THE 300-CONTRACT CEILING",
           "hosts": [
             {
               "host": "https://api.elections.kalshi.com/trade-api/v2",
@@ -47,14 +47,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will Lowell be categorized as a hurrican | Lowell | px=0.995",
-            "Will Wale be categorized as a hurricane  | Wale | px=0.120",
-            "Will Ulana be categorized as a hurricane | Ulana | px=0.320",
-            "Will Pena be categorized as a hurricane  | Pena | px=0.440",
-            "Will Olana be categorized as a hurricane | Olana | px=0.625",
-            "Will Nolo be categorized as a hurricane  | Nolo | px=0.240"
+            "Will there be more than 7 major Atlantic | Above 7 | px=0.005",
+            "Will there be more than 6 major Atlantic | Above 6 | px=0.005",
+            "Will there be more than 5 major Atlantic | Above 5 | px=0.010",
+            "Will there be more than 4 major Atlantic | Above 4 | px=0.025",
+            "Will there be more than 3 major Atlantic | Above 3 | px=0.025",
+            "Will there be more than 2 major Atlantic | Above 2 | px=0.105"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"135.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"135.00\"},\"px\":{\"last_price_dollars\":\"0.9900\",\"no_ask_dollars\":\"0.0100\",\"no_bid_dollars\":\"0.0000\",\"previous_price_dollars\":\"0.9900\",\"previous_yes_ask_dollars\":\"1.0000\",\"previous_yes_bid_dollars\":\"0.7000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"1.0000\",\"yes_ask_size_fp\":\"0.00\",\"yes_bid_dollars\":\"0.9900\",\"yes_bid_size_fp\":\"100.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2543.01\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"3581.85\"},\"px\":{\"last_price_dollars\":\"0.0100\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0100\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"612.93\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
         }
       ]
     },
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 358,
+      "latencyMs": 360,
       "count": 76,
       "attempts": [],
       "note": "El Niño · JJA 2026 ONI +1.80 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 1,
       "note": "1 area(s) under watch · 0 Atlantic",
-      "latencyMs": 211,
+      "latencyMs": 135,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -280,7 +280,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 103,
+      "latencyMs": 9,
       "source": "NHC graphical TWO",
       "count": 1,
       "note": "1 of 1 area(s) with geometry"
@@ -290,7 +290,7 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 1300,
+      "latencyMs": 1330,
       "count": 3,
       "note": "3/3 storm decks read · EP112026: a-deck cycle 2026090400 · 32 techs · consensus 3 member(s) peak 90 kt · b-deck 41 records · f-deck 233 fixes | EP132026: a-deck cycle 2026090400 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · b-deck 22 records · f-deck 91 fixes | EP122026: a-deck cycle 2026090400 · 32 techs · consensus 3 member(s) peak 119.7 kt · b-deck 38 records · f-deck 264 fixes",
       "attempts": [
@@ -319,7 +319,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 490,
+      "latencyMs": 493,
       "count": 2,
       "note": "2 vortex data message(s): AL052026 13:04Z, CP022026 08:53Z",
       "attempts": [
@@ -354,7 +354,7 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 590,
+      "latencyMs": 622,
       "count": 3,
       "note": "3/3 storms · EP112026: 2026-09-04T00:00Z · shear 1 kt · OHC 1 · MPI 125 kt · 8 RI thresholds | EP132026: 2026-09-04T00:00Z · shear 9 kt · OHC 17 · MPI 147 kt · 8 RI thresholds | EP122026: 2026-09-04T00:00Z · shear 9 kt · OHC 40 · MPI 155 kt · 8 RI thresholds",
       "attempts": [
@@ -462,11 +462,11 @@
         "already": true,
         "basis": "already carried at 90 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 362,
+      "advisoryLagMin": 372,
       "discussion": {
         "forecaster": "Evans/Brown",
         "issuedZ": "2026-09-03T20:31:00.000Z",
-        "lagMin": 363,
+        "lagMin": 373,
         "guidance": {
           "intensity": {
             "position": "with",
@@ -2142,7 +2142,7 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 154,
+        "consensusAgeMin": 164,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
@@ -2189,8 +2189,8 @@
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 362 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "ATCF consensus 154 min old, no aircraft in the storm"
+          "the advisory under this estimate is 372 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 164 min old, no aircraft in the storm"
         ]
       }
     },
@@ -2274,11 +2274,11 @@
         "already": true,
         "basis": "already carried at 80 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 352,
+      "advisoryLagMin": 362,
       "discussion": {
         "forecaster": "Adams",
         "issuedZ": "2026-09-03T20:43:00.000Z",
-        "lagMin": 351,
+        "lagMin": 361,
         "guidance": {
           "intensity": {
             "position": "above",
@@ -3650,7 +3650,7 @@
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 352 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "the advisory under this estimate is 362 min old, past the 180-min line — quality is capped regardless of what else arrived",
           "official advisory only — no guidance deck and no aircraft"
         ]
       }
@@ -3735,11 +3735,11 @@
         "already": true,
         "basis": "already carried at 120 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 358,
+      "advisoryLagMin": 368,
       "discussion": {
         "forecaster": "Reinhart",
         "issuedZ": "2026-09-03T20:37:00.000Z",
-        "lagMin": 357,
+        "lagMin": 367,
         "guidance": {
           "intensity": null,
           "track": null
@@ -5483,7 +5483,7 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 154,
+        "consensusAgeMin": 164,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
@@ -5530,8 +5530,8 @@
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 358 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "ATCF consensus 154 min old, no aircraft in the storm"
+          "the advisory under this estimate is 368 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 164 min old, no aircraft in the storm"
         ]
       }
     }
@@ -5544,61 +5544,23 @@
       "storm": "EP122026",
       "subject": null,
       "market": 0.015,
-      "model": 0.99,
-      "modelQuantity": "storm-intensity",
+      "model": null,
+      "modelQuantity": null,
       "modelBasin": null,
-      "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 120 kt now · combined 2 intensity estimates at 120 kt (sigma 8.1 kt, of which 8.1 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 120 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 358 min old when fetched",
+      "modelSource": null,
+      "modelBasis": null,
       "modelUncond": null,
-      "modelLayers": [
-        {
-          "id": "official",
-          "label": "Official forecast intensity",
-          "p": 0.99,
-          "basis": "already carried at 120 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
-        },
-        {
-          "id": "guidance",
-          "label": "Position in the guidance envelope",
-          "p": null,
-          "unavailable": true,
-          "basis": "the discussion states no position for the intensity forecast"
-        },
-        {
-          "id": "watch",
-          "label": "Watches and warnings",
-          "p": null,
-          "unavailable": true,
-          "basis": "no watch or warning in effect for this system"
-        },
-        {
-          "id": "consensus",
-          "label": "ATCF guidance consensus",
-          "p": 0.99,
-          "unavailable": false,
-          "basis": "3 aids in the 2026090400 deck peak at a mean of 119.7 kt near 0h, disagreeing by 8.1 kt"
-        }
-      ],
-      "modelLow": 0.99,
-      "modelHigh": 0.99,
-      "modelLagMin": 358,
-      "modelMaxLagMin": 360,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
       "modelGuidance": null,
       "modelRawP": null,
-      "modelOfficialP": 0.99,
-      "modelCalibrated": true,
-      "modelQuality": "LOW",
-      "modelIntel": {
-        "conKt": 119.7,
-        "conAgeMin": 154,
-        "spreadKt": 8.1,
-        "reconAgeMin": null,
-        "reconDeltaKt": null,
-        "ascatUsed": false,
-        "riFloorP": null,
-        "riScored": false,
-        "drivenBy": "forecast peak"
-      },
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.01,
@@ -5612,161 +5574,6 @@
       "depth": {
         "bidSize": 2313.34,
         "askSize": 80,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01EPAC"
-    },
-    {
-      "id": "KXHURRICANENAMES-26DEC01CPAC-LOW",
-      "label": "Will Lowell be categorized as a hurricane in the Central Pacific in 2026?",
-      "short": "Will Lowell be categorized as a hurricane in…",
-      "storm": "EP122026",
-      "subject": null,
-      "market": 0.99,
-      "model": 0.99,
-      "modelQuantity": "storm-intensity",
-      "modelBasin": null,
-      "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 120 kt now · combined 2 intensity estimates at 120 kt (sigma 8.1 kt, of which 8.1 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 120 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 358 min old when fetched",
-      "modelUncond": null,
-      "modelLayers": [
-        {
-          "id": "official",
-          "label": "Official forecast intensity",
-          "p": 0.99,
-          "basis": "already carried at 120 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
-        },
-        {
-          "id": "guidance",
-          "label": "Position in the guidance envelope",
-          "p": null,
-          "unavailable": true,
-          "basis": "the discussion states no position for the intensity forecast"
-        },
-        {
-          "id": "watch",
-          "label": "Watches and warnings",
-          "p": null,
-          "unavailable": true,
-          "basis": "no watch or warning in effect for this system"
-        },
-        {
-          "id": "consensus",
-          "label": "ATCF guidance consensus",
-          "p": 0.99,
-          "unavailable": false,
-          "basis": "3 aids in the 2026090400 deck peak at a mean of 119.7 kt near 0h, disagreeing by 8.1 kt"
-        }
-      ],
-      "modelLow": 0.99,
-      "modelHigh": 0.99,
-      "modelLagMin": 358,
-      "modelMaxLagMin": 360,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": 0.99,
-      "modelCalibrated": true,
-      "modelQuality": "LOW",
-      "modelIntel": {
-        "conKt": 119.7,
-        "conAgeMin": 154,
-        "spreadKt": 8.1,
-        "reconAgeMin": null,
-        "reconDeltaKt": null,
-        "ascatUsed": false,
-        "riFloorP": null,
-        "riScored": false,
-        "drivenBy": "forecast peak"
-      },
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": 0.99,
-      "yesAsk": 1,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": null,
-      "spread": 0.010000000000000009,
-      "volume": 135,
-      "volume24h": 0,
-      "openInterest": 135,
-      "depth": {
-        "bidSize": 100,
-        "askSize": 0,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01CPAC"
-    },
-    {
-      "id": "KXHURRICANENAMES-26DEC01EPAC-MAR",
-      "label": "Will Marie be categorized as a hurricane in the Eastern Pacific in 2026?",
-      "short": "Will Marie be categorized as a hurricane in…",
-      "storm": "EP132026",
-      "subject": null,
-      "market": 0.99,
-      "model": 0.99,
-      "modelQuantity": "storm-intensity",
-      "modelBasin": null,
-      "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Marie is 80 kt now · combined 1 intensity estimate at 80 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 80 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · advisory 352 min old when fetched",
-      "modelUncond": null,
-      "modelLayers": [
-        {
-          "id": "official",
-          "label": "Official forecast intensity",
-          "p": 0.99,
-          "basis": "already carried at 80 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
-        },
-        {
-          "id": "guidance",
-          "label": "Position in the guidance envelope",
-          "p": null,
-          "unavailable": false,
-          "basis": "NHC places its own intensity forecast above the guidance envelope"
-        },
-        {
-          "id": "watch",
-          "label": "Watches and warnings",
-          "p": null,
-          "unavailable": true,
-          "basis": "no watch or warning in effect for this system"
-        }
-      ],
-      "modelLow": 0.99,
-      "modelHigh": 0.99,
-      "modelLagMin": 352,
-      "modelMaxLagMin": 360,
-      "modelGuidance": "above",
-      "modelRawP": null,
-      "modelOfficialP": 0.99,
-      "modelCalibrated": true,
-      "modelQuality": "LOW",
-      "modelIntel": {
-        "conKt": null,
-        "conAgeMin": null,
-        "spreadKt": 0,
-        "reconAgeMin": null,
-        "reconDeltaKt": null,
-        "ascatUsed": false,
-        "riFloorP": null,
-        "riScored": false,
-        "drivenBy": "forecast peak"
-      },
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": 0.99,
-      "yesAsk": 1,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": null,
-      "spread": 0.010000000000000009,
-      "volume": 10.05,
-      "volume24h": 1,
-      "openInterest": 8.05,
-      "depth": {
-        "bidSize": 80499,
-        "askSize": 0,
         "notional": 1
       },
       "proxy": false,
@@ -5900,10 +5707,10 @@
       "liquidity": 93,
       "spread": 0.010000000000000009,
       "volume": 3221.79,
-      "volume24h": 1754.09,
+      "volume24h": 1654.09,
       "openInterest": 682.94,
       "depth": {
-        "bidSize": 93,
+        "bidSize": 2,
         "askSize": 101,
         "notional": 1
       },
@@ -6415,6 +6222,49 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26MARIE"
     },
     {
+      "id": "KXHURRICANENAMES-26DEC01CPAC-LOW",
+      "label": "Will Lowell be categorized as a hurricane in the Central Pacific in 2026?",
+      "short": "Will Lowell be categorized as a hurricane in…",
+      "storm": "EP122026",
+      "subject": null,
+      "market": 0.99,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": 0.99,
+      "yesAsk": 1,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": null,
+      "spread": 0.010000000000000009,
+      "volume": 135,
+      "volume24h": 0,
+      "openInterest": 135,
+      "depth": {
+        "bidSize": 100,
+        "askSize": 0,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01CPAC"
+    },
+    {
       "id": "KXHURCAT-26KARINA-T1",
       "label": "Will Karina become a Category 1 hurricane?",
       "short": "Will Karina become a Category 1 hurricane…",
@@ -6505,6 +6355,49 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26MARIE"
+    },
+    {
+      "id": "KXHURRICANENAMES-26DEC01EPAC-MAR",
+      "label": "Will Marie be categorized as a hurricane in the Eastern Pacific in 2026?",
+      "short": "Will Marie be categorized as a hurricane in…",
+      "storm": "EP132026",
+      "subject": null,
+      "market": 0.99,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": 0.99,
+      "yesAsk": 1,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": null,
+      "spread": 0.010000000000000009,
+      "volume": 10.05,
+      "volume24h": 1,
+      "openInterest": 8.05,
+      "depth": {
+        "bidSize": 80499,
+        "askSize": 0,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01EPAC"
     },
     {
       "id": "KXHURCTOTMAJ-26DEC01-T2",
@@ -7160,7 +7053,7 @@
       "short": "Will Gonzalo be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.16999999999999998,
+      "market": 0.16,
       "model": 0.17875796650242276,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -7193,17 +7086,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.15,
-      "yesAsk": 0.19,
+      "yesBid": 0.14,
+      "yesAsk": 0.18,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 6,
-      "spread": 0.04000000000000001,
+      "liquidity": 1,
+      "spread": 0.03999999999999998,
       "volume": 9791.44,
       "volume24h": 425.36,
       "openInterest": 4610.61,
       "depth": {
-        "bidSize": 5,
-        "askSize": 32,
+        "bidSize": 30,
+        "askSize": 4.38,
         "notional": 1
       },
       "proxy": false,
@@ -7476,7 +7369,7 @@
       "short": "Will Josephine be the first named hurricane…",
       "storm": null,
       "subject": null,
-      "market": 0.049999999999999996,
+      "market": 0.045,
       "model": 0.05462625540108456,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -7510,16 +7403,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.01,
-      "yesAsk": 0.09,
+      "yesAsk": 0.08,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 27,
-      "spread": 0.08,
+      "liquidity": 9,
+      "spread": 0.07,
       "volume": 8142.99,
       "volume24h": 0,
       "openInterest": 4946.39,
       "depth": {
-        "bidSize": 1269.12,
-        "askSize": 300,
+        "bidSize": 1111,
+        "askSize": 117,
         "notional": 1
       },
       "proxy": false,
@@ -13754,7 +13647,7 @@
       "short": "Will a hurricane make landfall in Hawaii…",
       "storm": null,
       "subject": null,
-      "market": 0.20500000000000002,
+      "market": 0.215,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -13774,13 +13667,13 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.16,
+      "yesBid": 0.18,
       "yesAsk": 0.25,
       "closeTime": "2027-01-01T04:59:00Z",
       "liquidity": 50,
-      "spread": 0.09,
+      "spread": 0.07,
       "volume": 35733.47,
-      "volume24h": 3471.04,
+      "volume24h": 3574.7,
       "openInterest": 18335.66,
       "depth": {
         "bidSize": 10,
@@ -14747,7 +14640,7 @@
       "liquidity": 0,
       "spread": 0.06999999999999999,
       "volume": 1183.4,
-      "volume24h": 72.77,
+      "volume24h": 47.52,
       "openInterest": 635.79,
       "depth": {
         "bidSize": 5,
@@ -16154,7 +16047,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.7250000000000001,
+      "market": 0.79,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -16174,11 +16067,11 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.53,
+      "yesBid": 0.66,
       "yesAsk": 0.92,
       "closeTime": "2026-11-01T03:59:00Z",
       "liquidity": 51,
-      "spread": 0.39,
+      "spread": 0.26,
       "volume": 142.94,
       "volume24h": 0,
       "openInterest": 142.94,
@@ -17338,7 +17231,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.24,
+      "market": 0.22,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -17359,10 +17252,10 @@
       "horizon": "storm",
       "strike": 5,
       "yesBid": 0.01,
-      "yesAsk": 0.47,
+      "yesAsk": 0.43,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.45999999999999996,
+      "spread": 0.42,
       "volume": 8,
       "volume24h": 0,
       "openInterest": 8,
@@ -17384,7 +17277,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.445,
+      "market": 0.28,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -17404,11 +17297,11 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 1,
-      "yesBid": 0.39,
+      "yesBid": 0.06,
       "yesAsk": 0.5,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.10999999999999999,
+      "spread": 0.44,
       "volume": 6.62,
       "volume24h": 0,
       "openInterest": 6.62,
@@ -17430,7 +17323,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.195,
+      "market": 0.17500000000000002,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -17451,10 +17344,10 @@
       "horizon": "storm",
       "strike": 3,
       "yesBid": 0.01,
-      "yesAsk": 0.38,
+      "yesAsk": 0.34,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 0,
-      "spread": 0.37,
+      "spread": 0.33,
       "volume": 6,
       "volume24h": 0,
       "openInterest": 6,
@@ -17890,7 +17783,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.28500000000000003,
+      "market": 0.265,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -17911,10 +17804,10 @@
       "horizon": "storm",
       "strike": 2,
       "yesBid": 0.02,
-      "yesAsk": 0.55,
+      "yesAsk": 0.51,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.53,
+      "spread": 0.49,
       "volume": 4,
       "volume24h": 0,
       "openInterest": 4,
