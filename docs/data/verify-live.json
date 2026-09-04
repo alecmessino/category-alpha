@@ -1,10 +1,10 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-04T15:44:21.585Z",
+  "ranAt": "2026-09-04T16:20:09.168Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "969bcc798f3a633fee144259e9056d4f4cb11c93",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/33891071019",
+  "sha": "556fcb6c5b78e4983a26544aa20bd22b547dd07f",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/33894449391",
   "ok": false,
   "passed": 45,
   "total": 46,
@@ -14,7 +14,7 @@
       "detail": "300 contracts · 51 series · droppedForCap=17"
     }
   ],
-  "thirdPartyFailures": 10,
+  "thirdPartyFailures": 8,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -34,7 +34,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-09-04T15:43:12.308Z · 1m old"
+      "detail": "2026-09-04T16:14:25.292Z · 6m old"
     },
     {
       "check": "renders: Situation",
@@ -94,12 +94,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "8 ranked of 20 candidates · 110/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "6 ranked of 13 candidates · 110/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 14 displayed-only · unverifiable=0"
+      "detail": "0 executable · 13 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -109,7 +109,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "51/54 tile(s) rendered · 3 hole(s) · 0 still loading"
+      "detail": "54/54 tile(s) rendered · 0 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -124,7 +124,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 1.9 screens tall (2720px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 813px · BANKROLL 719px · ▾ 698px"
+      "detail": "3 tabs · Situation is 2 screens tall (2764px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 857px · BANKROLL 763px · ▾ 698px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -149,12 +149,12 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "3/3 frame(s) carry a consensus peak against 3 in the snapshot · 3 carry its cycle · frame is 0m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "3/3 frame(s) carry a consensus peak against 3 in the snapshot · 3 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "3/3 frames carry a calibrated P · 3 carry the raw one · 3 carry an evidence tier · contracts: 4 calibrated, 4 with the official estimate beside it · strip: quality=MEDIUM lag=59m raw=99%"
+      "detail": "3/3 frames carry a calibrated P · 3 carry the raw one · 3 carry an evidence tier · contracts: 4 calibrated, 4 with the official estimate beside it · strip: quality=MEDIUM lag=80m raw=99%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
