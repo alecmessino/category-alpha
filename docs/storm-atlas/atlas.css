@@ -3021,7 +3021,23 @@
 /* THE SELECTED STORM'S STRIP. The minimum the locked rules ask for -- what the archive recorded,
    how much of the evidence this storm is in, and the way to a cohort -- with the whole record one
    press away. It is the panel's first screen, not a replacement for it. */
-[data-atlas] .at-insp-strip{flex:1 1 auto;min-height:0;overflow-y:auto}
+/* THE STRIP TAKES ITS CONTENT'S HEIGHT, NOT THE COLUMN'S SLACK.
+ *
+ * At `flex:1 1 auto` it absorbed everything the head and the bridge did not want, and since the
+ * bridge is the last block in the column that slack landed BETWEEN them: measured with Carlotta
+ * selected, 71px at 1440x900, 251 at 1920x1080 and 339 stacked at 1056x816, as a void bounded
+ * above by the OPEN RECORD control and below by the bridge's accent rule. Two blocks of equal
+ * weight held apart by nothing reads as a layout that failed rather than as a column that ended.
+ *
+ * Sized to its content the five facts and their control close up under the identity, the bridge
+ * follows immediately beneath them, and the same empty pixels fall at the FOOT of the column,
+ * where a column ending is what they look like. Nothing is added, removed, or made denser.
+ *
+ * ONLY IN THIS STATE. With the record open the strip is not rendered at all and the BODY is the
+ * elastic block -- the one the design nominates as the one that scrolls -- so the bridge is
+ * pinned by a full-height sibling exactly as before, which is what check-inspector-bridge
+ * asserts by driving that body to its full scroll extent. */
+[data-atlas] .at-insp-strip{flex:0 1 auto;min-height:0;overflow-y:auto}
 
 
 /* ─── the paper set, above and below the plate ────────────────────────────────────────────
