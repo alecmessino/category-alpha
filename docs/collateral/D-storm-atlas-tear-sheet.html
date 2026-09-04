@@ -1,0 +1,601 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Storm Atlas — Tear Sheet</title>
+<style>
+@page { size: Letter; margin: 10mm; }
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --ink-900:#0f172a; --ink-700:#334155; --ink-600:#475569; --ink-400:#94a3b8;
+  --line-300:#cbd5e1; --line-200:#e2e8f0; --paper-50:#f8fafc; --paper-100:#f4f5f8; --white:#fff;
+  --cyan-500:#0ea5e9; --green-600:#16a34a; --red-600:#dc2626; --amber-700:#b45309;
+  --violet-600:#7c3aed; --blue-600:#0066ff;
+  --font-display:'Source Serif 4',Georgia,serif;
+  --font-sans:'Inter',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  /* WHITESPACE IS THE LEVER, NOT TYPE. The type gate fixes the three text sizes, so every
+     density decision below it is made in this scale. Tightened once the gate was applied:
+     the page pays for a larger body size out of its gutters, never out of its point size. */
+  --sp-1:2px; --sp-2:3px; --sp-3:5px; --sp-4:6px; --sp-5:8px; --sp-6:10px; --sp-7:12px; --sp-8:15px;
+  /* THE TYPE GATE, AS TOKENS.
+     8.5 pt body, 7.5 pt detail, 7 pt legal, at 96 dpi where 1 pt = 4/3 px. Every font-size in
+     this stylesheet is one of these three or a display size above them, so the gate is a
+     property of the scale rather than something a reviewer has to measure line by line.
+     scripts/check-collateral-legibility.mjs measures the rendered result anyway. */
+  --t-body:11.4px;    /* 8.55 pt */
+  --t-detail:10.1px;  /* 7.58 pt */
+  --t-legal:9.4px;    /* 7.05 pt */
+}
+*{box-sizing:border-box}
+html{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:var(--paper-100);color:var(--ink-900);
+  font-family:var(--font-sans);font-size:var(--t-body);line-height:1.26;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+/* THE SCREEN BOX IS THE PRINT BOX, EXACTLY.
+   @page is Letter with a 10 mm margin, so the printed content area is 196 x 259 mm. The
+   on-screen sheet is that box and nothing else -- no padding of its own -- with the paper
+   margin drawn by a border instead, so a block that would paginate on paper overflows visibly
+   here. Measured against the PDF: an on-screen sheet that fits is a printed page that fits. */
+.sheet{width:216mm;height:279mm;margin:0 auto;background:var(--white);
+  padding:0;position:relative;border:10mm solid var(--white);
+  box-shadow:0 1px 10px rgba(15,23,42,.14);
+  display:flex;flex-direction:column;overflow:hidden}
+@media print{ body{background:#fff}
+  .sheet{box-shadow:none;margin:0;border:0;width:auto;height:auto;padding:0;
+    break-after:page;overflow:visible}
+  .sheet:last-child{break-after:auto} }
+
+/* ---- masthead ------------------------------------------------------------------ */
+.mh{border-bottom:1.6px solid var(--ink-900);padding-bottom:1px;margin-bottom:var(--sp-1)}
+.mh-top{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-6);line-height:1.1}
+.mh-brand{font-family:var(--font-mono);font-size:var(--t-body);font-weight:600;letter-spacing:1.6px;
+  text-transform:uppercase;color:var(--ink-900)}
+.mh-brand .sep{color:var(--ink-400);margin:0 6px}
+.mh-doc{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.4px;color:var(--ink-600);
+  text-transform:uppercase;text-align:right;white-space:nowrap}
+.mh-title{font-family:var(--font-display);font-size:19px;font-weight:700;line-height:1.1;
+  margin:var(--sp-2) 0 var(--sp-1);letter-spacing:-.3px;max-width:94%}
+.mh-sub{font-size:var(--t-body);color:var(--ink-600);max-width:92%;line-height:1.3}
+.mh-rule{display:flex;gap:var(--sp-2) var(--sp-5);margin-top:var(--sp-1);flex-wrap:wrap}
+.mh-rule .kv{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.5px;color:var(--ink-600);
+  text-transform:uppercase}
+.mh-rule .kv b{color:var(--ink-900);font-weight:600}
+
+/* ---- section furniture ---------------------------------------------------------- */
+.sec{margin-top:1px}
+.sec-hd{display:flex;align-items:baseline;gap:var(--sp-3);border-left:2.5px solid var(--ink-900);
+  padding-left:var(--sp-3);margin-bottom:var(--sp-1)}
+.sec.sechd-tight>.sec-hd{margin-bottom:0}
+.sec-hd h2{font-family:var(--font-mono);font-size:var(--t-body);font-weight:600;letter-spacing:1.5px;
+  text-transform:uppercase;margin:0;color:var(--ink-900)}
+.sec-hd .n{font-family:var(--font-mono);font-size:var(--t-body);color:var(--ink-400);letter-spacing:.6px}
+.sec-hd .note{font-size:var(--t-body);color:var(--ink-600);margin-left:auto;font-style:italic}
+.lede{font-size:var(--t-body);line-height:1.26;color:var(--ink-700);margin:0 0 var(--sp-2)}
+.lede p{margin:0 0 var(--sp-2)}
+.lede p:last-child{margin-bottom:0}
+/* minmax(0,1fr), NOT 1fr. A grid item whose min-content width is a nowrap table cell or an
+   unbroken URL refuses to shrink below it, and the other columns collapse to make room --
+   which is how one 100 px column ended up carrying 692 px of stacked text. */
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--sp-6)}
+/* Two prose boxes of unequal length: the longer one takes the wider track, so the row is as tall
+   as it needs to be and not as tall as the shorter box would be at half width. */
+.grid2.wideleft{grid-template-columns:minmax(0,1.22fr) minmax(0,.78fr)}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-5)}
+.grid3.tight{gap:var(--sp-4);align-items:start}
+.grid3.lastwide{grid-template-columns:minmax(0,1fr) minmax(0,.92fr) minmax(0,1.3fr)}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--sp-4)}
+.spacer{flex:1 1 auto;min-height:0}
+
+/* ---- ledger --------------------------------------------------------------------- */
+table.ledger{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:var(--t-detail)}
+table.ledger caption{caption-side:top;text-align:left;font-family:var(--font-mono);font-size:var(--t-detail);
+  letter-spacing:.6px;text-transform:uppercase;color:var(--ink-600);padding-bottom:1px}
+.ledger th{text-align:right;font-weight:600;font-size:var(--t-detail);letter-spacing:.4px;
+  text-transform:uppercase;color:var(--ink-600);border-bottom:1px solid var(--ink-900);
+  padding:1.5px var(--sp-3);white-space:nowrap}
+.ledger th:first-child{text-align:left}
+.ledger td{text-align:right;padding:0.8px var(--sp-3);border-bottom:1px solid var(--line-200);
+  white-space:nowrap}
+.ledger td:first-child{text-align:left;font-family:var(--font-sans);font-size:var(--t-detail);font-weight:500}
+.ledger tr.band td{background:var(--paper-50)}
+.ledger tr.rule-top td{border-top:1px solid var(--line-300)}
+.ledger .grp td{background:var(--ink-900);color:#fff;font-family:var(--font-mono);font-size:var(--t-detail);
+  letter-spacing:.6px;text-transform:uppercase;padding:1.5px var(--sp-3);text-align:left}
+.ledger .frac{color:var(--ink-900);font-weight:500}
+.ledger .rate{font-weight:600;font-size:var(--t-body)}
+.ledger .rate.refused{color:var(--red-600);font-weight:600;font-size:var(--t-detail);letter-spacing:.4px}
+.ledger .ci{color:var(--ink-600)}
+.ledger .status{text-align:left;font-size:var(--t-detail);letter-spacing:.3px;white-space:normal;
+  max-width:130px;line-height:1.2}
+.ledger .status.none{color:var(--ink-400);text-align:center}
+.ledger .status.refused{color:var(--red-600);font-weight:600}
+.ledger .status.gate{color:var(--amber-700);font-weight:600}
+.bar{display:inline-block;height:5px;background:var(--ink-900);vertical-align:middle;
+  margin-right:5px;min-width:0}
+.bar.zero{background:var(--line-300);width:1px}
+.barwrap{display:flex;align-items:center;gap:4px;justify-content:flex-end}
+.barbed{width:54px;height:5px;background:var(--line-200);position:relative;flex:0 0 54px}
+.barbed i{position:absolute;left:0;top:0;bottom:0;background:var(--ink-900)}
+.barbed u{position:absolute;top:-1.5px;bottom:-1.5px;background:rgba(14,165,233,.34);
+  border-left:1px solid var(--cyan-500);border-right:1px solid var(--cyan-500)}
+
+/* ---- cite ----------------------------------------------------------------------- */
+.cite{border-top:1px solid var(--ink-900);margin-top:var(--sp-1);padding-top:1px}
+.cite .k{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:1.1px;text-transform:uppercase;
+  color:var(--ink-600);display:block;margin-bottom:1px}
+.cite .v{font-family:var(--font-mono);font-size:var(--t-detail);line-height:1.2;color:var(--ink-900);
+  word-break:break-word}
+.cite .u{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--blue-600);word-break:break-all;
+  display:block;margin-top:3px}
+
+/* ---- chips / badges -------------------------------------------------------------- */
+.chip{display:inline-block;font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.7px;
+  text-transform:uppercase;padding:1px 4px;border:1px solid var(--line-300);border-radius:3px;
+  color:var(--ink-700);background:var(--white);white-space:nowrap}
+.chip.solid{background:var(--ink-900);color:#fff;border-color:var(--ink-900)}
+.chip.live{background:var(--red-600);color:#fff;border-color:var(--red-600)}
+.chip.obs{background:var(--ink-900);color:#fff;border-color:var(--ink-900)}
+.chip.pre{background:var(--white);color:var(--violet-600);border-color:var(--violet-600)}
+.chip.warn{color:var(--amber-700);border-color:var(--amber-700)}
+.chip.refuse{color:var(--red-600);border-color:var(--red-600)}
+.chip.ok{color:var(--green-600);border-color:var(--green-600)}
+
+/* ---- boxes ----------------------------------------------------------------------- */
+.box{border:1px solid var(--line-300);border-radius:4px;padding:3px 5px;background:var(--white)}
+.box.sunken{background:var(--paper-50)}
+.box.commercial{border:1px solid var(--ink-900);border-left-width:4px;background:var(--paper-50)}
+.box.refusal{border:1px solid var(--red-600);border-left-width:4px;background:#fef6f6}
+.box.hole{border:1px dashed var(--amber-700);background:#fffbf3}
+.box h3{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.1px;text-transform:uppercase;
+  margin:0 0 0.5px;color:var(--ink-900);line-height:1.08}
+.box p{margin:0 0 var(--sp-1);font-size:var(--t-body);line-height:1.22;color:var(--ink-700)}
+.box p:last-child{margin-bottom:0}
+.box ul{margin:0;padding-left:9px;font-size:var(--t-body);line-height:1.2;color:var(--ink-700)}
+.box li{margin-bottom:1px}
+.box li:last-child{margin-bottom:0}
+.box li b{color:var(--ink-900)}
+.disclaim{font-family:var(--font-mono);font-size:var(--t-legal);letter-spacing:.3px;color:var(--ink-600);
+  line-height:1.24}
+
+/* ---- comparison strip ------------------------------------------------------------- */
+.cmp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--ink-900);border-radius:6px;
+  overflow:hidden}
+.cmp>div{padding:var(--sp-3) var(--sp-4)}
+.cmp>div:first-child{border-right:1px solid var(--ink-900);background:var(--paper-50)}
+.cmp h4{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:1.2px;text-transform:uppercase;
+  margin:0 0 var(--sp-3);display:flex;align-items:center;gap:5px}
+.cmp h4 .dot{width:6px;height:6px;border-radius:50%;background:var(--ink-400);flex:0 0 6px}
+.cmp>div:last-child h4 .dot{background:var(--cyan-500)}
+.cmp ul{margin:0;padding-left:11px;font-size:var(--t-body);line-height:1.24;color:var(--ink-700)}
+.cmp li{margin-bottom:1px}
+
+/* ---- cards ------------------------------------------------------------------------ */
+.card{border:1px solid var(--line-300);border-radius:4px;padding:4px;background:var(--white);
+  display:flex;flex-direction:column;gap:1px}
+.card.major{border-left:3px solid var(--ink-900)}
+.card.hur{border-left:3px solid var(--ink-600)}
+.card.ts{border-left:3px solid var(--line-300)}
+.card .nm{font-family:var(--font-display);font-size:13px;font-weight:700;line-height:1.02}
+.card .yr{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);letter-spacing:.4px}
+.card .pk{font-family:var(--font-mono);font-size:14.5px;font-weight:600;letter-spacing:-.2px}
+.card .pk small{font-size:var(--t-detail);font-weight:400;color:var(--ink-600);letter-spacing:.6px}
+.card .facts{font-family:var(--font-mono);font-size:var(--t-detail);line-height:1.3;
+  color:var(--ink-700);margin-top:1px;letter-spacing:.1px}
+.card .catline{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;letter-spacing:.7px;
+  color:var(--ink-900);margin-top:-1px;line-height:1.1}
+.card .lf{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-900);
+  border-top:1px solid var(--line-200);padding-top:1.5px;margin-top:1px;line-height:1.22}
+.card .lf .none{color:var(--ink-400)}
+
+/* ---- stat tiles -------------------------------------------------------------------- */
+.tiles{display:grid;gap:var(--sp-4)}
+.tile{border:1px solid var(--line-300);border-radius:4px;padding:3px 5px;background:var(--paper-50)}
+.tile .k{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;
+  color:var(--ink-600);display:block;margin-bottom:2px}
+.tile .v{font-family:var(--font-mono);font-size:19px;font-weight:600;line-height:1.02;
+  letter-spacing:-.4px}
+.tile .v small{font-size:var(--t-detail);font-weight:400;color:var(--ink-600);letter-spacing:.5px}
+.tile .s{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);margin-top:1px;
+  display:block;line-height:1.22}
+.tile.refused .v{font-size:var(--t-body);color:var(--red-600)}
+
+/* ---- plate --------------------------------------------------------------------------- */
+.plate{border:1px solid var(--ink-900);border-radius:6px;overflow:hidden;background:#fbfcfe}
+.plate-hd{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-4);
+  padding:1px var(--sp-4);border-bottom:1px solid var(--ink-900);background:var(--white)}
+.plate-hd .t{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.2px;text-transform:uppercase;
+  font-weight:600;line-height:1.1}
+.plate-hd .m{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);letter-spacing:.5px}
+.plate svg{display:block;width:100%;height:auto}
+.plate-ft{display:flex;flex-wrap:wrap;gap:0 var(--sp-4);padding:0 var(--sp-4);
+  border-top:1px solid var(--line-200);background:var(--white)}
+.lg{display:flex;align-items:center;gap:3px;font-family:var(--font-mono);font-size:var(--t-detail);
+  letter-spacing:.5px;color:var(--ink-700);text-transform:uppercase}
+.lg i{display:block;width:14px;height:0;border-top-width:1.6px;border-top-style:solid;flex:0 0 14px}
+.lg i.dot{height:6px;width:6px;border-radius:50%;border:none;flex:0 0 6px}
+.lg i.sq{height:7px;width:9px;border:1px solid;border-radius:1px;flex:0 0 9px}
+.plate-note{padding:2px var(--sp-4);border-top:1px solid var(--line-200);
+  font-size:var(--t-detail);color:var(--ink-600);line-height:1.3;background:var(--white)}
+
+/* ---- answers rail --------------------------------------------------------------------- */
+.rail{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--sp-4);border-top:1px solid var(--ink-900);
+  border-bottom:1px solid var(--ink-900);padding:var(--sp-1) 0;margin:var(--sp-1) 0}
+.rail>div{padding-right:var(--sp-5);border-right:1px solid var(--line-200)}
+.rail>div:last-child{border-right:none;padding-right:0}
+.rail .q{font-family:var(--font-mono);font-size:var(--t-body);letter-spacing:.5px;text-transform:uppercase;
+  color:var(--ink-600);display:block;margin-bottom:1px}
+.rail .a{font-size:var(--t-body);line-height:1.24;color:var(--ink-900)}
+.rail .a b{font-weight:600}
+
+/* ---- live strip -------------------------------------------------------------------- */
+.live{border:1px solid var(--red-600);border-radius:6px;overflow:hidden}
+.live-hd{display:flex;align-items:center;gap:var(--sp-3);padding:1.5px var(--sp-4);
+  background:var(--red-600);color:#fff;font-family:var(--font-mono);font-size:var(--t-body);
+  letter-spacing:.4px;text-transform:uppercase;font-weight:600;line-height:1.15}
+.live-hd .ts{margin-left:auto;letter-spacing:.6px;font-weight:400;opacity:.94}
+.live table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:var(--t-detail)}
+.live th{text-align:left;font-size:var(--t-detail);letter-spacing:.2px;text-transform:uppercase;
+  white-space:nowrap;
+  color:var(--ink-600);padding:2px var(--sp-4);border-bottom:1px solid var(--line-200);font-weight:600}
+.live td{padding:1.5px var(--sp-4);border-bottom:1px solid var(--line-200);vertical-align:top;line-height:1.22}
+.live tr:last-child td{border-bottom:none}
+.live .nm{font-family:var(--font-sans);font-weight:600;font-size:var(--t-body)}
+.live .sub{color:var(--ink-600);font-size:var(--t-detail);display:block;letter-spacing:.3px}
+
+/* ---- artifact A: the merged system grid ------------------------------------------- */
+table.ledger.sysgrid{table-layout:fixed}
+.ledger.sysgrid th{white-space:nowrap;line-height:1.2;vertical-align:bottom;letter-spacing:.1px}
+.ledger.sysgrid .chip{white-space:normal;display:inline-block;max-width:100%;line-height:1.1;margin-top:1px}
+.ledger.sysgrid td{vertical-align:top;padding:1.2px var(--sp-3);overflow-wrap:anywhere}
+.ledger td.lft{text-align:left;white-space:normal}
+.ledger .mono6{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);display:block;
+  letter-spacing:.2px;line-height:1.18}
+.ledger .mono8{font-family:var(--font-mono);font-size:var(--t-detail);display:inline-block;margin-top:1px}
+/* TABLE PROSE SITS AT THE TABLE TIER. The legibility gate sets two floors: 8.5 pt for body and
+   callout copy, 7.5 pt for table, citation and detail. A sentence inside a ledger cell is table
+   content, so it is set at --t-detail like every other cell rather than at body size. This is the
+   gate's own distinction, not a way under it: no substantive text anywhere is below 7.5 pt. */
+.ledger .prose{font-family:var(--font-sans);font-size:var(--t-detail);line-height:1.2;color:var(--ink-700);
+  margin-top:1px}
+.ledger .prose p{margin:0 0 2px}
+.ledger .prose p:last-child{margin-bottom:0}
+.ledger .feed{font-family:var(--font-mono);font-size:var(--t-detail);line-height:1.2;color:var(--ink-600);
+  border-top:1px dotted var(--line-300);margin-top:2px;padding-top:1.5px}
+.feedts{color:var(--ink-400);margin-top:1.5px;letter-spacing:.2px}
+.ledger th.livecol,.ledger td.livecol{border-left:2px solid var(--red-600);
+  border-right:2px solid var(--red-600)}
+.ledger th.livecol{color:var(--red-600)}
+.box.tag{padding:6px 7px}
+.box.tag h3{font-size:var(--t-detail);margin-bottom:2px}
+.tagbody{font-size:var(--t-body);line-height:1.32;color:#334155}
+.tagbody p{margin:0}
+.grid2.tight{gap:var(--sp-5);align-items:start}
+.platerow{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(0,1fr);gap:var(--sp-5);align-items:start}
+.platerow.even{grid-template-columns:repeat(2,minmax(0,1fr))}
+.platerow.one{grid-template-columns:minmax(0,1fr)}
+.platerow .sec{margin-top:0}
+.tagstack{display:flex;flex-direction:column;gap:var(--sp-2)}
+.ledgerpair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.06fr);gap:var(--sp-6);align-items:start}
+/* THE EVIDENCE BRIDGE. Three columns of prose, not figures: the left cell is what a contract
+   needs, the middle is what the archive holds, and the right is the archive's verdict on the
+   distance. It borrows the ledger's rules and banding and carries no contract rows at all. */
+.bridge td{white-space:normal;vertical-align:top;line-height:1.16;padding:1.2px var(--sp-3)}
+.bridge td.status{font-weight:600;letter-spacing:.2px;max-width:none}
+.bridge th{white-space:normal}
+/* THE REFERENCE DOCUMENT STACKS INSTEAD OF COMPRESSING. It paginates by design and is not page-
+   count constrained, so it keeps the full group labels and the full event-gate stamps and simply
+   gives each ledger the sheet's whole width. */
+.ledgertrio.stack{grid-template-columns:minmax(0,1fr);gap:var(--sp-3)}
+/* A reference-document table that may grow downwards but not sideways. */
+.ledger.reflow th,.ledger.reflow td{white-space:normal}
+/* THE EVIDENCE ROW. Two lines: the contract row and its rate, then the arithmetic under it. The
+   rate is the darkest, heaviest thing in the band because it is what a reader scans for; the
+   denominator and interval sit directly beneath it in mono so the precision never leaves the
+   number; the state token is the only coloured thing in line two, present where the archive
+   stamped the row and absent where it did not. No cards, no rules between the two lines, no
+   repeated prose -- the tokens are glossed once in the panel note. */
+.ledger.evidence{table-layout:auto}
+.ledger.evidence td{padding:0.6px var(--sp-2) 1.2px;border-bottom:1px solid var(--line-200);
+  white-space:normal;text-align:left}
+.ledger.evidence tr.grp td{background:var(--ink-900);color:#fff;font-family:var(--font-mono);
+  font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;padding:1.5px var(--sp-2);
+  white-space:nowrap}
+.evidence .l1{display:flex;align-items:baseline;justify-content:space-between;gap:var(--sp-3)}
+.evidence .nm{font-family:var(--font-sans);font-size:var(--t-detail);font-weight:500;
+  color:var(--ink-900);line-height:1.14;white-space:nowrap}
+.evidence .rt{font-family:var(--font-mono);font-size:var(--t-body);font-weight:700;
+  color:var(--ink-900);font-variant-numeric:tabular-nums;line-height:1.04;white-space:nowrap}
+.evidence .rt.refused{font-size:var(--t-detail);font-weight:600;color:var(--red-600)}
+.evidence .l2{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);
+  line-height:1.14;white-space:nowrap}
+.evidence .l2.slotted{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3)}
+.evidence .l2 .slot{flex:0 0 84px;width:84px;display:flex;justify-content:flex-end;align-items:center;min-height:9px}
+.evidence .l2 .ivl{color:var(--ink-600)}
+.evidence .l2 .st{color:var(--red-600);font-weight:600;letter-spacing:.2px;white-space:nowrap}
+.ivl-glyph,.tr-glyph{display:block;overflow:visible}
+/* THE TIMING RANGE COLUMN. Head text is the axis; the glyph rows carry their own data-* values. */
+.ledger.timing th.rng{font-weight:500;letter-spacing:.2px;text-transform:none;white-space:normal;color:var(--ink-600)}
+.ledger.timing td.rng{padding:0 var(--sp-2);vertical-align:middle}
+/* THE RULE FLOW. Chips joined by arrows; the colours are the package's status colours. */
+.flow{display:flex;align-items:center;flex-wrap:wrap;gap:3px 5px;margin:2px 0 1px}
+.fstep{display:inline-block;font-family:var(--font-sans);font-size:var(--t-detail);font-weight:500;letter-spacing:0;
+  padding:1px 5px;border:1px solid var(--ink-700);border-radius:3px;color:var(--ink-900);line-height:1.25;
+  background:var(--white);white-space:nowrap}
+.fstep .n{font-family:var(--font-mono);font-weight:600}
+.fstep .tok{font-family:var(--font-mono);font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+.flowrow{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin-top:3px}
+.flowlead{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-600);white-space:nowrap}
+.bridge th .harrow{font-family:var(--font-mono);color:var(--ink-600);margin-right:5px;font-weight:400}
+.bridge td .flow{margin:0}
+.ledger th.rng{text-align:left;font-weight:500;text-transform:none;letter-spacing:.2px;color:var(--ink-600)}
+.ledger td.rng{padding:0 var(--sp-2);vertical-align:middle}
+.fstep b{font-weight:700}
+.fstep.gate{border-style:dashed;color:var(--ink-700)}
+.fstep.refused{border-color:var(--red-600);color:var(--red-600);font-weight:600;background:#fff5f5}
+.fstep.ok{border-color:var(--green-600);color:var(--green-600);font-weight:600;background:#f3fbf5}
+.fstep.absent{border-color:var(--red-600);color:var(--red-600);border-style:dashed;font-weight:600}
+.farrow{font-family:var(--font-mono);color:var(--ink-600);font-size:var(--t-body);line-height:1}
+/* THE REPLAY LINK. A label a reader can act on; the exact URL is the target and the title. */
+a.replay{display:inline-block;font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.25px;
+  text-transform:uppercase;color:var(--blue-600);border:1px solid var(--blue-600);border-radius:3px;
+  padding:1px 6px;text-decoration:none;white-space:nowrap;line-height:1.3}
+.replayrow{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:3px}
+.cite .khead{display:flex;align-items:center;flex-wrap:wrap;gap:2px 8px;margin-bottom:1px}
+.cite .khead .k{margin:0}
+.cite .raw b{color:var(--ink-600);font-weight:600;letter-spacing:.4px}
+/* THE MEMBER TIMELINE. A figure set between two rules, not a box: it reads as a table would. */
+.tl-fig{border-top:1px solid var(--ink-900);border-bottom:1px solid var(--line-300);padding:2px 0 1px;margin:2px 0 0}
+.tl-fig svg{display:block}
+.tl-legend{display:flex;flex-wrap:wrap;gap:1px var(--sp-4);padding:1px 0 0;font-family:var(--font-mono);font-size:var(--t-detail);
+  letter-spacing:.3px;color:var(--ink-600);line-height:1.3}
+.tl-legend i{display:inline-block;vertical-align:-1px;margin-right:4px}
+.tl-legend .o{width:7px;height:7px;border-radius:50%;background:#fff;border:1.2px solid var(--ink-900)}
+.tl-legend .f{width:7px;height:7px;border-radius:50%;background:#5b6b80}
+.tl-legend .d{width:6px;height:6px;background:var(--ink-900);transform:rotate(45deg);margin-right:5px}
+.tl-legend .up{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid #5b6b80}
+.tl-legend .dn{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:7px solid #5b6b80}
+.tl-legend .sw{width:9px;height:7px;border-radius:1px}
+/* THE FILL KEY IS NOT A SIXTH MARKER. At a flex gap it read as "Mexico at the crossing";
+   it is set off by its own rule, because it keys the fill of the two crossing marks. */
+.tl-legend .fill{margin-left:calc(var(--sp-4) - 2px);padding-left:var(--sp-4);
+  border-left:1px solid var(--line-300)}
+.figcap{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-600);margin:0 0 1px}
+/* THE JOINT MATRIX. Margins carry the published rows; the interior is drawn as what it is. */
+.joint{display:grid;grid-template-columns:148px minmax(0,1fr) minmax(0,1fr);gap:1.5px;margin-top:1px}
+.joint .jc{font-family:var(--font-mono);font-size:var(--t-detail);line-height:1.2;color:var(--ink-600)}
+.joint .head{padding:1px 3px 2px;display:flex;flex-direction:column;justify-content:flex-end}
+.joint .head.col{text-align:center;align-items:center;border-bottom:1px solid var(--ink-900)}
+.joint .head.row{text-align:right;align-items:flex-end;border-right:1px solid var(--ink-900);justify-content:center}
+.joint .head .t{font-family:var(--font-sans);font-weight:600;color:var(--ink-900);font-size:var(--t-detail);line-height:1.15}
+.joint .head .s{color:var(--ink-400)}
+.joint .head .m{margin-top:1px}
+.joint .head .m b{color:var(--ink-900)}
+.joint .head .ivl-glyph{margin-top:1px}
+.joint .head.not .t{color:var(--ink-400);font-weight:500}
+.joint .cell{min-height:22px;display:flex;align-items:center;justify-content:center;text-align:center;padding:3px 5px;
+  border:1px dotted var(--line-300);border-radius:2px;color:var(--ink-400);letter-spacing:.2px}
+.joint .cell.void{border:1.5px dashed var(--red-600);color:var(--red-600);font-weight:700;letter-spacing:.3px;
+  background:repeating-linear-gradient(135deg,#fff5f5 0 4px,#fde7e7 4px 6px)}
+.jointnote{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);line-height:1.28;margin-top:3px}
+.jointnote b{color:var(--ink-900)}
+/* THE WIND AXIS beneath the matrix: the archive's two landfall cuts against the contract's. */
+.axis{margin-top:2px}
+.grid2.matrixleft{grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr)}
+.axis svg{display:block}
+/* THE BRIDGE, AS RULES. Three columns, hairlines between rows, a verdict that is a coloured
+   word with a rule beside it -- not nine boxes. */
+.bridge2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,.86fr);column-gap:var(--sp-5);margin-top:2px}
+.bridge2 .col-h{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.9px;text-transform:uppercase;color:var(--ink-600);
+  padding-bottom:2px;border-bottom:1px solid var(--ink-900)}
+.bridge2 .col-h .ar{color:var(--ink-400);margin-right:6px}
+.bridge2 .need,.bridge2 .hold,.bridge2 .verdict{padding:2px 0 3px;border-bottom:1px solid var(--line-200)}
+.bridge2 .need,.bridge2 .hold{font-size:var(--t-body);line-height:1.2;color:var(--ink-700)}
+.bridge2 .need b,.bridge2 .hold b{color:var(--ink-900)}
+.bridge2 .ref{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);margin-top:1px;line-height:1.2}
+.bridge2 .ref b{color:var(--ink-900)}
+.bridge2 .verdict{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;letter-spacing:.3px;text-transform:uppercase;
+  color:var(--red-600);line-height:1.22;display:flex;align-items:flex-start}
+.bridge2 .verdict span{border-left:2px solid currentColor;padding-left:6px;display:block;margin-top:1px}
+.bridge2 .verdict.ok{color:var(--green-600)}
+/* One refusal box carrying two statements, each with its own lead. */
+.box .lead{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.6px;text-transform:uppercase;color:var(--red-600);font-weight:600;margin-right:4px}
+.liveline{border-left:3px solid var(--blue-600);padding-left:6px}
+/* Three short statements read as three, not as one column of prose: two columns inside the box. */
+.box.cols2{column-count:2;column-gap:var(--sp-6)}
+.box.cols2 h3{column-span:all}
+.box.cols2 p{margin-bottom:2px}
+.box .src{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);line-height:1.25;margin-top:2px;border-top:1px dotted var(--line-300);padding-top:1px}
+.box .src b{color:var(--ink-900)}
+/* The raw replay string, kept in the provenance block for print at the legal size. */
+.cite .raw{display:block;font-family:var(--font-mono);font-size:var(--t-legal);color:var(--ink-400);
+  word-break:break-all;line-height:1.25;margin-top:1px}
+.ledgertrio{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.04fr) minmax(0,1.04fr);
+  gap:var(--sp-4);align-items:start}
+.ledger.compact td{padding:0.6px var(--sp-2);font-size:var(--t-detail);line-height:1.18}
+.ledger.compact th{padding:1px var(--sp-2);font-size:var(--t-detail)}
+.ledger.compact td:first-child{font-size:var(--t-detail)}
+.ledger.compact .rate{font-size:var(--t-detail)}
+.ledger.compact .status{font-size:var(--t-detail);max-width:none;white-space:nowrap}
+.ledger .ivl{color:var(--ink-600);font-weight:400;font-size:var(--t-detail);letter-spacing:0}
+.ledger.compact .grp td{font-size:var(--t-detail);padding:1.5px var(--sp-2)}
+.cardrow{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:var(--sp-2)}
+.cardrow-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.cardrow-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cardrow-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cardrow-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.cardrow-6{grid-template-columns:repeat(6,minmax(0,1fr))}
+.cardrow .card{padding:2px 3px}
+.cardrow .card .nm{font-size:12px}
+.cardrow .card .pk{font-size:13.5px}
+.cardrow .card .facts{font-size:var(--t-detail)}
+.cardrow .card .lf{font-size:var(--t-detail)}
+.cardrow .card .yr{font-size:var(--t-detail)}
+.cmptable td{text-align:left;white-space:normal;vertical-align:top;line-height:1.22;
+  font-family:var(--font-sans);font-size:var(--t-body);padding:1px var(--sp-3)}
+.cmptable td.q{font-family:var(--font-mono);font-size:var(--t-body);color:var(--ink-900);font-weight:500}
+.cmptable td.atlas{color:var(--ink-900);border-left:2px solid var(--cyan-500)}
+/* Same rule as .ledger .prose: a comparison-strip cell is table content, so the compact strip
+   sits at the 7.5 pt table tier rather than the 8.5 pt body tier. The full-size strip stays at
+   body size where a page can afford it. */
+.cmptable.compact td{font-size:var(--t-detail);padding:0.5px var(--sp-2);line-height:1.18}
+.cmptable.compact td.q{font-size:var(--t-detail)}
+.platecol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.06fr);gap:var(--sp-5);align-items:start}
+/* A REPLAY URL IS 78 CHARACTERS AND MAY NOT SHRINK. At the 7.5 pt citation floor it needs about
+   440 px to sit on one line, and a column narrower than that costs a second line on every URL on
+   the page. Where a plate shares the band with a cite list, the cite side gets the width it
+   needs and the plate takes the remainder. */
+.platecol.cites{grid-template-columns:minmax(0,.62fr) minmax(0,1fr)}
+/* A plate beside a prose box: the plate takes the width its declared renderWidth expects, so its
+   labels paint at the size they were set at, and the box takes the rest. */
+.platecol.plateleft{grid-template-columns:minmax(0,.92fr) minmax(0,1fr)}
+/* The timing ledger is 376 px at its narrowest; give it the wider track. */
+.platecol.timingleft{grid-template-columns:minmax(0,1.08fr) minmax(0,1fr)}
+.platecol .sec{margin-top:0}
+/* THE MIDDLE TRACK HOLDS A GROUP BAR, AND A GROUP BAR DOES NOT WRAP: at .86fr it is 179 px and
+   INTENSITY · GENESIS-CONDITIONED is 213. Taking the 34 px from the plate was tried and reverted
+   -- the plate's SVG labels paint at their declared size times the rendered width, so a narrower
+   plate drops them to 6.6 pt, under the 7.5 pt map floor. The ratios stay as they were and C's
+   middle table overruns its column; that is reported, not hidden. */
+.triband{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(0,.86fr) minmax(0,1.36fr);
+  gap:var(--sp-4);align-items:start}
+.grid3.tight{gap:var(--sp-5);align-items:start}
+.grid4.tight{gap:var(--sp-4);align-items:start}
+.cardsplit{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(0,1fr);gap:var(--sp-6);align-items:start}
+.cardcmp{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:var(--sp-6);align-items:start}
+.cardcmp .sec{margin-top:0}
+.cardcmp .grid4{gap:var(--sp-2)}
+.cardsplit .sec{margin-top:0}
+.cardsplit .grid4{gap:var(--sp-2)}
+/* The manifest is a reference document, not a one-page sheet: it may run as long as the
+   evidence does, and it paginates rather than clipping. */
+.sheet.manifest{height:auto;min-height:279mm;overflow:visible}
+.qtiles{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:var(--sp-5);align-items:start}
+.workflowrow{display:grid;grid-template-columns:minmax(0,.72fr) minmax(0,2fr);gap:var(--sp-5);align-items:start}
+.fnrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-5)}
+.fnrow .fn{margin-top:var(--sp-2)}
+.citepair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--sp-6)}
+.citecmp{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:var(--sp-6);align-items:start}
+.citecmp .cite:first-child{margin-top:0}
+.citepair .cite{margin-top:var(--sp-3)}
+.qline{margin-top:var(--sp-3);padding:var(--sp-3) var(--sp-4)}
+.qline p{font-size:var(--t-body);line-height:1.35}
+.citelist.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--sp-5)}
+.citelist.two .cite:nth-child(2){border-top:1px solid var(--ink-900);margin-top:0}
+.citelist .cite{margin-top:var(--sp-1);padding-top:1px;border-top:1px solid var(--line-300)}
+.citelist .cite:first-child{border-top:1px solid var(--ink-900);margin-top:0}
+.citelist .v{font-size:var(--t-detail);line-height:1.18}
+.citerows{margin-top:1px}
+.citerows>div{border-top:1px dotted var(--line-300);padding-top:0.5px;margin-top:0.5px}
+.citerows .nm{font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;
+  letter-spacing:.2px;color:var(--ink-900);display:block;line-height:1.15}
+.citerows .u{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--blue-600);
+  word-break:break-all;display:block;line-height:1.12}
+.citelist.urls .cite{margin-top:1px}
+.citelist.urls .k{margin-bottom:0}
+.citelist .u{font-size:var(--t-detail)}
+/* A source URL printed in a footnote line. Same treatment as a replay URL: house blue, no
+   underline, and it may break mid-string rather than push the line over the sheet. */
+.fn .u{color:var(--blue-600);text-decoration:none;word-break:break-all}
+.citelist .k{font-size:var(--t-detail)}
+.ledger .cohortstat{text-align:right;font-family:var(--font-mono);font-size:var(--t-detail);font-weight:600;
+  letter-spacing:.3px}
+.ledger .cohortstat.refused{color:var(--red-600)}
+.qtiles .tiles.grid4{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.grid3.tight .sec{margin-top:0}
+.reasons{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp-1);
+  font-size:var(--t-detail);line-height:1.22;
+  color:var(--ink-700);margin-top:3px}
+.reasons b{color:var(--red-600)}
+.reasons .why{color:var(--ink-600)}
+
+/* ---- two-column body flow ---------------------------------------------------------
+   A Letter page is 192 mm of usable width. One column of that at 8 px type is a very long
+   measure and a very short page; two columns roughly double the vertical budget without
+   shrinking the type further, which is the trade the density of this material actually needs. */
+.cols{column-count:2;column-gap:var(--sp-6);column-rule:1px solid var(--line-200)}
+.cols>*{break-inside:avoid;margin-top:0}
+.cols .sec{margin-top:0;margin-bottom:var(--sp-5)}
+.wide{grid-column:1/-1}
+.stack{display:flex;flex-direction:column;gap:var(--sp-4)}
+
+/* ---- footer ----------------------------------------------------------------------- */
+.ft{margin-top:auto;border-top:1px solid var(--ink-900);padding-top:1px}
+.ft-disclaim{margin:0}
+.ft-row{display:flex;justify-content:space-between;gap:var(--sp-6);align-items:flex-start}
+.ft .l{font-family:var(--font-mono);font-size:var(--t-legal);color:var(--ink-600);letter-spacing:.1px;
+  line-height:1.5;max-width:70%}
+.ft .l b{color:var(--ink-900)}
+.ft .r{font-family:var(--font-mono);font-size:var(--t-legal);color:var(--ink-400);letter-spacing:.9px;
+  text-align:right;white-space:nowrap;text-transform:uppercase}
+.fn{font-family:var(--font-mono);font-size:var(--t-detail);color:var(--ink-600);line-height:1.2;
+  margin-top:var(--sp-1)}
+.fn b{color:var(--ink-900)}
+</style>
+</head><body>
+<div class="sheet">
+<header class="mh">
+  <div class="mh-top">
+    <div class="mh-brand">MILLIBAR<span class="sep">/</span>STORM ATLAS</div>
+    <div class="mh-doc">ARTIFACT D · TEAR SHEET &nbsp;·&nbsp; 1 OF 1</div>
+  </div>
+  <h1 class="mh-title">Storm Atlas</h1>
+  <p class="mh-sub">A research-only historical genesis/outcome engine for the North Atlantic and East Pacific: give it a genesis point or a declared pre-genesis reference cell and it returns what the record did next as exact n/N with a 95% Wilson interval, names every storm in the denominator, and refuses what the record cannot carry.</p>
+  <div class="mh-rule"><span class="kv">METHODOLOGY <b>1.1.0</b></span><span class="kv">PACK <b>134661125525f27a</b></span></div>
+</header>
+
+<section class="sec"><div class="sec-hd"><span class="n">01</span><h2>What a user can do</h2></div>
+<div class="grid2">
+  <div class="box"><ul><li><b>Condition on a point.</b> A genesis position or a declared pre-genesis reference cell, with a stated radius and month window. Rates assume formation — not P(forms), not a live feed, not a cone.</li><li><b>Retrieve the analog tracks.</b> Every storm in the cohort, and representative members under a stated rule with genesis date, distance from the cell, peak and their own landfalls. Nothing is ranked a closest analog.</li><li><b>Compare contract rows.</b> Reached TD, TS and Cat 1–5, each exact n/N with a 95% Wilson interval; six landfall regions, each an “any” and a ≥64 kt pair. State-level landfall is not scored.</li><li><b>Read the refusals as output.</b> Below min sample: counts, no rate, no interval. Move the cell and watch N and the refusal move with it.</li></ul></div>
+  <div class="box sunken"><h3>THE MOAT — SANITATION, REFUSAL, PROVENANCE</h3><p>An interpolated fix never establishes a threshold crossing, so time-to-hurricane is never dated off a wind nobody measured. A cohort’s defining variable is not reported back as an outcome of it, with one exception left in the open: every cohort returns reached TD at 100%, because a cohort is storms that formed. Below min sample a rate is refused rather than estimated. An absent outcome is not a zero. Every figure carries a pack stamp and a URL that reproduces it.</p></div>
+</div>
+</section>
+
+
+<section class="sec"><div class="sec-hd"><span class="n">02</span><h2>Three worked samples</h2><span class="note">every figure replayable</span></div>
+<div class="lede"><p>Three cohorts, as the engine returned them. The cell is an input, not an observation, and the URL records the choice. Karina is read at a <b>declared</b> point: the archive holds no genesis row for EP112026.</p></div>
+<div class="grid3 tight">
+<div class="box"><h3>SAMPLE 1 — GULF CELL, PRE-GENESIS</h3>
+    <p style="margin-bottom:3px">North Atlantic storms that formed within 250 km of 28.0°N 88.7°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
+    <table class="ledger compact evidence"><tbody><tr class="ev "><td><div class="l1"><span class="nm">reached TS</span><span class="rt">83.3%</span></div><div class="l2">10 / 12 · <span class="ivl">[55–95%]</span></div></td></tr><tr class="ev band"><td><div class="l1"><span class="nm">reached Cat 3</span><span class="rt">16.7%</span></div><div class="l2">2 / 12 · <span class="ivl">[5–45%]</span></div></td></tr><tr class="ev "><td><div class="l1"><span class="nm">CONUS — any</span><span class="rt">83.3%</span></div><div class="l2">10 / 12 · <span class="ivl">[55–95%]</span></div></td></tr><tr class="ev band"><td><div class="l1"><span class="nm">CONUS — ≥64 kt</span><span class="rt">8.3%</span></div><div class="l2">1 / 12 · <span class="ivl">[1–35%]</span></div></td></tr></tbody></table>
+    <div class="cite" style="margin-top:3px"><span class="k">CITE THIS COHORT</span><a class="u"
+      style="margin-top:0" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=28%2C-88.7%2C250&amp;s0=1971&amp;mo=8.9&amp;b=NA&amp;m=1.1.0</a></div></div>
+<div class="box"><h3>SAMPLE 2 — KARINA, DECLARED · NOT ATLAS-OBSERVED</h3>
+    <p style="margin-bottom:3px">East Pacific storms that formed within 250 km of 13.2°N 115.0°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
+    <table class="ledger compact evidence"><tbody><tr class="ev "><td><div class="l1"><span class="nm">reached Cat 3 (major)</span><span class="rt">28.6%</span></div><div class="l2">4 / 14 · <span class="ivl">[12–55%]</span></div></td></tr><tr class="ev band"><td><div class="l1"><span class="nm">reached Cat 4</span><span class="rt">7.1%</span></div><div class="l2">1 / 14 · <span class="ivl">[1–31%]</span></div></td></tr><tr class="ev "><td><div class="l1"><span class="nm">reached Cat 5</span><span class="rt">0.0%</span></div><div class="l2">0 / 14 · <span class="ivl">[0–22%]</span></div></td></tr><tr class="ev band"><td><div class="l1"><span class="nm">MEXICO — any</span><span class="rt">7.1%</span></div><div class="l2">1 / 14 · <span class="ivl">[1–31%]</span></div></td></tr></tbody></table>
+    <div class="cite" style="margin-top:3px"><span class="k">CITE THIS COHORT</span><a class="u"
+      style="margin-top:0" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=13.2%2C-115%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=13.2%2C-115%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0</a></div></div>
+<div class="box refusal"><h3>SAMPLE 3 — THE REFUSAL</h3>
+  <p style="margin-bottom:4px">East Pacific storms that formed within 250 km of 11.3°N 133.8°W, in August or September, in seasons from 1971 onwards, that went on to any outcome — what happened next?</p>
+  <p><b>N = 6</b>. BELOW MIN SAMPLE — rates refused. The engine returns
+  “6 storms with a known outcome &lt; min_sample=10” on every row. Counts are still published — TS
+  5 of 6, Cat 3
+  2 of 6 — because a
+  count is a fact and a rate over six storms is not one.</p>
+  <div class="cite" style="margin-top:3px"><span class="k">CITE THIS COHORT</span><a class="u"
+    style="margin-top:0" href="https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=11.3%2C-133.8%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0">https://alecmessino.github.io/category-alpha/storm-atlas/?v=1&amp;w=11.3%2C-133.8%2C250&amp;s0=1971&amp;mo=8.9&amp;b=EP&amp;m=1.1.0</a></div></div>
+</div>
+</section>
+
+<section class="sec"><div class="sec-hd"><span class="n">03</span><h2>Delivery, and what Storm Atlas adds</h2></div>
+<div class="grid2">
+  <div class="box"><h3>CURRENT — SHIPPING TODAY</h3><p>A browser and replayable cohort URLs. A URL carries the cell, radius, season floor, month window, basin and methodology version, so a reviewer opens the same cohort and reads the same counts, rates, intervals and refusals.</p></div>
+  <div class="box hole"><h3>PROPOSED / PILOT — NOT SHIPPING</h3><p><b>PROPOSED / PILOT — not available today.</b> Exportable charts. An API. Recurring institutional briefs. None of the three exists yet.</p></div>
+</div>
+<table class="ledger cmptable compact">
+  <thead><tr><th style="text-align:left;width:26%">The question a desk actually asks</th>
+    <th style="text-align:left;width:33%">NHC / Zoom Earth / public maps</th>
+    <th style="text-align:left;width:41%">Storm Atlas</th></tr></thead>
+  <tbody><tr class="">
+    <td class="q">Where is it now, will it form, where will it go?</td><td class="lft">Position, intensity and motion now; <b>P(forms)</b> at 48 h and 7 d; the 5-day cone.</td><td class="lft atlas">Silent on all three, by construction. No live view, no formation probability, no cone.</td></tr><tr class="band">
+    <td class="q">What happened to storms that began here before?</td><td class="lft">Not answered. No cohort, no denominator, no interval.</td><td class="lft atlas"><b>Exact n / N with a 95% Wilson interval</b> on every contract row, from a declared genesis point or pre-genesis cell, with the analog tracks drawn.</td></tr><tr class="">
+    <td class="q">Where does the evidence run out, and can a counterparty reproduce it?</td><td class="lft">Not answered. The advisory is public; the reasoning behind a number is not.</td><td class="lft atlas"><b>Visible refusal</b> — effective sample size, the min-sample gate and the archive-wide event gate, printed beside the number or instead of it. And the cohort is a <b>URL</b>: same question, same pack stamp, same numbers.</td></tr>
+  </tbody></table>
+</section>
+
+<div class="spacer"></div>
+<footer class="ft">
+    <p class="disclaim ft-disclaim">RESEARCH ONLY — NOT A FORECAST. Every rate here is GENESIS-CONDITIONED: it assumes formation and describes what the record did next — not P(forms), not a live feed, not a cone. AN UNCONDITIONAL INTENSITY PROBABILITY REQUIRES AN EXTERNAL FORMATION PROBABILITY DEFINED ON THE SAME FORMATION EVENT AND CONDITIONING SET. None is computed here. An NHC outlook probability is not multiplied by these Atlas rows unless the conditioning events are demonstrably aligned. Landfall is counted jointly and is never decomposed into path/intensity marginals.</p>
+    <div class="ft-row"><div class="l"><b>ARCHIVE</b> 3,959 storms · 224,153 track points · 3,379 landfall rows · 33,054 environment records · <b>METHODOLOGY</b> 1.1.0 · <b>PACK</b> 134661125525f27a · <b>BUILT</b> 2026-08-18T05:18:57Z · <b>SOURCES</b> ibtracs.EP.csv · ibtracs.NA.csv · ships.EP.txt · ships.CP.txt · ships.AL.txt · hurdat2.nepac.txt · hurdat2.atl.txt</div><div class="r">RESEARCH ONLY<br>NOT A FORECAST<br>MILLIBAR / STORM ATLAS</div></div>
+  </footer>
+</div>
+</body></html>
