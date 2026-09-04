@@ -30,15 +30,47 @@ const EXPECTED = {
   "E-discrete-event-contract-evidence.html": 1,
 };
 
+/* WHERE THE BROWSER IS, AND WHAT HAPPENS WHEN THERE IS NONE.
+   A pinned executable path is right on a container that ships one and wrong everywhere else, so
+   the path is used only when it exists and playwright resolves its own browser otherwise -- the
+   same resolution every Atlas browser gate uses.
+
+   THE SKIP IS THE DANGEROUS HALF. Printing "no browser, skipping" and exiting 0 is right on a
+   laptop and catastrophic in CI, where the step would go green forever while measuring nothing.
+   `--require-browser` turns that skip into an exit 2, so a missing browser fails loudly. */
+const REQUIRE_BROWSER = process.argv.includes("--require-browser")
+  || process.env.COLLATERAL_REQUIRE_BROWSER === "1";
+
+async function findChromium() {
+  if (process.env.MT_CHROMIUM) return process.env.MT_CHROMIUM;
+  const base = process.env.PLAYWRIGHT_BROWSERS_PATH;
+  if (!base) return null;
+  const { access, readdir } = await import("node:fs/promises");
+  let dirs = [];
+  try { dirs = (await readdir(base)).filter((d) => d.startsWith("chromium-")).sort(); }
+  catch { return null; }
+  for (const d of dirs.reverse()) {
+    const exe = join(base, d, "chrome-linux", "chrome");
+    try { await access(exe); return exe; } catch { /* next */ }
+  }
+  return null;
+}
+
 let chromium;
 try { ({ chromium } = await import("playwright-core")); }
 catch {
+  if (REQUIRE_BROWSER) {
+    console.error("[collateral-fit] playwright is REQUIRED here and is not installed.");
+    console.error("            not a skip. install it or drop --require-browser.");
+    process.exit(2);
+  }
   console.log("playwright-core is not installed; the fit gate needs a browser. Skipping.");
   process.exit(0);
 }
-const EXE = process.env.MT_CHROMIUM || "/opt/pw-browsers/chromium-1194/chrome-linux/chrome";
+const EXE = await findChromium();
 
-const browser = await chromium.launch({ executablePath: EXE, args: ["--no-sandbox"] });
+const browser = await chromium.launch(EXE ? { executablePath: EXE, args: ["--no-sandbox"] }
+  : { args: ["--no-sandbox"] });
 const page = await browser.newPage({ viewport: { width: 860, height: 1200 } });
 let failed = 0;
 
