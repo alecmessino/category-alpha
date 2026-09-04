@@ -632,7 +632,9 @@ about one storm, and <b>no row exists for it</b>.</p>
 <section class="sec sechd-tight">${sectionHead("02", "The only scored rows",
     `the ${s.cohort.n_cases} rows above are the sample these rates are counted over`)}
 <table class="ledger">
-<thead><tr><th>Contract row</th><th>n / N</th><th>Rate</th><th>95% Wilson</th><th style="text-align:left">Status</th></tr></thead>
+<thead><tr><th>Contract row</th><th>n / N</th><th>Rate</th><th>95% Wilson</th>${/* Every row on this page is unstamped, so the column prints six centred
+  em dashes; a left-set head sat entirely off their axis. The head centres with them. */""}
+<th style="text-align:center">Status</th></tr></thead>
 <tbody>
 ${band("ts", "reached tropical storm (34 kt)")}
 ${band("cat1", "reached hurricane (64 kt)")}

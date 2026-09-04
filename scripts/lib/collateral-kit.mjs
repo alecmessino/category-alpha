@@ -375,6 +375,10 @@ a.replay{display:inline-block;font-family:var(--font-mono);font-size:var(--t-det
 .tl-legend .up{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-bottom:7px solid #5b6b80}
 .tl-legend .dn{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:7px solid #5b6b80}
 .tl-legend .sw{width:9px;height:7px;border-radius:1px}
+/* THE FILL KEY IS NOT A SIXTH MARKER. At a flex gap it read as "Mexico at the crossing";
+   it is set off by its own rule, because it keys the fill of the two crossing marks. */
+.tl-legend .fill{margin-left:calc(var(--sp-4) - 2px);padding-left:var(--sp-4);
+  border-left:1px solid var(--line-300)}
 .figcap{font-family:var(--font-mono);font-size:var(--t-detail);letter-spacing:.8px;text-transform:uppercase;color:var(--ink-600);margin:0 0 1px}
 /* THE JOINT MATRIX. Margins carry the published rows; the interior is drawn as what it is. */
 .joint{display:grid;grid-template-columns:148px minmax(0,1fr) minmax(0,1fr);gap:1.5px;margin-top:1px}
@@ -939,7 +943,7 @@ export function memberTimeline(sys, { w = 742, rowH = 12, quantiles = [] } = {})
   const legend = `<div class="tl-legend">
     <span><i class="o"></i>TS 34 kt</span><span><i class="f"></i>Cat 1 64 kt</span><span><i class="d"></i>Cat 3 96 kt</span>
     <span><i class="up"></i>CONUS crossing</span><span><i class="dn"></i>Mexico</span>
-    <span>at the crossing <i class="sw" style="background:${TLINK.lo}"></i>&lt;64 <i class="sw" style="background:${TLINK.mid}"></i>64–95 <i class="sw" style="background:${TLINK.hi}"></i>≥96 kt</span>
+    <span class="fill">at the crossing <i class="sw" style="background:${TLINK.lo}"></i>&lt;64 <i class="sw" style="background:${TLINK.mid}"></i>64–95 <i class="sw" style="background:${TLINK.hi}"></i>≥96 kt</span>
   </div>`;
   return `<figure class="tl-fig">${svg}${legend}</figure>`;
 }
