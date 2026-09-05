@@ -25,7 +25,7 @@ try {
    const rows=await page.locator('.at-deck-data').evaluateAll(els=>els.map(e=>{
     const txt=s=>e.querySelector(s)?.textContent.trim()||null;
     const nums=s=>txt(s)?.match(/\d[\d,]*(?:\.\d+)?/g)||null;
-    return {contract:e.getAttribute('data-contract-row'),count:nums('.at-dc-count .at-val'),rate:txt('.at-dc-rate .at-val'),interval:nums('.at-dc-interval .at-val'),status:txt('.at-dc-status')};
+    return {contract:e.getAttribute('data-contract-row'),count:nums('.at-dc-count .at-val'),rate:txt('.at-dc-rate .at-val'),interval:nums('.at-dc-interval .at-val'),status:txt('.at-dc-status') || ''};
    }));
    assert.deepEqual(rows,f.rows.map(r=>({contract:r.contract,count:r.count,rate:r.rate,interval:r.interval,status:r.status})),`${width}: ${name} published values`);
    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`${width}: page overflow`);
