@@ -501,6 +501,9 @@ jobs:
       - name: Install Chromium for the browser gates
         run: npx playwright install --with-deps chromium
 
+      - name: Verify the September drafting release contract
+        run: node scripts/check-atlas-drafting.mjs
+
       - name: Verify the honesty surface reaches the screen
         run: node scripts/check-atlas-dom.mjs --require-browser
 
