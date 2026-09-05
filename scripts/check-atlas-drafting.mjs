@@ -47,6 +47,7 @@ try {
  const committed=await page.evaluate(read);
  assert.ok(Math.abs(committed.plate.top-draft.plate.top)<=1);assert.equal(committed.aperture,draft.aperture);
  assert.equal(await page.locator('[data-principal-rate]').innerText(),'26.2%');assert.ok(committed.url.includes('i=cat4'));
+ assert.equal(await page.evaluate(()=>document.activeElement?.getAttribute('data-zone-edit')),'outcome','commit returns focus to the question');
  await page.getByRole('button',{name:'DISMISS · ESC',exact:true}).click();
  await page.getByRole('button',{name:'EAST PACIFIC',exact:true}).click();
  assert.equal((await page.evaluate(read)).url,committed.url);
@@ -55,6 +56,10 @@ try {
  await page.getByRole('button',{name:'CANCEL · ESC',exact:true}).click();
  assert.equal(await page.locator('[data-principal-rate]').innerText(),'26.2%');
  await open('?v=1&i=cat5&m=1.1.0');assert.equal(await page.locator('[data-principal-rate]').count(),0);
+ await page.goto(origin+'/storm-atlas/?v=1&s0=2099&m=1.1.0');
+ await page.waitForSelector('[data-principal-branch="empty"]');
+ assert.equal(await page.locator('[data-principal-branch="empty"]').count(),1);
+ assert.equal(await page.locator('[data-principal-rate]').count(),0);
  assert.deepEqual(errors,[]);
  console.log('Drafting release: four fixtures at four widths, visible refusals, frozen preview, stable commit, principal and camera gates passed.');
 } finally {await browser.close();await new Promise(r=>server.close(r));}

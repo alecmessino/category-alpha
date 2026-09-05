@@ -214,10 +214,15 @@ export function Atlas() {
     setCohort(normalise(draft));
     setSheetZone(null);
     setDraft(null);
-    setReceipt({ height });
+    setReceipt({ height, zone: sheetZone });
     setHeldRow(null); setHoverRow(null);
-    anchorRef.current?.focus({ preventScroll: true });
   };
+  React.useLayoutEffect(() => {
+    if (!receipt) return;
+    const target = questionRegion.current?.querySelector(`[data-zone-edit="${receipt.zone}"]`);
+    anchorRef.current = target || anchorRef.current;
+    anchorRef.current?.focus({ preventScroll: true });
+  }, [receipt]);
   React.useEffect(() => {
     if (!receipt) return;
     const dismiss = () => setReceipt(null);
@@ -233,7 +238,7 @@ export function Atlas() {
     anchorRef.current = el || null;
     setSheetZone(zone);
   }, [cohort]);
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (sheetZone) questionRegion.current?.querySelector(sheetZone === 'outcome' ? '[aria-label="Reached intensity"]' : 'select, input')?.focus({ preventScroll: true });
   }, [sheetZone]);
   /* CLOSING RETURNS THE READER TO THE CLAUSE THEY PRESSED. A dialog that drops focus at the top

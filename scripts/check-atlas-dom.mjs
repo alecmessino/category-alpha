@@ -130,7 +130,7 @@ page.on("console", (m) => {
 const openBuilder = async () => {
   if (!(await page.$('[data-builder-sheet]'))) await page.locator('[data-zone-edit]').first().click();
   const advanced = page.locator('.at-editor-advanced');
-  if ((await advanced.getAttribute('open')) === null) await advanced.locator('summary').click();
+  if ((await advanced.getAttribute('open')) === null) await advanced.locator(':scope > summary').click();
 };
 const commitBuilder = async () => {
   if (!(await page.$('[data-builder-sheet]'))) return;
