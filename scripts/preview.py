@@ -6,6 +6,9 @@ from functools import partial
 import argparse
 
 class PreviewHandler(SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
     def end_headers(self):
         self.send_header('Cache-Control', 'no-store')
         super().end_headers()

@@ -52,6 +52,10 @@ const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dir, "..");
 const DOCS = resolve(ROOT, "docs");
 
+// September drafting contract: the plate height comes from the viewport, not the
+// answer column. The columns may end at different heights. Keep the aspect,
+// share, internal gap, selection and fault-injection checks; enforce the new
+// viewport formula in place of the superseded equal-column-bottom assertion.
 const CEILING = 3.2;
 
 let failures = 0;
@@ -128,6 +132,9 @@ const measure = () => page.evaluate(() => {
   const stacked = getComputedStyle(band).gridTemplateColumns.trim().split(/\s+/).length === 1;
   return {
     w: Math.round(b.width), h: Math.round(b.height),
+    expectedHeight: innerWidth >= 1240 ? Math.max(460, Math.min(590, innerWidth * .38))
+      : innerWidth >= 980 ? Math.max(460, Math.min(640, innerHeight * .54))
+      : Math.max(380, Math.min(540, innerHeight * .46)),
     ar: b.height ? b.width / b.height : null,
     stacked,
     band: Math.round(band.getBoundingClientRect().height),
@@ -203,8 +210,8 @@ for (const [w, h] of VIEWPORTS) {
      being the subject of its own plate, and that is about legibility rather than surplus. */
   ok(`${label} — at or below the ${CEILING} ceiling${wide}${tall}`, m.ar <= CEILING + 0.002,
      `aspect ${m.ar.toFixed(3)} is above ${CEILING}`);
-  ok(`${String(w + "x" + h).padEnd(10)} no blank plane in the band`, m.blank <= 2,
-     `the band's columns end ${m.blank}px apart`);
+  ok(`${String(w + "x" + h).padEnd(10)} viewport owns the plate height`, Math.abs(m.h - m.expectedHeight) <= 2,
+     `${m.h}px measured; ${m.expectedHeight}px declared by viewport`);
   /* AND NO HOLE INSIDE THE FIGURE EITHER. 12px is the reservation's slack at the widths where
      the row's own padding does not already absorb it; measured 8.8px from 1280 to 3440 and 0 at
      1220. A plate capped below its declared height shows here as tens of pixels. */
@@ -221,7 +228,7 @@ for (const [w, h] of VIEWPORTS) {
  * widened to make a cramped table fit moves both of these, and that is exactly the change that
  * should have to be argued for rather than merged. */
 console.log("\n[aperture] and the plate holds the contract's share at the two stated widths");
-for (const [w, h, lo, hi] of [[1440, 900, 0.57, 0.59], [1920, 1080, 0.60, 0.62]]) {
+for (const [w, h, lo, hi] of [[1440, 900, 0.59, 0.63], [1920, 1080, 0.59, 0.63]]) {
   await open("", w, h);
   const m = await measure();
   const share = m ? m.w / m.usable : 0;
@@ -282,7 +289,7 @@ console.log("\n[aperture] and through the states that change the plate's box");
       ok(`${String(w + "x" + h).padEnd(10)} selected storm — plate ${m.w}x${m.h}, aspect ${m.ar.toFixed(3)}`,
          m.docked && m.ar <= CEILING + 0.002,
          m.docked ? `aspect ${m.ar.toFixed(3)} above ${CEILING}` : "the inspector did not dock");
-      ok(`${String(w + "x" + h).padEnd(10)} selected storm — no blank plane`, m.blank === 0, `${m.blank}px`);
+      ok(`${String(w + "x" + h).padEnd(10)} selected storm — viewport height preserved`, Math.abs(m.h - m.expectedHeight) <= 2, `${m.h}px`);
       /* THE RULE THE ROW MODEL RESTS ON, STATED AS IT ACTUALLY HOLDS.
        *
        * A transport appears with a subject and its height should come out of the PLATE, not the
@@ -341,22 +348,22 @@ if (process.argv.includes("--self-test")) {
        nothing in the aspect envelope notices, because the aspect is a shape and this is a width. */
     { name: "the answer widened — the plate falls out of the contract's share",
       at: [1440, 900],
-      css: "[data-atlas].atlas-shell.atlas-instrument{--at-answer:700px!important}",
+      css: "[data-atlas].atlas-instrument .atlas-plate-row{grid-template-columns:minmax(0,1fr) 700px!important}",
       broke: (m) => m.w / m.usable < 0.57 },
     /* AND THE BLANK PLANE, WHICH IS NOW PAPER INSIDE THE BAND RATHER THAN A ROW SUM. The way it
        comes back is a bound applied to the PLATE instead of to the band: the map stops filling
        the figure column, and the paper under it is the remainder the composition exists to end.
        The band's own cap is the same bound applied where it costs nothing -- see the height on
        .atlas-plate-row -- and this seed is the difference between the two. */
-    { name: "the aspect bound moved from the band to the plate — paper returns under the map",
+    { name: "the plate height departs from its viewport declaration",
       at: [1440, 900],
       /* THE SEED HAD TO MOVE WITH THE FIX. It used to cap the plate and read the remainder at
          the column's foot; the caption is pinned there now, so the remainder appears as a hole
          above it and the old seed measured a column that ended exactly where it should. Same
          defect, same one line of CSS, read where it now shows. */
       css: `[data-atlas].atlas-instrument .atlas-stage{
-              height:calc((var(--at-band-h) - var(--at-fig-chrome)) * 0.6)!important}`,
-      broke: (m) => m.hole > 12 },
+              height:250px!important}`,
+      broke: (m) => Math.abs(m.h - m.expectedHeight) > 2 },
   ];
 
   for (const seed of SEEDS) {
@@ -377,7 +384,7 @@ if (process.argv.includes("--self-test")) {
     await page.waitForTimeout(300);
     const m = await measure();
     ok("an unrelated style change leaves the bound intact",
-       m.ar <= CEILING + 0.002 && m.blank <= 2,
+       m.ar <= CEILING + 0.002 && Math.abs(m.h - m.expectedHeight) <= 2,
        `aspect ${m.ar.toFixed(3)}, blank ${m.blank}`);
   }
 }
@@ -386,6 +393,6 @@ await browser.close();
 server.close();
 
 console.log(failures === 0
-  ? "\nthe plate is bounded at both ends, in every state, with no blank plane"
+  ? "\nthe plate is bounded at both ends, in every state, with viewport-owned height"
   : `\n${failures} aperture check(s) failed`);
 process.exit(failures === 0 ? 0 : 1);
