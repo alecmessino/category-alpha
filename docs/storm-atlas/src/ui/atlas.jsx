@@ -201,14 +201,8 @@ export function Atlas() {
   }, []);
 
 
-  /* The builder is a summoned sheet in the stacked shell rather than a resident rail. */
-  /* WHICH ZONE IS BEING EDITED, AND WHERE THE CLAUSE THAT OPENED IT SITS. The anchor is
-     measured at press time, in the shell's own coordinates, so the popover can be placed under
-     the words it edits without becoming part of the layout -- it is absolutely positioned, so
-     the plate's rectangle is a function of the viewport and the composition and of nothing else,
-     which scripts/check-atlas-stability.mjs measures through this exact transition. */
+  /* Edits are drafts until COMMIT; the editor is part of the question layout. */
   const [sheetZone, setSheetZone] = React.useState(null);
-  const [sheetAt, setSheetAt] = React.useState(null);
   const [draft, setDraft] = React.useState(null);
   const [receipt, setReceipt] = React.useState(null);
   const questionRegion = React.useRef(null);
@@ -222,6 +216,7 @@ export function Atlas() {
     setDraft(null);
     setReceipt({ height });
     setHeldRow(null); setHoverRow(null);
+    anchorRef.current?.focus({ preventScroll: true });
   };
   React.useEffect(() => {
     if (!receipt) return;
@@ -232,54 +227,15 @@ export function Atlas() {
   }, [receipt]);
   const shellRef = React.useRef(null);
   const anchorRef = React.useRef(null);
-  /* WHERE THE POPOVER HANGS, AND WHY IT IS NOT SIMPLY UNDER THE CLAUSE.
-   *
-   * It is RANGED LEFT TO THE CLAUSE, so a reader never has to work out what they pressed, and it
-   * DROPS FROM THE QUESTION AS A BLOCK rather than from the pressed line. Measured at 1440x900
-   * with the first clause open, hanging from the clause's own bottom put the sheet at y=76 over
-   * a question running 30 to 144: it covered 68 of its 114 pixels -- the second and third lines
-   * of the sentence being edited, which is the one thing on the surface that must stay readable
-   * while it is edited. Hanging from the question's bottom edge costs nothing: what it lands on
-   * instead is the cohort line, and the sheet's own head restates that line in full (the count,
-   * the archive total, SAMPLE GATE and the minimum).
-   *
-   * AND IT ENDS WHERE THE PLATE ENDS. The stylesheet's ceiling is min(62vh, 540px), which is the
-   * right height beside a full-height plate and too tall stacked: at 1056x816 a 506px sheet from
-   * y=76 reached 582 over an answer column starting at 546 -- the ledger, which the locked rules
-   * say it may never occupy. Bounded by the plate's own bottom it is 376 there and clears the
-   * ledger entirely, while at 1440 and 1920 the ceiling still binds and nothing changes.
-   *
-   * Both are read off the rendered boxes rather than written as constants, so neither can go
-   * stale: the sheet is placed against the question and the plate a reader is actually looking
-   * at. It stays absolutely positioned and moves neither. */
   const openEditor = React.useCallback((zone, el) => {
-    setDraft(normalise(cohort));
+    setDraft(current => current || normalise(cohort));
     setReceipt(null);
     anchorRef.current = el || null;
-    const shell = shellRef.current;
-    const q = document.querySelector("[data-question]");
-    const plate = document.querySelector(".at-plate");
-    if (el && shell) {
-      const a = el.getBoundingClientRect();
-      const b = shell.getBoundingClientRect();
-      const top = Math.round((q ? q.getBoundingClientRect().bottom : a.bottom) - b.top + 8);
-      /* AND IT STOPS AT THE PLATE'S RIGHT EDGE, WHICH IS THE LEDGER'S LEFT. The locked rule is
-         that the editor may overlap the plate and may never occupy the ledger or hide a row: at
-         1280x800 the fourth clause sits at x=439 and a 333px sheet from there reached 772 over
-         an answer column starting at 657, hiding six published rows. Ranged left to the clause
-         until that would cross the plate's edge, and held at the edge after -- so the sheet is
-         over cartography in every case and over the answer in none. Stacked, the plate spans
-         the width and the clamp never binds. */
-      const sheetW = Math.min(420, Math.max(320, innerWidth * 0.26));
-      const bound = (plate ? plate.getBoundingClientRect().right : b.right) - b.left;
-      const left = Math.round(Math.max(0, Math.min(a.left - b.left, bound - sheetW)));
-      const maxHeight = plate
-        ? Math.max(240, Math.round(plate.getBoundingClientRect().bottom - b.top - top))
-        : null;
-      setSheetAt({ left, top, maxHeight });
-    } else setSheetAt(null);
     setSheetZone(zone);
   }, [cohort]);
+  React.useEffect(() => {
+    if (sheetZone) questionRegion.current?.querySelector(sheetZone === 'outcome' ? '[aria-label="Reached intensity"]' : 'select, input')?.focus({ preventScroll: true });
+  }, [sheetZone]);
   /* CLOSING RETURNS THE READER TO THE CLAUSE THEY PRESSED. A dialog that drops focus at the top
      of the document costs a keyboard reader their place in the sentence. */
   const closeEditor = React.useCallback(() => {
@@ -287,7 +243,7 @@ export function Atlas() {
     setDraft(null);
     const el = anchorRef.current;
     anchorRef.current = null;
-    if (el && el.isConnected) el.focus();
+    if (el && el.isConnected) el.focus({ preventScroll: true });
   }, []);
 
   /* THE TWO DURATION COLUMNS FOLD BELOW 1440, and the fold is measured rather than assumed:
@@ -796,7 +752,10 @@ export function Atlas() {
     setSelected(null);
     setPlaying(false);
     setInteracted(true);
-    setDraft(normalise({ ...cohort, where: { lat, lon, radiusKm: cohort.where?.radiusKm || DEFAULT_RADIUS_KM } }));
+    setDraft(current => {
+      const next = current || cohort;
+      return normalise({ ...next, where: { lat, lon, radiusKm: next.where?.radiusKm || DEFAULT_RADIUS_KM } });
+    });
     setSheetZone("given"); setReceipt(null);
   }, [cohort]);
 
@@ -817,7 +776,7 @@ export function Atlas() {
 
   React.useEffect(() => {
     const onKey = (e) => {
-      if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+      if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) && e.key !== "Escape") return;
       /* ESCAPE DISMISSES ONE THING, AND NEVER THE QUERY.
        *
        * All three of these fired unconditionally, so the key the provenance drawer advertises
@@ -1029,7 +988,7 @@ export function Atlas() {
       </section> : null}
       {receipt ? <div className="at-commit-receipt" role="status" data-commit-receipt>
         <strong>COMMITTED</strong><span>{result.kept.toLocaleString()} storms · URL written · evidence recomputed</span>
-        <button onClick={() => setReceipt(null)}>DISMISS · ESC</button>
+        <button onClick={() => { setReceipt(null); anchorRef.current?.focus({ preventScroll: true }); }}>DISMISS · ESC</button>
       </div> : null}
       </div>
 

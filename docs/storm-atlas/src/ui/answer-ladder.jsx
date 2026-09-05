@@ -118,7 +118,13 @@ const signed = (pp) => `${pp > 0 ? "+" : pp < 0 ? "−" : ""}${Math.abs(pp).toFi
  */
 export function AnswerLadder({ result, comparison, subject, archiveTotal, lensKey = null,
   onLens = null, spec = null }) {
-  if (!result || !result.n_cases) return null;
+  if (!result) return null;
+  if (!result.n_cases) return <section className="at-answer" data-answer data-principal-branch="empty">
+    <div className="at-answer-stamp">COHORT · NO MATCHES</div>
+    <div className="at-ans-n">0</div>
+    <p className="at-principal-rule">No storms match this question. There is no sample, so no rate is published.</p>
+    <p className="at-principal-rule">Edit a clause above to change the question, then COMMIT to update the evidence.</p>
+  </section>;
   const groups = buildGroups(result, comparison, subject);
   const { intensity, landfall, denomL } = primaryEight(groups);
   /* THE TWO DENOMINATORS THE COHORT LINE CANNOT CARRY. The cohort is one number -- 514 storms --
