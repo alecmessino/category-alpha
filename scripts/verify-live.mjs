@@ -65,7 +65,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
    propagate, so poll rather than failing on the race — but fail loudly if it
    never lands, because that is exactly the "deployed but not really" case this
    whole script exists to catch. */
-const ASSETS = ["index.html", "app/main.jsx", "app/dist/terminal.js", "app/claims.js", "app/compute.js", "app/panels.jsx", "sw.js", "vendor/leaflet.css"];
+const ASSETS = ["index.html", "terminal-drafting.css", "assets/terminal-land.json", "app/main.jsx", "app/dist/terminal.js", "app/claims.js", "app/compute.js", "app/panels.jsx", "sw.js", "vendor/leaflet.css"];
 
 async function servedSha(path) {
   const url = BASE + path + "?cb=" + Date.now();          // busts the CDN edge

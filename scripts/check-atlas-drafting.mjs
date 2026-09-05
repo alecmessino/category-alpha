@@ -60,6 +60,16 @@ try {
  await page.waitForSelector('[data-principal-branch="empty"]');
  assert.equal(await page.locator('[data-principal-branch="empty"]').count(),1);
  assert.equal(await page.locator('[data-principal-rate]').count(),0);
+ await page.goto(origin+'/');
+ await page.waitForSelector('[data-terminal="drafting"]');
+ for(const width of [1440,1100,900,390]){
+  await page.setViewportSize({width,height:900});
+  await page.waitForTimeout(150);
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,`${width}: Terminal overflow`);
+ }
+ assert.equal(await page.evaluate(()=>/\bNaN/.test(document.body.innerText)),false,'finite advisory age');
+ assert.equal(await page.locator('script[src*="babel"]').count(),0,'precompiled Terminal');
+ assert.ok(await page.locator('.leaflet-control-attribution').innerText().then(t=>t.includes('Natural Earth')),'self-hosted coastline');
  assert.deepEqual(errors,[]);
  console.log('Drafting release: four fixtures at four widths, visible refusals, frozen preview, stable commit, principal and camera gates passed.');
 } finally {await browser.close();await new Promise(r=>server.close(r));}

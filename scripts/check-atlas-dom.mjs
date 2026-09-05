@@ -143,6 +143,8 @@ const chip = async (name, { optional = false } = {}) => {
   if (optional && !(await target.count())) return;
   await target.click();
   await commitBuilder();
+  await openBuilder();
+  await page.locator(`[data-chip="${name}"]`).focus();
 };
 
 await page.goto(`http://127.0.0.1:${port}/storm-atlas/`, { waitUntil: "domcontentloaded" });

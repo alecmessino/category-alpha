@@ -97,14 +97,26 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
     const map = L.map(elRef.current, { preferCanvas: true, zoomControl: false, attributionControl: true, minZoom: 2, maxZoom: 8, zoomSnap: 0.25 })
       .setView(home, S ? 5 : 3);
     L.control.zoom({ position: "topright" }).addTo(map);
-    L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-      { subdomains: "abcd", maxZoom: 9, opacity: 0.62, attribution: "© OpenStreetMap · CARTO" }).addTo(map);
+    // Same pinned Natural Earth context as Atlas; independent of tile-provider credentials.
+    map.createPane('contextLand');
+    map.getPane('contextLand').style.zIndex = 190;
+    map.attributionControl.addAttribution('Natural Earth 110m · context only');
+    let disposed = false;
+    fetch('assets/terminal-land.json').then(r => {
+      if (!r.ok) throw new Error('Context coastline unavailable');
+      return r.json();
+    }).then(land => {
+      if (!disposed) L.geoJSON(land, { pane: 'contextLand', interactive: false,
+        style: { color: '#536171', weight: .7, fillColor: '#26313d', fillOpacity: 1 } }).addTo(map);
+    }).catch(() => {
+      if (!disposed) map.attributionControl.addAttribution('Context coastline unavailable');
+    });
     map.attributionControl.addAttribution("NHC");
     refs.current.ovl = L.layerGroup().addTo(map);
     mapRef.current = map;
     window.__MT_MAP = map;   // handle for layout/interaction verification
     setTimeout(() => map.invalidateSize(), 200);
-    return () => { map.remove(); mapRef.current = null; };
+    return () => { disposed = true; map.remove(); mapRef.current = null; };
   }, []);
 
   /* Leaflet caches the container size and does not observe it. Anything that changes the box
