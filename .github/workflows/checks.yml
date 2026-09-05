@@ -90,6 +90,9 @@ jobs:
         run: |
           npm i --silent --no-fund --no-audit --no-save @babel/core @babel/preset-react esbuild@0.25.10 react@18.3.1 react-dom@18.3.1 playwright@1.49.1
           node scripts/check-jsx.mjs
+          node scripts/build-terminal.mjs --check
+          node scripts/build-terminal-context.mjs --check
+          node scripts/test-atlas-principal.mjs
 
       # The estimators, in the order they were built. Each checks its arithmetic against a
       # fixture whose answer is known, and — more importantly — checks every refusal path,
@@ -498,6 +501,9 @@ jobs:
       # exit 2. Chromium is installed once and used by all three.
       - name: Install Chromium for the browser gates
         run: npx playwright install --with-deps chromium
+
+      - name: Verify the September drafting release contract
+        run: node scripts/check-atlas-drafting.mjs
 
       - name: Verify the honesty surface reaches the screen
         run: node scripts/check-atlas-dom.mjs --require-browser

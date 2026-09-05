@@ -24,7 +24,7 @@ export const PathwayLayer = AtlasLayer.extend({
     pane: "overlayPane",
     zIndexOffset: 1,
     stepDeg: 2.0,
-    hue: "79, 195, 247", // the Atlas accent, as rgb components
+    hue: "78, 97, 123", // the Atlas accent, as rgb components
     /* alpha = floor + span * (n / peak) ^ gamma. The floor keeps a cell that one storm passed
        through visible as one storm rather than as nothing; the gamma opens out the long tail,
        where the interesting structure of a pathway map actually is. */

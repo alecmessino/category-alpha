@@ -25,19 +25,19 @@ import { AtlasLayer } from "./atlas-layer.js";
 /* The design's cartographic ink, at the weights it states. Screen pixels: this canvas draws in
    screen space and is repainted on every zoom, so there is no scale division to undo. */
 export const PLATE_INK = {
-  graticule: "#1e2736",
+  graticule: "#c9cfd7",
   graticuleWidth: 0.7,
-  halo: "#141c27",
+  halo: "#eef0f3",
   haloWidth: 3.4,
-  land: "#1a222e",
-  border: "#293341",
+  land: "#d8dde4",
+  border: "#a3acb8",
   borderWidth: 0.5,
-  coast: "#7590a6",
+  coast: "#596674",
   coastWidth: 1.25,
   /* The context tier sits one tone above the plate and its coast is a hairline: legible as a
      silhouette, never mistakable for the modelled rings drawn over it. */
-  contextLand: "#161c23",
-  contextCoast: "#2c3744",
+  contextLand: "#e2e6eb",
+  contextCoast: "#929da9",
   contextCoastWidth: 0.7,
 };
 

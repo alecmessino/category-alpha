@@ -313,7 +313,7 @@
   define("advisory.latency", "nhc", (s) => {
     const f = s.feeds.nhc || {};
     const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
-    const lags = storms.map((x) => x.advisoryLagMin).filter((v) => v != null);
+    const lags = storms.map((x) => typeof x.advisoryLagMin === "function" ? x.advisoryLagMin(Math.max(0, (window.MT?.FRAMES || 1) - 1)) : x.advisoryLagMin).filter(Number.isFinite);
     if (!f.ok) return { text: "advisory feed unavailable this cycle", ok: false };
     if (!lags.length) return { text: "no advisory issuance time parsed — ingestion lag unmeasured", ok: false };
     const worst = Math.max(...lags);
