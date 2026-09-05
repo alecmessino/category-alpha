@@ -102,7 +102,7 @@ function IngestionHUD() {
   const [open, setOpen] = React.useState(false);
   const F = (window.MT && MT._feeds) || {};
   const storms = Object.values((window.MT && MT.storms) || {});
-  const lags = storms.map((s) => s.advisoryLagMin).filter((v) => v != null);
+  const lags = storms.map((s) => typeof s.advisoryLagMin === "function" ? s.advisoryLagMin(Math.max(0, (window.MT?.FRAMES || 1) - 1)) : s.advisoryLagMin).filter(Number.isFinite);
   const advLag = lags.length ? Math.max(...lags) : null;
   const snapAge = window.MTC ? MTC.snapshotAgeMin() : null;
 

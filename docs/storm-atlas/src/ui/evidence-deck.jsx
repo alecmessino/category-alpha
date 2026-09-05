@@ -791,7 +791,7 @@ function GroupedLimits({ groups, onEvidence }) {
   return (
     <section className="at-deck-limitgroups" data-limit-groups>
       <div className="at-limitgroups-head">
-        <span className="at-foot-k">LIMITS &amp; EXCLUSIONS</span>
+        <span className="at-foot-k">LIMITS &amp; EXCLUSIONS · <span data-limits-refused-total>{[...byKind.values()].reduce((n, rows) => n + rows.length, 0)}</span> REFUSED</span>
         <span className="at-limitgroups-note">
           one explanation per governing refusal — every row above carries its own state and count
         </span>

@@ -52,6 +52,8 @@ import { Colophon } from "./shell.jsx";
 import { QueryHead } from "./condition-strip.jsx";
 import { EvidenceDeck, buildGroups, subjectVerdicts } from "./evidence-deck.jsx";
 import { AnswerLadder } from "./answer-ladder.jsx";
+import { ClauseEditor } from "./clause-editor.jsx";
+import { TitleBlock } from "./title-block.jsx";
 import { Transport } from "./transport.jsx";
 import { ArchiveTransport } from "./archive-transport.jsx";
 import { MONO, TextButton, claimText } from "./kit.jsx";
@@ -207,6 +209,27 @@ export function Atlas() {
      which scripts/check-atlas-stability.mjs measures through this exact transition. */
   const [sheetZone, setSheetZone] = React.useState(null);
   const [sheetAt, setSheetAt] = React.useState(null);
+  const [draft, setDraft] = React.useState(null);
+  const [receipt, setReceipt] = React.useState(null);
+  const questionRegion = React.useRef(null);
+  const draftResult = React.useMemo(() => archive && draft ? cohortResult(archive, draft) : null, [archive, draft]);
+  const draftPreview = React.useMemo(() => archive && draft ? previewCounts(archive, draft) : null, [archive, draft]);
+  const commitDraft = () => {
+    if (!draft) return;
+    const height = questionRegion.current?.getBoundingClientRect().height || 0;
+    setCohort(normalise(draft));
+    setSheetZone(null);
+    setDraft(null);
+    setReceipt({ height });
+    setHeldRow(null); setHoverRow(null);
+  };
+  React.useEffect(() => {
+    if (!receipt) return;
+    const dismiss = () => setReceipt(null);
+    window.addEventListener("wheel", dismiss, { passive: true, once: true });
+    window.addEventListener("touchmove", dismiss, { passive: true, once: true });
+    return () => { window.removeEventListener("wheel", dismiss); window.removeEventListener("touchmove", dismiss); };
+  }, [receipt]);
   const shellRef = React.useRef(null);
   const anchorRef = React.useRef(null);
   /* WHERE THE POPOVER HANGS, AND WHY IT IS NOT SIMPLY UNDER THE CLAUSE.
@@ -230,6 +253,8 @@ export function Atlas() {
    * stale: the sheet is placed against the question and the plate a reader is actually looking
    * at. It stays absolutely positioned and moves neither. */
   const openEditor = React.useCallback((zone, el) => {
+    setDraft(normalise(cohort));
+    setReceipt(null);
     anchorRef.current = el || null;
     const shell = shellRef.current;
     const q = document.querySelector("[data-question]");
@@ -254,11 +279,12 @@ export function Atlas() {
       setSheetAt({ left, top, maxHeight });
     } else setSheetAt(null);
     setSheetZone(zone);
-  }, []);
+  }, [cohort]);
   /* CLOSING RETURNS THE READER TO THE CLAUSE THEY PRESSED. A dialog that drops focus at the top
      of the document costs a keyboard reader their place in the sentence. */
   const closeEditor = React.useCallback(() => {
     setSheetZone(null);
+    setDraft(null);
     const el = anchorRef.current;
     anchorRef.current = null;
     if (el && el.isConnected) el.focus();
@@ -761,7 +787,7 @@ export function Atlas() {
     if (!b) return;
     setPlaying(false);
     setCursorMs(null);
-    setCohort(b.spec);
+    setDraft(b.spec); setSheetZone("given"); setReceipt(null);
   }, [archive, cohort, setCohort]);
 
   /* Clicking the ocean sets the cohort's LOCATION CONDITION -- it does not open a separate
@@ -770,10 +796,9 @@ export function Atlas() {
     setSelected(null);
     setPlaying(false);
     setInteracted(true);
-    setCohort((c) => normalise({
-      ...c, where: { lat, lon, radiusKm: c.where ? c.where.radiusKm : DEFAULT_RADIUS_KM },
-    }));
-  }, []);
+    setDraft(normalise({ ...cohort, where: { lat, lon, radiusKm: cohort.where?.radiusKm || DEFAULT_RADIUS_KM } }));
+    setSheetZone("given"); setReceipt(null);
+  }, [cohort]);
 
   /* RESET QUERY — ONE OF THREE WAYS OUT, AND THE ONLY ONE THAT TOUCHES THE QUESTION.
    *
@@ -787,9 +812,8 @@ export function Atlas() {
    * leave the membership verdict describing nothing. HOME and FIT, which do move the camera,
    * leave both the query and the selection exactly where they were. */
   const onResetQuery = React.useCallback(() => {
-    setCohort(normalise(EMPTY_COHORT));
-    setSelected(null);
-  }, [setCohort]);
+    setDraft(normalise(EMPTY_COHORT)); setSheetZone("scope"); setReceipt(null);
+  }, []);
 
   React.useEffect(() => {
     const onKey = (e) => {
@@ -805,6 +829,7 @@ export function Atlas() {
        * are visible, deliberate and next to the thing they remove. */
       if (e.key === "Escape") {
         if (sheetZone) { closeEditor(); return; }
+        if (receipt) { setReceipt(null); return; }
         if (provOpen) { setProvOpen(false); return; }
         /* THE HOLD IS DISMISSED BEFORE THE SELECTION, on the same most-recent-first rule the
            drawer and the inspector already follow, and the cohort is still not in the chain. */
@@ -823,7 +848,7 @@ export function Atlas() {
     };
     addEventListener("keydown", onKey);
     return () => removeEventListener("keydown", onKey);
-  }, [selected, mode, provOpen, heldRow, brush, sheetZone, closeEditor]);
+  }, [selected, mode, provOpen, heldRow, brush, sheetZone, receipt, closeEditor]);
 
   if (error) return <BootError error={error} />;
   if (!archive || !world || !result) return <Boot manifest={manifest} />;
@@ -975,7 +1000,9 @@ export function Atlas() {
           names, and the reader has to be told before they read the answer. */}
       {/* HEAD AND BAND, IN ONE BOX DECLARED FROM THE VIEWPORT. Everything below this element is
           the page continuing: the transport, the complete matrix, the limits and the colophon. */}
+      <TitleBlock archive={archive} onProvenance={() => setProvOpen(true)} onLedger={() => openLedger(null)} />
       <div className="atlas-above">
+      <div ref={questionRegion} className="at-question-region" style={receipt ? { minHeight: receipt.height } : undefined}>
       <QueryHead segments={segments} conditions={conditions}
         scope={conditions.filter((c) => c.zone === "scope")}
         kept={result.kept} total={archive.manifest.counts.storms}
@@ -984,8 +1011,28 @@ export function Atlas() {
         notice={<MethodologyMoved was={urlMethodology}
           now={archive.manifest.methodology_version} />}
         onEdit={(zone, el) => { setInteracted(true); openEditor(zone, el); }}
-        onClear={(key) => setCohort(clearCondition(cohort, key))}
+        onClear={(key) => { setDraft(clearCondition(cohort, key)); setSheetZone("scope"); setReceipt(null); }}
         onReset={onResetQuery} />
+      {sheetZone && draft && draftResult ? <section className="at-clause-editor" data-builder-sheet
+        role="region" aria-label="Edit question draft" onKeyDown={e => { if (e.key === "Escape") { e.stopPropagation(); closeEditor(); } }}>
+        <div className="at-draft-head"><span>EDIT QUESTION · PREVIEW</span><strong data-draft-count>{draftResult.kept.toLocaleString()} storms · {draftResult.sufficient ? "SUFFICIENT" : "BELOW SAMPLE"}</strong></div>
+        <ClauseEditor draft={draft} setDraft={setDraft}>
+          <CohortBuilder archive={archive} cohort={draft} setCohort={f => setDraft(normalise(f))}
+            result={draftResult} preview={draftPreview} sentence={openQuestion(draft)} conditions={conditionsOf(draft)}
+            layers={layers} setLayers={setLayers} bounds={bounds} mode={mode} setMode={setMode}
+            timeline={timeline} envCoverage={envCov} onReset={() => setDraft(normalise(EMPTY_COHORT))} />
+        </ClauseEditor>
+        <div className="at-draft-actions"><p>Evidence stays frozen until commit. Only COMMIT publishes this question.</p>
+          <button type="button" data-commit onClick={commitDraft}>COMMIT</button>
+          <button type="button" data-sheet-close onClick={closeEditor}>CANCEL · ESC</button>
+        </div>
+      </section> : null}
+      {receipt ? <div className="at-commit-receipt" role="status" data-commit-receipt>
+        <strong>COMMITTED</strong><span>{result.kept.toLocaleString()} storms · URL written · evidence recomputed</span>
+        <button onClick={() => setReceipt(null)}>DISMISS · ESC</button>
+      </div> : null}
+      </div>
+
 
       {/* THE BODY: PLATE LEFT, EVIDENCE LEDGER RIGHT.
           The two are simultaneous at every width from 900 up, which is the whole architecture --
@@ -1023,7 +1070,7 @@ export function Atlas() {
             selection is declared in answer-ladder.jsx and the rest is one screen below, at page
             width, with these eight underscored there. */}
         <div className="atlas-answer" data-answer-col>
-          <AnswerLadder result={result} comparison={comparison} subject={subject}
+          <AnswerLadder spec={cohort} result={result} comparison={comparison} subject={subject}
             archiveTotal={archive.manifest.counts.storms}
             lensKey={heldRow} onLens={onLens} />
         </div>
@@ -1045,7 +1092,8 @@ export function Atlas() {
           across -- and beneath it the limits, grouped once per governing refusal, then the
           method, the pathway, the environment and the citation. Nothing is behind a scroller of
           its own: the page scrolls, which is what a page is for. */}
-      <div className="atlas-evidence" data-evidence-row>
+      <div className="atlas-evidence" id="atlas-schedule" data-evidence-row>
+        <div className="at-schedule-title"><span>SCHEDULE / ALL OUTCOMES</span><span>COUNT · RATE · 95% WILSON</span></div>
         <EvidenceDeck result={result} comparison={comparison} subject={subject}
           onEvidence={openLedger}
           /* THE LADDER, CUMULATIVELY. The matrix runs the page's own width now rather than a
@@ -1085,29 +1133,6 @@ export function Atlas() {
 
       {/* THE BUILDER, SUMMONED. Same component, same state, same costs -- it is the same query
           surface the rail held, moved behind the zone label that opens it. */}
-      {sheetZone ? (
-        <div className="at-sheet" data-builder-sheet data-sheet-anchored={sheetAt ? "" : undefined}
-          role="dialog" aria-label="edit conditions" aria-modal="false"
-          style={sheetAt ? { left: sheetAt.left, top: sheetAt.top,
-            ...(sheetAt.maxHeight ? { maxHeight: sheetAt.maxHeight } : {}) } : undefined}
-          onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); closeEditor(); } }}>
-          <div className="at-sheet-hd">
-            <span>EDIT CONDITIONS</span>
-            <button type="button" className="at-sheet-x" data-sheet-close
-              onClick={closeEditor} aria-label="close">×</button>
-          </div>
-          <div className="at-sheet-body">
-            <CohortBuilder archive={archive} cohort={cohort}
-              setCohort={(f) => setCohort(normalise(f))}
-              result={result} preview={preview}
-              layers={layers} setLayers={setLayers} bounds={bounds}
-              mode={mode} setMode={setMode}
-              timeline={timeline} sentence={sentence} conditions={conditionsOf(cohort)}
-              envCoverage={envCov}
-              onReset={() => { setCohort(normalise(EMPTY_COHORT)); setSelected(null); }} />
-          </div>
-        </div>
-      ) : null}
 
       {/* THE COLOPHON. Wordmark, the archive's scale, the three stamps that say what these
           numbers MEAN, and the three ways out to provenance, calibration and a citation -- on
@@ -1511,7 +1536,7 @@ function Legend({ colorBy, showPathway, showGenesisDensity, probe }) {
      per cell, deduped by storm id, and never a probability -- said beside the shading, because a
      shaded ocean is read as a forecast cone unless it says otherwise. */
   if (showPathway) {
-    surfaces.push(["79, 195, 247", "PATHWAY COUNTS",
+    surfaces.push(["78, 97, 123", "PATHWAY COUNTS",
       probe ? "distinct storms of the matched pool through each 2° cell — not a forecast"
         : "distinct storms of the cohort through each 2° cell — not a forecast"]);
   }

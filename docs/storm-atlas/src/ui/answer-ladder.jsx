@@ -27,6 +27,8 @@
  * Limits & exclusions below the matrix.
  */
 import React from "react";
+import { principal } from "./principal.js";
+import { intensityContractKey, landfallContractKey } from "../engine/calibration.js";
 import { buildGroups, statusWordOf, refusalKindOfRow, isRefusedRow, pct1, subjectReached }
   from "./evidence-deck.jsx";
 
@@ -115,7 +117,7 @@ const signed = (pp) => `${pp > 0 ? "+" : pp < 0 ? "−" : ""}${Math.abs(pp).toFi
  * @param {number}   props.archiveTotal the archive's own storm count, for the sample line
  */
 export function AnswerLadder({ result, comparison, subject, archiveTotal, lensKey = null,
-  onLens = null }) {
+  onLens = null, spec = null }) {
   if (!result || !result.n_cases) return null;
   const groups = buildGroups(result, comparison, subject);
   const { intensity, landfall, denomL } = primaryEight(groups);
@@ -131,6 +133,13 @@ export function AnswerLadder({ result, comparison, subject, archiveTotal, lensKe
   const all = groups.flatMap((g) => g.rows);
   const contracts = all.length;
   const refused = all.filter(isRefusedRow).length;
+  const outContract = spec?.intensity && spec.intensity !== "all"
+    ? intensityContractKey(spec.intensity)
+    : spec?.landfall && spec.landfall !== "all"
+      ? landfallContractKey(spec.landfall, "any") : null;
+  const answer = principal(all.map(row => ({ ...row, refusalKind: refusalKindOfRow(row) })), outContract);
+  const principalRow = answer.row;
+
 
   const keyLine = !result.sufficient
     ? "n / N · STATUS — no rate exists, so no interval does"
@@ -138,27 +147,27 @@ export function AnswerLadder({ result, comparison, subject, archiveTotal, lensKe
 
   return (
     <section className="at-answer" data-answer>
-      <div className="at-ans-top">
+      <div className="at-ans-top" data-principal-branch={answer.branch}>
+        <div className="at-answer-stamp">{principalRow ? principalRow.label : answer.branch === "open" ? "COHORT · OPEN SCHEDULE" : "COHORT · NO PRINCIPAL RATE"}</div>
         <div className="at-ans-head">
-          <span className="at-ans-n">{result.kept.toLocaleString()}</span>
-          <span className="at-ans-l">EFFECTIVE SAMPLE<br />
-            OF {archiveTotal.toLocaleString()} ARCHIVE STORMS
-            {denomI !== null || denomL !== null ? (
-              <>{" · "}
-                <span className="at-ans-denoms" data-outcome-denominators
-                  title="the rates below are taken over two populations: the storms whose peak the archive recorded, and every storm in the cohort">
-                  {denomI !== null ? <>{denomI.toLocaleString()} INTENSITY</> : null}
-                  {denomI !== null && denomL !== null ? " · " : null}
-                  {denomL !== null ? <>{denomL.toLocaleString()} LANDFALL</> : null}
-                </span>
-              </>
-            ) : null}</span>
+          <span className="at-ans-n" data-principal-rate={principalRow ? "" : undefined}>
+            {principalRow ? pct1(principalRow.cell.rate) : result.kept.toLocaleString()}
+          </span>
           <span className="at-ans-state" data-sample-state>
-            {result.sufficient ? "SUFFICIENT" : "BELOW SAMPLE"}
+            {result.sufficient ? "SUFFICIENT" : "BELOW SAMPLE"} · MIN {result.min_sample}
+            <br /><span data-refused-total>{refused} REFUSED</span>
           </span>
         </div>
-        <p className="at-ans-syn" data-synthesis>
-          {synthesise({ result, comparison, groups })}
+        {principalRow ? <p className="at-principal-figures">
+          {principalRow.cell.count.toLocaleString()} / {principalRow.cell.n_storms.toLocaleString()}
+          {" · "}{principalRow.cell.ci95.map(v => (100 * v).toFixed(1)).join("–")}% · 95% WILSON
+          {principalRow.delta?.deltaPp != null ? <><br /><span className="at-principal-delta">
+            {signed(principalRow.delta.deltaPp)} pp vs {pct1(principalRow.delta.baseRate)} baseline
+          </span></> : null}
+        </p> : <p className="at-principal-figures">The answer is the schedule of {contracts} outcomes.</p>}
+        <p className="at-principal-rule" data-principal-rule>{answer.branch === "open" ? "No outcome is named in the question." : answer.rule}</p>
+        <p className="at-ans-denoms" data-outcome-denominators>
+          {denomI?.toLocaleString()} intensity · {denomL?.toLocaleString()} landfall
         </p>
       </div>
 
@@ -299,30 +308,19 @@ function AnswerRow({ row, comparison, subject = null, lensKey = null, onLens = n
             from an outcome name to a figure set hard right; the dotted rule is what keeps it on
             the line. It carries no meaning and no text. */}
         <i className="at-ans-ld" aria-hidden="true" />
-        <IntervalMark cell={cell} delta={delta} tone={row.tone} nonmember={nonmember} />
+        <IntervalMark cell={refused ? null : cell} delta={delta} tone={row.tone} nonmember={nonmember} />
       </span>
       <span className="at-ans-rate">
-        {refused ? (
-          <>
-            <span className="at-val">{cell ? cell.count.toLocaleString() : "—"}</span>
-            {cell && cell.n_storms ? (
-              <span className="at-ans-den">OF {cell.n_storms.toLocaleString()}</span>
-            ) : null}
-          </>
-        ) : <span className="at-val">{pct1(cell.rate)}</span>}
+        <span className="at-val">{refused ? "—" : pct1(cell.rate)}</span>
       </span>
       <span className="at-ans-vs">
         {!refused && comparison && delta && delta.deltaPp !== null
           ? <span className="at-val">{signed(delta.deltaPp)} pp</span> : null}
       </span>
       <span className="at-ans-sup">
-        {refused ? null : (
-          <span className="at-val">
-            {cell.count.toLocaleString()} / {cell.n_storms.toLocaleString()}
-            {cell.ci95 ? <> · {(100 * cell.ci95[0]).toFixed(1)}–{(100 * cell.ci95[1]).toFixed(1)}%</>
-              : null}
-          </span>
-        )}
+        <span className="at-val">{cell ? `${cell.count.toLocaleString()} / ${cell.n_storms.toLocaleString()}` : "—"}
+          {" · "}{!refused && cell?.ci95 ? `${(100 * cell.ci95[0]).toFixed(1)}–${(100 * cell.ci95[1]).toFixed(1)}%` : "—"}
+        </span>
       </span>
       <span className="at-ans-st" data-status={status || undefined}>{status || null}</span>
     </div>

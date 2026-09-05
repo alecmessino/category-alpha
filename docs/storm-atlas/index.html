@@ -12,8 +12,8 @@
 <link rel="preload" href="data/atlas-manifest.json" as="fetch" crossorigin>
 <link rel="preload" href="data/atlas-core-v1.bin.gz" as="fetch" crossorigin>
 <link rel="preload" href="data/atlas-tracks-v1.bin.gz" as="fetch" crossorigin>
-<link rel="preload" href="../assets/fonts/ibm-plex-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="../assets/fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/archivo-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../assets/fonts/martian-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="atlas.css">
 <style>
 /* `min-height`, NOT `height`, AND THE DOCUMENT SCROLLS.
@@ -54,6 +54,7 @@ body{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;-webkit-fo
 .atlas-boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;color:#7d8fa5;letter-spacing:.5px}
 input[type=range]{height:16px}
 </style>
+<link rel="stylesheet" href="drafting.css">
 <!-- Vendored and shared with the terminal, so a visitor arriving from it pays nothing here.
      NOT vendor/babel.js: this surface ships a precompiled bundle, so there is no in-browser
      transform and no 3.1 MB to download before any of its own code can run. -->
