@@ -1,10 +1,10 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-06T15:26:53.107Z",
+  "ranAt": "2026-09-06T20:23:11.308Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "8f2e6182c7b40894e0d1d5f5a18a8f11c737713c",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/34042284165",
+  "sha": "544ef3f76434eb9cbe8786dbf40f7a5f8561c986",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/34057771475",
   "ok": false,
   "passed": 45,
   "total": 46,
@@ -14,7 +14,7 @@
       "detail": "300 contracts · 51 series · droppedForCap=17"
     }
   ],
-  "thirdPartyFailures": 12,
+  "thirdPartyFailures": 8,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -34,7 +34,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-09-06T15:23:16.338Z · 4m old"
+      "detail": "2026-09-06T20:18:08.537Z · 5m old"
     },
     {
       "check": "renders: Situation",
@@ -124,7 +124,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 2 screens tall (2764px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 857px · BANKROLL 763px · ▾ 698px"
+      "detail": "3 tabs · Situation is 2 screens tall (2861px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 954px · BANKROLL 860px · ▾ 698px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -144,17 +144,17 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": true,
-      "detail": "24 frames · newest carries advisory state for 3/3 storm(s) · 14 advisory change(s) · 2 moved P · 4 pinned at the clamp · 14 register row(s) · situation P=99% at adv #22"
+      "detail": "24 frames · newest carries advisory state for 3/3 storm(s) · 15 advisory change(s) · 2 moved P · 4 pinned at the clamp · 15 register row(s) · situation P=99% at adv #22"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "3/3 frame(s) carry a consensus peak against 3 in the snapshot · 3 carry its cycle · frame is 4m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "1/3 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 11m behind the snapshot (lagging — wiring asserted, coverage is the CI gate's job) · 2 deck(s) carried no forecasting aids yet · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "3/3 frames carry a calibrated P · 3 carry the raw one · 3 carry an evidence tier · contracts: 4 calibrated, 4 with the official estimate beside it · strip: quality=MEDIUM lag=30m raw=88%"
+      "detail": "3/3 frames carry a calibrated P · 3 carry the raw one · 3 carry an evidence tier · contracts: 4 calibrated, 4 with the official estimate beside it · strip: quality=LOW lag=318m raw=88%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -164,12 +164,12 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "11 guidance cycle(s) turned over → 11 row(s) · 2 aircraft fix(es) arrived → 2 row(s) · 5 P-update row(s) · 1 SHIPS · 3 pass · strip arrivals=7"
+      "detail": "9 guidance cycle(s) turned over → 9 row(s) · 2 aircraft fix(es) arrived → 2 row(s) · 5 P-update row(s) · 1 SHIPS · 4 pass · strip arrivals=7"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: no storm past the 180-min line · forced: 4 anchored row(s) pushed past it → 0 HOLD, 4 SUSPECT, 0 ACTIONABLE · 20 stale-crossing row(s) in the register"
+      "detail": "live: past the 180-min line — Marie 318m, Karina 321m · 1 row(s), 0 held, 0 TAKE · forced: 4 anchored row(s) pushed past it → 0 HOLD, 4 SUSPECT, 0 ACTIONABLE · 19 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
@@ -179,7 +179,7 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-09-06T06:00:00Z"
+      "detail": "cycle 2026-09-06T12:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
