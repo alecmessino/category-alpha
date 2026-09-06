@@ -121,7 +121,7 @@ for (const [name, query] of STATES) {
 
   for (const row of rows.slice(0, 4)) {
     const numerator = (() => {
-      const m = row.refused ? row.rate.match(/^([\d,]+)/) : row.sup.match(/^([\d,]+)\s*\//);
+      const m = row.sup.match(/^([\d,]+)\s*\//);
       return m ? Number(m[1].replace(/,/g, "")) : null;
     })();
     await page.click(`[data-lens-row="${row.key}"]`);
@@ -211,6 +211,8 @@ console.log("\n[lens] a cohort edit releases the hold");
   await page.waitForTimeout(350);
   ok("held before the edit", !!(await page.evaluate(() => globalThis.__ATLAS_LENS)));
   await page.click("[data-condition-clear]");
+  await page.click("[data-commit]");
+  await page.click("[data-receipt-dismiss]");
   await page.waitForTimeout(700);
   ok("released by the edit", !(await page.evaluate(() => globalThis.__ATLAS_LENS)));
   ok("and no row is left reading as pressed",

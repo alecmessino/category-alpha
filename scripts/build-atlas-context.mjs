@@ -136,6 +136,8 @@ export async function buildContext({ dir = SRC_DIR, out = OUT } = {}) {
     not_used_for: sources.not_used_for,
   });
   const gz = gzipSync(buffer, { level: 9 });
+  // RFC 1952 OS byte is metadata, not geometry. Pin Unix for cross-platform builds.
+  gz[9] = 3;
   if (out) await writeFile(out, gz);
   return { header, raw: buffer.length, gz: gz.length, gzBytes: gz };
 }

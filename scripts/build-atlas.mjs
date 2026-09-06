@@ -23,7 +23,7 @@
 import { build } from "esbuild";
 import { readdir, readFile, rm } from "node:fs/promises";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = join(ROOT, "docs/storm-atlas/src");
@@ -70,7 +70,7 @@ export async function snapshotDist() {
   return files;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
   const r = await runBuild();
   const outputs = Object.entries(r.metafile.outputs).sort();
   let total = 0;

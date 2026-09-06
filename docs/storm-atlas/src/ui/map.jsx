@@ -321,6 +321,12 @@ export function AtlasMap({
      geography it does not research; a reader who has asked for the storms that crossed the
      dateline is asking to be taken to them, and refusing would be the camera overruling the
      query. The margin is 24px on each side so a track does not run into the graticule ticks. */
+  const goEastPacific = React.useCallback(() => {
+    const m = map.current;
+    if (!m) return;
+    camera(m, () => applyFrame(m, [[5, -168], [45, -98]], { mode: "aperture", anchor: [22.3, -133] }));
+    userMoved.current = true; atAperture.current = false;
+  }, []);
   const goFit = React.useCallback(() => {
     const m = map.current;
     if (!m) return;
@@ -895,7 +901,10 @@ export function AtlasMap({
           fixed pair of coordinates under a movable camera is a caption that becomes a lie on the
           first drag. */}
       <div className="at-platehead">
-        <span className="at-plate-title">PLATE 1 · NORTH ATLANTIC + EAST PACIFIC</span>
+        <span className="at-camera-group" role="group" aria-label="Camera aperture — view state only">
+          <span>CAMERA</span><button onClick={goHome} title="North Atlantic + East Pacific camera; view state only">BASIN · NA + EP</button>
+          <button onClick={goEastPacific} title="East Pacific camera; view state only">EAST PACIFIC</button>
+        </span>
         {/* THE HEAD NAMES THE PLATE, ITS READING AND ITS APERTURE -- AND NOTHING THE PAGE HAS
             ALREADY SAID. The cohort count used to sit here too, and with the mode segment
             beside it the line clipped at 1440: the region name lost its second basin and the
@@ -1251,11 +1260,11 @@ function PlateFrame({ frame }) {
         </g>
       ))}
       {labY.map((l) => (
-        <text key={`ly${l.y}`} x="8" y={l.y - 4} fill="#7f92a8" fontFamily="var(--font-mono)"
+        <text key={`ly${l.y}`} x="8" y={l.y - 4} fill="var(--t2)" fontFamily="var(--font-mono)"
           fontSize="9.5" letterSpacing="1">{l.text}</text>
       ))}
       {labX.map((l) => (
-        <text key={`lx${l.x}`} x={l.x + 4} y={h - 7} fill="#7f92a8" fontFamily="var(--font-mono)"
+        <text key={`lx${l.x}`} x={l.x + 4} y={h - 7} fill="var(--t2)" fontFamily="var(--font-mono)"
           fontSize="9.5" letterSpacing="1">{l.text}</text>
       ))}
     </svg>

@@ -37,18 +37,18 @@ export const MAJOR_WEIGHT = 1.35;
 export const MAJOR_FROM = 4;
 
 /** The colour of the population when it is context rather than subject. */
-export const POPULATION_INK = "#7a9cbb";
+export const POPULATION_INK = "#748395";
 
 /** The pool a query lifted out of the population. */
-export const EMPHASIS_INK = "#cfe6fa";
+export const EMPHASIS_INK = "#344962";
 
 /** Wind that was never recorded. Not a category, and deliberately outside the ramp. */
 export const UNKNOWN_INK = "#6a7c92";
 
-export const SELECTION_INK = "#ffffff";
+export const SELECTION_INK = "#14181d";
 export const LANDFALL_INK = "#f46966";
-export const GENESIS_INK = "#65cdfa";
-export const GENESIS_LIFTED_INK = "#9fdfff";
+export const GENESIS_INK = "#405b78";
+export const GENESIS_LIFTED_INK = "#293e5b";
 /** Hollow, stroke only -- see replay-layer.js. */
 export const REPLAY_HEAD_INK = "rgba(224,238,250,.92)";
 

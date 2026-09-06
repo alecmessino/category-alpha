@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import { principal } from '../docs/storm-atlas/src/ui/principal.js';
+const row=(key,rate,refusalKind=null)=>({key:`int:${key}`,contractKey:key,label:key,cell:{rate},refusalKind});
+const published=[row('cat3',.3),row('cat4',.13),row('cat5',.034)];
+assert.equal(principal(published,null).row,null);
+assert.equal(principal(published,'cat4').row,published[1]);
+const conditioned=[row('cat3',null,'CONDITIONED_ON'),row('cat4',null,'CONDITIONED_ON'),row('cat5',.262)];
+assert.equal(principal(conditioned,'cat4').row,conditioned[2]);
+assert.equal(principal([row('cat5',null,'CONDITIONED_ON')],'cat5').branch,'ceiling');
+assert.equal(principal([row('cat4',null,'RATE_REFUSED')],'cat4').row,null);
+assert.equal(principal([row('cat4',.1,'BASE_RATE_ONLY')],'cat4').row,null);
+assert.equal(principal([row('cat4',null,'CONDITIONED_ON'),row('cat5',.1,'BASE_RATE_ONLY')],'cat4').row,null);
+assert.equal(principal(published,'absent').row,null);
+assert.equal(principal([row('cat4',0)],'cat4').row.cell.rate,0);
+assert.equal(principal([{...row('mexico',null,'CONDITIONED_ON'),key:'lf:mexico:any'},...published],'mexico').row,null);
+assert.deepEqual(published.map(r=>r.cell.rate),[.3,.13,.034]);
+console.log('11 principal-answer assertions passed.');

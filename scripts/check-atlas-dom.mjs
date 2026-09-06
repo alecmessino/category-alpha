@@ -126,30 +126,25 @@ page.on("console", (m) => {
   if (m.type() === "error" && !/net::|ERR_/.test(m.text())) errors.push("console: " + m.text().slice(0, 200));
 });
 
-/* THE BUILDER MOVED, SO THE WAY TO IT MOVED WITH IT.
- *
- * In the three-column shell every chip was resident in the rail and a click found it. In the
- * stacked shell the builder is a SHEET summoned from a condition-strip zone label, which is the
- * whole point of the change -- a reader looks at their conditions constantly and edits them
- * rarely. The chips are the same chips with the same keys and the same costs; only the path to
- * them is new.
- *
- * So this opens the sheet if the chip is not already on the page, and clicks directly if it is.
- * That keeps ONE gate driving both shells through the transition, which is what makes the port
- * provable rather than asserted -- and it degrades to a plain click the moment the old shell is
- * deleted, because there will be no sheet to open that is not already open.
- */
+/* Drive the public draft editor, then explicitly publish the changed question. */
 const openBuilder = async () => {
-  if (await page.$("[data-builder-sheet]")) return;
-  const opener = await page.$("[data-zone-edit]");
-  if (!opener) return;                       // nothing to open
-  await opener.click();
-  await page.waitForTimeout(250);
+  if (!(await page.$('[data-builder-sheet]'))) await page.locator('[data-zone-edit]').first().click();
+  const advanced = page.locator('.at-editor-advanced');
+  if ((await advanced.getAttribute('open')) === null) await advanced.locator(':scope > summary').click();
+};
+const commitBuilder = async () => {
+  if (!(await page.$('[data-builder-sheet]'))) return;
+  await page.locator('[data-commit]').click();
+  await page.locator('[data-commit-receipt] button').click();
 };
 const chip = async (name, { optional = false } = {}) => {
-  if (!(await page.$(`[data-chip="${name}"]`))) await openBuilder();
-  if (optional) return page.click(`[data-chip="${name}"]`).catch(() => {});
-  return page.click(`[data-chip="${name}"]`);
+  await openBuilder();
+  const target = page.locator(`[data-chip="${name}"]`);
+  if (optional && !(await target.count())) return;
+  await target.click();
+  await commitBuilder();
+  await openBuilder();
+  await page.locator(`[data-chip="${name}"]`).focus();
 };
 
 await page.goto(`http://127.0.0.1:${port}/storm-atlas/`, { waitUntil: "domcontentloaded" });
@@ -206,6 +201,7 @@ const clickLatLng = async (lat, lng) => {
     return { x: r.left + c.x, y: r.top + c.y };
   }, { lat, lng });
   await page.mouse.click(p.x, p.y);
+  await commitBuilder();
   await page.waitForTimeout(600);
 };
 /* SELECT, THEN OPEN THE RECORD.
@@ -602,6 +598,7 @@ console.log("\n[4d] the comparison answers four questions and overstates none of
   await page.getByTitle(/^August/).click();
   await page.waitForTimeout(300);
   await page.getByTitle(/^September/).click();
+  await commitBuilder();
   await page.waitForTimeout(900);
 
   const t = await text();
@@ -1202,6 +1199,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
 
   /* BUILD IT WHILE THE CURSOR IS ELSEWHERE. */
   await page.click("[data-bridge-build]");
+  await commitBuilder();
   await page.waitForTimeout(1100);
   {
     const w = whereOf();
@@ -1273,6 +1271,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
      that rather than implying the rates are about it. */
   await open("v=1&mo=8.9&storm=2022191N14249");
   await page.click("[data-bridge-build]");
+  await commitBuilder();
   await page.waitForTimeout(1100);
   {
     const t = await text();
@@ -1290,6 +1289,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
      condition, not the methodology that decides what the cohort can be asked. */
   await open("v=1&storm=2004247N10332");
   await page.click("[data-bridge-build]");
+  await commitBuilder();
   await page.waitForTimeout(600);
   await page.click("[data-bridge-read]");
   await page.waitForTimeout(1100);
@@ -1346,6 +1346,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
   {
     await open(`v=1&mo=8.9&storm=${encodeURIComponent(INIKI)}`);
     await page.click("[data-bridge-build]");
+  await commitBuilder();
     await page.waitForTimeout(1000);
     let t = await text();
     ok("a member cohort is named as including this storm",
@@ -1378,6 +1379,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
     ok("the pack holds a provisional storm", prov !== null);
     await open(`v=1&storm=${encodeURIComponent(prov)}`);
     await page.click("[data-bridge-build]");
+  await commitBuilder();
     await page.waitForTimeout(1100);
     const t = await text();
     ok("a provisional storm is not in a cohort that excludes provisional seasons",
@@ -1406,6 +1408,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
     ok("the pack holds a storm with no recorded intensity", unmeasured !== null);
     await open(`v=1&i=cat1&storm=${encodeURIComponent(unmeasured)}`);
     await page.click("[data-bridge-build]");
+  await commitBuilder();
     await page.waitForTimeout(1100);
     const t = await text();
     ok("an intensity condition the archive cannot judge reads NOT JUDGED, never MISSED",
@@ -1428,6 +1431,7 @@ console.log("\n[8d] the bridge — one storm, and the population it belongs to")
   {
     await open("v=1&l=mexico&storm=2015293N13266");
     await page.click("[data-bridge-build]");
+  await commitBuilder();
     await page.waitForTimeout(1100);
     const t = await text();
     ok("a landfall-conditioned cohort still bridges", /Historical cohort/.test(t));

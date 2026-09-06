@@ -1,4 +1,18 @@
-# Storm Atlas — B2+ locked rules (accepted end of turn 3)
+# Storm Atlas — drafting-sheet production contract
+
+Updated 2026-09-05 for the supplied Atlas 1B Plus handoff. The rules below
+retain the evidence boundary; the September design supersedes the older visual treatment.
+
+- Cold sheet #dfe3e8, field #eef0f3, ink #14181d, hairline #b9c0c9.
+- Archivo for prose; Martian Mono for figures; #2f4fb5 for actions and references.
+- Clause controls edit a draft. Only COMMIT publishes it. Cancel and Escape discard drafts.
+- An inline committed receipt reserves the question/editor height until dismissed.
+- Open questions have no principal rate. A named published row is principal; a conditioned
+  intensity threshold promotes the first higher published threshold, or none at the ceiling.
+- Refused rows keep their count, two em dashes, and a legible row-local status at every width.
+- The schedule follows the first viewport at 1100×900 and 1280×800.
+
+## Retained evidence and interaction rules
 
 Architecture: **B2** plate + ledger, carried by **E** every row is a lens.
 Governing law: **Inspection changes the view. Commit changes the answer.**
@@ -9,15 +23,16 @@ Governing law: **Inspection changes the view. Commit changes the answer.**
 - Genesis rings and scale bars are the projected 500 km, computed from the plate's own
   aperture and centre latitude. One rule for engineering.
   (Cohort plate 118°W–48°W, centre 26.9°N. East Pacific plate 168°W–98°W, centre 22.3°N.)
-- East Pacific questions use the EP plate, which actually contains 145°W. Never place an
-  EP ring on the NA+EP cohort plate.
+- East Pacific questions do not move the camera. EAST PACIFIC, HOME and FIT are explicit
+  camera actions. A location outside the visible aperture stays off-screen until the reader
+  changes the camera; never clamp a geographic ring to an unrelated visible position.
 - Reticles that mark a point make no distance claim.
 - Lens inks are rendered, not asserted: POPULATION_INK `#7a9cbb`, EMPHASIS_INK `#cfe6fa`,
   class colour, MAJOR_WEIGHT 1.35, cased overlap.
 - A lifted subset on the plate is illustrative density. Published counts live only in the
   ledger. The plate may not invent 470 tracks to match a row.
 - Tracks remain placeholder until the engine supplies canonical member IDs.
-- Dark plate in the paper shell is locked. Light/paper belongs to CITE/export (Direction C).
+- The plate uses the cold light field; cartographic classes remain separate from action ink.
 
 ## Locked interaction rules
 - Holds are view state. They never write rates, cohort, citation, or URL.
@@ -34,7 +49,7 @@ Governing law: **Inspection changes the view. Commit changes the answer.**
   member IDs from the engine.
 
 ## Turn 4 scope — finish the resting instrument first, then annotate. Add no states.
-1. **Resting frame (do first).** Question wins the page at ~28–30px serif. Empty
+1. **Resting frame (do first).** Question wins the page at 26–38px Archivo. Empty
    genesis/outcome/scope states are pressable clauses *in the sentence* — not
    `GENESIS-SIDE NONE · OUTCOME-SIDE NONE`. The sentence must read before any condition
    exists. Cohort count has one primary home, a quiet line under the question:
@@ -96,4 +111,4 @@ DERIVED.
 
 Deliver: finished resting B2 frame; annotated existing state frames; updated 3j;
 annotations; responsive contract; must-preserve / may-change / must-not-do; PR sequence.
-Then stop. Do not implement. Do not propose another architecture.
+The production implementation follows the updated drafting-sheet contract above.

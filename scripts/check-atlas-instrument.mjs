@@ -152,17 +152,17 @@ for (const [w, h] of WIDTHS) {
   const at = `${w}x${h}`;
   ok(`${at.padEnd(9)} the head renders a question and a cohort line`, !!d);
   if (!d) continue;
-  const wantQ = w <= 480 ? 24 : 30;
+  const wantQ = w <= 679 ? 26 : Math.max(25, Math.min(38, w * .0225));
   /* PLEX SANS, NOT SERIF. 5c set the question in Source Serif 4; the product skin (Handoff B)
      sets it in IBM Plex Sans at the same 30px step. The size is 5c's and the family is B's. */
-  ok(`${at.padEnd(9)} the question is ${wantQ}px Plex Sans`,
-     d.question === wantQ && /IBM Plex Sans/.test(d.family), `${d.question}px ${d.family}`);
+  ok(`${at.padEnd(9)} the question uses the drafting Archivo scale`,
+     Math.abs(d.question - wantQ) < .1 && /Archivo/.test(d.family), `${d.question}px ${d.family}`);
   ok(`${at.padEnd(9)} and dominates the line beneath it`, d.question >= 2 * d.cohort,
      `question ${d.question}px against cohort ${d.cohort}px`);
   ok(`${at.padEnd(9)} which sits below it`, d.below);
   ok(`${at.padEnd(9)} the cohort count is stated exactly once in the head`, d.repeats === 1,
      `${d.repeats} renderings`);
-  ok(`${at.padEnd(9)} the question is the first thing on the surface`, d.firstText === "at-head",
+  ok(`${at.padEnd(9)} the title block opens the drafting sheet`, d.firstText === "at-title-block",
      `the surface opens with .${d.firstText}`);
   /* BOTH UNSET SIDES ARE PRESSABLE IN THE SENTENCE, which is the move that retired the strip. */
   ok(`${at.padEnd(9)} both sides are pressable clauses in the sentence`, d.clauses >= 2,
@@ -232,11 +232,11 @@ for (const [w, h] of WIDTHS) {
      tonal lock itself: the plate's ground is below the shell's, both are dark, and the caption
      set on the shell resolves a LIGHT ink -- readable on the charcoal, and demonstrably not the
      plate's own near-black ground leaking into the caption line. */
-  ok(`${at.padEnd(9)} the plate is the darkest plane, inside a charcoal shell`,
-     d.plateGround < 0.02 && d.shellGround < 0.05 && d.plateGround < d.shellGround,
+  ok(`${at.padEnd(9)} the plate is a light field within the cold drafting sheet`,
+     d.plateGround > .8 && d.shellGround > .7 && d.plateGround > d.shellGround,
      `plate luminance ${d.plateGround}, shell ${d.shellGround}`);
-  ok(`${at.padEnd(9)} and the caption resolves a light ink on the charcoal`,
-     d.captionInk !== null && d.captionInk > 0.2,
+  ok(`${at.padEnd(9)} and the caption resolves dark ink with AA contrast`,
+     d.captionInk !== null && (d.shellGround + .05) / (d.captionInk + .05) >= 4.5,
      `caption luminance ${d.captionInk} on a ${d.shellGround} ground`);
   /* FIGURE 1 SAYS WHAT IS DRAWN, which is what turns a map into a figure -- and it says it in
      ONE LINE, which is what keeps the map a fixed rectangle.
@@ -269,6 +269,7 @@ for (const [w, h] of WIDTHS) {
 console.log("\n[instrument] the class key is present wherever class-coloured tracks are");
 for (const [w, h] of WIDTHS) {
   await open("", w, h);
+  await page.locator("[data-class-key]").scrollIntoViewIfNeeded();
   const d = await page.evaluate(() => {
     const key = document.querySelector("[data-class-key]");
     if (!key) return null;
@@ -326,7 +327,7 @@ for (const [w, h] of WIDTHS) {
   } else if (d.noteCut) {
     console.log(`  note  ${at.padEnd(9)} the stroke note gives way to the swatches at this width`);
   }
-  ok(`${at.padEnd(9)} and it is subordinate — the frame's smallest step`, d.size === 9.5,
+  ok(`${at.padEnd(9)} and it is subordinate — the frame's smallest step`, d.size >= 9.5 && d.size <= 10,
      `${d.size}px`);
 }
 

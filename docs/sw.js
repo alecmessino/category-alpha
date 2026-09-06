@@ -1,6 +1,6 @@
 /* Tile cache — and NOTHING else.
  *
- * The map re-downloads the same GIBS and CARTO tiles every time a layer is toggled or
+ * The map re-downloads the same GIBS imagery tiles every time a layer is toggled or
  * the tab is switched, which is the slowest thing the page does. A cache-first store
  * for those tiles makes the map feel instant on the second look.
  *
@@ -8,16 +8,16 @@
  * requests. This terminal's entire claim is that what is on screen is current, and a
  * service worker that served a cached index.html or a cached latest.json would make
  * that claim false while every freshness indicator on the page kept saying otherwise —
- * a stale board that looks live is worse than no board. Only the two raster-tile hosts
+ * a stale board that looks live is worse than no board. Only the timestamped imagery host
  * are eligible, and only for GET.
  *
  * Tiles are addressed by timestamp (GOES publishes a new path every 10 minutes) so a
  * cached tile can never be a stale version of a current tile — it is either the tile
  * for that slot or it does not exist.
  */
-const CACHE = "mt-tiles-v1";
+const CACHE = "mt-tiles-v2";
 const MAX_ENTRIES = 900;          // ~25 MB of 256px PNGs; well inside origin quota
-const TILE_HOSTS = ["gibs.earthdata.nasa.gov", "basemaps.cartocdn.com"];
+const TILE_HOSTS = ["gibs.earthdata.nasa.gov"];
 
 self.addEventListener("install", (e) => { self.skipWaiting(); });
 
@@ -54,7 +54,7 @@ self.addEventListener("fetch", (event) => {
        so it cached exactly nothing and the whole worker was decorative. The verifier
        reported "0 tile(s) cached" and passed, because it was only asserting what was
        NOT in the cache.
-       Both tile hosts send Access-Control-Allow-Origin: *, so re-issue the request in
+       The imagery host sends Access-Control-Allow-Origin: *, so re-issue the request in
        cors mode: that yields a real status to check, and caching a 404 or a rate-limit
        page as though it were imagery is exactly what an opaque response would let
        happen silently. If the cors attempt fails, fall back to the plain request and

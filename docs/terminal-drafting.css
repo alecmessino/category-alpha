@@ -1,0 +1,23 @@
+/* Shared drafting-sheet identity; operational imagery keeps its dark aperture. */
+@font-face{font-family:Archivo;font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/archivo-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:Archivo;font-style:normal;font-weight:500;font-display:swap;src:url('assets/fonts/archivo-latin-500-normal.woff2') format('woff2')}
+@font-face{font-family:'Martian Mono';font-style:normal;font-weight:400;font-display:swap;src:url('assets/fonts/martian-mono-latin-400-normal.woff2') format('woff2')}
+@font-face{font-family:'Martian Mono';font-style:normal;font-weight:500;font-display:swap;src:url('assets/fonts/martian-mono-latin-500-normal.woff2') format('woff2')}
+[data-terminal="drafting"]{
+ --surface-app:#dfe3e8;--surface-card:#eef0f3;--surface-sunken:#e5e9ed;--surface-solid:#14181d;
+ --border-dim:#b9c0c9;--border-strong:#8a94a1;--border-accent:#2f4fb5;
+ --text-1:#14181d;--text-2:#515d6b;--text-inverse:#fff;--text-link:#2f4fb5;
+ --accent:#2f4fb5;--accent-bright:#233d90;--pos:#255f48;--neg:#9c393b;--warn:#644718;--special:#654485;
+ --edge-hot:#255f48;--edge-glow:#255f48;--shadow-card:none;--shadow-cmd:none;
+ --font-sans:Archivo,system-ui,sans-serif;--font-display:Archivo,system-ui,sans-serif;--font-mono:'Martian Mono',ui-monospace,monospace;
+ color-scheme:light;
+}
+[data-terminal] header{background:var(--surface-app)!important;border-bottom-color:var(--text-1)!important}
+[data-terminal] header>div{flex-wrap:wrap}
+[data-terminal] main>section,[data-terminal] .mt-grid>section,[data-terminal] .mt-grid>div{border-radius:0!important}
+[data-terminal] section{box-shadow:none!important}
+[data-terminal] button,[data-terminal] header a{border-radius:2px!important;touch-action:manipulation}
+[data-terminal] :focus-visible{outline:2px solid var(--accent)!important;outline-offset:3px!important}
+[data-terminal] [data-surface="tactical"]{color-scheme:dark;--surface-app:#0f1318;--surface-card:#151c24;--surface-sunken:#1c232b;--surface-solid:#273440;--border-dim:#303b48;--border-strong:#4b5b6d;--text-1:#e6edf6;--text-2:#a9b8ca;--accent:#82a6ff;--accent-bright:#abc2ff;--text-link:#82a6ff;--pos:#6ebf91;--neg:#ee8587;--warn:#e3bb74;--special:#bfa2df;--edge-glow:#6ebf91}
+@media(max-width:679px){[data-terminal] header{position:static!important;padding:12px 16px!important;gap:10px!important}[data-terminal] header>div{margin-left:0!important;gap:8px!important;max-width:100%}[data-terminal] header img{height:28px!important}}
+@media(prefers-reduced-motion:reduce){[data-terminal] *,[data-terminal] *::before,[data-terminal] *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
