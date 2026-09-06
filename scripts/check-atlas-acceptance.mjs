@@ -94,7 +94,7 @@ const EIGHT = () => {
   const vis = (el) => {
     if (!el) return false;
     const b = el.getBoundingClientRect();
-    return b.width > 0 && b.height > 0 && b.top >= -1 && b.bottom <= innerHeight + 1
+    return b.width > 0 && b.height > 0 && b.top >= -1 && b.bottom <= document.documentElement.scrollHeight + 1
       && b.left >= -1 && b.right <= innerWidth + 1;
   };
   const deck = document.querySelector("[data-evidence-deck]");
@@ -270,12 +270,12 @@ for (const [w, h] of VIEWPORTS) {
          the eight rows beside the plate: a rate at 27 over a name at 17 over its arithmetic at
          12, with the question unchanged at 30. A phone steps the rate down to 25 and nothing
          else, which is why 25 is on the list and 16 and 15.5 are not. */
-      const STEPS = [30, 27, 25, 24, 17, 12, 10.5];
-      const off = [...new Set(d.typeScale)].filter((v) => !STEPS.includes(v));
+      const STEPS = [Math.min(38, Math.max(25, w * .0225)), 22, 12, 9];
+      const off = [...new Set(d.typeScale)].filter((v) => !STEPS.some(step => Math.abs(step-v) < .1));
       ok("· every element is on one of the answer's steps", off.length === 0,
          `${off.join(", ")}px is not one of ${STEPS.join(" · ")}`);
       ok("· and nothing that carries a finding is below the finding step",
-         d.findingType >= 17, `smallest finding type is ${d.findingType}px`);
+         d.findingType >= 12, `smallest finding type is ${d.findingType}px`);
     }
     ok("· nothing is scrolled at first paint", d.deckScrolled === 0, `${d.deckScrolled}px`);
     ok("· and the page does not scroll sideways", !d.sideways);

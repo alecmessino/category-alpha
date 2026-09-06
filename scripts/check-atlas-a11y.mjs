@@ -215,6 +215,9 @@ console.log("\n[a11y] the map answers the keyboard");
   const urlBefore = await page.evaluate(() => location.search);
   await page.keyboard.press("Enter");
   await page.waitForTimeout(900);
+  ok("Enter opens a draft without publishing it", await page.locator("[data-commit]").count() === 1 && await page.evaluate(() => location.search) === urlBefore);
+  await page.click("[data-commit]");
+  await page.click("[data-receipt-dismiss]");
   const asked = await page.evaluate(() => ({ url: location.search,
     question: (document.querySelector("[data-question]") || {}).textContent || "" }));
   ok("Enter over open water asks the archive's question",

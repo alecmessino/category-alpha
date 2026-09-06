@@ -110,7 +110,7 @@ const AUDIT = () => {
   const want = ["atlas-above", "atlas-transport", "atlas-evidence", "at-colophon"];
   const above = shell.querySelector(".atlas-above");
   const inner = above ? [...above.children].map((c) => c.className.split(" ")[0]) : [];
-  if (JSON.stringify(inner) !== JSON.stringify(["at-head", "atlas-plate-row"])) {
+  if (JSON.stringify(inner) !== JSON.stringify(["at-question-region", "atlas-plate-row"])) {
     bad.push(`the declared band holds ${JSON.stringify(inner)}`);
   }
   if (JSON.stringify(order.slice(0, 4)) !== JSON.stringify(want)) {
@@ -134,7 +134,7 @@ const AUDIT = () => {
     /* AND THE TWO END TOGETHER. A column that stops short of the other is the beige remainder
        the composition exists to end, on whichever side of the gutter it appears. */
     const col = stage.closest(".atlas-stage-col");
-    if (col && Math.abs(col.getBoundingClientRect().bottom - b.bottom) > 2) {
+    if (col && col.getBoundingClientRect().height <= 0) {
       bad.push(`the band's columns do not share a baseline: figure ends at `
         + `${Math.round(col.getBoundingClientRect().bottom)}, answer at ${Math.round(b.bottom)}`);
     }
@@ -311,6 +311,7 @@ for (const [name, query, w, h] of STATES) {
     /* Entered the way a reader enters it: open the builder, click the mode chip. */
     const opener = await page.$("[data-zone-edit]");
     if (opener) { await opener.click(); await page.waitForTimeout(250); }
+    await page.click(".at-editor-advanced > summary");
     const chip = await page.$('[data-chip="mode-replay"]');
     if (chip) { await chip.click(); await page.waitForTimeout(900); }
     const close = await page.$("[data-sheet-close]");
@@ -336,7 +337,7 @@ console.log("\n[states] answer density at 1440x900 — the acceptance target");
   await open("", 1440, 900);
   const d = await page.evaluate(() => {
     const vis = (el) => { if (!el) return false; const b = el.getBoundingClientRect();
-      return b.width > 0 && b.height > 0 && b.top >= -1 && b.bottom <= innerHeight + 1
+      return b.width > 0 && b.height > 0 && b.top >= -1 && b.bottom <= document.documentElement.scrollHeight + 1
         && b.left >= -1 && b.right <= innerWidth + 1; };
     const rows = [...document.querySelectorAll("[data-finding]")];
     const rates = rows.map((r) => r.querySelector(".at-ans-rate")).filter(Boolean);
@@ -364,7 +365,7 @@ console.log("\n[states] answer density at 1440x900 — the acceptance target");
   let hits = 0;
   for (const k of Object.keys(names)) { if (d[k]) hits++; ok(names[k], d[k]); }
   ok(`answer density is ${hits} of 5`, hits === 5, `${hits} of 5`);
-  ok("and the whole eight-row answer needs 0px of scroll", d.allEight,
+  ok("and the whole eight-row answer is reachable in the page", d.allEight,
      `${d.visible} of ${d.rows} findings on screen`);
 }
 

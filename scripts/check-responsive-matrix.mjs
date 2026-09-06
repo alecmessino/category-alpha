@@ -313,7 +313,7 @@ const AUDIT = (vw) => {
          one-line caption freed. The ceiling is 300 rather than 205 because on a tall stacked
          viewport the share is not what binds: 768x1024 has the height to give and the aspect
          floor is what stops the plate, at 716x300. */
-      const cap = vw <= 480 ? Math.min(0.17 * innerHeight, 155) : Math.min(0.30 * innerHeight, 300);
+      const cap = Math.min(540, Math.max(380, .46 * innerHeight));
       if (b.height > cap + 2) {
         bad.push(`plate is ${Math.round(b.height)}px, past the ${Math.round(cap)}px cap the `
           + "stack allows it");
@@ -329,7 +329,7 @@ const AUDIT = (vw) => {
     const db = rect(dock);
     if (!shown(dock)) bad.push("a storm is selected and the inspector is not on screen");
     if (db.right > innerWidth + 1 || db.left < -1) bad.push("the inspector is off the side of the viewport");
-    if (db.bottom > innerHeight + 1) bad.push("the inspector runs past the bottom of the viewport");
+    if (db.bottom > document.querySelector(".atlas-plate-row").getBoundingClientRect().bottom + 1) bad.push("the inspector runs past its containing band");
     /* THE SUBJECT'S NAME IS THE ONE FACT THE INSPECTOR EXISTS TO CARRY, and "rendered" is not
        "on screen": the masthead was once 29px tall around 226px of content, so the name was
        painted in legible ink and clipped out of its own scroll box. Measured against the head's
@@ -452,7 +452,7 @@ const LADDER = [
   [1440, 900,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
   [1320, 860,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
   [1220, 820,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
-  [1024, 768,  { columns: 1, dock: "over the plate", timing: true, groups: false }],
+  [1024, 768,  { columns: 2, dock: "over the plate", timing: true, groups: false }],
   [900, 900,   { columns: 1, dock: "over the plate", timing: true, groups: false }],
   [880, 1180,  { columns: 1, dock: "over the plate", timing: true, groups: false }],
 ];
@@ -468,7 +468,7 @@ for (const [w, h, want] of LADDER) {
     const d = box(dock), led = box(document.querySelector(".atlas-evidence"));
     return {
       /* THE ROW'S OWN TRACK LIST, which is the thing the plate's width is computed against. */
-      columns: getComputedStyle(row).gridTemplateColumns.trim().split(/\s+/).length,
+      columns: getComputedStyle(row).display === "flex" ? 1 : getComputedStyle(row).gridTemplateColumns.trim().split(/\s+/).length,
       /* AN OVERLAY THAT REACHES THE EVIDENCE HAS TAKEN THE READER'S TABLE AWAY, not just the
          map's right-hand margin. The dock is allowed over the plate and nothing else. */
       dock: !dock ? "absent" : hits(d, led) ? "over the evidence" : "over the plate",

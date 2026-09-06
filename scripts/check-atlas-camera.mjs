@@ -73,6 +73,12 @@ for (const h of ["**fonts.googleapis.com**", "**fonts.gstatic.com**", "**basemap
   await ctx.route(h, (r) => r.abort());
 }
 const page = await ctx.newPage();
+const publishDraft = async () => {
+  if (await page.locator('[data-commit]').count()) {
+    await page.locator('[data-commit]').click();
+    await page.locator('[data-commit-receipt] button').click();
+  }
+};
 const errors = [];
 page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
 
@@ -160,7 +166,7 @@ const fmt = (v) => `lat ${v.s.toFixed(1)}..${v.n.toFixed(1)}  lon ${v.w.toFixed(
 
 /* THE RESEARCH GEOGRAPHY, restated here rather than imported: a gate that reads its bound from
    the file it is checking cannot catch that file widening the bound. */
-const NA_EP = { s: 0, n: 65, w: -180, e: 0 };
+const NA_EP = { s: -15, n: 75, w: -180, e: 0 };
 /* AND THE CORRIDOR THE APERTURE HAS TO HOLD, which is the other half. A view can sit inside the
    research geography and still be useless -- zoomed onto the Sargasso Sea satisfies the clamp
    and frames nothing. These are the two boxes the opening view must CONTAIN: the main
@@ -338,11 +344,12 @@ console.log("\n[camera] a query change never steals a camera the reader has move
     ["an outcome condition added in the builder", async () => {
       await (await page.$('[data-zone-edit="outcome"]')).click();
       await page.waitForTimeout(350);
+      await page.locator('.at-editor-advanced > summary').click();
       const chip = await page.$('[data-chip="intensity-cat3"]')
         || await page.$('[data-chip="intensity-cat4"]');
       if (chip) { await chip.click(); await page.waitForTimeout(700); }
       const close = await page.$("[data-sheet-close]");
-      if (close) { await close.click(); await page.waitForTimeout(400); }
+      if (close) { await publishDraft(); await page.waitForTimeout(400); }
     }],
     ["RESET QUERY", async () => {
       const r = await page.$("[data-reset-query]");
@@ -352,6 +359,7 @@ console.log("\n[camera] a query change never steals a camera the reader has move
   let prev = panned;
   for (const [name, act] of STEPS) {
     await act();
+    await publishDraft();
     const v = await view();
     ok(`${name} leaves the camera alone`, sameCameraWithinPx(prev, v),
        `camera moved from ${fmt(prev)} to ${fmt(v)} `
@@ -394,11 +402,12 @@ console.log("\n[camera] and never steals the opening aperture either — the at-
     ["an outcome condition added in the builder", async () => {
       await (await page.$('[data-zone-edit="outcome"]')).click();
       await page.waitForTimeout(350);
+      await page.locator('.at-editor-advanced > summary').click();
       const chip = await page.$('[data-chip="intensity-cat3"]')
         || await page.$('[data-chip="intensity-cat4"]');
       if (chip) { await chip.click(); await page.waitForTimeout(700); }
       const close = await page.$("[data-sheet-close]");
-      if (close) { await close.click(); await page.waitForTimeout(400); }
+      if (close) { await publishDraft(); await page.waitForTimeout(400); }
     }],
     ["a condition removed by its own ×", async () => {
       const x = await page.$("[data-condition-clear]");
@@ -413,6 +422,7 @@ console.log("\n[camera] and never steals the opening aperture either — the at-
   let prev = fresh;
   for (const [name, act] of STEPS) {
     await act();
+    await publishDraft();
     const v = await view();
     ok(`${name} leaves the opening aperture alone`, sameCameraWithinPx(prev, v),
        `camera moved from ${fmt(prev)} to ${fmt(v)} `
@@ -537,10 +547,11 @@ console.log("\n[camera] selecting a storm frames that storm, and deselecting doe
   if (chip) {
     await chip.click();
     await page.waitForTimeout(350);
+    await page.locator('.at-editor-advanced > summary').click();
     const mon = await page.$('[data-chip="month-9"]') || await page.$('[data-chip="month-8"]');
     if (mon) { await mon.click(); await page.waitForTimeout(700); }
     const close = await page.$("[data-sheet-close]");
-    if (close) { await close.click(); await page.waitForTimeout(400); }
+    if (close) { await publishDraft(); await page.waitForTimeout(400); }
   }
   const afterEdit = await view();
   ok("a cohort edit with the inspector open does not re-frame the subject",

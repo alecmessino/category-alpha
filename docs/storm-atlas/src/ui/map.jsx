@@ -1260,11 +1260,11 @@ function PlateFrame({ frame }) {
         </g>
       ))}
       {labY.map((l) => (
-        <text key={`ly${l.y}`} x="8" y={l.y - 4} fill="#7f92a8" fontFamily="var(--font-mono)"
+        <text key={`ly${l.y}`} x="8" y={l.y - 4} fill="var(--t2)" fontFamily="var(--font-mono)"
           fontSize="9.5" letterSpacing="1">{l.text}</text>
       ))}
       {labX.map((l) => (
-        <text key={`lx${l.x}`} x={l.x + 4} y={h - 7} fill="#7f92a8" fontFamily="var(--font-mono)"
+        <text key={`lx${l.x}`} x={l.x + 4} y={h - 7} fill="var(--t2)" fontFamily="var(--font-mono)"
           fontSize="9.5" letterSpacing="1">{l.text}</text>
       ))}
     </svg>

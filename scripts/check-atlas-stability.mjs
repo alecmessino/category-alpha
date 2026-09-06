@@ -228,7 +228,18 @@ const click = async (sel) => {
   await page.waitForTimeout(SETTLE);
   return true;
 };
-const openSheet = () => click("[data-zone-edit]");
+const openSheet = async () => {
+  if (!(await page.$('[data-builder-sheet]'))) await click('[data-zone-edit]');
+  if ((await page.locator('.at-editor-advanced').getAttribute('open')) === null)
+    await page.locator('.at-editor-advanced > summary').click();
+};
+const publishDraft = async () => {
+  if (await page.locator('[data-commit]').count()) {
+    await page.locator('[data-commit]').click();
+    await page.locator('[data-commit-receipt] button').click();
+    await page.waitForTimeout(SETTLE);
+  }
+};
 const closeSheet = () => click("[data-sheet-close]");
 /* THE SCOPE TOGGLES CARRY NO HOOK -- `Toggle` renders a bare <button> holding a pill and a label
    span -- so this one control is reached by its words. Everything else in this file is selected
@@ -244,7 +255,7 @@ const toggle = async (label) => {
 const chip = async (key) => {
   await openSheet();
   const hit = await click(`[data-chip="${key}"]`);
-  await closeSheet();
+  await publishDraft();
   return hit;
 };
 
@@ -257,27 +268,27 @@ const TRANSITIONS = [
   {
     name: "an outcome condition is added (the comparison column appears)",
     apply: async () => { await chip("intensity-cat1"); },
-    revert: async () => { await click("[data-condition-clear]"); },
+    revert: async () => { await click("[data-condition-clear]"); await publishDraft(); },
   },
   {
     name: "a landfall condition is added",
     apply: async () => { await chip("landfall-conus"); },
-    revert: async () => { await click("[data-condition-clear]"); },
+    revert: async () => { await click("[data-condition-clear]"); await publishDraft(); },
   },
   {
     name: "a genesis basin condition is added",
     apply: async () => { await chip("basin-NA"); },
-    revert: async () => { await click("[data-condition-clear]"); },
+    revert: async () => { await click("[data-condition-clear]"); await publishDraft(); },
   },
   {
     name: "a season condition is added",
     apply: async () => { await chip("season-1971+"); },
-    revert: async () => { await click("[data-condition-clear]"); },
+    revert: async () => { await click("[data-condition-clear]"); await publishDraft(); },
   },
   {
     name: "a scope toggle is flipped (provisional seasons)",
-    apply: async () => { await openSheet(); await toggle("PROVISIONAL SEASONS"); await closeSheet(); },
-    revert: async () => { await openSheet(); await toggle("PROVISIONAL SEASONS"); await closeSheet(); },
+    apply: async () => { await openSheet(); await toggle("PROVISIONAL SEASONS"); await publishDraft(); },
+    revert: async () => { await openSheet(); await toggle("PROVISIONAL SEASONS"); await publishDraft(); },
   },
   {
     name: "the duration columns unfold, then fold",
@@ -507,7 +518,7 @@ if (SELF_TEST) {
   console.log("\n  ── the seed: an answer column that widens must be caught ───────────");
   await open("", 1440, 900);
   const before = await read();
-  await page.addStyleTag({ content: "[data-atlas].atlas-shell.atlas-instrument{--at-answer:619px}" });
+  await page.addStyleTag({ content: "[data-atlas].atlas-instrument .atlas-plate-row{grid-template-columns:minmax(0,1fr) 619px!important}" });
   await page.waitForTimeout(SETTLE);
   const after = await read();
   ok("a 60px answer-column widening is detected as a plate move",

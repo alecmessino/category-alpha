@@ -1184,7 +1184,7 @@ const RECURVE_Q = 0.975;   // the band's north edge, at q97.5 of the lobe's trac
  * It is a CAMERA bound and nothing else. No storm is filtered by it, no rate is computed from
  * it, and a reader who drags west finds the West Pacific tail exactly where it always was. What
  * it forbids is the surface OPENING on geography it does not research. */
-export const NA_EP = [[0, -180], [65, 0]];
+export const NA_EP = [[-15, -180], [75, 0]];
 
 /* WHERE THE APERTURE IS CENTRED, WHICH IS NOT THE MIDDLE OF WHAT IT FRAMES.
  *

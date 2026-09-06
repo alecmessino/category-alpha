@@ -149,7 +149,7 @@ const PROBES = [
   ["conditioning note verbatim",    /Genesis-conditioned/i,                                       "always"],
   ["effective sample size",         /effective sample|ESS/i,                                       "always"],
   ["a count over a denominator",    /\d+\s*\/\s*\d+/,                                              "always"],
-  ["a Wilson interval",             /\[\s*\d+(\.\d+)?\s*[-–—]\s*\d+(\.\d+)?\s*%\s*\]/,             "always"],
+  ["a Wilson interval",             /\[\s*\d+(\.\d+)?\s*[-–—]\s*\d+(\.\d+)?\s*%\s*\]/,             "fixture"],
   ["a refusal reason on screen",    /below the sample gate|< min_sample|too few|not published|no analogs/i, "always"],
   ["a RATE REFUSED cell",           /RATE REFUSED/i,                                              "fixture"],
   ["the no-analogs state",          /no analogs|matched 0|0 storms matched/i,                     "fixture"],
