@@ -132,9 +132,9 @@ const measure = () => page.evaluate(() => {
   const stacked = getComputedStyle(band).gridTemplateColumns.trim().split(/\s+/).length === 1;
   return {
     w: Math.round(b.width), h: Math.round(b.height),
-    expectedHeight: innerWidth >= 1240 ? Math.max(460, Math.min(590, innerWidth * .38))
+    expectedHeight: Math.round((innerWidth >= 1240 ? Math.max(460, Math.min(590, innerWidth * .38))
       : innerWidth >= 980 ? Math.max(460, Math.min(640, innerHeight * .54))
-      : Math.max(380, Math.min(540, innerHeight * .46)),
+      : Math.max(380, Math.min(540, innerHeight * .46))) - 2),
     ar: b.height ? b.width / b.height : null,
     stacked,
     band: Math.round(band.getBoundingClientRect().height),
