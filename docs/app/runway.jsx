@@ -110,18 +110,18 @@ function RunwayTiles({ m, compact }) {
   return (
     <div data-runway-tiles style={{ display: "grid", gridTemplateColumns: compact ? "repeat(auto-fit,minmax(104px,1fr))" : "repeat(auto-fit,minmax(122px,1fr))", gap: 1, background: "var(--border-dim)" }}>
       <div style={{ background: "var(--surface-card)" }}>
-        <RTile testid="headroom" label="Headroom now" value={n.headNow} unit="kt"
+        <RTile testid="headroom" label="Headroom at analysis" value={n.headNow} unit="kt"
           tone={n.headNow == null ? null : (n.headNow <= 0 ? "var(--neg)" : n.headNow < 20 ? "var(--warn)" : "var(--text-1)")}
           sub="ocean ceiling less intensity" />
       </div>
       <div style={{ background: "var(--surface-card)" }}>
-        <RTile testid="limiting" label="Limiting now" value={limLabel(n.limNow)} sub="binding constraint" />
+        <RTile testid="limiting" label="Limiting at analysis" value={limLabel(n.limNow)} sub="binding constraint" />
       </div>
       <div style={{ background: "var(--surface-card)" }}>
         <RTile testid="limiting-end" label="Limiting later" value={limLabel(n.limEnd)} sub="at the last measured lead" />
       </div>
       <div style={{ background: "var(--surface-card)" }}>
-        <RTile testid="closes" label="Runway closes" value={n.close == null ? null : (n.close === 0 ? "NOW" : "+" + n.close + "h")}
+        <RTile testid="closes" label="Runway closes" value={n.close == null ? null : (n.close === 0 ? "AT ANALYSIS" : "+" + n.close + "h")}
           tone={n.close == null ? null : "var(--warn)"}
           sub={n.close == null ? "not inside the window" : "worst band reached"} />
       </div>
@@ -159,6 +159,12 @@ function RunwayTable({ R, compact }) {
               column should see the binding constraint, not the ocean heat content it was derived
               from. The dropped columns are named rather than silently missing. */}
           {compact ? " · valid time, OHC and MPI withheld at this width" : ""}
+          {/* The analysis instant, always, at every width. The ANALYSIS row's own VALID cell
+              carries it too, but that column is the first thing dropped when the table narrows,
+              and the one number a reader must not have to infer is WHEN this analysis was. */}
+          {R.samples[0] && R.samples[0].validIso
+            ? " · ANALYSIS is " + rFmtZ(R.samples[0].validIso) + ", the SHIPS cycle — not the board's clock"
+            : ""}
         </caption>
         <thead><tr>
           {th("LEAD", "left")}{compact ? null : th("VALID", "left")}{th("TYPE", "left")}
@@ -170,7 +176,11 @@ function RunwayTable({ R, compact }) {
             const measured = !!s.limiting;
             return (
               <tr key={s.hr} data-runway-lead={s.hr} data-runway-measured={measured ? "1" : "0"}>
-                {td(s.hr === 0 ? "NOW" : "+" + s.hr + "h", "lead", "var(--text-1)", "left")}
+                {/* ANALYSIS, never NOW. Tau 0 is the SHIPS cycle's own analysis time, which is up
+                    to six hours behind the terminal's clock — the board can read 18Z over a 12Z
+                    SHIPS run. "NOW" invites a reader to take a six-hour-old analysis for the
+                    current state of the storm; the valid time beside it is the actual instant. */}
+                {td(s.hr === 0 ? "ANALYSIS" : "+" + s.hr + "h", "lead", "var(--text-1)", "left")}
                 {compact ? null : td(s.validIso ? rFmtZ(s.validIso) : null, "valid", "var(--text-2)", "left")}
                 {td(s.type, "type", s.tropical === false ? "var(--warn)" : "var(--text-2)", "left")}
                 {cell(s, "shearKt", 0)}

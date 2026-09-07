@@ -80,6 +80,43 @@ fingerprint, not a cycle id: an a-deck keeps gaining late-arriving members for h
 cycle time, so a frame keeps its geometry only while every scalar it recorded still matches the
 deck in hand. At live every part of the panel reads from that one deck.
 
+### The genesis anchor for the analog prior
+
+The analog prior is genesis-conditioned — its whole claim is "for a system that formed HERE, in
+this season, what did the ones like it go on to do?" — so the position it queries on must be a
+**genesis** position. It looks that up in the archive's `genesis_events`, which is IBTrACS-derived
+and therefore carries no storm that is still running. Every live system fell through to its
+**current** position, silently, and was matched on where it had drifted to.
+
+On the snapshot that exposed this, all three live east-Pacific storms were being queried
+2,500–4,700 km from where they formed, and all three returned zero analogs — the archive honestly
+declining a cell where almost nothing forms. The dangerous case is the one that is *not* zero: a
+storm drifting into a genesis-rich cell would publish a confident rate for the wrong cohort, under
+the archive's name, with every other gate still green.
+
+There are now exactly three anchors, and only one of them is where the storm is now:
+
+| `position.which` | what it is | when |
+|---|---|---|
+| `genesis` | the archive's own genesis event | a storm the archive carries |
+| `genesis_operational` | the ATCF b-deck's **first tropical fix** | a live storm the archive does not carry yet |
+| `current` | the system's present cell | **only** a system that has not formed — an invest or an outlook area |
+
+A **formed** storm with no genesis fix from either source is **refused**, not matched on where it
+is. `scripts/genesis/sources/atcf_btk.py` supplies the operational fix using the archive's own
+definition of genesis — the first *tropical* point, not the first row of the deck, which routinely
+opens with `DB` disturbance rows days earlier and in a different month. The two vocabularies live
+in one stdlib-only module (`scripts/genesis/status.py`) so they cannot drift apart.
+
+The season window follows the same rule: a storm that formed in August and is still alive in
+September is matched against **August**-genesis cohorts. Using the run's month was the same error
+in the other dimension.
+
+This changes **where the archive is asked**, never what it answers. Every case, weight, rate and
+interval is still the archive's own, and `position_used` on each entry declares which anchor was
+used. `check-panel-dom` asserts the invariant against the payload rather than the rendered label,
+because a corrected caption over an uncorrected query would be worse than the original defect.
+
 ### The environmental runway
 
 The advisory says what NHC thinks the storm will do; the guidance envelope says how much the
@@ -92,6 +129,10 @@ models disagree about it. Neither says what the storm is *flying through*. SHIPS
   The runway carries both, and only calls itself "along the NHC forecast track" when that aid is
   the official forecast or its interpolated form. Nothing is interpolated between SHIPS' leads and
   nothing is extrapolated past them — where the product stops, the runway stops, as null.
+* **ANALYSIS, not "now".** SHIPS' tau 0 is the *cycle's* analysis time, which is up to six hours
+  behind the board's clock — a 12Z run is still current at 18Z. Every runway surface names that
+  sample `ANALYSIS`, prints its valid time beside it, and says "closes at analysis" rather than
+  "closes now", so a six-hour-old analysis cannot be read as the storm's present state.
 * **Headroom** is the ocean's maximum potential intensity less the intensity in hand: the observed
   intensity at analysis time, SHIPS' own forecast intensity thereafter. It states what it
   subtracted, and it goes *negative* for a storm already above what its environment supports.

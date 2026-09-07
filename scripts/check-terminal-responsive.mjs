@@ -357,6 +357,22 @@ async function selectStorm(id) {
   await page.waitForFunction(() => document.querySelector("[data-guidance-strip]"), { timeout: 20000 });
   await page.waitForTimeout(400);
 }
+/* scrollIntoView puts the target's top at the VIEWPORT's top, which is underneath the sticky
+   header — so the card masthead (storm, cycle, any as-of state) lands behind it and never
+   reaches the screenshot. These images are a deliverable, so the scroll backs off by whatever
+   the header actually measures rather than by a guessed constant. */
+async function scrollPanelIntoView(sel) {
+  await page.evaluate((s) => {
+    const p = document.querySelector(s);
+    if (!p) return;
+    p.scrollIntoView({ block: "start" });
+    const hdr = document.querySelector("header");
+    const h = hdr ? Math.ceil(hdr.getBoundingClientRect().height) : 0;
+    if (h) window.scrollBy(0, -(h + 10));
+  }, sel);
+  await page.waitForTimeout(250);
+}
+
 async function openTab(name) {
   await page.evaluate((n) => { const t = [...document.querySelectorAll('[role="tab"]')].find((x) => x.textContent.trim() === n); if (t) t.click(); }, name);
   await page.waitForTimeout(400);
@@ -404,8 +420,7 @@ for (const W of WIDTHS) {
     await page.evaluate(() => { const p = document.querySelector("[data-guidance-panel]"); if (p) p.scrollIntoView({ block: "start" }); });
     await page.waitForTimeout(200);
     await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-guidance.png`), fullPage: false });
-    await page.evaluate(() => { const p = document.querySelector("[data-runway-panel]"); if (p) p.scrollIntoView({ block: "start" }); });
-    await page.waitForTimeout(200);
+    await scrollPanelIntoView("[data-runway-panel]");
     await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-runway.png`), fullPage: false });
   }
   /* The null state: the storm without a deck, on the all-systems panel. */
@@ -488,6 +503,8 @@ for (const W of WIDTHS) {
       headroom: tileVal("headroom"),
       limiting: tileVal("limiting"),
       closes: tileVal("closes"),
+      leadCells: st ? [...st.querySelectorAll("[data-runway-lead]")].map((r) => r.firstElementChild.textContent.trim()) : [],
+      tileLabels: st ? [...st.querySelectorAll("[data-runway-tile]")].map((t) => t.firstElementChild.textContent.trim()) : [],
       stripAsOf: !!document.querySelector("[data-runway-strip-asof]"),
       stripAbsent: !!document.querySelector("[data-runway-strip] [data-runway-detail-absent]"),
       text: st ? st.textContent.replace(/\s+/g, " ") : "",
@@ -516,6 +533,22 @@ for (const W of WIDTHS) {
     /\d/.test(liveR.headroom || "") && /[A-Z]/.test(liveR.limiting || ""),
     JSON.stringify({ headroom: liveR.headroom, limiting: liveR.limiting }));
   ok("RUNWAY 1 · LIVE shows no as-of state", !liveR.absent && !liveR.stripAsOf);
+  /* ANALYSIS, NEVER "NOW". SHIPS' tau 0 is the cycle's analysis time, up to six hours behind
+     the board's clock — the board reads 18Z over a 12Z run. "NOW" would invite a reader to take
+     a six-hour-old analysis for the storm's present state. */
+  ok("RUNWAY 1 · the analysis lead is labelled ANALYSIS, never NOW",
+    liveR.leadCells[0] === "ANALYSIS", JSON.stringify(liveR.leadCells));
+  ok("RUNWAY 1 · no lead cell anywhere says NOW",
+    liveR.leadCells.every((c) => !/\bNOW\b/.test(c)), JSON.stringify(liveR.leadCells));
+  ok("RUNWAY 1 · no synthesis tile label says 'now'",
+    liveR.tileLabels.every((t) => !/\bnow\b/i.test(t)), JSON.stringify(liveR.tileLabels));
+  ok("RUNWAY 1 · a runway that is already closed says AT ANALYSIS, not NOW",
+    liveR.closes == null || !/\bNOW\b/.test(liveR.closes), String(liveR.closes));
+  /* And the instant itself stays on screen at every width, including the ones that drop the
+     VALID column — the one number a reader must never have to infer is WHEN this analysis was. */
+  ok("RUNWAY 1 · the analysis instant is stated on screen, and named as the SHIPS cycle rather than the board's clock",
+    /ANALYSIS is .*Z/.test(liveR.text) && /not the board's clock/.test(liveR.text),
+    (liveR.text.match(/ANALYSIS is [^·]*/) || ["(absent)"])[0]);
   /* The archive holds these five fields AT GENESIS. This storm is days past it, so the only
      honest state is the refusal — and it must be on screen in as many words, never silently
      omitted and never quietly upgraded to an offer. */
@@ -561,8 +594,7 @@ for (const W of WIDTHS) {
     await page.evaluate(() => { const p = document.querySelector("[data-guidance-panel]"); if (p) p.scrollIntoView({ block: "start" }); });
     await page.waitForTimeout(200);
     await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-guidance-asof.png`), fullPage: false });
-    await page.evaluate(() => { const p = document.querySelector("[data-runway-panel]"); if (p) p.scrollIntoView({ block: "start" }); });
-    await page.waitForTimeout(200);
+    await scrollPanelIntoView("[data-runway-panel]");
     await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-runway-asof.png`), fullPage: false });
   }
 

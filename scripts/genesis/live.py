@@ -24,6 +24,7 @@ and does not exist yet.
 
 from __future__ import annotations
 
+from .sources.atcf_btk import fetch_first_fix
 from .provenance import ARCHIVE_DIR
 from .retrieval.analogs import get_analogs, format_position
 from .sources import ships_rt
@@ -72,6 +73,55 @@ def genesis_position(atcf_id: str, *, archive_dir=None):
     return None
 
 
+def anchor_position(atcf_id: str, *, is_invest: bool, current, archive_dir=None,
+                    btk_text: str | None = None):
+    """WHERE the genesis-conditioned query is asked, and by what authority.
+
+    The prior's claim is "for a system that formed HERE". So the anchor must be a GENESIS
+    position, and there are exactly three honest answers:
+
+      'genesis'              the archive's own genesis event. Historical storms.
+      'genesis_operational'  the b-deck's first best-track fix. Live storms, which the
+                             IBTrACS-derived archive does not carry yet.
+      'current'              the system has not formed, so there is no genesis to use and its
+                             present position IS the candidate cell. INVESTS AND OUTLOOK AREAS
+                             ONLY.
+
+    A FORMED STORM WITH NO GENESIS FIX GETS NONE OF THEM. It returns None, and the caller
+    refuses, because the remaining option -- matching a named storm on where it has drifted to
+    -- answers a different question under this question's name. That was the live behaviour
+    this function replaces: three east-Pacific storms matched 2,500-4,700 km from where they
+    formed. They returned zero cases, which looked like an empty archive and was actually the
+    archive declining a cell where nothing forms. Had any of them drifted into a genesis-rich
+    cell instead, the panel would have published a confident rate for the wrong cohort.
+
+    Returns (lat, lon, which) or None.
+    """
+    arch = genesis_position(atcf_id, archive_dir=archive_dir)
+    if arch:
+        return {"lat": arch[0], "lon": arch[1], "which": "genesis",
+                "month": _genesis_month(atcf_id, archive_dir=archive_dir)}
+    fix = fetch_first_fix(atcf_id, text=btk_text)
+    if fix and fix.get("lat") is not None and fix.get("lon") is not None:
+        return {"lat": fix["lat"], "lon": fix["lon"], "which": "genesis_operational",
+                "month": fix.get("month")}
+    if is_invest:
+        # Nothing has formed. The invest's position is the cell being asked about, not a
+        # stand-in for a genesis it does not have, and the current month is the right season
+        # window for "if something forms here now".
+        return {"lat": current[0], "lon": current[1], "which": "current", "month": None}
+    return None
+
+
+def _genesis_month(atcf_id: str, *, archive_dir=None):
+    """The calendar month the archive says this system became tropical, or None."""
+    base = archive_dir or ARCHIVE_DIR
+    for g in read_table("genesis_events", base).to_pylist():
+        if g.get("atcf_id") == atcf_id and g.get("genesis_utc") is not None:
+            return g["genesis_utc"].month
+    return None
+
+
 def analogs_for_live_system(atcf_id: str, *, radius_km: float = 500.0,
                             season_window: int = 1, min_sample: int = 10,
                             archive_dir=None, use_environment: bool = True,
@@ -85,13 +135,26 @@ def analogs_for_live_system(atcf_id: str, *, radius_km: float = 500.0,
                       "note": ("SHIPS runs per ATCF system; an outlook area with no number "
                                "yet has none. Query by position instead.")}
 
-    pos = genesis_position(atcf_id, archive_dir=base)
-    if pos:
-        lat, lon, which = pos
-    else:
-        lat, lon, which = live["lat"], live["lon"], "current"
+    pos = anchor_position(atcf_id, is_invest=bool(live["is_invest"]),
+                          current=(live["lat"], live["lon"]), archive_dir=base,
+                          btk_text=kw.pop("btk_text", None))
+    if pos is None:
+        return None, {
+            "atcf_id": atcf_id,
+            "error": "no genesis position for a formed system",
+            "note": ("This prior is genesis-conditioned, and neither the archive nor the "
+                     "operational b-deck carries a genesis fix for this system. Matching it on "
+                     "its current position would answer a different question under this "
+                     "question's name, so no cohort is drawn."),
+            "current_position": (live["lat"], live["lon"]),
+        }
+    lat, lon, which = pos["lat"], pos["lon"], pos["which"]
 
-    month = live["run_utc"].month
+    # THE SEASON WINDOW BELONGS TO GENESIS TOO. A storm that formed in August and is still
+    # alive in September was being matched against SEPTEMBER-genesis cohorts, which is the
+    # same error as matching it on its current position, in the other dimension. The run's
+    # month is right only for a system that has not formed, where "now" IS the question.
+    month = pos["month"] or live["run_utc"].month
     months = sorted({((month - 1 + d) % 12) + 1
                      for d in range(-season_window, season_window + 1)})
     res = get_analogs(lat=lat, lon=lon, radius_km=radius_km, season_months=months,
@@ -105,6 +168,7 @@ def analogs_for_live_system(atcf_id: str, *, radius_km: float = 500.0,
         "is_invest": live["is_invest"],
         "position_used": which,
         "position": (lat, lon),
+        "position_month": month,
         "current_position": (live["lat"], live["lon"]),
         "env_vector": live["env_vector"],
         "caveat": ("the env_vector is OPERATIONAL SHIPS; the pool it matches is DEVELOPMENTAL "
@@ -121,7 +185,7 @@ def describe_live(res, ctx) -> str:
         f"{'  [INVEST]' if ctx['is_invest'] else ''}",
         f"  position used: {format_position(*ctx['position'])}  ({ctx['position_used']})",
     ]
-    if ctx["position_used"] == "genesis":
+    if ctx["position_used"] in ("genesis", "genesis_operational"):
         head.append(f"  current position {format_position(*ctx['current_position'])} is NOT "
                     "queried -- matching is on genesis location")
     head.append("  env_vector: " + ", ".join(f"{k}={v:g}" for k, v in ctx["env_vector"].items()))

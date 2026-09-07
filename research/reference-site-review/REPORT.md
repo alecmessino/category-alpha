@@ -317,6 +317,43 @@ so the guard cannot quietly become vacuous.
 
 6.3 KB per storm in `latest.json`; 131 bytes per storm per frame. No new network request.
 
+### Two semantic defects the screenshots caught
+
+Rendering the runway exposed two things that reading the code had not.
+
+**1. `NOW` was a lie by six hours.** SHIPS' tau 0 is the *cycle's* analysis time. A 12Z run is
+still the current run at 18Z, so a lead column reading `NOW` invited a reader to take a six-hour-old
+analysis for the storm's present state. Every runway surface now says `ANALYSIS`, the synthesis
+reads `RUNWAY CLOSES · AT ANALYSIS` and `HEADROOM AT ANALYSIS`, and the table caption carries the
+instant itself — "ANALYSIS is 07 Sep 12:00Z, the SHIPS cycle — not the board's clock" — at every
+width, including the ones that drop the VALID column. Gated at all five widths: the analysis lead
+is labelled `ANALYSIS`, no lead cell or tile label anywhere says "now", and the instant is on screen.
+
+**2. The genesis-conditioned prior was anchored on the current position.** Pre-existing on `main`
+and fixed here. `genesis_position` read the archive's `genesis_events`, which is IBTrACS-derived
+and carries no running storm, and the fallback was the storm's current position — silently. All
+three live systems were being queried 2,500–4,700 km from where they formed:
+
+| storm | formed | queried (before) | now queried | matched |
+|---|---|---|---|---|
+| EP112026 | 10.8N 111.5W | 23.0N 145.7W | 10.8N 111.5W | 0 → **65** |
+| EP122026 | 11.2N 134.0W | 18.0N 162.2W | 11.2N 134.0W | 0 → **23** |
+| EP132026 | 14.1N 108.1W | 24.6N 124.9W | 14.1N 108.1W | 0 → **133** |
+
+The zeros were the archive being honest about a question nobody meant to ask — almost nothing
+*forms* at 23N 145.7W. The dangerous version is the one that is not zero. The fix adds an
+operational genesis fix from the ATCF b-deck, using the archive's own definition of genesis (the
+first **tropical** point, not the deck's first row, which opens with `DB` disturbances days earlier
+and in a different month); anchors the season window on the genesis month rather than the run's;
+and **refuses** a formed storm with no genesis fix rather than matching it on where it drifted to.
+`current` now belongs only to a system that has not formed.
+
+The panel went from refusing every rate to publishing intervals over real cohorts. The gate asserts
+the invariant against the **payload**, not the rendered label: a corrected caption over an
+uncorrected query would be worse than the defect it replaced. Verified by reintroducing the defect
+— the gate names all three storms and fails.
+
+
 ### Next five, revised
 
 1. **Contract lens** — one row per contract with MARKET PRICE · OFFICIAL FORECAST · ATLAS RATE ·

@@ -772,7 +772,8 @@
      Every claim here exists to keep a band a band. The runway describes an environment; it
      does not forecast an outcome, and no number it publishes is a likelihood of one. */
   define("runway.semantics", "ships", () => ({
-    text: "The environment SHIPS sampled along the NHC forecast track, at the leads SHIPS publishes. "
+    text: "The environment SHIPS sampled along the NHC forecast track, at the leads SHIPS publishes, from ANALYSIS "
+        + "— the cycle's own analysis time, not the board's clock — out to +120 h. "
         + "Bands are cut points on a measured value at stated thresholds — a word, never a probability — and headroom is "
         + "the ocean's maximum potential intensity less the intensity in hand. Nothing here enters a price on this board.",
     ok: true,
@@ -801,7 +802,8 @@
   }));
   define("note.runway", "ships", () => ({
     text: "Headroom is the ocean's ceiling less the intensity in hand. The limiting field is whichever of shear, mid-level humidity, "
-        + "sea-surface temperature and ocean heat content sits in the worst band at that lead. Both are measurements, not forecasts of an outcome.",
+        + "sea-surface temperature and ocean heat content sits in the worst band at that lead. Both are measurements, not forecasts of an outcome. "
+        + "ANALYSIS is the SHIPS cycle's own analysis time — up to six hours behind the board's clock — not the storm's present state.",
     ok: true,
   }));
   define("guidance.semantics", "atcf", () => ({
@@ -958,19 +960,38 @@
     const a = analogsPayload();
     const e = (a && a.entries) || [];
     if (!e.length) return { text: "no system or outlook area was matched this cycle", ok: false };
-    const gen = e.filter((x) => x.position && x.position.which === "genesis").length;
+    /* Both genesis anchors count: the archive's own event, and the b-deck's first tropical
+       fix for a live storm the archive does not carry yet. Counting only the first understated
+       this while the live path was silently falling through to current position. */
+    const gen = e.filter((x) => x.position && (x.position.which === "genesis" || x.position.which === "genesis_operational")).length;
     return {
-      short: "Matched on the archived GENESIS position: this system's CURRENT position was NOT queried"
+      /* "GENESIS position", not "archived genesis position". The anchor is the archive's own
+         event for a historical storm and the b-deck's first tropical fix for a live one, and
+         the entry that used the second was reading a lead sentence that contradicted the
+         sentence beneath it. */
+      short: "Matched on the GENESIS position: this system's CURRENT position was NOT queried"
            + " — matching is on where a storm formed, and a query at where one is now returns few analogs or none.",
-      text: "Matched on the archived GENESIS position: this system's CURRENT position was NOT queried."
+      text: "Matched on the GENESIS position: this system's CURRENT position was NOT queried."
           + " Matching is on where a storm formed, and a query at where one is now returns few analogs"
           + " or none, because systems arrive at those latitudes rather than form there. Both positions"
           + " are shown so the difference is visible. " + gen + " of " + e.length + " entr"
-          + (e.length === 1 ? "y" : "ies") + " on this panel were matched that way; the rest are outlook"
-          + " areas with no track yet, for which the area's own position is the genesis position.",
+          + (e.length === 1 ? "y" : "ies") + " on this panel were matched that way; the rest are systems"
+          + " that have NOT formed — an outlook area or an invest — for which the present position is"
+          + " the cell being asked about rather than a stand-in for a genesis it does not have."
+          + " A formed storm with no genesis fix is refused, never matched on where it drifted to.",
       ok: true,
     };
   });
+
+  /* The operational genesis anchor: same question, a source the archive cannot supply yet. */
+  define("analogs.genesisOperational", "genesis", () => ({
+    text: "This system's genesis fix is the NHC ATCF b-deck's first TROPICAL point, not the archive's — "
+        + "the archive is IBTrACS-derived and does not carry a storm still running. It is the archive's own "
+        + "definition of genesis applied to the operational record, so the anchor and the cohort mean the same "
+        + "thing by it. The fix chooses WHERE the archive is asked; every case, weight, rate and interval "
+        + "returned is still the archive's own.",
+    ok: true,
+  }));
 
   /* Kish ESS, and the rule that the gate is never applied to it. */
   define("analogs.sample", "genesis", () => {

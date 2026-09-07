@@ -45,7 +45,11 @@
  */
 
 /* The leads an operator reads. Every one is a tau SHIPS actually publishes, so nothing here
-   is interpolated: NOW plus each of the five forecast days. */
+   is interpolated: the ANALYSIS time plus each of the five forecast days.
+
+   Tau 0 is the SHIPS CYCLE'S analysis, not the board's clock. A 12Z run is still the current
+   run at 18Z, so calling tau 0 "now" would invite a reader to take a six-hour-old analysis for
+   the storm's present state. Every surface names it ANALYSIS and prints its valid time. */
 export const LEADS = [0, 24, 48, 72, 96, 120];
 
 /* ---------------------------------------------------------------------------------------
@@ -304,7 +308,8 @@ export function runwayFrom(ships, opts = {}) {
          exist, which is the null-becoming-zero failure this build refuses everywhere else.
          The environmental rows are the honest witness: where they stop, the ledger stops. */
       attribution: limiting ? attributionAt(ships.attribution, hr) : null,
-      observed: hr === 0,
+      /* The analysis sample: SHIPS' own tau 0, valid at `validIso` above, not "now". */
+      analysis: hr === 0,
     });
   }
 

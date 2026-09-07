@@ -679,7 +679,7 @@ function MillibarTerminalApp() {
         <window.MT_Section label="Environmental runway" tier="SHIPS · shear, humidity, sea surface, ocean heat · headroom and the binding constraint · not a probability"
           defaultOpen summary={S && S.runway
             ? ((S.runway.summary.headroomNowKt == null ? "headroom —" : "headroom " + S.runway.summary.headroomNowKt + " kt")
-               + (S.runway.summary.closesAtHr == null ? " · runway open through the window" : " · closes " + (S.runway.summary.closesAtHr === 0 ? "now" : "+" + S.runway.summary.closesAtHr + "h")))
+               + (S.runway.summary.closesAtHr == null ? " · runway open through the window" : " · closes " + (S.runway.summary.closesAtHr === 0 ? "at analysis" : "+" + S.runway.summary.closesAtHr + "h")))
             : (stormIds.filter((id) => MT.storms[id].runway).length + " system(s) with a SHIPS runway")}>
           <window.MT_Runway stormId={storm} frame={frame} narrow={narrow} />
         </window.MT_Section>
