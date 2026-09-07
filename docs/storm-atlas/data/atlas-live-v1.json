@@ -1,6 +1,6 @@
 {
   "schema": "atlas-live-v1",
-  "generated_at": "2026-09-07T18:54:56.187Z",
+  "generated_at": "2026-09-07T21:03:32.412Z",
   "source": {
     "name": "NHC ATCF b-deck (best track)",
     "url": "https://ftp.nhc.noaa.gov/atcf/btk/",
@@ -59,10 +59,10 @@
       "season": 2026,
       "basin": "EP",
       "name": "MARIE",
-      "fetched_at": "2026-09-07T18:54:56.187Z",
+      "fetched_at": "2026-09-07T21:03:32.412Z",
       "first_valid_time": "2026-08-29T18:00:00.000Z",
       "latest_valid_time": "2026-09-07T18:00:00.000Z",
-      "age_hours": 0.9,
+      "age_hours": 3.1,
       "fix_count": 37,
       "fixes": [
         {
@@ -382,9 +382,9 @@
         "source": "ships_rt",
         "product": "NHC operational SHIPS (stext)",
         "tau": 0,
-        "valid_time": "2026-09-07T12:00:00.000Z",
-        "fetched_at": "2026-09-07T18:54:56.187Z",
-        "age_hours": 6.9,
+        "valid_time": "2026-09-07T18:00:00.000Z",
+        "fetched_at": "2026-09-07T21:03:32.412Z",
+        "age_hours": 3.1,
         "lat": null,
         "lon": null,
         "availability": {
@@ -393,43 +393,87 @@
         },
         "fields": {
           "shearKt": {
-            "value": 10,
+            "value": 11,
             "label": "850-200 mb deep-layer shear"
           },
           "shearAdjKt": {
-            "value": 3,
+            "value": 4,
             "label": "shear adjusted for storm motion"
           },
+          "shearDirDeg": {
+            "value": 321,
+            "label": "direction the deep-layer shear vector points toward"
+          },
           "sstC": {
-            "value": 24.3,
+            "value": 24.2,
             "label": "sea-surface temperature"
           },
           "mpiKt": {
-            "value": 104,
+            "value": 103,
             "label": "maximum potential intensity the ocean supports"
           },
           "rhMid": {
-            "value": 41,
+            "value": 38,
             "label": "mid-level relative humidity"
+          },
+          "thetaEDevC": {
+            "value": 1,
+            "label": "theta-e deviation from moist adiabatic — low is a dry, stable column"
           },
           "ohc": {
             "value": 0,
             "label": "ocean heat content (kJ/cm2)"
           },
           "landKm": {
-            "value": 979,
+            "value": 1049,
             "label": "distance to land"
           },
+          "stmSpeedKt": {
+            "value": 7,
+            "label": "forecast translation speed"
+          },
+          "latN": {
+            "value": 24.6,
+            "label": "forecast latitude on the track SHIPS was run along"
+          },
+          "lonW": {
+            "value": 124.9,
+            "label": "forecast longitude west on the track SHIPS was run along"
+          },
+          "t200C": {
+            "value": -49.6,
+            "label": "200 mb temperature"
+          },
+          "div200": {
+            "value": -21,
+            "label": "200 mb divergence (10^7 s-1)"
+          },
+          "envVor850": {
+            "value": 56,
+            "label": "850 mb environmental relative vorticity"
+          },
+          "tadv700850": {
+            "value": 4,
+            "label": "700-850 mb temperature advection"
+          },
+          "modelVtxKt": {
+            "value": 26,
+            "label": "the model's own vortex strength"
+          },
           "vNoLandKt": {
-            "value": 55,
+            "value": 50,
             "label": "SHIPS intensity forecast, no land interaction"
           },
+          "vLandKt": {
+            "value": 50,
+            "label": "SHIPS intensity forecast with land interaction"
+          },
           "vLgemKt": {
-            "value": 55,
+            "value": 50,
             "label": "LGEM intensity forecast"
           }
         },
-        "field_count": 9,
+        "field_count": 20,
         "not_comparable_with": "ships_dev",
         "note": "Operational SHIPS, not the developmental SHIPS archive. The two are sequential eras measured differently and are never pooled, differenced or compared as one instrument."
       },
@@ -448,10 +492,10 @@
       "season": 2026,
       "basin": "EP",
       "name": "LOWELL",
-      "fetched_at": "2026-09-07T18:54:56.187Z",
+      "fetched_at": "2026-09-07T21:03:32.412Z",
       "first_valid_time": "2026-08-25T18:00:00.000Z",
       "latest_valid_time": "2026-09-07T18:00:00.000Z",
-      "age_hours": 0.9,
+      "age_hours": 3.1,
       "fix_count": 53,
       "fixes": [
         {
@@ -899,9 +943,9 @@
         "source": "ships_rt",
         "product": "NHC operational SHIPS (stext)",
         "tau": 0,
-        "valid_time": "2026-09-07T12:00:00.000Z",
-        "fetched_at": "2026-09-07T18:54:56.187Z",
-        "age_hours": 6.9,
+        "valid_time": "2026-09-07T18:00:00.000Z",
+        "fetched_at": "2026-09-07T21:03:32.412Z",
+        "age_hours": 3.1,
         "lat": null,
         "lon": null,
         "availability": {
@@ -914,39 +958,83 @@
             "label": "850-200 mb deep-layer shear"
           },
           "shearAdjKt": {
-            "value": 5,
+            "value": 8,
             "label": "shear adjusted for storm motion"
           },
+          "shearDirDeg": {
+            "value": 233,
+            "label": "direction the deep-layer shear vector points toward"
+          },
           "sstC": {
-            "value": 27.8,
+            "value": 27.9,
             "label": "sea-surface temperature"
           },
           "mpiKt": {
-            "value": 142,
+            "value": 144,
             "label": "maximum potential intensity the ocean supports"
           },
           "rhMid": {
             "value": 58,
             "label": "mid-level relative humidity"
           },
+          "thetaEDevC": {
+            "value": 8,
+            "label": "theta-e deviation from moist adiabatic — low is a dry, stable column"
+          },
           "ohc": {
-            "value": 23,
+            "value": 27,
             "label": "ocean heat content (kJ/cm2)"
           },
           "landKm": {
-            "value": 602,
+            "value": 470,
             "label": "distance to land"
           },
+          "stmSpeedKt": {
+            "value": 13,
+            "label": "forecast translation speed"
+          },
+          "latN": {
+            "value": 18,
+            "label": "forecast latitude on the track SHIPS was run along"
+          },
+          "lonW": {
+            "value": 162.2,
+            "label": "forecast longitude west on the track SHIPS was run along"
+          },
+          "t200C": {
+            "value": -50,
+            "label": "200 mb temperature"
+          },
+          "div200": {
+            "value": 37,
+            "label": "200 mb divergence (10^7 s-1)"
+          },
+          "envVor850": {
+            "value": 138,
+            "label": "850 mb environmental relative vorticity"
+          },
+          "tadv700850": {
+            "value": 11,
+            "label": "700-850 mb temperature advection"
+          },
+          "modelVtxKt": {
+            "value": 36,
+            "label": "the model's own vortex strength"
+          },
           "vNoLandKt": {
-            "value": 100,
+            "value": 95,
             "label": "SHIPS intensity forecast, no land interaction"
           },
+          "vLandKt": {
+            "value": 95,
+            "label": "SHIPS intensity forecast with land interaction"
+          },
           "vLgemKt": {
-            "value": 100,
+            "value": 95,
             "label": "LGEM intensity forecast"
           }
         },
-        "field_count": 9,
+        "field_count": 20,
         "not_comparable_with": "ships_dev",
         "note": "Operational SHIPS, not the developmental SHIPS archive. The two are sequential eras measured differently and are never pooled, differenced or compared as one instrument."
       },
@@ -968,7 +1056,7 @@
       "fetched_at": "2026-09-07T07:34:38.680Z",
       "first_valid_time": "2026-08-25T00:00:00.000Z",
       "latest_valid_time": "2026-09-07T00:00:00.000Z",
-      "age_hours": 18.9,
+      "age_hours": 21.1,
       "fix_count": 53,
       "fixes": [
         {
@@ -1485,7 +1573,7 @@
       "fetched_at": "2026-09-03T15:34:05.957Z",
       "first_valid_time": "2026-08-28T18:00:00.000Z",
       "latest_valid_time": "2026-09-03T06:00:00.000Z",
-      "age_hours": 108.9,
+      "age_hours": 111.1,
       "fix_count": 23,
       "fixes": [
         {
@@ -1762,7 +1850,7 @@
       "fetched_at": "2026-08-28T21:48:13.203Z",
       "first_valid_time": "2026-08-24T00:00:00.000Z",
       "latest_valid_time": "2026-08-28T18:00:00.000Z",
-      "age_hours": 240.9,
+      "age_hours": 243.1,
       "fix_count": 20,
       "fixes": [
         {
@@ -2015,7 +2103,7 @@
       "fetched_at": "2026-08-28T15:48:18.264Z",
       "first_valid_time": "2026-08-10T00:00:00.000Z",
       "latest_valid_time": "2026-08-28T06:00:00.000Z",
-      "age_hours": 252.9,
+      "age_hours": 255.1,
       "fix_count": 74,
       "fixes": [
         {
@@ -2700,7 +2788,7 @@
       "fetched_at": "2026-08-27T03:10:09.299Z",
       "first_valid_time": "2026-08-21T12:00:00.000Z",
       "latest_valid_time": "2026-08-27T00:00:00.000Z",
-      "age_hours": 282.9,
+      "age_hours": 285.1,
       "fix_count": 23,
       "fixes": [
         {
@@ -2977,7 +3065,7 @@
       "fetched_at": "2026-08-26T05:17:22.975Z",
       "first_valid_time": "2026-08-20T00:00:00.000Z",
       "latest_valid_time": "2026-08-25T18:00:00.000Z",
-      "age_hours": 312.9,
+      "age_hours": 315.1,
       "fix_count": 24,
       "fixes": [
         {
@@ -3262,7 +3350,7 @@
       "fetched_at": "2026-08-25T15:43:45.983Z",
       "first_valid_time": "2026-08-18T12:00:00.000Z",
       "latest_valid_time": "2026-08-25T06:00:00.000Z",
-      "age_hours": 324.9,
+      "age_hours": 327.1,
       "fix_count": 28,
       "fixes": [
         {
