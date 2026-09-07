@@ -199,6 +199,9 @@
        of them can do a great deal. */
     if (sig.kind === "recon") return (a >= 5 || sig.crossedKt != null) ? "trade-relevant" : "material";
     if (sig.kind === "consensus") return (a >= 10 || sig.crossedKt != null) ? "trade-relevant" : a >= 3 ? "material" : "cosmetic";
+    /* A guidance cycle is material when the spread moved by a third or the scenario count
+       changed; it is never trade-relevant on its own, because nothing in it is priced. */
+    if (sig.kind === "guidance") return (sig.magnitude >= 0.66) ? "material" : "cosmetic";
     if (sig.kind === "probability") return a >= 10 ? "trade-relevant" : a >= 3 ? "material" : "cosmetic";
     /* SHIPS and the scatterometer inform the estimate; neither reprices anything on its
        own, and SHIPS explicitly does not score until it is claimed. Material at most. */
@@ -224,6 +227,7 @@
     if (sig.kind === "recon") return 1;
     if (sig.kind === "advisory") return 0.95;
     if (sig.kind === "consensus") return 0.9;   // the deck is authoritative about what the aids said
+    if (sig.kind === "guidance") return 0.9;    // same deck, same authority
     if (sig.kind === "ships") return 0.9;
     if (sig.kind === "ascat") return 0.85;      // objective, but a satellite retrieval with known limits
     if (sig.kind === "probability") return 0.85; // derived from the above, never stronger than its inputs
@@ -319,6 +323,33 @@
                   + (cv.conSpread != null ? ` disagreeing by ${cv.conSpread} kt` : "")
                   + (cv.conHr != null ? ` · peak near ${cv.conHr}h` : "")
                   + " — in the deck before the advisory built on it",
+          });
+        }
+
+        /* Priority 1, the rest of the deck — THE GUIDANCE CYCLE. What the models disagree about
+           and how that changed. previous → current → delta, stated, so nobody has to eyeball
+           two model plates. A spread is a distance, a scenario count is a count of clusters;
+           neither is a probability and the label never calls it confidence. */
+        if (cv.gCycle && pv.gCycle && cv.gCycle !== pv.gCycle) {
+          const dT = (cv.gTrack72 != null && pv.gTrack72 != null) ? cv.gTrack72 - pv.gTrack72 : null;
+          const dI = (cv.gInt72 != null && pv.gInt72 != null) ? cv.gInt72 - pv.gInt72 : null;
+          const dS = (cv.gScen72 != null && pv.gScen72 != null) ? cv.gScen72 - pv.gScen72 : null;
+          const pct = dT != null && pv.gTrack72 > 0 ? (dT / pv.gTrack72) * 100 : null;
+          const word = pct == null ? null : pct <= -15 ? "tightened" : pct >= 15 ? "widened" : "held";
+          out.push({
+            tsZ: ts, kind: "guidance", subject: nm, stormId: sid,
+            delta: dT != null ? Math.round(dT) : 0, unit: "km",
+            from: pv.gTrack72, to: cv.gTrack72,
+            magnitude: Math.max(pct != null ? Math.min(1, Math.abs(pct) / 50) : 0.3, dS ? 0.8 : 0),
+            label: `${nm} guidance cycle ${String(cv.gCycle).slice(-2)}Z — 72h track spread `
+                 + (cv.gTrack72 != null ? `${cv.gTrack72} km` : "—")
+                 + (word ? ` (${word}: ${pv.gTrack72} → ${cv.gTrack72} km)` : "")
+                 + (dS ? ` · scenarios ${pv.gScen72} → ${cv.gScen72}` : ""),
+            detail: (cv.gN72 != null ? `${cv.gN72} track members at 72h` : "no members at 72h")
+                  + (cv.gInt72 != null ? ` · intensity spread ${cv.gInt72} kt` + (dI != null && dI !== 0 ? ` (${dI > 0 ? "+" : ""}${dI})` : "") : "")
+                  + (cv.gOfclCon72 != null ? ` · official vs consensus ${cv.gOfclCon72} km at 72h` : "")
+                  + (cv.gPeakMed != null ? ` · members' median peak ${cv.gPeakMed} kt` + (cv.gPeakOfcl != null ? ` vs official ${cv.gPeakOfcl} kt` : "") : "")
+                  + " — raw model guidance, not a probability",
           });
         }
 
@@ -593,7 +624,7 @@
     /* ---- the intel line -------------------------------------------------------
        The strip's job is the 30-second read, and after this build the 30-second read has a new
        first question: has anything landed that the advisory has not caught up to yet? */
-    const ARRIVAL = { recon: "reconnaissance fix", consensus: "guidance cycle", ships: "SHIPS", ascat: "scatterometer pass", probability: "P update" };
+    const ARRIVAL = { recon: "reconnaissance fix", consensus: "guidance cycle", guidance: "guidance envelope", ships: "SHIPS", ascat: "scatterometer pass", probability: "P update" };
     const arrivals = sigs.filter((s) => ARRIVAL[s.kind]);
     const lastArrival = arrivals[0] || null;         // signals are newest-first
     const intel = {
@@ -630,11 +661,26 @@
      actually has. */
   const PRIO_RANK = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 
+  /* The advisory NUMBER is "043a" under a watch or warning: NHC letters the intermediate
+     advisories between the full ones. Number("043a") is NaN, and "Advisory #NaN expected in
+     83 min" reached the attention queue the first time a storm on this board went under a
+     warning. The next FULL advisory after 43A is 44 — the intermediate does not advance the
+     count. */
+  function advisoryOrdinal(advNum) {
+    const m = /^\s*0*(\d+)/.exec(String(advNum == null ? "" : advNum));
+    return m ? Number(m[1]) : null;
+  }
   function nextAdvisory(S) {
     if (!S || !S.advTimeZ) return null;
     const t = Date.parse(S.advTimeZ);
     if (!t) return null;
-    let due = t + 6 * 3600000;                    // full advisories run 03/09/15/21Z
+    /* Full advisories run 03/09/15/21Z. An intermediate lands on 00/06/12/18Z, and the next
+       FULL one is three hours after it, not six — so the next due slot is the first full slot
+       strictly after this advisory's nominal time, whichever kind this one was. */
+    const FULL = [3, 9, 15, 21];
+    let due = Math.floor(t / 3600000) * 3600000 + 3600000;      // the next whole hour
+    let step = 0;
+    while (!FULL.includes(new Date(due).getUTCHours()) && step++ < 6) due += 3600000;
     const now = Date.now();
     // If we are past a slot the feed has not caught up to yet, roll forward rather
     // than reporting a time in the past.
@@ -691,7 +737,7 @@
       const anchored = (MT.contracts || []).some((c) => c.storm === sig.stormId && mdl(c, NF) != null);
       st.assessed = anchored;
       st.why.assessed = anchored ? "a priced contract exists for this storm" : "no anchored contract for this storm";
-    } else if (sig.kind === "consensus" || sig.kind === "probability") {
+    } else if (sig.kind === "consensus" || sig.kind === "probability" || sig.kind === "guidance") {
       /* THE HEAD START, MADE AUDITABLE. A guidance cycle is observed the moment it lands in the
          deck; it is VALIDATED when the advisory built on it arrives and the official product
          catches up. */
@@ -702,8 +748,12 @@
         ? "an advisory has since been issued for this system — the official product has caught up"
         : "no advisory since this landed — the head start is still open";
       const anchored = (MT.contracts || []).some((c) => c.storm === sig.stormId && mdl(c, NF) != null);
-      st.assessed = anchored;
-      st.why.assessed = anchored ? "a priced contract exists for this storm" : "no anchored contract for this storm";
+      /* The envelope is never priced, so it cannot be ASSESSED in this lifecycle's sense even
+         when a contract exists for the storm: a spread is not an input to any anchor here. */
+      st.assessed = sig.kind === "guidance" ? "n/a" : anchored;
+      st.why.assessed = sig.kind === "guidance"
+        ? "raw model guidance enters no price on this board — it is shown beside the anchor, never inside it"
+        : anchored ? "a priced contract exists for this storm" : "no anchored contract for this storm";
     } else if (sig.kind === "ships" || sig.kind === "ascat") {
       st.validated = "n/a";
       st.why.validated = sig.kind === "ships"
@@ -789,7 +839,7 @@
       if (!n || n.inMin > 90 || n.inMin < -20) return;
       push({
         id: "adv:" + S.id, priority: n.inMin <= 30 ? "MEDIUM" : "LOW",
-        title: S.name + " Advisory #" + ((S.advNum ? Number(S.advNum) + 1 : "?")) + " expected in " + Math.max(0, n.inMin) + " min",
+        title: S.name + " Advisory #" + (advisoryOrdinal(S.advNum) != null ? advisoryOrdinal(S.advNum) + 1 : "?") + " expected in " + Math.max(0, n.inMin) + " min",
         detail: "NHC 6-hourly cycle from advisory #" + (S.advNum || "?") + " — scheduled, not observed",
         kind: "schedule", source: "NHC cadence", ageMin: null,
         waitingOn: "NHC issuance",
@@ -1139,6 +1189,6 @@
     return out.sort((a, b) => b.spread - a.spread);
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, lifecycleFor, LIFECYCLE, edgeBook, feePerContract, ladderArbs, exitCost, liquidityTraps };
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, advisoryOrdinal, lifecycleFor, LIFECYCLE, edgeBook, feePerContract, ladderArbs, exitCost, liquidityTraps };
 })();
 })();

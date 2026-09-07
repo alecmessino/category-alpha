@@ -25,6 +25,7 @@
  */
 import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { extname, join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HERMETIC, serviceWorkerEscape } from "./lib/browser-harness.mjs";
@@ -173,6 +174,16 @@ const PROBES = [
   ["genesis-vs-current statement",  /genesis/i,                                                    "always"],
 ];
 
+/* Whether any ladder cell in the payload carries a published interval. Read from the same
+   file the page will be served, so the requirement and the render cannot disagree. */
+function payloadPublishesRate(payloadPath) {
+  try {
+    const d = JSON.parse(readFileSync(payloadPath || join(DOCS, "data/analogs.json"), "utf8"));
+    return (d.entries || []).some((e) => Object.values(e.intensity || {}).concat(Object.values(e.landfall || {}))
+      .some((c) => c && Array.isArray(c.ci95)));
+  } catch { return false; }
+}
+
 async function run(label, payloadPath, kind) {
   const server = await serve(payloadPath);
   const port = server.address().port;
@@ -231,10 +242,19 @@ async function run(label, payloadPath, kind) {
     uniq.slice(0, 12).forEach((m) => console.log("     404 " + m));
     MISSING.length = 0;
   }
+  /* A WILSON INTERVAL EXISTS ONLY WHERE A RATE WAS PUBLISHED. The probe used to be "always",
+     which assumed the live payload carried at least one entry above the sample gate. On
+     2026-09-06 all three live entries were refused (4, 0 and 0 storms with a known outcome
+     against min_sample=10), so the panel correctly printed no interval and the gate failed the
+     panel for the archive's honesty. The requirement is now read from the payload under test:
+     an interval must appear iff some ladder cell carries a ci95. The fixture always does. */
+  const publishes = payloadPublishesRate(payloadPath);
+  if (!publishes) console.log("        payload publishes no rate (every ladder cell refused) — the Wilson probe is not required of it");
   let missing = 0;
   for (const [name, re, when] of PROBES) {
     const hit = typeof re === "function" ? re(text) : re.test(text);
-    const required = when === "always" || when === kind;
+    let required = when === "always" || when === kind;
+    if (name === "a Wilson interval" && !publishes) required = false;
     if (!hit && required) missing++;
     console.log(`  ${hit ? "yes" : (required ? "NO " : " - ")}  ${name}`);
   }

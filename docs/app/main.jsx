@@ -98,50 +98,104 @@ function AwaitingTelemetry({ feeds, generatedAt, note }) {
    Now that advisory lag is measured rather than asserted, it belongs where it is seen without
    looking for it. Three states only, and the third is the one that matters: a feed that was
    never wired is NOT a red light. */
+/* FEED / CYCLE HEALTH, in the header. Every operational source on one rule (docs/app/feed-health.js):
+   VALID TIME · FETCHED · AGE · EXPECTED CADENCE · LIVE / DELAYED / STALE / NO FEED. The previous
+   version of this read `s.advisoryLagMin` as a number; on the built MT it is a frame accessor, so
+   Math.max over functions printed "ADV NaNm" in the header. The model below is built from plain
+   values, and scripts/test-feed-health.mjs holds the rows to that. */
+function feedHealthModel() {
+  const M = window.MT || {};
+  const F = M._feeds || {};
+  const img = window.__MT_IMAGERY || null;
+  const fresh = img && img.fresh ? img.fresh : null;
+  return {
+    nowMs: Date.now(),
+    generatedAt: M._generatedAt || null,
+    fetchedAt: M._generatedAt || null,
+    marketsOk: !!(F.markets && F.markets.ok),
+    outlookOk: !!(F.outlook && F.outlook.ok),
+    outlookIssuedZ: null,
+    satelliteAt: fresh && fresh.at ? (fresh.product === "VIIRS daily" ? fresh.at + "T00:00:00Z" : fresh.at) : null,
+    satelliteDaily: !!(fresh && fresh.product === "VIIRS daily"),
+    satelliteProduct: fresh ? fresh.product : null,
+    storms: Object.values(M.storms || {}).map((s) => ({
+      advisoryIssuedZ: s.advisoryIssuedZ || s.advTimeZ || null,
+      guidanceCycleIso: s.guidance ? s.guidance.cycleIso : null,
+      shipsCycleIso: s.ships ? s.ships.cycleIso : null,
+      reconFixIso: s.recon && s.recon.ok ? s.recon.fixIso : null,
+      ascatIso: s.ascat ? s.ascat.iso : null,
+    })),
+  };
+}
+const HUD_TONE = { pos: "var(--pos)", warn: "var(--warn)", neg: "var(--neg)", info: "var(--blue-300)", off: "var(--border-strong)" };
 function IngestionHUD() {
   const [open, setOpen] = React.useState(false);
-  const F = (window.MT && MT._feeds) || {};
-  const storms = Object.values((window.MT && MT.storms) || {});
-  const lags = storms.map((s) => s.advisoryLagMin).filter((v) => v != null);
-  const advLag = lags.length ? Math.max(...lags) : null;
-  const snapAge = window.MTC ? MTC.snapshotAgeMin() : null;
-
-  const state = (ok, warn) => (ok ? "ok" : warn ? "warn" : "bad");
-  const pills = [
-    { k: "ADV", title: "NHC advisory ingestion lag",
-      st: advLag == null ? (F.nhc && F.nhc.ok ? "warn" : "off") : advLag <= 45 ? "ok" : advLag <= 180 ? "warn" : "bad",
-      v: advLag == null ? "—" : advLag + "m" },
-    { k: "MKT", title: "Prediction-market feed", st: state(F.markets && F.markets.ok, false),
-      v: F.markets && F.markets.count != null ? F.markets.count : "—" },
-    { k: "TWO", title: "Tropical Weather Outlook", st: state(F.outlook && F.outlook.ok, false),
-      v: F.outlook && F.outlook.count != null ? F.outlook.count : "—" },
-    { k: "SNAP", title: "Snapshot age", st: snapAge == null ? "bad" : snapAge <= 25 ? "ok" : snapAge <= 75 ? "warn" : "bad",
-      v: snapAge == null ? "—" : snapAge + "m" },
-    /* Never wired. Shown as absent, not as failed. */
-    { k: "RECON", title: "Reconnaissance", st: "off", v: "—" },
-    { k: "SST", title: "Sea-surface temperature anomaly", st: "off", v: "—" },
-  ];
-  const TONE = { ok: "var(--pos)", warn: "var(--warn)", bad: "var(--neg)", off: "var(--border-strong)" };
+  const [, setTick] = React.useState(0);
+  /* Ages move; the header must move with them. Re-read every 30 s and when the imagery resolves. */
+  React.useEffect(() => {
+    const iv = setInterval(() => setTick((t) => t + 1), 30000);
+    const onImg = () => setTick((t) => t + 1);
+    window.addEventListener("mt-imagery", onImg);
+    return () => { clearInterval(iv); window.removeEventListener("mt-imagery", onImg); };
+  }, []);
+  const FH = window.MTFeedHealth;
+  if (!FH) return null;
+  const rows = FH.rows(feedHealthModel());
+  const pillKeys = ["ADV", "GUID", "RECON", "SAT", "MKT", "SNAP"];
+  const pills = rows.filter((r) => pillKeys.includes(r.k));
+  const toneOf = (h) => HUD_TONE[FH.TONE[h.status] || "warn"];
+  const val = (r) => {
+    const h = r.h;
+    if (h.status === "OFF" || h.status === "NO FEED") return "—";
+    return FH.fmtMin(h.ageMin);
+  };
 
   return (
-    <span style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 4, marginLeft: 8, flexWrap: "wrap", maxWidth: "100%" }}>
-      {pills.map((p) => (
-        <span key={p.k} title={p.title} onClick={() => setOpen(!open)}
-          style={{ display: "inline-flex", alignItems: "center", gap: 3, cursor: "pointer",
-            fontSize: 9, fontWeight: 800, letterSpacing: ".4px", padding: "2px 6px", borderRadius: 999,
-            color: p.st === "off" ? "var(--text-2)" : TONE[p.st],
-            border: "1px solid " + (p.st === "off" ? "var(--border-dim)" : TONE[p.st]),
-            background: p.st === "off" ? "transparent" : "color-mix(in srgb, " + TONE[p.st] + " 12%, transparent)",
-            opacity: p.st === "off" ? .55 : 1 }}>
-          <span style={{ width: 5, height: 5, borderRadius: "50%", background: p.st === "off" ? "var(--border-strong)" : TONE[p.st] }} />
-          {p.k}<span style={{ opacity: .75 }}>{p.v}</span>
-        </span>
-      ))}
+    <span data-feed-health style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 4, marginLeft: 8, flexWrap: "wrap", maxWidth: "100%" }}>
+      {pills.map((r) => {
+        const off = r.h.status === "OFF";
+        const col = toneOf(r.h);
+        return (
+          <button key={r.k} type="button" title={r.name + " — " + r.h.status + (r.h.reason ? ": " + r.h.reason : "")}
+            aria-label={r.name + " " + r.h.status} aria-expanded={open} data-feed-pill={r.k} data-feed-status={r.h.status}
+            onClick={() => setOpen(!open)}
+            style={{ display: "inline-flex", alignItems: "center", gap: 3, cursor: "pointer", font: "inherit",
+              fontSize: 9, fontWeight: 800, letterSpacing: ".4px", padding: "2px 6px", borderRadius: 999,
+              color: off ? "var(--text-2)" : col,
+              border: "1px solid " + (off ? "var(--border-dim)" : col),
+              background: off ? "transparent" : "color-mix(in srgb, " + col + " 12%, transparent)",
+              opacity: off ? .55 : 1 }}>
+            <span style={{ width: 5, height: 5, borderRadius: "50%", background: off ? "var(--border-strong)" : col }} />
+            {r.k}<span style={{ opacity: .75 }}>{val(r)}</span>
+          </button>
+        );
+      })}
       {open && (
-        <div onClick={() => setOpen(false)} style={{ position: "absolute", top: 22, right: 0, zIndex: 900, width: "min(460px, calc(100vw - 24px))",
+        <div role="dialog" aria-label="Feed and cycle health" data-feed-health-table onClick={() => setOpen(false)}
+          style={{ position: "absolute", top: 22, right: 0, zIndex: 900, width: "min(640px, calc(100vw - 24px))",
           background: "var(--surface-card)", border: "1px solid var(--border-strong)", borderRadius: 10,
           boxShadow: "var(--shadow-cmd)", padding: "11px 13px", fontSize: 11, lineHeight: 1.6, cursor: "default" }}>
-          <div style={{ fontWeight: 800, letterSpacing: 1, fontSize: 10, color: "var(--accent)" }}>INGESTION HEALTH</div>
+          <div style={{ fontWeight: 800, letterSpacing: 1, fontSize: 10, color: "var(--accent)" }}>FEED / CYCLE HEALTH</div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 9.5, color: "var(--text-2)", marginTop: 3 }}>
+            {MTC.claim("feed.health").text}
+          </div>
+          <div style={{ overflowX: "auto", marginTop: 7 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-mono)", fontSize: 10, whiteSpace: "nowrap" }}>
+              <thead><tr>{["SOURCE", "VALID TIME", "FETCHED", "AGE", "CADENCE", "STATUS"].map((h) => (
+                <th key={h} scope="col" style={{ textAlign: "left", color: "var(--text-2)", fontWeight: 700, letterSpacing: ".5px", padding: "2px 8px 3px 0", borderBottom: "1px solid var(--border-dim)" }}>{h}</th>
+              ))}</tr></thead>
+              <tbody>{rows.map((r) => (
+                <tr key={r.k} data-feed-row={r.k}>
+                  <td style={{ padding: "2px 8px 2px 0", color: "var(--text-1)" }}>{r.k} <span style={{ color: "var(--text-2)" }}>{r.name}</span></td>
+                  <td style={{ padding: "2px 8px 2px 0", color: "var(--text-2)" }}>{FH.fmtZ(r.h.validZ)}</td>
+                  <td style={{ padding: "2px 8px 2px 0", color: "var(--text-2)" }}>{FH.fmtZ(r.h.fetchedAt)}</td>
+                  <td style={{ padding: "2px 8px 2px 0", color: "var(--text-1)" }}>{r.h.ageMin == null ? "—" : FH.fmtMin(r.h.ageMin)}</td>
+                  <td style={{ padding: "2px 8px 2px 0", color: "var(--text-2)" }}>{r.cadenceMin == null ? (r.h.status === "OFF" ? "—" : "event") : FH.fmtMin(r.cadenceMin)}</td>
+                  <td style={{ padding: "2px 0", fontWeight: 800, color: toneOf(r.h) }} title={r.h.reason || ""}>{r.h.status}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
           <div style={{ marginTop: 6, color: "var(--text-2)" }}>{MTC.claim("advisory.latency").text}</div>
           <div style={{ marginTop: 6, color: "var(--text-2)" }}>{MTC.claim("capability.notIngested").text}</div>
           {/* How staleness actually moved the evidence tier, from the same function
@@ -167,11 +221,15 @@ function IngestionHUD() {
   );
 }
 
-function LayerToggles({ layers, setLayers, storm }) {
+function LayerToggles({ layers, setLayers, storm, compact, frame }) {
   const [showOff, setShowOff] = React.useState(false);
+  /* PHONE: the chips fold into one control. Six chips laid over a 356px-wide map covered most
+     of it — apparatus was shrinking the map, which is the one thing it must not do. Below the
+     compact width the row is a single LAYERS button and the chips open under it on demand. */
+  const [menuOpen, setMenuOpen] = React.useState(false);
   const S = storm ? MT.storms[storm] : null;
   const all = window.MT_LAYERS.map((o) => Object.assign({}, o, {
-    prov: window.MT_layerProv ? window.MT_layerProv(o, S) : o.prov }));
+    prov: window.MT_layerProv ? window.MT_layerProv(o, S, frame) : o.prov }));
   const live = all.filter((o) => o.prov !== "nofeed");
   const off = all.filter((o) => o.prov === "nofeed");
   const chip = (extra) => Object.assign({
@@ -179,28 +237,41 @@ function LayerToggles({ layers, setLayers, storm }) {
     fontSize: 10.5, fontWeight: 700, letterSpacing: ".3px", padding: "4px 9px", borderRadius: 6,
     backdropFilter: "blur(4px)", cursor: "pointer",
   }, extra);
+  const onCount = live.filter((o) => layers[o.id]).length;
   return (
-    <div style={{ position: "absolute", left: 12, bottom: 26, zIndex: 500, display: "flex", gap: 5, flexWrap: "wrap", maxWidth: "72%" }}>
-      {live.map((o) => {
+    <div data-layer-toggles style={{ position: "absolute", left: 12, bottom: 26, zIndex: 500, display: "flex", gap: 5, flexWrap: "wrap", maxWidth: compact ? "60%" : "72%", alignItems: "flex-end" }}>
+      {compact && (
+        <button type="button" aria-expanded={menuOpen} aria-controls="mt-layer-menu" data-layer-menu
+          onClick={() => setMenuOpen(!menuOpen)}
+          style={chip({ font: "inherit", fontFamily: "var(--font-mono)", border: "1px solid var(--cyan-400)",
+            background: "rgba(7,12,22,.85)", color: "#eaf2ff" })}>
+          LAYERS <span style={{ opacity: .7 }}>{onCount}/{live.length}</span> {menuOpen ? "▾" : "▸"}
+        </button>
+      )}
+      {(!compact || menuOpen) && live.map((o) => {
         const on = !!layers[o.id];
-        return <span key={o.id} title="LIVE — real feed"
+        /* A real button: keyboard-reachable, and aria-pressed says which layers are on without
+           reading the colour. The map's toggles were spans, which a screen reader announced as
+           nothing at all. */
+        return <button key={o.id} type="button" title="LIVE — real feed" aria-pressed={on} data-layer-toggle={o.id}
           onClick={() => setLayers((st) => ({ ...st, [o.id]: !st[o.id] }))}
           style={chip({
+            font: "inherit", fontFamily: "var(--font-mono)",
             border: "1px solid " + (on ? "var(--cyan-400)" : "var(--graphite-700)"),
             background: on ? "color-mix(in srgb,var(--cyan-400) 15%,transparent)" : "rgba(7,12,22,.8)",
             color: on ? "#eaf2ff" : "#8ea3bd",
           })}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--pos)", flex: "none" }} />
           {o.label}
-        </span>;
+        </button>;
       })}
-      {off.length > 0 && (
-        <span onClick={() => setShowOff(!showOff)}
+      {(!compact || menuOpen) && off.length > 0 && (
+        <button type="button" onClick={() => setShowOff(!showOff)} aria-expanded={showOff} data-layer-toggle="unavailable"
           title={"Not published for this storm / not wired: " + off.map((o) => o.label).join(", ")}
-          style={chip({ border: "1px dashed var(--graphite-700)", background: "rgba(7,12,22,.8)", color: "#5b6b82" })}>
+          style={chip({ font: "inherit", fontFamily: "var(--font-mono)", border: "1px dashed var(--graphite-700)", background: "rgba(7,12,22,.8)", color: "#5b6b82" })}>
           <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--neg)", flex: "none" }} />
           {showOff ? off.map((o) => o.label).join(" · ") : off.length + " unavailable"}
-        </span>
+        </button>
       )}
     </div>
   );
@@ -264,15 +335,17 @@ function Transport({ frame, setFrame, playing, setPlaying, speed, setSpeed }) {
   const stepFwd = frame < NF ? frameGapMin(frame, frame + 1) : null;
   const btn = { cursor: "pointer", flex: "none", border: "1px solid var(--border-strong)", background: "var(--surface-sunken)", color: "var(--text-2)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-mono)", borderRadius: 6 };
   const single = NF <= 0;
+  /* Wraps onto a second line on a phone: the transport is apparatus, and apparatus folds
+     before the page is allowed to scroll sideways or the map to shrink. */
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: "var(--surface-card)", borderTop: "1px solid var(--border-dim)" }}>
-      <div style={{ display: "flex", gap: 6 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", flexWrap: "wrap", background: "var(--surface-card)", borderTop: "1px solid var(--border-dim)" }}>
+      <div style={{ display: "flex", gap: 6, flex: "none" }}>
         <div title={"Step back " + humanMin(stepBack) + " (←)"} onClick={() => { setPlaying(false); setFrame(Math.max(0, frame - 1)); flash("STEP −" + humanMin(stepBack)); }} style={{ ...btn, width: 30, height: 30, fontSize: 11, opacity: single ? 0.4 : 1 }}>◀◀</div>
         <div title="Play/pause (space)" onClick={() => setPlaying(!playing)} style={{ ...btn, width: 36, height: 36, fontSize: 13, background: "var(--surface-solid)", color: "var(--text-inverse)", borderColor: "var(--surface-solid)", opacity: single ? 0.4 : 1 }}>{playing ? "❚❚" : "▶"}</div>
         <div title={"Step forward " + humanMin(stepFwd) + " (→)"} onClick={() => { setPlaying(false); setFrame(Math.min(NF, frame + 1)); flash("STEP +" + humanMin(stepFwd)); }} style={{ ...btn, width: 30, height: 30, fontSize: 11, opacity: single ? 0.4 : 1 }}>▶▶|</div>
         <div title="Jump to live" onClick={() => { setPlaying(true); setFrame(NF); }} style={{ ...btn, padding: "0 10px", height: 30, fontSize: 10, fontWeight: 700, color: isLive ? "var(--pos)" : "var(--text-2)", borderColor: isLive ? "var(--pos)" : "var(--border-strong)" }}>▶▶ Live</div>
       </div>
-      <div style={{ flex: 1, position: "relative", height: 30, display: "flex", alignItems: "center", minWidth: 0 }}>
+      <div style={{ flex: "1 1 160px", position: "relative", height: 30, display: "flex", alignItems: "center", minWidth: 0 }}>
         <div style={{ position: "relative", width: "100%", height: 5, borderRadius: 3, background: "var(--border-dim)" }}>
           <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: (NF ? frame / NF * 100 : 100) + "%", background: "linear-gradient(90deg,var(--cyan-500),var(--cyan-400))", borderRadius: 3 }} />
           {MT.events.map((e) => (
@@ -305,7 +378,7 @@ function MillibarTerminalApp() {
   const [sel, setSel] = React.useState({ contract: (MT.contracts[0] && MT.contracts[0].id) || null, evidence: null });
   const [bankroll, setBankroll] = React.useState(10000);
   const [stake, setStake] = React.useState(0.25);
-  const [layers, setLayers] = React.useState({ satellite: true, infrared: false, track: true, forecast: true, cone: true });
+  const [layers, setLayers] = React.useState({ satellite: true, infrared: false, track: true, forecast: true, cone: true, guidance: true });
   const [vw, setVw] = React.useState(typeof window !== "undefined" ? window.innerWidth : 1440);
   const [vh, setVh] = React.useState(typeof window !== "undefined" ? window.innerHeight : 900);
   const narrow = vw < 900;
@@ -398,8 +471,11 @@ function MillibarTerminalApp() {
 
   // Real staleness of the snapshot itself — the dot was green regardless of age.
   const staleMin = MT._generatedAt ? Math.max(0, Math.round((Date.now() - Date.parse(MT._generatedAt)) / 60000)) : null;
+  /* The header sits ABOVE the sticky map section (zIndex 400): the feed-health table opens from
+     this bar and was painting UNDER the map — a z-index of 30 on the header put every dropdown
+     it owns behind the section that follows it. 450 keeps it under nothing on the page. */
   const shellHeader = (
-    <header style={{ position: "sticky", top: 0, zIndex: 30, display: "flex", alignItems: "center", gap: 12, padding: "9px 20px", background: "var(--surface-card)", borderBottom: "1px solid var(--border-dim)", flexWrap: "wrap" }}>
+    <header style={{ position: "sticky", top: 0, zIndex: 450, display: "flex", alignItems: "center", gap: 12, padding: "9px 20px", background: "var(--surface-card)", borderBottom: "1px solid var(--border-dim)", flexWrap: "wrap" }}>
       <img src="assets/logo-dark.svg" alt="Millibar Terminal" style={{ height: 34 }} onError={(e) => { e.target.style.display = "none"; }} />
       <PL>Category Alpha</PL>
       {/* Active systems live in the top bar — switching storms shouldn't require
@@ -415,7 +491,9 @@ function MillibarTerminalApp() {
           ))}
         </div>
       )}
-      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10, fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>
+      {/* Wraps: on a phone the links, the clock and the feed pills fold onto further lines rather
+          than pushing the page sideways. minWidth 0 lets the flex item shrink below its content. */}
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", justifyContent: "flex-end", minWidth: 0, maxWidth: "100%", fontFamily: "var(--font-mono)", fontSize: 10.5, color: "var(--text-2)" }}>
         {/* The historical surface. A LINK, not a panel: the Storm Atlas is a separate document
             with its own runtime, so this board loads none of its 1.9 MB of archive and none of
             its bundle. The trailing slash matters — there is no 404 fallback, and Pages serves
@@ -503,7 +581,7 @@ function MillibarTerminalApp() {
                   </span>
                 )}
               </div>
-              <LayerToggles layers={layers} setLayers={setLayers} storm={storm} />
+              <LayerToggles layers={layers} setLayers={setLayers} storm={storm} compact={vw < 640} frame={frame} />
             </div>
             {/* rail */}
             {S && (
@@ -540,6 +618,10 @@ function MillibarTerminalApp() {
                 )}
                 <div style={{ marginTop: 9 }}><window.MT_Hint id="note.lifecycle" label="interpretation, not observation" /></div>
               </div>
+              {/* The five disagreement metrics and the bridge to the archive, on the rail beside
+                  the map they describe. The full panel — lead table, fan, members — is under
+                  Models; this is the glance. */}
+              <window.MT_GuidanceStrip stormId={storm} frame={frame} />
             </aside>
             )}
           </div>
@@ -575,6 +657,16 @@ function MillibarTerminalApp() {
         </>)}
 
         {tab === "Models" && (<>
+        {/* 5 — the guidance envelope. What the models disagree about, by lead, and what moved
+            since the last cycle. Above the analog prior because it is about THIS storm's next
+            five days; the archive below is about storms like it. Raw guidance: it feeds nothing
+            under Fair value, and claims.js `guidance.semantics` says so on the panel. */}
+        <window.MT_Section label="Model guidance" tier="ATCF a-deck · track spread · intensity fan · cycle delta · raw guidance, not a probability"
+          defaultOpen summary={S && S.guidance ? (S.guidance.roster.inSpread.length + " track runs · 72h spread " + (S.guidance.summary.trackSpread72Km ?? "—") + " km")
+            : (stormIds.filter((id) => MT.storms[id].guidance).length + " system(s) with a deck")}>
+          <window.MT_Guidance stormId={storm} frame={frame} narrow={narrow} />
+        </window.MT_Section>
+
         {/* 5a — the empirical prior. A separate archive answering the question the rest of
             this tab cannot: for a system that formed HERE, in this season, in this
             environment, what did the ones like it go on to do? Above fair value because it
@@ -635,7 +727,7 @@ function MillibarTerminalApp() {
   // Order-independent boot: wait for the plain-script globals (live data, compute
   // engine, DS bundle) before first render. The async data-loader sets window.MT
   // when the fetch resolves, so poll until everything is present.
-  if (window.MT && window.MTX && window.CategoryAlphaDesignSystem_a835cf && window.MT_Evidence && window.MT_AnalogPrior) {
+  if (window.MT && window.MTX && window.CategoryAlphaDesignSystem_a835cf && window.MT_Evidence && window.MT_AnalogPrior && window.MT_Guidance) {
     ReactDOM.createRoot(document.getElementById("root")).render(<MillibarTerminalApp />);
   } else {
     setTimeout(mount, 30);

@@ -7,12 +7,24 @@ const MT_LAYERS = [
   { id: "track", label: "Observed Track", prov: "live" },
   { id: "forecast", label: "NHC Forecast Track", prov: "dynamic" },
   { id: "cone", label: "NHC Cone", prov: "dynamic" },
+  /* One line per model run from the ATCF a-deck. Drawn UNDER the official track and the cone,
+     in a different weight and a different vocabulary, so a reader cannot take the envelope for
+     the cone or the cone for the envelope. What it is and is not: claims.js `guidance.semantics`. */
+  { id: "guidance", label: "Model Guidance", prov: "dynamic" },
 ];
 // Layers whose provenance depends on what the current advisory actually delivered.
-function layerProv(layer, S) {
+function layerProv(layer, S, frame) {
   if (layer.prov !== "dynamic") return layer.prov;
   if (layer.id === "forecast") return S && S.track ? "live" : "nofeed";
   if (layer.id === "cone") return S && S.cone ? "live" : "nofeed";
+  /* The guidance layer is the one whose availability depends on the CURSOR as well as the feed:
+     rewound onto a frame that recorded a different deck, there is nothing this layer may draw,
+     and the chip has to say so rather than offering lines that will not appear. */
+  if (layer.id === "guidance") {
+    if (!(S && S.guidance && S.guidance.aids && S.guidance.aids.length)) return "nofeed";
+    if (frame == null || !window.MT_guidanceGeometryAt) return "live";
+    return window.MT_guidanceGeometryAt(S, frame) ? "live" : "nofeed";
+  }
   return "nofeed";
 }
 
@@ -75,6 +87,21 @@ function probColor(p) { return p == null ? "#8ea3bd" : p > 60 ? "#e5443b" : p >=
 
 /* Marker size by class, so strength is legible on the basin view without opening anything. */
 function clsRadius(cls) { return /C[45]/.test(cls) ? 9 : /C[123]/.test(cls) ? 7.5 : cls === "TS" ? 6 : 5; }
+
+/* How each class of aid is drawn. Muted and thin for the members, because there are a dozen of
+   them and the point is their disagreement, not any one of them; the consensus aids heavier and
+   pale, because they are what the members average to; the previous cycle's official track as a
+   dotted ghost, because "what moved" is a comparison and a comparison needs both ends. */
+const GUIDANCE_STYLE = {
+  global:          { color: "#8ea3bd", weight: 1.1, opacity: 0.55, dashArray: null,  label: "global model" },
+  hurricane:       { color: "#f0a860", weight: 1.2, opacity: 0.65, dashArray: null,  label: "hurricane model" },
+  "ensemble-mean": { color: "#9fd3c7", weight: 1.1, opacity: 0.6,  dashArray: "2,4", label: "ensemble average" },
+  ai:              { color: "#c4a6ff", weight: 1.2, opacity: 0.7,  dashArray: null,  label: "DeepMind" },
+  consensus:       { color: "#eaf2ff", weight: 2.0, opacity: 0.85, dashArray: null,  label: "consensus" },
+  official:        { color: "#38bdf8", weight: 0,   opacity: 0,    dashArray: null,  label: "official (drawn by the NHC Forecast Track layer)" },
+  prevOfcl:        { color: "#7fb2e6", weight: 1.3, opacity: 0.55, dashArray: "1,5", label: "previous cycle official" },
+};
+window.MT_GUIDANCE_STYLE = GUIDANCE_STYLE;
 
 function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", resizeKey }) {
   const elRef = React.useRef(null);
@@ -152,6 +179,10 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
       sat.addTo(mapRef.current);
       refs.current.sat = sat;
       refs.current.satFresh = fresh;
+      /* The slot that actually attached, for the feed-health row: a GOES slot is a real
+         10-minute valid time; the VIIRS fallback is a daily composite and is labelled as one. */
+      window.__MT_IMAGERY = { attribution, fresh, at: Date.now() };
+      window.dispatchEvent(new CustomEvent("mt-imagery", { detail: window.__MT_IMAGERY }));
       if (typeof onImagery === "function") onImagery({ attribution, fresh });
     };
 
@@ -176,6 +207,7 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
         }
       }
       if (!cancelled) setImgState("none");
+      if (!cancelled) { window.__MT_IMAGERY = { attribution: null, fresh: null, at: Date.now() }; window.dispatchEvent(new CustomEvent("mt-imagery", { detail: window.__MT_IMAGERY })); }
       if (typeof onImagery === "function" && !cancelled) onImagery({ attribution: null, fresh: null });
     };
 
@@ -305,6 +337,73 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
         '<div style="position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;background:currentColor;transform:translate(-50%,-50%);box-shadow:0 0 7px 1px currentColor"></div></div>' });
     refs.current.eye = L.marker(eyeAt, { icon, interactive: false, zIndexOffset: 1000 }).addTo(g);
   }, [stormId, layers.cone, layers.track, layers.forecast, layers.recon, layers.ascat, layers.models]);
+
+
+  /* MODEL GUIDANCE — ITS OWN GROUP, ITS OWN EFFECT, KEYED ON THE CURSOR.
+   *
+   * The members are one line each; the consensus aids are heavier; the official forecast is NOT
+   * redrawn from the deck (the NHC Forecast Track layer already carries the advisory's positions,
+   * which are the same forecast). Lead centroids are small crosses with the spread in the tooltip
+   * — no ring, because a ring around a centroid reads as a cone.
+   *
+   * IT LIVES APART FROM THE OTHER OVERLAYS FOR ONE REASON: it is the only layer whose presence
+   * depends on WHERE THE CURSOR IS STANDING. The frame stores the envelope's scalars and no
+   * geometry, so a rewound cursor may not be shown these lines — they are the deck in hand, and
+   * the board did not hold that deck then. `MT_guidanceGeometryAt` is the same predicate the
+   * panel uses, so the lines and the panel can never disagree about it. Its own group means
+   * scrubbing toggles the lines without rebuilding the cone, the track and the eye every step.
+   */
+  React.useEffect(() => {
+    const map = mapRef.current; if (!map) return;
+    if (!refs.current.guid) refs.current.guid = L.layerGroup().addTo(map);
+    const g = refs.current.guid;
+    g.clearLayers();
+    const S2 = MT.storms[stormId] || null;
+    const draw = !!(layers.guidance && S2 && S2.guidance && S2.guidance.aids
+      && (!window.MT_guidanceGeometryAt || window.MT_guidanceGeometryAt(S2, frame)));
+    /* A verification handle, like window.__MT_MAP above it. The polylines are canvas-drawn
+       (preferCanvas), so there is no DOM node a gate could count; this is how
+       scripts/check-terminal-responsive.mjs proves the lines are absent under a historical
+       cursor rather than merely invisible. Written on every pass, including the zero. */
+    const publish = () => { window.__MT_GUIDANCE_DRAWN = g.getLayers().length; };
+    if (draw) {
+    const G = S2.guidance;
+    const latlngs = (tr) => (tr || []).map((p) => [p.lat, p.lon]);
+    if (G.prevOfclTrack && G.prevOfclTrack.length > 1) {
+      const st = GUIDANCE_STYLE.prevOfcl;
+      L.polyline(latlngs(G.prevOfclTrack), { color: st.color, weight: st.weight, opacity: st.opacity, dashArray: st.dashArray, interactive: true })
+      .bindTooltip("NHC official forecast, PREVIOUS cycle " + String(G.previousCycle).slice(-2) + "Z — the ghost the current one moved from",
+        { className: "mt-tt", sticky: true }).addTo(g);
+    }
+    const order = ["global", "ensemble-mean", "hurricane", "ai", "consensus"];
+    G.aids.filter((a) => a.track && a.track.length > 1 && a.cls !== "official" && a.cls !== "statistical")
+      .sort((a, b) => order.indexOf(a.cls) - order.indexOf(b.cls))
+      .forEach((a) => {
+      const st = GUIDANCE_STYLE[a.cls] || GUIDANCE_STYLE.global;
+      L.polyline(latlngs(a.track), { color: st.color, weight: st.weight, opacity: st.opacity, dashArray: st.dashArray })
+        .bindTooltip(a.label + " (" + a.tech + ") · " + st.label + " · cycle " + String(G.cycle).slice(-2) + "Z"
+          + (a.peakKt != null ? " · peak " + a.peakKt + " kt at +" + a.peakHr + "h" : " · track aid, no intensity")
+          + (a.inSpread ? "" : " · shown, not counted in the spread"),
+          { className: "mt-tt", sticky: true }).addTo(g);
+      });
+    (G.leads || []).forEach((l) => {
+      if (!l.centroid || l.n < 2) return;
+      const [la, lo] = l.centroid;
+      const icon = L.divIcon({ className: "", iconSize: [14, 14], iconAnchor: [7, 7],
+      html: '<div style="position:relative;width:14px;height:14px;color:#eaf2ff;opacity:.85">'
+          + '<div style="position:absolute;left:6px;top:0;width:2px;height:14px;background:currentColor"></div>'
+          + '<div style="position:absolute;top:6px;left:0;height:2px;width:14px;background:currentColor"></div>'
+          + '<div style="position:absolute;left:16px;top:-3px;font:700 9px var(--font-mono);letter-spacing:.3px;white-space:nowrap;text-shadow:0 0 3px #000">+' + l.hr + 'h</div></div>' });
+      L.marker([la, lo], { icon, interactive: true, zIndexOffset: 500 })
+      .bindTooltip("+" + l.hr + "h centroid of " + l.n + " model runs · mean spread " + (l.meanKm ?? "—") + " km, max " + (l.maxKm ?? "—") + " km"
+        + " · " + l.scenarios + " scenario" + (l.scenarios === 1 ? "" : "s") + " at " + l.thresholdKm + " km"
+        + (l.ofcl && l.ofcl.offsetKm != null ? " · official " + l.ofcl.offsetKm + " km from centroid" : "")
+        + " — model disagreement, not a probability and not the cone",
+        { className: "mt-tt", direction: "top" }).addTo(g);
+    });
+    }
+    publish();
+  }, [stormId, layers.guidance, frame]);
 
   // bitemporal binding — move ONLY the eye marker as the as-of cursor scrubs, so
   // geometry rewinds with the tables and there is no overlay rebuild / tile flash.

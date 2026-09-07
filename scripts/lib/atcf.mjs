@@ -50,6 +50,26 @@ export function atcfLon(s) {
   if (!Number.isFinite(v) || v === 0) return null;
   return /W/i.test(m[2]) ? -v : v;
 }
+/* The f-deck is the one deck whose positions are HUNDREDTHS of a degree: "1652N" is 16.52N,
+   "14868W" is 148.68W (ATCF fix-file spec, and the live fcp012026 header row in the comment
+   above). Read with the tenths parser these came out as 165.2N / -1486.8, which is not a place.
+   Nothing downstream had used the fix POSITION yet — only its wind, its age and its
+   instrument — which is why a latitude of 230.6 sat in latest.json without anything breaking.
+   It is corrected at the parse boundary so nothing that starts using the position inherits it. */
+export function fixLat(s) {
+  const m = /^(-?\d+)\s*([NS])$/i.exec(String(s || "").trim());
+  if (!m) return null;
+  const v = Number(m[1]) / 100;
+  if (!Number.isFinite(v) || v === 0) return null;
+  return /S/i.test(m[2]) ? -v : v;
+}
+export function fixLon(s) {
+  const m = /^(-?\d+)\s*([EW])$/i.exec(String(s || "").trim());
+  if (!m) return null;
+  const v = Number(m[1]) / 100;
+  if (!Number.isFinite(v) || v === 0) return null;
+  return /W/i.test(m[2]) ? -v : v;
+}
 /* ATCF uses 0 for "not reported" in every numeric field, and a real 0 kt / 0 mb does
    not exist. Both read as absent. */
 function numOrNull(s) {
@@ -74,36 +94,30 @@ export function atcfTimeIso(s) {
 /* Returns every (tech, tau) row of the LATEST cycle in the deck, plus a census of what
    the deck contains. The census matters: it is how an operator sees that an aid they
    expect is missing this cycle, instead of the board quietly blending fewer members. */
-export function parseAdeck(text) {
-  const rows = [];
-  const cycles = new Set();
-  for (const line of String(text || "").split(/\r?\n/)) {
-    if (!line.trim()) continue;
-    const c = line.split(",").map((x) => x.trim());
-    if (c.length < 9) continue;
-    const cycle = c[2];
-    if (!/^\d{10}$/.test(cycle)) continue;
-    const tau = intOrNull(c[5]);
-    if (tau == null) continue;
-    cycles.add(cycle);
-    rows.push({
-      basin: c[0], cy: c[1], cycle, tech: c[4], tau,
-      lat: atcfLat(c[6]), lon: atcfLon(c[7]),
-      vmax: numOrNull(c[8]), mslp: numOrNull(c[9]), ty: c[10] || null,
-    });
-  }
-  if (!rows.length) return { ok: false, cycles: [], latestCycle: null, techs: {}, rows: [] };
+/* One raw a-deck row. Shared by the single-cycle and the multi-cycle readers so the two can
+   never disagree about a field index. */
+function adeckRow(line) {
+  if (!line.trim()) return null;
+  const c = line.split(",").map((x) => x.trim());
+  if (c.length < 9) return null;
+  const cycle = c[2];
+  if (!/^\d{10}$/.test(cycle)) return null;
+  const tau = intOrNull(c[5]);
+  if (tau == null) return null;
+  return {
+    basin: c[0], cy: c[1], cycle, tech: c[4], tau,
+    lat: atcfLat(c[6]), lon: atcfLon(c[7]),
+    vmax: numOrNull(c[8]), mslp: numOrNull(c[9]), ty: c[10] || null,
+  };
+}
 
-  const sorted = [...cycles].sort();
-  const latestCycle = sorted[sorted.length - 1];
-
-  /* Merge the radii duplicates. First row wins for position; the first NON-NULL wins for
-     intensity and pressure, because the 34-kt row sometimes carries the pressure and the
-     64-kt row does not. */
+/* Merge the radii duplicates of ONE cycle. First row wins for position; the first NON-NULL
+   wins for intensity and pressure, because the 34-kt row sometimes carries the pressure and
+   the 64-kt row does not. Returns the merged rows sorted by (tau, tech) and the census. */
+function mergeCycle(rows) {
   const byKey = new Map();
   const techs = {};
   for (const r of rows) {
-    if (r.cycle !== latestCycle) continue;
     techs[r.tech] = (techs[r.tech] || 0) + 1;
     const k = r.tech + "|" + r.tau;
     const prev = byKey.get(k);
@@ -120,9 +134,57 @@ export function parseAdeck(text) {
      finding the guidance NHC ran" — two states that look identical from a null consensus
      and need opposite responses. */
   const forecastTechs = [...new Set(merged.filter((r) => r.tau > 0).map((r) => r.tech))].sort();
+  return { techs, forecastTechs, rows: merged };
+}
+
+/* Returns every (tech, tau) row of the LATEST cycle in the deck, plus a census of what
+   the deck contains. The census matters: it is how an operator sees that an aid they
+   expect is missing this cycle, instead of the board quietly blending fewer members. */
+export function parseAdeck(text) {
+  const rows = [];
+  const cycles = new Set();
+  for (const line of String(text || "").split(/\r?\n/)) {
+    const r = adeckRow(line);
+    if (!r) continue;
+    cycles.add(r.cycle);
+    rows.push(r);
+  }
+  if (!rows.length) return { ok: false, cycles: [], latestCycle: null, techs: {}, rows: [] };
+
+  const sorted = [...cycles].sort();
+  const latestCycle = sorted[sorted.length - 1];
+  const m = mergeCycle(rows.filter((r) => r.cycle === latestCycle));
   return {
     ok: true, cycles: sorted, latestCycle, cycleIso: atcfTimeIso(latestCycle),
-    techs, forecastTechs, rows: merged,
+    techs: m.techs, forecastTechs: m.forecastTechs, rows: m.rows,
+  };
+}
+
+/* The LAST `keep` cycles of the deck, each merged exactly as parseAdeck merges the latest one.
+ *
+ * WHY MORE THAN ONE CYCLE. "What changed since the last cycle" is a question about two decks,
+ * and a reader who only ever holds the newest one has to answer it from memory. The previous
+ * cycle is read from the same file on the same tick, so the comparison is between two things
+ * the pipeline actually held rather than between a number and a recollection of one.
+ *
+ * A long-lived storm's deck carries every cycle since genesis; `keep` bounds the work to what
+ * the comparison needs. Cycles are returned newest LAST, in ATCF order. */
+export function parseAdeckCycles(text, opts) {
+  const keep = (opts && opts.keep) || 2;
+  const byCycle = new Map();
+  for (const line of String(text || "").split(/\r?\n/)) {
+    const r = adeckRow(line);
+    if (!r) continue;
+    let arr = byCycle.get(r.cycle);
+    if (!arr) { arr = []; byCycle.set(r.cycle, arr); }
+    arr.push(r);
+  }
+  const all = [...byCycle.keys()].sort();
+  const chosen = all.slice(-keep);
+  return {
+    ok: all.length > 0,
+    cycles: all,
+    kept: chosen.map((cycle) => ({ cycle, cycleIso: atcfTimeIso(cycle), ...mergeCycle(byCycle.get(cycle)) })),
   };
 }
 
@@ -331,7 +393,7 @@ export function parseFdeck(text) {
       basin: c[0], cy: c[1], time: c[2], iso: atcfTimeIso(c[2]),
       format: fmt, formatLabel: FIX_FORMAT[fmt] || ("format " + fmt),
       type: c[4] || null, ci: c[5] || null,
-      lat: atcfLat(c[7]), lon: atcfLon(c[8]),
+      lat: fixLat(c[7]), lon: fixLon(c[8]),
       positionConfidence: intOrNull(c[10]),
       kt: numOrNull(c[11]), windConfidence: intOrNull(c[12]),
       mslp: numOrNull(c[13]), pressureConfidence: intOrNull(c[14]),

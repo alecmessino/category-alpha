@@ -26,7 +26,10 @@ anything a feed can't supply is labelled **NO FEED / MODEL DEFERRED**, never inv
 | Recon mission arrival (coded observations) | TGFTP `URNT11`/`URPN11 KNHC` | **live** — arrival recorded, digits deliberately not decoded |
 | Shear, ocean heat content, mid-level RH, maximum potential intensity, RI probabilities | NHC ATCF SHIPS (`stext`) | **live** — published, and scored into a probability only under an operator claim |
 | Objective surface winds and radii | scatterometer fixes in the f-deck (ASCAT/OSCAT) | **live but intermittent** — an orbit either crossed the storm or it did not |
-| Forecast cone, ensemble spaghetti | — | **NO FEED** (GIS layers not wired) |
+| Forecast cone | NHC forecast advisory positions + published track-error radii | **live** — reconstructed, labelled as such |
+| Model guidance envelope (track + intensity, per aid, latest and previous cycle) | NHC ATCF **a-deck** (`aid_public`) — the named roster in `scripts/lib/guidance.mjs` | **live** — raw guidance, never a probability, never the cone; see *The guidance envelope* |
+| Genesis fix (for the Storm Atlas bridge) | NHC ATCF **b-deck** first fix | **live** |
+| Ensemble perturbation members (AP##) | present in the a-deck | **read, not drawn** — thirty members of one model are one model's uncertainty, not thirty opinions |
 | Per-storm intensity probability (Cat 4+) | — | **MODEL DEFERRED** (no public ensemble Cat-probability feed; fabricating one would break the honesty rule) |
 
 ### The four pre-advisory feeds, and why they exist
@@ -44,6 +47,60 @@ These four are earlier, in descending order of how much earlier:
 | 2 | **Aircraft reconnaissance** | often >1 h | A *measurement* of the initial condition every forecast rests on. When a plane finds the storm 12 mb deeper than the advisory carries, every forecast built on the old analysis is stale by a known amount. |
 | 3 | **SHIPS** | 6-hourly | The environment the forecast is standing on — shear, ocean heat, humidity, potential intensity — plus NHC's own calibrated rapid-intensification probabilities, which arrive with their climatological base rate on the same line. |
 | 4 | **Scatterometer** | intermittent | Objective surface winds. It **never moves an estimate**, only tightens the band around it, only when no aircraft is in the storm, and only below the wind speed where the retrieval saturates. |
+
+### The guidance envelope
+
+Every model run the forecaster was looking at, kept as a track and an intensity series for the
+latest deck cycle and the one before it. The roster is named, not pattern-matched (global models,
+hurricane models, ensemble *means*, DeepMind, the statistical intensity aids, the consensus aids
+and the official forecast), and the early interpolated forms are preferred so a cycle read while
+the late models are still running is reported as *partial*, not as disagreement.
+
+What is measured from it, per lead (24/48/72/96/120 h):
+
+| | Meaning | What it is not |
+|---|---|---|
+| **TRACK SPREAD** | mean distance of the members from their own centroid | the NHC cone — that is NHC's error radius around NHC's forecast |
+| **INTENSITY SPREAD** | max − min of the intensity members | a confidence |
+| **SCENARIO COUNT** | single-linkage clusters at a stated threshold (150 km + 3.5 km/h of lead) | a likelihood — two clusters are two groups of runs |
+| **CYCLE TREND** | spread now vs the previous cycle **at the same valid time** (a 6-h-old cycle's +30 h is this cycle's +24 h) | a tau-to-tau comparison, which reports the storm's own motion as a shift |
+| **NHC VS CONSENSUS** | official position vs the track consensus, and official peak vs the members' median peak | an error estimate |
+
+Four rules, enforced by `scripts/test-guidance.mjs`: a member count is never emitted as a
+fraction or named as a probability; the official forecast and the consensus aids are shown against
+the members and never counted among them; a lead with one member has a null spread, not a spread
+of 0; and nothing in the envelope reaches `calibratedIntensityP`, `kellyFor` or `edgeBook` — the
+test reads those sources to make sure. The frame carries the envelope's scalars, so the scrubber
+rewinds them and the register reports a cycle as *previous → current → delta*.
+
+**The as-of rule.** Only the scalars are on the frame, so a rewound cursor shows those and the
+geometry is *withheld* — no tracks, no lead table, no fan, no member roster, no deck health row —
+under an explicit `HISTORICAL GUIDANCE GEOMETRY NOT STORED FOR THIS FRAME`. The test is a
+fingerprint, not a cycle id: an a-deck keeps gaining late-arriving members for hours after its
+cycle time, so a frame keeps its geometry only while every scalar it recorded still matches the
+deck in hand. At live every part of the panel reads from that one deck.
+
+### Feed / cycle health
+
+Every operational source is judged by one rule (`docs/app/feed-health.js`, loaded by the page and
+by its test through `vm`): **VALID TIME** is the source's own instant, **FETCHED** is when the
+pipeline read it, **AGE** is valid time → the clock you are standing at (the live clock, or the
+replay cursor), judged against the source's **EXPECTED CADENCE** — LIVE inside one cadence plus a
+grace, DELAYED to the stale line, STALE past it, NO FEED when nothing valid was read. Event-driven
+sources (an aircraft, a scatterometer orbit) are dated, never judged. A valid time after the
+clock reads **FUTURE** rather than being clamped to zero: that is the replay leak guard. The
+header pills and the table behind them are built from plain values, which is what ended the
+`ADV NaNm` the header carried for weeks (a frame accessor read as a number).
+
+### The Millibar → Storm Atlas bridge
+
+`OPEN HISTORICAL CONTEXT` on a live storm opens the Atlas conditioned on the storm's **genesis**
+fix — the first b-deck position and the month it fell in — never on the current position, and
+names the storm by ATCF id (`?atcf=`). The Atlas resolves that id under the operational join's
+own rules (uppercased exact match, season checked, refused when ambiguous) and says on the surface
+whether the storm is a row yet: the pack is IBTrACS, which publishes a running season with a lag
+of days, so a storm on the board *now* is usually not in the archive *yet*, and the notice says
+so rather than letting the selection silently not happen.
 
 ### The probability engine
 
@@ -242,6 +299,10 @@ three passed:
 | `scripts/test-probability.mjs` | the engine's rules — raw never overwritten and always inside the band, never sharper than its sharpest input, disagreement only widens, scatterometer never moves the mean, SHIPS unscored until claimed, staleness caps quality |
 | `scripts/test-conflict.mjs` | the consensus-versus-recon rule — that the measured difference shifts the forecast curve rather than being averaged against it, that neither source can veto the other, that a correction never narrows the band, **and that the claim on the board says all of it** |
 | `scripts/test-intel-register.mjs` | that every ingested field reaches the **frame**, and from there the register, the probability update and the Situation strip |
+| `scripts/test-guidance.mjs` | the guidance envelope — semantics (no member fraction, no probability, not the cone), valid-time alignment across cycles, the `asOf` no-future-leak guard, null never zero, ensemble members and baselines excluded, and isolation from the probability engine and the Kelly path |
+| `scripts/test-feed-health.mjs` | the one freshness rule, at its boundaries — and that the ADV row can never be NaN |
+| `scripts/test-atlas-bridge.mjs` | both ends of the bridge: the link carries the genesis fix and the ATCF id, the Atlas resolves it under the join's rules and refuses otherwise |
+| `scripts/check-terminal-responsive.mjs` | **browser** — the terminal at 2560, 1280, 1024, 900 and 390 px: the map floor and no sideways scroll, the semantics footer on screen, the health pills with no `NaN`, valid-time columns, the rewind banner, the null state, the genesis bridge, a11y attributes, a render budget |
 | `scripts/check-intel-coverage.mjs` | **the coverage gate** — the build fails when Priority 1 or 2 is missing on an active storm |
 | `scripts/audit-claims.mjs` | every visible claim has a provenance owner |
 
@@ -306,6 +367,8 @@ scripts/
   lib/atcf.mjs          pure a/b/f-deck parsers + consensus extraction
   lib/recon.mjs         pure vortex-data-message parser
   lib/ships.mjs         pure SHIPS parser + the rapid-intensification floor
+  lib/guidance.mjs      THE GUIDANCE ENVELOPE — the whole a-deck as measurements, two cycles,
+                        aligned at valid time; feeds nothing that prices
   lib/probability.mjs   THE PROBABILITY ENGINE — one calibrated P(event) per storm
   check-intel-coverage.mjs   the coverage gate
 
@@ -315,7 +378,7 @@ docs/
   styles.css, tokens/   design tokens
   assets/               logos, fonts
   vendor/               react, react-dom, babel, leaflet (self-hosted)
-  app/                  data-loader.js, compute.js, map.jsx, panels.jsx, drawer.jsx, console.jsx, main.jsx, tweaks-panel.jsx
+  app/                  data-loader.js, compute.js, feed-health.js, map.jsx, panels.jsx, guidance.jsx, drawer.jsx, console.jsx, main.jsx, tweaks-panel.jsx
   data/                 latest.json + frames.json  (written by the workflow)
   storm-atlas/          THE HISTORICAL SURFACE — a second entry document, not a panel
     index.html          its own page: no data-loader, no compute, no babel

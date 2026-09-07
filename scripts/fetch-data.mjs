@@ -24,6 +24,7 @@ import { calibratedIntensityP, evidenceQuality } from "./lib/probability.mjs";
 import { riFloorFor } from "./lib/ships.mjs";
 import { parseOutlookShapes, attachShapes } from "./lib/shapefile.mjs";
 import { buildAtlasLive } from "./lib/atlas-live.mjs";
+import { guidanceFrameScalars } from "./lib/guidance.mjs";
 /* Moved to lib so the backtest replays the same estimator the board trades. Pure move,
    proven by scripts/verify-extraction.mjs. */
 import { INTENSITY_MAE, HURRICANE_REPORTED_KT, KT_INCREMENT, LATENT_THRESHOLD,
@@ -1634,6 +1635,11 @@ function applyIntel(storms, intel) {
   for (const s of storms) {
     const I = (intel && intel.byStorm && intel.byStorm[s.id]) || null;
     s.consensus = I ? I.consensus : null;
+    /* The model-guidance envelope and the genesis fix. Both are carried for the board to SHOW and
+       for the register to diff; neither is handed to calibratedIntensityP below, and
+       scripts/test-guidance.mjs reads this file to make sure of it. */
+    s.guidance = I ? I.guidance : null;
+    s.genesis = I ? I.genesis : null;
     s.recon = I ? I.recon : null;
     s.aircraftFix = I ? I.aircraftFix : null;
     s.ships = I ? I.ships : null;
@@ -2500,6 +2506,9 @@ async function main() {
       conSpread: con ? rr(con.spreadKt, 10) : null,
       conN: con ? con.n : null,
       conCycle: con ? con.cycle : null,
+      // Priority 1, the rest of the deck — the guidance envelope's scalars, so the scrubber
+      // rewinds them and the register can say the spread tightened or a cycle landed.
+      ...guidanceFrameScalars(s.guidance),
       // Priority 2 — aircraft reconnaissance
       reconMb: rec ? rec.mslp ?? null : null,
       reconKt: rec ? rec.intensityKt ?? null : null,
