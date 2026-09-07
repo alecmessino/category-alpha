@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-07T18:09:56.143Z",
+  "generatedAt": "2026-09-07T18:54:56.187Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 230,
+      "latencyMs": 166,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep132026\",\"binNumber\":\"EP3\",\"name\":\"Marie\",\"classification\":\"TS\",\"intensity\":\"55\",\"pressure\":\"988\",\"latitude\":\"24.7N\",\"longitude\":\"124.4W\",\"latitudeNumeric\":24.7,\"longitudeNumeric\":-124.4,\"movementDir\":300,\"movementSpeed\":7,\"lastUpdate\":\"2026-09-07T15:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"026\",\"issuance\":\"2026-09-07T15:00:00.000Z\",\"fileUpdateTime\":\"2026-09-07T14:32:48.457Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP3.shtml\"},\"forecastAdvisory\":{\"advNum\":\"026\",\"issuance\":\"2026-09-07T1",
-      "forecast": "Marie: 7 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 218m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · Hurricane Warning · forecast undefined guidance · advisory 26m old",
-      "advisoryLagMin": 218
+      "forecast": "Marie: 7 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 263m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 99% · Hurricane Warning · forecast undefined guidance · advisory 71m old",
+      "advisoryLagMin": 263
     },
     "markets": {
       "ok": true,
@@ -49,7 +49,7 @@
           "samples": [
             "When will the next hurricane form? | Before Sep 15, | px=0.005",
             "When will the next hurricane form? | Before Oct 15, | px=0.740",
-            "When will the next hurricane form? | Before Oct 1,  | px=0.570",
+            "When will the next hurricane form? | Before Oct 1,  | px=0.550",
             "When will the next hurricane form? | Before Nov 15, | px=0.875",
             "When will the next hurricane form? | Before Nov 1,  | px=0.770",
             "When will the next hurricane form? | Before Dec 1,  | px=0.865"
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 305,
+      "latencyMs": 312,
       "count": 76,
       "attempts": [],
       "note": "El Niño · JJA 2026 ONI +1.80 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 1,
       "note": "1 area(s) under watch · 0 Atlantic",
-      "latencyMs": 160,
+      "latencyMs": 391,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -280,7 +280,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 30,
+      "latencyMs": 124,
       "source": "NHC graphical TWO",
       "count": 1,
       "note": "1 of 1 area(s) with geometry"
@@ -290,21 +290,21 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 1045,
+      "latencyMs": 895,
       "count": 2,
-      "note": "2/2 storm decks read · EP132026: a-deck cycle 2026090712 · 34 techs · consensus 3 member(s) peak 55 kt · guidance 11 track members, 72h spread 97 km · b-deck 36 records · f-deck 214 fixes | EP122026: a-deck cycle 2026090712 · 35 techs · consensus 3 member(s) peak 100 kt · guidance 11 track members, 72h spread 135 km · b-deck 52 records · f-deck 404 fixes",
+      "note": "2/2 storm decks read · EP132026: a-deck cycle 2026090712 · 34 techs · consensus 3 member(s) peak 55 kt · guidance 11 track members, 72h spread 97 km · b-deck 37 records · f-deck 232 fixes | EP122026: a-deck cycle 2026090712 · 35 techs · consensus 3 member(s) peak 100 kt · guidance 11 track members, 72h spread 135 km · b-deck 53 records · f-deck 412 fixes",
       "attempts": [
         {
           "source": "EP132026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026090712 · 34 techs · consensus 3 member(s) peak 55 kt · guidance 11 track members, 72h spread 97 km · b-deck 36 records · f-deck 214 fixes"
+          "note": "a-deck cycle 2026090712 · 34 techs · consensus 3 member(s) peak 55 kt · guidance 11 track members, 72h spread 97 km · b-deck 37 records · f-deck 232 fixes"
         },
         {
           "source": "EP122026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026090712 · 35 techs · consensus 3 member(s) peak 100 kt · guidance 11 track members, 72h spread 135 km · b-deck 52 records · f-deck 404 fixes"
+          "note": "a-deck cycle 2026090712 · 35 techs · consensus 3 member(s) peak 100 kt · guidance 11 track members, 72h spread 135 km · b-deck 53 records · f-deck 412 fixes"
         }
       ]
     },
@@ -313,9 +313,9 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 578,
+      "latencyMs": 300,
       "count": 2,
-      "note": "2 vortex data message(s): AL052026 13:04Z, EP122026 16:49Z",
+      "note": "2 vortex data message(s): AL052026 13:04Z, EP122026 18:27Z",
       "attempts": [
         {
           "source": "URNT12 KNHC",
@@ -348,7 +348,7 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 70,
+      "latencyMs": 69,
       "count": 2,
       "note": "2/2 storms · EP132026: 2026-09-07T12:00Z · shear 10 kt · OHC 0 · MPI 104 kt · 8 RI thresholds | EP122026: 2026-09-07T12:00Z · shear 20 kt · OHC 23 · MPI 142 kt · 8 RI thresholds",
       "attempts": [
@@ -371,7 +371,7 @@
       "source": "ATCF f-deck scatterometer fixes",
       "url": "https://ftp.nhc.noaa.gov/atcf/fix/",
       "count": 2,
-      "note": "EP132026: ASCT 05:09Z 48 kt | EP122026: ASCT 08:30Z 72 kt"
+      "note": "EP132026: ASCT 17:13Z 45 kt | EP122026: ASCT 08:30Z 72 kt"
     }
   },
   "storms": [
@@ -448,11 +448,11 @@
         "already": false,
         "basis": "official forecast peaks at 55 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 218,
+      "advisoryLagMin": 263,
       "discussion": {
         "forecaster": "Evans/Hagen",
         "issuedZ": "2026-09-07T14:33:00.000Z",
-        "lagMin": 217,
+        "lagMin": 262,
         "guidance": {
           "intensity": null,
           "track": {
@@ -953,7 +953,7 @@
         "cycle": "2026090712",
         "cycleIso": "2026-09-07T12:00:00.000Z",
         "validZ": "2026-09-07T12:00:00.000Z",
-        "fetchedAt": "2026-09-07T18:09:56.143Z",
+        "fetchedAt": "2026-09-07T18:54:56.187Z",
         "cadenceMin": 360,
         "previousCycle": "2026090706",
         "previousCycleIso": "2026-09-07T06:00:00.000Z",
@@ -4353,55 +4353,48 @@
         "basis": "SHIPS MARIE EP132026 2026-09-07T12:00Z · shear 10 kt · OHC 0 kJ/cm2 · MPI 104 kt · mid-level RH 41%"
       },
       "ascat": {
-        "iso": "2026-09-07T05:09:00.000Z",
+        "iso": "2026-09-07T17:13:00.000Z",
         "type": "ASCT",
         "instrument": "ASCT",
-        "lat": 24.15,
-        "lon": -123.5,
-        "kt": 48,
-        "positionConfidence": 3,
-        "windConfidence": 0,
+        "lat": 24.55,
+        "lon": -124.82,
+        "kt": 45,
+        "positionConfidence": 1,
+        "windConfidence": 2,
         "radii": {
           "34": {
             "code": "NEQ",
             "ne": 0,
             "se": 0,
-            "sw": 50,
-            "nw": 100
-          },
-          "50": {
-            "code": "NEQ",
-            "ne": 50,
-            "se": 40,
-            "sw": 0,
-            "nw": 0
+            "sw": 90,
+            "nw": 140
           }
         },
         "site": "KNHC",
-        "passes": 22
+        "passes": 23
       },
       "bestTrack": {
-        "time": "2026090712",
-        "iso": "2026-09-07T12:00:00.000Z",
-        "lat": 24.5,
-        "lon": -124.1,
-        "kt": 55,
-        "mslp": 988,
+        "time": "2026090718",
+        "iso": "2026-09-07T18:00:00.000Z",
+        "lat": 24.6,
+        "lon": -124.9,
+        "kt": 50,
+        "mslp": 992,
         "ty": "TS",
         "radii": {
           "34": {
             "code": "NEQ",
             "ne": 110,
             "se": 100,
-            "sw": 80,
-            "nw": 130
+            "sw": 90,
+            "nw": 140
           },
           "50": {
             "code": "NEQ",
             "ne": 60,
             "se": 0,
             "sw": 0,
-            "nw": 40
+            "nw": 0
           }
         }
       },
@@ -4411,7 +4404,7 @@
         "forecastAids": 33
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026090712 · 34 techs · consensus 3 member(s) peak 55 kt · guidance 11 track members, 72h spread 97 km · b-deck 36 records · f-deck 214 fixes",
+        "atcf": "a-deck cycle 2026090712 · 34 techs · consensus 3 member(s) peak 55 kt · guidance 11 track members, 72h spread 97 km · b-deck 37 records · f-deck 232 fixes",
         "ships": "2026-09-07T12:00Z · shear 10 kt · OHC 0 · MPI 104 kt · 8 RI thresholds"
       },
       "riFloor": {
@@ -4425,26 +4418,26 @@
       },
       "hurricanePCal": {
         "ok": true,
-        "p": 0.06680722872027083,
+        "p": 0.03039629715762014,
         "pRaw": 0.01,
         "pLow": 0.01,
-        "pHigh": 0.06680722872027083,
+        "pHigh": 0.03039629715762014,
         "pPeak": 0.01,
-        "pNow": 0.06680722872027083,
-        "pWithRi": 0.06680722872027083,
+        "pNow": 0.03039629715762014,
+        "pWithRi": 0.06,
         "drivenBy": "current intensity",
         "meanKt": 55,
         "sigmaKt": 0,
-        "sigmaInitKt": 5,
-        "initSource": "satellite intensity analysis",
+        "sigmaInitKt": 4,
+        "initSource": "scatterometer (ASCT)",
         "tauKt": 0,
         "reconDeltaKt": null,
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 781,
-        "ascatUsed": false,
-        "consensusAgeMin": 370,
+        "ascatAgeMin": 102,
+        "ascatUsed": true,
+        "consensusAgeMin": 415,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
@@ -4494,22 +4487,23 @@
           }
         ],
         "notes": [
-          "scatterometer pass is 781 min old, past the 360-min line — band not tightened"
+          "SHIPS RI implies a floor of 6% — published, NOT scored (no operator claim)"
         ],
         "used": {
           "official": true,
           "consensus": true,
           "recon": false,
-          "ascat": false,
+          "ascat": true,
           "ships": false
         },
-        "basis": "combined 2 intensity estimates at 55 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 1%, calibrated 7%"
+        "basis": "combined 2 intensity estimates at 55 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 102 min ago · driven by the current intensity · raw official estimate 1%, calibrated 3%"
       },
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 218 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "ATCF consensus 370 min old, no aircraft in the storm",
+          "the advisory under this estimate is 263 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 415 min old, no aircraft in the storm",
+          "scatterometer pass tightened the current-intensity band",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -4608,11 +4602,11 @@
         "already": true,
         "basis": "already carried at 100 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast"
       },
-      "advisoryLagMin": 26,
+      "advisoryLagMin": 71,
       "discussion": {
         "forecaster": "Blake",
         "issuedZ": "2026-09-07T14:52:00.000Z",
-        "lagMin": 198,
+        "lagMin": 243,
         "guidance": {
           "intensity": null,
           "track": null
@@ -5268,7 +5262,7 @@
         "cycle": "2026090712",
         "cycleIso": "2026-09-07T12:00:00.000Z",
         "validZ": "2026-09-07T12:00:00.000Z",
-        "fetchedAt": "2026-09-07T18:09:56.143Z",
+        "fetchedAt": "2026-09-07T18:54:56.187Z",
         "cadenceMin": 360,
         "previousCycle": "2026090706",
         "previousCycleIso": "2026-09-07T06:00:00.000Z",
@@ -8060,58 +8054,58 @@
       "recon": {
         "ok": true,
         "stormId": "EP122026",
-        "fixIso": "2026-09-07T16:49:50.000Z",
+        "fixIso": "2026-09-07T18:27:20.000Z",
         "center": [
-          17.74,
-          -162.35
+          18.09,
+          -162.13
         ],
         "wmo": "URPN12 KNHC",
-        "issuedDdhhmm": "071714",
+        "issuedDdhhmm": "071851",
         "flightLevelMb": 700,
-        "mslp": 955,
+        "mslp": 957,
         "extrapolated": false,
-        "surfaceKt": 104,
-        "surfaceInboundKt": 104,
-        "surfaceOutboundKt": 99,
-        "flightLevelKt": 93,
+        "surfaceKt": 113,
+        "surfaceInboundKt": 113,
+        "surfaceOutboundKt": 109,
+        "flightLevelKt": 103,
         "flightInbound": {
-          "dir": 119,
-          "kt": 93
+          "dir": 225,
+          "kt": 103
         },
         "flightOutbound": {
-          "dir": 309,
-          "kt": 84
+          "dir": 71,
+          "kt": 92
         },
-        "reducedSurfaceKt": 84,
+        "reducedSurfaceKt": 93,
         "reductionFactor": 0.9,
         "flDisagreement": null,
         "mission": {
           "aircraft": "AF303",
           "number": "1012E",
           "storm": "LOWELL",
-          "ob": 4
+          "ob": 15
         },
-        "obNumber": 4,
-        "intensityKt": 104,
+        "obNumber": 15,
+        "intensityKt": 113,
         "intensitySource": "SFMR surface wind",
         "unparsed": {
-          "E": "160 deg 7 kt",
-          "F": "Poorly defined",
-          "G": "NA"
+          "E": "140 deg 10 kt",
+          "F": "OPEN SE",
+          "G": "C35"
         },
-        "raw": "URPN12 KNHC 071714\nVORTEX DATA MESSAGE   EP122026\nA. 07/16:49:50Z\nB. 17.74 deg N 162.35 deg W\nC. 700 mb 2710 m\nD. 955 mb\nE. 160 deg 7 kt\nF. Poorly defined\nG. NA\nH. 104 kt\nI. 002 deg 17 nm 16:45:00Z\nJ. 119 deg 93 kt\nK. 010 deg 29 nm 16:41:30Z\nL. 99 kt\nM. 223 deg 17 nm 16:55:00Z\nN. 309 deg 84 kt\nO. 225 deg 37 nm 17:01:00Z\nP. 9 C / 3054 m\nQ. 15 C / 3053 m\nR. 15 C / NA\nS. 1345 / 7\nT. 0.02 / 1.75 nm\nU. AF303 1012E LOWELL    OB 04\nMAX FL WIND 93 KT 010 / 29 NM 16:41:30Z\n;\n\n\u00030000147200\n00001",
+        "raw": "URPN12 KNHC 071851\nVORTEX DATA MESSAGE   EP122026\nA. 07/18:27:20Z\nB. 18.09 deg N 162.13 deg W\nC. 700 mb 2731 m\nD. 957 mb\nE. 140 deg 10 kt\nF. OPEN SE\nG. C35\nH. 113 kt\nI. 157 deg 34 nm 18:17:00Z\nJ. 225 deg 103 kt\nK. 151 deg 47 nm 18:12:30Z\nL. 109 kt\nM. 315 deg 21 nm 18:33:30Z\nN. 071 deg 92 kt\nO. 314 deg 23 nm 18:34:00Z\nP. 12 C / 3050 m\nQ. 17 C / 3054 m\nR. 13 C / NA\nS. 1345 / 7\nT. 0.02 / 1.25 nm\nU. AF303 1012E LOWELL    OB 15\nMAX FL WIND 103 KT 151 / 47 NM 18:12:30Z\nMAX FL TEMP 19 C 164 / 23 NM FROM FL CNTR\n;",
         "product": "URPN12 KNHC"
       },
       "aircraftFix": {
-        "iso": "2026-09-07T08:01:00.000Z",
+        "iso": "2026-09-07T16:49:00.000Z",
         "type": "AIRC",
-        "lat": 16.31,
-        "lon": -163.26,
-        "kt": 84,
-        "mslp": 951,
+        "lat": 17.74,
+        "lon": -162.35,
+        "kt": 104,
+        "mslp": 955,
         "pressureDerivation": null,
         "site": "KNHC",
-        "fixes": 28
+        "fixes": 29
       },
       "ships": {
         "ok": true,
@@ -9146,12 +9140,12 @@
         "passes": 25
       },
       "bestTrack": {
-        "time": "2026090712",
-        "iso": "2026-09-07T12:00:00.000Z",
-        "lat": 17,
-        "lon": -162.9,
-        "kt": 100,
-        "mslp": 950,
+        "time": "2026090718",
+        "iso": "2026-09-07T18:00:00.000Z",
+        "lat": 18,
+        "lon": -162.2,
+        "kt": 95,
+        "mslp": 956,
         "ty": "HU",
         "radii": {
           "34": {
@@ -9183,7 +9177,7 @@
         "forecastAids": 34
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026090712 · 35 techs · consensus 3 member(s) peak 100 kt · guidance 11 track members, 72h spread 135 km · b-deck 52 records · f-deck 404 fixes",
+        "atcf": "a-deck cycle 2026090712 · 35 techs · consensus 3 member(s) peak 100 kt · guidance 11 track members, 72h spread 135 km · b-deck 53 records · f-deck 412 fixes",
         "ships": "2026-09-07T12:00Z · shear 20 kt · OHC 23 · MPI 142 kt · 8 RI thresholds"
       },
       "riFloor": null,
@@ -9197,32 +9191,32 @@
         "pNow": 0.99,
         "pWithRi": 0.99,
         "drivenBy": "forecast peak",
-        "meanKt": 100,
+        "meanKt": 113,
         "sigmaKt": 0,
         "sigmaInitKt": 4,
-        "initSource": "aircraft reconnaissance, already incorporated by the advisory",
+        "initSource": "aircraft reconnaissance",
         "tauKt": 0,
-        "reconDeltaKt": null,
-        "reconAgeMin": 80,
-        "reconUsed": false,
-        "reconAlreadyPriced": true,
+        "reconDeltaKt": 13,
+        "reconAgeMin": 28,
+        "reconUsed": true,
+        "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 370,
+        "consensusAgeMin": 415,
         "shipsScoring": false,
         "riFloor": null,
         "sources": [
           {
             "id": "official",
             "label": "NHC official forecast intensity",
-            "peakKt": 100,
+            "peakKt": 113,
             "peakHr": 0,
             "sigmaKt": 0
           },
           {
             "id": "consensus",
             "label": "ATCF consensus (HCCA/IVCN/GDMI)",
-            "peakKt": 100,
+            "peakKt": 113,
             "peakHr": 0,
             "sigmaKt": 0
           }
@@ -9246,25 +9240,25 @@
             "label": "Aircraft reconnaissance",
             "p": null,
             "unavailable": false,
-            "basis": "aircraft measured 104 kt (SFMR surface wind) and 955 mb measured, 80 min ago"
+            "basis": "aircraft measured 113 kt (SFMR surface wind) and 957 mb measured, 28 min ago"
           }
         ],
         "notes": [
-          "recon fix not applied: Advisory 46A was issued 54 min AFTER this fix, so the forecaster already had it — their 100 kt is their reading of it, and shifting by the difference again would count it twice"
+          "every forecast peak shifted +13 kt: the aircraft measured 113 kt (SFMR surface wind) against the advisory's 100 kt"
         ],
         "used": {
           "official": true,
           "consensus": true,
-          "recon": false,
+          "recon": true,
           "ascat": false,
           "ships": false
         },
-        "basis": "combined 2 intensity estimates at 100 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99%"
+        "basis": "combined 2 intensity estimates at 113 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · initial condition MEASURED by aircraft 28 min ago · driven by the forecast peak · raw official estimate 99%, calibrated 99%"
       },
       "evidenceQuality": {
         "tier": "HIGH",
         "reasons": [
-          "aircraft reconnaissance 80 min old — the initial condition is measured, not estimated, and the advisory has already incorporated it"
+          "aircraft reconnaissance 28 min old — the initial condition is measured, not estimated"
         ]
       }
     }
@@ -9281,7 +9275,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 100 kt now · combined 2 intensity estimates at 100 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 100 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 26 min old when fetched",
+      "modelBasis": "Lowell is 100 kt now · combined 2 intensity estimates at 113 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · initial condition MEASURED by aircraft 28 min ago · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 100 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 71 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -9316,12 +9310,12 @@
           "label": "Aircraft reconnaissance",
           "p": null,
           "unavailable": false,
-          "basis": "aircraft measured 104 kt (SFMR surface wind) and 955 mb measured, 80 min ago"
+          "basis": "aircraft measured 113 kt (SFMR surface wind) and 957 mb measured, 28 min ago"
         }
       ],
       "modelLow": 0.99,
       "modelHigh": 0.99,
-      "modelLagMin": 26,
+      "modelLagMin": 71,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -9329,11 +9323,11 @@
       "modelCalibrated": true,
       "modelQuality": "HIGH",
       "modelIntel": {
-        "conKt": 100,
-        "conAgeMin": 370,
+        "conKt": 113,
+        "conAgeMin": 415,
         "spreadKt": 0,
-        "reconAgeMin": 80,
-        "reconDeltaKt": null,
+        "reconAgeMin": 28,
+        "reconDeltaKt": 13,
         "ascatUsed": false,
         "riFloorP": null,
         "riScored": false,
@@ -9344,14 +9338,14 @@
       "yesBid": 0.01,
       "yesAsk": 0.03,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 7,
+      "liquidity": 3,
       "spread": 0.019999999999999997,
-      "volume": 10916.81,
-      "volume24h": 571.9,
-      "openInterest": 4322.59,
+      "volume": 11072.87,
+      "volume24h": 727.96,
+      "openInterest": 4478.65,
       "depth": {
         "bidSize": 1674.72,
-        "askSize": 217,
+        "askSize": 108.94,
         "notional": 1
       },
       "proxy": false,
@@ -9369,7 +9363,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 100 kt now · combined 2 intensity estimates at 100 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 100 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 26 min old when fetched",
+      "modelBasis": "Lowell is 100 kt now · combined 2 intensity estimates at 113 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · initial condition MEASURED by aircraft 28 min ago · driven by the forecast peak · raw official estimate 99%, calibrated 99% · already carried at 100 kt in the current advisory, at or above the 65 kt hurricane threshold — the question is settled by the classification, not forecast · Hurricane Warning in effect · advisory 71 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -9404,12 +9398,12 @@
           "label": "Aircraft reconnaissance",
           "p": null,
           "unavailable": false,
-          "basis": "aircraft measured 104 kt (SFMR surface wind) and 955 mb measured, 80 min ago"
+          "basis": "aircraft measured 113 kt (SFMR surface wind) and 957 mb measured, 28 min ago"
         }
       ],
       "modelLow": 0.99,
       "modelHigh": 0.99,
-      "modelLagMin": 26,
+      "modelLagMin": 71,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -9417,11 +9411,11 @@
       "modelCalibrated": true,
       "modelQuality": "HIGH",
       "modelIntel": {
-        "conKt": 100,
-        "conAgeMin": 370,
+        "conKt": 113,
+        "conAgeMin": 415,
         "spreadKt": 0,
-        "reconAgeMin": 80,
-        "reconDeltaKt": null,
+        "reconAgeMin": 28,
+        "reconDeltaKt": 13,
         "ascatUsed": false,
         "riFloorP": null,
         "riScored": false,
@@ -9453,11 +9447,11 @@
       "storm": "EP132026",
       "subject": null,
       "market": 0.99,
-      "model": 0.06680722872027083,
+      "model": 0.03039629715762014,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Marie is 55 kt now · combined 2 intensity estimates at 55 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the current intensity · raw official estimate 1%, calibrated 7% · official forecast peaks at 55 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 218 min old when fetched",
+      "modelBasis": "Marie is 55 kt now · combined 2 intensity estimates at 55 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 102 min ago · driven by the current intensity · raw official estimate 1%, calibrated 3% · official forecast peaks at 55 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 263 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -9496,8 +9490,8 @@
         }
       ],
       "modelLow": 0.01,
-      "modelHigh": 0.06680722872027083,
-      "modelLagMin": 218,
+      "modelHigh": 0.03039629715762014,
+      "modelLagMin": 263,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -9506,11 +9500,11 @@
       "modelQuality": "LOW",
       "modelIntel": {
         "conKt": 55,
-        "conAgeMin": 370,
+        "conAgeMin": 415,
         "spreadKt": 0,
         "reconAgeMin": null,
         "reconDeltaKt": null,
-        "ascatUsed": false,
+        "ascatUsed": true,
         "riFloorP": 0.06,
         "riScored": false,
         "drivenBy": "current intensity"
@@ -10430,7 +10424,7 @@
       "volume24h": 994.73,
       "openInterest": 8256.51,
       "depth": {
-        "bidSize": 16,
+        "bidSize": 15,
         "askSize": 4.79,
         "notional": 1
       },
@@ -10554,14 +10548,14 @@
       "yesBid": 0.34,
       "yesAsk": 0.35,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 148,
+      "liquidity": 147,
       "spread": 0.009999999999999953,
       "volume": 10646.32,
       "volume24h": 23.49,
       "openInterest": 5031.39,
       "depth": {
         "bidSize": 16.02,
-        "askSize": 424.14,
+        "askSize": 421.38,
         "notional": 1
       },
       "proxy": false,
@@ -10574,7 +10568,7 @@
       "short": "Will Gonzalo be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.195,
+      "market": 0.20500000000000002,
       "model": 0.08637793441144401,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -10607,17 +10601,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.15,
+      "yesBid": 0.17,
       "yesAsk": 0.24,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 2,
-      "spread": 0.09,
+      "liquidity": 1,
+      "spread": 0.06999999999999998,
       "volume": 10078.4,
       "volume24h": 8.24,
       "openInterest": 4850.66,
       "depth": {
         "bidSize": 5,
-        "askSize": 6.25,
+        "askSize": 2.25,
         "notional": 1
       },
       "proxy": false,
@@ -11410,7 +11404,7 @@
       "short": "Will there be more than 12 Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.225,
+      "market": 0.21500000000000002,
       "model": 0.2609572433708251,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
@@ -11461,16 +11455,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 12,
-      "yesBid": 0.19,
+      "yesBid": 0.17,
       "yesAsk": 0.26,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.07,
+      "spread": 0.09,
       "volume": 5343.59,
       "volume24h": 0,
       "openInterest": 2038.03,
       "depth": {
-        "bidSize": 2.1,
+        "bidSize": 24,
         "askSize": 4,
         "notional": 1
       },
@@ -11528,6 +11522,62 @@
       "depth": {
         "bidSize": 0,
         "askSize": 111,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
+    },
+    {
+      "id": "KXFIRSTHURRICANE-26DEC01ATL-LEA",
+      "label": "Will Leah be the first named hurricane in the Atlantic in 2026?",
+      "short": "Will Leah be the first named hurricane in the…",
+      "storm": null,
+      "subject": null,
+      "market": 0.01,
+      "model": 0.03861736062284925,
+      "modelQuantity": "firsthurricane",
+      "modelBasin": "atlantic",
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Leah is name #12 on the Atlantic list and 5 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 4% once seasons are weighted by ONI similarity · used at all in 44%",
+      "modelUncond": 0.013888888888888888,
+      "modelLayers": [
+        {
+          "id": "ordinal",
+          "label": "Ordinal climatology",
+          "p": 0.013888888888888888,
+          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form was the season's FIRST hurricane in 0% of seasons"
+        },
+        {
+          "id": "onisim",
+          "label": "ONI-similarity weighted",
+          "p": 0.03861736062284925,
+          "basis": "same seasons weighted by ONI distance from +1.80 (effective 6.0 seasons, shrunk 57% toward unweighted)"
+        }
+      ],
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": null,
+      "yesAsk": 0.01,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": 3,
+      "spread": 0.01,
+      "volume": 4410.22,
+      "volume24h": 215.17,
+      "openInterest": 2598.99,
+      "depth": {
+        "bidSize": 0,
+        "askSize": 289.77,
         "notional": 1
       },
       "proxy": false,
@@ -11607,62 +11657,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCTOT-26DEC01"
-    },
-    {
-      "id": "KXFIRSTHURRICANE-26DEC01ATL-LEA",
-      "label": "Will Leah be the first named hurricane in the Atlantic in 2026?",
-      "short": "Will Leah be the first named hurricane in the…",
-      "storm": null,
-      "subject": null,
-      "market": 0.01,
-      "model": 0.03861736062284925,
-      "modelQuantity": "firsthurricane",
-      "modelBasin": "atlantic",
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Leah is name #12 on the Atlantic list and 5 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 4% once seasons are weighted by ONI similarity · used at all in 44%",
-      "modelUncond": 0.013888888888888888,
-      "modelLayers": [
-        {
-          "id": "ordinal",
-          "label": "Ordinal climatology",
-          "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form was the season's FIRST hurricane in 0% of seasons"
-        },
-        {
-          "id": "onisim",
-          "label": "ONI-similarity weighted",
-          "p": 0.03861736062284925,
-          "basis": "same seasons weighted by ONI distance from +1.80 (effective 6.0 seasons, shrunk 57% toward unweighted)"
-        }
-      ],
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": null,
-      "yesAsk": 0.01,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 4,
-      "spread": 0.01,
-      "volume": 4316.71,
-      "volume24h": 121.66,
-      "openInterest": 2598.99,
-      "depth": {
-        "bidSize": 0,
-        "askSize": 383.28,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
     },
     {
       "id": "KXHURCTOT-26DEC01-T9",
@@ -13024,7 +13018,7 @@
       "short": "Will there be more than 4 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.6599999999999999,
+      "market": 0.665,
       "model": 0.5159307349502569,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
@@ -13076,16 +13070,16 @@
       "horizon": "seasonal",
       "strike": 4,
       "yesBid": 0.62,
-      "yesAsk": 0.7,
+      "yesAsk": 0.71,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 1,
-      "spread": 0.07999999999999996,
+      "liquidity": 131,
+      "spread": 0.08999999999999997,
       "volume": 1257.63,
       "volume24h": 32.83,
       "openInterest": 604.91,
       "depth": {
         "bidSize": 112,
-        "askSize": 2.11,
+        "askSize": 184.11,
         "notional": 1
       },
       "proxy": false,
@@ -13859,7 +13853,7 @@
       "liquidity": 21,
       "spread": 0.06,
       "volume": 730.4,
-      "volume24h": 18.26,
+      "volume24h": 0,
       "openInterest": 457.26,
       "depth": {
         "bidSize": 106,
@@ -15730,7 +15724,7 @@
       "short": "Will Josephine be categorized as a hurricane…",
       "storm": null,
       "subject": null,
-      "market": 0.33499999999999996,
+      "market": 0.33999999999999997,
       "model": 0.35294870129999684,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -15763,11 +15757,11 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.2,
+      "yesBid": 0.21,
       "yesAsk": 0.47,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 24,
-      "spread": 0.26999999999999996,
+      "spread": 0.26,
       "volume": 106.92,
       "volume24h": 0,
       "openInterest": 77.2,
@@ -17229,7 +17223,7 @@
       "openInterest": 15825.45,
       "depth": {
         "bidSize": 0,
-        "askSize": 109945.32,
+        "askSize": 109947.55,
         "notional": 1
       },
       "proxy": false,
@@ -17265,14 +17259,14 @@
       "yesBid": 0.1,
       "yesAsk": 0.15,
       "closeTime": "2027-01-01T04:59:00Z",
-      "liquidity": 2195,
+      "liquidity": 1834,
       "spread": 0.04999999999999999,
-      "volume": 44341.28,
-      "volume24h": 3280.57,
-      "openInterest": 20331.44,
+      "volume": 46750.65,
+      "volume24h": 5601.81,
+      "openInterest": 22740.81,
       "depth": {
         "bidSize": 66,
-        "askSize": 14633.73,
+        "askSize": 12224.36,
         "notional": 1
       },
       "proxy": false,
@@ -18166,7 +18160,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.5700000000000001,
+      "market": 0.55,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -18186,17 +18180,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.54,
-      "yesAsk": 0.6,
+      "yesBid": 0.53,
+      "yesAsk": 0.57,
       "closeTime": "2026-10-01T03:59:00Z",
-      "liquidity": 10,
-      "spread": 0.05999999999999994,
+      "liquidity": 26,
+      "spread": 0.039999999999999925,
       "volume": 2044.98,
       "volume24h": 643.11,
       "openInterest": 1726.09,
       "depth": {
-        "bidSize": 1,
-        "askSize": 16,
+        "bidSize": 76.31,
+        "askSize": 45,
         "notional": 1
       },
       "proxy": false,
@@ -18324,7 +18318,7 @@
       "liquidity": 24,
       "spread": 0.09,
       "volume": 1639.3,
-      "volume24h": 125.91,
+      "volume24h": 0,
       "openInterest": 1071.45,
       "depth": {
         "bidSize": 32,
@@ -21099,7 +21093,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.35,
+      "market": 0.26,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -21120,10 +21114,10 @@
       "horizon": "storm",
       "strike": 5,
       "yesBid": 0.01,
-      "yesAsk": 0.69,
+      "yesAsk": 0.51,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 2,
-      "spread": 0.6799999999999999,
+      "spread": 0.5,
       "volume": 8,
       "volume24h": 0,
       "openInterest": 8,
@@ -21145,7 +21139,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.33,
+      "market": 0.275,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -21165,17 +21159,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 1,
-      "yesBid": 0.16,
-      "yesAsk": 0.5,
+      "yesBid": 0.04,
+      "yesAsk": 0.51,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.33999999999999997,
+      "spread": 0.47000000000000003,
       "volume": 6.62,
       "volume24h": 0,
       "openInterest": 6.62,
       "depth": {
         "bidSize": 1,
-        "askSize": 1,
+        "askSize": 2,
         "notional": 1
       },
       "proxy": false,
@@ -21191,7 +21185,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.135,
+      "market": 0.435,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -21212,10 +21206,10 @@
       "horizon": "storm",
       "strike": 3,
       "yesBid": 0.01,
-      "yesAsk": 0.26,
+      "yesAsk": 0.86,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 0,
-      "spread": 0.25,
+      "liquidity": 1,
+      "spread": 0.85,
       "volume": 6,
       "volume24h": 0,
       "openInterest": 6,
@@ -21651,7 +21645,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.25,
+      "market": 0.14,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -21672,10 +21666,10 @@
       "horizon": "storm",
       "strike": 2,
       "yesBid": 0.02,
-      "yesAsk": 0.48,
+      "yesAsk": 0.26,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 0,
-      "spread": 0.45999999999999996,
+      "spread": 0.24000000000000002,
       "volume": 4,
       "volume24h": 0,
       "openInterest": 4,
@@ -25296,11 +25290,11 @@
       "hot": true
     },
     {
-      "tsZ": "2026-09-07T16:49:50.000Z",
+      "tsZ": "2026-09-07T18:27:20.000Z",
       "kind": "recon",
       "stormId": "EP122026",
-      "label": "Lowell reconnaissance fix — 955 mb, 104 kt surface, 93 kt flight level · +4 mb since the last fix",
-      "detail": "AF303 mission 1012E observation 4 — measured, not estimated",
+      "label": "Lowell reconnaissance fix — 957 mb, 113 kt surface, 103 kt flight level · +2 mb since the last fix",
+      "detail": "AF303 mission 1012E observation 15 — measured, not estimated",
       "source": "URPN12 KNHC",
       "tier": "A",
       "hot": true
