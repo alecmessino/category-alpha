@@ -497,6 +497,27 @@ python3 scripts/genesis/cli.py analogs --lat 12 --lon -140 --radius 500 --months
 python3 scripts/genesis/cli.py gaps      # every data gap, with the measurement behind it
 ```
 
+## The Track Residual Monitor (preview, unmerged)
+
+`docs/TRACK-RESIDUAL.md` documents a module that measures **observed-position departures from an
+issued forecast** — where the storm actually is against where an advisory said it would be, in the
+frame that advisory was pointing, with an explicit sign convention and four separate refusal
+fields.
+
+It is **not wired to anything**. `residual_state` is left unwired on purpose, no probability is
+emitted, and the preview lives at `docs/preview/track-residual/` rather than on the board. The
+reason is the same one the calibration section gives: nothing here has been scored against a
+held-out storm, so nothing here may move a rank or a price.
+
+What it does establish is a measurement and its provenance. The worked example is recomputed by
+`scripts/test-track-residual.mjs` from eight preserved NHC products whose SHA-256 the test checks
+first, and it corrects a concept brief that had interpolated a forecast to the observed *latitude*
+(which forces the along-track residual to zero on a northbound storm), trusted a nominal `12H`
+label that was actually nine hours, and subtracted a cross-track residual from an eastward
+shoreline gap. The coverage report in `research/track-residual/COVERAGE.md` says what could ever
+be tested: 221 archived EP storms, of which only 65 carry the intermediate advisories that make a
+sub-six-hour window possible at all.
+
 ## Calibration — has any of this ever been right?
 
 Every other section describes what the board does. This one describes whether it has

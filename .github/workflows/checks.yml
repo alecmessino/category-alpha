@@ -142,6 +142,20 @@ jobs:
       - name: Test the calibration ledger and scorecard
         run: node scripts/test-calibration.mjs
 
+      # THE TRACK RESIDUAL MONITOR. Offline: it runs against the eight preserved NHC products in
+      # scripts/fixtures/lowell-ep122026/, re-hashing each one before it asserts anything, so a
+      # passing golden is a golden about bytes that have not moved.
+      #
+      # The suite is organised around the WRONG ANSWERS rather than around the functions, because
+      # every one of them is available and looks right: interpolating to the observed latitude
+      # (which forces the along-track term to zero on a meridional storm), trusting a nominal
+      # "12H" label that is actually nine hours, calling an eastward displacement pure
+      # cross-track, subtracting a cross-track residual from an eastward shoreline gap, scoring a
+      # fix against an advisory that had already ingested it, and resolving a contract No on a
+      # strike in geography it explicitly excludes.
+      - name: Test the track residual monitor
+        run: node scripts/test-track-residual.mjs
+
       # A guard that can fail silently is not a guard. The predicate deciding whether a
       # verification run may write the verdict the board reads once disabled itself to a
       # truthy regex object and `node --check` passed it, so it is now a pure function
