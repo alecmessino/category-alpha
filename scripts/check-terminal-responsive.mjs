@@ -335,6 +335,14 @@ for (const W of WIDTHS) {
     await page.waitForTimeout(300);
     const hasTable = await page.evaluate(() => !!document.querySelector("[data-feed-health-table]"));
     ok("the feed-health table opens from a pill", hasTable);
+    /* And it is on TOP: the point at the table's centre resolves to the table, not to the map
+       section beneath it (which is exactly where it painted with the header at z-index 30). */
+    const onTop = await page.evaluate(() => {
+      const t = document.querySelector("[data-feed-health-table]"); if (!t) return "no table";
+      const r = t.getBoundingClientRect(); const el = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return el && t.contains(el) ? null : "the table is occluded by " + (el ? el.tagName + "." + String(el.className).slice(0, 30) : "nothing");
+    });
+    ok("the feed-health table is not occluded by the map", onTop === null, onTop || "");
     await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-feed-health.png`), fullPage: false, clip: { x: W.w - 1000, y: 0, width: 1000, height: 520 } });
     await page.evaluate(() => { const t = document.querySelector("[data-feed-health-table]"); if (t) t.click(); });
   }

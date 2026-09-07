@@ -471,8 +471,11 @@ function MillibarTerminalApp() {
 
   // Real staleness of the snapshot itself — the dot was green regardless of age.
   const staleMin = MT._generatedAt ? Math.max(0, Math.round((Date.now() - Date.parse(MT._generatedAt)) / 60000)) : null;
+  /* The header sits ABOVE the sticky map section (zIndex 400): the feed-health table opens from
+     this bar and was painting UNDER the map — a z-index of 30 on the header put every dropdown
+     it owns behind the section that follows it. 450 keeps it under nothing on the page. */
   const shellHeader = (
-    <header style={{ position: "sticky", top: 0, zIndex: 30, display: "flex", alignItems: "center", gap: 12, padding: "9px 20px", background: "var(--surface-card)", borderBottom: "1px solid var(--border-dim)", flexWrap: "wrap" }}>
+    <header style={{ position: "sticky", top: 0, zIndex: 450, display: "flex", alignItems: "center", gap: 12, padding: "9px 20px", background: "var(--surface-card)", borderBottom: "1px solid var(--border-dim)", flexWrap: "wrap" }}>
       <img src="assets/logo-dark.svg" alt="Millibar Terminal" style={{ height: 34 }} onError={(e) => { e.target.style.display = "none"; }} />
       <PL>Category Alpha</PL>
       {/* Active systems live in the top bar — switching storms shouldn't require
