@@ -83,7 +83,7 @@ judged after the audit. Items that share an ingest are grouped; the tranche is t
 | 3 | Cycle delta engine — guidance and official track, at valid time | 5 | 5 | 5 (previous cycle in the same file) | 2 | 62 | **built** for guidance and OFCL; watches/radii/recon deltas already existed in the register |
 | 13 | Feed / cycle health (VALID · FETCHED · AGE · CADENCE · STATUS) | 4 | 3 | 5 | 1 | 60 | **built** |
 | 8 | Millibar → Atlas bridge (genesis + month + ATCF id) | 4 | 5 | 4 (b-deck first fix; pack lags IBTrACS) | 1 | 80 | **built** |
-| 6 | Synchronized evidence clock | 4 | 4 | 3 (only the frame's scalars are bitemporal) | 3 | 21 | partial: envelope scalars ride the existing cursor; geometry is latest-only and says so |
+| 6 | Synchronized evidence clock | 4 | 4 | 3 (only the frame's scalars are bitemporal) | 3 | 21 | **built** for the envelope: the scalars ride the cursor, and the geometry is WITHHELD under a historical as-of rather than drawn from the deck in hand |
 | 11 | Contract lens (price · official · Atlas rate · raw guidance) | 4 | 4 | 3 | 2.5 | 19 | deferred; guidance is on the board beside the anchor, never inside it |
 | 4 | Environmental runway sampled along the track | 4 | 5 | 2 (SHIPS gives storm-centre values; along-track needs GRIB sampling) | 4 | 10 | deferred |
 | 5 | Official hazard geometry (radii, watches, surge/rain) | 4 | 2 | 4 (b-deck radii parsed; GIS shapefiles not) | 3 | 11 | deferred |
@@ -117,6 +117,19 @@ judged after the audit. Items that share an ingest are grouped; the tranche is t
 - `docs/app/map.jsx` — a *Model Guidance* layer under the official track and the cone:
   members thin and muted by class, consensus aids heavier and pale, previous-cycle official
   as a dotted ghost, lead centroids as crosses (no ring, because a ring reads as a cone).
+- **The as-of rule.** The frame stores the envelope's scalars and no geometry, so a rewound
+  cursor shows the numbers that frame recorded — read from the frame's own row, never through
+  the loader's fall-back-to-latest accessors — while the tracks, the lead table, the intensity
+  fan, the member roster, the deck's health row and the latest cycle id in the masthead are all
+  withheld, replaced by `HISTORICAL GUIDANCE GEOMETRY NOT STORED FOR THIS FRAME` / `Recorded
+  cycle metrics below remain valid as-of this cursor.` The test is a **fingerprint, not a cycle
+  id**: an a-deck accretes late-arriving members for hours after its cycle time, so a frame keeps
+  its geometry only while every scalar it recorded still matches the deck in hand. At live
+  everything reads from that one deck, so no part can disagree with another. One predicate
+  (`MT_guidanceGeometryAt`) serves the panel, the rail strip, the layer chip and the map, whose
+  guidance layer moved into its own cursor-keyed effect so scrubbing toggles it without
+  rebuilding the cone, the track and the eye. A storm with no deck at all keeps its NO FEED
+  health row — that absence is a feed statement, not a leak.
 - `docs/app/guidance.jsx` — the rail strip (five metrics, health status, the bridge) and the
   Models-tab panel (metrics as previous → current → delta, the lead table with valid times,
   the intensity fan with category thresholds, the members, the health row judged at the
@@ -194,9 +207,21 @@ Browser:
 - `scripts/check-terminal-responsive.mjs` at 2560, 1280, 1024, 900 and 390 px: map floor
   (≥480 / ≥300 px) and width share, no sideways scroll, layer controls ≤25 % of the map and
   folded on phones, semantics footer text, health pills with statuses and no `NaN`, VALID
-  columns, rewind banner and scalars, health at the frame's clock, the null-deck state, the
-  genesis bridge (not the current position), a11y attributes, render budgets, no page
-  errors, no missing assets.
+  columns, health at the frame's clock, the null-deck state, the genesis bridge (not the
+  current position), a11y attributes, render budgets, no page errors, no missing assets.
+  It also withholds one storm's envelope deterministically, so the null state is exercised on
+  every run rather than whenever the ocean happens to carry a storm this repo has no fixture
+  for — the day Karina dissipated, both remaining storms had fixtures and that path went
+  unexercised.
+- **The as-of rule, in four steps at every width.** 1 LIVE renders the geometry, the lead table
+  and the fan. 2 REWOUND shows the frame's own 72 h spread — the fixture writes it 40 km wider
+  than the deck's, so the frame's number and the deck's cannot be mistaken for one another.
+  3 REWOUND renders no lead table, no fan, no members, no deck health row, no map layers
+  (counted through `__MT_GUIDANCE_DRAWN`, because the polylines are canvas-drawn and have no
+  DOM node to query), no latest-deck cycle id or roster count anywhere in the block, and states
+  the absence in as many words. 4 Returning to LIVE restores all of it. A fifth step proves the
+  rule is a fingerprint rather than "any rewind hides": a rewound frame that recorded *this*
+  deck keeps its geometry.
 
 All wired into `.github/workflows/checks.yml`. The Atlas bundle was rebuilt with the pinned
 esbuild and byte-compares to source; the existing Atlas suites that touch the changed
