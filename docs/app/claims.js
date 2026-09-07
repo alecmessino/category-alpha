@@ -768,6 +768,42 @@
       ok: true,
     };
   });
+  /* ---- the environmental runway --------------------------------------------------------
+     Every claim here exists to keep a band a band. The runway describes an environment; it
+     does not forecast an outcome, and no number it publishes is a likelihood of one. */
+  define("runway.semantics", "ships", () => ({
+    text: "The environment SHIPS sampled along the NHC forecast track, at the leads SHIPS publishes. "
+        + "Bands are cut points on a measured value at stated thresholds — a word, never a probability — and headroom is "
+        + "the ocean's maximum potential intensity less the intensity in hand. Nothing here enters a price on this board.",
+    ok: true,
+  }));
+  define("runway.attribution", "ships", () => ({
+    text: "These are SHIPS' own regression terms for its own intensity forecast, in knots. "
+        + "They decompose that forecast's arithmetic, not the storm's behaviour, and they are not probabilities.",
+    ok: true,
+  }));
+  define("runway.dryair", "ships", () => ({
+    text: "The only dry-air diagnostics this product publishes, under their own names. There is no Saharan Air Layer field in SHIPS "
+        + "and none is synthesised here; steering is the published steering-level pressure against its climatological mean, not a wind vector.",
+    ok: true,
+  }));
+  define("runway.replay", "derived", () => ({
+    text: "The frame stores the runway's SCALARS — headroom, the binding constraint now and later, the closing lead, the extratropical lead — "
+        + "and no per-lead detail. Scrubbing rewinds those numbers to what the frame recorded; the lead table, the attribution ledger and the "
+        + "dry-air block are withheld unless the cycle in hand is the cycle that frame recorded.",
+    ok: true,
+  }));
+  define("runway.absent", "ships", (s) => ({
+    text: s && s.ships
+      ? "SHIPS carries no environmental rows for this storm on the cycle in hand, so there is no runway to publish — not a favourable one."
+      : "No SHIPS product for this storm yet. The runway is the environment SHIPS samples along the NHC forecast track; without the product there is nothing to sample.",
+    ok: true,
+  }));
+  define("note.runway", "ships", () => ({
+    text: "Headroom is the ocean's ceiling less the intensity in hand. The limiting field is whichever of shear, mid-level humidity, "
+        + "sea-surface temperature and ocean heat content sits in the worst band at that lead. Both are measurements, not forecasts of an outcome.",
+    ok: true,
+  }));
   define("guidance.semantics", "atcf", () => ({
     text: "Raw model guidance from the NHC ATCF a-deck. A count of members is a count of model runs, not a probability. "
         + "The spread is disagreement between runs, not the NHC cone, and it enters no price on this board.",

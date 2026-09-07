@@ -117,6 +117,11 @@
            numbers; the lines on the map are always the latest deck and say so. */
         guidance: s.guidance || null,
         genesis: s.genesis || null,
+        /* The environmental runway (latest snapshot: the per-lead samples, the ledger and
+           the dry-air block). Its SCALARS are per-frame below; the samples are always the
+           latest SHIPS cycle, and the panel withholds them under a cursor that did not
+           record that cycle rather than showing a current answer as a historical one. */
+        runway: s.runway || null,
 
         pCalAt: (f) => { const r = fs(f); return r && r.pCal != null ? r.pCal : (s.hurricanePCal ? s.hurricanePCal.p : null); },
         pRawAt: (f) => { const r = fs(f); return r && r.pRaw != null ? r.pRaw : (s.hurricaneP ? s.hurricaneP.p : null); },
@@ -143,6 +148,17 @@
         gOfclCon72At: (f) => pick(f, "gOfclCon72", s.guidance ? s.guidance.summary.ofclVsConsensus72Km : null),
         gPeakMedAt: (f) => pick(f, "gPeakMed", s.guidance ? s.guidance.summary.peakMedianKt : null),
         gPeakOfclAt: (f) => pick(f, "gPeakOfcl", s.guidance ? s.guidance.summary.peakOfclKt : null),
+        /* The environmental runway's scalars, so the scrubber rewinds the headroom and the
+           binding constraint rather than showing the newest SHIPS cycle under an older
+           cursor. Scalars only — the per-lead samples live on the storm, and the panel
+           withholds them when the frame did not record this cycle. */
+        rwCycleAt: (f) => pick(f, "rwCycle", s.runway ? s.runway.cycle : null),
+        rwHeadNowAt: (f) => pick(f, "rwHeadNow", s.runway ? s.runway.summary.headroomNowKt : null),
+        rwHeadEndAt: (f) => pick(f, "rwHeadEnd", s.runway ? s.runway.summary.headroomEndKt : null),
+        rwLimNowAt: (f) => pick(f, "rwLimNow", s.runway ? s.runway.summary.limitingNow : null),
+        rwLimEndAt: (f) => pick(f, "rwLimEnd", s.runway ? s.runway.summary.limitingEnd : null),
+        rwCloseAt: (f) => pick(f, "rwClose", s.runway ? s.runway.summary.closesAtHr : null),
+        rwExtpAt: (f) => pick(f, "rwExtp", s.runway ? s.runway.summary.extratropicalAtHr : null),
         reconMbAt: (f) => { const r = fs(f); return r && r.reconMb != null ? r.reconMb : (s.recon ? s.recon.mslp : null); },
         reconKtAt: (f) => { const r = fs(f); return r && r.reconKt != null ? r.reconKt : (s.recon ? s.recon.intensityKt : null); },
         reconFlKtAt: (f) => { const r = fs(f); return r && r.reconFlKt != null ? r.reconFlKt : (s.recon ? s.recon.flightLevelKt : null); },

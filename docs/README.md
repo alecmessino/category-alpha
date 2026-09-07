@@ -80,6 +80,53 @@ fingerprint, not a cycle id: an a-deck keeps gaining late-arriving members for h
 cycle time, so a frame keeps its geometry only while every scalar it recorded still matches the
 deck in hand. At live every part of the panel reads from that one deck.
 
+### The environmental runway
+
+The advisory says what NHC thinks the storm will do; the guidance envelope says how much the
+models disagree about it. Neither says what the storm is *flying through*. SHIPS does, and
+`scripts/lib/runway.mjs` turns those rows into the two questions an operator actually asks:
+**how much headroom is there**, and **what runs out first**.
+
+* **Sampled along a named track, at leads the product publishes.** SHIPS prints its own forecast
+  latitude and longitude per lead, and names the aid it was run along (`FORECAST TRACK FROM OFCI`).
+  The runway carries both, and only calls itself "along the NHC forecast track" when that aid is
+  the official forecast or its interpolated form. Nothing is interpolated between SHIPS' leads and
+  nothing is extrapolated past them — where the product stops, the runway stops, as null.
+* **Headroom** is the ocean's maximum potential intensity less the intensity in hand: the observed
+  intensity at analysis time, SHIPS' own forecast intensity thereafter. It states what it
+  subtracted, and it goes *negative* for a storm already above what its environment supports.
+* **The binding constraint** is whichever of deep-layer shear, mid-level humidity, sea-surface
+  temperature and ocean heat content sits in the worst band at that lead. Bands are cut points on
+  a measured value at thresholds stated in the open (`BANDS` in the engine); ties break by a fixed
+  order, so the answer is a function of the data and never of an engine's iteration order. **A band
+  is a word, never a probability**, and no path leads from it to a price — `test-runway.mjs` reads
+  `probability.mjs`, `estimator-core.mjs`, `calibration.mjs`, the `calibratedIntensityP` call site,
+  `kellyFor` and `edgeBook` to prove it.
+* **Why the forecast moves.** SHIPS publishes its own decomposition of its intensity forecast into
+  nineteen regression terms, in knots. That ledger is carried and ranked, with the product's
+  printed `TOTAL CHANGE` used **verbatim** and the rounding residual against the summed terms
+  published rather than papered over. These are knots of *that forecast's arithmetic* — not
+  probabilities, not physical fluxes, and not attributions of the storm's behaviour.
+* **Padding zeros are not measurements.** Past the end of its forecast SHIPS pads the contributions
+  table with `0.` where its environmental rows use `N/A`. Read literally that publishes a confident
+  "nothing moved the forecast at +120 h" for a lead the product never computed. The environmental
+  rows are the witness: where they stop, the ledger stops.
+* **Dry air and steering are named, never invented.** There is no Saharan Air Layer row in SHIPS
+  and none is synthesised. What the product does publish — `BL DRY-AIR FLUX` and the upshear
+  `%area of TPW <45 mm` — is carried under its own name, and steering is the published
+  steering-level pressure against its climatological mean, not a wind vector.
+* **The Atlas comparison is narrow on purpose.** The Storm Atlas holds the same five fields, but it
+  holds them **at genesis**, for the 1,461 of its 3,959 storms that carry any environment at all.
+  A +96 h forecast shear and a genesis-time shear distribution are not the same measurement, so the
+  bridge is offered at analysis time only, and only while the storm is inside the archive's own
+  genesis window (read from `atlas-manifest.json`, not restated). Everywhere else it refuses **by
+  name, on screen**. Overlapping field names are not a basis for comparison.
+* **Replay.** The frame stores the runway's scalars — headroom, the constraint now and later, the
+  closing lead, the extratropical lead. Rewound to a frame that recorded a different SHIPS cycle,
+  the per-lead table, the ledger, the dry-air block and the Atlas verdict are **withheld** and the
+  recorded scalars shown in their place, under a named state. The same rule as the guidance
+  envelope's, applied to a different feed.
+
 ### Feed / cycle health
 
 Every operational source is judged by one rule (`docs/app/feed-health.js`, loaded by the page and

@@ -229,10 +229,13 @@ modules pass.
 
 ## 9. Next five
 
-1. **Environmental runway along the official track.** Sample shear, RH, SST/OHC and MPI at
-   NOW/+24…+120 from the GRIB reader that already exists (`scripts/lib/grib2.mjs`) rather
-   than from SHIPS' storm-centre row, and set each beside the Atlas cohort's environment
-   distribution where the archive holds the same field.
+1. ~~**Environmental runway along the official track.**~~ **DELIVERED — see §10.** The premise
+   of this item was wrong in a way worth recording: SHIPS is not a "storm-centre row". It is a
+   full along-track profile — every environmental field at every lead, at forecast positions it
+   prints itself (`LAT (DEG N)` / `LONG(DEG W)`), along a track it names in its own header
+   (`FORECAST TRACK FROM OFCI`). The GRIB reader was not needed for any field on the original
+   list, and reaching for it would have re-derived, less accurately and from a different
+   analysis, numbers NHC already publishes along exactly the track the runway wanted.
 2. **Contract lens.** One row per contract with MARKET PRICE · OFFICIAL FORECAST · ATLAS
    RATE · RAW GUIDANCE (members' median), divergence highlighted, guidance still outside the
    grade — the four columns now exist in three places.
@@ -244,3 +247,86 @@ modules pass.
    labelled as official products.
 5. **Invest continuity.** Read the `xx9x` invest decks and the TWO's area ids so a
    disturbance keeps one thread through naming, with its formation-probability history.
+
+## 10. Second tranche — the environmental runway
+
+Delivered after PR #32 merged, on the same terms: implemented rather than proposed, with
+deterministic tests and a browser gate, and with every refusal on screen rather than in a
+comment.
+
+### What it answers
+
+Two questions, before any row is read: **how much headroom is there** (the ocean's maximum
+potential intensity less the intensity in hand) and **what runs out first** (the binding
+constraint among shear, mid-level humidity, sea-surface temperature and ocean heat content,
+at each of NOW/+24/+48/+72/+96/+120). Underneath: the per-lead table, SHIPS' own ranked
+attribution of why its intensity forecast moves, and the dry-air and steering diagnostics the
+product actually publishes.
+
+On the snapshot this shipped against, Marie reads as a closed runway and says so: 24.3 °C sea
+surface at analysis time — below the tropical threshold — mid-levels at 41 % and drying, shear
+hostile by +48 h, extratropical at +72 h, and SHIPS' own ledger attributing −54 kt of its −61 kt
+forecast change at +96 h to the sea-surface term.
+
+### Sources
+
+One source, already fetched, no new request: the NHC ATCF SHIPS product
+(`https://ftp.nhc.noaa.gov/atcf/stext/<YYMMDDHH><BASIN><CY><YY>_ships.txt`). The parser was
+extended to read eleven further rows, the storm-type row, the steering block, the
+nineteen-term attribution ledger and the RI predictor table. Fixture:
+`scripts/fixtures/ships-ep132026.txt`, a real product (Marie, 7 Sep 2026 12Z).
+
+### What the build refuses to do
+
+| Temptation | What it does instead |
+|---|---|
+| Call a band a probability | Bands are cut points on a measured value at thresholds stated in the open. `test-runway.mjs` asserts every band word is letters only. |
+| Let the runway touch a price | Isolation is asserted by reading `probability.mjs`, `estimator-core.mjs`, `calibration.mjs`, the `calibratedIntensityP` **call site**, `kellyFor` and `edgeBook`. |
+| Publish SHIPS' padding zeros | Past its forecast SHIPS pads the ledger with `0.` where its environmental rows use `N/A`. The environmental rows are the witness: where they stop, the ledger stops. |
+| Recompute the ledger's total | The printed `TOTAL CHANGE` is carried verbatim; the residual against the rounded terms is published, not papered over. |
+| Invent a SAL field | There is none in SHIPS. `BL DRY-AIR FLUX` and upshear `%area of TPW <45 mm` are carried under their own names. |
+| Claim a steering wind | Steering is the published steering-level pressure against its climatological mean. |
+| Compare every lead to the Atlas | The archive holds these five fields **at genesis**. A +96 h forecast sample has no genesis-time counterpart, so the comparison is offered at analysis time only, inside the archive's own genesis window (read from `atlas-manifest.json`), and refused **by name, on screen**, everywhere else. |
+| Extrapolate past the product | Where SHIPS stops, the runway stops — as null, never as a carried-forward value and never as zero. |
+| Show a current answer under a historical cursor | The frame stores scalars; rewound, the per-lead table, ledger, dry-air block and Atlas verdict are withheld under a named state. |
+
+### A bug the rendering caught
+
+The first render put the ledger at **+120 h with every term at ±0** — SHIPS' padding zeros
+read as measured ones. It was invisible in the engine's own output and obvious the moment it
+was on screen. Fixed in the engine (the ledger is published only where the environment was
+measured) and pinned by a test that first asserts *the product really does print those zeros*,
+so the guard cannot quietly become vacuous.
+
+### Tests and gates
+
+* `scripts/test-runway.mjs` — 13 sections: named official track, bands checked **on** their
+  boundaries, the binding constraint's fixed tie-break, no interpolation or extrapolation,
+  dateline longitudes, headroom arithmetic including the negative case, storm type, where the
+  runway closes, the ledger (all nineteen terms, verbatim total, residual, padding-zero guard),
+  the Atlas bridge's four refusals, dry air and steering, frame scalars, and isolation.
+* `scripts/check-terminal-responsive.mjs` — nineteen further browser assertions at each of five
+  widths (2560/1280/1024/900/390), including a four-step as-of sequence proving LIVE renders the
+  detail, REWOUND shows the frame's own recorded scalars and **cannot** render the current
+  cycle's table, ledger, dry-air block or Atlas verdict, and returning to LIVE restores them.
+* The existing suite is unchanged and green: 39 offline gates plus panel-dom, responsive-matrix,
+  atlas-dom, atlas-states and atlas-live-dom. Three gates (`test-atlas-calibration`,
+  `test-atlas-pack`, `test-atlas-parity`) need `pyarrow` and run in CI only.
+
+### Cost
+
+6.3 KB per storm in `latest.json`; 131 bytes per storm per frame. No new network request.
+
+### Next five, revised
+
+1. **Contract lens** — one row per contract with MARKET PRICE · OFFICIAL FORECAST · ATLAS RATE ·
+   RAW GUIDANCE, divergence highlighted, guidance still outside the grade.
+2. **Historical trajectory envelope in the Atlas** — matched storms at +24…+120 h from genesis,
+   dispersion and attrition per lead, with the current official forecast located against it.
+3. **Official hazard geometry** — the b-deck 34/50/64 kt radii as quadrant arcs, plus watch and
+   warning breakpoints and the cone from NHC's GIS shapefiles, labelled as official products.
+4. **Invest continuity** — the `xx9x` invest decks and the TWO's area ids, so a disturbance keeps
+   one thread through naming with its formation-probability history.
+5. **Runway history under the scrubber** — the runway's scalars are already on every frame, so
+   "shear forecast at +48 h, as it was believed six cycles ago" is a chart of data already
+   committed. The one genuinely new thing it needs is a decision about how many cycles to keep.
