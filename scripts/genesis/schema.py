@@ -45,10 +45,9 @@ THRESHOLDS_KT = {
 }
 
 # IBTrACS/HURDAT2 status codes that count as "a tropical cyclone existed here".
-TROPICAL_STATUS = {"TD", "TS", "HU", "TY", "ST", "TC", "HR"}
-# Codes that are explicitly NOT a tropical cyclone: disturbance, low, extratropical,
-# subtropical, wave. Kept separate because genesis is defined as the first TROPICAL point.
-NONTROPICAL_STATUS = {"DB", "LO", "EX", "SD", "SS", "WV", "MD", "IN", "DS", "ET", "NR", "PT"}
+# Defined in status.py so the operational b-deck reader can share the vocabulary without
+# taking on this module's pyarrow dependency; re-exported here so existing imports resolve.
+from .status import TROPICAL_STATUS, NONTROPICAL_STATUS  # noqa: F401
 
 # ---------------------------------------------------------------------------
 # storms -- one row per storm

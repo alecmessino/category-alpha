@@ -13,6 +13,7 @@
  * Nothing here invents a storm, a price, a track, or a probability.
  */
 import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 /* The four pre-advisory feeds and the engine that combines them. The fetching lives in
@@ -25,6 +26,8 @@ import { riFloorFor } from "./lib/ships.mjs";
 import { parseOutlookShapes, attachShapes } from "./lib/shapefile.mjs";
 import { buildAtlasLive } from "./lib/atlas-live.mjs";
 import { guidanceFrameScalars } from "./lib/guidance.mjs";
+import { runwayFrom, runwayFrameScalars } from "./lib/runway.mjs";
+
 /* Moved to lib so the backtest replays the same estimator the board trades. Pure move,
    proven by scripts/verify-extraction.mjs. */
 import { INTENSITY_MAE, HURRICANE_REPORTED_KT, KT_INCREMENT, LATENT_THRESHOLD,
@@ -33,6 +36,19 @@ import { INTENSITY_MAE, HURRICANE_REPORTED_KT, KT_INCREMENT, LATENT_THRESHOLD,
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = resolve(__dir, "../docs/data");
+/* The Storm Atlas's OWN genesis window, read from the archive's manifest rather than
+   restated here. The runway uses it for one decision — whether an analysis-time sample is
+   close enough to genesis to be compared against the archive's genesis distribution — and a
+   copy of the number that drifted from the pack would make that decision wrongly and
+   silently. A missing manifest refuses by using the archive's documented 12 h, not by
+   widening the window. */
+const ATLAS_ENV_GENESIS_WINDOW_H = (() => {
+  try {
+    const m = JSON.parse(readFileSync(resolve(__dir, "../docs/storm-atlas/data/atlas-manifest.json"), "utf8"));
+    const w = Number(m.env_genesis_window_hours);
+    return Number.isFinite(w) && w > 0 ? w : 12;
+  } catch { return 12; }
+})();
 /* The Storm Atlas reads its own data directory. The OPERATIONAL artifact is written here
    rather than with the packs' four-times-a-day archive job, because it is a live product and
    has to move at the live cadence: an operational record refreshed every six hours would be
@@ -1655,6 +1671,21 @@ function applyIntel(storms, intel) {
     const floor = (s.ships && gap != null && gap > 0) ? riFloorFor(s.ships, gap, 48) : null;
     s.riFloor = floor;
 
+    /* THE ENVIRONMENTAL RUNWAY. Built from the SHIPS product already in hand — no extra
+       request — and, like the guidance envelope, carried for the board to SHOW. It is not
+       passed to calibratedIntensityP below and reaches no price; test-runway.mjs reads this
+       file to make sure of it.
+
+       `ageHours` comes from the genesis fix the previous tranche put on the storm, and it
+       decides one thing only: whether the analysis-time sample is inside the Storm Atlas's
+       genesis window and so comparable to the archive's distribution at all. Unknown genesis
+       means the comparison is refused, not assumed. */
+    const genIso = s.genesis && s.genesis.iso ? Date.parse(s.genesis.iso) : null;
+    const ageHours = Number.isFinite(genIso) ? (now.getTime() - genIso) / 3600e3 : null;
+    s.runway = s.ships
+      ? runwayFrom(s.ships, { currentKt: s.wind ?? null, ageHours, atlasWindowHours: ATLAS_ENV_GENESIS_WINDOW_H })
+      : null;
+
     const cal = calibratedIntensityP({
       official: s.hurricaneP, currentKt: s.wind,
       /* The advisory the engine is calibrating, and WHEN it was issued. The time is what
@@ -2509,6 +2540,10 @@ async function main() {
       // Priority 1, the rest of the deck — the guidance envelope's scalars, so the scrubber
       // rewinds them and the register can say the spread tightened or a cycle landed.
       ...guidanceFrameScalars(s.guidance),
+      // Priority 3, the rest of SHIPS — the runway's scalars, so the scrubber rewinds the
+      // headroom and the binding constraint instead of showing the newest cycle's under an
+      // older cursor.
+      ...runwayFrameScalars(s.runway),
       // Priority 2 — aircraft reconnaissance
       reconMb: rec ? rec.mslp ?? null : null,
       reconKt: rec ? rec.intensityKt ?? null : null,

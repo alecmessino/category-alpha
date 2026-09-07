@@ -125,6 +125,13 @@ jobs:
       # and the isolation of the whole thing from the probability engine and the Kelly path.
       - name: Test the model-guidance engine
         run: node scripts/test-guidance.mjs
+      # THE ENVIRONMENTAL RUNWAY: the bands are cut points on a measured value and never a
+      # probability; nothing is interpolated between SHIPS' leads or extrapolated past them;
+      # the attribution ledger is SHIPS' own arithmetic in knots with its printed total carried
+      # verbatim; the Storm Atlas comparison is refused wherever the archive's genesis basis
+      # does not match the sample's; and the whole thing is isolated from the pricing engine.
+      - name: Test the environmental runway
+        run: node scripts/test-runway.mjs
       # THE MILLIBAR → ATLAS BRIDGE, both ends: the link carries the genesis fix and the ATCF id;
       # the Atlas resolves the id under the operational join's own rules and refuses otherwise.
       - name: Test the Millibar → Storm Atlas bridge

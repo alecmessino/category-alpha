@@ -199,7 +199,14 @@ function AXEntry({ e, dense }) {
   const live = e.kind === "live_system";
   const q = e.query || {};
   const pos = e.position || {};
-  const onGenesis = pos.which === "genesis";
+  /* Three honest anchors, and only one of them is the storm's present location. `genesis` is
+     the archive's own genesis event; `genesis_operational` is the b-deck's first TROPICAL fix,
+     used for a live storm the IBTrACS-derived archive does not carry yet; `current` belongs to
+     a system that has NOT formed, where its position is the cell being asked about rather than
+     a stand-in for a genesis it does not have. A formed storm is never matched on `current` —
+     the engine refuses instead — so the label and the computation cannot disagree. */
+  const onGenesis = pos.which === "genesis" || pos.which === "genesis_operational";
+  const genesisOperational = pos.which === "genesis_operational";
   const ess = e.effective_sample_size;
   const essShare = (ess != null && e.n_cases) ? ess / e.n_cases : null;
   const essUnderGate = (ess != null && e.min_sample != null && ess < e.min_sample);
@@ -247,10 +254,12 @@ function AXEntry({ e, dense }) {
       {/* position — rule 6 */}
       <div style={{ display: "flex", gap: 1, background: "var(--border-dim)", borderRadius: 7, overflow: "hidden",
         flexWrap: "wrap", marginTop: 9 }}>
-        <AXKV k={onGenesis ? "MATCHED ON — GENESIS POSITION" : "MATCHED ON — CURRENT POSITION"}
+        <AXKV k={onGenesis
+            ? (genesisOperational ? "MATCHED ON — GENESIS POSITION (B-DECK)" : "MATCHED ON — GENESIS POSITION")
+            : "MATCHED ON — POSITION OF AN UNFORMED SYSTEM"}
           v={pos.text || (AXnum(pos.lat) + " / " + AXnum(pos.lon))} tone="var(--accent)" />
         {e.current_position && (
-          <AXKV k={onGenesis ? "CURRENT POSITION — NOT QUERIED" : "CURRENT POSITION"} v={e.current_position.text || (AXnum(e.current_position.lat) + " / " + AXnum(e.current_position.lon))}
+          <AXKV k={onGenesis ? "CURRENT POSITION — NOT QUERIED" : "CURRENT POSITION"} data-ax-current v={e.current_position.text || (AXnum(e.current_position.lat) + " / " + AXnum(e.current_position.lon))}
             tone="var(--text-2)" />
         )}
         <AXKV k="MATCHED STORMS" v={e.n_cases} tone={e.n_cases ? "var(--text-1)" : "var(--neg)"} />
@@ -264,9 +273,14 @@ function AXEntry({ e, dense }) {
       </div>
 
       {onGenesis && (
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--warn)",
+        <div data-ax-anchor={pos.which} style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, lineHeight: 1.55, color: "var(--warn)",
           border: "1px solid var(--warn)", borderRadius: 6, padding: "6px 9px", marginTop: 7 }}>
           {AXclaim("analogs.matching").short || AXclaim("analogs.matching").text}
+          {genesisOperational && (
+            <span style={{ display: "block", color: "var(--text-2)", marginTop: 4 }}>
+              {AXclaim("analogs.genesisOperational").text}
+            </span>
+          )}
         </div>
       )}
       {essUnderGate && (

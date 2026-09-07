@@ -622,6 +622,9 @@ function MillibarTerminalApp() {
                   the map they describe. The full panel — lead table, fan, members — is under
                   Models; this is the glance. */}
               <window.MT_GuidanceStrip stormId={storm} frame={frame} />
+              {/* The runway's four synthesis numbers, on the same rail. The lead table, the
+                  attribution ledger and the dry-air block are under Models; this is the glance. */}
+              <window.MT_RunwayStrip stormId={storm} frame={frame} />
             </aside>
             )}
           </div>
@@ -665,6 +668,20 @@ function MillibarTerminalApp() {
           defaultOpen summary={S && S.guidance ? (S.guidance.roster.inSpread.length + " track runs · 72h spread " + (S.guidance.summary.trackSpread72Km ?? "—") + " km")
             : (stormIds.filter((id) => MT.storms[id].guidance).length + " system(s) with a deck")}>
           <window.MT_Guidance stormId={storm} frame={frame} narrow={narrow} />
+        </window.MT_Section>
+
+        {/* 5b — the environmental runway. The envelope above says how much the models disagree
+            about this storm; this says what the storm is flying through, sampled along the NHC
+            forecast track at the leads SHIPS publishes. Directly beneath the envelope because
+            the two answer the same operator question from opposite sides: how fragile is this
+            forecast. Bands are measurements at stated thresholds — claims.js `runway.semantics`
+            says so on the panel — and nothing here feeds Fair value. */}
+        <window.MT_Section label="Environmental runway" tier="SHIPS · shear, humidity, sea surface, ocean heat · headroom and the binding constraint · not a probability"
+          defaultOpen summary={S && S.runway
+            ? ((S.runway.summary.headroomNowKt == null ? "headroom —" : "headroom " + S.runway.summary.headroomNowKt + " kt")
+               + (S.runway.summary.closesAtHr == null ? " · runway open through the window" : " · closes " + (S.runway.summary.closesAtHr === 0 ? "at analysis" : "+" + S.runway.summary.closesAtHr + "h")))
+            : (stormIds.filter((id) => MT.storms[id].runway).length + " system(s) with a SHIPS runway")}>
+          <window.MT_Runway stormId={storm} frame={frame} narrow={narrow} />
         </window.MT_Section>
 
         {/* 5a — the empirical prior. A separate archive answering the question the rest of
@@ -727,7 +744,7 @@ function MillibarTerminalApp() {
   // Order-independent boot: wait for the plain-script globals (live data, compute
   // engine, DS bundle) before first render. The async data-loader sets window.MT
   // when the fetch resolves, so poll until everything is present.
-  if (window.MT && window.MTX && window.CategoryAlphaDesignSystem_a835cf && window.MT_Evidence && window.MT_AnalogPrior && window.MT_Guidance) {
+  if (window.MT && window.MTX && window.CategoryAlphaDesignSystem_a835cf && window.MT_Evidence && window.MT_AnalogPrior && window.MT_Guidance && window.MT_Runway) {
     ReactDOM.createRoot(document.getElementById("root")).render(<MillibarTerminalApp />);
   } else {
     setTimeout(mount, 30);

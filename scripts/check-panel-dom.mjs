@@ -172,7 +172,47 @@ const PROBES = [
      which of the two it earned -- the fixture probe below pins the irreducible one. */
   ["a refusal badge",               /BASE RATE ONLY|OUT OF SCOPE/i,                                "always"],
   ["genesis-vs-current statement",  /genesis/i,                                                    "always"],
+  /* THE ANCHOR, IN THE RENDERED LABEL. The probe above matches any occurrence of the word
+     "genesis" — including the conditioning note that is always on the page — which is exactly
+     why a live panel matching every formed storm on its CURRENT position read as fine for as
+     long as it did. A formed system must never be labelled as matched on where it is now. */
+  ["no formed system is labelled as matched on its current position",
+    (t) => !/MATCHED ON — CURRENT POSITION/i.test(t), "always"],
+  ["a genesis anchor states that the current position was NOT queried",
+    (t) => !/MATCHED ON — GENESIS POSITION/i.test(t) || /CURRENT POSITION — NOT QUERIED/i.test(t), "always"],
 ];
+
+/* THE ANCHOR INVARIANT, READ FROM THE PAYLOAD THE PAGE WAS SERVED.
+ *
+ * The prior is genesis-conditioned, so a formed system may only be anchored on a genesis
+ * position — the archive's own event, or the b-deck's first tropical fix for a live storm the
+ * archive does not carry yet. `current` belongs to a system that has NOT formed, where its
+ * position is the cell being asked about rather than a stand-in for a genesis it lacks.
+ *
+ * This is checked against the payload rather than the screen because it is a property of the
+ * COMPUTATION. A label can be corrected without the query moving, and that would be the one
+ * outcome worse than the original defect: the panel would then be wrong AND say it was right.
+ */
+function payloadAnchorFaults(payloadPath) {
+  const faults = [];
+  let d;
+  try { d = JSON.parse(readFileSync(payloadPath || join(DOCS, "data/analogs.json"), "utf8")); }
+  catch (e) { return ["payload unreadable: " + e.message]; }
+  for (const e of d.entries || []) {
+    if (e.kind !== "live_system") continue;
+    const which = (e.position || {}).which;
+    if (e.is_invest === true) continue;          // has not formed; its own cell is the question
+    if (which !== "genesis" && which !== "genesis_operational") {
+      faults.push(`${e.id}: formed system anchored on "${which}" instead of a genesis position`);
+      continue;
+    }
+    const c = e.current_position;
+    if (c && e.position && c.lat === e.position.lat && c.lon === e.position.lon) {
+      faults.push(`${e.id}: anchored "${which}" but the queried point IS the current position`);
+    }
+  }
+  return faults;
+}
 
 /* Whether any ladder cell in the payload carries a published interval. Read from the same
    file the page will be served, so the requirement and the render cannot disagree. */
@@ -258,6 +298,13 @@ async function run(label, payloadPath, kind) {
     if (!hit && required) missing++;
     console.log(`  ${hit ? "yes" : (required ? "NO " : " - ")}  ${name}`);
   }
+  /* The computation, not the caption. A relabelled panel that still queries the current
+     position would pass every text probe above and be worse than the defect it replaced. */
+  const anchorFaults = payloadAnchorFaults(payloadPath);
+  console.log(`  ${anchorFaults.length ? "NO " : "yes"}  every formed live system is anchored on a genesis position, not where it is now`);
+  anchorFaults.forEach((f) => console.log("        " + f));
+  missing += anchorFaults.length;
+
   const summaryOk = entries > 0 ? summary.startsWith(String(entries)) : true;
   console.log(`  ${summaryOk ? "yes" : "NO "}  collapsed summary matches the payload (${entries} entries -> "${summary}")`);
   if (!summaryOk) missing++;

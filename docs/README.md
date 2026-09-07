@@ -80,6 +80,94 @@ fingerprint, not a cycle id: an a-deck keeps gaining late-arriving members for h
 cycle time, so a frame keeps its geometry only while every scalar it recorded still matches the
 deck in hand. At live every part of the panel reads from that one deck.
 
+### The genesis anchor for the analog prior
+
+The analog prior is genesis-conditioned — its whole claim is "for a system that formed HERE, in
+this season, what did the ones like it go on to do?" — so the position it queries on must be a
+**genesis** position. It looks that up in the archive's `genesis_events`, which is IBTrACS-derived
+and therefore carries no storm that is still running. Every live system fell through to its
+**current** position, silently, and was matched on where it had drifted to.
+
+On the snapshot that exposed this, all three live east-Pacific storms were being queried
+2,500–4,700 km from where they formed, and all three returned zero analogs — the archive honestly
+declining a cell where almost nothing forms. The dangerous case is the one that is *not* zero: a
+storm drifting into a genesis-rich cell would publish a confident rate for the wrong cohort, under
+the archive's name, with every other gate still green.
+
+There are now exactly three anchors, and only one of them is where the storm is now:
+
+| `position.which` | what it is | when |
+|---|---|---|
+| `genesis` | the archive's own genesis event | a storm the archive carries |
+| `genesis_operational` | the ATCF b-deck's **first tropical fix** | a live storm the archive does not carry yet |
+| `current` | the system's present cell | **only** a system that has not formed — an invest or an outlook area |
+
+A **formed** storm with no genesis fix from either source is **refused**, not matched on where it
+is. `scripts/genesis/sources/atcf_btk.py` supplies the operational fix using the archive's own
+definition of genesis — the first *tropical* point, not the first row of the deck, which routinely
+opens with `DB` disturbance rows days earlier and in a different month. The two vocabularies live
+in one stdlib-only module (`scripts/genesis/status.py`) so they cannot drift apart.
+
+The season window follows the same rule: a storm that formed in August and is still alive in
+September is matched against **August**-genesis cohorts. Using the run's month was the same error
+in the other dimension.
+
+This changes **where the archive is asked**, never what it answers. Every case, weight, rate and
+interval is still the archive's own, and `position_used` on each entry declares which anchor was
+used. `check-panel-dom` asserts the invariant against the payload rather than the rendered label,
+because a corrected caption over an uncorrected query would be worse than the original defect.
+
+### The environmental runway
+
+The advisory says what NHC thinks the storm will do; the guidance envelope says how much the
+models disagree about it. Neither says what the storm is *flying through*. SHIPS does, and
+`scripts/lib/runway.mjs` turns those rows into the two questions an operator actually asks:
+**how much headroom is there**, and **what runs out first**.
+
+* **Sampled along a named track, at leads the product publishes.** SHIPS prints its own forecast
+  latitude and longitude per lead, and names the aid it was run along (`FORECAST TRACK FROM OFCI`).
+  The runway carries both, and only calls itself "along the NHC forecast track" when that aid is
+  the official forecast or its interpolated form. Nothing is interpolated between SHIPS' leads and
+  nothing is extrapolated past them — where the product stops, the runway stops, as null.
+* **ANALYSIS, not "now".** SHIPS' tau 0 is the *cycle's* analysis time, which is up to six hours
+  behind the board's clock — a 12Z run is still current at 18Z. Every runway surface names that
+  sample `ANALYSIS`, prints its valid time beside it, and says "closes at analysis" rather than
+  "closes now", so a six-hour-old analysis cannot be read as the storm's present state.
+* **Headroom** is the ocean's maximum potential intensity less the intensity in hand: the observed
+  intensity at analysis time, SHIPS' own forecast intensity thereafter. It states what it
+  subtracted, and it goes *negative* for a storm already above what its environment supports.
+* **The binding constraint** is whichever of deep-layer shear, mid-level humidity, sea-surface
+  temperature and ocean heat content sits in the worst band at that lead. Bands are cut points on
+  a measured value at thresholds stated in the open (`BANDS` in the engine); ties break by a fixed
+  order, so the answer is a function of the data and never of an engine's iteration order. **A band
+  is a word, never a probability**, and no path leads from it to a price — `test-runway.mjs` reads
+  `probability.mjs`, `estimator-core.mjs`, `calibration.mjs`, the `calibratedIntensityP` call site,
+  `kellyFor` and `edgeBook` to prove it.
+* **Why the forecast moves.** SHIPS publishes its own decomposition of its intensity forecast into
+  nineteen regression terms, in knots. That ledger is carried and ranked, with the product's
+  printed `TOTAL CHANGE` used **verbatim** and the rounding residual against the summed terms
+  published rather than papered over. These are knots of *that forecast's arithmetic* — not
+  probabilities, not physical fluxes, and not attributions of the storm's behaviour.
+* **Padding zeros are not measurements.** Past the end of its forecast SHIPS pads the contributions
+  table with `0.` where its environmental rows use `N/A`. Read literally that publishes a confident
+  "nothing moved the forecast at +120 h" for a lead the product never computed. The environmental
+  rows are the witness: where they stop, the ledger stops.
+* **Dry air and steering are named, never invented.** There is no Saharan Air Layer row in SHIPS
+  and none is synthesised. What the product does publish — `BL DRY-AIR FLUX` and the upshear
+  `%area of TPW <45 mm` — is carried under its own name, and steering is the published
+  steering-level pressure against its climatological mean, not a wind vector.
+* **The Atlas comparison is narrow on purpose.** The Storm Atlas holds the same five fields, but it
+  holds them **at genesis**, for the 1,461 of its 3,959 storms that carry any environment at all.
+  A +96 h forecast shear and a genesis-time shear distribution are not the same measurement, so the
+  bridge is offered at analysis time only, and only while the storm is inside the archive's own
+  genesis window (read from `atlas-manifest.json`, not restated). Everywhere else it refuses **by
+  name, on screen**. Overlapping field names are not a basis for comparison.
+* **Replay.** The frame stores the runway's scalars — headroom, the constraint now and later, the
+  closing lead, the extratropical lead. Rewound to a frame that recorded a different SHIPS cycle,
+  the per-lead table, the ledger, the dry-air block and the Atlas verdict are **withheld** and the
+  recorded scalars shown in their place, under a named state. The same rule as the guidance
+  envelope's, applied to a different feed.
+
 ### Feed / cycle health
 
 Every operational source is judged by one rule (`docs/app/feed-health.js`, loaded by the page and

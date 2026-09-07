@@ -53,14 +53,31 @@ function numsAfterLabel(line, label) {
 const ROWS = [
   ["shearKt", "SHEAR (KT)", "850-200 mb deep-layer shear"],
   ["shearAdjKt", "SHEAR ADJ (KT)", "shear adjusted for storm motion"],
+  ["shearDirDeg", "SHEAR DIR", "direction the deep-layer shear vector points toward"],
   ["sstC", "SST (C)", "sea-surface temperature"],
   ["mpiKt", "POT. INT. (KT)", "maximum potential intensity the ocean supports"],
   ["rhMid", "700-500 MB RH", "mid-level relative humidity"],
+  ["thetaEDevC", "TH_E DEV (C)", "theta-e deviation from moist adiabatic — low is a dry, stable column"],
   ["ohc", "HEAT CONTENT", "ocean heat content (kJ/cm2)"],
   ["landKm", "LAND (KM)", "distance to land"],
+  ["stmSpeedKt", "STM SPEED (KT)", "forecast translation speed"],
+  ["latN", "LAT (DEG N)", "forecast latitude on the track SHIPS was run along"],
+  ["lonW", "LONG(DEG W)", "forecast longitude west on the track SHIPS was run along"],
+  ["t200C", "200 MB T (C)", "200 mb temperature"],
+  ["div200", "200 MB DIV", "200 mb divergence (10^7 s-1)"],
+  ["envVor850", "850 MB ENV VOR", "850 mb environmental relative vorticity"],
+  ["tadv700850", "700-850 TADV", "700-850 mb temperature advection"],
+  ["modelVtxKt", "MODEL VTX (KT)", "the model's own vortex strength"],
   ["vNoLandKt", "V (KT) NO LAND", "SHIPS intensity forecast, no land interaction"],
+  ["vLandKt", "V (KT) LAND", "SHIPS intensity forecast with land interaction"],
   ["vLgemKt", "V (KT) LGEM", "LGEM intensity forecast"],
 ];
+
+/* Storm Type is the one row that is a WORD, not a number. It is also the row that most
+   often explains a runway collapsing: a forecast that goes TROP → EXTP is not a storm
+   losing an argument with its environment, it is a storm ceasing to be the kind of thing
+   the rest of these rows describe. Parsed separately so it is never coerced to NaN. */
+const TYPE_OK = /^(TROP|SUBT|EXTP|LOW|WAVE|DISS|REMN)$/i;
 
 export function parseShips(text) {
   const raw = String(text || "");
@@ -123,6 +140,129 @@ export function parseShips(text) {
     }
   }
 
+  /* ---- storm type, per lead -------------------------------------------------------
+     Words, not numbers, so it is read with its own reader and its own vocabulary. An
+     unrecognised token becomes null rather than being passed through: this row decides
+     whether the environmental rows below it still describe a tropical cyclone at all. */
+  const typeLine = lines.find((l) => l.trim().startsWith("Storm Type"));
+  const stormType = typeLine
+    ? (() => {
+        const toks = cells(typeLine.slice(typeLine.indexOf("Storm Type") + "Storm Type".length));
+        return taus.map((hr, i) => ({ hr, v: toks[i] && TYPE_OK.test(toks[i]) ? toks[i].toUpperCase() : null }))
+                   .filter((x) => x.hr != null);
+      })()
+    : null;
+
+  /* ---- steering ------------------------------------------------------------------
+     SHIPS does not publish a steering-flow field, and this build does not pretend it
+     does. What it publishes is the PRESSURE OF THE STEERING LEVEL together with that
+     level's climatological mean — a deep-layer steered storm sits low (a large pressure),
+     a shallow one sits high — plus the initial heading and speed and the CX/CY motion
+     components. That is a real steering diagnostic and it is all there is here; a wind
+     vector at each lead would have to come from GRIB2, and is not claimed from this file.
+
+     The name of the track SHIPS was run ALONG is taken from the same block. It matters:
+     every environmental row in this product is sampled at the positions of THAT track,
+     so a runway can only be called "along the NHC forecast track" when the track is an
+     official one. OFCI is the interpolated official forecast; a run along a model track
+     says so instead. */
+  const steerRe = /PRESSURE\s+OF\s+STEERING\s+LEVEL\s*\(MB\)\s*:\s*(-?\d+(?:\.\d+)?)\s*(?:\(\s*MEAN\s*=\s*(-?\d+(?:\.\d+)?)\s*\))?/i.exec(raw);
+  const headRe = /INITIAL\s+HEADING\/SPEED\s*\(DEG\/KT\)\s*:\s*(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)/i.exec(raw);
+  const cxcyRe = /CX,\s*CY\s*:\s*(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)/i.exec(raw);
+  const trackRe = /FORECAST\s+TRACK\s+FROM\s+([A-Z0-9]{3,5})/i.exec(raw);
+  const steering = {
+    trackAid: trackRe ? trackRe[1].toUpperCase() : null,
+    levelMb: steerRe ? Number(steerRe[1]) : null,
+    levelClimoMb: steerRe && steerRe[2] != null ? Number(steerRe[2]) : null,
+    headingDeg: headRe ? Number(headRe[1]) : null,
+    speedKt: headRe ? Number(headRe[2]) : null,
+    cxKt: cxcyRe ? Number(cxcyRe[1]) : null,
+    cyKt: cxcyRe ? Number(cxcyRe[2]) : null,
+  };
+
+  /* ---- the attribution ledger ------------------------------------------------------
+     "INDIVIDUAL CONTRIBUTIONS TO INTENSITY CHANGE": SHIPS' own decomposition of its
+     intensity forecast into the terms that produced it, in KNOTS, per lead, ending in a
+     TOTAL CHANGE that is the sum. This is the single most useful block in the file,
+     because it answers "why" in the model's own arithmetic instead of leaving a reader
+     to infer causation from six curves moving at once.
+
+     THESE ARE KNOTS OF FORECAST INTENSITY CHANGE. They are contributions to a regression,
+     not probabilities, not physical fluxes, and not attributions of a real storm's
+     behaviour — only of THIS forecast's arithmetic. Nothing downstream may present them
+     as anything else.
+
+     The columns start at the SECOND tau (a change from t=0 is zero by construction), so
+     the header row is read on its own rather than reusing `taus`. */
+  const contribHead = lines.findIndex((l) => /INDIVIDUAL\s+CONTRIBUTIONS\s+TO\s+INTENSITY\s+CHANGE/i.test(l));
+  let contributions = null, contribTaus = null, contribTotal = null;
+  if (contribHead >= 0) {
+    /* The lead row is the next line that is all numbers. */
+    let hi = -1;
+    for (let i = contribHead + 1; i < Math.min(lines.length, contribHead + 4); i++) {
+      const c = cells(lines[i]);
+      if (c.length > 2 && c.every((x) => /^\d+$/.test(x))) { hi = i; break; }
+    }
+    if (hi >= 0) {
+      contribTaus = cells(lines[hi]).map(Number);
+      contributions = [];
+      for (let i = hi + 1; i < Math.min(lines.length, hi + 30); i++) {
+        const L = lines[i];
+        if (/^\s*-{5,}\s*$/.test(L)) continue;
+        if (/CURRENT\s+MAX\s+WIND/i.test(L) || /^\s*$/.test(L)) break;
+        /* "  SAMPLE MEAN CHANGE     0.    1. ..." — a label of words, then signed
+           numbers that the product writes with a trailing dot ("-31."). */
+        /* Labels begin with a letter OR a digit ("200 MB DIVERGENCE", "700-500 MB RH",
+           "850-700 T ADVEC"), so the leading class must admit both — an anchor of [A-Z]
+           silently drops five of the nineteen terms, including the humidity one. */
+        const mm = /^\s{2,}([A-Z0-9][A-Z0-9_\/\.\- ]*?[A-Z\.])\s{2,}(-?\d.*)$/.exec(L);
+        if (!mm) continue;
+        const label = mm[1].trim();
+        const vals = cells(mm[2]).map((c) => (MISSING.test(c) ? null
+          : (Number.isFinite(Number(c.replace(/\.$/, ""))) ? Number(c.replace(/\.$/, "")) : null)));
+        const row = { label, dvKt: contribTaus.map((hr, j) => ({ hr, v: vals[j] ?? null })) };
+        if (/^TOTAL\s+CHANGE$/i.test(label)) contribTotal = row;
+        else contributions.push(row);
+      }
+      if (!contributions.length) contributions = null;
+    }
+  }
+
+  /* ---- the RI predictor table -----------------------------------------------------
+     Analysis-time scalars, each with the RI-predictor RANGE it is scaled against and its
+     percent contribution to the RI index. Two of these are the only dry-air diagnostics
+     the product publishes:
+
+        BL DRY-AIR FLUX (W/M2)        boundary-layer dry-air flux
+        %area of TPW <45 mm upshear   the fraction of the upshear quadrant that is dry
+
+     The second is the Saharan-Air-Layer / dry-intrusion diagnostic in this file. There is
+     NO SAL row as such, and none is synthesised: a runway that wants to speak about dry
+     air speaks through these two, under their own names.
+
+     Note the range is printed low-to-high OR high-to-low depending on the sign of the
+     predictor's effect, so it is carried as `rangeFrom`/`rangeTo` verbatim rather than
+     being normalised into a min and a max that would silently flip the meaning. */
+  const predictors = [];
+  const predRe = /^\s*(\S.*?)\s*:\s*(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+to\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)\s*$/;
+  for (const L of lines) {
+    const mm = predRe.exec(L);
+    if (!mm) continue;
+    predictors.push({
+      label: mm[1].trim(), value: Number(mm[2]),
+      rangeFrom: Number(mm[3]), rangeTo: Number(mm[4]),
+      scaled: Number(mm[5]), pctContribution: Number(mm[6]),
+    });
+  }
+  const predictorBy = (re) => predictors.find((p) => re.test(p.label)) || null;
+  const dryAir = {
+    blFluxWm2: predictorBy(/BL\s+DRY-?AIR\s+FLUX/i),
+    tpwDryPctUpshear: predictorBy(/%\s*area\s+of\s+TPW/i),
+  };
+
+  const ahiRe = /AHI\s*=\s*(\d+)/i.exec(raw);
+  const annular = /STORM\s+NOT\s+ANNULAR/i.test(raw) ? false : (ahiRe ? Number(ahiRe[1]) > 0 : null);
+
   const prelim = /PRELIM\s+RI\s+PROB\s*\(DV\s*\.GE\.\s*(\d+)\s*KT\s*IN\s*(\d+)\s*HR\)\s*:\s*(\d+(?:\.\d+)?)/i.exec(raw);
 
   const ohcAvailable = /OHC AVAILABLE/i.test(raw);
@@ -140,6 +280,13 @@ export function parseShips(text) {
       schemes: Object.keys(matrix),
       prelim: prelim ? { dvKt: Number(prelim[1]), hours: Number(prelim[2]), value: Number(prelim[3]) } : null,
     },
+    stormType,
+    steering,
+    /* SHIPS' own arithmetic for its own forecast, in knots. Never a probability. */
+    attribution: contributions ? { taus: contribTaus, rows: contributions, total: contribTotal } : null,
+    predictors: predictors.length ? predictors : null,
+    dryAir,
+    annular: { ahi: ahiRe ? Number(ahiRe[1]) : null, isAnnular: annular },
     availability: { ohc: ohcAvailable, ir: irAvailable },
     basis: `SHIPS ${name} ${stormId} ${cycleIso.slice(0, 16)}Z · shear ${features.shearKt ?? "—"} kt`
          + ` · OHC ${features.ohc ?? "—"} kJ/cm2 · MPI ${features.mpiKt ?? "—"} kt`

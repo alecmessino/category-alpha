@@ -661,6 +661,89 @@ def test_crossing_class_never_interpolates_a_class():
     eq("crossing: an unbracketed time publishes nothing", got["category"], None)
 
 
+def test_genesis_anchor_is_never_the_current_position():
+    """THE PRIOR IS GENESIS-CONDITIONED, SO THE ANCHOR MUST BE A GENESIS POSITION.
+
+    The failure this pins: `genesis_position` looks in the archive's `genesis_events`, which is
+    IBTrACS-derived and carries no storm that is still running. Every LIVE system therefore fell
+    through to its CURRENT position, silently, and was matched on where it had drifted to rather
+    than where it formed. On the snapshot that exposed it, three east-Pacific storms were being
+    queried 2,500-4,700 km from their genesis, and all three returned zero cases -- the archive
+    honestly declining a cell where almost nothing forms. The dangerous version is the one that
+    is NOT zero: a storm drifting into a genesis-rich cell publishes a confident rate for the
+    wrong cohort, under the archive's name, with every other test still green.
+    """
+    from genesis.sources.atcf_btk import first_fix, btk_filename
+    from genesis.live import anchor_position
+    from genesis.status import TROPICAL_STATUS
+
+    fixtures = Path(__file__).resolve().parents[2] / "fixtures"
+
+    eq("btk: filename for an ATCF id", btk_filename("EP132026"), "bep132026.dat")
+    eq("btk: a non-id has no filename", btk_filename("LALA"), None)
+
+    deck = (fixtures / "bdeck-ep132026.dat").read_text()
+
+    # GENESIS IS THE FIRST TROPICAL POINT -- the archive's own definition (genesis_lat), not
+    # the first row of the deck (first_track_lat). A b-deck opens with DB disturbance rows.
+    trop = first_fix(deck)
+    any_pt = first_fix(deck, tropical_only=False)
+    check("btk: the first tropical fix is tropical", trop["stage"] in TROPICAL_STATUS, trop["stage"])
+    check("btk: the deck's first row is NOT tropical, so the two differ",
+          any_pt["stage"] not in TROPICAL_STATUS, any_pt["stage"])
+    check("btk: and they are a different place and month -- the definition is load-bearing",
+          (trop["lat"], trop["lon"]) != (any_pt["lat"], any_pt["lon"])
+          and trop["month"] != any_pt["month"],
+          f"tropical {trop['lat']},{trop['lon']} m{trop['month']} vs any {any_pt['lat']},{any_pt['lon']} m{any_pt['month']}")
+    eq("btk: EP132026 became tropical at 14.1N 108.1W", (trop["lat"], trop["lon"]), (14.1, -108.1))
+    eq("btk: in September", trop["month"], 9)
+
+    # A deck with no tropical row at all is None, not the disturbance rows.
+    db_only = "\n".join(l for l in deck.splitlines() if ", DB," in l)
+    eq("btk: a system that never became tropical has no genesis fix", first_fix(db_only), None)
+    eq("btk: empty input is None, not a coordinate", first_fix(""), None)
+
+    # A zero magnitude is ATCF's "not set", never the equator.
+    eq("btk: a zero latitude is absent, not the equator",
+       first_fix("EP, 13, 2026090100,   , BEST,   0,   0N,  1053W,  45, 1000, TS,"), None)
+
+    # ---- the anchor rule ------------------------------------------------------------------
+    CUR = (24.5, -124.1)          # where EP132026 actually is: 2,531 km from genesis
+
+    # THE PREMISE, STATED. This case is only about the operational fallback while the archive
+    # does not carry the storm. If a future pack does carry it, the archive's own genesis wins
+    # and this assertion says so plainly instead of the case failing somewhere further down.
+    from genesis.live import genesis_position
+    check("anchor: the archive does not carry this live storm (the premise of the fallback)",
+          genesis_position("EP132026") is None,
+          "the pack now holds EP132026 -- the archive anchor takes precedence and this case "
+          "should be re-pointed at a storm the archive still lacks")
+
+    a = anchor_position("EP132026", is_invest=False, current=CUR, btk_text=deck)
+    eq("anchor: a formed storm with no archived genesis uses the OPERATIONAL genesis fix",
+       a["which"], "genesis_operational")
+    eq("anchor: at the genesis position", (a["lat"], a["lon"]), (14.1, -108.1))
+    check("anchor: which is NOT the current position",
+          (a["lat"], a["lon"]) != CUR, f"{a['lat']},{a['lon']}")
+    eq("anchor: and the season window is the GENESIS month, not the run's", a["month"], 9)
+
+    # THE REFUSAL. A formed storm with no genesis fix anywhere is not matched on where it is.
+    none_at_all = anchor_position("EP132026", is_invest=False, current=CUR, btk_text="")
+    eq("anchor: a formed storm with no genesis fix is REFUSED, never matched on current position",
+       none_at_all, None)
+
+    # An INVEST has not formed, so its own position is the cell being asked about.
+    inv = anchor_position("EP902026", is_invest=True, current=CUR, btk_text="")
+    eq("anchor: an unformed invest legitimately uses its present position", inv["which"], "current")
+    eq("anchor: at that position", (inv["lat"], inv["lon"]), CUR)
+    eq("anchor: with no genesis month to impose", inv["month"], None)
+
+    # The three anchors are the only ones, and only one of them is 'current'.
+    kinds = {a["which"], inv["which"], "genesis"}
+    eq("anchor: exactly three anchor kinds exist", sorted(kinds),
+       ["current", "genesis", "genesis_operational"])
+
+
 def main() -> int:
     for fn in (test_categories, test_geometry, test_genesis_rules, test_analog_rules,
                test_subbasin_semantics, test_env_unknown_is_not_a_match, test_zero_is_an_answer,
@@ -668,6 +751,7 @@ def main() -> int:
                test_empty_result_is_explicit,
                test_unscoreable_is_stated,
                test_live_ships_rt,
+               test_genesis_anchor_is_never_the_current_position,
                test_crossing_class_never_interpolates_a_class,
                test_min_pool_season, test_scoring_rules, test_contract_resolution,
                test_store_and_schema, test_gtwo_reader):

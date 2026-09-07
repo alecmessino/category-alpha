@@ -37,6 +37,8 @@ import { fileURLToPath } from "node:url";
 import { HERMETIC, serviceWorkerEscape } from "./lib/browser-harness.mjs";
 import { parseAdeckCycles, parseBestTrack } from "./lib/atcf.mjs";
 import { guidanceFrom, guidanceFrameScalars, genesisFromBestTrack } from "./lib/guidance.mjs";
+import { parseShips } from "./lib/ships.mjs";
+import { runwayFrom, runwayFrameScalars } from "./lib/runway.mjs";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dir, "..");
@@ -64,6 +66,7 @@ const latest = JSON.parse(await readFile(join(DOCS, "data/latest.json"), "utf8")
 const framesJson = JSON.parse(await readFile(join(DOCS, "data/frames.json"), "utf8"));
 const before = JSON.stringify(latest).length;
 const withDeck = [];
+const withRunway = [];
 for (const s of latest.storms || []) {
   const stem = String(s.id).toLowerCase();
   let a = null, b = null;
@@ -72,6 +75,15 @@ for (const s of latest.storms || []) {
   s.guidance = a ? guidanceFrom(parseAdeckCycles(a, { keep: 2 }), { fetchedAt: latest.generatedAt }) : null;
   s.genesis = b ? genesisFromBestTrack(parseBestTrack(b).records) : null;
   if (s.guidance) withDeck.push(s.id);
+
+  /* The environmental runway, from the committed SHIPS product. `ageHours` is fixed at a
+     value well past the archive's genesis window so the Atlas bridge renders its REFUSAL
+     deterministically — the honest state for a storm days past genesis, and the one that
+     must never silently become an offer. */
+  let sh = null;
+  try { sh = await readFile(join(__dir, "fixtures", `ships-${stem}.txt`), "utf8"); } catch { /* no fixture: null state */ }
+  s.runway = sh ? runwayFrom(parseShips(sh), { currentKt: s.wind ?? null, ageHours: 200, atlasWindowHours: 12 }) : null;
+  if (s.runway) withRunway.push(s.id);
 }
 /* ONE STORM IS DELIBERATELY LEFT WITHOUT AN ENVELOPE, whatever the snapshot happens to hold.
    The null path — a storm with no deck renders the claim and never a zero — used to be
@@ -97,10 +109,22 @@ frames.forEach((fr, i) => {
   for (const s of latest.storms || []) {
     if (!fr.storms || !fr.storms[s.id]) continue;
     const sc = guidanceFrameScalars(s.guidance);
+    const rsc = runwayFrameScalars(s.runway);
     if (s.guidance && i - firstShown < half) {
       Object.assign(fr.storms[s.id], sc, { gCycle: s.guidance.previousCycle || "2026090612",
         gTrack72: sc.gTrack72 != null ? sc.gTrack72 + 40 : null, gScen72: sc.gScen72 != null ? sc.gScen72 + 1 : null });
     } else Object.assign(fr.storms[s.id], sc);
+    /* The runway rewinds on the same cursor. On the older half the frame records an EARLIER
+       SHIPS cycle with DIFFERENT numbers, so a rewound panel has recorded scalars of its own
+       to show and the current cycle's per-lead detail is provably withheld rather than simply
+       absent. On the newer half the frame records the cycle in hand, so LIVE renders in full. */
+    if (s.runway && i - firstShown < half) {
+      Object.assign(fr.storms[s.id], rsc, {
+        rwCycle: "2026-09-07T06:00:00.000Z",
+        rwHeadNow: rsc.rwHeadNow != null ? rsc.rwHeadNow + 17 : null,
+        rwClose: null, rwExtp: null, rwLimNow: "rhMid",
+      });
+    } else Object.assign(fr.storms[s.id], rsc);
   }
 });
 const FIXTURE = { "/data/latest.json": JSON.stringify(latest), "/data/frames.json": JSON.stringify(framesJson) };
@@ -109,6 +133,11 @@ ok("the envelope adds less than 100 KB to the snapshot", added < 100000, added +
 ok("at least one storm in the snapshot has a fixture deck (the check needs a rendered envelope)", withDeck.length >= 1);
 ok("at least one storm has NO deck (the null state must render too)", (latest.storms || []).length > withDeck.length,
   "every storm in the snapshot carries an envelope and none could be withheld — the null path is unexercised");
+console.log(`[terminal] fixture: ${withRunway.length} storm(s) with a runway (${withRunway.join(", ") || "none"}), ${(latest.storms || []).length - withRunway.length} without`);
+ok("at least one storm in the snapshot has a SHIPS runway (the check needs a rendered runway)", withRunway.length >= 1);
+ok("at least one storm has NO SHIPS product (the runway null state must render too)",
+  (latest.storms || []).length > withRunway.length,
+  "every storm in the snapshot carries a runway — the no-SHIPS path is unexercised");
 
 /* ---- server ------------------------------------------------------------------------------- */
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".jsx": "text/babel", ".json": "application/json",
@@ -328,6 +357,22 @@ async function selectStorm(id) {
   await page.waitForFunction(() => document.querySelector("[data-guidance-strip]"), { timeout: 20000 });
   await page.waitForTimeout(400);
 }
+/* scrollIntoView puts the target's top at the VIEWPORT's top, which is underneath the sticky
+   header — so the card masthead (storm, cycle, any as-of state) lands behind it and never
+   reaches the screenshot. These images are a deliverable, so the scroll backs off by whatever
+   the header actually measures rather than by a guessed constant. */
+async function scrollPanelIntoView(sel) {
+  await page.evaluate((s) => {
+    const p = document.querySelector(s);
+    if (!p) return;
+    p.scrollIntoView({ block: "start" });
+    const hdr = document.querySelector("header");
+    const h = hdr ? Math.ceil(hdr.getBoundingClientRect().height) : 0;
+    if (h) window.scrollBy(0, -(h + 10));
+  }, sel);
+  await page.waitForTimeout(250);
+}
+
 async function openTab(name) {
   await page.evaluate((n) => { const t = [...document.querySelectorAll('[role="tab"]')].find((x) => x.textContent.trim() === n); if (t) t.click(); }, name);
   await page.waitForTimeout(400);
@@ -375,6 +420,8 @@ for (const W of WIDTHS) {
     await page.evaluate(() => { const p = document.querySelector("[data-guidance-panel]"); if (p) p.scrollIntoView({ block: "start" }); });
     await page.waitForTimeout(200);
     await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-guidance.png`), fullPage: false });
+    await scrollPanelIntoView("[data-runway-panel]");
+    await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-runway.png`), fullPage: false });
   }
   /* The null state: the storm without a deck, on the all-systems panel. */
   if (NO_DECK) {
@@ -432,6 +479,37 @@ for (const W of WIDTHS) {
       text: st ? st.textContent.replace(/\s+/g, " ") : "",
     };
   }, STORM);
+  /* The runway's own probe, read the same way and at the same cursor. Its as-of rule is the
+     guidance rule applied to a different feed: the frame stores scalars, the per-lead detail
+     belongs to the cycle in hand, and a historical cursor may show the first and never the
+     second. */
+  const readRunway = () => page.evaluate((id) => {
+    const st = document.querySelector(`[data-runway-storm="${id}"]`);
+    const tileVal = (k) => {
+      const t = st && st.querySelector(`[data-runway-tile="${k}"]`);
+      const v = t && t.querySelector("[data-runway-tile-value]");
+      return v ? v.textContent.replace(/\s+/g, "") : null;
+    };
+    return {
+      block: !!st,
+      table: !!(st && st.querySelector("[data-runway-table]")),
+      leadRows: st ? st.querySelectorAll("[data-runway-lead]").length : 0,
+      measuredRows: st ? st.querySelectorAll('[data-runway-measured="1"]').length : 0,
+      attribution: !!(st && st.querySelector("[data-runway-attribution]")),
+      dryair: !!(st && st.querySelector("[data-runway-dryair]")),
+      atlas: (() => { const a = st && st.querySelector("[data-runway-atlas]"); return a ? a.getAttribute("data-runway-atlas") : null; })(),
+      absent: !!(st && st.querySelector("[data-runway-detail-absent]")),
+      absentText: (() => { const a = st && st.querySelector("[data-runway-detail-absent]"); return a ? a.textContent.replace(/\s+/g, " ").trim() : ""; })(),
+      headroom: tileVal("headroom"),
+      limiting: tileVal("limiting"),
+      closes: tileVal("closes"),
+      leadCells: st ? [...st.querySelectorAll("[data-runway-lead]")].map((r) => r.firstElementChild.textContent.trim()) : [],
+      tileLabels: st ? [...st.querySelectorAll("[data-runway-tile]")].map((t) => t.firstElementChild.textContent.trim()) : [],
+      stripAsOf: !!document.querySelector("[data-runway-strip-asof]"),
+      stripAbsent: !!document.querySelector("[data-runway-strip] [data-runway-detail-absent]"),
+      text: st ? st.textContent.replace(/\s+/g, " ") : "",
+    };
+  }, STORM);
   const toLive = async () => {
     await page.evaluate(() => { const b = document.querySelector('[title="Jump to live"]'); if (b) b.click(); });
     await page.waitForTimeout(500);
@@ -444,6 +522,43 @@ for (const W of WIDTHS) {
 
   /* 1 · LIVE */
   const live = await readGuidance();
+  const liveR = await readRunway();
+  ok("RUNWAY 1 · LIVE renders the per-lead table, the attribution ledger and the dry-air block",
+    liveR.table && liveR.attribution && liveR.dryair,
+    JSON.stringify({ table: liveR.table, ledger: liveR.attribution, dryair: liveR.dryair }));
+  ok("RUNWAY 1 · LIVE samples the six leads an operator reads", liveR.leadRows === 6, String(liveR.leadRows));
+  ok("RUNWAY 1 · LIVE names a binding constraint at the leads SHIPS measured",
+    liveR.measuredRows >= 1 && liveR.measuredRows <= 6, String(liveR.measuredRows));
+  ok("RUNWAY 1 · LIVE shows the headroom and the limiting field the cycle in hand published",
+    /\d/.test(liveR.headroom || "") && /[A-Z]/.test(liveR.limiting || ""),
+    JSON.stringify({ headroom: liveR.headroom, limiting: liveR.limiting }));
+  ok("RUNWAY 1 · LIVE shows no as-of state", !liveR.absent && !liveR.stripAsOf);
+  /* ANALYSIS, NEVER "NOW". SHIPS' tau 0 is the cycle's analysis time, up to six hours behind
+     the board's clock — the board reads 18Z over a 12Z run. "NOW" would invite a reader to take
+     a six-hour-old analysis for the storm's present state. */
+  ok("RUNWAY 1 · the analysis lead is labelled ANALYSIS, never NOW",
+    liveR.leadCells[0] === "ANALYSIS", JSON.stringify(liveR.leadCells));
+  ok("RUNWAY 1 · no lead cell anywhere says NOW",
+    liveR.leadCells.every((c) => !/\bNOW\b/.test(c)), JSON.stringify(liveR.leadCells));
+  ok("RUNWAY 1 · no synthesis tile label says 'now'",
+    liveR.tileLabels.every((t) => !/\bnow\b/i.test(t)), JSON.stringify(liveR.tileLabels));
+  ok("RUNWAY 1 · a runway that is already closed says AT ANALYSIS, not NOW",
+    liveR.closes == null || !/\bNOW\b/.test(liveR.closes), String(liveR.closes));
+  /* And the instant itself stays on screen at every width, including the ones that drop the
+     VALID column — the one number a reader must never have to infer is WHEN this analysis was. */
+  ok("RUNWAY 1 · the analysis instant is stated on screen, and named as the SHIPS cycle rather than the board's clock",
+    /ANALYSIS is .*Z/.test(liveR.text) && /not the board's clock/.test(liveR.text),
+    (liveR.text.match(/ANALYSIS is [^·]*/) || ["(absent)"])[0]);
+  /* The archive holds these five fields AT GENESIS. This storm is days past it, so the only
+     honest state is the refusal — and it must be on screen in as many words, never silently
+     omitted and never quietly upgraded to an offer. */
+  ok("RUNWAY 1 · the Atlas comparison is REFUSED, and says why", liveR.atlas === "refused"
+    && /NOT COMPARABLE TO THE ARCHIVE/.test(liveR.text) && /genesis window/.test(liveR.text),
+    liveR.atlas || "");
+  ok("RUNWAY 1 · the panel says on screen that a band is not a probability",
+    /not a probability|never a probability/i.test(liveR.text));
+  ok("RUNWAY 1 · the ledger is stated in knots of THIS forecast's change, not as a likelihood",
+    /in knots/i.test(liveR.text) && !/%\s*(chance|probability)/i.test(liveR.text));
   ok("AS-OF 1 · LIVE renders the lead table, the intensity fan and the members", live.leads && live.fan && live.members, JSON.stringify({ leads: live.leads, fan: live.fan, members: live.members }));
   ok("AS-OF 1 · LIVE draws guidance geometry on the map (" + live.drawn + " layers)", typeof live.drawn === "number" && live.drawn > 0, String(live.drawn));
   ok("AS-OF 1 · LIVE shows no as-of state and no geometry-absent state", !live.absent && !live.rewound && !live.stripAsOf);
@@ -456,6 +571,20 @@ for (const W of WIDTHS) {
   /* 2 · REWOUND onto a frame whose recorded deck is not the deck in hand */
   await stepBack(half + 1);
   const rew = await readGuidance();
+  const rewR = await readRunway();
+  ok("RUNWAY 2 · REWOUND still shows the scalars the frame recorded",
+    /\d/.test(rewR.headroom || ""), rewR.headroom || "");
+  ok("RUNWAY 2 · REWOUND shows the FRAME's headroom, not the cycle-in-hand's",
+    liveR.headroom == null || rewR.headroom !== liveR.headroom,
+    JSON.stringify({ live: liveR.headroom, rewound: rewR.headroom }));
+  ok("RUNWAY 3 · REWOUND withholds the per-lead table", !rewR.table && rewR.leadRows === 0);
+  ok("RUNWAY 3 · REWOUND withholds the attribution ledger", !rewR.attribution);
+  ok("RUNWAY 3 · REWOUND withholds the dry-air and steering block", !rewR.dryair);
+  ok("RUNWAY 3 · REWOUND withholds the Atlas comparability verdict", rewR.atlas === null);
+  ok("RUNWAY 3 · REWOUND states the absence in as many words", rewR.absent
+    && /HISTORICAL RUNWAY DETAIL NOT STORED FOR THIS FRAME/.test(rewR.absentText)
+    && /remain valid as-of this cursor/.test(rewR.absentText), rewR.absentText.slice(0, 110));
+  ok("RUNWAY 3 · the rail strip carries the same state", rewR.stripAsOf && rewR.stripAbsent);
   ok("AS-OF 2 · REWOUND still shows the metrics the frame recorded", /\d+\s*km/.test(rew.track || ""), rew.track || "");
   ok("AS-OF 2 · REWOUND shows the FRAME's 72h spread" + (frameKm != null ? " (" + frameKm + " km)" : "") + ", not the deck's",
     frameKm == null || (rew.trackValue === frameKm + "km" && rew.trackValue !== liveKm + "km"), rew.trackValue || "");
@@ -465,6 +594,8 @@ for (const W of WIDTHS) {
     await page.evaluate(() => { const p = document.querySelector("[data-guidance-panel]"); if (p) p.scrollIntoView({ block: "start" }); });
     await page.waitForTimeout(200);
     await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-guidance-asof.png`), fullPage: false });
+    await scrollPanelIntoView("[data-runway-panel]");
+    await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-runway-asof.png`), fullPage: false });
   }
 
   /* 3 · REWOUND cannot render the latest geometry, anywhere */
@@ -492,6 +623,12 @@ for (const W of WIDTHS) {
   /* 4 · back to LIVE */
   await toLive();
   const back = await readGuidance();
+  const backR = await readRunway();
+  ok("RUNWAY 4 · returning to LIVE restores the table, the ledger and the dry-air block",
+    backR.table && backR.attribution && backR.dryair && backR.leadRows === 6);
+  ok("RUNWAY 4 · returning to LIVE clears the as-of state", !backR.absent && !backR.stripAsOf);
+  ok("RUNWAY 4 · returning to LIVE shows the cycle-in-hand's headroom again",
+    backR.headroom === liveR.headroom, JSON.stringify({ first: liveR.headroom, back: backR.headroom }));
   ok("AS-OF 4 · returning to LIVE restores the lead table, the fan and the members", back.leads && back.fan && back.members);
   ok("AS-OF 4 · returning to LIVE restores the map geometry (" + back.drawn + " layers)", back.drawn > 0, String(back.drawn));
   ok("AS-OF 4 · returning to LIVE clears the as-of state", !back.absent && !back.rewound && !back.stripAsOf);
