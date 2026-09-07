@@ -61,10 +61,14 @@ Before touching anything, the repo already had, and none of it was duplicated:
 - **A recorded negative result** (`docs/PLAN-TRACK-MODEL.md`): the consensus intensity blend
   had no skill over four seasons. That is why nothing built here feeds a price.
 
-Two defects found in passing and fixed: the header read `ADV NaNm` and the panel read
+Three defects found in passing and fixed: the header read `ADV NaNm` and the panel read
 "Advisory ingestion lag NaN min" (a frame accessor read as a number in two places; visible in
 the user's own screenshot); and f-deck fix positions were parsed as tenths of a degree when
-the f-deck stores hundredths, so `latest.json` carried a scatterometer fix at 230.6°N.
+the f-deck stores hundredths, so `latest.json` carried a scatterometer fix at 230.6°N; and
+`check-panel-dom` required a Wilson interval of the live payload unconditionally, so on a day
+when every live analog entry is refused below the sample gate (2026-09-06: 4, 0 and 0 storms
+with a known outcome) the gate failed the panel for the archive's honesty — it was already red
+on the base commit, and now requires the interval only of a payload that publishes a rate.
 
 ## 3. Ranking
 
