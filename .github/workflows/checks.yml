@@ -112,10 +112,23 @@ jobs:
         run: node scripts/test-staleness.mjs
       - name: Test the GRIB2 reader
         run: node scripts/test-grib2.mjs
+      # FEED / CYCLE HEALTH. One rule for every operational source — valid time, fetched, age,
+      # cadence, LIVE/DELAYED/STALE/NO FEED — loaded from the same bytes the page runs, via vm.
+      - name: Test feed / cycle health
+        run: node scripts/test-feed-health.mjs
 
       # The four pre-advisory feeds and the engine that combines them.
       - name: Test the ATCF deck parsers
         run: node scripts/test-atcf.mjs
+      # THE GUIDANCE ENVELOPE. Semantics (a member count is not a probability, the envelope is not
+      # the cone), valid-time alignment across cycles, the no-future-leak guard, null-never-zero,
+      # and the isolation of the whole thing from the probability engine and the Kelly path.
+      - name: Test the model-guidance engine
+        run: node scripts/test-guidance.mjs
+      # THE MILLIBAR → ATLAS BRIDGE, both ends: the link carries the genesis fix and the ATCF id;
+      # the Atlas resolves the id under the operational join's own rules and refuses otherwise.
+      - name: Test the Millibar → Storm Atlas bridge
+        run: node scripts/test-atlas-bridge.mjs
       - name: Test the reconnaissance parser
         run: node scripts/test-recon.mjs
       - name: Test the SHIPS parser and the RI floor
@@ -713,6 +726,14 @@ jobs:
 
       - name: Verify every state holds at every breakpoint the ladder names
         run: node scripts/check-responsive-matrix.mjs --require-browser
+
+      # THE TERMINAL AT EVERY WIDTH, with the guidance envelope on screen. The map floor, no
+      # sideways scroll, the semantics footer, the feed-health pills (and never "NaN"), the
+      # valid-time columns, the rewind banner, the null state, the genesis bridge, the a11y
+      # attributes and a render budget — against a fixture-substituted snapshot, so the same
+      # bytes render on every run. --ci scales the time budgets x3 for a shared runner.
+      - name: Verify the terminal at every width, with the guidance envelope on screen
+        run: node scripts/check-terminal-responsive.mjs --ci --require-browser
 
       # MAP ↔ EVIDENCE, AS ONE CLAIM. Holding a row of the answer draws THAT ROW'S storms on the
       # plate, and the lens is the one place a published NUMBER and a set of drawn TRACKS claim to

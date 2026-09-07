@@ -42,6 +42,7 @@ import { loadCalibration } from "../engine/calibration.js";
 import {
   LIVE_OPERATIONAL, categoryLadder, liveStateFor, loadLive, operationalLifecycle,
   operationalView, shortfall, sourceDisagreement,
+  rowOfAtcfId,
 } from "../engine/live.js";
 import { AtlasMap } from "./map.jsx";
 import { CohortBuilder } from "./cohort-builder.jsx";
@@ -153,14 +154,21 @@ export function Atlas() {
      shown. */
   const [interacted, setInteracted] = React.useState(() => {
     const p = new URLSearchParams(location.search);
-    return !!p.get("storm") || conditionsOf(parseQuery(location.search).spec).length > 0;
+    return !!p.get("storm") || !!p.get("atcf") || conditionsOf(parseQuery(location.search).spec).length > 0;
   });
   /* THE STORM A SHARED LINK WAS LOOKING AT. Read once on mount and resolved after the pack lands
      -- the URL carries the archive's own `storm_id`, never the pack row, because a row is
      pack-order and a rebuild would silently point the same link at a different storm. */
   const [urlStorm] = React.useState(
     () => new URLSearchParams(location.search).get("storm"));
+  /* The terminal's bridge names the storm by ATCF id; resolved through the same join the
+     operational layer uses (engine/live.js rowOfAtcfId), and dropped when the pack does not hold it. */
+  const [urlAtcf] = React.useState(
+    () => new URLSearchParams(location.search).get("atcf"));
   const [urlStormResolved, setUrlStormResolved] = React.useState(false);
+  /* What became of the bridge's id: "resolved" (the row is selected), "missing" (the pack does
+     not hold it yet — IBTrACS publishes a live storm with a lag of days), or null (no bridge). */
+  const [urlAtcfState, setUrlAtcfState] = React.useState(null);
   /* THE PLATE'S MODE, AND IT RESTS ON PATHWAY COUNTS. Three readings of the same storms:
      PATHWAY counts the distinct storms through each 2-degree cell, GENESIS counts the storms that
      formed in each, TRACKS is the trajectories alone -- the reading the plate used to rest on,
@@ -346,12 +354,18 @@ export function Atlas() {
   React.useEffect(() => {
     if (!archive || !rowOfStormId || urlStormResolved) return;
     setUrlStormResolved(true);
-    if (!urlStorm) return;
-    const row = rowOfStormId.get(urlStorm);
-    /* An id this pack does not hold is dropped rather than guessed at. The cohort in the same
-       URL still opens, which is the half of the link that carries the question. */
-    if (row !== undefined) setSelected(row);
-  }, [archive, rowOfStormId, urlStorm, urlStormResolved]);
+    if (urlStorm) {
+      const row = rowOfStormId.get(urlStorm);
+      /* An id this pack does not hold is dropped rather than guessed at. The cohort in the same
+         URL still opens, which is the half of the link that carries the question. */
+      if (row !== undefined) { setSelected(row); return; }
+    }
+    if (urlAtcf) {
+      const row = rowOfAtcfId(archive, urlAtcf);
+      if (row !== null) setSelected(row);
+      setUrlAtcfState(row !== null ? "resolved" : "missing");
+    }
+  }, [archive, rowOfStormId, urlStorm, urlAtcf, urlStormResolved]);
 
   const bounds = React.useMemo(() => (archive ? seasonRange(archive) : [1851, 2026]), [archive]);
   const home = React.useMemo(() => (archive ? coreFrame(archive) : null), [archive]);
@@ -981,8 +995,10 @@ export function Atlas() {
         kept={result.kept} total={archive.manifest.counts.storms}
         sufficient={result.sufficient} minSample={result.min_sample}
         lastEdit={lastEdit}
-        notice={<MethodologyMoved was={urlMethodology}
-          now={archive.manifest.methodology_version} />}
+        notice={<>
+          <MethodologyMoved was={urlMethodology} now={archive.manifest.methodology_version} />
+          <BridgeNotice atcfId={urlAtcf} state={urlAtcfState} />
+        </>}
         onEdit={(zone, el) => { setInteracted(true); openEditor(zone, el); }}
         onClear={(key) => setCohort(clearCondition(cohort, key))}
         onReset={onResetQuery} />
@@ -1352,6 +1368,42 @@ function quantile(sorted, p) {
  * says which definitions moved, because the one thing a reader of a shared scenario cannot do
  * is notice that the refusals were recomputed. 1.1.0 is named specifically: it is the only bump
  * so far and the only one whose effect a reader would see. */
+/* THE BRIDGE, ACKNOWLEDGED. A reader who arrived from the terminal asked two things of this URL:
+   the cohort (genesis neighbourhood, month) and the storm itself. The cohort always opens. The
+   storm opens only when the pack holds it, and the pack is IBTrACS, which publishes a live storm
+   days after it forms — so the common case for a storm that is on the terminal RIGHT NOW is that
+   it is not here yet, and that has to be said rather than left as a selection that silently did
+   not happen. Nothing about the cohort's answer changes either way. */
+function BridgeNotice({ atcfId, state }) {
+  if (!atcfId || !state) return null;
+  const missing = state === "missing";
+  return (
+    <div data-atlas-bridge-notice={state} style={{
+      margin: "var(--sp-5) var(--sp-6) 0",
+      border: "1px solid var(--border-strong)",
+      borderLeft: "var(--bw-signal) solid " + (missing ? "var(--warn)" : "var(--accent)"),
+      borderRadius: "var(--radius-sm)", padding: "var(--sp-3) var(--sp-4)",
+      background: "color-mix(in srgb, " + (missing ? "var(--warn)" : "var(--accent)") + " 6%, transparent)",
+    }}>
+      <div style={{ ...MONO, fontSize: "var(--fs-mono-xs)", fontWeight: 800,
+        color: missing ? "var(--warn)" : "var(--accent)", letterSpacing: ".5px" }}>
+        {missing ? `OPENED FROM THE TERMINAL · ${String(atcfId).toUpperCase()} IS NOT IN THIS ARCHIVE PACK YET`
+                 : `OPENED FROM THE TERMINAL · ${String(atcfId).toUpperCase()} SELECTED`}
+      </div>
+      <div style={{ fontFamily: "var(--font-sans)", fontSize: "var(--fs-caption)",
+        color: "var(--text-2)", lineHeight: "var(--lh-body)", marginTop: 3 }}>
+        {missing
+          ? "The cohort below is the storm's genesis neighbourhood — where it formed and the month it formed in — and every "
+            + "count in it is a storm that already happened. The live storm itself is not a row here: the archive is IBTrACS, "
+            + "which publishes a running season with a lag of days, and the operational record joins by ATCF id only once "
+            + "that row exists. Nothing in the cohort is about this storm's own future."
+          : "The cohort is the storm's genesis neighbourhood and the month it formed in; the storm's own record is selected "
+            + "on the plate. The cohort's counts are storms that already happened, and none of them is a forecast for this one."}
+      </div>
+    </div>
+  );
+}
+
 function MethodologyMoved({ was, now }) {
   if (!was || !now || was === now) return null;
   return (

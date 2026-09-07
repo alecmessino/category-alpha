@@ -27,7 +27,11 @@ const OWNER_FILE = "claims.js";      // the one place claims may be authored
 /* Each rule is a phrase the UI must not assert on its own authority, plus why. */
 const RULES = [
   { re: /\bensemble\s+(consensus|mean|spread|probabilit)/i, why: "no ensemble feed is wired — this exact phrase drifted into the pipeline panel" },
-  { re: /\bspaghetti\b/i,                                   why: "no model-track feed is wired" },
+  /* A model-track feed IS wired now (the ATCF a-deck roster, scripts/lib/guidance.mjs), and the
+     word stays banned for a different reason: it is the one word that most reliably reads a count
+     of model runs as a probability. Components call the layer MODEL GUIDANCE and say what it is
+     through claims.js. */
+  { re: /\bspaghetti\b/i,                                   why: "model tracks are 'guidance' on this board — the word implies a probability the lines do not carry" },
   /* These two used to mean "no such feed is wired". Both are wired now, and that makes
      the rule MORE necessary rather than less: an intermittent feed is exactly the kind
      that a component will describe confidently on a cycle when it delivered nothing. A

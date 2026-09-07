@@ -344,7 +344,11 @@ const K = {
  * a condition on the population. Folding it into the spec would make two identical cohorts stop
  * comparing equal because different storms happened to be selected, and would put a storm into
  * the citation line as though it narrowed the question. */
-export const RESERVED_QUERY_KEYS = Object.freeze(["m", "view", "contract", "storm"]);
+/* `atcf` is the terminal's bridge: the Millibar board names a live storm by its ATCF id (it has
+ * no archive storm_id to name it by), and the Atlas resolves that to the archive row the same way
+ * the operational layer joins — uppercased exact match on the atcf_id column, season checked. A
+ * surface key for the same reason `storm` is: it selects, it does not condition. */
+export const RESERVED_QUERY_KEYS = Object.freeze(["m", "view", "contract", "storm", "atcf"]);
 
 export function toQuery(spec) {
   const s = normalise(spec);

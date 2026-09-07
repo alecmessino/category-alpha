@@ -174,6 +174,27 @@ export function seasonOfAtcfId(id) {
  *     tracking any more. The archive stub is all there is, it is still marked PROVISIONAL exactly
  *     as it was before this change, and nothing claims an operational continuation exists.
  */
+/* THE BRIDGE RESOLVER. An ATCF id from the terminal (`?atcf=EP132026`) to the archive row that
+ * carries it, under exactly the join rules above: uppercased exact string on the atcf_id column,
+ * and the id's own season must agree with the row's. Returns null — never a guess — when no row
+ * carries the id, when the season disagrees, or when two rows claim it (which a pack should never
+ * produce, and which is refused rather than resolved to the first). */
+export function rowOfAtcfId(archive, atcfId) {
+  const want = String(atcfId || "").trim().toUpperCase();
+  if (!/^[A-Z]{2}\d{6}$/.test(want)) return null;
+  const idSeason = seasonOfAtcfId(want);
+  let found = null;
+  for (let i = 0; i < archive.nStorms; i++) {
+    const id = archive.storms.str("atcf_id", i);
+    if (!id || String(id).toUpperCase() !== want) continue;
+    const season = archive.storms.num("season", i);
+    if (idSeason !== null && season !== null && idSeason !== season) continue;
+    if (found !== null) return null;
+    found = i;
+  }
+  return found;
+}
+
 export function liveStateFor(archive, row, live) {
   const provisional = archive.storms.bool("provisional", row);
   const atcfId = archive.storms.str("atcf_id", row);

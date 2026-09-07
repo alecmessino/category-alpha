@@ -33,7 +33,8 @@
  *   node scripts/ingest.mjs --storm CP012026
  */
 import { gunzipSync } from "node:zlib";
-import { parseAdeck, parseBestTrack, parseFdeck, consensusFrom, latestScatPass, latestAircraftFix, deckStem } from "./lib/atcf.mjs";
+import { parseAdeck, parseAdeckCycles, parseBestTrack, parseFdeck, consensusFrom, latestScatPass, latestAircraftFix, deckStem } from "./lib/atcf.mjs";
+import { guidanceFrom, genesisFromBestTrack } from "./lib/guidance.mjs";
 import { parseVDM, parseReccoHeader, vdmKey } from "./lib/recon.mjs";
 import { parseShips, shipsFileName, shipsCycles } from "./lib/ships.mjs";
 
@@ -81,7 +82,8 @@ async function tryUrls(urls, opts) {
 
 /* ---------------- Priority 1: ATCF a / b / f decks ---------------- */
 
-export async function fetchDecks(stormId) {
+export async function fetchDecks(stormId, opts) {
+  const nowMs = opts && opts.nowMs != null ? opts.nowMs : Date.now();
   const s = deckStem(stormId);
   if (!s) return { ok: false, note: `"${stormId}" is not an ATCF storm id — refusing to guess a deck name` };
 
@@ -95,6 +97,16 @@ export async function fetchDecks(stormId) {
   const bdeck = b.ok ? parseBestTrack(b.text) : null;
   const fdeck = f.ok ? parseFdeck(f.text) : null;
   const consensus = adeck ? consensusFrom(adeck) : null;
+  /* THE WHOLE DECK, AS GUIDANCE. The consensus above is the probability engine's input — three
+     aids, reduced to a peak. This is everything else the forecaster was looking at, kept as
+     tracks and intensities for the latest cycle and the one before it, so the board can say how
+     far the models disagree and what moved since the last cycle. It is read from the SAME text
+     the consensus was read from, on the same tick, so the two cannot describe different decks.
+     It feeds no probability; scripts/test-guidance.mjs asserts that. */
+  const guidance = a.ok ? guidanceFrom(parseAdeckCycles(a.text, { keep: 2 }), { fetchedAt: new Date(nowMs).toISOString() }) : null;
+  /* Where the storm FORMED, from the first fix the forecasters wrote down. The Storm Atlas
+     conditions on genesis, so this — never the current position — is what a bridge to it passes. */
+  const genesis = bdeck && bdeck.ok ? genesisFromBestTrack(bdeck.records) : null;
 
   return {
     ok: !!(adeck && adeck.ok),
@@ -103,6 +115,8 @@ export async function fetchDecks(stormId) {
     latencyMs: a.latencyMs ?? null,
     bytes: a.bytes ?? null,
     consensus,
+    guidance,
+    genesis,
     /* The deck census travels with the result. A null consensus is ambiguous on its own,
        and this is what disambiguates it. */
     cycle: adeck && adeck.ok ? adeck.latestCycle : null,
@@ -135,6 +149,7 @@ export async function fetchDecks(stormId) {
     note: adeck && adeck.ok
       ? `a-deck cycle ${adeck.latestCycle} · ${Object.keys(adeck.techs).length} techs`
         + (consensus ? ` · consensus ${consensus.n} member(s) peak ${consensus.peakKt} kt` : " · NO CONSENSUS AID IN THIS CYCLE")
+        + (guidance ? ` · guidance ${guidance.roster.inSpread.length} track members, 72h spread ${guidance.summary.trackSpread72Km ?? "—"} km` : " · no guidance roster in this cycle")
         + (bdeck && bdeck.ok ? ` · b-deck ${bdeck.records.length} records` : " · b-deck unavailable")
         + (fdeck && fdeck.ok ? ` · f-deck ${fdeck.fixes.length} fixes` : " · f-deck unavailable")
       : (a.error || "a-deck unavailable"),
@@ -230,7 +245,7 @@ export async function ingestIntel(storms, opts) {
   const recon = await fetchRecon(nowMs);
 
   const perStorm = await Promise.all(list.map(async (s) => {
-    const [decks, ships] = await Promise.all([fetchDecks(s.id), fetchShips(s.id, nowMs)]);
+    const [decks, ships] = await Promise.all([fetchDecks(s.id, { nowMs }), fetchShips(s.id, nowMs)]);
     return { id: s.id, name: s.name, decks, ships, vdm: vdmForStorm(recon, s.id) };
   }));
 
@@ -240,6 +255,8 @@ export async function ingestIntel(storms, opts) {
       atcf: r.decks && r.decks.ok ? r.decks : null,
       atcfNote: r.decks ? r.decks.note : "not attempted",
       consensus: r.decks && r.decks.ok ? r.decks.consensus : null,
+      guidance: r.decks && r.decks.ok ? r.decks.guidance : null,
+      genesis: r.decks ? r.decks.genesis : null,
       deck: r.decks && r.decks.ok
         ? { cycle: r.decks.cycle, techCount: r.decks.techCount, forecastAids: r.decks.forecastAids } : null,
       bestTrack: r.decks ? r.decks.bestTrack : null,

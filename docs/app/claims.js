@@ -313,7 +313,12 @@
   define("advisory.latency", "nhc", (s) => {
     const f = s.feeds.nhc || {};
     const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
-    const lags = storms.map((x) => x.advisoryLagMin).filter((v) => v != null);
+    /* advisoryLagMin is a FRAME ACCESSOR on the built MT (data-loader.js), not a number. Read
+       as a property it is a function, Math.max of a function is NaN, and the header read
+       "Advisory ingestion lag NaN min" for as long as nobody looked. Read at the live frame. */
+    const NF = (window.MT && MT.FRAMES ? MT.FRAMES : 1) - 1;
+    const lags = storms.map((x) => (typeof x.advisoryLagMin === "function" ? x.advisoryLagMin(NF) : x.advisoryLagMin))
+      .filter((v) => typeof v === "number" && Number.isFinite(v));
     if (!f.ok) return { text: "advisory feed unavailable this cycle", ok: false };
     if (!lags.length) return { text: "no advisory issuance time parsed — ingestion lag unmeasured", ok: false };
     const worst = Math.max(...lags);
@@ -745,6 +750,65 @@
     if (!f.ok) return { text: "outlook areas listed without geometry — " + (f.note || "shapes unavailable"), ok: false };
     return { text: drawn + " outlook area(s) drawn from NHC graphical TWO polygons", ok: drawn > 0 };
   });
+  /* ---- MODEL GUIDANCE. The whole a-deck as an envelope, owned by the atcf feed. ----------
+     Every sentence about what the lines on the map ARE lives here, because "spaghetti" is the
+     one word on the web that most reliably turns a count of model runs into a probability in a
+     reader's head. The layer label, the panel's semantics footer and the register's detail
+     line all read these; none of them authors one. */
+  define("map.guidance", "atcf", (s) => {
+    const f = s.feeds.atcf || {};
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const with_ = storms.filter((x) => x.guidance && x.guidance.roster && x.guidance.roster.inSpread.length);
+    if (!f.ok) return { text: "model guidance unavailable — the ATCF a-deck did not answer this cycle", ok: false };
+    if (!with_.length) return { text: "ATCF a-deck read, but no roster aid carried a track for any active system", ok: false };
+    return {
+      text: with_.map((x) => x.name + ": " + x.guidance.roster.inSpread.length + " track members, cycle "
+        + String(x.guidance.cycle).slice(-2) + "Z" + (x.guidance.roster.complete ? "" : " (partial — late forms still running)")).join(" · ")
+        + " — one line per model run; the official forecast is drawn apart from them",
+      ok: true,
+    };
+  });
+  define("guidance.semantics", "atcf", () => ({
+    text: "Raw model guidance from the NHC ATCF a-deck. A count of members is a count of model runs, not a probability. "
+        + "The spread is disagreement between runs, not the NHC cone, and it enters no price on this board.",
+    ok: true,
+  }));
+  define("guidance.threshold", "derived", () => ({
+    text: "Scenarios are a single-linkage partition of the members at each lead, at a threshold of 150 km + 3.5 km per hour of lead "
+        + "(roughly twice NHC's published mean track error). A partition rule, stated; not a likelihood.",
+    ok: true,
+  }));
+  define("guidance.replay", "derived", () => ({
+    text: "The lines on the map are always the latest deck. Scrubbing rewinds the envelope's SCALARS — spread, scenario count, "
+        + "official-versus-consensus — to what the frame recorded, and the panel says which cycle they belong to.",
+    ok: true,
+  }));
+  /* The bridge to the Storm Atlas. What is passed, and what is deliberately not. */
+  define("atlas.bridge", "atcf", () => {
+    const storms = (window.MT && MT.storms) ? Object.values(MT.storms) : [];
+    const g = storms.filter((x) => x.genesis && x.genesis.lat != null);
+    if (!g.length) return { text: "no genesis fix in the b-deck for any active system — the Atlas cannot be conditioned on where it formed", ok: false };
+    return {
+      text: "Conditions the Atlas on the GENESIS position (the first b-deck fix) and the month it formed in — never on the current position, "
+          + "which is where the storm has got to rather than where storms like it start. 500 km radius; the Atlas's own sample gates apply.",
+      ok: true,
+    };
+  });
+  define("feed.health", "derived", (s) => ({
+    text: "AGE is valid time → the clock you are standing at; INGEST LAG is valid time → fetched. Each source is judged against its own cadence: "
+        + "LIVE inside one cadence plus grace, DELAYED to the stale line, STALE past it, NO FEED when nothing valid was read. Event-driven sources "
+        + "(aircraft, scatterometer) are dated, not judged." + (s.generatedAt ? "" : " No snapshot has loaded yet."),
+    ok: !!s.generatedAt,
+  }));
+  note("note.guidance", "atcf", "What these lines are, and are not", [
+    "One line per model run from the NHC ATCF a-deck: global models, hurricane models, ensemble MEANS and DeepMind. The GEFS perturbation members are not drawn.",
+    "The official forecast and the consensus aids are drawn apart from the members and are never counted among them — a consensus is the members averaged.",
+    "TRACK SPREAD is the mean distance of the members from their own centroid at that lead. Not the cone, which is NHC's published error radius around NHC's forecast.",
+    "SCENARIO COUNT is a distance partition at a stated threshold. Two scenarios means two clusters of runs, not two outcomes with likelihoods.",
+    "Previous → current → delta compares the two cycles at the same VALID TIME, not at the same lead: a 6-hour-old cycle's +30h is this cycle's +24h.",
+    "Nothing here enters a price. Kelly and the grade read the probability engine, which does not read this.",
+    "The map's lines are the latest deck; a scrubbed frame carries the scalars it recorded and says which cycle they are from.",
+  ]);
   note("note.register", "derived", "How an event gets in here", [
     "A frame-to-frame diff over committed snapshots, at fixed thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢.",
     "TRADE-RELEVANT = a Saffir–Simpson boundary crossing, ≥20 kt intensification, or a ≥5¢ reprice.",

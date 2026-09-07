@@ -112,6 +112,11 @@
         evidenceQuality: s.evidenceQuality || null,
         bestTrack: s.bestTrack || null,
         atcfDeck: s.atcfDeck || null,
+        /* The model-guidance envelope (latest snapshot: the geometry) and the genesis fix. The
+           envelope's SCALARS are per-frame below, like the consensus: scrubbing rewinds the
+           numbers; the lines on the map are always the latest deck and say so. */
+        guidance: s.guidance || null,
+        genesis: s.genesis || null,
 
         pCalAt: (f) => { const r = fs(f); return r && r.pCal != null ? r.pCal : (s.hurricanePCal ? s.hurricanePCal.p : null); },
         pRawAt: (f) => { const r = fs(f); return r && r.pRaw != null ? r.pRaw : (s.hurricaneP ? s.hurricaneP.p : null); },
@@ -130,6 +135,14 @@
           const at = Date.parse(framesArr[clampF(f)].tsZ);
           return (t && at) ? Math.round((at - t) / 60000) : null;
         },
+        gCycleAt: (f) => pick(f, "gCycle", s.guidance ? s.guidance.cycle : null),
+        gTrack72At: (f) => pick(f, "gTrack72", s.guidance ? s.guidance.summary.trackSpread72Km : null),
+        gInt72At: (f) => pick(f, "gInt72", s.guidance ? s.guidance.summary.intensitySpread72Kt : null),
+        gScen72At: (f) => pick(f, "gScen72", s.guidance ? s.guidance.summary.scenarios72 : null),
+        gN72At: (f) => pick(f, "gN72", s.guidance ? s.guidance.summary.n72 : null),
+        gOfclCon72At: (f) => pick(f, "gOfclCon72", s.guidance ? s.guidance.summary.ofclVsConsensus72Km : null),
+        gPeakMedAt: (f) => pick(f, "gPeakMed", s.guidance ? s.guidance.summary.peakMedianKt : null),
+        gPeakOfclAt: (f) => pick(f, "gPeakOfcl", s.guidance ? s.guidance.summary.peakOfclKt : null),
         reconMbAt: (f) => { const r = fs(f); return r && r.reconMb != null ? r.reconMb : (s.recon ? s.recon.mslp : null); },
         reconKtAt: (f) => { const r = fs(f); return r && r.reconKt != null ? r.reconKt : (s.recon ? s.recon.intensityKt : null); },
         reconFlKtAt: (f) => { const r = fs(f); return r && r.reconFlKt != null ? r.reconFlKt : (s.recon ? s.recon.flightLevelKt : null); },
