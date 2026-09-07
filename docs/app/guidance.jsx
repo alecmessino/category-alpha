@@ -44,28 +44,84 @@ function gHealth(G, frame) {
 const G_TONE = { pos: "var(--pos)", warn: "var(--warn)", neg: "var(--neg)", info: "var(--blue-300)", off: "var(--border-strong)" };
 function gTone(h) { return G_TONE[(window.MTFeedHealth && MTFeedHealth.TONE[h.status]) || "warn"]; }
 
-/* ---- the five metrics ------------------------------------------------------------------- */
+/* ---- the five metrics, and the AS-OF rule ------------------------------------------------
+ *
+ * THE FRAME CARRIES THE ENVELOPE'S SCALARS AND NOTHING ELSE — no tracks, no lead table, no fan.
+ * So a rewound cursor can honestly show the numbers the board recorded at that moment, and it
+ * cannot show the geometry, because the geometry was never stored. The temptation is to draw the
+ * latest deck's lines under a historical AS OF banner, and that is exactly the leak this closes:
+ * lines from a cycle the reader had not seen yet, sitting beneath a timestamp that says otherwise.
+ *
+ *   LIVE      the deck in hand IS the current state. Every part of the panel reads from it —
+ *             scalars, tracks, lead table, fan — so no part can disagree with another.
+ *   REWOUND   the scalars come from the frame's OWN row, read raw: never through the loader's
+ *             accessors, which fall back to the latest deck when a frame has no value and would
+ *             quietly reintroduce current guidance under a historical cursor. The geometry is
+ *             withheld unless the frame's recorded fingerprint proves the deck in hand is the
+ *             same deck, unchanged. Equal cycle ids are NOT enough: an a-deck accretes late
+ *             members for hours after its cycle time, so a 12Z deck read at 19Z holds runs the
+ *             board did not have at 13Z. Every scalar the frame recorded must still match.
+ */
+function gFrameRow(S, frame) {
+  const fr = (window.MT && MT._frames) || [];
+  const f = fr[Math.max(0, Math.min(fr.length - 1, frame))];
+  return (f && f.storms && f.storms[S.id]) || null;
+}
+/* What the frame records about the deck, and where the same quantity lives on the deck itself.
+   The comparison is the fingerprint: all of it, or the geometry is not this frame's. */
+const G_FINGERPRINT = [
+  ["gCycle", (G) => G.cycle],
+  ["gN72", (G) => (G.summary.n72 || null)],
+  ["gTrack72", (G) => G.summary.trackSpread72Km],
+  ["gInt72", (G) => G.summary.intensitySpread72Kt],
+  ["gScen72", (G) => G.summary.scenarios72],
+  ["gOfclCon72", (G) => G.summary.ofclVsConsensus72Km],
+  ["gPeakMed", (G) => G.summary.peakMedianKt],
+  ["gPeakOfcl", (G) => G.summary.peakOfclKt],
+];
+function gDeckUnchangedSince(row, G) {
+  if (!row || !G || !G.summary) return false;
+  if (row.gCycle == null) return false;          // a frame that recorded no deck proves nothing
+  return G_FINGERPRINT.every(([k, of]) => (row[k] ?? null) === (of(G) ?? null));
+}
+/* THE ONE PREDICATE, shared with the map so the lines and the panel can never disagree about
+   whether this cursor is allowed to see them. */
+function gGeometryAt(S, frame) {
+  const G = S && S.guidance;
+  if (!G) return false;
+  const NF = (window.MT ? MT.FRAMES : 1) - 1;
+  if (frame >= NF) return true;
+  return gDeckUnchangedSince(gFrameRow(S, frame), G);
+}
+window.MT_guidanceGeometryAt = gGeometryAt;
+
 function gMetrics(S, frame) {
   const G = S.guidance || null;
   const NF = (window.MT ? MT.FRAMES : 1) - 1;
-  const cycle = gAt(S, "gCycleAt", frame);
-  const atLatest = !!(G && cycle === G.cycle);
+  const atLive = frame >= NF;
+  const row = gFrameRow(S, frame);
   const sum = (G && G.summary) || {};
-  const now = {
-    track: gAt(S, "gTrack72At", frame), int: gAt(S, "gInt72At", frame), scen: gAt(S, "gScen72At", frame),
-    n: gAt(S, "gN72At", frame), ofclCon: gAt(S, "gOfclCon72At", frame), peakMed: gAt(S, "gPeakMedAt", frame), peakOfcl: gAt(S, "gPeakOfclAt", frame),
-  };
-  /* previous → delta come from the latest deck's own comparison, so they exist only when the
-     frame's cycle IS the latest cycle. Anywhere else they are shown as unavailable, not as 0. */
-  const l72 = G && G.leads ? G.leads.find((l) => l.hr === 72) : null;
-  const prev = atLatest && l72 && l72.prev ? {
+  const geometry = gGeometryAt(S, frame);
+  const cycle = atLive ? (G ? G.cycle : null) : (row ? row.gCycle ?? null : null);
+  const now = atLive
+    ? { track: sum.trackSpread72Km ?? null, int: sum.intensitySpread72Kt ?? null, scen: sum.scenarios72 ?? null,
+        n: sum.n72 ?? null, ofclCon: sum.ofclVsConsensus72Km ?? null,
+        peakMed: sum.peakMedianKt ?? null, peakOfcl: sum.peakOfclKt ?? null }
+    : { track: row ? row.gTrack72 ?? null : null, int: row ? row.gInt72 ?? null : null,
+        scen: row ? row.gScen72 ?? null : null, n: row ? row.gN72 ?? null : null,
+        ofclCon: row ? row.gOfclCon72 ?? null : null, peakMed: row ? row.gPeakMed ?? null : null,
+        peakOfcl: row ? row.gPeakOfcl ?? null : null };
+  /* previous → delta are the DECK's own cycle-to-cycle comparison, so they travel with the
+     geometry: where the geometry is withheld they are unavailable, never 0. */
+  const l72 = geometry && G.leads ? G.leads.find((l) => l.hr === 72) : null;
+  const prev = l72 && l72.prev ? {
     track: l72.prev.meanKm, trackDelta: l72.prev.spreadDeltaKm, shift: l72.prev.centroidShiftKm, ofclShift: l72.prev.ofclShiftKm,
     int: (G.intensityFan.find((f) => f.hr === 72) || {}).prevMedian, peakMed: G.peaks.prevMedian, peakOfcl: G.peaks.prevOfcl ? G.peaks.prevOfcl.kt : null,
-    scen120: (G.leads.find((l) => l.hr === 120) || {}).scenarios,
   } : null;
-  const int72 = G && G.intensityFan ? G.intensityFan.find((f) => f.hr === 72) : null;
-  const scen120 = atLatest ? sum.scenarios120 : null;
-  return { G, cycle, atLatest, now, prev, sum, l72, int72, scen120, NF, trend: atLatest && G ? G.trend : null };
+  const int72 = geometry && G.intensityFan ? G.intensityFan.find((f) => f.hr === 72) : null;
+  const scen120 = geometry ? sum.scenarios120 ?? null : null;
+  return { G, row, cycle, atLive, geometry, now, prev, sum, l72, int72, scen120, NF,
+           trend: geometry ? G.trend : null };
 }
 
 function GTile({ label, value, unit, prev, delta, deltaUnit, lowerIsBetter, sub, title, testid }) {
@@ -85,9 +141,9 @@ function GTile({ label, value, unit, prev, delta, deltaUnit, lowerIsBetter, sub,
 }
 
 function GuidanceTiles({ m, compact }) {
-  const { now, prev, trend, atLatest, scen120 } = m;
+  const { now, prev, trend, geometry, scen120 } = m;
   const cols = compact ? "1fr 1fr" : "repeat(auto-fit,minmax(min(128px,100%),1fr))";
-  const unavailable = atLatest ? "" : "previous → delta are computed against the latest deck only; this frame carries a different cycle";
+  const unavailable = geometry ? "" : "this cursor is standing on a frame whose recorded deck is not the deck in hand, so the cycle-to-cycle comparison is not available here";
   return (
     <div className="mt-grid" data-guidance-tiles style={{ display: "grid", gridTemplateColumns: cols, borderBottom: "1px solid var(--border-dim)" }}>
       <GTile testid="track" label="Track spread · 72h" value={now.track} unit="km" prev={prev ? prev.track : null} delta={prev ? prev.trackDelta : null} deltaUnit=" km" lowerIsBetter
@@ -98,7 +154,7 @@ function GuidanceTiles({ m, compact }) {
       <GTile testid="scenarios" label="Scenarios · 72h / 120h" value={now.scen == null ? null : now.scen + (scen120 != null ? " / " + scen120 : "")}
         sub={now.scen == null ? "" : "clusters at a stated km threshold"} title={"single-linkage clusters of the members; a count of clusters, not a likelihood. " + unavailable} />
       <GTile testid="trend" label="Cycle trend · 72h" value={trend ? trend.label : null}
-        sub={trend ? "centroid moved " + (trend.centroidShiftKm ?? "—") + " km · spread " + gSign(trend.spreadDeltaPct, "%") : (atLatest ? "no previous cycle to compare" : "latest deck only")}
+        sub={trend ? "centroid moved " + (trend.centroidShiftKm ?? "—") + " km · spread " + gSign(trend.spreadDeltaPct, "%") : (geometry ? "no previous cycle to compare" : "not recorded on this frame")}
         title={"spread at +72h against the previous cycle at the SAME valid time: tightening ≤ −15%, widening ≥ +15%. " + unavailable} />
       <GTile testid="official" label="NHC vs consensus · 72h" value={now.ofclCon} unit="km"
         sub={now.peakOfcl != null || now.peakMed != null ? "peak: official " + (now.peakOfcl ?? "—") + " · members' median " + (now.peakMed ?? "—") + " kt" : ""}
@@ -274,19 +330,28 @@ function MT_GuidanceStrip({ stormId, frame }) {
   const S = stormId ? MT.storms[stormId] : null;
   if (!S) return null;
   const m = gMetrics(S, frame);
-  const h = m.G ? gHealth(m.G, frame) : null;
+  /* The deck's own freshness is a statement about the deck, so it is shown only where the deck
+     is what the cursor is looking at. */
+  const h = m.G && m.geometry ? gHealth(m.G, frame) : null;
   return (
     <div data-guidance-strip style={{ borderTop: "1px solid var(--border-dim)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 15px 0" }}>
         <span style={{ ...gmono, fontSize: 10, fontWeight: 800, letterSpacing: 1.4, color: "var(--accent)", textTransform: "uppercase" }}>Model guidance</span>
         {m.cycle && <span style={{ ...gmono, fontSize: 10, color: "var(--text-2)" }}>cycle {String(m.cycle).slice(-2)}Z</span>}
         {h && <span data-feed-status={h.status} style={{ ...gmono, fontSize: 9, fontWeight: 800, letterSpacing: ".4px", color: gTone(h), border: "1px solid " + gTone(h), borderRadius: 999, padding: "1px 6px" }}>{h.status}</span>}
+        {m.G && !m.geometry && <span data-guidance-strip-asof style={{ ...gmono, fontSize: 9, fontWeight: 800, letterSpacing: ".4px", color: "var(--warn)", border: "1px solid var(--warn)", borderRadius: 999, padding: "1px 6px" }}>AS OF</span>}
         <span style={{ marginLeft: "auto" }}><window.MT_Hint id="note.guidance" /></span>
       </div>
       {m.G ? (
         <div style={{ padding: "4px 4px 0" }}><GuidanceTiles m={m} compact /></div>
       ) : (
         <div style={{ ...gmono, fontSize: 10.5, color: "var(--text-2)", padding: "6px 15px 0" }}>{MTC.claim("map.guidance").text}</div>
+      )}
+      {m.G && !m.geometry && (
+        <div data-guidance-geometry-absent style={{ ...gmono, fontSize: 9.5, color: "var(--warn)", padding: "6px 15px 0", lineHeight: 1.5 }}>
+          HISTORICAL GUIDANCE GEOMETRY NOT STORED FOR THIS FRAME
+          <span style={{ display: "block", color: "var(--text-2)" }}>Recorded cycle metrics above remain valid as-of this cursor.</span>
+        </div>
       )}
       <div style={{ padding: "9px 15px 11px" }}><AtlasBridge S={S} compact /></div>
     </div>
@@ -323,43 +388,69 @@ function MT_Guidance({ stormId, frame, narrow }) {
             <div style={{ display: "flex", alignItems: "baseline", gap: 10, padding: "8px 11px", borderBottom: "1px solid var(--border-dim)", background: "var(--surface-sunken)", flexWrap: "wrap" }}>
               <span style={{ ...gmono, fontWeight: 800, fontSize: 13, color: "var(--text-1)", letterSpacing: ".5px" }}>{S.name}</span>
               <span style={{ ...gmono, fontSize: 10.5, color: "var(--text-2)" }}>model guidance</span>
-              {G && <span style={{ ...gmono, fontSize: 10.5, color: "var(--text-2)" }}>cycle <b style={{ color: "var(--text-1)" }}>{gFmtZ(G.cycleIso)}</b>
+              {/* THE CURSOR'S CYCLE, not the deck's. Rewound to a frame the deck in hand does not
+                  describe, the head names the cycle THAT FRAME recorded and says nothing about
+                  the deck — a masthead reading 18Z over an as-of 13Z body is the same leak the
+                  geometry rule closes, in smaller type. */}
+              {G && m.geometry && <span style={{ ...gmono, fontSize: 10.5, color: "var(--text-2)" }}>cycle <b style={{ color: "var(--text-1)" }}>{gFmtZ(G.cycleIso)}</b>
                 {G.previousCycleIso ? " · previous " + gFmtZ(G.previousCycleIso) : " · no previous cycle in the deck"}</span>}
-              {G && <span style={{ ...gmono, fontSize: 10.5, color: "var(--text-2)" }}>{G.roster.inSpread.length} track runs · {G.roster.inFan.length} intensity runs{G.roster.complete ? "" : " · PARTIAL CYCLE"}</span>}
+              {G && m.geometry && <span style={{ ...gmono, fontSize: 10.5, color: "var(--text-2)" }}>{G.roster.inSpread.length} track runs · {G.roster.inFan.length} intensity runs{G.roster.complete ? "" : " · PARTIAL CYCLE"}</span>}
+              {G && !m.geometry && <span style={{ ...gmono, fontSize: 10.5, color: "var(--warn)" }}>as of {MTX.frameTime(frame)}
+                {m.cycle ? " · recorded cycle " + String(m.cycle).slice(-2) + "Z" : " · no deck recorded on this frame"}</span>}
               <span style={{ marginLeft: "auto" }}><window.MT_Hint id="note.guidance" label="what these are" /></span>
             </div>
             {!G && <div style={{ ...gmono, fontSize: 11, color: "var(--text-2)", padding: "10px 11px" }}>{MTC.claim("map.guidance").text}</div>}
-            {G && !m.atLatest && (
+            {G && !m.geometry && (
               <div data-guidance-rewound style={{ ...gmono, fontSize: 10.5, color: "var(--warn)", padding: "6px 11px", borderBottom: "1px solid var(--border-dim)" }}>
-                ⏱ AS OF {MTX.frameTime(frame)} — the metrics below are what this frame recorded{m.cycle ? " for cycle " + String(m.cycle).slice(-2) + "Z" : ""};
-                the lead table, the fan and the map lines are the latest deck ({String(G.cycle).slice(-2)}Z). {MTC.claim("guidance.replay").text}
+                ⏱ AS OF {MTX.frameTime(frame)} — the metrics below are what this frame recorded{m.cycle ? " for cycle " + String(m.cycle).slice(-2) + "Z" : ""}.
               </div>
             )}
             {G && <GuidanceTiles m={m} />}
-            {G && (
+            {/* WHERE THE GEOMETRY WOULD BE. Not an empty space and not the latest deck: the state
+                itself, said in as many words, above the metrics that ARE valid here. */}
+            {G && !m.geometry && (
+              <div data-guidance-geometry-absent style={{ padding: "8px 11px", borderBottom: "1px solid var(--border-dim)" }}>
+                <div style={{ ...gmono, fontSize: 10, fontWeight: 800, letterSpacing: ".6px", color: "var(--warn)" }}>
+                  HISTORICAL GUIDANCE GEOMETRY NOT STORED FOR THIS FRAME
+                </div>
+                <div style={{ ...gmono, fontSize: 10.5, color: "var(--text-1)", marginTop: 3 }}>
+                  Recorded cycle metrics below remain valid as-of this cursor.
+                </div>
+                <div style={{ ...gmono, fontSize: 9.5, color: "var(--text-2)", marginTop: 5, lineHeight: 1.5 }}>
+                  {MTC.claim("guidance.asOfGeometry").text}
+                </div>
+              </div>
+            )}
+            {G && m.geometry && (
               <div style={{ padding: "8px 11px", borderBottom: "1px solid var(--border-dim)" }}>
-                {hd("By lead · latest deck " + String(G.cycle).slice(-2) + "Z · previous → current at the same valid time")}
+                {hd("By lead · deck " + String(G.cycle).slice(-2) + "Z · previous → current at the same valid time")}
                 <LeadTable G={G} />
                 <div style={{ ...gmono, fontSize: 9.5, color: "var(--text-2)", marginTop: 5 }}>{MTC.claim("guidance.threshold").text}</div>
               </div>
             )}
-            {G && (
+            {G && m.geometry && (
               <div style={{ padding: "8px 11px", borderBottom: "1px solid var(--border-dim)" }}>
                 {hd("Intensity guidance · " + G.roster.inFan.length + " members · peak median " + (G.peaks.median ?? "—") + " kt at +" + (G.peaks.medianHr ?? "—") + "h · official " + (G.peaks.ofcl ? G.peaks.ofcl.kt + " kt at +" + G.peaks.ofcl.hr + "h" : "—")
                   + (G.peaks.prevOfcl ? " · previous official " + G.peaks.prevOfcl.kt + " kt" : ""))}
                 <IntensityFan G={G} width={w - 24} />
               </div>
             )}
-            {G && (
+            {G && m.geometry && (
               <div style={{ padding: "8px 11px", borderBottom: "1px solid var(--border-dim)" }}>
                 {hd("Members · " + G.roster.present.length + " aids answered" + (G.roster.lateForms.length ? " · late forms: " + G.roster.lateForms.join(", ") : ""))}
                 <Members G={G} />
               </div>
             )}
-            <div style={{ padding: "8px 11px", borderBottom: "1px solid var(--border-dim)" }}>
-              {hd("Feed / cycle health · judged at the frame's clock")}
-              <HealthRow G={G} frame={frame} />
-            </div>
+            {/* The health row describes the DECK, so it goes with the deck: withheld only where a
+                deck EXISTS that this cursor may not see, since there it would publish the current
+                cycle's valid time and age under a past timestamp. A storm with no deck at all
+                keeps its row — NO FEED is the honest reading of the absence, not a leak. */}
+            {(!G || m.geometry) && (
+              <div style={{ padding: "8px 11px", borderBottom: "1px solid var(--border-dim)" }}>
+                {hd("Feed / cycle health · judged at the frame's clock")}
+                <HealthRow G={G} frame={frame} />
+              </div>
+            )}
             <div style={{ padding: "8px 11px", borderBottom: "1px solid var(--border-dim)" }}>
               {hd("Historical context")}
               <AtlasBridge S={S} />

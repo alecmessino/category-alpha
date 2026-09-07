@@ -779,9 +779,21 @@
     ok: true,
   }));
   define("guidance.replay", "derived", () => ({
-    text: "The lines on the map are always the latest deck. Scrubbing rewinds the envelope's SCALARS — spread, scenario count, "
-        + "official-versus-consensus — to what the frame recorded, and the panel says which cycle they belong to.",
+    text: "The frame stores the envelope's SCALARS — spread, scenario count, official-versus-consensus, the peaks — and no geometry. "
+        + "Scrubbing rewinds those numbers to what the frame recorded; the tracks, the lead table and the fan are withheld unless the "
+        + "cursor is at live or the frame's recorded fingerprint shows the deck in hand is still the deck it recorded.",
     ok: true,
+  }));
+  /* WHY THE GEOMETRY GOES AWAY, said where a reader meets its absence. The alternative — the
+     latest deck's lines under a historical timestamp — is not a smaller version of this problem,
+     it is the problem: an a-deck accretes members for hours after its cycle time, so even the
+     same cycle id is a different picture later in the day. */
+  define("guidance.asOfGeometry", "derived", () => ({
+    text: "Only the cycle's metrics were recorded on each frame; the model tracks, the lead table and the intensity fan were not, "
+        + "so they cannot be reconstructed for a past cursor. The deck in hand belongs to a later moment — an a-deck keeps gaining "
+        + "late-arriving members for hours after its cycle time — and drawing it here would show lines this board did not hold then. "
+        + "Return to live to see the current deck.",
+    ok: false,
   }));
   /* The bridge to the Storm Atlas. What is passed, and what is deliberately not. */
   define("atlas.bridge", "atcf", () => {
@@ -807,7 +819,7 @@
     "SCENARIO COUNT is a distance partition at a stated threshold. Two scenarios means two clusters of runs, not two outcomes with likelihoods.",
     "Previous → current → delta compares the two cycles at the same VALID TIME, not at the same lead: a 6-hour-old cycle's +30h is this cycle's +24h.",
     "Nothing here enters a price. Kelly and the grade read the probability engine, which does not read this.",
-    "The map's lines are the latest deck; a scrubbed frame carries the scalars it recorded and says which cycle they are from.",
+    "The map's lines, the lead table and the fan are the deck in hand. A scrubbed frame carries the scalars it recorded and withholds the geometry, which was never stored — it says so rather than drawing the current deck under a past timestamp.",
   ]);
   note("note.register", "derived", "How an event gets in here", [
     "A frame-to-frame diff over committed snapshots, at fixed thresholds: wind ≥5 kt, pressure ≥2 mb, price ≥2¢.",

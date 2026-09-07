@@ -73,6 +73,16 @@ for (const s of latest.storms || []) {
   s.genesis = b ? genesisFromBestTrack(parseBestTrack(b).records) : null;
   if (s.guidance) withDeck.push(s.id);
 }
+/* ONE STORM IS DELIBERATELY LEFT WITHOUT AN ENVELOPE, whatever the snapshot happens to hold.
+   The null path — a storm with no deck renders the claim and never a zero — used to be
+   exercised only when the ocean obliged by carrying a storm this repo has no fixture for, and
+   the day Karina dissipated it stopped being exercised at all. Withholding the last eligible
+   storm's envelope makes the state deterministic, and it is only withheld while at least one
+   storm still has one. */
+if (withDeck.length > 1) {
+  const drop = withDeck.pop();
+  (latest.storms || []).find((s) => s.id === drop).guidance = null;
+}
 const added = JSON.stringify(latest).length - before;
 /* Frames: the latest cycle's scalars on the newer half, and a DIFFERENT (older) cycle with
    different numbers on the older half, so the register has a cycle change to report and the
@@ -98,7 +108,7 @@ console.log(`[terminal] fixture: ${withDeck.length} storm(s) with an envelope ($
 ok("the envelope adds less than 100 KB to the snapshot", added < 100000, added + " bytes");
 ok("at least one storm in the snapshot has a fixture deck (the check needs a rendered envelope)", withDeck.length >= 1);
 ok("at least one storm has NO deck (the null state must render too)", (latest.storms || []).length > withDeck.length,
-  "add a storm without a fixture, or the null path goes unexercised");
+  "every storm in the snapshot carries an envelope and none could be withheld — the null path is unexercised");
 
 /* ---- server ------------------------------------------------------------------------------- */
 const TYPES = { ".html": "text/html", ".js": "text/javascript", ".jsx": "text/babel", ".json": "application/json",
@@ -157,6 +167,12 @@ const WIDTHS = [
 ];
 const STORM = withDeck[0];
 const NO_DECK = (latest.storms || []).map((s) => s.id).find((id) => !withDeck.includes(id));
+/* The deck's own numbers, for the as-of steps: what LIVE must show, what a historical frame
+   must NOT show, and the +40 km the fixture wrote onto the older half. */
+const STORM_G = (latest.storms || []).find((s) => s.id === STORM).guidance;
+const liveTrack72 = STORM_G ? STORM_G.summary.trackSpread72Km : null;
+const liveCycleIso = STORM_G ? STORM_G.cycleIso : null;
+const liveInSpread = STORM_G ? STORM_G.roster.inSpread.length : null;
 
 const AUDIT = ({ floor, share, stormId }) => {
   const bad = [], note = [];
@@ -374,23 +390,122 @@ for (const W of WIDTHS) {
     }, NO_DECK);
     ok("a storm with no deck renders the claim, not zeros", nul === null, nul || "");
   }
-  /* Rewind: frames on the older half carry the previous cycle. */
+  /* ---- THE AS-OF RULE, IN FOUR STEPS -------------------------------------------------------
+   *
+   * The frame stores the envelope's SCALARS and no geometry. So the one thing a replay surface
+   * must never do here is draw the deck in hand — tracks, lead table, fan — under a timestamp
+   * that says the reader is standing somewhere earlier. These four steps are that property:
+   *
+   *   1 LIVE      geometry, lead table and fan are all present
+   *   2 REWOUND   the recorded scalars are shown, and they are the FRAME's numbers
+   *   3 REWOUND   no latest geometry survives anywhere: no map lines, no lead table, no fan,
+   *               no members, no deck health row — and the explicit state is on screen instead
+   *   4 LIVE      returning restores all of it
+   *
+   * The fixture makes step 2 checkable rather than merely plausible: the older half of the
+   * replay window records a DIFFERENT cycle with a 72h spread 40 km wider than the deck's, so
+   * "the frame's number" and "the deck's number" cannot be confused for one another.
+   */
+  const liveKm = liveTrack72;
+  const frameKm = liveTrack72 == null ? null : liveTrack72 + 40;
+  const readGuidance = () => page.evaluate((id) => {
+    const st = document.querySelector(`[data-guidance-storm="${id}"]`);
+    const tile = (k) => { const t = st && st.querySelector(`[data-guidance-tile="${k}"]`); return t ? t.textContent.replace(/\s+/g, " ").trim() : null; };
+    return {
+      block: !!st,
+      leads: !!(st && st.querySelector("[data-guidance-leads]")),
+      fan: !!(st && st.querySelector("[data-guidance-fan]")),
+      members: !!(st && st.querySelector("[data-guidance-members]")),
+      health: !!(st && st.querySelector("[data-guidance-health]")),
+      absent: !!(st && st.querySelector("[data-guidance-geometry-absent]")),
+      rewound: !!(st && st.querySelector("[data-guidance-rewound]")),
+      absentText: (() => { const a = st && st.querySelector("[data-guidance-geometry-absent]"); return a ? a.textContent.replace(/\s+/g, " ").trim() : ""; })(),
+      track: tile("track"),
+      /* The VALUE node, not the whole tile: the tile's text runs the label into the number
+         ("Track spread · 72h" + "100" + "km"), so a word-boundary match on the number never
+         fires and a bare substring match would find 100 inside 1100. */
+      trackValue: (() => { const t = st && st.querySelector('[data-guidance-tile="track"]'); return t && t.children[1] ? t.children[1].textContent.replace(/\s+/g, "") : null; })(),
+      drawn: window.__MT_GUIDANCE_DRAWN,
+      stripAsOf: !!document.querySelector("[data-guidance-strip-asof]"),
+      stripAbsent: !!document.querySelector("[data-guidance-strip] [data-guidance-geometry-absent]"),
+      guidChip: (() => { const c = document.querySelector('[data-layer-toggle="guidance"]'); return c ? "offered" : "withheld"; })(),
+      text: st ? st.textContent.replace(/\s+/g, " ") : "",
+    };
+  }, STORM);
+  const toLive = async () => {
+    await page.evaluate(() => { const b = document.querySelector('[title="Jump to live"]'); if (b) b.click(); });
+    await page.waitForTimeout(500);
+  };
+  const stepBack = async (n) => { for (let i = 0; i < n; i++) { await page.keyboard.press("ArrowLeft"); } await page.waitForTimeout(450); };
+
   await selectStorm(STORM);
   await openTab("Models");
-  await page.keyboard.press("Home");
-  for (let i = 0; i < Math.max(2, half + 1); i++) await page.keyboard.press("ArrowLeft");
-  await page.waitForTimeout(400);
-  const rew = await page.evaluate((id) => {
+  await toLive();
+
+  /* 1 · LIVE */
+  const live = await readGuidance();
+  ok("AS-OF 1 · LIVE renders the lead table, the intensity fan and the members", live.leads && live.fan && live.members, JSON.stringify({ leads: live.leads, fan: live.fan, members: live.members }));
+  ok("AS-OF 1 · LIVE draws guidance geometry on the map (" + live.drawn + " layers)", typeof live.drawn === "number" && live.drawn > 0, String(live.drawn));
+  ok("AS-OF 1 · LIVE shows no as-of state and no geometry-absent state", !live.absent && !live.rewound && !live.stripAsOf);
+  ok("AS-OF 1 · LIVE shows the deck's own 72h spread" + (liveKm != null ? " (" + liveKm + " km)" : ""),
+    liveKm == null || live.trackValue === liveKm + "km", live.trackValue || "");
+  /* Below 640 the chips fold into one LAYERS control, so the per-layer chip is not in the DOM
+     until it is opened; the withheld/offered distinction is asserted at the wider bands. */
+  if (W.w >= 640) ok("AS-OF 1 · LIVE offers the Model Guidance layer chip", live.guidChip === "offered");
+
+  /* 2 · REWOUND onto a frame whose recorded deck is not the deck in hand */
+  await stepBack(half + 1);
+  const rew = await readGuidance();
+  ok("AS-OF 2 · REWOUND still shows the metrics the frame recorded", /\d+\s*km/.test(rew.track || ""), rew.track || "");
+  ok("AS-OF 2 · REWOUND shows the FRAME's 72h spread" + (frameKm != null ? " (" + frameKm + " km)" : "") + ", not the deck's",
+    frameKm == null || (rew.trackValue === frameKm + "km" && rew.trackValue !== liveKm + "km"), rew.trackValue || "");
+  ok("AS-OF 2 · REWOUND says AS OF", rew.rewound && /AS OF/.test(rew.text), rew.text.slice(0, 90));
+
+  if (SHOTS && W.name === "wide") {
+    await page.evaluate(() => { const p = document.querySelector("[data-guidance-panel]"); if (p) p.scrollIntoView({ block: "start" }); });
+    await page.waitForTimeout(200);
+    await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-guidance-asof.png`), fullPage: false });
+  }
+
+  /* 3 · REWOUND cannot render the latest geometry, anywhere */
+  ok("AS-OF 3 · REWOUND renders no lead table", !rew.leads);
+  ok("AS-OF 3 · REWOUND renders no intensity fan", !rew.fan);
+  ok("AS-OF 3 · REWOUND renders no member roster", !rew.members);
+  ok("AS-OF 3 · REWOUND renders no deck health row (it would publish the current cycle's valid time)", !rew.health);
+  ok("AS-OF 3 · REWOUND draws no guidance geometry on the map (" + rew.drawn + " layers)", rew.drawn === 0, String(rew.drawn));
+  if (W.w >= 640) ok("AS-OF 3 · REWOUND withholds the Model Guidance layer chip rather than offering lines that will not appear", rew.guidChip === "withheld");
+  ok("AS-OF 3 · REWOUND states the absence in as many words", rew.absent
+    && /HISTORICAL GUIDANCE GEOMETRY NOT STORED FOR THIS FRAME/.test(rew.absentText)
+    && /Recorded cycle metrics below remain valid as-of this cursor\./.test(rew.absentText), rew.absentText.slice(0, 140));
+  ok("AS-OF 3 · the rail strip carries the same state", rew.stripAsOf && rew.stripAbsent);
+  /* The deck's distinctive numbers must not survive anywhere in the block. */
+  const leak = await page.evaluate(({ id, cyc, n }) => {
     const st = document.querySelector(`[data-guidance-storm="${id}"]`); if (!st) return "no block";
-    const banner = st.querySelector("[data-guidance-rewound]");
-    if (!banner) return "no rewound banner while scrubbed to an older cycle";
-    if (!/AS OF/.test(banner.textContent)) return "banner does not say AS OF";
-    const t = st.querySelector('[data-guidance-tile="track"]').textContent;
-    return /\d+\s*km/.test(t) ? null : "rewound track tile shows no value: " + t;
-  }, STORM);
-  ok("rewound to an older cycle the panel says AS OF and shows that frame's scalars", rew === null, rew || "");
-  const rewHealth = await page.evaluate((id) => { const h = document.querySelector(`[data-guidance-storm="${id}"] [data-guidance-health]`); return h ? h.getAttribute("data-feed-status") : null; }, STORM);
-  ok("the health row at the rewound frame is judged at that frame's clock (" + rewHealth + ")", /LIVE|DELAYED|STALE|FUTURE/.test(rewHealth || ""));
+    const t = st.textContent.replace(/\s+/g, " ");
+    if (cyc && t.includes(cyc)) return "the deck's cycle id " + cyc + " is on screen under a historical as-of";
+    if (n && new RegExp("\\b" + n + " track runs").test(t)) return "the deck's roster count is on screen";
+    if (/VALID TIME/.test(t)) return "a deck valid-time row is on screen";
+    return null;
+  }, { id: STORM, cyc: liveCycleIso ? liveCycleIso.slice(0, 16).replace("T", " ") : null, n: liveInSpread });
+  ok("AS-OF 3 · no latest-deck identity leaks into the historical block", leak === null, leak || "");
+
+  /* 4 · back to LIVE */
+  await toLive();
+  const back = await readGuidance();
+  ok("AS-OF 4 · returning to LIVE restores the lead table, the fan and the members", back.leads && back.fan && back.members);
+  ok("AS-OF 4 · returning to LIVE restores the map geometry (" + back.drawn + " layers)", back.drawn > 0, String(back.drawn));
+  ok("AS-OF 4 · returning to LIVE clears the as-of state", !back.absent && !back.rewound && !back.stripAsOf);
+  ok("AS-OF 4 · returning to LIVE shows the deck's spread again",
+    liveKm == null || back.trackValue === liveKm + "km", back.trackValue || "");
+
+  /* The rule is a FINGERPRINT, not "any rewind hides": a frame that recorded this very deck
+     keeps its geometry, because that geometry is what the board held at that moment. */
+  await stepBack(1);
+  const near = await readGuidance();
+  ok("AS-OF · a rewound frame that recorded THIS deck keeps its geometry", near.leads && near.fan && near.drawn > 0 && !near.absent,
+    JSON.stringify({ leads: near.leads, fan: near.fan, drawn: near.drawn, absent: near.absent }));
+  await toLive();
+
   const sw = await serviceWorkerEscape(page);
   ok("no service worker controls the page", sw === null, sw || "");
   ok("no page errors", errors.length === 0, errors.slice(0, 3).join(" | "));

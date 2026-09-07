@@ -13,11 +13,18 @@ const MT_LAYERS = [
   { id: "guidance", label: "Model Guidance", prov: "dynamic" },
 ];
 // Layers whose provenance depends on what the current advisory actually delivered.
-function layerProv(layer, S) {
+function layerProv(layer, S, frame) {
   if (layer.prov !== "dynamic") return layer.prov;
   if (layer.id === "forecast") return S && S.track ? "live" : "nofeed";
   if (layer.id === "cone") return S && S.cone ? "live" : "nofeed";
-  if (layer.id === "guidance") return S && S.guidance && S.guidance.aids && S.guidance.aids.length ? "live" : "nofeed";
+  /* The guidance layer is the one whose availability depends on the CURSOR as well as the feed:
+     rewound onto a frame that recorded a different deck, there is nothing this layer may draw,
+     and the chip has to say so rather than offering lines that will not appear. */
+  if (layer.id === "guidance") {
+    if (!(S && S.guidance && S.guidance.aids && S.guidance.aids.length)) return "nofeed";
+    if (frame == null || !window.MT_guidanceGeometryAt) return "live";
+    return window.MT_guidanceGeometryAt(S, frame) ? "live" : "nofeed";
+  }
   return "nofeed";
 }
 
@@ -286,47 +293,6 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
       dot.bindTooltip(st.name + " " + st.cls, { direction: "top", className: "mt-tt" });
       dot.addTo(g);
     });
-    /* MODEL GUIDANCE — drawn FIRST so the official track and the cone paint over it. The
-       members are one line each; the consensus aids are heavier; the official forecast is NOT
-       redrawn from the deck (the NHC Forecast Track layer already carries the advisory's
-       positions, which are the same forecast). Lead centroids are small crosses with the
-       spread in the tooltip — no ring, because a ring around a centroid reads as a cone. */
-    if (layers.guidance && S.guidance && S.guidance.aids) {
-      const G = S.guidance;
-      const latlngs = (tr) => (tr || []).map((p) => [p.lat, p.lon]);
-      if (G.prevOfclTrack && G.prevOfclTrack.length > 1) {
-        const st = GUIDANCE_STYLE.prevOfcl;
-        L.polyline(latlngs(G.prevOfclTrack), { color: st.color, weight: st.weight, opacity: st.opacity, dashArray: st.dashArray, interactive: true })
-          .bindTooltip("NHC official forecast, PREVIOUS cycle " + String(G.previousCycle).slice(-2) + "Z — the ghost the current one moved from",
-            { className: "mt-tt", sticky: true }).addTo(g);
-      }
-      const order = ["global", "ensemble-mean", "hurricane", "ai", "consensus"];
-      G.aids.filter((a) => a.track && a.track.length > 1 && a.cls !== "official" && a.cls !== "statistical")
-        .sort((a, b) => order.indexOf(a.cls) - order.indexOf(b.cls))
-        .forEach((a) => {
-          const st = GUIDANCE_STYLE[a.cls] || GUIDANCE_STYLE.global;
-          L.polyline(latlngs(a.track), { color: st.color, weight: st.weight, opacity: st.opacity, dashArray: st.dashArray })
-            .bindTooltip(a.label + " (" + a.tech + ") · " + st.label + " · cycle " + String(G.cycle).slice(-2) + "Z"
-              + (a.peakKt != null ? " · peak " + a.peakKt + " kt at +" + a.peakHr + "h" : " · track aid, no intensity")
-              + (a.inSpread ? "" : " · shown, not counted in the spread"),
-              { className: "mt-tt", sticky: true }).addTo(g);
-        });
-      (G.leads || []).forEach((l) => {
-        if (!l.centroid || l.n < 2) return;
-        const [la, lo] = l.centroid;
-        const icon = L.divIcon({ className: "", iconSize: [14, 14], iconAnchor: [7, 7],
-          html: '<div style="position:relative;width:14px;height:14px;color:#eaf2ff;opacity:.85">'
-              + '<div style="position:absolute;left:6px;top:0;width:2px;height:14px;background:currentColor"></div>'
-              + '<div style="position:absolute;top:6px;left:0;height:2px;width:14px;background:currentColor"></div>'
-              + '<div style="position:absolute;left:16px;top:-3px;font:700 9px var(--font-mono);letter-spacing:.3px;white-space:nowrap;text-shadow:0 0 3px #000">+' + l.hr + 'h</div></div>' });
-        L.marker([la, lo], { icon, interactive: true, zIndexOffset: 500 })
-          .bindTooltip("+" + l.hr + "h centroid of " + l.n + " model runs · mean spread " + (l.meanKm ?? "—") + " km, max " + (l.maxKm ?? "—") + " km"
-            + " · " + l.scenarios + " scenario" + (l.scenarios === 1 ? "" : "s") + " at " + l.thresholdKm + " km"
-            + (l.ofcl && l.ofcl.offsetKm != null ? " · official " + l.ofcl.offsetKm + " km from centroid" : "")
-            + " — model disagreement, not a probability and not the cone",
-            { className: "mt-tt", direction: "top" }).addTo(g);
-      });
-    }
     if (layers.cone && S.cone) {
       L.polygon(S.cone, { stroke: false, fillColor: pc, fillOpacity: 0.10 })
         .bindTooltip("NHC cone — reconstructed from forecast positions + published track-error radii", { className: "mt-tt", sticky: true }).addTo(g);
@@ -370,7 +336,74 @@ function MT_Map({ stormId, frame, layers, onSelect, onImagery, height = "100%", 
         '<div style="position:absolute;inset:8px;border-radius:50%;border:1.5px solid currentColor;opacity:.5"></div>' +
         '<div style="position:absolute;left:50%;top:50%;width:4px;height:4px;border-radius:50%;background:currentColor;transform:translate(-50%,-50%);box-shadow:0 0 7px 1px currentColor"></div></div>' });
     refs.current.eye = L.marker(eyeAt, { icon, interactive: false, zIndexOffset: 1000 }).addTo(g);
-  }, [stormId, layers.cone, layers.track, layers.forecast, layers.recon, layers.ascat, layers.models, layers.guidance]);
+  }, [stormId, layers.cone, layers.track, layers.forecast, layers.recon, layers.ascat, layers.models]);
+
+
+  /* MODEL GUIDANCE — ITS OWN GROUP, ITS OWN EFFECT, KEYED ON THE CURSOR.
+   *
+   * The members are one line each; the consensus aids are heavier; the official forecast is NOT
+   * redrawn from the deck (the NHC Forecast Track layer already carries the advisory's positions,
+   * which are the same forecast). Lead centroids are small crosses with the spread in the tooltip
+   * — no ring, because a ring around a centroid reads as a cone.
+   *
+   * IT LIVES APART FROM THE OTHER OVERLAYS FOR ONE REASON: it is the only layer whose presence
+   * depends on WHERE THE CURSOR IS STANDING. The frame stores the envelope's scalars and no
+   * geometry, so a rewound cursor may not be shown these lines — they are the deck in hand, and
+   * the board did not hold that deck then. `MT_guidanceGeometryAt` is the same predicate the
+   * panel uses, so the lines and the panel can never disagree about it. Its own group means
+   * scrubbing toggles the lines without rebuilding the cone, the track and the eye every step.
+   */
+  React.useEffect(() => {
+    const map = mapRef.current; if (!map) return;
+    if (!refs.current.guid) refs.current.guid = L.layerGroup().addTo(map);
+    const g = refs.current.guid;
+    g.clearLayers();
+    const S2 = MT.storms[stormId] || null;
+    const draw = !!(layers.guidance && S2 && S2.guidance && S2.guidance.aids
+      && (!window.MT_guidanceGeometryAt || window.MT_guidanceGeometryAt(S2, frame)));
+    /* A verification handle, like window.__MT_MAP above it. The polylines are canvas-drawn
+       (preferCanvas), so there is no DOM node a gate could count; this is how
+       scripts/check-terminal-responsive.mjs proves the lines are absent under a historical
+       cursor rather than merely invisible. Written on every pass, including the zero. */
+    const publish = () => { window.__MT_GUIDANCE_DRAWN = g.getLayers().length; };
+    if (draw) {
+    const G = S2.guidance;
+    const latlngs = (tr) => (tr || []).map((p) => [p.lat, p.lon]);
+    if (G.prevOfclTrack && G.prevOfclTrack.length > 1) {
+      const st = GUIDANCE_STYLE.prevOfcl;
+      L.polyline(latlngs(G.prevOfclTrack), { color: st.color, weight: st.weight, opacity: st.opacity, dashArray: st.dashArray, interactive: true })
+      .bindTooltip("NHC official forecast, PREVIOUS cycle " + String(G.previousCycle).slice(-2) + "Z — the ghost the current one moved from",
+        { className: "mt-tt", sticky: true }).addTo(g);
+    }
+    const order = ["global", "ensemble-mean", "hurricane", "ai", "consensus"];
+    G.aids.filter((a) => a.track && a.track.length > 1 && a.cls !== "official" && a.cls !== "statistical")
+      .sort((a, b) => order.indexOf(a.cls) - order.indexOf(b.cls))
+      .forEach((a) => {
+      const st = GUIDANCE_STYLE[a.cls] || GUIDANCE_STYLE.global;
+      L.polyline(latlngs(a.track), { color: st.color, weight: st.weight, opacity: st.opacity, dashArray: st.dashArray })
+        .bindTooltip(a.label + " (" + a.tech + ") · " + st.label + " · cycle " + String(G.cycle).slice(-2) + "Z"
+          + (a.peakKt != null ? " · peak " + a.peakKt + " kt at +" + a.peakHr + "h" : " · track aid, no intensity")
+          + (a.inSpread ? "" : " · shown, not counted in the spread"),
+          { className: "mt-tt", sticky: true }).addTo(g);
+      });
+    (G.leads || []).forEach((l) => {
+      if (!l.centroid || l.n < 2) return;
+      const [la, lo] = l.centroid;
+      const icon = L.divIcon({ className: "", iconSize: [14, 14], iconAnchor: [7, 7],
+      html: '<div style="position:relative;width:14px;height:14px;color:#eaf2ff;opacity:.85">'
+          + '<div style="position:absolute;left:6px;top:0;width:2px;height:14px;background:currentColor"></div>'
+          + '<div style="position:absolute;top:6px;left:0;height:2px;width:14px;background:currentColor"></div>'
+          + '<div style="position:absolute;left:16px;top:-3px;font:700 9px var(--font-mono);letter-spacing:.3px;white-space:nowrap;text-shadow:0 0 3px #000">+' + l.hr + 'h</div></div>' });
+      L.marker([la, lo], { icon, interactive: true, zIndexOffset: 500 })
+      .bindTooltip("+" + l.hr + "h centroid of " + l.n + " model runs · mean spread " + (l.meanKm ?? "—") + " km, max " + (l.maxKm ?? "—") + " km"
+        + " · " + l.scenarios + " scenario" + (l.scenarios === 1 ? "" : "s") + " at " + l.thresholdKm + " km"
+        + (l.ofcl && l.ofcl.offsetKm != null ? " · official " + l.ofcl.offsetKm + " km from centroid" : "")
+        + " — model disagreement, not a probability and not the cone",
+        { className: "mt-tt", direction: "top" }).addTo(g);
+    });
+    }
+    publish();
+  }, [stormId, layers.guidance, frame]);
 
   // bitemporal binding — move ONLY the eye marker as the as-of cursor scrubs, so
   // geometry rewinds with the tables and there is no overlay rebuild / tile flash.

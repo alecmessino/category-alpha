@@ -221,7 +221,7 @@ function IngestionHUD() {
   );
 }
 
-function LayerToggles({ layers, setLayers, storm, compact }) {
+function LayerToggles({ layers, setLayers, storm, compact, frame }) {
   const [showOff, setShowOff] = React.useState(false);
   /* PHONE: the chips fold into one control. Six chips laid over a 356px-wide map covered most
      of it — apparatus was shrinking the map, which is the one thing it must not do. Below the
@@ -229,7 +229,7 @@ function LayerToggles({ layers, setLayers, storm, compact }) {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const S = storm ? MT.storms[storm] : null;
   const all = window.MT_LAYERS.map((o) => Object.assign({}, o, {
-    prov: window.MT_layerProv ? window.MT_layerProv(o, S) : o.prov }));
+    prov: window.MT_layerProv ? window.MT_layerProv(o, S, frame) : o.prov }));
   const live = all.filter((o) => o.prov !== "nofeed");
   const off = all.filter((o) => o.prov === "nofeed");
   const chip = (extra) => Object.assign({
@@ -581,7 +581,7 @@ function MillibarTerminalApp() {
                   </span>
                 )}
               </div>
-              <LayerToggles layers={layers} setLayers={setLayers} storm={storm} compact={vw < 640} />
+              <LayerToggles layers={layers} setLayers={setLayers} storm={storm} compact={vw < 640} frame={frame} />
             </div>
             {/* rail */}
             {S && (

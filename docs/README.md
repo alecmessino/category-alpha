@@ -71,8 +71,14 @@ fraction or named as a probability; the official forecast and the consensus aids
 the members and never counted among them; a lead with one member has a null spread, not a spread
 of 0; and nothing in the envelope reaches `calibratedIntensityP`, `kellyFor` or `edgeBook` — the
 test reads those sources to make sure. The frame carries the envelope's scalars, so the scrubber
-rewinds them and the register reports a cycle as *previous → current → delta*; the map's lines are
-always the latest deck and the panel says so when the frame is older.
+rewinds them and the register reports a cycle as *previous → current → delta*.
+
+**The as-of rule.** Only the scalars are on the frame, so a rewound cursor shows those and the
+geometry is *withheld* — no tracks, no lead table, no fan, no member roster, no deck health row —
+under an explicit `HISTORICAL GUIDANCE GEOMETRY NOT STORED FOR THIS FRAME`. The test is a
+fingerprint, not a cycle id: an a-deck keeps gaining late-arriving members for hours after its
+cycle time, so a frame keeps its geometry only while every scalar it recorded still matches the
+deck in hand. At live every part of the panel reads from that one deck.
 
 ### Feed / cycle health
 
