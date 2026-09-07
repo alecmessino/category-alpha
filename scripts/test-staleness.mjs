@@ -131,5 +131,24 @@ ck("the trade-relevant count includes it", sit.byClass["trade-relevant"] >= 1,
    JSON.stringify(sit.byClass));
 ck("and the top change names it", /advisory went stale/i.test(sit.topChange || ""), sit.topChange);
 
+console.log("\n[6] an intermediate advisory (043a) is a number with a letter, not NaN");
+/* Under a watch or warning NHC letters the intermediates. Number("043a") is NaN and the queue
+   read "Advisory #NaN expected in 83 min" the first time a storm here went under a warning. */
+{
+  const M6 = build([10, 12]);
+  eq("043a → 43", M6.advisoryOrdinal("043a"), 43);
+  eq("43A → 43", M6.advisoryOrdinal("43A"), 43);
+  eq("023 → 23", M6.advisoryOrdinal("023"), 23);
+  eq("nothing → null, never NaN", M6.advisoryOrdinal(null), null);
+  eq("garbage → null", M6.advisoryOrdinal("adv"), null);
+  /* The next FULL advisory after an intermediate at 00Z is 03Z, three hours on, not 06Z. */
+  const at00 = M6.nextAdvisory({ advTimeZ: "2099-09-07T00:00:00.000Z" });
+  eq("after an intermediate at 00Z the next full slot is 03Z", new Date(at00.dueMs).toISOString(), "2099-09-07T03:00:00.000Z");
+  const at21 = M6.nextAdvisory({ advTimeZ: "2099-09-06T21:00:00.000Z" });
+  eq("after a full advisory at 21Z the next full slot is 03Z", new Date(at21.dueMs).toISOString(), "2099-09-07T03:00:00.000Z");
+  const at2034 = M6.nextAdvisory({ advTimeZ: "2099-09-06T20:34:00.000Z" });
+  eq("an off-minute issuance still resolves to the next full slot on the hour", new Date(at2034.dueMs).toISOString(), "2099-09-06T21:00:00.000Z");
+}
+
 console.log(fail ? `\n${fail} FAILED\n` : "\nall staleness checks passed\n");
 process.exit(fail ? 1 : 0);

@@ -328,6 +328,16 @@ for (const W of WIDTHS) {
   const withStorm = await page.evaluate(AUDIT, { floor: W.floor, share: W.share, stormId: STORM });
   ok("storm selected: " + (withStorm.note.join(" · ") || "audited"), withStorm.bad.length === 0, withStorm.bad.join("; "));
   if (SHOTS) await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-situation.png`), fullPage: false });
+  /* The feed-health table, opened from a pill: STALE / NO FEED / EVENT / LIVE side by side, at
+     the frame's clock. Captured on the widest band only — the table is the same at every width. */
+  if (SHOTS && W.name === "wide") {
+    await page.evaluate(() => { const p = document.querySelector('[data-feed-pill="SNAP"]'); if (p) p.click(); });
+    await page.waitForTimeout(300);
+    const hasTable = await page.evaluate(() => !!document.querySelector("[data-feed-health-table]"));
+    ok("the feed-health table opens from a pill", hasTable);
+    await page.screenshot({ path: join(SHOTS, `terminal-${W.name}-${W.w}-feed-health.png`), fullPage: false, clip: { x: W.w - 1000, y: 0, width: 1000, height: 520 } });
+    await page.evaluate(() => { const t = document.querySelector("[data-feed-health-table]"); if (t) t.click(); });
+  }
   const t1 = Date.now();
   await openTab("Models");
   await page.waitForFunction(() => document.querySelector("[data-guidance-panel] [data-guidance-fan]"), { timeout: 20000 });

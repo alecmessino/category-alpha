@@ -661,11 +661,26 @@
      actually has. */
   const PRIO_RANK = { HIGH: 0, MEDIUM: 1, LOW: 2 };
 
+  /* The advisory NUMBER is "043a" under a watch or warning: NHC letters the intermediate
+     advisories between the full ones. Number("043a") is NaN, and "Advisory #NaN expected in
+     83 min" reached the attention queue the first time a storm on this board went under a
+     warning. The next FULL advisory after 43A is 44 — the intermediate does not advance the
+     count. */
+  function advisoryOrdinal(advNum) {
+    const m = /^\s*0*(\d+)/.exec(String(advNum == null ? "" : advNum));
+    return m ? Number(m[1]) : null;
+  }
   function nextAdvisory(S) {
     if (!S || !S.advTimeZ) return null;
     const t = Date.parse(S.advTimeZ);
     if (!t) return null;
-    let due = t + 6 * 3600000;                    // full advisories run 03/09/15/21Z
+    /* Full advisories run 03/09/15/21Z. An intermediate lands on 00/06/12/18Z, and the next
+       FULL one is three hours after it, not six — so the next due slot is the first full slot
+       strictly after this advisory's nominal time, whichever kind this one was. */
+    const FULL = [3, 9, 15, 21];
+    let due = Math.floor(t / 3600000) * 3600000 + 3600000;      // the next whole hour
+    let step = 0;
+    while (!FULL.includes(new Date(due).getUTCHours()) && step++ < 6) due += 3600000;
     const now = Date.now();
     // If we are past a slot the feed has not caught up to yet, roll forward rather
     // than reporting a time in the past.
@@ -824,7 +839,7 @@
       if (!n || n.inMin > 90 || n.inMin < -20) return;
       push({
         id: "adv:" + S.id, priority: n.inMin <= 30 ? "MEDIUM" : "LOW",
-        title: S.name + " Advisory #" + ((S.advNum ? Number(S.advNum) + 1 : "?")) + " expected in " + Math.max(0, n.inMin) + " min",
+        title: S.name + " Advisory #" + (advisoryOrdinal(S.advNum) != null ? advisoryOrdinal(S.advNum) + 1 : "?") + " expected in " + Math.max(0, n.inMin) + " min",
         detail: "NHC 6-hourly cycle from advisory #" + (S.advNum || "?") + " — scheduled, not observed",
         kind: "schedule", source: "NHC cadence", ageMin: null,
         waitingOn: "NHC issuance",
@@ -1174,6 +1189,6 @@
     return out.sort((a, b) => b.spread - a.spread);
   }
 
-  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, lifecycleFor, LIFECYCLE, edgeBook, feePerContract, ladderArbs, exitCost, liquidityTraps };
+  return { snap, at, kellyFor, tier, frameTime, mkt, mdl, priceHist, orderBookFor, signals, signalSummary, situation, attention, exposure, nextAdvisory, advisoryOrdinal, lifecycleFor, LIFECYCLE, edgeBook, feePerContract, ladderArbs, exitCost, liquidityTraps };
 })();
 })();
