@@ -1,0 +1,2380 @@
+{
+  "schema": "millibar.track-residual.q1/1",
+  "generatedAt": "2026-09-08T03:24:47.876Z",
+  "question": "Q1 — accuracy of the position-departure measurement. NOT a skill claim, and no part of Q2 or Q3 is answered or implied here.",
+  "population": {
+    "basin": "EP",
+    "years": [
+      2015,
+      2016,
+      2017,
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024,
+      2025
+    ],
+    "storms": 65,
+    "criterion": "at least one intermediate public advisory in the archived messages index"
+  },
+  "fetches": {
+    "ok": 2515,
+    "failed": 0
+  },
+  "q1a_parse": {
+    "reference": "ATCF a-deck OFCL rows — the same official forecast NHC publishes as prose in the TCM, matched at the same valid time. OFCI is deliberately not used: it is the official forecast interpolated forward, so comparing against it would report NHC's own adjustment as a parse error.",
+    "rowsCompared": 6907,
+    "storms": 65,
+    "stormsAgreeingExactly": 57,
+    "byRowKind": [
+      {
+        "kind": "initial",
+        "rows": 1057,
+        "exact": 1051,
+        "nonZero": 6,
+        "maxNm": 29.516524312794242
+      },
+      {
+        "kind": "forecast/outlook",
+        "rows": 5850,
+        "exact": 5839,
+        "nonZero": 11,
+        "maxNm": 13.058370860141913
+      }
+    ],
+    "literalRoundTrip": {
+      "what": "Every parsed position re-formatted into the product's own notation and required to appear verbatim in the product's bytes. Independent of the deck: it has one author, so it says whether the module reproduces the TRANSMITTED product.",
+      "positionsChecked": 7013,
+      "verbatim": 7013,
+      "notFound": 0,
+      "offenders": []
+    },
+    "everyNonZeroRow": [
+      {
+        "kind": "initial",
+        "tau": 3,
+        "deltaNm": 29.516524312794242,
+        "advNum": 44
+      },
+      {
+        "kind": "forecast",
+        "tau": 12,
+        "deltaNm": 13.058370860141913,
+        "advNum": 1
+      },
+      {
+        "kind": "forecast",
+        "tau": 12,
+        "deltaNm": 10.918204449447238,
+        "advNum": 22
+      },
+      {
+        "kind": "forecast",
+        "tau": 36,
+        "deltaNm": 8.386982973634607,
+        "advNum": 6
+      },
+      {
+        "kind": "forecast",
+        "tau": 48,
+        "deltaNm": 8.386982973634607,
+        "advNum": 6
+      },
+      {
+        "kind": "forecast",
+        "tau": 24,
+        "deltaNm": 8.383729158117813,
+        "advNum": 6
+      },
+      {
+        "kind": "forecast",
+        "tau": 24,
+        "deltaNm": 8.331163651426525,
+        "advNum": 1
+      },
+      {
+        "kind": "forecast",
+        "tau": 48,
+        "deltaNm": 8.275673204436021,
+        "advNum": 9
+      },
+      {
+        "kind": "forecast",
+        "tau": 12,
+        "deltaNm": 6.004054008290199,
+        "advNum": 9
+      },
+      {
+        "kind": "forecast",
+        "tau": 24,
+        "deltaNm": 6.004054008290199,
+        "advNum": 9
+      },
+      {
+        "kind": "initial",
+        "tau": 3,
+        "deltaNm": 6.004054008290199,
+        "advNum": 32
+      },
+      {
+        "kind": "forecast",
+        "tau": 12,
+        "deltaNm": 6.004054008290092,
+        "advNum": 6
+      },
+      {
+        "kind": "forecast",
+        "tau": 72,
+        "deltaNm": 5.812810674578268,
+        "advNum": 6
+      },
+      {
+        "kind": "initial",
+        "tau": 3,
+        "deltaNm": 5.7685698752964445,
+        "advNum": 36
+      },
+      {
+        "kind": "initial",
+        "tau": 3,
+        "deltaNm": 5.744760372930166,
+        "advNum": 13
+      },
+      {
+        "kind": "initial",
+        "tau": 3,
+        "deltaNm": 5.631135731161255,
+        "advNum": 5
+      },
+      {
+        "kind": "initial",
+        "tau": 3,
+        "deltaNm": 5.631135731161255,
+        "advNum": 5
+      }
+    ],
+    "nonZeroRowsByStorm": {
+      "ep022015": [
+        {
+          "advNum": 6,
+          "kind": "forecast",
+          "tau": 12,
+          "deltaNm": 6.004054008290092
+        },
+        {
+          "advNum": 6,
+          "kind": "forecast",
+          "tau": 24,
+          "deltaNm": 8.383729158117813
+        },
+        {
+          "advNum": 6,
+          "kind": "forecast",
+          "tau": 36,
+          "deltaNm": 8.386982973634607
+        },
+        {
+          "advNum": 6,
+          "kind": "forecast",
+          "tau": 48,
+          "deltaNm": 8.386982973634607
+        },
+        {
+          "advNum": 6,
+          "kind": "forecast",
+          "tau": 72,
+          "deltaNm": 5.812810674578268
+        }
+      ],
+      "ep052015": [
+        {
+          "advNum": 9,
+          "kind": "forecast",
+          "tau": 12,
+          "deltaNm": 6.004054008290199
+        },
+        {
+          "advNum": 9,
+          "kind": "forecast",
+          "tau": 24,
+          "deltaNm": 6.004054008290199
+        },
+        {
+          "advNum": 9,
+          "kind": "forecast",
+          "tau": 48,
+          "deltaNm": 8.275673204436021
+        }
+      ],
+      "ep012016": [
+        {
+          "advNum": 1,
+          "kind": "forecast",
+          "tau": 12,
+          "deltaNm": 13.058370860141913
+        },
+        {
+          "advNum": 1,
+          "kind": "forecast",
+          "tau": 24,
+          "deltaNm": 8.331163651426525
+        }
+      ],
+      "ep152016": [
+        {
+          "advNum": 5,
+          "kind": "initial",
+          "tau": 3,
+          "deltaNm": 5.631135731161255
+        },
+        {
+          "advNum": 5,
+          "kind": "initial",
+          "tau": 3,
+          "deltaNm": 5.631135731161255
+        }
+      ],
+      "ep032018": [
+        {
+          "advNum": 22,
+          "kind": "forecast",
+          "tau": 12,
+          "deltaNm": 10.918204449447238
+        }
+      ],
+      "ep202018": [
+        {
+          "advNum": 13,
+          "kind": "initial",
+          "tau": 3,
+          "deltaNm": 5.744760372930166
+        }
+      ],
+      "ep212018": [
+        {
+          "advNum": 44,
+          "kind": "initial",
+          "tau": 3,
+          "deltaNm": 29.516524312794242
+        }
+      ],
+      "ep042022": [
+        {
+          "advNum": 36,
+          "kind": "initial",
+          "tau": 3,
+          "deltaNm": 5.7685698752964445
+        },
+        {
+          "advNum": 32,
+          "kind": "initial",
+          "tau": 3,
+          "deltaNm": 6.004054008290199
+        }
+      ]
+    },
+    "p50Nm": 0,
+    "p90Nm": 0,
+    "p99Nm": 0,
+    "maxNm": 29.516524312794242,
+    "worstStorms": [
+      {
+        "stormId": "ep212018",
+        "value": 29.516524312794242
+      },
+      {
+        "stormId": "ep012016",
+        "value": 13.058370860141913
+      },
+      {
+        "stormId": "ep032018",
+        "value": 10.918204449447238
+      },
+      {
+        "stormId": "ep022015",
+        "value": 8.386982973634607
+      },
+      {
+        "stormId": "ep052015",
+        "value": 8.275673204436021
+      },
+      {
+        "stormId": "ep042022",
+        "value": 6.004054008290199
+      },
+      {
+        "stormId": "ep202018",
+        "value": 5.744760372930166
+      },
+      {
+        "stormId": "ep152016",
+        "value": 5.631135731161255
+      }
+    ]
+  },
+  "q1b_leadLabels": {
+    "advisories": 1072,
+    "initToFirstRowHoursHistogram": {
+      "6": 7,
+      "9": 1062,
+      "7.5": 1,
+      "6.5": 1,
+      "8.5": 1
+    },
+    "deckTauOfInitialPositionHistogram": {
+      "3": 1050,
+      "6": 7,
+      "null": 15
+    },
+    "stormsWithAtLeastOneNonTwelveHourFirstRow": 65,
+    "note": "The a-deck indexes rows by TAU from the SYNOPTIC CYCLE. A 15Z advisory off a 12Z cycle carries its initial position at TAU 3 and the row the product labels 12H at TAU 12 — so the label is twelve hours from the cycle, not from the initial position."
+  },
+  "q1c_interpolation": {
+    "method": "hold-one-out: an interior issued forecast position is reconstructed linearly in time from its two neighbours and compared against the position NHC issued.",
+    "nodesTested": 3876,
+    "storms": 65,
+    "p50Nm": 9.767508167300974,
+    "p90Nm": 22.529682783377112,
+    "maxNm": 66.16180931917118,
+    "perStormMedian": {
+      "p50": 9.41094820260464,
+      "p90": 17.383672078583867,
+      "max": 26.632641841141623
+    },
+    "perStormMax": {
+      "p50": 27.215978253602444,
+      "max": 66.16180931917118
+    },
+    "byGapHours": [
+      {
+        "gapHours": 18,
+        "n": 6,
+        "p50": 5.222191286745807,
+        "p90": 26.22418939078404,
+        "max": 36.81324390640798
+      },
+      {
+        "gapHours": 18.5,
+        "n": 1,
+        "p50": 26.569806944457394,
+        "p90": 26.569806944457394,
+        "max": 26.569806944457394
+      },
+      {
+        "gapHours": 19.5,
+        "n": 1,
+        "p50": 17.734341640960356,
+        "p90": 17.734341640960356,
+        "max": 17.734341640960356
+      },
+      {
+        "gapHours": 20.5,
+        "n": 1,
+        "p50": 7.024272232341534,
+        "p90": 7.024272232341534,
+        "max": 7.024272232341534
+      },
+      {
+        "gapHours": 21,
+        "n": 997,
+        "p50": 8.926052475607934,
+        "p90": 18.424149126004604,
+        "max": 45.97369044362895
+      },
+      {
+        "gapHours": 24,
+        "n": 2534,
+        "p50": 9.438488263065809,
+        "p90": 21.158575228811944,
+        "max": 61.397624460401154
+      },
+      {
+        "gapHours": 36,
+        "n": 336,
+        "p50": 17.321133990516046,
+        "p90": 36.24235895251459,
+        "max": 66.16180931917118
+      }
+    ],
+    "onDeckRowsOfTheSameCycle": {
+      "what": "The same hold-one-out over the a-deck rows of each advisory's own cycle. TAU 0/3/12/24 spacing means the TAU 3 node is reconstructed across a 12-hour gap — the gap this module actually interpolates across, and a 3-hour point of the kind a residual is evaluated at.",
+      "nodesTested": 6380,
+      "p50Nm": 10.116554075071612,
+      "p90Nm": 30.67818790367144,
+      "maxNm": 178.5738564700801,
+      "byGapHours": [
+        {
+          "gapHours": 12,
+          "n": 1070,
+          "p50": 3.3188516269868824,
+          "p90": 9.62495563220696,
+          "max": 77.93928319558697
+        },
+        {
+          "gapHours": 18,
+          "n": 15,
+          "p50": 6.004054008289985,
+          "p90": 32.086783993259594,
+          "max": 36.81324390640798
+        },
+        {
+          "gapHours": 19,
+          "n": 1,
+          "p50": 19.6364498985227,
+          "p90": 19.6364498985227,
+          "max": 19.6364498985227
+        },
+        {
+          "gapHours": 20,
+          "n": 1,
+          "p50": 9.244954572279783,
+          "p90": 9.244954572279783,
+          "max": 9.244954572279783
+        },
+        {
+          "gapHours": 21,
+          "n": 986,
+          "p50": 8.783680996758612,
+          "p90": 18.288749181068642,
+          "max": 45.97369044362895
+        },
+        {
+          "gapHours": 24,
+          "n": 2578,
+          "p50": 9.440070528047674,
+          "p90": 21.14411391406148,
+          "max": 61.397624460401154
+        },
+        {
+          "gapHours": 36,
+          "n": 607,
+          "p50": 15.293139696701786,
+          "p90": 35.72661885000395,
+          "max": 87.18888243150806
+        },
+        {
+          "gapHours": 48,
+          "n": 1122,
+          "p50": 26.696196189316602,
+          "p90": 62.721070376238124,
+          "max": 178.5738564700801
+        }
+      ],
+      "perStormMedian": {
+        "p50": 8.777100356679165,
+        "max": 22.696424426058222
+      }
+    },
+    "geodesicBoundNm": {
+      "p50": 0.1705653246783484,
+      "max": 10.231945881565057
+    },
+    "caveat": "Hold-one-out spans TWO segments, so it is an upper bound on the error of interpolating inside ONE. It is the honest number for a gap the size of the two it replaces, and it overstates the error at the gaps the module actually uses."
+  },
+  "q1d_frameSensitivity": {
+    "isNotAnAccuracy": "A frame is a choice, not an estimate. This is how far the same residual moves between the two defensible frames, so a reader can see what the choice is worth.",
+    "residuals": 611,
+    "storms": 65,
+    "crossDeltaNm": {
+      "p50": 0.6275008799332857,
+      "p90": 3.5768101499147784,
+      "max": 21.504600176598192
+    },
+    "alongDeltaNm": {
+      "p50": 0.535562303884018,
+      "p90": 3.1423554659323365,
+      "max": 39.491476279007514
+    },
+    "courseDeltaDeg": {
+      "p50": 7.20501883608722,
+      "p90": 22.459783083915568,
+      "max": 143.12036265962422
+    },
+    "perStormMedianCrossDeltaNm": {
+      "p50": 0.6979954260738936,
+      "max": 3.211411646789269
+    }
+  },
+  "retrospectiveReference": {
+    "label": "RETROSPECTIVE — NOT A LIVE PRODUCT, NEVER SUBSTITUTED FOR ONE",
+    "what": "The operational analysis (the a-deck's own TAU 0 row for each advisory's cycle) against the post-season best track at the same synoptic instant. Both answer 'where was the storm'; one was written at the time and one months later. It says how far post-analysis later moved the position operations were standing on. Reported for scale only: it is not used in any residual, correction or score, and no live quantity anywhere in this module is substituted from it.",
+    "n": 1063,
+    "storms": 65,
+    "p50Nm": 6.004054008290092,
+    "p90Nm": 18.921348947902974,
+    "maxNm": 98.3713739038981,
+    "perStormMedian": {
+      "p50": 6.004054008290199,
+      "max": 21.42512234924269
+    }
+  },
+  "missingness": {
+    "fstadvFetch": 0,
+    "fstadvParse": 0,
+    "interFetch": 0,
+    "interParse": 3,
+    "noDeck": 0,
+    "noBestTrack": 0,
+    "rowsUnmatched": 73,
+    "advisoriesWithoutComparableDeckCycle": 48,
+    "joinRefusalReasons": {
+      "REFERENCE_NOT_LIKE_FOR_LIKE_NO_ROW_AT_ADVISORY_INITIAL_TIME": 14,
+      "NO_FORECAST_ROWS": 33,
+      "NO_DECK_CYCLE_AT_THIS_ADVISORY_CYCLE_TIME": 1
+    },
+    "intermediatesRefused": 23,
+    "intermediateRefusalReasons": {
+      "NO_REPORTED_MOTION_TO_COMPARE_FRAMES": 21,
+      "NO_FULL_ADVISORY_WITH_THIS_NUMBER": 2
+    }
+  },
+  "perStorm": [
+    {
+      "stormId": "ep022015",
+      "year": 2015,
+      "advisories": 36,
+      "comparable": 35,
+      "rowsMatched": 228,
+      "rowsUnmatched": 8,
+      "parseMaxNm": 8.386982973634607,
+      "parseNonZeroRows": 5,
+      "hooMedianNm": 10.513765775280046,
+      "hooMaxNm": 52.324831679177635,
+      "deckHooMedianNm": 12.010926124651796,
+      "frameCrossDeltaMedianNm": 0.42677811158222095,
+      "intermediates": {
+        "total": 12,
+        "residualsComputed": 12,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep032015",
+      "year": 2015,
+      "advisories": 29,
+      "comparable": 29,
+      "rowsMatched": 207,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.502320691478654,
+      "hooMaxNm": 27.60695870233554,
+      "deckHooMedianNm": 7.954655056197996,
+      "frameCrossDeltaMedianNm": 0.9100514488835291,
+      "intermediates": {
+        "total": 23,
+        "residualsComputed": 16,
+        "residualsRefused": 7,
+        "refusalReasons": {
+          "NO_REPORTED_MOTION_TO_COMPARE_FRAMES": 7
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep052015",
+      "year": 2015,
+      "advisories": 32,
+      "comparable": 32,
+      "rowsMatched": 243,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 8.275673204436021,
+      "parseNonZeroRows": 3,
+      "hooMedianNm": 9.060700066564463,
+      "hooMaxNm": 59.74118592340812,
+      "deckHooMedianNm": 11.993643048332896,
+      "frameCrossDeltaMedianNm": 0.6880481271005969,
+      "intermediates": {
+        "total": 5,
+        "residualsComputed": 5,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep172015",
+      "year": 2015,
+      "advisories": 18,
+      "comparable": 18,
+      "rowsMatched": 127,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.138984382251792,
+      "hooMaxNm": 26.87163239867022,
+      "deckHooMedianNm": 9.136860624388632,
+      "frameCrossDeltaMedianNm": 0.6483472762812155,
+      "intermediates": {
+        "total": 12,
+        "residualsComputed": 10,
+        "residualsRefused": 2,
+        "refusalReasons": {
+          "NO_REPORTED_MOTION_TO_COMPARE_FRAMES": 2
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep202015",
+      "year": 2015,
+      "advisories": 20,
+      "comparable": 16,
+      "rowsMatched": 81,
+      "rowsUnmatched": 13,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 26.632641841141623,
+      "hooMaxNm": 53.764018576351305,
+      "deckHooMedianNm": 18.53900351494861,
+      "frameCrossDeltaMedianNm": 2.109309777976408,
+      "intermediates": {
+        "total": 10,
+        "residualsComputed": 10,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep222015",
+      "year": 2015,
+      "advisories": 20,
+      "comparable": 20,
+      "rowsMatched": 122,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 14.358135434373137,
+      "hooMaxNm": 48.68257085968683,
+      "deckHooMedianNm": 14.333924943596873,
+      "frameCrossDeltaMedianNm": 1.1121708901428482,
+      "intermediates": {
+        "total": 6,
+        "residualsComputed": 6,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep012016",
+      "year": 2016,
+      "advisories": 8,
+      "comparable": 7,
+      "rowsMatched": 22,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 13.058370860141913,
+      "parseNonZeroRows": 2,
+      "hooMedianNm": 10.75797511551334,
+      "hooMaxNm": 31.2661023183822,
+      "deckHooMedianNm": 4.1772943402096105,
+      "frameCrossDeltaMedianNm": 1.167732879249516,
+      "intermediates": {
+        "total": 5,
+        "residualsComputed": 5,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep112016",
+      "year": 2016,
+      "advisories": 11,
+      "comparable": 11,
+      "rowsMatched": 66,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.110485491277672,
+      "hooMaxNm": 22.81136125529195,
+      "deckHooMedianNm": 7.336721883799272,
+      "frameCrossDeltaMedianNm": 0.46246740707880196,
+      "intermediates": {
+        "total": 13,
+        "residualsComputed": 13,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep152016",
+      "year": 2016,
+      "advisories": 14,
+      "comparable": 14,
+      "rowsMatched": 64,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 5.631135731161255,
+      "parseNonZeroRows": 2,
+      "hooMedianNm": 22.579825018004108,
+      "hooMaxNm": 45.97369044362895,
+      "deckHooMedianNm": 13.920577545003127,
+      "frameCrossDeltaMedianNm": 0.8810379953081122,
+      "intermediates": {
+        "total": 12,
+        "residualsComputed": 12,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep172016",
+      "year": 2016,
+      "advisories": 13,
+      "comparable": 13,
+      "rowsMatched": 69,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 16.982702795837376,
+      "hooMaxNm": 48.324084013760945,
+      "deckHooMedianNm": 15.606201704888159,
+      "frameCrossDeltaMedianNm": 0.054522547002360144,
+      "intermediates": {
+        "total": 4,
+        "residualsComputed": 4,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep222016",
+      "year": 2016,
+      "advisories": 7,
+      "comparable": 6,
+      "rowsMatched": 45,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 11.712950753764389,
+      "hooMaxNm": 60.174271668430805,
+      "deckHooMedianNm": 12.675734517818494,
+      "frameCrossDeltaMedianNm": 0.333730747220244,
+      "intermediates": {
+        "total": 1,
+        "residualsComputed": 1,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep022017",
+      "year": 2017,
+      "advisories": 9,
+      "comparable": 9,
+      "rowsMatched": 36,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.479825124478165,
+      "hooMaxNm": 30.86587777454427,
+      "deckHooMedianNm": 4.204967530355961,
+      "frameCrossDeltaMedianNm": 1.4529711345991991,
+      "intermediates": {
+        "total": 7,
+        "residualsComputed": 7,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep032017",
+      "year": 2017,
+      "advisories": 8,
+      "comparable": 7,
+      "rowsMatched": 28,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 4.6640830037765735,
+      "hooMaxNm": 11.62412888285435,
+      "deckHooMedianNm": 4.232617895942744,
+      "frameCrossDeltaMedianNm": 0.7512943415507003,
+      "intermediates": {
+        "total": 6,
+        "residualsComputed": 5,
+        "residualsRefused": 1,
+        "refusalReasons": {
+          "NO_REPORTED_MOTION_TO_COMPARE_FRAMES": 1
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep142017",
+      "year": 2017,
+      "advisories": 19,
+      "comparable": 19,
+      "rowsMatched": 130,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.178304822205035,
+      "hooMaxNm": 31.215410483549313,
+      "deckHooMedianNm": 8.178304822205035,
+      "frameCrossDeltaMedianNm": 0.2072540938029528,
+      "intermediates": {
+        "total": 18,
+        "residualsComputed": 17,
+        "residualsRefused": 1,
+        "refusalReasons": {
+          "NO_REPORTED_MOTION_TO_COMPARE_FRAMES": 1
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep162017",
+      "year": 2017,
+      "advisories": 9,
+      "comparable": 8,
+      "rowsMatched": 24,
+      "rowsUnmatched": 3,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.532088776913524,
+      "hooMaxNm": 16.18467470560794,
+      "deckHooMedianNm": 7.499346905467857,
+      "frameCrossDeltaMedianNm": 0.6481796201446204,
+      "intermediates": {
+        "total": 6,
+        "residualsComputed": 6,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep172017",
+      "year": 2017,
+      "advisories": 23,
+      "comparable": 23,
+      "rowsMatched": 155,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 7.05915537677379,
+      "hooMaxNm": 26.5089916092342,
+      "deckHooMedianNm": 8.179454106204837,
+      "frameCrossDeltaMedianNm": 0.172119338064046,
+      "intermediates": {
+        "total": 7,
+        "residualsComputed": 6,
+        "residualsRefused": 1,
+        "refusalReasons": {
+          "NO_REPORTED_MOTION_TO_COMPARE_FRAMES": 1
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep182017",
+      "year": 2017,
+      "advisories": 9,
+      "comparable": 8,
+      "rowsMatched": 40,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.383769612200452,
+      "hooMaxNm": 16.374513976963723,
+      "deckHooMedianNm": 5.9485394654345285,
+      "frameCrossDeltaMedianNm": 0.4402752815373834,
+      "intermediates": {
+        "total": 7,
+        "residualsComputed": 7,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep192017",
+      "year": 2017,
+      "advisories": 5,
+      "comparable": 4,
+      "rowsMatched": 22,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 10.476750524195442,
+      "hooMaxNm": 58.59932690763944,
+      "deckHooMedianNm": 9.26996503365396,
+      "frameCrossDeltaMedianNm": 0.7798608912122803,
+      "intermediates": {
+        "total": 3,
+        "residualsComputed": 2,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 1,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep202017",
+      "year": 2017,
+      "advisories": 7,
+      "comparable": 6,
+      "rowsMatched": 19,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 12.050113640952732,
+      "hooMaxNm": 34.15602485777964,
+      "deckHooMedianNm": 7.584959113240768,
+      "frameCrossDeltaMedianNm": 0.9597403436166871,
+      "intermediates": {
+        "total": 5,
+        "residualsComputed": 5,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep032018",
+      "year": 2018,
+      "advisories": 26,
+      "comparable": 26,
+      "rowsMatched": 169,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 10.918204449447238,
+      "parseNonZeroRows": 1,
+      "hooMedianNm": 9.559814090385858,
+      "hooMaxNm": 36.23641751841554,
+      "deckHooMedianNm": 10.68186743548884,
+      "frameCrossDeltaMedianNm": 0.20700502848488078,
+      "intermediates": {
+        "total": 15,
+        "residualsComputed": 14,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 1,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep042018",
+      "year": 2018,
+      "advisories": 18,
+      "comparable": 18,
+      "rowsMatched": 66,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.004054008290199,
+      "hooMaxNm": 18.795747199829837,
+      "deckHooMedianNm": 4.921820341454327,
+      "frameCrossDeltaMedianNm": 0.27099293050179263,
+      "intermediates": {
+        "total": 12,
+        "residualsComputed": 8,
+        "residualsRefused": 4,
+        "refusalReasons": {
+          "NO_REPORTED_MOTION_TO_COMPARE_FRAMES": 4
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep112018",
+      "year": 2018,
+      "advisories": 12,
+      "comparable": 11,
+      "rowsMatched": 53,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 10.710027587997475,
+      "hooMaxNm": 31.334581702049064,
+      "deckHooMedianNm": 8.694909297940377,
+      "frameCrossDeltaMedianNm": 1.5587172170225867,
+      "intermediates": {
+        "total": 6,
+        "residualsComputed": 6,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep202018",
+      "year": 2018,
+      "advisories": 30,
+      "comparable": 29,
+      "rowsMatched": 192,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 5.744760372930166,
+      "parseNonZeroRows": 1,
+      "hooMedianNm": 12.65953762720514,
+      "hooMaxNm": 46.075848777525415,
+      "deckHooMedianNm": 14.570515318112228,
+      "frameCrossDeltaMedianNm": 0.17190533832120414,
+      "intermediates": {
+        "total": 12,
+        "residualsComputed": 12,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep212018",
+      "year": 2018,
+      "advisories": 54,
+      "comparable": 52,
+      "rowsMatched": 382,
+      "rowsUnmatched": 8,
+      "parseMaxNm": 29.516524312794242,
+      "parseNonZeroRows": 1,
+      "hooMedianNm": 13.33699468687502,
+      "hooMaxNm": 66.16180931917118,
+      "deckHooMedianNm": 16.53567274552931,
+      "frameCrossDeltaMedianNm": 0.23731241521719681,
+      "intermediates": {
+        "total": 10,
+        "residualsComputed": 10,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep222018",
+      "year": 2018,
+      "advisories": 11,
+      "comparable": 10,
+      "rowsMatched": 70,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.41956090254698,
+      "hooMaxNm": 25.08739458335159,
+      "deckHooMedianNm": 7.2556420700834625,
+      "frameCrossDeltaMedianNm": 1.330015880346806,
+      "intermediates": {
+        "total": 6,
+        "residualsComputed": 6,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep242018",
+      "year": 2018,
+      "advisories": 20,
+      "comparable": 19,
+      "rowsMatched": 109,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.499947564407796,
+      "hooMaxNm": 60.184498461614936,
+      "deckHooMedianNm": 9.035924642103748,
+      "frameCrossDeltaMedianNm": 0.926818705736421,
+      "intermediates": {
+        "total": 11,
+        "residualsComputed": 11,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep252018",
+      "year": 2018,
+      "advisories": 14,
+      "comparable": 14,
+      "rowsMatched": 100,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.41094820260464,
+      "hooMaxNm": 24.891699487613042,
+      "deckHooMedianNm": 9.489967990767408,
+      "frameCrossDeltaMedianNm": 1.2721207692791543,
+      "intermediates": {
+        "total": 5,
+        "residualsComputed": 5,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep152019",
+      "year": 2019,
+      "advisories": 22,
+      "comparable": 22,
+      "rowsMatched": 134,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 10.483704256009979,
+      "hooMaxNm": 38.645874226938695,
+      "deckHooMedianNm": 8.928160697701188,
+      "frameCrossDeltaMedianNm": 1.3507485048264556,
+      "intermediates": {
+        "total": 20,
+        "residualsComputed": 19,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 1,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep162019",
+      "year": 2019,
+      "advisories": 13,
+      "comparable": 12,
+      "rowsMatched": 74,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 15.010135020725283,
+      "hooMaxNm": 32.65633971588375,
+      "deckHooMedianNm": 13.712438867228965,
+      "frameCrossDeltaMedianNm": 0.2641912580323531,
+      "intermediates": {
+        "total": 12,
+        "residualsComputed": 11,
+        "residualsRefused": 1,
+        "refusalReasons": {
+          "NO_REPORTED_MOTION_TO_COMPARE_FRAMES": 1
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep172019",
+      "year": 2019,
+      "advisories": 4,
+      "comparable": 3,
+      "rowsMatched": 9,
+      "rowsUnmatched": 2,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 15.519857009287302,
+      "hooMaxNm": 15.617975236497665,
+      "deckHooMedianNm": 4.158236374103508,
+      "frameCrossDeltaMedianNm": 0.13531758065748134,
+      "intermediates": {
+        "total": 2,
+        "residualsComputed": 2,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep192019",
+      "year": 2019,
+      "advisories": 4,
+      "comparable": 3,
+      "rowsMatched": 8,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.85570231408365,
+      "hooMaxNm": 13.490492349123109,
+      "deckHooMedianNm": 4.72123812545781,
+      "frameCrossDeltaMedianNm": 1.2970184162116423,
+      "intermediates": {
+        "total": 2,
+        "residualsComputed": 2,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep022020",
+      "year": 2020,
+      "advisories": 5,
+      "comparable": 4,
+      "rowsMatched": 19,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 17.187048727596398,
+      "hooMaxNm": 37.36728172042967,
+      "deckHooMedianNm": 16.052876386100486,
+      "frameCrossDeltaMedianNm": 0.3425541067626574,
+      "intermediates": {
+        "total": 4,
+        "residualsComputed": 4,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep122020",
+      "year": 2020,
+      "advisories": 22,
+      "comparable": 22,
+      "rowsMatched": 183,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.806807921080713,
+      "hooMaxNm": 21.77348535348218,
+      "deckHooMedianNm": 9.006081012435084,
+      "frameCrossDeltaMedianNm": 0.3448080304561839,
+      "intermediates": {
+        "total": 16,
+        "residualsComputed": 15,
+        "residualsRefused": 1,
+        "refusalReasons": {
+          "NO_FULL_ADVISORY_WITH_THIS_NUMBER": 1
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep042021",
+      "year": 2021,
+      "advisories": 9,
+      "comparable": 7,
+      "rowsMatched": 30,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 18.05002762934143,
+      "hooMaxNm": 28.357385613874442,
+      "deckHooMedianNm": 15.148701372587631,
+      "frameCrossDeltaMedianNm": 1.4342044615142662,
+      "intermediates": {
+        "total": 8,
+        "residualsComputed": 8,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep052021",
+      "year": 2021,
+      "advisories": 24,
+      "comparable": 23,
+      "rowsMatched": 169,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.633365969742736,
+      "hooMaxNm": 19.207270483346733,
+      "deckHooMedianNm": 6.634504152534237,
+      "frameCrossDeltaMedianNm": 0.7949969705746202,
+      "intermediates": {
+        "total": 17,
+        "residualsComputed": 17,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep142021",
+      "year": 2021,
+      "advisories": 19,
+      "comparable": 18,
+      "rowsMatched": 153,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.393032751933353,
+      "hooMaxNm": 28.315906052281427,
+      "deckHooMedianNm": 10.481462449311284,
+      "frameCrossDeltaMedianNm": 0.6409942848729965,
+      "intermediates": {
+        "total": 15,
+        "residualsComputed": 15,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep152021",
+      "year": 2021,
+      "advisories": 15,
+      "comparable": 15,
+      "rowsMatched": 132,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 11.589119011639328,
+      "hooMaxNm": 21.725404134311606,
+      "deckHooMedianNm": 11.589119011639328,
+      "frameCrossDeltaMedianNm": 1.0649695537850876,
+      "intermediates": {
+        "total": 12,
+        "residualsComputed": 12,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep162021",
+      "year": 2021,
+      "advisories": 16,
+      "comparable": 15,
+      "rowsMatched": 84,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 24.6677828825074,
+      "hooMaxNm": 61.397624460401154,
+      "deckHooMedianNm": 22.696424426058222,
+      "frameCrossDeltaMedianNm": 1.3742086123696566,
+      "intermediates": {
+        "total": 9,
+        "residualsComputed": 9,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep172021",
+      "year": 2021,
+      "advisories": 16,
+      "comparable": 15,
+      "rowsMatched": 85,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.72174316189166,
+      "hooMaxNm": 27.215978253602444,
+      "deckHooMedianNm": 6.967272321886905,
+      "frameCrossDeltaMedianNm": 0.6979954260738936,
+      "intermediates": {
+        "total": 12,
+        "residualsComputed": 12,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep012022",
+      "year": 2022,
+      "advisories": 15,
+      "comparable": 14,
+      "rowsMatched": 74,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.06995746009378,
+      "hooMaxNm": 22.989152407335528,
+      "deckHooMedianNm": 7.909645428650688,
+      "frameCrossDeltaMedianNm": 0.6208871799689235,
+      "intermediates": {
+        "total": 13,
+        "residualsComputed": 13,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep042022",
+      "year": 2022,
+      "advisories": 31,
+      "comparable": 31,
+      "rowsMatched": 243,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 6.004054008290199,
+      "parseNonZeroRows": 2,
+      "hooMedianNm": 8.253473558091443,
+      "hooMaxNm": 18.975685417061094,
+      "deckHooMedianNm": 8.58923881738778,
+      "frameCrossDeltaMedianNm": 1.4699715951821748,
+      "intermediates": {
+        "total": 1,
+        "residualsComputed": 1,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep112022",
+      "year": 2022,
+      "advisories": 12,
+      "comparable": 12,
+      "rowsMatched": 106,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 14.834760614910651,
+      "hooMaxNm": 27.018243037305467,
+      "deckHooMedianNm": 15.246864696286742,
+      "frameCrossDeltaMedianNm": 0.47316763001119,
+      "intermediates": {
+        "total": 5,
+        "residualsComputed": 5,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep122022",
+      "year": 2022,
+      "advisories": 24,
+      "comparable": 24,
+      "rowsMatched": 210,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 13.104862525316767,
+      "hooMaxNm": 31.575085585625875,
+      "deckHooMedianNm": 14.758272469623325,
+      "frameCrossDeltaMedianNm": 0.7106465463378964,
+      "intermediates": {
+        "total": 18,
+        "residualsComputed": 18,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep132022",
+      "year": 2022,
+      "advisories": 9,
+      "comparable": 8,
+      "rowsMatched": 37,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.106529663136595,
+      "hooMaxNm": 25.538993274963058,
+      "deckHooMedianNm": 8.33314198274044,
+      "frameCrossDeltaMedianNm": 1.9556746849867321,
+      "intermediates": {
+        "total": 8,
+        "residualsComputed": 8,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep142022",
+      "year": 2022,
+      "advisories": 13,
+      "comparable": 13,
+      "rowsMatched": 117,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.6215494032874815,
+      "hooMaxNm": 16.49556158175596,
+      "deckHooMedianNm": 7.343952570876032,
+      "frameCrossDeltaMedianNm": 3.0457931395327487,
+      "intermediates": {
+        "total": 3,
+        "residualsComputed": 3,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep162022",
+      "year": 2022,
+      "advisories": 22,
+      "comparable": 20,
+      "rowsMatched": 134,
+      "rowsUnmatched": 7,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.424084782947617,
+      "hooMaxNm": 28.738982213713278,
+      "deckHooMedianNm": 6.304891598169892,
+      "frameCrossDeltaMedianNm": 0.24528565762961207,
+      "intermediates": {
+        "total": 11,
+        "residualsComputed": 11,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep182022",
+      "year": 2022,
+      "advisories": 5,
+      "comparable": 3,
+      "rowsMatched": 6,
+      "rowsUnmatched": 3,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 12.156365985819063,
+      "hooMaxNm": 12.156365985819063,
+      "deckHooMedianNm": 7.318561665509272,
+      "frameCrossDeltaMedianNm": 0.7482438476266688,
+      "intermediates": {
+        "total": 3,
+        "residualsComputed": 3,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep192022",
+      "year": 2022,
+      "advisories": 17,
+      "comparable": 17,
+      "rowsMatched": 93,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 18.6969103880166,
+      "hooMaxNm": 40.24576348245099,
+      "deckHooMedianNm": 14.1150517858243,
+      "frameCrossDeltaMedianNm": 1.0037346434528551,
+      "intermediates": {
+        "total": 13,
+        "residualsComputed": 13,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep022023",
+      "year": 2023,
+      "advisories": 13,
+      "comparable": 10,
+      "rowsMatched": 81,
+      "rowsUnmatched": 6,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.90370061738875,
+      "hooMaxNm": 24.778249127117395,
+      "deckHooMedianNm": 8.829991866688587,
+      "frameCrossDeltaMedianNm": 0.3388744521352074,
+      "intermediates": {
+        "total": 14,
+        "residualsComputed": 14,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep092023",
+      "year": 2023,
+      "advisories": 21,
+      "comparable": 21,
+      "rowsMatched": 126,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 17.514754312575512,
+      "hooMaxNm": 43.32931030256595,
+      "deckHooMedianNm": 17.288595454161506,
+      "frameCrossDeltaMedianNm": 0.5127285127360386,
+      "intermediates": {
+        "total": 17,
+        "residualsComputed": 17,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep152023",
+      "year": 2023,
+      "advisories": 33,
+      "comparable": 32,
+      "rowsMatched": 235,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 11.197645806295661,
+      "hooMaxNm": 29.021095739908045,
+      "deckHooMedianNm": 11.471628612143874,
+      "frameCrossDeltaMedianNm": 1.520704974536172,
+      "intermediates": {
+        "total": 10,
+        "residualsComputed": 10,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep162023",
+      "year": 2023,
+      "advisories": 10,
+      "comparable": 9,
+      "rowsMatched": 34,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.5749722537727315,
+      "hooMaxNm": 11.47726525939611,
+      "deckHooMedianNm": 6.306292776757191,
+      "frameCrossDeltaMedianNm": 0.4270562764585817,
+      "intermediates": {
+        "total": 8,
+        "residualsComputed": 8,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep172023",
+      "year": 2023,
+      "advisories": 24,
+      "comparable": 24,
+      "rowsMatched": 157,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.136558521304336,
+      "hooMaxNm": 22.735111651280988,
+      "deckHooMedianNm": 8.755982357064031,
+      "frameCrossDeltaMedianNm": 0.663041587095111,
+      "intermediates": {
+        "total": 16,
+        "residualsComputed": 16,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep182023",
+      "year": 2023,
+      "advisories": 15,
+      "comparable": 13,
+      "rowsMatched": 79,
+      "rowsUnmatched": 5,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.6554218650337615,
+      "hooMaxNm": 23.38949004348555,
+      "deckHooMedianNm": 6.5147541159309394,
+      "frameCrossDeltaMedianNm": 0.5188298812546472,
+      "intermediates": {
+        "total": 9,
+        "residualsComputed": 9,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep192023",
+      "year": 2023,
+      "advisories": 34,
+      "comparable": 34,
+      "rowsMatched": 287,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 12.632828836830507,
+      "hooMaxNm": 36.061400422678105,
+      "deckHooMedianNm": 14.545203075105615,
+      "frameCrossDeltaMedianNm": 1.6189708806937517,
+      "intermediates": {
+        "total": 13,
+        "residualsComputed": 13,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep092024",
+      "year": 2024,
+      "advisories": 13,
+      "comparable": 13,
+      "rowsMatched": 70,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.634621325636607,
+      "hooMaxNm": 22.02430575022423,
+      "deckHooMedianNm": 7.589910284301975,
+      "frameCrossDeltaMedianNm": 0.8917281988774737,
+      "intermediates": {
+        "total": 11,
+        "residualsComputed": 11,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep102024",
+      "year": 2024,
+      "advisories": 20,
+      "comparable": 16,
+      "rowsMatched": 88,
+      "rowsUnmatched": 11,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.846929261891331,
+      "hooMaxNm": 25.33279457704133,
+      "deckHooMedianNm": 8.44397896678327,
+      "frameCrossDeltaMedianNm": 3.211411646789269,
+      "intermediates": {
+        "total": 16,
+        "residualsComputed": 12,
+        "residualsRefused": 4,
+        "refusalReasons": {
+          "NO_REPORTED_MOTION_TO_COMPARE_FRAMES": 4
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep112024",
+      "year": 2024,
+      "advisories": 10,
+      "comparable": 10,
+      "rowsMatched": 47,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.00608101243519,
+      "hooMaxNm": 35.7932971038312,
+      "deckHooMedianNm": 7.505067510362641,
+      "frameCrossDeltaMedianNm": 1.1213795124208268,
+      "intermediates": {
+        "total": 8,
+        "residualsComputed": 8,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep042025",
+      "year": 2025,
+      "advisories": 14,
+      "comparable": 14,
+      "rowsMatched": 95,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 9.449144213739055,
+      "hooMaxNm": 25.318615384001948,
+      "deckHooMedianNm": 9.068084549055792,
+      "frameCrossDeltaMedianNm": 1.1899671466370485,
+      "intermediates": {
+        "total": 11,
+        "residualsComputed": 11,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep052025",
+      "year": 2025,
+      "advisories": 15,
+      "comparable": 14,
+      "rowsMatched": 68,
+      "rowsUnmatched": 3,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.733553118879026,
+      "hooMaxNm": 21.419230594417154,
+      "deckHooMedianNm": 7.157754188224247,
+      "frameCrossDeltaMedianNm": 0.4217490491068183,
+      "intermediates": {
+        "total": 11,
+        "residualsComputed": 11,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep062025",
+      "year": 2025,
+      "advisories": 20,
+      "comparable": 20,
+      "rowsMatched": 157,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 6.340971869459401,
+      "hooMaxNm": 17.228216307188895,
+      "deckHooMedianNm": 6.147067436922567,
+      "frameCrossDeltaMedianNm": 0.4053610258731557,
+      "intermediates": {
+        "total": 12,
+        "residualsComputed": 12,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep122025",
+      "year": 2025,
+      "advisories": 12,
+      "comparable": 12,
+      "rowsMatched": 88,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 10.510216433629559,
+      "hooMaxNm": 21.85381883103444,
+      "deckHooMedianNm": 9.981535190256231,
+      "frameCrossDeltaMedianNm": 0.6476408476798792,
+      "intermediates": {
+        "total": 8,
+        "residualsComputed": 7,
+        "residualsRefused": 1,
+        "refusalReasons": {
+          "NO_FULL_ADVISORY_WITH_THIS_NUMBER": 1
+        }
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep132025",
+      "year": 2025,
+      "advisories": 16,
+      "comparable": 14,
+      "rowsMatched": 98,
+      "rowsUnmatched": 4,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.515416632848169,
+      "hooMaxNm": 26.75033717050986,
+      "deckHooMedianNm": 8.272662751079299,
+      "frameCrossDeltaMedianNm": 2.3007306999737676,
+      "intermediates": {
+        "total": 2,
+        "residualsComputed": 2,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep162025",
+      "year": 2025,
+      "advisories": 25,
+      "comparable": 25,
+      "rowsMatched": 175,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 8.116626681584718,
+      "hooMaxNm": 18.783431205281047,
+      "deckHooMedianNm": 8.777100356679165,
+      "frameCrossDeltaMedianNm": 0.2731831969859133,
+      "intermediates": {
+        "total": 19,
+        "residualsComputed": 19,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    },
+    {
+      "stormId": "ep172025",
+      "year": 2025,
+      "advisories": 11,
+      "comparable": 11,
+      "rowsMatched": 53,
+      "rowsUnmatched": 0,
+      "parseMaxNm": 0,
+      "parseNonZeroRows": 0,
+      "hooMedianNm": 21.23070620172479,
+      "hooMaxNm": 30.745586001232418,
+      "deckHooMedianNm": 18.156838946685248,
+      "frameCrossDeltaMedianNm": 0.5245067780258559,
+      "intermediates": {
+        "total": 9,
+        "residualsComputed": 9,
+        "residualsRefused": 0,
+        "refusalReasons": {}
+      },
+      "missing": {
+        "fstadvFetch": 0,
+        "fstadvParse": 0,
+        "interFetch": 0,
+        "interParse": 0,
+        "noDeck": 0,
+        "noBestTrack": 0
+      }
+    }
+  ],
+  "notScored": [
+    "Q2 — sign of the next advisory's shift",
+    "Q3 — landfall or contract resolution"
+  ]
+}

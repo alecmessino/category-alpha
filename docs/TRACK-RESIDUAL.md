@@ -14,10 +14,11 @@ module has been scored against a held-out storm, and no surface it produces says
 |---|---|
 | Implementation | `scripts/lib/track-residual.mjs` (geometry), `-state.mjs` (what may be claimed), `-closure.mjs` (conditional kinematics), `-ingest.mjs` (sources), `-backtest.mjs` (scoring definitions), `scripts/lib/settlement-geometry.mjs` (contract terms) |
 | Preview | `docs/preview/track-residual/` — reads `data.json`, contains no arithmetic |
-| Gate | `scripts/test-track-residual.mjs` — 167 checks |
+| Gate | `scripts/test-track-residual.mjs` — 191 checks |
 | Fixture | `scripts/fixtures/lowell-ep122026/` — eight preserved NHC products with URLs, retrieval times and SHA-256 |
 | Coverage | `research/track-residual/COVERAGE.md` — measured, not estimated |
-| Pre-registration | `research/track-residual/PRE-REGISTRATION.md` — written before any backtest is run |
+| Pre-registration | `research/track-residual/PRE-REGISTRATION.md` — written before any backtest was run |
+| Q1 result | `research/track-residual/Q1-WRITEUP.md` and `Q1-RESULT.json` — **run**; Q2 and Q3 are not started |
 
 ---
 
@@ -299,6 +300,15 @@ A Hawaii ≥64 kt landfall contract remains unscoreable as a probability by this
 need, written before any run so the choices do not depend on the results. It scores nothing on
 import and ships no number. See `research/track-residual/PRE-REGISTRATION.md`.
 
+**Q1 has been run. Q2 and Q3 have not.** The result is in
+`research/track-residual/Q1-WRITEUP.md`, gated by `scripts/test-track-residual.mjs` §14. In short:
+across 65 EP storms with intermediate advisories, 2015–2025, the module reproduces the transmitted
+products verbatim (7013/7013 positions) and matches NHC's independent deck encoding on 6890 of
+6907 rows, with all 17 exceptions attributable to a difference between NHC's two channels rather
+than to the parse. It also found and fixed a real bug in this library — see §9 — and established
+that the nine-hour first-forecast-row interval is near-universal (1062 of 1072 advisories), not a
+Lowell quirk. **None of that is a skill claim and none of it bears on Q2 or Q3.**
+
 1. **Accuracy of the position-departure measurement.** A geometry question.
 2. **Whether a promoted residual predicts the sign of the next advisory's track shift** at shared
    future valid times, in the *earlier* advisory's frame, with a 6 nm dead band where the answer
@@ -356,6 +366,25 @@ Measured from two public indexes per season — `research/track-residual/COVERAG
 - The archive is large enough for question (1) and probably for (2); the coverage report says on
   which storms.
 
+**What Q1 added, and what it cost.**
+
+- The parse is measured, not asserted: 7013/7013 positions verbatim against the products' own
+  bytes, on a population of 65 storms rather than one.
+- The nine-hour lead-label interval is structural — 1062 of 1072 advisories, and twelve hours on
+  none of them.
+- The interpolation's cost is bounded by gap: ≤3.32 nm at the finest gap the archive can measure
+  (12 h), against a module operating gap of 9 h that no product can test directly.
+- The frame distinction this module is built around moves the median cross-track residual by
+  **0.63 nm** — a partly deflationary result, recorded as one. The case for the forecast frame was
+  about meaning, not magnitude, and is unchanged.
+- The post-season best track moves the operational position by a median 6.00 nm — the same order
+  as the residuals being measured. Reported as a labelled retrospective reference, used nowhere.
+- **It found a real bug in this library.** `parsePublicAdvisory` combined a local date with a UTC
+  hour and was a day out on every evening advisory. It never emitted a wrong number — the coverage
+  guard refused each instance — but it silently refused 183 of 634 archived intermediates for a
+  reason nobody had read. Fixed, cross-checked against the product's own printed UTC hour, and
+  pinned by a preserved real product.
+
 **What remains unproven.**
 
 - Everything about skill. No number here has been scored against a held-out storm. The window on
@@ -407,9 +436,10 @@ Measured from two public indexes per season — `research/track-residual/COVERAG
 ## 11. Running it
 
 ```bash
-node scripts/test-track-residual.mjs        # the gate — 167 checks, offline
+node scripts/test-track-residual.mjs        # the gate — 191 checks, offline
 node scripts/build-residual-preview.mjs     # rebuild docs/preview/track-residual/data.json
 node scripts/fetch-residual-fixture.mjs --check   # re-fetch and compare hashes (network)
 node scripts/residual-coverage.mjs          # rebuild the coverage report (network)
+node scripts/residual-q1.mjs                # re-run Q1 over the archive (network, ~7 min)
 cd docs && python3 -m http.server 8099      # then open /preview/track-residual/
 ```

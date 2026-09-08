@@ -2,8 +2,11 @@
 
 Written before any backtest is run, so that the choices below do not depend on the results.
 Companion to `docs/TRACK-RESIDUAL.md`. The primitives are in
-`scripts/lib/track-residual-backtest.mjs`; nothing in this repository has executed them over the
-archive yet.
+`scripts/lib/track-residual-backtest.mjs`.
+
+**Status.** Q1 has been run — see `Q1-WRITEUP.md` and `Q1-RESULT.json`. Q2 and Q3 have not been
+started, and this document was not edited after Q1 ran except to add this paragraph and the
+pointer above.
 
 ## Why this file exists first
 

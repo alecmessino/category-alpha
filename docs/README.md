@@ -509,6 +509,11 @@ emitted, and the preview lives at `docs/preview/track-residual/` rather than on 
 reason is the same one the calibration section gives: nothing here has been scored against a
 held-out storm, so nothing here may move a rank or a price.
 
+**Q1 of its three pre-registered questions has now been run** over 65 EP storms, 2015-2025:
+`research/track-residual/Q1-WRITEUP.md`. It measures whether the module reads and reduces the
+products correctly — not whether it forecasts anything — and it found and fixed a real
+valid-time bug in the library. Q2 and Q3 remain unstarted.
+
 What it does establish is a measurement and its provenance. The worked example is recomputed by
 `scripts/test-track-residual.mjs` from eight preserved NHC products whose SHA-256 the test checks
 first, and it corrects a concept brief that had interpolated a forecast to the observed *latitude*

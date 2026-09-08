@@ -236,27 +236,71 @@ export function parseForecastAdvisory(text, opts) {
 }
 
 /**
+ * NORTH AMERICAN ZONE OFFSETS USED BY NHC/CPHC PUBLIC PRODUCTS, in hours from UTC.
+ *
+ * All are fixed offsets — the product names the zone that was in force, so there is no DST rule to
+ * apply and no location to look up. An unlisted zone is REFUSED rather than defaulted, because
+ * defaulting to UTC would silently place a product several hours from where it belongs.
+ */
+export const PRODUCT_ZONE_OFFSET_H = {
+  UTC: 0, GMT: 0,
+  AST: -4, ADT: -3, EST: -5, EDT: -4, CST: -6, CDT: -5,
+  MST: -7, MDT: -6, PST: -8, PDT: -7,
+  AKST: -9, AKDT: -8, HST: -10, HDT: -9, SST: -11,
+};
+
+/**
  * Parse the observed centre out of a public advisory (TCP), full or intermediate.
  *
  * The SUMMARY block is read rather than the prose, because the prose wraps across lines and the
  * summary does not. The prose IS read for one thing: whether the centre was located by aircraft,
  * because an aircraft centre and a satellite-estimated centre are different definitions of
  * "centre" and this module refuses to mix definitions silently.
+ *
+ * THE VALID TIME IS BUILT FROM THE LOCAL CLOCK AND THE ZONE, NOT FROM THE LOCAL DATE AND THE UTC
+ * HOUR. The first version combined the header's LOCAL date with the summary's UTC hour, which is
+ * wrong whenever the two fall on different days — and for an evening advisory they always do.
+ * Measured on ep122022: "600 PM MDT Mon Sep 05" carries "0000 UTC", which is 6 September. The old
+ * reading dated it 5 September and put the fix TWENTY-FOUR HOURS before the advisory it should be
+ * measured against.
+ *
+ * It survived the Lowell fixture because both of that storm's intermediates were morning HST,
+ * where local and UTC share a date. Across the archive it silently refused 183 of 634
+ * intermediates as BEFORE_TRACK_COVERAGE — the coverage guard caught it as a refusal instead of
+ * letting a wrong number out, which is the guard working, and is also why nothing complained
+ * until a population-scale check looked at the refusal reasons.
+ *
+ * The printed UTC hour is now a CHECK rather than an input: local clock plus the product's own
+ * zone must reproduce it, or the product is refused. Two statements of one instant that disagree
+ * mean the reading is not understood.
  */
 export function parsePublicAdvisory(text) {
   const src = String(text || "");
-  const sum = /SUMMARY OF\s+[^.\n]*?\.\.\.(\d{4})\s*UTC\.\.\.INFORMATION/i.exec(src);
+  const sum = /SUMMARY OF\s+[^.\n]*?\.\.\.(\d{3,4})\s*UTC\.\.\.INFORMATION/i.exec(src);
   const loc = /^LOCATION\.\.\.([\d.]+)([NS])\s+([\d.]+)([EW])\s*$/im.exec(src);
-  const dateLine = /^\s*\d{3,4}\s+(?:AM|PM)\s+[A-Z]{3}\s+[A-Z]{3}\s+([A-Z]{3})\s+(\d{2})\s+(\d{4})\s*$/im.exec(src);
+  const dateLine = /^\s*(\d{3,4})\s+(AM|PM)\s+([A-Z]{2,4})\s+[A-Z]{3}\s+([A-Z]{3})\s+(\d{2})\s+(\d{4})\s*$/im.exec(src);
   if (!sum || !loc || !dateLine) return { ok: false, refusal: "NO_SUMMARY_BLOCK" };
-  const mon = MONTHS[dateLine[1].toUpperCase()];
+  const mon = MONTHS[dateLine[4].toUpperCase()];
   if (mon == null) return { ok: false, refusal: "UNREADABLE_MONTH" };
-  const hhmm = Number(sum[1]);
-  /* The local date on the header line and the UTC hour in the summary can straddle midnight
-     UTC. HST is UTC-10 and every product here is a morning one, so the UTC day is the local day;
-     a product where they differ is refused rather than guessed. */
-  const validMs = Date.UTC(Number(dateLine[3]), mon, Number(dateLine[2]),
-                           Math.floor(hhmm / 100), hhmm % 100);
+  const zone = dateLine[3].toUpperCase();
+  const offsetH = PRODUCT_ZONE_OFFSET_H[zone];
+  if (offsetH === undefined) return { ok: false, refusal: "UNKNOWN_TIME_ZONE", zone };
+
+  const localHHMM = Number(dateLine[1]);
+  let hh = Math.floor(localHHMM / 100) % 12;          // 12 AM -> 0, 12 PM -> 12
+  if (/PM/i.test(dateLine[2])) hh += 12;
+  const mi = localHHMM % 100;
+  const validMs = Date.UTC(Number(dateLine[6]), mon, Number(dateLine[5]), hh, mi) - offsetH * 3600e3;
+
+  const printedUtc = Number(sum[1]);
+  const d = new Date(validMs);
+  const derivedUtc = d.getUTCHours() * 100 + d.getUTCMinutes();
+  if (derivedUtc !== printedUtc)
+    return { ok: false, refusal: "UTC_HOUR_DISAGREES_WITH_LOCAL_TIME",
+             printedUtc, derivedUtc, zone,
+             note: "The local clock plus the product's own zone does not reproduce the UTC hour "
+                 + "it prints. The reading is not understood, so no position is returned." };
+
   let lat = Number(loc[1]); if (/S/i.test(loc[2])) lat = -lat;
   let lon = Number(loc[3]); if (/W/i.test(loc[4])) lon = -lon;
   const byAircraft = /was located\s*\n?\s*by an? [^\n]*(?:Hurricane Hunter|Air Force|NOAA)[^\n]*aircraft/i.test(src)
@@ -267,6 +311,7 @@ export function parsePublicAdvisory(text) {
     ok: true, refusal: null,
     advisoryNumber: advNum ? advNum[1] : null,
     validZ: new Date(validMs).toISOString(),
+    localZone: zone, localOffsetH: offsetH,
     lat, lonE: signedLonE(lon),
     /* THE CENTRE DEFINITION, named. Not a quality grade — a statement of what was measured. */
     centreDefinition: byAircraft ? "aircraft-fix" : "advisory-analysed",

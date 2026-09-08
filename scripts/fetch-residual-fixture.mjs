@@ -44,6 +44,12 @@ import { fileURLToPath } from "node:url";
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const OUT = join(ROOT, "scripts/fixtures/lowell-ep122026");
 const CHECK = process.argv.includes("--check");
+/* ONE KEY ONLY, so a product can be added without refetching the rest.
+   THE ARCHIVED .shtml PRODUCTS ARE IMMUTABLE; THE LIVE DECKS ARE NOT. fdeck.dat and bdeck.dat are
+   SNAPSHOTS of files NHC is still appending to, so a blind re-run rewrites them and every hash
+   that depended on them. Use --only to touch one entry and leave the snapshots alone. */
+const ONLY = (() => { const i = process.argv.indexOf("--only"); return i > -1 ? process.argv[i + 1] : null; })();
+const wanted = (key) => !ONLY || ONLY === key;
 
 /* The archive path is stable and public: /archive/<year>/<basin+cy>/<stem>.<product>.<num>.shtml.
    Advisory 45 and 47 are here for one reason — a baseline RESET is a real event in this module
@@ -114,6 +120,7 @@ async function main() {
   const entries = [];
 
   for (const p of PRODUCTS) {
+    if (!wanted(p.key)) continue;
     const url = archiveUrl(p);
     const html = await get(url);
     const text = extractPre(html);
@@ -129,6 +136,7 @@ async function main() {
   }
 
   for (const d of [FDECK, BDECK]) {
+    if (!wanted(d.key)) continue;
     const text = await get(d.url);
     if (!CHECK) await writeFile(join(OUT, `${d.key}.dat`), text, "utf8");
     entries.push({ key: d.key, label: d.label, url: d.url, file: `${d.key}.dat`, retrievedZ,
@@ -144,8 +152,8 @@ async function main() {
      time. Measured on Lowell, advisory 46 went out at 07/1451Z against a nominal 1500Z — NINE
      MINUTES EARLY — and 46A at 07/1744Z against 1800Z. The nominal hour is not a proxy for
      availability in either direction, which is the entire reason this block exists. */
-  const advIdx = await get("https://ftp.nhc.noaa.gov/atcf/adv/");
-  const stamps = [...new Set([...advIdx.matchAll(/ep122026_info_(\d{12})\.xml/g)].map((m) => m[1]))].sort();
+  const advIdx = ONLY ? null : await get("https://ftp.nhc.noaa.gov/atcf/adv/");
+  const stamps = advIdx == null ? [] : [...new Set([...advIdx.matchAll(/ep122026_info_(\d{12})\.xml/g)].map((m) => m[1]))].sort();
   const transmissions = [];
   for (const stamp of stamps) {
     if (!/^202609070[89]|^2026090[78][012]/.test(stamp)) continue;   // the window around adv 45-47
@@ -160,6 +168,23 @@ async function main() {
                          nominalValidZ: v, firstAvailableZ: t, url, sha256: sha256(xml),
                          offsetMinFromNominal: v ? Math.round((Date.parse(t) - Date.parse(v)) / 60000) : null });
     process.stdout.write(`  adv ${(num ? num[1] : "?").padEnd(5)} nominal ${v} -> sent ${t}\n`);
+  }
+
+  /* ONE PRODUCT FROM A DIFFERENT STORM, PRESERVED FOR ONE REASON.
+     ep122022's 6 PM MDT intermediate carries "0000 UTC" — a local date and a UTC date that are
+     not the same day. It is the case that broke parsePublicAdvisory and it is not reachable from
+     any Lowell product, because both of Lowell's intermediates are morning HST. A regression test
+     needs the real bytes, not a hand-built imitation of them. */
+  if (wanted("tcp-evening-mdt")) {
+    const url = "https://ftp.nhc.noaa.gov/atcf/archive/2022/messages/ep122022.public_a.006.09052344";
+    const text = await get(url);
+    if (!CHECK) await writeFile(join(OUT, "tcp-evening-mdt.txt"), text, "utf8");
+    entries.push({ key: "tcp-evening-mdt", label: "TCP 6A (ep122022) — an evening MDT intermediate, "
+                     + "where the local date and the UTC date differ",
+                   url, product: "public_a", advisoryNumber: "006", file: "tcp-evening-mdt.txt",
+                   retrievedZ, servedSha256: sha256(text), productSha256: sha256(text),
+                   productBytes: Buffer.byteLength(text), header: null });
+    process.stdout.write(`  ${"tcp-evening-mdt".padEnd(9)} ${sha256(text).slice(0, 16)}  ${url}\n`);
   }
 
   const manifest = {
@@ -188,6 +213,19 @@ async function main() {
     }
     console.log(bad ? `\n${bad} product(s) changed upstream.` : "\nEvery preserved product still hashes to what the manifest recorded.");
     process.exit(bad ? 1 : 0);
+  }
+  if (ONLY) {
+    /* Merge: keep every entry and the transmission list already recorded, replacing only the
+       entry named. A partial run must never silently shrink the manifest. */
+    const prev = JSON.parse(await readFile(path, "utf8"));
+    const merged = { ...prev };
+    for (const e of entries) {
+      const i = merged.entries.findIndex((x) => x.key === e.key);
+      if (i >= 0) merged.entries[i] = e; else merged.entries.push(e);
+    }
+    await writeFile(path, JSON.stringify(merged, null, 2) + "\n", "utf8");
+    console.log(`\nMerged ${entries.length} entry into ${path}`);
+    return;
   }
   await writeFile(path, JSON.stringify(manifest, null, 2) + "\n", "utf8");
   console.log(`\nWrote ${entries.length} products + manifest to ${OUT}`);

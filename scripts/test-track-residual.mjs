@@ -143,6 +143,45 @@ console.log("\n[3] AN EASTWARD DISPLACEMENT ON A NORTHEAST HEADING IS NOT PURE C
      Math.abs(res.crossPointsToward - ((res.frame.courseDeg + 90) % 360)) < 1e-9);
 }
 
+console.log("\n[3b] A PUBLIC ADVISORY'S VALID TIME COMES FROM THE LOCAL CLOCK AND ITS ZONE");
+{
+  /* THE REGRESSION. The first version of parsePublicAdvisory combined the header's LOCAL date with
+     the summary's UTC hour. For an evening advisory those are different days. This is the real
+     product that broke it: ep122022's 6 PM MDT intermediate, which carries 0000 UTC — the next
+     day. The old reading dated it 5 September and placed the fix twenty-four hours before the
+     advisory it belonged to.
+
+     Lowell cannot exercise this: both of its intermediates are morning HST, where local and UTC
+     share a date. A population-scale check found it, so a real product from that population is
+     preserved to keep it found. */
+  const evening = R.parsePublicAdvisory(read("tcp-evening-mdt.txt"));
+  ok("the evening MDT intermediate parses", evening.ok, String(evening.refusal));
+  ok("its zone is read from the product", evening.localZone === "MDT" && evening.localOffsetH === -6,
+     `${evening.localZone} ${evening.localOffsetH}`);
+  ok("6 PM MDT on 5 September is 0000 UTC on 6 SEPTEMBER, not 5 September",
+     evening.validZ === "2022-09-06T00:00:00.000Z", evening.validZ);
+  ok("and the product's own printed UTC hour agrees with that", /0000\s*UTC/.test(read("tcp-evening-mdt.txt")));
+
+  /* Lowell's morning products are unaffected — the golden must not have moved. */
+  ok("a morning HST intermediate is unchanged by the fix",
+     f46a.validZ === "2026-09-07T18:00:00.000Z" && f46a.localZone === "HST", f46a.validZ);
+
+  /* The printed UTC hour is a CHECK, not an input. Corrupt one and the product is refused. */
+  const corrupted = read("tcp-evening-mdt.txt").replace(/\.\.\.0000 UTC\.\.\./, "...1500 UTC...");
+  const bad = R.parsePublicAdvisory(corrupted);
+  ok("two disagreeing statements of one instant are refused, not reconciled",
+     bad.ok === false && bad.refusal === "UTC_HOUR_DISAGREES_WITH_LOCAL_TIME", String(bad.refusal));
+  ok("and the refusal names both readings", bad.printedUtc === 1500 && bad.derivedUtc === 0);
+
+  /* An unknown zone is refused rather than defaulted to UTC. */
+  const oddZone = read("tcp-evening-mdt.txt").replace(/\bMDT\b/g, "ZZZ");
+  const oz = R.parsePublicAdvisory(oddZone);
+  ok("an unrecognised zone is refused, never defaulted to UTC",
+     oz.ok === false && oz.refusal === "UNKNOWN_TIME_ZONE", String(oz.refusal));
+  ok("every offset in the table is a whole or half hour from UTC",
+     Object.values(R.PRODUCT_ZONE_OFFSET_H).every((h) => Number.isFinite(h) && Math.abs(h) <= 12));
+}
+
 /* ------------------------------------------------------------------------------------ §10.4 */
 
 console.log("\n[4] LONGITUDE WRAPPING AND SIGNED DEGREES EAST");
@@ -578,6 +617,64 @@ console.log("\n[13] THE BACKTEST SCORES THREE QUESTIONS SEPARATELY AND SHIPS NO 
      Object.keys(B.BASELINES).length === 3);
   ok("persistence returns 0, not a guess, when there is no history",
      B.BASELINES.persistLastResidualSign([]) === 0);
+}
+
+/* ------------------------------------------------------- the committed Q1 result, gated */
+
+console.log("\n[14] THE COMMITTED Q1 RESULT SAYS WHAT THE WRITE-UP SAYS IT SAYS");
+{
+  /* The Q1 sweep is network-bound and runs by hand. What CI can do — and what stops a write-up
+     drifting away from its evidence — is assert that the committed artefact still carries the
+     claims made about it, and that it has not quietly acquired a score for Q2 or Q3. */
+  const q1 = JSON.parse(readFileSync(join(ROOT, "research/track-residual/Q1-RESULT.json"), "utf8"));
+  ok("the population is the 65 EP storms with intermediate advisories",
+     q1.population.storms === 65 && q1.population.basin === "EP", String(q1.population.storms));
+  ok("it says out loud that it is not a skill claim", /NOT a skill claim/.test(q1.question));
+  ok("Q2 and Q3 are listed as not scored",
+     q1.notScored.length === 2 && q1.notScored.some((x) => x.startsWith("Q2")) && q1.notScored.some((x) => x.startsWith("Q3")));
+  /* The words appear in prose — "accuracy of the position-departure measurement", "NOT a skill
+     claim" — and must be allowed to. What must not exist is a NUMBER under such a name: a scored
+     quantity is a key with a value, and that is what this walks for. */
+  const scoredKeys = [];
+  (function walk(v, path) {
+    if (v == null) return;
+    if (Array.isArray(v)) return v.forEach((x, i) => walk(x, `${path}[${i}]`));
+    if (typeof v === "object") {
+      for (const [k, x] of Object.entries(v)) {
+        if (typeof x === "number" && /brier|skill|hitrate|accuracy|auc|logloss/i.test(k))
+          scoredKeys.push(`${path}.${k}`);
+        walk(x, `${path}.${k}`);
+      }
+    }
+  })(q1, "$");
+  ok("no Brier score, skill number or accuracy figure exists as a value anywhere in the artefact",
+     scoredKeys.length === 0, scoredKeys.join(", "));
+
+  const rt = q1.q1a_parse.literalRoundTrip;
+  ok(`every parsed position round-trips to the product's own bytes (${rt.verbatim}/${rt.positionsChecked})`,
+     rt.notFound === 0 && rt.verbatim === rt.positionsChecked);
+  ok("the deck comparison is against OFCL, and says why not OFCI",
+     /OFCI is deliberately not used/.test(q1.q1a_parse.reference));
+  ok("the parse agrees with the deck at the 99th percentile", q1.q1a_parse.p99Nm === 0,
+     String(q1.q1a_parse.p99Nm));
+  ok("and every disagreeing row is enumerated rather than averaged away",
+     Array.isArray(q1.q1a_parse.everyNonZeroRow) && q1.q1a_parse.everyNonZeroRow.length > 0);
+
+  const lead = q1.q1b_leadLabels.initToFirstRowHoursHistogram;
+  ok("the INIT → first forecast row interval is nine hours on the overwhelming majority",
+     lead["9"] / q1.q1b_leadLabels.advisories > 0.98, JSON.stringify(lead));
+  ok("and twelve hours on none of them", !("12" in lead), JSON.stringify(lead));
+
+  ok("the frame comparison is labelled a sensitivity, not an accuracy",
+     /A frame is a choice, not an estimate/.test(q1.q1d_frameSensitivity.isNotAnAccuracy));
+  ok("the best track is labelled retrospective and disclaims substitution",
+     /RETROSPECTIVE/.test(q1.retrospectiveReference.label)
+     && /not used in any residual, correction or score/.test(q1.retrospectiveReference.what));
+  ok("missingness is published rather than dropped",
+     q1.missingness && typeof q1.missingness.rowsUnmatched === "number"
+     && q1.missingness.joinRefusalReasons && q1.missingness.intermediateRefusalReasons);
+  ok("every fetch the sweep made is accounted for",
+     q1.fetches.ok > 0 && q1.fetches.failed === 0, JSON.stringify(q1.fetches));
 }
 
 console.log(`\n${failed ? "FAILED" : "PASSED"} — ${checks - failed}/${checks} checks\n`);

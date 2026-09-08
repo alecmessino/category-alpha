@@ -155,6 +155,11 @@ jobs:
       # strike in geography it explicitly excludes.
       - name: Test the track residual monitor
         run: node scripts/test-track-residual.mjs
+      # The Q1 sweep itself is network-bound and runs by hand. What CI can hold is the COMMITTED
+      # result: that it still carries the claims the write-up makes about it, that every parsed
+      # position round-trips to the product's own bytes, and above all that it has not quietly
+      # acquired a Brier score, a skill number or an accuracy figure for Q2 or Q3 -- neither of
+      # which has been started. Asserted by section 14 of the suite above.
 
       # A guard that can fail silently is not a guard. The predicate deciding whether a
       # verification run may write the verdict the board reads once disabled itself to a

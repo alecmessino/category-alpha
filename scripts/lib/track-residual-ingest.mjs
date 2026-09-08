@@ -162,6 +162,9 @@ export function fixFromTcp(text, meta) {
     ok: true,
     fixId: m.fixId || `tcp:${a.advisoryNumber}`,
     validZ: a.validZ,
+    /* The zone the product named, carried as provenance: a valid time built from a local clock
+       should be able to say which clock. */
+    localZone: a.localZone, localOffsetH: a.localOffsetH,
     receivedZ: m.receivedZ ?? null,
     availabilityAssumption: m.receivedZ ? null
       : "RECEIPT TIME UNKNOWN — archived product; no arrival time is recorded and none is assumed.",
