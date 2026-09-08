@@ -21,7 +21,7 @@ not a skill claim, it cannot become one, and no number below should be quoted as
 | Forecast/advisories read | 1105 |
 | Positions parsed | 7013 |
 | Deck rows compared | 6907 |
-| Intermediate advisories used | 611 |
+| Intermediate advisories used | 611 of the 634 that parsed (637 products, 3 unreadable) |
 | HTTP fetches | 2515, **0 failed** |
 
 The population is re-derived from the archived indexes inside the sweep rather than taken from the
@@ -187,7 +187,8 @@ twenty-four hours before the advisory it belonged to.
 - It never emitted a wrong number. The coverage guard caught every instance as
   `BEFORE_TRACK_COVERAGE` — a refusal, not a residual. That is the guard doing its job, and it is
   also why nothing complained until a population-scale run looked at *why* things were being
-  refused. **183 of 634 intermediates were being silently refused for a reason nobody had read.**
+  refused. **183 of the 634 intermediates that parsed were being silently refused for a reason nobody
+  had read.**
 - Fixed: the valid time is built from the local clock plus the zone the product names, and the
   printed UTC hour is now a **cross-check** — two statements of one instant that disagree are
   refused, not reconciled. An unrecognised zone is refused rather than defaulted to UTC.
@@ -209,7 +210,7 @@ Published rather than dropped. Denominators above are after these exclusions.
 |---|---|---|
 | Advisories with no comparable deck cycle | 48 of 1105 | 33 had no forecast rows at all; 14 had no deck row at the advisory's initial time (`REFERENCE_NOT_LIKE_FOR_LIKE`); 1 had no deck cycle at that time |
 | TCM rows with no deck row at the same valid time | 73 | counted, not matched to a neighbour |
-| Intermediates refused | 23 of 634 | 21 no reported motion, 2 no matching full advisory |
+| Intermediates refused | 23 of 634 that parsed | 21 no reported motion, 2 no matching full advisory |
 | Intermediates that would not parse | 3 | |
 | Storms with no a-deck / no b-deck | 0 / 0 | |
 | Failed fetches | **0** of 2515 | |
@@ -230,7 +231,7 @@ the time and one months later.
 quantity anywhere in the module is substituted from it. What it says is worth stating plainly:
 post-analysis later moves the operational position by a median of one tenth of a degree, which is
 **the same order as the residuals this module measures**. A 14 nm departure is being measured
-against an "observed" position that is itself revisable by about 6 nm.
+against an "observed" position that is itself revisable by a median 6.00 nm.
 
 ---
 
@@ -256,7 +257,7 @@ gate:
    residual under roughly 5 nm is inside the module's own arithmetic before any observation
    uncertainty is counted. The provisional band stays provisional; this is one measured
    contribution to it, not a fit.
-2. The retrospective reference says the observed position is revisable by a median 6 nm. Any
+2. The retrospective reference says the observed position is revisable by a median 6.00 nm. Any
    future calibration has to carry that, or it will be fitting to a target that moved.
 3. 611 usable residuals across 65 storms is what Q2 would have to work with, and the sampling unit
    is the storm — so it is 65, not 611.

@@ -675,6 +675,214 @@ console.log("\n[14] THE COMMITTED Q1 RESULT SAYS WHAT THE WRITE-UP SAYS IT SAYS"
      && q1.missingness.joinRefusalReasons && q1.missingness.intermediateRefusalReasons);
   ok("every fetch the sweep made is accounted for",
      q1.fetches.ok > 0 && q1.fetches.failed === 0, JSON.stringify(q1.fetches));
+
+  /* --------------------------------------------------------------------------------------
+     THE DOCUMENTS ARE CROSS-READ AGAINST THE ARTEFACT.
+ 
+     Until now this section pinned the artefact's own internal claims and never opened a document,
+     so a prose figure could drift away from the JSON it was derived from and nothing would notice.
+     Everything a reviewer would otherwise have to check by hand is now pinned by value in BOTH
+     documents, and a missing document is a FAILURE rather than a skip — a gate that quietly passes
+     when its subject is absent is not a gate.
+ 
+     EVERY EXPECTED VALUE IS DERIVED FROM Q1-RESULT.json. None is written into this file. If the
+     numbers were typed here they would be a THIRD source of truth, free to drift from both the
+     artefact and the prose while the suite stayed green.
+ 
+     The one exception is declared as one: 183 is the count of intermediates the timezone bug was
+     silently refusing BEFORE it was fixed, so no post-fix artefact can carry it. It is pinned as a
+     three-way consistency check across the two documents and the library comment that records it,
+     because the requirement is that the coverage-guard refusals which hid the bug stay named. */
+  const DOC_PATHS = ["docs/TRACK-RESIDUAL.md", "research/track-residual/Q1-WRITEUP.md"];
+  const docs = {};
+  for (const rel of DOC_PATHS) {
+    let text = null;
+    try { text = readFileSync(join(ROOT, rel), "utf8"); } catch { /* missing */ }
+    if (ok(`${rel} is present and readable`, text != null,
+           "the gate cannot verify a document that is not there")) docs[rel] = text;
+  }
+
+  /* EVERY STATEMENT OF A PINNED FIGURE IS CHECKED, NOT JUST ONE.
+ 
+     The first version of this asked "does a passage of this document contain the right number in
+     the right context". It passed a mutation test it should have failed: both documents state
+     several of these figures TWICE — once in a summary table and once in prose — and changing one
+     of them left the other to satisfy the pin. A reviewer would still have had to check by hand,
+     which is the whole thing this gate exists to remove.
+ 
+     So each figure is pinned by an ANCHOR: a regex over the normalised document with the number
+     captured, matched globally. Presence requires at least one match in each document; agreement
+     requires EVERY match, in every anchor, to equal the value derived from the artefact. A second
+     stale copy now fails.
+ 
+     The document is normalised first — emphasis stripped, newlines folded to spaces — so an
+     anchor is matching prose rather than line breaks. Markdown wrapping cannot make or break it.
+ 
+     THE COST, ACCEPTED: an anchor is tied to the wording around its number, so rewording a
+     sentence makes the anchor stop matching and the gate fails with "no recognised statement".
+     That is the correct direction to fail in — these figures are not supposed to be quietly
+     rephrasable — and the failure message says to update the anchor when the wording genuinely
+     changed.
+ 
+     EVERY EXPECTED VALUE IS DERIVED FROM Q1-RESULT.json. None is written into this file. Typed
+     here they would be a THIRD source of truth, free to drift from both the artefact and the
+     prose while the suite stayed green. */
+  const flat = (t) => t.replace(/[*`]/g, "").replace(/\s+/g, " ");
+  const N = (v) => String(v);
+  const D2 = (v) => v.toFixed(2);
+
+  const exactRows = q1.q1a_parse.byRowKind.reduce((a, k) => a + k.exact, 0);
+  const rowsCompared = q1.q1a_parse.rowsCompared;
+  const storms = q1.population.storms;
+  const deck12 = q1.q1c_interpolation.onDeckRowsOfTheSameCycle.byGapHours.find((g) => g.gapHours === 12);
+  const parsedIntermediates = q1.q1d_frameSensitivity.residuals + q1.missingness.intermediatesRefused;
+  const nineHour = q1.q1b_leadLabels.initToFirstRowHoursHistogram["9"];
+
+  /* Each pin: what it is, the value(s) it must carry, and the phrasings that state it. */
+  const PINS = [
+    { what: "rows matching the deck, of rows compared",
+      anchors: [
+        [new RegExp("(\\d+) of " + rowsCompared + "\\b", "g"), [N(exactRows)]],
+        [/\| Total \| (\d+) \| (\d+) \(/g, [N(rowsCompared), N(exactRows)]],
+        [/\| Deck rows compared \| (\d+) \|/g, [N(rowsCompared)]],
+        [/Q1a — parse: (\d+) rows against the a-deck/g, [N(rowsCompared)]],
+        [/(\d+) rows, with all \d+ exceptions/g, [N(rowsCompared)]],
+      ] },
+    { what: "storms exact on every row",
+      anchors: [
+        [/(\d+) of (\d+) storms agree exactly/g, [N(q1.q1a_parse.stormsAgreeingExactly), N(storms)]],
+        [/\| Storms exact on every row \| (\d+) of (\d+) \|/g,
+         [N(q1.q1a_parse.stormsAgreeingExactly), N(storms)]],
+      ] },
+    { what: "disagreeing rows, enumerated",
+      anchors: [
+        [/all (\d+) exceptions/g, [N(q1.q1a_parse.everyNonZeroRow.length)]],
+        [/The (\d+) disagreements are between/g, [N(q1.q1a_parse.everyNonZeroRow.length)]],
+        [/enumerated, and the largest \| (\d+), max ([\d.]+) nm \|/g,
+         [N(q1.q1a_parse.everyNonZeroRow.length), D2(q1.q1a_parse.maxNm)]],
+      ] },
+    { what: "the largest disagreement",
+      anchors: [
+        [/The largest, ([\d.]+) nm, is one initial row/g, [D2(q1.q1a_parse.maxNm)]],
+        [/enumerated, and the largest \| \d+, max ([\d.]+) nm \|/g, [D2(q1.q1a_parse.maxNm)]],
+      ] },
+    { what: "INIT to first forecast row at nine hours",
+      anchors: [
+        [/\((\d+) of (\d+) advisories\)/g, [N(nineHour), N(q1.q1b_leadLabels.advisories)]],
+        [/nine hours \| (\d+) of (\d+) advisories \|/g, [N(nineHour), N(q1.q1b_leadLabels.advisories)]],
+        [/(\d+) of (\d+) archived advisories/g, [N(nineHour), N(q1.q1b_leadLabels.advisories)]],
+        [/\| 9 h \| (\d+) \|/g, [N(nineHour)]],
+      ] },
+    { what: "interpolation cost at the 12 h gap",
+      anchors: [
+        [/≤([\d.]+) nm at the finest/g, [D2(deck12.p50)]],
+        [/12 h gap \| ([\d.]+) nm p50 \|/g, [D2(deck12.p50)]],
+        [/\| 12 h \| \d+ \| ([\d.]+) nm \|/g, [D2(deck12.p50)]],
+      ] },
+    { what: "linear-in-time deviation from a geodesic",
+      anchors: [
+        [/geodesic \| ([\d.]+) nm p50 \|/g, [D2(q1.q1c_interpolation.geodesicBoundNm.p50)]],
+        [/is p50 ([\d.]+) nm, max/g, [D2(q1.q1c_interpolation.geodesicBoundNm.p50)]],
+      ] },
+    { what: "frame sensitivity and the residuals behind it",
+      anchors: [
+        [/cross-track, over (\d+) residuals \| ([\d.]+) nm p50, n = (\d+) \|/g,
+         [N(q1.q1d_frameSensitivity.residuals), D2(q1.q1d_frameSensitivity.crossDeltaNm.p50),
+          N(q1.q1d_frameSensitivity.residuals)]],
+        [/([\d.]+) nm — a partly deflationary result/g, [D2(q1.q1d_frameSensitivity.crossDeltaNm.p50)]],
+        [/\| Cross-track difference \| ([\d.]+) nm \|/g, [D2(q1.q1d_frameSensitivity.crossDeltaNm.p50)]],
+        [/cross-track residual by ([\d.]+) nm/g, [D2(q1.q1d_frameSensitivity.crossDeltaNm.p50)]],
+        [/over (\d+) residuals on \d+ storms/g, [N(q1.q1d_frameSensitivity.residuals)]],
+      ] },
+    { what: "retrospective best-track offset and its sample",
+      anchors: [
+        [/best track vs operational analysis \| ([\d.]+) nm p50, n = (\d+) \|/g,
+         [D2(q1.retrospectiveReference.p50Nm), N(q1.retrospectiveReference.n)]],
+        [/by a median ([\d.]+) nm/g, [D2(q1.retrospectiveReference.p50Nm)]],
+        [new RegExp("\\| (\\d+) \\| " + storms + " \\| ([\\d.]+) nm \\|", "g"),
+         [N(q1.retrospectiveReference.n), D2(q1.retrospectiveReference.p50Nm)]],
+      ] },
+    { what: "intermediates refused, of those that parsed",
+      anchors: [
+        [/parsed \| (\d+) of (\d+) \(/g, [N(q1.missingness.intermediatesRefused), N(parsedIntermediates)]],
+        [/\| Intermediates refused \| (\d+) of (\d+) that parsed \|/g,
+         [N(q1.missingness.intermediatesRefused), N(parsedIntermediates)]],
+      ] },
+    { what: "TCM rows with no deck row at the same valid time",
+      anchors: [[/no deck row at the same valid time \| (\d+) \|/g, [N(q1.missingness.rowsUnmatched)]]] },
+    { what: "fetches made, and failed",
+      anchors: [
+        [/Fetches made, and failed \| (\d+), (\d+) failed \|/g, [N(q1.fetches.ok), N(q1.fetches.failed)]],
+        [/\| HTTP fetches \| (\d+), (\d+) failed \|/g, [N(q1.fetches.ok), N(q1.fetches.failed)]],
+        [/\| Failed fetches \| (\d+) of (\d+) \|/g, [N(q1.fetches.failed), N(q1.fetches.ok)]],
+      ] },
+  ];
+
+  /* THE HISTORICAL CONSTANT, declared as one. 183 is the count of intermediates the timezone bug
+     was silently refusing BEFORE it was fixed, so no post-fix artefact can carry it. It is pinned
+     across both documents AND the library comment that records it, because the requirement is
+     that the coverage-guard refusals which hid the bug stay named wherever the bug is described.
+     Only the denominator is artefact-derived. */
+  const HIDDEN_REFUSALS = "183";
+  const hiddenPin = { what: `the ${HIDDEN_REFUSALS} coverage-guard refusals that hid the timezone bug`,
+    anchors: [
+      [/silently refus\w+ (\d+) of (?:the )?(\d+)/g, [HIDDEN_REFUSALS, N(parsedIntermediates)]],
+      [/(\d+) of (?:the )?(\d+) intermediates that parsed were being silently refused/g,
+       [HIDDEN_REFUSALS, N(parsedIntermediates)]],
+    ] };
+
+  function checkPin(rel, text, pin) {
+    const t = flat(text);
+    let found = 0;
+    const wrong = [];
+    for (const [re, expect] of pin.anchors) {
+      re.lastIndex = 0;
+      for (const m of t.matchAll(re)) {
+        found++;
+        expect.forEach((want, i) => {
+          if (m[i + 1] !== want) wrong.push(`"${m[0].trim()}" gives ${m[i + 1]}, artefact says ${want}`);
+        });
+      }
+    }
+    ok(`${rel} states ${pin.what}`, found > 0,
+       "no recognised statement of this figure — the document dropped it, or the wording moved "
+       + "away from the anchor and the anchor needs updating");
+    ok(`${rel} agrees with the artefact on ${pin.what} in all ${found} place(s)`,
+       found > 0 && wrong.length === 0, wrong.join(" | "));
+  }
+
+  for (const rel of DOC_PATHS) {
+    if (docs[rel] == null) continue;
+    for (const pin of PINS) checkPin(rel, docs[rel], pin);
+    checkPin(rel, docs[rel], hiddenPin);
+  }
+  /* The library comment records the same historical count and must not drift from the documents. */
+  {
+    const rel = "scripts/lib/track-residual.mjs";
+    let text = null;
+    try { text = readFileSync(join(ROOT, rel), "utf8"); } catch { /* reported below */ }
+    if (ok(`${rel} is present and readable`, text != null)) checkPin(rel, text, hiddenPin);
+  }
+
+  /* And the four negatives stay in body text. A figure demoted to a footnote marker is a figure
+     being quietly retired, so each is required to appear on a line that is not a footnote
+     definition. */
+  const tok = (v) => new RegExp("(?<![\\d.])" + String(v).replace(".", "\\.") + "(?![\\d.])");
+  const NEGATIVES = [
+    [D2(q1.q1d_frameSensitivity.crossDeltaNm.p50), "the frame distinction's size"],
+    [D2(deck12.p50), "what linear interpolation costs at 12 h"],
+    [D2(q1.retrospectiveReference.p50Nm), "how far post-analysis moves the observed position"],
+    [N(nineHour), "the nine-hour interval's near-universality"],
+  ];
+  for (const rel of DOC_PATHS) {
+    if (docs[rel] == null) continue;
+    for (const [value, what] of NEGATIVES) {
+      const lines = docs[rel].split(/\r?\n/).filter((l) => tok(value).test(l));
+      ok(`${rel} carries ${what} (${value}) in body text, not only as a footnote marker`,
+         lines.length > 0 && lines.some((l) => !/^\s*\[\^/.test(l)),
+         `${value} appears only in footnote position`);
+    }
+  }
 }
 
 console.log(`\n${failed ? "FAILED" : "PASSED"} — ${checks - failed}/${checks} checks\n`);

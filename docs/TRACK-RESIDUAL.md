@@ -309,6 +309,27 @@ than to the parse. It also found and fixed a real bug in this library — see §
 that the nine-hour first-forecast-row interval is near-universal (1062 of 1072 advisories), not a
 Lowell quirk. **None of that is a skill claim and none of it bears on Q2 or Q3.**
 
+Every figure below is derived from `Q1-RESULT.json` and pinned by value in
+`scripts/test-track-residual.mjs` §14, which cross-reads this file and `Q1-WRITEUP.md` and fails
+if either disagrees with the artefact. A number here is not a number a reviewer has to check by
+hand.
+
+| Q1 figure | Value |
+|---|---|
+| Positions verbatim against the products' own bytes | **7013 / 7013** |
+| Rows matching NHC's deck encoding, of rows compared | **6890** of **6907** |
+| Storms exact on every row | **57** of **65** |
+| Disagreeing rows, each enumerated, and the largest | **17**, max **29.52 nm** |
+| INIT → first forecast row at nine hours | **1062** of **1072** advisories |
+| Interpolation cost, hold-one-out at the 12 h gap | **3.32 nm** p50 |
+| Linear-in-time deviation from a geodesic | **0.17 nm** p50 |
+| Frame sensitivity, cross-track, over 611 residuals | **0.63 nm** p50, n = **611** |
+| Retrospective: best track vs operational analysis | **6.00 nm** p50, n = **1063** |
+| Intermediates refused, of those that parsed | **23** of **634** (637 products, 3 unreadable) |
+| TCM rows with no deck row at the same valid time | **73** |
+| Fetches made, and failed | **2515**, **0** failed |
+
+
 1. **Accuracy of the position-departure measurement.** A geometry question.
 2. **Whether a promoted residual predicts the sign of the next advisory's track shift** at shared
    future valid times, in the *earlier* advisory's frame, with a 6 nm dead band where the answer
@@ -381,8 +402,8 @@ Measured from two public indexes per season — `research/track-residual/COVERAG
   as the residuals being measured. Reported as a labelled retrospective reference, used nowhere.
 - **It found a real bug in this library.** `parsePublicAdvisory` combined a local date with a UTC
   hour and was a day out on every evening advisory. It never emitted a wrong number — the coverage
-  guard refused each instance — but it silently refused 183 of 634 archived intermediates for a
-  reason nobody had read. Fixed, cross-checked against the product's own printed UTC hour, and
+  guard refused each instance — but it silently refused 183 of the 634 archived intermediates
+  that parsed, for a reason nobody had read. Fixed, cross-checked against the product's own printed UTC hour, and
   pinned by a preserved real product.
 
 **What remains unproven.**

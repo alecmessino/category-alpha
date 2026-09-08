@@ -155,11 +155,24 @@ jobs:
       # strike in geography it explicitly excludes.
       - name: Test the track residual monitor
         run: node scripts/test-track-residual.mjs
-      # The Q1 sweep itself is network-bound and runs by hand. What CI can hold is the COMMITTED
-      # result: that it still carries the claims the write-up makes about it, that every parsed
-      # position round-trips to the product's own bytes, and above all that it has not quietly
-      # acquired a Brier score, a skill number or an accuracy figure for Q2 or Q3 -- neither of
-      # which has been started. Asserted by section 14 of the suite above.
+      # The Q1 sweep itself is network-bound and runs by hand. What CI holds is the COMMITTED
+      # result AND THE PROSE ABOUT IT. Section 14 of the suite above cross-reads
+      # docs/TRACK-RESIDUAL.md and research/track-residual/Q1-WRITEUP.md against Q1-RESULT.json and
+      # fails when they disagree, so no figure in either document is a figure a reviewer has to
+      # check by hand. Every expected value is DERIVED from the artefact and none is written into
+      # the test, which would make the test a third source of truth free to drift from both.
+      #
+      # It pins every statement, not one. An earlier version asked only whether a document
+      # contained the right number somewhere; it passed a mutation test it should have failed,
+      # because both documents state several figures twice and changing one left the other to
+      # satisfy the check. The anchors now collect every occurrence and require all of them to
+      # agree. A missing document is a failure, not a skip.
+      #
+      # It also holds the things that must not quietly disappear: the 17 a-deck disagreements
+      # enumerated rather than averaged, the 183 coverage-guard refusals that hid the timezone bug
+      # named wherever the bug is described (documents and library comment alike), the four
+      # negatives in body text rather than footnotes, and the absence of any Brier, skill or
+      # accuracy VALUE anywhere in the artefact -- Q2 and Q3 have not been started.
 
       # A guard that can fail silently is not a guard. The predicate deciding whether a
       # verification run may write the verdict the board reads once disabled itself to a
