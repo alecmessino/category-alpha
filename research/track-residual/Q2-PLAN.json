@@ -1,0 +1,149 @@
+{
+  "schema": "millibar.track-residual.q2-plan/1",
+  "writtenAt": "2026-09-08T03:49:45.444Z",
+  "status": "PLAN ONLY — NOT RUN. No archive was opened for Q2, no residual series was read, and no count, rate, Brier score or accuracy figure exists in this file.",
+  "question": "Q2 — did a promoted residual predict the SIGN of the next advisory's cross-track shift at shared future valid times?",
+  "authority": "research/track-residual/PRE-REGISTRATION.md",
+  "populationSource": {
+    "file": "research/track-residual/Q1-RESULT.json",
+    "fieldsRead": [
+      "perStorm[].stormId",
+      "perStorm[].year"
+    ],
+    "note": "Only the identifier and the season were read. No residual, error, count or refusal of any storm influenced its assignment, and no archive request was made to build this split."
+  },
+  "split": {
+    "method": "held-out period: seasons >= cutYear",
+    "cutYear": 2022,
+    "rule": "The smallest cut year whose training share reaches the 0.60 the pre-registration declares as its default training fraction. Through 2021 the share is 39/65 = 0.600; through 2020 it is 33/65 = 0.508. Chosen on STORM COUNTS ONLY, before any Q2 quantity exists.",
+    "training": {
+      "seasons": [
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021
+      ],
+      "storms": [
+        "ep022015",
+        "ep032015",
+        "ep052015",
+        "ep172015",
+        "ep202015",
+        "ep222015",
+        "ep012016",
+        "ep112016",
+        "ep152016",
+        "ep172016",
+        "ep222016",
+        "ep022017",
+        "ep032017",
+        "ep142017",
+        "ep162017",
+        "ep172017",
+        "ep182017",
+        "ep192017",
+        "ep202017",
+        "ep032018",
+        "ep042018",
+        "ep112018",
+        "ep202018",
+        "ep212018",
+        "ep222018",
+        "ep242018",
+        "ep252018",
+        "ep152019",
+        "ep162019",
+        "ep172019",
+        "ep192019",
+        "ep022020",
+        "ep122020",
+        "ep042021",
+        "ep052021",
+        "ep142021",
+        "ep152021",
+        "ep162021",
+        "ep172021"
+      ]
+    },
+    "heldOut": {
+      "seasons": [
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "storms": [
+        "ep012022",
+        "ep042022",
+        "ep112022",
+        "ep122022",
+        "ep132022",
+        "ep142022",
+        "ep162022",
+        "ep182022",
+        "ep192022",
+        "ep022023",
+        "ep092023",
+        "ep152023",
+        "ep162023",
+        "ep172023",
+        "ep182023",
+        "ep192023",
+        "ep092024",
+        "ep102024",
+        "ep112024",
+        "ep042025",
+        "ep052025",
+        "ep062025",
+        "ep122025",
+        "ep132025",
+        "ep162025",
+        "ep172025"
+      ]
+    }
+  },
+  "thresholds": {
+    "source": "Taken from the pre-registration and the shipped implementation. NOT fitted, and not to be fitted on the held-out seasons.",
+    "promotionRule": "candidateTrendRule() as already implemented in scripts/lib/track-residual-state.mjs — same-sign cross-track residuals from at least MIN_INDEPENDENT_FIXES independent groups, inside one WINDOW_HOURS window, under a single baseline.",
+    "deadBandNm": 6,
+    "deadBandMeaning": "|cross| < 6 nm is NO CALL, a third outcome, never a coin flip.",
+    "horizonsHours": [
+      12,
+      24,
+      48,
+      72
+    ],
+    "frame": "the EARLIER advisory's local direction at the shared valid time",
+    "component": "cross-track sign only; along-track revisions are recorded and are not the target"
+  },
+  "sampling": {
+    "unit": "storm, or promotion event where that is what is under test",
+    "never": "the fix",
+    "wilsonOverFixes": "REFUSED — wilsonRefusal exists to make the wrong version fail loudly"
+  },
+  "gates": {
+    "minScoredStorms": 10,
+    "minReliabilityStorms": 30,
+    "belowGate": "return the base rate and a refusal (BASE RATE ONLY -- unscoreable). Never a rate."
+  },
+  "baselines": [
+    "persistLastResidualSign",
+    "persistLastOfficialBias",
+    "climatology"
+  ],
+  "leakage": {
+    "firstAvailability": "from the archived messages/ filename, to the minute. Never the nominal slot.",
+    "zeroOrNegativeLead": "refused",
+    "bestTrack": "labelled retrospective reference only; never substituted for a live product",
+    "receiptTimeUnknown": "stated on the entry, never filled in"
+  },
+  "forbiddenUntilThisPlanIsSigned": [
+    "opening the archive for residuals, revisions or skill",
+    "moving any storm between splits",
+    "emitting a count, rate, Brier score, accuracy figure or an impression",
+    "starting Q3 or touching the contract registry"
+  ]
+}

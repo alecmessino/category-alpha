@@ -885,5 +885,103 @@ console.log("\n[14] THE COMMITTED Q1 RESULT SAYS WHAT THE WRITE-UP SAYS IT SAYS"
   }
 }
 
+/* ------------------------------------------------------- the Q2 plan, before Q2 is run */
+
+console.log("\n[15] THE Q2 SPLIT IS THE ONE THE PLAN NAMES, AND NOTHING HAS MOVED");
+{
+  /* The plan's whole value is that it was written before the run. That is only checkable if the
+     split can be RE-DERIVED from something the plan did not author: here, the Q1 population, which
+     was fixed before Q2 was contemplated. This section re-partitions that population by the cut
+     year the plan names and requires the plan's own lists to match member for member.
+ 
+     WHAT IT CATCHES. A storm quietly moved between splits after its series was seen; a storm
+     dropped from both lists because it turned out to produce nothing; a cut year edited to a
+     kinder one. Each of those is the specific way a pre-registered split stops being one, and each
+     leaves the plan's lists disagreeing with the artefact they claim to partition.
+ 
+     WHAT IT CANNOT CATCH, and is not pretending to: whether the question asked is the question
+     answered. That needs a reader. */
+  const plan = JSON.parse(readFileSync(join(ROOT, "research/track-residual/Q2-PLAN.json"), "utf8"));
+  const q1p = JSON.parse(readFileSync(join(ROOT, "research/track-residual/Q1-RESULT.json"), "utf8"));
+
+  ok("the plan declares itself unrun", /PLAN ONLY — NOT RUN/.test(plan.status), plan.status);
+  ok("and cites the pre-registration as its authority",
+     plan.authority === "research/track-residual/PRE-REGISTRATION.md");
+  ok("it records that only the identifier and the season were read to build the split",
+     plan.populationSource.fieldsRead.join(",") === "perStorm[].stormId,perStorm[].year");
+
+  /* The population, re-derived. */
+  const pop = q1p.perStorm.map((x) => ({ id: x.stormId, year: x.year }));
+  const cut = plan.split.cutYear;
+  const wantTrain = pop.filter((x) => x.year < cut).map((x) => x.id).sort();
+  const wantTest = pop.filter((x) => x.year >= cut).map((x) => x.id).sort();
+  const gotTrain = [...plan.split.training.storms].sort();
+  const gotTest = [...plan.split.heldOut.storms].sort();
+  const same = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+
+  ok(`the training list is exactly the seasons before ${cut} (${wantTrain.length} storms)`,
+     same(gotTrain, wantTrain),
+     "added: " + gotTrain.filter((x) => !wantTrain.includes(x)).join(",")
+     + " | missing: " + wantTrain.filter((x) => !gotTrain.includes(x)).join(","));
+  ok(`the held-out list is exactly the seasons from ${cut} (${wantTest.length} storms)`,
+     same(gotTest, wantTest),
+     "added: " + gotTest.filter((x) => !wantTest.includes(x)).join(",")
+     + " | missing: " + wantTest.filter((x) => !gotTest.includes(x)).join(","));
+  ok("the two splits are disjoint", gotTrain.every((x) => !gotTest.includes(x)));
+  ok("and together they account for every storm in the Q1 population, none dropped",
+     gotTrain.length + gotTest.length === pop.length,
+     `${gotTrain.length} + ${gotTest.length} vs ${pop.length}`);
+  ok("assertNoOverlap agrees", (() => {
+    try { B.assertNoOverlap(gotTrain, gotTest); return true; } catch { return false; }
+  })());
+
+  /* The cut year is a rule, not a preference: it must be the smallest year reaching 0.60. */
+  const years = [...new Set(pop.map((x) => x.year))].sort();
+  const shareThrough = (y) => pop.filter((x) => x.year <= y).length / pop.length;
+  const smallest = years.find((y) => shareThrough(y) >= 0.6);
+  ok(`the cut year follows the stated rule — ${smallest + 1} is the smallest cut reaching a 0.60 training share`,
+     cut === smallest + 1, `plan says ${cut}, the rule gives ${smallest + 1}`);
+
+  /* Thresholds must match what is actually shipped, not a friendlier copy. */
+  ok("the dead band matches the backtest module", plan.thresholds.deadBandNm === B.NEGLIGIBLE_SHIFT_NM,
+     `${plan.thresholds.deadBandNm} vs ${B.NEGLIGIBLE_SHIFT_NM}`);
+  ok("the horizons match", plan.thresholds.horizonsHours.join(",") === B.HORIZONS_H.join(","));
+  ok("the gates match", plan.gates.minScoredStorms === B.MIN_SCORED_STORMS
+     && plan.gates.minReliabilityStorms === B.MIN_RELIABILITY_STORMS);
+  ok("the three baselines are the three that exist",
+     plan.baselines.length === 3 && plan.baselines.every((b) => b in B.BASELINES),
+     plan.baselines.join(","));
+  ok("the frame is the EARLIER advisory's", /earlier/i.test(plan.thresholds.frame));
+  ok("the component is the cross-track sign only", /cross-track sign only/i.test(plan.thresholds.component));
+  ok("the sampling unit is the storm, and Wilson-over-fixes is refused",
+     /storm/.test(plan.sampling.unit) && plan.sampling.never === "the fix"
+     && /REFUSED/.test(plan.sampling.wilsonOverFixes));
+
+  /* A plan that has quietly become a result is the failure this repository cares most about. */
+  const scored = [];
+  (function walk(v, path) {
+    if (v == null) return;
+    if (Array.isArray(v)) return v.forEach((x, i) => walk(x, `${path}[${i}]`));
+    if (typeof v === "object") for (const [k, x] of Object.entries(v)) {
+      if (typeof x === "number" && /brier|skill|hitrate|accuracy|auc|logloss|score(?!dStorms)/i.test(k))
+        scored.push(`${path}.${k}`);
+      walk(x, `${path}.${k}`);
+    }
+  })(plan, "$");
+  ok("the plan carries no score of any kind", scored.length === 0, scored.join(", "));
+
+  /* And the prose twin must name the same split, so the two cannot drift apart. */
+  const md = readFileSync(join(ROOT, "research/track-residual/Q2-PLAN.md"), "utf8");
+  ok("the prose plan declares itself unrun", /\*\*This is a plan\. It has not been run\.\*\*/.test(md));
+  ok(`the prose plan names cut year ${cut}`,
+     new RegExp("\\*\\*Cut year: " + cut + "\\.\\*\\*").test(md),
+     "the prose must name the same cut year the JSON does, in as many words");
+  const missingFromProse = [...gotTrain, ...gotTest].filter((id) => !md.includes("`" + id + "`"));
+  ok("every storm in the split is listed by id in the prose plan too",
+     missingFromProse.length === 0, missingFromProse.join(","));
+  ok("the prose plan states that no storm is excluded on the strength of its residuals",
+     /no storm enters or leaves on the strength\s+of its residuals/i.test(md.replace(/\s+/g, " ")));
+}
+
 console.log(`\n${failed ? "FAILED" : "PASSED"} — ${checks - failed}/${checks} checks\n`);
 process.exit(failed ? 1 : 0);
