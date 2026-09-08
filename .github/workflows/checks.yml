@@ -155,6 +155,26 @@ jobs:
       # strike in geography it explicitly excludes.
       - name: Test the track residual monitor
         run: node scripts/test-track-residual.mjs
+
+      # AND PROVE THAT SUITE'S DOCUMENT GATE CAN STILL FAIL.
+      #
+      # Section 14 cross-reads the two Q1 documents against the artefact, and a checker like that
+      # is worth exactly what its failures are worth -- which is invisible while everything agrees.
+      # The first version of §14 was green AND WRONG: it asked whether a document contained the
+      # right number somewhere, and both documents state several figures twice, so a stale copy
+      # sailed through. That was not found by reading the code. It was found by changing a number
+      # and watching the suite stay green.
+      #
+      # So the mutations are kept and they run: a stale copy in either document, an artefact that
+      # moves while the documents do not, a figure deleted outright, the historical 183 refusals
+      # stripped from the library comment, and a missing document. Each must fail, and must fail
+      # NAMING THE RIGHT SUBJECT -- a gate that fails for the wrong reason gets "fixed" by
+      # silencing the wrong message.
+      #
+      # It rewrites tracked files, so it refuses to start on a dirty tree and restores every
+      # original from memory in a finally block and on SIGINT/SIGTERM.
+      - name: Prove the Q1 document gate can still fail
+        run: node scripts/check-residual-gate.mjs
       # The Q1 sweep itself is network-bound and runs by hand. What CI holds is the COMMITTED
       # result AND THE PROSE ABOUT IT. Section 14 of the suite above cross-reads
       # docs/TRACK-RESIDUAL.md and research/track-residual/Q1-WRITEUP.md against Q1-RESULT.json and

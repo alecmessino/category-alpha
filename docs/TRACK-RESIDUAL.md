@@ -312,7 +312,13 @@ Lowell quirk. **None of that is a skill claim and none of it bears on Q2 or Q3.*
 Every figure below is derived from `Q1-RESULT.json` and pinned by value in
 `scripts/test-track-residual.mjs` §14, which cross-reads this file and `Q1-WRITEUP.md` and fails
 if either disagrees with the artefact. A number here is not a number a reviewer has to check by
-hand.
+hand. `scripts/check-residual-gate.mjs` keeps that honest by mutating each figure in turn and
+requiring §14 to catch it — the first version of §14 was green and would have passed a stale copy,
+which is why the battery is a build step rather than a memory of one.
+
+**What the gate does not cover.** It pins numbers, not interpretation: it can say every statement
+of a figure agrees with the artefact, and it cannot say the figure is being read correctly. That
+is enough for Q1, which is a measurement question. It would not be enough for Q2.
 
 | Q1 figure | Value |
 |---|---|
