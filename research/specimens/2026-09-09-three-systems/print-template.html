@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Storm Atlas — Three Systems, Three Answers — 2026-09-09</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* PRINT SPECIMEN — one Letter page, light only. A PDF has one ground; designing two here would
+   be a decision nobody sees. Palette is the Category Alpha light set from docs/tokens/colors.css.
+   TYPE SIZES ARE THE LEGIBILITY CONTRACT: body/callout >= 8.5pt, table/detail >= 7.5pt,
+   footer/legal >= 7pt. Nothing on this page is set below those. */
+@page { size: Letter; margin: 0.26in 0.4in 0.22in; }
+:root{
+  --ink:#0f172a; --ink-2:#475569; --ink-3:#64748b;
+  --line:#e2e8f0; --line-strong:#cbd5e1; --sunken:#f8fafc;
+  --d1:#7c3aed; --d2:#b45309; --e14:#0284c7;
+  --refuse:#dc2626; --publish:#16a34a;
+  --fd:"IBM Plex Sans Condensed",Arial Narrow,sans-serif;
+  --fb:"IBM Plex Sans",Helvetica,Arial,sans-serif;
+  --fm:"IBM Plex Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:var(--fb);font-size:8.5pt;line-height:1.3}
+.mono{font-family:var(--fm);font-variant-numeric:tabular-nums}
+h1{font-family:var(--fd);font-size:18pt;font-weight:700;line-height:1;letter-spacing:-.01em;margin:0 0 3pt}
+h2{font-family:var(--fd);font-size:10.5pt;font-weight:600;margin:0;line-height:1.15}
+.eyebrow{font-family:var(--fm);font-size:7.5pt;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);margin:0 0 4pt}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:12pt;
+     border-bottom:1.6pt solid var(--ink);padding-bottom:3pt;margin-bottom:4pt}
+.frozen{font-family:var(--fm);font-size:7pt;line-height:1.5;text-align:right;color:var(--ink-2);white-space:nowrap}
+.frozen b{color:var(--ink);font-weight:600}
+.lede{font-size:8.5pt;color:var(--ink-2);margin:0 0 4pt;max-width:none}
+.lede b{color:var(--ink);font-weight:600}
+
+.spine{display:grid;grid-template-columns:repeat(3,1fr);gap:5pt;margin-bottom:4pt}
+.sy{border:.6pt solid var(--line);border-top:2pt solid var(--c);padding:3pt 5pt;display:flex;flex-direction:column;gap:2pt}
+.sy .t{font-family:var(--fm);font-size:7.5pt;letter-spacing:.09em;color:var(--c);text-transform:uppercase}
+.sy .n{font-family:var(--fd);font-size:11pt;font-weight:700;line-height:1.05}
+.sy .k{font-family:var(--fm);font-size:7.5pt;letter-spacing:.05em;color:var(--ink-3);line-height:1.3}
+.sy .v{font-family:var(--fm);font-size:8.5pt;font-weight:600;letter-spacing:.03em;line-height:1.25;
+       padding:2.5pt 4pt;border:.6pt solid;border-radius:1.5pt;margin-top:1pt}
+.sy .v.no{color:var(--refuse);border-color:#f3c0c0;background:#fdf4f4}
+.sy .v.yes{color:var(--publish);border-color:#bfe3cd;background:#f3faf5}
+.sy .p{font-family:var(--fm);font-size:7.5pt;color:var(--ink-2);border-top:.6pt solid var(--line);padding-top:3pt;margin-top:auto}
+
+.band{display:grid;grid-template-columns:repeat(3,1fr);gap:5pt;margin-bottom:3pt}
+.panel{border:.6pt solid var(--line);padding:3.5pt 5.5pt;display:flex;flex-direction:column;gap:2.5pt}
+.panel .hd{display:flex;justify-content:space-between;align-items:baseline;gap:6pt;
+           border-bottom:.6pt solid var(--line);padding-bottom:2.5pt}
+.panel .hd .q{font-family:var(--fm);font-size:7.5pt;color:var(--ink-3);white-space:nowrap}
+.panel p{margin:0;font-size:8.5pt;color:var(--ink-2)}
+.panel p b{color:var(--ink);font-weight:600}
+.callout{border:.6pt solid var(--refuse);border-left:2pt solid var(--refuse);background:#fdf4f4;
+         padding:3pt 5pt;font-size:8.5pt;color:var(--ink-2);line-height:1.3}
+.callout .h{font-family:var(--fm);font-size:8.5pt;font-weight:600;letter-spacing:.05em;color:var(--refuse);display:block;margin-bottom:2pt}
+.qp{background:var(--sunken);border-left:1.6pt solid var(--c);padding:2pt 4pt;font-size:7.5pt;color:var(--ink-2);line-height:1.28}
+.qp b{display:block;font-family:var(--fm);font-size:7.5pt;letter-spacing:.06em;color:var(--c);font-weight:600}
+
+table{width:100%;border-collapse:collapse;font-size:7.6pt}
+th{font-family:var(--fm);font-size:7.5pt;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);
+   font-weight:500;text-align:left;padding:0 4pt 2pt 0;border-bottom:.6pt solid var(--line-strong);white-space:nowrap}
+td{padding:.9pt 4pt .9pt 0;border-bottom:.4pt solid var(--line);font-size:7.6pt}
+td.n{text-align:right;font-family:var(--fm);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.m{font-family:var(--fm)}
+svg{display:block;width:100%;overflow:visible}
+.ct{font-family:var(--fm);font-size:7.5pt;fill:var(--ink-3)}
+.cv{font-family:var(--fm);font-size:7.5pt;fill:var(--ink);font-variant-numeric:tabular-nums}
+.cap{font-size:7.5pt;color:var(--ink-3);margin:0;line-height:1.28}
+.clock{display:flex;gap:7pt;background:var(--sunken);border:.6pt solid var(--line);padding:2.5pt 4pt}
+.clock div{display:flex;flex-direction:column;gap:.5pt}
+.clock span{font-family:var(--fm);font-size:7.5pt;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.clock b{font-family:var(--fm);font-size:7.6pt;font-weight:500}
+.clock .o b{color:var(--e14);font-size:9.5pt;font-weight:600}
+
+footer{border-top:.8pt solid var(--line-strong);margin-top:auto;padding-top:3pt;
+       font-family:var(--fm);font-size:7pt;line-height:1.35;color:var(--ink-3)}
+footer .row{display:flex;gap:10pt;flex-wrap:wrap}
+footer b{color:var(--ink-2);font-weight:500}
+.sheet{min-height:0;display:flex;flex-direction:column}
+</style></head><body><div class="sheet" id="root"></div>
+<script id="payload" type="application/json">"__DATA__"</script>
+<script>
+const D = JSON.parse(document.getElementById("payload").textContent);
+const $=(t,a,...k)=>{const e=document.createElement(t);for(const[n,v]of Object.entries(a||{})){if(v==null)continue;
+ if(n==="class")e.className=v;else if(n==="html")e.innerHTML=v;else e.setAttribute(n,v);}
+ for(const c of k.flat())if(c!=null)e.append(c.nodeType?c:String(c));return e;};
+const NS="http://www.w3.org/2000/svg";
+const S=(t,a,...k)=>{const e=document.createElementNS(NS,t);for(const[n,v]of Object.entries(a||{}))if(v!=null)e.setAttribute(n,v);
+ for(const c of k.flat())if(c!=null)e.append(c.nodeType?c:String(c));return e;};
+const P=(v)=>v==null?"—":v.toFixed(1)+"%";
+const LV=[["td","TD"],["ts","TS"],["cat1","Cat 1"],["cat2","Cat 2"],["cat3","Cat 3"],["cat4","Cat 4"]];
+const ll=(la,lo)=>`${Math.abs(la).toFixed(1)}${la<0?"S":"N"} ${Math.abs(lo).toFixed(1)}${lo<0?"W":"E"}`;
+const dz=(i)=>i?i.slice(8,10)+"/"+i.slice(11,13)+i.slice(14,16)+"Z":"—";
+
+/* Compact ladder: rate where published, count where refused. One hue, one scale. */
+function ladder(a,hue){
+  const W=250,rh=14,padL=30,padR=38,H=LV.length*rh+15;
+  const g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"analogs reaching each intensity"});
+  const max=a.sufficient?100:a.nCases;
+  const x=(v)=>padL+(v/max)*(W-padL-padR);
+  for(const t of (a.sufficient?[0,50,100]:[0,a.nCases])){
+    g.append(S("line",{x1:x(t),x2:x(t),y1:8,y2:H-5,stroke:"#e2e8f0","stroke-width":.5}));
+    g.append(S("text",{x:x(t),y:5.5,"text-anchor":"middle",class:"ct"},a.sufficient?t+"%":t));}
+  LV.forEach(([k,lab],i)=>{const o=a.levels[k];if(!o)return;const y=11+i*rh;
+    g.append(S("text",{x:padL-3,y:y+6.5,"text-anchor":"end",class:"ct"},lab));
+    const v=a.sufficient?o.rate:o.count,w=Math.max(v>0?1.2:0,x(v)-padL);
+    if(w>0)g.append(S("rect",{x:padL,y,width:w,height:8,rx:1.5,fill:hue}));
+    if(a.sufficient&&o.ci){const[lo,hi]=o.ci;
+      g.append(S("line",{x1:x(lo),x2:x(hi),y1:y+4,y2:y+4,stroke:"#475569","stroke-width":.7}));
+      for(const e of[lo,hi])g.append(S("line",{x1:x(e),x2:x(e),y1:y+1.5,y2:y+6.5,stroke:"#475569","stroke-width":.7}));}
+    g.append(S("text",{x:W-padR+3,y:y+6.5,class:"cv"},a.sufficient?o.rate.toFixed(0)+"%":o.count+"/"+o.n));});
+  return g;
+}
+/* Timing: p10–p90 whisker, p25–p75 box, median, and the forecast on the SAME clock. */
+function timing(a,f){
+  const t=a.timeToEvent.cat1,W=250,H=58,pad=10;
+  const hi=Math.max(t.p90,f.clock.elapsedHours)*1.08,x=(h)=>pad+(h/hi)*(W-pad*2),yB=31;
+  const g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"hours from genesis to hurricane strength"});
+  for(let h=0;h<=hi;h+=48){g.append(S("line",{x1:x(h),x2:x(h),y1:12,y2:yB+10,stroke:"#e2e8f0","stroke-width":.5}));
+    g.append(S("text",{x:x(h),y:yB+18,"text-anchor":"middle",class:"ct"},"+"+h+"h"));}
+  g.append(S("line",{x1:x(t.p10),x2:x(t.p90),y1:yB,y2:yB,stroke:"#0284c7","stroke-width":1}));
+  for(const e of[t.p10,t.p90])g.append(S("line",{x1:x(e),x2:x(e),y1:yB-3.5,y2:yB+3.5,stroke:"#0284c7","stroke-width":1}));
+  g.append(S("rect",{x:x(t.p25),y:yB-6,width:x(t.p75)-x(t.p25),height:12,rx:1.5,fill:"#0284c7","fill-opacity":".25",stroke:"#0284c7","stroke-width":.7}));
+  g.append(S("line",{x1:x(t.median),x2:x(t.median),y1:yB-7,y2:yB+7,stroke:"#0284c7","stroke-width":1.6}));
+  g.append(S("text",{x:x(t.median),y:yB-9.5,"text-anchor":"middle",class:"cv"},"med +"+t.median+"h"));
+  const fx=x(f.clock.elapsedHours),near=fx>W-56;
+  g.append(S("line",{x1:fx,x2:fx,y1:14,y2:yB+8,stroke:"#0f172a","stroke-width":.9,"stroke-dasharray":"2 1.5"}));
+  g.append(S("circle",{cx:fx,cy:yB,r:2.6,fill:"#0f172a"}));
+  g.append(S("text",{x:near?W:fx,y:10,"text-anchor":near?"end":"middle",class:"cv"},"forecast +"+f.clock.elapsedHours+"h"));
+  return g;
+}
+
+const r=document.getElementById("root");
+const e=D.storms.fourteenE,f=e.forecastVsAnalogs;
+
+r.append($("div",{class:"top"},
+  $("div",{},$("p",{class:"eyebrow"},"Storm Atlas · genesis-conditioned analogs · eastern & central Pacific"),
+    $("h1",{},"Three systems, three answers")),
+  $("div",{class:"frozen"},
+    $("div",{},$("b",{},"FROZEN SPECIMEN")),
+    $("div",{},"as of ",D.specimen.asOfLocal),
+    $("div",{},"outlook ",D.gtwo.issued,"Z · forecaster ",D.outlook.forecaster))));
+
+r.append($("p",{class:"lede",html:
+  "One Pacific chart carries a trough that may become something, a low that has not formed, and a "
+  + "depression that already has. The archive is asked the same question of each — <b>what did storms "
+  + "born here, in September, go on to do?</b> — and gives three different kinds of answer. "
+  + "<b>The most useful of them is a refusal.</b>"}));
+
+const SY=[["d1","D1","Trough S-SE of Hawaiʻi","var(--d1)"],
+          ["d2","D2","Low forecast to form","var(--d2)"],
+          ["fourteenE","EP142026","TD Fourteen-E","var(--e14)"]];
+const spine=$("div",{class:"spine"});
+for(const[k,tag,nm,c]of SY){const a=D.atlas[k];
+  spine.append($("div",{class:"sy",style:`--c:${c}`},
+    $("div",{class:"t"},tag),$("div",{class:"n"},nm),
+    $("div",{class:"k"},D.pointType[k]),
+    $("div",{class:"v "+(a.sufficient?"yes":"no")},D.spine[k]),
+    $("div",{class:"p"},`${a.nCases} analogs · ESS ${a.ess.toFixed(1)} · gate ${a.minSample}`)));}
+r.append(spine);
+
+const band=$("div",{class:"band"});
+
+/* D1 */
+{const a=D.atlas.d1;
+band.append($("div",{class:"panel",style:"--c:var(--d1)"},
+  $("div",{class:"hd"},$("h2",{},"D1 — the archive declines"),
+    $("span",{class:"q"},ll(a.query.lat,a.query.lonE))),
+  $("p",{html:`NHC gives this trough <b>${D.gtwo.d1.pct48}% / ${D.gtwo.d1.pct7d}%</b>. The pool is <b>${a.nCases} storms</b> — effective sample <b>${a.ess.toFixed(1)}</b> against a gate of ${a.minSample}. Below that line the archive publishes counts and refuses rates.`}),
+  ladder(a,"var(--d1)"),
+  $("p",{class:"cap"},"Counts out of the pool. No rate is drawn because none is published at this sample size."),
+  $("div",{class:"qp"},$("b",{},D.queryPoints.d1.kind),D.queryPoints.d1.note)));}
+
+/* D2 */
+{const a=D.atlas.d2,c=D.composition.d2;
+band.append($("div",{class:"panel",style:"--c:var(--d2)"},
+  $("div",{class:"hd"},$("h2",{},"D2 — no unconditional number"),
+    $("span",{class:"q"},ll(a.query.lat,a.query.lonE))),
+  ladder(a,"var(--d2)"),
+  $("p",{class:"cap"},`Reached each threshold, ${a.nCases} storms, 95% Wilson intervals over distinct storms. Conditional on formation under the declared reference condition.`),
+  $("div",{class:"callout"},$("span",{class:"h"},"NO COMPOSED NUMBER"),c.reason),
+  $("div",{class:"qp"},$("b",{},D.queryPoints.d2.kind),D.queryPoints.d2.note)));}
+
+/* Fourteen-E */
+{const a=D.atlas.fourteenE;
+band.append($("div",{class:"panel",style:"--c:var(--e14)"},
+  $("div",{class:"hd"},$("h2",{},"Fourteen-E — rates and timing"),
+    $("span",{class:"q"},`genesis ${ll(e.genesis.lat,e.genesis.lonE)}`)),
+  ladder(a,"var(--e14)"),
+  $("p",{class:"cap"},`Given genesis here · ${a.nCases} storms, effective sample ${a.ess.toFixed(1)}. It has formed, so no formation chance is needed.`),
+  $("div",{class:"clock"},
+    $("div",{},$("span",{},"Genesis · first tropical pt"),$("b",{},dz(f.clock.genesisZ))),
+    $("div",{},$("span",{},`Forecast ${f.clock.forecastKt} kt`),$("b",{},dz(f.clock.forecastValidZ))),
+    $("div",{class:"o"},$("span",{},"Elapsed"),$("b",{},f.clock.elapsedHours+" h"))),
+  timing(a,f),
+  $("p",{class:"cap"},`Of ${f.analogHoursToCat1.n} analogs reaching Cat 1: median +${f.analogHoursToCat1.median} h, p90 +${Math.round(f.analogHoursToCat1.p90)} h. The forecast's +${f.clock.elapsedHours} h is above ${f.above.join(", ")} and below ${f.below.join(", ")}.`)));}
+r.append(band);
+
+/* Lower band — the three things a research reader needs and a summary would drop: the
+   observing-era gap behind D1's pool, the correction this specimen carries, and the named
+   analogs behind Fourteen-E's rates. Not marketing; the evidence. */
+const low=$("div",{class:"band"});
+{const all=D.atlas.d1AllEras;
+low.append($("div",{class:"panel",style:"--c:var(--d1)"},
+  $("div",{class:"hd"},$("h2",{},"Why D1's pool is smaller still"),$("span",{class:"q"},"all-eras gap")),
+  $("p",{class:"cap"},(all.gaps[0]||"").split(". ")[0]+"."),
+  $("p",{},$("b",{},`Restricting to 1971+ takes the pool from ${all.nCases} to ${D.atlas.d1.nCases}.`),
+    " Both are below the gate, so the refusal stands either way.")));}
+{const f=D.storms.fourteenE.forecastVsAnalogs,c=D.composition.d2;
+low.append($("div",{class:"panel",style:"--c:var(--d2)"},
+  $("div",{class:"hd"},$("h2",{},"What this specimen corrects"),$("span",{class:"q"},"vs. first draft")),
+  $("p",{},$("b",{},"No composed probability."),
+    ` An earlier draft multiplied NHC's ${c.formationPct}% by the archive's conditional rate. Withdrawn: the conditioning events are not the same event.`),
+  $("p",{},$("b",{},"Clocks aligned."),
+    ` Timing was measured from the ${f.clock.withdrawn.fromType} first-track fix (${f.clock.withdrawn.elapsedHours} h) against a genesis-measured cohort, and called beyond p90. Withdrawn — on the shared clock it is ${f.clock.elapsedHours} h, inside the distribution.`),
+  $("p",{},$("b",{},"Points typed."),
+    " An outlook centroid is an analyst-declared reference cell, not an observed genesis point.")));}
+{const a=D.atlas.fourteenE;
+low.append($("div",{class:"panel",style:"--c:var(--e14)"},
+  $("div",{class:"hd"},$("h2",{},"Nearest analogs"),$("span",{class:"q"},"by distance from genesis")),
+  $("table",{},
+    $("thead",{},$("tr",{},$("th",{},"Season"),$("th",{},"Name"),$("th",{class:"n"},"km"),$("th",{class:"n"},"Peak"),$("th",{},"Landfall"))),
+    $("tbody",{},a.cases.slice(0,4).map((c)=>$("tr",{},
+      $("td",{class:"m"},c.season),
+      $("td",{},c.name==="UNNAMED"?"unnamed":c.name),
+      $("td",{class:"n"},c.km),
+      $("td",{class:"n"},c.peakKt+" kt"),
+      $("td",{class:"m",style:"font-size:7.5pt"},c.landfalls.length?c.landfalls.map(x=>x.region).join(", "):"—"))))),
+  $("p",{class:"cap"},"Weight falls with distance from genesis; it drives the effective sample size and is not a probability.")));}
+r.append(low);
+
+const src=D.provenance.sources;
+const cnt=(k)=>src.filter((s)=>s.kind===k).length;
+r.append($("footer",{},
+  $("div",{class:"row"},
+    $("span",{},$("b",{},"REPLAY · "),`${cnt("ARCHIVED")} archived + ${cnt("CAPTURED")} captured + ${cnt("DERIVED")} derived sources, SHA-256 pinned in MANIFEST.json`),
+    $("span",{},$("b",{},"ARCHIVE · "),"IBTrACS v04r01 · EP+NA · pool 1971+")),
+  $("div",{class:"row",style:"margin-top:2pt"},
+    $("span",{},$("b",{},"CAPTURED sources cannot be re-fetched"),' — NHC serves only the current issuance. Verify against the hash, not the live URL.')),
+  $("div",{class:"row",style:"margin-top:2pt"},
+    $("span",{},$("b",{},"RESEARCH ONLY · "),"Not a forecast and not advice. For live watches and warnings, NHC is the only authority. Genesis-conditioned analog frequencies are not probabilities of this season's outcome.")),
+  $("div",{class:"row",style:"margin-top:2pt"},
+    $("span",{},"Storm Atlas — Three Systems, Three Answers — 2026-09-09 · frozen ",D.builtAt.slice(0,16).replace("T"," "),"Z · scripts/build-disturbance-specimen.mjs"))));
+</script></body></html>

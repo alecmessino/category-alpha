@@ -1,0 +1,266 @@
+{
+  "query": {
+    "lat": 13.21,
+    "lon": -147.3,
+    "radius_km": 500.0,
+    "season_months": [
+      9
+    ],
+    "env_vector": null,
+    "as_of": null,
+    "basins": null,
+    "subbasins": null,
+    "genesis_subbasins": null,
+    "regions": [
+      "hawaii"
+    ],
+    "include_provisional": false,
+    "min_pool_season": 1971
+  },
+  "n_cases": 3,
+  "env_unmatched_excluded": 0,
+  "unscoreable": {
+    "hawaii:any": {
+      "archive_events": 11,
+      "scope_events": 8,
+      "scope": "in the EP basin since 1971",
+      "required": 10,
+      "status": "OUT OF SCOPE -- unscoreable here",
+      "reason": "only 8 storm(s) in the EP basin since 1971 carry this outcome, below the 10 distinct events any skill score requires. The archive holds 11 in total, outside the population this query draws from. Widen the basin or the era and this contract becomes scoreable; a skill number over a population that does not carry the events would be borrowed from one that does."
+    },
+    "hawaii:hurricane": {
+      "archive_events": 2,
+      "scope_events": 1,
+      "scope": "in the EP basin since 1971",
+      "required": 10,
+      "status": "BASE RATE ONLY -- unscoreable",
+      "reason": "only 2 storm(s) in the entire archive carry this outcome, below the 10 distinct events any skill score requires. A base rate can be quoted with its interval; a calibrated or skill-scored probability cannot, and this archive will not produce one."
+    }
+  },
+  "effective_sample_size": 2.499292553699365,
+  "sufficient": false,
+  "min_sample": 10,
+  "intensity": {
+    "td": {
+      "n_storms": 3,
+      "n_unknown": 0,
+      "count": 3,
+      "rate": null,
+      "weighted_rate": null,
+      "ci95": null,
+      "refused_reason": "3 storms with a known outcome < min_sample=10"
+    },
+    "ts": {
+      "n_storms": 3,
+      "n_unknown": 0,
+      "count": 1,
+      "rate": null,
+      "weighted_rate": null,
+      "ci95": null,
+      "refused_reason": "3 storms with a known outcome < min_sample=10"
+    },
+    "cat1": {
+      "n_storms": 3,
+      "n_unknown": 0,
+      "count": 0,
+      "rate": null,
+      "weighted_rate": null,
+      "ci95": null,
+      "refused_reason": "3 storms with a known outcome < min_sample=10"
+    },
+    "cat2": {
+      "n_storms": 3,
+      "n_unknown": 0,
+      "count": 0,
+      "rate": null,
+      "weighted_rate": null,
+      "ci95": null,
+      "refused_reason": "3 storms with a known outcome < min_sample=10"
+    },
+    "cat3": {
+      "n_storms": 3,
+      "n_unknown": 0,
+      "count": 0,
+      "rate": null,
+      "weighted_rate": null,
+      "ci95": null,
+      "refused_reason": "3 storms with a known outcome < min_sample=10"
+    },
+    "cat4": {
+      "n_storms": 3,
+      "n_unknown": 0,
+      "count": 0,
+      "rate": null,
+      "weighted_rate": null,
+      "ci95": null,
+      "refused_reason": "3 storms with a known outcome < min_sample=10"
+    },
+    "cat5": {
+      "n_storms": 3,
+      "n_unknown": 0,
+      "count": 0,
+      "rate": null,
+      "weighted_rate": null,
+      "ci95": null,
+      "refused_reason": "3 storms with a known outcome < min_sample=10"
+    }
+  },
+  "landfall": {
+    "hawaii": {
+      "any": {
+        "n_storms": 3,
+        "n_unknown": 0,
+        "count": 0,
+        "rate": null,
+        "weighted_rate": null,
+        "ci95": null,
+        "refused_reason": "3 storms with a known outcome < min_sample=10"
+      },
+      "hurricane": {
+        "n_storms": 3,
+        "n_unknown": 0,
+        "count": 0,
+        "rate": null,
+        "weighted_rate": null,
+        "ci95": null,
+        "refused_reason": "3 storms with a known outcome < min_sample=10"
+      }
+    }
+  },
+  "time_to_event": {
+    "ts": {
+      "n": 1,
+      "p10": 6.0,
+      "p25": 6.0,
+      "median": 6.0,
+      "p75": 6.0,
+      "p90": 6.0
+    },
+    "cat1": {
+      "n": 0,
+      "p10": null,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "p90": null
+    },
+    "cat3": {
+      "n": 0,
+      "p10": null,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "p90": null
+    },
+    "landfall_hawaii": {
+      "n": 0,
+      "p10": null,
+      "p25": null,
+      "median": null,
+      "p75": null,
+      "p90": null
+    }
+  },
+  "track_density": {
+    "12.0,-144.0": 1,
+    "12.0,-146.0": 1,
+    "12.0,-148.0": 3,
+    "14.0,-148.0": 1,
+    "14.0,-150.0": 2,
+    "14.0,-152.0": 2,
+    "14.0,-154.0": 1,
+    "14.0,-156.0": 2,
+    "14.0,-158.0": 2,
+    "14.0,-160.0": 2,
+    "14.0,-162.0": 2,
+    "16.0,-164.0": 1,
+    "12.0,-150.0": 2,
+    "12.0,-152.0": 1,
+    "12.0,-154.0": 1,
+    "12.0,-156.0": 1,
+    "10.0,-148.0": 1,
+    "16.0,-152.0": 1,
+    "16.0,-154.0": 1,
+    "16.0,-156.0": 1,
+    "14.0,-164.0": 1
+  },
+  "cases": [
+    {
+      "storm_id": "2001253N13213",
+      "atcf_id": "CP012001",
+      "name": "UNNAMED",
+      "season": 2001,
+      "basin": "EP",
+      "subbasin": "CP",
+      "genesis_utc": "2001-09-10T00:00:00+00:00",
+      "genesis_lat": 12.7,
+      "genesis_lon": -146.7,
+      "genesis_month": 9,
+      "distance_km": 86.27505121481953,
+      "weight": 0.9421911782408255,
+      "weight_distance": 0.9421911782408255,
+      "weight_env": 1.0,
+      "env_fields_compared": 0,
+      "peak_vmax_kt": 30.0,
+      "max_category": "td",
+      "hours_to_ts": null,
+      "hours_to_cat1": null,
+      "hours_to_cat3": null,
+      "landfalls": [],
+      "environment": {}
+    },
+    {
+      "storm_id": "2015266N11214",
+      "atcf_id": "CP062015",
+      "name": "NIALA",
+      "season": 2015,
+      "basin": "EP",
+      "subbasin": "CP",
+      "genesis_utc": "2015-09-25T00:00:00+00:00",
+      "genesis_lat": 14.0,
+      "genesis_lon": -149.1,
+      "genesis_month": 9,
+      "distance_km": 213.44689466495126,
+      "weight": 0.6945600782727264,
+      "weight_distance": 0.6945600782727264,
+      "weight_env": 1.0,
+      "env_fields_compared": 0,
+      "peak_vmax_kt": 55.0,
+      "max_category": "ts",
+      "hours_to_ts": 6.0,
+      "hours_to_cat1": null,
+      "hours_to_cat3": null,
+      "landfalls": [],
+      "environment": {}
+    },
+    {
+      "storm_id": "1996260N14217",
+      "atcf_id": "CP011996",
+      "name": "UNNAMED",
+      "season": 1996,
+      "basin": "EP",
+      "subbasin": "CP",
+      "genesis_utc": "1996-09-16T00:00:00+00:00",
+      "genesis_lat": 13.2,
+      "genesis_lon": -143.5,
+      "genesis_month": 9,
+      "distance_km": 411.36644460149404,
+      "weight": 0.2582624885048961,
+      "weight_distance": 0.2582624885048961,
+      "weight_env": 1.0,
+      "env_fields_compared": 0,
+      "peak_vmax_kt": 30.0,
+      "max_category": "td",
+      "hours_to_ts": null,
+      "hours_to_cat1": null,
+      "hours_to_cat3": null,
+      "landfalls": [],
+      "environment": {}
+    }
+  ],
+  "gaps": [],
+  "provenance": {
+    "archive_dir": "/home/user/category-alpha/data/genesis-archive",
+    "track_density_deg": 2.0
+  }
+}
