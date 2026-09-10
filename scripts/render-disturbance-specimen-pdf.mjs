@@ -58,6 +58,8 @@ const PROSPECT_TIERS = [
   { sel: ".say, .say *, .facts, .facts *", min: 8.5, tier: "body/callout" },
   /* TABLE / DETAIL -- labels, chart type, and the boundary strip. */
   { sel: ".eyebrow, .tag, .pt, .ct, .cv, .cl", min: 7.5, tier: "table/detail" },
+  { sel: ".gl, .gt, .gk .cap", min: 7.5, tier: "table/detail" },
+  { sel: ".gk .row, .gk .row *", min: 8.5, tier: "body/callout" },
   { sel: ".hold .b, .hold .b *", min: 7.5, tier: "table/detail" },
   /* FOOTER / LEGAL -- provenance, replay reference, the research-only notice. */
   { sel: "footer, footer *, .stamp, .stamp *", min: 7, tier: "footer/legal" },

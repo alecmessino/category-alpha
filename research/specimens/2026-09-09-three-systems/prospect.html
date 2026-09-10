@@ -49,14 +49,27 @@ h1{font-family:var(--fd);font-size:26pt;font-weight:700;line-height:.98;letter-s
 .stamp{font-family:var(--fm);font-size:8.5pt;line-height:1.55;text-align:right;color:var(--ink-3);
        white-space:nowrap;flex:0 0 auto}
 .stamp b{color:var(--ink);font-weight:600;letter-spacing:.08em}
-.finding{font-size:13pt;line-height:1.38;color:var(--ink-2);margin:14pt 0 0;max-width:6.4in}
+.finding{font-size:12pt;line-height:1.36;color:var(--ink-2);margin:11pt 0 0;max-width:7.4in}
 .finding b{color:var(--ink);font-weight:600}
 
-/* ---- region 1: the three-state plate ------------------------------------------------------ */
-.plate{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:18pt 0 0;
+/* ---- region 1: where the three systems are ------------------------------------------------ */
+.geo{display:grid;grid-template-columns:1fr 200px;gap:14pt;align-items:start;margin-top:13pt}
+.geo svg{margin:0}
+.gk{display:flex;flex-direction:column;gap:5pt;padding-top:1pt}
+.gk .row{display:flex;gap:6pt;align-items:flex-start;font-size:8.5pt;color:var(--ink-2);line-height:1.3}
+.gk .sw{flex:0 0 14pt;height:9pt;margin-top:1.5pt;border:.9pt solid var(--c);background:var(--c);
+        border-radius:1.5pt}
+.gk .sw.line{height:0;border:0;border-top:1.8pt solid var(--c);border-radius:0;margin-top:5.5pt}
+.gk .sw.hollow{background:color-mix(in srgb, var(--c) 13%, #fff)}
+.gk .cap{font-size:8pt;color:var(--ink-4);line-height:1.32;margin:1pt 0 0}
+.gl{font-family:var(--fm);font-size:8pt;fill:var(--ink-4)}
+.gt{font-family:var(--fm);font-size:8.5pt;font-weight:600}
+
+/* ---- region 2: the three-state plate ------------------------------------------------------ */
+.plate{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:13pt 0 0;
        border-top:.7pt solid var(--line-strong);border-bottom:.7pt solid var(--line-strong);
        flex:0 0 auto}
-.col{padding:12pt 13pt 13pt;display:flex;flex-direction:column;gap:9pt;border-left:.7pt solid var(--line)}
+.col{padding:10pt 13pt 11pt;display:flex;flex-direction:column;gap:7pt;border-left:.7pt solid var(--line)}
 .col:first-child{padding-left:0;border-left:0}
 .col:last-child{padding-right:0}
 .tag{font-family:var(--fm);font-size:8.5pt;letter-spacing:.12em;text-transform:uppercase;color:var(--c);font-weight:600}
@@ -68,7 +81,7 @@ h1{font-family:var(--fd);font-size:26pt;font-weight:700;line-height:.98;letter-s
          padding:6pt 0 0;border-top:2.5pt solid var(--c);min-height:calc(2.2em + 6pt)}
 .verdict.no{color:var(--refuse)}
 .verdict.yes{color:var(--publish)}
-.facts{font-family:var(--fm);font-size:10pt;color:var(--ink-2);line-height:1.55;
+.facts{font-family:var(--fm);font-size:10pt;color:var(--ink-2);line-height:1.45;
        font-variant-numeric:tabular-nums}
 .facts b{color:var(--ink);font-weight:600}
 .say{font-size:9.5pt;color:var(--ink-2);margin:0}
@@ -79,16 +92,16 @@ svg{display:block;width:100%;overflow:visible;margin-top:1pt}
 .cv{font-family:var(--fm);font-size:8pt;fill:var(--ink);font-variant-numeric:tabular-nums}
 .cl{font-family:var(--fm);font-size:8pt;fill:var(--ink-3)}
 
-/* ---- region 2: the refusal that holds across all three ----------------------------------- */
+/* ---- region 3: the refusal that holds across all three ----------------------------------- */
 .hold{margin-top:auto;border:.9pt solid var(--refuse);border-left:3.5pt solid var(--refuse);
-      background:#fdf5f4;padding:8pt 11pt;display:flex;gap:14pt;align-items:flex-start}
+      background:#fdf5f4;padding:7pt 10pt;display:flex;gap:14pt;align-items:flex-start}
 .hold .h{font-family:var(--fd);font-size:14pt;font-weight:700;color:var(--refuse);
          line-height:1.05;white-space:nowrap;padding-top:.5pt}
 .hold p{margin:0;font-size:10.5pt;line-height:1.42;color:var(--ink-2)}
 .hold .b{margin-top:6pt;font-family:var(--fm);font-size:9.5pt;letter-spacing:.02em;color:var(--ink-3)}
 .hold .b b{color:var(--ink);font-weight:600}
 
-footer{border-top:.7pt solid var(--line-strong);margin-top:9pt;padding-top:5pt;
+footer{border-top:.7pt solid var(--line-strong);margin-top:7pt;padding-top:4pt;
        font-family:var(--fm);font-size:7.5pt;line-height:1.5;color:var(--ink-4)}
 footer b{color:var(--ink-3);font-weight:500}
 </style></head><body><div class="sheet" id="root"></div>
@@ -110,47 +123,103 @@ function shortVerdict(v){
   return "CONDITIONAL RATES · NO COMPOSED NUMBER";
 }
 
+/* THE GEOMETRY BAND — the one place the three systems appear together, which is what the finding
+   is about. Drawn ENTIRELY from the frozen payload: the two NHC outlook rings as issued, the
+   three declared query cells with their 500 km radius, and Fourteen-E's own track. NO BASEMAP.
+   A coastline would need a source this specimen does not pin, and an unpinned coastline on a
+   plate that advertises eleven hashed inputs is exactly the kind of quiet exception the archive
+   exists to refuse. The graticule carries the geography instead. */
+const LON0=-154.5,LON1=-106.5,LAT0=7,LAT1=23,SC=9.6;
+const KX=Math.cos(((LAT0+LAT1)/2)*Math.PI/180);
+const MW=(LON1-LON0)*KX*SC, MH=(LAT1-LAT0)*SC;
+const mx=(lon)=>(lon-LON0)*KX*SC, my=(lat)=>(LAT1-lat)*SC;
+/* 500 km on the ground, in degrees, at the cell's own latitude. Drawn as the ellipse it is. */
+const KM_DEG=111.32;
+function geoMap(){
+  const g=S("svg",{viewBox:`0 0 ${MW} ${MH}`,role:"img","aria-label":
+    "eastern and central Pacific: the two NHC outlook areas, the three query cells, "
+    +"and Tropical Depression Fourteen-E's track"});
+  g.append(S("rect",{x:0,y:0,width:MW,height:MH,fill:"var(--sunken)",
+    stroke:"var(--line-strong)","stroke-width":.8}));
+  const marks=[];
+  for(let lon=-150;lon<=-110;lon+=10){
+    g.append(S("line",{x1:mx(lon),x2:mx(lon),y1:0,y2:MH,stroke:"var(--line)","stroke-width":.6}));
+    marks.push([mx(lon),MH-3,"middle",Math.abs(lon)+"°W"]);}
+  for(let lat=10;lat<=20;lat+=5){
+    g.append(S("line",{x1:0,x2:MW,y1:my(lat),y2:my(lat),stroke:"var(--line)","stroke-width":.6}));
+    marks.push([3,my(lat)-2.5,"start",lat+"°N"]);}
+  /* The outlook polygons, as NHC drew them. */
+  const ring=(r)=>r.map(([la,lo])=>`${mx(lo).toFixed(1)},${my(la).toFixed(1)}`).join(" ");
+  for(const[k,c]of[["d1","var(--d1)"],["d2","var(--d2)"]])
+    g.append(S("polygon",{points:ring(D.gtwo[k].rings[0]),fill:c,"fill-opacity":.11,
+      stroke:c,"stroke-width":1.1,"stroke-linejoin":"round"}));
+  /* Fourteen-E: the tropical best track from genesis, then NHC's forecast positions. */
+  g.append(S("polyline",{points:ring([[e.genesis.lat,e.genesis.lonE],[e.latestBest.lat,e.latestBest.lonE]]),
+    fill:"none",stroke:"var(--e14)","stroke-width":1.6}));
+  g.append(S("polyline",{points:ring([[e.latestBest.lat,e.latestBest.lonE],
+    ...e.forecast.map((r)=>[r.lat,r.lonE])]),fill:"none",stroke:"var(--e14)","stroke-width":1.3,
+    "stroke-dasharray":"3 2"}));
+  for(const r of e.forecast)
+    g.append(S("circle",{cx:mx(r.lonE),cy:my(r.lat),r:1.5,fill:"#fff",stroke:"var(--e14)","stroke-width":.9}));
+  /* The three declared query cells: centre and the 500 km radius each cohort was drawn inside. */
+  for(const[k,c]of[["d1","var(--d1)"],["d2","var(--d2)"],["fourteenE","var(--e14)"]]){
+    const q=A[k].query,ry=(q.radiusKm/KM_DEG)*SC,rx=ry*KX/Math.cos(q.lat*Math.PI/180);
+    g.append(S("ellipse",{cx:mx(q.lonE),cy:my(q.lat),rx,ry,fill:"none",stroke:c,
+      "stroke-width":.9,"stroke-dasharray":"2.5 2"}));
+    g.append(S("circle",{cx:mx(q.lonE),cy:my(q.lat),r:2.8,fill:c,stroke:"#fff","stroke-width":1}));}
+  for(const[k,lab,dx,dy,anch,c]of[["d1","D1",0,-14,"middle","var(--d1)"],
+                                   ["d2","D2",-8,-16,"end","var(--d2)"],
+                                   ["fourteenE","EP142026",6,24,"start","var(--e14)"]]){
+    const q=A[k].query;
+    g.append(S("text",{x:mx(q.lonE)+dx,y:my(q.lat)+dy,"text-anchor":anch,class:"gt",
+      fill:c,stroke:"#fff","stroke-width":2.4,"paint-order":"stroke"},lab));}
+  for(const[x,y,anch,t]of marks)
+    g.append(S("text",{x,y,"text-anchor":anch,class:"gl",stroke:"var(--sunken)","stroke-width":2.4,
+      "paint-order":"stroke"},t));
+  return g;
+}
+
 /* D1's chart is the gate itself: how far short the pool falls. Ten slots, three filled. */
 function gate(a){
-  const W=210,H=78,box=W/a.minSample,g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img",
+  const W=210,H=50,box=W/a.minSample,g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img",
     "aria-label":`${a.nCases} analog storms against a sample gate of ${a.minSample}`});
   for(let i=0;i<a.minSample;i++)
-    g.append(S("rect",{x:i*box+1,y:12,width:box-2,height:45,rx:2.5,
+    g.append(S("rect",{x:i*box+1,y:8,width:box-2,height:24,rx:2,
       fill:i<a.nCases?"var(--d1)":"#fff",stroke:i<a.nCases?"var(--d1)":"var(--line-strong)","stroke-width":.8}));
   g.append(S("text",{x:0,y:H-2,class:"cl"},a.nCases+" of "+a.minSample+" required"));
   return g;
 }
 /* D2's chart is what a sufficient pool supports: three thresholds, rate and interval. */
 function rates(a,hue,keys){
-  const W=210,rh=37,padL=34,padR=34,H=keys.length*rh+4;
+  const W=210,rh=25,padL=34,padR=34,H=keys.length*rh+4;
   const g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"share of analog storms reaching each threshold"});
   const x=(v)=>padL+(v/100)*(W-padL-padR);
   keys.forEach(([k,lab],i)=>{const o=a.levels[k],y=3+i*rh;
-    g.append(S("text",{x:padL-4,y:y+17,"text-anchor":"end",class:"ct"},lab));
-    g.append(S("rect",{x:padL,y:y+2,width:Math.max(1,x(o.rate)-padL),height:22,rx:2.5,fill:hue}));
-    g.append(S("line",{x1:x(o.ci[0]),x2:x(o.ci[1]),y1:y+13,y2:y+13,stroke:"#475569","stroke-width":.9}));
-    for(const q of o.ci)g.append(S("line",{x1:x(q),x2:x(q),y1:y+7,y2:y+19,stroke:"#475569","stroke-width":.9}));
-    g.append(S("text",{x:W-padR+4,y:y+17,class:"cv"},o.rate.toFixed(0)+"%"));});
+    g.append(S("text",{x:padL-4,y:y+13,"text-anchor":"end",class:"ct"},lab));
+    g.append(S("rect",{x:padL,y:y+2,width:Math.max(1,x(o.rate)-padL),height:15,rx:2,fill:hue}));
+    g.append(S("line",{x1:x(o.ci[0]),x2:x(o.ci[1]),y1:y+9.5,y2:y+9.5,stroke:"#475569","stroke-width":.9}));
+    for(const q of o.ci)g.append(S("line",{x1:x(q),x2:x(q),y1:y+4,y2:y+15,stroke:"#475569","stroke-width":.9}));
+    g.append(S("text",{x:W-padR+4,y:y+13,class:"cv"},o.rate.toFixed(0)+"%"));});
   return g;
 }
 /* E14's chart is the only thing a formed cyclone adds: a clock both sides can be read on. */
 function timing(a,f){
-  const t=a.timeToEvent.cat1,W=210,H=122,pad=8;
-  const hi=Math.max(t.p90,f.clock.elapsedHours)*1.06,x=(h)=>pad+(h/hi)*(W-pad*2),y=68;
+  const t=a.timeToEvent.cat1,W=210,H=70,pad=8;
+  const hi=Math.max(t.p90,f.clock.elapsedHours)*1.06,x=(h)=>pad+(h/hi)*(W-pad*2),y=38;
   const g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img",
     "aria-label":"hours from genesis to hurricane strength, historical spread and forecast"});
-  for(let h=0;h<=hi;h+=48){g.append(S("line",{x1:x(h),x2:x(h),y1:28,y2:y+20,stroke:"var(--line)","stroke-width":.6}));
-    g.append(S("text",{x:x(h),y:y+32,"text-anchor":"middle",class:"ct"},"+"+h+"h"));}
+  for(let h=0;h<=hi;h+=48){g.append(S("line",{x1:x(h),x2:x(h),y1:19,y2:y+11,stroke:"var(--line)","stroke-width":.6}));
+    g.append(S("text",{x:x(h),y:y+21,"text-anchor":"middle",class:"ct"},"+"+h+"h"));}
   g.append(S("line",{x1:x(t.p10),x2:x(t.p90),y1:y,y2:y,stroke:"var(--e14)","stroke-width":1}));
-  for(const q of[t.p10,t.p90])g.append(S("line",{x1:x(q),x2:x(q),y1:y-9,y2:y+9,stroke:"var(--e14)","stroke-width":1.2}));
-  g.append(S("rect",{x:x(t.p25),y:y-16,width:x(t.p75)-x(t.p25),height:32,rx:3,
+  for(const q of[t.p10,t.p90])g.append(S("line",{x1:x(q),x2:x(q),y1:y-5,y2:y+5,stroke:"var(--e14)","stroke-width":1.1}));
+  g.append(S("rect",{x:x(t.p25),y:y-9,width:x(t.p75)-x(t.p25),height:18,rx:2,
     fill:"var(--e14)","fill-opacity":".22",stroke:"var(--e14)","stroke-width":.8}));
-  g.append(S("line",{x1:x(t.median),x2:x(t.median),y1:y-18,y2:y+18,stroke:"var(--e14)","stroke-width":2.4}));
-  g.append(S("text",{x:x(t.median),y:y-22,"text-anchor":"middle",class:"cv"},"median +"+t.median+"h"));
+  g.append(S("line",{x1:x(t.median),x2:x(t.median),y1:y-11,y2:y+11,stroke:"var(--e14)","stroke-width":2}));
+  g.append(S("text",{x:x(t.median),y:y-14,"text-anchor":"middle",class:"cv"},"median +"+t.median+"h"));
   const fx=x(f.clock.elapsedHours);
-  g.append(S("line",{x1:fx,x2:fx,y1:18,y2:y+18,stroke:"var(--ink)","stroke-width":1,"stroke-dasharray":"2 1.6"}));
-  g.append(S("circle",{cx:fx,cy:y,r:4,fill:"var(--ink)"}));
-  g.append(S("text",{x:W-3,y:11,"text-anchor":"end",class:"cv"},"forecast +"+f.clock.elapsedHours+"h"));
+  g.append(S("line",{x1:fx,x2:fx,y1:13,y2:y+11,stroke:"var(--ink)","stroke-width":1,"stroke-dasharray":"2 1.6"}));
+  g.append(S("circle",{cx:fx,cy:y,r:3,fill:"var(--ink)"}));
+  g.append(S("text",{x:W-3,y:9,"text-anchor":"end",class:"cv"},"forecast +"+f.clock.elapsedHours+"h"));
   return g;
 }
 
@@ -169,6 +238,20 @@ r.append($("p",{class:"finding",html:
   + "none of them does the archive turn what it knows into a probability for the live system."}));
 
 /* ---- REGION 1 --------------------------------------------------------------------------- */
+r.append($("div",{class:"geo"},
+  geoMap(),
+  $("div",{class:"gk"},
+    $("div",{class:"row",style:"--c:var(--d1)"},$("span",{class:"sw hollow"}),
+      $("span",{},"D1 outlook area")),
+    $("div",{class:"row",style:"--c:var(--d2)"},$("span",{class:"sw hollow"}),
+      $("span",{},"D2 outlook area")),
+    $("div",{class:"row",style:"--c:var(--e14)"},$("span",{class:"sw line"}),
+      $("span",{},"Fourteen-E track, then forecast")),
+    $("p",{class:"cap"},`Dashed ring: the ${A.d1.query.radiusKm} km query cell each cohort was drawn `
+      + `inside. Polygons as NHC issued them, ${D.gtwo.issued.slice(6,8)}/${D.gtwo.issued.slice(8,12)}Z. `
+      + `Geometry from the pinned sources; no basemap is drawn.`))));
+
+/* ---- REGION 2 --------------------------------------------------------------------------- */
 const plate=$("div",{class:"plate"});
 
 /* D1 — the pool is short, so the answer is a refusal. */
@@ -216,7 +299,7 @@ plate.append($("div",{class:"col",style:"--c:var(--e14)"},
   $("p",{class:"say"},"Inside the historical distribution, not beyond it.")));}
 r.append(plate);
 
-/* ---- REGION 2 --------------------------------------------------------------------------- */
+/* ---- REGION 3 --------------------------------------------------------------------------- */
 r.append($("div",{class:"hold"},
   $("div",{class:"h"},"NO COMPOSED",$("br"),"NUMBER"),
   $("div",{},
