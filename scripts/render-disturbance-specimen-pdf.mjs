@@ -32,7 +32,7 @@
  */
 import { chromium } from "playwright";
 import { createServer } from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { extname, join, resolve } from "node:path";
 
 const DIR = resolve("research/specimens/2026-09-09-three-systems");
@@ -199,6 +199,36 @@ await page.pdf({ path: OUT, printBackground: true, preferCSSPageSize: true });
 await page.close();
 await browser.close();
 srv.close();
+
+/* STAMP THE PDF WITH THE FREEZE TIME, NOT THE RENDER TIME.
+ *
+ * Chromium writes a wall-clock /CreationDate and /ModDate, so two renders of the same frozen
+ * payload differ in four bytes and the specimen stops reproducing itself. The rest of the
+ * specimen already resolved this -- builtAt is the manifest's frozenAt -- and the PDF is the one
+ * artefact that had not. The replacement is length-for-length, so no xref offset moves; the
+ * lengths are asserted rather than assumed, because a shifted offset would corrupt the file
+ * silently and the corruption would ship. */
+{
+  const M = JSON.parse(await readFile(join(DIR, "MANIFEST.json"), "utf8"));
+  const d = new Date(M.frozenAt);
+  const p2 = (n) => String(n).padStart(2, "0");
+  const stamp = `D:${d.getUTCFullYear()}${p2(d.getUTCMonth() + 1)}${p2(d.getUTCDate())}`
+    + `${p2(d.getUTCHours())}${p2(d.getUTCMinutes())}${p2(d.getUTCSeconds())}+00'00'`;
+  const raw = await readFile(OUT);
+  let text = raw.toString("latin1"), hits = 0;
+  text = text.replace(/\/(CreationDate|ModDate)\s*\(([^)]*)\)/g, (whole, key, was) => {
+    if (was.length !== stamp.length)
+      throw new Error(`refusing to rewrite /${key}: "${was}" is ${was.length} bytes, `
+        + `"${stamp}" is ${stamp.length} -- a length change would move every xref offset`);
+    hits++;
+    return `/${key} (${stamp})`;
+  });
+  if (hits === 0) throw new Error("no /CreationDate or /ModDate in the PDF: the reproducibility "
+    + "rewrite found nothing, so this build is not reproducible and is not silently passing");
+  const out = Buffer.from(text, "latin1");
+  if (out.length !== raw.length) throw new Error("PDF length changed during the date rewrite");
+  await writeFile(OUT, out);
+}
 
 const buf = await readFile(OUT);
 const m = /\/Type\s*\/Pages[\s\S]*?\/Count\s+(\d+)/.exec(buf.toString("latin1"));
