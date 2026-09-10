@@ -1,24 +1,24 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-10T11:15:58.124Z",
+  "ranAt": "2026-09-10T13:05:29.441Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "a3b56c9d48af676bdce4c07336ae67db3eb368fe",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/34470285208",
+  "sha": "a165233613b005959fd1ff264beae1e93f2516b9",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/34480399175",
   "ok": false,
   "passed": 44,
   "total": 46,
   "failures": [
     {
-      "check": "served snapshot is fresh",
-      "detail": "2026-09-10T08:23:31.036Z · 172m old"
+      "check": "every consensus in the snapshot reaches the newest frame",
+      "detail": "0/2 frame(s) carry a consensus peak against 2 in the snapshot · 0 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "all markets carried",
       "detail": "300 contracts · 51 series · droppedForCap=17"
     }
   ],
-  "thirdPartyFailures": 12,
+  "thirdPartyFailures": 8,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -37,8 +37,8 @@
     },
     {
       "check": "served snapshot is fresh",
-      "pass": false,
-      "detail": "2026-09-10T08:23:31.036Z · 172m old"
+      "pass": true,
+      "detail": "2026-09-10T13:01:02.177Z · 4m old"
     },
     {
       "check": "renders: Situation",
@@ -98,12 +98,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "5 ranked of 10 candidates · 107/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "8 ranked of 17 candidates · 108/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 17 displayed-only · unverifiable=0"
+      "detail": "0 executable · 13 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -128,7 +128,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 1.9 screens tall (2667px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 759px · ▾ 698px · BANKROLL 665px"
+      "detail": "3 tabs · Situation is 1.9 screens tall (2700px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 792px · ▾ 698px · BANKROLL 698px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -148,32 +148,32 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": true,
-      "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 5 advisory change(s) · 0 moved P · 3 pinned at the clamp · 5 register row(s) · situation P=73% at adv #2"
+      "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 7 advisory change(s) · 1 moved P · 4 pinned at the clamp · 7 register row(s) · situation P=67% at adv #3"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
-      "pass": true,
-      "detail": "2/2 frame(s) carry a consensus peak against 2 in the snapshot · 2 carry its cycle · frame is 3m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "pass": false,
+      "detail": "0/2 frame(s) carry a consensus peak against 2 in the snapshot · 0 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 2 calibrated, 2 with the official estimate beside it · strip: quality=LOW lag=347m raw=77%"
+      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 3 calibrated, 3 with the official estimate beside it · strip: quality=LOW lag=232m raw=67%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
       "pass": true,
-      "detail": "2/2 calibrated contract(s) publish the raw official estimate"
+      "detail": "3/3 calibrated contract(s) publish the raw official estimate"
     },
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "6 guidance cycle(s) turned over → 6 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 4 P-update row(s) · 3 SHIPS · 1 pass · strip arrivals=6"
+      "detail": "6 guidance cycle(s) turned over → 8 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 7 P-update row(s) · 4 SHIPS · 2 pass · strip arrivals=13"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: past the 180-min line — Fourteen-E 347m, Lowell 348m · 0 row(s), 0 held, 0 TAKE · forced: 2 anchored row(s) pushed past it → 0 HOLD, 2 SUSPECT, 0 ACTIONABLE · 10 stale-crossing row(s) in the register"
+      "detail": "live: past the 180-min line — Norbert 232m, Lowell 241m · 0 row(s), 0 held, 0 TAKE · forced: 3 anchored row(s) pushed past it → 0 HOLD, 3 SUSPECT, 0 ACTIONABLE · 9 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
@@ -183,7 +183,7 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-09-10T00:00:00Z"
+      "detail": "cycle 2026-09-10T06:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
