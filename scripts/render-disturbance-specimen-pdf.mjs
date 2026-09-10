@@ -72,11 +72,26 @@ const DENSITY = {
   substantiveFloorPt: 7.5, // nothing but footer/legal may sit below this
 };
 
+/* CONTENT TYPES ARE LOAD-BEARING, NOT COSMETIC.
+   Chromium refuses a stylesheet served with a non-CSS MIME type in standards mode, silently.
+   Serving fonts/fonts.css as application/octet-stream meant the pinned webfaces never loaded
+   in the render that produces the PDF -- the sheet fell back to Helvetica, the gate measured
+   fallback metrics, and the PDF shipped in the wrong type while every screenshot taken through
+   a correctly-typed server looked right. Every extension the sheet can request is named here. */
+const CONTENT_TYPE = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".woff2": "font/woff2",
+  ".woff": "font/woff",
+  ".ttf": "font/ttf",
+  ".json": "application/json",
+  ".svg": "image/svg+xml",
+};
 const srv = createServer(async (rq, rs) => {
   const p = decodeURIComponent(rq.url.split("?")[0]);
   try {
     const b = await readFile(join(DIR, p));
-    rs.writeHead(200, { "content-type": extname(p) === ".html" ? "text/html; charset=utf-8" : "application/octet-stream" });
+    rs.writeHead(200, { "content-type": CONTENT_TYPE[extname(p)] || "application/octet-stream" });
     rs.end(b);
   } catch { rs.writeHead(404); rs.end("404"); }
 });
@@ -217,6 +232,11 @@ const shape = await page.evaluate(() => ({
     .filter((el) => !el.matches(".head, .deck, .rule, footer"))
     .map((el) => el.className || el.tagName),
   methods: document.querySelectorAll(".method").length,
+  /* A panel title is set nowrap so it cannot hyphen-break. That turns "too long" from a quiet
+     bad line-break into a silent overflow, so the overflow is what gets asserted. */
+  clipped: [...document.querySelectorAll(".atitle")]
+    .filter((el) => el.scrollWidth > el.clientWidth + 1)
+    .map((el) => el.textContent.trim()),
   /* Chrome the note is not allowed to grow back. Uppercase is reserved for timestamps, n/N, ESS
      and hashes, which live in the mono classes; a shouting heading or finding is what this
      catches, and it is the first thing that creeps back when a note is edited in a hurry. */
@@ -227,6 +247,8 @@ const shape = await page.evaluate(() => ({
 ok(`prospect: <= ${DENSITY.maxRegions} content regions below the masthead (${shape.regions.length}: `
    + `${shape.regions.join(", ")})`, shape.regions.length <= DENSITY.maxRegions);
 ok(`prospect: exactly one method line (${shape.methods})`, shape.methods === 1);
+ok("prospect: every panel title fits its column on one line", shape.clipped.length === 0,
+   shape.clipped.join(" | "));
 ok("prospect: no all-caps headings or findings", shape.shout.length === 0,
    shape.shout.slice(0, 3).join(" | "));
 
