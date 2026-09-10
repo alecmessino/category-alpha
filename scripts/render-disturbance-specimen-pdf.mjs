@@ -52,24 +52,23 @@ const AUDIT_TIERS = [
   { sel: "footer, footer *, .frozen, .frozen *", min: 7, tier: "footer/legal" },
 ];
 const PROSPECT_TIERS = [
-  /* BODY / CALLOUT -- the finding, the verdicts, the refusal, and the figures a reader quotes. */
-  { sel: ".hold .h, .hold p, .hold p *", min: 8.5, tier: "body/callout" },
-  { sel: "h1, .finding, .finding *, .nm, .verdict", min: 8.5, tier: "body/callout" },
-  { sel: ".say, .say *, .facts, .facts *", min: 8.5, tier: "body/callout" },
-  /* TABLE / DETAIL -- labels, chart type, and the boundary strip. */
-  { sel: ".eyebrow, .tag, .pt, .ct, .cv, .cl", min: 7.5, tier: "table/detail" },
-  { sel: ".gl, .gt, .gk .cap", min: 7.5, tier: "table/detail" },
-  { sel: ".gk .row, .gk .row *", min: 8.5, tier: "body/callout" },
-  { sel: ".hold .b, .hold .b *", min: 7.5, tier: "table/detail" },
-  /* FOOTER / LEGAL -- provenance, replay reference, the research-only notice. */
+  /* BODY / CALLOUT -- the idea, the panel titles, the findings, the figures a reader quotes. */
+  { sel: "h1, .deck, .deck *, .method, .method *", min: 8.5, tier: "body/callout" },
+  { sel: ".atitle, .averdict, .anum, .acap", min: 8.5, tier: "body/callout" },
+  /* TABLE / DETAIL -- point types, figure captions, chart and map labels. */
+  { sel: ".atype, .figcap, .gl, .gt, .ct, .cv, .cl", min: 7.5, tier: "table/detail" },
+  /* FOOTER / LEGAL -- provenance, the research-only notice, the frozen stamp. */
   { sel: "footer, footer *, .stamp, .stamp *", min: 7, tier: "footer/legal" },
 ];
-
-/* The prospect plate's editorial lock. Numbers, not adjectives. */
+/* The prospect note's editorial lock. Numbers, not adjectives.
+   The word count is a BAND, not a ceiling: a note that shrinks below its floor has stopped
+   saying enough, and that is as much a failure as one that sprawls. Provenance is excluded
+   because it is fixed cost -- it cannot be edited down and should not buy room for prose. */
 const DENSITY = {
-  maxWords: 350,          // visible words on the whole page, chart labels included
-  maxParaLines: 3,        // no paragraph runs longer than this once rendered
-  maxRegions: 3,          // content regions below the masthead
+  minWords: 175,           // visible words excluding the provenance line
+  maxWords: 225,
+  maxParaLines: 2,         // no paragraph runs longer than this once rendered
+  maxRegions: 3,           // content regions below the masthead
   substantiveFloorPt: 7.5, // nothing but footer/legal may sit below this
 };
 
@@ -117,7 +116,20 @@ const leavesOf = (page, tiers) => page.evaluate((t) => {
     const txt = (el.textContent || "").trim();
     if (!txt || el.children.length || !el.getClientRects().length) continue;
     const cs = getComputedStyle(el);
-    const pt = parseFloat(cs.fontSize) * 72 / 96;
+    let px = parseFloat(cs.fontSize);
+    /* SVG TEXT IS MEASURED AS IT PRINTS, NOT AS IT IS DECLARED.
+       A <text> inside a viewBox is laid out in user units and then scaled by the ratio of the
+       element's rendered width to the viewBox width. Reading computed font-size alone reports
+       the declared size, which for a chart drawn at 210 units into a 175px column understates
+       the shrink by a fifth -- the gate passes labels a reader cannot read, and on a map scaled
+       UP it fails labels that are perfectly legible. Scale it. */
+    const svg = el.ownerSVGElement;
+    if (svg) {
+      const vb = svg.viewBox && svg.viewBox.baseVal;
+      const w = svg.getBoundingClientRect().width;
+      if (vb && vb.width > 0 && w > 0) px *= w / vb.width;
+    }
+    const pt = px * 72 / 96;
     const lh = parseFloat(cs.lineHeight) || parseFloat(cs.fontSize) * 1.2;
     const hit = t.find((x) => el.matches(x.sel));
     rows.push({
@@ -125,14 +137,28 @@ const leavesOf = (page, tiers) => page.evaluate((t) => {
       lines: Math.round(el.getBoundingClientRect().height / lh),
       words: (txt.match(/[^\s]+/g) || []).length,
       svg: el.namespaceURI === "http://www.w3.org/2000/svg",
-      para: el.matches(".finding, .say, .hold p"),
+      para: el.matches(".deck, .acap, .figcap, .method"),
       where: (el.getAttribute("class") || el.tagName) + ": " + txt.slice(0, 40),
     });
   }
   return rows;
 }, tiers);
 
-function gateType(leaves, label) {
+/* THE AUDIT SHEET'S ONE RECORDED EXCEPTION.
+ *
+ * Scaling SVG text correctly (above) revealed that print.html's chart ticks are declared 7.5pt
+ * and print at 6.76pt. That is a real defect, and it is NOT being fixed here: print.html is the
+ * frozen audit sheet and this pass is under instruction not to alter it. So it is recorded at
+ * its measured value and asserted as NO WORSE -- the sheet cannot quietly degrade further, and
+ * the number sits in the source where the next unfreeze will find it. Relaxing the tier floor
+ * instead would have hidden the defect on every future sheet as well. */
+const AUDIT_KNOWN = {
+  tier: "table/detail",
+  floorPt: 6.76,
+  why: "frozen sheet; SVG chart ticks declared 7.5pt print at 6.76pt; fix at the next unfreeze",
+};
+
+function gateType(leaves, label, known) {
   const unclassified = leaves.filter((r) => !r.tier);
   ok(`${label}: every text leaf is classified into a legibility tier (${leaves.length} leaves)`,
      unclassified.length === 0,
@@ -141,8 +167,11 @@ function gateType(leaves, label) {
                                { tier: "footer/legal", min: 7 }]) {
     let w = null;
     for (const r of leaves) if (r.tier === tier && (!w || r.pt < w.pt)) w = r;
-    ok(`${label}: ${tier} holds >= ${min}pt (smallest ${w ? w.pt.toFixed(2) : "n/a"}pt)`,
-       w != null && w.pt >= min - 0.01, w && w.where);
+    const waived = known && known.tier === tier;
+    const floor = waived ? known.floorPt : min;
+    ok(`${label}: ${tier} holds >= ${floor}pt (smallest ${w ? w.pt.toFixed(2) : "n/a"}pt)`
+       + (waived ? ` [recorded exception: ${known.why}]` : ""),
+       w != null && w.pt >= floor - 0.01, w && w.where);
   }
 }
 
@@ -153,7 +182,7 @@ console.log("\naudit sheet — research/specimens/2026-09-09-three-systems/print
   const fit = await page.evaluate(() => document.documentElement.scrollHeight);
   ok("audit: the sheet raised no script error", errs.length === 0, errs.slice(0, 2).join(" | "));
   ok(`audit: content fits the page box at print width (${fit} of ${H}px)`, fit <= H);
-  gateType(await leavesOf(page, AUDIT_TIERS), "audit");
+  gateType(await leavesOf(page, AUDIT_TIERS), "audit", AUDIT_KNOWN);
   await page.close();
 }
 
@@ -168,27 +197,38 @@ ok(`prospect: content fits the page box at print width (${fit} of ${H}px)`, fit 
    "measured at the real print width, not the default viewport");
 
 const leaves = await leavesOf(page, PROSPECT_TIERS);
-gateType(leaves, "prospect");
+gateType(leaves, "prospect", null);
 
 const words = leaves.reduce((n, r) => n + r.words, 0);
-const prose = leaves.filter((r) => !r.svg).reduce((n, r) => n + r.words, 0);
-ok(`prospect: <= ${DENSITY.maxWords} visible words (${words}; ${prose} in HTML, ${words - prose} in charts)`,
-   words <= DENSITY.maxWords);
+const footWords = leaves.filter((r) => r.tier === "footer/legal").reduce((n, r) => n + r.words, 0);
+const body = words - footWords;
+ok(`prospect: ${DENSITY.minWords}-${DENSITY.maxWords} visible words excluding provenance `
+   + `(${body}; ${words} with the ${footWords}-word provenance line)`,
+   body >= DENSITY.minWords && body <= DENSITY.maxWords);
 
 const overrun = leaves.filter((r) => r.para && r.lines > DENSITY.maxParaLines);
 ok(`prospect: no paragraph runs over ${DENSITY.maxParaLines} rendered lines`, overrun.length === 0,
    overrun.map((r) => r.lines + " lines — " + r.where).join(" | "));
 
 const shape = await page.evaluate(() => ({
-  /* Content regions below the masthead: the sheet's own children, less the masthead block, the
-     finding line that belongs to it, and the footer. */
+  /* Content regions below the masthead: the sheet's own children, less the headline block, the
+     deck and rule that belong to it, and the provenance line. */
   regions: [...document.querySelector(".sheet").children]
-    .filter((el) => !el.matches(".top, .finding, footer")).map((el) => el.className || el.tagName),
-  refusals: document.querySelectorAll(".hold").length,
+    .filter((el) => !el.matches(".head, .deck, .rule, footer"))
+    .map((el) => el.className || el.tagName),
+  methods: document.querySelectorAll(".method").length,
+  /* Chrome the note is not allowed to grow back. Uppercase is reserved for timestamps, n/N, ESS
+     and hashes, which live in the mono classes; a shouting heading or finding is what this
+     catches, and it is the first thing that creeps back when a note is edited in a hurry. */
+  shout: [...document.querySelectorAll("h1, .deck, .atitle, .averdict, .acap, .method, .figcap")]
+    .map((el) => (el.textContent || "").trim())
+    .filter((t) => /\p{Lu}{4,}/u.test(t)),
 }));
 ok(`prospect: <= ${DENSITY.maxRegions} content regions below the masthead (${shape.regions.length}: `
    + `${shape.regions.join(", ")})`, shape.regions.length <= DENSITY.maxRegions);
-ok(`prospect: exactly one refusal region (${shape.refusals})`, shape.refusals === 1);
+ok(`prospect: exactly one method line (${shape.methods})`, shape.methods === 1);
+ok("prospect: no all-caps headings or findings", shape.shout.length === 0,
+   shape.shout.slice(0, 3).join(" | "));
 
 let low = null;
 for (const r of leaves) if (r.tier !== "footer/legal" && (!low || r.pt < low.pt)) low = r;

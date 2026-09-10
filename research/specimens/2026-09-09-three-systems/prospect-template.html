@@ -1,109 +1,95 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <title>Storm Atlas — Three Systems, Three Answers — 2026-09-09</title>
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
-/* PROSPECT PLATE — one Letter page, one finding, light only.
+/* PROSPECT PLATE — one Letter page, one idea, set as a research note rather than a dashboard.
  *
- * This is an EDITORIAL REDUCTION of print-template.html. It reads the SAME frozen payload and
- * changes no number, no cohort, no query point and no source. What it changes is what a reader
- * is asked to carry: print.html is the audit sheet and prints the evidence a researcher would
- * check; this plate prints the finding a prospect must understand in ten seconds.
+ * Reads the SAME frozen payload as print.html and changes no number, no cohort, no query point
+ * and no source. print.html and snapshot.html remain the full audit versions; this is the sheet
+ * a reader is handed.
  *
- * THE FINDING, and the only thing on this page that is allowed to compete for attention:
- *   three atmospheric states produce three legitimate answers, and in none of them does the
- *   archive convert its output into a probability for the live system.
+ * THE IDEA, and the only thing allowed to compete for attention:
+ *   three atmospheric states, three legitimate Storm Atlas answers, and none of them is a
+ *   probability for the live system.
  *
- * DENSITY LOCK, asserted in scripts/render-prospect-plate.mjs and not merely intended here:
- *   <= 350 visible words on the whole page; no paragraph over three rendered lines;
- *   <= 3 content regions below the masthead; one refusal; provenance in two footer lines.
- * Anything useful but not load-bearing for that ten-second read stays in print.html and
- * snapshot.html, which remain the full audit versions.
+ * THE ORDER IS THE ARGUMENT: headline, then the map, then the three answers, then one
+ * methodological sentence, then provenance. The map is dominant and each object on it is
+ * coloured to the panel beneath it, so the correspondence is read rather than explained.
  *
- * Each column carries ONE chart, and the chart is the reason for that column's answer:
- *   D1  pool against the sample gate      -> why the answer is a refusal
- *   D2  three conditional thresholds      -> what a sufficient pre-genesis pool supports
- *   E14 time-to-hurricane distribution    -> what a formed cyclone adds, and nothing more
+ * TEXT IS RESIDUAL. Anything a chart already shows is cut, not restated. The density lock in
+ * scripts/render-disturbance-specimen-pdf.mjs asserts it on the rendered page: 175-225 visible
+ * words excluding provenance, no paragraph over two lines, three regions below the masthead,
+ * one method line. A note drifts back into documentation one useful sentence at a time.
+ *
+ * TYPE. Source Serif 4 for the headline and deck; Public Sans for body, panel titles and
+ * findings; Source Code Pro at caption size for coordinates, times, n/N, ESS and hashes only.
+ * All three are pinned in fonts/ and hashed in fonts/FONTS.sha256 -- the previous sheet named
+ * IBM Plex, which is not installed here, so every render had silently fallen back to Arial
+ * Narrow and Helvetica. They are typography, not evidence, so they are deliberately NOT in
+ * MANIFEST.json, which pins the eleven data inputs.
  */
-@page { size: Letter; margin: 0.5in 0.55in 0.45in; }
+@page { size: Letter; margin: 0.62in 0.62in 0.5in; }
 :root{
-  --ink:#0f172a; --ink-2:#334155; --ink-3:#64748b; --ink-4:#94a3b8;
-  --line:#e2e8f0; --line-strong:#cbd5e1; --sunken:#f8fafc;
-  --d1:#7c3aed; --d2:#b45309; --e14:#0284c7;
-  --refuse:#dc2626; --publish:#15803d;
-  --fd:"IBM Plex Sans Condensed",Arial Narrow,sans-serif;
-  --fb:"IBM Plex Sans",Helvetica,Arial,sans-serif;
-  --fm:"IBM Plex Mono",Menlo,Consolas,monospace;
+  --ink:#12181f; --ink-2:#3c4854; --ink-3:#6b7885; --ink-4:#9aa5b1;
+  --line:#e6eaee; --line-strong:#c3ccd5; --sunken:#fafbfc;
+  --d1:#6d3fc4; --d2:#a8551a; --e14:#0a6ea8;
+  --serif:"Source Serif 4",Georgia,serif;
+  --sans:"Public Sans",Helvetica,Arial,sans-serif;
+  --mono:"Source Code Pro",Menlo,Consolas,monospace;
 }
 *{box-sizing:border-box}
-html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:var(--fb);
-          font-size:8.5pt;line-height:1.35;-webkit-font-smoothing:antialiased;height:100%}
-/* The sheet is the page. Without this the flex column collapses to its content and every
-   pt of slack lands in one dead band at the foot instead of between the regions. */
+html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:var(--sans);
+          font-size:9.5pt;line-height:1.42;-webkit-font-smoothing:antialiased;height:100%}
 .sheet{display:flex;flex-direction:column;min-height:100%}
 
-/* ---- masthead ---------------------------------------------------------------------------- */
-.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16pt;
-     border-bottom:2pt solid var(--ink);padding-bottom:5pt}
-.eyebrow{font-family:var(--fm);font-size:8.5pt;letter-spacing:.14em;text-transform:uppercase;
-         color:var(--ink-3);margin:0 0 6pt}
-h1{font-family:var(--fd);font-size:26pt;font-weight:700;line-height:.98;letter-spacing:-.015em;margin:0}
-.stamp{font-family:var(--fm);font-size:8.5pt;line-height:1.55;text-align:right;color:var(--ink-3);
-       white-space:nowrap;flex:0 0 auto}
-.stamp b{color:var(--ink);font-weight:600;letter-spacing:.08em}
-.finding{font-size:12pt;line-height:1.36;color:var(--ink-2);margin:11pt 0 0;max-width:7.4in}
-.finding b{color:var(--ink);font-weight:600}
+/* ---- masthead ------------------------------------------------------------------------- */
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:24pt}
+h1{font-family:var(--serif);font-size:26pt;font-weight:600;line-height:1.06;
+   letter-spacing:-.008em;margin:0}
+.stamp{font-family:var(--mono);font-size:7.5pt;color:var(--ink-3);white-space:nowrap;flex:0 0 auto}
+.deck{font-family:var(--serif);font-size:12.5pt;line-height:1.45;color:var(--ink-2);
+      margin:8pt 0 0;max-width:6.3in}
+.rule{border:0;border-top:.8pt solid var(--ink);margin:9pt 0 0}
 
-/* ---- region 1: where the three systems are ------------------------------------------------ */
-.geo{display:grid;grid-template-columns:1fr 200px;gap:14pt;align-items:start;margin-top:13pt}
-.geo svg{margin:0}
-.gk{display:flex;flex-direction:column;gap:5pt;padding-top:1pt}
-.gk .row{display:flex;gap:6pt;align-items:flex-start;font-size:8.5pt;color:var(--ink-2);line-height:1.3}
-.gk .sw{flex:0 0 14pt;height:9pt;margin-top:1.5pt;border:.9pt solid var(--c);background:var(--c);
-        border-radius:1.5pt}
-.gk .sw.line{height:0;border:0;border-top:1.8pt solid var(--c);border-radius:0;margin-top:5.5pt}
-.gk .sw.hollow{background:color-mix(in srgb, var(--c) 13%, #fff)}
-.gk .cap{font-size:8pt;color:var(--ink-4);line-height:1.32;margin:1pt 0 0}
-.gl{font-family:var(--fm);font-size:8pt;fill:var(--ink-4)}
-.gt{font-family:var(--fm);font-size:8.5pt;font-weight:600}
+/* ---- the map ------------------------------------------------------------------------- */
+.fig{margin-top:13pt}
+.fig svg{display:block;width:100%;overflow:visible}
+.figcap{font-size:8.5pt;line-height:1.4;color:var(--ink-3);margin:6pt 0 0;max-width:6.4in}
+/* CHART TYPE IS DECLARED AT THE SIZE IT PRINTS.
+   A <text> inside a viewBox is laid out in user units and then scaled by rendered-width over
+   viewBox-width, so `font-size:8pt` on a map scaled UP prints far larger and on a panel chart
+   scaled DOWN prints far smaller -- these labels were declared 7.5pt and printing 6.07pt.
+   --k is that ratio, inverted, measured after layout; every chart size is stated as the size a
+   reader actually gets. */
+.gl{font-family:var(--mono);font-size:calc(8pt * var(--k,1));fill:var(--ink-4)}
+.gt{font-family:var(--sans);font-size:calc(10.5pt * var(--k,1));font-weight:600}
 
-/* ---- region 2: the three-state plate ------------------------------------------------------ */
-.plate{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:13pt 0 0;
-       border-top:.7pt solid var(--line-strong);border-bottom:.7pt solid var(--line-strong);
-       flex:0 0 auto}
-.col{padding:10pt 13pt 11pt;display:flex;flex-direction:column;gap:7pt;border-left:.7pt solid var(--line)}
-.col:first-child{padding-left:0;border-left:0}
-.col:last-child{padding-right:0}
-.tag{font-family:var(--fm);font-size:8.5pt;letter-spacing:.12em;text-transform:uppercase;color:var(--c);font-weight:600}
-.nm{font-family:var(--fd);font-size:16pt;font-weight:600;line-height:1.12;margin-top:-2pt;
-    min-height:2.24em}
-.pt{font-family:var(--fm);font-size:8pt;letter-spacing:.05em;color:var(--ink-4);line-height:1.35;
-    min-height:2.7em}
-.verdict{font-family:var(--fd);font-size:12pt;font-weight:700;line-height:1.1;letter-spacing:-.005em;
-         padding:6pt 0 0;border-top:2.5pt solid var(--c);min-height:calc(2.2em + 6pt)}
-.verdict.no{color:var(--refuse)}
-.verdict.yes{color:var(--publish)}
-.facts{font-family:var(--fm);font-size:10pt;color:var(--ink-2);line-height:1.45;
-       font-variant-numeric:tabular-nums}
-.facts b{color:var(--ink);font-weight:600}
-.say{font-size:9.5pt;color:var(--ink-2);margin:0}
-.say+.say{margin-top:-4pt;color:var(--ink-3)}
-.col>.say:last-child{margin-top:auto;padding-top:6pt}
-svg{display:block;width:100%;overflow:visible;margin-top:1pt}
-.ct{font-family:var(--fm);font-size:8pt;fill:var(--ink-4)}
-.cv{font-family:var(--fm);font-size:8pt;fill:var(--ink);font-variant-numeric:tabular-nums}
-.cl{font-family:var(--fm);font-size:8pt;fill:var(--ink-3)}
+/* ---- the three answers ----------------------------------------------------------------
+   Deliberately NOT three equal columns. Each panel is as wide as its answer needs, and the
+   order is the map's order: D1 west, then D2 and Fourteen-E overlapping in the east. */
+.ans{display:grid;grid-template-columns:0.82fr 1.05fr 1.13fr;gap:28pt;margin-top:22pt;
+     flex:0 0 auto}
+.a{display:flex;flex-direction:column;gap:6pt}
+.tick{width:26pt;border-top:2.4pt solid var(--c)}
+.atitle{font-size:11.5pt;font-weight:600;line-height:1.2;color:var(--ink);margin:-1pt 0 0;
+        min-height:2.4em}
+.atype{font-size:9pt;color:var(--ink-4);line-height:1.3;margin:-4pt 0 0}
+.averdict{font-size:11pt;font-weight:600;line-height:1.3;color:var(--c);margin:1pt 0 0}
+.anum{font-family:var(--mono);font-size:9pt;color:var(--ink-2);line-height:1.5;
+      font-variant-numeric:tabular-nums;margin:0}
+.a svg{display:block;width:100%;overflow:visible;margin-top:2pt}
+.acap{font-size:9pt;line-height:1.4;color:var(--ink-3);margin:0}
+.a>.acap:last-child{padding-top:2pt}
+.ct{font-family:var(--mono);font-size:calc(8pt * var(--k,1));fill:var(--ink-4)}
+.cv{font-family:var(--mono);font-size:calc(8pt * var(--k,1));fill:var(--ink);font-variant-numeric:tabular-nums}
+.cl{font-family:var(--mono);font-size:calc(8pt * var(--k,1));fill:var(--ink-3)}
 
-/* ---- region 3: the refusal that holds across all three ----------------------------------- */
-.hold{margin-top:auto;border:.9pt solid var(--refuse);border-left:3.5pt solid var(--refuse);
-      background:#fdf5f4;padding:7pt 10pt;display:flex;gap:14pt;align-items:flex-start}
-.hold .h{font-family:var(--fd);font-size:14pt;font-weight:700;color:var(--refuse);
-         line-height:1.05;white-space:nowrap;padding-top:.5pt}
-.hold p{margin:0;font-size:10.5pt;line-height:1.42;color:var(--ink-2)}
-.hold .b{margin-top:6pt;font-family:var(--fm);font-size:9.5pt;letter-spacing:.02em;color:var(--ink-3)}
-.hold .b b{color:var(--ink);font-weight:600}
-
-footer{border-top:.7pt solid var(--line-strong);margin-top:7pt;padding-top:4pt;
-       font-family:var(--fm);font-size:7.5pt;line-height:1.5;color:var(--ink-4)}
-footer b{color:var(--ink-3);font-weight:500}
+/* ---- method, then provenance ---------------------------------------------------------- */
+.method{font-size:10.5pt;line-height:1.45;color:var(--ink-2);margin:auto 0 0;padding-top:22pt;
+        max-width:6.2in}
+.method b{color:var(--ink);font-weight:600}
+footer{border-top:.6pt solid var(--line-strong);margin-top:11pt;padding-top:5pt;
+       font-family:var(--mono);font-size:7pt;line-height:1.5;color:var(--ink-4)}
 </style></head><body><div class="sheet" id="root"></div>
 <script id="payload" type="application/json">"__DATA__"</script>
 <script>
@@ -117,19 +103,16 @@ const S=(t,a,...k)=>{const e=document.createElementNS(NS,t);for(const[n,v]of Obj
 const dz=(i)=>i.slice(8,10)+"/"+i.slice(11,13)+i.slice(14,16)+"Z";
 
 const A=D.atlas, e=D.storms.fourteenE, f=e.forecastVsAnalogs;
-function shortVerdict(v){
-  const EXPECT="CONDITIONAL RATES PUBLISHED · NO COMPOSED NUMBER";
-  if(v!==EXPECT)throw new Error("frozen D2 verdict changed; re-read the reduction: "+v);
-  return "CONDITIONAL RATES · NO COMPOSED NUMBER";
-}
 
-/* THE GEOMETRY BAND — the one place the three systems appear together, which is what the finding
-   is about. Drawn ENTIRELY from the frozen payload: the two NHC outlook rings as issued, the
-   three declared query cells with their 500 km radius, and Fourteen-E's own track. NO BASEMAP.
-   A coastline would need a source this specimen does not pin, and an unpinned coastline on a
-   plate that advertises eleven hashed inputs is exactly the kind of quiet exception the archive
-   exists to refuse. The graticule carries the geography instead. */
-const LON0=-154.5,LON1=-106.5,LAT0=7,LAT1=23,SC=9.6;
+/* THE MAP — the one place the three systems appear together, which is what the note is about.
+   Drawn ENTIRELY from the frozen payload: the two NHC outlook rings as issued, the three
+   declared query cells with their 500 km radius, and Fourteen-E's own track. NO BASEMAP. A
+   coastline would need a source this specimen does not pin, and an unpinned coastline on a
+   plate that advertises eleven hashed inputs is exactly the quiet exception the archive exists
+   to refuse. The graticule carries the geography instead.
+   The science below is unchanged from the version this note replaces; only the label weights
+   and the map's size moved. */
+const LON0=-153.5,LON1=-108.5,LAT0=6,LAT1=24,SC=9.6;
 const KX=Math.cos(((LAT0+LAT1)/2)*Math.PI/180);
 const MW=(LON1-LON0)*KX*SC, MH=(LAT1-LAT0)*SC;
 const mx=(lon)=>(lon-LON0)*KX*SC, my=(lat)=>(LAT1-lat)*SC;
@@ -140,7 +123,7 @@ function geoMap(){
     "eastern and central Pacific: the two NHC outlook areas, the three query cells, "
     +"and Tropical Depression Fourteen-E's track"});
   g.append(S("rect",{x:0,y:0,width:MW,height:MH,fill:"var(--sunken)",
-    stroke:"var(--line-strong)","stroke-width":.8}));
+    stroke:"var(--line-strong)","stroke-width":.7}));
   const marks=[];
   for(let lon=-150;lon<=-110;lon+=10){
     g.append(S("line",{x1:mx(lon),x2:mx(lon),y1:0,y2:MH,stroke:"var(--line)","stroke-width":.6}));
@@ -151,7 +134,7 @@ function geoMap(){
   /* The outlook polygons, as NHC drew them. */
   const ring=(r)=>r.map(([la,lo])=>`${mx(lo).toFixed(1)},${my(la).toFixed(1)}`).join(" ");
   for(const[k,c]of[["d1","var(--d1)"],["d2","var(--d2)"]])
-    g.append(S("polygon",{points:ring(D.gtwo[k].rings[0]),fill:c,"fill-opacity":.11,
+    g.append(S("polygon",{points:ring(D.gtwo[k].rings[0]),fill:c,"fill-opacity":.10,
       stroke:c,"stroke-width":1.1,"stroke-linejoin":"round"}));
   /* Fourteen-E: the tropical best track from genesis, then NHC's forecast positions. */
   g.append(S("polyline",{points:ring([[e.genesis.lat,e.genesis.lonE],[e.latestBest.lat,e.latestBest.lonE]]),
@@ -167,12 +150,14 @@ function geoMap(){
     g.append(S("ellipse",{cx:mx(q.lonE),cy:my(q.lat),rx,ry,fill:"none",stroke:c,
       "stroke-width":.9,"stroke-dasharray":"2.5 2"}));
     g.append(S("circle",{cx:mx(q.lonE),cy:my(q.lat),r:2.8,fill:c,stroke:"#fff","stroke-width":1}));}
-  for(const[k,lab,dx,dy,anch,c]of[["d1","D1",0,-14,"middle","var(--d1)"],
-                                   ["d2","D2",-8,-16,"end","var(--d2)"],
-                                   ["fourteenE","EP142026",6,24,"start","var(--e14)"]]){
+  /* Each label carries its panel's name and its panel's colour, so the map and the three
+     answers below lock together without a legend to mediate them. */
+  for(const[k,lab,dx,dy,anch,c]of[["d1","D1",0,-15,"middle","var(--d1)"],
+                                  ["d2","D2",-9,-17,"end","var(--d2)"],
+                                  ["fourteenE","Fourteen-E",7,25,"start","var(--e14)"]]){
     const q=A[k].query;
     g.append(S("text",{x:mx(q.lonE)+dx,y:my(q.lat)+dy,"text-anchor":anch,class:"gt",
-      fill:c,stroke:"#fff","stroke-width":2.4,"paint-order":"stroke"},lab));}
+      fill:c,stroke:"#fff","stroke-width":2.6,"paint-order":"stroke"},lab));}
   for(const[x,y,anch,t]of marks)
     g.append(S("text",{x,y,"text-anchor":anch,class:"gl",stroke:"var(--sunken)","stroke-width":2.4,
       "paint-order":"stroke"},t));
@@ -181,138 +166,117 @@ function geoMap(){
 
 /* D1's chart is the gate itself: how far short the pool falls. Ten slots, three filled. */
 function gate(a){
-  const W=210,H=50,box=W/a.minSample,g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img",
+  const W=210,H=52,box=W/a.minSample,g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img",
     "aria-label":`${a.nCases} analog storms against a sample gate of ${a.minSample}`});
   for(let i=0;i<a.minSample;i++)
-    g.append(S("rect",{x:i*box+1,y:8,width:box-2,height:24,rx:2,
+    g.append(S("rect",{x:i*box+1,y:6,width:box-2,height:28,rx:2,
       fill:i<a.nCases?"var(--d1)":"#fff",stroke:i<a.nCases?"var(--d1)":"var(--line-strong)","stroke-width":.8}));
   g.append(S("text",{x:0,y:H-2,class:"cl"},a.nCases+" of "+a.minSample+" required"));
   return g;
 }
 /* D2's chart is what a sufficient pool supports: three thresholds, rate and interval. */
 function rates(a,hue,keys){
-  const W=210,rh=25,padL=34,padR=34,H=keys.length*rh+4;
+  const W=210,rh=29,padL=34,padR=32,H=keys.length*rh+3;
   const g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"share of analog storms reaching each threshold"});
   const x=(v)=>padL+(v/100)*(W-padL-padR);
-  keys.forEach(([k,lab],i)=>{const o=a.levels[k],y=3+i*rh;
-    g.append(S("text",{x:padL-4,y:y+13,"text-anchor":"end",class:"ct"},lab));
-    g.append(S("rect",{x:padL,y:y+2,width:Math.max(1,x(o.rate)-padL),height:15,rx:2,fill:hue}));
-    g.append(S("line",{x1:x(o.ci[0]),x2:x(o.ci[1]),y1:y+9.5,y2:y+9.5,stroke:"#475569","stroke-width":.9}));
-    for(const q of o.ci)g.append(S("line",{x1:x(q),x2:x(q),y1:y+4,y2:y+15,stroke:"#475569","stroke-width":.9}));
-    g.append(S("text",{x:W-padR+4,y:y+13,class:"cv"},o.rate.toFixed(0)+"%"));});
+  keys.forEach(([k,lab],i)=>{const o=a.levels[k],y=2+i*rh;
+    g.append(S("text",{x:padL-5,y:y+15,"text-anchor":"end",class:"ct"},lab));
+    g.append(S("rect",{x:padL,y:y+2,width:Math.max(1,x(o.rate)-padL),height:18,rx:2,fill:hue}));
+    g.append(S("line",{x1:x(o.ci[0]),x2:x(o.ci[1]),y1:y+11,y2:y+11,stroke:"#5b6875","stroke-width":.9}));
+    for(const q of o.ci)g.append(S("line",{x1:x(q),x2:x(q),y1:y+5,y2:y+18,stroke:"#5b6875","stroke-width":.9}));
+    g.append(S("text",{x:W-padR+5,y:y+15,class:"cv"},o.rate.toFixed(0)+"%"));});
   return g;
 }
-/* E14's chart is the only thing a formed cyclone adds: a clock both sides can be read on. */
+/* Fourteen-E's chart is the only thing a formed cyclone adds: a clock both sides read on. */
 function timing(a,f){
-  const t=a.timeToEvent.cat1,W=210,H=70,pad=8;
-  const hi=Math.max(t.p90,f.clock.elapsedHours)*1.06,x=(h)=>pad+(h/hi)*(W-pad*2),y=38;
+  const t=a.timeToEvent.cat1,W=210,H=84,pad=8;
+  const hi=Math.max(t.p90,f.clock.elapsedHours)*1.06,x=(h)=>pad+(h/hi)*(W-pad*2),y=46;
   const g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img",
     "aria-label":"hours from genesis to hurricane strength, historical spread and forecast"});
-  for(let h=0;h<=hi;h+=48){g.append(S("line",{x1:x(h),x2:x(h),y1:19,y2:y+11,stroke:"var(--line)","stroke-width":.6}));
-    g.append(S("text",{x:x(h),y:y+21,"text-anchor":"middle",class:"ct"},"+"+h+"h"));}
+  for(let h=0;h<=hi;h+=48){g.append(S("line",{x1:x(h),x2:x(h),y1:22,y2:y+13,stroke:"var(--line)","stroke-width":.6}));
+    g.append(S("text",{x:x(h),y:y+24,"text-anchor":"middle",class:"ct"},"+"+h+"h"));}
   g.append(S("line",{x1:x(t.p10),x2:x(t.p90),y1:y,y2:y,stroke:"var(--e14)","stroke-width":1}));
-  for(const q of[t.p10,t.p90])g.append(S("line",{x1:x(q),x2:x(q),y1:y-5,y2:y+5,stroke:"var(--e14)","stroke-width":1.1}));
-  g.append(S("rect",{x:x(t.p25),y:y-9,width:x(t.p75)-x(t.p25),height:18,rx:2,
-    fill:"var(--e14)","fill-opacity":".22",stroke:"var(--e14)","stroke-width":.8}));
-  g.append(S("line",{x1:x(t.median),x2:x(t.median),y1:y-11,y2:y+11,stroke:"var(--e14)","stroke-width":2}));
-  g.append(S("text",{x:x(t.median),y:y-14,"text-anchor":"middle",class:"cv"},"median +"+t.median+"h"));
+  for(const q of[t.p10,t.p90])g.append(S("line",{x1:x(q),x2:x(q),y1:y-6,y2:y+6,stroke:"var(--e14)","stroke-width":1.1}));
+  g.append(S("rect",{x:x(t.p25),y:y-11,width:x(t.p75)-x(t.p25),height:22,rx:2,
+    fill:"var(--e14)","fill-opacity":".20",stroke:"var(--e14)","stroke-width":.8}));
+  g.append(S("line",{x1:x(t.median),x2:x(t.median),y1:y-13,y2:y+13,stroke:"var(--e14)","stroke-width":2}));
+  g.append(S("text",{x:x(t.median),y:y-17,"text-anchor":"middle",class:"cv"},"median +"+t.median+"h"));
   const fx=x(f.clock.elapsedHours);
-  g.append(S("line",{x1:fx,x2:fx,y1:13,y2:y+11,stroke:"var(--ink)","stroke-width":1,"stroke-dasharray":"2 1.6"}));
+  g.append(S("line",{x1:fx,x2:fx,y1:15,y2:y+13,stroke:"var(--ink)","stroke-width":1,"stroke-dasharray":"2 1.6"}));
   g.append(S("circle",{cx:fx,cy:y,r:3,fill:"var(--ink)"}));
-  g.append(S("text",{x:W-3,y:9,"text-anchor":"end",class:"cv"},"forecast +"+f.clock.elapsedHours+"h"));
+  g.append(S("text",{x:W-3,y:10,"text-anchor":"end",class:"cv"},"forecast +"+f.clock.elapsedHours+"h"));
   return g;
 }
 
 const r=document.getElementById("root");
 
-r.append($("div",{class:"top"},
-  $("div",{},
-    $("p",{class:"eyebrow"},"Storm Atlas · genesis-conditioned analogs"),
-    $("h1",{},"Three systems, three answers")),
-  $("div",{class:"stamp"},
-    $("div",{},$("b",{},"FROZEN SPECIMEN")),
-    $("div",{},D.specimen.asOfLocal))));
+r.append($("div",{class:"head"},
+  $("h1",{},"Three systems, three answers"),
+  $("div",{class:"stamp"},"Frozen ",D.gtwo.issued.slice(4,6),"/",D.gtwo.issued.slice(6,8),
+    " ",D.gtwo.issued.slice(8,12),"Z")));
+r.append($("p",{class:"deck"},
+  "Three atmospheric states on one Pacific chart, and three legitimate answers from the "
+  + "archive. None of them is a probability for the live system."));
+r.append($("hr",{class:"rule"}));
 
-r.append($("p",{class:"finding",html:
-  "One Pacific chart, three atmospheric states, <b>three different legitimate answers</b> — and in "
-  + "none of them does the archive turn what it knows into a probability for the live system."}));
-
-/* ---- REGION 1 --------------------------------------------------------------------------- */
-r.append($("div",{class:"geo"},
+r.append($("div",{class:"fig"},
   geoMap(),
-  $("div",{class:"gk"},
-    $("div",{class:"row",style:"--c:var(--d1)"},$("span",{class:"sw hollow"}),
-      $("span",{},"D1 outlook area")),
-    $("div",{class:"row",style:"--c:var(--d2)"},$("span",{class:"sw hollow"}),
-      $("span",{},"D2 outlook area")),
-    $("div",{class:"row",style:"--c:var(--e14)"},$("span",{class:"sw line"}),
-      $("span",{},"Fourteen-E track, then forecast")),
-    $("p",{class:"cap"},`Dashed ring: the ${A.d1.query.radiusKm} km query cell each cohort was drawn `
-      + `inside. Polygons as NHC issued them, ${D.gtwo.issued.slice(6,8)}/${D.gtwo.issued.slice(8,12)}Z. `
-      + `Geometry from the pinned sources; no basemap is drawn.`))));
+  $("p",{class:"figcap"},`Outlook polygons as NHC issued them; dashed ring is the `
+    + `${A.d1.query.radiusKm} km cell each cohort was drawn inside. No basemap.`)));
 
-/* ---- REGION 2 --------------------------------------------------------------------------- */
-const plate=$("div",{class:"plate"});
+const PANELS=[
+  {k:"d1", c:"var(--d1)", title:"D1 — trough south-southeast of Hawaiʻi",
+   type:"Outlook area, no centre",
+   verdict:"History too thin. Rates refused.",
+   num:(a)=>`${a.nCases} storms · ESS ${a.ess.toFixed(1)} · gate ${a.minSample}`,
+   chart:(a)=>gate(a),
+   /* Not a restatement of the verdict above or the chart below: the one thing neither says
+      is what the gate IS. */
+   cap:()=>"Ten distinct storms is the publishing threshold."},
+  {k:"d2", c:"var(--d2)", title:"D2 — forecast formation area",
+   type:"Analyst-declared reference cell",
+   verdict:"Conditional rates only. No composed number.",
+   num:(a)=>`${a.nCases} storms · ESS ${a.ess.toFixed(1)} · NHC ${D.gtwo.d2.pct7d}%`,
+   chart:(a)=>rates(a,"var(--d2)",[["ts","TS"],["cat1","Cat 1"],["cat3","Cat 3"]]),
+   cap:()=>"Given formation at this cell. Bars are 95% intervals over distinct storms."},
+  {k:"fourteenE", c:"var(--e14)", title:"Fourteen-E — observed genesis",
+   type:"Operationally observed genesis · ATCF",
+   verdict:"Conditional rates, plus historical timing.",
+   num:(a)=>`${a.nCases} storms · ESS ${a.ess.toFixed(1)} · Cat 1 ${a.levels.cat1.rate.toFixed(0)}%`,
+   chart:(a)=>timing(a,f),
+   cap:()=>"Hours from genesis to hurricane strength. The forecast sits inside the spread."},
+];
+const ans=$("div",{class:"ans"});
+for(const p of PANELS){const a=A[p.k];
+  ans.append($("div",{class:"a",style:`--c:${p.c}`},
+    $("div",{class:"tick"}),
+    $("div",{class:"atitle"},p.title),
+    $("div",{class:"atype"},p.type),
+    $("div",{class:"averdict"},p.verdict),
+    $("p",{class:"anum"},p.num(a)),
+    p.chart(a),
+    $("p",{class:"acap"},p.cap(a))));}
+r.append(ans);
 
-/* D1 — the pool is short, so the answer is a refusal. */
-{const a=A.d1,g=D.gtwo.d1;
-plate.append($("div",{class:"col",style:"--c:var(--d1)"},
-  $("div",{class:"tag"},"D1"),
-  $("div",{class:"nm"},"Trough S-SE of Hawaiʻi"),
-  $("div",{class:"pt"},"OUTLOOK AREA · NO CENTRE"),
-  $("div",{class:"verdict no"},D.spine.d1),
-  $("div",{class:"facts",html:
-    `NHC formation <b>${g.pct48}%</b> / <b>${g.pct7d}%</b><br>Pool <b>${a.nCases} storms</b> · ESS <b>${a.ess.toFixed(1)}</b>`}),
-  gate(a),
-  $("p",{class:"say"},"Below the gate the archive publishes counts and refuses rates."),
-  $("p",{class:"say"},`All eras give ${A.d1AllEras.nCases} storms here, ${A.d1.nCases} since 1971. Both fall short.`)));}
+/* The one methodological sentence, said once and nowhere else on the page. */
+r.append($("p",{class:"method",html:
+  "<b>Different conditioning events are not multiplied.</b> Storm Atlas does not turn these "
+  + "frequencies into a probability for the live system."}));
 
-/* D2 — the pool clears the gate, so conditional rates publish and nothing is composed. */
-{const a=A.d2,g=D.gtwo.d2;
-plate.append($("div",{class:"col",style:"--c:var(--d2)"},
-  $("div",{class:"tag"},"D2"),
-  $("div",{class:"nm"},"Forecast formation area"),
-  $("div",{class:"pt"},"ANALYST-DECLARED REFERENCE CELL"),
-  /* The payload's verdict, shortened by a GUARDED transform rather than retyped. "PUBLISHED"
-     carries nothing for a reader who can see the rates beside it; dropping it is editorial.
-     Asserting the input is what keeps this from becoming a second source of truth: if the frozen
-     verdict ever changes, this throws instead of quietly printing a stale headline. */
-  $("div",{class:"verdict yes"},shortVerdict(D.spine.d2)),
-  $("div",{class:"facts",html:
-    `NHC formation <b>${g.pct48}%</b> / <b>${g.pct7d}%</b><br>Pool <b>${a.nCases} storms</b> · ESS <b>${a.ess.toFixed(1)}</b>`}),
-  rates(a,"var(--d2)",[["ts","TS"],["cat1","Cat 1"],["cat3","Cat 3"]]),
-  $("p",{class:"say"},"Given formation at this cell. Bars are 95% intervals over distinct storms.")));}
-
-/* E14 — formed, so the cohort is keyed to an operational fix and timing becomes available. */
-{const a=A.fourteenE;
-plate.append($("div",{class:"col",style:"--c:var(--e14)"},
-  $("div",{class:"tag"},"EP142026"),
-  $("div",{class:"nm"},"TD Fourteen-E"),
-  $("div",{class:"pt"},"OPERATIONALLY OBSERVED GENESIS · ATCF"),
-  $("div",{class:"verdict yes"},D.spine.fourteenE),
-  $("div",{class:"facts",html:
-    `Genesis <b>${dz(f.clock.genesisZ)}</b><br>Pool <b>${a.nCases} storms</b> · ESS <b>${a.ess.toFixed(1)}</b>`
-    + `<br>Reached Cat&nbsp;1: <b>${a.levels.cat1.rate.toFixed(0)}%</b>`}),
-  timing(a,f),
-  $("p",{class:"say"},`Hours from genesis to hurricane strength. Median `
-    + `+${f.analogHoursToCat1.median} h; the forecast +${f.clock.elapsedHours} h on the same clock.`),
-  $("p",{class:"say"},"Inside the historical distribution, not beyond it.")));}
-r.append(plate);
-
-/* ---- REGION 3 --------------------------------------------------------------------------- */
-r.append($("div",{class:"hold"},
-  $("div",{class:"h"},"NO COMPOSED",$("br"),"NUMBER"),
-  $("div",{},
-    $("p",{},"NHC’s formation probability and Storm Atlas’s cell-conditioned historical rate "
-      + "describe different conditioning events, so they are not multiplied."),
-    $("p",{class:"b",html:
-      "insufficient history <b>→ refusal</b> · sufficient pre-genesis history <b>→ conditional "
-      + "rates</b> · formed cyclone <b>→ conditional rates + timing</b>"}),
-    $("p",{class:"b",html:"<b>UNCHANGED:</b> no live-event probability · no unsupported composition"}))));
+/* Measure each chart's viewBox-to-pixel ratio and hand it back to the sheet as --k, so the
+   sizes above are the sizes that print. Run again once webfonts land, because a metric change
+   can reflow a column and move the ratio. */
+function lockChartType(){
+  for(const g of document.querySelectorAll("svg")){
+    const vb=g.viewBox&&g.viewBox.baseVal, w=g.getBoundingClientRect().width;
+    if(vb&&vb.width>0&&w>0)g.style.setProperty("--k",vb.width/w);
+  }
+}
 
 r.append($("footer",{},
-  $("div",{},$("b",{},"FROZEN "),D.builtAt.slice(0,16).replace("T"," "),"Z · IBTrACS v04r01 · EP+NA · pool 1971+ · ",
-    D.provenance.sources.length," source inputs SHA-256 pinned in MANIFEST.json"),
-  $("div",{},$("b",{},"RESEARCH ONLY · "),
-    "Not a forecast and not advice. NHC is the sole authority for watches and warnings.")));
+  `Frozen ${D.builtAt.slice(0,16).replace("T"," ")}Z · IBTrACS v04r01 · `
+  + `${D.provenance.sources.length} sources SHA-256 pinned in MANIFEST.json · `
+  + `Research only, not a forecast.`));
+requestAnimationFrame(lockChartType);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(lockChartType);
 </script></body></html>
