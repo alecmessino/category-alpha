@@ -1,0 +1,384 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Track Residual Monitor — preview</title>
+<!-- THE PREVIEW SURFACE FOR THE TRACK RESIDUAL MONITOR.
+     Unmerged, unlinked from the terminal, and deliberately separate: it is here to be reviewed,
+     not to ship. It contains NO ARITHMETIC. Every number on screen is read from data.json,
+     which scripts/build-residual-preview.mjs computes from the preserved NHC products in
+     scripts/fixtures/lowell-ep122026/ — the same rule the rest of this repository runs on, so a
+     figure shown here is a figure a test can reach. -->
+<link rel="stylesheet" href="../../styles.css">
+<style>
+  html,body{margin:0;background:var(--surface-app);color:var(--text-1);
+            font-family:var(--font-sans);font-size:13px;line-height:1.45}
+  .wrap{max-width:1280px;margin:0 auto;padding:20px 16px 64px}
+  h1{font-family:var(--font-display);font-size:20px;letter-spacing:.2px;margin:0 0 2px}
+  h2{font-family:var(--font-display);font-size:13px;letter-spacing:.6px;text-transform:uppercase;
+     margin:0;color:var(--text-1)}
+  .sub{color:var(--text-2);font-size:11.5px}
+  .mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+  .panel{background:var(--surface-card);border:1px solid var(--border-dim);
+         border-radius:var(--radius-md);margin:14px 0}
+  .panel > header{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+                  padding:9px 12px;border-bottom:1px solid var(--border-dim)}
+  .body{padding:12px}
+  .grid{display:grid;gap:10px}
+  @media(min-width:900px){.c2{grid-template-columns:1fr 1fr}.c4{grid-template-columns:repeat(4,1fr)}}
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  th,td{text-align:left;padding:4px 8px 4px 0;border-bottom:1px solid var(--border-dim);
+        vertical-align:top}
+  th{color:var(--text-2);font-weight:var(--fw-bold);font-size:10px;letter-spacing:.5px;
+     text-transform:uppercase;white-space:nowrap}
+  td.n{text-align:right;font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pill{display:inline-block;padding:1px 7px;border-radius:var(--radius-pill);font-size:10px;
+        font-family:var(--font-mono);letter-spacing:.4px;border:1px solid var(--border-strong);
+        color:var(--text-2);white-space:nowrap}
+  .pill.neg{color:var(--neg);border-color:var(--neg)}
+  .pill.warn{color:var(--warn);border-color:var(--warn)}
+  .pill.pos{color:var(--pos);border-color:var(--pos)}
+  .pill.acc{color:var(--accent);border-color:var(--accent)}
+  .note{color:var(--text-2);font-size:11px;margin:6px 0 0}
+  .kv{display:flex;justify-content:space-between;gap:10px;padding:3px 0;
+      border-bottom:1px solid var(--border-dim);font-size:11.5px}
+  .kv:last-child{border-bottom:0}
+  .kv b{font-weight:var(--fw-bold);color:var(--text-2);font-size:10px;letter-spacing:.4px;
+        text-transform:uppercase}
+  .margin-note{font-family:var(--font-mono);font-size:10px;color:var(--text-2);letter-spacing:.3px}
+  ul{margin:6px 0 0;padding-left:16px}
+  li{margin:3px 0;font-size:11.5px;color:var(--text-2)}
+  code{font-family:var(--font-mono);font-size:11px;color:var(--text-1)}
+  .legend{display:flex;flex-wrap:wrap;gap:12px;font-size:10.5px;color:var(--text-2);
+          font-family:var(--font-mono)}
+  .swatch{display:inline-block;width:9px;height:9px;margin-right:4px;vertical-align:-1px}
+  footer.prov{margin-top:8px;padding-top:8px;border-top:1px solid var(--border-dim);
+              font-family:var(--font-mono);font-size:10px;color:var(--text-2);
+              display:flex;flex-wrap:wrap;gap:14px}
+  .banner{border:1px solid var(--warn);border-radius:var(--radius-sm);padding:8px 10px;
+          color:var(--warn);font-family:var(--font-mono);font-size:11px;letter-spacing:.3px}
+</style>
+<body data-surface="tactical">
+<div class="wrap" id="root">
+  <p class="sub mono">loading data.json …</p>
+</div>
+<script>
+/* Rendering only. If a value is not in the payload it is rendered as an em dash and never
+   computed here — a number that exists only in a browser is a number no test can reach. */
+const $ = (t, a, ...kids) => {
+  const el = document.createElement(t);
+  for (const [k, v] of Object.entries(a || {})) {
+    if (k === "class") el.className = v;
+    else if (k === "html") el.innerHTML = v;
+    else if (v != null) el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null) el.append(k.nodeType ? k : String(k));
+  return el;
+};
+const NS = "http://www.w3.org/2000/svg";
+const svg = (t, a, ...kids) => {
+  const el = document.createElementNS(NS, t);
+  for (const [k, v] of Object.entries(a || {})) if (v != null) el.setAttribute(k, v);
+  for (const k of kids.flat()) if (k != null) el.append(k.nodeType ? k : String(k));
+  return el;
+};
+const num = (v, d = 2) => (Number.isFinite(v) ? v.toFixed(d) : "—");
+const hhmm = (iso) => (iso ? iso.slice(11, 16) + "Z" : "—");
+const dayz = (iso) => (iso ? iso.slice(8, 10) + "/" + iso.slice(11, 13) + iso.slice(14, 16) + "Z" : "—");
+
+/* Source families get a mark each. NONE of them is called ground truth, and the legend says so. */
+const FAMILY_INK = {
+  official: "var(--accent)", aircraft: "var(--pos)", satellite: "var(--warn)",
+  microwave: "var(--special)", scatterometer: "var(--text-2)", radar: "var(--text-2)",
+  bestTrack: "var(--text-2)", other: "var(--text-2)",
+};
+
+function panel(title, right, ...body) {
+  return $("section", { class: "panel" },
+    $("header", {}, $("h2", {}, title), right ? $("span", { class: "margin-note" }, right) : null),
+    $("div", { class: "body" }, ...body));
+}
+function kv(k, v, cls) { return $("div", { class: "kv" }, $("b", {}, k), $("span", { class: cls || "mono" }, v)); }
+function pill(text, tone) { return $("span", { class: "pill " + (tone || "") }, text); }
+
+/* ------------------------------------------------------------------ THE RESIDUAL STRIP */
+function strip(d) {
+  const rows = d.series.fixed.filter((r) => r.ok);
+  const W = 1180, H = 260, L = 56, R = 220, T = 18, B = 34;
+  const times = rows.map((r) => Date.parse(r.fixValidZ));
+  const t0 = Math.min(...times, Date.parse(d.worked.baseline.initialValidZ));
+  const t1 = Math.max(...times);
+  const sigma = d.series.assessedFixed.uncertaintyCalibration.sigma;
+  /* THE BAND IS THE ASSUMED MAGNITUDES IN QUADRATURE, DRAWN ONLY SO THE LABEL HAS SOMETHING TO
+     BE ABOUT. It is not a fit and the strip says so twice: on the band and in the margin. */
+  const bandNm = Math.hypot(sigma.observation, sigma.baseline, sigma.wobble, sigma.rounding);
+  const vMax = Math.max(bandNm, ...rows.map((r) => Math.abs(r.crossNm))) * 1.25;
+  const x = (t) => L + ((t - t0) / Math.max(1, t1 - t0)) * (W - L - R);
+  const y = (v) => T + (1 - (v + vMax) / (2 * vMax)) * (H - T - B);
+
+  const g = svg("svg", { viewBox: `0 0 ${W} ${H}`, width: "100%",
+                         role: "img", "aria-label": "cross-track residual against fix time" });
+  /* provisional band */
+  g.append(svg("rect", { x: L, y: y(bandNm), width: W - L - R, height: y(-bandNm) - y(bandNm),
+                         fill: "var(--warn)", "fill-opacity": ".07",
+                         stroke: "var(--warn)", "stroke-opacity": ".35", "stroke-dasharray": "3 3" }));
+  g.append(svg("text", { x: L + 6, y: y(bandNm) - 4, fill: "var(--warn)",
+                         "font-family": "var(--font-mono)", "font-size": 9.5 },
+               `PROVISIONAL BAND ±${bandNm.toFixed(1)} nm — ASSUMED, NOT FITTED`));
+  /* zero line = the baseline forecast track itself */
+  g.append(svg("line", { x1: L, x2: W - R, y1: y(0), y2: y(0),
+                         stroke: "var(--border-strong)", "stroke-width": 1 }));
+  g.append(svg("text", { x: L - 6, y: y(0) + 3, "text-anchor": "end", fill: "var(--text-2)",
+                         "font-family": "var(--font-mono)", "font-size": 9.5 }, "0"));
+  for (const v of [-vMax * 0.6, vMax * 0.6]) {
+    g.append(svg("line", { x1: L, x2: W - R, y1: y(v), y2: y(v),
+                           stroke: "var(--border-dim)", "stroke-width": 1 }));
+    g.append(svg("text", { x: L - 6, y: y(v) + 3, "text-anchor": "end", fill: "var(--text-2)",
+                           "font-family": "var(--font-mono)", "font-size": 9.5 }, v.toFixed(0)));
+  }
+  /* the series line, then the markers on top */
+  const pts = rows.map((r) => `${x(Date.parse(r.fixValidZ))},${y(r.crossNm)}`).join(" ");
+  g.append(svg("polyline", { points: pts, fill: "none", stroke: "var(--text-2)",
+                             "stroke-width": 1, "stroke-opacity": ".55" }));
+  for (const r of rows) {
+    const cx = x(Date.parse(r.fixValidZ)), cy = y(r.crossNm);
+    const ink = FAMILY_INK[r.family] || FAMILY_INK.other;
+    g.append(svg("circle", { cx, cy, r: 4.5, fill: ink, "fill-opacity": ".85", stroke: ink }));
+    g.append(svg("text", { x: cx, y: H - 20, "text-anchor": "middle", fill: "var(--text-2)",
+                           "font-family": "var(--font-mono)", "font-size": 9 }, hhmm(r.fixValidZ)));
+    g.append(svg("text", { x: cx, y: cy - 9, "text-anchor": "middle", fill: ink,
+                           "font-family": "var(--font-mono)", "font-size": 9 }, num(r.crossNm, 1)));
+  }
+  /* baseline identity and every reset, marked on the strip itself */
+  g.append(svg("text", { x: L, y: H - 6, fill: "var(--text-2)",
+                         "font-family": "var(--font-mono)", "font-size": 9.5 },
+               `BASELINE ${d.series.fixedBaselineId} · INIT ${dayz(d.worked.baseline.initialValidZ)}`));
+  for (const r of d.series.baselineResets) {
+    const rx = x(Date.parse(r.at));
+    g.append(svg("line", { x1: rx, x2: rx, y1: T, y2: H - B, stroke: "var(--special)",
+                           "stroke-width": 1.5, "stroke-dasharray": "4 3" }));
+    /* A reset near the right edge labels itself LEFTWARD, so it never lands on top of the sign
+       convention in the margin — a legend that collides with the thing it explains is worse than
+       no legend. */
+    const near = rx > (W - R) - 150;
+    g.append(svg("text", { x: near ? rx - 6 : rx + 6, y: H - B - 6,
+                           "text-anchor": near ? "end" : "start", fill: "var(--special)",
+                           "font-family": "var(--font-mono)", "font-size": 9 },
+                 `BASELINE RESET ${r.from.split("/").pop()} → ${r.to.split("/").pop()}`));
+  }
+  /* THE SIGN CONVENTION, IN THE MARGIN, ALWAYS. */
+  const m = W - R + 12;
+  g.append(svg("text", { x: m, y: T + 12, fill: "var(--text-1)",
+                         "font-family": "var(--font-mono)", "font-size": 10 }, "SIGN CONVENTION"));
+  d.signConvention.split(" · ").forEach((line, i) =>
+    g.append(svg("text", { x: m, y: T + 28 + i * 12, fill: "var(--text-2)",
+                           "font-family": "var(--font-mono)", "font-size": 9 }, line)));
+  g.append(svg("text", { x: m, y: T + 76, fill: "var(--text-2)",
+                         "font-family": "var(--font-mono)", "font-size": 9 },
+               `+CROSS POINTS ${num(d.worked.residualForecastFrame.crossPointsToward, 0)}° TRUE HERE`));
+  g.append(svg("text", { x: m, y: T + 90, fill: "var(--text-2)",
+                         "font-family": "var(--font-mono)", "font-size": 9 },
+               `FRAME ${num(d.worked.residualForecastFrame.frame.courseDeg, 1)}° — FORECAST'S OWN`));
+  g.append(svg("text", { x: m, y: T + 112, fill: "var(--text-2)",
+                         "font-family": "var(--font-mono)", "font-size": 9 },
+               "NO TARGET GAP IS DRAWN HERE:"));
+  g.append(svg("text", { x: m, y: T + 124, fill: "var(--text-2)",
+                         "font-family": "var(--font-mono)", "font-size": 9 },
+               "A SHORELINE GAP IS A DIFFERENT FRAME."));
+  return g;
+}
+
+function refusalCard(label, f) {
+  const tone = f.ok ? "pos" : (f.state === "DEGRADED" ? "warn" : "neg");
+  return $("div", { class: "panel" },
+    $("header", {}, $("h2", {}, label), pill(f.state, tone)),
+    $("div", { class: "body" },
+      f.reasons && f.reasons.length
+        ? $("ul", {}, f.reasons.map((r) => $("li", { class: "mono" }, r)))
+        /* A field with nothing to refuse says so in its own terms. "No reasons recorded" reads
+           as a missing value; "nothing refused this field" reads as the state it is. */
+        : $("p", { class: "note mono" }, "NOTHING REFUSED THIS FIELD"),
+      f.note ? $("p", { class: "note" }, f.note) : null));
+}
+
+function render(d) {
+  const root = document.getElementById("root");
+  root.textContent = "";
+  const w = d.worked;
+
+  root.append($("h1", {}, "Track Residual Monitor"),
+    $("p", { class: "sub" }, "Observed-position departures from an issued forecast, with the "
+      + "frame they were measured in and the claims that are refused. Preview build — unmerged, "
+      + "not wired to the board."),
+    $("p", { class: "banner mono" },
+      "PREDICTIVE ADVANTAGE AND COMMERCIAL VALUE ARE HYPOTHESES, NOT FINDINGS. "
+      + "NOTHING HERE HAS BEEN SCORED AGAINST A HELD-OUT STORM."));
+
+  /* ---------------- the strip ---------------- */
+  root.append(panel("Residual strip — cross-track vs fix time",
+    `${w.storm} · fixed baseline`,
+    strip(d),
+    $("div", { class: "legend" },
+      Object.entries(d.sourceFamilies).map(([k, v]) =>
+        $("span", {}, $("span", { class: "swatch", style: `background:${FAMILY_INK[k] || FAMILY_INK.other}` }),
+          v.label.toUpperCase())),
+      $("span", {}, "— MARKED BY SOURCE FAMILY. NO SOURCE IS GROUND TRUTH.")),
+    $("div", { class: "grid c4", style: "margin-top:10px" },
+      kv("Observation age", num(d.series.assessedFixed.freshness.observationAgeMin, 0) + " min"),
+      kv("Ingest latency", num(d.series.assessedFixed.freshness.ingestLatencyS, 0) + " s"
+         + (d.series.assessedFixed.freshness.receivedBeforeValidTime ? " (on the wire before its valid time)" : "")),
+      kv("Effective information age", num(d.series.assessedFixed.freshness.effectiveInformationAgeMin, 0) + " min"),
+      kv("Interpolation", d.interpolation)),
+    $("p", { class: "note" }, d.series.assessedFixed.freshness.definition)));
+
+  /* ---------------- the four fields ---------------- */
+  const a = d.series.assessedFixed;
+  root.append($("div", { class: "grid c2" },
+    refusalCard("Data quality", a.dataQuality),
+    refusalCard("Uncertainty calibration", a.uncertaintyCalibration),
+    refusalCard("Sample sufficiency", a.sampleSufficiency),
+    refusalCard("Trend status", a.trendStatus)));
+
+  root.append(panel("Independence — the sample is groups, not rows", null,
+    $("table", {}, $("thead", {}, $("tr", {},
+      ["Upstream", "Fixes", "Fix ids"].map((h) => $("th", {}, h)))),
+      $("tbody", {}, a.sampleSufficiency.groups.map((g) => $("tr", {},
+        $("td", { class: "mono" }, g.upstream), $("td", { class: "n" }, g.n),
+        $("td", { class: "mono" }, g.fixIds.join("  ")))))),
+    $("p", { class: "note" }, a.sampleSufficiency.note),
+    $("p", { class: "note" }, "Candidate promotion rule (three same-sign, six hours, n≥3): "
+      + (a.trendStatus.candidate.candidateMet ? "MET" : "not met")
+      + " — " + a.trendStatus.candidate.promotionStatus + ". "
+      + a.trendStatus.candidate.reasonNotPromoted)));
+
+  /* ---------------- the corrected worked example ---------------- */
+  const frames = $("table", {}, $("thead", {}, $("tr", {},
+    ["Reading", "Interpolation", "Frame", "Cross nm", "Along nm", "Separation nm"].map((h) => $("th", {}, h)))),
+    $("tbody", {},
+      w.frames.map((f) => $("tr", {},
+        $("td", {}, f.name), $("td", { class: "mono" }, d.interpolation),
+        $("td", { class: "n" }, num(f.courseDeg, 2) + "°"),
+        $("td", { class: "n" }, num(f.crossNm)), $("td", { class: "n" }, num(f.alongNm)),
+        $("td", { class: "n" }, num(f.separationNm)))),
+      $("tr", {}, $("td", {}, "rejected — interpolated to the observed latitude"),
+        $("td", { class: "mono" }, "linear-in-latitude"), $("td", { class: "n" }, num(w.frames[0].courseDeg, 2) + "°"),
+        $("td", { class: "n" }, num(w.rejected.latInterp.crossNm)),
+        $("td", { class: "n" }, num(w.rejected.latInterp.alongNm)),
+        $("td", { class: "n" }, num(w.rejected.latInterp.separationNm))),
+      $("tr", {}, $("td", {}, "the concept brief's table — the thing being corrected"),
+        $("td", { class: "mono" }, w.rejected.brief.interpolation),
+        $("td", { class: "n" }, w.rejected.brief.frameDeg + "°"),
+        $("td", { class: "n" }, num(w.rejected.brief.crossNm)),
+        $("td", { class: "n" }, num(w.rejected.brief.alongNm)), $("td", { class: "n" }, "—"))));
+
+  root.append(panel("Corrected worked example — " + w.storm,
+    w.baseline.baselineId + " × " + w.fix.fixId,
+    $("div", { class: "grid c4" },
+      kv("Baseline INIT", dayz(w.baseline.initialValidZ)),
+      kv("First available", dayz(w.baseline.firstAvailableZ)),
+      kv("Fix valid", dayz(w.fix.validZ)),
+      kv("Lead", num(w.residualForecastFrame.leadHours, 2) + " h")),
+    $("p", { class: "note mono" },
+      `NOMINAL LABEL ${w.leadLabels.nominalFirstRowLabel} · ACTUAL `
+      + `${w.leadLabels.actualHoursInitToFirstRow} h INIT → FIRST FORECAST ROW`),
+    $("p", { class: "note" }, w.leadLabels.note),
+    $("p", { class: "note mono" },
+      `FORECAST @ ${dayz(w.fix.validZ)} = ${num(w.interpolated.lat, 4)}N `
+      + `${num(-w.interpolated.lonE, 4)}W · OBSERVED = ${num(w.fix.lat, 1)}N ${num(-w.fix.lonE, 1)}W`),
+    frames,
+    $("p", { class: "note" }, w.rejected.latInterp.note),
+    $("p", { class: "note" }, "The brief reported along-track 0.0 nm. On the brief's own "
+      + "construction — a due-east displacement projected onto a 030° heading — the along-track "
+      + "component is " + num(w.rejected.briefAlongOnItsOwnTerms) + " nm."),
+    $("div", { class: "grid c2", style: "margin-top:10px" },
+      $("div", {},
+        kv("Published accuracy", w.positionAccuracy.verbatim || "—"),
+        kv("Converted to a sigma?", w.positionAccuracy.unconverted.refusal),
+        kv("If converted, under an assumption",
+           "σ " + num(w.positionAccuracy.ifConverted.sigmaNm, 1) + " nm · " + w.positionAccuracy.ifConverted.assumption)),
+      $("div", {},
+        kv("0.1° rounding box", "±" + num(w.rounding.maxNm, 1) + " nm"),
+        kv("Linear vs geodesic bound", "≤ " + num(w.interpolationBound.maxDeviationNm, 3) + " nm"),
+        kv("Wobble", d.series.wobbleBound.ok ? "peak-to-peak " + num(d.series.wobbleBound.peakToPeakNm, 1) + " nm — bounded, not removed" : "—"))),
+    $("p", { class: "note" }, w.positionAccuracy.unconverted.note)));
+
+  /* ---------------- official-only, refused ---------------- */
+  const oo = d.officialOnly.assessed;
+  root.append(panel("Official-only series (advisory 46 vs 46A) — refused",
+    "the state a six-hourly cycle produces on its own",
+    $("div", { class: "grid c4" },
+      kv("Residuals", String(d.officialOnly.series.filter((r) => r.ok).length)),
+      kv("Independent groups", String(oo.sampleSufficiency.independentGroups)),
+      kv("Sample", oo.sampleSufficiency.state),
+      kv("Trend", oo.trendStatus.state)),
+    $("p", { class: "note" }, "Two official products of one six-hourly cycle are one or two "
+      + "independent observations, never three. The window is populated by intermediate "
+      + "advisories and non-advisory centre fixes; without them this refusal is the correct "
+      + "output, not a defect.")));
+
+  /* ---------------- closure ---------------- */
+  const rows = Object.entries(d.closure.byAssumption).map(([k, c]) => $("tr", {},
+    $("td", { class: "mono" }, k),
+    $("td", {}, c.state),
+    $("td", { class: "n" }, c.requiredRate && c.requiredRate.ok ? num(c.requiredRate.requiredKt, 2) + " kt" : "—"),
+    $("td", { class: "mono" }, c.requiredRate && c.requiredRate.nearestRing || "—"),
+    $("td", { class: "n" }, c.requiredRate && c.requiredRate.ok ? num(c.requiredRate.hoursRemaining, 1) + " h" : "—")));
+  root.append(panel("Closure — conditional kinematics", "no probability is emitted",
+    $("table", {}, $("thead", {}, $("tr", {},
+      ["Displacement assumption", "State", "Required rate", "Nearest qualifying shore", "Time remaining"]
+        .map((h) => $("th", {}, h)))), $("tbody", {}, rows)),
+    $("p", { class: "note mono" }, d.closure.byAssumption["forecast-as-issued"].probabilityRefusal),
+    $("p", { class: "note mono" }, d.closure.byAssumption["forecast-as-issued"].exactTriggerNote
+      + " — " + d.settlement.hawaiiTrigger.note),
+    $("p", { class: "note" }, "Frame guard: " + (d.closure.frameGuard.threw
+      ? "combining a cross-track with an eastward shoreline gap throws — " + d.closure.frameGuard.message
+      : "DID NOT THROW — this is a defect")),
+    $("p", { class: "note mono" }, "LATITUDE-CROSSING DIAGNOSTIC · 21.9N crossed "
+      + dayz(d.closure.latitudeDiagnostic.validZ) + " = T+"
+      + num(d.closure.latitudeDiagnostic.leadHours, 2) + " h. 21.9 IS A LATITUDE, NOT A LEAD."),
+    $("p", { class: "note" }, d.closure.latitudeDiagnostic.note)));
+
+  /* ---------------- settlement, on its own layers ---------------- */
+  const dem = d.settlement.demonstration;
+  root.append(panel("Settlement geometry — a separate surface",
+    "registry empty · rules not ingested",
+    $("p", { class: "banner mono" }, d.settlement.registryEmpty.state + " — "
+      + d.settlement.registryEmpty.note),
+    $("div", { class: "grid c2" },
+      $("div", {},
+        kv("Incomplete record", d.settlement.incompleteRecordRefusal.refusal, "mono"),
+        kv("Missing fields", (d.settlement.incompleteRecordRefusal.missing || []).join(", "), "mono")),
+      $("div", {},
+        kv("Excluded strike", dem.strikeClassification ? dem.strikeClassification.reason : "—", "mono"),
+        kv("While the window is open", dem.stateWhileWindowOpen ? dem.stateWhileWindowOpen.text : "—", "mono"),
+        kv("After the window closes", dem.stateAfterWindowCloses ? dem.stateAfterWindowCloses.text : "—", "mono"))),
+    $("p", { class: "note" }, dem.disclaimer),
+    $("p", { class: "note" }, dem.strikeClassification ? dem.strikeClassification.note : ""),
+    $("p", { class: "note" }, dem.warningVsCrossing ? dem.warningVsCrossing.note : ""),
+    $("p", { class: "note mono" }, "LAYERS, RENDERED SEPARATELY: "
+      + Object.values(d.settlement.layers).map((l) => l.id + " (" + l.authority + ")").join(" · ")),
+    $("p", { class: "note" }, d.settlement.warningSemantics),
+    $("p", { class: "note mono" }, "QUALIFYING RINGS: " + [...new Set(d.closure.qualifyingRings)].join(", ")
+      + " — EXCLUDED SET HELD ON A DIFFERENT LAYER.")));
+
+  /* ---------------- limits + provenance ---------------- */
+  root.append(panel("Known limits, printed on the artefact", null,
+    $("ul", {}, d.knownLimits.map((l) => $("li", {}, l))),
+    $("footer", { class: "prov" },
+      $("span", {}, "SOURCE " + d.fixtureManifest.entries.length + " preserved NHC products"),
+      $("span", {}, "RETRIEVED " + d.fixtureManifest.retrievedZ),
+      $("span", {}, d.fixtureManifest.status),
+      $("span", {}, "BUILT " + d.generatedAt),
+      $("span", {}, "COMPUTED BY scripts/build-residual-preview.mjs · GATED BY scripts/test-track-residual.mjs"))));
+
+  root.append(panel("Preserved products", "sha-256 of the product text", 
+    $("table", {}, $("thead", {}, $("tr", {}, ["Key", "URL", "SHA-256"].map((h) => $("th", {}, h)))),
+      $("tbody", {}, d.fixtureManifest.entries.map((e) => $("tr", {},
+        $("td", { class: "mono" }, e.key),
+        $("td", { class: "mono" }, $("a", { href: e.url, style: "color:var(--text-link)" }, e.url)),
+        $("td", { class: "mono" }, e.sha256.slice(0, 24) + "…")))))));
+}
+
+fetch("data.json").then((r) => r.json()).then(render).catch((e) => {
+  document.getElementById("root").textContent = "data.json could not be read: " + e.message;
+});
+</script>

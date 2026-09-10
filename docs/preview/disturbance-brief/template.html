@@ -1,0 +1,562 @@
+<title>Three Systems, Three Answers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Palette taken from the Category Alpha tokens in docs/tokens/colors.css. Series hues validated
+   for CVD separation and contrast against both surfaces; red and green are reserved for the
+   refused / published status and are never used as a series. */
+:root{
+  --ground:#f4f5f8; --panel:#ffffff; --sunken:#f8fafc; --raise:#ffffff;
+  --line:#e2e8f0; --line-strong:#cbd5e1;
+  --ink:#0f172a; --ink-2:#475569; --ink-3:#64748b;
+  --accent:#0ea5e9;
+  --s-d1:#7c3aed; --s-d2:#b45309; --s-e14:#0284c7;
+  --refuse:#dc2626; --publish:#16a34a;
+  --grid:rgba(15,23,42,.09);
+  --shadow:0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.05);
+  --font-d:"IBM Plex Sans Condensed",-apple-system,"Segoe UI",sans-serif;
+  --font-b:"IBM Plex Sans",-apple-system,"Segoe UI",sans-serif;
+  --font-m:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#05070d; --panel:#070b14; --sunken:#0b1220; --raise:#0e1626;
+  --line:#152238; --line-strong:#1e3050;
+  --ink:#e6edf6; --ink-2:#8ea3bd; --ink-3:#6b809c;
+  --accent:#38bdf8;
+  --s-d1:#7c3aed; --s-d2:#b45309; --s-e14:#0284c7;
+  --refuse:#ef4444; --publish:#34d399;
+  --grid:rgba(230,237,246,.10);
+  --shadow:none;
+}}
+:root[data-theme="dark"]{
+  --ground:#05070d; --panel:#070b14; --sunken:#0b1220; --raise:#0e1626;
+  --line:#152238; --line-strong:#1e3050;
+  --ink:#e6edf6; --ink-2:#8ea3bd; --ink-3:#6b809c;
+  --accent:#38bdf8;
+  --s-d1:#7c3aed; --s-d2:#b45309; --s-e14:#0284c7;
+  --refuse:#ef4444; --publish:#34d399;
+  --grid:rgba(230,237,246,.10);
+  --shadow:none;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-b);
+     font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 72px;padding-left:18px;padding-right:18px}
+.mono{font-family:var(--font-m);font-variant-numeric:tabular-nums}
+h1{font-family:var(--font-d);font-size:clamp(28px,4.4vw,44px);font-weight:700;line-height:1.04;
+   letter-spacing:-.015em;margin:0 0 10px;text-wrap:balance}
+h2{font-family:var(--font-d);font-size:19px;font-weight:600;letter-spacing:.01em;margin:0;text-wrap:balance}
+h3{font-family:var(--font-d);font-size:15px;font-weight:600;margin:0 0 6px}
+p{margin:0 0 10px;max-width:68ch}
+a{color:var(--accent)}
+.eyebrow{font-family:var(--font-m);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+         color:var(--ink-3);margin:0 0 10px}
+.lede{font-size:16.5px;color:var(--ink-2);max-width:70ch;margin:0 0 18px}
+.lede b{color:var(--ink);font-weight:600}
+
+/* header */
+.masthead{border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:22px}
+.statline{display:flex;flex-wrap:wrap;gap:8px 18px;font-family:var(--font-m);font-size:11px;
+          color:var(--ink-3);margin-top:14px}
+.statline b{color:var(--ink-2);font-weight:500}
+
+/* the three-verdict rail */
+.rail{display:grid;gap:14px;margin:26px 0 30px}
+@media(min-width:820px){.rail{grid-template-columns:repeat(3,1fr)}}
+.sys{background:var(--panel);border:1px solid var(--line);border-top:3px solid var(--sc);
+     border-radius:3px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:9px}
+.sys .tag{font-family:var(--font-m);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--sc)}
+.sys .nm{font-family:var(--font-d);font-size:20px;font-weight:700;line-height:1.1}
+.sys .ptype{font-family:var(--font-m);font-size:9.5px;letter-spacing:.07em;color:var(--ink-3);
+            line-height:1.35;padding-bottom:2px}
+.sys .sub{font-size:12.5px;color:var(--ink-2);min-height:2.6em}
+.sys .pool{font-family:var(--font-m);font-size:11.5px;color:var(--ink-2);
+           padding-top:9px;border-top:1px solid var(--line)}
+.verdict{font-family:var(--font-m);font-size:10px;font-weight:600;letter-spacing:.045em;line-height:1.3;
+         padding:5px 8px;border-radius:2px;display:inline-flex;align-items:center;gap:7px;align-self:flex-start}
+.verdict.no{color:var(--refuse);background:color-mix(in srgb,var(--refuse) 11%,transparent);
+            border:1px solid color-mix(in srgb,var(--refuse) 34%,transparent)}
+.verdict.yes{color:var(--publish);background:color-mix(in srgb,var(--publish) 11%,transparent);
+             border:1px solid color-mix(in srgb,var(--publish) 34%,transparent)}
+.dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+
+/* panels */
+section{background:var(--panel);border:1px solid var(--line);border-radius:3px;
+        padding:20px;margin-bottom:18px;box-shadow:var(--shadow)}
+.sechead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;
+         gap:10px;padding-bottom:12px;margin-bottom:16px;border-bottom:1px solid var(--line)}
+.sechead .rule{font-family:var(--font-m);font-size:10.5px;color:var(--ink-3);letter-spacing:.06em}
+.cols{display:grid;gap:20px}
+@media(min-width:840px){.cols.c2{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}}
+
+/* metadata list */
+.kv{display:grid;grid-template-columns:auto 1fr;gap:3px 14px;font-size:12.5px;align-items:baseline}
+.kv dt{font-family:var(--font-m);font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+       color:var(--ink-3);white-space:nowrap}
+.kv dd{margin:0;font-family:var(--font-m);font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--ink)}
+
+/* charts */
+.chart{width:100%;display:block;overflow:visible}
+.ct{font-family:var(--font-m);font-size:10.5px;fill:var(--ink-3)}
+.cv{font-family:var(--font-m);font-size:11px;fill:var(--ink);font-variant-numeric:tabular-nums}
+.figcap{font-size:11.5px;color:var(--ink-3);margin-top:8px;max-width:62ch}
+figure{margin:0}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+.scroll{overflow-x:auto}
+th{font-family:var(--font-m);font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;
+   color:var(--ink-3);text-align:left;font-weight:500;padding:0 10px 6px 0;white-space:nowrap;
+   border-bottom:1px solid var(--line-strong)}
+td{padding:6px 10px 6px 0;border-bottom:1px solid var(--line);vertical-align:baseline}
+td.n{text-align:right;font-family:var(--font-m);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.m{font-family:var(--font-m)}
+
+/* quoted archive voice */
+blockquote{margin:0;padding:11px 14px;background:var(--sunken);border-left:2px solid var(--sc,var(--ink-3));
+           font-size:12.5px;color:var(--ink-2)}
+blockquote .st{font-family:var(--font-m);font-size:10.5px;letter-spacing:.07em;color:var(--refuse);
+               display:block;margin-bottom:5px;font-weight:600}
+
+/* the composition */
+.calc{display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-family:var(--font-m);
+      background:var(--sunken);border:1px solid var(--line);border-radius:3px;padding:14px}
+.calc .term{display:flex;flex-direction:column;gap:2px}
+.calc .term span{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.calc .term b{font-size:19px;font-weight:600;font-variant-numeric:tabular-nums}
+.calc .op{font-size:17px;color:var(--ink-3);padding:0 2px}
+.calc .out b{color:var(--s-d2)}
+
+.note{font-size:12px;color:var(--ink-3);max-width:66ch}
+.qp{display:flex;flex-direction:column;gap:3px;background:var(--sunken);border:1px solid var(--line);
+    border-left:2px solid var(--sc,var(--ink-3));border-radius:3px;padding:9px 12px;font-size:11.5px;
+    color:var(--ink-2)}
+.qp .qpk{font-family:var(--font-m);font-size:9.5px;letter-spacing:.08em;color:var(--sc,var(--ink-3));font-weight:600}
+.clockbox{display:flex;flex-wrap:wrap;gap:8px 22px;background:var(--sunken);border:1px solid var(--line);
+          border-radius:3px;padding:11px 13px;margin:10px 0 4px}
+.clockbox .cl{display:flex;flex-direction:column;gap:1px}
+.clockbox .cl span{font-family:var(--font-m);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.clockbox .cl b{font-family:var(--font-m);font-size:12px;font-weight:500;font-variant-numeric:tabular-nums}
+.clockbox .out b{color:var(--s-e14);font-size:15px;font-weight:600}
+.warnbox{border:1px solid var(--refuse);border-left-width:3px;border-radius:3px;padding:14px 16px;
+         background:color-mix(in srgb,var(--refuse) 6%,transparent)}
+.warnbox h3{color:var(--refuse)}
+ul{margin:8px 0 0;padding-left:18px}li{margin:5px 0;color:var(--ink-2);font-size:12.5px;max-width:66ch}
+footer{border-top:1px solid var(--line);margin-top:26px;padding-top:16px;
+       font-family:var(--font-m);font-size:10.5px;color:var(--ink-3);display:flex;flex-wrap:wrap;gap:6px 20px}
+.tip{position:fixed;pointer-events:none;opacity:0;transition:opacity .1s;background:var(--raise);
+     border:1px solid var(--line-strong);border-radius:3px;padding:7px 9px;font-family:var(--font-m);
+     font-size:11px;color:var(--ink);box-shadow:0 6px 20px rgba(0,0,0,.22);z-index:9;max-width:250px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+</style>
+
+<div class="wrap" id="root"></div>
+<div class="tip" id="tip"></div>
+
+<script id="payload" type="application/json">"__DATA__"</script>
+<script>
+/* Rendering only. Every number here was computed by scripts/build-disturbance-brief.mjs and is
+   read from the payload above; nothing on this page is calculated in the browser except the
+   pixel geometry of the charts. */
+const D = JSON.parse(document.getElementById("payload").textContent);
+const $ = (t, a, ...k) => { const e = document.createElement(t);
+  for (const [n, v] of Object.entries(a || {})) { if (v == null) continue;
+    if (n === "class") e.className = v; else if (n === "html") e.innerHTML = v; else e.setAttribute(n, v); }
+  for (const c of k.flat()) if (c != null) e.append(c.nodeType ? c : String(c)); return e; };
+const NS = "http://www.w3.org/2000/svg";
+const S = (t, a, ...k) => { const e = document.createElementNS(NS, t);
+  for (const [n, v] of Object.entries(a || {})) if (v != null) e.setAttribute(n, v);
+  for (const c of k.flat()) if (c != null) e.append(c.nodeType ? c : String(c)); return e; };
+
+const n1 = (v) => (v == null ? "—" : v.toFixed(1));
+const pctS = (v) => (v == null ? "—" : v.toFixed(1) + "%");
+const ll = (lat, lonE) => `${Math.abs(lat).toFixed(1)}${lat < 0 ? "S" : "N"} ${Math.abs(lonE).toFixed(1)}${lonE < 0 ? "W" : "E"}`;
+const dayz = (iso) => (iso ? iso.slice(8, 10) + "/" + iso.slice(11, 13) + iso.slice(14, 16) + "Z" : "—");
+const LEVELS = [["td","TD"],["ts","TS"],["cat1","Cat 1"],["cat2","Cat 2"],["cat3","Cat 3"],["cat4","Cat 4"],["cat5","Cat 5"]];
+
+const tip = document.getElementById("tip");
+const hover = (el, html) => {
+  el.addEventListener("pointerenter", (e) => { tip.innerHTML = html; tip.style.opacity = "1";
+    tip.style.left = Math.min(innerWidth - 262, e.clientX + 12) + "px"; tip.style.top = (e.clientY + 14) + "px"; });
+  el.addEventListener("pointerleave", () => { tip.style.opacity = "0"; });
+};
+
+const SYS = [
+  { key: "d1", hue: "var(--s-d1)", tag: "Disturbance 1", nm: "Trough S-SE of Hawaiʻi",
+    sub: "Disorganised convection, moving generally northward. Queried from a reference cell." },
+  { key: "d2", hue: "var(--s-d2)", tag: "Disturbance 2", nm: "Low forecast to form",
+    sub: "Nothing exists yet. NHC expects a low to form south of Baja this weekend." },
+  { key: "fourteenE", hue: "var(--s-e14)", tag: "EP142026", nm: "TD Fourteen-E",
+    sub: "A tropical depression. No formation chance is needed — it has formed." },
+];
+
+/* ---------------------------------------------------------------- the intensity ladder */
+function ladder(a, hue) {
+  const W = 420, rowH = 26, padL = 46, padR = 58, H = LEVELS.length * rowH + 26;
+  const g = S("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": `Analog storms reaching each intensity, out of ${a.nCases}` });
+  const max = a.sufficient ? 100 : a.nCases;
+  const x = (v) => padL + (v / max) * (W - padL - padR);
+  for (const t of (a.sufficient ? [0, 25, 50, 75, 100] : [0, a.nCases])) {
+    g.append(S("line", { x1: x(t), x2: x(t), y1: 16, y2: H - 12, stroke: "var(--grid)", "stroke-width": 1 }));
+    g.append(S("text", { x: x(t), y: 11, "text-anchor": "middle", class: "ct" }, a.sufficient ? t + "%" : t));
+  }
+  LEVELS.forEach(([k, label], i) => {
+    const o = a.levels[k]; if (!o) return;
+    const y = 22 + i * rowH;
+    g.append(S("text", { x: padL - 8, y: y + 11, "text-anchor": "end", class: "ct" }, label));
+    const v = a.sufficient ? o.rate : o.count;
+    const w = Math.max(v > 0 ? 2 : 0, x(v) - padL);
+    if (w > 0) g.append(S("rect", { x: padL, y, width: w, height: 14, rx: 3, fill: hue, "fill-opacity": ".92" }));
+    if (a.sufficient && o.ci) {
+      const [lo, hi] = o.ci;
+      g.append(S("line", { x1: x(lo), x2: x(hi), y1: y + 7, y2: y + 7, stroke: "var(--ink-2)", "stroke-width": 1.5 }));
+      for (const e of [lo, hi]) g.append(S("line", { x1: x(e), x2: x(e), y1: y + 3, y2: y + 11, stroke: "var(--ink-2)", "stroke-width": 1.5 }));
+    }
+    g.append(S("text", { x: W - padR + 6, y: y + 11, class: "cv" },
+      a.sufficient ? `${o.rate.toFixed(0)}%` : `${o.count}/${o.n}`));
+    const hit = S("rect", { x: 0, y: y - 4, width: W, height: rowH, fill: "transparent" });
+    hover(hit, a.sufficient
+      ? `<b>${label}</b><br>${o.count} of ${o.n} storms<br>${o.rate.toFixed(1)}% &middot; 95% CI ${o.ci[0].toFixed(0)}–${o.ci[1].toFixed(0)}%`
+      : `<b>${label}</b><br>${o.count} of ${o.n} storms<br>rate refused — pool below the sample gate`);
+    g.append(hit);
+  });
+  return g;
+}
+
+/* ------------------------------------------------- time to hurricane strength, with the forecast */
+function timing(a, fva) {
+  const t = a.timeToEvent.cat1, W = 520, H = 118, padL = 12, padR = 12;
+  if (!t || !fva) return null;
+  const hiV = Math.max(t.p90, fva.clock.elapsedHours) * 1.1;
+  const x = (h) => padL + (h / hiV) * (W - padL - padR);
+  const g = S("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": "Hours from first fix to hurricane strength: analog distribution against the official forecast" });
+  const yB = 62;
+  for (let h = 0; h <= hiV; h += 24) {
+    g.append(S("line", { x1: x(h), x2: x(h), y1: 22, y2: yB + 22, stroke: "var(--grid)", "stroke-width": 1 }));
+    g.append(S("text", { x: x(h), y: yB + 36, "text-anchor": "middle", class: "ct" }, "+" + h + "h"));
+  }
+  /* p10–p90 whisker, p25–p75 box, median tick — one distribution, one hue. */
+  g.append(S("line", { x1: x(t.p10), x2: x(t.p90), y1: yB, y2: yB, stroke: "var(--s-e14)", "stroke-width": 2 }));
+  for (const e of [t.p10, t.p90]) g.append(S("line", { x1: x(e), x2: x(e), y1: yB - 7, y2: yB + 7, stroke: "var(--s-e14)", "stroke-width": 2 }));
+  g.append(S("rect", { x: x(t.p25), y: yB - 13, width: x(t.p75) - x(t.p25), height: 26, rx: 3,
+                       fill: "var(--s-e14)", "fill-opacity": ".28", stroke: "var(--s-e14)", "stroke-width": 1.5 }));
+  g.append(S("line", { x1: x(t.median), x2: x(t.median), y1: yB - 15, y2: yB + 15, stroke: "var(--s-e14)", "stroke-width": 3 }));
+  g.append(S("text", { x: x(t.median), y: yB - 21, "text-anchor": "middle", class: "cv" }, "median +" + t.median + "h"));
+  g.append(S("text", { x: x(t.p10), y: yB + 21, "text-anchor": "middle", class: "ct" }, "p10"));
+  g.append(S("text", { x: x(t.p90), y: yB + 21, "text-anchor": "middle", class: "ct" }, "p90"));
+  /* The official forecast on the SAME clock. Marked in the accent, not the refusal ink: it sits
+     inside the distribution and nothing about it is being flagged. */
+  const fx = x(fva.clock.elapsedHours);
+  g.append(S("line", { x1: fx, x2: fx, y1: 26, y2: yB + 18, stroke: "var(--accent)", "stroke-width": 2, "stroke-dasharray": "4 3" }));
+  g.append(S("circle", { cx: fx, cy: yB, r: 5, fill: "var(--accent)", stroke: "var(--panel)", "stroke-width": 2 }));
+  const near = fx > W - 118;
+  g.append(S("text", { x: near ? W - 4 : fx, y: 18, "text-anchor": near ? "end" : "middle",
+    class: "cv", fill: "var(--accent)" }, "NHC forecast +" + fva.clock.elapsedHours + " h"));
+  return g;
+}
+
+/* ------------------------------------------------------------------------ the locator map */
+function locator() {
+  const W = 1080, H = 380, lo0 = -180, lo1 = -104, la0 = 3, la1 = 33;
+  const x = (lon) => ((lon - lo0) / (lo1 - lo0)) * W;
+  const y = (lat) => H - ((lat - la0) / (la1 - la0)) * H;
+  const g = S("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": "Eastern and central Pacific: two outlook areas, Fourteen-E and Lowell" });
+  g.append(S("rect", { x: 0, y: 0, width: W, height: H, fill: "var(--sunken)" }));
+  for (let lon = -180; lon <= -104; lon += 10) {
+    g.append(S("line", { x1: x(lon), x2: x(lon), y1: 0, y2: H, stroke: "var(--grid)", "stroke-width": 1 }));
+    g.append(S("text", { x: x(lon) + 4, y: H - 6, class: "ct" }, Math.abs(lon) + "W"));
+  }
+  for (let lat = 10; lat <= 30; lat += 10) {
+    g.append(S("line", { x1: 0, x2: W, y1: y(lat), y2: y(lat), stroke: "var(--grid)", "stroke-width": 1 }));
+    g.append(S("text", { x: 4, y: y(lat) - 4, class: "ct" }, lat + "N"));
+  }
+  const poly = (rings, hue, label, sub) => {
+    for (const r of rings) {
+      g.append(S("path", { d: "M" + r.map((p) => `${x(p[1]).toFixed(1)},${y(p[0]).toFixed(1)}`).join("L") + "Z",
+        fill: hue, "fill-opacity": ".16", stroke: hue, "stroke-width": 1.5 }));
+    }
+    /* Label at the polygon's NORTHERN edge rather than its centroid: Disturbance 2's centroid sits
+       exactly where Fourteen-E's own label goes, and two labels on one point is worse than none. */
+    const pts = rings.flat();
+    const cx = x(pts.reduce((a, p) => a + p[1], 0) / pts.length);
+    const top = y(Math.max(...pts.map((p) => p[0])));
+    g.append(S("text", { x: cx, y: top - 14, "text-anchor": "middle", class: "cv", fill: hue }, label));
+    g.append(S("text", { x: cx, y: top - 3, "text-anchor": "middle", class: "ct", fill: hue }, sub));
+  };
+  poly(D.gtwo.d1.rings, "var(--s-d1)", "DISTURBANCE 1", `${D.gtwo.d1.pct48}% / ${D.gtwo.d1.pct7d}%`);
+  poly(D.gtwo.d2.rings, "var(--s-d2)", "DISTURBANCE 2", `${D.gtwo.d2.pct48}% / ${D.gtwo.d2.pct7d}%`);
+
+  const e = D.storms.fourteenE;
+  const track = [{ lat: e.lat, lonE: e.lonE }, ...e.forecast];
+  g.append(S("path", { d: "M" + track.map((p) => `${x(p.lonE).toFixed(1)},${y(p.lat).toFixed(1)}`).join("L"),
+    fill: "none", stroke: "var(--s-e14)", "stroke-width": 2, "stroke-dasharray": "5 4" }));
+  for (const p of e.forecast) g.append(S("circle", { cx: x(p.lonE), cy: y(p.lat), r: p.kt >= 64 ? 4.5 : 3,
+    fill: p.kt >= 64 ? "var(--s-e14)" : "var(--panel)", stroke: "var(--s-e14)", "stroke-width": 1.5 }));
+  g.append(S("circle", { cx: x(e.lonE), cy: y(e.lat), r: 6, fill: "var(--s-e14)", stroke: "var(--panel)", "stroke-width": 2 }));
+  g.append(S("text", { x: x(e.lonE), y: y(e.lat) + 19, "text-anchor": "middle", class: "cv", fill: "var(--s-e14)" }, "FOURTEEN-E"));
+  /* Two points, drawn as two things: the genesis the query uses, and the pre-genesis disturbance
+     fix 48 h earlier that it deliberately does not. */
+  g.append(S("circle", { cx: x(e.genesis.lonE), cy: y(e.genesis.lat), r: 4.5,
+    fill: "var(--s-e14)", "fill-opacity": ".5", stroke: "var(--s-e14)", "stroke-width": 1.5 }));
+  g.append(S("text", { x: x(e.genesis.lonE), y: y(e.genesis.lat) - 10, "text-anchor": "middle", class: "ct",
+    fill: "var(--s-e14)" }, "genesis"));
+  g.append(S("circle", { cx: x(e.firstTrack.lonE), cy: y(e.firstTrack.lat), r: 3.5,
+    fill: "none", stroke: "var(--ink-3)", "stroke-width": 1.5, "stroke-dasharray": "2 2" }));
+  g.append(S("text", { x: x(e.firstTrack.lonE), y: y(e.firstTrack.lat) + 15, "text-anchor": "middle", class: "ct" },
+    "first track (DB)"));
+
+  if (D.storms.lowell) {
+    const L = D.storms.lowell;
+    g.append(S("circle", { cx: x(L.lonE), cy: y(L.lat), r: 5, fill: "none", stroke: "var(--ink-3)", "stroke-width": 2 }));
+    g.append(S("text", { x: x(L.lonE), y: y(L.lat) - 11, "text-anchor": "middle", class: "ct" }, "TS LOWELL"));
+  }
+  return g;
+}
+
+/* ------------------------------------------------------------------------------ render */
+function poolLine(a) {
+  return `${a.nCases} analog storms · effective sample ${a.ess.toFixed(1)} · gate ${a.minSample}`;
+}
+function verdict(key, a) {
+  const label = D.spine[key];
+  return $("span", { class: "verdict " + (a.sufficient ? "yes" : "no") },
+    $("span", { class: "dot" }), label);
+}
+
+const root = document.getElementById("root");
+
+/* masthead */
+const head = $("div", { class: "masthead" },
+  $("p", { class: "eyebrow" }, "Storm Atlas · genesis-conditioned analogs · eastern & central Pacific"),
+  $("h1", {}, "Three systems, three answers"),
+  $("p", { class: "lede", html:
+    "On one Pacific chart NHC is carrying a trough that may become something, a low that has not "
+    + "formed yet, and a depression that already has. The archive is asked the same question of "
+    + "each — <b>what did storms born here, in September, go on to do?</b> — and gives three "
+    + "different kinds of answer. The most useful of them is a refusal." }),
+  $("div", { class: "statline" },
+    $("span", {}, $("b", {}, "OUTLOOK "), D.outlook.issuedLocal || "—"),
+    $("span", {}, $("b", {}, "FORECASTER "), D.outlook.forecaster || "—"),
+    $("span", {}, $("b", {}, "GTWO "), D.gtwo.issued),
+    $("span", {}, $("b", {}, "ARCHIVE "), "IBTrACS v04r01 · EP+NA · pool restricted to 1971+"),
+    $("span", {}, $("b", {}, "BUILT "), D.generatedAt.slice(0, 16).replace("T", " ") + "Z")));
+root.append(head);
+
+/* verdict rail */
+const rail = $("div", { class: "rail" });
+for (const s of SYS) {
+  const a = D.atlas[s.key];
+  rail.append($("div", { class: "sys", style: `--sc:${s.hue}` },
+    $("div", { class: "tag" }, s.tag),
+    $("div", { class: "nm" }, s.nm),
+    $("div", { class: "ptype" }, D.pointType[s.key]),
+    $("div", { class: "sub" }, s.sub),
+    verdict(s.key, a),
+    $("div", { class: "pool" }, poolLine(a))));
+}
+root.append(rail);
+
+/* map */
+root.append($("section", {},
+  $("div", { class: "sechead" }, $("h2", {}, "Where they are"),
+    $("span", { class: "rule" }, "NHC outlook polygons · official forecast track · equirectangular")),
+  locator(),
+  $("p", { class: "figcap" },
+    "Both outlook areas are drawn from NHC’s own GTWO shapefile. Fourteen-E’s dashed line is its "
+    + "forecast track from advisory 1; filled markers are the points forecast at hurricane strength. "
+    + "The hollow ring west of it is the genesis fix the archive query is conditioned on — not its "
+    + "current position.")));
+
+/* ---- per-system panels, ordered by how much the archive can say ---- */
+
+/* D1 */
+{
+  const a = D.atlas.d1, all = D.atlas.d1AllEras;
+  root.append($("section", { style: "--sc:var(--s-d1)" },
+    $("div", { class: "sechead" },
+      $("h2", {}, "Disturbance 1 — the archive declines"),
+      $("span", { class: "rule" }, `${ll(a.query.lat, a.query.lonE)} · r=${a.query.radiusKm} km · September`)),
+    $("div", { class: "cols c2" },
+      $("div", {},
+        $("p", {}, "NHC gives this trough ", $("b", {}, `${D.gtwo.d1.pct48}% at 48 hours and ${D.gtwo.d1.pct7d}% at seven days`),
+          ". Ask the archive what storms born in that box in September went on to do and the pool is ",
+          $("b", {}, `${a.nCases} storms`), " — an effective sample of ", $("b", {}, a.ess.toFixed(1)),
+          " against a gate of ", a.minSample, ". Below that line the Atlas publishes counts and refuses rates."),
+        $("p", { class: "note" },
+          "That is not a missing number. It is the answer: this corner of the central Pacific has not "
+          + "produced enough September storms for a rate to mean anything, and a percentage computed "
+          + "from three cases would be a decimal point wearing a lab coat."),
+        $("blockquote", { style: "--sc:var(--s-d1)" },
+          $("span", { class: "st" }, "OBSERVING-ERA GAP · all-eras pool"), all.gaps[0] || ""),
+        $("div", { class: "qp" },
+          $("span", { class: "qpk" }, D.queryPoints.d1.kind),
+          $("span", {}, D.queryPoints.d1.derivation, ". ", D.queryPoints.d1.note))),
+      $("figure", {},
+        $("h3", {}, `Counts only · ${a.nCases} storms, 1971+`),
+        ladder(a, "var(--s-d1)"),
+        $("p", { class: "figcap" },
+          "Storms reaching each threshold, as counts out of the pool. No rate is drawn because none "
+          + "is published at this sample size.")))));
+}
+
+/* D2 */
+{
+  const a = D.atlas.d2, c = D.composition.d2;
+  root.append($("section", { style: "--sc:var(--s-d2)" },
+    $("div", { class: "sechead" },
+      $("h2", {}, "Disturbance 2 — conditional rates, and no unconditional number"),
+      $("span", { class: "rule" }, `${ll(a.query.lat, a.query.lonE)} · r=${a.query.radiusKm} km · September`)),
+    $("div", { class: "cols c2" },
+      $("figure", {},
+        $("h3", {}, `Given formation under the reference condition · ${a.nCases} storms, effective sample ${a.ess.toFixed(1)}`),
+        ladder(a, "var(--s-d2)"),
+        $("p", { class: "figcap" },
+          "Share of analog storms that reached each threshold, with 95% Wilson intervals over "
+          + "distinct storms. Every figure here is conditional on a storm having formed under the "
+          + "declared reference condition — this cell, this radius, September, EP+NA, 1971 on.")),
+      $("div", {},
+        $("div", { class: "qp" },
+          $("span", { class: "qpk" }, D.queryPoints.d2.kind),
+          $("span", {}, D.queryPoints.d2.derivation, ". ", D.queryPoints.d2.note)),
+        $("div", { class: "warnbox", style: "margin-top:14px" },
+          $("h3", {}, "NO COMPOSED NUMBER"),
+          $("p", { style: "margin-bottom:8px" }, c.reason),
+          $("p", { class: "note", style: "margin-bottom:0" },
+            "So there is no P(this forecast area produces a Cat 1) on this page. NHC's ",
+            $("b", {}, c.formationPct + "%"), " and the archive's ", $("b", {}, pctS(a.levels.cat1.rate)),
+            " are both published above, and they are left un-multiplied.")),
+        $("div", { class: "scroll", style: "margin-top:14px" },
+          $("table", {},
+            $("thead", {}, $("tr", {}, $("th", {}, "Threshold"), $("th", { class: "n" }, "Count"),
+              $("th", { class: "n" }, "Conditional rate"), $("th", { class: "n" }, "95% CI"))),
+            $("tbody", {}, ["ts","cat1","cat2","cat3"].map((k) => $("tr", {},
+              $("td", { class: "m" }, LEVELS.find((l) => l[0] === k)[1]),
+              $("td", { class: "n" }, `${a.levels[k].count}/${a.levels[k].n}`),
+              $("td", { class: "n", style: "color:var(--s-d2);font-weight:600" }, pctS(a.levels[k].rate)),
+              $("td", { class: "n", style: "color:var(--ink-3)" },
+                `${a.levels[k].ci[0].toFixed(0)}–${a.levels[k].ci[1].toFixed(0)}%`))))))))));
+}
+
+/* Fourteen-E */
+{
+  const a = D.atlas.fourteenE, e = D.storms.fourteenE, fva = e.forecastVsAnalogs;
+  const lfRows = [];
+  for (const [reg, kinds] of Object.entries(a.landfall)) {
+    for (const [kind, o] of Object.entries(kinds)) {
+      lfRows.push($("tr", {},
+        $("td", { class: "m" }, reg + (kind === "hurricane" ? " ≥64 kt" : " any")),
+        $("td", { class: "n" }, `${o.count}/${o.n}`),
+        $("td", { class: "n" }, o.unscoreable ? "—" : pctS(o.rate)),
+        $("td", {}, o.unscoreable
+          ? $("span", { class: "mono", style: "color:var(--refuse);font-size:10.5px" }, o.unscoreable.status)
+          : $("span", { class: "mono", style: "color:var(--ink-3);font-size:11px" },
+              `95% CI ${o.ci[0].toFixed(0)}–${o.ci[1].toFixed(0)}%`))));
+    }
+  }
+  const haw = a.landfall.hawaii && a.landfall.hawaii.hurricane && a.landfall.hawaii.hurricane.unscoreable;
+
+  root.append($("section", { style: "--sc:var(--s-e14)" },
+    $("div", { class: "sechead" },
+      $("h2", {}, "Fourteen-E — a formed storm, and a forecast worth timing"),
+      $("span", { class: "rule" }, `genesis ${ll(e.genesis.lat, e.genesis.lonE)} · ${dayz(e.genesis.atZ)} · r=${a.query.radiusKm} km`)),
+    $("div", { class: "cols c2" },
+      $("div", {},
+        $("dl", { class: "kv" },
+          $("dt", {}, "Now"), $("dd", {}, `${ll(e.lat, e.lonE)} · ${e.kt} kt · ${e.mslp} mb`),
+          $("dt", {}, "Advisory"), $("dd", {}, `#${e.advNum} · ${dayz(e.atZ)}`),
+          $("dt", {}, "Motion"), $("dd", {}, `${e.motionDeg}° at ${e.motionKt} kt`),
+          $("dt", {}, "Genesis"), $("dd", {}, `${ll(e.genesis.lat, e.genesis.lonE)} · ${dayz(e.genesis.atZ)} · ${e.genesis.kt} kt ${e.genesis.type}`),
+          $("dt", {}, "First track"), $("dd", { style: "color:var(--ink-3)" },
+            `${ll(e.firstTrack.lat, e.firstTrack.lonE)} · ${dayz(e.firstTrack.atZ)} · ${e.firstTrack.kt} kt ${e.firstTrack.type}`),
+          $("dt", {}, "Pre-genesis"), $("dd", { style: "color:var(--ink-3)" }, e.preGenesisHours + " h as a disturbance"),
+          $("dt", {}, "Analog pool"), $("dd", {}, poolLine(a))),
+        $("div", { class: "qp" },
+          $("span", { class: "qpk" }, D.queryPoints.fourteenE.kind),
+          $("span", {}, D.queryPoints.fourteenE.derivation, ". ", D.queryPoints.fourteenE.note)),
+        $("p", { style: "margin-top:12px" },
+          "Because it has formed, no formation chance is needed — the conditional rate ", $("i", {}, "is"),
+          " the answer. Genesis here is the archive's own rule: the first best-track point with a "
+          + "tropical status. This storm spent ", $("b", {}, e.preGenesisHours + " hours"),
+          " as a disturbance first, and those hours belong to neither clock."),
+        $("figure", { style: "margin-top:6px" },
+          $("h3", {}, "Time from first fix to hurricane strength"),
+          timing(a, fva),
+          $("div", { class: "clockbox" },
+            $("div", { class: "cl" }, $("span", {}, "Genesis · first tropical point"), $("b", {}, fva.clock.genesisZ.replace("T", " ").slice(0, 16) + "Z")),
+            $("div", { class: "cl" }, $("span", {}, `Forecast first ${fva.clock.forecastKt} kt`), $("b", {}, fva.clock.forecastValidZ.replace("T", " ").slice(0, 16) + "Z")),
+            $("div", { class: "cl out" }, $("span", {}, "Elapsed on the shared clock"), $("b", {}, fva.clock.elapsedHours + " h"))),
+          $("p", { class: "figcap" },
+            `Among the ${fva.analogHoursToCat1.n} analogs that reached Cat 1, the median took `
+            + `+${fva.analogHoursToCat1.median} h from genesis and the 90th percentile `
+            + `+${Math.round(fva.analogHoursToCat1.p90)} h. The forecast's `
+            + `+${fva.clock.elapsedHours} h is above ${fva.above.join(", ")} and below `
+            + `${fva.below.join(", ")}. ${fva.caveat}`),
+          $("p", { class: "figcap", style: "color:var(--ink-3)" },
+            `Corrected: an earlier version measured this from the ${fva.clock.withdrawn.fromType} `
+            + `fix at ${fva.clock.withdrawn.fromZ.replace("T", " ").slice(0, 16)}Z — `
+            + `+${fva.clock.withdrawn.elapsedHours} h — against a cohort measured from genesis, and `
+            + `called it beyond the historical p90. That claim is withdrawn.`))),
+      $("figure", {},
+        $("h3", {}, `Given genesis here · ${a.nCases} storms, effective sample ${a.ess.toFixed(1)}`),
+        ladder(a, "var(--s-e14)"),
+        $("h3", { style: "margin-top:18px" }, "Where they went ashore"),
+        $("div", { class: "scroll" }, $("table", {},
+          $("thead", {}, $("tr", {}, $("th", {}, "Region"), $("th", { class: "n" }, "Count"),
+            $("th", { class: "n" }, "Rate"), $("th", {}, "Interval / status"))),
+          $("tbody", {}, lfRows))),
+        haw ? $("blockquote", { style: "--sc:var(--s-e14);margin-top:12px" },
+          $("span", { class: "st" }, haw.status + " · hawaiʻi ≥64 kt"), haw.reason) : null))));
+
+  /* closest analogs */
+  root.append($("section", { style: "--sc:var(--s-e14)" },
+    $("div", { class: "sechead" }, $("h2", {}, "The ten nearest analogs to Fourteen-E"),
+      $("span", { class: "rule" }, "ranked by distance from the genesis fix")),
+    $("div", { class: "scroll" }, $("table", {},
+      $("thead", {}, $("tr", {}, $("th", {}, "Season"), $("th", {}, "Name"), $("th", {}, "ATCF"),
+        $("th", { class: "n" }, "Distance"), $("th", { class: "n" }, "Weight"),
+        $("th", { class: "n" }, "Peak"), $("th", {}, "Landfall"))),
+      $("tbody", {}, a.cases.slice(0, 10).map((c) => $("tr", {},
+        $("td", { class: "m" }, c.season),
+        $("td", {}, c.name === "UNNAMED" ? $("span", { style: "color:var(--ink-3)" }, "unnamed") : c.name),
+        $("td", { class: "m", style: "color:var(--ink-3)" }, c.atcf),
+        $("td", { class: "n" }, c.km + " km"),
+        $("td", { class: "n" }, c.w.toFixed(3)),
+        $("td", { class: "n", style: c.peakKt >= 96 ? "color:var(--s-e14);font-weight:600" : "" }, c.peakKt + " kt"),
+        $("td", { class: "m", style: "font-size:11px" }, c.landfalls.length
+          ? c.landfalls.map((f) => $("span", { style: f.hurricane ? "color:var(--s-e14)" : "color:var(--ink-3)" },
+              f.label)).reduce((acc, el, i) => (i ? [...acc, ", ", el] : [el]), [])
+          : $("span", { style: "color:var(--ink-3)" }, "—"))))))),
+    $("p", { class: "figcap" },
+      "Weight falls with distance from the genesis fix; it is the weight behind the effective sample "
+      + "size, not a probability. Peak intensity is the storm’s lifetime maximum, wherever it occurred.")));
+}
+
+/* the correction */
+root.append($("section", {},
+  $("div", { class: "warnbox" },
+    $("h3", {}, "Disturbance 2 is not Fourteen-E"),
+    $("p", { style: "margin-bottom:6px" },
+      "They sit in overlapping boxes on the chart and it is easy to read the orange shading as the "
+      + "depression’s. It is not. Fourteen-E is an active tropical cyclone with advisories running. "
+      + "Disturbance 2 is a low NHC expects to form ", $("i", {}, "later"), " — its 48-hour chance is ",
+      $("b", {}, D.gtwo.d2.pct48 + "%"), ", which is NHC saying the thing does not exist yet."),
+    $("p", { class: "note", style: "margin-bottom:0" },
+      "They are queried separately here for that reason: one on an outlook centroid, one on a genesis "
+      + "fix that has already been observed."))));
+
+/* limits */
+root.append($("section", {},
+  $("div", { class: "sechead" }, $("h2", {}, "What this cannot tell you"),
+    $("span", { class: "rule" }, "printed on the artefact")),
+  $("ul", {}, D.limits.map((l) => $("li", {}, l))),
+  $("footer", {},
+    $("span", {}, "SOURCES NHC TWO · GTWO shapefile · CurrentStorms.json · ATCF b-deck · TCM EP4"),
+    $("span", {}, "ARCHIVE IBTrACS v04r01 via scripts/genesis"),
+    $("span", {}, "COMPUTED scripts/build-disturbance-brief.mjs — no arithmetic in this page"),
+    $("span", {}, "TYPE IBM Plex, standing in for the project’s Erode/Satoshi"))));
+</script>

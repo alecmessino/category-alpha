@@ -1,0 +1,212 @@
+{
+  "schema": "millibar.specimen/1",
+  "name": "Storm Atlas — Three Systems, Three Answers",
+  "asOf": "2026-09-09T23:21:00Z",
+  "asOfLocal": "500 PM PDT Wed Sep 9 2026",
+  "frozenAt": "2026-09-10T04:43:18.258Z",
+  "purpose": "A prospect-facing research specimen. The analysis is fixed to the 09 Sep 2026 outlook issuance so that rebuilding it cannot silently change the result.",
+  "reproducibility": {
+    "ARCHIVED": "Permanently addressable at NHC. Re-fetch and compare the hash.",
+    "CAPTURED": "Live-only at source; NHC keeps no archive. The frozen copy IS the record and cannot be re-fetched. Verify against the hash here, not against the live URL.",
+    "DERIVED": "Recomputable from the pinned archive tables below with the recorded command."
+  },
+  "sources": [
+    {
+      "kind": "ARCHIVED",
+      "key": "two-ep-092321",
+      "url": "https://www.nhc.noaa.gov/text/refresh/MIATWOEP+shtml/092321_MIATWOEP.shtml",
+      "file": "two-ep-092321.shtml",
+      "bytes": 24337,
+      "sha256": "5eb97d5c15b45c40b9eff6675398aeefd546142989c7524dcdf02a01c4a17803",
+      "retrievedZ": "2026-09-10T04:43:03.750Z",
+      "note": "Tropical Weather Outlook issued 500 PM PDT Wed Sep 9 2026 (2321Z) — the issuance this specimen reads."
+    },
+    {
+      "kind": "ARCHIVED",
+      "key": "tcm-ep14-001",
+      "url": "https://www.nhc.noaa.gov/archive/2026/ep14/ep142026.fstadv.001.shtml",
+      "file": "tcm-ep142026-001.shtml",
+      "bytes": 24556,
+      "sha256": "f65c90fd69635ac3225f12972fdb9ea82c94979a2b51204b1ffe7b486b1593d5",
+      "retrievedZ": "2026-09-10T04:43:04.038Z",
+      "note": "Forecast/Advisory 1 for TD Fourteen-E, 2100 UTC Wed Sep 09 2026 — the forecast this specimen times."
+    },
+    {
+      "kind": "ARCHIVED",
+      "key": "tcd-ep14-001",
+      "url": "https://www.nhc.noaa.gov/archive/2026/ep14/ep142026.discus.001.shtml",
+      "file": "tcd-ep142026-001.shtml",
+      "bytes": 25167,
+      "sha256": "8891a673b66f8a67f4270fcdfe26cec3636a3f024b739fab4dced49d3f12f407",
+      "retrievedZ": "2026-09-10T04:43:04.223Z",
+      "note": "Discussion 1 for TD Fourteen-E. Context only; nothing is computed from it."
+    },
+    {
+      "kind": "CAPTURED",
+      "key": "gtwo-shapefiles",
+      "url": "https://www.nhc.noaa.gov/xgtwo/gtwo_shapefiles.zip",
+      "file": "gtwo_shapefiles.zip",
+      "bytes": 26493,
+      "sha256": "20b0361dc23f7829c718664f71b3e67a1aa0ae77a3ff3efb03f7faaebc40cbd9",
+      "retrievedZ": "2026-09-10T04:43:04.391Z",
+      "note": "Graphical outlook polygons. NHC serves only the current issuance and archives none, so this capture cannot be re-fetched. The specimen builder reads THIS file, and the issuance stamp inside it is asserted to be 202609092323 before anything is drawn."
+    },
+    {
+      "kind": "CAPTURED",
+      "key": "bdeck-ep142026",
+      "url": "https://ftp.nhc.noaa.gov/atcf/btk/bep142026.dat",
+      "file": "bep142026.dat",
+      "bytes": 2231,
+      "sha256": "def706e1229d72f52eb98d94165cf6409a4a6db7fefcb405deb9f6692a55ee81",
+      "retrievedZ": "2026-09-10T04:43:04.772Z",
+      "note": "Working best track for EP142026. The file grows as the storm runs; the rows this specimen uses (through 2026-09-10T00Z) are frozen here. Best track is revisable for months — this is the operational file as it stood, not a post-season product."
+    },
+    {
+      "kind": "CAPTURED",
+      "key": "currentstorms",
+      "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
+      "file": "CurrentStorms.json",
+      "bytes": 9239,
+      "sha256": "533d3757d6714b514b6b632f38181a78c75cc9825cb2c6432ebe72d68d79ff8f",
+      "retrievedZ": "2026-09-10T04:43:04.821Z",
+      "note": "Active-storm summary. Live-only; superseded every advisory cycle."
+    },
+    {
+      "kind": "DERIVED",
+      "key": "analogs-d1-alleras",
+      "url": null,
+      "file": "analogs-d1-alleras.json",
+      "bytes": 10905,
+      "sha256": "9afa862d47de6c23c2fe868a5fe0409f0b105d03fa017cf6fea25b2c4af831e2",
+      "retrievedZ": "2026-09-10T04:43:07.634Z",
+      "command": "python3 scripts/genesis/cli.py analogs --lat 13.21 --lon -147.30 --radius 500 --months 9 --regions hawaii --json",
+      "note": "Storm Atlas analog query output."
+    },
+    {
+      "kind": "DERIVED",
+      "key": "analogs-d1-1971",
+      "url": null,
+      "file": "analogs-d1-1971.json",
+      "bytes": 6842,
+      "sha256": "3239c9d040a811ce87283d41b89abfeecddf1c44e040421a06470f1018730eed",
+      "retrievedZ": "2026-09-10T04:43:11.302Z",
+      "command": "python3 scripts/genesis/cli.py analogs --lat 13.21 --lon -147.30 --radius 500 --months 9 --regions hawaii --json --min-pool-season 1971",
+      "note": "Storm Atlas analog query output."
+    },
+    {
+      "kind": "DERIVED",
+      "key": "analogs-d2-1971",
+      "url": null,
+      "file": "analogs-d2-1971.json",
+      "bytes": 17035,
+      "sha256": "da53ae6125b471dc31c48108e73a9aa80c5c1791319826d669410b3cb2efa7e2",
+      "retrievedZ": "2026-09-10T04:43:13.215Z",
+      "command": "python3 scripts/genesis/cli.py analogs --lat 15.84 --lon -120.05 --radius 500 --months 9 --regions hawaii --json --min-pool-season 1971",
+      "note": "Storm Atlas analog query output."
+    },
+    {
+      "kind": "DERIVED",
+      "key": "analogs-e14-genesis",
+      "url": null,
+      "file": "analogs-e14-genesis.json",
+      "bytes": 24473,
+      "sha256": "aa27dedf73897337ee992b40c710ab3b09c275b09860dc3e8c68febb343ceef2",
+      "retrievedZ": "2026-09-10T04:43:16.089Z",
+      "command": "python3 scripts/genesis/cli.py analogs --lat 15.8 --lon -115.0 --radius 500 --months 9 --regions hawaii --json --min-pool-season 1971",
+      "note": "Storm Atlas analog query output."
+    },
+    {
+      "kind": "DERIVED",
+      "key": "analogs-e14-firsttrack-WITHDRAWN",
+      "url": null,
+      "file": "analogs-e14-firsttrack-WITHDRAWN.json",
+      "bytes": 42904,
+      "sha256": "bbf20fb6b87d92fe0522ebb3c2897fdb27ce8b171fa0d0bb4d8f1a6e9c287e7d",
+      "retrievedZ": "2026-09-10T04:43:17.972Z",
+      "command": "python3 scripts/genesis/cli.py analogs --lat 12.6 --lon -108.7 --radius 500 --months 9 --regions hawaii --json --min-pool-season 1971",
+      "note": "The cohort the first version drew, from the pre-genesis disturbance fix. Frozen so the correction is checkable; not a result."
+    }
+  ],
+  "genesisArchive": {
+    "methodologyVersion": null,
+    "builtAt": null,
+    "upstream": [
+      {
+        "key": "ibtracs.EP.csv",
+        "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.EP.list.v04r01.csv",
+        "sha256": "2e9467ba4a4f12a86ecdcc3174c247903bd87a4e60dfc9ad550d3a7e0c066520"
+      },
+      {
+        "key": "ibtracs.NA.csv",
+        "url": "https://www.ncei.noaa.gov/data/international-best-track-archive-for-climate-stewardship-ibtracs/v04r01/access/csv/ibtracs.NA.list.v04r01.csv",
+        "sha256": "1b67895f53fdfd78742bd90a585f871b5d735638aed17b6b8e91ec0befb3fff7"
+      },
+      {
+        "key": "ships.EP.txt",
+        "url": "https://rammb-data.cira.colostate.edu/ships/data/EP/lsdiage_1982_2023_sat_ts_7day.txt",
+        "sha256": "d71cc4eb8641c5f5cf3e7b3774075c64d258ed7d9b10c367867bc0379e374d3d"
+      },
+      {
+        "key": "ships.CP.txt",
+        "url": "https://rammb-data.cira.colostate.edu/ships/data/CP/lsdiagc_1982_2023_sat_ts_7day.txt",
+        "sha256": "443822caa9c2fb00540eb51a32ee85f9512cc43cb39c0fed374c0b228f30fe31"
+      },
+      {
+        "key": "ships.AL.txt",
+        "url": "https://rammb-data.cira.colostate.edu/ships/data/AL/lsdiaga_1982_2023_sat_ts_7day.txt",
+        "sha256": "3fef6609f633f55f5f95114b88d69dd0b6f76f35264a6ce833de128ed99847c7"
+      },
+      {
+        "key": "hurdat2.nepac.txt",
+        "url": "https://www.nhc.noaa.gov/data/hurdat/hurdat2-nepac-1949-2025-02272026.txt",
+        "sha256": "db65f8bc538d5c05e15f738c96111861d6ce3572c007879de58e44d4d05a9cd6"
+      },
+      {
+        "key": "hurdat2.atl.txt",
+        "url": "https://www.nhc.noaa.gov/data/hurdat/hurdat2-1851-2025-02272026.txt",
+        "sha256": "1b9b0c7beed5b4505838658b1d30e159fc84330c60891a58cfcf43ae55c37202"
+      }
+    ],
+    "tables": [
+      {
+        "file": "data/genesis-archive/backtest-ledger.parquet",
+        "bytes": 152308,
+        "sha256": "c5dabb2062d8cb527e042eb4d0345f913cc848d168d604616f07940f30163893"
+      },
+      {
+        "file": "data/genesis-archive/daily_disturbances.parquet",
+        "bytes": 349975,
+        "sha256": "e3f0e6efe2c4c897e27cb3d65328639303496f5e79d55cc5d066e0c1aee479a3"
+      },
+      {
+        "file": "data/genesis-archive/environment.parquet",
+        "bytes": 1029895,
+        "sha256": "30fb5508f23f57ed125750c33ecf13daae6b161ba9bbe723f86d0743ded2a6d2"
+      },
+      {
+        "file": "data/genesis-archive/genesis_events.parquet",
+        "bytes": 239460,
+        "sha256": "5fe9f13d72114e5f1227ead7d529a1443aabbf2335e3b61fc6915f9896a632cf"
+      },
+      {
+        "file": "data/genesis-archive/landfalls.parquet",
+        "bytes": 130427,
+        "sha256": "5cfd2f722dbf375cd873cc39c0f000dcb1d689327989fea7d60ce1b19cca9f46"
+      },
+      {
+        "file": "data/genesis-archive/storms.parquet",
+        "bytes": 135795,
+        "sha256": "ec45a23578d2400ab891d1a7174649b6ff1c6a4aa90df20b9628a7ac6e716689"
+      },
+      {
+        "file": "data/genesis-archive/track_points.parquet",
+        "bytes": 2658123,
+        "sha256": "865d905326b1e2137867ddd0bf0159cf45599a9779ab8dbc79526546561c0b76"
+      }
+    ]
+  },
+  "notResponsible": [
+    "This specimen is research output, not a forecast and not advice.",
+    "For live warnings and watches, NHC is the only authority."
+  ]
+}

@@ -149,6 +149,58 @@ jobs:
       - name: Test the calibration ledger and scorecard
         run: node scripts/test-calibration.mjs
 
+      # THE TRACK RESIDUAL MONITOR. Offline: it runs against the eight preserved NHC products in
+      # scripts/fixtures/lowell-ep122026/, re-hashing each one before it asserts anything, so a
+      # passing golden is a golden about bytes that have not moved.
+      #
+      # The suite is organised around the WRONG ANSWERS rather than around the functions, because
+      # every one of them is available and looks right: interpolating to the observed latitude
+      # (which forces the along-track term to zero on a meridional storm), trusting a nominal
+      # "12H" label that is actually nine hours, calling an eastward displacement pure
+      # cross-track, subtracting a cross-track residual from an eastward shoreline gap, scoring a
+      # fix against an advisory that had already ingested it, and resolving a contract No on a
+      # strike in geography it explicitly excludes.
+      - name: Test the track residual monitor
+        run: node scripts/test-track-residual.mjs
+
+      # AND PROVE THAT SUITE'S DOCUMENT GATE CAN STILL FAIL.
+      #
+      # Section 14 cross-reads the two Q1 documents against the artefact, and a checker like that
+      # is worth exactly what its failures are worth -- which is invisible while everything agrees.
+      # The first version of §14 was green AND WRONG: it asked whether a document contained the
+      # right number somewhere, and both documents state several figures twice, so a stale copy
+      # sailed through. That was not found by reading the code. It was found by changing a number
+      # and watching the suite stay green.
+      #
+      # So the mutations are kept and they run: a stale copy in either document, an artefact that
+      # moves while the documents do not, a figure deleted outright, the historical 183 refusals
+      # stripped from the library comment, and a missing document. Each must fail, and must fail
+      # NAMING THE RIGHT SUBJECT -- a gate that fails for the wrong reason gets "fixed" by
+      # silencing the wrong message.
+      #
+      # It rewrites tracked files, so it refuses to start on a dirty tree and restores every
+      # original from memory in a finally block and on SIGINT/SIGTERM.
+      - name: Prove the Q1 document gate can still fail
+        run: node scripts/check-residual-gate.mjs
+      # The Q1 sweep itself is network-bound and runs by hand. What CI holds is the COMMITTED
+      # result AND THE PROSE ABOUT IT. Section 14 of the suite above cross-reads
+      # docs/TRACK-RESIDUAL.md and research/track-residual/Q1-WRITEUP.md against Q1-RESULT.json and
+      # fails when they disagree, so no figure in either document is a figure a reviewer has to
+      # check by hand. Every expected value is DERIVED from the artefact and none is written into
+      # the test, which would make the test a third source of truth free to drift from both.
+      #
+      # It pins every statement, not one. An earlier version asked only whether a document
+      # contained the right number somewhere; it passed a mutation test it should have failed,
+      # because both documents state several figures twice and changing one left the other to
+      # satisfy the check. The anchors now collect every occurrence and require all of them to
+      # agree. A missing document is a failure, not a skip.
+      #
+      # It also holds the things that must not quietly disappear: the 17 a-deck disagreements
+      # enumerated rather than averaged, the 183 coverage-guard refusals that hid the timezone bug
+      # named wherever the bug is described (documents and library comment alike), the four
+      # negatives in body text rather than footnotes, and the absence of any Brier, skill or
+      # accuracy VALUE anywhere in the artefact -- Q2 and Q3 have not been started.
+
       # A guard that can fail silently is not a guard. The predicate deciding whether a
       # verification run may write the verdict the board reads once disabled itself to a
       # truthy regex object and `node --check` passed it, so it is now a pure function

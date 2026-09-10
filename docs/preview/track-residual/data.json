@@ -1,0 +1,2781 @@
+{
+  "schema": "millibar.track-residual.preview/1",
+  "generatedAt": "2026-09-08T03:23:55.145Z",
+  "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+  "interpolation": "linear-in-time",
+  "fixtureManifest": {
+    "retrievedZ": "2026-09-07T21:11:25.749Z",
+    "status": "VERIFIED_ORIGINAL_PRODUCTS",
+    "entries": [
+      {
+        "key": "tcm-046",
+        "url": "https://www.nhc.noaa.gov/archive/2026/ep12/ep122026.fstadv.046.shtml",
+        "sha256": "4ab9bb352abb032d9e7f400d40b03f118526ae92d12ede75a88fbf251fb333cb"
+      },
+      {
+        "key": "tcp-046",
+        "url": "https://www.nhc.noaa.gov/archive/2026/ep12/ep122026.public.046.shtml",
+        "sha256": "068760680229fd8945464563f7a20e0c29001d01d7ed33125fc8cdc1a360d172"
+      },
+      {
+        "key": "tcp-046a",
+        "url": "https://www.nhc.noaa.gov/archive/2026/ep12/ep122026.public_a.046.shtml",
+        "sha256": "d3070a19333e75847a1b14a8afc690373ff4363de5edc30fe10a3060626e7c85"
+      },
+      {
+        "key": "tcd-046",
+        "url": "https://www.nhc.noaa.gov/archive/2026/ep12/ep122026.discus.046.shtml",
+        "sha256": "c46e1759e9861ed9bcd6895687530be58735a645d368f9b9424cffd2e4fb0cd3"
+      },
+      {
+        "key": "tcm-045",
+        "url": "https://www.nhc.noaa.gov/archive/2026/ep12/ep122026.fstadv.045.shtml",
+        "sha256": "dfaa0428a164524689166a9e175c2df61f4430616d16825008eb4012b1dd87b4"
+      },
+      {
+        "key": "tcm-047",
+        "url": "https://www.nhc.noaa.gov/archive/2026/ep12/ep122026.fstadv.047.shtml",
+        "sha256": "4c0a3109015a84debaa085c4c3cc38b8bdb7f68e788a8f1ff3b66842334e2ccf"
+      },
+      {
+        "key": "fdeck",
+        "url": "https://ftp.nhc.noaa.gov/atcf/fix/fep122026.dat",
+        "sha256": "fb2926d0cf40f56454a23d3c51016d737531397572a3019a6562a51ccd6f9638"
+      },
+      {
+        "key": "bdeck",
+        "url": "https://ftp.nhc.noaa.gov/atcf/btk/bep122026.dat",
+        "sha256": "a70fdbf806f02a19d02a8a8c2dc78a3076619e76dbe3b113c6153c0d17b958e5"
+      },
+      {
+        "key": "tcp-evening-mdt",
+        "url": "https://ftp.nhc.noaa.gov/atcf/archive/2022/messages/ep122022.public_a.006.09052344",
+        "sha256": "cbb01baf0330010c12a1b427e30bfe0763e5a948cedde6300f41932c8618a932"
+      }
+    ]
+  },
+  "firstAvailability": {
+    "44": {
+      "firstAvailableZ": "2026-09-07T02:40:00.000Z",
+      "nominalValidZ": "2026-09-07T03:00:00.000Z",
+      "offsetMinFromNominal": -20,
+      "laterStamps": [],
+      "note": null
+    },
+    "45": {
+      "firstAvailableZ": "2026-09-07T08:47:00.000Z",
+      "nominalValidZ": "2026-09-07T09:00:00.000Z",
+      "offsetMinFromNominal": -13,
+      "laterStamps": [
+        "2026-09-07T09:17:00.000Z"
+      ],
+      "note": "A later file exists for this advisory number. Its meaning (correction or retransmission) is not established, so the earliest stamp is used and the rest kept."
+    },
+    "46": {
+      "firstAvailableZ": "2026-09-07T14:51:00.000Z",
+      "nominalValidZ": "2026-09-07T15:00:00.000Z",
+      "offsetMinFromNominal": -9,
+      "laterStamps": [],
+      "note": null
+    },
+    "47": {
+      "firstAvailableZ": "2026-09-07T20:47:00.000Z",
+      "nominalValidZ": "2026-09-07T21:00:00.000Z",
+      "offsetMinFromNominal": -13,
+      "laterStamps": [],
+      "note": null
+    },
+    "43A": {
+      "firstAvailableZ": "2026-09-07T02:35:00.000Z",
+      "nominalValidZ": "2026-09-07T00:00:00.000Z",
+      "offsetMinFromNominal": 155,
+      "laterStamps": [],
+      "note": null
+    },
+    "44A": {
+      "firstAvailableZ": "2026-09-07T05:39:00.000Z",
+      "nominalValidZ": "2026-09-07T06:00:00.000Z",
+      "offsetMinFromNominal": -21,
+      "laterStamps": [
+        "2026-09-07T08:46:00.000Z"
+      ],
+      "note": "A later file exists for this advisory number. Its meaning (correction or retransmission) is not established, so the earliest stamp is used and the rest kept."
+    },
+    "45A": {
+      "firstAvailableZ": "2026-09-07T11:43:00.000Z",
+      "nominalValidZ": "2026-09-07T12:00:00.000Z",
+      "offsetMinFromNominal": -17,
+      "laterStamps": [
+        "2026-09-07T14:50:00.000Z"
+      ],
+      "note": "A later file exists for this advisory number. Its meaning (correction or retransmission) is not established, so the earliest stamp is used and the rest kept."
+    },
+    "46A": {
+      "firstAvailableZ": "2026-09-07T17:44:00.000Z",
+      "nominalValidZ": "2026-09-07T18:00:00.000Z",
+      "offsetMinFromNominal": -16,
+      "laterStamps": [],
+      "note": null
+    }
+  },
+  "sourceFamilies": {
+    "official": {
+      "label": "official advisory",
+      "members": [
+        "advisory-analysed"
+      ]
+    },
+    "aircraft": {
+      "label": "aircraft",
+      "members": [
+        "aircraft-fix"
+      ]
+    },
+    "satellite": {
+      "label": "satellite estimate",
+      "members": [
+        "dvorak-subjective",
+        "dvorak-objective"
+      ]
+    },
+    "microwave": {
+      "label": "microwave",
+      "members": [
+        "microwave"
+      ]
+    },
+    "scatterometer": {
+      "label": "scatterometer",
+      "members": [
+        "scatterometer"
+      ]
+    },
+    "radar": {
+      "label": "radar",
+      "members": [
+        "radar-centroid"
+      ]
+    },
+    "bestTrack": {
+      "label": "working best track",
+      "members": [
+        "best-track"
+      ]
+    }
+  },
+  "worked": {
+    "storm": "Hurricane Lowell (EP122026)",
+    "baseline": {
+      "baselineId": "EP122026/TCM/046",
+      "advisoryNumber": "46",
+      "initialValidZ": "2026-09-07T15:00:00.000Z",
+      "issuedZ": "2026-09-07T15:00:00.000Z",
+      "firstAvailableZ": "2026-09-07T14:51:00.000Z",
+      "positionAccuracyText": "POSITION ACCURATE WITHIN 15 NM",
+      "reportedMotion": {
+        "deg": 25,
+        "kt": 12,
+        "units": "kt",
+        "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+      },
+      "source": {
+        "url": "https://www.nhc.noaa.gov/archive/2026/ep12/ep122026.fstadv.046.shtml",
+        "retrievedZ": "2026-09-07T21:11:25.749Z",
+        "sha256": "4ab9bb352abb032d9e7f400d40b03f118526ae92d12ede75a88fbf251fb333cb"
+      },
+      "points": [
+        {
+          "validZ": "2026-09-07T15:00:00.000Z",
+          "lat": 17.5,
+          "lonE": -162.6,
+          "kt": 100,
+          "gustKt": 120,
+          "kind": "initial"
+        },
+        {
+          "validZ": "2026-09-08T00:00:00.000Z",
+          "lat": 19.5,
+          "lonE": -161.7,
+          "kt": 95,
+          "gustKt": 115,
+          "kind": "forecast"
+        },
+        {
+          "validZ": "2026-09-08T12:00:00.000Z",
+          "lat": 22.4,
+          "lonE": -160.9,
+          "kt": 85,
+          "gustKt": 105,
+          "kind": "forecast"
+        },
+        {
+          "validZ": "2026-09-09T00:00:00.000Z",
+          "lat": 25.1,
+          "lonE": -160.8,
+          "kt": 70,
+          "gustKt": 85,
+          "kind": "forecast"
+        },
+        {
+          "validZ": "2026-09-09T12:00:00.000Z",
+          "lat": 27,
+          "lonE": -161.5,
+          "kt": 55,
+          "gustKt": 65,
+          "kind": "forecast"
+        },
+        {
+          "validZ": "2026-09-10T00:00:00.000Z",
+          "lat": 27.8,
+          "lonE": -163.5,
+          "kt": 50,
+          "gustKt": 60,
+          "kind": "forecast"
+        },
+        {
+          "validZ": "2026-09-10T12:00:00.000Z",
+          "lat": 27.8,
+          "lonE": -166,
+          "kt": 45,
+          "gustKt": 55,
+          "kind": "forecast"
+        },
+        {
+          "validZ": "2026-09-11T12:00:00.000Z",
+          "lat": 27.5,
+          "lonE": -170,
+          "kt": 40,
+          "gustKt": 50,
+          "kind": "outlook"
+        },
+        {
+          "validZ": "2026-09-12T12:00:00.000Z",
+          "lat": 29,
+          "lonE": -172,
+          "kt": 35,
+          "gustKt": 45,
+          "kind": "outlook"
+        }
+      ]
+    },
+    "fix": {
+      "fixId": "tcp:46A",
+      "validZ": "2026-09-07T18:00:00.000Z",
+      "lat": 18,
+      "lonE": -162.1,
+      "centreDefinition": "aircraft-fix",
+      "reportedMotion": {
+        "deg": 30,
+        "mph": 15,
+        "units": "mph",
+        "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 15 MPH"
+      },
+      "advisoryNumber": "46A"
+    },
+    "leadLabels": {
+      "nominalFirstRowLabel": "12H",
+      "actualHoursInitToFirstRow": 9,
+      "note": "The first forecast row is filed under a nominal 12 h label and is NINE hours after the initial position. Only explicit UTC valid times are read."
+    },
+    "interpolated": {
+      "validZ": "2026-09-07T18:00:00.000Z",
+      "lat": 18.166666666666668,
+      "lonE": -162.3,
+      "segmentValidZ": [
+        "2026-09-07T15:00:00.000Z",
+        "2026-09-08T00:00:00.000Z"
+      ],
+      "segmentHours": 9,
+      "fraction": 0.3333333333333333
+    },
+    "frames": [
+      {
+        "name": "baseline forecast local direction (THE FRAME THIS MODULE USES)",
+        "courseDeg": 23.110154960660168,
+        "crossNm": 14.429159474623658,
+        "alongNm": -4.715525121148406,
+        "separationNm": 15.180145595886206
+      },
+      {
+        "name": "observed motion reported in TCP 46A (comparison only)",
+        "courseDeg": 30,
+        "crossNm": 14.890639575746118,
+        "alongNm": -2.950537804795398,
+        "separationNm": 15.180145595886206
+      }
+    ],
+    "rejected": {
+      "latInterp": {
+        "ok": true,
+        "forecast": {
+          "lat": 18,
+          "lonE": -162.375
+        },
+        "dLatDeg": 0,
+        "crossNm": 14.438321326872897,
+        "alongNm": 6.174151978010766,
+        "separationNm": 15.703033954800167,
+        "impliedValidZ": "2026-09-07T17:15:00.000Z",
+        "note": "Rejected as a residual definition: matching latitude forces the latitude difference to zero, which for a meridional storm reports the whole departure as lateral."
+      },
+      "brief": {
+        "forecast": {
+          "lat": 18,
+          "lonE": -162.38
+        },
+        "crossNm": 13.6,
+        "alongNm": 0,
+        "interpolation": "linear-in-latitude",
+        "frameDeg": 30,
+        "note": "The brief's table. Not a fixture, not evidence — the thing being corrected."
+      },
+      "briefAlongOnItsOwnTerms": 7.851516977400083
+    },
+    "interpolationBound": {
+      "method": "linear-in-time",
+      "against": "great circle through the same two forecast positions",
+      "maxDeviationNm": 0.33779975842956905,
+      "perSegment": [
+        {
+          "segment": [
+            0,
+            1
+          ],
+          "validZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "hours": 9,
+          "maxDeviationNm": 0.15301309577932168,
+          "atFraction": 0.5
+        },
+        {
+          "segment": [
+            1,
+            2
+          ],
+          "validZ": [
+            "2026-09-08T00:00:00.000Z",
+            "2026-09-08T12:00:00.000Z"
+          ],
+          "hours": 12,
+          "maxDeviationNm": 0.2191684486605111,
+          "atFraction": 0.51
+        },
+        {
+          "segment": [
+            2,
+            3
+          ],
+          "validZ": [
+            "2026-09-08T12:00:00.000Z",
+            "2026-09-09T00:00:00.000Z"
+          ],
+          "hours": 12,
+          "maxDeviationNm": 0.0284970909885739,
+          "atFraction": 0.5
+        },
+        {
+          "segment": [
+            3,
+            4
+          ],
+          "validZ": [
+            "2026-09-09T00:00:00.000Z",
+            "2026-09-09T12:00:00.000Z"
+          ],
+          "hours": 12,
+          "maxDeviationNm": 0.15511074063851388,
+          "atFraction": 0.5
+        },
+        {
+          "segment": [
+            4,
+            5
+          ],
+          "validZ": [
+            "2026-09-09T12:00:00.000Z",
+            "2026-09-10T00:00:00.000Z"
+          ],
+          "hours": 12,
+          "maxDeviationNm": 0.28818719518321323,
+          "atFraction": 0.5
+        },
+        {
+          "segment": [
+            5,
+            6
+          ],
+          "validZ": [
+            "2026-09-10T00:00:00.000Z",
+            "2026-09-10T12:00:00.000Z"
+          ],
+          "hours": 12,
+          "maxDeviationNm": 0.33779975842956905,
+          "atFraction": 0.5
+        }
+      ],
+      "note": "A systematic bound on the interpolation, not a random error. It is reported beside the residual and never added in quadrature to it."
+    },
+    "positionAccuracy": {
+      "verbatim": "POSITION ACCURATE WITHIN 15 NM",
+      "unconverted": {
+        "ok": false,
+        "refusal": "UNLABELLED_CONVERSION",
+        "note": "A printed accuracy bound is not a standard deviation. Name an assumption from WITHIN_ASSUMPTIONS or do not convert."
+      },
+      "ifConverted": {
+        "ok": true,
+        "sigmaNm": 7.5,
+        "assumption": "two-sigma",
+        "assumptionText": "Treats WITHIN r as a 2-sigma bound; sigma = r/2. Arguable.",
+        "sourceText": "POSITION ACCURATE WITHIN 15 NM",
+        "labelled": true,
+        "provisional": true
+      }
+    },
+    "rounding": {
+      "stepDeg": 0.1,
+      "halfLatNm": 3,
+      "halfLonNm": 2.8531695488854605,
+      "maxNm": 4.140117930045865,
+      "note": "A half-step box, not a sigma."
+    },
+    "residualForecastFrame": {
+      "baselineId": "EP122026/TCM/046",
+      "fixId": "tcp:46A",
+      "fixValidZ": "2026-09-07T18:00:00.000Z",
+      "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+      "interpolation": "linear-in-time",
+      "ok": true,
+      "refusal": null,
+      "forecast": {
+        "lat": 18.166666666666668,
+        "lonE": -162.3,
+        "validZ": "2026-09-07T18:00:00.000Z"
+      },
+      "observed": {
+        "lat": 18,
+        "lonE": -162.1,
+        "validZ": "2026-09-07T18:00:00.000Z"
+      },
+      "frame": {
+        "courseDeg": 23.110154960660168,
+        "source": "baseline-forecast-local-direction",
+        "nodeDiscontinuityDeg": null,
+        "reportedMotion": {
+          "deg": 25,
+          "kt": 12,
+          "units": "kt",
+          "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+        },
+        "fixReportedMotion": {
+          "deg": 30,
+          "mph": 15,
+          "units": "mph",
+          "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 15 MPH"
+        }
+      },
+      "crossNm": 14.429159474623658,
+      "alongNm": -4.715525121148406,
+      "separationNm": 15.180145595886206,
+      "bearingDeg": 131.20781884914686,
+      "crossPointsToward": 113.11015496066017,
+      "leadHours": 3,
+      "segment": [
+        0,
+        1
+      ],
+      "segmentValidZ": [
+        "2026-09-07T15:00:00.000Z",
+        "2026-09-08T00:00:00.000Z"
+      ],
+      "segmentHours": 9,
+      "nodeDiscontinuityDeg": null,
+      "outlookUsed": false,
+      "centreDefinition": "aircraft-fix",
+      "baselineCentreDefinition": "advisory-analysed"
+    }
+  },
+  "series": {
+    "fixedBaselineId": "EP122026/TCM/046",
+    "fixed": [
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "fdeck:202609071649:AIRC:KNHC",
+        "fixValidZ": "2026-09-07T16:49:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 17.903703703703705,
+          "lonE": -162.41833333333332,
+          "validZ": "2026-09-07T16:49:00.000Z"
+        },
+        "observed": {
+          "lat": 17.74,
+          "lonE": -162.35,
+          "validZ": "2026-09-07T16:49:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": null
+        },
+        "crossNm": 7.451648611807301,
+        "alongNm": -7.505688317544411,
+        "separationNm": 10.576503399232298,
+        "bearingDeg": 158.3171592962317,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 1.8166666666666667,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "aircraft-fix",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "atcf-fdeck",
+        "derivation": "AIRC",
+        "derivationLabel": "aircraft",
+        "family": "aircraft",
+        "upstream": "site:KNHC",
+        "upstreamNamed": false,
+        "site": "KNHC",
+        "receivedZ": null,
+        "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+        "positionConfidence": 2
+      },
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "fdeck:202609071700:DVTS:PGTW",
+        "fixValidZ": "2026-09-07T17:00:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 17.944444444444443,
+          "lonE": -162.4,
+          "validZ": "2026-09-07T17:00:00.000Z"
+        },
+        "observed": {
+          "lat": 17.89,
+          "lonE": -162.13,
+          "validZ": "2026-09-07T17:00:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": null
+        },
+        "crossNm": 15.467758049375126,
+        "alongNm": 3.058880611212642,
+        "separationNm": 15.767317136014663,
+        "bearingDeg": 101.92376454918121,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 2,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "dvorak-subjective",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "atcf-fdeck",
+        "derivation": "DVTS",
+        "derivationLabel": "subjective Dvorak",
+        "family": "satellite",
+        "upstream": "platform:GOES18",
+        "upstreamNamed": true,
+        "site": "PGTW",
+        "receivedZ": null,
+        "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+        "positionConfidence": 1
+      },
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "fdeck:202609071730:DVTS:PHFO",
+        "fixValidZ": "2026-09-07T17:30:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 18.055555555555557,
+          "lonE": -162.35,
+          "validZ": "2026-09-07T17:30:00.000Z"
+        },
+        "observed": {
+          "lat": 17.9,
+          "lonE": -162.1,
+          "validZ": "2026-09-07T17:30:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": null
+        },
+        "crossNm": 16.799374170580652,
+        "alongNm": -2.9749884332921797,
+        "separationNm": 17.060759909845594,
+        "bearingDeg": 123.15250682876496,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 2.5,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "dvorak-subjective",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "atcf-fdeck",
+        "derivation": "DVTS",
+        "derivationLabel": "subjective Dvorak",
+        "family": "satellite",
+        "upstream": "platform:GOES18",
+        "upstreamNamed": true,
+        "site": "PHFO",
+        "receivedZ": null,
+        "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+        "positionConfidence": 1
+      },
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "fdeck:202609071740:DVTO:CIMS",
+        "fixValidZ": "2026-09-07T17:40:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 18.09259259259259,
+          "lonE": -162.33333333333334,
+          "validZ": "2026-09-07T17:40:00.000Z"
+        },
+        "observed": {
+          "lat": 17.87,
+          "lonE": -162.03,
+          "validZ": "2026-09-07T17:40:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": null
+        },
+        "crossNm": 21.182718618210032,
+        "alongNm": -5.475570491634853,
+        "separationNm": 21.878972559677575,
+        "bearingDeg": 127.60342861700042,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 2.6666666666666665,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "dvorak-objective",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "atcf-fdeck",
+        "derivation": "DVTO",
+        "derivationLabel": "objective Dvorak",
+        "family": "satellite",
+        "upstream": "platform:GOES18",
+        "upstreamNamed": true,
+        "site": "CIMS",
+        "receivedZ": null,
+        "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+        "positionConfidence": 1
+      },
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "tcp:46A",
+        "fixValidZ": "2026-09-07T18:00:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 18.166666666666668,
+          "lonE": -162.3,
+          "validZ": "2026-09-07T18:00:00.000Z"
+        },
+        "observed": {
+          "lat": 18,
+          "lonE": -162.1,
+          "validZ": "2026-09-07T18:00:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": {
+            "deg": 30,
+            "mph": 15,
+            "units": "mph",
+            "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 15 MPH"
+          }
+        },
+        "crossNm": 14.429159474623658,
+        "alongNm": -4.715525121148406,
+        "separationNm": 15.180145595886206,
+        "bearingDeg": 131.20781884914686,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 3,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "aircraft-fix",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "nhc-tcp",
+        "derivation": "public advisory",
+        "derivationLabel": "official advisory position",
+        "family": "aircraft",
+        "upstream": "advisory:46A",
+        "upstreamNamed": true,
+        "site": null,
+        "receivedZ": "2026-09-07T17:44:00.000Z",
+        "availabilityAssumption": null,
+        "positionConfidence": null
+      },
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "tcp:47",
+        "fixValidZ": "2026-09-07T21:00:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 18.833333333333332,
+          "lonE": -162,
+          "validZ": "2026-09-07T21:00:00.000Z"
+        },
+        "observed": {
+          "lat": 18.7,
+          "lonE": -161.8,
+          "validZ": "2026-09-07T21:00:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": {
+            "deg": 30,
+            "mph": 17,
+            "units": "mph",
+            "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 17 MPH"
+          }
+        },
+        "crossNm": 13.601065980469482,
+        "alongNm": -2.892726882771191,
+        "separationNm": 13.905281896581291,
+        "bearingDeg": 125.11713182185105,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 6,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "aircraft-fix",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "nhc-tcp",
+        "derivation": "public advisory",
+        "derivationLabel": "official advisory position",
+        "family": "aircraft",
+        "upstream": "advisory:47",
+        "upstreamNamed": true,
+        "site": null,
+        "receivedZ": "2026-09-07T20:47:00.000Z",
+        "availabilityAssumption": null,
+        "positionConfidence": null
+      }
+    ],
+    "latest": [
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "fdeck:202609071649:AIRC:KNHC",
+        "fixValidZ": "2026-09-07T16:49:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 17.903703703703705,
+          "lonE": -162.41833333333332,
+          "validZ": "2026-09-07T16:49:00.000Z"
+        },
+        "observed": {
+          "lat": 17.74,
+          "lonE": -162.35,
+          "validZ": "2026-09-07T16:49:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": null
+        },
+        "crossNm": 7.451648611807301,
+        "alongNm": -7.505688317544411,
+        "separationNm": 10.576503399232298,
+        "bearingDeg": 158.3171592962317,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 1.8166666666666667,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "aircraft-fix",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "atcf-fdeck",
+        "derivation": "AIRC",
+        "derivationLabel": "aircraft",
+        "family": "aircraft",
+        "upstream": "site:KNHC",
+        "upstreamNamed": false,
+        "site": "KNHC",
+        "receivedZ": null,
+        "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+        "positionConfidence": 2
+      },
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "fdeck:202609071700:DVTS:PGTW",
+        "fixValidZ": "2026-09-07T17:00:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 17.944444444444443,
+          "lonE": -162.4,
+          "validZ": "2026-09-07T17:00:00.000Z"
+        },
+        "observed": {
+          "lat": 17.89,
+          "lonE": -162.13,
+          "validZ": "2026-09-07T17:00:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": null
+        },
+        "crossNm": 15.467758049375126,
+        "alongNm": 3.058880611212642,
+        "separationNm": 15.767317136014663,
+        "bearingDeg": 101.92376454918121,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 2,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "dvorak-subjective",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "atcf-fdeck",
+        "derivation": "DVTS",
+        "derivationLabel": "subjective Dvorak",
+        "family": "satellite",
+        "upstream": "platform:GOES18",
+        "upstreamNamed": true,
+        "site": "PGTW",
+        "receivedZ": null,
+        "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+        "positionConfidence": 1
+      },
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "fdeck:202609071730:DVTS:PHFO",
+        "fixValidZ": "2026-09-07T17:30:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 18.055555555555557,
+          "lonE": -162.35,
+          "validZ": "2026-09-07T17:30:00.000Z"
+        },
+        "observed": {
+          "lat": 17.9,
+          "lonE": -162.1,
+          "validZ": "2026-09-07T17:30:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": null
+        },
+        "crossNm": 16.799374170580652,
+        "alongNm": -2.9749884332921797,
+        "separationNm": 17.060759909845594,
+        "bearingDeg": 123.15250682876496,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 2.5,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "dvorak-subjective",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "atcf-fdeck",
+        "derivation": "DVTS",
+        "derivationLabel": "subjective Dvorak",
+        "family": "satellite",
+        "upstream": "platform:GOES18",
+        "upstreamNamed": true,
+        "site": "PHFO",
+        "receivedZ": null,
+        "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+        "positionConfidence": 1
+      },
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "fdeck:202609071740:DVTO:CIMS",
+        "fixValidZ": "2026-09-07T17:40:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 18.09259259259259,
+          "lonE": -162.33333333333334,
+          "validZ": "2026-09-07T17:40:00.000Z"
+        },
+        "observed": {
+          "lat": 17.87,
+          "lonE": -162.03,
+          "validZ": "2026-09-07T17:40:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": null
+        },
+        "crossNm": 21.182718618210032,
+        "alongNm": -5.475570491634853,
+        "separationNm": 21.878972559677575,
+        "bearingDeg": 127.60342861700042,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 2.6666666666666665,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "dvorak-objective",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "atcf-fdeck",
+        "derivation": "DVTO",
+        "derivationLabel": "objective Dvorak",
+        "family": "satellite",
+        "upstream": "platform:GOES18",
+        "upstreamNamed": true,
+        "site": "CIMS",
+        "receivedZ": null,
+        "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+        "positionConfidence": 1
+      },
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "tcp:46A",
+        "fixValidZ": "2026-09-07T18:00:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 18.166666666666668,
+          "lonE": -162.3,
+          "validZ": "2026-09-07T18:00:00.000Z"
+        },
+        "observed": {
+          "lat": 18,
+          "lonE": -162.1,
+          "validZ": "2026-09-07T18:00:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": {
+            "deg": 30,
+            "mph": 15,
+            "units": "mph",
+            "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 15 MPH"
+          }
+        },
+        "crossNm": 14.429159474623658,
+        "alongNm": -4.715525121148406,
+        "separationNm": 15.180145595886206,
+        "bearingDeg": 131.20781884914686,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 3,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "aircraft-fix",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "nhc-tcp",
+        "derivation": "public advisory",
+        "derivationLabel": "official advisory position",
+        "family": "aircraft",
+        "upstream": "advisory:46A",
+        "upstreamNamed": true,
+        "site": null,
+        "receivedZ": "2026-09-07T17:44:00.000Z",
+        "availabilityAssumption": null,
+        "positionConfidence": null
+      },
+      {
+        "ok": false,
+        "refusal": "FIX_AT_OR_BEFORE_BASELINE_INITIAL_TIME",
+        "baselineId": "EP122026/TCM/047",
+        "fixId": "tcp:47",
+        "fixValidZ": "2026-09-07T21:00:00.000Z",
+        "source": "nhc-tcp",
+        "derivation": "public advisory",
+        "derivationLabel": "official advisory position",
+        "centreDefinition": "aircraft-fix",
+        "family": "aircraft",
+        "upstream": "advisory:47",
+        "upstreamNamed": true,
+        "site": null,
+        "receivedZ": "2026-09-07T20:47:00.000Z",
+        "availabilityAssumption": null,
+        "positionConfidence": null
+      }
+    ],
+    "assessedFixed": {
+      "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+      "residuals": [
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "fdeck:202609071649:AIRC:KNHC",
+          "fixValidZ": "2026-09-07T16:49:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 17.903703703703705,
+            "lonE": -162.41833333333332,
+            "validZ": "2026-09-07T16:49:00.000Z"
+          },
+          "observed": {
+            "lat": 17.74,
+            "lonE": -162.35,
+            "validZ": "2026-09-07T16:49:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": null
+          },
+          "crossNm": 7.451648611807301,
+          "alongNm": -7.505688317544411,
+          "separationNm": 10.576503399232298,
+          "bearingDeg": 158.3171592962317,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 1.8166666666666667,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "aircraft-fix",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "atcf-fdeck",
+          "derivation": "AIRC",
+          "derivationLabel": "aircraft",
+          "family": "aircraft",
+          "upstream": "site:KNHC",
+          "upstreamNamed": false,
+          "site": "KNHC",
+          "receivedZ": null,
+          "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+          "positionConfidence": 2,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "fdeck:202609071700:DVTS:PGTW",
+          "fixValidZ": "2026-09-07T17:00:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 17.944444444444443,
+            "lonE": -162.4,
+            "validZ": "2026-09-07T17:00:00.000Z"
+          },
+          "observed": {
+            "lat": 17.89,
+            "lonE": -162.13,
+            "validZ": "2026-09-07T17:00:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": null
+          },
+          "crossNm": 15.467758049375126,
+          "alongNm": 3.058880611212642,
+          "separationNm": 15.767317136014663,
+          "bearingDeg": 101.92376454918121,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 2,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "dvorak-subjective",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "atcf-fdeck",
+          "derivation": "DVTS",
+          "derivationLabel": "subjective Dvorak",
+          "family": "satellite",
+          "upstream": "platform:GOES18",
+          "upstreamNamed": true,
+          "site": "PGTW",
+          "receivedZ": null,
+          "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+          "positionConfidence": 1,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "fdeck:202609071730:DVTS:PHFO",
+          "fixValidZ": "2026-09-07T17:30:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 18.055555555555557,
+            "lonE": -162.35,
+            "validZ": "2026-09-07T17:30:00.000Z"
+          },
+          "observed": {
+            "lat": 17.9,
+            "lonE": -162.1,
+            "validZ": "2026-09-07T17:30:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": null
+          },
+          "crossNm": 16.799374170580652,
+          "alongNm": -2.9749884332921797,
+          "separationNm": 17.060759909845594,
+          "bearingDeg": 123.15250682876496,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 2.5,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "dvorak-subjective",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "atcf-fdeck",
+          "derivation": "DVTS",
+          "derivationLabel": "subjective Dvorak",
+          "family": "satellite",
+          "upstream": "platform:GOES18",
+          "upstreamNamed": true,
+          "site": "PHFO",
+          "receivedZ": null,
+          "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+          "positionConfidence": 1,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "fdeck:202609071740:DVTO:CIMS",
+          "fixValidZ": "2026-09-07T17:40:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 18.09259259259259,
+            "lonE": -162.33333333333334,
+            "validZ": "2026-09-07T17:40:00.000Z"
+          },
+          "observed": {
+            "lat": 17.87,
+            "lonE": -162.03,
+            "validZ": "2026-09-07T17:40:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": null
+          },
+          "crossNm": 21.182718618210032,
+          "alongNm": -5.475570491634853,
+          "separationNm": 21.878972559677575,
+          "bearingDeg": 127.60342861700042,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 2.6666666666666665,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "dvorak-objective",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "atcf-fdeck",
+          "derivation": "DVTO",
+          "derivationLabel": "objective Dvorak",
+          "family": "satellite",
+          "upstream": "platform:GOES18",
+          "upstreamNamed": true,
+          "site": "CIMS",
+          "receivedZ": null,
+          "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+          "positionConfidence": 1,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "tcp:46A",
+          "fixValidZ": "2026-09-07T18:00:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 18.166666666666668,
+            "lonE": -162.3,
+            "validZ": "2026-09-07T18:00:00.000Z"
+          },
+          "observed": {
+            "lat": 18,
+            "lonE": -162.1,
+            "validZ": "2026-09-07T18:00:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": {
+              "deg": 30,
+              "mph": 15,
+              "units": "mph",
+              "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 15 MPH"
+            }
+          },
+          "crossNm": 14.429159474623658,
+          "alongNm": -4.715525121148406,
+          "separationNm": 15.180145595886206,
+          "bearingDeg": 131.20781884914686,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 3,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "aircraft-fix",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "nhc-tcp",
+          "derivation": "public advisory",
+          "derivationLabel": "official advisory position",
+          "family": "aircraft",
+          "upstream": "advisory:46A",
+          "upstreamNamed": true,
+          "site": null,
+          "receivedZ": "2026-09-07T17:44:00.000Z",
+          "availabilityAssumption": null,
+          "positionConfidence": null,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "tcp:47",
+          "fixValidZ": "2026-09-07T21:00:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 18.833333333333332,
+            "lonE": -162,
+            "validZ": "2026-09-07T21:00:00.000Z"
+          },
+          "observed": {
+            "lat": 18.7,
+            "lonE": -161.8,
+            "validZ": "2026-09-07T21:00:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": {
+              "deg": 30,
+              "mph": 17,
+              "units": "mph",
+              "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 17 MPH"
+            }
+          },
+          "crossNm": 13.601065980469482,
+          "alongNm": -2.892726882771191,
+          "separationNm": 13.905281896581291,
+          "bearingDeg": 125.11713182185105,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 6,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "aircraft-fix",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "nhc-tcp",
+          "derivation": "public advisory",
+          "derivationLabel": "official advisory position",
+          "family": "aircraft",
+          "upstream": "advisory:47",
+          "upstreamNamed": true,
+          "site": null,
+          "receivedZ": "2026-09-07T20:47:00.000Z",
+          "availabilityAssumption": null,
+          "positionConfidence": null,
+          "baselineReset": false,
+          "previousBaselineId": null
+        }
+      ],
+      "dataQuality": {
+        "ok": false,
+        "state": "DEGRADED",
+        "reasons": [
+          "MIXED_CENTRE_DEFINITIONS:aircraft-fix+dvorak-subjective+dvorak-objective"
+        ],
+        "centreDefinitions": {
+          "ok": false,
+          "definitions": [
+            "aircraft-fix",
+            "dvorak-subjective",
+            "dvorak-objective"
+          ],
+          "refusal": "MIXED_CENTRE_DEFINITIONS",
+          "missingOffsets": [
+            "aircraft-fix|dvorak-subjective",
+            "aircraft-fix|dvorak-objective",
+            "dvorak-subjective|dvorak-objective"
+          ],
+          "note": "An offset term between these definitions has not been measured, so they are not one series."
+        }
+      },
+      "uncertaintyCalibration": {
+        "ok": false,
+        "state": "UNCALIBRATED_UNCERTAINTY",
+        "reasons": [
+          "NO_EMPIRICAL_FIT"
+        ],
+        "sigma": {
+          "provisional": true,
+          "fittedOn": null,
+          "note": "ASSUMED, NOT MEASURED. No empirical fit exists for this pipeline. Never present these as a noise floor and never read WITHIN_NOISE as absence of signal.",
+          "observation": 12,
+          "baseline": 5,
+          "wobble": 12,
+          "rounding": 6
+        },
+        "note": "The band drawn on the strip is the brief's assumed magnitudes, not a fit. WITHIN_NOISE would mean 'indistinguishable from an unvalidated floor', which is a statement about the floor."
+      },
+      "sampleSufficiency": {
+        "ok": true,
+        "state": "SUFFICIENT",
+        "reasons": [],
+        "independentGroups": 4,
+        "fixes": 6,
+        "duplicates": 0,
+        "groups": [
+          {
+            "upstream": "site:KNHC",
+            "n": 1,
+            "fixIds": [
+              "fdeck:202609071649:AIRC:KNHC"
+            ]
+          },
+          {
+            "upstream": "platform:GOES18",
+            "n": 3,
+            "fixIds": [
+              "fdeck:202609071700:DVTS:PGTW",
+              "fdeck:202609071730:DVTS:PHFO",
+              "fdeck:202609071740:DVTO:CIMS"
+            ]
+          },
+          {
+            "upstream": "advisory:46A",
+            "n": 1,
+            "fixIds": [
+              "tcp:46A"
+            ]
+          },
+          {
+            "upstream": "advisory:47",
+            "n": 1,
+            "fixIds": [
+              "tcp:47"
+            ]
+          }
+        ],
+        "note": "The unit is an independent group, not a row. Two agencies on one satellite image are one group; an official-only pair (46 and 46A) is one or two, never three."
+      },
+      "trendStatus": {
+        "ok": false,
+        "state": "NO_TREND_ASSERTED",
+        "promoted": false,
+        "reasons": [
+          "RULE_NOT_VALIDATED",
+          "DATA_QUALITY_DEGRADED",
+          "UNCALIBRATED_UNCERTAINTY"
+        ],
+        "candidate": {
+          "candidateMet": true,
+          "promoted": false,
+          "promotionStatus": "CANDIDATE RULE — NOT VALIDATED",
+          "reasonNotPromoted": "No held-out-storm backtest has scored this rule. Source tier is not independence; six hours need not span a trochoidal cycle.",
+          "detail": {
+            "n": 6,
+            "independentGroups": 4,
+            "sameSign": true,
+            "spanHours": 4.183333333333334,
+            "singleBaseline": true,
+            "signs": [
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        "baselineResets": [],
+        "note": "A residual may be reported with its uncertainty; a bias may not be asserted from an insufficient or dependent sample. No trend is asserted across a baseline reset."
+      },
+      "freshness": {
+        "ok": true,
+        "effectiveInformationAgeMin": 10,
+        "observationAgeMin": 10,
+        "ingestLatencyS": -780,
+        "receivedBeforeValidTime": true,
+        "newestFixId": "tcp:47",
+        "newestValidZ": "2026-09-07T21:00:00.000Z",
+        "definition": "Age of the newest input eligible to enter the residual series, including one that confirms an unchanged position."
+      },
+      "residual_state": {
+        "value": null,
+        "wired": false,
+        "reason": "Left unwired on purpose: nothing here has been scored against a held-out storm, so no residual may move a rank."
+      }
+    },
+    "assessedLatest": {
+      "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+      "residuals": [
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "fdeck:202609071649:AIRC:KNHC",
+          "fixValidZ": "2026-09-07T16:49:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 17.903703703703705,
+            "lonE": -162.41833333333332,
+            "validZ": "2026-09-07T16:49:00.000Z"
+          },
+          "observed": {
+            "lat": 17.74,
+            "lonE": -162.35,
+            "validZ": "2026-09-07T16:49:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": null
+          },
+          "crossNm": 7.451648611807301,
+          "alongNm": -7.505688317544411,
+          "separationNm": 10.576503399232298,
+          "bearingDeg": 158.3171592962317,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 1.8166666666666667,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "aircraft-fix",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "atcf-fdeck",
+          "derivation": "AIRC",
+          "derivationLabel": "aircraft",
+          "family": "aircraft",
+          "upstream": "site:KNHC",
+          "upstreamNamed": false,
+          "site": "KNHC",
+          "receivedZ": null,
+          "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+          "positionConfidence": 2,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "fdeck:202609071700:DVTS:PGTW",
+          "fixValidZ": "2026-09-07T17:00:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 17.944444444444443,
+            "lonE": -162.4,
+            "validZ": "2026-09-07T17:00:00.000Z"
+          },
+          "observed": {
+            "lat": 17.89,
+            "lonE": -162.13,
+            "validZ": "2026-09-07T17:00:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": null
+          },
+          "crossNm": 15.467758049375126,
+          "alongNm": 3.058880611212642,
+          "separationNm": 15.767317136014663,
+          "bearingDeg": 101.92376454918121,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 2,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "dvorak-subjective",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "atcf-fdeck",
+          "derivation": "DVTS",
+          "derivationLabel": "subjective Dvorak",
+          "family": "satellite",
+          "upstream": "platform:GOES18",
+          "upstreamNamed": true,
+          "site": "PGTW",
+          "receivedZ": null,
+          "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+          "positionConfidence": 1,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "fdeck:202609071730:DVTS:PHFO",
+          "fixValidZ": "2026-09-07T17:30:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 18.055555555555557,
+            "lonE": -162.35,
+            "validZ": "2026-09-07T17:30:00.000Z"
+          },
+          "observed": {
+            "lat": 17.9,
+            "lonE": -162.1,
+            "validZ": "2026-09-07T17:30:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": null
+          },
+          "crossNm": 16.799374170580652,
+          "alongNm": -2.9749884332921797,
+          "separationNm": 17.060759909845594,
+          "bearingDeg": 123.15250682876496,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 2.5,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "dvorak-subjective",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "atcf-fdeck",
+          "derivation": "DVTS",
+          "derivationLabel": "subjective Dvorak",
+          "family": "satellite",
+          "upstream": "platform:GOES18",
+          "upstreamNamed": true,
+          "site": "PHFO",
+          "receivedZ": null,
+          "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+          "positionConfidence": 1,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "fdeck:202609071740:DVTO:CIMS",
+          "fixValidZ": "2026-09-07T17:40:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 18.09259259259259,
+            "lonE": -162.33333333333334,
+            "validZ": "2026-09-07T17:40:00.000Z"
+          },
+          "observed": {
+            "lat": 17.87,
+            "lonE": -162.03,
+            "validZ": "2026-09-07T17:40:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": null
+          },
+          "crossNm": 21.182718618210032,
+          "alongNm": -5.475570491634853,
+          "separationNm": 21.878972559677575,
+          "bearingDeg": 127.60342861700042,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 2.6666666666666665,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "dvorak-objective",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "atcf-fdeck",
+          "derivation": "DVTO",
+          "derivationLabel": "objective Dvorak",
+          "family": "satellite",
+          "upstream": "platform:GOES18",
+          "upstreamNamed": true,
+          "site": "CIMS",
+          "receivedZ": null,
+          "availabilityAssumption": "RECEIPT TIME UNKNOWN — archived deck; no arrival time is recorded and none is assumed.",
+          "positionConfidence": 1,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "tcp:46A",
+          "fixValidZ": "2026-09-07T18:00:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 18.166666666666668,
+            "lonE": -162.3,
+            "validZ": "2026-09-07T18:00:00.000Z"
+          },
+          "observed": {
+            "lat": 18,
+            "lonE": -162.1,
+            "validZ": "2026-09-07T18:00:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": {
+              "deg": 30,
+              "mph": 15,
+              "units": "mph",
+              "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 15 MPH"
+            }
+          },
+          "crossNm": 14.429159474623658,
+          "alongNm": -4.715525121148406,
+          "separationNm": 15.180145595886206,
+          "bearingDeg": 131.20781884914686,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 3,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "aircraft-fix",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "nhc-tcp",
+          "derivation": "public advisory",
+          "derivationLabel": "official advisory position",
+          "family": "aircraft",
+          "upstream": "advisory:46A",
+          "upstreamNamed": true,
+          "site": null,
+          "receivedZ": "2026-09-07T17:44:00.000Z",
+          "availabilityAssumption": null,
+          "positionConfidence": null,
+          "baselineReset": false,
+          "previousBaselineId": null
+        },
+        {
+          "ok": false,
+          "refusal": "FIX_AT_OR_BEFORE_BASELINE_INITIAL_TIME",
+          "baselineId": "EP122026/TCM/047",
+          "fixId": "tcp:47",
+          "fixValidZ": "2026-09-07T21:00:00.000Z",
+          "source": "nhc-tcp",
+          "derivation": "public advisory",
+          "derivationLabel": "official advisory position",
+          "centreDefinition": "aircraft-fix",
+          "family": "aircraft",
+          "upstream": "advisory:47",
+          "upstreamNamed": true,
+          "site": null,
+          "receivedZ": "2026-09-07T20:47:00.000Z",
+          "availabilityAssumption": null,
+          "positionConfidence": null,
+          "baselineReset": true,
+          "previousBaselineId": "EP122026/TCM/046"
+        }
+      ],
+      "dataQuality": {
+        "ok": false,
+        "state": "DEGRADED",
+        "reasons": [
+          "REFUSED_RESIDUAL:FIX_AT_OR_BEFORE_BASELINE_INITIAL_TIME",
+          "MIXED_CENTRE_DEFINITIONS:aircraft-fix+dvorak-subjective+dvorak-objective"
+        ],
+        "centreDefinitions": {
+          "ok": false,
+          "definitions": [
+            "aircraft-fix",
+            "dvorak-subjective",
+            "dvorak-objective"
+          ],
+          "refusal": "MIXED_CENTRE_DEFINITIONS",
+          "missingOffsets": [
+            "aircraft-fix|dvorak-subjective",
+            "aircraft-fix|dvorak-objective",
+            "dvorak-subjective|dvorak-objective"
+          ],
+          "note": "An offset term between these definitions has not been measured, so they are not one series."
+        }
+      },
+      "uncertaintyCalibration": {
+        "ok": false,
+        "state": "UNCALIBRATED_UNCERTAINTY",
+        "reasons": [
+          "NO_EMPIRICAL_FIT"
+        ],
+        "sigma": {
+          "provisional": true,
+          "fittedOn": null,
+          "note": "ASSUMED, NOT MEASURED. No empirical fit exists for this pipeline. Never present these as a noise floor and never read WITHIN_NOISE as absence of signal.",
+          "observation": 12,
+          "baseline": 5,
+          "wobble": 12,
+          "rounding": 6
+        },
+        "note": "The band drawn on the strip is the brief's assumed magnitudes, not a fit. WITHIN_NOISE would mean 'indistinguishable from an unvalidated floor', which is a statement about the floor."
+      },
+      "sampleSufficiency": {
+        "ok": true,
+        "state": "SUFFICIENT",
+        "reasons": [],
+        "independentGroups": 3,
+        "fixes": 5,
+        "duplicates": 0,
+        "groups": [
+          {
+            "upstream": "site:KNHC",
+            "n": 1,
+            "fixIds": [
+              "fdeck:202609071649:AIRC:KNHC"
+            ]
+          },
+          {
+            "upstream": "platform:GOES18",
+            "n": 3,
+            "fixIds": [
+              "fdeck:202609071700:DVTS:PGTW",
+              "fdeck:202609071730:DVTS:PHFO",
+              "fdeck:202609071740:DVTO:CIMS"
+            ]
+          },
+          {
+            "upstream": "advisory:46A",
+            "n": 1,
+            "fixIds": [
+              "tcp:46A"
+            ]
+          }
+        ],
+        "note": "The unit is an independent group, not a row. Two agencies on one satellite image are one group; an official-only pair (46 and 46A) is one or two, never three."
+      },
+      "trendStatus": {
+        "ok": false,
+        "state": "NO_TREND_ASSERTED",
+        "promoted": false,
+        "reasons": [
+          "RULE_NOT_VALIDATED",
+          "DATA_QUALITY_DEGRADED",
+          "UNCALIBRATED_UNCERTAINTY"
+        ],
+        "candidate": {
+          "candidateMet": true,
+          "promoted": false,
+          "promotionStatus": "CANDIDATE RULE — NOT VALIDATED",
+          "reasonNotPromoted": "No held-out-storm backtest has scored this rule. Source tier is not independence; six hours need not span a trochoidal cycle.",
+          "detail": {
+            "n": 5,
+            "independentGroups": 3,
+            "sameSign": true,
+            "spanHours": 1.1833333333333333,
+            "singleBaseline": true,
+            "signs": [
+              1,
+              1,
+              1,
+              1,
+              1
+            ]
+          }
+        },
+        "baselineResets": [
+          {
+            "at": "2026-09-07T21:00:00.000Z",
+            "from": "EP122026/TCM/046",
+            "to": "EP122026/TCM/047"
+          }
+        ],
+        "note": "A residual may be reported with its uncertainty; a bias may not be asserted from an insufficient or dependent sample. No trend is asserted across a baseline reset."
+      },
+      "freshness": {
+        "ok": true,
+        "effectiveInformationAgeMin": 190,
+        "observationAgeMin": 190,
+        "ingestLatencyS": -960,
+        "receivedBeforeValidTime": true,
+        "newestFixId": "tcp:46A",
+        "newestValidZ": "2026-09-07T18:00:00.000Z",
+        "definition": "Age of the newest input eligible to enter the residual series, including one that confirms an unchanged position."
+      },
+      "residual_state": {
+        "value": null,
+        "wired": false,
+        "reason": "Left unwired on purpose: nothing here has been scored against a held-out storm, so no residual may move a rank."
+      }
+    },
+    "baselineResets": [
+      {
+        "at": "2026-09-07T21:00:00.000Z",
+        "from": "EP122026/TCM/046",
+        "to": "EP122026/TCM/047"
+      }
+    ],
+    "wobbleBound": {
+      "ok": true,
+      "peakToPeakNm": 13.731070006402732,
+      "note": "An observed spread across the window. It bounds the sum of wobble, observation error and any real departure — it does not separate them, and nothing is subtracted from a residual on the strength of it."
+    }
+  },
+  "officialOnly": {
+    "series": [
+      {
+        "baselineId": "EP122026/TCM/046",
+        "fixId": "tcp:46A",
+        "fixValidZ": "2026-09-07T18:00:00.000Z",
+        "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+        "interpolation": "linear-in-time",
+        "ok": true,
+        "refusal": null,
+        "forecast": {
+          "lat": 18.166666666666668,
+          "lonE": -162.3,
+          "validZ": "2026-09-07T18:00:00.000Z"
+        },
+        "observed": {
+          "lat": 18,
+          "lonE": -162.1,
+          "validZ": "2026-09-07T18:00:00.000Z"
+        },
+        "frame": {
+          "courseDeg": 23.110154960660168,
+          "source": "baseline-forecast-local-direction",
+          "nodeDiscontinuityDeg": null,
+          "reportedMotion": {
+            "deg": 25,
+            "kt": 12,
+            "units": "kt",
+            "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+          },
+          "fixReportedMotion": {
+            "deg": 30,
+            "mph": 15,
+            "units": "mph",
+            "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 15 MPH"
+          }
+        },
+        "crossNm": 14.429159474623658,
+        "alongNm": -4.715525121148406,
+        "separationNm": 15.180145595886206,
+        "bearingDeg": 131.20781884914686,
+        "crossPointsToward": 113.11015496066017,
+        "leadHours": 3,
+        "segment": [
+          0,
+          1
+        ],
+        "segmentValidZ": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-08T00:00:00.000Z"
+        ],
+        "segmentHours": 9,
+        "nodeDiscontinuityDeg": null,
+        "outlookUsed": false,
+        "centreDefinition": "aircraft-fix",
+        "baselineCentreDefinition": "advisory-analysed",
+        "source": "nhc-tcp",
+        "derivation": "public advisory",
+        "derivationLabel": "official advisory position",
+        "family": "aircraft",
+        "upstream": "advisory:46A",
+        "upstreamNamed": true,
+        "site": null,
+        "receivedZ": "2026-09-07T17:44:00.000Z",
+        "availabilityAssumption": null,
+        "positionConfidence": null
+      }
+    ],
+    "assessed": {
+      "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+      "residuals": [
+        {
+          "baselineId": "EP122026/TCM/046",
+          "fixId": "tcp:46A",
+          "fixValidZ": "2026-09-07T18:00:00.000Z",
+          "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
+          "interpolation": "linear-in-time",
+          "ok": true,
+          "refusal": null,
+          "forecast": {
+            "lat": 18.166666666666668,
+            "lonE": -162.3,
+            "validZ": "2026-09-07T18:00:00.000Z"
+          },
+          "observed": {
+            "lat": 18,
+            "lonE": -162.1,
+            "validZ": "2026-09-07T18:00:00.000Z"
+          },
+          "frame": {
+            "courseDeg": 23.110154960660168,
+            "source": "baseline-forecast-local-direction",
+            "nodeDiscontinuityDeg": null,
+            "reportedMotion": {
+              "deg": 25,
+              "kt": 12,
+              "units": "kt",
+              "text": "PRESENT MOVEMENT TOWARD THE NORTH-NORTHEAST OR 25 DEGREES AT 12 KT"
+            },
+            "fixReportedMotion": {
+              "deg": 30,
+              "mph": 15,
+              "units": "mph",
+              "text": "PRESENT MOVEMENT...NNE OR 30 DEGREES AT 15 MPH"
+            }
+          },
+          "crossNm": 14.429159474623658,
+          "alongNm": -4.715525121148406,
+          "separationNm": 15.180145595886206,
+          "bearingDeg": 131.20781884914686,
+          "crossPointsToward": 113.11015496066017,
+          "leadHours": 3,
+          "segment": [
+            0,
+            1
+          ],
+          "segmentValidZ": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-08T00:00:00.000Z"
+          ],
+          "segmentHours": 9,
+          "nodeDiscontinuityDeg": null,
+          "outlookUsed": false,
+          "centreDefinition": "aircraft-fix",
+          "baselineCentreDefinition": "advisory-analysed",
+          "source": "nhc-tcp",
+          "derivation": "public advisory",
+          "derivationLabel": "official advisory position",
+          "family": "aircraft",
+          "upstream": "advisory:46A",
+          "upstreamNamed": true,
+          "site": null,
+          "receivedZ": "2026-09-07T17:44:00.000Z",
+          "availabilityAssumption": null,
+          "positionConfidence": null,
+          "baselineReset": false,
+          "previousBaselineId": null
+        }
+      ],
+      "dataQuality": {
+        "ok": true,
+        "state": "OK",
+        "reasons": [],
+        "centreDefinitions": {
+          "ok": true,
+          "definitions": [
+            "aircraft-fix"
+          ],
+          "refusal": null
+        }
+      },
+      "uncertaintyCalibration": {
+        "ok": false,
+        "state": "UNCALIBRATED_UNCERTAINTY",
+        "reasons": [
+          "NO_EMPIRICAL_FIT"
+        ],
+        "sigma": {
+          "provisional": true,
+          "fittedOn": null,
+          "note": "ASSUMED, NOT MEASURED. No empirical fit exists for this pipeline. Never present these as a noise floor and never read WITHIN_NOISE as absence of signal.",
+          "observation": 12,
+          "baseline": 5,
+          "wobble": 12,
+          "rounding": 6
+        },
+        "note": "The band drawn on the strip is the brief's assumed magnitudes, not a fit. WITHIN_NOISE would mean 'indistinguishable from an unvalidated floor', which is a statement about the floor."
+      },
+      "sampleSufficiency": {
+        "ok": false,
+        "state": "INSUFFICIENT_SAMPLE",
+        "reasons": [
+          "INDEPENDENT_GROUPS_1_OF_3"
+        ],
+        "independentGroups": 1,
+        "fixes": 1,
+        "duplicates": 0,
+        "groups": [
+          {
+            "upstream": "advisory:46A",
+            "n": 1,
+            "fixIds": [
+              "tcp:46A"
+            ]
+          }
+        ],
+        "note": "The unit is an independent group, not a row. Two agencies on one satellite image are one group; an official-only pair (46 and 46A) is one or two, never three."
+      },
+      "trendStatus": {
+        "ok": false,
+        "state": "NO_TREND_ASSERTED",
+        "promoted": false,
+        "reasons": [
+          "RULE_NOT_VALIDATED",
+          "INSUFFICIENT_SAMPLE",
+          "UNCALIBRATED_UNCERTAINTY"
+        ],
+        "candidate": {
+          "candidateMet": false,
+          "promoted": false,
+          "promotionStatus": "CANDIDATE RULE — NOT VALIDATED",
+          "reasonNotPromoted": "No held-out-storm backtest has scored this rule. Source tier is not independence; six hours need not span a trochoidal cycle.",
+          "detail": {
+            "n": 1,
+            "independentGroups": 1,
+            "sameSign": false,
+            "spanHours": 0,
+            "singleBaseline": true,
+            "signs": [
+              1
+            ]
+          }
+        },
+        "baselineResets": [],
+        "note": "A residual may be reported with its uncertainty; a bias may not be asserted from an insufficient or dependent sample. No trend is asserted across a baseline reset."
+      },
+      "freshness": {
+        "ok": true,
+        "effectiveInformationAgeMin": 190,
+        "observationAgeMin": 190,
+        "ingestLatencyS": -960,
+        "receivedBeforeValidTime": true,
+        "newestFixId": "tcp:46A",
+        "newestValidZ": "2026-09-07T18:00:00.000Z",
+        "definition": "Age of the newest input eligible to enter the residual series, including one that confirms an unchanged position."
+      },
+      "residual_state": {
+        "value": null,
+        "wired": false,
+        "reason": "Left unwired on purpose: nothing here has been scored against a held-out storm, so no residual may move a rank."
+      }
+    }
+  },
+  "closure": {
+    "byAssumption": {
+      "forecast-as-issued": {
+        "target": "Main Hawaiian Islands (qualifying set, illustrative)",
+        "assumption": "forecast-as-issued",
+        "assumptionText": "The issued forecast, unmodified. No residual is carried forward.",
+        "frame": "great-circle-nm",
+        "probability": null,
+        "probabilityRefusal": "NOT SCOREABLE AS A PROBABILITY — no held-out validation exists for this module, so no P(centre reaches X) is emitted.",
+        "exactTriggerScored": false,
+        "exactTriggerNote": "EXACT TRIGGER NOT SCORED",
+        "ok": true,
+        "carried": {
+          "alongNm": 0,
+          "crossNm": 0
+        },
+        "requiredRate": {
+          "ok": true,
+          "frame": "great-circle-nm",
+          "distanceNm": 250.75519677975998,
+          "nearestRing": "Niihau",
+          "hoursRemaining": 30,
+          "requiredKt": 8.358506559325333,
+          "ambiguousShoreSide": null,
+          "state": "REQUIRED RATE — KINEMATICS ONLY",
+          "note": "Distance to the nearest point of the supplied shoreline geometry over the time remaining. Not a probability, not a forecast, not a statement that this rate is achievable."
+        },
+        "intersection": {
+          "ok": false,
+          "refusal": "NO_INTERSECTION_IN_COVERAGE",
+          "coverage": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-09T00:00:00.000Z"
+          ],
+          "totalTurnDeg": 21.047174126706864
+        },
+        "state": "UNRESOLVED — NO_INTERSECTION_IN_COVERAGE",
+        "coverage": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-09T00:00:00.000Z"
+        ],
+        "fullTrackCoverage": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-10T12:00:00.000Z"
+        ],
+        "truncatedToDeadline": true,
+        "knownLimits": [
+          "Linear-in-time interpolation between forecast positions.",
+          "The displacement assumption is kinematic and unvalidated.",
+          "Required rate is arithmetic, not achievability.",
+          "Polygon containment is planar in lon/lat, valid at island scale away from the poles."
+        ]
+      },
+      "residual-persists": {
+        "target": "Main Hawaiian Islands (qualifying set, illustrative)",
+        "assumption": "residual-persists",
+        "assumptionText": "The measured along/cross residual held constant and applied to every future forecast position in that position's own local frame. Kinematic assumption; not a validated persistence model.",
+        "frame": "great-circle-nm",
+        "probability": null,
+        "probabilityRefusal": "NOT SCOREABLE AS A PROBABILITY — no held-out validation exists for this module, so no P(centre reaches X) is emitted.",
+        "exactTriggerScored": false,
+        "exactTriggerNote": "EXACT TRIGGER NOT SCORED",
+        "ok": true,
+        "carried": {
+          "alongNm": -4.715525121148406,
+          "crossNm": 14.429159474623658
+        },
+        "requiredRate": {
+          "ok": true,
+          "frame": "great-circle-nm",
+          "distanceNm": 250.75519677975998,
+          "nearestRing": "Niihau",
+          "hoursRemaining": 30,
+          "requiredKt": 8.358506559325333,
+          "ambiguousShoreSide": null,
+          "state": "REQUIRED RATE — KINEMATICS ONLY",
+          "note": "Distance to the nearest point of the supplied shoreline geometry over the time remaining. Not a probability, not a forecast, not a statement that this rate is achievable."
+        },
+        "intersection": {
+          "ok": false,
+          "refusal": "NO_INTERSECTION_IN_COVERAGE",
+          "coverage": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-09T00:00:00.000Z"
+          ],
+          "totalTurnDeg": 27.36161081288992
+        },
+        "state": "UNRESOLVED — NO_INTERSECTION_IN_COVERAGE",
+        "coverage": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-09T00:00:00.000Z"
+        ],
+        "fullTrackCoverage": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-10T12:00:00.000Z"
+        ],
+        "truncatedToDeadline": true,
+        "knownLimits": [
+          "Linear-in-time interpolation between forecast positions.",
+          "The displacement assumption is kinematic and unvalidated.",
+          "Required rate is arithmetic, not achievability.",
+          "Polygon containment is planar in lon/lat, valid at island scale away from the poles."
+        ]
+      },
+      "residual-decays": {
+        "target": "Main Hawaiian Islands (qualifying set, illustrative)",
+        "assumption": "residual-decays",
+        "assumptionText": "As residual-persists, relaxed linearly to zero over decayHours.",
+        "frame": "great-circle-nm",
+        "probability": null,
+        "probabilityRefusal": "NOT SCOREABLE AS A PROBABILITY — no held-out validation exists for this module, so no P(centre reaches X) is emitted.",
+        "exactTriggerScored": false,
+        "exactTriggerNote": "EXACT TRIGGER NOT SCORED",
+        "ok": true,
+        "carried": {
+          "alongNm": -4.715525121148406,
+          "crossNm": 14.429159474623658
+        },
+        "requiredRate": {
+          "ok": true,
+          "frame": "great-circle-nm",
+          "distanceNm": 250.75519677975998,
+          "nearestRing": "Niihau",
+          "hoursRemaining": 30,
+          "requiredKt": 8.358506559325333,
+          "ambiguousShoreSide": null,
+          "state": "REQUIRED RATE — KINEMATICS ONLY",
+          "note": "Distance to the nearest point of the supplied shoreline geometry over the time remaining. Not a probability, not a forecast, not a statement that this rate is achievable."
+        },
+        "intersection": {
+          "ok": false,
+          "refusal": "NO_INTERSECTION_IN_COVERAGE",
+          "coverage": [
+            "2026-09-07T15:00:00.000Z",
+            "2026-09-09T00:00:00.000Z"
+          ],
+          "totalTurnDeg": 27.276287436318512
+        },
+        "state": "UNRESOLVED — NO_INTERSECTION_IN_COVERAGE",
+        "coverage": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-09T00:00:00.000Z"
+        ],
+        "fullTrackCoverage": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-10T12:00:00.000Z"
+        ],
+        "truncatedToDeadline": true,
+        "knownLimits": [
+          "Linear-in-time interpolation between forecast positions.",
+          "The displacement assumption is kinematic and unvalidated.",
+          "Required rate is arithmetic, not achievability.",
+          "Polygon containment is planar in lon/lat, valid at island scale away from the poles."
+        ]
+      },
+      "full-track-recurvature": {
+        "target": "Main Hawaiian Islands (qualifying set, illustrative)",
+        "assumption": "forecast-as-issued",
+        "assumptionText": "The issued forecast, unmodified. No residual is carried forward.",
+        "frame": "great-circle-nm",
+        "probability": null,
+        "probabilityRefusal": "NOT SCOREABLE AS A PROBABILITY — no held-out validation exists for this module, so no P(centre reaches X) is emitted.",
+        "exactTriggerScored": false,
+        "exactTriggerNote": "EXACT TRIGGER NOT SCORED",
+        "ok": true,
+        "carried": {
+          "alongNm": 0,
+          "crossNm": 0
+        },
+        "requiredRate": {
+          "ok": true,
+          "frame": "great-circle-nm",
+          "distanceNm": 250.75519677975998,
+          "nearestRing": "Niihau",
+          "hoursRemaining": 66,
+          "requiredKt": 3.799321163329697,
+          "ambiguousShoreSide": null,
+          "state": "REQUIRED RATE — KINEMATICS ONLY",
+          "note": "Distance to the nearest point of the supplied shoreline geometry over the time remaining. Not a probability, not a forecast, not a statement that this rate is achievable."
+        },
+        "intersection": {
+          "ok": false,
+          "refusal": "RECURVATURE_IN_WINDOW",
+          "totalTurnDeg": 112.38576325403852,
+          "crossings": 0
+        },
+        "state": "UNRESOLVED — RECURVATURE_IN_WINDOW",
+        "coverage": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-10T12:00:00.000Z"
+        ],
+        "fullTrackCoverage": [
+          "2026-09-07T15:00:00.000Z",
+          "2026-09-10T12:00:00.000Z"
+        ],
+        "truncatedToDeadline": false,
+        "knownLimits": [
+          "Linear-in-time interpolation between forecast positions.",
+          "The displacement assumption is kinematic and unvalidated.",
+          "Required rate is arithmetic, not achievability.",
+          "Polygon containment is planar in lon/lat, valid at island scale away from the poles."
+        ]
+      }
+    },
+    "latitudeDiagnostic": {
+      "diagnosticOnly": true,
+      "label": "LATITUDE-CROSSING DIAGNOSTIC — NOT A LANDFALL CLAIM",
+      "assumption": "forecast-as-issued",
+      "assumptionText": "The issued forecast, unmodified. No residual is carried forward.",
+      "targetLat": 21.9,
+      "ok": true,
+      "refusal": null,
+      "index": 1,
+      "fraction": 0.8275862068965516,
+      "tMs": 1788861351724.138,
+      "validZ": "2026-09-08T09:55:51.724Z",
+      "lonE": -161.0379310344828,
+      "meridionalRatio": 3.8816018034138566,
+      "segmentValidZ": [
+        "2026-09-08T00:00:00.000Z",
+        "2026-09-08T12:00:00.000Z"
+      ],
+      "method": "linear-in-latitude",
+      "note": "A latitude is not a lead time. The lead below is computed from the path's own valid times. A parallel is not a shore: crossing it says nothing about intersecting land.",
+      "leadHours": 18.93103448276096
+    },
+    "frameGuard": {
+      "threw": true,
+      "message": "closure: refusing to combine cross-track-nm with shoreline-gap-east-nm — different coordinates"
+    },
+    "qualifyingRings": [
+      "Island of Hawaii",
+      "Kahoolawe",
+      "Lanai",
+      "Maui",
+      "Molokai",
+      "Oahu",
+      "Niihau",
+      "Kauai"
+    ],
+    "excludedRings": [
+      null,
+      "Lisianski Island"
+    ]
+  },
+  "settlement": {
+    "registryEmpty": {
+      "ok": false,
+      "refusal": "UNSUPPORTED_CONTRACT",
+      "state": "UNRESOLVED — RULES NOT INGESTED",
+      "note": "No authoritative rules text has been retrieved for this contract."
+    },
+    "incompleteRecordRefusal": {
+      "ok": false,
+      "refusal": "INCOMPLETE_CONTRACT_RECORD",
+      "missing": [
+        "rulesText",
+        "rulesRetrievedZ",
+        "rulesSha256"
+      ],
+      "note": "A contract term is not inferable from a market title, a warning polygon or a map. Supply the venue's own rules text or leave the contract unsupported."
+    },
+    "demonstration": {
+      "contractId": "DEMO-NOT-A-REAL-CONTRACT",
+      "disclaimer": "DEMONSTRATION RECORD — not a real contract, not any venue's rules.",
+      "strikeClassification": {
+        "qualifying": false,
+        "reason": "NAMED_EXCLUSION",
+        "region": "Nihoa",
+        "state": "NON-QUALIFYING EVENT RECORDED",
+        "note": "An excluded-geography strike does not by itself resolve No."
+      },
+      "stateWhileWindowOpen": {
+        "state": "OPEN",
+        "reason": "WINDOW_STILL_OPEN",
+        "text": "OPEN — WINDOW STILL RUNNING",
+        "classified": [
+          {
+            "strike": {
+              "region": "Nihoa",
+              "centreCrossed": true,
+              "atZ": "2026-09-08T06:00:00Z"
+            },
+            "qualifying": false,
+            "reason": "NAMED_EXCLUSION",
+            "region": "Nihoa",
+            "state": "NON-QUALIFYING EVENT RECORDED",
+            "note": "An excluded-geography strike does not by itself resolve No."
+          }
+        ],
+        "windowEndsZ": "2026-09-12T00:00:00Z",
+        "timezone": "UTC",
+        "note": "An excluded-geography strike has occurred and did not resolve this contract."
+      },
+      "stateAfterWindowCloses": {
+        "state": "RESOLVED_NO",
+        "reason": "WINDOW_CLOSED_WITHOUT_QUALIFYING_EVENT",
+        "text": "RESOLVED NO",
+        "classified": [
+          {
+            "strike": {
+              "region": "Nihoa",
+              "centreCrossed": true,
+              "atZ": "2026-09-08T06:00:00Z"
+            },
+            "qualifying": false,
+            "reason": "NAMED_EXCLUSION",
+            "region": "Nihoa",
+            "state": "NON-QUALIFYING EVENT RECORDED",
+            "note": "An excluded-geography strike does not by itself resolve No."
+          }
+        ],
+        "windowOpen": false
+      },
+      "warningVsCrossing": {
+        "qualifying": false,
+        "reason": "CENTRE_CROSSING_NOT_ESTABLISHED",
+        "region": "Oahu",
+        "state": "UNRESOLVED — CENTRE CROSSING NOT ESTABLISHED",
+        "note": "Hurricane conditions in an area are not a centre crossing. A warning polygon is not evidence either way."
+      }
+    },
+    "layers": {
+      "SETTLEMENT_QUALIFYING": {
+        "id": "settlement-qualifying",
+        "authority": "contract rules text"
+      },
+      "SETTLEMENT_EXCLUDED": {
+        "id": "settlement-excluded",
+        "authority": "contract rules text"
+      },
+      "WARNING_AREA": {
+        "id": "warning-area",
+        "authority": "issuing forecast centre"
+      },
+      "RESIDUAL_MARKER": {
+        "id": "residual-marker",
+        "authority": "this module"
+      }
+    },
+    "warningSemantics": "A hurricane warning means hurricane conditions are expected somewhere in an area. It does not state whether the centre will cross land, and it is not a contract term.",
+    "hawaiiTrigger": {
+      "text": "EXACT TRIGGER NOT SCORED",
+      "note": "A Hawaii >=64 kt landfall contract is not scoreable as a probability by this module. What is published is a required rate and a state."
+    }
+  },
+  "knownLimits": [
+    "Linear interpolation between forecast positions; the deviation from a geodesic is measured and printed, not hidden.",
+    "Wobble is BOUNDED, not removed.",
+    "The heading frame is derived from a smoothed forecast path, not from the storm's instantaneous motion.",
+    "Mixed centre definitions disagree by several nautical miles; no offset between them has been measured.",
+    "A required rate is kinematics, not achievability.",
+    "The quadrature noise floor is an assumption. WITHIN_NOISE is not absence of signal."
+  ]
+}
