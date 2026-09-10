@@ -68,10 +68,12 @@ a{color:var(--accent)}
      border-radius:3px;padding:16px 16px 14px;display:flex;flex-direction:column;gap:9px}
 .sys .tag{font-family:var(--font-m);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--sc)}
 .sys .nm{font-family:var(--font-d);font-size:20px;font-weight:700;line-height:1.1}
+.sys .ptype{font-family:var(--font-m);font-size:9.5px;letter-spacing:.07em;color:var(--ink-3);
+            line-height:1.35;padding-bottom:2px}
 .sys .sub{font-size:12.5px;color:var(--ink-2);min-height:2.6em}
 .sys .pool{font-family:var(--font-m);font-size:11.5px;color:var(--ink-2);
            padding-top:9px;border-top:1px solid var(--line)}
-.verdict{font-family:var(--font-m);font-size:11px;font-weight:600;letter-spacing:.06em;
+.verdict{font-family:var(--font-m);font-size:10px;font-weight:600;letter-spacing:.045em;line-height:1.3;
          padding:5px 8px;border-radius:2px;display:inline-flex;align-items:center;gap:7px;align-self:flex-start}
 .verdict.no{color:var(--refuse);background:color-mix(in srgb,var(--refuse) 11%,transparent);
             border:1px solid color-mix(in srgb,var(--refuse) 34%,transparent)}
@@ -127,6 +129,16 @@ blockquote .st{font-family:var(--font-m);font-size:10.5px;letter-spacing:.07em;c
 .calc .out b{color:var(--s-d2)}
 
 .note{font-size:12px;color:var(--ink-3);max-width:66ch}
+.qp{display:flex;flex-direction:column;gap:3px;background:var(--sunken);border:1px solid var(--line);
+    border-left:2px solid var(--sc,var(--ink-3));border-radius:3px;padding:9px 12px;font-size:11.5px;
+    color:var(--ink-2)}
+.qp .qpk{font-family:var(--font-m);font-size:9.5px;letter-spacing:.08em;color:var(--sc,var(--ink-3));font-weight:600}
+.clockbox{display:flex;flex-wrap:wrap;gap:8px 22px;background:var(--sunken);border:1px solid var(--line);
+          border-radius:3px;padding:11px 13px;margin:10px 0 4px}
+.clockbox .cl{display:flex;flex-direction:column;gap:1px}
+.clockbox .cl span{font-family:var(--font-m);font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.clockbox .cl b{font-family:var(--font-m);font-size:12px;font-weight:500;font-variant-numeric:tabular-nums}
+.clockbox .out b{color:var(--s-e14);font-size:15px;font-weight:600}
 .warnbox{border:1px solid var(--refuse);border-left-width:3px;border-radius:3px;padding:14px 16px;
          background:color-mix(in srgb,var(--refuse) 6%,transparent)}
 .warnbox h3{color:var(--refuse)}
@@ -173,11 +185,11 @@ const hover = (el, html) => {
 
 const SYS = [
   { key: "d1", hue: "var(--s-d1)", tag: "Disturbance 1", nm: "Trough S-SE of Hawaiʻi",
-    sub: "A broad trough with disorganised convection. No centre. Moving generally northward." },
+    sub: "Disorganised convection, moving generally northward. Queried from a reference cell." },
   { key: "d2", hue: "var(--s-d2)", tag: "Disturbance 2", nm: "Low forecast to form",
-    sub: "Not yet a disturbance — a low NHC expects to form south of Baja this weekend." },
+    sub: "Nothing exists yet. NHC expects a low to form south of Baja this weekend." },
   { key: "fourteenE", hue: "var(--s-e14)", tag: "EP142026", nm: "TD Fourteen-E",
-    sub: "A tropical depression. Advisory 1 issued; no formation chance is needed." },
+    sub: "A tropical depression. No formation chance is needed — it has formed." },
 ];
 
 /* ---------------------------------------------------------------- the intensity ladder */
@@ -218,7 +230,7 @@ function ladder(a, hue) {
 function timing(a, fva) {
   const t = a.timeToEvent.cat1, W = 520, H = 118, padL = 12, padR = 12;
   if (!t || !fva) return null;
-  const hiV = Math.max(t.p90, fva.hoursFromGenesis) * 1.1;
+  const hiV = Math.max(t.p90, fva.clock.elapsedHours) * 1.1;
   const x = (h) => padL + (h / hiV) * (W - padL - padR);
   const g = S("svg", { class: "chart", viewBox: `0 0 ${W} ${H}`, role: "img",
     "aria-label": "Hours from first fix to hurricane strength: analog distribution against the official forecast" });
@@ -236,14 +248,14 @@ function timing(a, fva) {
   g.append(S("text", { x: x(t.median), y: yB - 21, "text-anchor": "middle", class: "cv" }, "median +" + t.median + "h"));
   g.append(S("text", { x: x(t.p10), y: yB + 21, "text-anchor": "middle", class: "ct" }, "p10"));
   g.append(S("text", { x: x(t.p90), y: yB + 21, "text-anchor": "middle", class: "ct" }, "p90"));
-  /* The official forecast, marked where it actually falls. */
-  const fx = x(fva.hoursFromGenesis);
-  g.append(S("line", { x1: fx, x2: fx, y1: 26, y2: yB + 18, stroke: "var(--refuse)", "stroke-width": 2, "stroke-dasharray": "4 3" }));
-  g.append(S("circle", { cx: fx, cy: yB, r: 5, fill: "var(--refuse)", stroke: "var(--panel)", "stroke-width": 2 }));
-  const lbl = S("text", { x: Math.min(fx, W - 96), y: 18, "text-anchor": fx > W - 110 ? "end" : "middle", class: "cv", fill: "var(--refuse)" },
-    "NHC forecast +" + fva.hoursFromGenesis + "h");
-  if (fx > W - 110) lbl.setAttribute("x", W - 4);
-  g.append(lbl);
+  /* The official forecast on the SAME clock. Marked in the accent, not the refusal ink: it sits
+     inside the distribution and nothing about it is being flagged. */
+  const fx = x(fva.clock.elapsedHours);
+  g.append(S("line", { x1: fx, x2: fx, y1: 26, y2: yB + 18, stroke: "var(--accent)", "stroke-width": 2, "stroke-dasharray": "4 3" }));
+  g.append(S("circle", { cx: fx, cy: yB, r: 5, fill: "var(--accent)", stroke: "var(--panel)", "stroke-width": 2 }));
+  const near = fx > W - 118;
+  g.append(S("text", { x: near ? W - 4 : fx, y: 18, "text-anchor": near ? "end" : "middle",
+    class: "cv", fill: "var(--accent)" }, "NHC forecast +" + fva.clock.elapsedHours + " h"));
   return g;
 }
 
@@ -287,10 +299,16 @@ function locator() {
     fill: p.kt >= 64 ? "var(--s-e14)" : "var(--panel)", stroke: "var(--s-e14)", "stroke-width": 1.5 }));
   g.append(S("circle", { cx: x(e.lonE), cy: y(e.lat), r: 6, fill: "var(--s-e14)", stroke: "var(--panel)", "stroke-width": 2 }));
   g.append(S("text", { x: x(e.lonE), y: y(e.lat) + 19, "text-anchor": "middle", class: "cv", fill: "var(--s-e14)" }, "FOURTEEN-E"));
-  g.append(S("circle", { cx: x(e.genesisFix.lonE), cy: y(e.genesisFix.lat), r: 4,
-    fill: "none", stroke: "var(--s-e14)", "stroke-width": 1.5 }));
-  g.append(S("text", { x: x(e.genesisFix.lonE), y: y(e.genesisFix.lat) - 10, "text-anchor": "middle", class: "ct",
-    fill: "var(--s-e14)" }, "genesis fix"));
+  /* Two points, drawn as two things: the genesis the query uses, and the pre-genesis disturbance
+     fix 48 h earlier that it deliberately does not. */
+  g.append(S("circle", { cx: x(e.genesis.lonE), cy: y(e.genesis.lat), r: 4.5,
+    fill: "var(--s-e14)", "fill-opacity": ".5", stroke: "var(--s-e14)", "stroke-width": 1.5 }));
+  g.append(S("text", { x: x(e.genesis.lonE), y: y(e.genesis.lat) - 10, "text-anchor": "middle", class: "ct",
+    fill: "var(--s-e14)" }, "genesis"));
+  g.append(S("circle", { cx: x(e.firstTrack.lonE), cy: y(e.firstTrack.lat), r: 3.5,
+    fill: "none", stroke: "var(--ink-3)", "stroke-width": 1.5, "stroke-dasharray": "2 2" }));
+  g.append(S("text", { x: x(e.firstTrack.lonE), y: y(e.firstTrack.lat) + 15, "text-anchor": "middle", class: "ct" },
+    "first track (DB)"));
 
   if (D.storms.lowell) {
     const L = D.storms.lowell;
@@ -304,10 +322,10 @@ function locator() {
 function poolLine(a) {
   return `${a.nCases} analog storms · effective sample ${a.ess.toFixed(1)} · gate ${a.minSample}`;
 }
-function verdict(a) {
-  return a.sufficient
-    ? $("span", { class: "verdict yes" }, $("span", { class: "dot" }), "RATES PUBLISHED")
-    : $("span", { class: "verdict no" }, $("span", { class: "dot" }), "RATES REFUSED");
+function verdict(key, a) {
+  const label = D.spine[key];
+  return $("span", { class: "verdict " + (a.sufficient ? "yes" : "no") },
+    $("span", { class: "dot" }), label);
 }
 
 const root = document.getElementById("root");
@@ -336,8 +354,9 @@ for (const s of SYS) {
   rail.append($("div", { class: "sys", style: `--sc:${s.hue}` },
     $("div", { class: "tag" }, s.tag),
     $("div", { class: "nm" }, s.nm),
+    $("div", { class: "ptype" }, D.pointType[s.key]),
     $("div", { class: "sub" }, s.sub),
-    verdict(a),
+    verdict(s.key, a),
     $("div", { class: "pool" }, poolLine(a))));
 }
 root.append(rail);
@@ -374,17 +393,9 @@ root.append($("section", {},
           + "from three cases would be a decimal point wearing a lab coat."),
         $("blockquote", { style: "--sc:var(--s-d1)" },
           $("span", { class: "st" }, "OBSERVING-ERA GAP · all-eras pool"), all.gaps[0] || ""),
-        $("figure", { style: "margin-top:16px" },
-          $("h3", {}, "What the composition would need"),
-          $("div", { class: "calc" },
-            $("div", { class: "term" }, $("span", {}, "P(forms), NHC"), $("b", {}, D.gtwo.d1.pct7d + "%")),
-            $("div", { class: "op" }, "×"),
-            $("div", { class: "term" }, $("span", {}, "P(Cat 1 | forms)"),
-              $("b", { style: "color:var(--refuse)" }, "REFUSED")),
-            $("div", { class: "op" }, "="),
-            $("div", { class: "term out" }, $("span", {}, "unconditional"),
-              $("b", { style: "color:var(--refuse)" }, "no number"))),
-          $("p", { class: "figcap" }, D.composed.d1.reason))),
+        $("div", { class: "qp" },
+          $("span", { class: "qpk" }, D.queryPoints.d1.kind),
+          $("span", {}, D.queryPoints.d1.derivation, ". ", D.queryPoints.d1.note))),
       $("figure", {},
         $("h3", {}, `Counts only · ${a.nCases} storms, 1971+`),
         ladder(a, "var(--s-d1)"),
@@ -395,40 +406,40 @@ root.append($("section", {},
 
 /* D2 */
 {
-  const a = D.atlas.d2, c = D.composed.d2;
+  const a = D.atlas.d2, c = D.composition.d2;
   root.append($("section", { style: "--sc:var(--s-d2)" },
     $("div", { class: "sechead" },
-      $("h2", {}, "Disturbance 2 — the one number the archive will compose"),
+      $("h2", {}, "Disturbance 2 — conditional rates, and no unconditional number"),
       $("span", { class: "rule" }, `${ll(a.query.lat, a.query.lonE)} · r=${a.query.radiusKm} km · September`)),
     $("div", { class: "cols c2" },
       $("figure", {},
-        $("h3", {}, `Given formation · ${a.nCases} storms, effective sample ${a.ess.toFixed(1)}`),
+        $("h3", {}, `Given formation under the reference condition · ${a.nCases} storms, effective sample ${a.ess.toFixed(1)}`),
         ladder(a, "var(--s-d2)"),
         $("p", { class: "figcap" },
-          "Share of analog storms that reached each threshold, with 95% Wilson intervals over distinct "
-          + "storms. These are conditional on a storm forming at all.")),
+          "Share of analog storms that reached each threshold, with 95% Wilson intervals over "
+          + "distinct storms. Every figure here is conditional on a storm having formed under the "
+          + "declared reference condition — this cell, this radius, September, EP+NA, 1971 on.")),
       $("div", {},
-        $("p", {}, "This one clears the gate, so the archive publishes rates — and because NHC "
-          + "publishes a formation chance for the same box, the two multiply. The archive authorises "
-          + "that composition for intensity, and says in the same breath that landfall does not "
-          + "decompose this way."),
-        $("div", { class: "calc" },
-          $("div", { class: "term" }, $("span", {}, "P(forms), 7-day"), $("b", {}, c.formationPct + "%")),
-          $("div", { class: "op" }, "×"),
-          $("div", { class: "term" }, $("span", {}, "P(Cat 1 | forms)"), $("b", {}, pctS(a.levels.cat1.rate))),
-          $("div", { class: "op" }, "="),
-          $("div", { class: "term out" }, $("span", {}, "P(Cat 1)"), $("b", {}, pctS(c.levels.cat1.composed)))),
+        $("div", { class: "qp" },
+          $("span", { class: "qpk" }, D.queryPoints.d2.kind),
+          $("span", {}, D.queryPoints.d2.derivation, ". ", D.queryPoints.d2.note)),
+        $("div", { class: "warnbox", style: "margin-top:14px" },
+          $("h3", {}, "NO COMPOSED NUMBER"),
+          $("p", { style: "margin-bottom:8px" }, c.reason),
+          $("p", { class: "note", style: "margin-bottom:0" },
+            "So there is no P(this forecast area produces a Cat 1) on this page. NHC's ",
+            $("b", {}, c.formationPct + "%"), " and the archive's ", $("b", {}, pctS(a.levels.cat1.rate)),
+            " are both published above, and they are left un-multiplied.")),
         $("div", { class: "scroll", style: "margin-top:14px" },
           $("table", {},
-            $("thead", {}, $("tr", {}, [["Threshold",""],["Given formation","n"],["× " + c.formationPct + "%","n"],["95% CI","n"]]
-              .map(([h, cl]) => $("th", { class: cl }, h)))),
+            $("thead", {}, $("tr", {}, $("th", {}, "Threshold"), $("th", { class: "n" }, "Count"),
+              $("th", { class: "n" }, "Conditional rate"), $("th", { class: "n" }, "95% CI"))),
             $("tbody", {}, ["ts","cat1","cat2","cat3"].map((k) => $("tr", {},
               $("td", { class: "m" }, LEVELS.find((l) => l[0] === k)[1]),
-              $("td", { class: "n" }, pctS(a.levels[k].rate)),
-              $("td", { class: "n", style: "color:var(--s-d2);font-weight:600" }, pctS(c.levels[k].composed)),
+              $("td", { class: "n" }, `${a.levels[k].count}/${a.levels[k].n}`),
+              $("td", { class: "n", style: "color:var(--s-d2);font-weight:600" }, pctS(a.levels[k].rate)),
               $("td", { class: "n", style: "color:var(--ink-3)" },
-                `${c.levels[k].ci[0].toFixed(0)}–${c.levels[k].ci[1].toFixed(0)}%`)))))),
-        $("p", { class: "figcap" }, c.note)))));
+                `${a.levels[k].ci[0].toFixed(0)}–${a.levels[k].ci[1].toFixed(0)}%`))))))))));
 }
 
 /* Fourteen-E */
@@ -452,28 +463,44 @@ root.append($("section", {},
   root.append($("section", { style: "--sc:var(--s-e14)" },
     $("div", { class: "sechead" },
       $("h2", {}, "Fourteen-E — a formed storm, and a forecast worth timing"),
-      $("span", { class: "rule" }, `genesis ${ll(e.genesisFix.lat, e.genesisFix.lonE)} · ${dayz(e.genesisFix.atZ)} · r=${a.query.radiusKm} km`)),
+      $("span", { class: "rule" }, `genesis ${ll(e.genesis.lat, e.genesis.lonE)} · ${dayz(e.genesis.atZ)} · r=${a.query.radiusKm} km`)),
     $("div", { class: "cols c2" },
       $("div", {},
         $("dl", { class: "kv" },
           $("dt", {}, "Now"), $("dd", {}, `${ll(e.lat, e.lonE)} · ${e.kt} kt · ${e.mslp} mb`),
           $("dt", {}, "Advisory"), $("dd", {}, `#${e.advNum} · ${dayz(e.atZ)}`),
           $("dt", {}, "Motion"), $("dd", {}, `${e.motionDeg}° at ${e.motionKt} kt`),
-          $("dt", {}, "Genesis fix"), $("dd", {}, `${ll(e.genesisFix.lat, e.genesisFix.lonE)} · ${dayz(e.genesisFix.atZ)} · ${e.genesisFix.kt} kt`),
+          $("dt", {}, "Genesis"), $("dd", {}, `${ll(e.genesis.lat, e.genesis.lonE)} · ${dayz(e.genesis.atZ)} · ${e.genesis.kt} kt ${e.genesis.type}`),
+          $("dt", {}, "First track"), $("dd", { style: "color:var(--ink-3)" },
+            `${ll(e.firstTrack.lat, e.firstTrack.lonE)} · ${dayz(e.firstTrack.atZ)} · ${e.firstTrack.kt} kt ${e.firstTrack.type}`),
+          $("dt", {}, "Pre-genesis"), $("dd", { style: "color:var(--ink-3)" }, e.preGenesisHours + " h as a disturbance"),
           $("dt", {}, "Analog pool"), $("dd", {}, poolLine(a))),
-        $("p", { style: "margin-top:14px" },
+        $("div", { class: "qp" },
+          $("span", { class: "qpk" }, D.queryPoints.fourteenE.kind),
+          $("span", {}, D.queryPoints.fourteenE.derivation, ". ", D.queryPoints.fourteenE.note)),
+        $("p", { style: "margin-top:12px" },
           "Because it has formed, no formation chance is needed — the conditional rate ", $("i", {}, "is"),
-          " the answer. The query is conditioned on the genesis fix rather than on where the storm is "
-          + "now, which is the rule the live Millibar → Atlas bridge follows."),
+          " the answer. Genesis here is the archive's own rule: the first best-track point with a "
+          + "tropical status. This storm spent ", $("b", {}, e.preGenesisHours + " hours"),
+          " as a disturbance first, and those hours belong to neither clock."),
         $("figure", { style: "margin-top:6px" },
           $("h3", {}, "Time from first fix to hurricane strength"),
           timing(a, fva),
+          $("div", { class: "clockbox" },
+            $("div", { class: "cl" }, $("span", {}, "Genesis · first tropical point"), $("b", {}, fva.clock.genesisZ.replace("T", " ").slice(0, 16) + "Z")),
+            $("div", { class: "cl" }, $("span", {}, `Forecast first ${fva.clock.forecastKt} kt`), $("b", {}, fva.clock.forecastValidZ.replace("T", " ").slice(0, 16) + "Z")),
+            $("div", { class: "cl out" }, $("span", {}, "Elapsed on the shared clock"), $("b", {}, fva.clock.elapsedHours + " h"))),
           $("p", { class: "figcap" },
             `Among the ${fva.analogHoursToCat1.n} analogs that reached Cat 1, the median took `
-            + `+${fva.analogHoursToCat1.median} h from first fix and the 90th percentile +${fva.analogHoursToCat1.p90} h. `
-            + `NHC’s advisory 1 first carries ${fva.firstCat1.kt} kt at ${dayz(fva.firstCat1.validZ)} — `
-            + `+${fva.hoursFromGenesis} h. This is a forecast placed against a distribution, not a `
-            + `correction to it. ${fva.caveat}`))),
+            + `+${fva.analogHoursToCat1.median} h from genesis and the 90th percentile `
+            + `+${Math.round(fva.analogHoursToCat1.p90)} h. The forecast's `
+            + `+${fva.clock.elapsedHours} h is above ${fva.above.join(", ")} and below `
+            + `${fva.below.join(", ")}. ${fva.caveat}`),
+          $("p", { class: "figcap", style: "color:var(--ink-3)" },
+            `Corrected: an earlier version measured this from the ${fva.clock.withdrawn.fromType} `
+            + `fix at ${fva.clock.withdrawn.fromZ.replace("T", " ").slice(0, 16)}Z — `
+            + `+${fva.clock.withdrawn.elapsedHours} h — against a cohort measured from genesis, and `
+            + `called it beyond the historical p90. That claim is withdrawn.`))),
       $("figure", {},
         $("h3", {}, `Given genesis here · ${a.nCases} storms, effective sample ${a.ess.toFixed(1)}`),
         ladder(a, "var(--s-e14)"),
