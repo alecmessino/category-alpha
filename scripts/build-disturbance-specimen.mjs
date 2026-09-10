@@ -178,6 +178,9 @@ const inject = (tplFile, outFile) => {
     tpl.replace('"__DATA__"', JSON.stringify(payload).replace(/</g, "\\u003c")));
 };
 inject("print-template.html", "print.html");
+/* The prospect plate is the SAME payload, editorially reduced: one finding, one refusal, no
+   number of its own. print.html stays the audit sheet -- see prospect-template.html's header. */
+inject("prospect-template.html", "prospect.html");
 /* The static snapshot is the LIVE brief template with the frozen payload — deliberately the
    same template the live builder uses, so the snapshot cannot drift into a second design that
    says something the live page does not. */

@@ -1,0 +1,235 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<title>Storm Atlas — Three Systems, Three Answers — 2026-09-09</title>
+<style>
+/* PROSPECT PLATE — one Letter page, one finding, light only.
+ *
+ * This is an EDITORIAL REDUCTION of print-template.html. It reads the SAME frozen payload and
+ * changes no number, no cohort, no query point and no source. What it changes is what a reader
+ * is asked to carry: print.html is the audit sheet and prints the evidence a researcher would
+ * check; this plate prints the finding a prospect must understand in ten seconds.
+ *
+ * THE FINDING, and the only thing on this page that is allowed to compete for attention:
+ *   three atmospheric states produce three legitimate answers, and in none of them does the
+ *   archive convert its output into a probability for the live system.
+ *
+ * DENSITY LOCK, asserted in scripts/render-prospect-plate.mjs and not merely intended here:
+ *   <= 350 visible words on the whole page; no paragraph over three rendered lines;
+ *   <= 3 content regions below the masthead; one refusal; provenance in two footer lines.
+ * Anything useful but not load-bearing for that ten-second read stays in print.html and
+ * snapshot.html, which remain the full audit versions.
+ *
+ * Each column carries ONE chart, and the chart is the reason for that column's answer:
+ *   D1  pool against the sample gate      -> why the answer is a refusal
+ *   D2  three conditional thresholds      -> what a sufficient pre-genesis pool supports
+ *   E14 time-to-hurricane distribution    -> what a formed cyclone adds, and nothing more
+ */
+@page { size: Letter; margin: 0.5in 0.55in 0.45in; }
+:root{
+  --ink:#0f172a; --ink-2:#334155; --ink-3:#64748b; --ink-4:#94a3b8;
+  --line:#e2e8f0; --line-strong:#cbd5e1; --sunken:#f8fafc;
+  --d1:#7c3aed; --d2:#b45309; --e14:#0284c7;
+  --refuse:#dc2626; --publish:#15803d;
+  --fd:"IBM Plex Sans Condensed",Arial Narrow,sans-serif;
+  --fb:"IBM Plex Sans",Helvetica,Arial,sans-serif;
+  --fm:"IBM Plex Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#fff;color:var(--ink);font-family:var(--fb);
+          font-size:8.5pt;line-height:1.35;-webkit-font-smoothing:antialiased;height:100%}
+/* The sheet is the page. Without this the flex column collapses to its content and every
+   pt of slack lands in one dead band at the foot instead of between the regions. */
+.sheet{display:flex;flex-direction:column;min-height:100%}
+
+/* ---- masthead ---------------------------------------------------------------------------- */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16pt;
+     border-bottom:2pt solid var(--ink);padding-bottom:5pt}
+.eyebrow{font-family:var(--fm);font-size:8.5pt;letter-spacing:.14em;text-transform:uppercase;
+         color:var(--ink-3);margin:0 0 6pt}
+h1{font-family:var(--fd);font-size:26pt;font-weight:700;line-height:.98;letter-spacing:-.015em;margin:0}
+.stamp{font-family:var(--fm);font-size:8.5pt;line-height:1.55;text-align:right;color:var(--ink-3);
+       white-space:nowrap;flex:0 0 auto}
+.stamp b{color:var(--ink);font-weight:600;letter-spacing:.08em}
+.finding{font-size:13pt;line-height:1.38;color:var(--ink-2);margin:14pt 0 0;max-width:6.4in}
+.finding b{color:var(--ink);font-weight:600}
+
+/* ---- region 1: the three-state plate ------------------------------------------------------ */
+.plate{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin:18pt 0 0;
+       border-top:.7pt solid var(--line-strong);border-bottom:.7pt solid var(--line-strong);
+       flex:0 0 auto}
+.col{padding:12pt 13pt 13pt;display:flex;flex-direction:column;gap:9pt;border-left:.7pt solid var(--line)}
+.col:first-child{padding-left:0;border-left:0}
+.col:last-child{padding-right:0}
+.tag{font-family:var(--fm);font-size:8.5pt;letter-spacing:.12em;text-transform:uppercase;color:var(--c);font-weight:600}
+.nm{font-family:var(--fd);font-size:16pt;font-weight:600;line-height:1.12;margin-top:-2pt;
+    min-height:2.24em}
+.pt{font-family:var(--fm);font-size:8pt;letter-spacing:.05em;color:var(--ink-4);line-height:1.35;
+    min-height:2.7em}
+.verdict{font-family:var(--fd);font-size:12pt;font-weight:700;line-height:1.1;letter-spacing:-.005em;
+         padding:6pt 0 0;border-top:2.5pt solid var(--c);min-height:calc(2.2em + 6pt)}
+.verdict.no{color:var(--refuse)}
+.verdict.yes{color:var(--publish)}
+.facts{font-family:var(--fm);font-size:10pt;color:var(--ink-2);line-height:1.55;
+       font-variant-numeric:tabular-nums}
+.facts b{color:var(--ink);font-weight:600}
+.say{font-size:9.5pt;color:var(--ink-2);margin:0}
+.say+.say{margin-top:-4pt;color:var(--ink-3)}
+.col>.say:last-child{margin-top:auto;padding-top:6pt}
+svg{display:block;width:100%;overflow:visible;margin-top:1pt}
+.ct{font-family:var(--fm);font-size:8pt;fill:var(--ink-4)}
+.cv{font-family:var(--fm);font-size:8pt;fill:var(--ink);font-variant-numeric:tabular-nums}
+.cl{font-family:var(--fm);font-size:8pt;fill:var(--ink-3)}
+
+/* ---- region 2: the refusal that holds across all three ----------------------------------- */
+.hold{margin-top:auto;border:.9pt solid var(--refuse);border-left:3.5pt solid var(--refuse);
+      background:#fdf5f4;padding:8pt 11pt;display:flex;gap:14pt;align-items:flex-start}
+.hold .h{font-family:var(--fd);font-size:14pt;font-weight:700;color:var(--refuse);
+         line-height:1.05;white-space:nowrap;padding-top:.5pt}
+.hold p{margin:0;font-size:10.5pt;line-height:1.42;color:var(--ink-2)}
+.hold .b{margin-top:6pt;font-family:var(--fm);font-size:9.5pt;letter-spacing:.02em;color:var(--ink-3)}
+.hold .b b{color:var(--ink);font-weight:600}
+
+footer{border-top:.7pt solid var(--line-strong);margin-top:9pt;padding-top:5pt;
+       font-family:var(--fm);font-size:7.5pt;line-height:1.5;color:var(--ink-4)}
+footer b{color:var(--ink-3);font-weight:500}
+</style></head><body><div class="sheet" id="root"></div>
+<script id="payload" type="application/json">"__DATA__"</script>
+<script>
+const D = JSON.parse(document.getElementById("payload").textContent);
+const $=(t,a,...k)=>{const e=document.createElement(t);for(const[n,v]of Object.entries(a||{})){if(v==null)continue;
+ if(n==="class")e.className=v;else if(n==="html")e.innerHTML=v;else e.setAttribute(n,v);}
+ for(const c of k.flat())if(c!=null)e.append(c.nodeType?c:String(c));return e;};
+const NS="http://www.w3.org/2000/svg";
+const S=(t,a,...k)=>{const e=document.createElementNS(NS,t);for(const[n,v]of Object.entries(a||{}))if(v!=null)e.setAttribute(n,v);
+ for(const c of k.flat())if(c!=null)e.append(c.nodeType?c:String(c));return e;};
+const dz=(i)=>i.slice(8,10)+"/"+i.slice(11,13)+i.slice(14,16)+"Z";
+
+const A=D.atlas, e=D.storms.fourteenE, f=e.forecastVsAnalogs;
+function shortVerdict(v){
+  const EXPECT="CONDITIONAL RATES PUBLISHED · NO COMPOSED NUMBER";
+  if(v!==EXPECT)throw new Error("frozen D2 verdict changed; re-read the reduction: "+v);
+  return "CONDITIONAL RATES · NO COMPOSED NUMBER";
+}
+
+/* D1's chart is the gate itself: how far short the pool falls. Ten slots, three filled. */
+function gate(a){
+  const W=210,H=78,box=W/a.minSample,g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img",
+    "aria-label":`${a.nCases} analog storms against a sample gate of ${a.minSample}`});
+  for(let i=0;i<a.minSample;i++)
+    g.append(S("rect",{x:i*box+1,y:12,width:box-2,height:45,rx:2.5,
+      fill:i<a.nCases?"var(--d1)":"#fff",stroke:i<a.nCases?"var(--d1)":"var(--line-strong)","stroke-width":.8}));
+  g.append(S("text",{x:0,y:H-2,class:"cl"},a.nCases+" of "+a.minSample+" required"));
+  return g;
+}
+/* D2's chart is what a sufficient pool supports: three thresholds, rate and interval. */
+function rates(a,hue,keys){
+  const W=210,rh=37,padL=34,padR=34,H=keys.length*rh+4;
+  const g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img","aria-label":"share of analog storms reaching each threshold"});
+  const x=(v)=>padL+(v/100)*(W-padL-padR);
+  keys.forEach(([k,lab],i)=>{const o=a.levels[k],y=3+i*rh;
+    g.append(S("text",{x:padL-4,y:y+17,"text-anchor":"end",class:"ct"},lab));
+    g.append(S("rect",{x:padL,y:y+2,width:Math.max(1,x(o.rate)-padL),height:22,rx:2.5,fill:hue}));
+    g.append(S("line",{x1:x(o.ci[0]),x2:x(o.ci[1]),y1:y+13,y2:y+13,stroke:"#475569","stroke-width":.9}));
+    for(const q of o.ci)g.append(S("line",{x1:x(q),x2:x(q),y1:y+7,y2:y+19,stroke:"#475569","stroke-width":.9}));
+    g.append(S("text",{x:W-padR+4,y:y+17,class:"cv"},o.rate.toFixed(0)+"%"));});
+  return g;
+}
+/* E14's chart is the only thing a formed cyclone adds: a clock both sides can be read on. */
+function timing(a,f){
+  const t=a.timeToEvent.cat1,W=210,H=122,pad=8;
+  const hi=Math.max(t.p90,f.clock.elapsedHours)*1.06,x=(h)=>pad+(h/hi)*(W-pad*2),y=68;
+  const g=S("svg",{viewBox:`0 0 ${W} ${H}`,role:"img",
+    "aria-label":"hours from genesis to hurricane strength, historical spread and forecast"});
+  for(let h=0;h<=hi;h+=48){g.append(S("line",{x1:x(h),x2:x(h),y1:28,y2:y+20,stroke:"var(--line)","stroke-width":.6}));
+    g.append(S("text",{x:x(h),y:y+32,"text-anchor":"middle",class:"ct"},"+"+h+"h"));}
+  g.append(S("line",{x1:x(t.p10),x2:x(t.p90),y1:y,y2:y,stroke:"var(--e14)","stroke-width":1}));
+  for(const q of[t.p10,t.p90])g.append(S("line",{x1:x(q),x2:x(q),y1:y-9,y2:y+9,stroke:"var(--e14)","stroke-width":1.2}));
+  g.append(S("rect",{x:x(t.p25),y:y-16,width:x(t.p75)-x(t.p25),height:32,rx:3,
+    fill:"var(--e14)","fill-opacity":".22",stroke:"var(--e14)","stroke-width":.8}));
+  g.append(S("line",{x1:x(t.median),x2:x(t.median),y1:y-18,y2:y+18,stroke:"var(--e14)","stroke-width":2.4}));
+  g.append(S("text",{x:x(t.median),y:y-22,"text-anchor":"middle",class:"cv"},"median +"+t.median+"h"));
+  const fx=x(f.clock.elapsedHours);
+  g.append(S("line",{x1:fx,x2:fx,y1:18,y2:y+18,stroke:"var(--ink)","stroke-width":1,"stroke-dasharray":"2 1.6"}));
+  g.append(S("circle",{cx:fx,cy:y,r:4,fill:"var(--ink)"}));
+  g.append(S("text",{x:W-3,y:11,"text-anchor":"end",class:"cv"},"forecast +"+f.clock.elapsedHours+"h"));
+  return g;
+}
+
+const r=document.getElementById("root");
+
+r.append($("div",{class:"top"},
+  $("div",{},
+    $("p",{class:"eyebrow"},"Storm Atlas · genesis-conditioned analogs"),
+    $("h1",{},"Three systems, three answers")),
+  $("div",{class:"stamp"},
+    $("div",{},$("b",{},"FROZEN SPECIMEN")),
+    $("div",{},D.specimen.asOfLocal))));
+
+r.append($("p",{class:"finding",html:
+  "One Pacific chart, three atmospheric states, <b>three different legitimate answers</b> — and in "
+  + "none of them does the archive turn what it knows into a probability for the live system."}));
+
+/* ---- REGION 1 --------------------------------------------------------------------------- */
+const plate=$("div",{class:"plate"});
+
+/* D1 — the pool is short, so the answer is a refusal. */
+{const a=A.d1,g=D.gtwo.d1;
+plate.append($("div",{class:"col",style:"--c:var(--d1)"},
+  $("div",{class:"tag"},"D1"),
+  $("div",{class:"nm"},"Trough S-SE of Hawaiʻi"),
+  $("div",{class:"pt"},"OUTLOOK AREA · NO CENTRE"),
+  $("div",{class:"verdict no"},D.spine.d1),
+  $("div",{class:"facts",html:
+    `NHC formation <b>${g.pct48}%</b> / <b>${g.pct7d}%</b><br>Pool <b>${a.nCases} storms</b> · ESS <b>${a.ess.toFixed(1)}</b>`}),
+  gate(a),
+  $("p",{class:"say"},"Below the gate the archive publishes counts and refuses rates."),
+  $("p",{class:"say"},`All eras give ${A.d1AllEras.nCases} storms here, ${A.d1.nCases} since 1971. Both fall short.`)));}
+
+/* D2 — the pool clears the gate, so conditional rates publish and nothing is composed. */
+{const a=A.d2,g=D.gtwo.d2;
+plate.append($("div",{class:"col",style:"--c:var(--d2)"},
+  $("div",{class:"tag"},"D2"),
+  $("div",{class:"nm"},"Forecast formation area"),
+  $("div",{class:"pt"},"ANALYST-DECLARED REFERENCE CELL"),
+  /* The payload's verdict, shortened by a GUARDED transform rather than retyped. "PUBLISHED"
+     carries nothing for a reader who can see the rates beside it; dropping it is editorial.
+     Asserting the input is what keeps this from becoming a second source of truth: if the frozen
+     verdict ever changes, this throws instead of quietly printing a stale headline. */
+  $("div",{class:"verdict yes"},shortVerdict(D.spine.d2)),
+  $("div",{class:"facts",html:
+    `NHC formation <b>${g.pct48}%</b> / <b>${g.pct7d}%</b><br>Pool <b>${a.nCases} storms</b> · ESS <b>${a.ess.toFixed(1)}</b>`}),
+  rates(a,"var(--d2)",[["ts","TS"],["cat1","Cat 1"],["cat3","Cat 3"]]),
+  $("p",{class:"say"},"Given formation at this cell. Bars are 95% intervals over distinct storms.")));}
+
+/* E14 — formed, so the cohort is keyed to an operational fix and timing becomes available. */
+{const a=A.fourteenE;
+plate.append($("div",{class:"col",style:"--c:var(--e14)"},
+  $("div",{class:"tag"},"EP142026"),
+  $("div",{class:"nm"},"TD Fourteen-E"),
+  $("div",{class:"pt"},"OPERATIONALLY OBSERVED GENESIS · ATCF"),
+  $("div",{class:"verdict yes"},D.spine.fourteenE),
+  $("div",{class:"facts",html:
+    `Genesis <b>${dz(f.clock.genesisZ)}</b><br>Pool <b>${a.nCases} storms</b> · ESS <b>${a.ess.toFixed(1)}</b>`
+    + `<br>Reached Cat&nbsp;1: <b>${a.levels.cat1.rate.toFixed(0)}%</b>`}),
+  timing(a,f),
+  $("p",{class:"say"},`Hours from genesis to hurricane strength. Median `
+    + `+${f.analogHoursToCat1.median} h; the forecast +${f.clock.elapsedHours} h on the same clock.`),
+  $("p",{class:"say"},"Inside the historical distribution, not beyond it.")));}
+r.append(plate);
+
+/* ---- REGION 2 --------------------------------------------------------------------------- */
+r.append($("div",{class:"hold"},
+  $("div",{class:"h"},"NO COMPOSED",$("br"),"NUMBER"),
+  $("div",{},
+    $("p",{},"NHC’s formation probability and Storm Atlas’s cell-conditioned historical rate "
+      + "describe different conditioning events, so they are not multiplied."),
+    $("p",{class:"b",html:
+      "insufficient history <b>→ refusal</b> · sufficient pre-genesis history <b>→ conditional "
+      + "rates</b> · formed cyclone <b>→ conditional rates + timing</b>"}),
+    $("p",{class:"b",html:"<b>UNCHANGED:</b> no live-event probability · no unsupported composition"}))));
+
+r.append($("footer",{},
+  $("div",{},$("b",{},"FROZEN "),D.builtAt.slice(0,16).replace("T"," "),"Z · IBTrACS v04r01 · EP+NA · pool 1971+ · ",
+    D.provenance.sources.length," source inputs SHA-256 pinned in MANIFEST.json"),
+  $("div",{},$("b",{},"RESEARCH ONLY · "),
+    "Not a forecast and not advice. NHC is the sole authority for watches and warnings.")));
+</script></body></html>
