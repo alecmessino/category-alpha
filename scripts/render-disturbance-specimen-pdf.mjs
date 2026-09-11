@@ -237,6 +237,12 @@ const shape = await page.evaluate(() => ({
   clipped: [...document.querySelectorAll(".atitle")]
     .filter((el) => el.scrollWidth > el.clientWidth + 1)
     .map((el) => el.textContent.trim()),
+  /* A stat line that wraps orphans a token -- "gate" over "10" -- and reads as a mistake.
+     These are sized to fit, so a wrap is a track that has drifted, and it fails here. */
+  wrappedStats: [...document.querySelectorAll(".anum")].filter((el) => {
+    const lh = parseFloat(getComputedStyle(el).lineHeight);
+    return Math.round(el.getBoundingClientRect().height / lh) > 1;
+  }).map((el) => el.textContent.trim()),
   /* Chrome the note is not allowed to grow back. Uppercase is reserved for timestamps, n/N, ESS
      and hashes, which live in the mono classes; a shouting heading or finding is what this
      catches, and it is the first thing that creeps back when a note is edited in a hurry. */
@@ -249,6 +255,8 @@ ok(`prospect: <= ${DENSITY.maxRegions} content regions below the masthead (${sha
 ok(`prospect: exactly one method line (${shape.methods})`, shape.methods === 1);
 ok("prospect: every panel title fits its column on one line", shape.clipped.length === 0,
    shape.clipped.join(" | "));
+ok("prospect: every panel stat line sets on one line", shape.wrappedStats.length === 0,
+   shape.wrappedStats.join(" | "));
 ok("prospect: no all-caps headings or findings", shape.shout.length === 0,
    shape.shout.slice(0, 3).join(" | "));
 

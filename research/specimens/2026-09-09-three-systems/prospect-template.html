@@ -67,7 +67,7 @@ h1{font-family:var(--serif);font-size:26pt;font-weight:600;line-height:1.06;
 /* ---- the three answers ----------------------------------------------------------------
    Deliberately NOT three equal columns. Each panel is as wide as its answer needs, and the
    order is the map's order: D1 west, then D2 and Fourteen-E overlapping in the east. */
-.ans{display:grid;grid-template-columns:0.89fr 0.97fr 1.14fr;gap:24pt;margin-top:22pt;
+.ans{display:grid;grid-template-columns:0.93fr 1.00fr 1.07fr;gap:14pt;margin-top:22pt;
      flex:0 0 auto}
 /* min-width:0 because a grid item's automatic minimum is its MIN-CONTENT size, and a nowrap
    title makes that the whole title -- the tracks then grow past their fr shares and the last
@@ -92,8 +92,12 @@ h1{font-family:var(--serif);font-size:26pt;font-weight:600;line-height:1.06;
 .method{font-size:10.5pt;line-height:1.45;color:var(--ink-2);margin:0;padding-top:18pt;
         max-width:6.2in}
 .method b{color:var(--ink);font-weight:600}
+/* "Package frozen" pushes the provenance line past one rendered line and orphaned the final
+   word. The wording and the 7pt floor are both fixed, so the only lever left is where it
+   breaks: balance splits it into two even lines instead of one long line plus "forecast.". */
 footer{border-top:.6pt solid var(--line-strong);margin-top:11pt;padding-top:5pt;
-       font-family:var(--mono);font-size:7pt;line-height:1.5;color:var(--ink-4)}
+       font-family:var(--mono);font-size:7pt;line-height:1.5;color:var(--ink-4);
+       text-wrap:balance}
 </style></head><body><div class="sheet" id="root"></div>
 <script id="payload" type="application/json">"__DATA__"</script>
 <script>
@@ -106,6 +110,7 @@ const S=(t,a,...k)=>{const e=document.createElementNS(NS,t);for(const[n,v]of Obj
  for(const c of k.flat())if(c!=null)e.append(c.nodeType?c:String(c));return e;};
 const dz=(i)=>i.slice(8,10)+"/"+i.slice(11,13)+i.slice(14,16)+"Z";
 
+const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 const A=D.atlas, e=D.storms.fourteenE, f=e.forecastVsAnalogs;
 
 /* THE MAP — the one place the three systems appear together, which is what the note is about.
@@ -208,7 +213,7 @@ function timing(a,f){
   const fx=x(f.clock.elapsedHours);
   g.append(S("line",{x1:fx,x2:fx,y1:15,y2:y+13,stroke:"var(--ink)","stroke-width":1,"stroke-dasharray":"2 1.6"}));
   g.append(S("circle",{cx:fx,cy:y,r:3,fill:"var(--ink)"}));
-  g.append(S("text",{x:W-3,y:10,"text-anchor":"end",class:"cv"},"forecast +"+f.clock.elapsedHours+"h"));
+  g.append(S("text",{x:W-3,y:10,"text-anchor":"end",class:"cv"},"NHC forecast +"+f.clock.elapsedHours+"h"));
   return g;
 }
 
@@ -216,8 +221,8 @@ const r=document.getElementById("root");
 
 r.append($("div",{class:"head"},
   $("h1",{},"Three systems, three answers"),
-  $("div",{class:"stamp"},"Frozen ",D.gtwo.issued.slice(4,6),"/",D.gtwo.issued.slice(6,8),
-    " ",D.gtwo.issued.slice(8,12),"Z")));
+  $("div",{class:"stamp"},"Snapshot ",D.gtwo.issued.slice(6,8)," ",
+    MON[+D.gtwo.issued.slice(4,6)-1]," ",D.gtwo.issued.slice(8,12),"Z")));
 r.append($("p",{class:"deck"},
   "Three atmospheric states on one Pacific chart, and three legitimate answers from the "
   + "archive. None of them is a probability for the live system."));
@@ -276,7 +281,7 @@ function lockChartType(){
 }
 
 r.append($("footer",{},
-  `Frozen ${D.builtAt.slice(0,16).replace("T"," ")}Z · IBTrACS v04r01 · `
+  `Package frozen ${D.builtAt.slice(0,16).replace("T"," ")}Z · IBTrACS v04r01 · `
   + `${D.provenance.sources.length} sources SHA-256 pinned in MANIFEST.json · `
   + `Research only, not a forecast.`));
 requestAnimationFrame(lockChartType);
