@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-11T00:51:23.772Z",
+  "generatedAt": "2026-09-11T01:01:45.424Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 188,
+      "latencyMs": 212,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep142026\",\"binNumber\":\"EP4\",\"name\":\"Norbert\",\"classification\":\"TS\",\"intensity\":\"40\",\"pressure\":\"1002\",\"latitude\":\"16.5N\",\"longitude\":\"120.5W\",\"latitudeNumeric\":16.5,\"longitudeNumeric\":-120.5,\"movementDir\":270,\"movementSpeed\":14,\"lastUpdate\":\"2026-09-10T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"005\",\"issuance\":\"2026-09-10T21:00:00.000Z\",\"fileUpdateTime\":\"2026-09-10T20:46:06.149Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP4.shtml\"},\"forecastAdvisory\":{\"advNum\":\"005\",\"issuance\":\"2026-09-",
-      "forecast": "Norbert: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 49% · forecast undefined guidance · advisory 246m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 248m old",
-      "advisoryLagMin": 248
+      "forecast": "Norbert: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 49% · forecast undefined guidance · advisory 257m old | Lowell: 9 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 259m old",
+      "advisoryLagMin": 259
     },
     "markets": {
       "ok": true,
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 294,
+      "latencyMs": 309,
       "count": 76,
       "attempts": [],
       "note": "El Niño · JJA 2026 ONI +1.80 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 2,
       "note": "2 area(s) under watch · 0 Atlantic",
-      "latencyMs": 109,
+      "latencyMs": 349,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -280,7 +280,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 53,
+      "latencyMs": 87,
       "source": "NHC graphical TWO",
       "count": 2,
       "note": "2 of 2 area(s) with geometry"
@@ -290,21 +290,21 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 617,
+      "latencyMs": 675,
       "count": 2,
-      "note": "2/2 storm decks read · EP142026: a-deck cycle 2026091100 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · no guidance roster in this cycle · b-deck 14 records · f-deck 44 fixes | EP122026: a-deck cycle 2026091100 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · no guidance roster in this cycle · b-deck 66 records · f-deck 532 fixes",
+      "note": "2/2 storm decks read · EP142026: a-deck cycle 2026091100 · 32 techs · consensus 3 member(s) peak 68 kt · guidance 11 track members, 72h spread 100 km · b-deck 14 records · f-deck 44 fixes | EP122026: a-deck cycle 2026091100 · 32 techs · consensus 3 member(s) peak 49.3 kt · guidance 11 track members, 72h spread 171 km · b-deck 66 records · f-deck 532 fixes",
       "attempts": [
         {
           "source": "EP142026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026091100 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · no guidance roster in this cycle · b-deck 14 records · f-deck 44 fixes"
+          "note": "a-deck cycle 2026091100 · 32 techs · consensus 3 member(s) peak 68 kt · guidance 11 track members, 72h spread 100 km · b-deck 14 records · f-deck 44 fixes"
         },
         {
           "source": "EP122026",
           "ok": true,
           "status": 200,
-          "note": "a-deck cycle 2026091100 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · no guidance roster in this cycle · b-deck 66 records · f-deck 532 fixes"
+          "note": "a-deck cycle 2026091100 · 32 techs · consensus 3 member(s) peak 49.3 kt · guidance 11 track members, 72h spread 171 km · b-deck 66 records · f-deck 532 fixes"
         }
       ]
     },
@@ -348,7 +348,7 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 500,
+      "latencyMs": 501,
       "count": 2,
       "note": "2/2 storms · EP142026: 2026-09-11T00:00Z · shear 12 kt · OHC 10 · MPI 150 kt · 8 RI thresholds | EP122026: 2026-09-11T00:00Z · shear 28 kt · OHC 0 · MPI 127 kt · 8 RI thresholds",
       "attempts": [
@@ -465,11 +465,11 @@
         "already": false,
         "basis": "official forecast peaks at 65 kt at 69h; NHC's published mean absolute intensity error there is 11.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 49% central, 49-57% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 2.8 kt lower (57% unadjusted)"
       },
-      "advisoryLagMin": 246,
+      "advisoryLagMin": 257,
       "discussion": {
         "forecaster": "Hagen",
         "issuedZ": "2026-09-10T20:46:00.000Z",
-        "lagMin": 245,
+        "lagMin": 256,
         "guidance": {
           "intensity": {
             "position": "above",
@@ -735,8 +735,3061 @@
       ],
       "advisoryIssuedZ": "2026-09-10T20:45:00.000Z",
       "advNumFull": "5",
-      "consensus": null,
-      "guidance": null,
+      "consensus": {
+        "cycle": "2026091100",
+        "cycleIso": "2026-09-11T00:00:00.000Z",
+        "peakKt": 68,
+        "peakHr": 72,
+        "spreadKt": 12.8,
+        "minKt": 54,
+        "maxKt": 79,
+        "n": 3,
+        "members": [
+          {
+            "tech": "HCCA",
+            "label": "HFIP corrected consensus",
+            "peakKt": 79,
+            "peakHr": 72,
+            "initialKt": 40
+          },
+          {
+            "tech": "IVCN",
+            "label": "variable consensus (intensity)",
+            "peakKt": 54,
+            "peakHr": 72,
+            "initialKt": 40
+          },
+          {
+            "tech": "GDMI",
+            "label": "DeepMind (interpolated)",
+            "peakKt": 71,
+            "peakHr": 72,
+            "initialKt": 40
+          }
+        ],
+        "corrected": {
+          "tech": "HCCA",
+          "peakKt": 79,
+          "peakHr": 72,
+          "intensity": [
+            {
+              "hr": 0,
+              "kt": 40,
+              "mslp": null
+            },
+            {
+              "hr": 12,
+              "kt": 53,
+              "mslp": null
+            },
+            {
+              "hr": 24,
+              "kt": 64,
+              "mslp": null
+            },
+            {
+              "hr": 36,
+              "kt": 72,
+              "mslp": null
+            },
+            {
+              "hr": 48,
+              "kt": 76,
+              "mslp": null
+            },
+            {
+              "hr": 60,
+              "kt": 76,
+              "mslp": null
+            },
+            {
+              "hr": 72,
+              "kt": 79,
+              "mslp": null
+            },
+            {
+              "hr": 84,
+              "kt": 78,
+              "mslp": null
+            },
+            {
+              "hr": 96,
+              "kt": 73,
+              "mslp": null
+            },
+            {
+              "hr": 108,
+              "kt": 64,
+              "mslp": null
+            },
+            {
+              "hr": 120,
+              "kt": 60,
+              "mslp": null
+            },
+            {
+              "hr": 132,
+              "kt": 55,
+              "mslp": null
+            },
+            {
+              "hr": 144,
+              "kt": 53,
+              "mslp": null
+            },
+            {
+              "hr": 156,
+              "kt": 51,
+              "mslp": null
+            },
+            {
+              "hr": 168,
+              "kt": 51,
+              "mslp": null
+            }
+          ],
+          "track": [
+            {
+              "hr": 0,
+              "lat": 16.4,
+              "lon": -121.3
+            },
+            {
+              "hr": 12,
+              "lat": 16.6,
+              "lon": -123.7
+            },
+            {
+              "hr": 24,
+              "lat": 16.7,
+              "lon": -125.9
+            },
+            {
+              "hr": 36,
+              "lat": 17,
+              "lon": -127.9
+            },
+            {
+              "hr": 48,
+              "lat": 17.5,
+              "lon": -129.8
+            },
+            {
+              "hr": 60,
+              "lat": 18,
+              "lon": -131.7
+            },
+            {
+              "hr": 72,
+              "lat": 18.3,
+              "lon": -133.5
+            },
+            {
+              "hr": 84,
+              "lat": 18.3,
+              "lon": -135.6
+            },
+            {
+              "hr": 96,
+              "lat": 18.3,
+              "lon": -137.6
+            },
+            {
+              "hr": 108,
+              "lat": 17.8,
+              "lon": -139.8
+            },
+            {
+              "hr": 120,
+              "lat": 17.3,
+              "lon": -142
+            },
+            {
+              "hr": 132,
+              "lat": 16.3,
+              "lon": -144
+            },
+            {
+              "hr": 144,
+              "lat": 15.2,
+              "lon": -146
+            },
+            {
+              "hr": 156,
+              "lat": 14.4,
+              "lon": -147.2
+            },
+            {
+              "hr": 168,
+              "lat": 14.1,
+              "lon": -147.7
+            }
+          ]
+        },
+        "variableIntensity": {
+          "tech": "IVCN",
+          "peakKt": 54,
+          "peakHr": 72
+        },
+        "variableTrack": {
+          "tech": "TVCN",
+          "track": [
+            {
+              "hr": 0,
+              "lat": 16.4,
+              "lon": -121.3
+            },
+            {
+              "hr": 12,
+              "lat": 16.6,
+              "lon": -123.7
+            },
+            {
+              "hr": 24,
+              "lat": 16.7,
+              "lon": -126
+            },
+            {
+              "hr": 36,
+              "lat": 17,
+              "lon": -128.1
+            },
+            {
+              "hr": 48,
+              "lat": 17.4,
+              "lon": -130
+            },
+            {
+              "hr": 60,
+              "lat": 17.9,
+              "lon": -131.8
+            },
+            {
+              "hr": 72,
+              "lat": 18.1,
+              "lon": -133.7
+            },
+            {
+              "hr": 84,
+              "lat": 18.4,
+              "lon": -135.7
+            },
+            {
+              "hr": 96,
+              "lat": 18.6,
+              "lon": -137.7
+            },
+            {
+              "hr": 108,
+              "lat": 18.6,
+              "lon": -139.8
+            },
+            {
+              "hr": 120,
+              "lat": 18.5,
+              "lon": -141.9
+            },
+            {
+              "hr": 132,
+              "lat": 18.2,
+              "lon": -144
+            },
+            {
+              "hr": 144,
+              "lat": 16.6,
+              "lon": -145.8
+            },
+            {
+              "hr": 156,
+              "lat": 15.9,
+              "lon": -147.2
+            },
+            {
+              "hr": 168,
+              "lat": 14.6,
+              "lon": -147.5
+            }
+          ]
+        },
+        "deepmind": {
+          "tech": "GDMI",
+          "peakKt": 71,
+          "peakHr": 72,
+          "track": [
+            {
+              "hr": 0,
+              "lat": 16.4,
+              "lon": -121.3
+            },
+            {
+              "hr": 12,
+              "lat": 16.6,
+              "lon": -123.7
+            },
+            {
+              "hr": 24,
+              "lat": 16.7,
+              "lon": -126
+            },
+            {
+              "hr": 36,
+              "lat": 17,
+              "lon": -128
+            },
+            {
+              "hr": 48,
+              "lat": 17.5,
+              "lon": -129.9
+            },
+            {
+              "hr": 60,
+              "lat": 17.9,
+              "lon": -131.8
+            },
+            {
+              "hr": 72,
+              "lat": 18.1,
+              "lon": -133.6
+            },
+            {
+              "hr": 84,
+              "lat": 18.2,
+              "lon": -135.5
+            },
+            {
+              "hr": 96,
+              "lat": 18.2,
+              "lon": -137.6
+            },
+            {
+              "hr": 108,
+              "lat": 17.9,
+              "lon": -139.8
+            },
+            {
+              "hr": 120,
+              "lat": 17.4,
+              "lon": -142.1
+            },
+            {
+              "hr": 132,
+              "lat": 16.5,
+              "lon": -144.3
+            },
+            {
+              "hr": 144,
+              "lat": 15.5,
+              "lon": -146.1
+            },
+            {
+              "hr": 156,
+              "lat": 14.8,
+              "lon": -147.2
+            },
+            {
+              "hr": 168,
+              "lat": 14.5,
+              "lon": -148
+            }
+          ]
+        },
+        "official": {
+          "tech": "OFCI",
+          "peakKt": 60,
+          "peakHr": 72
+        },
+        "missing": [],
+        "techsPresent": [
+          "AEMI",
+          "AVNI",
+          "CARQ",
+          "CEM2",
+          "CLP5",
+          "CMC2",
+          "CTCI",
+          "DSHP",
+          "GDMI",
+          "HCCA",
+          "HFAI",
+          "HFBI",
+          "HMNI",
+          "HWFI",
+          "IVCN",
+          "LGEM",
+          "NGX2",
+          "NNIB",
+          "NNIC",
+          "NVGI",
+          "OCD5",
+          "OFCI",
+          "RVCN",
+          "SHF5",
+          "SHIP",
+          "TABD",
+          "TABM",
+          "TABS",
+          "TCLP",
+          "TVCN",
+          "UKX2",
+          "XTRP"
+        ]
+      },
+      "guidance": {
+        "schema": "millibar-guidance/1",
+        "source": {
+          "name": "NHC ATCF a-deck (aid_public)",
+          "kind": "raw model guidance"
+        },
+        "cycle": "2026091100",
+        "cycleIso": "2026-09-11T00:00:00.000Z",
+        "validZ": "2026-09-11T00:00:00.000Z",
+        "fetchedAt": "2026-09-11T01:01:45.424Z",
+        "cadenceMin": 360,
+        "previousCycle": "2026091018",
+        "previousCycleIso": "2026-09-10T18:00:00.000Z",
+        "cycleGapHr": 6,
+        "semantics": {
+          "kind": "raw model guidance",
+          "isProbability": false,
+          "isForecastCone": false,
+          "note": "Each line is one model run. A count of members is a count of runs, not a probability; the spread is model disagreement, not the NHC cone; clusters are a distance partition at a stated threshold."
+        },
+        "roster": {
+          "present": [
+            "TVCN",
+            "HCCA",
+            "IVCN",
+            "AVNI",
+            "UKX2",
+            "CMC2",
+            "NVGI",
+            "AEMI",
+            "HWFI",
+            "HFAI",
+            "HFBI",
+            "HMNI",
+            "CTCI",
+            "GDMI",
+            "SHIP",
+            "DSHP",
+            "LGEM"
+          ],
+          "inSpread": [
+            "AVNI",
+            "UKX2",
+            "CMC2",
+            "NVGI",
+            "AEMI",
+            "HWFI",
+            "HFAI",
+            "HFBI",
+            "HMNI",
+            "CTCI",
+            "GDMI"
+          ],
+          "inFan": [
+            "HWFI",
+            "HFAI",
+            "HFBI",
+            "HMNI",
+            "CTCI",
+            "GDMI",
+            "SHIP",
+            "DSHP",
+            "LGEM"
+          ],
+          "missing": [
+            {
+              "key": "OFCL",
+              "label": "NHC official forecast",
+              "ids": [
+                "OFCL"
+              ]
+            },
+            {
+              "key": "GEPS",
+              "label": "Canadian ensemble mean",
+              "ids": [
+                "CEMI",
+                "CEMN"
+              ]
+            }
+          ],
+          "lateForms": [],
+          "excluded": {
+            "ensembleMembers": 0,
+            "baselines": [
+              "CARQ",
+              "CLP5",
+              "OCD5",
+              "OFCI",
+              "SHF5",
+              "TABD",
+              "TABM",
+              "TABS",
+              "TCLP",
+              "XTRP"
+            ],
+            "unlisted": [
+              "CEM2",
+              "NGX2",
+              "NNIB",
+              "NNIC",
+              "RVCN"
+            ]
+          },
+          "complete": false
+        },
+        "aids": [
+          {
+            "key": "TVCN",
+            "tech": "TVCN",
+            "label": "track consensus",
+            "cls": "consensus",
+            "inSpread": false,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.6,
+                "lon": -123.7
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.7,
+                "lon": -126
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 17,
+                "lon": -128.1
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.4,
+                "lon": -130
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 17.9,
+                "lon": -131.8
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.1,
+                "lon": -133.7
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.4,
+                "lon": -135.7
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 18.6,
+                "lon": -137.7
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 18.6,
+                "lon": -139.8
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 18.5,
+                "lon": -141.9
+              }
+            ],
+            "intensity": [],
+            "peakKt": null,
+            "peakHr": null
+          },
+          {
+            "key": "HCCA",
+            "tech": "HCCA",
+            "label": "HFIP corrected consensus",
+            "cls": "consensus",
+            "inSpread": false,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.6,
+                "lon": -123.7
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.7,
+                "lon": -125.9
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 17,
+                "lon": -127.9
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.5,
+                "lon": -129.8
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 18,
+                "lon": -131.7
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.3,
+                "lon": -133.5
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.3,
+                "lon": -135.6
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 18.3,
+                "lon": -137.6
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 17.8,
+                "lon": -139.8
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 17.3,
+                "lon": -142
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 53
+              },
+              {
+                "hr": 24,
+                "kt": 64
+              },
+              {
+                "hr": 36,
+                "kt": 72
+              },
+              {
+                "hr": 48,
+                "kt": 76
+              },
+              {
+                "hr": 60,
+                "kt": 76
+              },
+              {
+                "hr": 72,
+                "kt": 79
+              },
+              {
+                "hr": 84,
+                "kt": 78
+              },
+              {
+                "hr": 96,
+                "kt": 73
+              },
+              {
+                "hr": 108,
+                "kt": 64
+              },
+              {
+                "hr": 120,
+                "kt": 60
+              }
+            ],
+            "peakKt": 79,
+            "peakHr": 72
+          },
+          {
+            "key": "IVCN",
+            "tech": "IVCN",
+            "label": "intensity consensus",
+            "cls": "consensus",
+            "inSpread": false,
+            "inFan": false,
+            "late": false,
+            "track": [],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 47
+              },
+              {
+                "hr": 24,
+                "kt": 49
+              },
+              {
+                "hr": 36,
+                "kt": 50
+              },
+              {
+                "hr": 48,
+                "kt": 52
+              },
+              {
+                "hr": 60,
+                "kt": 53
+              },
+              {
+                "hr": 72,
+                "kt": 54
+              },
+              {
+                "hr": 84,
+                "kt": 51
+              },
+              {
+                "hr": 96,
+                "kt": 48
+              },
+              {
+                "hr": 108,
+                "kt": 43
+              },
+              {
+                "hr": 120,
+                "kt": 39
+              }
+            ],
+            "peakKt": 54,
+            "peakHr": 72
+          },
+          {
+            "key": "GFS",
+            "tech": "AVNI",
+            "label": "GFS",
+            "cls": "global",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.5,
+                "lon": -123.5
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.8,
+                "lon": -125.8
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 17.3,
+                "lon": -127.8
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.8,
+                "lon": -129.6
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 18.2,
+                "lon": -131.5
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.5,
+                "lon": -133.5
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.8,
+                "lon": -135.4
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 19.2,
+                "lon": -137.7
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 19.4,
+                "lon": -140.2
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 19.4,
+                "lon": -142.7
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 43
+              },
+              {
+                "hr": 24,
+                "kt": 42
+              },
+              {
+                "hr": 36,
+                "kt": 40
+              },
+              {
+                "hr": 48,
+                "kt": 38
+              },
+              {
+                "hr": 60,
+                "kt": 37
+              },
+              {
+                "hr": 72,
+                "kt": 33
+              },
+              {
+                "hr": 84,
+                "kt": 34
+              },
+              {
+                "hr": 96,
+                "kt": 33
+              },
+              {
+                "hr": 108,
+                "kt": 28
+              },
+              {
+                "hr": 120,
+                "kt": 26
+              }
+            ],
+            "peakKt": 43,
+            "peakHr": 12
+          },
+          {
+            "key": "UKM",
+            "tech": "UKX2",
+            "label": "UKMET",
+            "cls": "global",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.4,
+                "lon": -123.9
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -126.5
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 16.6,
+                "lon": -128.9
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.1,
+                "lon": -131
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 17.6,
+                "lon": -133
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.3,
+                "lon": -134.8
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 19,
+                "lon": -136.7
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 19.6,
+                "lon": -138.7
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 20.1,
+                "lon": -140.9
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 20.6,
+                "lon": -142.6
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 40
+              },
+              {
+                "hr": 24,
+                "kt": 40
+              },
+              {
+                "hr": 36,
+                "kt": 40
+              },
+              {
+                "hr": 48,
+                "kt": 40
+              },
+              {
+                "hr": 60,
+                "kt": 41
+              },
+              {
+                "hr": 72,
+                "kt": 44
+              },
+              {
+                "hr": 84,
+                "kt": 46
+              },
+              {
+                "hr": 96,
+                "kt": 45
+              },
+              {
+                "hr": 108,
+                "kt": 42
+              },
+              {
+                "hr": 120,
+                "kt": 40
+              }
+            ],
+            "peakKt": 46,
+            "peakHr": 84
+          },
+          {
+            "key": "CMC",
+            "tech": "CMC2",
+            "label": "Canadian GEM",
+            "cls": "global",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.2,
+                "lon": -123.8
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.1,
+                "lon": -125.9
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 16.5,
+                "lon": -127.5
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.3,
+                "lon": -129.1
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 17.8,
+                "lon": -130.5
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.1,
+                "lon": -131.8
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.3,
+                "lon": -133.1
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 18,
+                "lon": -134.2
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 17.3,
+                "lon": -135.4
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 16.5,
+                "lon": -136.5
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 37
+              },
+              {
+                "hr": 24,
+                "kt": 36
+              },
+              {
+                "hr": 36,
+                "kt": 36
+              },
+              {
+                "hr": 48,
+                "kt": 39
+              },
+              {
+                "hr": 60,
+                "kt": 40
+              },
+              {
+                "hr": 72,
+                "kt": 41
+              },
+              {
+                "hr": 84,
+                "kt": 39
+              },
+              {
+                "hr": 96,
+                "kt": 38
+              },
+              {
+                "hr": 108,
+                "kt": 39
+              },
+              {
+                "hr": 120,
+                "kt": 40
+              }
+            ],
+            "peakKt": 43,
+            "peakHr": 156
+          },
+          {
+            "key": "NVG",
+            "tech": "NVGI",
+            "label": "NAVGEM",
+            "cls": "global",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.6,
+                "lon": -123.8
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.7,
+                "lon": -125.8
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 17.1,
+                "lon": -127.5
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.6,
+                "lon": -128.9
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 18.1,
+                "lon": -130.2
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.1,
+                "lon": -131.5
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 17.9,
+                "lon": -132.9
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 17.3,
+                "lon": -134.2
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 16.5,
+                "lon": -135.4
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 15.5,
+                "lon": -136.8
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 38
+              },
+              {
+                "hr": 24,
+                "kt": 37
+              },
+              {
+                "hr": 36,
+                "kt": 38
+              },
+              {
+                "hr": 48,
+                "kt": 37
+              },
+              {
+                "hr": 60,
+                "kt": 38
+              },
+              {
+                "hr": 72,
+                "kt": 38
+              },
+              {
+                "hr": 84,
+                "kt": 39
+              },
+              {
+                "hr": 96,
+                "kt": 39
+              },
+              {
+                "hr": 108,
+                "kt": 44
+              },
+              {
+                "hr": 120,
+                "kt": 50
+              }
+            ],
+            "peakKt": 90,
+            "peakHr": 168
+          },
+          {
+            "key": "GEFS",
+            "tech": "AEMI",
+            "label": "GEFS ensemble mean",
+            "cls": "ensemble-mean",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.5,
+                "lon": -123.6
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.7,
+                "lon": -126
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 17,
+                "lon": -128.2
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.5,
+                "lon": -130.4
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 18,
+                "lon": -132.7
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.4,
+                "lon": -134.9
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.8,
+                "lon": -137.3
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 19.3,
+                "lon": -139.7
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 19.6,
+                "lon": -141.8
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 19.6,
+                "lon": -144
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 38
+              },
+              {
+                "hr": 24,
+                "kt": 36
+              },
+              {
+                "hr": 36,
+                "kt": 33
+              },
+              {
+                "hr": 48,
+                "kt": 32
+              },
+              {
+                "hr": 60,
+                "kt": 31
+              },
+              {
+                "hr": 72,
+                "kt": 30
+              },
+              {
+                "hr": 84,
+                "kt": 30
+              },
+              {
+                "hr": 96,
+                "kt": 29
+              },
+              {
+                "hr": 108,
+                "kt": 29
+              },
+              {
+                "hr": 120,
+                "kt": 28
+              }
+            ],
+            "peakKt": 40,
+            "peakHr": 0
+          },
+          {
+            "key": "HWRF",
+            "tech": "HWFI",
+            "label": "HWRF",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.7,
+                "lon": -123.4
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 17,
+                "lon": -125.5
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 17.5,
+                "lon": -127.6
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.9,
+                "lon": -129.5
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 18.3,
+                "lon": -131.6
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.7,
+                "lon": -133.9
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 19,
+                "lon": -136.4
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 19.4,
+                "lon": -139
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 19.7,
+                "lon": -141.7
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 19.8,
+                "lon": -144.6
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 43
+              },
+              {
+                "hr": 24,
+                "kt": 40
+              },
+              {
+                "hr": 36,
+                "kt": 39
+              },
+              {
+                "hr": 48,
+                "kt": 36
+              },
+              {
+                "hr": 60,
+                "kt": 37
+              },
+              {
+                "hr": 72,
+                "kt": 35
+              },
+              {
+                "hr": 84,
+                "kt": 36
+              },
+              {
+                "hr": 96,
+                "kt": 31
+              },
+              {
+                "hr": 108,
+                "kt": 31
+              },
+              {
+                "hr": 120,
+                "kt": 27
+              }
+            ],
+            "peakKt": 43,
+            "peakHr": 12
+          },
+          {
+            "key": "HAFA",
+            "tech": "HFAI",
+            "label": "HAFS-A",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.8,
+                "lon": -123.5
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 17.1,
+                "lon": -125.8
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 17.5,
+                "lon": -127.7
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 18.1,
+                "lon": -129.4
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 18.7,
+                "lon": -131.2
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 19,
+                "lon": -133.1
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 19.3,
+                "lon": -135
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 19.6,
+                "lon": -137
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 19.8,
+                "lon": -139.3
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 20.1,
+                "lon": -141.6
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 49
+              },
+              {
+                "hr": 24,
+                "kt": 48
+              },
+              {
+                "hr": 36,
+                "kt": 49
+              },
+              {
+                "hr": 48,
+                "kt": 52
+              },
+              {
+                "hr": 60,
+                "kt": 60
+              },
+              {
+                "hr": 72,
+                "kt": 72
+              },
+              {
+                "hr": 84,
+                "kt": 74
+              },
+              {
+                "hr": 96,
+                "kt": 64
+              },
+              {
+                "hr": 108,
+                "kt": 50
+              },
+              {
+                "hr": 120,
+                "kt": 55
+              }
+            ],
+            "peakKt": 74,
+            "peakHr": 84
+          },
+          {
+            "key": "HAFB",
+            "tech": "HFBI",
+            "label": "HAFS-B",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.9,
+                "lon": -123.6
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 17.2,
+                "lon": -126
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 17.4,
+                "lon": -128.2
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.8,
+                "lon": -130.1
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 18.1,
+                "lon": -131.9
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.5,
+                "lon": -133.8
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.8,
+                "lon": -135.9
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 19.1,
+                "lon": -138.2
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 19.5,
+                "lon": -140.7
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 19.8,
+                "lon": -143.3
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 47
+              },
+              {
+                "hr": 24,
+                "kt": 52
+              },
+              {
+                "hr": 36,
+                "kt": 54
+              },
+              {
+                "hr": 48,
+                "kt": 52
+              },
+              {
+                "hr": 60,
+                "kt": 45
+              },
+              {
+                "hr": 72,
+                "kt": 43
+              },
+              {
+                "hr": 84,
+                "kt": 39
+              },
+              {
+                "hr": 96,
+                "kt": 35
+              },
+              {
+                "hr": 108,
+                "kt": 33
+              },
+              {
+                "hr": 120,
+                "kt": 29
+              }
+            ],
+            "peakKt": 54,
+            "peakHr": 36
+          },
+          {
+            "key": "HMON",
+            "tech": "HMNI",
+            "label": "HMON",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.8,
+                "lon": -123.6
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 17.5,
+                "lon": -125.9
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 18.2,
+                "lon": -128
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 18.7,
+                "lon": -130
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 19,
+                "lon": -131.6
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 19.2,
+                "lon": -133.3
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 19.3,
+                "lon": -135.3
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 19.4,
+                "lon": -137.3
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 19.6,
+                "lon": -139.4
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 19.5,
+                "lon": -141.7
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 45
+              },
+              {
+                "hr": 24,
+                "kt": 46
+              },
+              {
+                "hr": 36,
+                "kt": 49
+              },
+              {
+                "hr": 48,
+                "kt": 52
+              },
+              {
+                "hr": 60,
+                "kt": 52
+              },
+              {
+                "hr": 72,
+                "kt": 46
+              },
+              {
+                "hr": 84,
+                "kt": 38
+              },
+              {
+                "hr": 96,
+                "kt": 35
+              },
+              {
+                "hr": 108,
+                "kt": 33
+              },
+              {
+                "hr": 120,
+                "kt": 26
+              }
+            ],
+            "peakKt": 52,
+            "peakHr": 48
+          },
+          {
+            "key": "CTC",
+            "tech": "CTCI",
+            "label": "COAMPS-TC",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.7,
+                "lon": -123.4
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.8,
+                "lon": -125.6
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 16.9,
+                "lon": -127.7
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.2,
+                "lon": -129.5
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 17.5,
+                "lon": -131.2
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 17.7,
+                "lon": -133
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18,
+                "lon": -135.1
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 18.3,
+                "lon": -137.2
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 18.5,
+                "lon": -139.3
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 18.5,
+                "lon": -141.3
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 45
+              },
+              {
+                "hr": 24,
+                "kt": 42
+              },
+              {
+                "hr": 36,
+                "kt": 40
+              },
+              {
+                "hr": 48,
+                "kt": 43
+              },
+              {
+                "hr": 60,
+                "kt": 51
+              },
+              {
+                "hr": 72,
+                "kt": 50
+              },
+              {
+                "hr": 84,
+                "kt": 45
+              },
+              {
+                "hr": 96,
+                "kt": 49
+              },
+              {
+                "hr": 108,
+                "kt": 44
+              },
+              {
+                "hr": 120,
+                "kt": 33
+              }
+            ],
+            "peakKt": 51,
+            "peakHr": 60
+          },
+          {
+            "key": "GDM",
+            "tech": "GDMI",
+            "label": "DeepMind",
+            "cls": "ai",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.6,
+                "lon": -123.7
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.7,
+                "lon": -126
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 17,
+                "lon": -128
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.5,
+                "lon": -129.9
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 17.9,
+                "lon": -131.8
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18.1,
+                "lon": -133.6
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.2,
+                "lon": -135.5
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 18.2,
+                "lon": -137.6
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 17.9,
+                "lon": -139.8
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 17.4,
+                "lon": -142.1
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 53
+              },
+              {
+                "hr": 24,
+                "kt": 60
+              },
+              {
+                "hr": 36,
+                "kt": 63
+              },
+              {
+                "hr": 48,
+                "kt": 65
+              },
+              {
+                "hr": 60,
+                "kt": 67
+              },
+              {
+                "hr": 72,
+                "kt": 71
+              },
+              {
+                "hr": 84,
+                "kt": 68
+              },
+              {
+                "hr": 96,
+                "kt": 60
+              },
+              {
+                "hr": 108,
+                "kt": 50
+              },
+              {
+                "hr": 120,
+                "kt": 44
+              }
+            ],
+            "peakKt": 71,
+            "peakHr": 72
+          },
+          {
+            "key": "SHIP",
+            "tech": "SHIP",
+            "label": "SHIPS",
+            "cls": "statistical",
+            "inSpread": false,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.4,
+                "lon": -123.8
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -126
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 16.6,
+                "lon": -128.2
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.2,
+                "lon": -129.9
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 17.7,
+                "lon": -131.5
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18,
+                "lon": -133.4
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.2,
+                "lon": -135.2
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 18.4,
+                "lon": -137
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 18.3,
+                "lon": -138.9
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 18,
+                "lon": -140.5
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 47
+              },
+              {
+                "hr": 24,
+                "kt": 52
+              },
+              {
+                "hr": 36,
+                "kt": 56
+              },
+              {
+                "hr": 48,
+                "kt": 57
+              },
+              {
+                "hr": 60,
+                "kt": 57
+              },
+              {
+                "hr": 72,
+                "kt": 55
+              },
+              {
+                "hr": 84,
+                "kt": 53
+              },
+              {
+                "hr": 96,
+                "kt": 53
+              },
+              {
+                "hr": 108,
+                "kt": 53
+              },
+              {
+                "hr": 120,
+                "kt": 53
+              }
+            ],
+            "peakKt": 57,
+            "peakHr": 48
+          },
+          {
+            "key": "DSHP",
+            "tech": "DSHP",
+            "label": "decay SHIPS",
+            "cls": "statistical",
+            "inSpread": false,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.4,
+                "lon": -123.8
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -126
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 16.6,
+                "lon": -128.2
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.2,
+                "lon": -129.9
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 17.7,
+                "lon": -131.5
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18,
+                "lon": -133.4
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.2,
+                "lon": -135.2
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 18.4,
+                "lon": -137
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 18.3,
+                "lon": -138.9
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 18,
+                "lon": -140.5
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 47
+              },
+              {
+                "hr": 24,
+                "kt": 52
+              },
+              {
+                "hr": 36,
+                "kt": 56
+              },
+              {
+                "hr": 48,
+                "kt": 57
+              },
+              {
+                "hr": 60,
+                "kt": 57
+              },
+              {
+                "hr": 72,
+                "kt": 55
+              },
+              {
+                "hr": 84,
+                "kt": 53
+              },
+              {
+                "hr": 96,
+                "kt": 53
+              },
+              {
+                "hr": 108,
+                "kt": 53
+              },
+              {
+                "hr": 120,
+                "kt": 53
+              }
+            ],
+            "peakKt": 57,
+            "peakHr": 48
+          },
+          {
+            "key": "LGEM",
+            "tech": "LGEM",
+            "label": "LGEM",
+            "cls": "statistical",
+            "inSpread": false,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -121.3
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 16.4,
+                "lon": -123.8
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 16.4,
+                "lon": -126
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 16.6,
+                "lon": -128.2
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 17.2,
+                "lon": -129.9
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 17.7,
+                "lon": -131.5
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 18,
+                "lon": -133.4
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 18.2,
+                "lon": -135.2
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 18.4,
+                "lon": -137
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 18.3,
+                "lon": -138.9
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 18,
+                "lon": -140.5
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 40
+              },
+              {
+                "hr": 12,
+                "kt": 45
+              },
+              {
+                "hr": 24,
+                "kt": 48
+              },
+              {
+                "hr": 36,
+                "kt": 51
+              },
+              {
+                "hr": 48,
+                "kt": 53
+              },
+              {
+                "hr": 60,
+                "kt": 54
+              },
+              {
+                "hr": 72,
+                "kt": 53
+              },
+              {
+                "hr": 84,
+                "kt": 52
+              },
+              {
+                "hr": 96,
+                "kt": 50
+              },
+              {
+                "hr": 108,
+                "kt": 48
+              },
+              {
+                "hr": 120,
+                "kt": 47
+              }
+            ],
+            "peakKt": 54,
+            "peakHr": 60
+          }
+        ],
+        "prevOfclTrack": [
+          {
+            "hr": 0,
+            "validZ": "2026-09-10T18:00:00.000Z",
+            "lat": 16.5,
+            "lon": -119.9
+          },
+          {
+            "hr": 3,
+            "validZ": "2026-09-10T21:00:00.000Z",
+            "lat": 16.5,
+            "lon": -120.5
+          },
+          {
+            "hr": 12,
+            "validZ": "2026-09-11T06:00:00.000Z",
+            "lat": 16.5,
+            "lon": -122.5
+          },
+          {
+            "hr": 24,
+            "validZ": "2026-09-11T18:00:00.000Z",
+            "lat": 16.5,
+            "lon": -124.9
+          },
+          {
+            "hr": 36,
+            "validZ": "2026-09-12T06:00:00.000Z",
+            "lat": 16.6,
+            "lon": -127.1
+          },
+          {
+            "hr": 48,
+            "validZ": "2026-09-12T18:00:00.000Z",
+            "lat": 17,
+            "lon": -129
+          },
+          {
+            "hr": 60,
+            "validZ": "2026-09-13T06:00:00.000Z",
+            "lat": 17.6,
+            "lon": -130.7
+          },
+          {
+            "hr": 72,
+            "validZ": "2026-09-13T18:00:00.000Z",
+            "lat": 18,
+            "lon": -132.4
+          },
+          {
+            "hr": 96,
+            "validZ": "2026-09-14T18:00:00.000Z",
+            "lat": 18.4,
+            "lon": -136.1
+          },
+          {
+            "hr": 120,
+            "validZ": "2026-09-15T18:00:00.000Z",
+            "lat": 18.3,
+            "lon": -139.7
+          }
+        ],
+        "leads": [
+          {
+            "hr": 24,
+            "validZ": "2026-09-12T00:00:00.000Z",
+            "n": 11,
+            "centroid": [
+              16.8,
+              -125.9
+            ],
+            "meanKm": 41,
+            "maxKm": 80,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 16.7,
+              "lon": -126,
+              "offsetKm": 18
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 234,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CMC2",
+                "CTCI",
+                "GDMI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "NVGI",
+                "UKX2"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [],
+            "prev": {
+              "n": 10,
+              "centroidShiftKm": 9,
+              "meanKm": 51,
+              "spreadDeltaKm": -10,
+              "ofclShiftKm": null
+            }
+          },
+          {
+            "hr": 48,
+            "validZ": "2026-09-13T00:00:00.000Z",
+            "n": 11,
+            "centroid": [
+              17.7,
+              -129.8
+            ],
+            "meanKm": 68,
+            "maxKm": 146,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 17.4,
+              "lon": -130,
+              "offsetKm": 40
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 318,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CMC2",
+                "CTCI",
+                "GDMI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "NVGI",
+                "UKX2"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [],
+            "prev": {
+              "n": 10,
+              "centroidShiftKm": 31,
+              "meanKm": 116,
+              "spreadDeltaKm": -48,
+              "ofclShiftKm": null
+            }
+          },
+          {
+            "hr": 72,
+            "validZ": "2026-09-14T00:00:00.000Z",
+            "n": 11,
+            "centroid": [
+              18.4,
+              -133.4
+            ],
+            "meanKm": 100,
+            "maxKm": 202,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 18.1,
+              "lon": -133.7,
+              "offsetKm": 49
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 402,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CMC2",
+                "CTCI",
+                "GDMI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "NVGI",
+                "UKX2"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [],
+            "prev": {
+              "n": 10,
+              "centroidShiftKm": 34,
+              "meanKm": 170,
+              "spreadDeltaKm": -70,
+              "ofclShiftKm": null
+            }
+          },
+          {
+            "hr": 96,
+            "validZ": "2026-09-15T00:00:00.000Z",
+            "n": 11,
+            "centroid": [
+              18.9,
+              -137.3
+            ],
+            "meanKm": 160,
+            "maxKm": 375,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 18.6,
+              "lon": -137.7,
+              "offsetKm": 47
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 486,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CTCI",
+                "GDMI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "UKX2",
+                "CMC2",
+                "NVGI"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [],
+            "prev": {
+              "n": 10,
+              "centroidShiftKm": 60,
+              "meanKm": 214,
+              "spreadDeltaKm": -54,
+              "ofclShiftKm": null
+            }
+          },
+          {
+            "hr": 120,
+            "validZ": "2026-09-16T00:00:00.000Z",
+            "n": 11,
+            "centroid": [
+              18.8,
+              -141.6
+            ],
+            "meanKm": 258,
+            "maxKm": 624,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 18.5,
+              "lon": -141.9,
+              "offsetKm": 48
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 570,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CTCI",
+                "GDMI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "UKX2",
+                "CMC2",
+                "NVGI"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [],
+            "prev": {
+              "n": 10,
+              "centroidShiftKm": 88,
+              "meanKm": 294,
+              "spreadDeltaKm": -35,
+              "ofclShiftKm": null
+            }
+          }
+        ],
+        "intensityFan": [
+          {
+            "hr": 0,
+            "validZ": "2026-09-11T00:00:00.000Z",
+            "n": 9,
+            "min": 40,
+            "median": 40,
+            "max": 40,
+            "ofcl": null,
+            "ivcn": 40,
+            "hcca": 40,
+            "prevOfcl": 42,
+            "prevMedian": 43,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 12,
+            "validZ": "2026-09-11T12:00:00.000Z",
+            "n": 9,
+            "min": 43,
+            "median": 47,
+            "max": 53,
+            "ofcl": null,
+            "ivcn": 47,
+            "hcca": 53,
+            "prevOfcl": 48,
+            "prevMedian": 46,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 24,
+            "validZ": "2026-09-12T00:00:00.000Z",
+            "n": 9,
+            "min": 40,
+            "median": 48,
+            "max": 60,
+            "ofcl": null,
+            "ivcn": 49,
+            "hcca": 64,
+            "prevOfcl": 53,
+            "prevMedian": 46,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 36,
+            "validZ": "2026-09-12T12:00:00.000Z",
+            "n": 9,
+            "min": 39,
+            "median": 51,
+            "max": 63,
+            "ofcl": null,
+            "ivcn": 50,
+            "hcca": 72,
+            "prevOfcl": 58,
+            "prevMedian": 47,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 48,
+            "validZ": "2026-09-13T00:00:00.000Z",
+            "n": 9,
+            "min": 36,
+            "median": 52,
+            "max": 65,
+            "ofcl": null,
+            "ivcn": 52,
+            "hcca": 76,
+            "prevOfcl": 60,
+            "prevMedian": 48,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 60,
+            "validZ": "2026-09-13T12:00:00.000Z",
+            "n": 9,
+            "min": 37,
+            "median": 54,
+            "max": 67,
+            "ofcl": null,
+            "ivcn": 53,
+            "hcca": 76,
+            "prevOfcl": 63,
+            "prevMedian": 48,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 72,
+            "validZ": "2026-09-14T00:00:00.000Z",
+            "n": 9,
+            "min": 35,
+            "median": 53,
+            "max": 72,
+            "ofcl": null,
+            "ivcn": 54,
+            "hcca": 79,
+            "prevOfcl": 64,
+            "prevMedian": 47,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 84,
+            "validZ": "2026-09-14T12:00:00.000Z",
+            "n": 9,
+            "min": 36,
+            "median": 52,
+            "max": 74,
+            "ofcl": null,
+            "ivcn": 51,
+            "hcca": 78,
+            "prevOfcl": 61,
+            "prevMedian": 45,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 96,
+            "validZ": "2026-09-15T00:00:00.000Z",
+            "n": 9,
+            "min": 31,
+            "median": 50,
+            "max": 64,
+            "ofcl": null,
+            "ivcn": 48,
+            "hcca": 73,
+            "prevOfcl": 60,
+            "prevMedian": 43,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 108,
+            "validZ": "2026-09-15T12:00:00.000Z",
+            "n": 9,
+            "min": 31,
+            "median": 48,
+            "max": 53,
+            "ofcl": null,
+            "ivcn": 43,
+            "hcca": 64,
+            "prevOfcl": 60,
+            "prevMedian": 42,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 120,
+            "validZ": "2026-09-16T00:00:00.000Z",
+            "n": 9,
+            "min": 26,
+            "median": 44,
+            "max": 55,
+            "ofcl": null,
+            "ivcn": 39,
+            "hcca": 60,
+            "prevOfcl": null,
+            "prevMedian": 40,
+            "prevInterpolated": true
+          }
+        ],
+        "peaks": {
+          "members": [
+            {
+              "tech": "HWFI",
+              "label": "HWRF",
+              "kt": 43,
+              "hr": 12
+            },
+            {
+              "tech": "HFAI",
+              "label": "HAFS-A",
+              "kt": 74,
+              "hr": 84
+            },
+            {
+              "tech": "HFBI",
+              "label": "HAFS-B",
+              "kt": 54,
+              "hr": 36
+            },
+            {
+              "tech": "HMNI",
+              "label": "HMON",
+              "kt": 52,
+              "hr": 48
+            },
+            {
+              "tech": "CTCI",
+              "label": "COAMPS-TC",
+              "kt": 51,
+              "hr": 60
+            },
+            {
+              "tech": "GDMI",
+              "label": "DeepMind",
+              "kt": 71,
+              "hr": 72
+            },
+            {
+              "tech": "SHIP",
+              "label": "SHIPS",
+              "kt": 57,
+              "hr": 48
+            },
+            {
+              "tech": "DSHP",
+              "label": "decay SHIPS",
+              "kt": 57,
+              "hr": 48
+            },
+            {
+              "tech": "LGEM",
+              "label": "LGEM",
+              "kt": 54,
+              "hr": 60
+            }
+          ],
+          "n": 9,
+          "min": 43,
+          "median": 54,
+          "max": 74,
+          "medianHr": 48,
+          "ofcl": null,
+          "prevOfcl": {
+            "kt": 65,
+            "hr": 72
+          },
+          "prevMedian": 49
+        },
+        "trend": {
+          "hr": 72,
+          "label": "tightening",
+          "spreadDeltaKm": -70,
+          "spreadDeltaPct": -41,
+          "centroidShiftKm": 34
+        },
+        "summary": {
+          "trackSpread72Km": 100,
+          "trackSpreadMax72Km": 202,
+          "n72": 11,
+          "intensitySpread72Kt": 37,
+          "intensityN72": 9,
+          "scenarios72": 1,
+          "scenarios120": 1,
+          "ofclVsConsensus72Km": null,
+          "ofclOffset72Km": null,
+          "cycleShift72Km": 34,
+          "ofclShift72Km": null,
+          "trend": "tightening",
+          "peakMedianKt": 54,
+          "peakOfclKt": null,
+          "peakDeltaVsPrevKt": 5,
+          "ofclPeakDeltaVsPrevKt": null
+        }
+      },
       "genesis": {
         "lat": 12.6,
         "lon": -108.7,
@@ -4154,11 +7207,11 @@
       },
       "atcfDeck": {
         "cycle": "2026091100",
-        "techCount": 1,
-        "forecastAids": 0
+        "techCount": 32,
+        "forecastAids": 31
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026091100 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · no guidance roster in this cycle · b-deck 14 records · f-deck 44 fixes",
+        "atcf": "a-deck cycle 2026091100 · 32 techs · consensus 3 member(s) peak 68 kt · guidance 11 track members, 72h spread 100 km · b-deck 14 records · f-deck 44 fixes",
         "ships": "2026-09-11T00:00Z · shear 12 kt · OHC 10 · MPI 150 kt · 8 RI thresholds"
       },
       "riFloor": {
@@ -4699,26 +7752,26 @@
       },
       "hurricanePCal": {
         "ok": true,
-        "p": 0.49155922011609016,
+        "p": 0.5531488862182877,
         "pRaw": 0.4907680333948931,
-        "pLow": 0.4894494714933142,
-        "pHigh": 0.49472426980140044,
-        "pPeak": 0.49155922011609016,
+        "pLow": 0.4907680333948931,
+        "pHigh": 0.5663252966452019,
+        "pPeak": 0.5531488862182877,
         "pNow": 0.01,
-        "pWithRi": 0.49155922011609016,
+        "pWithRi": 0.5531488862182877,
         "drivenBy": "forecast peak",
-        "meanKt": 62.2,
-        "sigmaKt": 14.2,
+        "meanKt": 65.1,
+        "sigmaKt": 19.1,
         "sigmaInitKt": 5,
         "initSource": "satellite intensity analysis",
-        "tauKt": 0,
+        "tauKt": 12.8,
         "reconDeltaKt": null,
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 1915,
+        "ascatAgeMin": 1926,
         "ascatUsed": false,
-        "consensusAgeMin": null,
+        "consensusAgeMin": 62,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 25,
@@ -4736,6 +7789,13 @@
             "peakKt": 62.2,
             "peakHr": 69,
             "sigmaKt": 14.2
+          },
+          {
+            "id": "consensus",
+            "label": "ATCF consensus (HCCA/IVCN/GDMI)",
+            "peakKt": 68,
+            "peakHr": 72,
+            "sigmaKt": 14.4
           }
         ],
         "layers": [
@@ -4746,6 +7806,13 @@
             "basis": "official forecast peaks at 65 kt at 69h; NHC's published mean absolute intensity error there is 11.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 49% central, 49-57% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 2.8 kt lower (57% unadjusted)"
           },
           {
+            "id": "consensus",
+            "label": "ATCF guidance consensus",
+            "p": 0.6486197800147911,
+            "unavailable": false,
+            "basis": "3 aids in the 2026091100 deck peak at a mean of 68 kt near 72h, disagreeing by 12.8 kt"
+          },
+          {
             "id": "ships-ri",
             "label": "SHIPS rapid-intensification floor",
             "p": null,
@@ -4754,22 +7821,22 @@
           }
         ],
         "notes": [
-          "scatterometer pass is 1915 min old, past the 360-min line — band not tightened"
+          "scatterometer pass is 1926 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
-          "consensus": false,
+          "consensus": true,
           "recon": false,
           "ascat": false,
           "ships": false
         },
-        "basis": "combined 1 intensity estimate at 62 kt (sigma 14.2 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 49%, calibrated 49%"
+        "basis": "combined 2 intensity estimates at 65 kt (sigma 19.1 kt, of which 12.8 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 49%, calibrated 55%"
       },
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 246 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "official advisory only — no guidance deck and no aircraft",
+          "the advisory under this estimate is 257 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 62 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -4857,11 +7924,11 @@
         "already": false,
         "basis": "official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 248,
+      "advisoryLagMin": 259,
       "discussion": {
         "forecaster": "Evans/Papin",
         "issuedZ": "2026-09-10T20:44:00.000Z",
-        "lagMin": 247,
+        "lagMin": 258,
         "guidance": {
           "intensity": null,
           "track": null
@@ -5129,8 +8196,2945 @@
       ],
       "advisoryIssuedZ": "2026-09-10T20:43:00.000Z",
       "advNumFull": "59",
-      "consensus": null,
-      "guidance": null,
+      "consensus": {
+        "cycle": "2026091100",
+        "cycleIso": "2026-09-11T00:00:00.000Z",
+        "peakKt": 49.3,
+        "peakHr": 36,
+        "spreadKt": 2.3,
+        "minKt": 48,
+        "maxKt": 52,
+        "n": 3,
+        "members": [
+          {
+            "tech": "HCCA",
+            "label": "HFIP corrected consensus",
+            "peakKt": 52,
+            "peakHr": 36,
+            "initialKt": 45
+          },
+          {
+            "tech": "IVCN",
+            "label": "variable consensus (intensity)",
+            "peakKt": 48,
+            "peakHr": 36,
+            "initialKt": 45
+          },
+          {
+            "tech": "GDMI",
+            "label": "DeepMind (interpolated)",
+            "peakKt": 48,
+            "peakHr": 48,
+            "initialKt": 45
+          }
+        ],
+        "corrected": {
+          "tech": "HCCA",
+          "peakKt": 52,
+          "peakHr": 36,
+          "intensity": [
+            {
+              "hr": 0,
+              "kt": 45,
+              "mslp": null
+            },
+            {
+              "hr": 12,
+              "kt": 40,
+              "mslp": null
+            },
+            {
+              "hr": 24,
+              "kt": 47,
+              "mslp": null
+            },
+            {
+              "hr": 36,
+              "kt": 52,
+              "mslp": null
+            },
+            {
+              "hr": 48,
+              "kt": 45,
+              "mslp": null
+            },
+            {
+              "hr": 60,
+              "kt": 34,
+              "mslp": null
+            },
+            {
+              "hr": 72,
+              "kt": 26,
+              "mslp": null
+            },
+            {
+              "hr": 84,
+              "kt": 22,
+              "mslp": null
+            },
+            {
+              "hr": 96,
+              "kt": 23,
+              "mslp": null
+            },
+            {
+              "hr": 108,
+              "kt": 26,
+              "mslp": null
+            },
+            {
+              "hr": 120,
+              "kt": 28,
+              "mslp": null
+            },
+            {
+              "hr": 132,
+              "kt": 28,
+              "mslp": null
+            }
+          ],
+          "track": [
+            {
+              "hr": 0,
+              "lat": 29,
+              "lon": -169.5
+            },
+            {
+              "hr": 12,
+              "lat": 29.2,
+              "lon": -171.3
+            },
+            {
+              "hr": 24,
+              "lat": 30.6,
+              "lon": -171.8
+            },
+            {
+              "hr": 36,
+              "lat": 33.2,
+              "lon": -172.6
+            },
+            {
+              "hr": 48,
+              "lat": 34.4,
+              "lon": -174.8
+            },
+            {
+              "hr": 60,
+              "lat": 33.8,
+              "lon": -176.4
+            },
+            {
+              "hr": 72,
+              "lat": 33,
+              "lon": -176.6
+            },
+            {
+              "hr": 84,
+              "lat": 32.4,
+              "lon": -176.4
+            },
+            {
+              "hr": 96,
+              "lat": 31.5,
+              "lon": -176.2
+            },
+            {
+              "hr": 108,
+              "lat": 31,
+              "lon": -176.1
+            },
+            {
+              "hr": 120,
+              "lat": 31.2,
+              "lon": -176.7
+            },
+            {
+              "hr": 132,
+              "lat": 30.5,
+              "lon": -178.1
+            },
+            {
+              "hr": 144,
+              "lat": 30.1,
+              "lon": -179.2
+            },
+            {
+              "hr": 156,
+              "lat": 29.7,
+              "lon": 179
+            },
+            {
+              "hr": 168,
+              "lat": 29.4,
+              "lon": 176.8
+            }
+          ]
+        },
+        "variableIntensity": {
+          "tech": "IVCN",
+          "peakKt": 48,
+          "peakHr": 36
+        },
+        "variableTrack": {
+          "tech": "TVCN",
+          "track": [
+            {
+              "hr": 0,
+              "lat": 29,
+              "lon": -169.5
+            },
+            {
+              "hr": 12,
+              "lat": 29.3,
+              "lon": -171.3
+            },
+            {
+              "hr": 24,
+              "lat": 30.5,
+              "lon": -172.1
+            },
+            {
+              "hr": 36,
+              "lat": 32.7,
+              "lon": -173.1
+            },
+            {
+              "hr": 48,
+              "lat": 34.3,
+              "lon": -175.3
+            },
+            {
+              "hr": 60,
+              "lat": 33.2,
+              "lon": -177.3
+            },
+            {
+              "hr": 72,
+              "lat": 32.6,
+              "lon": -177.6
+            },
+            {
+              "hr": 84,
+              "lat": 32.3,
+              "lon": -177.8
+            },
+            {
+              "hr": 96,
+              "lat": 32,
+              "lon": -177.9
+            },
+            {
+              "hr": 108,
+              "lat": 31.2,
+              "lon": -178.1
+            },
+            {
+              "hr": 120,
+              "lat": 30.2,
+              "lon": -179.3
+            },
+            {
+              "hr": 132,
+              "lat": 29,
+              "lon": 178.9
+            },
+            {
+              "hr": 144,
+              "lat": 27.9,
+              "lon": 179.2
+            },
+            {
+              "hr": 156,
+              "lat": 27.2,
+              "lon": 176.7
+            },
+            {
+              "hr": 168,
+              "lat": 26.8,
+              "lon": 174.2
+            }
+          ]
+        },
+        "deepmind": {
+          "tech": "GDMI",
+          "peakKt": 48,
+          "peakHr": 48,
+          "track": [
+            {
+              "hr": 0,
+              "lat": 29,
+              "lon": -169.5
+            },
+            {
+              "hr": 12,
+              "lat": 29.3,
+              "lon": -171.3
+            },
+            {
+              "hr": 24,
+              "lat": 30.6,
+              "lon": -171.9
+            },
+            {
+              "hr": 36,
+              "lat": 33.2,
+              "lon": -172.6
+            },
+            {
+              "hr": 48,
+              "lat": 35.7,
+              "lon": -173.4
+            }
+          ]
+        },
+        "official": {
+          "tech": "OFCI",
+          "peakKt": 45,
+          "peakHr": 0
+        },
+        "missing": [],
+        "techsPresent": [
+          "AEMI",
+          "AVNI",
+          "CARQ",
+          "CEM2",
+          "CLP5",
+          "CMC2",
+          "CTCI",
+          "DSHP",
+          "GDMI",
+          "HCCA",
+          "HFAI",
+          "HFBI",
+          "HMNI",
+          "HWFI",
+          "IVCN",
+          "LGEM",
+          "NGX2",
+          "NNIB",
+          "NNIC",
+          "NVGI",
+          "OCD5",
+          "OFCI",
+          "RVCN",
+          "SHF5",
+          "SHIP",
+          "TABD",
+          "TABM",
+          "TABS",
+          "TCLP",
+          "TVCN",
+          "UKX2",
+          "XTRP"
+        ]
+      },
+      "guidance": {
+        "schema": "millibar-guidance/1",
+        "source": {
+          "name": "NHC ATCF a-deck (aid_public)",
+          "kind": "raw model guidance"
+        },
+        "cycle": "2026091100",
+        "cycleIso": "2026-09-11T00:00:00.000Z",
+        "validZ": "2026-09-11T00:00:00.000Z",
+        "fetchedAt": "2026-09-11T01:01:45.424Z",
+        "cadenceMin": 360,
+        "previousCycle": "2026091018",
+        "previousCycleIso": "2026-09-10T18:00:00.000Z",
+        "cycleGapHr": 6,
+        "semantics": {
+          "kind": "raw model guidance",
+          "isProbability": false,
+          "isForecastCone": false,
+          "note": "Each line is one model run. A count of members is a count of runs, not a probability; the spread is model disagreement, not the NHC cone; clusters are a distance partition at a stated threshold."
+        },
+        "roster": {
+          "present": [
+            "TVCN",
+            "HCCA",
+            "IVCN",
+            "AVNI",
+            "UKX2",
+            "CMC2",
+            "NVGI",
+            "AEMI",
+            "HWFI",
+            "HFAI",
+            "HFBI",
+            "HMNI",
+            "CTCI",
+            "GDMI",
+            "SHIP",
+            "DSHP",
+            "LGEM"
+          ],
+          "inSpread": [
+            "AVNI",
+            "UKX2",
+            "CMC2",
+            "NVGI",
+            "AEMI",
+            "HWFI",
+            "HFAI",
+            "HFBI",
+            "HMNI",
+            "CTCI",
+            "GDMI"
+          ],
+          "inFan": [
+            "HWFI",
+            "HFAI",
+            "HFBI",
+            "HMNI",
+            "CTCI",
+            "GDMI",
+            "SHIP",
+            "DSHP",
+            "LGEM"
+          ],
+          "missing": [
+            {
+              "key": "OFCL",
+              "label": "NHC official forecast",
+              "ids": [
+                "OFCL"
+              ]
+            },
+            {
+              "key": "GEPS",
+              "label": "Canadian ensemble mean",
+              "ids": [
+                "CEMI",
+                "CEMN"
+              ]
+            }
+          ],
+          "lateForms": [],
+          "excluded": {
+            "ensembleMembers": 0,
+            "baselines": [
+              "CARQ",
+              "CLP5",
+              "OCD5",
+              "OFCI",
+              "SHF5",
+              "TABD",
+              "TABM",
+              "TABS",
+              "TCLP",
+              "XTRP"
+            ],
+            "unlisted": [
+              "CEM2",
+              "NGX2",
+              "NNIB",
+              "NNIC",
+              "RVCN"
+            ]
+          },
+          "complete": false
+        },
+        "aids": [
+          {
+            "key": "TVCN",
+            "tech": "TVCN",
+            "label": "track consensus",
+            "cls": "consensus",
+            "inSpread": false,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.3,
+                "lon": -171.3
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.5,
+                "lon": -172.1
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 32.7,
+                "lon": -173.1
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34.3,
+                "lon": -175.3
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 33.2,
+                "lon": -177.3
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 32.6,
+                "lon": -177.6
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 32.3,
+                "lon": -177.8
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 32,
+                "lon": -177.9
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 31.2,
+                "lon": -178.1
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 30.2,
+                "lon": -179.3
+              }
+            ],
+            "intensity": [],
+            "peakKt": null,
+            "peakHr": null
+          },
+          {
+            "key": "HCCA",
+            "tech": "HCCA",
+            "label": "HFIP corrected consensus",
+            "cls": "consensus",
+            "inSpread": false,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.2,
+                "lon": -171.3
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.6,
+                "lon": -171.8
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 33.2,
+                "lon": -172.6
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34.4,
+                "lon": -174.8
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 33.8,
+                "lon": -176.4
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 33,
+                "lon": -176.6
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 32.4,
+                "lon": -176.4
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 31.5,
+                "lon": -176.2
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 31,
+                "lon": -176.1
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 31.2,
+                "lon": -176.7
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 40
+              },
+              {
+                "hr": 24,
+                "kt": 47
+              },
+              {
+                "hr": 36,
+                "kt": 52
+              },
+              {
+                "hr": 48,
+                "kt": 45
+              },
+              {
+                "hr": 60,
+                "kt": 34
+              },
+              {
+                "hr": 72,
+                "kt": 26
+              },
+              {
+                "hr": 84,
+                "kt": 22
+              },
+              {
+                "hr": 96,
+                "kt": 23
+              },
+              {
+                "hr": 108,
+                "kt": 26
+              },
+              {
+                "hr": 120,
+                "kt": 28
+              }
+            ],
+            "peakKt": 52,
+            "peakHr": 36
+          },
+          {
+            "key": "IVCN",
+            "tech": "IVCN",
+            "label": "intensity consensus",
+            "cls": "consensus",
+            "inSpread": false,
+            "inFan": false,
+            "late": false,
+            "track": [],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 42
+              },
+              {
+                "hr": 24,
+                "kt": 46
+              },
+              {
+                "hr": 36,
+                "kt": 48
+              },
+              {
+                "hr": 48,
+                "kt": 44
+              },
+              {
+                "hr": 60,
+                "kt": 37
+              },
+              {
+                "hr": 72,
+                "kt": 32
+              },
+              {
+                "hr": 84,
+                "kt": 28
+              },
+              {
+                "hr": 96,
+                "kt": 28
+              },
+              {
+                "hr": 108,
+                "kt": 30
+              },
+              {
+                "hr": 120,
+                "kt": 30
+              }
+            ],
+            "peakKt": 48,
+            "peakHr": 36
+          },
+          {
+            "key": "GFS",
+            "tech": "AVNI",
+            "label": "GFS",
+            "cls": "global",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.2,
+                "lon": -171.2
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.3,
+                "lon": -172.1
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 32.6,
+                "lon": -172.8
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34.4,
+                "lon": -175.3
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 34.1,
+                "lon": -177.7
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 33.2,
+                "lon": -178.1
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 32.8,
+                "lon": -178.4
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 32.3,
+                "lon": -178.6
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 31.7,
+                "lon": -178.9
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 30.7,
+                "lon": 179.1
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 41
+              },
+              {
+                "hr": 24,
+                "kt": 38
+              },
+              {
+                "hr": 36,
+                "kt": 43
+              },
+              {
+                "hr": 48,
+                "kt": 41
+              },
+              {
+                "hr": 60,
+                "kt": 33
+              },
+              {
+                "hr": 72,
+                "kt": 28
+              },
+              {
+                "hr": 84,
+                "kt": 25
+              },
+              {
+                "hr": 96,
+                "kt": 26
+              },
+              {
+                "hr": 108,
+                "kt": 28
+              },
+              {
+                "hr": 120,
+                "kt": 27
+              }
+            ],
+            "peakKt": 45,
+            "peakHr": 0
+          },
+          {
+            "key": "UKM",
+            "tech": "UKX2",
+            "label": "UKMET",
+            "cls": "global",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.5,
+                "lon": -171.3
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 31,
+                "lon": -172.1
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 33,
+                "lon": -173.3
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34.2,
+                "lon": -176.1
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 33.8,
+                "lon": -178.4
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 32.7,
+                "lon": -179
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 31.6,
+                "lon": -179.1
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 30.3,
+                "lon": -179.1
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 29,
+                "lon": -179
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 27.9,
+                "lon": -178.7
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 43
+              },
+              {
+                "hr": 24,
+                "kt": 45
+              },
+              {
+                "hr": 36,
+                "kt": 47
+              },
+              {
+                "hr": 48,
+                "kt": 40
+              },
+              {
+                "hr": 60,
+                "kt": 34
+              },
+              {
+                "hr": 72,
+                "kt": 32
+              },
+              {
+                "hr": 84,
+                "kt": 32
+              },
+              {
+                "hr": 96,
+                "kt": 31
+              },
+              {
+                "hr": 108,
+                "kt": 31
+              },
+              {
+                "hr": 120,
+                "kt": 32
+              }
+            ],
+            "peakKt": 47,
+            "peakHr": 36
+          },
+          {
+            "key": "CMC",
+            "tech": "CMC2",
+            "label": "Canadian GEM",
+            "cls": "global",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.3,
+                "lon": -171.5
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.8,
+                "lon": -172.7
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 33,
+                "lon": -173.5
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34.2,
+                "lon": -175.7
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 34,
+                "lon": -177.5
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 33.6,
+                "lon": -178.2
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 32.8,
+                "lon": -178.5
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 31.3,
+                "lon": -178.6
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 29.4,
+                "lon": -178.4
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 28,
+                "lon": -178.2
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 40
+              },
+              {
+                "hr": 24,
+                "kt": 41
+              },
+              {
+                "hr": 36,
+                "kt": 47
+              },
+              {
+                "hr": 48,
+                "kt": 44
+              },
+              {
+                "hr": 60,
+                "kt": 38
+              },
+              {
+                "hr": 72,
+                "kt": 34
+              },
+              {
+                "hr": 84,
+                "kt": 33
+              },
+              {
+                "hr": 96,
+                "kt": 35
+              },
+              {
+                "hr": 108,
+                "kt": 34
+              },
+              {
+                "hr": 120,
+                "kt": 34
+              }
+            ],
+            "peakKt": 47,
+            "peakHr": 36
+          },
+          {
+            "key": "NVG",
+            "tech": "NVGI",
+            "label": "NAVGEM",
+            "cls": "global",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.8,
+                "lon": -171.3
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 31.9,
+                "lon": -172.4
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 34.6,
+                "lon": -173.7
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 36.4,
+                "lon": -176
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 37.9,
+                "lon": -177.6
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 39.8,
+                "lon": -177.1
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 41.3,
+                "lon": -175.2
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 41.7,
+                "lon": -172.7
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 41.8,
+                "lon": -170.1
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 41.9,
+                "lon": -167.5
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 42
+              },
+              {
+                "hr": 24,
+                "kt": 44
+              },
+              {
+                "hr": 36,
+                "kt": 47
+              },
+              {
+                "hr": 48,
+                "kt": 41
+              },
+              {
+                "hr": 60,
+                "kt": 37
+              },
+              {
+                "hr": 72,
+                "kt": 37
+              },
+              {
+                "hr": 84,
+                "kt": 42
+              },
+              {
+                "hr": 96,
+                "kt": 44
+              },
+              {
+                "hr": 108,
+                "kt": 40
+              },
+              {
+                "hr": 120,
+                "kt": 37
+              }
+            ],
+            "peakKt": 47,
+            "peakHr": 36
+          },
+          {
+            "key": "GEFS",
+            "tech": "AEMI",
+            "label": "GEFS ensemble mean",
+            "cls": "ensemble-mean",
+            "inSpread": true,
+            "inFan": false,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.2,
+                "lon": -171.4
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.3,
+                "lon": -172.5
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 32.3,
+                "lon": -173.4
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34,
+                "lon": -175.4
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 33.9,
+                "lon": -177.1
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 33.5,
+                "lon": -177.6
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 33,
+                "lon": -177.6
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 32.4,
+                "lon": -177.3
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 31.5,
+                "lon": -177
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 30.5,
+                "lon": -177.2
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 38
+              },
+              {
+                "hr": 24,
+                "kt": 37
+              },
+              {
+                "hr": 36,
+                "kt": 41
+              },
+              {
+                "hr": 48,
+                "kt": 40
+              },
+              {
+                "hr": 60,
+                "kt": 33
+              },
+              {
+                "hr": 72,
+                "kt": 30
+              },
+              {
+                "hr": 84,
+                "kt": 29
+              },
+              {
+                "hr": 96,
+                "kt": 33
+              },
+              {
+                "hr": 108,
+                "kt": 34
+              },
+              {
+                "hr": 120,
+                "kt": 32
+              }
+            ],
+            "peakKt": 45,
+            "peakHr": 0
+          },
+          {
+            "key": "HWRF",
+            "tech": "HWFI",
+            "label": "HWRF",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.3,
+                "lon": -171.3
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 31,
+                "lon": -172.3
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 33.7,
+                "lon": -174
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34.2,
+                "lon": -176.6
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 33.1,
+                "lon": -177.7
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 32.1,
+                "lon": -178
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 31.5,
+                "lon": -177.8
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 31,
+                "lon": -177.5
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 30.9,
+                "lon": -176.8
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 31.5,
+                "lon": -176.6
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 40
+              },
+              {
+                "hr": 24,
+                "kt": 45
+              },
+              {
+                "hr": 36,
+                "kt": 48
+              },
+              {
+                "hr": 48,
+                "kt": 44
+              },
+              {
+                "hr": 60,
+                "kt": 38
+              },
+              {
+                "hr": 72,
+                "kt": 30
+              },
+              {
+                "hr": 84,
+                "kt": 26
+              },
+              {
+                "hr": 96,
+                "kt": 26
+              },
+              {
+                "hr": 108,
+                "kt": 27
+              },
+              {
+                "hr": 120,
+                "kt": 32
+              }
+            ],
+            "peakKt": 48,
+            "peakHr": 36
+          },
+          {
+            "key": "HAFA",
+            "tech": "HFAI",
+            "label": "HAFS-A",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.2,
+                "lon": -171.2
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.4,
+                "lon": -171.9
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 32.9,
+                "lon": -172.9
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34.3,
+                "lon": -176.2
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 32.6,
+                "lon": -178
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 31.6,
+                "lon": -178.4
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 31.2,
+                "lon": -179.2
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 30.3,
+                "lon": -180
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 29.3,
+                "lon": 179.2
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 28.9,
+                "lon": 177.8
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 39
+              },
+              {
+                "hr": 24,
+                "kt": 48
+              },
+              {
+                "hr": 36,
+                "kt": 52
+              },
+              {
+                "hr": 48,
+                "kt": 42
+              },
+              {
+                "hr": 60,
+                "kt": 39
+              },
+              {
+                "hr": 72,
+                "kt": 37
+              },
+              {
+                "hr": 84,
+                "kt": 31
+              },
+              {
+                "hr": 96,
+                "kt": 29
+              },
+              {
+                "hr": 108,
+                "kt": 29
+              },
+              {
+                "hr": 120,
+                "kt": 31
+              }
+            ],
+            "peakKt": 52,
+            "peakHr": 36
+          },
+          {
+            "key": "HAFB",
+            "tech": "HFBI",
+            "label": "HAFS-B",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.2,
+                "lon": -171
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.6,
+                "lon": -171.5
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 32.9,
+                "lon": -172.9
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34,
+                "lon": -176.2
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 32.8,
+                "lon": -178.2
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 31.7,
+                "lon": -178.1
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 31.5,
+                "lon": -178.3
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 31.4,
+                "lon": -178.9
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 30.6,
+                "lon": -179.8
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 29.4,
+                "lon": 178.4
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 43
+              },
+              {
+                "hr": 24,
+                "kt": 53
+              },
+              {
+                "hr": 36,
+                "kt": 50
+              },
+              {
+                "hr": 48,
+                "kt": 38
+              },
+              {
+                "hr": 60,
+                "kt": 32
+              },
+              {
+                "hr": 72,
+                "kt": 31
+              },
+              {
+                "hr": 84,
+                "kt": 27
+              },
+              {
+                "hr": 96,
+                "kt": 26
+              },
+              {
+                "hr": 108,
+                "kt": 27
+              },
+              {
+                "hr": 120,
+                "kt": 28
+              }
+            ],
+            "peakKt": 53,
+            "peakHr": 24
+          },
+          {
+            "key": "HMON",
+            "tech": "HMNI",
+            "label": "HMON",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.3,
+                "lon": -171.2
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.8,
+                "lon": -171.9
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 33,
+                "lon": -172.7
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34.3,
+                "lon": -175.3
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 33.8,
+                "lon": -177.6
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 32.9,
+                "lon": -178.7
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 31.9,
+                "lon": -178.8
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 31.5,
+                "lon": -178
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 31.6,
+                "lon": -177.1
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 32.2,
+                "lon": -176.7
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 45
+              },
+              {
+                "hr": 24,
+                "kt": 55
+              },
+              {
+                "hr": 36,
+                "kt": 57
+              },
+              {
+                "hr": 48,
+                "kt": 52
+              },
+              {
+                "hr": 60,
+                "kt": 44
+              },
+              {
+                "hr": 72,
+                "kt": 34
+              },
+              {
+                "hr": 84,
+                "kt": 27
+              },
+              {
+                "hr": 96,
+                "kt": 28
+              },
+              {
+                "hr": 108,
+                "kt": 32
+              },
+              {
+                "hr": 120,
+                "kt": 34
+              }
+            ],
+            "peakKt": 57,
+            "peakHr": 36
+          },
+          {
+            "key": "CTC",
+            "tech": "CTCI",
+            "label": "COAMPS-TC",
+            "cls": "hurricane",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.4,
+                "lon": -171.3
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.7,
+                "lon": -172.1
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 32.6,
+                "lon": -172.9
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 34.3,
+                "lon": -174.9
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 34.4,
+                "lon": -176.9
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 34.4,
+                "lon": -177.6
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 34.6,
+                "lon": -177.8
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 34.8,
+                "lon": -177.6
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 34.1,
+                "lon": -178.4
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 32,
+                "lon": 179.4
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 45
+              },
+              {
+                "hr": 24,
+                "kt": 48
+              },
+              {
+                "hr": 36,
+                "kt": 50
+              },
+              {
+                "hr": 48,
+                "kt": 44
+              },
+              {
+                "hr": 60,
+                "kt": 34
+              },
+              {
+                "hr": 72,
+                "kt": 29
+              },
+              {
+                "hr": 84,
+                "kt": 26
+              },
+              {
+                "hr": 96,
+                "kt": 30
+              },
+              {
+                "hr": 108,
+                "kt": 36
+              },
+              {
+                "hr": 120,
+                "kt": 32
+              }
+            ],
+            "peakKt": 50,
+            "peakHr": 36
+          },
+          {
+            "key": "GDM",
+            "tech": "GDMI",
+            "label": "DeepMind",
+            "cls": "ai",
+            "inSpread": true,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29.3,
+                "lon": -171.3
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.6,
+                "lon": -171.9
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 33.2,
+                "lon": -172.6
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 35.7,
+                "lon": -173.4
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 38
+              },
+              {
+                "hr": 24,
+                "kt": 38
+              },
+              {
+                "hr": 36,
+                "kt": 43
+              },
+              {
+                "hr": 48,
+                "kt": 48
+              }
+            ],
+            "peakKt": 48,
+            "peakHr": 48
+          },
+          {
+            "key": "SHIP",
+            "tech": "SHIP",
+            "label": "SHIPS",
+            "cls": "statistical",
+            "inSpread": false,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29,
+                "lon": -171.4
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.3,
+                "lon": -172
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 32,
+                "lon": -172.7
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 33.4,
+                "lon": -173.7
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 34,
+                "lon": -174.5
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 33.3,
+                "lon": -175.5
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 32.9,
+                "lon": -175.8
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 32.7,
+                "lon": -175.5
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 31.8,
+                "lon": -175.4
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 30.1,
+                "lon": -175.9
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 40
+              },
+              {
+                "hr": 24,
+                "kt": 41
+              },
+              {
+                "hr": 36,
+                "kt": 46
+              },
+              {
+                "hr": 48,
+                "kt": 45
+              },
+              {
+                "hr": 60,
+                "kt": 38
+              },
+              {
+                "hr": 72,
+                "kt": 35
+              },
+              {
+                "hr": 84,
+                "kt": 29
+              },
+              {
+                "hr": 96,
+                "kt": 28
+              },
+              {
+                "hr": 108,
+                "kt": 29
+              },
+              {
+                "hr": 120,
+                "kt": 26
+              }
+            ],
+            "peakKt": 46,
+            "peakHr": 36
+          },
+          {
+            "key": "DSHP",
+            "tech": "DSHP",
+            "label": "decay SHIPS",
+            "cls": "statistical",
+            "inSpread": false,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29,
+                "lon": -171.4
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.3,
+                "lon": -172
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 32,
+                "lon": -172.7
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 33.4,
+                "lon": -173.7
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 34,
+                "lon": -174.5
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 33.3,
+                "lon": -175.5
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 32.9,
+                "lon": -175.8
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 32.7,
+                "lon": -175.5
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 31.8,
+                "lon": -175.4
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 30.1,
+                "lon": -175.9
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 40
+              },
+              {
+                "hr": 24,
+                "kt": 41
+              },
+              {
+                "hr": 36,
+                "kt": 46
+              },
+              {
+                "hr": 48,
+                "kt": 45
+              },
+              {
+                "hr": 60,
+                "kt": 38
+              },
+              {
+                "hr": 72,
+                "kt": 35
+              },
+              {
+                "hr": 84,
+                "kt": 29
+              },
+              {
+                "hr": 96,
+                "kt": 28
+              },
+              {
+                "hr": 108,
+                "kt": 29
+              },
+              {
+                "hr": 120,
+                "kt": 26
+              }
+            ],
+            "peakKt": 46,
+            "peakHr": 36
+          },
+          {
+            "key": "LGEM",
+            "tech": "LGEM",
+            "label": "LGEM",
+            "cls": "statistical",
+            "inSpread": false,
+            "inFan": true,
+            "late": false,
+            "track": [
+              {
+                "hr": 0,
+                "validZ": "2026-09-11T00:00:00.000Z",
+                "lat": 29,
+                "lon": -169.5
+              },
+              {
+                "hr": 12,
+                "validZ": "2026-09-11T12:00:00.000Z",
+                "lat": 29,
+                "lon": -171.4
+              },
+              {
+                "hr": 24,
+                "validZ": "2026-09-12T00:00:00.000Z",
+                "lat": 30.3,
+                "lon": -172
+              },
+              {
+                "hr": 36,
+                "validZ": "2026-09-12T12:00:00.000Z",
+                "lat": 32,
+                "lon": -172.7
+              },
+              {
+                "hr": 48,
+                "validZ": "2026-09-13T00:00:00.000Z",
+                "lat": 33.4,
+                "lon": -173.7
+              },
+              {
+                "hr": 60,
+                "validZ": "2026-09-13T12:00:00.000Z",
+                "lat": 34,
+                "lon": -174.5
+              },
+              {
+                "hr": 72,
+                "validZ": "2026-09-14T00:00:00.000Z",
+                "lat": 33.3,
+                "lon": -175.5
+              },
+              {
+                "hr": 84,
+                "validZ": "2026-09-14T12:00:00.000Z",
+                "lat": 32.9,
+                "lon": -175.8
+              },
+              {
+                "hr": 96,
+                "validZ": "2026-09-15T00:00:00.000Z",
+                "lat": 32.7,
+                "lon": -175.5
+              },
+              {
+                "hr": 108,
+                "validZ": "2026-09-15T12:00:00.000Z",
+                "lat": 31.8,
+                "lon": -175.4
+              },
+              {
+                "hr": 120,
+                "validZ": "2026-09-16T00:00:00.000Z",
+                "lat": 30.1,
+                "lon": -175.9
+              }
+            ],
+            "intensity": [
+              {
+                "hr": 0,
+                "kt": 45
+              },
+              {
+                "hr": 12,
+                "kt": 40
+              },
+              {
+                "hr": 24,
+                "kt": 37
+              },
+              {
+                "hr": 36,
+                "kt": 37
+              },
+              {
+                "hr": 48,
+                "kt": 35
+              },
+              {
+                "hr": 60,
+                "kt": 31
+              },
+              {
+                "hr": 72,
+                "kt": 28
+              },
+              {
+                "hr": 84,
+                "kt": 26
+              },
+              {
+                "hr": 96,
+                "kt": 25
+              },
+              {
+                "hr": 108,
+                "kt": 26
+              },
+              {
+                "hr": 120,
+                "kt": 27
+              }
+            ],
+            "peakKt": 45,
+            "peakHr": 0
+          }
+        ],
+        "prevOfclTrack": [
+          {
+            "hr": 0,
+            "validZ": "2026-09-10T18:00:00.000Z",
+            "lat": 29,
+            "lon": -168.3
+          },
+          {
+            "hr": 3,
+            "validZ": "2026-09-10T21:00:00.000Z",
+            "lat": 29,
+            "lon": -168.9
+          },
+          {
+            "hr": 12,
+            "validZ": "2026-09-11T06:00:00.000Z",
+            "lat": 29,
+            "lon": -170.4
+          },
+          {
+            "hr": 24,
+            "validZ": "2026-09-11T18:00:00.000Z",
+            "lat": 29.6,
+            "lon": -171.7
+          },
+          {
+            "hr": 36,
+            "validZ": "2026-09-12T06:00:00.000Z",
+            "lat": 31.2,
+            "lon": -172.2
+          },
+          {
+            "hr": 48,
+            "validZ": "2026-09-12T18:00:00.000Z",
+            "lat": 32.8,
+            "lon": -173
+          },
+          {
+            "hr": 60,
+            "validZ": "2026-09-13T06:00:00.000Z",
+            "lat": 33.9,
+            "lon": -174
+          },
+          {
+            "hr": 72,
+            "validZ": "2026-09-13T18:00:00.000Z",
+            "lat": 33.8,
+            "lon": -175
+          },
+          {
+            "hr": 96,
+            "validZ": "2026-09-14T18:00:00.000Z",
+            "lat": 32.9,
+            "lon": -175.5
+          },
+          {
+            "hr": 120,
+            "validZ": "2026-09-15T18:00:00.000Z",
+            "lat": 31,
+            "lon": -175.5
+          }
+        ],
+        "leads": [
+          {
+            "hr": 24,
+            "validZ": "2026-09-12T00:00:00.000Z",
+            "n": 11,
+            "centroid": [
+              30.8,
+              -172.1
+            ],
+            "meanKm": 47,
+            "maxKm": 129,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 30.5,
+              "lon": -172.1,
+              "offsetKm": 29
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 234,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CMC2",
+                "CTCI",
+                "GDMI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "NVGI",
+                "UKX2"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [],
+            "prev": {
+              "n": 10,
+              "centroidShiftKm": 37,
+              "meanKm": 69,
+              "spreadDeltaKm": -21,
+              "ofclShiftKm": null
+            }
+          },
+          {
+            "hr": 48,
+            "validZ": "2026-09-13T00:00:00.000Z",
+            "n": 11,
+            "centroid": [
+              34.5,
+              -175.6
+            ],
+            "meanKm": 90,
+            "maxKm": 234,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 34.3,
+              "lon": -175.3,
+              "offsetKm": 36
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 318,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CMC2",
+                "CTCI",
+                "GDMI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "NVGI",
+                "UKX2"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [],
+            "prev": {
+              "n": 10,
+              "centroidShiftKm": 109,
+              "meanKm": 137,
+              "spreadDeltaKm": -47,
+              "ofclShiftKm": null
+            }
+          },
+          {
+            "hr": 72,
+            "validZ": "2026-09-14T00:00:00.000Z",
+            "n": 10,
+            "centroid": [
+              33.6,
+              -178.1
+            ],
+            "meanKm": 171,
+            "maxKm": 700,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 32.6,
+              "lon": -177.6,
+              "offsetKm": 115
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 402,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CMC2",
+                "CTCI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "UKX2"
+              ],
+              [
+                "NVGI"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [
+              "NVGI"
+            ],
+            "prev": {
+              "n": 9,
+              "centroidShiftKm": 45,
+              "meanKm": 165,
+              "spreadDeltaKm": 5,
+              "ofclShiftKm": null
+            }
+          },
+          {
+            "hr": 96,
+            "validZ": "2026-09-15T00:00:00.000Z",
+            "n": 10,
+            "centroid": [
+              32.7,
+              -177.8
+            ],
+            "meanKm": 278,
+            "maxKm": 1099,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 32,
+              "lon": -177.9,
+              "offsetKm": 78
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 486,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CMC2",
+                "CTCI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "UKX2"
+              ],
+              [
+                "NVGI"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [
+              "NVGI"
+            ],
+            "prev": {
+              "n": 9,
+              "centroidShiftKm": 83,
+              "meanKm": 197,
+              "spreadDeltaKm": 81,
+              "ofclShiftKm": null
+            }
+          },
+          {
+            "hr": 120,
+            "validZ": "2026-09-16T00:00:00.000Z",
+            "n": 10,
+            "centroid": [
+              31.3,
+              -178
+            ],
+            "meanKm": 410,
+            "maxKm": 1505,
+            "ofcl": null,
+            "consensus": {
+              "tech": "TVCN",
+              "lat": 30.2,
+              "lon": -179.3,
+              "offsetKm": 173
+            },
+            "ofclVsConsensusKm": null,
+            "thresholdKm": 570,
+            "clusters": [
+              [
+                "AEMI",
+                "AVNI",
+                "CMC2",
+                "CTCI",
+                "HFAI",
+                "HFBI",
+                "HMNI",
+                "HWFI",
+                "UKX2"
+              ],
+              [
+                "NVGI"
+              ]
+            ],
+            "scenarios": 1,
+            "outliers": [
+              "NVGI"
+            ],
+            "prev": {
+              "n": 9,
+              "centroidShiftKm": 197,
+              "meanKm": 250,
+              "spreadDeltaKm": 160,
+              "ofclShiftKm": null
+            }
+          }
+        ],
+        "intensityFan": [
+          {
+            "hr": 0,
+            "validZ": "2026-09-11T00:00:00.000Z",
+            "n": 9,
+            "min": 45,
+            "median": 45,
+            "max": 45,
+            "ofcl": null,
+            "ivcn": 45,
+            "hcca": 45,
+            "prevOfcl": 43,
+            "prevMedian": 42,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 12,
+            "validZ": "2026-09-11T12:00:00.000Z",
+            "n": 9,
+            "min": 38,
+            "median": 40,
+            "max": 45,
+            "ofcl": null,
+            "ivcn": 42,
+            "hcca": 40,
+            "prevOfcl": 40,
+            "prevMedian": 38,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 24,
+            "validZ": "2026-09-12T00:00:00.000Z",
+            "n": 9,
+            "min": 37,
+            "median": 45,
+            "max": 55,
+            "ofcl": null,
+            "ivcn": 46,
+            "hcca": 47,
+            "prevOfcl": 40,
+            "prevMedian": 38,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 36,
+            "validZ": "2026-09-12T12:00:00.000Z",
+            "n": 9,
+            "min": 37,
+            "median": 48,
+            "max": 57,
+            "ofcl": null,
+            "ivcn": 48,
+            "hcca": 52,
+            "prevOfcl": 43,
+            "prevMedian": 42,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 48,
+            "validZ": "2026-09-13T00:00:00.000Z",
+            "n": 9,
+            "min": 35,
+            "median": 44,
+            "max": 52,
+            "ofcl": null,
+            "ivcn": 44,
+            "hcca": 45,
+            "prevOfcl": 40,
+            "prevMedian": 42,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 60,
+            "validZ": "2026-09-13T12:00:00.000Z",
+            "n": 8,
+            "min": 31,
+            "median": 38,
+            "max": 44,
+            "ofcl": null,
+            "ivcn": 37,
+            "hcca": 34,
+            "prevOfcl": 33,
+            "prevMedian": 35,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 72,
+            "validZ": "2026-09-14T00:00:00.000Z",
+            "n": 8,
+            "min": 28,
+            "median": 33,
+            "max": 37,
+            "ofcl": null,
+            "ivcn": 32,
+            "hcca": 26,
+            "prevOfcl": 29,
+            "prevMedian": 29,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 84,
+            "validZ": "2026-09-14T12:00:00.000Z",
+            "n": 8,
+            "min": 26,
+            "median": 27,
+            "max": 31,
+            "ofcl": null,
+            "ivcn": 28,
+            "hcca": 22,
+            "prevOfcl": 26,
+            "prevMedian": 25,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 96,
+            "validZ": "2026-09-15T00:00:00.000Z",
+            "n": 8,
+            "min": 25,
+            "median": 28,
+            "max": 30,
+            "ofcl": null,
+            "ivcn": 28,
+            "hcca": 23,
+            "prevOfcl": 25,
+            "prevMedian": 26,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 108,
+            "validZ": "2026-09-15T12:00:00.000Z",
+            "n": 8,
+            "min": 26,
+            "median": 29,
+            "max": 36,
+            "ofcl": null,
+            "ivcn": 30,
+            "hcca": 26,
+            "prevOfcl": 25,
+            "prevMedian": 26,
+            "prevInterpolated": true
+          },
+          {
+            "hr": 120,
+            "validZ": "2026-09-16T00:00:00.000Z",
+            "n": 8,
+            "min": 26,
+            "median": 30,
+            "max": 34,
+            "ofcl": null,
+            "ivcn": 30,
+            "hcca": 28,
+            "prevOfcl": null,
+            "prevMedian": 29,
+            "prevInterpolated": true
+          }
+        ],
+        "peaks": {
+          "members": [
+            {
+              "tech": "HWFI",
+              "label": "HWRF",
+              "kt": 48,
+              "hr": 36
+            },
+            {
+              "tech": "HFAI",
+              "label": "HAFS-A",
+              "kt": 52,
+              "hr": 36
+            },
+            {
+              "tech": "HFBI",
+              "label": "HAFS-B",
+              "kt": 53,
+              "hr": 24
+            },
+            {
+              "tech": "HMNI",
+              "label": "HMON",
+              "kt": 57,
+              "hr": 36
+            },
+            {
+              "tech": "CTCI",
+              "label": "COAMPS-TC",
+              "kt": 50,
+              "hr": 36
+            },
+            {
+              "tech": "GDMI",
+              "label": "DeepMind",
+              "kt": 48,
+              "hr": 48
+            },
+            {
+              "tech": "SHIP",
+              "label": "SHIPS",
+              "kt": 46,
+              "hr": 36
+            },
+            {
+              "tech": "DSHP",
+              "label": "decay SHIPS",
+              "kt": 46,
+              "hr": 36
+            },
+            {
+              "tech": "LGEM",
+              "label": "LGEM",
+              "kt": 45,
+              "hr": 0
+            }
+          ],
+          "n": 9,
+          "min": 45,
+          "median": 48,
+          "max": 57,
+          "medianHr": 36,
+          "ofcl": null,
+          "prevOfcl": {
+            "kt": 45,
+            "hr": 0
+          },
+          "prevMedian": 46
+        },
+        "trend": {
+          "hr": 72,
+          "label": "steady",
+          "spreadDeltaKm": 5,
+          "spreadDeltaPct": 4,
+          "centroidShiftKm": 45
+        },
+        "summary": {
+          "trackSpread72Km": 171,
+          "trackSpreadMax72Km": 700,
+          "n72": 10,
+          "intensitySpread72Kt": 9,
+          "intensityN72": 8,
+          "scenarios72": 1,
+          "scenarios120": 1,
+          "ofclVsConsensus72Km": null,
+          "ofclOffset72Km": null,
+          "cycleShift72Km": 45,
+          "ofclShift72Km": null,
+          "trend": "steady",
+          "peakMedianKt": 48,
+          "peakOfclKt": null,
+          "peakDeltaVsPrevKt": 2,
+          "ofclPeakDeltaVsPrevKt": null
+        }
+      },
       "genesis": {
         "lat": 10.1,
         "lon": -136.7,
@@ -8613,11 +14617,11 @@
       },
       "atcfDeck": {
         "cycle": "2026091100",
-        "techCount": 1,
-        "forecastAids": 0
+        "techCount": 32,
+        "forecastAids": 31
       },
       "intelNotes": {
-        "atcf": "a-deck cycle 2026091100 · 1 techs · NO CONSENSUS AID IN THIS CYCLE · no guidance roster in this cycle · b-deck 66 records · f-deck 532 fixes",
+        "atcf": "a-deck cycle 2026091100 · 32 techs · consensus 3 member(s) peak 49.3 kt · guidance 11 track members, 72h spread 171 km · b-deck 66 records · f-deck 532 fixes",
         "ships": "2026-09-11T00:00Z · shear 28 kt · OHC 0 · MPI 127 kt · 8 RI thresholds"
       },
       "riFloor": {
@@ -9167,17 +15171,17 @@
         "pWithRi": 0.01,
         "drivenBy": "forecast peak",
         "meanKt": 45,
-        "sigmaKt": 0,
+        "sigmaKt": 2.3,
         "sigmaInitKt": 4,
         "initSource": "scatterometer (ASCT)",
-        "tauKt": 0,
+        "tauKt": 2.3,
         "reconDeltaKt": null,
-        "reconAgeMin": 3614,
+        "reconAgeMin": 3624,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 197,
+        "ascatAgeMin": 208,
         "ascatUsed": true,
-        "consensusAgeMin": null,
+        "consensusAgeMin": 62,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 20,
@@ -9195,6 +15199,13 @@
             "peakKt": 45,
             "peakHr": 0,
             "sigmaKt": 0
+          },
+          {
+            "id": "consensus",
+            "label": "ATCF consensus (HCCA/IVCN/GDMI)",
+            "peakKt": 49.3,
+            "peakHr": 36,
+            "sigmaKt": 11.3
           }
         ],
         "layers": [
@@ -9205,11 +15216,18 @@
             "basis": "official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
           },
           {
+            "id": "consensus",
+            "label": "ATCF guidance consensus",
+            "p": 0.12095412978638183,
+            "unavailable": false,
+            "basis": "3 aids in the 2026091100 deck peak at a mean of 49.3 kt near 36h, disagreeing by 2.3 kt"
+          },
+          {
             "id": "recon",
             "label": "Aircraft reconnaissance",
             "p": null,
             "unavailable": true,
-            "basis": "recon fix present but not applied: the fix is 3614 min old, past the 180-min line"
+            "basis": "recon fix present but not applied: the fix is 3624 min old, past the 180-min line"
           },
           {
             "id": "ships-ri",
@@ -9220,22 +15238,22 @@
           }
         ],
         "notes": [
-          "recon fix not applied: the fix is 3614 min old, past the 180-min line"
+          "recon fix not applied: the fix is 3624 min old, past the 180-min line"
         ],
         "used": {
           "official": true,
-          "consensus": false,
+          "consensus": true,
           "recon": false,
           "ascat": true,
           "ships": false
         },
-        "basis": "combined 1 intensity estimate at 45 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 197 min ago · driven by the forecast peak · raw official estimate 1%, calibrated 1%"
+        "basis": "combined 2 intensity estimates at 45 kt (sigma 2.3 kt, of which 2.3 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 208 min ago · driven by the forecast peak · raw official estimate 1%, calibrated 1%"
       },
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 248 min old, past the 180-min line — quality is capped regardless of what else arrived",
-          "official advisory only — no guidance deck and no aircraft",
+          "the advisory under this estimate is 259 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "ATCF consensus 62 min old, no aircraft in the storm",
           "scatterometer pass tightened the current-intensity band",
           "SHIPS RI diagnostics present, published but not scored"
         ]
@@ -9254,7 +15272,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 45 kt now · combined 1 intensity estimate at 45 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 197 min ago · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 248 min old when fetched",
+      "modelBasis": "Lowell is 45 kt now · combined 2 intensity estimates at 45 kt (sigma 2.3 kt, of which 2.3 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 208 min ago · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 259 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -9278,11 +15296,18 @@
           "basis": "no watch or warning in effect for this system"
         },
         {
+          "id": "consensus",
+          "label": "ATCF guidance consensus",
+          "p": 0.12095412978638183,
+          "unavailable": false,
+          "basis": "3 aids in the 2026091100 deck peak at a mean of 49.3 kt near 36h, disagreeing by 2.3 kt"
+        },
+        {
           "id": "recon",
           "label": "Aircraft reconnaissance",
           "p": null,
           "unavailable": true,
-          "basis": "recon fix present but not applied: the fix is 3614 min old, past the 180-min line"
+          "basis": "recon fix present but not applied: the fix is 3624 min old, past the 180-min line"
         },
         {
           "id": "ships-ri",
@@ -9294,7 +15319,7 @@
       ],
       "modelLow": 0.01,
       "modelHigh": 0.01,
-      "modelLagMin": 248,
+      "modelLagMin": 259,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -9302,10 +15327,10 @@
       "modelCalibrated": true,
       "modelQuality": "LOW",
       "modelIntel": {
-        "conKt": null,
-        "conAgeMin": null,
-        "spreadKt": 0,
-        "reconAgeMin": 3614,
+        "conKt": 49.3,
+        "conAgeMin": 62,
+        "spreadKt": 2.3,
+        "reconAgeMin": 3624,
         "reconDeltaKt": null,
         "ascatUsed": true,
         "riFloorP": 0,
@@ -9342,7 +15367,7 @@
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Lowell is 45 kt now · combined 1 intensity estimate at 45 kt (sigma 0 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 197 min ago · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 248 min old when fetched",
+      "modelBasis": "Lowell is 45 kt now · combined 2 intensity estimates at 45 kt (sigma 2.3 kt, of which 2.3 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · band tightened by a scatterometer pass 208 min ago · driven by the forecast peak · raw official estimate 1%, calibrated 1% · official forecast peaks at 45 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths · advisory 259 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -9366,11 +15391,18 @@
           "basis": "no watch or warning in effect for this system"
         },
         {
+          "id": "consensus",
+          "label": "ATCF guidance consensus",
+          "p": 0.12095412978638183,
+          "unavailable": false,
+          "basis": "3 aids in the 2026091100 deck peak at a mean of 49.3 kt near 36h, disagreeing by 2.3 kt"
+        },
+        {
           "id": "recon",
           "label": "Aircraft reconnaissance",
           "p": null,
           "unavailable": true,
-          "basis": "recon fix present but not applied: the fix is 3614 min old, past the 180-min line"
+          "basis": "recon fix present but not applied: the fix is 3624 min old, past the 180-min line"
         },
         {
           "id": "ships-ri",
@@ -9382,7 +15414,7 @@
       ],
       "modelLow": 0.01,
       "modelHigh": 0.01,
-      "modelLagMin": 248,
+      "modelLagMin": 259,
       "modelMaxLagMin": 360,
       "modelGuidance": null,
       "modelRawP": null,
@@ -9390,10 +15422,10 @@
       "modelCalibrated": true,
       "modelQuality": "LOW",
       "modelIntel": {
-        "conKt": null,
-        "conAgeMin": null,
-        "spreadKt": 0,
-        "reconAgeMin": 3614,
+        "conKt": 49.3,
+        "conAgeMin": 62,
+        "spreadKt": 2.3,
+        "reconAgeMin": 3624,
         "reconDeltaKt": null,
         "ascatUsed": true,
         "riFloorP": 0,
@@ -9426,11 +15458,11 @@
       "storm": "EP142026",
       "subject": null,
       "market": 0.51,
-      "model": 0.49155922011609016,
+      "model": 0.5531488862182877,
       "modelQuantity": "storm-intensity",
       "modelBasin": null,
       "modelSource": "NHC forecast + ATCF/recon",
-      "modelBasis": "Norbert is 40 kt now · combined 1 intensity estimate at 62 kt (sigma 14.2 kt, of which 0 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 49%, calibrated 49% · official forecast peaks at 65 kt at 69h; NHC's published mean absolute intensity error there is 11.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 49% central, 49-57% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 2.8 kt lower (57% unadjusted) · advisory 246 min old when fetched",
+      "modelBasis": "Norbert is 40 kt now · combined 2 intensity estimates at 65 kt (sigma 19.1 kt, of which 12.8 kt is observed disagreement); 65 kt needs 62.5 kt of latent wind · driven by the forecast peak · raw official estimate 49%, calibrated 55% · official forecast peaks at 65 kt at 69h; NHC's published mean absolute intensity error there is 11.3 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 49% central, 49-57% across a plausible range of error widths; NHC places this forecast above the guidance envelope, so the peak is read 2.8 kt lower (57% unadjusted) · advisory 257 min old when fetched",
       "modelUncond": null,
       "modelLayers": [
         {
@@ -9454,6 +15486,13 @@
           "basis": "no watch or warning in effect for this system"
         },
         {
+          "id": "consensus",
+          "label": "ATCF guidance consensus",
+          "p": 0.6486197800147911,
+          "unavailable": false,
+          "basis": "3 aids in the 2026091100 deck peak at a mean of 68 kt near 72h, disagreeing by 12.8 kt"
+        },
+        {
           "id": "ships-ri",
           "label": "SHIPS rapid-intensification floor",
           "p": null,
@@ -9461,9 +15500,9 @@
           "basis": "SHIPS publishes a 23% chance of a 25 kt gain in 24 h (1.9x the 13% climatological rate), and 25 kt is enough to clear the 25 kt gap to the strike — published, not scored"
         }
       ],
-      "modelLow": 0.4894494714933142,
-      "modelHigh": 0.49472426980140044,
-      "modelLagMin": 246,
+      "modelLow": 0.4907680333948931,
+      "modelHigh": 0.5663252966452019,
+      "modelLagMin": 257,
       "modelMaxLagMin": 360,
       "modelGuidance": "above",
       "modelRawP": 0.5699818954929254,
@@ -9471,9 +15510,9 @@
       "modelCalibrated": true,
       "modelQuality": "LOW",
       "modelIntel": {
-        "conKt": null,
-        "conAgeMin": null,
-        "spreadKt": 0,
+        "conKt": 68,
+        "conAgeMin": 62,
+        "spreadKt": 12.8,
         "reconAgeMin": null,
         "reconDeltaKt": null,
         "ascatUsed": false,
@@ -10996,14 +17035,14 @@
       "yesBid": 0.01,
       "yesAsk": 0.08,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 38,
+      "liquidity": 40,
       "spread": 0.07,
       "volume": 7450.4,
       "volume24h": 0,
       "openInterest": 2935.4,
       "depth": {
         "bidSize": 59,
-        "askSize": 474.88,
+        "askSize": 504.65,
         "notional": 1
       },
       "proxy": false,
@@ -11016,7 +17055,7 @@
       "short": "Will Isaias be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.125,
+      "market": 0.135,
       "model": 0.03861736062284925,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -11049,11 +17088,11 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.06,
+      "yesBid": 0.08,
       "yesAsk": 0.19,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 0,
-      "spread": 0.13,
+      "spread": 0.11,
       "volume": 6144.09,
       "volume24h": 4.16,
       "openInterest": 3820.06,
@@ -12390,7 +18429,7 @@
       "short": "Will there be more than 5 named storms in the…",
       "storm": null,
       "subject": null,
-      "market": 0.9299999999999999,
+      "market": 0.925,
       "model": 0.5281078182557383,
       "modelQuantity": "namedstorm",
       "modelBasin": "cpac",
@@ -12441,17 +18480,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 5,
-      "yesBid": 0.88,
+      "yesBid": 0.87,
       "yesAsk": 0.98,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 1,
-      "spread": 0.09999999999999998,
+      "liquidity": 7,
+      "spread": 0.10999999999999999,
       "volume": 1774.02,
       "volume24h": 0,
       "openInterest": 1146.13,
       "depth": {
-        "bidSize": 2.97,
-        "askSize": 1.02,
+        "bidSize": 5,
+        "askSize": 7.03,
         "notional": 1
       },
       "proxy": false,
@@ -16862,7 +22901,7 @@
       "liquidity": 955,
       "spread": 0.01,
       "volume": 110482.93,
-      "volume24h": 936.47,
+      "volume24h": 842.96,
       "openInterest": 32948.34,
       "depth": {
         "bidSize": 0,
@@ -18750,14 +24789,14 @@
       "yesBid": 0.75,
       "yesAsk": 0.86,
       "closeTime": "2026-11-15T04:59:00Z",
-      "liquidity": 3,
+      "liquidity": 23,
       "spread": 0.10999999999999999,
       "volume": 447.53,
       "volume24h": 91.9,
       "openInterest": 240.99,
       "depth": {
         "bidSize": 5,
-        "askSize": 4,
+        "askSize": 27,
         "notional": 1
       },
       "proxy": false,
@@ -18770,7 +24809,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.7849999999999999,
+      "market": 0.75,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -18790,17 +24829,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.73,
-      "yesAsk": 0.84,
+      "yesBid": 0.67,
+      "yesAsk": 0.83,
       "closeTime": "2026-11-01T03:59:00Z",
-      "liquidity": 21,
-      "spread": 0.10999999999999999,
+      "liquidity": 8,
+      "spread": 0.15999999999999992,
       "volume": 418.02,
       "volume24h": 0,
       "openInterest": 402.94,
       "depth": {
         "bidSize": 4.96,
-        "askSize": 25,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -20782,7 +26821,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.14500000000000002,
+      "market": 0.125,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -20803,10 +26842,10 @@
       "horizon": "storm",
       "strike": 5,
       "yesBid": 0.01,
-      "yesAsk": 0.28,
+      "yesAsk": 0.24,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.27,
+      "spread": 0.22999999999999998,
       "volume": 8,
       "volume24h": 0,
       "openInterest": 8,
@@ -20828,7 +26867,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.295,
+      "market": 0.315,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -20848,11 +26887,11 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 1,
-      "yesBid": 0.09,
+      "yesBid": 0.13,
       "yesAsk": 0.5,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.41000000000000003,
+      "spread": 0.37,
       "volume": 6.62,
       "volume24h": 0,
       "openInterest": 6.62,
@@ -20874,7 +26913,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.375,
+      "market": 0.355,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -20895,10 +26934,10 @@
       "horizon": "storm",
       "strike": 3,
       "yesBid": 0.01,
-      "yesAsk": 0.74,
+      "yesAsk": 0.7,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.73,
+      "spread": 0.69,
       "volume": 6,
       "volume24h": 0,
       "openInterest": 6,
@@ -21334,7 +27373,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.39,
+      "market": 0.37,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -21355,10 +27394,10 @@
       "horizon": "storm",
       "strike": 2,
       "yesBid": 0.02,
-      "yesAsk": 0.76,
+      "yesAsk": 0.72,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.74,
+      "spread": 0.7,
       "volume": 4,
       "volume24h": 0,
       "openInterest": 4,
@@ -25256,21 +31295,21 @@
     },
     {
       "tsZ": "2026-09-11T00:00:00.000Z",
-      "kind": "ships",
+      "kind": "consensus",
       "stormId": "EP142026",
-      "label": "Norbert SHIPS 00Z — shear 12 kt, OHC 10, MPI 150 kt",
-      "detail": "RI 11% for 20 kt in 12h against a 6% base rate — published, scored only under an operator claim",
-      "source": "NHC ATCF SHIPS",
+      "label": "Norbert guidance consensus 00Z — peak 68 kt",
+      "detail": "3 aids (HCCA, IVCN, GDMI) disagreeing by 12.8 kt — in the deck before the advisory built on it",
+      "source": "NHC ATCF a-deck",
       "tier": "A",
       "hot": false
     },
     {
       "tsZ": "2026-09-11T00:00:00.000Z",
-      "kind": "ships",
+      "kind": "consensus",
       "stormId": "EP122026",
-      "label": "Lowell SHIPS 00Z — shear 28 kt, OHC 0, MPI 127 kt",
-      "detail": "RI 0% for 20 kt in 12h against a 6% base rate — published, scored only under an operator claim",
-      "source": "NHC ATCF SHIPS",
+      "label": "Lowell guidance consensus 00Z — peak 49.3 kt",
+      "detail": "3 aids (HCCA, IVCN, GDMI) disagreeing by 2.3 kt — in the deck before the advisory built on it",
+      "source": "NHC ATCF a-deck",
       "tier": "A",
       "hot": false
     }
