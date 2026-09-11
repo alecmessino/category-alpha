@@ -1,17 +1,21 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-11T11:17:23.608Z",
+  "ranAt": "2026-09-11T16:26:31.684Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "2e7b603659e8e90de089febd555f208697f519bf",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/34593216074",
+  "sha": "bd5434fb7aad68682bbe2fc1a0f9ef5d72776c23",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/34621923993",
   "ok": false,
-  "passed": 44,
+  "passed": 43,
   "total": 46,
   "failures": [
     {
+      "check": "served snapshot is fresh",
+      "detail": "2026-09-11T15:27:23.164Z · 59m old"
+    },
+    {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
-      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 7 advisory change(s) · 3 moved P · 2 pinned at the clamp · 7 register row(s) · situation P=59% at adv #7 · DID NOT MOVE: EP142026 #6->#7 peak 70->70 P 0.6432->0.6432"
+      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 6 advisory change(s) · 3 moved P · 1 pinned at the clamp · 6 register row(s) · situation P=62% at adv #8 · DID NOT MOVE: EP142026 #6->#7 peak 70->70 P 0.6432->0.6432"
     },
     {
       "check": "all markets carried",
@@ -37,8 +41,8 @@
     },
     {
       "check": "served snapshot is fresh",
-      "pass": true,
-      "detail": "2026-09-11T10:59:11.353Z · 18m old"
+      "pass": false,
+      "detail": "2026-09-11T15:27:23.164Z · 59m old"
     },
     {
       "check": "renders: Situation",
@@ -98,7 +102,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "6 ranked of 15 candidates · 106/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "7 ranked of 16 candidates · 106/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -128,7 +132,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 1.9 screens tall (2672px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 764px · ▾ 698px · BANKROLL 670px"
+      "detail": "3 tabs · Situation is 1.9 screens tall (2665px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 757px · ▾ 698px · BANKROLL 663px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -148,17 +152,17 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": false,
-      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 7 advisory change(s) · 3 moved P · 2 pinned at the clamp · 7 register row(s) · situation P=59% at adv #7 · DID NOT MOVE: EP142026 #6->#7 peak 70->70 P 0.6432->0.6432"
+      "detail": "24 frames · newest carries advisory state for 1/1 storm(s) · 6 advisory change(s) · 3 moved P · 1 pinned at the clamp · 6 register row(s) · situation P=62% at adv #8 · DID NOT MOVE: EP142026 #6->#7 peak 70->70 P 0.6432->0.6432"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 4m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "1/1 frame(s) carry a consensus peak against 1 in the snapshot · 1 carry its cycle · frame is 3m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=133m raw=64%"
+      "detail": "1/1 frames carry a calibrated P · 1 carry the raw one · 1 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=40m raw=66%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -168,7 +172,7 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "4 guidance cycle(s) turned over → 4 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 7 P-update row(s) · 1 SHIPS · 1 pass · strip arrivals=5"
+      "detail": "5 guidance cycle(s) turned over → 5 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 6 P-update row(s) · 2 SHIPS · 1 pass · strip arrivals=4"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
@@ -183,7 +187,7 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-09-11T00:00:00Z"
+      "detail": "cycle 2026-09-11T06:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
