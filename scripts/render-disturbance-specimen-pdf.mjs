@@ -56,7 +56,7 @@ const PROSPECT_TIERS = [
   { sel: "h1, .deck, .deck *, .method, .method *", min: 8.5, tier: "body/callout" },
   { sel: ".atitle, .averdict, .anum, .acap", min: 8.5, tier: "body/callout" },
   /* TABLE / DETAIL -- point types, figure captions, chart and map labels. */
-  { sel: ".atype, .figcap, .gl, .gt, .ct, .cv, .cl", min: 7.5, tier: "table/detail" },
+  { sel: ".atype, .asrc, .figcap, .gl, .gt, .ct, .cv, .cl", min: 7.5, tier: "table/detail" },
   /* FOOTER / LEGAL -- provenance, the research-only notice, the frozen stamp. */
   { sel: "footer, footer *, .stamp, .stamp *", min: 7, tier: "footer/legal" },
 ];
@@ -152,7 +152,7 @@ const leavesOf = (page, tiers) => page.evaluate((t) => {
       lines: Math.round(el.getBoundingClientRect().height / lh),
       words: (txt.match(/[^\s]+/g) || []).length,
       svg: el.namespaceURI === "http://www.w3.org/2000/svg",
-      para: el.matches(".deck, .acap, .figcap, .method"),
+      para: el.matches(".deck, .acap, .asrc, .figcap, .method"),
       where: (el.getAttribute("class") || el.tagName) + ": " + txt.slice(0, 40),
     });
   }
@@ -232,6 +232,20 @@ const shape = await page.evaluate(() => ({
     .filter((el) => !el.matches(".head, .deck, .rule, footer"))
     .map((el) => el.className || el.tagName),
   methods: document.querySelectorAll(".method").length,
+  /* The provenance line sets over two lines and must break at a separator, never mid-token.
+     text-wrap:balance once split it inside "SHA-256"; a line ending in a hyphen is that bug. */
+  footerLines: (() => {
+    const f = document.querySelector("footer"), t = f.firstChild, out = [];
+    const r = document.createRange(); let last = null, line = "";
+    for (let i = 0; i < t.length; i++) {
+      r.setStart(t, i); r.setEnd(t, i + 1);
+      const top = Math.round(r.getBoundingClientRect().top);
+      if (last !== null && top !== last) { out.push(line); line = ""; }
+      last = top; line += t.data[i];
+    }
+    out.push(line);
+    return out.map((l) => l.trim());
+  })(),
   /* A panel title is set nowrap so it cannot hyphen-break. That turns "too long" from a quiet
      bad line-break into a silent overflow, so the overflow is what gets asserted. */
   clipped: [...document.querySelectorAll(".atitle")]
@@ -257,6 +271,14 @@ ok("prospect: every panel title fits its column on one line", shape.clipped.leng
    shape.clipped.join(" | "));
 ok("prospect: every panel stat line sets on one line", shape.wrappedStats.length === 0,
    shape.wrappedStats.join(" | "));
+{
+  const L = shape.footerLines;
+  const hyphenBreak = L.slice(0, -1).some((l) => /-$/.test(l));
+  const runt = (L[L.length - 1].match(/\S+/g) || []).length < 3;
+  ok(`prospect: the provenance line breaks cleanly (${L.length} lines)`,
+     L.length <= 2 && !hyphenBreak && !runt,
+     hyphenBreak ? "a line ends mid-token on a hyphen" : runt ? "last line is a runt" : L.join(" / "));
+}
 ok("prospect: no all-caps headings or findings", shape.shout.length === 0,
    shape.shout.slice(0, 3).join(" | "));
 

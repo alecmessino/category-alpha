@@ -82,6 +82,7 @@ h1{font-family:var(--serif);font-size:26pt;font-weight:600;line-height:1.06;
 .anum{font-family:var(--mono);font-size:9pt;color:var(--ink-2);line-height:1.5;
       font-variant-numeric:tabular-nums;margin:0}
 .a svg{display:block;width:100%;overflow:visible;margin-top:2pt}
+.asrc{font-size:9pt;color:var(--ink-4);line-height:1.3;margin:-3pt 0 0}
 .acap{font-size:9pt;line-height:1.4;color:var(--ink-3);margin:0}
 .a>.acap:last-child{padding-top:2pt}
 .ct{font-family:var(--mono);font-size:calc(8pt * var(--k,1));fill:var(--ink-4)}
@@ -92,12 +93,13 @@ h1{font-family:var(--serif);font-size:26pt;font-weight:600;line-height:1.06;
 .method{font-size:10.5pt;line-height:1.45;color:var(--ink-2);margin:0;padding-top:18pt;
         max-width:6.2in}
 .method b{color:var(--ink);font-weight:600}
-/* "Package frozen" pushes the provenance line past one rendered line and orphaned the final
-   word. The wording and the 7pt floor are both fixed, so the only lever left is where it
-   breaks: balance splits it into two even lines instead of one long line plus "forecast.". */
+/* "Package frozen" pushes the provenance past one rendered line, and the wording and the 7pt
+   floor are both fixed, so the only lever is where it breaks. text-wrap:balance aimed for the
+   middle and landed inside "SHA-256"; a measure instead puts the break on the separator, so
+   line one is the provenance and line two is the notice. No word, size or colour changed. */
 footer{border-top:.6pt solid var(--line-strong);margin-top:11pt;padding-top:5pt;
        font-family:var(--mono);font-size:7pt;line-height:1.5;color:var(--ink-4);
-       text-wrap:balance}
+       max-width:5.6in}
 </style></head><body><div class="sheet" id="root"></div>
 <script id="payload" type="application/json">"__DATA__"</script>
 <script>
@@ -243,7 +245,10 @@ const PANELS=[
   {k:"d2", c:"var(--d2)", title:"D2 — forecast formation area",
    type:"Analyst-declared reference cell",
    verdict:"Conditional rates only. No composed number.",
-   num:(a)=>`${a.nCases} storms · ESS ${a.ess.toFixed(1)} · NHC ${D.gtwo.d2.pct7d}%`,
+   num:(a)=>`${a.nCases} storms · ESS ${a.ess.toFixed(1)}`,
+   /* The only external number on the page, on its own line so it cannot be read as an Atlas
+      statistic. pct7d is the payload's own field for NHC's 7-day formation chance. */
+   src:()=>`NHC 7-day formation ${D.gtwo.d2.pct7d}%`,
    chart:(a)=>rates(a,"var(--d2)",[["ts","TS"],["cat1","Cat 1"],["cat3","Cat 3"]]),
    cap:()=>"Given formation at this cell. Bars are 95% intervals over distinct storms."},
   {k:"fourteenE", c:"var(--e14)", title:"Fourteen-E — observed genesis",
@@ -261,6 +266,7 @@ for(const p of PANELS){const a=A[p.k];
     $("div",{class:"atype"},p.type),
     $("div",{class:"averdict"},p.verdict),
     $("p",{class:"anum"},p.num(a)),
+    p.src?$("p",{class:"asrc"},p.src(a)):null,
     p.chart(a),
     p.cap(a)?$("p",{class:"acap"},p.cap(a)):null));}
 r.append(ans);
