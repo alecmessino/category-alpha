@@ -1,23 +1,53 @@
 {
   "schema": "millibar-calibration/1",
-  "generatedAt": "2026-09-11T10:35:16.433Z",
+  "generatedAt": "2026-09-11T10:45:36.648Z",
   "thresholdKt": 65,
   "minResolvedStorms": 10,
-  "ok": false,
+  "ok": true,
   "counts": {
     "entries": 562,
     "storms": 11,
-    "resolvedEntries": 173,
-    "resolvedStorms": 9,
+    "resolvedEntries": 204,
+    "resolvedStorms": 10,
     "outcomes": {
-      "reached": 3,
+      "reached": 4,
       "notReached": 6
     },
-    "provisional": 173
+    "provisional": 204
   },
-  "note": "9 resolved storms of the 10 needed to publish a score. 173 resolved forecasts sit behind them, and that gap is the reason the threshold counts STORMS: every forecast made during one storm's life shares that storm's single outcome, so scoring the entries would quote a handful of coin flips to three decimal places.",
-  "progress": {
-    "have": 9,
-    "need": 10
-  }
+  "baseRate": 0.3417085427135678,
+  "brier": {
+    "calibrated": 0.03513655620794654,
+    "raw": 0.038418281342387194,
+    "market": 0.15252266483516483,
+    "climatology": 0.22494381455013762
+  },
+  "brierN": {
+    "calibrated": 199,
+    "raw": 204,
+    "market": 182
+  },
+  "skill": {
+    "vsClimatology": 0.8437985224078479,
+    "calibrationVsRaw": 0.04911844688125744,
+    "vsMarket": 0.7572954999906133
+  },
+  "paired": {
+    "calibratedVsRaw": {
+      "calibrated": 0.03513655620794654,
+      "raw": 0.03695155941631651,
+      "entries": 199,
+      "storms": 10
+    },
+    "calibratedVsMarket": {
+      "calibrated": 0.037930633996170374,
+      "market": 0.15628319209039548,
+      "entries": 177,
+      "storms": 10
+    }
+  },
+  "coverageNote": "coverage differs across series — calibrated 199, official-estimate 204, market 182 of 204 resolved forecasts. The skill numbers are computed on the overlap (199 against the official estimate, 177 against the market) so they compare the same storms; the marginal Brier scores above do not and must not be divided.",
+  "reliability": null,
+  "reliabilityNote": "a reliability curve needs 30 resolved storms to have support in each bin; 10 so far",
+  "note": "scored over 10 resolved storms (204 forecasts). Forecasts within a storm share one outcome, so the storms are the sample size."
 }
