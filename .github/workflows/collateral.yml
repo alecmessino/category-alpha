@@ -67,6 +67,15 @@ jobs:
       - name: Verify the collateral copy is inside its budget
         run: node scripts/check-collateral-copy-budget.mjs
 
+      # A SHEET THAT IS SENT IS READ ON A DAY NOBODY CHOSE FOR IT. The terminal re-renders on its
+      # own tick, so present tense there is a reading of the moment it is read; a PDF asserts, on
+      # the day it is opened, whatever its sentences claim. Both send-ready sheets were rendered
+      # with AL052026 live and said so in the present tense; the storm left the feed and the
+      # numbers stayed right while the claim turned false. This gate is the one that bites on
+      # tense rather than on figures, and it needs no browser and no network.
+      - name: Verify no send-ready sheet makes a stale present-tense live claim
+        run: node scripts/check-collateral-asof.mjs
+
       # --require-browser for the reason it is on every browser gate in this repository: both
       # scripts print a skip and exit 0 when playwright is absent, and a step that goes green
       # while measuring nothing is worse than no step at all.

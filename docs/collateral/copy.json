@@ -108,7 +108,7 @@
   "B1": {
     "copy": {
       "answers": {
-        "now": "AL052026 (Tropical Storm Edouard, declared as Invest 97L) is at 29.9N 94.0W, 45 kt on NHC advisory 006; the archive returns no genesis row for it.",
+        "now": "AL052026 (Tropical Storm Edouard, declared as Invest 97L) was at 29.9N 94.0W, 45 kt on NHC advisory 006; the archive holds no genesis row for it.",
         "adds": "The alternative is not a public map but your own IBTrACS or HURDAT2 query, which a cat modelling team can write. Storm Atlas adds the declared cohort, exact n/N with 95% Wilson intervals, printed refusals, a replay URL.",
         "commercial": "It gives a basis-risk file one component that can be tested: a cohort a counterparty reopens from a URL and reproduces line for line, misses included."
       },
@@ -852,6 +852,18 @@
       "slot": "geography-not-probability · section 03 head · scored-rows caption · wind axis label",
       "change": "B2's refusal slot no longer ends on the analog plate -- the plate is retired and the sentence pointed at nothing; the timeline caption already says a crossing is modelled landfall geometry, never an NHC determination. Section 03 is headed BEFORE THESE ROWS ARE QUOTED, not READ THIS BEFORE THE TIMELINE, which named a figure printed above it. The scored-rows table dropped its caption, which restated its own section head. On E the compact wind axis is labelled CONTRACT - >=113 KT: the longer label reached back past 113 kt on the scale and was struck through by the contract's own dashed rule.",
       "why": "Every one of these is a reference that stopped being true when the composition changed, or a line printed twice. No held value, threshold, rate, interval, refusal or source moved: the contract cut is still 113 kt at the crossing, named as such by the axis it sits on."
+    },
+    {
+      "artifact": "E",
+      "slot": "contract-sources.json · discrete-terms · terms block heading · SOURCES line · discrete-terms copy",
+      "change": "The Discrete entry now holds a URL: discrete.markets/contracts/category-4-hurricane-us-landfall, read 13 Sep 2026. The terms block is headed DISCRETE — PUBLISHED ILLUSTRATIVE TERMS · VERIFIED 13 SEP 2026 and the SOURCES line prints the citation in place of the gap sentence. The page's own eight term-sheet fields are stored verbatim in the record as source_quotes, and the reference event now reads \"on or before 30 Nov 2026\" rather than \"before\", matching the cited observation period \"Execution date through November 30, 2026, 11:59 p.m. ET\".",
+      "why": "AS PUBLISHED and VERIFIED assert a document a reader can re-open, and the record now holds one. The heading and the citation both derive from the URL's presence, so neither was written by hand and neither can drift from the record; supplying the URL restored both in one edit, which is what that mechanism was built for. VERIFIED is dated 13 SEP, not 31 AUG: 31 Aug is when the terms were transcribed, and no document was held on that date to verify them against. ILLUSTRATIVE rather than PUBLIC because that is the publisher's own word for them — the page heads the term sheet \"Illustrative terms\" and adds \"Terms for discussion. Not an offer, solicitation, or recommendation to enter into any transaction\" — and a citable source makes overstating it checkable. The deadline correction is the same discipline: once the terms are cited, a transcription that excludes 30 Nov where the source includes it is a discrepancy a reader would find. NO ATLAS NUMBER, INTERVAL, REFUSAL, CITE STRING OR REPLAY URL MOVED, and the three holes are untouched: no joint Cat 4-at-CONUS-landfall row was created, no marginal was multiplied, no Gulf, Florida or state rate was inferred."
+    },
+    {
+      "artifact": "B1, E",
+      "slot": "masthead rule key · B1 live line · E operational-context line · E cohort-note · E desk-not",
+      "change": "Both sheets read OPERATIONAL AS OF rather than LIVE STATUS in the masthead, against the same instant as before. B1's live line is headed OPERATIONAL CONTEXT AS OF 01 SEP 2026 — HISTORICAL, NOT A CURRENT READING and its reading is in the past: AL052026 \"was at\" 29.9N 94.0W, and \"the archive holds no genesis row for it\". E's closing line is headed the same way and reads \"NHC/ATCF classified\" and \"first tropical-status fix was\". E's cohort-note and desk-not no longer resolve {{LIVE}} to a storm name: both statements are about ANY live system, and the substitution is removed from the renderer so copy cannot mint a live name through it.",
+      "why": "A terminal re-renders on its own tick and the present tense is a reading of the moment it is read. A PDF is opened on a day of the recipient's choosing, so the same sentence asserts a 01 Sep observation as a fact about that day. AL052026 has since left the feed: the numbers were still right and the tense had made them a false claim. Refreshing to a newer ingest only re-arms the same failure with a newer date, so the reading is kept verbatim and DATED instead. Every reading, name, position, advisory number and instant is the same value the manifest holds; no cohort number, interval, refusal, cite string or replay URL moved, and the pack is the one the rest of the package cites. Enforced by scripts/check-collateral-asof.mjs, which fails both sheets as they stood before this edit."
     }
   ],
   "E": {
@@ -864,11 +876,11 @@
         },
         {
           "slot": "discrete-terms",
-          "body": "<p><b>Reference event</b> — a Category 4+ hurricane makes US landfall before 30 Nov 2026. <b>Cat 4</b> 130 mph sustained. <b>Trigger</b> — the hurricane centre crosses the contiguous-US coastline at Cat 4 or higher. <b>Determination</b> — landfall and intensity by the NHC, <b>at landfall</b>. <b>Region</b> — the lower 48, plus stated Gulf-only and Florida-only variants. <b>PUBLIC FACTS ONLY</b> — no access to any Discrete transaction, pricing process, client or methodology is implied, and Storm Atlas neither prices nor scores this contract.</p>"
+          "body": "<p><b>Reference event</b> — a Category 4+ hurricane makes US landfall on or before 30 Nov 2026. <b>Cat 4</b> 130 mph sustained. <b>Trigger</b> — the hurricane centre crosses the contiguous-US coastline at Cat 4 or higher. <b>Determination</b> — landfall and intensity by the NHC, <b>at landfall</b>. <b>Region</b> — the lower 48, plus stated Gulf-only and Florida-only variants. <b>PUBLIC FACTS ONLY</b> — no access to any Discrete transaction, pricing process, client or methodology is implied, and Storm Atlas neither prices nor scores this contract.</p>"
         },
         {
           "slot": "cohort-note",
-          "body": "<p>Conditional on formation in the declared cell — <b>none is a probability for {{LIVE}}</b> or for Discrete's contract.</p>"
+          "body": "<p>Conditional on formation in the declared cell — <b>none is a probability for any live system</b> or for Discrete's contract.</p>"
         },
         {
           "slot": "history-note",
@@ -880,7 +892,7 @@
         },
         {
           "slot": "desk-not",
-          "body": "<p>This page does <b>not</b> price the contract, estimate fair value, predict landfall, estimate the chance {{LIVE}} triggers anything, replace the NHC, or supply settlement data. <b>WHAT ATLAS ADDS:</b> a declared cohort, exact n / N with a 95% Wilson interval, a visible refusal, a replay URL.</p>"
+          "body": "<p>This page does <b>not</b> price the contract, estimate fair value, predict landfall, estimate the chance any live system triggers anything, replace the NHC, or supply settlement data. <b>WHAT ATLAS ADDS:</b> a declared cohort, exact n / N with a 95% Wilson interval, a visible refusal, a replay URL.</p>"
         }
       ]
     }

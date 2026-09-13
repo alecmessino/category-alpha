@@ -152,17 +152,37 @@ export function liveRows(D) {
  * not do is call the result an Atlas OBSERVED GENESIS point or run a cohort from it -- the engine
  * does not accept the operational layer as a genesis source, and the manifest's genesis
  * determination is where that is settled. Both halves are read off the manifest, never typed. */
-function opFormation(D, atcfId) {
+/* TENSE FOLLOWS DELIVERY, NOT INGEST. A terminal reads its own tick and the present tense is
+   correct there. A PDF is read on whatever day it is opened, and a sheet that says "NHC/ATCF
+   CLASSIFIES" is asserting, on that day, something it only observed on the ingest's day. The
+   reading itself is unchanged and still read off the manifest; `asOf` puts it in the past, and
+   the caller prints the instant beside it so the sentence carries its own date. */
+function opFormation(D, atcfId, { asOf = false } = {}) {
   const g = (D.genesis_determinations || []).find((x) => x.atcf_id === atcfId);
   const a = (D.nhc_advisories || []).find((x) => x.atcf_id === atcfId);
   const bits = [];
-  if (a) bits.push(`NHC/ATCF classifies <b>${esc(a.cls_label)} ${esc(a.name)}</b> (${esc(atcfId)})`);
+  if (a) {
+    bits.push(`NHC/ATCF ${asOf ? "classified" : "classifies"} `
+      + `<b>${esc(a.cls_label)} ${esc(a.name)}</b> (${esc(atcfId)})`);
+  }
   const f = g && g.first_tropical_fix_in_operational_record;
   if (f) {
-    bits.push(`the operational record's first tropical-status fix is <b>${esc(f.t)}</b>, `
-      + `<b>${f.lat}N ${Math.abs(f.lon)}W</b>, ${esc(f.stage)} ${f.kt} kt`);
+    bits.push(`the operational record's first tropical-status fix ${asOf ? "was" : "is"} `
+      + `<b>${esc(f.t)}</b>, <b>${f.lat}N ${Math.abs(f.lon)}W</b>, ${esc(f.stage)} ${f.kt} kt`);
   }
   return bits.length ? `${bits.join("; ")}.` : "No operational record in this ingest.";
+}
+
+/* THE INGEST'S DAY, WITHOUT ITS CLOCK. The as-of label on a prospect-send sheet needs the date a
+   reader can check a reading against, not a second copy of the full stamp already in the
+   masthead. Derived from the same operational.generated_at liveStamp() reads, so the two cannot
+   disagree, and printed without a time so it is not a second LIVE reading to reconcile. */
+function stampDay(D) {
+  const iso = D.operational && D.operational.generated_at;
+  if (!iso) return "AN UNAVAILABLE FEED";
+  const d = new Date(iso);
+  const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+  return `${String(d.getUTCDate()).padStart(2, "0")} ${MON[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 }
 
 /** The published question, spelled out with its declared radius and window. This is the thing a
@@ -509,7 +529,11 @@ ${masthead({
       + `in <b>August or September</b>, in seasons from <b>1971</b> onwards, what happened to `
       + `storms that formed there? <b>${esc(s.cohort.cohort_status)}</b>, N = ${s.cohort.n_cases}, `
       + `ESS ${s.cohort.effective_sample_size}, min ${s.cohort.min_sample}.`,
-    rule: [["LIVE STATUS", liveStamp(D)], ["CELL", "28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+"],
+    /* AS OF, NOT LIVE. This sheet goes out as a PDF and is read on a day of the reader's
+       choosing; the stamp is unchanged, but labelling it LIVE STATUS asserts on that day a
+       reading taken on the ingest's. The instant stays; the claim about it is dated. */
+    rule: [["OPERATIONAL AS OF", liveStamp(D)],
+      ["CELL", "28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+"],
       ["PACK", D.pack.archive_stamp]],
   })}
 
@@ -519,8 +543,8 @@ ${/* THE QUESTION BOX, FOLDED INTO THE MASTHEAD. It stood as its own sunken pane
 <p class="fn"><b>IT SAYS NOTHING ABOUT WHETHER THE SYSTEM FORMS.</b> An unconditional intensity
 probability would require an external formation probability on the <b>same formation event and
 conditioning set</b>; none is computed here, and an NHC outlook probability is not multiplied by
-these rows unless the conditioning events are demonstrably aligned. <b>LIVE,
-${esc(liveStamp(D))}:</b> ${C.answers.now || ""}
+these rows unless the conditioning events are demonstrably aligned. <b>OPERATIONAL CONTEXT AS OF
+${esc(stampDay(D))} — HISTORICAL, NOT A CURRENT READING:</b> ${C.answers.now || ""}
 ${/* ROW = STATE TOKEN, PANEL NOTE = EXPLANATION. Printed immediately above the panel because
      this page has no UNSCOREABLE box to carry it; the stamps are the archive's own strings. */""}
 <b>TD is definitional.</b> Status tokens: ${stampList(s)}.</p>
@@ -935,6 +959,12 @@ function contractSourceLine(sources) {
 export function artifactE(D, copy, contractSources = []) {
   const C = makeCopy(copy, "E");
   const aE = (D.nhc_advisories || []).find((a) => a.atcf_id === "AL052026");
+  /* THE ONE PLACE A LIVE NAME MAY STILL APPEAR. The {{LIVE}} substitution that put this
+     name into the cohort-note and desk-not slots is gone: both statements are about ANY live
+     system, and resolving a name into them dated the sheet to the ingest that happened to be
+     running. What is left is the operational-context line, which prints the name INSIDE its
+     own as-of date. A {{LIVE}} left in copy now prints literally rather than resolving
+     silently to whatever storm the feed was carrying. */
   const liveName = aE ? aE.name : "AL052026";
   const s = D.byId["97L"];
   const rows = liveRows(D);
@@ -968,7 +998,10 @@ ${masthead({
     title: "A published Cat 4+ CONUS landfall trigger — and the cell of evidence that does not exist",
     /* No lede: the title is the lede, and the slot is retired in the cut register. */
     sub: "",
-    rule: [["LIVE STATUS", liveStamp(D)], ["POINT TYPE", "PRE-GENESIS REFERENCE CELL"],
+    /* AS OF, NOT LIVE — see B1. The instant is the same one liveStamp() has always printed; what
+       changes is that the sheet dates the claim instead of asserting it on the day it is read. */
+    rule: [["OPERATIONAL AS OF", liveStamp(D)],
+      ["POINT TYPE", "PRE-GENESIS REFERENCE CELL"],
       ["PACK", D.pack.archive_stamp]],
   })}
 
@@ -1006,12 +1039,17 @@ ${contractSourceLine(contractSources).replace('<p class="fn">', '<p class="src">
     "what is needed · what is held · the archive's verdict")}
 ${bridge(BRIDGE)}
 <p class="fn">${C.get("history-note").replace(/^<p>|<\/p>$/g, "")}
-${C.get("cohort-note").replace(/^<p>|<\/p>$/g, "").replace(/\{\{LIVE\}\}/g, esc(liveName))}</p>
+${C.get("cohort-note").replace(/^<p>|<\/p>$/g, "")}</p>
 <div class="box commercial" style="margin-top:3px"><h3>WHAT A STRUCTURER COULD USE THIS FOR — AND WHAT THIS PAGE DOES NOT DO</h3>
   ${C.get("desk-use")}
-  ${C.get("desk-not").replace(/\{\{LIVE\}\}/g, esc(liveName))}</div>
+  ${C.get("desk-not")}</div>
 ${citeBlock(s, { link: "label", replay: `REPLAY PUBLISHED COHORT · N=${s.cohort.n_cases}` })}
-<p class="fn liveline"><b>LIVE STATUS, AND WHAT IT IS NOT.</b> ${opFormation(D, "AL052026")}
+${/* The operational reading is unchanged and still read off the manifest; it is now dated on its
+     own line and put in the past, so the sheet states what was observed on the ingest's day
+     rather than asserting it on the day the PDF is opened. NOT ATLAS GENESIS is not a reading
+     and does not move: the pack holds no AL052026 row, which is a fact about the pack. */""}
+<p class="fn liveline"><b>OPERATIONAL CONTEXT AS OF ${esc(stampDay(D))} — NOT A CURRENT READING.</b>
+${opFormation(D, "AL052026", { asOf: true })}
 <b>NOT ATLAS GENESIS:</b> the pack does not hold AL052026 and takes no genesis from the operational layer; the cohort
 remains the declared cell at <b>28.0°N 88.7°W</b>, <b>not where ${esc(liveName)} formed</b>.</p>
 </section>

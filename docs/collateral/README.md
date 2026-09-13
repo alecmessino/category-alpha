@@ -104,10 +104,27 @@ node scripts/check-collateral-replay.mjs     # every printed URL reopens the ide
 node scripts/check-collateral-copy-budget.mjs # prose stays inside its layout budget
 node scripts/check-collateral-fit.mjs        # every sheet fits its printed page (needs a browser)
 node scripts/check-collateral-legibility.mjs # measured type sizes clear the gate (needs a browser)
+node scripts/check-collateral-asof.mjs       # no send-ready sheet makes a stale present-tense live claim
 ```
 
-Current: 184/184 content, 42/42 replay, every slot inside budget and printed somewhere, every
-sheet fits, every semantic class clears its own type floor.
+Current: 249/249 content, 42/42 replay, 10/10 as-of, every slot inside budget and printed
+somewhere, every sheet fits, every semantic class clears its own type floor.
+
+Re-exporting a named sheet without moving the evidence under it:
+
+```bash
+node scripts/reexport-collateral.mjs E B1    # render only these, from the COMMITTED manifest
+node scripts/render-collateral-pdf.mjs E B1  # one Letter page each, fonts asserted (needs a browser)
+```
+
+`build-collateral.mjs` re-renders all eight documents from a live `build()`, which re-opens the
+archive pack as it stands now — and the refresh loop rebuilds that pack on main every few minutes.
+A full rebuild is therefore the right tool for a full rebuild and the wrong one for a copy
+correction on one sheet: it restamps every masthead, footer and cite string, and it rewrites the
+six sheets nobody asked to change. `reexport-collateral.mjs` reads its evidence from the committed
+`source-manifest.json` instead — the same file `check-collateral.mjs` gates every printed figure
+against — so no cohort number, interval, refusal, cite string, replay URL or pack stamp can move,
+and it writes only the sheets named on the command line.
 
 ### The contract's own provenance
 
@@ -120,13 +137,46 @@ follow it unless it is the Atlas replay URL or one of those declared sources, so
 be invented on the page.
 
 This build holds NOAA/NHC sources for the Category 4 = 130 mph definition and for the landfall and
-intensity determination authority. It holds no citable public document for Discrete's own published
-terms — the reference event, the deadline, the trigger wording and the regional variants — so the
-sheet prints that gap, and the terms block is headed **PUBLIC TERMS TRANSCRIBED 31 AUG 2026 ·
-SOURCE RECORD INCOMPLETE** rather than AS PUBLISHED · VERIFIED: a transcription nobody can re-open
-is not a verified citation. Both headings live in `contract-sources.json` and the sheet picks
-between them from whether the URL is held, so supplying the URL restores the stronger heading and
-prints the citation in one edit — and a check fails the sheet if heading and record ever disagree.
+intensity determination authority, and — since 13 Sep 2026 — Discrete's own published contract page
+for the reference event, the observation deadline, the trigger wording, the CONUS reference region
+and the Gulf-only and Florida-only variants. The terms block is headed **PUBLISHED ILLUSTRATIVE
+TERMS · VERIFIED 13 SEP 2026** and the SOURCES line prints the citation.
+
+That heading was earned, not typed. Until the URL was held the same block read **PUBLIC TERMS
+TRANSCRIBED 31 AUG 2026 · SOURCE RECORD INCOMPLETE**, because a transcription nobody can re-open is
+not a verified citation. Both headings live in `contract-sources.json` and the sheet picks between
+them from whether the URL is held, so supplying the URL restored the stronger heading and printed
+the citation in one edit — and a check fails the sheet if heading and record ever disagree. Three
+details of that entry are deliberate:
+
+- **VERIFIED 13 SEP, not 31 AUG.** 31 Aug is when the terms were transcribed. No document was held
+  on that date to verify them against, so dating the verification to it would claim a check that
+  never happened.
+- **ILLUSTRATIVE, not PUBLIC.** That is the publisher's own word: the page heads its term sheet
+  *Illustrative terms* and adds *"Terms for discussion. Not an offer, solicitation, or
+  recommendation to enter into any transaction."* A citable source makes overstating it checkable,
+  so the heading does not.
+- **The source's own wording is stored.** The page's eight term-sheet fields are kept verbatim in
+  the entry as `source_quotes`, and the printed transcription was corrected against them — the
+  reference event now reads *on or before* 30 Nov 2026, matching an observation period that runs
+  *through November 30, 2026, 11:59 p.m. ET*.
+
+### As-of, not live
+
+`check-collateral-asof.mjs` gates the sheets that are actually sent — today B1 and E. A terminal
+re-renders on its own tick, so present tense there is a reading of the moment it is read; a PDF is
+opened on a day of the recipient's choosing, so the same sentence asserts a months-old observation
+as a fact about that day. Both sheets were rendered at the 01 Sep 2026 21:08 UTC ingest with
+AL052026 live, and both said so in the present tense. AL052026 has since left the feed: the numbers
+were still right, and the tense had turned them into a false claim.
+
+The fix is neither deletion nor a refresh — a refresh re-arms the same failure with a newer date.
+The reading stays, verbatim, and is dated: the masthead key reads `OPERATIONAL AS OF`, the sentence
+is in the past, and the paragraph carries the ingest's day. The gate checks four things on those
+sheets: no `LIVE STATUS` / `LIVE, <stamp>` framing label; every live reading in a block that also
+carries the ingest's day; no present-tense verb binding a live subject to a reading; and every
+printed as-of day equal to the manifest's own ingest day. Statements about the committed pack —
+*the archive holds no genesis row for it* — are evergreen and are deliberately left in the present.
 
 ### Width is a fit question too
 
