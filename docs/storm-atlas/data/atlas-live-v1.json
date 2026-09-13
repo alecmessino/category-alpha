@@ -1,6 +1,6 @@
 {
   "schema": "atlas-live-v1",
-  "generated_at": "2026-09-13T08:32:11.067Z",
+  "generated_at": "2026-09-13T12:56:54.330Z",
   "source": {
     "name": "NHC ATCF b-deck (best track)",
     "url": "https://ftp.nhc.noaa.gov/atcf/btk/",
@@ -62,11 +62,11 @@
       "season": 2026,
       "basin": "EP",
       "name": "NORBERT",
-      "fetched_at": "2026-09-13T08:32:11.067Z",
+      "fetched_at": "2026-09-13T12:56:54.330Z",
       "first_valid_time": "2026-09-07T18:00:00.000Z",
-      "latest_valid_time": "2026-09-13T06:00:00.000Z",
-      "age_hours": 2.5,
-      "fix_count": 23,
+      "latest_valid_time": "2026-09-13T12:00:00.000Z",
+      "age_hours": 0.9,
+      "fix_count": 24,
       "fixes": [
         {
           "t": "2026-09-07T18:00:00.000Z",
@@ -251,14 +251,22 @@
           "kt": 40,
           "mslp": 1002,
           "stage": "TS"
+        },
+        {
+          "t": "2026-09-13T12:00:00.000Z",
+          "lat": 18.1,
+          "lon": -132.1,
+          "kt": 40,
+          "mslp": 1000,
+          "stage": "TS"
         }
       ],
       "latest": {
-        "t": "2026-09-13T06:00:00.000Z",
-        "lat": 17.9,
-        "lon": -131.2,
+        "t": "2026-09-13T12:00:00.000Z",
+        "lat": 18.1,
+        "lon": -132.1,
         "kt": 40,
-        "mslp": 1002,
+        "mslp": 1000,
         "stage": "TS"
       },
       "stage": "TS",
@@ -267,15 +275,15 @@
       "peak_wind_at": "2026-09-11T12:00:00.000Z",
       "min_mslp_mb": 996,
       "min_mslp_at": "2026-09-11T06:00:00.000Z",
-      "fixes_with_wind": 23,
-      "fixes_with_pressure": 20,
+      "fixes_with_wind": 24,
+      "fixes_with_pressure": 21,
       "ships_rt": {
         "source": "ships_rt",
         "product": "NHC operational SHIPS (stext)",
         "tau": 0,
-        "valid_time": "2026-09-13T00:00:00.000Z",
-        "fetched_at": "2026-09-13T08:32:11.067Z",
-        "age_hours": 8.5,
+        "valid_time": "2026-09-13T12:00:00.000Z",
+        "fetched_at": "2026-09-13T12:56:54.330Z",
+        "age_hours": 0.9,
         "lat": null,
         "lon": null,
         "availability": {
@@ -284,39 +292,39 @@
         },
         "fields": {
           "shearKt": {
-            "value": 8,
+            "value": 11,
             "label": "850-200 mb deep-layer shear"
           },
           "shearAdjKt": {
-            "value": 3,
+            "value": 0,
             "label": "shear adjusted for storm motion"
           },
           "shearDirDeg": {
-            "value": 249,
+            "value": 294,
             "label": "direction the deep-layer shear vector points toward"
           },
           "sstC": {
-            "value": 27.7,
+            "value": 27,
             "label": "sea-surface temperature"
           },
           "mpiKt": {
-            "value": 141,
+            "value": 134,
             "label": "maximum potential intensity the ocean supports"
           },
           "rhMid": {
-            "value": 61,
+            "value": 62,
             "label": "mid-level relative humidity"
           },
           "thetaEDevC": {
-            "value": 6,
+            "value": 5,
             "label": "theta-e deviation from moist adiabatic — low is a dry, stable column"
           },
           "ohc": {
-            "value": 9,
+            "value": 4,
             "label": "ocean heat content (kJ/cm2)"
           },
           "landKm": {
-            "value": 1897,
+            "value": 2055,
             "label": "distance to land"
           },
           "stmSpeedKt": {
@@ -324,43 +332,43 @@
             "label": "forecast translation speed"
           },
           "latN": {
-            "value": 17.8,
+            "value": 18.1,
             "label": "forecast latitude on the track SHIPS was run along"
           },
           "lonW": {
-            "value": 130,
+            "value": 132.1,
             "label": "forecast longitude west on the track SHIPS was run along"
           },
           "t200C": {
-            "value": -50.3,
+            "value": -50.8,
             "label": "200 mb temperature"
           },
           "div200": {
-            "value": -18,
+            "value": 0,
             "label": "200 mb divergence (10^7 s-1)"
           },
           "envVor850": {
-            "value": 65,
+            "value": 56,
             "label": "850 mb environmental relative vorticity"
           },
           "tadv700850": {
-            "value": 0,
+            "value": 5,
             "label": "700-850 mb temperature advection"
           },
           "modelVtxKt": {
-            "value": 17,
+            "value": 16,
             "label": "the model's own vortex strength"
           },
           "vNoLandKt": {
-            "value": 45,
+            "value": 40,
             "label": "SHIPS intensity forecast, no land interaction"
           },
           "vLandKt": {
-            "value": 45,
+            "value": 40,
             "label": "SHIPS intensity forecast with land interaction"
           },
           "vLgemKt": {
-            "value": 45,
+            "value": 40,
             "label": "LGEM intensity forecast"
           }
         },
@@ -373,7 +381,7 @@
         "kind": "operational",
         "url": "https://ftp.nhc.noaa.gov/atcf/btk/bep142026.dat",
         "status": 200,
-        "bytes": 6335,
+        "bytes": 6551,
         "note": "Operational best track, revised by the forecast office while the storm is live. Not post-analysed and not an archive record."
       },
       "active": true
@@ -386,7 +394,7 @@
       "fetched_at": "2026-09-11T10:34:55.872Z",
       "first_valid_time": "2026-08-25T18:00:00.000Z",
       "latest_valid_time": "2026-09-11T00:00:00.000Z",
-      "age_hours": 56.5,
+      "age_hours": 60.9,
       "fix_count": 66,
       "fixes": [
         {
@@ -1051,7 +1059,7 @@
       "fetched_at": "2026-09-08T22:41:48.740Z",
       "first_valid_time": "2026-08-29T18:00:00.000Z",
       "latest_valid_time": "2026-09-08T12:00:00.000Z",
-      "age_hours": 116.5,
+      "age_hours": 120.9,
       "fix_count": 40,
       "fixes": [
         {
@@ -1508,7 +1516,7 @@
       "fetched_at": "2026-09-07T07:34:38.680Z",
       "first_valid_time": "2026-08-25T00:00:00.000Z",
       "latest_valid_time": "2026-09-07T00:00:00.000Z",
-      "age_hours": 152.5,
+      "age_hours": 156.9,
       "fix_count": 53,
       "fixes": [
         {
@@ -2025,7 +2033,7 @@
       "fetched_at": "2026-09-03T15:34:05.957Z",
       "first_valid_time": "2026-08-28T18:00:00.000Z",
       "latest_valid_time": "2026-09-03T06:00:00.000Z",
-      "age_hours": 242.5,
+      "age_hours": 246.9,
       "fix_count": 23,
       "fixes": [
         {
@@ -2302,7 +2310,7 @@
       "fetched_at": "2026-08-28T21:48:13.203Z",
       "first_valid_time": "2026-08-24T00:00:00.000Z",
       "latest_valid_time": "2026-08-28T18:00:00.000Z",
-      "age_hours": 374.5,
+      "age_hours": 378.9,
       "fix_count": 20,
       "fixes": [
         {
@@ -2555,7 +2563,7 @@
       "fetched_at": "2026-08-28T15:48:18.264Z",
       "first_valid_time": "2026-08-10T00:00:00.000Z",
       "latest_valid_time": "2026-08-28T06:00:00.000Z",
-      "age_hours": 386.5,
+      "age_hours": 390.9,
       "fix_count": 74,
       "fixes": [
         {
@@ -3240,7 +3248,7 @@
       "fetched_at": "2026-08-27T03:10:09.299Z",
       "first_valid_time": "2026-08-21T12:00:00.000Z",
       "latest_valid_time": "2026-08-27T00:00:00.000Z",
-      "age_hours": 416.5,
+      "age_hours": 420.9,
       "fix_count": 23,
       "fixes": [
         {
@@ -3517,7 +3525,7 @@
       "fetched_at": "2026-08-26T05:17:22.975Z",
       "first_valid_time": "2026-08-20T00:00:00.000Z",
       "latest_valid_time": "2026-08-25T18:00:00.000Z",
-      "age_hours": 446.5,
+      "age_hours": 450.9,
       "fix_count": 24,
       "fixes": [
         {
@@ -3802,7 +3810,7 @@
       "fetched_at": "2026-08-25T15:43:45.983Z",
       "first_valid_time": "2026-08-18T12:00:00.000Z",
       "latest_valid_time": "2026-08-25T06:00:00.000Z",
-      "age_hours": 458.5,
+      "age_hours": 462.9,
       "fix_count": 28,
       "fixes": [
         {
