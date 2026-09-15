@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-15T22:30:53.494Z",
+  "generatedAt": "2026-09-15T22:34:29.169Z",
   "stepMin": 10,
   "note": null,
   "feeds": {
@@ -9,12 +9,12 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 209,
+      "latencyMs": 215,
       "count": 2,
       "note": "2 active",
       "raw": "{\"id\":\"ep152026\",\"binNumber\":\"EP5\",\"name\":\"Fifteen-E\",\"classification\":\"TD\",\"intensity\":\"25\",\"pressure\":\"1006\",\"latitude\":\"15.7N\",\"longitude\":\"125.0W\",\"latitudeNumeric\":15.7,\"longitudeNumeric\":-125,\"movementDir\":255,\"movementSpeed\":12,\"lastUpdate\":\"2026-09-15T21:00:00.000Z\",\"publicAdvisory\":{\"advNum\":\"009\",\"issuance\":\"2026-09-15T21:00:00.000Z\",\"fileUpdateTime\":\"2026-09-15T20:39:38.874Z\",\"url\":\"https://www.nhc.noaa.gov/text/MIATCPEP5.shtml\"},\"forecastAdvisory\":{\"advNum\":\"009\",\"issuance\":\"2026-09-",
-      "forecast": "Fifteen-E: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 112m old | Norbert: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 479m old",
-      "advisoryLagMin": 479
+      "forecast": "Fifteen-E: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 115m old | Norbert: 3 forecast positions · cone reconstructed from NHC track-error radii · P(hurricane) 1% · forecast undefined guidance · advisory 482m old",
+      "advisoryLagMin": 482
     },
     "markets": {
       "ok": true,
@@ -238,7 +238,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 295,
+      "latencyMs": 288,
       "count": 76,
       "attempts": [],
       "note": "El Niño · JJA 2026 ONI +1.80 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -249,7 +249,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 4,
       "note": "4 area(s) under watch · 1 Atlantic · highest 7-day 40%",
-      "latencyMs": 108,
+      "latencyMs": 105,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -274,7 +274,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 53,
+      "latencyMs": 94,
       "source": "NHC graphical TWO",
       "count": 4,
       "note": "4 of 4 area(s) with geometry"
@@ -284,7 +284,7 @@
       "source": "NHC ATCF a/b/f decks",
       "url": "https://ftp.nhc.noaa.gov/atcf/aid_public/",
       "status": 200,
-      "latencyMs": 662,
+      "latencyMs": 612,
       "count": 2,
       "note": "2/2 storm decks read · EP152026: a-deck cycle 2026091518 · 32 techs · consensus 3 member(s) peak 30 kt · guidance 12 track members, 72h spread 148 km · b-deck 22 records · f-deck 76 fixes | EP142026: a-deck cycle 2026091512 · 33 techs · consensus 3 member(s) peak 30 kt · guidance 11 track members, 72h spread 42 km · b-deck 32 records · f-deck 176 fixes",
       "attempts": [
@@ -307,7 +307,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 357,
+      "latencyMs": 291,
       "count": 2,
       "note": "2 vortex data message(s): AL052026 13:04Z, EP122026 12:37Z",
       "attempts": [
@@ -342,7 +342,7 @@
       "source": "NHC ATCF SHIPS (stext)",
       "url": "https://ftp.nhc.noaa.gov/atcf/stext/",
       "status": 200,
-      "latencyMs": 427,
+      "latencyMs": 374,
       "count": 2,
       "note": "2/2 storms · EP152026: 2026-09-15T18:00Z · shear 8 kt · OHC 26 · MPI 158 kt · 8 RI thresholds | EP142026: 2026-09-15T12:00Z · shear 26 kt · OHC 4 · MPI 129 kt · 8 RI thresholds",
       "attempts": [
@@ -422,11 +422,11 @@
         "already": false,
         "basis": "official forecast peaks at 25 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 112,
+      "advisoryLagMin": 115,
       "discussion": {
         "forecaster": "Jackson/Blake",
         "issuedZ": "2026-09-15T20:41:00.000Z",
-        "lagMin": 110,
+        "lagMin": 113,
         "guidance": {
           "intensity": {
             "position": "with",
@@ -873,7 +873,7 @@
         "cycle": "2026091518",
         "cycleIso": "2026-09-15T18:00:00.000Z",
         "validZ": "2026-09-15T18:00:00.000Z",
-        "fetchedAt": "2026-09-15T22:30:53.494Z",
+        "fetchedAt": "2026-09-15T22:34:29.169Z",
         "cadenceMin": 360,
         "previousCycle": "2026091512",
         "previousCycleIso": "2026-09-15T12:00:00.000Z",
@@ -7332,9 +7332,9 @@
         "reconAgeMin": null,
         "reconUsed": false,
         "reconAlreadyPriced": false,
-        "ascatAgeMin": 1032,
+        "ascatAgeMin": 1035,
         "ascatUsed": false,
-        "consensusAgeMin": 271,
+        "consensusAgeMin": 274,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 40,
@@ -7384,7 +7384,7 @@
           }
         ],
         "notes": [
-          "scatterometer pass is 1032 min old, past the 360-min line — band not tightened"
+          "scatterometer pass is 1035 min old, past the 360-min line — band not tightened"
         ],
         "used": {
           "official": true,
@@ -7398,7 +7398,7 @@
       "evidenceQuality": {
         "tier": "MEDIUM",
         "reasons": [
-          "ATCF consensus 271 min old, no aircraft in the storm",
+          "ATCF consensus 274 min old, no aircraft in the storm",
           "SHIPS RI diagnostics present, published but not scored"
         ]
       }
@@ -7456,11 +7456,11 @@
         "already": false,
         "basis": "official forecast peaks at 30 kt at 0h; NHC's published mean absolute intensity error there is 0.0 kt, and reported intensities come in 5 kt steps so 65 kt needs 62.5 kt of latent wind — 1% central, 1-1% across a plausible range of error widths"
       },
-      "advisoryLagMin": 479,
+      "advisoryLagMin": 482,
       "discussion": {
         "forecaster": "Cangialosi",
         "issuedZ": "2026-09-15T14:32:00.000Z",
-        "lagMin": 479,
+        "lagMin": 482,
         "guidance": {
           "intensity": null,
           "track": null
@@ -7766,7 +7766,7 @@
         "cycle": "2026091512",
         "cycleIso": "2026-09-15T12:00:00.000Z",
         "validZ": "2026-09-15T12:00:00.000Z",
-        "fetchedAt": "2026-09-15T22:30:53.494Z",
+        "fetchedAt": "2026-09-15T22:34:29.169Z",
         "cadenceMin": 360,
         "previousCycle": "2026091506",
         "previousCycleIso": "2026-09-15T06:00:00.000Z",
@@ -13066,7 +13066,7 @@
         "reconAlreadyPriced": false,
         "ascatAgeMin": null,
         "ascatUsed": false,
-        "consensusAgeMin": 631,
+        "consensusAgeMin": 634,
         "shipsScoring": false,
         "riFloor": {
           "dvKt": 35,
@@ -13098,7 +13098,7 @@
             "label": "ATCF guidance consensus",
             "p": null,
             "unavailable": true,
-            "basis": "consensus present but stale (631 min) — not scored"
+            "basis": "consensus present but stale (634 min) — not scored"
           },
           {
             "id": "ships-ri",
@@ -13109,7 +13109,7 @@
           }
         ],
         "notes": [
-          "ATCF consensus cycle 2026091512 is 631 min old, past the 420-min line — not used"
+          "ATCF consensus cycle 2026091512 is 634 min old, past the 420-min line — not used"
         ],
         "used": {
           "official": true,
@@ -13123,7 +13123,7 @@
       "evidenceQuality": {
         "tier": "LOW",
         "reasons": [
-          "the advisory under this estimate is 479 min old, past the 180-min line — quality is capped regardless of what else arrived",
+          "the advisory under this estimate is 482 min old, past the 180-min line — quality is capped regardless of what else arrived",
           "official advisory only — no guidance deck and no aircraft",
           "SHIPS RI diagnostics present, published but not scored"
         ]
@@ -14100,7 +14100,7 @@
       "volume24h": 18.42,
       "openInterest": 4805.15,
       "depth": {
-        "bidSize": 10.01,
+        "bidSize": 10,
         "askSize": 275.14,
         "notional": 1
       },
@@ -24499,7 +24499,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.415,
+      "market": 0.405,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -24520,10 +24520,10 @@
       "horizon": "storm",
       "strike": 5,
       "yesBid": 0.01,
-      "yesAsk": 0.82,
+      "yesAsk": 0.8,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 2,
-      "spread": 0.8099999999999999,
+      "spread": 0.79,
       "volume": 8,
       "volume24h": 0,
       "openInterest": 8,
@@ -24545,7 +24545,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.31,
+      "market": 0.33999999999999997,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -24565,11 +24565,11 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 1,
-      "yesBid": 0.12,
+      "yesBid": 0.18,
       "yesAsk": 0.5,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.38,
+      "spread": 0.32,
       "volume": 6.62,
       "volume24h": 0,
       "openInterest": 6.62,
@@ -24591,7 +24591,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.385,
+      "market": 0.375,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -24612,10 +24612,10 @@
       "horizon": "storm",
       "strike": 3,
       "yesBid": 0.01,
-      "yesAsk": 0.76,
+      "yesAsk": 0.74,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.75,
+      "spread": 0.73,
       "volume": 6,
       "volume24h": 0,
       "openInterest": 6,
@@ -25051,7 +25051,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.425,
+      "market": 0.395,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -25072,10 +25072,10 @@
       "horizon": "storm",
       "strike": 2,
       "yesBid": 0.02,
-      "yesAsk": 0.83,
+      "yesAsk": 0.77,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.8099999999999999,
+      "spread": 0.75,
       "volume": 4,
       "volume24h": 0,
       "openInterest": 4,
@@ -25179,52 +25179,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26YOLANDA"
-    },
-    {
-      "id": "KXHURCAT-26WINNIE-T1",
-      "label": "Will Winnie become a Category 1 hurricane?",
-      "short": "Will Winnie become a Category 1 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Winnie",
-        "active": false
-      },
-      "market": 0.5,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 1,
-      "yesBid": 0.01,
-      "yesAsk": 0.99,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 50,
-      "spread": 0.98,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 50,
-        "askSize": 50,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26WINNIE"
     },
     {
       "id": "KXHURCAT-26XAVIER-T1",
@@ -25457,52 +25411,6 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26POLO"
     },
     {
-      "id": "KXHURCAT-26ISAIAS-T1",
-      "label": "Will Isaias become a Category 1 hurricane?",
-      "short": "Will Isaias become a Category 1 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Isaias",
-        "active": false
-      },
-      "market": 0.5,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 1,
-      "yesBid": 0.01,
-      "yesAsk": 0.99,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 50,
-      "spread": 0.98,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 50,
-        "askSize": 50,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26ISAIAS"
-    },
-    {
       "id": "KXHURCAT-26GONZALO-T1",
       "label": "Will Gonzalo become a Category 1 hurricane?",
       "short": "Will Gonzalo become a Category 1 hurricane…",
@@ -25639,52 +25547,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26TRUDY"
-    },
-    {
-      "id": "KXHURCAT-26VANCE-T2",
-      "label": "Will Vance become a Category 2 hurricane?",
-      "short": "Will Vance become a Category 2 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Vance",
-        "active": false
-      },
-      "market": 0.5,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 2,
-      "yesBid": 0.01,
-      "yesAsk": 0.99,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 50,
-      "spread": 0.98,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 50,
-        "askSize": 50,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26VANCE"
     },
     {
       "id": "KXHURCAT-26WINNIE-T3",
@@ -26101,52 +25963,6 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26ODALYS"
     },
     {
-      "id": "KXHURCAT-26ODALYS-T5",
-      "label": "Will Odalys become a Category 5 hurricane?",
-      "short": "Will Odalys become a Category 5 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Odalys",
-        "active": false
-      },
-      "market": 0.5,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 5,
-      "yesBid": 0.01,
-      "yesAsk": 0.99,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 50,
-      "spread": 0.98,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 50,
-        "askSize": 50,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26ODALYS"
-    },
-    {
       "id": "KXHURCAT-26RACHEL-T5",
       "label": "Will Rachel become a Category 5 hurricane?",
       "short": "Will Rachel become a Category 5 hurricane…",
@@ -26421,52 +26237,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26JOSEPHINE"
-    },
-    {
-      "id": "KXHURCAT-26KYLE-T2",
-      "label": "Will Kyle become a Category 2 hurricane?",
-      "short": "Will Kyle become a Category 2 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Kyle",
-        "active": false
-      },
-      "market": 0.085,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 2,
-      "yesBid": 0.01,
-      "yesAsk": 0.16,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 8,
-      "spread": 0.15,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 50,
-        "askSize": 50,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26KYLE"
     },
     {
       "id": "KXHURCAT-26NANA-T2",
@@ -27067,6 +26837,52 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26HANNA"
     },
     {
+      "id": "KXHURCAT-26WINNIE-T1",
+      "label": "Will Winnie become a Category 1 hurricane?",
+      "short": "Will Winnie become a Category 1 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Winnie",
+        "active": false
+      },
+      "market": 0.5,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 1,
+      "yesBid": 0.02,
+      "yesAsk": 0.98,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 5,
+      "spread": 0.96,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 5,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26WINNIE"
+    },
+    {
       "id": "KXHURCAT-26ODALYS-T1",
       "label": "Will Odalys become a Category 1 hurricane?",
       "short": "Will Odalys become a Category 1 hurricane…",
@@ -27111,6 +26927,52 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26ODALYS"
+    },
+    {
+      "id": "KXHURCAT-26ISAIAS-T1",
+      "label": "Will Isaias become a Category 1 hurricane?",
+      "short": "Will Isaias become a Category 1 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Isaias",
+        "active": false
+      },
+      "market": 0.5,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 1,
+      "yesBid": 0.02,
+      "yesAsk": 0.98,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 5,
+      "spread": 0.96,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 5,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26ISAIAS"
     },
     {
       "id": "KXHURCAT-26FAY-T1",
@@ -27341,6 +27203,52 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26RACHEL"
+    },
+    {
+      "id": "KXHURCAT-26VANCE-T2",
+      "label": "Will Vance become a Category 2 hurricane?",
+      "short": "Will Vance become a Category 2 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Vance",
+        "active": false
+      },
+      "market": 0.5,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 2,
+      "yesBid": 0.02,
+      "yesAsk": 0.98,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 5,
+      "spread": 0.96,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 5,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26VANCE"
     },
     {
       "id": "KXHURCAT-26POLO-T2",
@@ -28355,6 +28263,52 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26WINNIE"
     },
     {
+      "id": "KXHURCAT-26ODALYS-T5",
+      "label": "Will Odalys become a Category 5 hurricane?",
+      "short": "Will Odalys become a Category 5 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Odalys",
+        "active": false
+      },
+      "market": 0.5,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 5,
+      "yesBid": 0.02,
+      "yesAsk": 0.98,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 5,
+      "spread": 0.96,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 5,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26ODALYS"
+    },
+    {
       "id": "KXHURCAT-26TRUDY-T5",
       "label": "Will Trudy become a Category 5 hurricane?",
       "short": "Will Trudy become a Category 5 hurricane…",
@@ -28997,6 +28951,52 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26RENE"
+    },
+    {
+      "id": "KXHURCAT-26OMAR-T4",
+      "label": "Will Omar become a Category 4 hurricane?",
+      "short": "Will Omar become a Category 4 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Omar",
+        "active": false
+      },
+      "market": 0.030000000000000002,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 4,
+      "yesBid": 0.01,
+      "yesAsk": 0.05,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 3,
+      "spread": 0.04,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 50,
+        "askSize": 50,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26OMAR"
     }
   ],
   "models": [],
