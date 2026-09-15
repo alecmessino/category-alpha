@@ -1,24 +1,24 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-14T21:48:35.611Z",
+  "ranAt": "2026-09-15T04:51:13.167Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "aa34560c87ddf3df301bf22cb4d7edea3819bdda",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/34900726109",
+  "sha": "832dd180c8afed1d5b0a0b9338be33c0318e8ad5",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/34930369254",
   "ok": false,
   "passed": 44,
   "total": 46,
   "failures": [
     {
       "check": "served snapshot is fresh",
-      "detail": "2026-09-14T20:47:57.179Z · 61m old"
+      "detail": "2026-09-15T03:15:06.951Z · 96m old"
     },
     {
       "check": "all markets carried",
       "detail": "300 contracts · 50 series · droppedForCap=6"
     }
   ],
-  "thirdPartyFailures": 8,
+  "thirdPartyFailures": 20,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -38,7 +38,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": false,
-      "detail": "2026-09-14T20:47:57.179Z · 61m old"
+      "detail": "2026-09-15T03:15:06.951Z · 96m old"
     },
     {
       "check": "renders: Situation",
@@ -93,17 +93,17 @@
     {
       "check": "genesis watch matches the outlook feed",
       "pass": true,
-      "detail": "1 area(s) · block=true"
+      "detail": "2 area(s) · block=true"
     },
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "6 ranked of 14 candidates · 106/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "8 ranked of 18 candidates · 106/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 6 displayed-only · unverifiable=0"
+      "detail": "0 executable · 5 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -113,7 +113,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "66/66 tile(s) rendered · 0 hole(s) · 0 still loading"
+      "detail": "34/36 tile(s) rendered · 2 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -128,7 +128,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": true,
-      "detail": "3 tabs · Situation is 1.9 screens tall (2715px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 807px · BANKROLL 713px · ▾ 698px"
+      "detail": "3 tabs · Situation is 1.9 screens tall (2693px / 1400px) · tallest: EDGE BOOK — RANKED BY EXPECT 785px · ▾ 698px · BANKROLL 691px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -148,7 +148,7 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": true,
-      "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 9 advisory change(s) · 0 moved P · 2 pinned at the clamp · 9 register row(s) · situation P=1% at adv #21"
+      "detail": "24 frames · newest carries advisory state for 2/2 storm(s) · 10 advisory change(s) · 0 moved P · 2 pinned at the clamp · 10 register row(s) · situation P=1% at adv #22"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
@@ -158,7 +158,7 @@
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
       "pass": true,
-      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=5m raw=1%"
+      "detail": "2/2 frames carry a calibrated P · 2 carry the raw one · 2 carry an evidence tier · contracts: 1 calibrated, 1 with the official estimate beside it · strip: quality=MEDIUM lag=39m raw=1%"
     },
     {
       "check": "no contract is priced off a calibration without publishing what it started from",
@@ -168,12 +168,12 @@
     {
       "check": "an arrival that happened reaches the register and the Situation strip",
       "pass": true,
-      "detail": "8 guidance cycle(s) turned over → 8 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 6 SHIPS · 1 pass · strip arrivals=4"
+      "detail": "9 guidance cycle(s) turned over → 9 row(s) · 0 aircraft fix(es) arrived → 0 row(s) · 0 P-update row(s) · 5 SHIPS · 2 pass · strip arrivals=6"
     },
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: no storm past the 180-min line · forced: 1 anchored row(s) pushed past it → 0 HOLD, 1 SUSPECT, 0 ACTIONABLE · 13 stale-crossing row(s) in the register"
+      "detail": "live: no storm past the 180-min line · forced: 1 anchored row(s) pushed past it → 0 HOLD, 1 SUSPECT, 0 ACTIONABLE · 15 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
@@ -183,7 +183,7 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-09-14T12:00:00Z"
+      "detail": "cycle 2026-09-14T18:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
@@ -193,12 +193,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "67 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "34 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "67 tile(s) served on reload · 67 in cache"
+      "detail": "35 tile(s) served on reload · 34 in cache"
     },
     {
       "check": "all markets carried",
