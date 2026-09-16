@@ -1,43 +1,43 @@
 {
   "schema": "millibar-calibration/1",
-  "generatedAt": "2026-09-16T08:49:46.627Z",
+  "generatedAt": "2026-09-16T13:53:37.957Z",
   "thresholdKt": 65,
   "minResolvedStorms": 10,
   "ok": true,
   "counts": {
     "entries": 613,
     "storms": 12,
-    "resolvedEntries": 252,
-    "resolvedStorms": 11,
+    "resolvedEntries": 269,
+    "resolvedStorms": 12,
     "outcomes": {
       "reached": 4,
-      "notReached": 7
+      "notReached": 8
     },
-    "provisional": 252
+    "provisional": 269
   },
-  "baseRate": 0.27530364372469635,
+  "baseRate": 0.25757575757575757,
   "brier": {
-    "calibrated": 0.060947924307745295,
-    "raw": 0.06771214713449918,
+    "calibrated": 0.05702968675762532,
+    "raw": 0.06343926051261631,
     "market": 0.15903628318584093,
-    "climatology": 0.19951154747660182
+    "climatology": 0.19123048668503215
   },
   "brierN": {
-    "calibrated": 247,
-    "raw": 252,
+    "calibrated": 264,
+    "raw": 269,
     "market": 226
   },
   "skill": {
-    "vsClimatology": 0.694514302161417,
-    "calibrationVsRaw": 0.09200249942244632,
+    "vsClimatology": 0.7017751314331142,
+    "calibrationVsRaw": 0.09199306679245545,
     "vsMarket": 0.6366499444439138
   },
   "paired": {
     "calibratedVsRaw": {
-      "calibrated": 0.060947924307745295,
-      "raw": 0.06712344942467122,
-      "entries": 247,
-      "storms": 11
+      "calibrated": 0.05702968675762532,
+      "raw": 0.06280754548444616,
+      "entries": 264,
+      "storms": 12
     },
     "calibratedVsMarket": {
       "calibrated": 0.058933734893298825,
@@ -46,8 +46,8 @@
       "storms": 11
     }
   },
-  "coverageNote": "coverage differs across series — calibrated 247, official-estimate 252, market 226 of 252 resolved forecasts. The skill numbers are computed on the overlap (247 against the official estimate, 221 against the market) so they compare the same storms; the marginal Brier scores above do not and must not be divided.",
+  "coverageNote": "coverage differs across series — calibrated 264, official-estimate 269, market 226 of 269 resolved forecasts. The skill numbers are computed on the overlap (264 against the official estimate, 221 against the market) so they compare the same storms; the marginal Brier scores above do not and must not be divided.",
   "reliability": null,
-  "reliabilityNote": "a reliability curve needs 30 resolved storms to have support in each bin; 11 so far",
-  "note": "scored over 11 resolved storms (252 forecasts). Forecasts within a storm share one outcome, so the storms are the sample size."
+  "reliabilityNote": "a reliability curve needs 30 resolved storms to have support in each bin; 12 so far",
+  "note": "scored over 12 resolved storms (269 forecasts). Forecasts within a storm share one outcome, so the storms are the sample size."
 }
