@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-16T21:10:52.207Z",
+  "generatedAt": "2026-09-16T21:21:11.171Z",
   "stepMin": 10,
   "note": "No CLASSIFIED tropical cyclones. 3 area(s) under NHC watch — see the genesis outlook below.",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 222,
+      "latencyMs": 234,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 30  Atlantic hur | Above 30 | px=0.010",
-            "Will there be more than 25  Atlantic hur | Above 25 | px=0.010",
-            "Will there be more than 20  Atlantic hur | Above 20 | px=0.005",
-            "Will there be more than 18  Atlantic hur | Above 18 | px=0.015",
-            "Will there be more than 16  Atlantic hur | Above 16 | px=0.030",
-            "Will there be more than 14  Atlantic hur | Above 14 | px=0.035"
+            "Will a hurricane make landfall in North  | 2026 | px=0.075",
+            "Will there be more than 26 named storms  | Above 26 | px=0.115",
+            "Will there be more than 24 named storms  | Above 24 | px=0.145",
+            "Will there be more than 22 named storms  | Above 22 | px=0.280",
+            "Will there be more than 20 named storms  | Above 20 | px=0.435",
+            "Will there be more than 19 named storms  | Above 19 | px=0.630"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"498.37\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"740.24\"},\"px\":{\"last_price_dollars\":\"0.0200\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9800\",\"previous_price_dollars\":\"0.0200\",\"previous_yes_ask_dollars\":\"0.0200\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0200\",\"yes_ask_size_fp\":\"1037.00\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"494.64\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"520.07\"},\"px\":{\"last_price_dollars\":\"0.0300\",\"no_ask_dollars\":\"0.9700\",\"no_bid_dollars\":\"0.8800\",\"previous_price_dollars\":\"0.0300\",\"previous_yes_ask_dollars\":\"0.1300\",\"previous_yes_bid_dollars\":\"0.0300\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.1200\",\"yes_ask_size_fp\":\"100.00\",\"yes_bid_dollars\":\"0.0300\",\"yes_bid_size_fp\":\"0.90\"}}"
         }
       ]
     },
@@ -237,7 +237,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 286,
+      "latencyMs": 288,
       "count": 76,
       "attempts": [],
       "note": "El Niño · JJA 2026 ONI +1.80 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -248,7 +248,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 3,
       "note": "3 area(s) under watch · 1 Atlantic · highest 7-day 30%",
-      "latencyMs": 117,
+      "latencyMs": 157,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -273,7 +273,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 51,
+      "latencyMs": 50,
       "source": "NHC graphical TWO",
       "count": 3,
       "note": "3 of 3 area(s) with geometry"
@@ -293,7 +293,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 356,
+      "latencyMs": 420,
       "count": 2,
       "note": "2 vortex data message(s): AL052026 13:04Z, EP122026 12:37Z",
       "attempts": [
@@ -349,7 +349,7 @@
       "short": "Will there be more than 2 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.04,
+      "market": 0.035,
       "model": 0.15162546851307301,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -400,16 +400,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 2,
-      "yesBid": 0.03,
+      "yesBid": 0.02,
       "yesAsk": 0.05,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 6,
-      "spread": 0.020000000000000004,
-      "volume": 40666.89,
-      "volume24h": 249.3,
-      "openInterest": 13659.83,
+      "spread": 0.030000000000000002,
+      "volume": 40721.89,
+      "volume24h": 304.3,
+      "openInterest": 13618.1,
       "depth": {
-        "bidSize": 46.73,
+        "bidSize": 1192.34,
         "askSize": 116.76,
         "notional": 1
       },
@@ -980,7 +980,7 @@
       "liquidity": 63,
       "spread": 0.020000000000000018,
       "volume": 12015.92,
-      "volume24h": 412.72,
+      "volume24h": 364.5,
       "openInterest": 6540.08,
       "depth": {
         "bidSize": 176.32,
@@ -1425,7 +1425,7 @@
       "short": "Will there be more than 16 Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.03,
+      "market": 0.04,
       "model": 0.05510533818053863,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
@@ -1477,16 +1477,16 @@
       "horizon": "seasonal",
       "strike": 16,
       "yesBid": 0.02,
-      "yesAsk": 0.04,
+      "yesAsk": 0.06,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 1,
-      "spread": 0.02,
+      "liquidity": 9,
+      "spread": 0.039999999999999994,
       "volume": 8011.68,
       "volume24h": 0,
       "openInterest": 3208.69,
       "depth": {
         "bidSize": 1361.44,
-        "askSize": 20.79,
+        "askSize": 143.93,
         "notional": 1
       },
       "proxy": false,
@@ -4409,14 +4409,14 @@
       "yesBid": 0.15,
       "yesAsk": 0.25,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 27,
+      "liquidity": 26,
       "spread": 0.1,
       "volume": 683.26,
       "volume24h": 0,
       "openInterest": 451.4,
       "depth": {
         "bidSize": 3.17,
-        "askSize": 109,
+        "askSize": 104,
         "notional": 1
       },
       "proxy": false,
@@ -12347,6 +12347,52 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26JOSEPHINE"
     },
     {
+      "id": "KXHURCAT-26KYLE-T1",
+      "label": "Will Kyle become a Category 1 hurricane?",
+      "short": "Will Kyle become a Category 1 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Kyle",
+        "active": false
+      },
+      "market": 0.16,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 1,
+      "yesBid": 0.11,
+      "yesAsk": 0.21,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 11,
+      "spread": 0.09999999999999999,
+      "volume": 0,
+      "volume24h": 0,
+      "openInterest": 0,
+      "depth": {
+        "bidSize": 4,
+        "askSize": 50,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26KYLE"
+    },
+    {
       "id": "KXHURCAT-26FAY-T4",
       "label": "Will Fay become a Category 4 hurricane?",
       "short": "Will Fay become a Category 4 hurricane…",
@@ -16117,52 +16163,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26LEAH"
-    },
-    {
-      "id": "KXHURCAT-26KYLE-T1",
-      "label": "Will Kyle become a Category 1 hurricane?",
-      "short": "Will Kyle become a Category 1 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Kyle",
-        "active": false
-      },
-      "market": 0.14,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 1,
-      "yesBid": 0.08,
-      "yesAsk": 0.2,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 1,
-      "spread": 0.12000000000000001,
-      "volume": 0,
-      "volume24h": 0,
-      "openInterest": 0,
-      "depth": {
-        "bidSize": 5,
-        "askSize": 5,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26KYLE"
     },
     {
       "id": "KXHURCAT-26MARCO-T1",
