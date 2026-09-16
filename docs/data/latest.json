@@ -1,15 +1,15 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-16T17:51:15.572Z",
+  "generatedAt": "2026-09-16T18:01:36.424Z",
   "stepMin": 10,
-  "note": "No CLASSIFIED tropical cyclones. 4 area(s) under NHC watch — see the genesis outlook below.",
+  "note": "No CLASSIFIED tropical cyclones. 3 area(s) under NHC watch — see the genesis outlook below.",
   "feeds": {
     "nhc": {
       "ok": true,
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 411,
+      "latencyMs": 239,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "When will the next hurricane form? | Before Oct 15, | px=0.745",
-            "When will the next hurricane form? | Before Oct 1,  | px=0.410",
-            "When will the next hurricane form? | Before Nov 15, | px=0.810",
-            "When will the next hurricane form? | Before Nov 1,  | px=0.765",
-            "When will the next hurricane form? | Before Dec 1,  | px=0.805",
-            "Will there be more than 26 named storms  | Above 26 | px=0.115"
+            "Will there be more than 9  Atlantic hurr | Above 9 | px=0.010",
+            "Will there be more than 8  Atlantic hurr | Above 8 | px=0.005",
+            "Will there be more than 7  Atlantic hurr | Above 7 | px=0.015",
+            "Will there be more than 6  Atlantic hurr | Above 6 | px=0.035",
+            "Will there be more than 5  Atlantic hurr | Above 5 | px=0.035",
+            "Will there be more than 4  Atlantic hurr | Above 4 | px=0.040"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"1425.51\",\"volume_24h_fp\":\"132.02\",\"volume_fp\":\"1780.88\"},\"px\":{\"last_price_dollars\":\"0.7300\",\"no_ask_dollars\":\"0.2800\",\"no_bid_dollars\":\"0.2300\",\"previous_price_dollars\":\"0.6900\",\"previous_yes_ask_dollars\":\"0.7900\",\"previous_yes_bid_dollars\":\"0.7000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.7700\",\"yes_ask_size_fp\":\"15.00\",\"yes_bid_dollars\":\"0.7200\",\"yes_bid_size_fp\":\"110.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2926.52\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"4165.66\"},\"px\":{\"last_price_dollars\":\"0.0200\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9800\",\"previous_price_dollars\":\"0.0200\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0200\",\"yes_ask_size_fp\":\"2112.58\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
         }
       ]
     },
@@ -237,7 +237,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 288,
+      "latencyMs": 291,
       "count": 76,
       "attempts": [],
       "note": "El Niño · JJA 2026 ONI +1.80 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -246,16 +246,16 @@
       "ok": true,
       "status": 200,
       "source": "NHC Tropical Weather Outlook",
-      "count": 4,
-      "note": "4 area(s) under watch · 1 Atlantic · highest 7-day 30%",
-      "latencyMs": 109,
+      "count": 3,
+      "note": "3 area(s) under watch · 1 Atlantic · highest 7-day 30%",
+      "latencyMs": 98,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
           "ok": true,
           "status": 200,
           "count": 1,
-          "note": "1 area(s) · issued 800 AM EDT Wed Sep 16 2026",
+          "note": "1 area(s) · issued 200 PM EDT Wed Sep 16 2026",
           "quietOrUnparsed": null,
           "diag": null
         },
@@ -263,8 +263,8 @@
           "source": "E/C Pacific TWO (NWS API)",
           "ok": true,
           "status": 200,
-          "count": 3,
-          "note": "3 area(s) · issued 500 AM PDT Wed Sep 16 2026",
+          "count": 2,
+          "note": "2 area(s) · issued 1100 AM PDT Wed Sep 16 2026",
           "quietOrUnparsed": null,
           "diag": null
         }
@@ -273,10 +273,10 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 51,
+      "latencyMs": 49,
       "source": "NHC graphical TWO",
-      "count": 4,
-      "note": "4 of 4 area(s) with geometry"
+      "count": 3,
+      "note": "3 of 3 area(s) with geometry"
     },
     "atcf": {
       "ok": true,
@@ -293,7 +293,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 424,
+      "latencyMs": 421,
       "count": 2,
       "note": "2 vortex data message(s): AL052026 13:04Z, EP122026 12:37Z",
       "attempts": [
@@ -719,7 +719,7 @@
       "short": "Will Fay be the first named hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.36,
+      "market": 0.365,
       "model": 0.49252424343714896,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -752,17 +752,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.34,
+      "yesBid": 0.35,
       "yesAsk": 0.38,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 87,
-      "spread": 0.03999999999999998,
-      "volume": 16907.08,
-      "volume24h": 297.17,
+      "liquidity": 79,
+      "spread": 0.030000000000000027,
+      "volume": 16922.08,
+      "volume24h": 312.17,
       "openInterest": 8093.01,
       "depth": {
-        "bidSize": 81.84,
-        "askSize": 229.97,
+        "bidSize": 46.14,
+        "askSize": 208.08,
         "notional": 1
       },
       "proxy": false,
@@ -910,7 +910,7 @@
       "openInterest": 4223.2,
       "depth": {
         "bidSize": 291.94,
-        "askSize": 232.64,
+        "askSize": 271.64,
         "notional": 1
       },
       "proxy": false,
@@ -1035,11 +1035,11 @@
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 2,
       "spread": 0.07,
-      "volume": 11081.37,
-      "volume24h": 68.72,
-      "openInterest": 4822.16,
+      "volume": 11118.81,
+      "volume24h": 106.16,
+      "openInterest": 4784.72,
       "depth": {
-        "bidSize": 7.31,
+        "bidSize": 6.73,
         "askSize": 8.02,
         "notional": 1
       },
@@ -1122,62 +1122,6 @@
       "url": "https://kalshi.com/markets/KXTROPSTORM-26DEC01"
     },
     {
-      "id": "KXFIRSTHURRICANE-26DEC01ATL-NAN",
-      "label": "Will Nana be the first named hurricane in the Atlantic in 2026?",
-      "short": "Will Nana be the first named hurricane in the…",
-      "storm": null,
-      "subject": null,
-      "market": 0.025,
-      "model": 0.03861736062284925,
-      "modelQuantity": "firsthurricane",
-      "modelBasin": "atlantic",
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Nana is name #14 on the Atlantic list and 5 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 4% once seasons are weighted by ONI similarity · used at all in 12%",
-      "modelUncond": 0.013888888888888888,
-      "modelLayers": [
-        {
-          "id": "ordinal",
-          "label": "Ordinal climatology",
-          "p": 0.013888888888888888,
-          "basis": "1991–2025 (n=35), unweighted — the #9 storm still to form was the season's FIRST hurricane in 0% of seasons"
-        },
-        {
-          "id": "onisim",
-          "label": "ONI-similarity weighted",
-          "p": 0.03861736062284925,
-          "basis": "same seasons weighted by ONI distance from +1.80 (effective 6.0 seasons, shrunk 57% toward unweighted)"
-        }
-      ],
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": 0.01,
-      "yesAsk": 0.04,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 14,
-      "spread": 0.03,
-      "volume": 9527.7,
-      "volume24h": 0,
-      "openInterest": 4076.42,
-      "depth": {
-        "bidSize": 100,
-        "askSize": 362.3,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
-    },
-    {
       "id": "KXTROPSTORM-26DEC01-T10",
       "label": "Will there be more than 10  Atlantic hurricanes in 2026?",
       "short": "Will there be more than 10 Atlantic…",
@@ -1237,19 +1181,75 @@
       "yesBid": 0.27,
       "yesAsk": 0.3,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 89,
+      "liquidity": 59,
       "spread": 0.02999999999999997,
-      "volume": 9427.93,
+      "volume": 9527.93,
       "volume24h": 10.16,
-      "openInterest": 3644.57,
+      "openInterest": 3744.57,
       "depth": {
         "bidSize": 5.12,
-        "askSize": 296.84,
+        "askSize": 196.84,
         "notional": 1
       },
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXTROPSTORM-26DEC01"
+    },
+    {
+      "id": "KXFIRSTHURRICANE-26DEC01ATL-NAN",
+      "label": "Will Nana be the first named hurricane in the Atlantic in 2026?",
+      "short": "Will Nana be the first named hurricane in the…",
+      "storm": null,
+      "subject": null,
+      "market": 0.025,
+      "model": 0.03861736062284925,
+      "modelQuantity": "firsthurricane",
+      "modelBasin": "atlantic",
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Nana is name #14 on the Atlantic list and 5 have been used, so this is the #9 storm still to form · in 1991–2025 (n=35), that storm was the season's FIRST hurricane in 1% of seasons · 4% once seasons are weighted by ONI similarity · used at all in 12%",
+      "modelUncond": 0.013888888888888888,
+      "modelLayers": [
+        {
+          "id": "ordinal",
+          "label": "Ordinal climatology",
+          "p": 0.013888888888888888,
+          "basis": "1991–2025 (n=35), unweighted — the #9 storm still to form was the season's FIRST hurricane in 0% of seasons"
+        },
+        {
+          "id": "onisim",
+          "label": "ONI-similarity weighted",
+          "p": 0.03861736062284925,
+          "basis": "same seasons weighted by ONI distance from +1.80 (effective 6.0 seasons, shrunk 57% toward unweighted)"
+        }
+      ],
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": 0.01,
+      "yesAsk": 0.04,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": 14,
+      "spread": 0.03,
+      "volume": 9527.7,
+      "volume24h": 0,
+      "openInterest": 4076.42,
+      "depth": {
+        "bidSize": 100,
+        "askSize": 362.3,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXFIRSTHURRICANE-26DEC01ATL"
     },
     {
       "id": "KXFIRSTHURRICANE-26DEC01ATL-OMA",
@@ -1685,7 +1685,7 @@
       "short": "Will there be more than 12 Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.08,
+      "market": 0.08499999999999999,
       "model": 0.18771135108680528,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
@@ -1737,16 +1737,16 @@
       "horizon": "seasonal",
       "strike": 12,
       "yesBid": 0.06,
-      "yesAsk": 0.1,
+      "yesAsk": 0.11,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 19,
-      "spread": 0.04000000000000001,
+      "liquidity": 22,
+      "spread": 0.05,
       "volume": 5819.74,
       "volume24h": 187.18,
       "openInterest": 1978.92,
       "depth": {
-        "bidSize": 10,
-        "askSize": 186,
+        "bidSize": 13.63,
+        "askSize": 200,
         "notional": 1
       },
       "proxy": false,
@@ -2071,16 +2071,16 @@
       "horizon": "seasonal",
       "strike": 9,
       "yesBid": null,
-      "yesAsk": 0.01,
+      "yesAsk": 0.02,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 0,
-      "spread": 0.01,
+      "liquidity": 42,
+      "spread": 0.02,
       "volume": 4165.66,
       "volume24h": 0,
       "openInterest": 2926.52,
       "depth": {
         "bidSize": 0,
-        "askSize": 18,
+        "askSize": 2112.58,
         "notional": 1
       },
       "proxy": false,
@@ -4409,14 +4409,14 @@
       "yesBid": 0.15,
       "yesAsk": 0.25,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 27,
+      "liquidity": 25,
       "spread": 0.1,
       "volume": 683.26,
       "volume24h": 0,
       "openInterest": 451.4,
       "depth": {
         "bidSize": 3.17,
-        "askSize": 109,
+        "askSize": 100,
         "notional": 1
       },
       "proxy": false,
@@ -4929,14 +4929,14 @@
       "yesBid": 0.13,
       "yesAsk": 0.44,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 1,
+      "liquidity": 213,
       "spread": 0.31,
       "volume": 382.27,
       "volume24h": 224.27,
       "openInterest": 277.27,
       "depth": {
         "bidSize": 10,
-        "askSize": 3,
+        "askSize": 485,
         "notional": 1
       },
       "proxy": false,
@@ -6171,14 +6171,14 @@
       "yesBid": 0.19,
       "yesAsk": 0.29,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 37,
+      "liquidity": 29,
       "spread": 0.09999999999999998,
       "volume": 106.92,
       "volume24h": 0,
       "openInterest": 77.2,
       "depth": {
         "bidSize": 100,
-        "askSize": 126,
+        "askSize": 100,
         "notional": 1
       },
       "proxy": false,
@@ -8049,14 +8049,14 @@
       "yesBid": 0.38,
       "yesAsk": 0.44,
       "closeTime": "2026-10-01T03:59:00Z",
-      "liquidity": 2,
+      "liquidity": 1,
       "spread": 0.06,
-      "volume": 4946.46,
-      "volume24h": 399.04,
+      "volume": 4947.4,
+      "volume24h": 391.98,
       "openInterest": 3818.22,
       "depth": {
         "bidSize": 167.12,
-        "askSize": 4,
+        "askSize": 3.06,
         "notional": 1
       },
       "proxy": false,
@@ -8821,7 +8821,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.745,
+      "market": 0.75,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -8841,16 +8841,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.72,
+      "yesBid": 0.73,
       "yesAsk": 0.77,
       "closeTime": "2026-10-15T03:59:00Z",
       "liquidity": 12,
-      "spread": 0.050000000000000044,
+      "spread": 0.040000000000000036,
       "volume": 1780.88,
       "volume24h": 132.02,
       "openInterest": 1425.51,
       "depth": {
-        "bidSize": 110,
+        "bidSize": 5,
         "askSize": 15,
         "notional": 1
       },
@@ -9392,7 +9392,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.81,
+      "market": 0.8049999999999999,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -9413,10 +9413,10 @@
       "horizon": "storm",
       "strike": null,
       "yesBid": 0.77,
-      "yesAsk": 0.85,
+      "yesAsk": 0.84,
       "closeTime": "2026-11-15T04:59:00Z",
-      "liquidity": 93,
-      "spread": 0.07999999999999996,
+      "liquidity": 91,
+      "spread": 0.06999999999999995,
       "volume": 697.53,
       "volume24h": 200,
       "openInterest": 390.99,
@@ -16127,7 +16127,7 @@
         "subject": "Kyle",
         "active": false
       },
-      "market": 0.14,
+      "market": 0.135,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -16147,16 +16147,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 1,
-      "yesBid": 0.08,
+      "yesBid": 0.07,
       "yesAsk": 0.2,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.12000000000000001,
+      "spread": 0.13,
       "volume": 0,
       "volume24h": 0,
       "openInterest": 0,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 9,
         "askSize": 5,
         "notional": 1
       },
@@ -16218,12 +16218,12 @@
     {
       "n": 1,
       "basin": "atlantic",
-      "id": null,
+      "id": "AL98",
       "title": "Central Subtropical Atlantic",
-      "pct48": 10,
+      "pct48": 20,
       "pct7d": 30,
-      "summary": "A trough of low pressure located several hundred miles east of Bermuda is associated with disorganized showers and thunderstorms. Environmental conditions could become a little more conducive for development in the next few days while the system moves slowly westward to west-northwestward over the subtropical Atlantic.",
-      "issued": "800 AM EDT Wed Sep 16 2026",
+      "summary": "A small area of low pressure located several hundred miles east of Bermuda has become better defined over the last 24 hours. Environmental conditions could become a little more conducive for further development in the next few days while the system moves slowly westward to southward over the subtropical Atlantic.",
+      "issued": "200 PM EDT Wed Sep 16 2026",
       "url": "https://api.weather.gov/products/types/ABNT20/locations/NHC",
       "rings": [
         [
@@ -17440,11 +17440,11 @@
       "n": 1,
       "basin": "pacific",
       "id": null,
-      "title": "Gulf of California",
-      "pct48": 20,
-      "pct7d": 20,
-      "summary": "An area of low pressure over the central Gulf of California is bringing heavy rains to portions of the Mexican state of Sonora. Although the development chances appear to be decreasing since the system is expected to move inland later this morning, heavy rains will likely continue across portions of the state of Sonora",
-      "issued": "500 AM PDT Wed Sep 16 2026",
+      "title": "Southwest of Southwestern Mexico",
+      "pct48": null,
+      "pct7d": 60,
+      "summary": "An area of low pressure could form well offshore of southwestern Mexico within the next few days. Environmental conditions appear conducive for some gradual development, and this system could become a tropical depression early next week while it moves slowly northwestward or northward.",
+      "issued": "1100 AM PDT Wed Sep 16 2026",
       "url": "https://api.weather.gov/products/types/ABPZ20/locations/NHC",
       "rings": [
         [
@@ -18661,11 +18661,11 @@
       "n": 2,
       "basin": "pacific",
       "id": null,
-      "title": "Southwest of Southwestern Mexico",
+      "title": "Western East Pacific",
       "pct48": null,
-      "pct7d": 50,
-      "summary": "An area of low pressure could form well offshore of southwestern Mexico within the next few days. Environmental conditions appear conducive for some gradual development, and this system could become a tropical depression early next week while it moves slowly northwestward or northward.",
-      "issued": "500 AM PDT Wed Sep 16 2026",
+      "pct7d": 40,
+      "summary": "A tropical wave is producing disorganized showers and thunderstorms well to the south of the southern tip of the Baja California Peninsula. Upper-level winds are forecast to remain unfavorable for significant development through the weekend as the system moves westward at 10 to 15 mph. However, gradual development of t",
+      "issued": "1100 AM PDT Wed Sep 16 2026",
       "url": "https://api.weather.gov/products/types/ABPZ20/locations/NHC",
       "rings": [
         [
@@ -19876,1227 +19876,6 @@
         9.103601627682558,
         -100.19107223500595,
         18.31299357147983
-      ]
-    },
-    {
-      "n": 3,
-      "basin": "pacific",
-      "id": null,
-      "title": "Western East Pacific",
-      "pct48": null,
-      "pct7d": 30,
-      "summary": "A tropical wave is producing disorganized showers and thunderstorms well to the south of the southern tip of the Baja California Peninsula. Upper-level winds are forecast to be unfavorable for significant development through the weekend as the system moves westward at 10 to 15 mph. However, some gradual development of ",
-      "issued": "500 AM PDT Wed Sep 16 2026",
-      "url": "https://api.weather.gov/products/types/ABPZ20/locations/NHC",
-      "rings": [
-        [
-          [
-            12.302366081327918,
-            -134.77932574800715
-          ],
-          [
-            12.375143317278816,
-            -134.89248813152778
-          ],
-          [
-            12.450076907931813,
-            -135.0021591644892
-          ],
-          [
-            12.527094803840077,
-            -135.1083456264146
-          ],
-          [
-            12.606124955556778,
-            -135.21105429682706
-          ],
-          [
-            12.687095313635082,
-            -135.31029195524977
-          ],
-          [
-            12.769933828628163,
-            -135.40606538120582
-          ],
-          [
-            12.854568451089188,
-            -135.49838135421842
-          ],
-          [
-            12.940927131571325,
-            -135.58724665381064
-          ],
-          [
-            13.02893782062774,
-            -135.6726680595057
-          ],
-          [
-            13.118528468811611,
-            -135.75465235082666
-          ],
-          [
-            13.2096270266761,
-            -135.83320630729676
-          ],
-          [
-            13.30216144477438,
-            -135.90833670843907
-          ],
-          [
-            13.396059673659618,
-            -135.9800503337767
-          ],
-          [
-            13.491249663884982,
-            -136.04835396283286
-          ],
-          [
-            13.587659366003644,
-            -136.11325437513068
-          ],
-          [
-            13.685216730568772,
-            -136.1747583501933
-          ],
-          [
-            13.783849708133534,
-            -136.2328726675438
-          ],
-          [
-            13.883486249251101,
-            -136.2876041067054
-          ],
-          [
-            13.984054304474641,
-            -136.33895944720123
-          ],
-          [
-            14.085481824357322,
-            -136.38694546855442
-          ],
-          [
-            14.187696759452313,
-            -136.43156895028807
-          ],
-          [
-            14.290627060312788,
-            -136.47283667192536
-          ],
-          [
-            14.394200677491911,
-            -136.51075541298948
-          ],
-          [
-            14.498345561542852,
-            -136.54533195300348
-          ],
-          [
-            14.602989663018779,
-            -136.5765730714906
-          ],
-          [
-            14.708060932472863,
-            -136.60448554797387
-          ],
-          [
-            14.813487320458275,
-            -136.6290761619765
-          ],
-          [
-            14.919196777528182,
-            -136.65035169302163
-          ],
-          [
-            15.025117254235752,
-            -136.6683189206324
-          ],
-          [
-            15.131176701134157,
-            -136.68298462433194
-          ],
-          [
-            15.237303068776562,
-            -136.69435558364341
-          ],
-          [
-            15.34342430771614,
-            -136.70243857808993
-          ],
-          [
-            15.449468368506059,
-            -136.70724038719462
-          ],
-          [
-            15.555363201699485,
-            -136.70876779048066
-          ],
-          [
-            15.661036757849594,
-            -136.7070275674712
-          ],
-          [
-            15.766416987509547,
-            -136.70202649768933
-          ],
-          [
-            15.871431841232521,
-            -136.69377136065822
-          ],
-          [
-            15.976009269571676,
-            -136.68226893590105
-          ],
-          [
-            16.080077223080192,
-            -136.66752600294092
-          ],
-          [
-            16.18356365231123,
-            -136.649549341301
-          ],
-          [
-            16.286396507817958,
-            -136.62834573050438
-          ],
-          [
-            16.388503740153553,
-            -136.60392195007424
-          ],
-          [
-            16.48981332162616,
-            -136.5762847879765
-          ],
-          [
-            16.590255119946608,
-            -136.54544176775434
-          ],
-          [
-            16.68976234221524,
-            -136.51140170891767
-          ],
-          [
-            16.788268535453966,
-            -136.47417356289495
-          ],
-          [
-            16.885707246684703,
-            -136.4337662811146
-          ],
-          [
-            16.982012022929364,
-            -136.390188815005
-          ],
-          [
-            17.077116411209857,
-            -136.34345011599453
-          ],
-          [
-            17.1709539585481,
-            -136.29355913551169
-          ],
-          [
-            17.26345821196601,
-            -136.24052482498482
-          ],
-          [
-            17.354562718485493,
-            -136.18435613584228
-          ],
-          [
-            17.44420102512846,
-            -136.1250620195126
-          ],
-          [
-            17.532306678916832,
-            -136.06265142742413
-          ],
-          [
-            17.61881322687252,
-            -135.99713331100526
-          ],
-          [
-            17.70365421601743,
-            -135.92851662168442
-          ],
-          [
-            17.786763193373485,
-            -135.85681031089004
-          ],
-          [
-            17.86807370596259,
-            -135.7820233300505
-          ],
-          [
-            17.947519300806665,
-            -135.7041646305942
-          ],
-          [
-            18.02503352492762,
-            -135.62324316394958
-          ],
-          [
-            18.100549925347366,
-            -135.53926788154504
-          ],
-          [
-            18.174002049087814,
-            -135.452247734809
-          ],
-          [
-            18.245323443170882,
-            -135.3621916751698
-          ],
-          [
-            18.314447654618487,
-            -135.269108654056
-          ],
-          [
-            18.381308230452532,
-            -135.17300762289585
-          ],
-          [
-            18.445838717694937,
-            -135.07389753311782
-          ],
-          [
-            18.507972663367617,
-            -134.97178733615033
-          ],
-          [
-            18.56764361449247,
-            -134.8666859834218
-          ],
-          [
-            18.62478511809143,
-            -134.7586024263606
-          ],
-          [
-            18.6793307211864,
-            -134.64754561639518
-          ],
-          [
-            18.73121397079929,
-            -134.5335245049539
-          ],
-          [
-            18.78036841395202,
-            -134.4165480434652
-          ],
-          [
-            18.826727597666494,
-            -134.29662518335752
-          ],
-          [
-            18.870225068964636,
-            -134.17376487605924
-          ],
-          [
-            18.91079437486835,
-            -134.04797607299875
-          ],
-          [
-            18.948369062399554,
-            -133.91926772560447
-          ],
-          [
-            18.98288267858016,
-            -133.7876487853048
-          ],
-          [
-            19.01426877043208,
-            -133.65312820352818
-          ],
-          [
-            19.042460884977224,
-            -133.51571493170303
-          ],
-          [
-            19.067392569237516,
-            -133.3754179212577
-          ],
-          [
-            19.088997370234857,
-            -133.23224612362063
-          ],
-          [
-            19.107208834991166,
-            -133.08620849022026
-          ],
-          [
-            19.121960510528357,
-            -132.93731397248496
-          ],
-          [
-            19.13318594386834,
-            -132.78557152184314
-          ],
-          [
-            19.14081868203303,
-            -132.6309900897232
-          ],
-          [
-            19.144797543200475,
-            -132.47358154334268
-          ],
-          [
-            19.145149884499375,
-            -132.31340672606342
-          ],
-          [
-            19.141976529797038,
-            -132.15056712005756
-          ],
-          [
-            19.13538052672976,
-            -131.98516543759558
-          ],
-          [
-            19.125464922933837,
-            -131.81730439094807
-          ],
-          [
-            19.112332766045565,
-            -131.64708669238556
-          ],
-          [
-            19.096087103701237,
-            -131.4746150541786
-          ],
-          [
-            19.076830983537153,
-            -131.2999921885978
-          ],
-          [
-            19.054667453189612,
-            -131.12332080791367
-          ],
-          [
-            19.0296995602949,
-            -130.9447036243967
-          ],
-          [
-            19.00203035248933,
-            -130.76424335031754
-          ],
-          [
-            18.971762877409187,
-            -130.5820426979467
-          ],
-          [
-            18.939000182690766,
-            -130.39820437955476
-          ],
-          [
-            18.90384531597036,
-            -130.21283110741223
-          ],
-          [
-            18.86640132488428,
-            -130.02602559378965
-          ],
-          [
-            18.826771257068817,
-            -129.83789055095767
-          ],
-          [
-            18.785058160160254,
-            -129.64852869118675
-          ],
-          [
-            18.741365081794903,
-            -129.4580427267475
-          ],
-          [
-            18.695795069609055,
-            -129.2665353699104
-          ],
-          [
-            18.648451171239007,
-            -129.07410933294608
-          ],
-          [
-            18.599436434321053,
-            -128.88086732812505
-          ],
-          [
-            18.548853906491487,
-            -128.68691206771786
-          ],
-          [
-            18.496806635386616,
-            -128.49234626399507
-          ],
-          [
-            18.44339766864272,
-            -128.29727262922725
-          ],
-          [
-            18.38873005389611,
-            -128.10179387568496
-          ],
-          [
-            18.33290683878308,
-            -127.9060127156387
-          ],
-          [
-            18.276031070939915,
-            -127.71003186135908
-          ],
-          [
-            18.218205798002924,
-            -127.51395402511663
-          ],
-          [
-            18.1595340676084,
-            -127.31788191918189
-          ],
-          [
-            18.10011892739264,
-            -127.12191825582542
-          ],
-          [
-            18.04006342499193,
-            -126.92616574731777
-          ],
-          [
-            17.97947060804258,
-            -126.7307271059295
-          ],
-          [
-            17.91844352418088,
-            -126.53570504393117
-          ],
-          [
-            17.857085221043125,
-            -126.34120227359332
-          ],
-          [
-            17.79549874626562,
-            -126.1473215071865
-          ],
-          [
-            17.733787147484648,
-            -125.9541654569813
-          ],
-          [
-            17.67205347233652,
-            -125.7618368352482
-          ],
-          [
-            17.610400768457513,
-            -125.57043835425783
-          ],
-          [
-            17.54893208348394,
-            -125.38007272628067
-          ],
-          [
-            17.487750465052095,
-            -125.19084266358735
-          ],
-          [
-            17.426958960798267,
-            -125.00285087844836
-          ],
-          [
-            17.366660618358758,
-            -124.81620008313426
-          ],
-          [
-            17.306958485369865,
-            -124.63099298991564
-          ],
-          [
-            17.247937474809095,
-            -124.44732619279357
-          ],
-          [
-            17.189570585301386,
-            -124.26525852811544
-          ],
-          [
-            17.131788165440827,
-            -124.0848344429653
-          ],
-          [
-            17.07452047986476,
-            -123.90609835610188
-          ],
-          [
-            17.017697793210523,
-            -123.72909468628387
-          ],
-          [
-            16.961250370115447,
-            -123.55386785226999
-          ],
-          [
-            16.905108475216874,
-            -123.380462272819
-          ],
-          [
-            16.84920237315214,
-            -123.20892236668958
-          ],
-          [
-            16.793462328558586,
-            -123.03929255264043
-          ],
-          [
-            16.737818606073546,
-            -122.8716172494303
-          ],
-          [
-            16.682201470334366,
-            -122.7059408758179
-          ],
-          [
-            16.626541185978372,
-            -122.54230785056193
-          ],
-          [
-            16.57076801764291,
-            -122.3807625924211
-          ],
-          [
-            16.514812229965315,
-            -122.22134952015418
-          ],
-          [
-            16.458604087582927,
-            -122.06411305251984
-          ],
-          [
-            16.40207385513308,
-            -121.90909760827681
-          ],
-          [
-            16.34515179725312,
-            -121.7563476061838
-          ],
-          [
-            16.28776817858037,
-            -121.60590746499953
-          ],
-          [
-            16.229853263752187,
-            -121.45782160348271
-          ],
-          [
-            16.171337317405893,
-            -121.31213444039207
-          ],
-          [
-            16.112150604178833,
-            -121.16889039448633
-          ],
-          [
-            16.052223388708345,
-            -121.02813388452418
-          ],
-          [
-            15.991485935631761,
-            -120.88990932926437
-          ],
-          [
-            15.929868509586429,
-            -120.7542611474656
-          ],
-          [
-            15.867301375209678,
-            -120.62123375788656
-          ],
-          [
-            15.803714797138849,
-            -120.49087157928604
-          ],
-          [
-            15.739039040011281,
-            -120.36321903042266
-          ],
-          [
-            15.673204368464312,
-            -120.23832053005522
-          ],
-          [
-            15.606141047135274,
-            -120.11622049694239
-          ],
-          [
-            15.537779340661514,
-            -119.9969633498429
-          ],
-          [
-            15.468049513680363,
-            -119.8805935075155
-          ],
-          [
-            15.396881830829164,
-            -119.76715538871882
-          ],
-          [
-            15.32420655674525,
-            -119.65669341221167
-          ],
-          [
-            15.249953956065962,
-            -119.5492519967527
-          ],
-          [
-            15.174054293428634,
-            -119.44487556110067
-          ],
-          [
-            15.09643783347061,
-            -119.34360852401429
-          ],
-          [
-            15.017034840829222,
-            -119.24549530425224
-          ],
-          [
-            14.935775580141812,
-            -119.15058032057327
-          ],
-          [
-            14.852590316045717,
-            -119.0589079917361
-          ],
-          [
-            14.767409313178273,
-            -118.97052273649945
-          ],
-          [
-            14.680162836176818,
-            -118.885468973622
-          ],
-          [
-            14.59078114967869,
-            -118.8037911218625
-          ],
-          [
-            14.499194624230071,
-            -118.72553360345603
-          ],
-          [
-            14.40538743206962,
-            -118.65074260663303
-          ],
-          [
-            14.309484921924303,
-            -118.57946895362359
-          ],
-          [
-            14.211635318831284,
-            -118.5117642175535
-          ],
-          [
-            14.111986847827726,
-            -118.44767997154854
-          ],
-          [
-            14.010687733950782,
-            -118.38726778873443
-          ],
-          [
-            13.907886202237615,
-            -118.33057924223696
-          ],
-          [
-            13.803730477725383,
-            -118.2776659051819
-          ],
-          [
-            13.698368785451251,
-            -118.22857935069504
-          ],
-          [
-            13.591949350452369,
-            -118.1833711519021
-          ],
-          [
-            13.484620397765905,
-            -118.14209288192887
-          ],
-          [
-            13.376530152429023,
-            -118.1047961139011
-          ],
-          [
-            13.267826839478872,
-            -118.07153242094459
-          ],
-          [
-            13.158658683952616,
-            -118.04235337618506
-          ],
-          [
-            13.049173910887419,
-            -118.01731055274831
-          ],
-          [
-            12.939520745320433,
-            -117.9964555237601
-          ],
-          [
-            12.829847412288823,
-            -117.97983986234621
-          ],
-          [
-            12.720302136829748,
-            -117.96751514163239
-          ],
-          [
-            12.611033143980366,
-            -117.95953293474437
-          ],
-          [
-            12.50218865877784,
-            -117.95594481480799
-          ],
-          [
-            12.393916906259324,
-            -117.95680235494896
-          ],
-          [
-            12.286366111461987,
-            -117.9621571282931
-          ],
-          [
-            12.17968449942298,
-            -117.9720607079661
-          ],
-          [
-            12.074020295179466,
-            -117.9865646670938
-          ],
-          [
-            11.969521723768606,
-            -118.00572057880191
-          ],
-          [
-            11.866337010227557,
-            -118.02958001621624
-          ],
-          [
-            11.764614379593484,
-            -118.05819455246255
-          ],
-          [
-            11.66450205690354,
-            -118.09161576066657
-          ],
-          [
-            11.566148267194889,
-            -118.1298952139541
-          ],
-          [
-            11.469701235504688,
-            -118.17308448545089
-          ],
-          [
-            11.375309186870101,
-            -118.22123514828273
-          ],
-          [
-            11.283120346328282,
-            -118.27439877557536
-          ],
-          [
-            11.193282938916397,
-            -118.33262694045455
-          ],
-          [
-            11.105945189671603,
-            -118.39597121604609
-          ],
-          [
-            11.021255323631058,
-            -118.46448317547572
-          ],
-          [
-            10.939361565831923,
-            -118.53821439186922
-          ],
-          [
-            10.860412141311361,
-            -118.61721643835233
-          ],
-          [
-            10.784555275106527,
-            -118.70154088805087
-          ],
-          [
-            10.711939192254581,
-            -118.79123931409056
-          ],
-          [
-            10.642712117792687,
-            -118.88636328959717
-          ],
-          [
-            10.577022276758004,
-            -118.9869643876965
-          ],
-          [
-            10.515017894187686,
-            -119.09309418151429
-          ],
-          [
-            10.456847195118899,
-            -119.2048042441763
-          ],
-          [
-            10.40265514716639,
-            -119.32214338075909
-          ],
-          [
-            10.352479102360087,
-            -119.4450689481947
-          ],
-          [
-            10.306226719059877,
-            -119.57342809404813
-          ],
-          [
-            10.263797934328077,
-            -119.70706140458253
-          ],
-          [
-            10.225092685227002,
-            -119.8458094660611
-          ],
-          [
-            10.190010908818975,
-            -119.98951286474701
-          ],
-          [
-            10.158452542166309,
-            -120.13801218690345
-          ],
-          [
-            10.130317522331326,
-            -120.29114801879355
-          ],
-          [
-            10.105505786376341,
-            -120.44876094668052
-          ],
-          [
-            10.083917271363674,
-            -120.6106915568275
-          ],
-          [
-            10.065451914355643,
-            -120.77678043549768
-          ],
-          [
-            10.050009652414566,
-            -120.94686816895423
-          ],
-          [
-            10.037490422602758,
-            -121.12079534346032
-          ],
-          [
-            10.027794161982541,
-            -121.2984025452791
-          ],
-          [
-            10.020820807616229,
-            -121.4795303606738
-          ],
-          [
-            10.016470296566144,
-            -121.66401937590754
-          ],
-          [
-            10.0146425658946,
-            -121.85171017724352
-          ],
-          [
-            10.01523755266392,
-            -122.04244335094488
-          ],
-          [
-            10.01815519393642,
-            -122.23605948327481
-          ],
-          [
-            10.023295426774418,
-            -122.43239916049649
-          ],
-          [
-            10.030558188240228,
-            -122.63130296887307
-          ],
-          [
-            10.039843415396172,
-            -122.83261149466774
-          ],
-          [
-            10.05105104530457,
-            -123.03616532414368
-          ],
-          [
-            10.064081015027735,
-            -123.24180504356406
-          ],
-          [
-            10.078833261627988,
-            -123.44937123919202
-          ],
-          [
-            10.095207722167647,
-            -123.65870449729074
-          ],
-          [
-            10.113104333709028,
-            -123.86964540412342
-          ],
-          [
-            10.13242303331445,
-            -124.0820345459532
-          ],
-          [
-            10.153063758046232,
-            -124.29571250904328
-          ],
-          [
-            10.174926444966692,
-            -124.51051987965683
-          ],
-          [
-            10.197911031138146,
-            -124.72629724405698
-          ],
-          [
-            10.221917453622915,
-            -124.94288518850696
-          ],
-          [
-            10.246845649483314,
-            -125.1601242992699
-          ],
-          [
-            10.272595555781665,
-            -125.37785516260898
-          ],
-          [
-            10.299067109580282,
-            -125.59591836478738
-          ],
-          [
-            10.326160247941482,
-            -125.81415449206828
-          ],
-          [
-            10.353774907927589,
-            -126.03240413071485
-          ],
-          [
-            10.381811026600912,
-            -126.25050786699023
-          ],
-          [
-            10.41016854102378,
-            -126.46830628715763
-          ],
-          [
-            10.438747388258504,
-            -126.68563997748018
-          ],
-          [
-            10.467447505367401,
-            -126.9023495242211
-          ],
-          [
-            10.496168829412793,
-            -127.11827551364354
-          ],
-          [
-            10.524811297456997,
-            -127.33325853201066
-          ],
-          [
-            10.553284388046142,
-            -127.54714550622991
-          ],
-          [
-            10.581591315263333,
-            -127.7598456536979
-          ],
-          [
-            10.609788496505413,
-            -127.97130354724365
-          ],
-          [
-            10.637932959824184,
-            -128.18146416549737
-          ],
-          [
-            10.666081733271456,
-            -128.39027248708936
-          ],
-          [
-            10.694291844899029,
-            -128.5976734906498
-          ],
-          [
-            10.722620322758717,
-            -128.803612154809
-          ],
-          [
-            10.751124194902323,
-            -129.00803345819713
-          ],
-          [
-            10.77986048938165,
-            -129.2108823794445
-          ],
-          [
-            10.808886234248506,
-            -129.4121038971813
-          ],
-          [
-            10.838258457554694,
-            -129.61164299003778
-          ],
-          [
-            10.868034187352025,
-            -129.80944463664417
-          ],
-          [
-            10.898270451692303,
-            -130.00545381563077
-          ],
-          [
-            10.929024278627333,
-            -130.19961550562778
-          ],
-          [
-            10.96035269620892,
-            -130.3918746852654
-          ],
-          [
-            10.992312732488871,
-            -130.58217633317395
-          ],
-          [
-            11.024961415518993,
-            -130.77046542798365
-          ],
-          [
-            11.058355773351092,
-            -130.95668694832472
-          ],
-          [
-            11.09255283403697,
-            -131.1407858728274
-          ],
-          [
-            11.127609625628438,
-            -131.32270718012197
-          ],
-          [
-            11.163583176177298,
-            -131.50239584883866
-          ],
-          [
-            11.200530513735355,
-            -131.67979685760764
-          ],
-          [
-            11.238508666354422,
-            -131.85485518505928
-          ],
-          [
-            11.2775746620863,
-            -132.02751580982368
-          ],
-          [
-            11.317785528982792,
-            -132.1977237105312
-          ],
-          [
-            11.359198295095709,
-            -132.365423865812
-          ],
-          [
-            11.401869988476857,
-            -132.53056125429637
-          ],
-          [
-            11.445857637178035,
-            -132.69308085461452
-          ],
-          [
-            11.491218269251059,
-            -132.85292764539673
-          ],
-          [
-            11.538008912747724,
-            -133.01004660527323
-          ],
-          [
-            11.586286595719844,
-            -133.16438271287424
-          ],
-          [
-            11.636108346219222,
-            -133.31588094683005
-          ],
-          [
-            11.687531192297666,
-            -133.46448628577082
-          ],
-          [
-            11.740612162006979,
-            -133.61014370832683
-          ],
-          [
-            11.795408283398965,
-            -133.75279819312837
-          ],
-          [
-            11.851976584525437,
-            -133.8923947188056
-          ],
-          [
-            11.910374093438195,
-            -134.02887826398882
-          ],
-          [
-            11.970657838189048,
-            -134.16219380730828
-          ],
-          [
-            12.0328848468298,
-            -134.29228632739415
-          ],
-          [
-            12.097112147412254,
-            -134.41910080287676
-          ],
-          [
-            12.163396767988223,
-            -134.5425822123863
-          ],
-          [
-            12.231795736609508,
-            -134.662675534553
-          ],
-          [
-            12.302366081327918,
-            -134.77932574800715
-          ]
-        ]
-      ],
-      "bbox": [
-        -136.70876779048066,
-        10.0146425658946,
-        -117.95594481480799,
-        19.145149884499375
       ]
     }
   ],
