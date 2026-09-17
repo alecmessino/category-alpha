@@ -1,0 +1,31 @@
+{
+ "schema": "millibar.pacific-genesis-watch.correction/1",
+ "label": "CORRECTION — APPENDED, ORIGINAL UNCHANGED",
+ "record_id": "0003c1",
+ "supersedes": "0003",
+ "supersedes_scope": "the timestamps block only; every other value in 0003 stands",
+ "supersedes_manifest_sha256": "7d3bcb78349daebb2f8e6786f282d13502dc810341c23bad7432064dc791ed48",
+ "defect": {
+  "what": "0003's timestamps block carries invest_designated_at, source_acquired_at and atlas_computed_at, and omits source_issued_at and snapshot_committed_at.",
+  "why_it_matters": "The contract for this sequence is that issuance, acquisition, computation and commit are never conflated, and that rule is only checkable if every record carries all four keys. A new record kind does not get an exemption from a sequence-wide invariant; a key left out reads as an oversight rather than as a statement.",
+  "severity": "SCHEMA ONLY. No time in 0003 is wrong, none is conflated with another, and no probability, geometry, identifier, association or refusal is affected. The defect is an absent field, not a wrong value.",
+  "found_by": "scripts/genesis-watch/tests/test_contract.py::test_every_record_keeps_its_timestamps_apart",
+  "found_before_publication": true
+ },
+ "fix": {
+  "timestamps_as_they_should_read": {
+   "source_issued_at": null,
+   "source_issued_at_refusal": "The ATCF b-deck carries no issuance time. Its entries are valid at synoptic hours and the file is republished continuously, so no issuance is claimed. invest_designated_at is a VALID time, not an issuance.",
+   "invest_designated_at": "2026-09-17T18:00Z",
+   "source_acquired_at": null,
+   "source_acquired_at_note": "unchanged from 0003; read it there",
+   "atlas_computed_at": null,
+   "atlas_computed_at_note": "unchanged from 0003; read it there",
+   "snapshot_committed_at": null
+  },
+  "generator": "scripts/genesis-watch/append_invest.py now emits all four keys, with a stated refusal where a time genuinely does not exist.",
+  "why_appended_rather_than_edited": "0003 was sealed and ledgered before the test ran. The contract does not have a grace period for a record whose defect its author found quickly -- that is exactly the case where editing feels harmless -- so it is corrected the way 0002 was, by appending."
+ },
+ "append_rule": "This correction is itself immutable. The contract is append-only in both directions: a frozen state is never rewritten, and neither is its correction.",
+ "manifest_sha256_excluding_this_field": "4cda92125256db344a16938870ec87e383ba9a1441fac7fa34cb9ba7d8f3a669"
+}

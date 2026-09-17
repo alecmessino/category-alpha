@@ -1,0 +1,260 @@
+{
+ "schema": "millibar.pacific-genesis-watch.invest-designation/1",
+ "label": "INVEST DESIGNATION — APPENDED, EARLIER RECORDS UNCHANGED",
+ "record_id": "0003",
+ "appends_to": "0002",
+ "appends_to_manifest_sha256": "a22ecfe3cce2a00cbb6b439bd13fec3582acf6bb159bae1338c373f1c9e00317",
+ "appends_to_note": "0002 is corrected in provenance only by 0002c1; every value this record builds on is unaffected by that correction.",
+ "why_separate": "The Tropical Weather Outlook standing at capture time is the same 17:53Z product 0002 already holds, so no new source state exists for it and none is invented. What is new is the ATCF designation of EP982026, which 0002 predates.",
+ "timestamps": {
+  "invest_designated_at": "2026-09-17T18:00Z",
+  "source_acquired_at": "2026-09-17T21:19:46Z",
+  "atlas_computed_at": "2026-09-17T21:19:48Z"
+ },
+ "contemporaneity": {
+  "atlas_captured_with_source": true,
+  "acquired_after_designation_by_minutes": 200,
+  "note": "This record is NOT contemporaneous with the designation itself. The b-deck entry is valid at the synoptic hour shown; it is published afterwards, and this is the first acquisition of it. Nothing is backdated to the designation hour."
+ },
+ "invest": {
+  "atcf_id": "EP982026",
+  "designation": {
+   "designated_invest_at": "2026-09-17T18:00Z",
+   "prior_label": "GENESIS024",
+   "prior_label_rows": 4,
+   "evidence": "the b-deck's own storm-name field: 'GENESIS024' through 17/1200Z, 'INVEST' from 17/1800Z",
+   "position_at_designation": "11.5N 115.5W",
+   "vmax_kt_at_designation": 20,
+   "stage_at_designation": "DB"
+  },
+  "latest_fix": {
+   "valid": "2026-09-17T18:00Z",
+   "position": "11.5N 115.5W",
+   "vmax_kt": 20,
+   "mslp_mb": 1009,
+   "stage": "DB"
+  },
+  "source": {
+   "file": "bep982026.dat",
+   "url": "https://ftp.nhc.noaa.gov/atcf/btk/bep982026.dat",
+   "sha256": "ba03bf5720702f9b0edd4a0312d2101ea5ea7cbae43eacbd38eeb5e4d0742fe0"
+  },
+  "refusals": [
+   "No track is plotted. An invest is not a tropical cyclone and carries no official forecast track.",
+   "An invest number is a working label that is reused every season. It is not a persistent storm identifier and it is not an NHC forecast of anything."
+  ]
+ },
+ "association": {
+  "object": "PGW-2026-D1",
+  "nhc_gtwo_area_number": "1",
+  "basis": "GEOMETRIC CONTAINMENT OF TWO OFFICIAL PRODUCTS",
+  "what_was_computed": "the invest's own ATCF position at its latest fix falls inside the polygon NHC published for this area in the GTWO shapefile, and inside no other Pacific polygon in the same product",
+  "nhc_states_this_association": false,
+  "why_not_stronger": "No NHC product names an invest against an outlook area: the text outlook names no invest, and the shapefile's attributes are basin, area number and two probabilities. Containment is a relation between two official products, not a statement by either of them.",
+  "if_rejected": "Drop this block. Every other value in this record -- the designation, its evidence, the fix, the hashes -- stands without it.",
+  "unique": true,
+  "gis_vintage": "202609171755"
+ },
+ "text_gis_agreement": {
+  "note": "0002 recorded a disagreement: the 17:53Z text said 40 percent for this area while the 17:28Z GIS vintage still said 20, and the text stood. The GIS vintage current at this capture is read here for the same area.",
+  "gis_vintage": "202609171755",
+  "gis_prob_48h_pct": 40.0,
+  "gis_prob_7d_pct": 80.0,
+  "resolution": "the later GIS vintage now carries the text's figure; the earlier disagreement is not edited out of 0002, which stands as captured"
+ },
+ "atlas_state": {
+  "archive": {
+   "archive_dir": "data/genesis-archive",
+   "built_utc": "2026-08-18T05:18:57Z",
+   "started_utc": "2026-08-18T05:18:13Z",
+   "processing_version": "1.0.0",
+   "tables": {
+    "environment": 32842,
+    "genesis_events": 3959,
+    "landfalls": 3379,
+    "storms": 3959,
+    "track_points": 224153
+   },
+   "sources": [
+    {
+     "key": "ibtracs.EP.csv",
+     "sha256": "2e9467ba4a4f12a86ecdcc3174c247903bd87a4e60dfc9ad550d3a7e0c066520",
+     "retrieved_utc": "2026-08-18T05:18:13Z"
+    },
+    {
+     "key": "ibtracs.NA.csv",
+     "sha256": "1b67895f53fdfd78742bd90a585f871b5d735638aed17b6b8e91ec0befb3fff7",
+     "retrieved_utc": "2026-08-18T05:18:16Z"
+    },
+    {
+     "key": "ships.EP.txt",
+     "sha256": "d71cc4eb8641c5f5cf3e7b3774075c64d258ed7d9b10c367867bc0379e374d3d",
+     "retrieved_utc": "2026-08-18T05:18:22Z"
+    },
+    {
+     "key": "ships.CP.txt",
+     "sha256": "443822caa9c2fb00540eb51a32ee85f9512cc43cb39c0fed374c0b228f30fe31",
+     "retrieved_utc": "2026-08-18T05:18:25Z"
+    },
+    {
+     "key": "ships.AL.txt",
+     "sha256": "3fef6609f633f55f5f95114b88d69dd0b6f76f35264a6ce833de128ed99847c7",
+     "retrieved_utc": "2026-08-18T05:18:26Z"
+    },
+    {
+     "key": "hurdat2.nepac.txt",
+     "sha256": "db65f8bc538d5c05e15f738c96111861d6ce3572c007879de58e44d4d05a9cd6",
+     "retrieved_utc": "2026-08-18T05:18:30Z"
+    },
+    {
+     "key": "hurdat2.atl.txt",
+     "sha256": "1b9b0c7beed5b4505838658b1d30e159fc84330c60891a58cfcf43ae55c37202",
+     "retrieved_utc": "2026-08-18T05:18:31Z"
+    }
+   ],
+   "recorded_gaps": [
+    "ships_join",
+    "era5",
+    "ncep_r1",
+    "ncep_r1",
+    "ncep_r1",
+    "ncep_r1",
+    "landfall_join"
+   ]
+  },
+  "methodology": {
+   "spec_sha256": "8c2206a192904d02e70447a4bfb8841be12c31924e99f54f1ef806408d939a50",
+   "files": {
+    "scripts/genesis/retrieval/analogs.py": "c8668629df537aac7182b28d7a8f3829e847a778ade668687163f044b815fc62",
+    "scripts/genesis/schema.py": "39a1f1a98e25e7882d7e2daacdc220aae140428b3baefa98fe058d550a612136",
+    "scripts/genesis/store.py": "48236ba050a03c0a808842b00b3b5fcf76de25c055f4c9f962a3628f99a869d7",
+    "scripts/genesis-watch/atlas_state.py": "0895f946627d9f75236724c89adac9be718ea8786a9bfbbe045780ae31d969a8"
+   }
+  },
+  "model_guidance": {
+   "available": true,
+   "invest_ids": [
+    "EP982026"
+   ],
+   "label_required": "MODEL GUIDANCE — NOT AN OFFICIAL NHC FORECAST"
+  },
+  "cohort_at_invest_position": {
+   "available": true,
+   "definition": {
+    "kind": "genesis-conditioned positional analog cohort",
+    "radius_km": 500.0,
+    "season_months": [
+     9
+    ],
+    "min_sample": 10,
+    "position_source": "GTWO GIS disturbance point, this snapshot's own geometry"
+   },
+   "n": 22,
+   "effective_sample_size": 16.733740706957327,
+   "sufficient": true,
+   "env_unmatched_excluded": 0,
+   "unscoreable": {},
+   "intensity_rates": {
+    "td": {
+     "n_storms": 22,
+     "count": 22,
+     "rate": 1.0,
+     "ci95": [
+      0.8513404742740388,
+      1.0
+     ],
+     "refused_reason": null
+    },
+    "ts": {
+     "n_storms": 22,
+     "count": 21,
+     "rate": 0.9545454545454546,
+     "ci95": [
+      0.7820151050048196,
+      0.9919307806988522
+     ],
+     "refused_reason": null
+    },
+    "cat1": {
+     "n_storms": 22,
+     "count": 8,
+     "rate": 0.36363636363636365,
+     "ci95": [
+      0.19732972772607899,
+      0.5704865065628195
+     ],
+     "refused_reason": null
+    },
+    "cat2": {
+     "n_storms": 22,
+     "count": 4,
+     "rate": 0.18181818181818182,
+     "ci95": [
+      0.07306766024105121,
+      0.38517021976637866
+     ],
+     "refused_reason": null
+    },
+    "cat3": {
+     "n_storms": 22,
+     "count": 3,
+     "rate": 0.13636363636363635,
+     "ci95": [
+      0.04748917264236269,
+      0.3333541187947
+     ],
+     "refused_reason": null
+    },
+    "cat4": {
+     "n_storms": 22,
+     "count": 1,
+     "rate": 0.045454545454545456,
+     "ci95": [
+      0.008069219301147859,
+      0.21798489499518053
+     ],
+     "refused_reason": null
+    },
+    "cat5": {
+     "n_storms": 22,
+     "count": 0,
+     "rate": 0.0,
+     "ci95": [
+      1.3877787807814457e-17,
+      0.14865952572596125
+     ],
+     "refused_reason": null
+    }
+   },
+   "landfall_rates": {
+    "mexico": {
+     "n_storms": null,
+     "count": null,
+     "rate": null,
+     "ci95": null,
+     "refused_reason": null
+    }
+   },
+   "gaps": [
+    "2 of 22 analogs are from before 1971, when East Pacific intensities were estimated without geostationary satellites or Dvorak analysis and major hurricanes were under-observed (measured: 1.7% Cat 3 in the 1960s vs 20-30% from the 1970s on). Intensity rates above are therefore biased LOW. Pass min_pool_season=1971 to restrict the pool to the reliably-observed era."
+   ],
+   "interpretation": "Historical evidence, conditioned on genesis having occurred near this position in this season. NOT a formation probability, NOT an impact probability, and NOT a forecast. NHC's formation probability answers a different question over a different population."
+  },
+  "environment": {
+   "archive_environment_rows": 33220,
+   "for_these_objects": "REFUSED",
+   "refusal": "The archive's environment table is keyed to storms that exist in the best-track record. A pre-genesis GTWO disturbance has no ATCF identifier and no best-track row, so no environmental vector can be attached to it from this archive without inventing the association. Operational SHIPS runs exist only for systems that have been designated or invested."
+  },
+  "refusals": [
+   "No formation probability is computed. NHC's is the only one, in NHC's words.",
+   "Historical evidence, conditioned on genesis having occurred near this position in this season. NOT a formation probability, NOT an impact probability, and NOT a forecast. NHC's formation probability answers a different question over a different population."
+  ],
+  "what_changed_for_the_atlas": "Model guidance was refused in every earlier record because no invest association was sourced and naming one would have been a guess about which disturbance it belonged to. A designated invest with a position now exists, and containment singles out one area, so guidance becomes admissible FOR THAT OBJECT ONLY and only under its mandatory label. Nothing about the other two disturbances changes."
+ },
+ "raw_sha256": {
+  "bep982026.dat": "ba03bf5720702f9b0edd4a0312d2101ea5ea7cbae43eacbd38eeb5e4d0742fe0",
+  "gtwo_shapefiles.zip": "8d501eeb00c2dc490cd6846a5d37da07b56033270f254f7438f0076b7b12aea8"
+ },
+ "append_rule": "This record is immutable once committed. Later states append new records; an error is corrected by appending a supersession record, never by editing this one or any record before it.",
+ "manifest_sha256_excluding_this_field": "7d3bcb78349daebb2f8e6786f282d13502dc810341c23bad7432064dc791ed48"
+}
