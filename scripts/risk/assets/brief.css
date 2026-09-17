@@ -1,0 +1,56 @@
+
+  /* ONE PAGE IS A GATE, NOT A PREFERENCE. scripts/risk/gates.py measures .page
+     scrollHeight against 1056px (11in at 96dpi) and fails the build above it, so the
+     vertical whitespace below is load-bearing: presenting both 18Z evidence vintages as
+     peers cost ~23px and it was taken back out of margins, not out of type size. Body
+     and table text is separately gated at >=9pt and captions at >=7.5pt. */
+  @page{size:Letter;margin:0}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{width:8.5in;height:11in;font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;color:#10202B;font-size:9.2pt;line-height:1.34;background:#fff}
+  .page{width:8.5in;height:11in;padding:.4in .55in .28in;display:flex;flex-direction:column}
+  .mast{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #C6D2D4;padding-bottom:4pt;font-size:8.6pt}
+  .mast b{font-weight:600}.mast span{color:#6F8590}
+  h1{font-size:20pt;line-height:1.08;font-weight:500;letter-spacing:-.02em;margin:6pt 0 4pt;max-width:6.4in}
+  .lede{font-size:9.8pt;color:#3B5260;margin:0 0 5pt;max-width:6.6in}
+  .band{background:#10202B;color:#EDF1F0;padding:8pt 12pt;margin:0 0 6pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .band h2{font-size:12.6pt;font-weight:500;margin:0 0 4pt;line-height:1.25}
+  .band p{margin:0;font-size:9pt;opacity:.92}
+  .band em{font-style:normal;border-bottom:1.6pt solid #E28A54}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18pt;flex:1}
+  h3{font-size:9.2pt;font-weight:600;margin:0 0 3pt;padding-top:4pt;border-top:1.4pt solid #10202B}
+  table{border-collapse:collapse;width:100%;font-size:9pt}
+  td,th{padding:1.9pt 4pt 1.9pt 0;border-bottom:.6pt solid #C6D2D4;vertical-align:top;text-align:left}
+  th{color:#6F8590;font-weight:500;font-size:8.2pt}
+  td.k{color:#6F8590;width:34%}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  ul{margin:3pt 0 0;padding-left:12pt}li{margin:1.5pt 0}
+  .stamp{display:inline-block;border:1.2pt solid #B8571F;color:#B8571F;background:#F3E2D6;padding:2.5pt 7pt;font-weight:600;font-size:8.6pt;margin-top:7pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .chart{border:.7pt solid #C6D2D4;background:#F3F6F6;padding:4pt;margin-top:3pt}
+  .chart svg{width:100%;height:auto;display:block}
+  .cap{font-size:8.6pt;color:#6F8590;margin-top:4pt;line-height:1.35}
+  .foot{border-top:1.4pt solid #10202B;margin-top:4pt;padding-top:4pt;font-size:7.5pt;color:#6F8590;display:grid;grid-template-columns:1.5fr 1fr;gap:14pt}
+  .foot p{margin:0 0 2pt}
+  .mono{font-family:"IBM Plex Mono",Menlo,monospace}
+  .tag{font-size:8.2pt;color:#6F8590}
+  .core{background:#DCE8EE;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  .res{margin:0 0 1pt;font-size:9pt}.res .big{font-size:13pt;font-weight:500;letter-spacing:-.02em}
+
+  /* TWO EVIDENCE VINTAGES AS PEERS. The earlier layout printed the revised 21Z figures at
+     display size and demoted the 18Z ones to a sentence, which reads as a correction of the
+     observation rather than what it is: the same forecast verified against two source
+     vintages of the same fix. Equal columns, equal type, equal weight. */
+  .vsrc{margin:0 0 2pt}
+  .vints{display:grid;grid-template-columns:1fr 1fr;gap:9pt;margin:0 0 2pt}
+  .vint{border-top:1.2pt solid #10202B;padding-top:2pt}
+  .vh{font-size:7.6pt;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#3B5260;margin-bottom:1pt}
+  .peer{margin:0 0 1pt;font-size:9pt}
+  .audit{margin:0}
+
+  /* The canonical URL is the one thing a reader retypes, so it must not break mid-token.
+     At 7.8pt mono it does not fit the footer's right column, so it gets its own full-width
+     row rather than being hyphen-free-wrapped across three lines as it was. */
+  .urlrow{grid-column:1/-1;margin:1pt 0 0}
+  .url{white-space:nowrap;color:#10202B;font-size:7.8pt;text-decoration:none;border-bottom:.5pt solid #C6D2D4}
+  :root{--rule:#C6D2D4;--mute:#6F8590;--ink:#10202B;--ink-2:#3B5260;--chart:#2E6E8E;--chart-soft:#B9D3DF}

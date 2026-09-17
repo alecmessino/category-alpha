@@ -214,6 +214,11 @@ function workedExample(b46, tcp46a) {
     storm: "Hurricane Lowell (EP122026)",
     baseline: {
       baselineId: b46.baselineId, advisoryNumber: b46.advisoryNumber,
+      /* THE THREE TIMES, SEPARATELY. nominalCycleZ is the forecast lead's origin; issuedZ is
+         when the product went out; initialValidZ is what its analysed position is valid for.
+         The earlier payload carried only the last two, which is why lead was measured from the
+         initial position and the retired result followed. */
+      nominalCycleZ: b46.nominalCycleZ, nominalCycleRefusal: b46.nominalCycleRefusal,
       initialValidZ: b46.initialValidZ, issuedZ: b46.issuedZ, firstAvailableZ: b46.firstAvailableZ,
       positionAccuracyText: b46.positionAccuracyText,
       reportedMotion: b46.reportedMotion,
@@ -223,12 +228,21 @@ function workedExample(b46, tcp46a) {
     fix: { fixId: tcp46a.fixId, validZ: tcp46a.validZ, lat: tcp46a.lat, lonE: tcp46a.lonE,
            centreDefinition: tcp46a.centreDefinition, reportedMotion: tcp46a.reportedMotion,
            advisoryNumber: tcp46a.advisoryNumber },
-    /* THE NOMINAL-LABEL TRAP, as a number. */
+    /* THE LEAD ORIGIN, RECONCILED. Both numbers below are true of the same row. The label is
+       not a trap and was never wrong; reading it against the initial position is. */
     leadLabels: {
-      nominalFirstRowLabel: "12H",
-      actualHoursInitToFirstRow: (Date.parse(b46.points[1].validZ) - Date.parse(b46.points[0].validZ)) / 3600e3,
-      note: "The first forecast row is filed under a nominal 12 h label and is NINE hours after "
-          + "the initial position. Only explicit UTC valid times are read.",
+      firstRowLabel: "12H",
+      nominalCycleZ: b46.nominalCycleZ,
+      leadHoursFromCycle: b46.points[1].leadHoursFromCycle,
+      hoursFromInitialPosition: b46.points[1].hoursFromInitialPosition,
+      note: "The 08/0000Z row is filed under a 12H label, is twelve hours after the 12Z nominal "
+          + "cycle, and is nine hours after the 07/1500Z initial position. All three are true. "
+          + "Forecast lead is valid - nominal_cycle, so the label is exact and the nine hours is "
+          + "a separate quantity. An earlier version of this payload reported the nine hours as "
+          + "evidence that the label could not be trusted; that reading is withdrawn.",
+      proof: "The companion discussion prints the same table with its labels attached "
+           + "(INIT 07/1500Z / 12H 08/0000Z), and the labels reconcile against the cycle and "
+           + "against nothing else. Checked on every archived discussion by scripts/risk/tec.py.",
     },
     interpolated: { validZ: tcp46a.validZ, lat: at.lat, lonE: at.lonE,
                     segmentValidZ: at.segmentValidZ, segmentHours: at.segmentHours, fraction: at.fraction },
@@ -256,6 +270,24 @@ function workedExample(b46, tcp46a) {
     },
     rounding: S.roundingBoundNm(tcp46a.lat, 0.1),
     residualForecastFrame: resForecastFrame,
+    /* SUPERSEDED, AND SAYING SO ON THE SURFACE ITSELF.
+       This page's 18Z forecast position is THIS MODULE'S OWN linear-in-time interpolation of
+       TCM 46. NHC issued an interpolated 18Z position of its own, in the aviation advisory
+       (TCA 46, +3 HR), and an official interpolation outranks a derived one. The published
+       record at /risk/lowell-2026/ uses it, and reports both source vintages of the 18Z fix.
+       Nothing here is deleted -- the derivation and its bounds are still the audit trail --
+       but the authoritative figure for this event is the one below. */
+    supersededBy: {
+      record: "https://alecmessino.github.io/category-alpha/risk/lowell-2026/",
+      reason: "This preview interpolates the 18Z forecast position itself. NHC's own "
+            + "interpolated 18Z position exists in the aviation advisory and is authoritative.",
+      authoritativeForecast: "TCA 46 +3 HR, valid 2026-09-07T18:00Z",
+      residualVsFirstReportedFix: { fix: "TCP 46A, 18.0N 162.1W", alongNm: -5.0, crossNm: 13.6 },
+      residualVsRevisedFix: { fix: "Advisory 47 prior-position revision, 18.0N 162.2W",
+                              alongNm: -7.3, crossNm: 8.3 },
+      note: "Same forecast. Same valid time. The verifying observation changed with the source "
+          + "vintage, and both vintages are preserved.",
+    },
   };
 }
 
@@ -265,7 +297,8 @@ async function main() {
   await writeFile(join(OUT, "data.json"), JSON.stringify(payload, null, 2) + "\n", "utf8");
   const w = payload.worked;
   console.log(`\n  ${w.storm} — baseline ${w.baseline.baselineId}, fix ${w.fix.fixId}`);
-  console.log(`  nominal label 12H, actual ${w.leadLabels.actualHoursInitToFirstRow} h`);
+  console.log(`  cycle ${w.leadLabels.nominalCycleZ} — first row lead ${w.leadLabels.leadHoursFromCycle} h `
+            + `(${w.leadLabels.hoursFromInitialPosition} h from the initial position)`);
   console.log(`  forecast @ ${w.interpolated.validZ}: ${w.interpolated.lat.toFixed(4)}N ${(-w.interpolated.lonE).toFixed(4)}W`);
   for (const f of w.frames)
     console.log(`  frame ${String(f.courseDeg && f.courseDeg.toFixed(2)).padStart(6)}°  cross ${f.crossNm.toFixed(2).padStart(7)} nm  along ${f.alongNm.toFixed(2).padStart(7)} nm  — ${f.name}`);

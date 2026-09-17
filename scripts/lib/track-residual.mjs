@@ -22,12 +22,40 @@
  *    (`interpolateAtLatitude`) which refuses when its own construction is invalid, and which no
  *    residual is ever computed from.
  *
- * 2. IT TRUSTED THE NOMINAL LEAD LABELS. A forecast/advisory prints rows labelled by the
- *    forecaster's cycle, not by elapsed time. Lowell's TCM 46 is issued at 07/1500Z and its
- *    first FORECAST VALID row is 08/0000Z — NINE hours, filed under a nominal "12H". Reading
- *    the label puts the interpolation a third of a segment out of place, silently, on every
- *    off-synoptic advisory. Only the explicit UTC valid times in the product are read here; the
- *    labels are not parsed at all, and `leadHours` is always computed from timestamps.
+ * 2. IT READ THE LEAD LABELS AGAINST THE WRONG ORIGIN — and so, for a while, did this file.
+ *
+ *    A forecast/advisory prints rows labelled by lead from the NOMINAL SYNOPTIC CYCLE. Lowell's
+ *    TCM 46 is issued 07/1500Z and its first FORECAST VALID row is 08/0000Z, filed under "12H".
+ *    That row is NINE hours after the initial position and TWELVE hours after the 12Z cycle.
+ *    Both numbers are right; they are measured from different origins, and the forecast lead is
+ *    the second one.
+ *
+ *    The earlier version of this header concluded from the same nine hours that the label was
+ *    untrustworthy and that only timestamps could be read. That conclusion is what produced the
+ *    retired Lowell result: with 15Z taken as forecast hour zero, an 18Z forecast position is a
+ *    third of the way along a nine-hour segment, and the residual computed against it was
+ *    reported as 0.0 nm along-track. The label was never the problem.
+ *
+ *    THE PROOF IS IN THE ARCHIVE, not in convention. The companion discussion prints the same
+ *    table WITH its labels attached (`INIT 07/1500Z` / `12H 08/0000Z`), and those labels
+ *    reconcile with the explicit UTC valid times against the cycle and against nothing else.
+ *    scripts/risk/tec.py checks both hypotheses on every archived discussion and requires the
+ *    cycle origin to hold while the initial-position origin fails.
+ *
+ *    THREE TIMES, SEPARATELY REPRESENTED, NEVER DERIVED FROM ONE ANOTHER:
+ *
+ *        nominalCycleZ    the synoptic cycle the forecast belongs to    — lead origin
+ *        issuedZ          when the product says it was issued           — NOT the lead origin
+ *        validZ           what the row is valid for                     — lead target
+ *
+ *        forecastLeadHours = validZ − nominalCycleZ
+ *
+ *    A SPECIAL ADVISORY DOES NOT OPEN A CYCLE. Lowell's special 34 went out 04/1830Z and its
+ *    discussion labels the 05/0000Z row 12H — +12 h from the 12Z cycle, +6 h from the 18Z slot.
+ *    A special reissues the running cycle, so the cycle is derived from the product's own rows
+ *    (`nominalCycleFromRows`) rather than from the release hour, and is REFUSED when the rows do
+ *    not determine it. Interpolation is still linear in time between explicit UTC valid times;
+ *    what changed is that the lead origin is no longer silently the initial position.
  *
  * 3. IT PROJECTED ONTO ONE AXIS. An eastward displacement on a north-northeast heading has a
  *    component on BOTH the cross-track and along-track axes. On the corrected Lowell numbers
@@ -151,8 +179,53 @@ export function geodesicInterpolate(lat1, lon1, lat2, lon2, f) {
 const MS = (iso) => (iso ? Date.parse(iso) : NaN);
 
 /* A forecast/advisory (TCM) gives its own issue hour and then a series of rows carrying an
-   explicit day-of-month and HHMM. The DAY is what disambiguates the month roll; the nominal
-   lead label ("12H", "24H") is NOT PARSED, on purpose — see the header. */
+   explicit day-of-month and HHMM. The DAY is what disambiguates the month roll. The TCM prints
+   no lead labels of its own — the discussion does — so the cycle is recovered from the rows. */
+
+/* The canonical NHC/CPHC forecast lead set, in hours from the nominal cycle. */
+export const NHC_LEAD_SET = Object.freeze([12, 24, 36, 48, 60, 72, 96, 120]);
+
+/**
+ * The nominal synoptic cycle a forecast/advisory belongs to, derived from its OWN ROWS.
+ *
+ * Why not from the release hour: that rule is right for a scheduled advisory and wrong for a
+ * special, and being wrong there costs six hours of lead in the same direction as the defect
+ * this module exists to correct. The rows constrain the answer on their own — they land on the
+ * canonical lead set measured from the cycle and on nothing else — so the cycle is recoverable
+ * from the product, and REFUSED rather than guessed when the product does not determine it.
+ *
+ * Returns `{ ok, nominalCycleZ, refusal }`.
+ */
+export function nominalCycleFromRows(initialValidZ, forecastValidZ) {
+  const init = MS(initialValidZ);
+  const rows = (forecastValidZ || []).map(MS).filter(Number.isFinite).sort((a, b) => a - b);
+  if (!Number.isFinite(init) || rows.length === 0) {
+    return { ok: false, nominalCycleZ: null,
+             refusal: "CYCLE NOT CONSTRAINED — no initial position or no forecast rows; no cycle is assumed." };
+  }
+  const base = Math.floor(init / 3600e3) * 3600e3;
+  const slot = base - ((new Date(base).getUTCHours() % 6) * 3600e3);
+  const fits = [];
+  for (let back = 0; back <= 4; back++) {
+    const c = slot - back * 6 * 3600e3;
+    const leads = rows.map((r) => (r - c) / 3600e3);
+    if (leads.every((l) => Number.isInteger(l) && NHC_LEAD_SET.includes(l))) fits.push(c);
+  }
+  if (fits.length !== 1) {
+    return { ok: false, nominalCycleZ: null,
+             refusal: `CYCLE NOT UNIQUELY DETERMINED — ${fits.length} candidate cycles fit the `
+                    + `forecast rows against the canonical lead set; no cycle is assumed.` };
+  }
+  return { ok: true, nominalCycleZ: new Date(fits[0]).toISOString(), refusal: null };
+}
+
+/** Forecast lead, from the nominal cycle. Never from the issue time. */
+export function forecastLeadHours(validZ, nominalCycleZ) {
+  const v = MS(validZ), c = MS(nominalCycleZ);
+  if (!Number.isFinite(v) || !Number.isFinite(c)) return null;
+  return (v - c) / 3600e3;
+}
+
 const TCM_ISSUE = /^\s*(\d{3,4})\s+UTC\s+[A-Z]{3}\s+([A-Z]{3})\s+(\d{2})\s+(\d{4})\s*$/im;
 const MONTHS = { JAN: 0, FEB: 1, MAR: 2, APR: 3, MAY: 4, JUN: 5, JUL: 6, AUG: 7, SEP: 8, OCT: 9, NOV: 10, DEC: 11 };
 
@@ -211,6 +284,21 @@ export function parseForecastAdvisory(text, opts) {
   }
   points.sort((a, b) => MS(a.validZ) - MS(b.validZ));
 
+  /* The cycle comes from the FORECAST rows only. An outlook row is a different product on a
+     different lead grid, and including it would put a cycle that is otherwise determined into
+     the refusal branch. */
+  const initialValidZ = points.length && points[0].kind === "initial" ? points[0].validZ : null;
+  const cycle = nominalCycleFromRows(
+    initialValidZ, points.filter((q) => q.kind === "forecast").map((q) => q.validZ));
+  for (const q of points) {
+    q.leadHoursFromCycle = q.kind === "initial" ? null
+      : forecastLeadHours(q.validZ, cycle.nominalCycleZ);
+    /* Kept, and kept LABELLED: it is a useful diagnostic and it is NOT the forecast lead.
+       Conflating the two is the retired defect. */
+    q.hoursFromInitialPosition = initialValidZ === null ? null
+      : (MS(q.validZ) - MS(initialValidZ)) / 3600e3;
+  }
+
   const within = /POSITION ACCURATE WITHIN\s+(\d+)\s*NM/i.exec(src);
   const motion = /PRESENT MOVEMENT TOWARD [^\n]*?\bOR\s+(\d+)\s+DEGREES AT\s+(\d+)\s*KT/i.exec(src);
   const advNum = /FORECAST\/ADVISORY NUMBER\s+(\d+[A-Z]?)/i.exec(src);
@@ -223,6 +311,10 @@ export function parseForecastAdvisory(text, opts) {
     stormId: stormId ? stormId[1] : null,
     issuedZ: new Date(issuedMs).toISOString(),
     initialValidZ: points.length && points[0].kind === "initial" ? points[0].validZ : null,
+    /* THE LEAD ORIGIN, derived from the rows and carried beside the other two times rather
+       than in place of either. Null with a stated refusal when the rows do not determine it. */
+    nominalCycleZ: cycle.nominalCycleZ,
+    cycleRefusal: cycle.refusal,
     points,
     /* VERBATIM, with its original meaning. This is a stated bound on the analysed centre, not a
        standard deviation, and this module never converts it without an explicit labelled call. */

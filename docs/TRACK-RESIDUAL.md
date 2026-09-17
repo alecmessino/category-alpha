@@ -87,10 +87,28 @@ observed **latitude**. Matching latitude forces the latitude difference to zero,
 northbound storm the whole departure is mechanically reported as lateral — and the example then
 read that artefact as physics.
 
-It also trusted a nominal lead label. Lowell's TCM 46 is issued at `07/1500Z` and its first
-`FORECAST VALID` row is `08/0000Z` — **nine hours**, filed under a nominal "12H". Reading the
-label rather than the timestamp puts the 1800Z forecast position **10.88 nm** out of place, on
-every off-synoptic advisory, silently. This module parses no lead labels at all.
+It also read a lead label against the wrong origin — and so, for a while, did this file. Lowell's
+TCM 46 is issued at `07/1500Z` and its first `FORECAST VALID` row is `08/0000Z`: **nine hours**
+after the initial position, **twelve hours** after the 12Z nominal synoptic cycle, and filed
+under "12H". All three are true. Forecast lead is `valid − nominal_cycle`, so the label is exact,
+and the nine hours is a different quantity — one this file previously offered as evidence that
+the label could not be trusted. **That reading is withdrawn.** Measuring the label's twelve hours
+from the initial position is what puts the 1800Z forecast position **10.88 nm** out of place, on
+every off-synoptic advisory, silently. The label was never the defect; the origin was.
+
+The proof is in the archive rather than in convention: the companion discussion prints the same
+table with its labels attached (`INIT 07/1500Z` / `12H 08/0000Z`), and those labels reconcile
+with the explicit UTC valid times against the cycle and against nothing else. `scripts/risk/tec.py`
+checks both hypotheses on every archived Lowell discussion and requires the cycle origin to hold
+while the initial-position origin fails.
+
+Three times are now carried separately and never derived from one another — `nominalCycleZ`,
+`issuedZ`, `validZ` — and the cycle is recovered from the product's own forecast rows
+(`nominalCycleFromRows`) rather than from its release hour, because **a special advisory does not
+open a cycle**. Lowell's special 34 went out `04/1830Z` and its discussion labels the `05/0000Z`
+row `12H`: twelve hours from the 12Z cycle, six from the 18Z slot the release hour would suggest.
+A special reissues the running cycle. Where the rows do not determine one, the module refuses
+rather than defaulting.
 
 Time-linear interpolation of TCM 46 to `07/1800Z`:
 
@@ -307,7 +325,11 @@ products verbatim (7013/7013 positions) and matches NHC's independent deck encod
 6907 rows, with all 17 exceptions attributable to a difference between NHC's two channels rather
 than to the parse. It also found and fixed a real bug in this library — see §9 — and established
 that the nine-hour first-forecast-row interval is near-universal (1062 of 1072 advisories), not a
-Lowell quirk. **None of that is a skill claim and none of it bears on Q2 or Q3.**
+Lowell quirk. That measurement stands; **the reading of it has been corrected.** Nine hours is
+what a cycle + 12 h forecast row minus a cycle + 3 h issuance comes to, so the near-universal
+nine-hour interval is a consequence of the advisory schedule and is exactly what the cycle-origin
+model predicts. It is not evidence that the lead labels are unreliable, which is how it was read.
+**None of that is a skill claim and none of it bears on Q2 or Q3.**
 
 Every figure below is derived from `Q1-RESULT.json` and pinned by value in
 `scripts/test-track-residual.mjs` §14, which cross-reads this file and `Q1-WRITEUP.md` and fails
@@ -316,9 +338,13 @@ hand. `scripts/check-residual-gate.mjs` keeps that honest by mutating each figur
 requiring §14 to catch it — the first version of §14 was green and would have passed a stale copy,
 which is why the battery is a build step rather than a memory of one.
 
-**What the gate does not cover.** It pins numbers, not interpretation: it can say every statement
-of a figure agrees with the artefact, and it cannot say the figure is being read correctly. That
-is enough for Q1, which is a measurement question. It would not be enough for Q2.
+**What the gate does not cover, demonstrated.** It pins numbers, not interpretation: it can say
+every statement of a figure agrees with the artefact, and it cannot say the figure is being read
+correctly. That limitation was not hypothetical. The 1062 of 1072 figure was right and green
+throughout, while the sentence it supported — that the lead labels could not be trusted — was
+wrong, and the retired Lowell residual followed from it. A numeric gate could not have caught
+that, and did not. That is enough for Q1, which is a measurement question. It would not be
+enough for Q2.
 
 | Q1 figure | Value |
 |---|---|

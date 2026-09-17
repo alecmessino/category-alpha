@@ -94,7 +94,7 @@ one that was transmitted, on about 0.25% of rows.
 
 ---
 
-## Q1b — the nominal lead label is nine hours, on essentially every advisory
+## Q1b — the INIT → first-row interval is nine hours, on essentially every advisory
 
 | INIT → first forecast row | Advisories |
 |---|---|
@@ -109,8 +109,24 @@ their first forecast row nine hours after their initial position**, and none pla
 The mechanism is visible in the deck's own encoding. TAU is measured from the **synoptic cycle**,
 not from the initial position: a 15Z advisory off a 12Z cycle carries its initial position at
 TAU 3 and the row the product labels "12H" at TAU 12. Twelve hours from the cycle; nine from the
-analysis. Reading the label instead of the clock displaces the interpolated forecast position by
-10.88 nm on Lowell — and would do so on 1062 of 1072 archived advisories.
+analysis. Measuring the label's twelve hours from the *initial position* displaces the
+interpolated forecast position by 10.88 nm on Lowell — and would do so on 1062 of 1072 archived
+advisories.
+
+**The label is not wrong, and this section originally implied that it was.** Nine hours is what
+TAU 12 minus TAU 3 comes to, so the near-universal nine-hour interval is a consequence of the
+advisory schedule and is exactly what the paragraph above predicts. The heading of this section
+read "the nominal lead label is nine hours", which is a statement about the wrong quantity.
+
+**And the implementation did not follow the finding.** The mechanism above was established here
+and then not adopted: `scripts/lib/track-residual-ingest.mjs` continued to carry `cycleZ: null`
+with a comment saying an advisory does not print a cycle and that inferring one from the issue
+hour would be a guess, and forecast lead continued to be measured from the initial position. The
+retired Lowell 18Z residual of 0.0 nm along-track followed from that gap between what the research
+had shown and what the module computed — not from any figure in this document, all of which stand.
+The cycle is now derived from each product's own forecast rows, refused where they do not
+determine it, and checked against the discussions' printed labels. See `docs/TRACK-RESIDUAL.md`
+§2.2 and `scripts/risk/tec.py`.
 
 ---
 
