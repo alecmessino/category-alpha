@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-17T08:51:41.898Z",
+  "generatedAt": "2026-09-17T08:55:32.080Z",
   "stepMin": 10,
   "note": "No CLASSIFIED tropical cyclones. 3 area(s) under NHC watch — see the genesis outlook below.",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 186,
+      "latencyMs": 234,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "When will the next Category 5 hurricane  | Before Oct 1,  | px=0.040",
-            "When will the next Category 5 hurricane  | Before Nov 1,  | px=0.060",
-            "When will the next Category 5 hurricane  | Before Dec 1,  | px=0.060",
-            "Will a hurricane make landfall in North  | 2026 | px=0.075",
-            "Will there be more than 30  Atlantic hur | Above 30 | px=0.010",
-            "Will there be more than 25  Atlantic hur | Above 25 | px=0.010"
+            "Will a hurricane make landfall in Hawaii | Before 2027 | px=0.070",
+            "Will Wilfred be the first named hurrican | Wilfred | px=0.005",
+            "Will Vicky be the first named hurricane  | Vicky | px=0.005",
+            "Will Teddy be the first named hurricane  | Teddy | px=0.005",
+            "Will Sally be the first named hurricane  | Sally | px=0.005",
+            "Will Rene be the first named hurricane i | Rene | px=0.005"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"1122.90\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"1722.75\"},\"px\":{\"last_price_dollars\":\"0.0500\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9200\",\"previous_price_dollars\":\"0.0500\",\"previous_yes_ask_dollars\":\"0.0500\",\"previous_yes_bid_dollars\":\"0.0100\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0800\",\"yes_ask_size_fp\":\"490.80\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"32698.26\",\"volume_24h_fp\":\"567.01\",\"volume_fp\":\"88772.89\"},\"px\":{\"last_price_dollars\":\"0.0900\",\"no_ask_dollars\":\"0.9400\",\"no_bid_dollars\":\"0.9200\",\"previous_price_dollars\":\"0.0500\",\"previous_yes_ask_dollars\":\"0.0900\",\"previous_yes_bid_dollars\":\"0.0600\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0800\",\"yes_ask_size_fp\":\"110.00\",\"yes_bid_dollars\":\"0.0600\",\"yes_bid_size_fp\":\"110.00\"}}"
         }
       ]
     },
@@ -237,7 +237,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 140,
+      "latencyMs": 171,
       "count": 76,
       "attempts": [],
       "note": "El Niño · JJA 2026 ONI +1.80 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -248,7 +248,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 3,
       "note": "3 area(s) under watch · 1 Atlantic · highest 7-day 40%",
-      "latencyMs": 57,
+      "latencyMs": 86,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -273,7 +273,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 10,
+      "latencyMs": 7,
       "source": "NHC graphical TWO",
       "count": 3,
       "note": "3 of 3 area(s) with geometry"
@@ -293,7 +293,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 397,
+      "latencyMs": 89,
       "count": 2,
       "note": "2 vortex data message(s): AL052026 13:04Z, EP122026 12:37Z",
       "attempts": [
