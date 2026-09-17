@@ -1,0 +1,488 @@
+"""Render the Pacific Genesis Watch surface from the committed snapshot sequence.
+
+ONE COMPACT INSTITUTIONAL SURFACE, not a weather dashboard. It answers, for each object NHC
+is watching: what the official state IS, where, what NHC says about motion and expectation,
+what the archive can say as historical evidence, what is NOT YET KNOWABLE, and what would
+have to happen next for any of that to change.
+
+WHAT IT WILL NOT DRAW
+
+  * A track. None exists for a pre-genesis disturbance. A formation-area polygon is not a
+    forecast cone and is labelled as such everywhere it appears.
+  * A probability of its own. NHC's is the only one on the page, in NHC's own words.
+  * A GIS 0% where the product printed "near 0 percent". The text is authoritative; the GIS
+    value is shown beside it, as a disagreement, not in place of it.
+  * A regeneration rate without a denominator.
+
+Every value is read from a committed record. The page computes nothing.
+"""
+from __future__ import annotations
+
+import html
+import json
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import contract as C   # noqa: E402
+
+OUT = C.ROOT / "docs" / "risk" / "genesis-watch"
+
+LIFECYCLE = ["OUTLOOK", "INVEST_GUIDANCE", "DEPRESSION", "NAMED", "OFFICIAL_FORECAST",
+             "OBSERVATION", "POST_SEASON"]
+LIFECYCLE_LABEL = {
+    "OUTLOOK": "Outlook", "INVEST_GUIDANCE": "Invest / guidance", "DEPRESSION": "Depression",
+    "NAMED": "Named cyclone", "OFFICIAL_FORECAST": "Official forecast",
+    "OBSERVATION": "Observation", "POST_SEASON": "Post-season record",
+}
+
+E = html.escape
+
+
+def esc(v) -> str:
+    return E(str(v)) if v is not None else "—"
+
+
+def polygon_svg(geom: dict | None, w: int = 300, h: int = 150) -> str:
+    """The formation-area polygon, at a locator scale, labelled for what it is.
+
+    Drawn because "where" is one of the questions the surface has to answer and prose alone
+    does not answer it. Drawn SMALL and without a heading, a centre marker or a time axis,
+    because every one of those would make an outlook polygon read like a cone.
+    """
+    if not geom or not geom.get("areas"):
+        return '<p class="nil">No polygon: the GIS join was refused for this object.</p>'
+    rings = geom["areas"]["coordinates"]
+    pts = [p for r in rings for p in r]
+    xs = [p[0] for p in pts]
+    ys = [p[1] for p in pts]
+    x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+    sx = (w - 8) / max(x1 - x0, 1e-6)
+    sy = (h - 8) / max(y1 - y0, 1e-6)
+    s = min(sx, sy)
+    ox = 4 + ((w - 8) - (x1 - x0) * s) / 2
+    oy = 4 + ((h - 8) - (y1 - y0) * s) / 2
+    body = []
+    for r in rings:
+        d = " ".join(f"{ox + (x - x0) * s:.1f},{oy + (y1 - y) * s:.1f}" for x, y in r)
+        body.append(f'<polygon points="{d}" fill="#DCE8EE" stroke="#2E6E8E" stroke-width="1.2"/>')
+    pt = geom.get("points")
+    if pt and pt.get("coordinates"):
+        px, py = pt["coordinates"]
+        body.append(f'<circle cx="{ox + (px - x0) * s:.1f}" cy="{oy + (y1 - py) * s:.1f}" '
+                    f'r="2.4" fill="#10202B"/>')
+    return (f'<svg viewBox="0 0 {w} {h}" width="100%" role="img" '
+            f'aria-label="NHC formation-area polygon. Not a forecast cone.">'
+            + "".join(body) + "</svg>"
+            + '<p class="cap">NHC formation-area polygon, this outlook’s own GIS geometry. '
+              '<b>Not a forecast cone.</b> No official track exists for this object; the dot is '
+              'the polygon’s published centroid, not a cyclone centre.</p>')
+
+
+def lifecycle_rail(life: dict) -> str:
+    cells = []
+    for k in LIFECYCLE:
+        v = (life or {}).get(k)
+        state = "reached" if v else "null"
+        note = esc(v) if v else "not reached"
+        cells.append(f'<li class="{state}"><span class="lk">{LIFECYCLE_LABEL[k]}</span>'
+                     f'<span class="lv">{note}</span></li>')
+    return ('<ol class="rail">' + "".join(cells) + "</ol>"
+            + '<p class="cap">The common lifecycle. <b>Not every object occupies every state, '
+              'and a state never reached is a fact about the object, not a gap in the record.</b></p>')
+
+
+def atlas_block(obj_id: str, atlas: dict) -> str:
+    entry = next((o for o in (atlas or {}).get("objects", [])
+                  if o.get("millibar_object_id") == obj_id), None)
+    if not entry:
+        return '<p class="nil">No Atlas state recorded for this object in this snapshot.</p>'
+    c = entry.get("cohort") or {}
+    out = []
+    if not c.get("available"):
+        out.append(f'<p class="refuse">REFUSED — {esc(c.get("refusal"))}</p>')
+    else:
+        d = c.get("definition") or {}
+        out.append(
+            '<dl class="kv">'
+            f'<dt>Cohort</dt><dd>{esc(d.get("kind"))}, radius {esc(d.get("radius_km"))} km, '
+            f'month {esc((d.get("season_months") or [None])[0])}</dd>'
+            f'<dt>n</dt><dd>{esc(c.get("n"))}</dd>'
+            f'<dt>Effective sample size</dt><dd>{esc(round(c.get("effective_sample_size") or 0, 1))}</dd>'
+            f'<dt>Sufficient</dt><dd>{"yes" if c.get("sufficient") else "NO — below the minimum sample"}</dd>'
+            "</dl>")
+        rates = [(b, r) for b, r in (c.get("intensity_rates") or {}).items()
+                 if r.get("rate") is not None]
+        if rates:
+            def _row(b, r):
+                ci = r.get("ci95")
+                ci_txt = f"{ci[0] * 100:.0f}\u2013{ci[1] * 100:.0f}%" if ci else "\u2014"
+                return (f"<tr><td>{E(b.upper())}</td>"
+                        f"<td class='n'>{r['count']}/{r['n_storms']}</td>"
+                        f"<td class='n'>{r['rate'] * 100:.0f}%</td>"
+                        f"<td class='n'>{ci_txt}</td></tr>")
+            rows = "".join(_row(b, r) for b, r in rates)
+            out.append('<table class="rates"><thead><tr><th>Reached</th><th class="n">n</th>'
+                       '<th class="n">Rate</th><th class="n">95% interval</th></tr></thead>'
+                       f"<tbody>{rows}</tbody></table>")
+        out.append(f'<p class="cap"><b>Historical evidence, not a forecast.</b> {esc(c.get("interpretation"))}</p>')
+
+    ident = entry.get("identity") or {}
+    if ident.get("regeneration_rate") == "REFUSED":
+        out.append(f'<p class="refuse">REGENERATION RATE REFUSED — {esc(ident.get("refusal"))}</p>')
+    elif ident.get("lineage_preserved"):
+        out.append(f'<p class="cap">{esc(ident.get("lineage_preserved"))}</p>')
+    return "".join(out)
+
+
+def object_card(o: dict, atlas: dict) -> str:
+    p48, p7 = o.get("formation_prob_48h") or {}, o.get("formation_prob_7d") or {}
+
+    def prob_row(label: str, p: dict) -> str:
+        dis = p.get("text_gis_disagreement")
+        extra = ""
+        if dis:
+            extra = (f'<div class="dis">GIS attribute prints <b>{esc(dis.get("gis"))}</b>. '
+                     f'The text stands: <b>{esc(dis.get("text"))}</b>. The GIS value is carried, '
+                     f'not displayed in its place.</div>')
+        return (f'<div class="prob"><span class="pl">{E(label)}</span>'
+                f'<span class="pv">{esc(p.get("official_text"))}</span>{extra}</div>')
+
+    also = o.get("also_described_in") or []
+    also_html = ""
+    if also:
+        bits = []
+        for a in also:
+            d = a.get("disagreements_with_primary")
+            bits.append(f'{esc(a.get("product"))} describes the same disturbance'
+                        + (f' — <b>disagrees on {esc(", ".join(d))}</b>' if d else ", in agreement")
+                        + f'. Matched on {esc(a.get("matched_on"))}.')
+        also_html = f'<p class="cap">{" ".join(bits)}</p>'
+
+    refusals = "".join(f"<li>{esc(r)}</li>" for r in (o.get("refusals") or []))
+    nyk = "".join(f"<li>{esc(x)}</li>" for x in (o.get("not_yet_knowable") or []))
+    geom = o.get("geometry")
+    pt = ((geom or {}).get("points") or {}).get("coordinates")
+    where = (f'{abs(pt[1]):.1f}°{"N" if pt[1] >= 0 else "S"} '
+             f'{abs(pt[0]):.1f}°{"W" if pt[0] < 0 else "E"}') if pt else "—"
+
+    return f"""
+<article class="obj">
+  <header>
+    <div class="oid">{esc(o.get("millibar_object_id"))}{(f'<span class="tag">{E(o["test"])} TEST</span>' if o.get("test") else '<span class="tag new">NEW OBJECT · NO TEST ASSIGNED</span>')}</div>
+    <h2>{esc(o.get("nhc_name"))}</h2>
+    <p class="idnote">{esc(o.get("id_note"))} GTWO area {esc(o.get("nhc_gtwo_area_number"))} —
+      {esc(o.get("nhc_area_number_note"))}</p>
+  </header>
+
+  <section><h3>NHC state</h3>
+    <p class="state">{esc(o.get("classification"))}</p>
+    {prob_row("Formation, 48 h", p48)}
+    {prob_row("Formation, 7 d", p7)}
+    <p class="cap"><b>Formation probability is not impact probability.</b> It is the chance a
+      tropical cyclone forms, not the chance anything is affected if one does.</p>
+  </section>
+
+  <section><h3>Where</h3>
+    <p class="where">{E(where)}</p>
+    {polygon_svg(geom)}
+  </section>
+
+  <section><h3>Motion / expectation, in NHC&rsquo;s words</h3>
+    <p class="quote">{esc(o.get("official_description"))}</p>
+    {also_html}
+  </section>
+
+  <section><h3>Atlas evidence</h3>
+    {atlas_block(o.get("millibar_object_id"), atlas)}
+  </section>
+
+  <section><h3>Not yet knowable</h3>
+    <ul class="nyk">{nyk}</ul>
+    <ul class="refusals">{refusals}</ul>
+  </section>
+
+  <section><h3>Next state change</h3>
+    {lifecycle_rail(o.get("lifecycle"))}
+  </section>
+</article>"""
+
+
+def changes_since(prev: dict, cur: dict) -> list[dict]:
+    """What moved between two decision states. Reported, never scored.
+
+    This is the prospective-verification ledger the watch exists to accumulate: probabilities,
+    geometry, wording, designation, and the objects that appeared or left. It compares only
+    values that are already committed in both records, and it says nothing about whether a
+    change was right -- that is a later question, answered against what actually happened, and
+    it is not a prediction contest either way.
+    """
+    out = []
+    pi = {o["millibar_object_id"]: o for o in prev.get("objects", [])}
+    ci = {o["millibar_object_id"]: o for o in cur.get("objects", [])}
+
+    for oid, o in ci.items():
+        if oid not in pi:
+            out.append({"object": oid, "kind": "APPEARED", "detail":
+                        f"{o.get('nhc_name')} — {o.get('identity_basis')}"})
+            continue
+        p = pi[oid]
+        for horizon, key in (("48 h", "formation_prob_48h"), ("7 d", "formation_prob_7d")):
+            a = (p.get(key) or {}).get("official_text")
+            b = (o.get(key) or {}).get("official_text")
+            if a != b:
+                out.append({"object": oid, "kind": f"FORMATION {horizon}",
+                            "detail": f"{a} \u2192 {b}"})
+        if (p.get("nhc_name") or "") != (o.get("nhc_name") or ""):
+            out.append({"object": oid, "kind": "NHC NAME",
+                        "detail": f"{p.get('nhc_name')} \u2192 {o.get('nhc_name')}"})
+        if (p.get("official_description") or "") != (o.get("official_description") or ""):
+            out.append({"object": oid, "kind": "WORDING",
+                        "detail": "NHC\u2019s description changed; both are preserved verbatim "
+                                  "in their own records"})
+        pg = ((p.get("geometry") or {}).get("points") or {}).get("coordinates")
+        cg = ((o.get("geometry") or {}).get("points") or {}).get("coordinates")
+        if pg and cg and (round(pg[0], 2), round(pg[1], 2)) != (round(cg[0], 2), round(cg[1], 2)):
+            out.append({"object": oid, "kind": "GEOMETRY",
+                        "detail": f"polygon centroid {abs(pg[1]):.1f}\u00b0N {abs(pg[0]):.1f}\u00b0W "
+                                  f"\u2192 {abs(cg[1]):.1f}\u00b0N {abs(cg[0]):.1f}\u00b0W"})
+        for lk, label in (("DEPRESSION", "designation"), ("NAMED", "name"),
+                          ("INVEST_GUIDANCE", "invest / guidance")):
+            if (p.get("lifecycle") or {}).get(lk) != (o.get("lifecycle") or {}).get(lk):
+                out.append({"object": oid, "kind": "LIFECYCLE",
+                            "detail": f"{label}: {(p.get('lifecycle') or {}).get(lk)} \u2192 "
+                                      f"{(o.get('lifecycle') or {}).get(lk)}"})
+
+    for oid, o in pi.items():
+        if oid not in ci:
+            out.append({"object": oid, "kind": "NO LONGER CARRIED",
+                        "detail": f"{o.get('nhc_name')} is not in this outlook. That is the "
+                                  f"product\u2019s statement, not a judgement about the system."})
+    return out
+
+
+def build() -> Path:
+    """THE LEDGER IS THE AUTHORITY ON IDENTITY, not a field inside a record.
+
+    Snapshot 0001 arrived frozen and carries no `record_id` of its own -- only
+    `snapshot_seq: 1`. Its identifier is the one the ledger attested when it was committed.
+    Reading identity out of the records themselves means every record must agree on a field
+    the first one does not have, which is how a hardcoded "0001" ends up in a renderer.
+    """
+    ledger = C.read_ledger()
+    entries = ledger["entries"]
+    records = C.load_all()
+    by_id = {e["record_id"]: r for e, r in zip(entries, records)}
+
+    snaps = [(e["record_id"], r) for e, r in zip(entries, records)
+             if r.get("schema", "").startswith("millibar.pacific-genesis-watch.snapshot")]
+    if not snaps:
+        raise SystemExit("no snapshot records committed")
+    latest_id, latest = snaps[-1]
+
+    atlas = latest.get("atlas_state")
+    atlas_src = ""
+    if atlas and atlas.get("status") != "NOT CAPTURED IN THIS SNAPSHOT":
+        atlas_note = ("Atlas state captured with this source state, against the repository as "
+                      "it then stood.")
+    else:
+        appended_id, appended = next(
+            ((e["record_id"], r) for e, r in zip(entries, records)
+             if r.get("appends_to") == latest_id
+             and r.get("schema", "").startswith("millibar.pacific-genesis-watch.atlas-append")),
+            (None, None))
+        if appended is None:
+            atlas = None
+            atlas_note = (f"No Atlas state has been appended for record {esc(latest_id)}. The "
+                          f"snapshot records that its own Atlas state was not captured, and "
+                          f"nothing is reconstructed for it.")
+        else:
+            atlas = appended.get("atlas_state")
+            atlas_note = (f'Atlas state for this snapshot is the separately timestamped record '
+                          f'{esc(appended_id)}, captured later than the NHC source issuance. It '
+                          f'is not contemporaneous and does not claim to be.')
+            # The Atlas time belongs to a DIFFERENT record from the one committed above, and
+            # can postdate it. Saying which record it came from is what keeps the table from
+            # reading as one object's timeline.
+            atlas_src = f" <span class=\"src\">(record {esc(appended_id)})</span>"
+
+    ts = latest.get("timestamps") or {}
+    issued = ts.get("source_issued_at") or (latest.get("products", {}).get("TWOEP", {}) or {}).get("issued")
+    acquired = ts.get("source_acquired_at") or latest.get("captured_at_utc")
+    committed = next((e["committed_at_utc"] for e in entries
+                      if e["record_id"] == latest_id), None)
+
+    seq_rows = "".join(
+        f'<tr><td class="mono">{esc(e["record_id"])}</td><td>{esc(e["kind"])}</td>'
+        f'<td class="mono">{esc(e["committed_at_utc"])}</td>'
+        f'<td class="mono sha">{esc(e["manifest_sha256"][:16])}…</td></tr>'
+        for e in entries)
+
+    # THE TEST LABEL IS RESOLVED FROM HISTORY, NOT GUESSED. An object that was being followed
+    # under a test keeps it; a newly identified object has none, and the page says so rather
+    # than borrowing the label of the object it replaced in the product's ordering.
+    test_by_id = {}
+    for r in records:
+        for o in r.get("objects", []):
+            if o.get("test"):
+                test_by_id[o.get("millibar_object_id")] = o["test"]
+    for o in latest.get("objects", []):
+        if not o.get("test"):
+            o["test"] = test_by_id.get(o.get("millibar_object_id"))
+    objects = "".join(object_card(o, atlas) for o in latest.get("objects", []))
+
+    prev_snap = snaps[-2][1] if len(snaps) > 1 else None
+    if prev_snap is None:
+        changes_html = ('<p class="nil">This is the first decision state in the sequence; there '
+                        'is nothing to compare it against.</p>')
+    else:
+        deltas = changes_since(prev_snap, latest)
+        rows = "".join(f'<tr><td class="mono">{esc(d["object"])}</td>'
+                       f'<td>{esc(d["kind"])}</td><td>{esc(d["detail"])}</td></tr>'
+                       for d in deltas)
+        changes_html = (
+            f'<p class="cap">Against record {esc(snaps[-2][0])}. Reported, never scored: whether '
+            f'a change was right is a later question answered against what actually happened, '
+            f'and success does not require a storm to form.</p>'
+            + (f'<table class="seq"><thead><tr><th>Object</th><th>What</th><th>Change</th></tr>'
+               f'</thead><tbody>{rows}</tbody></table>'
+               if deltas else '<p class="nil">Nothing this comparison covers changed.</p>'))
+    global_refusals = "".join(f"<li>{esc(r)}</li>" for r in ((atlas or {}).get("refusals") or []))
+
+    page = f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pacific Genesis Watch — Millibar</title>
+<meta name="description" content="Frozen decision states for pre-genesis Pacific disturbances: the authoritative NHC source state, the Storm Atlas state captured alongside it, and what is not yet knowable. Not a forecast.">
+<link rel="canonical" href="https://alecmessino.github.io/category-alpha/risk/genesis-watch/">
+<style>{STYLE}</style>
+</head><body>
+<div class="wrap">
+<header class="mast">
+  <div><b>Millibar</b> <span>/ Risk Evidence</span></div>
+  <div><a href="../lowell-2026/">Lowell 2026</a></div>
+</header>
+
+<h1>Pacific Genesis Watch</h1>
+<p class="sub">Frozen decision states</p>
+
+<p class="banner">Not a forecast. Formation probabilities on this page are NHC&rsquo;s, in NHC&rsquo;s
+  own words. Archive cohorts are historical evidence conditioned on genesis having occurred, and
+  are never a formation or impact probability. No official cyclone track is rendered, because
+  none exists.</p>
+
+<section class="state">
+  <h3>This decision state</h3>
+  <dl class="kv wide">
+    <dt>Record</dt><dd class="mono">{esc(latest_id)}</dd>
+    <dt>Source issued at</dt><dd class="mono">{esc(issued)}</dd>
+    <dt>Source acquired at</dt><dd class="mono">{esc(acquired)}</dd>
+    <dt>Atlas computed at{atlas_src}</dt><dd class="mono">{esc((atlas or {}).get("atlas_computed_at_utc"))}</dd>
+    <dt>Snapshot committed at</dt><dd class="mono">{esc(committed)}</dd>
+    <dt>Active tropical cyclones</dt><dd>{esc((latest.get("global_state") or {}).get("active_tropical_cyclones"))}</dd>
+    <dt>Pre-genesis objects</dt><dd>{esc((latest.get("global_state") or {}).get("pacific_pre_genesis_objects"))}</dd>
+  </dl>
+  <p class="cap">Four timestamps, kept apart. {atlas_note}</p>
+</section>
+
+{objects}
+
+<section class="state">
+  <h3>What changed since the previous decision state</h3>
+  {changes_html}
+</section>
+
+<section class="state">
+  <h3>What this watch refuses to say</h3>
+  <ul class="refusals big">{global_refusals}</ul>
+</section>
+
+<section class="state">
+  <h3>The sequence</h3>
+  <p class="cap">Append-only. A committed record is never edited; a correction appends a
+    supersession record naming what it supersedes. Enforced by
+    <span class="mono">scripts/check-genesis-watch-append-only.mjs</span> and
+    <span class="mono">scripts/genesis-watch/tests/</span>, not by this sentence.</p>
+  <table class="seq"><thead><tr><th>Record</th><th>Kind</th><th>Committed (UTC)</th>
+    <th>Integrity hash</th></tr></thead><tbody>{seq_rows}</tbody></table>
+</section>
+
+<footer>
+  <p>Independent research by Alec Messino. Not a weather forecast, loss estimate, claims
+     determination, or insurance advice. Official products remain the property of NOAA/NWS.</p>
+  <p class="mono"><a href="https://alecmessino.github.io/category-alpha/risk/genesis-watch/">https://alecmessino.github.io/category-alpha/risk/genesis-watch/</a></p>
+</footer>
+</div></body></html>
+"""
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "index.html").write_text(page, encoding="utf-8")
+    return OUT / "index.html"
+
+
+STYLE = """
+:root{--ink:#10202B;--ink2:#3B5260;--mute:#6F8590;--rule:#C6D2D4;--bg:#fff;--soft:#F3F6F6;
+      --accent:#2E6E8E;--warn:#B8571F}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:15px/1.5 "IBM Plex Sans","Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 56px}
+.mast{display:flex;justify-content:space-between;align-items:baseline;
+      border-bottom:1px solid var(--rule);padding-bottom:8px;font-size:13px;color:var(--mute)}
+.mast b{color:var(--ink);font-weight:600}
+.mast a{color:var(--accent)}
+h1{font-size:30px;font-weight:500;letter-spacing:-.02em;margin:18px 0 2px}
+.sub{margin:0 0 14px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.banner{border:1.5px solid var(--warn);color:var(--warn);background:#FCF4EE;
+        padding:10px 12px;font-size:13px;margin:0 0 22px}
+h2{font-size:20px;font-weight:500;margin:2px 0 4px;letter-spacing:-.01em}
+h3{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);
+   margin:16px 0 6px;padding-top:8px;border-top:1px solid var(--rule)}
+section.state{margin:22px 0}
+.obj{border:1px solid var(--rule);padding:16px;margin:0 0 22px;background:var(--bg)}
+.obj>header{border-bottom:2px solid var(--ink);padding-bottom:8px}
+.oid{font:12px/1 "IBM Plex Mono",Menlo,monospace;color:var(--mute);letter-spacing:.06em}
+.tag{margin-left:10px;background:var(--ink);color:#fff;padding:2px 6px;font-size:10px;letter-spacing:.1em}
+.tag.new{background:var(--warn)}
+.idnote{margin:4px 0 0;font-size:12px;color:var(--mute)}
+.state p.state{margin:0 0 6px}
+.prob{margin:0 0 6px}
+.pl{display:inline-block;min-width:130px;font-size:12px;color:var(--mute)}
+.pv{font-size:17px;font-weight:500}
+.dis{margin:4px 0 0 130px;border-left:2px solid var(--warn);padding-left:8px;font-size:12px;color:var(--ink2)}
+.where{font:16px/1.3 "IBM Plex Mono",Menlo,monospace;margin:0 0 6px}
+.quote{margin:0;padding-left:10px;border-left:2px solid var(--rule);color:var(--ink2);font-size:14px}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 14px;margin:0 0 8px;font-size:13px}
+.kv.wide{grid-template-columns:max-content 1fr}
+.kv dt{color:var(--mute)}
+.kv dd{margin:0}
+.cap{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.45}
+.nil{font-size:13px;color:var(--mute);font-style:italic;margin:4px 0}
+.refuse{border-left:2px solid var(--warn);padding-left:8px;font-size:12.5px;color:var(--ink2);margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th{text-align:left;font-weight:500;color:var(--mute);font-size:11px;letter-spacing:.06em;
+   text-transform:uppercase;border-bottom:1px solid var(--rule);padding:4px 6px 4px 0}
+td{padding:4px 6px 4px 0;border-bottom:1px solid var(--rule)}
+td.n,th.n{text-align:right}
+.sha{color:var(--mute)}
+.src{font-size:11px;color:var(--mute);font-weight:400}
+.mono{font-family:"IBM Plex Mono",Menlo,monospace}
+ul.nyk,ul.refusals{margin:4px 0;padding-left:18px;font-size:13px}
+ul.refusals{color:var(--ink2)}
+ul.refusals.big{font-size:13.5px}
+ol.rail{list-style:none;margin:6px 0;padding:0;display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:1px;background:var(--rule)}
+ol.rail li{background:var(--soft);padding:7px 8px}
+ol.rail li.reached{background:#DCE8EE}
+ol.rail li.null{background:var(--soft);color:var(--mute)}
+.lk{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.lv{display:block;font-size:11px;margin-top:2px;font-family:"IBM Plex Mono",Menlo,monospace}
+svg{display:block;border:1px solid var(--rule);background:var(--soft);max-width:320px}
+footer{border-top:2px solid var(--ink);margin-top:28px;padding-top:10px;font-size:12px;color:var(--mute)}
+footer a{color:var(--mute)}
+@media (max-width:560px){.dis{margin-left:0}.pl{min-width:0;display:block}}
+"""
+
+if __name__ == "__main__":
+    print(build())

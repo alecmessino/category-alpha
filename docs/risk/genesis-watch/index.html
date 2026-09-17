@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pacific Genesis Watch — Millibar</title>
+<meta name="description" content="Frozen decision states for pre-genesis Pacific disturbances: the authoritative NHC source state, the Storm Atlas state captured alongside it, and what is not yet knowable. Not a forecast.">
+<link rel="canonical" href="https://alecmessino.github.io/category-alpha/risk/genesis-watch/">
+<style>
+:root{--ink:#10202B;--ink2:#3B5260;--mute:#6F8590;--rule:#C6D2D4;--bg:#fff;--soft:#F3F6F6;
+      --accent:#2E6E8E;--warn:#B8571F}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:15px/1.5 "IBM Plex Sans","Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:24px 16px 56px}
+.mast{display:flex;justify-content:space-between;align-items:baseline;
+      border-bottom:1px solid var(--rule);padding-bottom:8px;font-size:13px;color:var(--mute)}
+.mast b{color:var(--ink);font-weight:600}
+.mast a{color:var(--accent)}
+h1{font-size:30px;font-weight:500;letter-spacing:-.02em;margin:18px 0 2px}
+.sub{margin:0 0 14px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.banner{border:1.5px solid var(--warn);color:var(--warn);background:#FCF4EE;
+        padding:10px 12px;font-size:13px;margin:0 0 22px}
+h2{font-size:20px;font-weight:500;margin:2px 0 4px;letter-spacing:-.01em}
+h3{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);
+   margin:16px 0 6px;padding-top:8px;border-top:1px solid var(--rule)}
+section.state{margin:22px 0}
+.obj{border:1px solid var(--rule);padding:16px;margin:0 0 22px;background:var(--bg)}
+.obj>header{border-bottom:2px solid var(--ink);padding-bottom:8px}
+.oid{font:12px/1 "IBM Plex Mono",Menlo,monospace;color:var(--mute);letter-spacing:.06em}
+.tag{margin-left:10px;background:var(--ink);color:#fff;padding:2px 6px;font-size:10px;letter-spacing:.1em}
+.tag.new{background:var(--warn)}
+.idnote{margin:4px 0 0;font-size:12px;color:var(--mute)}
+.state p.state{margin:0 0 6px}
+.prob{margin:0 0 6px}
+.pl{display:inline-block;min-width:130px;font-size:12px;color:var(--mute)}
+.pv{font-size:17px;font-weight:500}
+.dis{margin:4px 0 0 130px;border-left:2px solid var(--warn);padding-left:8px;font-size:12px;color:var(--ink2)}
+.where{font:16px/1.3 "IBM Plex Mono",Menlo,monospace;margin:0 0 6px}
+.quote{margin:0;padding-left:10px;border-left:2px solid var(--rule);color:var(--ink2);font-size:14px}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 14px;margin:0 0 8px;font-size:13px}
+.kv.wide{grid-template-columns:max-content 1fr}
+.kv dt{color:var(--mute)}
+.kv dd{margin:0}
+.cap{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.45}
+.nil{font-size:13px;color:var(--mute);font-style:italic;margin:4px 0}
+.refuse{border-left:2px solid var(--warn);padding-left:8px;font-size:12.5px;color:var(--ink2);margin:8px 0}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th{text-align:left;font-weight:500;color:var(--mute);font-size:11px;letter-spacing:.06em;
+   text-transform:uppercase;border-bottom:1px solid var(--rule);padding:4px 6px 4px 0}
+td{padding:4px 6px 4px 0;border-bottom:1px solid var(--rule)}
+td.n,th.n{text-align:right}
+.sha{color:var(--mute)}
+.src{font-size:11px;color:var(--mute);font-weight:400}
+.mono{font-family:"IBM Plex Mono",Menlo,monospace}
+ul.nyk,ul.refusals{margin:4px 0;padding-left:18px;font-size:13px}
+ul.refusals{color:var(--ink2)}
+ul.refusals.big{font-size:13.5px}
+ol.rail{list-style:none;margin:6px 0;padding:0;display:grid;
+        grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:1px;background:var(--rule)}
+ol.rail li{background:var(--soft);padding:7px 8px}
+ol.rail li.reached{background:#DCE8EE}
+ol.rail li.null{background:var(--soft);color:var(--mute)}
+.lk{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+.lv{display:block;font-size:11px;margin-top:2px;font-family:"IBM Plex Mono",Menlo,monospace}
+svg{display:block;border:1px solid var(--rule);background:var(--soft);max-width:320px}
+footer{border-top:2px solid var(--ink);margin-top:28px;padding-top:10px;font-size:12px;color:var(--mute)}
+footer a{color:var(--mute)}
+@media (max-width:560px){.dis{margin-left:0}.pl{min-width:0;display:block}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="mast">
+  <div><b>Millibar</b> <span>/ Risk Evidence</span></div>
+  <div><a href="../lowell-2026/">Lowell 2026</a></div>
+</header>
+
+<h1>Pacific Genesis Watch</h1>
+<p class="sub">Frozen decision states</p>
+
+<p class="banner">Not a forecast. Formation probabilities on this page are NHC&rsquo;s, in NHC&rsquo;s
+  own words. Archive cohorts are historical evidence conditioned on genesis having occurred, and
+  are never a formation or impact probability. No official cyclone track is rendered, because
+  none exists.</p>
+
+<section class="state">
+  <h3>This decision state</h3>
+  <dl class="kv wide">
+    <dt>Record</dt><dd class="mono">0002</dd>
+    <dt>Source issued at</dt><dd class="mono">2026-09-17T17:53Z</dd>
+    <dt>Source acquired at</dt><dd class="mono">2026-09-17T17:54:21Z</dd>
+    <dt>Atlas computed at</dt><dd class="mono">2026-09-17T17:54:21Z</dd>
+    <dt>Snapshot committed at</dt><dd class="mono">2026-09-17T17:54:30Z</dd>
+    <dt>Active tropical cyclones</dt><dd>0</dd>
+    <dt>Pre-genesis objects</dt><dd>3</dd>
+  </dl>
+  <p class="cap">Four timestamps, kept apart. Atlas state captured with this source state, against the repository as it then stood.</p>
+</section>
+
+
+<article class="obj">
+  <header>
+    <div class="oid">PGW-2026-D1<span class="tag">HORIZON TEST</span></div>
+    <h2>Western East Pacific</h2>
+    <p class="idnote">Internal Millibar identifier. Not an NHC identifier. GTWO area 1 —
+      Product-local area number in this GTWO GIS vintage; not a persistent disturbance ID.</p>
+  </header>
+
+  <section><h3>NHC state</h3>
+    <p class="state">pre-genesis disturbance</p>
+    <div class="prob"><span class="pl">Formation, 48 h</span><span class="pv">medium, 40 percent</span><div class="dis">GIS attribute prints <b>20.0</b>. The text stands: <b>40 percent</b>. The GIS value is carried, not displayed in its place.</div></div>
+    <div class="prob"><span class="pl">Formation, 7 d</span><span class="pv">high, 80 percent</span><div class="dis">GIS attribute prints <b>70.0</b>. The text stands: <b>80 percent</b>. The GIS value is carried, not displayed in its place.</div></div>
+    <p class="cap"><b>Formation probability is not impact probability.</b> It is the chance a
+      tropical cyclone forms, not the chance anything is affected if one does.</p>
+  </section>
+
+  <section><h3>Where</h3>
+    <p class="where">13.0°N 127.1°W</p>
+    <svg viewBox="0 0 300 150" width="100%" role="img" aria-label="NHC formation-area polygon. Not a forecast cone."><polygon points="82.5,113.2 79.1,113.0 75.8,112.8 72.6,112.6 69.6,112.4 66.7,112.3 63.9,112.1 61.2,111.9 58.7,111.7 56.3,111.6 53.9,111.4 51.7,111.2 49.6,111.0 47.6,110.8 45.7,110.6 43.9,110.4 42.1,110.2 40.5,110.0 38.9,109.8 37.4,109.6 36.0,109.4 34.7,109.1 33.4,108.9 32.2,108.6 31.1,108.3 30.0,108.0 29.0,107.7 28.0,107.4 27.1,107.1 26.2,106.8 25.4,106.4 24.6,106.0 23.8,105.6 23.1,105.2 22.4,104.8 21.8,104.4 21.1,103.9 20.5,103.4 19.9,102.9 19.3,102.4 18.7,101.8 18.1,101.2 17.5,100.6 17.0,100.0 16.4,99.4 15.8,98.7 15.2,98.0 14.6,97.3 14.0,96.5 13.5,95.8 12.9,95.0 12.3,94.2 11.8,93.4 11.2,92.5 10.7,91.7 10.2,90.8 9.6,89.9 9.1,89.0 8.7,88.1 8.2,87.1 7.7,86.2 7.3,85.2 6.9,84.3 6.5,83.3 6.1,82.3 5.8,81.3 5.5,80.3 5.2,79.3 4.9,78.3 4.7,77.3 4.5,76.2 4.3,75.2 4.2,74.2 4.1,73.1 4.0,72.1 4.0,71.1 4.0,70.0 4.1,69.0 4.2,68.0 4.3,66.9 4.5,65.9 4.7,64.9 5.0,63.8 5.3,62.8 5.6,61.8 6.1,60.8 6.5,59.8 7.0,58.9 7.6,57.9 8.2,56.9 8.9,56.0 9.6,55.0 10.4,54.1 11.2,53.2 12.0,52.3 12.9,51.4 13.8,50.5 14.8,49.6 15.8,48.8 16.9,48.0 18.0,47.1 19.1,46.3 20.2,45.6 21.4,44.8 22.7,44.1 23.9,43.3 25.2,42.6 26.5,42.0 27.8,41.3 29.2,40.7 30.6,40.0 32.0,39.5 33.5,38.9 34.9,38.3 36.4,37.8 37.9,37.3 39.5,36.9 41.0,36.4 42.6,36.0 44.2,35.6 45.8,35.3 47.4,35.0 49.0,34.7 50.6,34.4 52.3,34.2 53.9,34.0 55.6,33.8 57.3,33.7 58.9,33.6 60.6,33.5 62.3,33.5 64.0,33.5 65.7,33.5 67.4,33.6 69.1,33.7 70.9,33.8 72.6,33.9 74.4,34.1 76.1,34.3 77.9,34.5 79.7,34.7 81.5,35.0 83.4,35.3 85.2,35.6 87.1,35.9 89.0,36.2 90.9,36.6 92.8,37.0 94.8,37.4 96.7,37.7 98.7,38.2 100.8,38.6 102.8,39.0 104.9,39.4 107.0,39.9 109.2,40.3 111.3,40.8 113.5,41.2 115.8,41.7 118.0,42.1 120.3,42.6 122.7,43.1 125.1,43.5 127.5,44.0 129.9,44.4 132.4,44.9 134.9,45.3 137.5,45.8 140.1,46.2 142.8,46.6 145.5,47.0 148.2,47.4 151.0,47.8 153.8,48.2 156.7,48.5 159.6,48.9 162.5,49.2 165.5,49.6 168.5,49.9 171.5,50.2 174.6,50.6 177.6,50.9 180.7,51.2 183.8,51.5 186.9,51.8 190.1,52.2 193.2,52.5 196.3,52.8 199.4,53.2 202.6,53.5 205.7,53.8 208.8,54.2 211.9,54.6 215.0,55.0 218.0,55.3 221.1,55.7 224.1,56.2 227.1,56.6 230.1,57.0 233.0,57.5 236.0,58.0 238.8,58.5 241.7,59.0 244.5,59.6 247.2,60.1 249.9,60.7 252.6,61.3 255.1,62.0 257.7,62.6 260.2,63.3 262.6,64.1 264.9,64.8 267.2,65.6 269.5,66.4 271.6,67.3 273.7,68.2 275.7,69.1 277.6,70.0 279.4,71.0 281.2,72.0 282.8,73.0 284.4,74.1 285.9,75.2 287.3,76.3 288.6,77.4 289.8,78.5 290.9,79.6 291.9,80.8 292.8,81.9 293.6,83.1 294.2,84.2 294.8,85.4 295.3,86.6 295.6,87.8 295.9,88.9 296.0,90.1 296.0,91.3 295.9,92.4 295.6,93.6 295.3,94.7 294.8,95.8 294.1,97.0 293.4,98.0 292.5,99.1 291.4,100.2 290.3,101.2 289.0,102.2 287.5,103.2 285.9,104.2 284.2,105.1 282.3,106.0 280.2,106.9 278.0,107.7 275.6,108.5 273.1,109.3 270.5,110.0 267.6,110.7 264.6,111.3 261.5,111.9 258.1,112.5 254.7,113.0 251.1,113.5 247.4,113.9 243.5,114.3 239.5,114.6 235.5,115.0 231.3,115.3 227.0,115.5 222.7,115.7 218.2,115.9 213.7,116.1 209.1,116.2 204.5,116.3 199.8,116.4 195.0,116.5 190.2,116.5 185.4,116.5 180.6,116.5 175.7,116.5 170.9,116.4 166.0,116.4 161.1,116.3 156.3,116.2 151.5,116.1 146.7,115.9 141.9,115.8 137.1,115.7 132.5,115.5 127.8,115.3 123.3,115.1 118.8,115.0 114.3,114.8 110.0,114.6 105.7,114.4 101.6,114.2 97.5,114.0 93.6,113.8 89.7,113.6 86.1,113.4 82.5,113.2" fill="#DCE8EE" stroke="#2E6E8E" stroke-width="1.2"/><circle cx="139.1" cy="80.0" r="2.4" fill="#10202B"/></svg><p class="cap">NHC formation-area polygon, this outlook’s own GIS geometry. <b>Not a forecast cone.</b> No official track exists for this object; the dot is the polygon’s published centroid, not a cyclone centre.</p>
+  </section>
+
+  <section><h3>Motion / expectation, in NHC&rsquo;s words</h3>
+    <p class="quote">Western East Pacific: A tropical wave located well to the south-southwest of the southern tip of the Baja California Peninsula is showing signs of organization. Environmental conditions appear conducive for additional development of this system, and a tropical depression is likely to form this weekend or early next week as it moves westward at at 10 to 15 mph across the western part of the East Pacific. * Formation chance through 48 hours...medium...40 percent. * Formation chance through 7 days...high...80 percent.</p>
+    <p class="cap">TWOCP describes the same disturbance, in agreement. Matched on exact NHC area title.</p>
+  </section>
+
+  <section><h3>Atlas evidence</h3>
+    <dl class="kv"><dt>Cohort</dt><dd>genesis-conditioned positional analog cohort, radius 500.0 km, month 9</dd><dt>n</dt><dd>7</dd><dt>Effective sample size</dt><dd>6.3</dd><dt>Sufficient</dt><dd>NO — below the minimum sample</dd></dl><p class="cap"><b>Historical evidence, not a forecast.</b> Historical evidence, conditioned on genesis having occurred near this position in this season. NOT a formation probability, NOT an impact probability, and NOT a forecast. NHC&#x27;s formation probability answers a different question over a different population.</p>
+  </section>
+
+  <section><h3>Not yet knowable</h3>
+    <ul class="nyk"><li>formation</li><li>designation</li><li>official track</li><li>intensity</li><li>landfall or coastal impact</li></ul>
+    <ul class="refusals"><li>No track plotted: no official NHC track exists for a pre-genesis disturbance, and a Tropical Weather Outlook formation polygon is not a forecast cone.</li><li>No invest or model-guidance association claimed: none is sourced here.</li><li>Invented NHC or invest identifiers refused; the internal id above is Millibar&#x27;s.</li></ul>
+  </section>
+
+  <section><h3>Next state change</h3>
+    <ol class="rail"><li class="null"><span class="lk">Outlook</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Invest / guidance</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Depression</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Named cyclone</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Official forecast</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Observation</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Post-season record</span><span class="lv">not reached</span></li></ol><p class="cap">The common lifecycle. <b>Not every object occupies every state, and a state never reached is a fact about the object, not a gap in the record.</b></p>
+  </section>
+</article>
+<article class="obj">
+  <header>
+    <div class="oid">PGW-2026-D2<span class="tag">IDENTITY TEST</span></div>
+    <h2>Well East-Southeast of the Hawaiian Islands (Former TD15-E)</h2>
+    <p class="idnote">Internal Millibar identifier. Not an NHC identifier. GTWO area 2 —
+      Product-local area number in this GTWO GIS vintage; not a persistent disturbance ID.</p>
+  </header>
+
+  <section><h3>NHC state</h3>
+    <p class="state">pre-genesis disturbance</p>
+    <div class="prob"><span class="pl">Formation, 48 h</span><span class="pv">low, 10 percent</span></div>
+    <div class="prob"><span class="pl">Formation, 7 d</span><span class="pv">low, 20 percent</span><div class="dis">GIS attribute prints <b>10.0</b>. The text stands: <b>20 percent</b>. The GIS value is carried, not displayed in its place.</div></div>
+    <p class="cap"><b>Formation probability is not impact probability.</b> It is the chance a
+      tropical cyclone forms, not the chance anything is affected if one does.</p>
+  </section>
+
+  <section><h3>Where</h3>
+    <p class="where">15.2°N 141.6°W</p>
+    <svg viewBox="0 0 300 150" width="100%" role="img" aria-label="NHC formation-area polygon. Not a forecast cone."><polygon points="252.1,101.0 249.2,101.6 246.1,102.3 242.9,102.9 239.6,103.5 236.3,104.1 232.8,104.6 229.2,105.2 225.6,105.7 221.8,106.2 218.0,106.7 214.2,107.2 210.2,107.7 206.2,108.1 202.2,108.6 198.1,109.0 194.0,109.4 189.8,109.8 185.6,110.1 181.3,110.5 177.1,110.8 172.8,111.1 168.5,111.5 164.2,111.7 159.9,112.0 155.6,112.3 151.3,112.5 147.0,112.8 142.7,113.0 138.4,113.2 134.2,113.4 130.0,113.6 125.8,113.8 121.7,113.9 117.6,114.1 113.6,114.2 109.6,114.3 105.7,114.4 101.8,114.5 98.1,114.6 94.4,114.6 90.7,114.7 87.2,114.7 83.7,114.8 80.4,114.8 77.1,114.8 73.9,114.8 70.8,114.8 67.8,114.7 64.9,114.7 62.0,114.6 59.3,114.5 56.6,114.4 54.0,114.3 51.5,114.2 49.1,114.0 46.8,113.9 44.5,113.7 42.3,113.5 40.2,113.2 38.1,113.0 36.2,112.7 34.3,112.4 32.4,112.1 30.7,111.8 29.0,111.4 27.4,111.0 25.8,110.6 24.3,110.2 22.9,109.7 21.5,109.2 20.2,108.7 18.9,108.1 17.7,107.6 16.6,106.9 15.5,106.3 14.5,105.6 13.5,104.9 12.6,104.2 11.7,103.5 10.9,102.7 10.1,101.8 9.4,101.0 8.7,100.1 8.1,99.2 7.5,98.2 7.0,97.2 6.5,96.2 6.0,95.1 5.6,94.0 5.2,92.9 4.9,91.7 4.6,90.5 4.4,89.3 4.2,88.1 4.1,86.8 4.0,85.6 4.0,84.3 4.0,83.0 4.1,81.7 4.2,80.3 4.4,79.0 4.7,77.7 4.9,76.3 5.3,75.0 5.7,73.6 6.2,72.2 6.7,70.9 7.3,69.5 7.9,68.2 8.6,66.9 9.4,65.5 10.2,64.2 11.1,62.9 12.1,61.6 13.1,60.4 14.2,59.1 15.4,57.9 16.6,56.7 17.9,55.5 19.3,54.3 20.7,53.2 22.2,52.1 23.8,51.0 25.5,49.9 27.2,48.9 29.0,48.0 30.8,47.0 32.8,46.1 34.8,45.3 36.9,44.5 39.1,43.7 41.3,43.0 43.7,42.3 46.0,41.6 48.5,41.0 51.0,40.4 53.5,39.9 56.1,39.4 58.8,38.9 61.5,38.5 64.2,38.1 67.0,37.7 69.9,37.4 72.8,37.0 75.7,36.8 78.6,36.5 81.6,36.3 84.6,36.1 87.7,35.9 90.7,35.7 93.8,35.6 96.9,35.5 100.0,35.4 103.1,35.3 106.3,35.3 109.4,35.2 112.6,35.2 115.8,35.2 118.9,35.2 122.1,35.3 125.2,35.3 128.4,35.4 131.5,35.5 134.7,35.6 137.8,35.7 140.9,35.8 143.9,35.9 147.0,36.0 150.0,36.2 153.0,36.3 156.0,36.5 159.0,36.6 161.9,36.8 164.8,37.0 167.6,37.1 170.4,37.3 173.2,37.5 176.0,37.7 178.7,37.9 181.4,38.1 184.1,38.3 186.7,38.5 189.3,38.7 191.9,38.9 194.4,39.1 196.9,39.3 199.4,39.5 201.8,39.8 204.2,40.0 206.6,40.3 209.0,40.5 211.3,40.7 213.6,41.0 215.8,41.2 218.0,41.5 220.2,41.8 222.4,42.0 224.5,42.3 226.6,42.6 228.7,42.9 230.7,43.1 232.7,43.4 234.7,43.7 236.7,44.0 238.6,44.3 240.5,44.6 242.3,44.9 244.1,45.2 245.9,45.5 247.7,45.8 249.4,46.1 251.1,46.4 252.8,46.7 254.4,47.0 256.0,47.3 257.6,47.7 259.1,48.0 260.6,48.3 262.1,48.6 263.5,49.0 265.0,49.3 266.3,49.7 267.7,50.0 269.0,50.4 270.3,50.7 271.6,51.1 272.8,51.5 274.0,51.8 275.2,52.2 276.3,52.6 277.4,53.0 278.5,53.4 279.5,53.8 280.5,54.3 281.5,54.7 282.4,55.2 283.4,55.6 284.2,56.1 285.1,56.5 285.9,57.0 286.7,57.5 287.5,58.0 288.2,58.5 288.9,59.1 289.6,59.6 290.2,60.2 290.8,60.7 291.4,61.3 291.9,61.9 292.4,62.5 292.9,63.1 293.3,63.8 293.7,64.4 294.1,65.1 294.5,65.7 294.8,66.4 295.1,67.1 295.3,67.9 295.5,68.6 295.7,69.4 295.8,70.1 295.9,70.9 296.0,71.7 296.0,72.5 296.0,73.3 295.9,74.1 295.7,74.9 295.5,75.8 295.3,76.6 295.0,77.5 294.6,78.3 294.2,79.2 293.7,80.0 293.2,80.9 292.5,81.8 291.8,82.6 291.1,83.5 290.2,84.4 289.3,85.2 288.3,86.1 287.3,86.9 286.1,87.8 284.9,88.6 283.6,89.5 282.2,90.3 280.7,91.2 279.1,92.0 277.4,92.8 275.6,93.6 273.7,94.4 271.8,95.2 269.7,96.0 267.5,96.7 265.2,97.5 262.8,98.2 260.3,98.9 257.7,99.6 255.0,100.3 252.1,101.0" fill="#DCE8EE" stroke="#2E6E8E" stroke-width="1.2"/><circle cx="141.8" cy="75.3" r="2.4" fill="#10202B"/></svg><p class="cap">NHC formation-area polygon, this outlook’s own GIS geometry. <b>Not a forecast cone.</b> No official track exists for this object; the dot is the polygon’s published centroid, not a cyclone centre.</p>
+  </section>
+
+  <section><h3>Motion / expectation, in NHC&rsquo;s words</h3>
+    <p class="quote">Well East-Southeast of the Hawaiian Islands (Former TD15-E): Showers and thunderstorms continue in association with the remnants of Tropical Depression Fifteen-E. Environmental conditions appear only marginally conducive for some development of this system as it moves gradually westward, remaining east-southeast of the Hawaiian Islands. * Formation chance through 48 hours...low...10 percent. * Formation chance through 7 days...low...20 percent.</p>
+    <p class="cap">TWOCP describes the same disturbance, in agreement. Matched on exact NHC area title.</p>
+  </section>
+
+  <section><h3>Atlas evidence</h3>
+    <dl class="kv"><dt>Cohort</dt><dd>genesis-conditioned positional analog cohort, radius 500.0 km, month 9</dd><dt>n</dt><dd>8</dd><dt>Effective sample size</dt><dd>6.8</dd><dt>Sufficient</dt><dd>NO — below the minimum sample</dd></dl><p class="cap"><b>Historical evidence, not a forecast.</b> Historical evidence, conditioned on genesis having occurred near this position in this season. NOT a formation probability, NOT an impact probability, and NOT a forecast. NHC&#x27;s formation probability answers a different question over a different population.</p><p class="refuse">REGENERATION RATE REFUSED — NO VALID DENOMINATOR. This archive enumerates genesis events and best tracks; it does not enumerate remnant lows, so neither the population that later regenerated nor the population that did not can be counted. A regeneration rate computed against storms-that-formed would silently change the question. A rate without a denominator is not a small rate -- it is not a rate.</p>
+  </section>
+
+  <section><h3>Not yet knowable</h3>
+    <ul class="nyk"><li>formation</li><li>designation</li><li>official track</li><li>intensity</li><li>landfall or coastal impact</li></ul>
+    <ul class="refusals"><li>No track plotted: no official NHC track exists for a pre-genesis disturbance, and a Tropical Weather Outlook formation polygon is not a forecast cone.</li><li>No invest or model-guidance association claimed: none is sourced here.</li><li>Invented NHC or invest identifiers refused; the internal id above is Millibar&#x27;s.</li></ul>
+  </section>
+
+  <section><h3>Next state change</h3>
+    <ol class="rail"><li class="null"><span class="lk">Outlook</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Invest / guidance</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Depression</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Named cyclone</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Official forecast</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Observation</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Post-season record</span><span class="lv">not reached</span></li></ol><p class="cap">The common lifecycle. <b>Not every object occupies every state, and a state never reached is a fact about the object, not a gap in the record.</b></p>
+  </section>
+</article>
+<article class="obj">
+  <header>
+    <div class="oid">PGW-2026-N4<span class="tag new">NEW OBJECT · NO TEST ASSIGNED</span></div>
+    <h2>South of Southern Mexico</h2>
+    <p class="idnote">Internal Millibar identifier. Not an NHC identifier. GTWO area 3 —
+      Product-local area number in this GTWO GIS vintage; not a persistent disturbance ID.</p>
+  </header>
+
+  <section><h3>NHC state</h3>
+    <p class="state">pre-genesis disturbance</p>
+    <div class="prob"><span class="pl">Formation, 48 h</span><span class="pv">low, near 0 percent</span><div class="dis">GIS attribute prints <b>0.0</b>. The text stands: <b>near 0 percent</b>. The GIS value is carried, not displayed in its place.</div></div>
+    <div class="prob"><span class="pl">Formation, 7 d</span><span class="pv">high, 80 percent</span></div>
+    <p class="cap"><b>Formation probability is not impact probability.</b> It is the chance a
+      tropical cyclone forms, not the chance anything is affected if one does.</p>
+  </section>
+
+  <section><h3>Where</h3>
+    <p class="where">14.4°N 106.5°W</p>
+    <svg viewBox="0 0 300 150" width="100%" role="img" aria-label="NHC formation-area polygon. Not a forecast cone."><polygon points="215.9,132.9 217.1,131.6 218.2,130.2 219.3,128.7 220.3,127.1 221.3,125.5 222.3,123.8 223.3,122.0 224.2,120.2 225.0,118.4 225.9,116.4 226.6,114.5 227.4,112.5 228.1,110.4 228.7,108.4 229.4,106.3 229.9,104.1 230.4,102.0 230.9,99.8 231.3,97.6 231.7,95.4 232.0,93.1 232.3,90.9 232.5,88.7 232.7,86.4 232.8,84.2 232.9,82.0 232.9,79.7 232.8,77.5 232.7,75.3 232.5,73.2 232.3,71.0 232.0,68.9 231.7,66.8 231.2,64.8 230.7,62.8 230.2,60.8 229.6,58.9 228.9,57.0 228.1,55.2 227.3,53.4 226.5,51.7 225.5,50.0 224.5,48.4 223.5,46.8 222.4,45.3 221.2,43.8 220.0,42.3 218.8,40.9 217.5,39.5 216.2,38.2 214.8,36.9 213.4,35.6 212.0,34.4 210.5,33.2 209.1,32.1 207.5,31.0 206.0,29.9 204.4,28.8 202.8,27.8 201.2,26.9 199.6,25.9 198.0,25.0 196.4,24.1 194.7,23.2 193.1,22.4 191.4,21.6 189.8,20.8 188.1,20.0 186.5,19.2 184.8,18.5 183.2,17.8 181.6,17.1 180.0,16.5 178.4,15.8 176.8,15.2 175.2,14.6 173.7,14.0 172.2,13.4 170.7,12.9 169.2,12.3 167.7,11.8 166.3,11.3 164.9,10.8 163.5,10.3 162.1,9.9 160.7,9.5 159.3,9.0 158.0,8.6 156.7,8.2 155.4,7.9 154.1,7.5 152.8,7.2 151.5,6.9 150.3,6.6 149.0,6.3 147.8,6.0 146.6,5.7 145.4,5.5 144.2,5.3 143.0,5.1 141.9,4.9 140.7,4.7 139.6,4.6 138.4,4.5 137.3,4.3 136.2,4.2 135.1,4.2 134.0,4.1 133.0,4.0 131.9,4.0 130.8,4.0 129.8,4.0 128.7,4.0 127.7,4.1 126.7,4.1 125.7,4.2 124.7,4.3 123.7,4.4 122.7,4.5 121.7,4.7 120.7,4.8 119.7,5.0 118.7,5.2 117.8,5.4 116.8,5.7 115.8,5.9 114.8,6.2 113.9,6.5 112.9,6.9 112.0,7.2 111.0,7.6 110.0,8.0 109.1,8.4 108.1,8.8 107.1,9.2 106.2,9.7 105.2,10.2 104.2,10.7 103.3,11.3 102.3,11.9 101.3,12.4 100.3,13.1 99.3,13.7 98.3,14.4 97.3,15.0 96.3,15.8 95.3,16.5 94.3,17.3 93.3,18.0 92.2,18.8 91.2,19.7 90.1,20.5 89.1,21.4 88.0,22.3 87.0,23.3 85.9,24.2 84.9,25.2 83.9,26.3 82.8,27.3 81.8,28.4 80.8,29.4 79.9,30.6 78.9,31.7 78.0,32.9 77.1,34.1 76.2,35.3 75.3,36.5 74.5,37.8 73.7,39.1 72.9,40.4 72.2,41.7 71.5,43.1 70.9,44.5 70.3,45.9 69.7,47.3 69.2,48.8 68.7,50.2 68.3,51.8 68.0,53.3 67.7,54.8 67.5,56.4 67.3,58.0 67.2,59.7 67.1,61.3 67.1,63.0 67.2,64.7 67.4,66.4 67.6,68.2 67.9,69.9 68.3,71.7 68.7,73.5 69.2,75.4 69.8,77.2 70.4,79.0 71.1,80.9 71.9,82.7 72.7,84.6 73.5,86.5 74.4,88.3 75.4,90.2 76.4,92.1 77.4,93.9 78.5,95.7 79.6,97.6 80.8,99.4 81.9,101.2 83.2,103.0 84.4,104.7 85.7,106.5 87.0,108.2 88.3,109.9 89.7,111.6 91.1,113.2 92.5,114.8 93.9,116.4 95.3,117.9 96.7,119.4 98.2,120.8 99.6,122.2 101.0,123.6 102.5,124.9 104.0,126.1 105.4,127.3 106.9,128.5 108.3,129.6 109.7,130.6 111.2,131.6 112.6,132.6 114.0,133.4 115.4,134.3 116.8,135.1 118.3,135.8 119.7,136.5 121.1,137.1 122.5,137.7 123.9,138.3 125.3,138.9 126.7,139.4 128.1,139.8 129.5,140.2 130.9,140.6 132.3,141.0 133.7,141.4 135.1,141.7 136.5,142.0 137.9,142.2 139.3,142.5 140.7,142.7 142.2,142.9 143.6,143.1 145.0,143.3 146.5,143.5 147.9,143.6 149.4,143.8 150.9,143.9 152.3,144.0 153.8,144.2 155.3,144.3 156.8,144.4 158.3,144.5 159.8,144.7 161.3,144.8 162.9,144.9 164.4,145.1 166.0,145.2 167.5,145.3 169.1,145.5 170.7,145.6 172.3,145.7 173.9,145.8 175.4,145.9 177.0,145.9 178.6,146.0 180.2,146.0 181.8,146.0 183.3,146.0 184.9,145.9 186.5,145.8 188.0,145.7 189.6,145.6 191.1,145.4 192.7,145.2 194.2,144.9 195.7,144.6 197.2,144.2 198.6,143.8 200.1,143.3 201.5,142.8 203.0,142.2 204.4,141.6 205.7,140.9 207.1,140.2 208.4,139.3 209.8,138.5 211.1,137.5 212.3,136.5 213.6,135.4 214.8,134.2 215.9,132.9" fill="#DCE8EE" stroke="#2E6E8E" stroke-width="1.2"/><circle cx="151.7" cy="75.9" r="2.4" fill="#10202B"/></svg><p class="cap">NHC formation-area polygon, this outlook’s own GIS geometry. <b>Not a forecast cone.</b> No official track exists for this object; the dot is the polygon’s published centroid, not a cyclone centre.</p>
+  </section>
+
+  <section><h3>Motion / expectation, in NHC&rsquo;s words</h3>
+    <p class="quote">South of Southern Mexico: Disorganized showers and thunderstorms continue with a tropical wave located several hundred miles south of southern Mexico. Environmental conditions remain conducive for gradual development of this system, and a tropical depression is likely to form late this weekend or early next week while it moves gradually northwestward and then northward off the coast of southwestern Mexico. * Formation chance through 48 hours...low...near 0 percent. * Formation chance through 7 days...high...80 percent.</p>
+    
+  </section>
+
+  <section><h3>Atlas evidence</h3>
+    <dl class="kv"><dt>Cohort</dt><dd>genesis-conditioned positional analog cohort, radius 500.0 km, month 9</dd><dt>n</dt><dd>95</dd><dt>Effective sample size</dt><dd>75.1</dd><dt>Sufficient</dt><dd>yes</dd></dl><table class="rates"><thead><tr><th>Reached</th><th class="n">n</th><th class="n">Rate</th><th class="n">95% interval</th></tr></thead><tbody><tr><td>TD</td><td class='n'>95/95</td><td class='n'>100%</td><td class='n'>96–100%</td></tr><tr><td>TS</td><td class='n'>91/95</td><td class='n'>96%</td><td class='n'>90–98%</td></tr><tr><td>CAT1</td><td class='n'>54/95</td><td class='n'>57%</td><td class='n'>47–66%</td></tr><tr><td>CAT2</td><td class='n'>30/95</td><td class='n'>32%</td><td class='n'>23–41%</td></tr><tr><td>CAT3</td><td class='n'>22/95</td><td class='n'>23%</td><td class='n'>16–33%</td></tr><tr><td>CAT4</td><td class='n'>15/95</td><td class='n'>16%</td><td class='n'>10–24%</td></tr><tr><td>CAT5</td><td class='n'>2/95</td><td class='n'>2%</td><td class='n'>1–7%</td></tr></tbody></table><p class="cap"><b>Historical evidence, not a forecast.</b> Historical evidence, conditioned on genesis having occurred near this position in this season. NOT a formation probability, NOT an impact probability, and NOT a forecast. NHC&#x27;s formation probability answers a different question over a different population.</p>
+  </section>
+
+  <section><h3>Not yet knowable</h3>
+    <ul class="nyk"><li>formation</li><li>designation</li><li>official track</li><li>intensity</li><li>landfall or coastal impact</li></ul>
+    <ul class="refusals"><li>No track plotted: no official NHC track exists for a pre-genesis disturbance, and a Tropical Weather Outlook formation polygon is not a forecast cone.</li><li>No invest or model-guidance association claimed: none is sourced here.</li><li>Invented NHC or invest identifiers refused; the internal id above is Millibar&#x27;s.</li></ul>
+  </section>
+
+  <section><h3>Next state change</h3>
+    <ol class="rail"><li class="null"><span class="lk">Outlook</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Invest / guidance</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Depression</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Named cyclone</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Official forecast</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Observation</span><span class="lv">not reached</span></li><li class="null"><span class="lk">Post-season record</span><span class="lv">not reached</span></li></ol><p class="cap">The common lifecycle. <b>Not every object occupies every state, and a state never reached is a fact about the object, not a gap in the record.</b></p>
+  </section>
+</article>
+
+<section class="state">
+  <h3>What changed since the previous decision state</h3>
+  <p class="cap">Against record 0001. Reported, never scored: whether a change was right is a later question answered against what actually happened, and success does not require a storm to form.</p><table class="seq"><thead><tr><th>Object</th><th>What</th><th>Change</th></tr></thead><tbody><tr><td class="mono">PGW-2026-D1</td><td>FORMATION 48 h</td><td>low, 20 percent → medium, 40 percent</td></tr><tr><td class="mono">PGW-2026-D1</td><td>FORMATION 7 d</td><td>high, 70 percent → high, 80 percent</td></tr><tr><td class="mono">PGW-2026-D1</td><td>WORDING</td><td>NHC’s description changed; both are preserved verbatim in their own records</td></tr><tr><td class="mono">PGW-2026-D1</td><td>GEOMETRY</td><td>polygon centroid 11.9°N 114.3°W → 13.0°N 127.1°W</td></tr><tr><td class="mono">PGW-2026-D2</td><td>FORMATION 7 d</td><td>low, 10 percent → low, 20 percent</td></tr><tr><td class="mono">PGW-2026-D2</td><td>WORDING</td><td>NHC’s description changed; both are preserved verbatim in their own records</td></tr><tr><td class="mono">PGW-2026-D2</td><td>GEOMETRY</td><td>polygon centroid 15.0°N 131.3°W → 15.2°N 141.6°W</td></tr><tr><td class="mono">PGW-2026-N4</td><td>APPEARED</td><td>South of Southern Mexico — new internal identifier; no earlier snapshot carries this NHC name</td></tr><tr><td class="mono">PGW-2026-D3</td><td>NO LONGER CARRIED</td><td>Southwest of Southwestern Mexico is not in this outlook. That is the product’s statement, not a judgement about the system.</td></tr></tbody></table>
+</section>
+
+<section class="state">
+  <h3>What this watch refuses to say</h3>
+  <ul class="refusals big"><li>No official NHC track is rendered for any object: none exists.</li><li>No invest or model-guidance association is claimed: none is sourced.</li><li>No formation probability is computed, offered, or adjusted. NHC&#x27;s is the only one.</li><li>No regeneration rate for the former TD15-E object: no valid denominator exists in this archive.</li><li>No environmental vector is attached to a pre-genesis disturbance: the archive&#x27;s environment table is keyed to designated systems.</li><li>Cohort rates are conditioned on genesis having occurred and are historical evidence about pathways, never formation or impact probability.</li></ul>
+</section>
+
+<section class="state">
+  <h3>The sequence</h3>
+  <p class="cap">Append-only. A committed record is never edited; a correction appends a
+    supersession record naming what it supersedes. Enforced by
+    <span class="mono">scripts/check-genesis-watch-append-only.mjs</span> and
+    <span class="mono">scripts/genesis-watch/tests/</span>, not by this sentence.</p>
+  <table class="seq"><thead><tr><th>Record</th><th>Kind</th><th>Committed (UTC)</th>
+    <th>Integrity hash</th></tr></thead><tbody><tr><td class="mono">0001</td><td>nhc-source-state</td><td class="mono">2026-09-17T17:15:52Z</td><td class="mono sha">961cdc3e6df6a82b…</td></tr><tr><td class="mono">0001b</td><td>atlas-state-append</td><td class="mono">2026-09-17T17:17:19Z</td><td class="mono sha">e5b841f82ce5ef02…</td></tr><tr><td class="mono">0002</td><td>nhc-source-and-atlas-state</td><td class="mono">2026-09-17T17:54:30Z</td><td class="mono sha">a22ecfe3cce2a00c…</td></tr><tr><td class="mono">0002c1</td><td>correction</td><td class="mono">2026-09-17T17:56:18Z</td><td class="mono sha">9bbc71ea4788e246…</td></tr></tbody></table>
+</section>
+
+<footer>
+  <p>Independent research by Alec Messino. Not a weather forecast, loss estimate, claims
+     determination, or insurance advice. Official products remain the property of NOAA/NWS.</p>
+  <p class="mono"><a href="https://alecmessino.github.io/category-alpha/risk/genesis-watch/">https://alecmessino.github.io/category-alpha/risk/genesis-watch/</a></p>
+</footer>
+</div></body></html>
