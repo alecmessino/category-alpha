@@ -1,17 +1,17 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-17T11:38:06.432Z",
+  "ranAt": "2026-09-17T16:57:59.398Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "cbc0e12c1cfd19885665906a8d74d9a056aaef7f",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35216640670",
+  "sha": "cbbe7bac059f617b88560dcf3a6abaef67e3f6f9",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35249718378",
   "ok": false,
   "passed": 42,
   "total": 46,
   "failures": [
     {
       "check": "served snapshot is fresh",
-      "detail": "2026-09-17T08:55:32.080Z · 162m old"
+      "detail": "2026-09-17T14:41:48.787Z · 136m old"
     },
     {
       "check": "storm block swaps correctly",
@@ -19,14 +19,14 @@
     },
     {
       "check": "three tabs, so no single view is a wall",
-      "detail": "3 tabs · Situation is 2.4 screens tall (3329px / 1400px) · tallest: ──────────────────────────── 800px · ▾ 698px · + 648px"
+      "detail": "3 tabs · Situation is 2.4 screens tall (3391px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
     },
     {
       "check": "all markets carried",
       "detail": "300 contracts · 50 series · droppedForCap=5"
     }
   ],
-  "thirdPartyFailures": 20,
+  "thirdPartyFailures": 8,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -46,7 +46,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": false,
-      "detail": "2026-09-17T08:55:32.080Z · 162m old"
+      "detail": "2026-09-17T14:41:48.787Z · 136m old"
     },
     {
       "check": "renders: Situation",
@@ -101,7 +101,7 @@
     {
       "check": "genesis watch matches the outlook feed",
       "pass": true,
-      "detail": "3 area(s) · block=true"
+      "detail": "4 area(s) · block=true"
     },
     {
       "check": "edge book renders and ranks nothing it cannot support",
@@ -111,7 +111,7 @@
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 6 displayed-only · unverifiable=0"
+      "detail": "0 executable · 5 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -121,7 +121,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "34/36 tile(s) rendered · 2 hole(s) · 0 still loading"
+      "detail": "36/36 tile(s) rendered · 0 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -136,7 +136,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": false,
-      "detail": "3 tabs · Situation is 2.4 screens tall (3329px / 1400px) · tallest: ──────────────────────────── 800px · ▾ 698px · + 648px"
+      "detail": "3 tabs · Situation is 2.4 screens tall (3391px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -156,7 +156,7 @@
     {
       "check": "a new advisory moves P(hurricane) and the Situation strip",
       "pass": true,
-      "detail": "24 frames · newest carries advisory state for 0/0 storm(s) · 1 advisory change(s) · 0 moved P · 0 pinned at the clamp · 1 register row(s) · situation P=— · DID NOT MOVE: EP152026 #9->#10 peak 25->null P 0.01->null"
+      "detail": "24 frames · newest carries advisory state for 0/0 storm(s) · 0 advisory change(s) · 0 moved P · 0 pinned at the clamp · 0 register row(s) · situation P=— (no advisory change in the retained window yet — wiring asserted, behaviour not yet exercised)"
     },
     {
       "check": "every consensus in the snapshot reaches the newest frame",
@@ -181,7 +181,7 @@
     {
       "check": "a stale advisory forces HOLD, so no storm on it can grade TAKE",
       "pass": true,
-      "detail": "live: no storm past the 180-min line · forced: not exercised — no contract carries an advisory age to push · 2 stale-crossing row(s) in the register"
+      "detail": "live: no storm past the 180-min line · forced: not exercised — no contract carries an advisory age to push · 0 stale-crossing row(s) in the register"
     },
     {
       "check": "nothing on HOLD is counted as stakeable",
@@ -191,7 +191,7 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-09-17T00:00:00Z"
+      "detail": "cycle 2026-09-17T06:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
@@ -201,12 +201,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "34 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "36 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "35 tile(s) served on reload · 34 in cache"
+      "detail": "37 tile(s) served on reload · 36 in cache"
     },
     {
       "check": "all markets carried",
@@ -226,7 +226,7 @@
     {
       "check": "fillable cap priced at the ask",
       "pass": true,
-      "detail": "KXFIRSTHURRICANE-26DEC01ATL-EDO: 109541 × $0.01 = $1095"
+      "detail": "KXFIRSTHURRICANE-26DEC01ATL-EDO: 109354 × $0.01 = $1094"
     },
     {
       "check": "order book shows depth",
