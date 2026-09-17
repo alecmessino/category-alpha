@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-17T14:41:48.787Z",
+  "generatedAt": "2026-09-17T17:54:30.645Z",
   "stepMin": 10,
   "note": "No CLASSIFIED tropical cyclones. 4 area(s) under NHC watch — see the genesis outlook below.",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 207,
+      "latencyMs": 268,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "When will the next Category 5 hurricane  | Before Oct 1,  | px=0.040",
-            "When will the next Category 5 hurricane  | Before Nov 1,  | px=0.095",
-            "When will the next Category 5 hurricane  | Before Dec 1,  | px=0.085",
-            "Will there be more than 30  Atlantic hur | Above 30 | px=0.010",
-            "Will there be more than 25  Atlantic hur | Above 25 | px=0.010",
-            "Will there be more than 20  Atlantic hur | Above 20 | px=0.005"
+            "Will Lowell be categorized as a hurrican | Lowell | px=0.995",
+            "Will Wale be categorized as a hurricane  | Wale | px=0.120",
+            "Will Ulana be categorized as a hurricane | Ulana | px=0.085",
+            "Will Pena be categorized as a hurricane  | Pena | px=0.375",
+            "Will Olana be categorized as a hurricane | Olana | px=0.665",
+            "Will Nolo be categorized as a hurricane  | Nolo | px=0.495"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"1122.90\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"1722.75\"},\"px\":{\"last_price_dollars\":\"0.0500\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9200\",\"previous_price_dollars\":\"0.0500\",\"previous_yes_ask_dollars\":\"0.0500\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0800\",\"yes_ask_size_fp\":\"490.80\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"135.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"135.00\"},\"px\":{\"last_price_dollars\":\"0.9900\",\"no_ask_dollars\":\"0.0100\",\"no_bid_dollars\":\"0.0000\",\"previous_price_dollars\":\"0.9900\",\"previous_yes_ask_dollars\":\"1.0000\",\"previous_yes_bid_dollars\":\"0.9900\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"1.0000\",\"yes_ask_size_fp\":\"0.00\",\"yes_bid_dollars\":\"0.9900\",\"yes_bid_size_fp\":\"100.00\"}}"
         }
       ]
     },
@@ -237,7 +237,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 396,
+      "latencyMs": 178,
       "count": 76,
       "attempts": [],
       "note": "El Niño · JJA 2026 ONI +1.80 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -247,15 +247,15 @@
       "status": 200,
       "source": "NHC Tropical Weather Outlook",
       "count": 4,
-      "note": "4 area(s) under watch · 1 Atlantic · highest 7-day 40%",
-      "latencyMs": 164,
+      "note": "4 area(s) under watch · 1 Atlantic · highest 7-day 30%",
+      "latencyMs": 227,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
           "ok": true,
           "status": 200,
           "count": 1,
-          "note": "1 area(s) · issued 800 AM EDT Thu Sep 17 2026",
+          "note": "1 area(s) · issued 200 PM EDT Thu Sep 17 2026",
           "quietOrUnparsed": null,
           "diag": null
         },
@@ -273,7 +273,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 128,
+      "latencyMs": 20,
       "source": "NHC graphical TWO",
       "count": 4,
       "note": "4 of 4 area(s) with geometry"
@@ -293,7 +293,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 303,
+      "latencyMs": 183,
       "count": 2,
       "note": "2 vortex data message(s): AL052026 13:04Z, EP122026 12:37Z",
       "attempts": [
@@ -403,14 +403,14 @@
       "yesBid": 0.02,
       "yesAsk": 0.04,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 4,
+      "liquidity": 0,
       "spread": 0.02,
-      "volume": 40749.25,
-      "volume24h": 331.66,
+      "volume": 40811.25,
+      "volume24h": 393.66,
       "openInterest": 13598.63,
       "depth": {
-        "bidSize": 1160.7,
-        "askSize": 110,
+        "bidSize": 2160.7,
+        "askSize": 7.01,
         "notional": 1
       },
       "proxy": false,
@@ -423,7 +423,7 @@
       "short": "Will there be more than 1 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.16,
+      "market": 0.16499999999999998,
       "model": 0.3491125311203772,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -475,16 +475,16 @@
       "horizon": "seasonal",
       "strike": 1,
       "yesBid": 0.15,
-      "yesAsk": 0.17,
+      "yesAsk": 0.18,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 7,
-      "spread": 0.020000000000000018,
-      "volume": 21445.94,
-      "volume24h": 770.43,
-      "openInterest": 11843.03,
+      "liquidity": 38,
+      "spread": 0.03,
+      "volume": 21500.85,
+      "volume24h": 599.16,
+      "openInterest": 11875.94,
       "depth": {
-        "bidSize": 5,
-        "askSize": 43.9,
+        "bidSize": 113,
+        "askSize": 212.12,
         "notional": 1
       },
       "proxy": false,
@@ -497,7 +497,7 @@
       "short": "Will there be more than 4 Atlantic hurricanes…",
       "storm": null,
       "subject": null,
-      "market": 0.05500000000000001,
+      "market": 0.065,
       "model": 0.16761065397896882,
       "modelQuantity": "hurricane",
       "modelBasin": "atlantic",
@@ -548,17 +548,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.04,
+      "yesBid": 0.06,
       "yesAsk": 0.07,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 34,
-      "spread": 0.030000000000000006,
-      "volume": 18136.49,
-      "volume24h": 247.36,
-      "openInterest": 10142.36,
+      "liquidity": 27,
+      "spread": 0.010000000000000009,
+      "volume": 18296.84,
+      "volume24h": 399.71,
+      "openInterest": 10242.36,
       "depth": {
-        "bidSize": 31.09,
-        "askSize": 488.14,
+        "bidSize": 89.65,
+        "askSize": 388.14,
         "notional": 1
       },
       "proxy": false,
@@ -645,7 +645,7 @@
       "short": "Will Fay be the first named hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.38,
+      "market": 0.385,
       "model": 0.4766112794103081,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -679,16 +679,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.37,
-      "yesAsk": 0.39,
+      "yesAsk": 0.4,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 110,
-      "spread": 0.020000000000000018,
-      "volume": 17537.13,
-      "volume24h": 637.91,
-      "openInterest": 8541.63,
+      "liquidity": 6,
+      "spread": 0.030000000000000027,
+      "volume": 17554.79,
+      "volume24h": 647.71,
+      "openInterest": 8523.97,
       "depth": {
-        "bidSize": 33.21,
-        "askSize": 281.21,
+        "bidSize": 4.88,
+        "askSize": 15,
         "notional": 1
       },
       "proxy": false,
@@ -758,7 +758,7 @@
       "liquidity": 0,
       "spread": 0.010000000000000002,
       "volume": 17515.5,
-      "volume24h": 169.11,
+      "volume24h": 2,
       "openInterest": 6567.83,
       "depth": {
         "bidSize": 30.56,
@@ -832,10 +832,10 @@
       "liquidity": 2,
       "spread": 0.02,
       "volume": 15895.12,
-      "volume24h": 275.7,
+      "volume24h": 124,
       "openInterest": 7311.84,
       "depth": {
-        "bidSize": 200,
+        "bidSize": 29,
         "askSize": 50,
         "notional": 1
       },
@@ -906,11 +906,11 @@
       "liquidity": 5,
       "spread": 0.01,
       "volume": 13682.86,
-      "volume24h": 38.82,
+      "volume24h": 0,
       "openInterest": 4223.2,
       "depth": {
         "bidSize": 291.94,
-        "askSize": 271.64,
+        "askSize": 232.64,
         "notional": 1
       },
       "proxy": false,
@@ -923,7 +923,7 @@
       "short": "Will there be more than 0 major Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.325,
+      "market": 0.35,
       "model": 0.6087828378498963,
       "modelQuantity": "major",
       "modelBasin": "atlantic",
@@ -974,17 +974,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 0,
-      "yesBid": 0.32,
-      "yesAsk": 0.33,
+      "yesBid": 0.34,
+      "yesAsk": 0.36,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 54,
-      "spread": 0.010000000000000009,
-      "volume": 12122.12,
-      "volume24h": 211.4,
-      "openInterest": 6528.36,
+      "liquidity": 40,
+      "spread": 0.019999999999999962,
+      "volume": 12185.9,
+      "volume24h": 190.35,
+      "openInterest": 6559.36,
       "depth": {
-        "bidSize": 1216.43,
-        "askSize": 164.85,
+        "bidSize": 11,
+        "askSize": 112,
         "notional": 1
       },
       "proxy": false,
@@ -1033,14 +1033,14 @@
       "yesBid": 0.17,
       "yesAsk": 0.24,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 9,
+      "liquidity": 4,
       "spread": 0.06999999999999998,
       "volume": 11137.6,
-      "volume24h": 87.44,
+      "volume24h": 56.23,
       "openInterest": 4778.95,
       "depth": {
         "bidSize": 3.96,
-        "askSize": 38.47,
+        "askSize": 18,
         "notional": 1
       },
       "proxy": false,
@@ -1127,7 +1127,7 @@
       "short": "Will there be more than 10 Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.255,
+      "market": 0.25,
       "model": 0.3831833309535454,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
@@ -1178,16 +1178,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 10,
-      "yesBid": 0.24,
+      "yesBid": 0.23,
       "yesAsk": 0.27,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.030000000000000027,
+      "spread": 0.04000000000000001,
       "volume": 9672.01,
       "volume24h": 244.08,
       "openInterest": 3715.47,
       "depth": {
-        "bidSize": 1,
+        "bidSize": 13.46,
         "askSize": 5,
         "notional": 1
       },
@@ -1237,14 +1237,14 @@
       "yesBid": 0.01,
       "yesAsk": 0.04,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 19,
+      "liquidity": 15,
       "spread": 0.03,
       "volume": 9527.7,
       "volume24h": 0,
       "openInterest": 4076.42,
       "depth": {
         "bidSize": 100,
-        "askSize": 485.72,
+        "askSize": 370.24,
         "notional": 1
       },
       "proxy": false,
@@ -1369,7 +1369,7 @@
       "short": "Will Hanna be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.125,
+      "market": 0.135,
       "model": 0.10674376335406882,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -1403,16 +1403,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.11,
-      "yesAsk": 0.14,
+      "yesAsk": 0.16,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 19,
-      "spread": 0.030000000000000013,
+      "liquidity": 16,
+      "spread": 0.05,
       "volume": 8244.95,
-      "volume24h": 100.7,
+      "volume24h": 98.7,
       "openInterest": 4605.95,
       "depth": {
         "bidSize": 33.98,
-        "askSize": 137.85,
+        "askSize": 98,
         "notional": 1
       },
       "proxy": false,
@@ -1425,7 +1425,7 @@
       "short": "Will there be more than 16 Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.03,
+      "market": 0.04,
       "model": 0.05510533818053863,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
@@ -1477,16 +1477,16 @@
       "horizon": "seasonal",
       "strike": 16,
       "yesBid": 0.02,
-      "yesAsk": 0.04,
+      "yesAsk": 0.06,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 4,
-      "spread": 0.02,
+      "liquidity": 0,
+      "spread": 0.039999999999999994,
       "volume": 8011.68,
       "volume24h": 0,
       "openInterest": 3208.69,
       "depth": {
         "bidSize": 1361.44,
-        "askSize": 100,
+        "askSize": 0.31,
         "notional": 1
       },
       "proxy": false,
@@ -1499,7 +1499,7 @@
       "short": "Will there be more than 14 Atlantic…",
       "storm": null,
       "subject": null,
-      "market": 0.04,
+      "market": 0.035,
       "model": 0.10758514279754208,
       "modelQuantity": "namedstorm",
       "modelBasin": "atlantic",
@@ -1551,16 +1551,16 @@
       "horizon": "seasonal",
       "strike": 14,
       "yesBid": 0.03,
-      "yesAsk": 0.05,
+      "yesAsk": 0.04,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 8,
-      "spread": 0.020000000000000004,
+      "liquidity": 1,
+      "spread": 0.010000000000000002,
       "volume": 7698.03,
       "volume24h": 0,
       "openInterest": 3093.01,
       "depth": {
         "bidSize": 347.1,
-        "askSize": 150,
+        "askSize": 22,
         "notional": 1
       },
       "proxy": false,
@@ -1629,7 +1629,7 @@
       "short": "Will Isaias be the first named hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.11,
+      "market": 0.075,
       "model": 0.07047330748430902,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -1662,17 +1662,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.07,
-      "yesAsk": 0.15,
+      "yesBid": 0.02,
+      "yesAsk": 0.13,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 24,
-      "spread": 0.07999999999999999,
-      "volume": 6327.81,
-      "volume24h": 0,
-      "openInterest": 3923.72,
+      "liquidity": 1,
+      "spread": 0.11,
+      "volume": 6347.81,
+      "volume24h": 20,
+      "openInterest": 3908.72,
       "depth": {
-        "bidSize": 3.84,
-        "askSize": 162,
+        "bidSize": 4,
+        "askSize": 5,
         "notional": 1
       },
       "proxy": false,
@@ -1739,14 +1739,14 @@
       "yesBid": 0.05,
       "yesAsk": 0.1,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 23,
+      "liquidity": 5,
       "spread": 0.05,
       "volume": 5825.52,
       "volume24h": 5.78,
       "openInterest": 1978.92,
       "depth": {
-        "bidSize": 4.75,
-        "askSize": 233,
+        "bidSize": 21.75,
+        "askSize": 50,
         "notional": 1
       },
       "proxy": false,
@@ -1816,7 +1816,7 @@
       "liquidity": 19,
       "spread": 0.02,
       "volume": 5629.66,
-      "volume24h": 45.56,
+      "volume24h": 0,
       "openInterest": 2587.88,
       "depth": {
         "bidSize": 0,
@@ -1833,7 +1833,7 @@
       "short": "Will Kyle be the first named hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.055,
+      "market": 0.04,
       "model": 0.03861736062284925,
       "modelQuantity": "firsthurricane",
       "modelBasin": "atlantic",
@@ -1867,10 +1867,10 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": null,
-      "yesAsk": 0.11,
+      "yesAsk": 0.08,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 0,
-      "spread": 0.11,
+      "spread": 0.08,
       "volume": 5377.26,
       "volume24h": 0,
       "openInterest": 2911.3,
@@ -1999,14 +1999,14 @@
       "yesBid": null,
       "yesAsk": 0.01,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 2,
+      "liquidity": 0,
       "spread": 0.01,
-      "volume": 4475.67,
-      "volume24h": 9.35,
+      "volume": 4677.67,
+      "volume24h": 202,
       "openInterest": 2598.99,
       "depth": {
         "bidSize": 0,
-        "askSize": 224.32,
+        "askSize": 22.32,
         "notional": 1
       },
       "proxy": false,
@@ -2873,7 +2873,7 @@
       "short": "Will Isaias be categorized as a hurricane in…",
       "storm": null,
       "subject": null,
-      "market": 0.27,
+      "market": 0.29,
       "model": 0.2939267604078555,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -2906,11 +2906,11 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.19,
+      "yesBid": 0.23,
       "yesAsk": 0.35,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 2,
-      "spread": 0.15999999999999998,
+      "spread": 0.11999999999999997,
       "volume": 2028.7,
       "volume24h": 0,
       "openInterest": 1317.68,
@@ -3442,12 +3442,68 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACTOT"
     },
     {
+      "id": "KXHURRICANENAMES-26DEC01EPAC-ODA",
+      "label": "Will Odalys be categorized as a hurricane in the Eastern Pacific in 2026?",
+      "short": "Will Odalys be categorized as a hurricane in…",
+      "storm": null,
+      "subject": null,
+      "market": 0.435,
+      "model": 0.4715615924694351,
+      "modelQuantity": "namedhurricane",
+      "modelBasin": "epac",
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Odalys is name #15 on the eastern Pacific list and 14 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 54% of seasons · 47% once seasons are weighted by ONI similarity · used at all in 96%",
+      "modelUncond": 0.5416666666666666,
+      "modelLayers": [
+        {
+          "id": "ordinal",
+          "label": "Ordinal climatology",
+          "p": 0.5416666666666666,
+          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form reached hurricane strength in 54% of seasons"
+        },
+        {
+          "id": "onisim",
+          "label": "ONI-similarity weighted",
+          "p": 0.4715615924694351,
+          "basis": "same seasons weighted by ONI distance from +1.80 (effective 6.0 seasons, shrunk 57% toward unweighted)"
+        }
+      ],
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": 0.16,
+      "yesAsk": 0.71,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": 43,
+      "spread": 0.5499999999999999,
+      "volume": 1344,
+      "volume24h": 961.73,
+      "openInterest": 1239,
+      "depth": {
+        "bidSize": 10,
+        "askSize": 61,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01EPAC"
+    },
+    {
       "id": "KXHURRICANE-26DEC01CPACTOT-4",
       "label": "Will there be more than 4 hurricanes of category 1 or above in the Central Pacific in 2026?",
       "short": "Will there be more than 4 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.75,
+      "market": 0.745,
       "model": 0.9613826393771507,
       "modelQuantity": "hurricane",
       "modelBasin": "cpac",
@@ -3498,16 +3554,16 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.7,
+      "yesBid": 0.69,
       "yesAsk": 0.8,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 5,
-      "spread": 0.10000000000000009,
-      "volume": 1274.33,
-      "volume24h": 0,
-      "openInterest": 608.52,
+      "spread": 0.1100000000000001,
+      "volume": 1279.33,
+      "volume24h": 5,
+      "openInterest": 613.52,
       "depth": {
-        "bidSize": 5,
+        "bidSize": 100,
         "askSize": 6.53,
         "notional": 1
       },
@@ -3868,68 +3924,12 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACMAJ"
     },
     {
-      "id": "KXHURRICANENAMES-26DEC01ATL-LEA",
-      "label": "Will Leah be categorized as a hurricane in the Atlantic in 2026?",
-      "short": "Will Leah be categorized as a hurricane in…",
-      "storm": null,
-      "subject": null,
-      "market": 0.13,
-      "model": 0.16715559799752833,
-      "modelQuantity": "namedhurricane",
-      "modelBasin": "atlantic",
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Leah is name #12 on the Atlantic list and 5 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 24% of seasons · 17% once seasons are weighted by ONI similarity · used at all in 24%",
-      "modelUncond": 0.2361111111111111,
-      "modelLayers": [
-        {
-          "id": "ordinal",
-          "label": "Ordinal climatology",
-          "p": 0.2361111111111111,
-          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form reached hurricane strength in 23% of seasons"
-        },
-        {
-          "id": "onisim",
-          "label": "ONI-similarity weighted",
-          "p": 0.16715559799752833,
-          "basis": "same seasons weighted by ONI distance from +1.80 (effective 6.0 seasons, shrunk 57% toward unweighted)"
-        }
-      ],
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": 0.08,
-      "yesAsk": 0.18,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 18,
-      "spread": 0.09999999999999999,
-      "volume": 893.67,
-      "volume24h": 0,
-      "openInterest": 646.5,
-      "depth": {
-        "bidSize": 115,
-        "askSize": 100,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01ATL"
-    },
-    {
       "id": "KXHURRICANE-26DEC01CPACMAJ-2",
       "label": "Will there be more than 2 hurricanes of category 3 or above in the Central Pacific in 2026?",
       "short": "Will there be more than 2 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.615,
+      "market": 0.6100000000000001,
       "model": 0.9613826393771507,
       "modelQuantity": "major",
       "modelBasin": "cpac",
@@ -3981,16 +3981,16 @@
       "horizon": "seasonal",
       "strike": 2,
       "yesBid": 0.55,
-      "yesAsk": 0.68,
+      "yesAsk": 0.67,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 3,
-      "spread": 0.13,
-      "volume": 893.61,
-      "volume24h": 0,
+      "liquidity": 1,
+      "spread": 0.12,
+      "volume": 895.61,
+      "volume24h": 2,
       "openInterest": 839.43,
       "depth": {
-        "bidSize": 10,
-        "askSize": 5,
+        "bidSize": 8,
+        "askSize": 2,
         "notional": 1
       },
       "proxy": false,
@@ -3998,12 +3998,68 @@
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01CPACMAJ"
     },
     {
+      "id": "KXHURRICANENAMES-26DEC01ATL-LEA",
+      "label": "Will Leah be categorized as a hurricane in the Atlantic in 2026?",
+      "short": "Will Leah be categorized as a hurricane in…",
+      "storm": null,
+      "subject": null,
+      "market": 0.155,
+      "model": 0.16715559799752833,
+      "modelQuantity": "namedhurricane",
+      "modelBasin": "atlantic",
+      "modelSource": "HURDAT2 climatology",
+      "modelBasis": "Leah is name #12 on the Atlantic list and 5 have been used, so this is the #7 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 24% of seasons · 17% once seasons are weighted by ONI similarity · used at all in 24%",
+      "modelUncond": 0.2361111111111111,
+      "modelLayers": [
+        {
+          "id": "ordinal",
+          "label": "Ordinal climatology",
+          "p": 0.2361111111111111,
+          "basis": "1991–2025 (n=35), unweighted — the #7 storm still to form reached hurricane strength in 23% of seasons"
+        },
+        {
+          "id": "onisim",
+          "label": "ONI-similarity weighted",
+          "p": 0.16715559799752833,
+          "basis": "same seasons weighted by ONI distance from +1.80 (effective 6.0 seasons, shrunk 57% toward unweighted)"
+        }
+      ],
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "seasonal",
+      "strike": null,
+      "yesBid": 0.09,
+      "yesAsk": 0.22,
+      "closeTime": "2026-12-01T15:00:00Z",
+      "liquidity": 22,
+      "spread": 0.13,
+      "volume": 893.67,
+      "volume24h": 0,
+      "openInterest": 646.5,
+      "depth": {
+        "bidSize": 10,
+        "askSize": 100,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01ATL"
+    },
+    {
       "id": "KXHURRICANE-26DEC01EPACMAJ-4",
       "label": "Will there be more than 4 hurricanes of category 3 or above in the Eastern Pacific in 2026?",
       "short": "Will there be more than 4 hurricanes of…",
       "storm": null,
       "subject": null,
-      "market": 0.475,
+      "market": 0.445,
       "model": 0.5147727892982541,
       "modelQuantity": "major",
       "modelBasin": "epac",
@@ -4054,17 +4110,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": 4,
-      "yesBid": 0.43,
-      "yesAsk": 0.52,
+      "yesBid": 0.38,
+      "yesAsk": 0.51,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 1,
-      "spread": 0.09000000000000002,
+      "liquidity": 5,
+      "spread": 0.13,
       "volume": 810.98,
       "volume24h": 3.86,
       "openInterest": 132.69,
       "depth": {
-        "bidSize": 103,
-        "askSize": 2.22,
+        "bidSize": 100,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -4205,14 +4261,14 @@
       "yesBid": 0.29,
       "yesAsk": 0.34,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 37,
+      "liquidity": 3,
       "spread": 0.050000000000000044,
       "volume": 761.38,
       "volume24h": 0,
       "openInterest": 372.9,
       "depth": {
         "bidSize": 5,
-        "askSize": 110,
+        "askSize": 10,
         "notional": 1
       },
       "proxy": false,
@@ -4546,7 +4602,7 @@
       "openInterest": 227.87,
       "depth": {
         "bidSize": 0,
-        "askSize": 1,
+        "askSize": 46,
         "notional": 1
       },
       "proxy": false,
@@ -4855,14 +4911,14 @@
       "yesBid": 0.26,
       "yesAsk": 0.38,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 36,
+      "liquidity": 9,
       "spread": 0.12,
       "volume": 392.17,
-      "volume24h": 250.71,
+      "volume24h": 249.12,
       "openInterest": 363.32,
       "depth": {
         "bidSize": 10,
-        "askSize": 96,
+        "askSize": 24,
         "notional": 1
       },
       "proxy": false,
@@ -4942,62 +4998,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANE-26DEC01EPACTOT"
-    },
-    {
-      "id": "KXHURRICANENAMES-26DEC01EPAC-ODA",
-      "label": "Will Odalys be categorized as a hurricane in the Eastern Pacific in 2026?",
-      "short": "Will Odalys be categorized as a hurricane in…",
-      "storm": null,
-      "subject": null,
-      "market": 0.305,
-      "model": 0.4715615924694351,
-      "modelQuantity": "namedhurricane",
-      "modelBasin": "epac",
-      "modelSource": "HURDAT2 climatology",
-      "modelBasis": "Odalys is name #15 on the eastern Pacific list and 14 have been used, so this is the #1 storm still to form · in 1991–2025 (n=35), that storm reached hurricane strength in 54% of seasons · 47% once seasons are weighted by ONI similarity · used at all in 96%",
-      "modelUncond": 0.5416666666666666,
-      "modelLayers": [
-        {
-          "id": "ordinal",
-          "label": "Ordinal climatology",
-          "p": 0.5416666666666666,
-          "basis": "1991–2025 (n=35), unweighted — the #1 storm still to form reached hurricane strength in 54% of seasons"
-        },
-        {
-          "id": "onisim",
-          "label": "ONI-similarity weighted",
-          "p": 0.4715615924694351,
-          "basis": "same seasons weighted by ONI distance from +1.80 (effective 6.0 seasons, shrunk 57% toward unweighted)"
-        }
-      ],
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "seasonal",
-      "strike": null,
-      "yesBid": 0.16,
-      "yesAsk": 0.45,
-      "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 433,
-      "spread": 0.29000000000000004,
-      "volume": 382.27,
-      "volume24h": 0,
-      "openInterest": 277.27,
-      "depth": {
-        "bidSize": 10,
-        "askSize": 961.73,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01EPAC"
     },
     {
       "id": "KXHURRICANE-26DEC01EPACMAJ-7",
@@ -5227,7 +5227,7 @@
       "short": "Will there be more than 19 named storms in…",
       "storm": null,
       "subject": null,
-      "market": 0.615,
+      "market": 0.62,
       "model": 0.34676850221678324,
       "modelQuantity": "namedstorm",
       "modelBasin": "epac",
@@ -5279,10 +5279,10 @@
       "horizon": "seasonal",
       "strike": 19,
       "yesBid": 0.54,
-      "yesAsk": 0.69,
+      "yesAsk": 0.7,
       "closeTime": "2026-12-01T15:00:00Z",
       "liquidity": 4,
-      "spread": 0.1499999999999999,
+      "spread": 0.15999999999999992,
       "volume": 297,
       "volume24h": 2.86,
       "openInterest": 246.4,
@@ -6171,14 +6171,14 @@
       "yesBid": 0.19,
       "yesAsk": 0.29,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 33,
+      "liquidity": 32,
       "spread": 0.09999999999999998,
       "volume": 106.92,
       "volume24h": 0,
       "openInterest": 77.2,
       "depth": {
         "bidSize": 100,
-        "askSize": 113,
+        "askSize": 112,
         "notional": 1
       },
       "proxy": false,
@@ -7518,7 +7518,7 @@
       "liquidity": 19,
       "spread": 0.03,
       "volume": 88888.57,
-      "volume24h": 382.69,
+      "volume24h": 313.42,
       "openInterest": 32813.94,
       "depth": {
         "bidSize": 156.31,
@@ -7828,7 +7828,7 @@
       "liquidity": 16,
       "spread": 0.030000000000000002,
       "volume": 12106.34,
-      "volume24h": 293.08,
+      "volume24h": 191.08,
       "openInterest": 5019.8,
       "depth": {
         "bidSize": 413.87,
@@ -7932,6 +7932,49 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26NORBERT"
     },
     {
+      "id": "KXNEXTHURDATE-26DEC01-26OCT01",
+      "label": "When will the next hurricane form?",
+      "short": "When will the next hurricane form · Before…",
+      "storm": null,
+      "subject": null,
+      "market": 0.35,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": null,
+      "yesBid": 0.32,
+      "yesAsk": 0.38,
+      "closeTime": "2026-10-01T03:59:00Z",
+      "liquidity": 22,
+      "spread": 0.06,
+      "volume": 5931.91,
+      "volume24h": 985.45,
+      "openInterest": 4195.74,
+      "depth": {
+        "bidSize": 1,
+        "askSize": 57,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
+    },
+    {
       "id": "KXHURCAT-26NORBERT-T2",
       "label": "Will Norbert become a Category 2 hurricane?",
       "short": "Will Norbert become a Category 2 hurricane…",
@@ -7976,49 +8019,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26NORBERT"
-    },
-    {
-      "id": "KXNEXTHURDATE-26DEC01-26OCT01",
-      "label": "When will the next hurricane form?",
-      "short": "When will the next hurricane form · Before…",
-      "storm": null,
-      "subject": null,
-      "market": 0.395,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": null,
-      "yesBid": 0.39,
-      "yesAsk": 0.4,
-      "closeTime": "2026-10-01T03:59:00Z",
-      "liquidity": 0,
-      "spread": 0.010000000000000009,
-      "volume": 5446.15,
-      "volume24h": 749.09,
-      "openInterest": 4283.97,
-      "depth": {
-        "bidSize": 60,
-        "askSize": 1,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
     },
     {
       "id": "KXHURRICANENAMES-26DEC01CPAC-AKO",
@@ -8580,7 +8580,7 @@
       "liquidity": 301,
       "spread": 0.01,
       "volume": 3124.47,
-      "volume24h": 221,
+      "volume24h": 0,
       "openInterest": 905.83,
       "depth": {
         "bidSize": 0,
@@ -8778,7 +8778,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.745,
+      "market": 0.755,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -8798,17 +8798,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.73,
-      "yesAsk": 0.76,
+      "yesBid": 0.74,
+      "yesAsk": 0.77,
       "closeTime": "2026-10-15T03:59:00Z",
-      "liquidity": 4,
+      "liquidity": 42,
       "spread": 0.030000000000000027,
-      "volume": 1799.66,
-      "volume24h": 107.38,
-      "openInterest": 1438.04,
+      "volume": 1991.07,
+      "volume24h": 210.19,
+      "openInterest": 1624.45,
       "depth": {
-        "bidSize": 0.8,
-        "askSize": 4.62,
+        "bidSize": 8.59,
+        "askSize": 55,
         "notional": 1
       },
       "proxy": false,
@@ -8907,7 +8907,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.8,
+      "market": 0.8049999999999999,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -8927,16 +8927,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.75,
+      "yesBid": 0.76,
       "yesAsk": 0.85,
       "closeTime": "2026-12-01T04:59:00Z",
       "liquidity": 21,
-      "spread": 0.09999999999999998,
+      "spread": 0.08999999999999997,
       "volume": 1382.45,
-      "volume24h": 65,
+      "volume24h": 0,
       "openInterest": 1153.96,
       "depth": {
-        "bidSize": 160,
+        "bidSize": 5,
         "askSize": 25,
         "notional": 1
       },
@@ -8971,16 +8971,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": null,
-      "yesAsk": 0.02,
+      "yesAsk": 0.01,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 3,
-      "spread": 0.02,
+      "liquidity": 500,
+      "spread": 0.01,
       "volume": 1281.43,
       "volume24h": 0,
       "openInterest": 458.79,
       "depth": {
         "bidSize": 0,
-        "askSize": 146,
+        "askSize": 50000,
         "notional": 1
       },
       "proxy": false,
@@ -9174,7 +9174,7 @@
       "short": "When will the next hurricane form · Before…",
       "storm": null,
       "subject": null,
-      "market": 0.73,
+      "market": 0.7350000000000001,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -9194,17 +9194,60 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.67,
+      "yesBid": 0.68,
       "yesAsk": 0.79,
       "closeTime": "2026-11-01T03:59:00Z",
       "liquidity": 5,
-      "spread": 0.12,
+      "spread": 0.10999999999999999,
       "volume": 915.6,
-      "volume24h": 74.32,
+      "volume24h": 16.81,
       "openInterest": 798.87,
       "depth": {
-        "bidSize": 3.73,
+        "bidSize": 2005,
         "askSize": 6.27,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
+    },
+    {
+      "id": "KXNEXTHURDATE-26DEC01-26NOV15",
+      "label": "When will the next hurricane form?",
+      "short": "When will the next hurricane form · Before…",
+      "storm": null,
+      "subject": null,
+      "market": 0.8300000000000001,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": null,
+      "yesBid": 0.78,
+      "yesAsk": 0.88,
+      "closeTime": "2026-11-15T04:59:00Z",
+      "liquidity": 97,
+      "spread": 0.09999999999999998,
+      "volume": 831.44,
+      "volume24h": 133.91,
+      "openInterest": 520.9,
+      "depth": {
+        "bidSize": 5,
+        "askSize": 110,
         "notional": 1
       },
       "proxy": false,
@@ -9217,7 +9260,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.095,
+      "market": 0.1,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -9237,16 +9280,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.04,
+      "yesBid": 0.05,
       "yesAsk": 0.15,
       "closeTime": "2026-11-01T03:59:00Z",
       "liquidity": 9,
-      "spread": 0.10999999999999999,
+      "spread": 0.09999999999999999,
       "volume": 817.31,
       "volume24h": 0,
       "openInterest": 621.79,
       "depth": {
-        "bidSize": 10.09,
+        "bidSize": 5,
         "askSize": 58.03,
         "notional": 1
       },
@@ -9306,7 +9349,7 @@
       "short": "When will the next Category 5 hurricane form…",
       "storm": null,
       "subject": null,
-      "market": 0.085,
+      "market": 0.1,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -9326,17 +9369,17 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": null,
-      "yesBid": 0.03,
-      "yesAsk": 0.14,
+      "yesBid": 0.05,
+      "yesAsk": 0.15,
       "closeTime": "2026-12-01T04:59:00Z",
-      "liquidity": 1,
-      "spread": 0.11000000000000001,
+      "liquidity": 15,
+      "spread": 0.09999999999999999,
       "volume": 754.9,
       "volume24h": 0,
       "openInterest": 411.14,
       "depth": {
-        "bidSize": 13.45,
-        "askSize": 5,
+        "bidSize": 5,
+        "askSize": 100,
         "notional": 1
       },
       "proxy": false,
@@ -9385,49 +9428,6 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURRICANENAMES-26DEC01EPAC"
-    },
-    {
-      "id": "KXNEXTHURDATE-26DEC01-26NOV15",
-      "label": "When will the next hurricane form?",
-      "short": "When will the next hurricane form · Before…",
-      "storm": null,
-      "subject": null,
-      "market": 0.8,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": null,
-      "yesBid": 0.77,
-      "yesAsk": 0.83,
-      "closeTime": "2026-11-15T04:59:00Z",
-      "liquidity": 20,
-      "spread": 0.05999999999999994,
-      "volume": 698.72,
-      "volume24h": 41.19,
-      "openInterest": 392.18,
-      "depth": {
-        "bidSize": 60,
-        "askSize": 23.81,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXNEXTHURDATE-26DEC01"
     },
     {
       "id": "KXHURRICANENAMES-26DEC01CPAC-ULA",
@@ -9521,7 +9521,7 @@
       "short": "Will a hurricane make landfall in North…",
       "storm": null,
       "subject": null,
-      "market": 0.075,
+      "market": 0.07,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -9542,16 +9542,16 @@
       "horizon": "seasonal",
       "strike": null,
       "yesBid": 0.03,
-      "yesAsk": 0.12,
+      "yesAsk": 0.11,
       "closeTime": "2027-01-01T04:59:00Z",
-      "liquidity": 12,
-      "spread": 0.09,
+      "liquidity": 1,
+      "spread": 0.08,
       "volume": 520.07,
       "volume24h": 0,
       "openInterest": 494.64,
       "depth": {
-        "bidSize": 0.9,
-        "askSize": 100,
+        "bidSize": 5,
+        "askSize": 11.15,
         "notional": 1
       },
       "proxy": false,
@@ -12338,7 +12338,7 @@
       "volume24h": 0,
       "openInterest": 0,
       "depth": {
-        "bidSize": 13,
+        "bidSize": 12,
         "askSize": 50,
         "notional": 1
       },
@@ -16220,10 +16220,10 @@
       "basin": "atlantic",
       "id": "AL98",
       "title": "Central Subtropical Atlantic",
-      "pct48": 40,
-      "pct7d": 40,
-      "summary": "Showers and thunderstorms associated with a low pressure area located about 350 miles east of Bermuda have changed little in organization during the past several hours. Environmental conditions could support gradual development of the system during the next day or two, and a tropical depression could form during that t",
-      "issued": "800 AM EDT Thu Sep 17 2026",
+      "pct48": 20,
+      "pct7d": 30,
+      "summary": "Showers and thunderstorms associated with a low pressure area located a few hundred miles east of Bermuda have become less organized over the past several hours. Environmental conditions appear marginally conducive for development over the next couple of days as the system moves slowly westward and southward over the s",
+      "issued": "200 PM EDT Thu Sep 17 2026",
       "url": "https://api.weather.gov/products/types/ABNT20/locations/NHC",
       "rings": [
         [
@@ -16912,7 +16912,7 @@
             -63.57286514077595
           ],
           [
-            29.36237530400763,
+            29.362375304007628,
             -63.544612998431404
           ],
           [
@@ -16920,7 +16920,7 @@
             -63.51466100940641
           ],
           [
-            29.63016471546839,
+            29.630164715468393,
             -63.48306546972941
           ],
           [
@@ -16944,7 +16944,7 @@
             -63.30240487256043
           ],
           [
-            30.410720848187754,
+            30.41072084818775,
             -63.262130245569004
           ],
           [
@@ -16960,11 +16960,11 @@
             -63.13403467799165
           ],
           [
-            30.901949971210406,
+            30.90194997121041,
             -63.089099913359696
           ],
           [
-            31.01995364147719,
+            31.019953641477187,
             -63.04314085438873
           ],
           [
@@ -16988,7 +16988,7 @@
             -62.7998325031067
           ],
           [
-            31.67862981322854,
+            31.678629813228536,
             -62.748650429393784
           ],
           [
@@ -17040,7 +17040,7 @@
             -62.06199030828178
           ],
           [
-            32.80832770610002,
+            32.80832770610003,
             -61.99817957842281
           ],
           [
@@ -17064,7 +17064,7 @@
             -61.662290185553225
           ],
           [
-            33.202315350116194,
+            33.20231535011619,
             -61.591618362098245
           ],
           [
@@ -17076,11 +17076,11 @@
             -61.44663586040307
           ],
           [
-            33.371311734116624,
+            33.37131173411663,
             -61.37228895468684
           ],
           [
-            33.423642823643334,
+            33.42364282364334,
             -61.296680794074156
           ],
           [
@@ -17485,7 +17485,7 @@
             -135.09693726055067
           ],
           [
-            9.885980938803131,
+            9.885980938803133,
             -135.33840405276354
           ],
           [
@@ -17525,7 +17525,7 @@
             -137.0614713743025
           ],
           [
-            10.08144754139241,
+            10.081447541392409,
             -137.20899763168848
           ],
           [
@@ -17557,7 +17557,7 @@
             -138.04839695827096
           ],
           [
-            10.296146123455737,
+            10.296146123455738,
             -138.14468473833125
           ],
           [
@@ -17577,7 +17577,7 @@
             -138.4840553630189
           ],
           [
-            10.474095016155328,
+            10.47409501615533,
             -138.55911358631187
           ],
           [
@@ -17878,7 +17878,7 @@
           ],
           [
             16.80057829578027,
-            -138.29411013656514
+            -138.2941101365651
           ],
           [
             16.866057730054262,
@@ -17926,7 +17926,7 @@
           ],
           [
             17.427904121750124,
-            -136.5394533122887
+            -136.53945331228869
           ],
           [
             17.463005286878765,
@@ -18025,7 +18025,7 @@
             -132.46239072089824
           ],
           [
-            17.40133654163802,
+            17.401336541638024,
             -132.27677719262834
           ],
           [
@@ -18110,7 +18110,7 @@
           ],
           [
             16.509867496611665,
-            -127.77408671013035
+            -127.77408671013038
           ],
           [
             16.465964061038566,
@@ -18130,7 +18130,7 @@
           ],
           [
             16.29846148734563,
-            -126.4766740713207
+            -126.47667407132073
           ],
           [
             16.259157664207564,
@@ -18823,7 +18823,7 @@
           ],
           [
             11.976036594290258,
-            -144.80084111299277
+            -144.80084111299274
           ],
           [
             11.96968231937325,
@@ -19171,7 +19171,7 @@
           ],
           [
             17.29980626713614,
-            -150.86418734348786
+            -150.86418734348788
           ],
           [
             17.378681491550058,
@@ -19330,7 +19330,7 @@
             -142.13680144900266
           ],
           [
-            18.376622753211915,
+            18.37662275321192,
             -141.88385386877908
           ],
           [
@@ -19582,7 +19582,7 @@
             -130.9188972653993
           ],
           [
-            17.063365334637414,
+            17.063365334637417,
             -130.82165757815477
           ],
           [
@@ -19622,12 +19622,12 @@
             -130.06088597500278
           ],
           [
-            16.72024093839463,
+            16.720240938394628,
             -129.98909143409227
           ],
           [
             16.681838016369685,
-            -129.91984924624555
+            -129.91984924624552
           ],
           [
             16.642588428371653,
@@ -19635,7 +19635,7 @@
           ],
           [
             16.60246643892547,
-            -129.78902763041978
+            -129.78902763041975
           ],
           [
             16.561446312556082,
@@ -19666,7 +19666,7 @@
             -129.41176059640125
           ],
           [
-            16.246995814215474,
+            16.246995814215477,
             -129.36812032349476
           ],
           [
@@ -19690,11 +19690,11 @@
             -129.18846791121044
           ],
           [
-            15.934744568589734,
+            15.934744568589737,
             -129.1602571953872
           ],
           [
-            15.878448300414126,
+            15.878448300414124,
             -129.1346230605032
           ],
           [
