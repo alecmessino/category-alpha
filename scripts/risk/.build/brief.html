@@ -1,0 +1,168 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Lowell 2026 event brief</title><style>
+  /* ONE PAGE IS A GATE, NOT A PREFERENCE. scripts/risk/gates.py measures .page
+     scrollHeight against 1056px (11in at 96dpi) and fails the build above it, so the
+     vertical whitespace below is load-bearing: presenting both 18Z evidence vintages as
+     peers cost ~23px and it was taken back out of margins, not out of type size. Body
+     and table text is separately gated at >=9pt and captions at >=7.5pt. */
+  @page{size:Letter;margin:0}
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{width:8.5in;height:11in;font-family:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;color:#10202B;font-size:9.2pt;line-height:1.34;background:#fff}
+  .page{width:8.5in;height:11in;padding:.4in .55in .28in;display:flex;flex-direction:column}
+  .mast{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #C6D2D4;padding-bottom:4pt;font-size:8.6pt}
+  .mast b{font-weight:600}.mast span{color:#6F8590}
+  h1{font-size:20pt;line-height:1.08;font-weight:500;letter-spacing:-.02em;margin:6pt 0 4pt;max-width:6.4in}
+  .lede{font-size:9.8pt;color:#3B5260;margin:0 0 5pt;max-width:6.6in}
+  .band{background:#10202B;color:#EDF1F0;padding:8pt 12pt;margin:0 0 6pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .band h2{font-size:12.6pt;font-weight:500;margin:0 0 4pt;line-height:1.25}
+  .band p{margin:0;font-size:9pt;opacity:.92}
+  .band em{font-style:normal;border-bottom:1.6pt solid #E28A54}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:18pt;flex:1}
+  h3{font-size:9.2pt;font-weight:600;margin:0 0 3pt;padding-top:4pt;border-top:1.4pt solid #10202B}
+  table{border-collapse:collapse;width:100%;font-size:9pt}
+  td,th{padding:1.9pt 4pt 1.9pt 0;border-bottom:.6pt solid #C6D2D4;vertical-align:top;text-align:left}
+  th{color:#6F8590;font-weight:500;font-size:8.2pt}
+  td.k{color:#6F8590;width:34%}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  ul{margin:3pt 0 0;padding-left:12pt}li{margin:1.5pt 0}
+  .stamp{display:inline-block;border:1.2pt solid #B8571F;color:#B8571F;background:#F3E2D6;padding:2.5pt 7pt;font-weight:600;font-size:8.6pt;margin-top:7pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .chart{border:.7pt solid #C6D2D4;background:#F3F6F6;padding:4pt;margin-top:3pt}
+  .chart svg{width:100%;height:auto;display:block}
+  .cap{font-size:8.6pt;color:#6F8590;margin-top:4pt;line-height:1.35}
+  .foot{border-top:1.4pt solid #10202B;margin-top:4pt;padding-top:4pt;font-size:7.5pt;color:#6F8590;display:grid;grid-template-columns:1.5fr 1fr;gap:14pt}
+  .foot p{margin:0 0 2pt}
+  .mono{font-family:"IBM Plex Mono",Menlo,monospace}
+  .tag{font-size:8.2pt;color:#6F8590}
+  .core{background:#DCE8EE;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+  .res{margin:0 0 1pt;font-size:9pt}.res .big{font-size:13pt;font-weight:500;letter-spacing:-.02em}
+
+  /* TWO EVIDENCE VINTAGES AS PEERS. The earlier layout printed the revised 21Z figures at
+     display size and demoted the 18Z ones to a sentence, which reads as a correction of the
+     observation rather than what it is: the same forecast verified against two source
+     vintages of the same fix. Equal columns, equal type, equal weight. */
+  .vsrc{margin:0 0 2pt}
+  .vints{display:grid;grid-template-columns:1fr 1fr;gap:9pt;margin:0 0 2pt}
+  .vint{border-top:1.2pt solid #10202B;padding-top:2pt}
+  .vh{font-size:7.6pt;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#3B5260;margin-bottom:1pt}
+  .peer{margin:0 0 1pt;font-size:9pt}
+  .audit{margin:0}
+
+  /* The canonical URL is the one thing a reader retypes, so it must not break mid-token.
+     At 7.8pt mono it does not fit the footer's right column, so it gets its own full-width
+     row rather than being hyphen-free-wrapped across three lines as it was. */
+  .urlrow{grid-column:1/-1;margin:1pt 0 0}
+  .url{white-space:nowrap;color:#10202B;font-size:7.8pt;text-decoration:none;border-bottom:.5pt solid #C6D2D4}
+  :root{--rule:#C6D2D4;--mute:#6F8590;--ink:#10202B;--ink-2:#3B5260;--chart:#2E6E8E;--chart-soft:#B9D3DF}
+</style></head>
+<body><div class="page">
+ <div class="mast"><div><b>Millibar</b> <span>/ Risk Evidence</span></div><div><span>Event brief · Hurricane Lowell, EP12 2026 · Hawaiʻi reef parametric policy · 17 Sep 2026 · Rev 3</span></div></div>
+ <h1>Lowell paid $300,000. The public contract record cannot reproduce the payout cell.</h1>
+ <p class="lede">A point-in-time reconstruction from official CPHC/NHC products and the policyholder's published terms. Reopen the evidence behind a storm trigger.</p>
+ <div class="band"><h2>The 2026 zone geometry, payout schedule, designated observation source and wind definition are not published.</h2>
+ <p>The 2024 fact sheet states that payouts are triggered and calculated from officially reported wind speeds and proximity to the core zone. <em>Millibar does not infer an undisclosed contract term from an observed payout.</em> Supplied with the schedule, the same evaluator resolves this brief deterministically.</p></div>
+ <div class="cols"><div>
+  <h3>A. Established from public sources</h3>
+  <table>
+   <tr><td class="k">Policyholder</td><td>The Nature Conservancy; first US reef policy 2022, redesigned 2024</td></tr>
+   <tr><td class="k">Broker / insurer</td><td>WTW; Munich Re Group company after a competitive placement</td></tr>
+   <tr><td class="k">Trigger basis</td><td>Officially reported wind; ≥50 kt in core zone; more wind, closer storm, larger payout</td></tr>
+   <tr><td class="k">Published 2024–25 limits</td><td>$200k minimum · $1m per event · $2m annual</td></tr>
+   <tr><td class="k">2026</td><td>$200k minimum confirmed. Lala $200,000 (21 Aug) · Lowell $300,000 (15 Sep)</td></tr>
+  </table>
+  <h3 style="margin-top:6pt">Historical 2024 payout ladder <span class="tag">— not assumed for 2026</span></h3>
+  <table><thead><tr><th>Wind</th><th class="num">X</th><th class="num">Y</th><th class="num">Z</th><th class="num core">I (core)</th></tr></thead><tr><td>50 kt</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num core">$200k</td></tr>
+<tr><td>64 kt</td><td class="num">—</td><td class="num">—</td><td class="num">$200k</td><td class="num core">$300k</td></tr>
+<tr><td>83 kt</td><td class="num">—</td><td class="num">$200k</td><td class="num">$300k</td><td class="num core">$450k</td></tr>
+<tr><td>96 kt</td><td class="num">$200k</td><td class="num">$300k</td><td class="num">$450k</td><td class="num core">$600k</td></tr>
+<tr><td>113 kt</td><td class="num">$300k</td><td class="num">$450k</td><td class="num">$600k</td><td class="num core">$750k</td></tr>
+<tr><td>137 kt</td><td class="num">$450k</td><td class="num">$600k</td><td class="num">$750k</td><td class="num core">$1.0m</td></tr></table>
+  <p class="cap">$300,000 sits in three distinct 2024 cells; the amount alone cannot identify the condition met.</p>
+  <h3 style="margin-top:6pt">B. Missing from the public record</h3>
+  <ul><li>Georeferenced 2026 zone polygons</li><li>The 2026 wind × zone payout schedule and limits</li>
+   <li>Designated observation source and wind definition</li><li>Treatment of intermediates, corrections and revisions</li></ul>
+  <div class="stamp">Not reconstructable from public terms</div>
+ </div><div>
+  <h3>C. Operational replay: selected official vintages</h3>
+  <div class="chart"><svg viewBox="0 0 660 450" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, Menlo, monospace" font-size="12.5" role="img" aria-label="Hurricane Lowell official track and forecast vintages near the main Hawaiian Islands">
+<g stroke="var(--rule,#C6D2D4)" stroke-width="1">
+<line x1="53.5" y1="0" x2="53.5" y2="450"/>
+<line x1="231.9" y1="0" x2="231.9" y2="450"/>
+<line x1="410.3" y1="0" x2="410.3" y2="450"/>
+<line x1="588.6" y1="0" x2="588.6" y2="450"/>
+<line x1="0" y1="450.0" x2="660" y2="450.0"/>
+<line x1="0" y1="340.2" x2="660" y2="340.2"/>
+<line x1="0" y1="230.5" x2="660" y2="230.5"/>
+<line x1="0" y1="120.7" x2="660" y2="120.7"/>
+<line x1="0" y1="11.0" x2="660" y2="11.0"/>
+</g><g fill="var(--mute,#6F8590)">
+<text x="57.5" y="444">164°W</text>
+<text x="235.9" y="444">162°W</text>
+<text x="414.3" y="444">160°W</text>
+<text x="592.6" y="444">158°W</text>
+<text x="4" y="336.2">18°N</text>
+<text x="4" y="226.5">20°N</text>
+<text x="4" y="116.7">22°N</text>
+</g>
+<polygon points="802.1,222.9 803.9,223.7 806.0,223.4 809.2,223.6 812.4,224.3 818.7,225.5 826.6,227.9 837.0,231.8 841.2,233.4 845.9,236.2 848.4,238.1 848.5,240.3 848.4,243.2 848.6,245.4 851.1,245.4 854.6,244.4 857.1,245.5 858.3,246.6 858.0,249.0 859.2,250.4 860.7,251.8 865.2,254.2 869.9,255.5 871.8,256.4 872.8,257.6 872.5,259.0 871.4,259.9 867.4,262.7 863.4,263.6 857.8,266.8 854.0,267.4 853.8,268.0 850.6,268.5 847.9,269.7 842.6,270.6 838.1,271.3 834.4,270.8 832.2,270.8 830.3,271.1 828.2,271.9 825.4,273.0 823.7,274.2 821.9,274.4 820.5,274.7 818.5,275.5 817.3,276.0 812.7,277.5 811.4,277.8 807.5,280.0 806.8,280.9 807.0,282.9 805.3,283.9 802.5,285.5 801.1,287.8 799.8,288.6 798.1,289.4 796.0,290.5 795.3,290.2 795.3,289.0 793.4,288.2 789.8,287.1 785.6,285.5 783.3,284.6 779.6,284.1 777.9,283.8 777.4,282.8 776.7,281.8 775.6,281.6 774.9,280.1 774.2,277.8 775.2,275.0 777.2,267.0 777.1,265.6 775.9,264.4 774.8,262.6 773.3,260.0 772.7,259.0 771.8,258.3 770.9,257.1 771.1,255.9 770.1,254.8 769.6,253.6 768.6,252.0 767.1,250.7 765.7,250.1 763.8,248.7 761.7,245.2 762.5,243.7 763.6,242.4 765.5,241.4 767.3,240.7 768.1,240.1 768.6,239.1 769.9,238.5 773.6,237.7 775.4,235.9 776.3,235.2 778.3,233.2 780.3,231.8 781.7,231.8 782.3,230.1 782.7,229.4 782.1,228.3 780.6,227.5 777.5,224.7 776.2,222.3 776.0,220.4 776.0,218.6 777.7,216.7 778.9,216.0 782.1,216.0 787.9,216.8 790.4,217.1 790.9,217.4 791.2,217.8 791.3,218.3 792.7,219.7 796.2,220.5 798.4,221.3 800.0,222.4 802.1,222.9" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="719.4,201.3 718.5,202.3 715.9,202.3 713.6,202.1 711.8,202.3 709.4,202.6 706.4,202.8 704.5,201.7 705.6,200.8 707.5,199.9 710.0,198.9 712.7,198.1 715.1,197.6 716.9,197.7 719.2,199.2 718.0,200.8 719.4,201.3" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="685.5,190.2 681.2,190.3 679.4,188.8 679.0,187.5 678.9,186.5 678.9,185.2 678.5,184.0 677.0,183.5 673.3,182.7 672.2,181.6 672.9,180.5 675.0,179.9 678.7,179.6 687.4,180.3 691.4,182.4 691.4,182.4 692.8,183.3 694.2,184.3 695.2,185.2 695.4,185.9 694.8,186.8 692.9,188.6 688.8,189.6 685.5,190.2" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="714.4,174.1 715.2,174.6 716.1,174.7 717.5,175.2 718.7,175.4 719.1,176.1 720.1,176.3 720.4,177.0 720.4,177.7 721.6,178.3 722.4,179.0 723.1,179.9 724.1,180.9 725.6,180.8 726.6,180.1 728.3,180.1 729.7,180.0 732.3,179.9 733.3,179.8 736.1,178.6 737.5,178.3 738.9,178.2 740.4,178.2 741.9,178.3 743.1,178.6 743.4,178.7 743.7,178.7 744.0,178.8 744.2,179.0 745.4,178.8 746.8,179.3 747.2,180.0 747.8,180.3 748.5,180.7 749.4,181.4 751.0,182.0 752.2,182.7 752.3,183.1 753.4,183.2 753.8,183.2 754.1,182.9 755.3,183.4 755.8,184.2 756.4,184.6 759.4,184.9 762.5,185.7 766.9,186.6 768.8,188.9 768.4,191.1 766.8,192.8 764.6,193.2 762.7,194.8 760.3,194.8 755.5,196.2 752.3,196.2 750.5,196.1 748.9,196.1 744.4,197.3 741.6,198.2 740.0,198.6 737.9,198.3 737.1,198.2 735.6,198.0 734.4,198.2 730.7,198.3 728.2,196.9 727.9,196.3 726.7,195.6 727.5,195.2 727.5,194.2 726.8,190.6 726.1,189.6 726.2,188.5 725.6,187.6 725.3,187.4 724.6,187.1 723.7,186.8 722.3,186.8 721.0,187.1 720.5,187.9 719.4,188.0 718.1,187.6 716.8,187.0 714.9,186.8 713.0,186.1 711.7,186.2 710.5,185.3 708.4,184.0 705.9,182.1 705.8,180.9 705.0,180.2 705.3,179.1 705.9,177.6 706.7,176.3 707.6,175.4 708.7,175.3 709.5,174.9 709.5,174.4 710.3,174.1 711.1,174.2 712.1,174.2 712.9,174.1 713.2,173.9 713.7,173.8 714.4,174.1" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="655.6,163.4 657.1,163.6 659.2,163.5 660.3,163.7 661.0,164.4 662.4,164.4 670.8,165.1 675.3,165.5 678.8,165.6 679.5,165.0 679.6,164.4 680.0,164.0 680.9,163.9 682.1,164.8 682.5,165.9 684.5,166.2 687.0,166.5 691.5,166.5 693.5,166.3 694.7,166.1 695.6,165.9 696.4,166.0 698.0,165.9 699.3,166.1 700.2,166.2 701.1,166.1 701.6,166.3 701.4,166.6 702.0,166.8 703.4,166.8 704.1,167.0 702.4,168.8 699.6,170.4 696.3,171.4 692.9,172.3 689.5,172.7 686.0,172.5 682.5,172.1 675.6,171.0 671.4,170.2 665.3,170.4 661.1,170.6 658.0,170.8 655.5,170.8 653.5,170.8 651.7,170.4 650.7,169.6 650.7,168.6 651.4,167.7 652.4,167.0 654.0,166.7 655.4,165.7 655.8,164.6 654.7,163.8 654.7,163.4 655.6,163.4" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="598.1,142.8 598.7,143.7 599.6,144.0 599.9,144.4 600.1,145.0 600.8,144.9 601.7,145.1 602.4,145.5 603.2,146.3 603.2,147.2 603.2,147.6 602.5,147.5 602.1,147.9 602.2,148.8 602.4,149.4 602.7,150.3 603.6,150.5 604.7,150.7 605.5,151.4 606.2,152.1 607.5,152.3 607.7,152.7 608.6,152.9 609.2,152.5 610.1,151.8 608.7,151.3 608.8,150.7 609.8,150.4 612.0,150.6 613.1,150.4 613.4,150.8 612.1,151.6 611.8,152.6 612.0,153.4 613.4,153.9 614.6,154.6 614.9,155.0 614.5,155.7 614.8,156.3 615.8,157.1 617.7,157.9 619.5,158.5 620.1,158.8 619.1,159.5 616.9,160.6 616.0,161.2 615.0,161.4 614.7,161.0 614.8,160.5 614.0,160.1 611.7,160.5 609.7,160.6 608.1,161.1 606.9,161.6 605.5,161.7 604.9,161.5 604.4,161.0 603.7,160.4 600.8,159.7 599.3,159.3 598.4,158.4 598.0,157.9 598.0,157.4 597.4,157.6 596.2,158.2 597.1,158.8 593.4,159.0 593.4,158.7 594.0,158.6 593.3,158.2 591.9,158.3 591.8,157.7 591.5,157.3 591.7,156.9 591.5,156.5 592.5,156.3 593.4,156.0 594.3,155.7 594.7,155.2 593.6,154.7 592.8,154.5 592.1,154.3 591.7,154.5 591.4,155.2 590.6,155.0 589.9,154.5 589.4,154.1 589.5,154.9 590.0,155.7 589.6,155.9 587.6,154.9 586.8,154.6 587.5,155.5 588.9,156.4 590.0,156.9 590.8,157.3 590.4,158.1 588.8,158.5 586.6,158.7 583.4,159.2 581.7,159.3 580.2,159.5 579.8,159.4 579.4,159.2 578.4,158.9 577.6,157.0 576.6,155.5 575.4,154.7 574.6,153.9 572.9,153.5 572.5,152.0 572.0,151.2 570.4,150.4 569.4,150.1 568.3,149.1 568.3,148.0 568.2,146.4 567.6,145.9 563.8,144.0 564.4,143.9 567.6,143.5 571.4,143.4 573.9,143.5 575.3,143.4 576.5,143.3 577.8,143.5 578.2,142.8 578.6,142.5 580.2,141.9 582.1,141.1 582.8,140.7 582.7,140.4 583.3,139.8 584.1,138.8 585.5,138.1 587.4,137.1 590.2,136.7 591.4,136.7 592.0,136.9 592.5,137.3 593.1,137.7 594.5,138.4 594.6,139.0 595.4,139.2 595.4,139.7 596.2,140.2 595.8,141.2 596.9,142.1 598.1,142.8" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="392.6,132.6 391.4,132.8 390.3,132.3 389.3,132.1 388.2,130.2 388.4,128.9 389.4,127.6 392.8,125.6 395.6,124.3 399.2,123.1 399.8,122.4 400.2,121.7 400.1,120.7 400.1,120.7 401.7,120.3 403.2,120.3 404.9,120.7 405.7,121.7 404.9,122.2 403.8,123.0 403.2,124.1 403.8,125.6 402.7,126.6 401.1,127.0 399.8,127.4 398.1,127.7 396.1,128.4 395.0,129.0 394.3,129.9 393.2,131.4 392.6,132.6" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="464.8,108.2 466.1,108.5 467.5,108.5 469.3,109.0 469.9,109.9 471.0,110.5 471.7,110.6 472.0,111.3 472.3,111.9 472.6,112.4 472.6,112.4 473.3,112.7 473.4,113.3 473.2,114.8 472.3,115.5 471.0,117.6 469.7,118.0 469.6,119.5 469.9,120.5 470.0,121.6 469.9,122.6 469.7,123.0 468.4,123.0 467.4,123.3 468.1,123.7 468.4,124.2 467.9,124.6 466.9,124.5 465.3,125.3 464.7,125.9 463.9,126.3 462.4,126.9 462.3,127.3 461.4,127.3 460.8,127.6 460.5,127.9 456.5,127.1 454.0,127.0 452.2,127.0 448.8,126.6 447.6,126.5 446.8,126.1 446.4,126.2 446.3,126.6 445.5,126.7 445.1,126.2 443.9,125.9 442.9,125.5 442.2,125.0 441.8,124.5 441.5,124.0 440.4,123.9 440.1,123.4 439.1,123.2 437.4,123.0 436.0,122.7 434.9,122.4 433.2,122.2 431.7,121.9 430.9,121.0 430.7,120.4 429.9,120.2 429.2,119.7 429.2,118.9 429.4,118.3 429.4,117.6 429.3,117.1 430.2,116.9 432.6,115.3 433.8,114.4 434.0,113.9 434.0,113.4 434.1,113.0 434.7,112.9 434.9,112.7 435.6,112.1 437.5,111.8 439.9,111.4 442.4,110.5 444.0,109.7 446.1,109.2 446.9,108.6 448.0,108.3 449.0,108.4 449.6,107.9 450.5,108.1 451.2,108.4 451.5,108.8 452.2,108.8 453.4,109.0 454.1,109.3 454.9,109.3 454.7,108.9 454.9,108.5 456.5,108.1 458.2,108.2 460.2,108.2 461.2,108.6 462.1,108.5 463.1,108.2 463.8,107.8 464.8,108.2" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="236.8,63.7 236.5,63.8 236.7,63.6 236.7,63.4 236.8,63.3 237.2,63.4 237.2,63.5 237.0,63.6 236.8,63.7" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="-9.3,34.1 -8.8,34.5 -9.6,34.4 -9.7,34.3 -9.5,34.2 -9.3,34.1" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="-302.9,-44.1 -303.0,-44.0 -303.5,-44.7 -303.2,-44.8 -302.9,-44.5 -302.8,-44.3 -302.9,-44.1" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="-635.3,-86.3 -635.9,-85.2 -636.7,-85.4 -636.9,-86.1 -635.3,-86.3" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="-834.7,-102.1 -834.8,-101.8 -835.3,-102.0 -835.4,-102.2 -835.3,-102.4 -835.3,-102.7 -835.1,-102.4 -834.9,-102.2 -834.7,-102.1" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="-1221.7,-229.8 -1222.1,-229.7 -1222.3,-229.8 -1221.7,-230.0 -1221.4,-230.2 -1221.2,-230.4 -1221.0,-230.6 -1220.8,-230.1 -1221.2,-229.9 -1221.7,-229.8" fill="var(--ink,#10202B)" opacity=".82"/>
+<text x="272.0" y="156.4" fill="var(--ink-2,#3B5260)">Niʻihau</text>
+<text x="428.1" y="101.5" fill="var(--ink-2,#3B5260)">Kauaʻi</text>
+<text x="561.9" y="129.0" fill="var(--ink-2,#3B5260)">Oʻahu</text>
+<polyline points="178.4,592.7 107.0,570.7 44.6,526.8 35.7,466.5 71.4,378.7 133.8,247.0 187.3,93.3 142.7,-137.2 -151.6,-225.0" fill="none" stroke="var(--chart,#2E6E8E)" stroke-opacity="0.35" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="127.8" y="251.0" text-anchor="end" fill="var(--chart,#2E6E8E)" fill-opacity="0.60">Adv 38</text>
+<polyline points="71.4,521.3 62.4,472.0 115.9,367.7 187.3,230.5 240.8,65.9 231.9,-65.9 160.5,-148.2 -178.4,-203.0 -535.1,-192.1" fill="none" stroke="var(--chart,#2E6E8E)" stroke-opacity="0.57" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="181.3" y="234.5" text-anchor="end" fill="var(--chart,#2E6E8E)" fill-opacity="0.60">Adv 42</text>
+<polyline points="178.4,367.7 258.6,257.9 330.0,98.8 338.9,-49.4 276.5,-153.7 98.1,-197.6 -124.9,-197.6 -481.6,-181.1 -660.0,-263.4" fill="none" stroke="var(--chart,#2E6E8E)" stroke-opacity="0.78" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="252.6" y="261.9" text-anchor="end" fill="var(--chart,#2E6E8E)" fill-opacity="0.78">Adv 46</text>
+<polyline points="338.9,126.2 365.7,5.5 330.0,-115.2 187.3,-192.1 -17.8,-219.5 -249.7,-208.5 -437.0,-203.0 -633.2,-263.4 -749.2,-345.7" fill="none" stroke="var(--chart,#2E6E8E)" stroke-opacity="1.00" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="332.9" y="130.2" text-anchor="end" fill="var(--chart,#2E6E8E)" fill-opacity="1.00">Adv 49</text>
+<polyline points="107.0,444.5 151.6,395.1 214.1,340.2 276.5,257.9 321.1,170.1 347.8,65.9" fill="none" stroke="var(--ink,#10202B)" stroke-width="2.2"/>
+<circle cx="107.0" cy="444.5" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="151.6" cy="395.1" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="214.1" cy="340.2" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="276.5" cy="257.9" r="2.6" fill="var(--ink,#10202B)"/>
+<text x="282.5" y="261.9" fill="var(--ink,#10202B)">08/00Z 95 kt</text>
+<circle cx="321.1" cy="170.1" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="347.8" cy="65.9" r="2.6" fill="var(--ink,#10202B)"/>
+</svg></div>
+  <p class="cap">Solid: operational track. Dashed: Advisories 38, 42, 46, 49 (darker is later). Coastlines Natural Earth 1:10m, not contract geometry. Forecast-track distance to Niʻihau coastline: Adv 38 131 nm → Adv 42 103 nm → Adv 46 43 nm → Adv 49 31 nm (derived). NHC location wind probabilities, not contract payout probabilities, Adv 46: Niʻihau 71% for 50 kt, 28% for 64 kt.</p>
+  <h3 style="margin-top:6pt">D. Residual, Advisory 46 at 18Z</h3>
+  <p class="cap vsrc">Both against NHC's official interpolated 18Z position, aviation advisory 46. Track direction 23.3°.</p>
+  <div class="vints">
+   <div class="vint">
+    <div class="vh">As known at 18Z · Intermediate 46A</div>
+    <p class="res"><span class="big">−5.0 nm</span> along</p>
+    <p class="res"><span class="big">+13.6 nm</span> right-of-track</p>
+   </div>
+   <div class="vint">
+    <div class="vh">Revised at 21Z · Advisory 47</div>
+    <p class="res"><span class="big">−7.3 nm</span> along</p>
+    <p class="res"><span class="big">+8.3 nm</span> right-of-track</p>
+   </div>
+  </div>
+  <p class="peer">Same forecast. Same valid time. The verifying observation changed with the source vintage.</p>
+  <p class="cap audit">Earlier Millibar 0.0 nm along-track calculation withdrawn after time-base audit.</p>
+ </div></div>
+ <div class="foot"><div>
+  <p><b>Provenance.</b> CPHC/NHC Forecast/Advisories, Public and Intermediate Advisories, ICAO aviation advisories and Wind Speed Probabilities 31–51 (EP122026) · ATCF public aids · Natural Earth 1:10m · TNC 2024 fact sheet, 2025 renewal and 2026 Lowell release · WTW releases 2022 and 2024.</p>
+  <p>Independent research by Alec Messino. Not a weather forecast, loss estimate, claims determination, or insurance advice.</p>
+ </div><div>
+  <p><b>Full evidence record</b>, with the complete 78-product chronology, manifests and hashes:</p>
+  <p>alec.messino@gmail.com</p>
+ </div>
+ <p class="urlrow"><a class="mono url" href="https://alecmessino.github.io/category-alpha/risk/lowell-2026/">https://alecmessino.github.io/category-alpha/risk/lowell-2026/</a></p>
+ </div>
+</div></body></html>

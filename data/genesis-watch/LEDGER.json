@@ -1,0 +1,42 @@
+{
+ "schema": "millibar.pacific-genesis-watch.ledger/1",
+ "note": "Append-only. Every entry is a frozen decision state; a committed record is never edited. Corrections append a supersession record. Enforced by scripts/check-genesis-watch-append-only.mjs and scripts/genesis-watch/tests/.",
+ "entries": [
+  {
+   "record_id": "0001",
+   "kind": "nhc-source-state",
+   "file": "0001.manifest.json",
+   "file_sha256": "d52186c8afbcc675b261bdff9adbaf4c8b9c3a5cbfd2cff6bcb4801a872216f8",
+   "manifest_sha256": "961cdc3e6df6a82b82877da92e3e48cd065bb2a6521d4b5ffed09f925cc72ed7",
+   "committed_at_utc": "2026-09-17T17:15:52Z",
+   "note": "ARCHIVED NHC BASELINE, imported byte-for-byte as received. Its source products were issued 2026-09-17T11:54Z and the manifest was captured 2026-09-17T16:23:22Z, so it is not a contemporaneous NHC + Storm Atlas decision state and does not claim to be: its own atlas_state.status is NOT CAPTURED IN THIS SNAPSHOT. The Atlas state is appended separately as 0001b with its own capture time and is never backfilled into this record."
+  },
+  {
+   "record_id": "0001b",
+   "kind": "atlas-state-append",
+   "file": "0001b.json",
+   "file_sha256": "0925d44d39bd9831d6e8d0e89235db08286037ce1496449bbe4885e9afc2f0ce",
+   "manifest_sha256": "e5b841f82ce5ef024e4481e2c9a7469d7dc9ef6a6bb01d760ca69cf3af690f2b",
+   "committed_at_utc": "2026-09-17T17:17:19Z",
+   "note": "Storm Atlas state for snapshot 0001's three objects, computed later than the NHC source issuance and labelled as such."
+  },
+  {
+   "record_id": "0002",
+   "kind": "nhc-source-and-atlas-state",
+   "file": "0002.json",
+   "file_sha256": "cf088615b1c6c4358ee3ceb176976d2728004f86db73431f1d9a00729c21056c",
+   "manifest_sha256": "a22ecfe3cce2a00cbb6b439bd13fec3582acf6bb159bae1338c373f1c9e00317",
+   "committed_at_utc": "2026-09-17T17:54:30Z",
+   "note": "Prospective capture at outlook issuance 2026-09-17T17:53Z."
+  },
+  {
+   "record_id": "0002c1",
+   "kind": "correction",
+   "file": "0002c1.json",
+   "file_sha256": "2f8cde234c9f5440e5c2f724e6b4d2b383a5df32663d6f0fa67f3535f55b212e",
+   "manifest_sha256": "9bbc71ea4788e246a80eb8ba8f181f14e8057748dd60618d6534d939cec08f82",
+   "committed_at_utc": "2026-09-17T17:56:18Z",
+   "note": "Provenance-only correction to 0002's identity_basis attribution."
+  }
+ ]
+}

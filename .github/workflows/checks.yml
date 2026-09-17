@@ -276,6 +276,28 @@ jobs:
       - name: Test the genesis archive's honesty rules
         run: python3 scripts/genesis/tests/run_tests.py
 
+      # THE PACIFIC GENESIS WATCH'S APPEND-ONLY CONTRACT.
+      #
+      # A "frozen decision state" is worth exactly as much as the guarantee that nobody went
+      # back and adjusted it once the outcome was known. Prose cannot carry that guarantee, so
+      # it is a test: every committed record must still hash to the bytes the ledger recorded,
+      # and a correction must APPEND a supersession record rather than rewrite the original.
+      #
+      # The Node gate needs nothing but the standard library and runs on every pull request;
+      # the Python suite additionally exercises the contract against a temporary ledger, so the
+      # rules are made to FIRE rather than read and pronounced correct.
+      - name: Prove the genesis-watch append-only gate can still fail
+        run: node scripts/check-genesis-watch-append-only.mjs --self-test
+
+      - name: The genesis-watch sequence is append-only and unedited
+        run: node scripts/check-genesis-watch-append-only.mjs
+
+      - name: Install the genesis watch's pinned dependencies
+        run: pip install -r scripts/genesis-watch/requirements.txt
+
+      - name: Test the genesis watch's contract and its refusals
+        run: python3 -m pytest -q scripts/genesis-watch/tests/
+
       # ------------------------------------------------------------------------------------
       # STORM ATLAS. Three gates, and they run HERE rather than with the other Node suites
       # because two of them need the archive's Python: the browser's answers are checked

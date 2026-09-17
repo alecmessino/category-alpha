@@ -1,0 +1,8 @@
+# Pacific Genesis Watch.
+#
+# The append-only contract and the surface build need nothing but the standard library --
+# deliberately, so the guarantee does not depend on a wheel resolving. The Storm Atlas state
+# is computed from the genesis archive, so that pipeline's pins are required for a capture
+# and are listed here rather than duplicated.
+-r ../genesis/requirements.txt
+pytest==9.1.1

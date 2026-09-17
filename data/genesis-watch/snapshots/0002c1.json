@@ -1,0 +1,33 @@
+{
+ "schema": "millibar.pacific-genesis-watch.correction/1",
+ "label": "CORRECTION — APPENDED, ORIGINAL UNCHANGED",
+ "record_id": "0002c1",
+ "supersedes": "0002",
+ "supersedes_scope": "one field per affected object; every other value in 0002 stands",
+ "supersedes_manifest_sha256": "a22ecfe3cce2a00cbb6b439bd13fec3582acf6bb159bae1338c373f1c9e00317",
+ "defect": {
+  "field": "objects[].identity_basis",
+  "what": "Two objects recorded their identity as 'carried forward from ?' instead of naming the record the identifier came from.",
+  "why": "The generator read the source record's identifier from a field inside the record. Snapshot 0001 arrived frozen from an external capture and carries no record_id field of its own -- its identifier is the one the LEDGER attested when it was committed -- so the lookup fell through to a placeholder.",
+  "severity": "Provenance only. No probability, geometry, timestamp, refusal or object identifier is affected: the identifiers carried forward are correct and the stated BASIS for carrying them (identical NHC name string) is correct. What was lost is which record they were carried from.",
+  "affected": [
+   {
+    "millibar_object_id": "PGW-2026-D1",
+    "as_recorded": "carried forward from ?: identical NHC name string",
+    "corrected_to": "carried forward from record 0001: identical NHC name string"
+   },
+   {
+    "millibar_object_id": "PGW-2026-D2",
+    "as_recorded": "carried forward from ?: identical NHC name string",
+    "corrected_to": "carried forward from record 0001: identical NHC name string"
+   }
+  ]
+ },
+ "fix": {
+  "code": "scripts/genesis-watch/capture.py::object_id_for now resolves prior record identifiers through the ledger rather than through a field inside the record.",
+  "applies_from": "the next captured snapshot onward",
+  "original_record": "0002 is NOT edited. Its bytes and its integrity hash are unchanged, and this record does not invalidate it."
+ },
+ "append_rule": "This correction is itself immutable. The contract is append-only in both directions: a frozen state is never rewritten, and neither is its correction.",
+ "manifest_sha256_excluding_this_field": "9bbc71ea4788e246a80eb8ba8f181f14e8057748dd60618d6534d939cec08f82"
+}
