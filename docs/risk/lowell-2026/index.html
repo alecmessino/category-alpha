@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lowell 2026 — Trigger evidence record · Millibar Risk Evidence</title>
+<meta name="description" content="Point-in-time evidence record for the Hawaiʻi reef parametric policy's Lowell payout: what the public record supports, what it cannot reproduce, and what was knowable advisory by advisory.">
+<meta property="og:title" content="Lowell 2026 — Trigger evidence record">
+<meta property="og:description" content="Independent, reproducible evidence for a parametric tropical-cyclone trigger. Official sources only.">
+<meta property="og:type" content="article"><meta property="og:url" content="https://alecmessino.github.io/category-alpha/risk/lowell-2026/">
+<link rel="canonical" href="https://alecmessino.github.io/category-alpha/risk/lowell-2026/">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDF1F0; --paper-2:#E2E9E8; --ink:#10202B; --ink-2:#3B5260; --mute:#6F8590;
+    --chart:#2E6E8E; --chart-soft:#B9D3DF; --rule:#C6D2D4; --signal:#B8571F; --signal-soft:#F3E2D6;
+    --ok:#2F6B4F;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0E181E; --paper-2:#152229; --ink:#E6EDEF; --ink-2:#B8C7CD; --mute:#7F939B;
+      --chart:#6FB1CF; --chart-soft:#24475A; --rule:#2A3C45; --signal:#E28A54; --signal-soft:#3A2416; --ok:#7BC29B;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0E181E; --paper-2:#152229; --ink:#E6EDEF; --ink-2:#B8C7CD; --mute:#7F939B;
+    --chart:#6FB1CF; --chart-soft:#24475A; --rule:#2A3C45; --signal:#E28A54; --signal-soft:#3A2416; --ok:#7BC29B;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.55}
+  a{color:var(--chart)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  .wrap{max-width:1400px;margin:0 auto;padding:0 32px}
+  /* masthead */
+  .mast{border-bottom:1px solid var(--rule);padding:22px 0 18px;display:flex;justify-content:space-between;align-items:baseline;gap:24px;flex-wrap:wrap}
+  .mast .brand{font-weight:600;font-size:15px;letter-spacing:.01em}
+  .mast .brand span{color:var(--mute);font-weight:400}
+  .mast .note{color:var(--mute);font-size:14px}
+  /* header */
+  header.title{padding:56px 0 34px;display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:end}
+  h1{font-size:clamp(36px,5vw,58px);line-height:1.02;font-weight:500;margin:0 0 16px;letter-spacing:-.02em;text-wrap:balance}
+  .lede{font-size:19px;line-height:1.5;color:var(--ink-2);max-width:62ch;margin:0}
+  .facts{border-top:1px solid var(--ink);padding-top:14px;font-size:15px}
+  .facts div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:6px 0;border-bottom:1px solid var(--rule)}
+  .facts div span:first-child{color:var(--mute)}
+  /* finding band */
+  .finding{background:var(--ink);color:var(--paper);padding:34px 0;margin:8px 0 0}
+  :root[data-theme="dark"] .finding,body .finding{ }
+  .finding .wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+  .finding h2{font-size:clamp(22px,2.6vw,30px);line-height:1.25;font-weight:500;margin:0;letter-spacing:-.01em;text-wrap:balance}
+  .finding p{margin:0;font-size:16px;line-height:1.55;opacity:.9;max-width:56ch}
+  .finding em{font-style:normal;border-bottom:2px solid var(--signal);padding-bottom:1px}
+  /* sections */
+  section{padding:52px 0 8px}
+  .sec-head{display:grid;grid-template-columns:220px 1fr;gap:32px;border-top:2px solid var(--ink);padding-top:18px;margin-bottom:28px}
+  .sec-head .plate{font-weight:600;font-size:15px}
+  .sec-head .plate small{display:block;color:var(--mute);font-weight:400;margin-top:4px;font-size:14px}
+  .sec-head h2{font-size:clamp(24px,3vw,34px);font-weight:500;line-height:1.15;margin:0 0 10px;letter-spacing:-.015em;text-wrap:balance}
+  .sec-head p{margin:0;color:var(--ink-2);max-width:72ch}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:36px}
+  .grid-chart{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:44px;align-items:start}
+  h3{font-size:17px;font-weight:600;margin:0 0 12px}
+  p{margin:0 0 12px}
+  .small{font-size:14px;color:var(--mute)}
+  /* tables */
+  table{border-collapse:collapse;width:100%;font-size:15.5px}
+  th,td{text-align:left;padding:9px 10px 9px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:500;color:var(--mute);font-size:13.5px}
+  td.num,th.num{text-align:right;padding-right:0;font-variant-numeric:tabular-nums}
+  .ladder{font-size:17px}.ladder td.num,.ladder th.num{padding:11px 8px;text-align:right;font-variant-numeric:tabular-nums}
+  .ladder th.z{text-align:right;padding:8px 6px}
+  .ladder td:first-child,.ladder th:first-child{padding-left:0}
+  .ladder tbody tr:last-child td{border-bottom:1px solid var(--ink)}
+  .ladder .core{background:var(--chart-soft)}
+  /* status stamps */
+  .status{display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--signal);color:var(--signal);padding:8px 12px;font-weight:600;font-size:14px;letter-spacing:.01em;background:var(--signal-soft)}
+  .status::before{content:"";width:9px;height:9px;background:var(--signal);border-radius:50%}
+  .status.ok{border-color:var(--ok);color:var(--ok);background:transparent}
+  .status.ok::before{background:var(--ok)}
+  .unres{margin-top:22px;border-left:3px solid var(--signal);padding:4px 0 4px 16px}
+  .unres ul{margin:8px 0 0;padding-left:18px}
+  .unres li{margin:4px 0}
+  /* chart */
+  figure{margin:0}
+  .chart-frame{border:1px solid var(--rule);background:var(--paper-2);padding:14px}
+  .chart-frame svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13.5px;color:var(--mute);margin-top:10px;line-height:1.45}
+  .legend{display:flex;flex-wrap:wrap;gap:14px 22px;font-size:13.5px;margin-top:12px;color:var(--ink-2)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:22px;height:0;border-top:2px solid var(--ink)}
+  .sw.dash{border-top-style:dashed;border-color:var(--chart)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--ink)}
+  .dot.fc{background:var(--paper);border:2px solid var(--chart)}
+  .dot.press{background:var(--signal)}
+  /* advisory transcript */
+  .transcript{background:var(--paper-2);border:1px solid var(--rule);padding:16px 18px;font-size:13.5px;line-height:1.5;white-space:pre;overflow-x:auto;margin:10px 0 16px}
+  .transcript b{font-weight:500;color:var(--chart)}
+  .residual{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0 6px}
+  .residual div{border-top:1px solid var(--ink);padding-top:10px}
+  .residual .v{font-size:34px;font-weight:500;letter-spacing:-.02em;line-height:1.05}
+  .residual .l{color:var(--mute);font-size:13.5px;margin-top:4px}
+  .prob{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;align-items:center;font-size:15px;padding-right:44px}
+  .bar{height:13px;background:var(--chart-soft);position:relative}
+  .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--chart)}
+  .bar b{position:absolute;right:-42px;top:-4px;font-weight:500;font-variant-numeric:tabular-nums;font-size:13.5px}
+  .lineage{border:1px solid var(--rule);background:var(--paper-2);padding:18px 20px;margin:6px 0 14px}
+  .lineage table{font-size:14.5px}
+  .lineage td.mono{white-space:nowrap}
+  /* register */
+  .register table td:first-child{width:36%}
+  .register .cls{color:var(--mute);white-space:nowrap}
+  /* use cases */
+  .uses{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--ink);margin-top:10px}
+  .uses div{padding:20px 22px 22px 0;border-right:1px solid var(--rule)}
+  .uses div:last-child{border-right:0}
+  .uses div+div{padding-left:22px}
+  .uses h3{margin-bottom:8px}
+  .uses p{color:var(--ink-2);font-size:15px}
+  footer{border-top:2px solid var(--ink);margin-top:56px;padding:22px 0 44px;font-size:13.5px;color:var(--mute);display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  footer p{margin:0;max-width:70ch}
+  @media (max-width:900px){
+    header.title,.finding .wrap,.grid2,.grid-chart,.sec-head,.uses{grid-template-columns:1fr}
+    .uses div{border-right:0;border-bottom:1px solid var(--rule);padding-left:0!important}
+    .facts div{grid-template-columns:120px 1fr}
+    .wrap{padding:0 20px}
+    header.title{padding:40px 0 28px}
+    .residual{grid-template-columns:1fr 1fr}
+  }
+  @media print{
+    body{background:#fff;color:#000;font-size:11.5px}
+    .wrap{max-width:none;padding:0}
+    .finding{background:#000;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    section{padding:22px 0 0;break-inside:avoid}
+    .chart-frame{background:#fff}
+    a{color:#000;text-decoration:none}
+    footer{margin-top:24px}
+  }
+
+  .sw.faint{border-top:1px solid var(--chart-soft)}
+  .scroll{overflow-x:auto;border-top:1px solid var(--ink)}
+  table.chrono{font-size:13.5px}
+  table.chrono td{padding:6px 12px 6px 0;white-space:nowrap}
+  table.chrono td:last-child{white-space:normal;min-width:220px}
+  table.ca{font-size:14px}
+  .barcell{width:30%;padding-right:10px}
+  .hb{display:block;height:9px;background:var(--chart)}
+  details summary{cursor:pointer;color:var(--chart);font-size:15px}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  @media (max-width:900px){
+    .register .cls{white-space:normal}
+    .grid2 table,.grid-chart table,.register table{display:block;overflow-x:auto;max-width:100%}
+    .grid-chart>*,.grid2>*{min-width:0}
+    .ladder{font-size:15px}
+  }
+
+  .pl{padding-left:14px}
+  tr.after td{color:var(--mute)}
+  tr.optrack td{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+</style></head><body>
+<div class="wrap">
+ <div class="mast"><div class="brand">Millibar <span>/ Risk Evidence</span></div>
+  <div class="note">Trigger evidence record · Hurricane Lowell (EP12 2026) · Hawaiʻi reef parametric policy · Rev 3, 17 September 2026</div></div>
+ <header class="title"><div>
+  <h1>Lowell paid $300,000. Here is what the record can and cannot show.</h1>
+  <p class="lede">A point-in-time reconstruction of the Hawaiʻi coral-reef parametric policy's second 2026 payout, built from 78 official CPHC/NHC products and the policyholder's published terms. Where the public record stops, this record stops with it.</p>
+ </div><div class="facts">
+  <div><span>Policyholder</span><span>The Nature Conservancy; first US reef policy 2022, redesigned 2024</span></div>
+  <div><span>Broker</span><span>WTW</span></div>
+  <div><span>Insurer</span><span>Munich Re Group company, after a competitive placement</span></div>
+  <div><span>Public trigger</span><span>Officially reported wind of 50 kt or more in the core zone; payout scales with wind and proximity</span></div>
+  <div><span>Published 2024–25 limits</span><span>$200k minimum · $1m per event · $2m annual</span></div>
+  <div><span>2026 terms</span><span>$200k minimum confirmed by the policyholder. Full schedule, limits and geometry not publicly reproduced.</span></div>
+  <div><span>2026 payouts</span><span>Lala $200,000 (21 Aug) · Lowell $300,000 (15 Sep)</span></div>
+ </div></header></div>
+
+<div class="finding"><div class="wrap">
+ <h2>The public 2026 terms are insufficient to independently reconstruct the $300,000 payout cell.</h2>
+ <p>The 2024 fact sheet states that payouts are triggered and calculated from officially reported wind speeds and proximity to the core zone. The 2026 zone geometry, payout schedule, designated observation source and wind definition are not published. <em>Millibar does not infer an undisclosed contract term from an observed payout.</em> Supplied with the schedule, the same evaluator resolves this record deterministically.</p>
+</div></div>
+
+<div class="wrap">
+<section><div class="sec-head"><div class="plate">Plate A<small>Settlement evidence</small></div><div>
+ <h2>What the contract and the official record actually support</h2>
+ <p>Settlement evidence answers one question: which official observation, evaluated against which contract version, produced the payout. Forecasts never appear on this plate unless the contract itself settles on them.</p></div></div>
+ <div class="grid2"><div>
+  <h3>Established from public sources</h3>
+  <table>
+   <tr><td>Trigger variable</td><td>Officially reported wind speed of active and former hurricanes in the insured area (2024 terms)</td></tr>
+   <tr><td>Geometry, 2024 design</td><td>One core zone, three buffer zones; 555,137 sq km covered</td></tr>
+   <tr><td>Threshold</td><td>At least 50 kt in the core zone qualifies; higher wind and closer proximity pay more</td></tr>
+   <tr><td>Lowell outcome</td><td>$300,000, the second payout in three weeks, routed to the Hawaiʻi Emergency Reef Restoration Network</td></tr>
+   <tr><td>Renewal</td><td>Annual. The 2025 renewal was described as unchanged from 2024. No 2026 publication reproducing the schedule has been located.</td></tr>
+  </table>
+  <div class="unres"><strong>Not available in the public record</strong><ul>
+   <li>Georeferenced 2026 zone polygons</li><li>The 2026 wind × zone payout schedule and limits</li>
+   <li>Designated observation source and the wind definition applied</li>
+   <li>Treatment of intermediate advisories, corrections and post-season revisions</li></ul></div>
+  <p style="margin-top:18px"><span class="status">Not reconstructable from public terms</span></p>
+ </div><div>
+  <h3>Historical contract terms, 2024 fact sheet</h3>
+  <p class="small">Context only. Not assumed for 2026. X, Y and Z are buffer zones; I is the core zone.</p>
+  <table class="ladder"><thead><tr><th>Wind threshold</th><th class="num">X</th><th class="num">Y</th><th class="num">Z</th><th class="num core">I</th></tr></thead><tbody><tr><td>50 kt</td><td class="num">—</td><td class="num">—</td><td class="num">—</td><td class="num core">$200k</td></tr>
+<tr><td>64 kt</td><td class="num">—</td><td class="num">—</td><td class="num">$200k</td><td class="num core">$300k</td></tr>
+<tr><td>83 kt</td><td class="num">—</td><td class="num">$200k</td><td class="num">$300k</td><td class="num core">$450k</td></tr>
+<tr><td>96 kt</td><td class="num">$200k</td><td class="num">$300k</td><td class="num">$450k</td><td class="num core">$600k</td></tr>
+<tr><td>113 kt</td><td class="num">$300k</td><td class="num">$450k</td><td class="num">$600k</td><td class="num core">$750k</td></tr>
+<tr><td>137 kt</td><td class="num">$450k</td><td class="num">$600k</td><td class="num">$750k</td><td class="num core">$1.0m</td></tr></tbody></table>
+  <p class="small" style="margin-top:12px">Under the 2024 ladder, $300,000 corresponds to three distinct cells (64 kt in I, 83 kt in Z, 96 kt in Y). The amount alone cannot identify which condition was met, so the 2026 schedule is required rather than inferred.</p>
+ </div></div>
+</section>
+
+<section><div class="sec-head"><div class="plate">Plate B<small>Operational replay</small></div><div>
+ <h2>What a risk desk could have known, advisory by advisory</h2>
+ <p>Operational replay answers a different question: what was knowable at each issuance time, with no later information leaking backward. It is evidence of exposure and decision timing, not of settlement. Every regular, special, intermediate, corrected and aviation product from Advisory 31 (4 Sep, 03Z) to Advisory 51 (8 Sep, 21Z) is ingested.</p></div></div>
+
+ <div class="grid-chart"><figure>
+  <div class="chart-frame"><svg viewBox="0 0 760 820" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, Menlo, monospace" font-size="12" role="img" aria-label="Hurricane Lowell official track and forecast vintages near the main Hawaiian Islands">
+<g stroke="var(--rule,#C6D2D4)" stroke-width="1">
+<line x1="91.2" y1="0" x2="91.2" y2="820"/>
+<line x1="243.2" y1="0" x2="243.2" y2="820"/>
+<line x1="395.2" y1="0" x2="395.2" y2="820"/>
+<line x1="547.2" y1="0" x2="547.2" y2="820"/>
+<line x1="699.2" y1="0" x2="699.2" y2="820"/>
+<line x1="0" y1="744.1" x2="760" y2="744.1"/>
+<line x1="0" y1="592.2" x2="760" y2="592.2"/>
+<line x1="0" y1="440.4" x2="760" y2="440.4"/>
+<line x1="0" y1="288.5" x2="760" y2="288.5"/>
+<line x1="0" y1="136.7" x2="760" y2="136.7"/>
+</g><g fill="var(--mute,#6F8590)">
+<text x="95.2" y="814">164°W</text>
+<text x="247.2" y="814">162°W</text>
+<text x="399.2" y="814">160°W</text>
+<text x="551.2" y="814">158°W</text>
+<text x="703.2" y="814">156°W</text>
+<text x="4" y="740.1">14°N</text>
+<text x="4" y="588.2">16°N</text>
+<text x="4" y="436.4">18°N</text>
+<text x="4" y="284.5">20°N</text>
+<text x="4" y="132.7">22°N</text>
+</g>
+<polygon points="729.1,278.0 730.6,279.2 732.4,278.8 735.1,278.9 737.9,279.9 743.2,281.7 749.9,285.0 758.9,290.4 762.4,292.6 766.4,296.4 768.6,299.1 768.6,302.1 768.5,306.1 768.7,309.2 770.8,309.1 773.8,307.8 776.0,309.3 777.0,310.9 776.7,314.1 777.7,316.1 779.0,318.0 782.8,321.4 786.9,323.1 788.5,324.4 789.3,326.0 789.1,328.0 788.1,329.2 784.7,333.1 781.4,334.3 776.5,338.7 773.3,339.6 773.2,340.4 770.4,341.1 768.1,342.7 763.6,344.0 759.8,345.0 756.6,344.3 754.7,344.2 753.1,344.7 751.3,345.8 748.9,347.4 747.5,349.0 746.0,349.2 744.8,349.7 743.1,350.8 742.0,351.5 738.1,353.6 737.0,354.0 733.7,357.0 733.1,358.2 733.2,361.0 731.8,362.4 729.4,364.6 728.2,367.8 727.1,369.0 725.7,370.1 723.9,371.6 723.3,371.2 723.3,369.5 721.7,368.3 718.6,366.8 715.0,364.7 713.1,363.4 709.9,362.6 708.5,362.2 708.0,360.9 707.5,359.5 706.5,359.2 705.9,357.1 705.3,353.9 706.2,350.1 707.9,339.1 707.8,337.1 706.7,335.4 705.8,333.0 704.6,329.4 704.0,327.9 703.3,327.0 702.5,325.4 702.7,323.7 701.8,322.2 701.4,320.4 700.6,318.3 699.2,316.4 698.1,315.6 696.4,313.7 694.6,308.9 695.4,306.8 696.3,305.0 697.9,303.6 699.4,302.6 700.1,301.9 700.6,300.4 701.6,299.6 704.8,298.5 706.4,296.0 707.1,295.1 708.8,292.2 710.5,290.4 711.7,290.4 712.2,288.0 712.6,287.0 712.0,285.5 710.8,284.4 708.1,280.6 707.0,277.2 706.8,274.5 706.9,272.1 708.3,269.4 709.3,268.5 712.0,268.5 717.0,269.6 719.1,270.0 719.5,270.4 719.8,270.9 719.9,271.7 721.1,273.6 724.0,274.7 725.9,275.8 727.3,277.3 729.1,278.0" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="658.6,248.1 657.8,249.6 655.7,249.6 653.6,249.2 652.2,249.5 650.1,249.9 647.6,250.2 646.0,248.6 646.9,247.5 648.5,246.2 650.6,244.9 652.9,243.6 654.9,243.0 656.5,243.1 658.4,245.2 657.4,247.4 658.6,248.1" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="629.8,232.7 626.1,232.9 624.5,230.9 624.2,229.1 624.1,227.7 624.1,225.9 623.8,224.3 622.5,223.5 619.3,222.4 618.4,220.9 619.0,219.3 620.8,218.5 623.9,218.1 631.4,219.1 634.7,221.9 634.7,221.9 635.9,223.2 637.2,224.6 638.0,225.9 638.1,226.8 637.7,228.1 636.0,230.5 632.6,232.0 629.8,232.7" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="654.4,210.5 655.0,211.2 655.8,211.3 657.0,212.0 658.0,212.3 658.3,213.3 659.2,213.6 659.5,214.6 659.5,215.5 660.5,216.4 661.2,217.3 661.7,218.5 662.6,219.9 663.9,219.8 664.8,218.8 666.2,218.8 667.4,218.7 669.6,218.6 670.4,218.4 672.9,216.7 674.1,216.3 675.2,216.2 676.5,216.2 677.8,216.4 678.8,216.8 679.1,216.8 679.4,216.9 679.6,217.0 679.8,217.3 680.7,217.0 682.0,217.8 682.3,218.6 682.8,219.1 683.5,219.7 684.2,220.6 685.6,221.4 686.6,222.3 686.7,223.0 687.6,223.1 688.0,223.1 688.2,222.7 689.2,223.4 689.6,224.4 690.1,225.0 692.7,225.4 695.3,226.6 699.1,227.7 700.8,231.0 700.4,234.0 699.0,236.4 697.1,236.9 695.5,239.1 693.5,239.1 689.4,241.1 686.6,241.0 685.1,240.9 683.7,241.0 679.9,242.6 677.5,243.8 676.2,244.4 674.4,243.9 673.7,243.9 672.4,243.5 671.4,243.8 668.2,243.9 666.1,242.1 665.9,241.3 664.9,240.3 665.5,239.7 665.6,238.4 665.0,233.4 664.4,232.0 664.4,230.5 663.9,229.2 663.6,228.9 663.1,228.5 662.3,228.0 661.1,228.1 660.0,228.5 659.6,229.6 658.6,229.7 657.5,229.1 656.4,228.4 654.8,228.1 653.1,227.1 652.1,227.2 651.1,226.0 649.3,224.2 647.1,221.6 647.1,219.9 646.3,219.0 646.6,217.4 647.1,215.3 647.8,213.5 648.5,212.3 649.5,212.2 650.1,211.6 650.2,211.0 650.9,210.5 651.6,210.6 652.4,210.7 653.0,210.5 653.3,210.2 653.8,210.1 654.4,210.5" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="604.3,195.8 605.5,196.0 607.3,195.9 608.2,196.1 608.9,197.0 610.0,197.0 617.2,198.0 621.1,198.6 624.0,198.7 624.6,197.9 624.7,197.1 625.1,196.6 625.8,196.4 626.8,197.7 627.2,199.1 628.9,199.6 631.0,200.0 634.9,199.9 636.5,199.7 637.6,199.4 638.4,199.1 639.0,199.2 640.4,199.1 641.5,199.5 642.3,199.6 643.0,199.5 643.5,199.8 643.3,200.1 643.8,200.4 645.0,200.3 645.6,200.7 644.1,203.2 641.8,205.3 638.9,206.8 636.0,208.0 633.1,208.5 630.1,208.3 627.2,207.7 621.3,206.2 617.7,205.0 612.5,205.4 609.0,205.6 606.3,206.0 604.1,205.9 602.4,206.0 601.0,205.4 600.1,204.3 600.1,202.9 600.7,201.7 601.5,200.7 602.9,200.3 604.1,198.9 604.5,197.4 603.5,196.3 603.5,195.7 604.3,195.8" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="555.3,167.2 555.8,168.5 556.6,168.9 556.8,169.4 557.0,170.2 557.6,170.1 558.3,170.4 558.9,171.0 559.6,172.0 559.6,173.2 559.6,173.8 559.0,173.8 558.6,174.2 558.8,175.5 558.9,176.3 559.2,177.6 559.9,177.8 560.8,178.2 561.5,179.0 562.1,180.0 563.3,180.4 563.4,180.9 564.2,181.2 564.7,180.7 565.4,179.7 564.3,179.0 564.4,178.1 565.2,177.8 567.1,178.0 568.0,177.7 568.3,178.3 567.1,179.4 566.9,180.7 567.1,181.8 568.3,182.5 569.3,183.5 569.6,184.1 569.2,185.0 569.5,185.9 570.3,187.1 571.9,188.1 573.5,188.9 574.0,189.3 573.1,190.3 571.2,191.9 570.5,192.6 569.7,192.9 569.4,192.4 569.5,191.7 568.8,191.2 566.8,191.7 565.2,191.9 563.8,192.5 562.8,193.3 561.6,193.3 561.0,193.0 560.7,192.4 560.1,191.5 557.6,190.5 556.3,190.0 555.5,188.8 555.2,188.1 555.2,187.4 554.6,187.7 553.6,188.6 554.4,189.4 551.2,189.6 551.3,189.3 551.7,189.0 551.1,188.5 549.9,188.6 549.9,187.8 549.7,187.2 549.8,186.7 549.6,186.2 550.5,185.8 551.2,185.5 552.0,185.0 552.4,184.4 551.5,183.7 550.7,183.4 550.2,183.1 549.8,183.4 549.5,184.3 548.9,184.0 548.3,183.4 547.9,182.9 547.9,183.9 548.4,185.1 548.0,185.4 546.3,184.0 545.7,183.5 546.2,184.7 547.4,186.0 548.4,186.7 549.1,187.2 548.7,188.4 547.3,189.0 545.5,189.2 542.7,189.8 541.3,190.0 540.0,190.3 539.7,190.2 539.3,189.9 538.4,189.4 537.8,186.9 537.0,184.8 535.9,183.6 535.2,182.6 533.8,182.0 533.5,179.9 533.0,178.8 531.6,177.8 530.8,177.2 529.9,175.9 529.9,174.3 529.8,172.2 529.3,171.5 526.0,168.9 526.5,168.7 529.2,168.2 532.5,168.0 534.6,168.1 535.9,168.1 536.8,167.8 538.0,168.1 538.3,167.2 538.6,166.7 540.0,166.0 541.6,164.8 542.2,164.3 542.1,163.9 542.6,163.1 543.4,161.6 544.5,160.7 546.1,159.3 548.5,158.7 549.5,158.8 550.1,159.1 550.5,159.5 551.0,160.2 552.2,161.1 552.3,161.9 552.9,162.2 553.0,162.9 553.6,163.6 553.3,164.9 554.2,166.2 555.3,167.2" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="380.1,153.1 379.1,153.4 378.1,152.7 377.3,152.4 376.4,149.7 376.5,148.0 377.4,146.2 380.3,143.3 382.7,141.6 385.8,140.0 386.3,139.0 386.6,138.1 386.6,136.7 386.6,136.6 387.9,136.1 389.2,136.1 390.6,136.6 391.3,137.9 390.6,138.6 389.7,139.7 389.2,141.4 389.7,143.4 388.7,144.8 387.4,145.3 386.3,145.9 384.8,146.3 383.1,147.3 382.2,148.2 381.6,149.3 380.7,151.5 380.1,153.1" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="441.7,119.3 442.8,119.8 444.0,119.8 445.5,120.5 446.0,121.6 447.0,122.6 447.5,122.7 447.8,123.7 448.0,124.4 448.3,125.2 448.3,125.2 448.9,125.6 449.0,126.4 448.8,128.5 448.1,129.4 447.0,132.3 445.9,132.9 445.8,135.0 446.0,136.4 446.1,137.8 446.0,139.2 445.8,139.8 444.8,139.8 443.9,140.2 444.5,140.8 444.8,141.5 444.3,142.0 443.4,141.9 442.1,142.9 441.6,143.8 440.9,144.4 439.7,145.2 439.6,145.7 438.7,145.8 438.2,146.2 438.0,146.6 434.6,145.5 432.5,145.3 431.0,145.3 428.1,144.8 427.0,144.7 426.3,144.1 426.0,144.2 425.9,144.7 425.2,144.9 424.8,144.3 423.9,143.9 423.0,143.2 422.4,142.5 422.1,141.8 421.8,141.2 420.9,141.0 420.6,140.4 419.8,140.1 418.3,139.8 417.1,139.4 416.2,139.0 414.7,138.7 413.5,138.3 412.8,137.0 412.6,136.3 411.9,136.0 411.4,135.2 411.4,134.1 411.5,133.3 411.5,132.3 411.4,131.7 412.2,131.4 414.2,129.2 415.3,127.9 415.4,127.2 415.4,126.5 415.5,126.0 416.0,125.8 416.2,125.5 416.7,124.7 418.4,124.3 420.4,123.8 422.6,122.6 424.0,121.5 425.7,120.7 426.4,119.9 427.4,119.5 428.2,119.5 428.8,119.0 429.5,119.1 430.1,119.6 430.3,120.1 430.9,120.1 431.9,120.4 432.6,120.9 433.2,120.8 433.0,120.3 433.2,119.7 434.6,119.2 436.0,119.4 437.7,119.4 438.6,119.9 439.3,119.8 440.2,119.3 440.8,118.8 441.7,119.3" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="247.4,57.7 247.2,57.9 247.3,57.6 247.3,57.4 247.4,57.2 247.7,57.3 247.7,57.6 247.6,57.7 247.4,57.7" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="37.7,16.8 38.1,17.4 37.4,17.3 37.4,17.1 37.5,17.0 37.7,16.8" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="-212.5,-91.4 -212.6,-91.2 -213.0,-92.2 -212.8,-92.4 -212.5,-92.0 -212.4,-91.7 -212.5,-91.4" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="-495.7,-149.8 -496.2,-148.2 -497.0,-148.5 -497.1,-149.5 -495.7,-149.8" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="-665.7,-171.6 -665.8,-171.2 -666.2,-171.5 -666.2,-171.7 -666.2,-172.1 -666.1,-172.5 -666.0,-172.1 -665.8,-171.8 -665.7,-171.6" fill="var(--ink,#10202B)" opacity=".82"/>
+<polygon points="-995.5,-348.3 -995.8,-348.2 -995.9,-348.3 -995.4,-348.6 -995.2,-348.9 -995.0,-349.1 -994.9,-349.4 -994.7,-348.7 -995.0,-348.5 -995.5,-348.3" fill="var(--ink,#10202B)" opacity=".82"/>
+<text x="277.4" y="186.0" fill="var(--ink-2,#3B5260)">Niʻihau</text>
+<text x="410.4" y="110.1" fill="var(--ink-2,#3B5260)">Kauaʻi</text>
+<text x="524.4" y="148.1" fill="var(--ink-2,#3B5260)">Oʻahu</text>
+<text x="653.6" y="197.4" fill="var(--ink-2,#3B5260)">Maui</text>
+<path d="M197.6,288.5 L208.0,288.8 L218.4,289.6 L228.8,290.9 L239.0,292.7 L249.2,295.0 L259.2,297.8 L269.0,301.1 L278.6,304.9 L288.0,309.2 L297.2,313.9 L306.1,319.1 L314.7,324.8 L323.0,330.8 L330.9,337.3 L338.5,344.1 L345.6,351.3 L352.4,358.9 L358.8,366.8 L364.7,375.0 L370.1,383.4 L375.1,392.2 L379.6,401.1 L383.6,410.3 L387.1,419.7 L390.0,429.2 L392.5,438.9 L394.4,448.6 L395.7,458.5 L396.5,468.4 L396.8,478.3 L383.5,478.3 L383.3,487.6 L382.5,496.9 L381.2,506.0 L379.5,515.2 L377.2,524.2 L374.4,533.1 L371.2,541.8 L367.5,550.4 L363.3,558.8 L358.6,566.9 L353.5,574.8 L348.0,582.5 L342.1,589.8 L335.8,596.9 L329.1,603.6 L322.0,610.0 L314.6,616.0 L306.9,621.7 L298.9,626.9 L290.6,631.8 L282.0,636.2 L273.2,640.2 L264.2,643.7 L255.1,646.8 L245.7,649.5 L236.3,651.6 L226.7,653.3 L217.0,654.5 L207.3,655.3 L197.6,655.5 L197.6,604.9 L190.6,604.7 L183.7,604.2 L176.8,603.3 L170.0,602.1 L163.2,600.6 L156.6,598.7 L150.0,596.5 L143.6,593.9 L137.3,591.1 L131.2,587.9 L125.3,584.5 L119.5,580.7 L114.0,576.7 L108.7,572.4 L103.7,567.8 L98.9,563.0 L94.4,558.0 L90.2,552.7 L86.2,547.3 L82.6,541.6 L79.3,535.8 L76.3,529.8 L73.6,523.7 L71.3,517.4 L69.3,511.1 L67.7,504.6 L66.4,498.1 L65.5,491.6 L65.0,485.0 L64.8,478.3 L11.7,478.3 L11.9,469.1 L12.7,459.8 L14.0,450.6 L15.7,441.5 L18.0,432.5 L20.8,423.6 L24.0,414.8 L27.7,406.3 L31.9,397.9 L36.6,389.8 L41.7,381.8 L47.2,374.2 L53.1,366.8 L59.4,359.8 L66.1,353.1 L73.2,346.7 L80.6,340.7 L88.3,335.0 L96.3,329.8 L104.6,324.9 L113.2,320.5 L122.0,316.5 L131.0,312.9 L140.1,309.8 L149.5,307.2 L158.9,305.0 L168.5,303.4 L178.2,302.1 L187.9,301.4 L197.6,301.2 Z" fill="none" stroke="var(--chart,#2E6E8E)" stroke-width="1.1" stroke-dasharray="2 4"/>
+<text x="344.0" y="341.7" fill="var(--chart,#2E6E8E)">34 kt</text>
+<path d="M197.6,364.4 L203.9,364.6 L210.1,365.1 L216.3,365.8 L222.5,366.9 L228.5,368.3 L234.5,370.0 L240.4,372.0 L246.2,374.3 L251.9,376.9 L257.4,379.7 L262.7,382.8 L267.9,386.2 L272.8,389.8 L277.6,393.7 L282.1,397.8 L286.4,402.1 L290.5,406.7 L294.3,411.4 L297.8,416.3 L301.1,421.4 L304.1,426.6 L306.8,432.0 L309.2,437.5 L311.3,443.1 L313.1,448.9 L314.5,454.7 L315.7,460.5 L316.5,466.4 L317.0,472.4 L317.1,478.3 L303.9,478.3 L303.7,483.6 L303.3,488.9 L302.5,494.2 L301.5,499.4 L300.2,504.5 L298.7,509.6 L296.8,514.6 L294.7,519.5 L292.3,524.3 L289.6,529.0 L286.7,533.5 L283.6,537.8 L280.2,542.0 L276.6,546.1 L272.7,549.9 L268.7,553.6 L264.5,557.0 L260.1,560.2 L255.5,563.2 L250.7,566.0 L245.8,568.5 L240.8,570.8 L235.7,572.8 L230.4,574.6 L225.1,576.1 L219.7,577.4 L214.2,578.3 L208.7,579.0 L203.2,579.4 L197.6,579.6 L197.6,554.3 L193.4,554.2 L189.3,553.8 L185.1,553.3 L181.0,552.6 L177.0,551.7 L173.0,550.5 L169.0,549.2 L165.2,547.7 L161.4,546.0 L157.8,544.1 L154.2,542.0 L150.8,539.8 L147.5,537.3 L144.3,534.8 L141.3,532.0 L138.4,529.1 L135.7,526.1 L133.1,523.0 L130.8,519.7 L128.6,516.3 L126.6,512.8 L124.8,509.2 L123.2,505.5 L121.8,501.8 L120.6,498.0 L119.7,494.1 L118.9,490.2 L118.3,486.3 L118.0,482.3 L117.9,478.3 L104.6,478.3 L104.8,473.7 L105.1,469.1 L105.8,464.5 L106.7,459.9 L107.8,455.4 L109.2,451.0 L110.8,446.6 L112.7,442.3 L114.8,438.1 L117.1,434.0 L119.6,430.1 L122.4,426.3 L125.3,422.6 L128.5,419.1 L131.9,415.7 L135.4,412.5 L139.1,409.5 L143.0,406.7 L147.0,404.0 L151.1,401.6 L155.4,399.4 L159.8,397.4 L164.3,395.6 L168.9,394.1 L173.5,392.8 L178.3,391.7 L183.1,390.8 L187.9,390.2 L192.7,389.9 L197.6,389.8 Z" fill="none" stroke="var(--chart,#2E6E8E)" stroke-width="1.1" stroke-dasharray="4 3"/>
+<text x="286.7" y="396.3" fill="var(--chart,#2E6E8E)">50 kt</text>
+<path d="M197.6,415.1 L201.1,415.1 L204.5,415.4 L208.0,415.8 L211.4,416.4 L214.8,417.2 L218.1,418.2 L221.4,419.3 L224.6,420.5 L227.7,422.0 L230.8,423.5 L233.8,425.3 L236.6,427.1 L239.4,429.2 L242.0,431.3 L244.6,433.6 L246.9,436.0 L249.2,438.5 L251.3,441.1 L253.3,443.9 L255.1,446.7 L256.8,449.6 L258.3,452.6 L259.6,455.7 L260.8,458.8 L261.7,462.0 L262.6,465.2 L263.2,468.4 L263.6,471.7 L263.9,475.0 L264.0,478.3 L264.0,478.3 L263.9,481.6 L263.6,484.9 L263.2,488.2 L262.6,491.5 L261.7,494.7 L260.8,497.9 L259.6,501.0 L258.3,504.1 L256.8,507.1 L255.1,510.0 L253.3,512.8 L251.3,515.5 L249.2,518.2 L246.9,520.7 L244.6,523.1 L242.0,525.4 L239.4,527.5 L236.6,529.5 L233.8,531.4 L230.8,533.1 L227.7,534.7 L224.6,536.1 L221.4,537.4 L218.1,538.5 L214.8,539.4 L211.4,540.2 L208.0,540.8 L204.5,541.3 L201.1,541.5 L197.6,541.6 L197.6,529.0 L194.8,528.9 L192.0,528.7 L189.3,528.3 L186.6,527.8 L183.9,527.2 L181.2,526.5 L178.6,525.6 L176.0,524.6 L173.5,523.4 L171.0,522.2 L168.7,520.8 L166.4,519.3 L164.2,517.7 L162.1,515.9 L160.0,514.1 L158.1,512.2 L156.3,510.2 L154.6,508.1 L153.0,505.9 L151.6,503.6 L150.3,501.3 L149.1,498.9 L148.0,496.5 L147.1,494.0 L146.3,491.4 L145.6,488.9 L145.1,486.3 L144.8,483.6 L144.5,481.0 L144.5,478.3 L137.8,478.3 L137.9,475.4 L138.2,472.4 L138.6,469.4 L139.1,466.5 L139.9,463.6 L140.8,460.7 L141.8,457.9 L143.0,455.2 L144.3,452.5 L145.8,449.9 L147.5,447.3 L149.2,444.9 L151.2,442.5 L153.2,440.2 L155.3,438.1 L157.6,436.0 L160.0,434.1 L162.5,432.3 L165.0,430.6 L167.7,429.0 L170.5,427.6 L173.3,426.3 L176.2,425.2 L179.1,424.2 L182.1,423.3 L185.2,422.6 L188.3,422.1 L191.4,421.7 L194.5,421.5 L197.6,421.4 Z" fill="none" stroke="var(--chart,#2E6E8E)" stroke-width="1.1" stroke-dasharray=""/>
+<text x="248.4" y="432.8" fill="var(--chart,#2E6E8E)">64 kt</text>
+<polyline points="288.8,797.2 220.4,782.0 152.0,759.3 98.8,698.5 83.6,622.6 106.4,493.5 159.6,303.7 190.0,-45.6 53.2,-280.9" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="250.8,797.2 190.0,774.4 121.6,728.9 83.6,660.6 91.2,554.3 121.6,402.4 174.8,205.0 167.2,-129.1 -30.4,-326.5" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="159.6,782.0 114.0,751.7 76.0,675.7 83.6,577.0 136.8,425.2 190.0,205.0 212.8,-7.6 98.8,-235.4 -174.8,-288.5" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="136.8,766.9 106.4,713.7 91.2,630.2 121.6,501.1 174.8,311.3 220.4,83.5 190.0,-91.1 22.8,-227.8 -258.4,-265.7" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="129.2,736.5 106.4,683.3 106.4,569.4 159.6,402.4 212.8,182.2 228.0,-22.8 174.8,-144.3 -30.4,-258.1 -364.8,-280.9" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="114.0,653.0 136.8,569.4 190.0,402.4 250.8,182.2 273.6,-30.4 243.2,-197.4 144.4,-288.5 -152.0,-318.9 -387.6,-311.3" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="129.2,599.8 167.2,501.1 235.6,311.3 281.2,91.1 281.2,-113.9 243.2,-243.0 91.2,-303.7 -243.2,-303.7 -433.2,-318.9" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="152.0,554.3 212.8,417.6 273.6,212.6 296.4,0.0 281.2,-167.0 174.8,-265.7 15.2,-296.1 -319.2,-273.3 -486.4,-296.1" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="258.4,387.2 311.6,220.2 334.4,0.0 311.6,-159.4 212.8,-280.9 30.4,-311.3 -167.2,-288.5 -440.8,-288.5 -516.8,-470.7" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="296.4,265.7 342.0,83.5 349.6,-113.9 281.2,-258.1 129.2,-334.1 -60.8,-334.1 -250.8,-311.3 -440.8,-318.9 -478.8,-508.7" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="342.0,7.6 342.0,-151.9 258.4,-296.1 91.2,-364.4 -114.0,-364.4 -288.8,-318.9 -395.2,-318.9 -478.8,-417.6 -706.8,-660.6" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="334.4,-98.7 304.0,-227.8 182.4,-349.3 -15.2,-387.2 -212.8,-364.4 -380.0,-341.7 -486.4,-364.4 -554.8,-546.7 -706.8,-660.6" fill="none" stroke="var(--chart-soft,#B9D3DF)" stroke-width="1"/>
+<polyline points="197.6,789.6 136.8,759.3 83.6,698.5 76.0,615.0 106.4,493.5 159.6,311.3 205.2,98.7 167.2,-220.2 -83.6,-341.7" fill="none" stroke="var(--chart,#2E6E8E)" stroke-opacity="0.35" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="153.6" y="315.3" text-anchor="end" fill="var(--chart,#2E6E8E)" fill-opacity="0.60">Adv 38</text>
+<polyline points="106.4,690.9 98.8,622.6 144.4,478.3 205.2,288.5 250.8,60.7 243.2,-121.5 182.4,-235.4 -106.4,-311.3 -410.4,-296.1" fill="none" stroke="var(--chart,#2E6E8E)" stroke-opacity="0.57" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="199.2" y="292.5" text-anchor="end" fill="var(--chart,#2E6E8E)" fill-opacity="0.60">Adv 42</text>
+<polyline points="197.6,478.3 266.0,326.5 326.8,106.3 334.4,-98.7 281.2,-243.0 129.2,-303.7 -60.8,-303.7 -364.8,-280.9 -516.8,-394.8" fill="none" stroke="var(--chart,#2E6E8E)" stroke-opacity="0.78" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="260.0" y="330.5" text-anchor="end" fill="var(--chart,#2E6E8E)" fill-opacity="0.78">Adv 46</text>
+<polyline points="334.4,144.3 357.2,-22.8 326.8,-189.8 205.2,-296.1 30.4,-334.1 -167.2,-318.9 -326.8,-311.3 -494.0,-394.8 -592.8,-508.7" fill="none" stroke="var(--chart,#2E6E8E)" stroke-opacity="1.00" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="328.4" y="148.3" text-anchor="end" fill="var(--chart,#2E6E8E)" fill-opacity="1.00">Adv 49</text>
+<polyline points="516.8,782.0 456.0,782.0 410.4,797.2 364.8,804.8 311.6,804.8 266.0,797.2 212.8,789.6 174.8,789.6 152.0,774.4 136.8,751.7 106.4,713.7 106.4,683.3 114.0,637.8 136.8,584.6 174.8,516.3 228.0,440.4 281.2,326.5 319.2,205.0 342.0,60.7" fill="none" stroke="var(--ink,#10202B)" stroke-width="2.2"/>
+<circle cx="516.8" cy="782.0" r="2.6" fill="var(--ink,#10202B)"/>
+<text x="522.8" y="786.0" fill="var(--ink,#10202B)">04/00Z 115 kt</text>
+<circle cx="456.0" cy="782.0" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="410.4" cy="797.2" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="364.8" cy="804.8" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="311.6" cy="804.8" r="2.6" fill="var(--ink,#10202B)"/>
+<text x="317.6" y="808.8" fill="var(--ink,#10202B)">05/00Z 130 kt</text>
+<circle cx="266.0" cy="797.2" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="212.8" cy="789.6" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="174.8" cy="789.6" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="152.0" cy="774.4" r="2.6" fill="var(--ink,#10202B)"/>
+<text x="158.0" y="778.4" fill="var(--ink,#10202B)">06/00Z 115 kt</text>
+<circle cx="136.8" cy="751.7" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="106.4" cy="713.7" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="106.4" cy="683.3" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="114.0" cy="637.8" r="2.6" fill="var(--ink,#10202B)"/>
+<text x="120.0" y="641.8" fill="var(--ink,#10202B)">07/00Z 105 kt</text>
+<circle cx="136.8" cy="584.6" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="174.8" cy="516.3" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="228.0" cy="440.4" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="281.2" cy="326.5" r="2.6" fill="var(--ink,#10202B)"/>
+<text x="287.2" y="330.5" fill="var(--ink,#10202B)">08/00Z 95 kt</text>
+<circle cx="319.2" cy="205.0" r="2.6" fill="var(--ink,#10202B)"/>
+<circle cx="342.0" cy="60.7" r="2.6" fill="var(--ink,#10202B)"/>
+</svg></div>
+  <div class="legend"><span><i class="sw"></i>Operational track, ATCF working best track (6-hourly)</span>
+   <span><i class="sw dash"></i>Forecast tracks, Advisories 38, 42, 46, 49 (darker is later)</span>
+   <span><i class="sw faint"></i>Other advisory forecasts, 36–50</span></div>
+  <figcaption>Plotted to scale on an equirectangular projection. Coastlines: Natural Earth 1:10m land, generalized, not contract geometry. Wind radii are the official quadrant radii (NE/SE/SW/NW, nautical miles) from Forecast/Advisory 46 at 07/1500Z.</figcaption>
+ </figure>
+ <div>
+  <h3>Forecast track distance to the Niʻihau coastline</h3>
+  <p class="small">Closest point of each advisory's forecast track to the Natural Earth Niʻihau coastline, with Kauaʻi for comparison. Derived by Millibar: linear interpolation between official forecast points at 15-minute steps. Not an official product.</p>
+  <table class="ca"><thead><tr><th>Adv</th><th>Cycle</th><th>Issued</th><th></th><th class="num">Niʻihau</th><th class="num">At</th><th class="num">Wind</th><th class="num">Kauaʻi</th></tr></thead>
+  <tbody><tr><td>Adv 31</td><td>04/00Z</td><td>04/0300Z</td><td class="barcell"><span class="hb" style="width:61%"></span></td><td class="num">116 nm</td><td class="num">08/0615Z</td><td class="num">100 kt</td><td class="num">141 nm</td></tr>
+<tr><td>Adv 32</td><td>04/06Z</td><td>04/0900Z</td><td class="barcell"><span class="hb" style="width:72%"></span></td><td class="num">137 nm</td><td class="num">08/0900Z</td><td class="num">100 kt</td><td class="num">162 nm</td></tr>
+<tr><td>Adv 33</td><td>04/12Z</td><td>04/1500Z</td><td class="barcell"><span class="hb" style="width:70%"></span></td><td class="num">133 nm</td><td class="num">08/1200Z</td><td class="num">95 kt</td><td class="num">157 nm</td></tr>
+<tr><td>Adv 35</td><td>04/18Z</td><td>04/2100Z</td><td class="barcell"><span class="hb" style="width:73%"></span></td><td class="num">139 nm</td><td class="num">08/1130Z</td><td class="num">100 kt</td><td class="num">162 nm</td></tr>
+<tr><td>Adv 36</td><td>05/00Z</td><td>05/0300Z</td><td class="barcell"><span class="hb" style="width:78%"></span></td><td class="num">148 nm</td><td class="num">08/1145Z</td><td class="num">105 kt</td><td class="num">173 nm</td></tr>
+<tr><td>Adv 37</td><td>05/06Z</td><td>05/0900Z</td><td class="barcell"><span class="hb" style="width:78%"></span></td><td class="num">149 nm</td><td class="num">08/0945Z</td><td class="num">110 kt</td><td class="num">174 nm</td></tr>
+<tr><td>Adv 38</td><td>05/12Z</td><td>05/1500Z</td><td class="barcell"><span class="hb" style="width:69%"></span></td><td class="num">131 nm</td><td class="num">08/1100Z</td><td class="num">100 kt</td><td class="num">153 nm</td></tr>
+<tr><td>Adv 39</td><td>05/18Z</td><td>05/2100Z</td><td class="barcell"><span class="hb" style="width:69%"></span></td><td class="num">131 nm</td><td class="num">08/1015Z</td><td class="num">100 kt</td><td class="num">155 nm</td></tr>
+<tr><td>Adv 40</td><td>06/00Z</td><td>06/0300Z</td><td class="barcell"><span class="hb" style="width:64%"></span></td><td class="num">122 nm</td><td class="num">08/1015Z</td><td class="num">95 kt</td><td class="num">144 nm</td></tr>
+<tr><td>Adv 41</td><td>06/06Z</td><td>06/0900Z</td><td class="barcell"><span class="hb" style="width:62%"></span></td><td class="num">118 nm</td><td class="num">08/0830Z</td><td class="num">95 kt</td><td class="num">142 nm</td></tr>
+<tr><td>Adv 42</td><td>06/12Z</td><td>06/1500Z</td><td class="barcell"><span class="hb" style="width:54%"></span></td><td class="num">103 nm</td><td class="num">08/0845Z</td><td class="num">95 kt</td><td class="num">126 nm</td></tr>
+<tr><td>Adv 43</td><td>06/18Z</td><td>06/2100Z</td><td class="barcell"><span class="hb" style="width:47%"></span></td><td class="num">89 nm</td><td class="num">08/0830Z</td><td class="num">90 kt</td><td class="num">113 nm</td></tr>
+<tr><td>Adv 44</td><td>07/00Z</td><td>07/0300Z</td><td class="barcell"><span class="hb" style="width:41%"></span></td><td class="num">77 nm</td><td class="num">08/1000Z</td><td class="num">80 kt</td><td class="num">100 nm</td></tr>
+<tr><td>Adv 45</td><td>07/06Z</td><td>07/0900Z</td><td class="barcell"><span class="hb" style="width:37%"></span></td><td class="num">70 nm</td><td class="num">08/1015Z</td><td class="num">85 kt</td><td class="num">94 nm</td></tr>
+<tr><td>Adv 46</td><td>07/12Z</td><td>07/1500Z</td><td class="barcell"><span class="hb" style="width:23%"></span></td><td class="num">43 nm</td><td class="num">08/1030Z</td><td class="num">85 kt</td><td class="num">65 nm</td></tr>
+<tr><td>Adv 47</td><td>07/18Z</td><td>07/2100Z</td><td class="barcell"><span class="hb" style="width:22%"></span></td><td class="num">42 nm</td><td class="num">08/1015Z</td><td class="num">80 kt</td><td class="num">66 nm</td></tr>
+<tr><td>Adv 48</td><td>08/00Z</td><td>08/0300Z</td><td class="barcell"><span class="hb" style="width:19%"></span></td><td class="num">36 nm</td><td class="num">08/0915Z</td><td class="num">90 kt</td><td class="num">58 nm</td></tr>
+<tr class="after"><td>Adv 49</td><td>08/06Z</td><td>08/0900Z</td><td colspan="5" class="small">Issued after the operational closest approach; storm already past</td></tr>
+<tr class="after"><td>Adv 50</td><td>08/12Z</td><td>08/1500Z</td><td colspan="5" class="small">Issued after the operational closest approach; storm already past</td></tr>
+<tr class="after"><td>Adv 51</td><td>08/18Z</td><td>08/2100Z</td><td colspan="5" class="small">Issued after the operational closest approach; storm already past</td></tr>
+<tr class="optrack"><td colspan="3"><b>Operational track</b> (ATCF, interpolated)</td><td></td><td class="num"><b>35 nm</b></td><td class="num">08/0845Z</td><td class="num">90 kt</td><td class="num">60 nm</td></tr></tbody></table>
+ </div></div>
+
+ <div class="grid2" style="margin-top:40px"><div>
+  <h3>Three-hour residual, Advisory 46 at 18Z</h3>
+  <p style="margin-bottom:12px"><span class="status ok">Published: authoritative 18Z forecast sourced</span></p>
+  <p>The aviation advisory issued with Advisory 46 (TCAPA4, 07/1500Z) carries an official 18Z position interpolated by NHC from its forecast: <span class="mono">N1810 W16217</span>, degrees and minutes, or 18.167N 162.283W. Its nominal cycle is 12Z, so its lead is 6 hours even though the product labels it "+3 HR" from issuance.</p>
+  <div class="residual">
+   <div><div class="v">−7.3 nm</div><div class="l">Along-track. The storm ran behind the forecast.</div></div>
+   <div><div class="v">+8.3 nm</div><div class="l">Cross-track, positive to the right of the forecast track.</div></div>
+  </div>
+  <p class="small">Against the 18Z fix as revised in Advisory 47 and matched by the ATCF working best track (18.0N 162.2W). Reporting precision of ±0.05° spans −11.2 to −3.4 nm along and +4.5 to +12.1 nm across. Against the first-reported 46A fix (18.0N 162.1W) the same forecast gives −5.0 nm along and +13.6 nm across. Track direction 23.3°: bearing from TCA 46 observed position (07/1500Z) to its +6 h position (07/2100Z), centred on 18Z. Post-season best track not yet published; these values may change when it is.</p>
+  <div class="unres"><strong>Retired</strong><ul>
+   <li><b>Withdrawn after a time-base audit:</b> an earlier Millibar figure of 0.0 nm along-track and +13.6 nm cross-track. It treated the 15Z release as forecast hour zero and used a position not traceable to an official product. Its "timing verified" reading does not survive: the storm was behind the forecast track. The forecast lead is measured from the nominal cycle, and the archived discussion's own lead labels are the proof.</li>
+   <li>Revision 2 wind-probability figures (70% and 26%), which were 24-hour cumulative values presented as totals.</li>
+   <li>The Revision 1–2 chart, whose plotted positions were not to scale.</li></ul></div>
+ </div><div>
+  <h3>Every official forecast valid at 07/1800Z</h3>
+  <p class="small">Same verifying fix and track direction throughout. Positive cross-track means the storm ended up to the right of the forecast track. No cardinal-direction claim is made: right-of-track is defined by the track direction printed beside it, and a separate cardinal decomposition is not computed here.</p>
+  <table><thead><tr><th>Product</th><th>Issued</th><th class="num">Lead</th><th class="pl">Position</th><th class="num">Along</th><th class="num">Cross</th><th class="num">Total</th></tr></thead>
+  <tbody><tr><td>TCM 35</td><td>04/2100Z</td><td class="num">72 h</td><td class="mono pl">18.4N 163.3W</td><td class="num">+2.8</td><td class="num">+67.1</td><td class="num">67.1</td></tr>
+<tr><td>TCM 37</td><td>05/0900Z</td><td class="num">60 h</td><td class="mono pl">18.5N 163.6W</td><td class="num">+4.0</td><td class="num">+85.1</td><td class="num">85.2</td></tr>
+<tr><td>TCM 39</td><td>05/2100Z</td><td class="num">48 h</td><td class="mono pl">18.2N 163.4W</td><td class="num">+16.1</td><td class="num">+67.6</td><td class="num">69.5</td></tr>
+<tr><td>TCM 41</td><td>06/0900Z</td><td class="num">36 h</td><td class="mono pl">18.5N 163.1W</td><td class="num">−7.2</td><td class="num">+59.0</td><td class="num">59.4</td></tr>
+<tr><td>TCA 42</td><td>06/1500Z</td><td class="num">30 h</td><td class="mono pl">N1845 W16254</td><td class="num">−25.5</td><td class="num">+54.4</td><td class="num">60.1</td></tr>
+<tr><td>TCA 43</td><td>06/2100Z</td><td class="num">24 h</td><td class="mono pl">N1830 W16242</td><td class="num">−16.3</td><td class="num">+38.0</td><td class="num">41.4</td></tr>
+<tr><td>TCM 43</td><td>06/2100Z</td><td class="num">24 h</td><td class="mono pl">18.5N 162.7W</td><td class="num">−16.3</td><td class="num">+38.0</td><td class="num">41.4</td></tr>
+<tr><td>TCA 44</td><td>07/0300Z</td><td class="num">18 h</td><td class="mono pl">N1827 W16233</td><td class="num">−16.9</td><td class="num">+29.0</td><td class="num">33.6</td></tr>
+<tr><td>TCA 45</td><td>07/0900Z</td><td class="num">12 h</td><td class="mono pl">N1818 W16224</td><td class="num">−12.0</td><td class="num">+17.6</td><td class="num">21.3</td></tr>
+<tr><td>TCM 45</td><td>07/0900Z</td><td class="num">12 h</td><td class="mono pl">18.3N 162.4W</td><td class="num">−12.0</td><td class="num">+17.6</td><td class="num">21.3</td></tr>
+<tr><td>TCA 46</td><td>07/1500Z</td><td class="num">6 h</td><td class="mono pl">N1810 W16217</td><td class="num">−7.3</td><td class="num">+8.3</td><td class="num">11.1</td></tr></tbody></table>
+  <p class="small" style="margin-top:10px">Every vintage from 72 hours out placed the 18Z center west of where the storm was. The eastward error narrowed from about 85 nm at 60 hours to about 8 nm at 6 hours.</p>
+
+  <h3 style="margin-top:26px">NHC location wind probabilities, issued with Advisory 46</h3>
+  <p class="small">NHC location wind probabilities — not contract payout probabilities. Cumulative, 12Z Mon to 12Z Sat (forecast hours 0–120).</p>
+  <div class="prob">
+   <span>Niʻihau · 34 kt</span><div class="bar"><i style="width:98%"></i><b>98%</b></div>
+   <span>Niʻihau · 50 kt</span><div class="bar"><i style="width:71%"></i><b>71%</b></div>
+   <span>Niʻihau · 64 kt</span><div class="bar"><i style="width:28%"></i><b>28%</b></div>
+   <span>Barking Sands · 50 kt</span><div class="bar"><i style="width:48%"></i><b>48%</b></div>
+   <span>Līhuʻe · 34 kt</span><div class="bar"><i style="width:83%"></i><b>83%</b></div>
+   <span>Līhuʻe · 50 kt</span><div class="bar"><i style="width:14%"></i><b>14%</b></div>
+  </div>
+ </div></div>
+
+ <h3 style="margin-top:40px">Complete official chronology, 4–8 September</h3>
+ <p class="small">100 position records from 78 products. Times are day and UTC. Nominal cycle, issuance and valid time are stored separately; a forecast's lead is measured from its nominal cycle. Corrections and re-transmissions stay in the lineage beside the version they supersede.</p>
+ <div class="scroll"><table class="chrono"><thead><tr><th>Product</th><th>Cycle</th><th>Issued</th><th>Valid</th><th>Position (as issued)</th><th>Wind (as issued)</th><th>Class</th><th>Lineage</th></tr></thead>
+ <tbody><tr><td>Forecast/Advisory, prior-position line 31</td><td class="mono">04 00:00</td><td class="mono">04 03:00</td><td class="mono">04 00:00</td><td class="mono">13.5N 158.4W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 31</td><td class="mono"></td><td class="mono">04 02:44</td><td class="mono">04 03:00</td><td class="mono">13.5N 158.9W</td><td class="mono">130 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 31</td><td class="mono">04 00:00</td><td class="mono">04 03:00</td><td class="mono">04 03:00</td><td class="mono">N1330 W15854</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 31</td><td class="mono">04 00:00</td><td class="mono">04 03:00</td><td class="mono">04 03:00</td><td class="mono">13.5N 158.9W</td><td class="mono">115 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 32</td><td class="mono">04 06:00</td><td class="mono">04 09:00</td><td class="mono">04 06:00</td><td class="mono">13.5N 159.2W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 32</td><td class="mono"></td><td class="mono">04 08:54</td><td class="mono">04 09:00</td><td class="mono">13.4N 159.6W</td><td class="mono">125 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 32</td><td class="mono">04 06:00</td><td class="mono">04 09:00</td><td class="mono">04 09:00</td><td class="mono">N1324 W15936</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 32</td><td class="mono">04 06:00</td><td class="mono">04 09:00</td><td class="mono">04 09:00</td><td class="mono">13.4N 159.6W</td><td class="mono">110 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 33</td><td class="mono">04 12:00</td><td class="mono">04 15:00</td><td class="mono">04 12:00</td><td class="mono">13.3N 159.8W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Special forecast/advisory, prior-position line 34</td><td class="mono">04 12:00</td><td class="mono">04 18:30</td><td class="mono">04 12:00</td><td class="mono">13.3N 159.8W</td><td class="mono">—</td><td>Observation</td><td class="small">two transmissions; later one moves the fix 0.1° N and E</td></tr>
+<tr><td>Special forecast/advisory, prior-position line 34</td><td class="mono">04 12:00</td><td class="mono">04 18:30</td><td class="mono">04 12:00</td><td class="mono">13.3N 159.8W</td><td class="mono">—</td><td>Observation</td><td class="small">two transmissions; later one moves the fix 0.1° N and E</td></tr>
+<tr><td>Public advisory 33</td><td class="mono"></td><td class="mono">04 14:47</td><td class="mono">04 15:00</td><td class="mono">13.3N 160.1W</td><td class="mono">125 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 33</td><td class="mono">04 12:00</td><td class="mono">04 15:00</td><td class="mono">04 15:00</td><td class="mono">N1318 W16006</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 33</td><td class="mono">04 12:00</td><td class="mono">04 15:00</td><td class="mono">04 15:00</td><td class="mono">N1318 W16006</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 33</td><td class="mono">04 12:00</td><td class="mono">04 15:00</td><td class="mono">04 15:00</td><td class="mono">13.3N 160.1W</td><td class="mono">110 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 35</td><td class="mono">04 18:00</td><td class="mono">04 21:00</td><td class="mono">04 18:00</td><td class="mono">13.2N 160.4W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Special public advisory 34</td><td class="mono"></td><td class="mono">04 18:25</td><td class="mono">04 18:30</td><td class="mono">13.3N 160.4W</td><td class="mono">150 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 34</td><td class="mono">04 12:00</td><td class="mono">04 18:30</td><td class="mono">04 18:30</td><td class="mono">N1318 W16024</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Special forecast/advisory 34</td><td class="mono">04 12:00</td><td class="mono">04 18:30</td><td class="mono">04 18:30</td><td class="mono">13.2N 160.5W</td><td class="mono">130 KT</td><td>Observation</td><td class="small">two transmissions; later one moves the fix 0.1° N and E</td></tr>
+<tr><td>Special forecast/advisory 34</td><td class="mono">04 12:00</td><td class="mono">04 18:30</td><td class="mono">04 18:30</td><td class="mono">13.3N 160.4W</td><td class="mono">130 KT</td><td>Observation</td><td class="small">two transmissions; later one moves the fix 0.1° N and E</td></tr>
+<tr><td>Public advisory 35</td><td class="mono"></td><td class="mono">04 20:38</td><td class="mono">04 21:00</td><td class="mono">13.2N 160.7W</td><td class="mono">150 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 35</td><td class="mono">04 18:00</td><td class="mono">04 21:00</td><td class="mono">04 21:00</td><td class="mono">N1312 W16042</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 35</td><td class="mono">04 18:00</td><td class="mono">04 21:00</td><td class="mono">04 21:00</td><td class="mono">13.2N 160.7W</td><td class="mono">130 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 36</td><td class="mono">05 00:00</td><td class="mono">05 03:00</td><td class="mono">05 00:00</td><td class="mono">13.2N 161.1W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 36</td><td class="mono"></td><td class="mono">05 02:47</td><td class="mono">05 03:00</td><td class="mono">13.3N 161.4W</td><td class="mono">160 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 36</td><td class="mono">05 00:00</td><td class="mono">05 03:00</td><td class="mono">05 03:00</td><td class="mono">N1318 W16124</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 36</td><td class="mono">05 00:00</td><td class="mono">05 03:00</td><td class="mono">05 03:00</td><td class="mono">13.3N 161.4W</td><td class="mono">140 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 37</td><td class="mono">05 06:00</td><td class="mono">05 09:00</td><td class="mono">05 06:00</td><td class="mono">13.3N 161.7W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 37</td><td class="mono"></td><td class="mono">05 08:52</td><td class="mono">05 09:00</td><td class="mono">13.3N 161.9W</td><td class="mono">155 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 37</td><td class="mono">05 06:00</td><td class="mono">05 09:00</td><td class="mono">05 09:00</td><td class="mono">N1318 W16154</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 37</td><td class="mono">05 06:00</td><td class="mono">05 09:00</td><td class="mono">05 09:00</td><td class="mono">13.3N 161.9W</td><td class="mono">135 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 38</td><td class="mono">05 12:00</td><td class="mono">05 15:00</td><td class="mono">05 12:00</td><td class="mono">13.4N 162.4W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 38</td><td class="mono"></td><td class="mono">05 14:41</td><td class="mono">05 15:00</td><td class="mono">13.4N 162.6W</td><td class="mono">150 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 38</td><td class="mono">05 12:00</td><td class="mono">05 15:00</td><td class="mono">05 15:00</td><td class="mono">N1324 W16236</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 38</td><td class="mono">05 12:00</td><td class="mono">05 15:00</td><td class="mono">05 15:00</td><td class="mono">13.4N 162.6W</td><td class="mono">130 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 39</td><td class="mono">05 18:00</td><td class="mono">05 21:00</td><td class="mono">05 18:00</td><td class="mono">13.4N 162.9W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 39</td><td class="mono"></td><td class="mono">05 20:42</td><td class="mono">05 21:00</td><td class="mono">13.5N 163.1W</td><td class="mono">145 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 39</td><td class="mono">05 18:00</td><td class="mono">05 21:00</td><td class="mono">05 21:00</td><td class="mono">N1330 W16306</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 39</td><td class="mono">05 18:00</td><td class="mono">05 21:00</td><td class="mono">05 21:00</td><td class="mono">13.5N 163.1W</td><td class="mono">125 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 40</td><td class="mono">06 00:00</td><td class="mono">06 03:00</td><td class="mono">06 00:00</td><td class="mono">13.6N 163.2W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Intermediate public advisory 43A</td><td class="mono"></td><td class="mono">06 23:37</td><td class="mono">06 00:00</td><td class="mono">15.4N 163.7W</td><td class="mono">120 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Public advisory 40</td><td class="mono"></td><td class="mono">06 02:32</td><td class="mono">06 03:00</td><td class="mono">13.7N 163.4W</td><td class="mono">130 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 40</td><td class="mono">06 00:00</td><td class="mono">06 03:00</td><td class="mono">06 03:00</td><td class="mono">N1342 W16324</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 40</td><td class="mono">06 00:00</td><td class="mono">06 03:00</td><td class="mono">06 03:00</td><td class="mono">13.7N 163.4W</td><td class="mono">115 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Intermediate public advisory 40A</td><td class="mono"></td><td class="mono">06 05:33</td><td class="mono">06 06:00</td><td class="mono">13.9N 163.5W</td><td class="mono">130 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 41</td><td class="mono">06 06:00</td><td class="mono">06 09:00</td><td class="mono">06 06:00</td><td class="mono">13.9N 163.4W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 41</td><td class="mono"></td><td class="mono">06 08:51</td><td class="mono">06 09:00</td><td class="mono">14.1N 163.5W</td><td class="mono">125 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 41</td><td class="mono">06 06:00</td><td class="mono">06 09:00</td><td class="mono">06 09:00</td><td class="mono">N1406 W16330</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 41</td><td class="mono">06 06:00</td><td class="mono">06 09:00</td><td class="mono">06 09:00</td><td class="mono">14.1N 163.5W</td><td class="mono">110 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Intermediate public advisory 41A</td><td class="mono"></td><td class="mono">06 11:39</td><td class="mono">06 12:00</td><td class="mono">14.4N 163.7W</td><td class="mono">125 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 42</td><td class="mono">06 12:00</td><td class="mono">06 15:00</td><td class="mono">06 12:00</td><td class="mono">14.4N 163.8W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 42</td><td class="mono"></td><td class="mono">06 14:48</td><td class="mono">06 15:00</td><td class="mono">14.7N 163.8W</td><td class="mono">125 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 42</td><td class="mono">06 12:00</td><td class="mono">06 15:00</td><td class="mono">06 15:00</td><td class="mono">N1442 W16348</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 42</td><td class="mono">06 12:00</td><td class="mono">06 15:00</td><td class="mono">06 15:00</td><td class="mono">14.7N 163.8W</td><td class="mono">110 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Intermediate public advisory 42A</td><td class="mono"></td><td class="mono">06 17:37</td><td class="mono">06 18:00</td><td class="mono">14.8N 163.8W</td><td class="mono">125 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 43</td><td class="mono">06 18:00</td><td class="mono">06 21:00</td><td class="mono">06 18:00</td><td class="mono">14.8N 163.8W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 43</td><td class="mono"></td><td class="mono">06 20:46</td><td class="mono">06 21:00</td><td class="mono">15.2N 163.7W</td><td class="mono">120 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 43</td><td class="mono">06 18:00</td><td class="mono">06 21:00</td><td class="mono">06 21:00</td><td class="mono">N1512 W16342</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 43</td><td class="mono">06 18:00</td><td class="mono">06 21:00</td><td class="mono">06 21:00</td><td class="mono">15.2N 163.7W</td><td class="mono">105 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 44</td><td class="mono">07 00:00</td><td class="mono">07 03:00</td><td class="mono">07 00:00</td><td class="mono">15.4N 163.7W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Intermediate public advisory 47A</td><td class="mono"></td><td class="mono">07 23:38</td><td class="mono">07 00:00</td><td class="mono">19.4N 161.6W</td><td class="mono">110 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Public advisory 44</td><td class="mono"></td><td class="mono">07 02:40</td><td class="mono">07 03:00</td><td class="mono">15.9N 163.5W</td><td class="mono">120 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 44</td><td class="mono">07 00:00</td><td class="mono">07 03:00</td><td class="mono">07 03:00</td><td class="mono">N1554 W16330</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 44</td><td class="mono">07 00:00</td><td class="mono">07 03:00</td><td class="mono">07 03:00</td><td class="mono">15.9N 163.5W</td><td class="mono">105 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Intermediate public advisory 44A</td><td class="mono"></td><td class="mono">07 05:40</td><td class="mono">07 06:00</td><td class="mono">16.1N 163.4W</td><td class="mono">120 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 45</td><td class="mono">07 06:00</td><td class="mono">07 09:00</td><td class="mono">07 06:00</td><td class="mono">16.1N 163.4W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 45</td><td class="mono"></td><td class="mono">07 08:47</td><td class="mono">07 09:00</td><td class="mono">16.5N 163.2W</td><td class="mono">115 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 45</td><td class="mono">07 06:00</td><td class="mono">07 09:00</td><td class="mono">07 09:00</td><td class="mono">N1630 W16312</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 45</td><td class="mono">07 06:00</td><td class="mono">07 09:00</td><td class="mono">07 09:00</td><td class="mono">16.5N 163.2W</td><td class="mono">100 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Public advisory 45</td><td class="mono"></td><td class="mono">07 09:17</td><td class="mono">07 09:00</td><td class="mono">16.5N 163.2W</td><td class="mono">115 MPH</td><td>Observation</td><td class="small">correction CCA: Corrected to remove Tropical Storm Warning; supersedes earlier transmission of the same advisory</td></tr>
+<tr><td>Intermediate public advisory 45A</td><td class="mono"></td><td class="mono">07 11:43</td><td class="mono">07 12:00</td><td class="mono">17.0N 163.0W</td><td class="mono">115 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 46</td><td class="mono">07 12:00</td><td class="mono">07 15:00</td><td class="mono">07 12:00</td><td class="mono">17.0N 162.9W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 46</td><td class="mono"></td><td class="mono">07 14:51</td><td class="mono">07 15:00</td><td class="mono">17.5N 162.6W</td><td class="mono">115 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 46</td><td class="mono">07 12:00</td><td class="mono">07 15:00</td><td class="mono">07 15:00</td><td class="mono">N1730 W16236</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 46</td><td class="mono">07 12:00</td><td class="mono">07 15:00</td><td class="mono">07 15:00</td><td class="mono">17.5N 162.6W</td><td class="mono">100 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Intermediate public advisory 46A</td><td class="mono"></td><td class="mono">07 17:44</td><td class="mono">07 18:00</td><td class="mono">18.0N 162.1W</td><td class="mono">115 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 47</td><td class="mono">07 18:00</td><td class="mono">07 21:00</td><td class="mono">07 18:00</td><td class="mono">18.0N 162.2W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 47</td><td class="mono"></td><td class="mono">07 20:48</td><td class="mono">07 21:00</td><td class="mono">18.7N 161.8W</td><td class="mono">110 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 47</td><td class="mono">07 18:00</td><td class="mono">07 21:00</td><td class="mono">07 21:00</td><td class="mono">N1842 W16148</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 47</td><td class="mono">07 18:00</td><td class="mono">07 21:00</td><td class="mono">07 21:00</td><td class="mono">18.7N 161.8W</td><td class="mono">95 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 48</td><td class="mono">08 00:00</td><td class="mono">08 03:00</td><td class="mono">08 00:00</td><td class="mono">19.5N 161.5W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 48</td><td class="mono"></td><td class="mono">08 02:42</td><td class="mono">08 03:00</td><td class="mono">20.3N 161.3W</td><td class="mono">110 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 48</td><td class="mono">08 00:00</td><td class="mono">08 03:00</td><td class="mono">08 03:00</td><td class="mono">N2018 W16118</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 48</td><td class="mono">08 00:00</td><td class="mono">08 03:00</td><td class="mono">08 03:00</td><td class="mono">20.3N 161.3W</td><td class="mono">95 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Public advisory 48</td><td class="mono"></td><td class="mono">08 03:00</td><td class="mono">08 03:00</td><td class="mono">20.3N 161.3W</td><td class="mono">110 MPH</td><td>Observation</td><td class="small">correction CCA: Corrected rainfall statement in hazards section; supersedes earlier transmission of the same advisory</td></tr>
+<tr><td>Intermediate public advisory 48A</td><td class="mono"></td><td class="mono">08 05:48</td><td class="mono">08 06:00</td><td class="mono">20.9N 161.1W</td><td class="mono">110 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 49</td><td class="mono">08 06:00</td><td class="mono">08 09:00</td><td class="mono">08 06:00</td><td class="mono">21.1N 161.0W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 49</td><td class="mono"></td><td class="mono">08 08:51</td><td class="mono">08 09:00</td><td class="mono">21.9N 160.8W</td><td class="mono">110 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 49</td><td class="mono">08 06:00</td><td class="mono">08 09:00</td><td class="mono">08 09:00</td><td class="mono">N2154 W16048</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 49</td><td class="mono">08 06:00</td><td class="mono">08 09:00</td><td class="mono">08 09:00</td><td class="mono">21.9N 160.8W</td><td class="mono">95 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Intermediate public advisory 49A</td><td class="mono"></td><td class="mono">08 11:53</td><td class="mono">08 12:00</td><td class="mono">22.9N 160.8W</td><td class="mono">105 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 50</td><td class="mono">08 12:00</td><td class="mono">08 15:00</td><td class="mono">08 12:00</td><td class="mono">23.0N 160.7W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 50</td><td class="mono"></td><td class="mono">08 14:47</td><td class="mono">08 15:00</td><td class="mono">23.7N 160.7W</td><td class="mono">90 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 50</td><td class="mono">08 12:00</td><td class="mono">08 15:00</td><td class="mono">08 15:00</td><td class="mono">N2342 W16042</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 50</td><td class="mono">08 12:00</td><td class="mono">08 15:00</td><td class="mono">08 15:00</td><td class="mono">23.7N 160.7W</td><td class="mono">80 KT</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Intermediate public advisory 50A</td><td class="mono"></td><td class="mono">08 17:46</td><td class="mono">08 18:00</td><td class="mono">24.5N 160.7W</td><td class="mono">80 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory, prior-position line 51</td><td class="mono">08 18:00</td><td class="mono">08 21:00</td><td class="mono">08 18:00</td><td class="mono">24.5N 160.7W</td><td class="mono">—</td><td>Observation</td><td class="small">prior-position line; may revise an earlier-reported fix</td></tr>
+<tr><td>Public advisory 51</td><td class="mono"></td><td class="mono">08 20:32</td><td class="mono">08 21:00</td><td class="mono">25.1N 160.8W</td><td class="mono">75 MPH</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Aviation advisory 51</td><td class="mono">08 18:00</td><td class="mono">08 21:00</td><td class="mono">08 21:00</td><td class="mono">N2506 W16048</td><td class="mono">—</td><td>Observation</td><td class="small"></td></tr>
+<tr><td>Forecast/Advisory 51</td><td class="mono">08 18:00</td><td class="mono">08 21:00</td><td class="mono">08 21:00</td><td class="mono">25.1N 160.8W</td><td class="mono">65 KT</td><td>Observation</td><td class="small"></td></tr></tbody></table></div>
+</section>
+
+<section><div class="sec-head"><div class="plate">The product<small>Trigger Evidence Record</small></div><div>
+ <h2>Reopen the evidence behind a storm trigger</h2>
+ <p>Each contract gets a machine-readable record: a contract manifest, an event manifest for every official product used, and a decision manifest that replays the evaluation. This page and its one-page brief are renderings of those manifests.</p></div></div>
+ <div class="uses">
+  <div><h3>Event evidence</h3><p>Reconstruct which official observation, under which contract version and geometry, satisfied a trigger, and state a refusal when a term is missing.</p></div>
+  <div><h3>Trigger watch</h3><p>Replay what was knowable at each advisory, with corrections kept and later information never leaking backward.</p></div>
+  <div><h3>Renewal evidence</h3><p>Re-run a contract definition across the historical record with exact n/N, intervals, known data-defect windows and explicit refusals.</p></div>
+ </div>
+ <p style="margin-top:26px;max-width:72ch">Basis risk between a wind trigger and reef damage is inherent to the design and is documented here, not eliminated. What this record reduces are disputes about data, vintage, geometry, units and contract version.</p>
+</section>
+
+<section class="register"><div class="sec-head"><div class="plate">Provenance<small>Source register</small></div><div>
+ <h2>Every value on this page traces to one of these</h2>
+ <p>Official products are archived byte-for-byte and identified by SHA-256. Public documents are cited by publisher and date.</p></div></div>
+ <table><thead><tr><th>Source</th><th>Used for</th><th>Class</th></tr></thead><tbody>
+  <tr><td>CPHC/NHC Forecast/Advisories 31–51 (incl. special 34), EP122026</td><td>Fixes, intensities, pressures, quadrant wind radii, forecast positions</td><td class="cls">Official</td></tr>
+  <tr><td>CPHC/NHC Public Advisories 31–51, intermediates 40A–50A, corrections 45 and 48</td><td>Public-product fixes, intermediate positions, correction lineage</td><td class="cls">Official</td></tr>
+  <tr><td>CPHC/NHC ICAO aviation advisories (TCAPA4) with Advisories 31–51</td><td>Authoritative interpolated 18Z forecast position; track direction</td><td class="cls">Official</td></tr>
+  <tr><td>CPHC/NHC Wind Speed Probabilities 46 (PWSCP4)</td><td>Location wind probabilities</td><td class="cls">Official</td></tr>
+  <tr><td>ATCF public aids, aep122026 (CARQ records)</td><td>Operational working best track, 6-hourly</td><td class="cls">Official, operational</td></tr>
+  <tr><td>Natural Earth 1:10m land</td><td>Coastlines and coastline distances</td><td class="cls">Public-domain geometry</td></tr>
+  <tr><td>TNC, 2024 Hawaiʻi Reef Insurance fact sheet; 2025 renewal release; Lowell release, 15–16 Sep 2026</td><td>Trigger basis, zone structure, 2024 ladder and limits, 2026 minimum and payouts</td><td class="cls">Policyholder</td></tr>
+  <tr><td>WTW releases, Nov 2022 and Feb 2024; Insurance Journal and Insurance Business, Feb 2024 (placement reported as seven bids)</td><td>Broker, insurer, competitive placement</td><td class="cls">Broker, trade press</td></tr>
+  <tr><td>Honolulu Star-Advertiser, Yale Climate Connections, ABC7, Sep 2026</td><td>Corroboration of the forecast shift only; no value on this page depends on them</td><td class="cls">Press</td></tr>
+  <tr><td>Millibar derivations</td><td>Coastline distances, residual, rounding envelope, track direction</td><td class="cls">Derived</td></tr>
+ </tbody></table>
+ <details style="margin-top:18px"><summary>Archived files and hashes (105)</summary>
+ <table><thead><tr><th>File</th><th>Product</th><th>SHA-256</th></tr></thead><tbody><tr><td class="mono">PWSCP4.202609071451.txt</td><td>PWS (wind speed probabilities)</td><td class="mono small">551c1550f4ed8a59…</td></tr>
+<tr><td class="mono">SOURCES.json</td><td>Coastline provenance register</td><td class="mono small">b4bf07f8efaa1a6f…</td></tr>
+<tr><td class="mono">TCAPA4.202609040245.txt</td><td>TCA</td><td class="mono small">48d46b9f3e31edc8…</td></tr>
+<tr><td class="mono">TCAPA4.202609040854.txt</td><td>TCA</td><td class="mono small">bcac0ffdf529f185…</td></tr>
+<tr><td class="mono">TCAPA4.202609041447.txt</td><td>TCA</td><td class="mono small">fec0c660d0890064…</td></tr>
+<tr><td class="mono">TCAPA4.202609041448.txt</td><td>TCA</td><td class="mono small">5084932a9ea94c3b…</td></tr>
+<tr><td class="mono">TCAPA4.202609041825.txt</td><td>TCA</td><td class="mono small">06dba0557eab1d2d…</td></tr>
+<tr><td class="mono">TCAPA4.202609042039.txt</td><td>TCA</td><td class="mono small">fb5b53bbeff402cf…</td></tr>
+<tr><td class="mono">TCAPA4.202609050248.txt</td><td>TCA</td><td class="mono small">396456e13c225a01…</td></tr>
+<tr><td class="mono">TCAPA4.202609050852.txt</td><td>TCA</td><td class="mono small">a809583279f9ef1c…</td></tr>
+<tr><td class="mono">TCAPA4.202609051441.txt</td><td>TCA</td><td class="mono small">b81f003af17c710c…</td></tr>
+<tr><td class="mono">TCAPA4.202609052043.txt</td><td>TCA</td><td class="mono small">eeda07e42184af8c…</td></tr>
+<tr><td class="mono">TCAPA4.202609060234.txt</td><td>TCA</td><td class="mono small">21411e1e2b9477a2…</td></tr>
+<tr><td class="mono">TCAPA4.202609060852.txt</td><td>TCA</td><td class="mono small">2c9a414fedba451c…</td></tr>
+<tr><td class="mono">TCAPA4.202609061449.txt</td><td>TCA</td><td class="mono small">29d628758ac7f4cd…</td></tr>
+<tr><td class="mono">TCAPA4.202609062047.txt</td><td>TCA</td><td class="mono small">439d0ea38f4204c8…</td></tr>
+<tr><td class="mono">TCAPA4.202609070241.txt</td><td>TCA</td><td class="mono small">3b8085645806c311…</td></tr>
+<tr><td class="mono">TCAPA4.202609070848.txt</td><td>TCA</td><td class="mono small">bf7c48b785183235…</td></tr>
+<tr><td class="mono">TCAPA4.202609071452.txt</td><td>TCA</td><td class="mono small">5d607b97722dc8b9…</td></tr>
+<tr><td class="mono">TCAPA4.202609072048.txt</td><td>TCA</td><td class="mono small">d837196234408a9b…</td></tr>
+<tr><td class="mono">TCAPA4.202609080243.txt</td><td>TCA</td><td class="mono small">b2f2da207a724608…</td></tr>
+<tr><td class="mono">TCAPA4.202609080852.txt</td><td>TCA</td><td class="mono small">1878d51b34786f2b…</td></tr>
+<tr><td class="mono">TCAPA4.202609081448.txt</td><td>TCA</td><td class="mono small">e92c4fdad4ff8dfe…</td></tr>
+<tr><td class="mono">TCAPA4.202609082032.txt</td><td>TCA</td><td class="mono small">07ab1947bfa91a05…</td></tr>
+<tr><td class="mono">TCDCP4.202609040245.txt</td><td>TCD (discussion)</td><td class="mono small">79da08820c5889d9…</td></tr>
+<tr><td class="mono">TCDCP4.202609040856.txt</td><td>TCD (discussion)</td><td class="mono small">06bc1e0f3ffaaafe…</td></tr>
+<tr><td class="mono">TCDCP4.202609041448.txt</td><td>TCD (discussion)</td><td class="mono small">4bf293b7b8396127…</td></tr>
+<tr><td class="mono">TCDCP4.202609041817.txt</td><td>TCD (discussion)</td><td class="mono small">a70eb1c0b2f8df19…</td></tr>
+<tr><td class="mono">TCDCP4.202609041826.txt</td><td>TCD (discussion)</td><td class="mono small">f79255370a4440e5…</td></tr>
+<tr><td class="mono">TCDCP4.202609042039.txt</td><td>TCD (discussion)</td><td class="mono small">a0b30732df098b3d…</td></tr>
+<tr><td class="mono">TCDCP4.202609050248.txt</td><td>TCD (discussion)</td><td class="mono small">d71223a69ee327e6…</td></tr>
+<tr><td class="mono">TCDCP4.202609050853.txt</td><td>TCD (discussion)</td><td class="mono small">90961b59a261fd18…</td></tr>
+<tr><td class="mono">TCDCP4.202609051441.txt</td><td>TCD (discussion)</td><td class="mono small">f59b1e114311f145…</td></tr>
+<tr><td class="mono">TCDCP4.202609052043.txt</td><td>TCD (discussion)</td><td class="mono small">f579a0d6694af086…</td></tr>
+<tr><td class="mono">TCDCP4.202609060235.txt</td><td>TCD (discussion)</td><td class="mono small">1c835fb83f2e4f2b…</td></tr>
+<tr><td class="mono">TCDCP4.202609060852.txt</td><td>TCD (discussion)</td><td class="mono small">383a582ac68efaf9…</td></tr>
+<tr><td class="mono">TCDCP4.202609060857.txt</td><td>TCD (discussion)</td><td class="mono small">4d833d9dbb48eb43…</td></tr>
+<tr><td class="mono">TCDCP4.202609061449.txt</td><td>TCD (discussion)</td><td class="mono small">d75e463e4bec692c…</td></tr>
+<tr><td class="mono">TCDCP4.202609062047.txt</td><td>TCD (discussion)</td><td class="mono small">b7df3a4172fe26fd…</td></tr>
+<tr><td class="mono">TCDCP4.202609070244.txt</td><td>TCD (discussion)</td><td class="mono small">d03a44a285be947e…</td></tr>
+<tr><td class="mono">TCDCP4.202609070849.txt</td><td>TCD (discussion)</td><td class="mono small">9ca47a818b06694f…</td></tr>
+<tr><td class="mono">TCDCP4.202609071452.txt</td><td>TCD (discussion)</td><td class="mono small">45c9c5f2cc5ece9c…</td></tr>
+<tr><td class="mono">TCDCP4.202609072048.txt</td><td>TCD (discussion)</td><td class="mono small">028305febd8e600f…</td></tr>
+<tr><td class="mono">TCDCP4.202609080246.txt</td><td>TCD (discussion)</td><td class="mono small">cd3da7dd50b937d9…</td></tr>
+<tr><td class="mono">TCDCP4.202609080852.txt</td><td>TCD (discussion)</td><td class="mono small">591168b81d37da14…</td></tr>
+<tr><td class="mono">TCDCP4.202609081449.txt</td><td>TCD (discussion)</td><td class="mono small">5c36d0abe4d2c343…</td></tr>
+<tr><td class="mono">TCDCP4.202609082033.txt</td><td>TCD (discussion)</td><td class="mono small">f25fc945ff0128e1…</td></tr>
+<tr><td class="mono">TCMCP4.202609040244.txt</td><td>TCM</td><td class="mono small">a5fd55818a8bd6cc…</td></tr>
+<tr><td class="mono">TCMCP4.202609040854.txt</td><td>TCM</td><td class="mono small">7368aa69775332e1…</td></tr>
+<tr><td class="mono">TCMCP4.202609041446.txt</td><td>TCM</td><td class="mono small">a014337c83a79c6a…</td></tr>
+<tr><td class="mono">TCMCP4.202609041817.txt</td><td>TCM</td><td class="mono small">a5a44c1bb74a655d…</td></tr>
+<tr><td class="mono">TCMCP4.202609041825.txt</td><td>TCM</td><td class="mono small">a4cb7fbde000bb3e…</td></tr>
+<tr><td class="mono">TCMCP4.202609042037.txt</td><td>TCM</td><td class="mono small">80d4e799e0dd45d1…</td></tr>
+<tr><td class="mono">TCMCP4.202609050247.txt</td><td>TCM</td><td class="mono small">685494c4a75b84fd…</td></tr>
+<tr><td class="mono">TCMCP4.202609050851.txt</td><td>TCM</td><td class="mono small">d97e180c8a7c3c4b…</td></tr>
+<tr><td class="mono">TCMCP4.202609051440.txt</td><td>TCM</td><td class="mono small">db0469dde9534dce…</td></tr>
+<tr><td class="mono">TCMCP4.202609052041.txt</td><td>TCM</td><td class="mono small">cec27e4c6ed52b06…</td></tr>
+<tr><td class="mono">TCMCP4.202609060231.txt</td><td>TCM</td><td class="mono small">b7d8b2a6f0bd1847…</td></tr>
+<tr><td class="mono">TCMCP4.202609060850.txt</td><td>TCM</td><td class="mono small">d2ea13133ebce82d…</td></tr>
+<tr><td class="mono">TCMCP4.202609061447.txt</td><td>TCM</td><td class="mono small">6f79eb207f148ed9…</td></tr>
+<tr><td class="mono">TCMCP4.202609062046.txt</td><td>TCM</td><td class="mono small">bc2f85fb1da8a51a…</td></tr>
+<tr><td class="mono">TCMCP4.202609070236.txt</td><td>TCM</td><td class="mono small">8ab2b08f6d85770d…</td></tr>
+<tr><td class="mono">TCMCP4.202609070847.txt</td><td>TCM</td><td class="mono small">c4e12bc64441a017…</td></tr>
+<tr><td class="mono">TCMCP4.202609071451.txt</td><td>TCM</td><td class="mono small">7539c65b84f1930b…</td></tr>
+<tr><td class="mono">TCMCP4.202609072047.txt</td><td>TCM</td><td class="mono small">bc26347ecdd907e2…</td></tr>
+<tr><td class="mono">TCMCP4.202609080241.txt</td><td>TCM</td><td class="mono small">4574c4278020b8d1…</td></tr>
+<tr><td class="mono">TCMCP4.202609080851.txt</td><td>TCM</td><td class="mono small">4a5d2c72fab03c64…</td></tr>
+<tr><td class="mono">TCMCP4.202609081447.txt</td><td>TCM</td><td class="mono small">11810f4e7f2ae512…</td></tr>
+<tr><td class="mono">TCMCP4.202609082031.txt</td><td>TCM</td><td class="mono small">e0d8adf8ea224f7b…</td></tr>
+<tr><td class="mono">TCPCP4.202609040244.txt</td><td>TCP</td><td class="mono small">6e73d462ab82981f…</td></tr>
+<tr><td class="mono">TCPCP4.202609040854.txt</td><td>TCP</td><td class="mono small">ab3103d5156012ad…</td></tr>
+<tr><td class="mono">TCPCP4.202609041447.txt</td><td>TCP</td><td class="mono small">d7c152c6365b2b25…</td></tr>
+<tr><td class="mono">TCPCP4.202609041825.txt</td><td>TCP</td><td class="mono small">13825e01f43c88ff…</td></tr>
+<tr><td class="mono">TCPCP4.202609042038.txt</td><td>TCP</td><td class="mono small">cd949f4925d4e218…</td></tr>
+<tr><td class="mono">TCPCP4.202609050247.txt</td><td>TCP</td><td class="mono small">6983bd6125f0f3d0…</td></tr>
+<tr><td class="mono">TCPCP4.202609050852.txt</td><td>TCP</td><td class="mono small">3ff45d141883cd33…</td></tr>
+<tr><td class="mono">TCPCP4.202609051441.txt</td><td>TCP</td><td class="mono small">73d5275e9b07fea5…</td></tr>
+<tr><td class="mono">TCPCP4.202609052042.txt</td><td>TCP</td><td class="mono small">728eabfdcdbb2a61…</td></tr>
+<tr><td class="mono">TCPCP4.202609060232.txt</td><td>TCP</td><td class="mono small">ba58dcadf937221c…</td></tr>
+<tr><td class="mono">TCPCP4.202609060533.txt</td><td>TCP</td><td class="mono small">cc6a38d3e5629a8d…</td></tr>
+<tr><td class="mono">TCPCP4.202609060851.txt</td><td>TCP</td><td class="mono small">9c340c2cd3d05cc5…</td></tr>
+<tr><td class="mono">TCPCP4.202609061139.txt</td><td>TCP</td><td class="mono small">fb7f85bfa0a2fc04…</td></tr>
+<tr><td class="mono">TCPCP4.202609061448.txt</td><td>TCP</td><td class="mono small">48babdb3a5f3fdba…</td></tr>
+<tr><td class="mono">TCPCP4.202609061737.txt</td><td>TCP</td><td class="mono small">67baa1e94ed1c147…</td></tr>
+<tr><td class="mono">TCPCP4.202609062046.txt</td><td>TCP</td><td class="mono small">c05c4895d3a4e3c1…</td></tr>
+<tr><td class="mono">TCPCP4.202609062337.txt</td><td>TCP</td><td class="mono small">a49e68199c27c873…</td></tr>
+<tr><td class="mono">TCPCP4.202609070240.txt</td><td>TCP</td><td class="mono small">031cd8da3650a7b5…</td></tr>
+<tr><td class="mono">TCPCP4.202609070540.txt</td><td>TCP</td><td class="mono small">c748c594184b36fa…</td></tr>
+<tr><td class="mono">TCPCP4.202609070847.txt</td><td>TCP</td><td class="mono small">a6c4449d798e2070…</td></tr>
+<tr><td class="mono">TCPCP4.202609070917.txt</td><td>TCP</td><td class="mono small">603194d9e214328e…</td></tr>
+<tr><td class="mono">TCPCP4.202609071143.txt</td><td>TCP</td><td class="mono small">c2d4ff54bc7da580…</td></tr>
+<tr><td class="mono">TCPCP4.202609071451.txt</td><td>TCP</td><td class="mono small">7fc2a8bde73f25b4…</td></tr>
+<tr><td class="mono">TCPCP4.202609071744.txt</td><td>TCP</td><td class="mono small">1e4dc581aad5310a…</td></tr>
+<tr><td class="mono">TCPCP4.202609072048.txt</td><td>TCP</td><td class="mono small">a32117494bde43f9…</td></tr>
+<tr><td class="mono">TCPCP4.202609072338.txt</td><td>TCP</td><td class="mono small">01cf782e3ab0f436…</td></tr>
+<tr><td class="mono">TCPCP4.202609080242.txt</td><td>TCP</td><td class="mono small">d529afa80c8ee41c…</td></tr>
+<tr><td class="mono">TCPCP4.202609080300.txt</td><td>TCP</td><td class="mono small">33f7db0ff48598a0…</td></tr>
+<tr><td class="mono">TCPCP4.202609080548.txt</td><td>TCP</td><td class="mono small">a282f41cf215be50…</td></tr>
+<tr><td class="mono">TCPCP4.202609080851.txt</td><td>TCP</td><td class="mono small">cca487572808ce20…</td></tr>
+<tr><td class="mono">TCPCP4.202609081153.txt</td><td>TCP</td><td class="mono small">a47e64fb33fccd9a…</td></tr>
+<tr><td class="mono">TCPCP4.202609081447.txt</td><td>TCP</td><td class="mono small">38e67eb5c99a8ad7…</td></tr>
+<tr><td class="mono">TCPCP4.202609081746.txt</td><td>TCP</td><td class="mono small">87b69d6f1ccfcc45…</td></tr>
+<tr><td class="mono">TCPCP4.202609082032.txt</td><td>TCP</td><td class="mono small">5aab56285562bdfe…</td></tr>
+<tr><td class="mono">aep122026.dat</td><td>ATCF-CARQ</td><td class="mono small">5bee7ac88b668f33…</td></tr>
+<tr><td class="mono">hawaii.geojson</td><td>Natural Earth 10m coastline, shared repository primitive</td><td class="mono small">3c45b617f7793c6e…</td></tr></tbody></table></details>
+</section>
+
+<footer><p>Independent research by Alec Messino. Not a weather forecast, loss estimate, claims determination, or insurance advice. Official products remain the property of NOAA/NWS; contract terms remain the property of the parties.</p>
+<p>One-page brief: <a href="Millibar-Lowell-2026-Event-Brief.pdf">Millibar-Lowell-2026-Event-Brief.pdf</a> &nbsp;·&nbsp; Machine-readable record: <a href="lowell-2026.manifest.json">lowell-2026.manifest.json</a></p></footer>
+</div></body></html>

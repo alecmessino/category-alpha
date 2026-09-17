@@ -60,24 +60,62 @@ const f47 = fixFromTcp(read("tcp-047.txt"), { fixId: "tcp:47", receivedZ: avail[
 
 /* ------------------------------------------------------------------------------------ §10.1 */
 
-console.log("\n[1] THE NOMINAL '12H' LABEL IS NOT TWELVE HOURS (Lowell TCM 46)");
+console.log("\n[1] THE '12H' LABEL IS TWELVE HOURS — FROM THE CYCLE, NOT FROM THE INITIAL POSITION");
 {
   const p = b46.points;
   ok("the initial position is the product's own 07/1500Z",
      p[0].kind === "initial" && p[0].validZ === "2026-09-07T15:00:00.000Z", p[0].validZ);
   const gapH = (Date.parse(p[1].validZ) - Date.parse(p[0].validZ)) / 3600e3;
   near("INIT -> first FORECAST VALID row", gapH, 9, 1e-9);
-  ok("and the product does file that row under a nominal 12 h label",
-     /12\s*H|FORECAST VALID 08\/0000Z/i.test(read("tcm-046.txt")));
-  /* THE FAILURE THIS PREVENTS, PRICED. Interpolating with the label instead of the timestamp
-     puts the 1800Z forecast position a third of a segment out of place. */
+
+  /* THE CORRECTION. The earlier version of this section read the same nine hours as evidence
+     that the official 12H label was untrustworthy. It is not: the label is measured from the
+     NOMINAL SYNOPTIC CYCLE, and against that origin it is exact. Both numbers are true of the
+     same row, from different origins, and the forecast lead is the one from the cycle. */
+  ok("the cycle is recovered from the product's own rows",
+     b46.nominalCycleZ === "2026-09-07T12:00:00.000Z",
+     `${b46.nominalCycleZ} ${b46.nominalCycleRefusal || ""}`);
+  ok("and it is not the issue time, which is carried separately",
+     b46.issuedZ === "2026-09-07T15:00:00.000Z" && b46.nominalCycleZ !== b46.issuedZ);
+  near("forecast lead of the 08/0000Z row, from the cycle", p[1].leadHoursFromCycle, 12, 1e-9);
+  near("hours from the initial position, kept and labelled as the diagnostic it is",
+       p[1].hoursFromInitialPosition, 9, 1e-9);
+  ok("every forecast row lands on the canonical NHC lead set",
+     p.filter((q) => q.kind === "forecast").every((q) => R.NHC_LEAD_SET.includes(q.leadHoursFromCycle)),
+     p.filter((q) => q.kind === "forecast").map((q) => q.leadHoursFromCycle).join(","));
+  ok("and none of them does against the initial position",
+     !p.filter((q) => q.kind === "forecast").every((q) => R.NHC_LEAD_SET.includes(q.hoursFromInitialPosition)));
+
+  /* THE FAILURE THIS PREVENTS, PRICED — and it is a failure of INTERPOLATION, not of the
+     label. Treating the label's 12 h as elapsed time from the initial position puts the 1800Z
+     forecast position a third of a segment out of place. Interpolation is still linear in time
+     between explicit UTC valid times; the lead origin is a separate question with a separate
+     answer, and conflating the two is what produced the retired 0.0 nm along-track result. */
   const t = Date.parse("2026-09-07T18:00:00Z");
   const correct = R.interpolateAtTime(p, t);
   const asIfTwelve = { lat: p[0].lat + (3 / 12) * (p[1].lat - p[0].lat),
                        lonE: p[0].lonE + (3 / 12) * R.deltaLonDeg(p[0].lonE, p[1].lonE) };
   const errNm = R.haversineNm(correct.lat, correct.lonE, asIfTwelve.lat, asIfTwelve.lonE);
-  near("reading the label instead of the clock costs this much forecast position, nm",
+  near("measuring the label's 12 h from the initial position costs this much position, nm",
        errNm, 10.88, 0.01);
+
+  /* A CYCLE IS NEVER GUESSED. Rows that do not determine one produce a refusal, not a default. */
+  const none = R.nominalCycleFromRows("2026-09-07T15:00:00.000Z", []);
+  ok("no forecast rows -> refusal, not an assumed cycle",
+     !none.ok && none.nominalCycleZ === null && /no cycle is assumed/i.test(none.refusal),
+     none.refusal);
+  const offGrid = R.nominalCycleFromRows("2026-09-07T15:00:00.000Z", ["2026-09-07T20:00:00.000Z"]);
+  ok("a row off the canonical lead set -> refusal", !offGrid.ok, offGrid.refusal);
+
+  /* THE SPECIAL ADVISORY, which the release-hour convention gets wrong by six hours. Lowell's
+     special 34 went out 04/1830Z; its rows put it on the 12Z cycle, not the 18Z slot. */
+  const special = R.nominalCycleFromRows("2026-09-04T18:30:00.000Z",
+    ["2026-09-05T00:00:00.000Z", "2026-09-05T12:00:00.000Z", "2026-09-06T00:00:00.000Z",
+     "2026-09-06T12:00:00.000Z", "2026-09-07T00:00:00.000Z", "2026-09-07T12:00:00.000Z"]);
+  ok("a special advisory inherits the running cycle rather than opening one",
+     special.ok && special.nominalCycleZ === "2026-09-04T12:00:00.000Z", special.nominalCycleZ);
+  near("so its 05/0000Z row leads 12 h, not the 6 h the release hour would give",
+       R.forecastLeadHours("2026-09-05T00:00:00.000Z", special.nominalCycleZ), 12, 1e-9);
 }
 
 /* ------------------------------------------------------------------------------------ §10.2 */

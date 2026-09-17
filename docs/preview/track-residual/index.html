@@ -213,6 +213,24 @@ function render(d) {
       "PREDICTIVE ADVANTAGE AND COMMERCIAL VALUE ARE HYPOTHESES, NOT FINDINGS. "
       + "NOTHING HERE HAS BEEN SCORED AGAINST A HELD-OUT STORM."));
 
+  /* SUPERSESSION, AT THE TOP, WHERE IT CANNOT BE MISSED. This page derives its own 18Z
+     forecast position by interpolating TCM 46. NHC issued an interpolated 18Z position of its
+     own in the aviation advisory, and an official interpolation outranks a derived one. The
+     derivation stays — it is the audit trail — but nobody should read this page's 18Z figure
+     as the authoritative one for Lowell. */
+  if (w.supersededBy) {
+    const sb = w.supersededBy;
+    root.append($("p", { class: "banner mono", style: "border-color:#B8571F;color:#B8571F" },
+      "SUPERSEDED FOR THE 18Z RESIDUAL. THE AUTHORITATIVE RECORD USES NHC'S OWN INTERPOLATED "
+      + "18Z POSITION (" + sb.authoritativeForecast + ")."),
+      $("p", { class: "note" }, sb.reason + " " + sb.note + " First-reported fix: "
+        + num(sb.residualVsFirstReportedFix.alongNm, 1) + " nm along, "
+        + num(sb.residualVsFirstReportedFix.crossNm, 1) + " nm right-of-track. Revised fix: "
+        + num(sb.residualVsRevisedFix.alongNm, 1) + " nm along, "
+        + num(sb.residualVsRevisedFix.crossNm, 1) + " nm right-of-track."),
+      $("p", { class: "note" }, $("a", { href: sb.record }, sb.record)));
+  }
+
   /* ---------------- the strip ---------------- */
   root.append(panel("Residual strip — cross-track vs fix time",
     `${w.storm} · fixed baseline`,
@@ -273,14 +291,19 @@ function render(d) {
   root.append(panel("Corrected worked example — " + w.storm,
     w.baseline.baselineId + " × " + w.fix.fixId,
     $("div", { class: "grid c4" },
+      kv("Nominal cycle", dayz(w.baseline.nominalCycleZ)),
       kv("Baseline INIT", dayz(w.baseline.initialValidZ)),
       kv("First available", dayz(w.baseline.firstAvailableZ)),
       kv("Fix valid", dayz(w.fix.validZ)),
-      kv("Lead", num(w.residualForecastFrame.leadHours, 2) + " h")),
+      /* NOT the forecast lead. This is the leak gate's quantity: how much later the fix is
+         than the baseline's own analysis. Printing both under the word "Lead" is how the two
+         got conflated in the first place, so each is named for what it measures. */
+      kv("Evidence lead (fix − INIT)", num(w.residualForecastFrame.leadHours, 2) + " h")),
     $("p", { class: "note mono" },
-      `NOMINAL LABEL ${w.leadLabels.nominalFirstRowLabel} · ACTUAL `
-      + `${w.leadLabels.actualHoursInitToFirstRow} h INIT → FIRST FORECAST ROW`),
+      `LABEL ${w.leadLabels.firstRowLabel} · LEAD ${w.leadLabels.leadHoursFromCycle} h FROM CYCLE `
+      + `${dayz(w.leadLabels.nominalCycleZ)} · ${w.leadLabels.hoursFromInitialPosition} h FROM INIT`),
     $("p", { class: "note" }, w.leadLabels.note),
+    $("p", { class: "note" }, w.leadLabels.proof),
     $("p", { class: "note mono" },
       `FORECAST @ ${dayz(w.fix.validZ)} = ${num(w.interpolated.lat, 4)}N `
       + `${num(-w.interpolated.lonE, 4)}W · OBSERVED = ${num(w.fix.lat, 1)}N ${num(-w.fix.lonE, 1)}W`),

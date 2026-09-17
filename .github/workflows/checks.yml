@@ -201,6 +201,32 @@ jobs:
       # negatives in body text rather than footnotes, and the absence of any Brier, skill or
       # accuracy VALUE anywhere in the artefact -- Q2 and Q3 have not been started.
 
+      # THE RISK EVIDENCE RECORDS UNDER docs/risk/.
+      #
+      # Both gates below exist because of one hand-off that could not be rebuilt from its own
+      # contents, and both are made to fire before they are trusted.
+      #
+      # PROVENANCE. The Lowell Rev 3 package declared a Natural Earth input in its published
+      # source register, never shipped the file, and crashed on a clean checkout -- while the
+      # geometry it actually opened appeared nowhere in that register. So this checks both
+      # directions: nothing declared may be absent, and nothing read may go undeclared. It is
+      # Node rather than Python precisely so it runs HERE, on every pull request, instead of
+      # only in the release job that needs shapely, pypdf and a browser.
+      - name: Prove the risk-provenance gate can still fail
+        run: node scripts/check-risk-provenance.mjs --self-test
+      - name: Every declared risk-record input is present and hash-matched
+        run: node scripts/check-risk-provenance.mjs
+
+      # THE RETIRED LOWELL RESIDUAL. A 0.0 nm along-track result that took the 15Z release as
+      # forecast hour zero. The rule is not that the digits may not appear -- a correction that
+      # erases its own subject cannot be audited -- but that every occurrence sits inside a
+      # withdrawal. It walks all of docs/ rather than a list of pages, because docs/ is the
+      # Pages root and /preview/track-residual/ is served at 200 while being linked from nothing.
+      - name: Prove the retired-residual scanner can still fail
+        run: node scripts/check-retired-residual.mjs --self-test
+      - name: The retired Lowell residual cannot render on a published surface
+        run: node scripts/check-retired-residual.mjs
+
       # A guard that can fail silently is not a guard. The predicate deciding whether a
       # verification run may write the verdict the board reads once disabled itself to a
       # truthy regex object and `node --check` passed it, so it is now a pure function
@@ -275,6 +301,20 @@ jobs:
 
       - name: Test the genesis archive's honesty rules
         run: python3 scripts/genesis/tests/run_tests.py
+
+      # THE RISK PIPELINE'S TIME MODEL. Offline and browser-free: the nine regressions that came
+      # with the Lowell hand-off, plus the ones that close it -- the cycle origin proven from
+      # every archived discussion rather than adopted by convention, the special advisory that
+      # inherits the running cycle instead of opening one (which the release-hour rule gets wrong
+      # by six hours), and the declared-inputs check the hand-off needed and did not have.
+      #
+      # Runs after setup-python for the same reason the genesis steps do: `pip` before that
+      # action is whatever the runner image happens to ship, not the interpreter the tests use.
+      - name: Install the risk pipeline's pinned dependencies
+        run: pip install -r scripts/risk/requirements.txt
+
+      - name: Test the risk pipeline's time model
+        run: python3 -m pytest -q scripts/risk/tests/
 
       # THE PACIFIC GENESIS WATCH'S APPEND-ONLY CONTRACT.
       #

@@ -134,9 +134,17 @@ export function baselineFromTcm(text, meta) {
     baselineId: m.baselineId || `${adv.stormId || "?"}/TCM/${adv.advisoryNumber || "?"}`,
     stormId: adv.stormId, advisoryNumber: adv.advisoryNumber,
     product: "fstadv",
-    /* THE FIVE TIMES. cycleZ is null unless the caller knows the deck cycle — an advisory does
-       not print one, and inventing it from the issue hour would be a guess. */
+    /* THE SIX TIMES.
+       cycleZ stays as it was: the MODEL/DECK cycle a caller may know from outside the product.
+       nominalCycleZ is different and is the forecast's own lead origin, derived from the
+       product's rows by parseForecastAdvisory. The earlier comment here said an advisory does
+       not print a cycle and that inventing one from the issue hour would be a guess. The second
+       half is true — see the special advisory in track-residual.mjs's header — but the first
+       half is not: the rows determine the cycle, and leaving it null is what left forecast lead
+       measured from the initial position, which is the retired defect. */
     cycleZ: m.cycleZ ?? null,
+    nominalCycleZ: adv.nominalCycleZ ?? null,
+    nominalCycleRefusal: adv.cycleRefusal ?? null,
     initialValidZ: adv.initialValidZ,
     issuedZ: adv.issuedZ,
     firstAvailableZ: m.firstAvailableZ ?? null,
@@ -234,6 +242,10 @@ export function eligibleAt(baseline, fix, opts) {
     }
   }
   return { ok: true, refusal: null,
+           /* EVIDENCE LEAD, not forecast lead. This is how much later the fix is than the
+              baseline's own initial analysis, which is what the leak gate needs. Forecast
+              lead is valid - nominalCycleZ and lives on the points; the two answer different
+              questions and must never be printed under the same word. */
            leadHours: (tFix - tInit) / 3600e3,
            availabilityKnown: Number.isFinite(avail) };
 }
