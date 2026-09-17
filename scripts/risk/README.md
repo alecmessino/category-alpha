@@ -1,44 +1,67 @@
 # Millibar Risk Evidence — the Trigger Evidence Record pipeline
 
-Builds the published record at `/category-alpha/risk/lowell-2026/` from archived official
-products. One command produces the web note, the one-page PDF and the machine-readable
-manifest, and a second one gates them.
+Builds the published records under `/category-alpha/risk/` from archived official products.
+One command produces each record's web note, one-page PDF and machine-readable manifest, and
+a second one gates them.
+
+| Record | Event | Route |
+|---|---|---|
+| `lowell-2026` | EP122026 Lowell, 4–8 Sep | `/risk/lowell-2026/` |
+| `lala-2026` | CP012026 Lala, 12–28 Aug | `/risk/lala-2026/` |
+
+Both are evaluated against the **same contract manifest** — the TNC-HI-REEF public view,
+written once in `record.py::contract_manifest()` — by the same evaluator, with no logic
+written for either storm.
 
 ## Rebuild
 
 ```sh
 pip install -r scripts/risk/requirements.txt
-python3 -m playwright install chromium          # the PDF is rendered, not hand-assembled
+python3 -m playwright install chromium          # the PDFs are rendered, not hand-assembled
 cd scripts/risk && python3 build.py && python3 gates.py
 ```
 
-`gates.py --offline` skips the one gate that needs the network — the live-URL 200 check —
-and reports it as SKIP rather than counting it as a pass. Everything else runs offline
-against committed bytes.
+`build.py` and `gates.py` take an optional record slug (`python3 build.py lala-2026`) and do
+every record when given none. `gates.py --offline` skips the one gate that needs the network —
+the live-URL 200 check — and reports it as SKIP rather than counting it as a pass. Each record
+is gated in a process of its own, because the gates read the rendered PDF and page as module
+state and a record whose gates could see another record's document is a record whose gates can
+pass on the wrong one.
 
 **A rebuild is byte-identical.** `python3 build.py && python3 gates.py && git status` is the
-reproducibility check: if anything under `docs/risk/lowell-2026/` shows as modified, the
-build is not a function of its inputs. Chromium stamps the PDF with the wall clock, which was
-the only thing that ever differed between two renders, so the dates are pinned to the latest
-archived source transmission time instead.
+reproducibility check: if anything under `docs/risk/` shows as modified, the build is not a
+function of its inputs. Chromium stamps each PDF with the wall clock, which was the only thing
+that ever differed between two renders, so the dates are pinned to the latest archived source
+time instead.
+
+## How a second record was added
+
+`tec.py` holds the evaluator and `record.py` the build machinery; both are shared and neither
+knows which storm it is working on. What differs between two records is declared as data in
+`tec.EVENTS` — which products were archived and what they are named, which coastline rings the
+distances are measured to, which ATCF deck, and how precisely the issuance time is known — and
+the prose lives in that record's own module (`record_lowell.py`, `record_lala.py`).
+
+Adding Lala changed Lowell's build path substantially and its published bytes **not at all**;
+that is the check, and it is `git status` after a rebuild.
 
 ## What this reads, and nothing else
 
-`tec.py::declared_inputs()` is the single list of files the build opens, and the manifest's
-source register is built from it. Both directions are gated:
+`tec.py::declared_inputs(event)` is the single list of files a build opens, and each manifest's
+source register is built from it. Both directions are gated, for every event:
 
 - nothing declared may be absent from the checkout,
 - nothing read may go undeclared.
 
 That is not a general principle applied speculatively. The Rev 3 hand-off this pipeline came
-from declared a Natural Earth file it never shipped and never read for geometry, while
-leaving the geometry it *did* read out of its own register, and a clean checkout could not
-build it at all. `scripts/check-risk-provenance.mjs` enforces the same invariant in Node so
-it runs on every pull request without the Python dependencies.
+from declared a Natural Earth file it never shipped and never read for geometry, while leaving
+the geometry it *did* read out of its own register, and a clean checkout could not build it at
+all. `scripts/check-risk-provenance.mjs` enforces the same invariant in Node so it runs on every
+pull request without the Python dependencies.
 
 Coastlines come from `data/genesis-archive/coastlines/hawaii.geojson`, the shared repository
-primitive, with islands selected by `properties.name`. See
-`data/risk/lowell-ep122026/SOURCES.md` for why, and for what was verified before switching.
+primitive, with islands selected by `properties.name`. See each event's `SOURCES.md` for what
+was archived and what was verified.
 
 ## The time model
 
@@ -60,12 +83,27 @@ out `04/1830Z` and its discussion labels the `05/0000Z` row `12H` — twelve hou
 cycle, six from the 18Z slot the release hour would suggest. A special reissues the running
 cycle; it does not open one.
 
-`reconcile_lead_labels` proves the model from the archive rather than from convention. The
-discussion products print the forecast table with its labels attached, and those labels
-reconcile with the explicit UTC valid times against the cycle and against nothing else. Both
-hypotheses are scored on every archived discussion, and the check requires the cycle origin
-to hold **while the initial-position origin fails** — a product where both held would not
-discriminate and is reported as unproven rather than counted as evidence.
+Where the rows genuinely do not determine the cycle, the **companion discussion does** — by
+printing the lead label, not by applying a convention. Lala's last three advisories print five
+rows as the system dissipates, and a five-row set beginning at +12 h is equally canonical read
+as +24 h from a cycle six hours earlier. Two candidates, so `nominal_cycle_from_rows` refuses;
+`label_cycles` then reads `12H` off the discussion. Each manifest records which advisories
+those were.
+
+`reconcile_lead_labels` proves the model from the archive rather than from convention. Both
+hypotheses are scored on every archived discussion in both events, and the check requires the
+cycle origin to hold **while the initial-position origin fails** — a product where both held
+would not discriminate and is reported as unproven rather than counted as evidence. Across the
+two archives: **84 discriminating discussions, cycle origin holds on 84, initial-position
+origin on none.**
+
+## Issuance precision differs between the two archives, and is declared
+
+Lowell's products were captured off the WMO feed, so their filenames carry the transmission
+time to the minute. Lala's come from NHC's public archive, which masks the transmission group
+as the literal `TTAA00 PHFO DDHHMM`; those products establish their issuance only to the hour
+they print for themselves, and no minute is reconstructed. `Event.issued_basis` says which, the
+manifest carries it under `event_manifest.issuance_provenance`, and each page states it.
 
 ## What is retired
 
@@ -73,14 +111,3 @@ A Lowell 18Z residual of 0.0 nm along-track and +13.6 nm cross-track, which took
 release as forecast hour zero and used a forecast position not traceable to an official
 product. `scripts/check-retired-residual.mjs` walks every published file under `docs/` and
 fails if that result can render anywhere except inside a withdrawal.
-
-The record's own 18Z figures are against **NHC's own interpolated 18Z position** (aviation
-advisory 46, `+3 HR`), and both source vintages of the verifying fix are reported as peers:
-
-| Vintage | Along | Right-of-track |
-|---|---|---|
-| As known at 18Z · Intermediate 46A (18.0N 162.1W) | −5.0 nm | +13.6 nm |
-| Revised at 21Z · Advisory 47 prior position (18.0N 162.2W) | −7.3 nm | +8.3 nm |
-
-Same forecast, same valid time. The verifying observation changed with the source vintage,
-and no later product overwrites the earlier one.

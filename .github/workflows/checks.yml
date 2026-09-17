@@ -308,6 +308,13 @@ jobs:
       # inherits the running cycle instead of opening one (which the release-hour rule gets wrong
       # by six hours), and the declared-inputs check the hand-off needed and did not have.
       #
+      # One evaluator now serves two archives (Lowell and Lala), so the suite also runs the
+      # cross-archive checks: the cycle origin holds on all 84 discriminating discussions across
+      # both and the initial-position origin on none; an ambiguous five-row forecast is refused
+      # and then settled by the discussion's printed label; and a public advisory whose local
+      # stamp and UTC line disagree is refused rather than resolved -- 11 PM HST on the 16th is
+      # 09Z on the 17th, and getting that from the wrong line is a day, not an hour.
+      #
       # Runs after setup-python for the same reason the genesis steps do: `pip` before that
       # action is whatever the runner image happens to ship, not the interpreter the tests use.
       - name: Install the risk pipeline's pinned dependencies
