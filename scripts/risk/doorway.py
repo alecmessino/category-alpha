@@ -73,14 +73,28 @@ def watch() -> dict | None:
     entries = led.get("entries", [])
     # The ledger's `kind` is a schema token. It is shown to a reader in the reader's words,
     # and an unrecognised one falls through as itself rather than being dropped.
-    SAYS = {"nhc-source-state": "official source state",
-            "nhc-source-and-atlas-state": "source state with the Atlas state beside it",
-            "atlas-state-append": "Atlas state appended to an earlier capture",
-            "correction": "correction, appended over a record left unedited"}
-    kinds = {}
+    # Singular and plural, because "2 correction" reads as a typo and a doorway that cannot
+    # count its own records is not reassuring about the ones it is pointing at.
+    SAYS = {"nhc-source-state": ("official source state", "official source states"),
+            "nhc-source-and-atlas-state": ("source state with the Atlas state beside it",
+                                           "source states with the Atlas state beside them"),
+            "atlas-state-append": ("Atlas state appended to an earlier capture",
+                                   "Atlas states appended to earlier captures"),
+            "invest-designation": ("invest designation, sourced from ATCF",
+                                   "invest designations, sourced from ATCF"),
+            "correction": ("correction, appended over a record left unedited",
+                           "corrections, appended over records left unedited")}
+    counts = {}
     for e in entries:
-        k = SAYS.get(e.get("kind", "?"), e.get("kind", "?"))
-        kinds[k] = kinds.get(k, 0) + 1
+        k = e.get("kind", "?")
+        counts[k] = counts.get(k, 0) + 1
+    kinds = {}
+    for k, n in counts.items():
+        pair = SAYS.get(k)
+        kinds[pair[0] if n == 1 else pair[1]] = n if pair else None
+        if not pair:                      # an unrecognised kind falls through as itself
+            kinds.pop(None, None)
+            kinds[k] = n
     return {"n": len(entries), "kinds": kinds,
             "latest": max((e.get("committed_at_utc", "") for e in entries), default=""),
             "url": "https://alecmessino.github.io/category-alpha/risk/genesis-watch/"}

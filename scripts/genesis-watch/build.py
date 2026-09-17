@@ -262,6 +262,184 @@ def changes_since(prev: dict, cur: dict) -> list[dict]:
     return out
 
 
+# THE THREE QUESTIONS. A test label is the watch's own word for what a disturbance is being
+# used to answer; the sentence beside it is what that question means to a reader who has not
+# read the contract. The mapping is prose keyed to a label the RECORDS carry -- an unknown
+# label falls through as itself rather than being dropped or guessed at.
+QUESTION = {
+    "HORIZON": ("How early is a watch worth anything?",
+                "The value of a pre-genesis record is decided before genesis, not after. This "
+                "is the object that tests it."),
+    "IDENTITY": ("Is this the same system as before?",
+                 "A remnant low that redevelops raises a question the archive cannot answer "
+                 "with a rate, and the watch says so rather than producing one."),
+    "EXPOSURE CLOCK": ("How long until this matters to a coastline?",
+                       "The question a slow-developing system near land raises, and the one "
+                       "that does not survive a rename."),
+}
+
+
+def _probs(rec) -> str:
+    if rec is None:
+        return ""
+    a = (rec.get("formation_prob_48h") or {}).get("official_text", "")
+    b = (rec.get("formation_prob_7d") or {}).get("official_text", "")
+    return f"{a} / {b}"
+
+
+def atlas_by_stage(entries: list, records: list, snaps: list) -> dict:
+    """For each snapshot, the Atlas cohort it is accompanied by, keyed by object.
+
+    A snapshot either carries its own Atlas state or has one APPENDED against it, and the two
+    are not interchangeable: 0001's was appended hours later and says so. Either way the state
+    is found through the ledger rather than by position.
+    """
+    out = {}
+    for sid, snap in snaps:
+        atlas = snap.get("atlas_state")
+        if not atlas or atlas.get("status"):
+            atlas = next((r.get("atlas_state") for e, r in zip(entries, records)
+                          if r.get("appends_to") == sid
+                          and r.get("schema", "").startswith(
+                              "millibar.pacific-genesis-watch.atlas-append")), None)
+        objs = (atlas or {}).get("objects") or []
+        out[sid] = {(o.get("object_id") or o.get("millibar_object_id")): o for o in objs}
+    return out
+
+
+def atlas_line(oid: str, snaps: list, stages: dict, invest: dict | None) -> str:
+    """What the archive could and could not say about one object, at each stage.
+
+    THIS IS NOT A SUMMARY OF GOOD NEWS. A cohort can exist and still refuse its rates, and the
+    interesting case in this sequence is the one where the archive said LESS as NHC's chance
+    rose -- because the disturbance moved into a worse-sampled part of the basin, not because
+    anything improved or degraded about the method.
+    """
+    rows = []
+    for sid, _ in snaps:
+        c = (stages.get(sid, {}).get(oid) or {}).get("cohort")
+        if not c:
+            continue
+        n, ok = c.get("n"), c.get("sufficient")
+        verdict = ("rates supported" if ok else
+                   f"rates refused, {esc(str(n))} &lt; {esc(str((c.get('definition') or {}).get('min_sample')))} minimum")
+        rows.append(f'<tr><td class="mono">{esc(sid)}</td>'
+                    f'<td>{esc(str(n))} analogs &middot; {verdict}</td></tr>')
+    if invest and (invest.get("association") or {}).get("object") == oid:
+        g = (invest.get("atlas_state") or {}).get("model_guidance") or {}
+        if g.get("available"):
+            rows.append('<tr><td class="mono">0003</td><td>model guidance becomes admissible, '
+                        'for this object only</td></tr>')
+    if not rows:
+        return ""
+    return ('   <p class="cap">What the archive could say, by state:</p>\n'
+            f'   <table class="prog">{"".join(rows)}</table>\n')
+
+
+def brief_section(snaps: list, invest: dict | None, stages: dict) -> str:
+    """Three disturbances, three different questions, one frozen sequence.
+
+    Every figure here is read out of the committed records: the first snapshot's test labels,
+    the progression between the first state and the latest, and the identifier each object
+    carries now. Nothing is restated from memory and nothing is recomputed.
+    """
+    first_id, first = snaps[0]
+    last_id, last = snaps[-1]
+    first_ids = {o.get("millibar_object_id") for o in first.get("objects", [])}
+    last_ids = {o.get("millibar_object_id") for o in last.get("objects", [])}
+    first_by = {o.get("millibar_object_id"): o for o in first.get("objects", [])}
+    retired = [o for o in first.get("objects", []) if o.get("millibar_object_id") not in last_ids]
+
+    out = []
+    for o in last.get("objects", []):
+        oid = o.get("millibar_object_id")
+        prior = first_by.get(oid)
+        note = ""
+        if prior is None:
+            # An object the latest state holds that the first one did not is a NEW identifier,
+            # and the test it did not inherit is the whole point of it being new.
+            test = None
+            headline = "A question that was not inherited."
+            gloss = ("NHC renamed this area between the two states, so the watch minted a new "
+                     "identifier and refused continuity. Handing the new object the retired "
+                     "one's test label would assert through the back door exactly what the "
+                     "identifier refused.")
+            if retired:
+                r = retired[0]
+                note = (f"{esc(r.get('millibar_object_id'))} carried "
+                        f"{esc(r.get('test'))}. {esc(oid)} carries no test label.")
+        else:
+            test = prior.get("test")
+            headline, gloss = QUESTION.get(test, (esc(test or ""), ""))
+
+        states = [(last_id, o)] if prior is None else [(first_id, prior), (last_id, o)]
+        rows_html = "".join(
+            f'<tr><td class="mono">{esc(rid)}</td>'
+            f'<td class="mono">{esc(_probs(rec))}</td></tr>' for rid, rec in states)
+        unchanged = (prior is not None and _probs(prior) == _probs(o))
+        prog = (f'<table class="prog">{rows_html}</table>'
+                + ('<p class="cap">Unchanged between the two states.</p>' if unchanged else ""))
+
+        inv = ""
+        if invest and (invest.get("association") or {}).get("object") == oid:
+            d = invest["invest"]["designation"]
+            # THE SUBJECT OF THIS SENTENCE IS THE INVEST, NOT THE OBJECT. An earlier draft
+            # opened "Now designated EP982026", which reads as NHC having identified this
+            # disturbance as that invest -- the exact claim the record refuses with
+            # nhc_states_this_association: false. What is true is narrower and is what is
+            # said: the invest exists, and it is inside this area's published polygon.
+            ev = str(d.get("evidence") or "")
+            inv = (f'<p class="cap"><b>Invest '
+                   f'{esc(invest["invest"]["atcf_id"])} now exists inside this area&rsquo;s '
+                   f'published NHC polygon.</b> The association is geometric containment of two '
+                   f'official products; NHC does not state the association. The invest\'s own '
+                   f'ATCF deck reads {esc(ev[ev.find(":") + 2:] if ":" in ev else ev)}.</p>')
+
+        out.append(
+            '  <article class="q">\n'
+            f'   <h3>{esc(o.get("nhc_name"))}</h3>\n'
+            f'   <p class="qid"><span class="mono">{esc(oid)}</span>'
+            + (f' &middot; test <span class="mono">{esc(test)}</span>' if test
+               else ' &middot; no test label')
+            + '</p>\n'
+            f'   <p class="qhead">{headline}</p>\n'
+            f'   <p>{gloss}</p>\n'
+            '   <p class="cap">NHC formation chance, 48 h / 7 d:</p>\n'
+            f'   {prog}\n'
+            + (f'   <p class="cap">{note}</p>\n' if note else "")
+            + atlas_line(oid, snaps, stages, invest)
+            + inv
+            + '  </article>')
+    return "\n".join(out)
+
+
+def invest_section(invest: dict | None) -> str:
+    """The invest state, or the refusal that stood in every record before it."""
+    if not invest:
+        return ('<p class="cap">No invest has been designated for any object in this sequence. '
+                'Model guidance stays refused, because naming an invest without a source would '
+                'be a guess about which disturbance it belongs to.</p>')
+    g = (invest.get("atlas_state") or {}).get("model_guidance") or {}
+    a = invest.get("association") or {}
+    t = invest.get("timestamps") or {}
+    guidance = ("admissible for this object only, under its mandatory label"
+                if g.get("available") else "refused")
+    return (
+        '  <dl class="kv wide">\n'
+        f'    <dt>ATCF identifier</dt><dd class="mono">{esc(invest["invest"]["atcf_id"])}</dd>\n'
+        f'    <dt>Designated INVEST at</dt><dd class="mono">{esc(t.get("invest_designated_at"))}</dd>\n'
+        f'    <dt>Acquired at</dt><dd class="mono">{esc(t.get("source_acquired_at"))}</dd>\n'
+        f'    <dt>Association</dt><dd>{esc(a.get("object"))}, by containment</dd>\n'
+        '    <dt>NHC states this association</dt><dd>'
+        + ("yes" if a.get("nhc_states_this_association") else "no") + '</dd>\n'
+        f'    <dt>Model guidance</dt><dd>{guidance}</dd>\n'
+        '  </dl>\n'
+        f'  <p class="cap">{esc(a.get("why_not_stronger"))}</p>\n'
+        f'  <p class="cap">{esc(a.get("if_rejected"))}</p>\n'
+        '  <p class="cap"><b>What changed for the Atlas.</b> '
+        f'{esc((invest.get("atlas_state") or {}).get("what_changed_for_the_atlas"))}</p>')
+
+
 def build() -> Path:
     """THE LEDGER IS THE AUTHORITY ON IDENTITY, not a field inside a record.
 
@@ -332,6 +510,13 @@ def build() -> Path:
             o["test"] = test_by_id.get(o.get("millibar_object_id"))
     objects = "".join(object_card(o, atlas) for o in latest.get("objects", []))
 
+    # The invest designation, resolved through the LEDGER like every other identity here.
+    invest = next((r for e, r in zip(entries, records)
+                   if e.get("kind") == "invest-designation"), None)
+    stages = atlas_by_stage(entries, records, snaps)
+    brief_html = brief_section(snaps, invest, stages)
+    invest_html = invest_section(invest)
+
     prev_snap = snaps[-2][1] if len(snaps) > 1 else None
     if prev_snap is None:
         changes_html = ('<p class="nil">This is the first decision state in the sequence; there '
@@ -367,6 +552,22 @@ def build() -> Path:
 
 <h1>Pacific Genesis Watch</h1>
 <p class="sub">Frozen decision states</p>
+
+<section class="brief">
+  <h2>Three disturbances. Three different questions. One frozen decision state.</h2>
+  <p class="lead">The Pacific is carrying three pre-genesis areas at once. They are not three
+  instances of the same problem &mdash; each one tests something different about what a record
+  taken <em>before</em> the outcome can be worth, and the sequence below was written while all
+  three were still open.</p>
+  <div class="qs">
+{brief_html}
+  </div>
+</section>
+
+<section class="state">
+  <h3>The first invest in this sequence</h3>
+  {invest_html}
+</section>
 
 <p class="banner">Not a forecast. Formation probabilities on this page are NHC&rsquo;s, in NHC&rsquo;s
   own words. Archive cohorts are historical evidence conditioned on genesis having occurred, and
@@ -453,6 +654,19 @@ section.state{margin:22px 0}
 .dis{margin:4px 0 0 130px;border-left:2px solid var(--warn);padding-left:8px;font-size:12px;color:var(--ink2)}
 .where{font:16px/1.3 "IBM Plex Mono",Menlo,monospace;margin:0 0 6px}
 .quote{margin:0;padding-left:10px;border-left:2px solid var(--rule);color:var(--ink2);font-size:14px}
+.brief{border-top:2px solid var(--ink);padding-top:16px;margin:26px 0 30px}
+.brief h2{font-size:21px;margin:0 0 10px;letter-spacing:-.01em;max-width:34ch}
+.brief .lead{margin:0 0 20px;max-width:74ch}
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
+.q{border-left:2px solid var(--rule);padding-left:14px}
+.q h3{font-size:14px;margin:0 0 4px;line-height:1.3}
+.q .qid{font-size:11.5px;color:var(--mute);margin:0 0 8px}
+.q .qhead{font-weight:600;margin:0 0 6px}
+.q p{margin:0 0 8px;font-size:13px}
+.prog{border-collapse:collapse;margin:0 0 8px;font-size:12px}
+.prog td{padding:1px 12px 1px 0;vertical-align:top;color:var(--ink)}
+.prog td:first-child{color:var(--mute);white-space:nowrap}
+@media (max-width:760px){.qs{grid-template-columns:1fr}}
 .kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 14px;margin:0 0 8px;font-size:13px}
 .kv.wide{grid-template-columns:max-content 1fr}
 .kv dt{color:var(--mute)}

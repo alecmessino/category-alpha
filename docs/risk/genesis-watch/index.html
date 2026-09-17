@@ -37,6 +37,19 @@ section.state{margin:22px 0}
 .dis{margin:4px 0 0 130px;border-left:2px solid var(--warn);padding-left:8px;font-size:12px;color:var(--ink2)}
 .where{font:16px/1.3 "IBM Plex Mono",Menlo,monospace;margin:0 0 6px}
 .quote{margin:0;padding-left:10px;border-left:2px solid var(--rule);color:var(--ink2);font-size:14px}
+.brief{border-top:2px solid var(--ink);padding-top:16px;margin:26px 0 30px}
+.brief h2{font-size:21px;margin:0 0 10px;letter-spacing:-.01em;max-width:34ch}
+.brief .lead{margin:0 0 20px;max-width:74ch}
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
+.q{border-left:2px solid var(--rule);padding-left:14px}
+.q h3{font-size:14px;margin:0 0 4px;line-height:1.3}
+.q .qid{font-size:11.5px;color:var(--mute);margin:0 0 8px}
+.q .qhead{font-weight:600;margin:0 0 6px}
+.q p{margin:0 0 8px;font-size:13px}
+.prog{border-collapse:collapse;margin:0 0 8px;font-size:12px}
+.prog td{padding:1px 12px 1px 0;vertical-align:top;color:var(--ink)}
+.prog td:first-child{color:var(--mute);white-space:nowrap}
+@media (max-width:760px){.qs{grid-template-columns:1fr}}
 .kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 14px;margin:0 0 8px;font-size:13px}
 .kv.wide{grid-template-columns:max-content 1fr}
 .kv dt{color:var(--mute)}
@@ -76,6 +89,62 @@ footer a{color:var(--mute)}
 
 <h1>Pacific Genesis Watch</h1>
 <p class="sub">Frozen decision states</p>
+
+<section class="brief">
+  <h2>Three disturbances. Three different questions. One frozen decision state.</h2>
+  <p class="lead">The Pacific is carrying three pre-genesis areas at once. They are not three
+  instances of the same problem &mdash; each one tests something different about what a record
+  taken <em>before</em> the outcome can be worth, and the sequence below was written while all
+  three were still open.</p>
+  <div class="qs">
+  <article class="q">
+   <h3>Western East Pacific</h3>
+   <p class="qid"><span class="mono">PGW-2026-D1</span> &middot; test <span class="mono">HORIZON</span></p>
+   <p class="qhead">How early is a watch worth anything?</p>
+   <p>The value of a pre-genesis record is decided before genesis, not after. This is the object that tests it.</p>
+   <p class="cap">NHC formation chance, 48 h / 7 d:</p>
+   <table class="prog"><tr><td class="mono">0001</td><td class="mono">low, 20 percent / high, 70 percent</td></tr><tr><td class="mono">0002</td><td class="mono">medium, 40 percent / high, 80 percent</td></tr></table>
+   <p class="cap">What the archive could say, by state:</p>
+   <table class="prog"><tr><td class="mono">0001</td><td>22 analogs &middot; rates supported</td></tr><tr><td class="mono">0002</td><td>7 analogs &middot; rates refused, 7 &lt; 10 minimum</td></tr><tr><td class="mono">0003</td><td>model guidance becomes admissible, for this object only</td></tr></table>
+<p class="cap"><b>Invest EP982026 now exists inside this area&rsquo;s published NHC polygon.</b> The association is geometric containment of two official products; NHC does not state the association. The invest's own ATCF deck reads &#x27;GENESIS024&#x27; through 17/1200Z, &#x27;INVEST&#x27; from 17/1800Z.</p>  </article>
+  <article class="q">
+   <h3>Well East-Southeast of the Hawaiian Islands (Former TD15-E)</h3>
+   <p class="qid"><span class="mono">PGW-2026-D2</span> &middot; test <span class="mono">IDENTITY</span></p>
+   <p class="qhead">Is this the same system as before?</p>
+   <p>A remnant low that redevelops raises a question the archive cannot answer with a rate, and the watch says so rather than producing one.</p>
+   <p class="cap">NHC formation chance, 48 h / 7 d:</p>
+   <table class="prog"><tr><td class="mono">0001</td><td class="mono">low, 10 percent / low, 10 percent</td></tr><tr><td class="mono">0002</td><td class="mono">low, 10 percent / low, 20 percent</td></tr></table>
+   <p class="cap">What the archive could say, by state:</p>
+   <table class="prog"><tr><td class="mono">0001</td><td>7 analogs &middot; rates refused, 7 &lt; 10 minimum</td></tr><tr><td class="mono">0002</td><td>8 analogs &middot; rates refused, 8 &lt; 10 minimum</td></tr></table>
+  </article>
+  <article class="q">
+   <h3>South of Southern Mexico</h3>
+   <p class="qid"><span class="mono">PGW-2026-N4</span> &middot; no test label</p>
+   <p class="qhead">A question that was not inherited.</p>
+   <p>NHC renamed this area between the two states, so the watch minted a new identifier and refused continuity. Handing the new object the retired one's test label would assert through the back door exactly what the identifier refused.</p>
+   <p class="cap">NHC formation chance, 48 h / 7 d:</p>
+   <table class="prog"><tr><td class="mono">0002</td><td class="mono">low, near 0 percent / high, 80 percent</td></tr></table>
+   <p class="cap">PGW-2026-D3 carried EXPOSURE CLOCK. PGW-2026-N4 carries no test label.</p>
+   <p class="cap">What the archive could say, by state:</p>
+   <table class="prog"><tr><td class="mono">0002</td><td>95 analogs &middot; rates supported</td></tr></table>
+  </article>
+  </div>
+</section>
+
+<section class="state">
+  <h3>The first invest in this sequence</h3>
+    <dl class="kv wide">
+    <dt>ATCF identifier</dt><dd class="mono">EP982026</dd>
+    <dt>Designated INVEST at</dt><dd class="mono">2026-09-17T18:00Z</dd>
+    <dt>Acquired at</dt><dd class="mono">2026-09-17T21:19:46Z</dd>
+    <dt>Association</dt><dd>PGW-2026-D1, by containment</dd>
+    <dt>NHC states this association</dt><dd>no</dd>
+    <dt>Model guidance</dt><dd>admissible for this object only, under its mandatory label</dd>
+  </dl>
+  <p class="cap">No NHC product names an invest against an outlook area: the text outlook names no invest, and the shapefile&#x27;s attributes are basin, area number and two probabilities. Containment is a relation between two official products, not a statement by either of them.</p>
+  <p class="cap">Drop this block. Every other value in this record -- the designation, its evidence, the fix, the hashes -- stands without it.</p>
+  <p class="cap"><b>What changed for the Atlas.</b> Model guidance was refused in every earlier record because no invest association was sourced and naming one would have been a guess about which disturbance it belonged to. A designated invest with a position now exists, and containment singles out one area, so guidance becomes admissible FOR THAT OBJECT ONLY and only under its mandatory label. Nothing about the other two disturbances changes.</p>
+</section>
 
 <p class="banner">Not a forecast. Formation probabilities on this page are NHC&rsquo;s, in NHC&rsquo;s
   own words. Archive cohorts are historical evidence conditioned on genesis having occurred, and
@@ -232,7 +301,7 @@ footer a{color:var(--mute)}
     <span class="mono">scripts/check-genesis-watch-append-only.mjs</span> and
     <span class="mono">scripts/genesis-watch/tests/</span>, not by this sentence.</p>
   <table class="seq"><thead><tr><th>Record</th><th>Kind</th><th>Committed (UTC)</th>
-    <th>Integrity hash</th></tr></thead><tbody><tr><td class="mono">0001</td><td>nhc-source-state</td><td class="mono">2026-09-17T17:15:52Z</td><td class="mono sha">961cdc3e6df6a82b…</td></tr><tr><td class="mono">0001b</td><td>atlas-state-append</td><td class="mono">2026-09-17T17:17:19Z</td><td class="mono sha">e5b841f82ce5ef02…</td></tr><tr><td class="mono">0002</td><td>nhc-source-and-atlas-state</td><td class="mono">2026-09-17T17:54:30Z</td><td class="mono sha">a22ecfe3cce2a00c…</td></tr><tr><td class="mono">0002c1</td><td>correction</td><td class="mono">2026-09-17T17:56:18Z</td><td class="mono sha">9bbc71ea4788e246…</td></tr></tbody></table>
+    <th>Integrity hash</th></tr></thead><tbody><tr><td class="mono">0001</td><td>nhc-source-state</td><td class="mono">2026-09-17T17:15:52Z</td><td class="mono sha">961cdc3e6df6a82b…</td></tr><tr><td class="mono">0001b</td><td>atlas-state-append</td><td class="mono">2026-09-17T17:17:19Z</td><td class="mono sha">e5b841f82ce5ef02…</td></tr><tr><td class="mono">0002</td><td>nhc-source-and-atlas-state</td><td class="mono">2026-09-17T17:54:30Z</td><td class="mono sha">a22ecfe3cce2a00c…</td></tr><tr><td class="mono">0002c1</td><td>correction</td><td class="mono">2026-09-17T17:56:18Z</td><td class="mono sha">9bbc71ea4788e246…</td></tr><tr><td class="mono">0003</td><td>invest-designation</td><td class="mono">2026-09-17T21:19:48Z</td><td class="mono sha">7d3bcb78349daebb…</td></tr><tr><td class="mono">0003c1</td><td>correction</td><td class="mono">2026-09-17T21:21:01Z</td><td class="mono sha">4cda92125256db34…</td></tr></tbody></table>
 </section>
 
 <footer>

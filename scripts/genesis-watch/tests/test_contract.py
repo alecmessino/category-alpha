@@ -69,17 +69,42 @@ def test_the_atlas_append_is_separate_and_later():
     assert "NOT RECOVERABLE" in rec["atlas_state"]["timing_statement"]
 
 
+def _corrections_for(record_id: str) -> list[dict]:
+    """Every appended correction that supersedes a record."""
+    return [r for r in C.load_all()
+            if r.get("schema", "").startswith("millibar.pacific-genesis-watch.correction")
+            and r.get("supersedes") == record_id]
+
+
 def test_every_record_keeps_its_timestamps_apart():
-    """No record may conflate issuance, acquisition, computation and commit."""
+    """No record may conflate issuance, acquisition, computation and commit.
+
+    READ AS CORRECTED, WHICH IS WHAT THE CONTRACT ACTUALLY PROMISES. A frozen record is never
+    edited, so a record that shipped with a field missing carries that gap forever and an
+    appended correction is the only thing that can supply it. Checking each record in
+    isolation would therefore demand the one thing the contract forbids. The invariant is over
+    the sequence: the four times, apart, for every record that states any of them -- in the
+    record itself or in a correction that names it.
+
+    This is not a softer rule. An uncorrected record missing a key still fails here, and a
+    correction only counts for the record it explicitly supersedes.
+    """
+    keys = {"source_issued_at", "source_acquired_at", "atlas_computed_at",
+            "snapshot_committed_at"}
     for rec in C.load_all():
         ts = rec.get("timestamps")
         if not ts:
             continue
-        keys = {"source_issued_at", "source_acquired_at", "atlas_computed_at",
-                "snapshot_committed_at"}
-        assert keys <= set(ts), f"{rec.get('record_id')} is missing a timestamp field"
+        present = set(ts)
+        for corr in _corrections_for(rec.get("record_id")):
+            present |= set((corr.get("fix") or {}).get("timestamps_as_they_should_read") or {})
+        missing = keys - present
+        assert not missing, (
+            f"{rec.get('record_id')} states no {', '.join(sorted(missing))}, and no appended "
+            f"correction supplies it")
         # snapshot_committed_at belongs to the ledger, which is written after sealing.
-        assert ts["snapshot_committed_at"] is None
+        if "snapshot_committed_at" in ts:
+            assert ts["snapshot_committed_at"] is None
 
 
 def test_commit_times_come_from_the_ledger_and_are_after_issuance():
