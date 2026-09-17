@@ -6,8 +6,11 @@ a second one gates them.
 
 | Record | Event | Route |
 |---|---|---|
-| `lowell-2026` | EP122026 Lowell, 4–8 Sep | `/risk/lowell-2026/` |
 | `lala-2026` | CP012026 Lala, 12–28 Aug | `/risk/lala-2026/` |
+| `lowell-2026` | EP122026 Lowell, 4–8 Sep | `/risk/lowell-2026/` |
+
+`build.py` also writes the `/risk/` index, after the records and from their published
+manifests — see **The doorway** below.
 
 Both are evaluated against the **same contract manifest** — the TNC-HI-REEF public view,
 written once in `record.py::contract_manifest()` — by the same evaluator, with no logic
@@ -104,6 +107,26 @@ time to the minute. Lala's come from NHC's public archive, which masks the trans
 as the literal `TTAA00 PHFO DDHHMM`; those products establish their issuance only to the hour
 they print for themselves, and no minute is reconstructed. `Event.issued_basis` says which, the
 manifest carries it under `event_manifest.issuance_provenance`, and each page states it.
+
+## The doorway
+
+`doorway.py` writes `docs/risk/index.html`, and `build.py` runs it after the records because
+it reads what they published. Every card is derived: the trigger evidence records from their
+own manifests, the Pacific Genesis Watch from its ledger. Nothing on that page is a second
+copy of a fact, so it cannot list a record that no longer exists or quietly stop listing one
+that was added — and the ordering is the season's, taken from the earliest record each
+manifest holds, not a list anyone maintains.
+
+`scripts/check-risk-doorway.mjs` gates it in both directions: every published route under
+`docs/risk/` must be linked from the index, and every link on the index must resolve. That is
+not hypothetical — `docs/` is the Pages root, and `/preview/track-residual/` is served at 200
+in this repository while being linked from nothing. The same gate holds the standing
+constraint on this surface: no page here may carry the vocabulary of a trading or wagering
+venue. It ships a `--self-test`.
+
+The page's Methodology section states the standing commitments in prose and links the
+repository's markdown underneath as source, rather than sending a reader to an unrendered
+file and calling that a methodology.
 
 ## What is retired
 
