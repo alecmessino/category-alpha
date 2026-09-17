@@ -1,6 +1,6 @@
 {
   "schema": "millibar.track-residual.preview/1",
-  "generatedAt": "2026-09-08T03:23:55.145Z",
+  "generatedAt": "2026-09-17T17:04:25.159Z",
   "signConvention": "+CROSS = RIGHT OF BASELINE FORECAST DIRECTION · +ALONG = AHEAD ALONG IT · ALONG ≠ SPEED ERROR",
   "interpolation": "linear-in-time",
   "fixtureManifest": {
@@ -168,6 +168,8 @@
     "baseline": {
       "baselineId": "EP122026/TCM/046",
       "advisoryNumber": "46",
+      "nominalCycleZ": "2026-09-07T12:00:00.000Z",
+      "nominalCycleRefusal": null,
       "initialValidZ": "2026-09-07T15:00:00.000Z",
       "issuedZ": "2026-09-07T15:00:00.000Z",
       "firstAvailableZ": "2026-09-07T14:51:00.000Z",
@@ -190,7 +192,9 @@
           "lonE": -162.6,
           "kt": 100,
           "gustKt": 120,
-          "kind": "initial"
+          "kind": "initial",
+          "leadHoursFromCycle": null,
+          "hoursFromInitialPosition": 0
         },
         {
           "validZ": "2026-09-08T00:00:00.000Z",
@@ -198,7 +202,9 @@
           "lonE": -161.7,
           "kt": 95,
           "gustKt": 115,
-          "kind": "forecast"
+          "kind": "forecast",
+          "leadHoursFromCycle": 12,
+          "hoursFromInitialPosition": 9
         },
         {
           "validZ": "2026-09-08T12:00:00.000Z",
@@ -206,7 +212,9 @@
           "lonE": -160.9,
           "kt": 85,
           "gustKt": 105,
-          "kind": "forecast"
+          "kind": "forecast",
+          "leadHoursFromCycle": 24,
+          "hoursFromInitialPosition": 21
         },
         {
           "validZ": "2026-09-09T00:00:00.000Z",
@@ -214,7 +222,9 @@
           "lonE": -160.8,
           "kt": 70,
           "gustKt": 85,
-          "kind": "forecast"
+          "kind": "forecast",
+          "leadHoursFromCycle": 36,
+          "hoursFromInitialPosition": 33
         },
         {
           "validZ": "2026-09-09T12:00:00.000Z",
@@ -222,7 +232,9 @@
           "lonE": -161.5,
           "kt": 55,
           "gustKt": 65,
-          "kind": "forecast"
+          "kind": "forecast",
+          "leadHoursFromCycle": 48,
+          "hoursFromInitialPosition": 45
         },
         {
           "validZ": "2026-09-10T00:00:00.000Z",
@@ -230,7 +242,9 @@
           "lonE": -163.5,
           "kt": 50,
           "gustKt": 60,
-          "kind": "forecast"
+          "kind": "forecast",
+          "leadHoursFromCycle": 60,
+          "hoursFromInitialPosition": 57
         },
         {
           "validZ": "2026-09-10T12:00:00.000Z",
@@ -238,7 +252,9 @@
           "lonE": -166,
           "kt": 45,
           "gustKt": 55,
-          "kind": "forecast"
+          "kind": "forecast",
+          "leadHoursFromCycle": 72,
+          "hoursFromInitialPosition": 69
         },
         {
           "validZ": "2026-09-11T12:00:00.000Z",
@@ -246,7 +262,9 @@
           "lonE": -170,
           "kt": 40,
           "gustKt": 50,
-          "kind": "outlook"
+          "kind": "outlook",
+          "leadHoursFromCycle": 96,
+          "hoursFromInitialPosition": 93
         },
         {
           "validZ": "2026-09-12T12:00:00.000Z",
@@ -254,7 +272,9 @@
           "lonE": -172,
           "kt": 35,
           "gustKt": 45,
-          "kind": "outlook"
+          "kind": "outlook",
+          "leadHoursFromCycle": 120,
+          "hoursFromInitialPosition": 117
         }
       ]
     },
@@ -273,9 +293,12 @@
       "advisoryNumber": "46A"
     },
     "leadLabels": {
-      "nominalFirstRowLabel": "12H",
-      "actualHoursInitToFirstRow": 9,
-      "note": "The first forecast row is filed under a nominal 12 h label and is NINE hours after the initial position. Only explicit UTC valid times are read."
+      "firstRowLabel": "12H",
+      "nominalCycleZ": "2026-09-07T12:00:00.000Z",
+      "leadHoursFromCycle": 12,
+      "hoursFromInitialPosition": 9,
+      "note": "The 08/0000Z row is filed under a 12H label, is twelve hours after the 12Z nominal cycle, and is nine hours after the 07/1500Z initial position. All three are true. Forecast lead is valid - nominal_cycle, so the label is exact and the nine hours is a separate quantity. An earlier version of this payload reported the nine hours as evidence that the label could not be trusted; that reading is withdrawn.",
+      "proof": "The companion discussion prints the same table with its labels attached (INIT 07/1500Z / 12H 08/0000Z), and the labels reconcile against the cycle and against nothing else. Checked on every archived discussion by scripts/risk/tec.py."
     },
     "interpolated": {
       "validZ": "2026-09-07T18:00:00.000Z",
@@ -495,6 +518,22 @@
       "outlookUsed": false,
       "centreDefinition": "aircraft-fix",
       "baselineCentreDefinition": "advisory-analysed"
+    },
+    "supersededBy": {
+      "record": "https://alecmessino.github.io/category-alpha/risk/lowell-2026/",
+      "reason": "This preview interpolates the 18Z forecast position itself. NHC's own interpolated 18Z position exists in the aviation advisory and is authoritative.",
+      "authoritativeForecast": "TCA 46 +3 HR, valid 2026-09-07T18:00Z",
+      "residualVsFirstReportedFix": {
+        "fix": "TCP 46A, 18.0N 162.1W",
+        "alongNm": -5,
+        "crossNm": 13.6
+      },
+      "residualVsRevisedFix": {
+        "fix": "Advisory 47 prior-position revision, 18.0N 162.2W",
+        "alongNm": -7.3,
+        "crossNm": 8.3
+      },
+      "note": "Same forecast. Same valid time. The verifying observation changed with the source vintage, and both vintages are preserved."
     }
   },
   "series": {

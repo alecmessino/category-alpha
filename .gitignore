@@ -23,3 +23,7 @@ plugins/**/.build/
 # reproducible from the script at any commit, and 2x frames of a 1440x900 instrument are several
 # megabytes docs/ would otherwise publish to every reader.
 .atlas-shots/
+
+# scripts/risk/build.py renders the PDF from a Letter-sized print source. It is build
+# output, not a page of the site, and is never served.
+scripts/risk/.build/
