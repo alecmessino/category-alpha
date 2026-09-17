@@ -383,12 +383,17 @@ def brief_section(snaps: list, invest: dict | None, stages: dict) -> str:
         inv = ""
         if invest and (invest.get("association") or {}).get("object") == oid:
             d = invest["invest"]["designation"]
+            # THE SUBJECT OF THIS SENTENCE IS THE INVEST, NOT THE OBJECT. An earlier draft
+            # opened "Now designated EP982026", which reads as NHC having identified this
+            # disturbance as that invest -- the exact claim the record refuses with
+            # nhc_states_this_association: false. What is true is narrower and is what is
+            # said: the invest exists, and it is inside this area's published polygon.
             ev = str(d.get("evidence") or "")
-            inv = (f'<p class="cap"><b>Now designated '
-                   f'{esc(invest["invest"]["atcf_id"])}.</b> The designation is '
-                   f'{esc(ev[0].lower() + ev[1:] if ev else "")}. The association to this '
-                   f'object is geometric containment of two official products; NHC states no '
-                   f'association, and the record says so.</p>')
+            inv = (f'<p class="cap"><b>Invest '
+                   f'{esc(invest["invest"]["atcf_id"])} now exists inside this area&rsquo;s '
+                   f'published NHC polygon.</b> The association is geometric containment of two '
+                   f'official products; NHC does not state the association. The invest\'s own '
+                   f'ATCF deck reads {esc(ev[ev.find(":") + 2:] if ":" in ev else ev)}.</p>')
 
         out.append(
             '  <article class="q">\n'
