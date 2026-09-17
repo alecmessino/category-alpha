@@ -126,9 +126,13 @@ with sync_playwright() as p:
         # Review frames are BUILD OUTPUT, not pages of the site. They go to the gitignored
         # build directory; writing them beside index.html published four PNGs to every reader
         # of /risk/lowell-2026/ and put them in the deployment diff on every run.
-        v.screenshot(path=str(BUILD / f"shot-{w}.png"), full_page=(w != 1440))
+        # NAMED PER RECORD. These were shot-<width>.png, which is one set of filenames for
+        # however many records exist -- so gating the second record silently overwrote the
+        # first one's review frames, and whichever ran last was the one you looked at. The
+        # print source is already per-record for the same reason.
+        v.screenshot(path=str(BUILD / f"shot-{SLUG}-{w}.png"), full_page=(w != 1440))
         if w == 1440:
-            v.screenshot(path=str(BUILD / "shot-1440-full.png"), full_page=True)
+            v.screenshot(path=str(BUILD / f"shot-{SLUG}-1440-full.png"), full_page=True)
     b.close()
 
 pdf_text = "".join(pg_.extract_text() for pg_ in PdfReader(str(PDF)).pages)
