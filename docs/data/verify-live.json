@@ -1,10 +1,10 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-17T20:38:16.937Z",
+  "ranAt": "2026-09-17T21:15:03.250Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "d0c51381a3979af14b11c139b25df0ac28432efb",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35271919090",
+  "sha": "f65da0247d92682f83479ebc7b799b276c42dfea",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35275494633",
   "ok": false,
   "passed": 43,
   "total": 46,
@@ -15,14 +15,14 @@
     },
     {
       "check": "three tabs, so no single view is a wall",
-      "detail": "3 tabs · Situation is 2.4 screens tall (3291px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
+      "detail": "3 tabs · Situation is 2.4 screens tall (3354px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
     },
     {
       "check": "all markets carried",
       "detail": "300 contracts · 50 series · droppedForCap=5"
     }
   ],
-  "thirdPartyFailures": 8,
+  "thirdPartyFailures": 18,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -42,7 +42,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": true,
-      "detail": "2026-09-17T20:32:17.435Z · 6m old"
+      "detail": "2026-09-17T21:05:32.298Z · 9m old"
     },
     {
       "check": "renders: Situation",
@@ -102,7 +102,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "4 ranked of 9 candidates · 105/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "5 ranked of 10 candidates · 105/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -117,7 +117,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "36/36 tile(s) rendered · 0 hole(s) · 0 still loading"
+      "detail": "30/36 tile(s) rendered · 6 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -132,7 +132,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": false,
-      "detail": "3 tabs · Situation is 2.4 screens tall (3291px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
+      "detail": "3 tabs · Situation is 2.4 screens tall (3354px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -157,7 +157,7 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "0/0 frame(s) carry a consensus peak against 0 in the snapshot · 0 carry its cycle · frame is 3m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "0/0 frame(s) carry a consensus peak against 0 in the snapshot · 0 carry its cycle · frame is 18m behind the snapshot (lagging — wiring asserted, coverage is the CI gate's job) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
@@ -197,12 +197,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "36 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "35 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "37 tile(s) served on reload · 36 in cache"
+      "detail": "36 tile(s) served on reload · 35 in cache"
     },
     {
       "check": "all markets carried",
