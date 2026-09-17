@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Risk Evidence — Millibar</title>
+<meta name="description" content="Published evidence records for parametric tropical-cyclone triggers: what the official record supports, what it cannot reproduce, and what was knowable at the time.">
+<meta property="og:title" content="Millibar Risk Evidence">
+<meta property="og:description" content="Independent, reproducible evidence for parametric tropical-cyclone triggers. Official sources only.">
+<meta property="og:type" content="website"><meta property="og:url" content="https://alecmessino.github.io/category-alpha/risk/">
+<link rel="canonical" href="https://alecmessino.github.io/category-alpha/risk/">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDF1F0; --paper-2:#E2E9E8; --ink:#10202B; --ink-2:#3B5260; --mute:#6F8590;
+    --chart:#2E6E8E; --chart-soft:#B9D3DF; --rule:#C6D2D4; --signal:#B8571F; --signal-soft:#F3E2D6;
+    --ok:#2F6B4F;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#0E181E; --paper-2:#152229; --ink:#E6EDEF; --ink-2:#B8C7CD; --mute:#7F939B;
+      --chart:#6FB1CF; --chart-soft:#24475A; --rule:#2A3C45; --signal:#E28A54; --signal-soft:#3A2416; --ok:#7BC29B;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0E181E; --paper-2:#152229; --ink:#E6EDEF; --ink-2:#B8C7CD; --mute:#7F939B;
+    --chart:#6FB1CF; --chart-soft:#24475A; --rule:#2A3C45; --signal:#E28A54; --signal-soft:#3A2416; --ok:#7BC29B;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.55}
+  a{color:var(--chart)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+  .wrap{max-width:1400px;margin:0 auto;padding:0 32px}
+  /* masthead */
+  .mast{border-bottom:1px solid var(--rule);padding:22px 0 18px;display:flex;justify-content:space-between;align-items:baseline;gap:24px;flex-wrap:wrap}
+  .mast .brand{font-weight:600;font-size:15px;letter-spacing:.01em}
+  .mast .brand span{color:var(--mute);font-weight:400}
+  .mast .note{color:var(--mute);font-size:14px}
+  /* header */
+  header.title{padding:56px 0 34px;display:grid;grid-template-columns:1.25fr 1fr;gap:48px;align-items:end}
+  h1{font-size:clamp(36px,5vw,58px);line-height:1.02;font-weight:500;margin:0 0 16px;letter-spacing:-.02em;text-wrap:balance}
+  .lede{font-size:19px;line-height:1.5;color:var(--ink-2);max-width:62ch;margin:0}
+  .facts{border-top:1px solid var(--ink);padding-top:14px;font-size:15px}
+  .facts div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:6px 0;border-bottom:1px solid var(--rule)}
+  .facts div span:first-child{color:var(--mute)}
+  /* finding band */
+  .finding{background:var(--ink);color:var(--paper);padding:34px 0;margin:8px 0 0}
+  :root[data-theme="dark"] .finding,body .finding{ }
+  .finding .wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start}
+  .finding h2{font-size:clamp(22px,2.6vw,30px);line-height:1.25;font-weight:500;margin:0;letter-spacing:-.01em;text-wrap:balance}
+  .finding p{margin:0;font-size:16px;line-height:1.55;opacity:.9;max-width:56ch}
+  .finding em{font-style:normal;border-bottom:2px solid var(--signal);padding-bottom:1px}
+  /* sections */
+  section{padding:52px 0 8px}
+  .sec-head{display:grid;grid-template-columns:220px 1fr;gap:32px;border-top:2px solid var(--ink);padding-top:18px;margin-bottom:28px}
+  .sec-head .plate{font-weight:600;font-size:15px}
+  .sec-head .plate small{display:block;color:var(--mute);font-weight:400;margin-top:4px;font-size:14px}
+  .sec-head h2{font-size:clamp(24px,3vw,34px);font-weight:500;line-height:1.15;margin:0 0 10px;letter-spacing:-.015em;text-wrap:balance}
+  .sec-head p{margin:0;color:var(--ink-2);max-width:72ch}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:36px}
+  .grid-chart{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:44px;align-items:start}
+  h3{font-size:17px;font-weight:600;margin:0 0 12px}
+  p{margin:0 0 12px}
+  .small{font-size:14px;color:var(--mute)}
+  /* tables */
+  table{border-collapse:collapse;width:100%;font-size:15.5px}
+  th,td{text-align:left;padding:9px 10px 9px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-weight:500;color:var(--mute);font-size:13.5px}
+  td.num,th.num{text-align:right;padding-right:0;font-variant-numeric:tabular-nums}
+  .ladder{font-size:17px}.ladder td.num,.ladder th.num{padding:11px 8px;text-align:right;font-variant-numeric:tabular-nums}
+  .ladder th.z{text-align:right;padding:8px 6px}
+  .ladder td:first-child,.ladder th:first-child{padding-left:0}
+  .ladder tbody tr:last-child td{border-bottom:1px solid var(--ink)}
+  .ladder .core{background:var(--chart-soft)}
+  /* status stamps */
+  .status{display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--signal);color:var(--signal);padding:8px 12px;font-weight:600;font-size:14px;letter-spacing:.01em;background:var(--signal-soft)}
+  .status::before{content:"";width:9px;height:9px;background:var(--signal);border-radius:50%}
+  .status.ok{border-color:var(--ok);color:var(--ok);background:transparent}
+  .status.ok::before{background:var(--ok)}
+  .unres{margin-top:22px;border-left:3px solid var(--signal);padding:4px 0 4px 16px}
+  .unres ul{margin:8px 0 0;padding-left:18px}
+  .unres li{margin:4px 0}
+  /* chart */
+  figure{margin:0}
+  .chart-frame{border:1px solid var(--rule);background:var(--paper-2);padding:14px}
+  .chart-frame svg{width:100%;height:auto;display:block}
+  figcaption{font-size:13.5px;color:var(--mute);margin-top:10px;line-height:1.45}
+  .legend{display:flex;flex-wrap:wrap;gap:14px 22px;font-size:13.5px;margin-top:12px;color:var(--ink-2)}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .sw{width:22px;height:0;border-top:2px solid var(--ink)}
+  .sw.dash{border-top-style:dashed;border-color:var(--chart)}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--ink)}
+  .dot.fc{background:var(--paper);border:2px solid var(--chart)}
+  .dot.press{background:var(--signal)}
+  /* advisory transcript */
+  .transcript{background:var(--paper-2);border:1px solid var(--rule);padding:16px 18px;font-size:13.5px;line-height:1.5;white-space:pre;overflow-x:auto;margin:10px 0 16px}
+  .transcript b{font-weight:500;color:var(--chart)}
+  .residual{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:8px 0 6px}
+  .residual div{border-top:1px solid var(--ink);padding-top:10px}
+  .residual .v{font-size:34px;font-weight:500;letter-spacing:-.02em;line-height:1.05}
+  .residual .l{color:var(--mute);font-size:13.5px;margin-top:4px}
+  .prob{display:grid;grid-template-columns:auto 1fr;gap:8px 18px;align-items:center;font-size:15px;padding-right:44px}
+  .bar{height:13px;background:var(--chart-soft);position:relative}
+  .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--chart)}
+  .bar b{position:absolute;right:-42px;top:-4px;font-weight:500;font-variant-numeric:tabular-nums;font-size:13.5px}
+  .lineage{border:1px solid var(--rule);background:var(--paper-2);padding:18px 20px;margin:6px 0 14px}
+  .lineage table{font-size:14.5px}
+  .lineage td.mono{white-space:nowrap}
+  /* register */
+  .register table td:first-child{width:36%}
+  .register .cls{color:var(--mute);white-space:nowrap}
+  /* use cases */
+  .uses{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--ink);margin-top:10px}
+  .uses div{padding:20px 22px 22px 0;border-right:1px solid var(--rule)}
+  .uses div:last-child{border-right:0}
+  .uses div+div{padding-left:22px}
+  .uses h3{margin-bottom:8px}
+  .uses p{color:var(--ink-2);font-size:15px}
+  footer{border-top:2px solid var(--ink);margin-top:56px;padding:22px 0 44px;font-size:13.5px;color:var(--mute);display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+  footer p{margin:0;max-width:70ch}
+  @media (max-width:900px){
+    header.title,.finding .wrap,.grid2,.grid-chart,.sec-head,.uses{grid-template-columns:1fr}
+    .uses div{border-right:0;border-bottom:1px solid var(--rule);padding-left:0!important}
+    .facts div{grid-template-columns:120px 1fr}
+    .wrap{padding:0 20px}
+    header.title{padding:40px 0 28px}
+    .residual{grid-template-columns:1fr 1fr}
+  }
+  @media print{
+    body{background:#fff;color:#000;font-size:11.5px}
+    .wrap{max-width:none;padding:0}
+    .finding{background:#000;color:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    section{padding:22px 0 0;break-inside:avoid}
+    .chart-frame{background:#fff}
+    a{color:#000;text-decoration:none}
+    footer{margin-top:24px}
+  }
+
+  .sw.faint{border-top:1px solid var(--chart-soft)}
+  .scroll{overflow-x:auto;border-top:1px solid var(--ink)}
+  table.chrono{font-size:13.5px}
+  table.chrono td{padding:6px 12px 6px 0;white-space:nowrap}
+  table.chrono td:last-child{white-space:normal;min-width:220px}
+  table.ca{font-size:14px}
+  .barcell{width:30%;padding-right:10px}
+  .hb{display:block;height:9px;background:var(--chart)}
+  details summary{cursor:pointer;color:var(--chart);font-size:15px}
+  a:focus-visible,summary:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+  @media (max-width:900px){
+    .register .cls{white-space:normal}
+    .grid2 table,.grid-chart table,.register table{display:block;overflow-x:auto;max-width:100%}
+    .grid-chart>*,.grid2>*{min-width:0}
+    .ladder{font-size:15px}
+  }
+
+  .pl{padding-left:14px}
+  tr.after td{color:var(--mute)}
+  tr.optrack td{border-top:1px solid var(--ink);border-bottom:1px solid var(--ink)}
+/* The /risk/ index only. Everything else it needs is in web.css, which the records use, so
+   the door and the rooms behind it are the same building. */
+.recs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;margin-top:8px}
+.rec{border:1px solid var(--rule);border-radius:2px;padding:20px 22px 18px;background:var(--paper-2)}
+.rec h3{margin:0 0 12px;font-size:17px;letter-spacing:-.01em}
+.rec h3 a{color:var(--ink);text-decoration:none;border-bottom:2px solid var(--chart-soft)}
+.rec h3 a:hover{border-bottom-color:var(--chart)}
+.rec table{margin:0;width:100%}
+.rec td{padding:5px 0;vertical-align:top;border-bottom:1px solid var(--rule)}
+.rec td:first-child{color:var(--mute);white-space:nowrap;padding-right:14px;width:42%}
+.rec tr:last-child td{border-bottom:0}
+.rec p{margin:10px 0 0}
+.rec .small{margin-top:14px}
+@media (max-width:900px){.recs{grid-template-columns:1fr}}
+</style></head><body>
+<div class="wrap">
+ <div class="mast"><div class="brand">Millibar <span>/ Risk Evidence</span></div>
+  <div class="note">Independent research · Official sources only · Not a forecast, loss estimate or claims determination</div></div>
+ <header class="title"><div>
+  <h1>The evidence behind a parametric trigger, reopened.</h1>
+  <p class="lede">Each record here answers one question: which official observation, evaluated
+  against which contract version and which geometry, produced the outcome — and where the public
+  record runs out, the record stops with it and says so. Every figure traces to an archived
+  official product identified by SHA-256. 396 products across 2 events,
+  402 hashed inputs, rebuilt byte-for-byte from those inputs on every run.</p>
+ </div><div class="facts">
+  <div><span>What this is</span><span>Point-in-time evidence records, reproducible from archived official products</span></div>
+  <div><span>What it is not</span><span>A forecast, a loss estimate, a claims determination, or insurance advice</span></div>
+  <div><span>Sources</span><span>NHC/CPHC text products, ATCF, Natural Earth, and the policyholder's own publications</span></div>
+  <div><span>Method</span><span>Nothing is inferred from an observed outcome; a missing term is reported as missing</span></div>
+ </div></header></div>
+
+<div class="finding"><div class="wrap">
+ <h2>A record that cannot be rebuilt from its own contents is not evidence.</h2>
+ <p>So each of these is a build, not a document: one command reads the archived products and
+ produces the page, the one-page brief and the machine-readable manifest, and a second command
+ gates them. The source register is generated from the files the build actually opens —
+ nothing declared may be absent, and nothing read may go undeclared. <em>Millibar does not
+ infer an undisclosed contract term from an observed payout.</em></p>
+</div></div>
+
+<div class="wrap">
+<section><div class="sec-head"><div class="plate">Settled<small>Trigger evidence records</small></div><div>
+ <h2>Events with a published outcome</h2>
+ <p>One contract, two events, one evaluator. Each record carries its own contract manifest, an
+ event manifest for every official product it reads, and a decision manifest replaying the
+ evaluation. Where the 2026 terms are not public, the settlement is reported as not
+ reconstructable rather than reverse-engineered from the amount.</p></div></div>
+ <div class="recs"><div class="rec">
+ <h3><a href="lala-2026/">CP012026 Lala</a></h3>
+ <table>
+  <tr><td>Observed payout</td><td>$200,000</td></tr>
+  <tr><td>Settlement</td><td><span class="status">Not reconstructable from public terms</span></td></tr>
+  <tr><td>Official products</td><td>294</td></tr>
+  <tr><td>Position records</td><td>792</td></tr>
+  <tr><td>Hashed inputs</td><td>297</td></tr>
+  <tr><td>Time model</td><td>Cycle origin confirmed on 61 archived discussions</td></tr>
+  <tr><td>Source vintage</td><td>issuance to the printed hour; no transmission minute is reconstructed</td></tr>
+ </table>
+ <p class="small"><a href="lala-2026/Millibar-Lala-2026-Event-Brief.pdf">one-page brief</a> · <a href="lala-2026/lala-2026.manifest.json">machine-readable record</a></p>
+</div><div class="rec">
+ <h3><a href="lowell-2026/">EP122026 Lowell</a></h3>
+ <table>
+  <tr><td>Observed payout</td><td>$300,000</td></tr>
+  <tr><td>Settlement</td><td><span class="status">Not reconstructable from public terms</span></td></tr>
+  <tr><td>Official products</td><td>102</td></tr>
+  <tr><td>Position records</td><td>470</td></tr>
+  <tr><td>Hashed inputs</td><td>105</td></tr>
+  <tr><td>Time model</td><td>Cycle origin confirmed on 23 archived discussions</td></tr>
+  <tr><td>Source vintage</td><td>issuance to the transmission minute</td></tr>
+ </table>
+ <p class="small"><a href="lowell-2026/Millibar-Lowell-2026-Event-Brief.pdf">one-page brief</a> · <a href="lowell-2026/lowell-2026.manifest.json">machine-readable record</a></p>
+</div></div>
+</section>
+
+<section><div class="sec-head"><div class="plate">Prospective<small>Frozen decision states</small></div><div>
+ <h2>A state recorded before the outcome is known</h2>
+ <p>A settled record is written after the fact, which is exactly what makes it easy to write
+ well. The watch is the other half: the authoritative source state at an official issuance,
+ captured as it is issued and then never edited.</p></div></div>
+ <div class="recs">
+ <div class="rec">
+  <h3><a href="genesis-watch/">Pacific Genesis Watch</a></h3>
+  <table>
+   <tr><td>Sequence</td><td>4 committed records (1 Atlas state appended to an earlier capture; 1 correction, appended over a record left unedited; 1 official source state; 1 source state with the Atlas state beside it)</td></tr>
+   <tr><td>Contract</td><td>Append-only; every record hashed twice and never edited</td></tr>
+   <tr><td>Latest entry</td><td class="mono">2026-09-17T17:56:18Z</td></tr>
+   <tr><td>Refuses</td><td>A track, a formation probability of its own, and any continuity beyond an exact name match</td></tr>
+  </table>
+  <p class="small">A decision state is frozen when it is taken, not reconstructed afterwards. A correction
+  appends a supersession record; it never rewrites the original.</p>
+ </div></div>
+</section>
+
+<section><div class="sec-head"><div class="plate">Archive<small>Historical base rates</small></div><div>
+ <h2>What the historical record supports</h2>
+ <p>Cohorts conditioned on genesis having occurred — historical evidence about pathways, never a
+ formation or impact probability, and refused outright where the denominator does not exist.</p></div></div>
+ <div class="recs"><div class="rec">
+  <h3><a href="../storm-atlas/">Storm Atlas</a></h3>
+  <p>A reproducible, versioned archive of every tropical cyclone from its first best-track fix to
+  its last, with the environment it formed in, so a live area of interest can be matched to the
+  historical cases most like it. Research only.</p>
+  <p class="small">Its methodology, quality remedies and refusals are documented in
+  <a href="../GENESIS-ARCHIVE.md">GENESIS-ARCHIVE.md</a>.</p>
+ </div></div>
+</section>
+
+<section><div class="sec-head"><div class="plate">Methodology<small>Standing commitments</small></div><div>
+ <h2>The rules every record on this page is built under</h2>
+ <p>These are not aspirations. Each one is enforced by a gate that runs on every change, and
+ each was written because something went wrong without it.</p></div></div>
+ <div class="grid2"><div>
+  <h3>Three times, never derived from one another</h3>
+  <p>A forecast has a <b>nominal cycle</b> (the synoptic hour it belongs to), an <b>issuance</b>
+  and a <b>valid time</b>, and they are stored separately. Forecast lead is
+  <span class="mono">valid − nominal_cycle</span> and nothing else. Reading the release hour as
+  forecast hour zero is what produced the residual this work retired, and the proof is
+  documentary: the discussion products print the forecast table with its lead labels attached,
+  and those labels reconcile against the cycle and against nothing else. Both hypotheses are
+  scored on every archived discussion; the cycle origin holds on all of them and the
+  initial-position origin on none.</p>
+
+  <h3>A source vintage is carried, not smoothed over</h3>
+  <p>Where two official products report the same fix differently, both are published as peers
+  and neither overwrites the other. Where an archive establishes issuance only to the hour, no
+  minute is invented to make it match an archive that has one.</p>
+ </div><div>
+  <h3>Every input declared, and every declaration read</h3>
+  <p>The list of files a build opens is the list its manifest hashes — checked in both
+  directions, because the failure that prompted it had both halves: a declared input that was
+  never shipped, and the geometry it actually read appearing nowhere in its own register.</p>
+
+  <h3>A refusal is a result</h3>
+  <p>A rate without a denominator is not a small rate. An ambiguous cycle is not resolved by
+  convention. A settlement that public terms cannot reproduce is reported as not reconstructable,
+  with the missing terms named. Nothing here infers a contract term from an outcome.</p>
+
+  <h3>Nothing on this page prices anything</h3>
+  <p>These records are evidence about data, vintage, geometry, units and contract version. They
+  are not a forecast, a loss estimate or a claims determination, and no page reachable from here
+  quotes, ranks or prices a market. The gate that enforces it does not take the word for it: it
+  fails on the vocabulary of such a surface appearing anywhere on this page at all.</p>
+ </div></div>
+ <p class="small" style="margin-top:22px">Source documents, served as repository text:
+ <a href="../GENESIS-ARCHIVE.md">GENESIS-ARCHIVE.md</a> · <a href="../TRACK-RESIDUAL.md">TRACK-RESIDUAL.md</a> · <a href="../PLAN-TRACK-MODEL.md">PLAN-TRACK-MODEL.md</a></p>
+ <table style="margin-top:10px"><tbody>
+  <tr><td class="mono">GENESIS-ARCHIVE.md</td><td>The genesis-to-intensity archive: scope, quality remedies and the refusals</td></tr><tr><td class="mono">TRACK-RESIDUAL.md</td><td>Track residuals: the time model, and the result it retired</td></tr><tr><td class="mono">PLAN-TRACK-MODEL.md</td><td>The time-model correction, as it was planned and carried out</td></tr>
+ </tbody></table>
+</section>
+
+<footer><p>Independent research by Alec Messino. Not a weather forecast, loss estimate, claims
+determination, or insurance advice. Official products remain the property of NOAA/NWS; contract
+terms remain the property of the parties.</p>
+<p>alec.messino@gmail.com</p></footer>
+</div></body></html>

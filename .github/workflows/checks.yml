@@ -227,6 +227,17 @@ jobs:
       - name: The retired Lowell residual cannot render on a published surface
         run: node scripts/check-retired-residual.mjs
 
+      # THE /risk/ DOORWAY. docs/ is the Pages root, so a published record that the index
+      # forgets is invisible to a reader while being perfectly public -- /preview/track-residual/
+      # is the standing example in this repository, served at 200 and linked from nothing. Both
+      # directions are checked: every published route under docs/risk/ must be linked, and every
+      # link on the index must resolve. It also holds the standing constraint on this surface --
+      # no page here may carry the vocabulary of a trading or wagering venue.
+      - name: Prove the doorway gate can still fail
+        run: node scripts/check-risk-doorway.mjs --self-test
+      - name: The /risk/ index lists every published record and every link resolves
+        run: node scripts/check-risk-doorway.mjs
+
       # A guard that can fail silently is not a guard. The predicate deciding whether a
       # verification run may write the verdict the board reads once disabled itself to a
       # truthy regex object and `node --check` passed it, so it is now a pure function

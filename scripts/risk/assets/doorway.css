@@ -1,0 +1,14 @@
+/* The /risk/ index only. Everything else it needs is in web.css, which the records use, so
+   the door and the rooms behind it are the same building. */
+.recs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:28px;margin-top:8px}
+.rec{border:1px solid var(--rule);border-radius:2px;padding:20px 22px 18px;background:var(--paper-2)}
+.rec h3{margin:0 0 12px;font-size:17px;letter-spacing:-.01em}
+.rec h3 a{color:var(--ink);text-decoration:none;border-bottom:2px solid var(--chart-soft)}
+.rec h3 a:hover{border-bottom-color:var(--chart)}
+.rec table{margin:0;width:100%}
+.rec td{padding:5px 0;vertical-align:top;border-bottom:1px solid var(--rule)}
+.rec td:first-child{color:var(--mute);white-space:nowrap;padding-right:14px;width:42%}
+.rec tr:last-child td{border-bottom:0}
+.rec p{margin:10px 0 0}
+.rec .small{margin-top:14px}
+@media (max-width:900px){.recs{grid-template-columns:1fr}}
