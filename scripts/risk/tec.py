@@ -12,7 +12,6 @@ from pathlib import Path
 
 UTC = timezone.utc
 ROOT = Path(__file__).resolve().parents[2]
-RAW = ROOT / "data" / "risk" / "lowell-ep122026" / "raw"
 
 # The Hawaii coastline is a SHARED REPOSITORY PRIMITIVE, not a pipeline-local file.
 #
@@ -36,6 +35,85 @@ COASTLINE_REGISTER = ROOT / "data" / "genesis-archive" / "coastlines" / "SOURCES
 
 NM_PER_DEG = 60.0
 
+# Hawaii-Aleutian Standard Time is a FIXED offset. Hawaii does not observe daylight saving,
+# so HST is UTC-10 every day of the year and the conversion below needs no calendar. It is
+# still never trusted on its own -- see issued_from_tcp_body.
+HST = timedelta(hours=-10)
+
+
+@dataclass(frozen=True)
+class Event:
+    """One published Trigger Evidence Record's archive, geometry and provenance basis.
+
+    THE PIPELINE IS SHARED AND THE EVENTS ARE DATA. The first record was written against
+    one storm and read its archive from a module-level constant, which is how a second
+    event turns into a second copy of the evaluator. Everything that differs between two
+    records -- which products were archived, what they are named, which coastline rings the
+    distances are measured to, and how precisely the issuance time is known -- is declared
+    here instead, and the code below branches on the declaration rather than on the storm.
+    """
+    slug: str            # publication slug: docs/risk/<slug>/
+    archive: str         # data/risk/<archive>/raw/
+    atcf_id: str         # "EP122026"
+    name: str            # "Lowell"
+    pil: dict            # product -> WMO PIL prefix present in this archive
+    deck: str            # ATCF a-deck filename
+    islands: tuple       # coastline rings this record measures to, BY NAME
+    issued_basis: str    # how the issuance time is established -- see ISSUED_BASIS
+    canonical_url: str
+
+    @property
+    def raw(self) -> Path:
+        return ROOT / "data" / "risk" / self.archive / "raw"
+
+    @property
+    def label(self) -> str:
+        return f"{self.atcf_id} {self.name}"
+
+    def glob(self, product: str) -> list:
+        """Archived files for a product type, or [] where this event has none of it."""
+        pre = self.pil.get(product)
+        return sorted(self.raw.glob(f"{pre}.*.txt")) if pre else []
+
+
+# The two issuance bases, and why the difference is carried rather than smoothed over.
+#
+#   wmo-transmission-minute   The products were captured off the WMO feed as they went out,
+#                             so the filename carries the transmission time to the minute and
+#                             the body carries the nominal issuance hour. The two differ --
+#                             a 15Z advisory is transmitted at 14:51Z -- and both are kept.
+#
+#   product-body-hour         The products came from NHC's public product archive, which
+#                             masks the transmission group as the literal "TTAA00 PHFO DDHHMM".
+#                             The transmission minute IS NOT RECOVERABLE from these bytes. The
+#                             issuance time is the product's own printed hour and nothing finer,
+#                             and no minute is invented to make the two archives look alike.
+ISSUED_BASIS = {
+    "wmo-transmission-minute": "WMO transmission time, to the minute, from the archived filename",
+    "product-body-hour": "the product's own printed issuance hour; the WMO transmission minute "
+                         "is masked by the NHC public archive and is not reconstructed",
+}
+
+EVENTS = {
+    "lowell-2026": Event(
+        slug="lowell-2026", archive="lowell-ep122026", atcf_id="EP122026", name="Lowell",
+        pil={"TCM": "TCMCP4", "TCP": "TCPCP4", "TCA": "TCAPA4", "TCD": "TCDCP4", "PWS": "PWSCP4"},
+        deck="aep122026.dat", islands=("Niihau", "Kauai"),
+        issued_basis="wmo-transmission-minute",
+        canonical_url="https://alecmessino.github.io/category-alpha/risk/lowell-2026/"),
+    "lala-2026": Event(
+        slug="lala-2026", archive="lala-cp012026", atcf_id="CP012026", name="Lala",
+        pil={"TCM": "TCMCP2", "TCP": "TCPCP2", "TCD": "TCDCP2", "PWS": "PWSCP2", "TCU": "TCUCP2"},
+        deck="acp012026.dat",
+        # The eight MAIN Hawaiian Islands, under the coastline primitive's own names. The
+        # northwestern chain is uninhabited and runs far to the west; selecting rings BY NAME
+        # leaves it out of every distance without a longitude cutoff having to be invented.
+        islands=("Island of Hawaii", "Kahoolawe", "Lanai", "Maui", "Molokai", "Oahu",
+                 "Kauai", "Niihau"),
+        issued_basis="product-body-hour",
+        canonical_url="https://alecmessino.github.io/category-alpha/risk/lala-2026/"),
+}
+
 MON = {m: i for i, m in enumerate(
     "JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC".split(), 1)}
 
@@ -48,6 +126,47 @@ def stamp_from_name(name: str) -> datetime:
     """Archive file stamp (WMO transmission time), e.g. TCMCP4.202609071451.txt."""
     s = re.search(r"\.(\d{12})\.", name).group(1)
     return datetime.strptime(s, "%Y%m%d%H%M").replace(tzinfo=UTC)
+
+
+UTC_LINE = re.compile(r"\n(\d{2})(\d{2}) UTC \w{3} (\w{3}) (\d{1,2}) (\d{4})")
+HST_LINE = re.compile(r"\n\s*(\d{1,2})(\d{2}) (AM|PM) HST \w{3} (\w{3}) (\d{1,2}) (\d{4})")
+SUMMARY_UTC = re.compile(r"SUMMARY OF .*?\.\.\.(\d{2})(\d{2}) UTC")
+
+
+def issued_from_utc_line(txt: str) -> datetime:
+    """The product's own printed issuance, e.g. '1500 UTC WED AUG 12 2026'."""
+    m = UTC_LINE.search(txt)
+    if not m:
+        raise Refusal("product prints no UTC issuance line; no issuance time is assumed")
+    return datetime(int(m.group(5)), MON[m.group(3).upper()], int(m.group(4)),
+                    int(m.group(1)), int(m.group(2)), tzinfo=UTC)
+
+
+def issued_from_tcp_body(txt: str) -> datetime:
+    """A public advisory's issuance, DERIVED TWICE FROM THE PRODUCT AND REQUIRED TO AGREE.
+
+    The public product prints its local time in full ('1100 PM HST Sun Aug 16 2026') and its
+    UTC time as an hour only, inside the summary line ('...0900 UTC...'). Neither alone gives
+    a UTC instant: the local line needs a zone conversion, and the UTC hour carries no date --
+    and the date is exactly where it goes wrong, because 11 PM HST on the 16th is 09Z on the
+    SEVENTEENTH. So the date comes from the local line, the conversion is the fixed HST offset,
+    and the result must reproduce the UTC hour the product printed for itself. Where the two
+    disagree the reading is refused rather than resolved in favour of one of them.
+    """
+    m = HST_LINE.search(txt)
+    if not m:
+        return issued_from_utc_line(txt)
+    hh, mm, ampm = int(m.group(1)), int(m.group(2)), m.group(3)
+    hh = 0 if (hh == 12 and ampm == "AM") else (12 if (hh == 12 and ampm == "PM")
+                                                else (hh + 12 if ampm == "PM" else hh))
+    local = datetime(int(m.group(6)), MON[m.group(4).upper()], int(m.group(5)), hh, mm, tzinfo=UTC)
+    t = local - HST                      # HST is UTC-10, so UTC is local + 10 h
+    su = SUMMARY_UTC.search(txt)
+    if su and (t.hour, t.minute) != (int(su.group(1)), int(su.group(2))):
+        raise Refusal(
+            f"public advisory disagrees with itself about its own time: local line gives "
+            f"{t:%d/%H%MZ}, summary line says {su.group(1)}{su.group(2)}Z. No time is assumed.")
+    return t
 
 
 def dd_hhmm(token: str, ref: datetime) -> datetime:
@@ -132,7 +251,57 @@ def nominal_cycle_from_rows(init_valid: datetime, forecast_valids: list[datetime
 TCD_ROW_RE = re.compile(r"^\s*(INIT|(\d{1,3})H)\s+(\d{2}/\d{4}Z)", re.M)
 
 
-def reconcile_lead_labels(tcd_path: Path):
+# Where a forecast/advisory's own rows leave its cycle ambiguous, the companion DISCUSSION
+# settles it -- by printing the lead label, not by applying a convention.
+_LABEL_CYCLES: dict = {}
+CYCLE_BASIS: dict = {}
+
+
+def label_cycles(ev: "Event") -> dict:
+    """advisory number -> nominal cycle, read off the discussions' printed lead labels.
+
+    WHY THIS EXISTS. nominal_cycle_from_rows recovers the cycle from a TCM alone by requiring
+    every row to land on the canonical lead set, and requiring the answer to be unique. On a
+    full eight-row forecast it always is. On a DISSIPATING storm it need not be: Lala's last
+    three advisories print five rows, and a five-row set beginning at +12 h is equally
+    canonical read as +24 h from a cycle six hours earlier. Two candidates, so that function
+    refuses -- correctly, because nothing in the TCM discriminates.
+
+    The discussion does. It prints the same table with the labels attached:
+
+        INIT  27/2100Z ...
+         12H  28/0600Z ...
+
+    so the cycle is 28/0600Z minus twelve hours, stated by the product rather than inferred
+    from it. Every labelled row must agree, or the advisory is left unresolved.
+
+    This is the same evidence reconcile_lead_labels checks the whole archive against. It is
+    not a fallback convention -- a convention is exactly what the retired model was.
+    """
+    if ev.slug in _LABEL_CYCLES:
+        return _LABEL_CYCLES[ev.slug]
+    out = {}
+    for path in ev.glob("TCD"):
+        txt = path.read_text()
+        num = re.search(r"Discussion Number\s+(\d+)", txt, re.I)
+        if not num:
+            continue
+        try:
+            issued = issued_from_tcp_body(txt)
+        except Refusal:
+            continue
+        cycles = set()
+        for label, hrs, token in TCD_ROW_RE.findall(txt):
+            if label == "INIT":
+                continue
+            cycles.add(dd_hhmm(token, issued) - timedelta(hours=int(hrs)))
+        if len(cycles) == 1:
+            out[num.group(1)] = cycles.pop()
+    _LABEL_CYCLES[ev.slug] = out
+    return out
+
+
+def reconcile_lead_labels(tcd_path: Path, ev: "Event" = None):
     """Prove a cycle's nominal time from the discussion's own lead labels.
 
     Returns {issued, cycle, init_valid, rows, ok, from_cycle_ok, from_init_ok}.
@@ -145,9 +314,14 @@ def reconcile_lead_labels(tcd_path: Path):
     rather than counted as evidence.
     """
     txt = tcd_path.read_text()
-    # The discussion stamps itself in LOCAL time ("500 AM HST Mon Sep 07 2026"), so the
-    # transmission time comes from the archive filename, which carries it to the minute.
-    issued = stamp_from_name(tcd_path.name)
+    # The discussion stamps itself in LOCAL time ("500 AM HST Mon Sep 07 2026"). Where the
+    # archive preserves the WMO transmission time in the filename that is used, to the minute;
+    # where it does not, the local stamp is converted against the fixed HST offset and checked
+    # against whatever UTC the product prints for itself. Either way this is only the reference
+    # a "07/1500Z" row is resolved against, never a forecast origin.
+    issued = (stamp_from_name(tcd_path.name)
+              if ev is None or ev.issued_basis == "wmo-transmission-minute"
+              else issued_from_tcp_body(txt))
     rows, init_valid = [], None
     for m in TCD_ROW_RE.finditer(txt):
         valid = dd_hhmm(m.group(3), issued)
@@ -219,16 +393,16 @@ def _latlon(lat, ns, lon, ew):
 RADII_RE = re.compile(r"(64|50|34) KT\.+\s*(\d+)NE\s+(\d+)SE\s+(\d+)SW\s+(\d+)NW")
 
 
-def parse_tcm(path: Path) -> list[Position]:
+def parse_tcm(path: Path, ev: "Event") -> list[Position]:
     txt = path.read_text()
     h = sha256(path)
     num = re.search(r"(SPECIAL )?FORECAST/ADVISORY NUMBER\s+(\d+)", txt)
     variant = "special" if num.group(1) else "regular"
     adv = num.group(2)
-    stamp = stamp_from_name(path.name)
-    it = re.search(r"\n(\d{2})(\d{2}) UTC \w{3} (\w{3}) (\d{2}) (\d{4})", txt)
-    issued = datetime(int(it.group(5)), MON[it.group(3)], int(it.group(4)),
-                      int(it.group(1)), int(it.group(2)), tzinfo=UTC)
+    issued = issued_from_utc_line(txt)
+    # The record id is stamped with the transmission time where the archive preserves one and
+    # with the product's own issuance hour where it does not. It is never a mixture of the two.
+    stamp = stamp_from_name(path.name) if ev.issued_basis == "wmo-transmission-minute" else issued
     out = []
     c = re.search(r"CENTER LOCATED NEAR\s+([\d.]+)([NS])\s+([\d.]+)([EW]) AT (\d{2}/\d{4}Z)", txt)
     init_valid = dd_hhmm(c.group(5), issued)
@@ -237,7 +411,15 @@ def parse_tcm(path: Path) -> list[Position]:
     # The cycle comes from the product's own rows. nominal_cycle_for_release is the
     # scheduled-advisory convention and is kept only as a cross-check: where the two
     # disagree the product wins, and a special advisory is exactly where they disagree.
-    nominal = nominal_cycle_from_rows(init_valid, row_valids)
+    try:
+        nominal = nominal_cycle_from_rows(init_valid, row_valids)
+        basis = "forecast-rows"
+    except Refusal:
+        nominal = label_cycles(ev).get(adv)
+        if nominal is None:
+            raise
+        basis = "discussion-lead-labels"
+    CYCLE_BASIS.setdefault(ev.slug, {})[adv] = basis
     la, lo = _latlon(*c.groups()[:4])
     body = txt[c.end():]
     vm = re.search(r"MAX SUSTAINED WINDS\s+(\d+) KT", body)
@@ -271,17 +453,20 @@ def parse_tcm(path: Path) -> list[Position]:
     return out
 
 
-def parse_tcp(path: Path) -> list[Position]:
+def parse_tcp(path: Path, ev: "Event") -> list[Position]:
     txt = path.read_text()
     m = re.search(r"(Intermediate |Special )?Advisory Number\s+(\w+)", txt)
     if not m:
         return []
     variant = {"Intermediate ": "intermediate", "Special ": "special"}.get(m.group(1) or "", "regular")
-    stamp = stamp_from_name(path.name)
-    s = re.search(r"SUMMARY OF .*?\.\.\.(\d{2})(\d{2}) UTC", txt)
-    valid = stamp.replace(hour=int(s.group(1)), minute=int(s.group(2)))
-    if valid > stamp + timedelta(hours=1):
-        valid -= timedelta(days=1)
+    if ev.issued_basis == "wmo-transmission-minute":
+        stamp = stamp_from_name(path.name)
+        s = SUMMARY_UTC.search(txt)
+        valid = stamp.replace(hour=int(s.group(1)), minute=int(s.group(2)))
+        if valid > stamp + timedelta(hours=1):
+            valid -= timedelta(days=1)
+    else:
+        stamp = valid = issued_from_tcp_body(txt)
     loc = re.search(r"LOCATION\.\.\.([\d.]+)([NS])\s+([\d.]+)([EW])", txt)
     w = re.search(r"MAXIMUM SUSTAINED WINDS\.\.\.(\d+) MPH", txt)
     pr = re.search(r"CENTRAL PRESSURE\.\.\.(\d+) MB", txt)
@@ -297,6 +482,32 @@ def parse_tcp(path: Path) -> list[Position]:
                      f"{loc.group(1)}{loc.group(2)} {loc.group(3)}{loc.group(4)}",
                      mph / 1.15078, f"{int(mph)} MPH", float(pr.group(1)) if pr else None,
                      note=note)]
+
+
+def parse_tcu(path: Path, ev: "Event") -> list[Position]:
+    """Tropical Cyclone Update -- an off-schedule position and intensity statement.
+
+    CPHC issues one between scheduled advisories when something changes that people need
+    before the next cycle. It carries the same SUMMARY block a public advisory does, and
+    like a public advisory it reports wind in ROUNDED MPH, so the kt figure here is derived
+    and says so. It carries NO advisory number and NO forecast, so it constrains no nominal
+    cycle and none is assumed for it.
+    """
+    txt = path.read_text()
+    loc = re.search(r"LOCATION\.\.\.([\d.]+)([NS])\s+([\d.]+)([EW])", txt)
+    w = re.search(r"MAXIMUM SUSTAINED WINDS\.\.\.(\d+) MPH", txt)
+    if not loc or not w:
+        return []
+    t = issued_from_tcp_body(txt)
+    pr = re.search(r"CENTRAL PRESSURE\.\.\.(\d+) MB", txt)
+    la, lo = _latlon(*loc.groups())
+    mph = float(w.group(1))
+    return [Position(f"TCU-{t:%d%H%M}", "TCU", path.name, sha256(path), None, "update",
+                     "observation", None, _iso(t), _iso(t), la, lo,
+                     f"{loc.group(1)}{loc.group(2)} {loc.group(3)}{loc.group(4)}",
+                     mph / 1.15078, f"{int(mph)} MPH", float(pr.group(1)) if pr else None,
+                     note="off-schedule update; public-product wind is rounded mph and the "
+                          "kt figure is derived; carries no advisory number and no forecast")]
 
 
 def _dm(tok: str) -> float:
@@ -405,12 +616,14 @@ def rounding_envelope(forecast: Position, observed: Position, heading_deg: float
     return {"along_nm": [min(a), max(a)], "cross_nm": [min(c), max(c)]}
 
 
-def load_coastline():
+def load_coastline(ev: "Event"):
     """The named Hawaii rings, from the shared repository primitive.
 
-    Returns (by_name, all_polys, provenance). Islands are selected BY NAME. The
-    hand-off picked them by guessing at a centroid longitude, which is a silent
-    failure the moment the geometry is refreshed or a ring is added.
+    Returns (by_name, all_polys, provenance). Islands are selected BY NAME, and the names
+    the record needs are declared by the event. The hand-off picked them by guessing at a
+    centroid longitude, which is a silent failure the moment the geometry is refreshed or a
+    ring is added -- and a second event, measuring to a different set of islands, is exactly
+    such a refresh.
     """
     from shapely.geometry import shape
     land = json.loads(COASTLINES.read_text())
@@ -421,14 +634,14 @@ def load_coastline():
         nm = (f.get("properties") or {}).get("name")
         if nm:
             by_name[nm] = g
-    for required in ("Niihau", "Kauai"):
+    for required in ev.islands:
         if required not in by_name:
             raise Refusal(f"coastline primitive has no ring named {required!r}: "
                           f"{COASTLINES}. Island selection is by name and is not guessed.")
     return by_name, polys, land.get("provenance", {})
 
 
-def declared_inputs() -> list[Path]:
+def declared_inputs(ev: "Event") -> list[Path]:
     """Every file this build reads. The provenance gate walks exactly this list.
 
     The hand-off's manifest hashed raw/ne_10m_land.geojson -- a file the build never
@@ -436,22 +649,24 @@ def declared_inputs() -> list[Path]:
     read unhashed. Both failures are structural: a build cannot declare an input it
     does not open, and cannot open an input it does not declare.
     """
-    out = sorted(RAW.glob("TCMCP4.*.txt")) + sorted(RAW.glob("TCPCP4.*.txt")) \
-        + sorted(RAW.glob("TCAPA4.*.txt")) + sorted(RAW.glob("TCDCP4.*.txt")) \
-        + sorted(RAW.glob("PWSCP4.*.txt")) + [RAW / "aep122026.dat"] \
-        + [COASTLINES, COASTLINE_REGISTER]
+    out = []
+    for product in ("TCM", "TCP", "TCA", "TCD", "PWS", "TCU"):
+        out += ev.glob(product)
+    out += [ev.raw / ev.deck, COASTLINES, COASTLINE_REGISTER]
     return out
 
 
-def load_all() -> list[Position]:
+def load_all(ev: "Event") -> list[Position]:
     recs = []
-    for p in sorted(RAW.glob("TCMCP4.*.txt")):
-        recs += parse_tcm(p)
-    for p in sorted(RAW.glob("TCPCP4.*.txt")):
-        recs += parse_tcp(p)
+    for p in ev.glob("TCM"):
+        recs += parse_tcm(p, ev)
+    for p in ev.glob("TCP"):
+        recs += parse_tcp(p, ev)
+    for p in ev.glob("TCU"):
+        recs += parse_tcu(p, ev)
     tca = []
-    for p in sorted(RAW.glob("TCAPA4.*.txt")):
-        if "LOWELL" in p.read_text():
+    for p in ev.glob("TCA"):
+        if ev.name.upper() in p.read_text().upper():
             tca += parse_tca(p)
     # AN AVIATION ADVISORY CARRIES NO CYCLE OF ITS OWN. Its rows are labelled "+3 HR",
     # "+6 HR" relative to issuance, so they place no constraint on the nominal cycle the
@@ -476,5 +691,5 @@ def load_all() -> list[Position]:
             cy = datetime.strptime(c, "%Y-%m-%dT%H:%MZ").replace(tzinfo=UTC)
             r.lead_h = (v - cy).total_seconds() / 3600
     recs += tca
-    recs += parse_carq(RAW / "aep122026.dat")
+    recs += parse_carq(ev.raw / ev.deck)
     return recs

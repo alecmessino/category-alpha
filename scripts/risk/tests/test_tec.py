@@ -1,8 +1,14 @@
-"""Regression gates for the Millibar time model and residual evaluator."""
+"""Regression gates for the Millibar time model and residual evaluator.
+
+The evaluator is shared by every published record, so the suite runs it over every event in
+tec.EVENTS as well as over the two events' own fixed figures.
+"""
 from datetime import datetime, timezone
 from tec import *
 
-R = {r.record_id: r for r in load_all()}
+LOWELL = EVENTS["lowell-2026"]
+LALA = EVENTS["lala-2026"]
+R = {r.record_id: r for r in load_all(LOWELL)}
 
 def test_15z_release_is_not_hour_zero():
     t = datetime(2026, 9, 7, 15, 0, tzinfo=timezone.utc)
@@ -59,8 +65,9 @@ def test_retired_zero_along_track_result_cannot_reappear():
 
 
 # ---------------------------------------------------------------------------------------
-# Added in production hardening. The nine tests above came with the Rev 3 hand-off and are
-# unchanged; these close the two gaps that let the hand-off ship unbuildable.
+# Added in production hardening. The nine tests above came with the Rev 3 hand-off; their
+# assertions are unchanged and only the evaluator calls now name the event they are about.
+# These close the gaps that let the hand-off ship unbuildable.
 # ---------------------------------------------------------------------------------------
 
 def test_cycle_origin_is_proven_by_the_discussion_not_assumed():
@@ -71,7 +78,7 @@ def test_cycle_origin_is_proven_by_the_discussion_not_assumed():
     that asymmetry: a product where both origins reconciled would not discriminate and is
     reported as unproven rather than counted as evidence.
     """
-    r = reconcile_lead_labels(RAW / "TCDCP4.202609071452.txt")
+    r = reconcile_lead_labels(LOWELL.raw / "TCDCP4.202609071452.txt", LOWELL)
     assert r["cycle"] == "2026-09-07T12:00Z"
     assert r["init_valid"] == "2026-09-07T15:00Z"
     assert r["from_cycle_ok"] is True and r["from_init_ok"] is False
@@ -81,7 +88,7 @@ def test_cycle_origin_is_proven_by_the_discussion_not_assumed():
 
 
 def test_every_archived_discussion_confirms_the_cycle_origin():
-    checked = [reconcile_lead_labels(p) for p in sorted(RAW.glob("TCDCP4.*.txt"))]
+    checked = [reconcile_lead_labels(p, LOWELL) for p in LOWELL.glob("TCD")]
     proven = [r for r in checked if r.get("ok") is not None]
     assert len(proven) >= 20, f"only {len(proven)} discussions carry a labelled table"
     assert all(r["ok"] for r in proven)
@@ -93,12 +100,12 @@ def test_declared_inputs_all_exist_and_are_readable():
     The hand-off declared raw/ne_10m_land.geojson, never shipped it, and crashed on a
     clean checkout. This is that failure as a test.
     """
-    missing = [str(f) for f in declared_inputs() if not f.is_file()]
+    missing = [str(f) for ev in EVENTS.values() for f in declared_inputs(ev) if not f.is_file()]
     assert not missing, f"declared inputs absent from the checkout: {missing}"
 
 
 def test_coastline_is_the_shared_primitive_selected_by_name():
-    by_name, polys, prov = load_coastline()
+    by_name, polys, prov = load_coastline(LOWELL)
     assert "Niihau" in by_name and "Kauai" in by_name
     assert prov.get("geometry_source"), "coastline carries no provenance"
     assert not (COASTLINES.parent.parent.parent / "scripts" / "risk" / "hawaii_land.geojson").exists()
@@ -112,7 +119,7 @@ def test_coastline_equivalence_to_the_handoff_geometry_is_bounded():
     a future coastline refresh that actually moves the geometry fails here first.
     """
     import json
-    by_name, _, _ = load_coastline()
+    by_name, _, _ = load_coastline(LOWELL)
     niihau = by_name["Niihau"]
     minx, miny, maxx, maxy = niihau.bounds
     assert -160.25 <= minx and maxx <= -160.05, (minx, maxx)
@@ -130,7 +137,7 @@ def test_a_special_advisory_inherits_its_cycle_and_does_not_open_one():
     cycle is derived from the product instead of from the clock.
     """
     from datetime import datetime as _dt
-    special = [r for r in load_all() if r.record_id.startswith("TCM34S")]
+    special = [r for r in load_all(LOWELL) if r.record_id.startswith("TCM34S")]
     assert special, "special advisory 34 is not in the archive"
     assert {r.nominal_cycle for r in special} == {"2026-09-04T12:00Z"}
     assert {r.issued for r in special} == {"2026-09-04T18:30Z"}
@@ -149,12 +156,119 @@ def test_aviation_advisory_takes_the_forecast_advisorys_cycle():
     guessed from its own release hour, and reports no lead at all when that advisory is
     not archived.
     """
-    R2 = {r.record_id: r for r in load_all()}
+    R2 = {r.record_id: r for r in load_all(LOWELL)}
     a = R2["TCA46-p3"]
     tcm = R2["TCM46-071451-f0800"]
     assert a.nominal_cycle == tcm.nominal_cycle == "2026-09-07T12:00Z"
     assert a.issued == "2026-09-07T15:00Z" and a.valid == "2026-09-07T18:00Z"
     assert a.lead_h == 6.0
-    for r in load_all():
+    for r in load_all(LOWELL):
         if r.product == "TCA" and r.nominal_cycle is None:
             assert r.lead_h is None and "CYCLE UNRESOLVED" in r.note
+
+
+# ---------------------------------------------------------------------------------------
+# Added with the second record. One evaluator now serves two archives that were acquired
+# differently, and these are the places where that could go wrong quietly.
+# ---------------------------------------------------------------------------------------
+
+def test_every_event_declares_inputs_that_exist_and_are_all_read():
+    """Both directions, for every event, not just the one that happened to be checked."""
+    for slug, ev in EVENTS.items():
+        declared = declared_inputs(ev)
+        assert declared, f"{slug} declares no inputs"
+        assert not [f for f in declared if not f.is_file()], slug
+        read = {p.name for product in ("TCM", "TCP", "TCA", "TCD", "PWS", "TCU")
+                for p in ev.glob(product)} | {ev.deck, COASTLINES.name, COASTLINE_REGISTER.name}
+        assert {f.name for f in declared} == read, slug
+        # Nothing archived under raw/ may sit outside the declared list.
+        assert not [f.name for f in ev.raw.iterdir() if f.is_file() and f.name not in read], slug
+
+
+def test_the_time_model_holds_in_both_archives_and_the_retired_one_holds_in_neither():
+    """87 archived discussions across two storms, and the asymmetry is the whole proof."""
+    total = cycle_ok = init_ok = 0
+    for ev in EVENTS.values():
+        for p in ev.glob("TCD"):
+            r = reconcile_lead_labels(p, ev)
+            if r.get("ok") is None:
+                continue
+            total += 1
+            cycle_ok += bool(r["from_cycle_ok"])
+            init_ok += bool(r["from_init_ok"])
+    assert total >= 80, total
+    assert cycle_ok == total, f"cycle origin failed on {total - cycle_ok} discussions"
+    assert init_ok == 0, f"initial-position origin held on {init_ok} discussions"
+
+
+def test_an_ambiguous_cycle_is_refused_and_then_taken_from_the_printed_label():
+    """A dissipating storm's five-row forecast does not determine its own cycle.
+
+    Rows at +12..+60 from one cycle are equally canonical read as +24..+72 from the cycle
+    six hours earlier. nominal_cycle_from_rows must REFUSE that rather than pick, and the
+    companion discussion -- which prints '12H' outright -- must be what settles it.
+    """
+    from datetime import timedelta
+    init = datetime(2026, 8, 27, 21, 0, tzinfo=timezone.utc)
+    rows = [datetime(2026, 8, 28, 6, 0, tzinfo=timezone.utc) + timedelta(hours=12 * i)
+            for i in range(5)]
+    try:
+        nominal_cycle_from_rows(init, rows)
+        assert False, "an ambiguous row set was resolved instead of refused"
+    except Refusal:
+        pass
+    assert label_cycles(LALA)["62"] == datetime(2026, 8, 27, 18, 0, tzinfo=timezone.utc)
+    recs = {r.record_id: r for r in load_all(LALA)}
+    adv62 = [r for r in recs.values() if r.advisory == "62" and r.product == "TCM"]
+    assert adv62 and {r.nominal_cycle for r in adv62} == {"2026-08-27T18:00Z"}
+    assert CYCLE_BASIS["lala-2026"]["62"] == "discussion-lead-labels"
+    assert CYCLE_BASIS["lala-2026"]["15"] == "forecast-rows"
+
+
+def test_a_public_advisory_is_read_against_its_own_utc_line_or_refused():
+    """11 PM HST on the 16th is 09Z on the SEVENTEENTH.
+
+    Taking the date from the local stamp and the hour from the summary line, without
+    converting, puts the record a day out. The conversion is therefore checked against the
+    UTC the product prints for itself, and a product that disagrees with itself is refused.
+    """
+    body = ("\n1100 PM HST Sun Aug 16 2026\n\n"
+            "SUMMARY OF 1100 PM HST...0900 UTC...INFORMATION\n")
+    assert issued_from_tcp_body(body) == datetime(2026, 8, 17, 9, 0, tzinfo=timezone.utc)
+    try:
+        issued_from_tcp_body(body.replace("0900 UTC", "2300 UTC"))
+        assert False, "a self-inconsistent advisory time was resolved instead of refused"
+    except Refusal:
+        pass
+    # And the real product it was modelled on lands on the same instant.
+    real = (LALA.raw / "TCPCP2.adv020.txt").read_text()
+    assert issued_from_tcp_body(real) == datetime(2026, 8, 17, 9, 0, tzinfo=timezone.utc)
+
+
+def test_the_issuance_basis_is_per_archive_and_never_mixed():
+    """Lowell's minute comes from the filename; Lala's archive does not carry one."""
+    assert LOWELL.issued_basis == "wmo-transmission-minute"
+    assert LALA.issued_basis == "product-body-hour"
+    # Lala's products print whole hours only; inventing a minute would show up here.
+    for r in load_all(LALA):
+        if r.issued:
+            assert r.issued.endswith(":00Z"), r.record_id
+    # Lowell's do not, and that difference must survive.
+    assert any(not r.issued.endswith(":00Z") for r in load_all(LOWELL) if r.issued)
+
+
+def test_both_observation_vintages_are_carried_where_they_agree_too():
+    recs = {r.record_id: r for r in load_all(LALA)}
+    early, late = recs["TCP14A-160000"], recs["TCM15-160300-prior"]
+    assert early.valid == late.valid == "2026-08-16T00:00Z"
+    assert (early.lat, early.lon) == (late.lat, late.lon) == (18.3, -155.7)
+    assert early.issued < late.issued        # still two vintages, not one record reused
+
+
+def test_an_update_carries_no_cycle_and_no_forecast():
+    """A Tropical Cyclone Update states a position, not a forecast, so it constrains nothing."""
+    ups = [r for r in load_all(LALA) if r.product == "TCU"]
+    assert len(ups) == 11
+    for r in ups:
+        assert r.nominal_cycle is None and r.lead_h is None and r.advisory is None
+        assert r.kind == "observation" and "rounded mph" in r.note

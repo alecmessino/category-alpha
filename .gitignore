@@ -24,6 +24,7 @@ plugins/**/.build/
 # megabytes docs/ would otherwise publish to every reader.
 .atlas-shots/
 
-# scripts/risk/build.py renders the PDF from a Letter-sized print source. It is build
-# output, not a page of the site, and is never served.
+# Each risk record's build writes a Letter-sized print source here and gates.py renders the
+# PDF from it, alongside the review screenshots. All of it is build output, not a page of the
+# site, and none of it is served.
 scripts/risk/.build/
