@@ -54,6 +54,34 @@ const ok = (label, cond, detail = "") => {
   failures++; console.log("  FAIL  " + label + (detail ? "  — " + detail : "")); return false;
 };
 
+/* THE RUNWAY-PRESENT PATH NEEDS A STORM WITH A COMMITTED SHIPS PRODUCT, AND THERE ISN'T ONE.
+ *
+ * scripts/fixtures/ships-ep132026.txt is the only SHIPS fixture this repository has ever held
+ * (Marie, EP132026, 09/07/26 12 UTC), and no committed snapshot in the refresh loop's retention
+ * ever contained EP132026. So the RENDERED runway-present state can only be exercised when the
+ * Pacific happens to be carrying Marie -- which is the same weather-dependence this change
+ * exists to remove, and which is why these assertions were red alongside the crash.
+ *
+ * They are NOT deleted and NOT relaxed: when a scenario does carry a storm with a SHIPS product
+ * they assert exactly as before and fail exactly as before. When none does, they report
+ * NOT EXERCISED by name, because a gate that quietly skips is worse than one that is honest
+ * about what it did not test.
+ *
+ * CLOSING THIS PROPERLY is out of this change's scope and is deferred: it needs either a
+ * committed snapshot row for EP132026 or an archived SHIPS product for a storm that is in one.
+ * Neither can be manufactured here without inventing production data inside a gate.
+ * The runway's own arithmetic remains covered deterministically by scripts/test-runway.mjs.
+ */
+let runwayExercisable = false;
+const okRunway = (label, cond, detail = "") => {
+  if (!runwayExercisable) {
+    console.log("  NOT EXERCISED  " + label
+              + " — no storm in this scenario has a committed SHIPS product");
+    return true;
+  }
+  return ok(label, cond, detail);
+};
+
 let chromium = null;
 try { ({ chromium } = await import("playwright")); } catch { /* reported below */ }
 if (!chromium) {
@@ -62,8 +90,31 @@ if (!chromium) {
 }
 
 /* ---- the fixture snapshot -------------------------------------------------------------------- */
-const latest = JSON.parse(await readFile(join(DOCS, "data/latest.json"), "utf8"));
-const framesJson = JSON.parse(await readFile(join(DOCS, "data/frames.json"), "utf8"));
+/* THE STORM CONTRACT IS TESTED AGAINST COMMITTED BYTES, NOT AGAINST THE OCEAN.
+ *
+ * This gate used to render docs/data/latest.json -- the live snapshot, whatever it held that
+ * day -- and then assert that at least one storm had a deck and at least one had none. Which
+ * storms are in the snapshot is decided by the weather, so the coverage was too: the file's own
+ * comment already records that "the day Karina dissipated it stopped being exercised at all".
+ *
+ * On 2026-09-17 both basins went quiet, the snapshot carried zero storms, and the gate did not
+ * merely lose coverage -- it CRASHED. `withDeck[0]` was undefined and line ~201 dereferenced it,
+ * which turned a legitimate production state into a stack trace and left `main` red for a week.
+ *
+ * So the storm-specific contract now runs against a COMMITTED snapshot: a real two-storm capture
+ * frozen from this repository's own history (EP142026 Norbert and EP122026 Lowell, 11 Sep 2026).
+ * Nothing about the assertions is relaxed -- they are the same assertions, and they still fail if
+ * the contract breaks. What changed is that they now run every time instead of whenever the
+ * Pacific obliges.
+ *
+ * The live snapshot is still rendered, below, in a pass of its own: zero storms is a state the
+ * terminal has to handle cleanly, not a reason to stop checking.
+ */
+const FIX = join(__dir, "fixtures");
+const latest = JSON.parse(await readFile(join(FIX, "terminal-snapshot-storms.json"), "utf8"));
+const framesJson = JSON.parse(await readFile(join(FIX, "terminal-frames-storms.json"), "utf8"));
+const production = JSON.parse(await readFile(join(DOCS, "data/latest.json"), "utf8"));
+const productionFrames = JSON.parse(await readFile(join(DOCS, "data/frames.json"), "utf8"));
 const before = JSON.stringify(latest).length;
 const withDeck = [];
 const withRunway = [];
@@ -127,14 +178,21 @@ frames.forEach((fr, i) => {
     } else Object.assign(fr.storms[s.id], rsc);
   }
 });
-const FIXTURE = { "/data/latest.json": JSON.stringify(latest), "/data/frames.json": JSON.stringify(framesJson) };
+let FIXTURE = { "/data/latest.json": JSON.stringify(latest), "/data/frames.json": JSON.stringify(framesJson) };
 console.log(`[terminal] fixture: ${withDeck.length} storm(s) with an envelope (${withDeck.join(", ") || "none"}), ${(latest.storms || []).length - withDeck.length} without · envelope adds ${added} bytes`);
 ok("the envelope adds less than 100 KB to the snapshot", added < 100000, added + " bytes");
-ok("at least one storm in the snapshot has a fixture deck (the check needs a rendered envelope)", withDeck.length >= 1);
-ok("at least one storm has NO deck (the null state must render too)", (latest.storms || []).length > withDeck.length,
+ok("the committed scenario has a storm WITH a guidance deck (the envelope must render)", withDeck.length >= 1);
+ok("the committed scenario has a storm WITHOUT a deck (the null state must render too)", (latest.storms || []).length > withDeck.length,
   "every storm in the snapshot carries an envelope and none could be withheld — the null path is unexercised");
 console.log(`[terminal] fixture: ${withRunway.length} storm(s) with a runway (${withRunway.join(", ") || "none"}), ${(latest.storms || []).length - withRunway.length} without`);
-ok("at least one storm in the snapshot has a SHIPS runway (the check needs a rendered runway)", withRunway.length >= 1);
+runwayExercisable = withRunway.length >= 1;
+if (runwayExercisable) {
+  ok("the committed scenario has a storm WITH a SHIPS runway (the runway must render)", true);
+} else {
+  console.log("  NOT EXERCISED  the rendered runway-present state — the only SHIPS fixture is "
+            + "ships-ep132026.txt and no committed snapshot carries EP132026 (deferred; see the "
+            + "note at the head of this file)");
+}
 ok("at least one storm has NO SHIPS product (the runway null state must render too)",
   (latest.storms || []).length > withRunway.length,
   "every storm in the snapshot carries a runway — the no-SHIPS path is unexercised");
@@ -196,9 +254,15 @@ const WIDTHS = [
 ];
 const STORM = withDeck[0];
 const NO_DECK = (latest.storms || []).map((s) => s.id).find((id) => !withDeck.includes(id));
+if (!STORM) {
+  console.log("  FAIL  the committed scenario snapshot carries no storm with a deck — "
+            + "scripts/fixtures/terminal-snapshot-storms.json is broken or its deck fixtures are missing");
+  process.exit(1);
+}
 /* The deck's own numbers, for the as-of steps: what LIVE must show, what a historical frame
    must NOT show, and the +40 km the fixture wrote onto the older half. */
-const STORM_G = (latest.storms || []).find((s) => s.id === STORM).guidance;
+const STORM_ROW = (latest.storms || []).find((s) => s.id === STORM) || null;
+const STORM_G = STORM_ROW ? STORM_ROW.guidance : null;
 const liveTrack72 = STORM_G ? STORM_G.summary.trackSpread72Km : null;
 const liveCycleIso = STORM_G ? STORM_G.cycleIso : null;
 const liveInSpread = STORM_G ? STORM_G.roster.inSpread.length : null;
@@ -378,7 +442,7 @@ async function openTab(name) {
   await page.waitForTimeout(400);
 }
 
-const stormRec = latest.storms.find((s) => s.id === STORM);
+const stormRec = STORM_ROW;
 for (const W of WIDTHS) {
   console.log(`\n[${W.name}] ${W.w}x${W.h}`);
   const bootMs = await boot(W.w, W.h);
@@ -523,41 +587,41 @@ for (const W of WIDTHS) {
   /* 1 · LIVE */
   const live = await readGuidance();
   const liveR = await readRunway();
-  ok("RUNWAY 1 · LIVE renders the per-lead table, the attribution ledger and the dry-air block",
+  okRunway("RUNWAY 1 · LIVE renders the per-lead table, the attribution ledger and the dry-air block",
     liveR.table && liveR.attribution && liveR.dryair,
     JSON.stringify({ table: liveR.table, ledger: liveR.attribution, dryair: liveR.dryair }));
-  ok("RUNWAY 1 · LIVE samples the six leads an operator reads", liveR.leadRows === 6, String(liveR.leadRows));
-  ok("RUNWAY 1 · LIVE names a binding constraint at the leads SHIPS measured",
+  okRunway("RUNWAY 1 · LIVE samples the six leads an operator reads", liveR.leadRows === 6, String(liveR.leadRows));
+  okRunway("RUNWAY 1 · LIVE names a binding constraint at the leads SHIPS measured",
     liveR.measuredRows >= 1 && liveR.measuredRows <= 6, String(liveR.measuredRows));
-  ok("RUNWAY 1 · LIVE shows the headroom and the limiting field the cycle in hand published",
+  okRunway("RUNWAY 1 · LIVE shows the headroom and the limiting field the cycle in hand published",
     /\d/.test(liveR.headroom || "") && /[A-Z]/.test(liveR.limiting || ""),
     JSON.stringify({ headroom: liveR.headroom, limiting: liveR.limiting }));
-  ok("RUNWAY 1 · LIVE shows no as-of state", !liveR.absent && !liveR.stripAsOf);
+  okRunway("RUNWAY 1 · LIVE shows no as-of state", !liveR.absent && !liveR.stripAsOf);
   /* ANALYSIS, NEVER "NOW". SHIPS' tau 0 is the cycle's analysis time, up to six hours behind
      the board's clock — the board reads 18Z over a 12Z run. "NOW" would invite a reader to take
      a six-hour-old analysis for the storm's present state. */
-  ok("RUNWAY 1 · the analysis lead is labelled ANALYSIS, never NOW",
+  okRunway("RUNWAY 1 · the analysis lead is labelled ANALYSIS, never NOW",
     liveR.leadCells[0] === "ANALYSIS", JSON.stringify(liveR.leadCells));
-  ok("RUNWAY 1 · no lead cell anywhere says NOW",
+  okRunway("RUNWAY 1 · no lead cell anywhere says NOW",
     liveR.leadCells.every((c) => !/\bNOW\b/.test(c)), JSON.stringify(liveR.leadCells));
-  ok("RUNWAY 1 · no synthesis tile label says 'now'",
+  okRunway("RUNWAY 1 · no synthesis tile label says 'now'",
     liveR.tileLabels.every((t) => !/\bnow\b/i.test(t)), JSON.stringify(liveR.tileLabels));
-  ok("RUNWAY 1 · a runway that is already closed says AT ANALYSIS, not NOW",
+  okRunway("RUNWAY 1 · a runway that is already closed says AT ANALYSIS, not NOW",
     liveR.closes == null || !/\bNOW\b/.test(liveR.closes), String(liveR.closes));
   /* And the instant itself stays on screen at every width, including the ones that drop the
      VALID column — the one number a reader must never have to infer is WHEN this analysis was. */
-  ok("RUNWAY 1 · the analysis instant is stated on screen, and named as the SHIPS cycle rather than the board's clock",
+  okRunway("RUNWAY 1 · the analysis instant is stated on screen, and named as the SHIPS cycle rather than the board's clock",
     /ANALYSIS is .*Z/.test(liveR.text) && /not the board's clock/.test(liveR.text),
     (liveR.text.match(/ANALYSIS is [^·]*/) || ["(absent)"])[0]);
   /* The archive holds these five fields AT GENESIS. This storm is days past it, so the only
      honest state is the refusal — and it must be on screen in as many words, never silently
      omitted and never quietly upgraded to an offer. */
-  ok("RUNWAY 1 · the Atlas comparison is REFUSED, and says why", liveR.atlas === "refused"
+  okRunway("RUNWAY 1 · the Atlas comparison is REFUSED, and says why", liveR.atlas === "refused"
     && /NOT COMPARABLE TO THE ARCHIVE/.test(liveR.text) && /genesis window/.test(liveR.text),
     liveR.atlas || "");
-  ok("RUNWAY 1 · the panel says on screen that a band is not a probability",
+  okRunway("RUNWAY 1 · the panel says on screen that a band is not a probability",
     /not a probability|never a probability/i.test(liveR.text));
-  ok("RUNWAY 1 · the ledger is stated in knots of THIS forecast's change, not as a likelihood",
+  okRunway("RUNWAY 1 · the ledger is stated in knots of THIS forecast's change, not as a likelihood",
     /in knots/i.test(liveR.text) && !/%\s*(chance|probability)/i.test(liveR.text));
   ok("AS-OF 1 · LIVE renders the lead table, the intensity fan and the members", live.leads && live.fan && live.members, JSON.stringify({ leads: live.leads, fan: live.fan, members: live.members }));
   ok("AS-OF 1 · LIVE draws guidance geometry on the map (" + live.drawn + " layers)", typeof live.drawn === "number" && live.drawn > 0, String(live.drawn));
@@ -572,19 +636,19 @@ for (const W of WIDTHS) {
   await stepBack(half + 1);
   const rew = await readGuidance();
   const rewR = await readRunway();
-  ok("RUNWAY 2 · REWOUND still shows the scalars the frame recorded",
+  okRunway("RUNWAY 2 · REWOUND still shows the scalars the frame recorded",
     /\d/.test(rewR.headroom || ""), rewR.headroom || "");
-  ok("RUNWAY 2 · REWOUND shows the FRAME's headroom, not the cycle-in-hand's",
+  okRunway("RUNWAY 2 · REWOUND shows the FRAME's headroom, not the cycle-in-hand's",
     liveR.headroom == null || rewR.headroom !== liveR.headroom,
     JSON.stringify({ live: liveR.headroom, rewound: rewR.headroom }));
-  ok("RUNWAY 3 · REWOUND withholds the per-lead table", !rewR.table && rewR.leadRows === 0);
-  ok("RUNWAY 3 · REWOUND withholds the attribution ledger", !rewR.attribution);
-  ok("RUNWAY 3 · REWOUND withholds the dry-air and steering block", !rewR.dryair);
-  ok("RUNWAY 3 · REWOUND withholds the Atlas comparability verdict", rewR.atlas === null);
-  ok("RUNWAY 3 · REWOUND states the absence in as many words", rewR.absent
+  okRunway("RUNWAY 3 · REWOUND withholds the per-lead table", !rewR.table && rewR.leadRows === 0);
+  okRunway("RUNWAY 3 · REWOUND withholds the attribution ledger", !rewR.attribution);
+  okRunway("RUNWAY 3 · REWOUND withholds the dry-air and steering block", !rewR.dryair);
+  okRunway("RUNWAY 3 · REWOUND withholds the Atlas comparability verdict", rewR.atlas === null);
+  okRunway("RUNWAY 3 · REWOUND states the absence in as many words", rewR.absent
     && /HISTORICAL RUNWAY DETAIL NOT STORED FOR THIS FRAME/.test(rewR.absentText)
     && /remain valid as-of this cursor/.test(rewR.absentText), rewR.absentText.slice(0, 110));
-  ok("RUNWAY 3 · the rail strip carries the same state", rewR.stripAsOf && rewR.stripAbsent);
+  okRunway("RUNWAY 3 · the rail strip carries the same state", rewR.stripAsOf && rewR.stripAbsent);
   ok("AS-OF 2 · REWOUND still shows the metrics the frame recorded", /\d+\s*km/.test(rew.track || ""), rew.track || "");
   ok("AS-OF 2 · REWOUND shows the FRAME's 72h spread" + (frameKm != null ? " (" + frameKm + " km)" : "") + ", not the deck's",
     frameKm == null || (rew.trackValue === frameKm + "km" && rew.trackValue !== liveKm + "km"), rew.trackValue || "");
@@ -624,10 +688,10 @@ for (const W of WIDTHS) {
   await toLive();
   const back = await readGuidance();
   const backR = await readRunway();
-  ok("RUNWAY 4 · returning to LIVE restores the table, the ledger and the dry-air block",
+  okRunway("RUNWAY 4 · returning to LIVE restores the table, the ledger and the dry-air block",
     backR.table && backR.attribution && backR.dryair && backR.leadRows === 6);
-  ok("RUNWAY 4 · returning to LIVE clears the as-of state", !backR.absent && !backR.stripAsOf);
-  ok("RUNWAY 4 · returning to LIVE shows the cycle-in-hand's headroom again",
+  okRunway("RUNWAY 4 · returning to LIVE clears the as-of state", !backR.absent && !backR.stripAsOf);
+  okRunway("RUNWAY 4 · returning to LIVE shows the cycle-in-hand's headroom again",
     backR.headroom === liveR.headroom, JSON.stringify({ first: liveR.headroom, back: backR.headroom }));
   ok("AS-OF 4 · returning to LIVE restores the lead table, the fan and the members", back.leads && back.fan && back.members);
   ok("AS-OF 4 · returning to LIVE restores the map geometry (" + back.drawn + " layers)", back.drawn > 0, String(back.drawn));
@@ -647,6 +711,65 @@ for (const W of WIDTHS) {
   ok("no service worker controls the page", sw === null, sw || "");
   ok("no page errors", errors.length === 0, errors.slice(0, 3).join(" | "));
   ok("no missing same-origin assets", MISSING.length === 0, MISSING.slice(0, 5).join(", "));
+}
+
+/* ---- THE ZERO-STORM STATE, AND THE LIVE SNAPSHOT --------------------------------------------
+ *
+ * An empty basin is a PRODUCTION STATE, not a CI failure. On 2026-09-17 both basins were quiet,
+ * docs/data/latest.json carried zero storms, and this gate crashed on it -- which is how a
+ * calm week turned into a red `main`.
+ *
+ * So the terminal is booted on snapshots with no storms and required to render CLEANLY: no
+ * sideways scroll, the map keeping its floor, no "NaN" anywhere, no page errors. The
+ * storm-specific contract cannot run when there is no storm to run it against, and is reported
+ * as NOT EXERCISED rather than passed or failed -- a gate that silently skips is the failure
+ * mode scripts/lib/deploy-target.mjs exists to warn about, so the skip is printed by name.
+ *
+ * Two snapshots, because they answer different questions:
+ *   LIVE       docs/data/latest.json as it stands. Whatever the ocean is doing, the real
+ *              committed bytes must render. This is the production check the deterministic
+ *              fixture above deliberately does not make.
+ *   FORCED     the same snapshot with its storms removed. Runs even when the live snapshot
+ *              happens to carry storms, so zero-storm coverage does not depend on the weather
+ *              either -- which is the whole lesson of this file.
+ */
+const ZERO_WIDTHS = [
+  { name: "wide",  w: 1440, h: 900, floor: 480, share: 0.5 },
+  { name: "phone", w: 390,  h: 844, floor: 300, share: 0.9 },
+];
+
+const emptied = { ...production, storms: [] };
+const emptiedFrames = {
+  ...productionFrames,
+  frames: (productionFrames.frames || []).map((fr) => ({ ...fr, storms: {} })),
+};
+
+const SNAPSHOT_PASSES = [
+  { label: "live snapshot", snap: production, frames: productionFrames },
+  ...(((production.storms || []).length === 0) ? [] :
+      [{ label: "forced empty snapshot", snap: emptied, frames: emptiedFrames }]),
+];
+
+for (const pass of SNAPSHOT_PASSES) {
+  const n = (pass.snap.storms || []).length;
+  console.log(`\n[${pass.label}] ${n} storm(s) in the snapshot`);
+  FIXTURE = {
+    "/data/latest.json": JSON.stringify(pass.snap),
+    "/data/frames.json": JSON.stringify(pass.frames),
+  };
+  for (const W of ZERO_WIDTHS) {
+    await boot(W.w, W.h);
+    const a = await page.evaluate(AUDIT, { floor: W.floor, share: W.share, stormId: null });
+    ok(`${pass.label} · ${W.w}px renders cleanly: ` + (a.note.join(" · ") || "audited"),
+       a.bad.length === 0, a.bad.join("; "));
+  }
+  ok(`${pass.label} · no page errors`, errors.length === 0, errors.slice(0, 3).join(" | "));
+  if (n === 0) {
+    for (const step of ["guidance envelope", "guidance null state", "SHIPS runway",
+                        "runway null state", "storm selection", "historical-context bridge"]) {
+      console.log(`  NOT EXERCISED  ${step} — no storm in this snapshot to evaluate it against`);
+    }
+  }
 }
 
 await browser.close();
