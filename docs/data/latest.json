@@ -1,6 +1,6 @@
 {
   "schema": "millibar-terminal/1",
-  "generatedAt": "2026-09-18T18:25:34.689Z",
+  "generatedAt": "2026-09-18T18:35:36.400Z",
   "stepMin": 10,
   "note": "No CLASSIFIED tropical cyclones. 4 area(s) under NHC watch — see the genesis outlook below.",
   "feeds": {
@@ -9,7 +9,7 @@
       "status": 200,
       "source": "NHC CurrentStorms.json",
       "url": "https://www.nhc.noaa.gov/CurrentStorms.json",
-      "latencyMs": 138,
+      "latencyMs": 176,
       "count": 0,
       "note": "no active tropical cyclones",
       "raw": null,
@@ -46,14 +46,14 @@
             "noPrice": 0
           },
           "samples": [
-            "Will there be more than 26 named storms  | Above 26 | px=0.100",
-            "Will there be more than 24 named storms  | Above 24 | px=0.155",
-            "Will there be more than 22 named storms  | Above 22 | px=0.365",
-            "Will there be more than 20 named storms  | Above 20 | px=0.565",
-            "Will there be more than 19 named storms  | Above 19 | px=0.685",
-            "Will there be more than 18 named storms  | Above 18 | px=0.755"
+            "Will Wilfred be the first named hurrican | Wilfred | px=0.005",
+            "Will Vicky be the first named hurricane  | Vicky | px=0.005",
+            "Will Teddy be the first named hurricane  | Teddy | px=0.005",
+            "Will Sally be the first named hurricane  | Sally | px=0.005",
+            "Will Rene be the first named hurricane i | Rene | px=0.005",
+            "Will Paulette be the first named hurrica | Paulette | px=0.005"
           ],
-          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"floor_strike\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"245.99\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"252.44\"},\"px\":{\"last_price_dollars\":\"0.1700\",\"no_ask_dollars\":\"0.9700\",\"no_bid_dollars\":\"0.8300\",\"previous_price_dollars\":\"0.1700\",\"previous_yes_ask_dollars\":\"0.1700\",\"previous_yes_bid_dollars\":\"0.0300\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.1700\",\"yes_ask_size_fp\":\"100.00\",\"yes_bid_dollars\":\"0.0300\",\"yes_bid_size_fp\":\"10.00\"}}"
+          "raw": "{\"keys\":[\"can_close_early\",\"close_time\",\"created_time\",\"custom_strike\",\"early_close_condition\",\"event_ticker\",\"exchange_index\",\"expected_expiration_time\",\"expiration_time\",\"expiration_value\",\"last_price_dollars\",\"latest_expiration_time\",\"liquidity_dollars\",\"market_type\",\"no_ask_dollars\",\"no_bid_dollars\",\"no_sub_title\",\"notional_value_dollars\",\"occurrence_datetime\",\"open_interest_fp\",\"open_time\",\"previous_price_dollars\",\"previous_yes_ask_dollars\",\"previous_yes_bid_dollars\",\"price_level_structure\",\"price_ranges\",\"result\",\"rules_primary\",\"rules_secondary\",\"settlement_timer_seconds\",\"status\",\"strike_type\",\"subtitle\",\"ticker\",\"title\",\"updated_time\",\"volume_24h_fp\",\"volume_fp\",\"yes_ask_dollars\",\"yes_ask_size_fp\",\"yes_bid_dollars\",\"yes_bid_size_fp\",\"yes_sub_title\"],\"size\":{\"liquidity_dollars\":\"0.0000\",\"notional_value_dollars\":\"1.0000\",\"open_interest_fp\":\"2100.00\",\"volume_24h_fp\":\"0.00\",\"volume_fp\":\"2787.90\"},\"px\":{\"last_price_dollars\":\"0.0100\",\"no_ask_dollars\":\"1.0000\",\"no_bid_dollars\":\"0.9900\",\"previous_price_dollars\":\"0.0100\",\"previous_yes_ask_dollars\":\"0.0100\",\"previous_yes_bid_dollars\":\"0.0000\",\"price_level_structure\":\"linear_cent\",\"price_ranges\":[{\"end\":\"1.0000\",\"start\":\"0.0000\",\"step\":\"0.0100\"}],\"yes_ask_dollars\":\"0.0100\",\"yes_ask_size_fp\":\"10422.76\",\"yes_bid_dollars\":\"0.0000\",\"yes_bid_size_fp\":\"0.00\"}}"
         }
       ]
     },
@@ -237,7 +237,7 @@
       "ok": true,
       "source": "CPC ONI",
       "status": 200,
-      "latencyMs": 385,
+      "latencyMs": 319,
       "count": 76,
       "attempts": [],
       "note": "El Niño · JJA 2026 ONI +1.80 (peak-season ASO not yet observed — carried forward, 2mo old)"
@@ -248,7 +248,7 @@
       "source": "NHC Tropical Weather Outlook",
       "count": 4,
       "note": "4 area(s) under watch · 1 Atlantic · highest 7-day 70%",
-      "latencyMs": 145,
+      "latencyMs": 161,
       "attempts": [
         {
           "source": "Atlantic TWO (NWS API)",
@@ -273,7 +273,7 @@
     "outlookShapes": {
       "ok": true,
       "status": 200,
-      "latencyMs": 329,
+      "latencyMs": 31,
       "source": "NHC graphical TWO",
       "count": 4,
       "note": "4 of 4 area(s) with geometry"
@@ -293,7 +293,7 @@
       "source": "TGFTP URNT12/URPN12/URNT11/URPN11",
       "url": "https://tgftp.nws.noaa.gov/data/raw/ur",
       "status": 200,
-      "latencyMs": 450,
+      "latencyMs": 385,
       "count": 2,
       "note": "2 vortex data message(s): AL052026 13:04Z, EP122026 12:37Z",
       "attempts": [
@@ -1039,7 +1039,7 @@
       "volume24h": 178.9,
       "openInterest": 4788.88,
       "depth": {
-        "bidSize": 30.95,
+        "bidSize": 60.95,
         "askSize": 8.9,
         "notional": 1
       },
@@ -1237,14 +1237,14 @@
       "yesBid": 0.01,
       "yesAsk": 0.04,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 14,
+      "liquidity": 13,
       "spread": 0.03,
       "volume": 9527.7,
       "volume24h": 0,
       "openInterest": 4076.42,
       "depth": {
         "bidSize": 100,
-        "askSize": 362.38,
+        "askSize": 317,
         "notional": 1
       },
       "proxy": false,
@@ -4485,7 +4485,7 @@
       "short": "Will Fay be categorized as a hurricane in the…",
       "storm": null,
       "subject": null,
-      "market": 0.385,
+      "market": 0.39,
       "model": 0.384072055705113,
       "modelQuantity": "namedhurricane",
       "modelBasin": "atlantic",
@@ -4518,17 +4518,17 @@
       "modelIntel": null,
       "horizon": "seasonal",
       "strike": null,
-      "yesBid": 0.28,
+      "yesBid": 0.29,
       "yesAsk": 0.49,
       "closeTime": "2026-12-01T15:00:00Z",
-      "liquidity": 60,
-      "spread": 0.20999999999999996,
+      "liquidity": 48,
+      "spread": 0.2,
       "volume": 666.52,
       "volume24h": 274.35,
       "openInterest": 475.88,
       "depth": {
         "bidSize": 10,
-        "askSize": 122,
+        "askSize": 98,
         "notional": 1
       },
       "proxy": false,
@@ -7788,7 +7788,7 @@
       "volume24h": 942.43,
       "openInterest": 5962.23,
       "depth": {
-        "bidSize": 413.87,
+        "bidSize": 414.87,
         "askSize": 250,
         "notional": 1
       },
@@ -7963,7 +7963,7 @@
       "liquidity": 9,
       "spread": 0.06,
       "volume": 8068.3,
-      "volume24h": 1736.39,
+      "volume24h": 1736.15,
       "openInterest": 5356.83,
       "depth": {
         "bidSize": 15,
@@ -11665,7 +11665,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.505,
+      "market": 0.5,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -11686,16 +11686,16 @@
       "horizon": "storm",
       "strike": 1,
       "yesBid": 0.02,
-      "yesAsk": 0.99,
+      "yesAsk": 0.98,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 50,
-      "spread": 0.97,
+      "liquidity": 2,
+      "spread": 0.96,
       "volume": 15,
       "volume24h": 0,
       "openInterest": 11,
       "depth": {
         "bidSize": 10,
-        "askSize": 50,
+        "askSize": 2,
         "notional": 1
       },
       "proxy": false,
@@ -11757,7 +11757,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.48,
+      "market": 0.425,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -11778,16 +11778,16 @@
       "horizon": "storm",
       "strike": 5,
       "yesBid": 0.01,
-      "yesAsk": 0.95,
+      "yesAsk": 0.84,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 10,
-      "spread": 0.94,
+      "liquidity": 3,
+      "spread": 0.83,
       "volume": 8,
       "volume24h": 0,
       "openInterest": 8,
       "depth": {
         "bidSize": 50,
-        "askSize": 10,
+        "askSize": 3,
         "notional": 1
       },
       "proxy": false,
@@ -11803,7 +11803,7 @@
         "subject": "Simon",
         "active": false
       },
-      "market": 0.265,
+      "market": 0.38,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -11823,16 +11823,16 @@
       "modelIntel": null,
       "horizon": "storm",
       "strike": 1,
-      "yesBid": 0.03,
+      "yesBid": 0.26,
       "yesAsk": 0.5,
       "closeTime": "2026-12-02T04:59:00Z",
       "liquidity": 1,
-      "spread": 0.47,
+      "spread": 0.24,
       "volume": 6.62,
       "volume24h": 0,
       "openInterest": 6.62,
       "depth": {
-        "bidSize": 9,
+        "bidSize": 1,
         "askSize": 1,
         "notional": 1
       },
@@ -11849,7 +11849,7 @@
         "subject": "Zeke",
         "active": false
       },
-      "market": 0.485,
+      "market": 0.4,
       "model": null,
       "modelQuantity": null,
       "modelBasin": null,
@@ -11870,16 +11870,16 @@
       "horizon": "storm",
       "strike": 3,
       "yesBid": 0.01,
-      "yesAsk": 0.96,
+      "yesAsk": 0.79,
       "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 10,
-      "spread": 0.95,
+      "liquidity": 1,
+      "spread": 0.78,
       "volume": 6,
       "volume24h": 0,
       "openInterest": 6,
       "depth": {
         "bidSize": 50,
-        "askSize": 10,
+        "askSize": 1,
         "notional": 1
       },
       "proxy": false,
@@ -12255,52 +12255,6 @@
       "url": "https://kalshi.com/markets/KXHURCAT-26XAVIER"
     },
     {
-      "id": "KXHURCAT-26ZEKE-T2",
-      "label": "Will Zeke become a Category 2 hurricane?",
-      "short": "Will Zeke become a Category 2 hurricane…",
-      "storm": null,
-      "subject": {
-        "subject": "Zeke",
-        "active": false
-      },
-      "market": 0.49,
-      "model": null,
-      "modelQuantity": null,
-      "modelBasin": null,
-      "modelSource": null,
-      "modelBasis": null,
-      "modelUncond": null,
-      "modelLayers": null,
-      "modelLow": null,
-      "modelHigh": null,
-      "modelLagMin": null,
-      "modelMaxLagMin": null,
-      "modelGuidance": null,
-      "modelRawP": null,
-      "modelOfficialP": null,
-      "modelCalibrated": false,
-      "modelQuality": null,
-      "modelIntel": null,
-      "horizon": "storm",
-      "strike": 2,
-      "yesBid": 0.02,
-      "yesAsk": 0.96,
-      "closeTime": "2026-12-02T04:59:00Z",
-      "liquidity": 8,
-      "spread": 0.94,
-      "volume": 4,
-      "volume24h": 0,
-      "openInterest": 4,
-      "depth": {
-        "bidSize": 2,
-        "askSize": 8,
-        "notional": 1
-      },
-      "proxy": false,
-      "source": "kalshi",
-      "url": "https://kalshi.com/markets/KXHURCAT-26ZEKE"
-    },
-    {
       "id": "KXHURCAT-26OMAR-T5",
       "label": "Will Omar become a Category 5 hurricane?",
       "short": "Will Omar become a Category 5 hurricane…",
@@ -12345,6 +12299,52 @@
       "proxy": false,
       "source": "kalshi",
       "url": "https://kalshi.com/markets/KXHURCAT-26OMAR"
+    },
+    {
+      "id": "KXHURCAT-26ZEKE-T2",
+      "label": "Will Zeke become a Category 2 hurricane?",
+      "short": "Will Zeke become a Category 2 hurricane…",
+      "storm": null,
+      "subject": {
+        "subject": "Zeke",
+        "active": false
+      },
+      "market": 0.315,
+      "model": null,
+      "modelQuantity": null,
+      "modelBasin": null,
+      "modelSource": null,
+      "modelBasis": null,
+      "modelUncond": null,
+      "modelLayers": null,
+      "modelLow": null,
+      "modelHigh": null,
+      "modelLagMin": null,
+      "modelMaxLagMin": null,
+      "modelGuidance": null,
+      "modelRawP": null,
+      "modelOfficialP": null,
+      "modelCalibrated": false,
+      "modelQuality": null,
+      "modelIntel": null,
+      "horizon": "storm",
+      "strike": 2,
+      "yesBid": 0.02,
+      "yesAsk": 0.61,
+      "closeTime": "2026-12-02T04:59:00Z",
+      "liquidity": 1,
+      "spread": 0.59,
+      "volume": 4,
+      "volume24h": 0,
+      "openInterest": 4,
+      "depth": {
+        "bidSize": 2,
+        "askSize": 1,
+        "notional": 1
+      },
+      "proxy": false,
+      "source": "kalshi",
+      "url": "https://kalshi.com/markets/KXHURCAT-26ZEKE"
     },
     {
       "id": "KXHURCAT-26JOSEPHINE-T1",
