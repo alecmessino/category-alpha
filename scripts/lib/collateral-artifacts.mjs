@@ -128,13 +128,16 @@ export function liveRows(D) {
       live: `No advisory or b-deck under EP95 in this ingest. `
         + `<b>Pre-genesis: no formation point to query.</b>`,
       /* The issuance line is NHC's own string minus its weekday and year -- the stamp above the
-         table already dates the ingest -- so the row holds to six lines beside its neighbours. */
+         table already dates the ingest -- so the row holds to six lines beside its neighbours.
+         The area TITLES are NHC's and are carried verbatim however long they run. */
       feed: pacAreas.length
         ? `NHC Pacific outlook: ${pacAreas.map((o) => `<b>${esc(o.title)}</b>`
           + `${o.pct48 === null ? "" : ` ${o.pct48}% / 48 h`}${o.pct7d === null ? "" : ` ${o.pct7d}% / 7 d`}`)
           .join("; ")}, issued ${esc(String(pacAreas[0].issued).replace(/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s+/, "").replace(/\s+\d{4}$/, ""))}. `
           + `<b>Never multiplied by an Atlas row.</b>`
         : `No Pacific outlook area in this ingest. <b>NHC's outlook; never multiplied by an Atlas row.</b>`,
+      /* No advisory AND no b-deck: one absence, one flow. */
+      mergeLiveAndFeed: true,
     },
     LOWELL: {
       name: `${aL ? esc(aL.cls_label) : ""} Lowell`.trim(), basin: "EAST PACIFIC / CENTRAL PACIFIC",
@@ -258,8 +261,9 @@ export function artifactA(D, copy) {
         <span class="chip ${r.pre ? "pre" : "obs"}">${r.pre ? "PRE-GENESIS CELL" : "DECLARED · NOT ATLAS-OBSERVED"}</span>
         <span class="mono8">${coord(sy.coordinates_queried.lat, sy.coordinates_queried.lon)}</span>
         <span class="mono6">${esc(sy.basin_label)} · r ${sy.radius_km} km · ${esc(sy.month_window.replace("August–September", "Aug–Sep"))} · ${sy.season_floor}+</span></td>
-      <td class="lft livecol"><div class="prose">${r.live}</div>
-        <div class="feed">${r.feed}</div></td>
+      <td class="lft livecol">${r.mergeLiveAndFeed
+        ? `<div class="prose">${r.live} ${r.feed}</div>`
+        : `<div class="prose">${r.live}</div><div class="feed">${r.feed}</div>`}</td>
       <td class="lft"><span class="chip ${sy.cohort.sufficient ? "ok" : "refuse"}">${esc(sy.cohort.cohort_status)}</span>
         <span class="chip">N = ${sy.cohort.n_cases}</span>
         <div class="prose">${C.get(`atlas-value-${k}`)}</div></td></tr>`;
