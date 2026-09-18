@@ -127,11 +127,67 @@ function checkComparison(html, riskDir) {
     problems.push({ kind: "HISTORICAL TERMS UNLABELLED",
       detail: "the 2024 ladder appears without the historical-terms qualifier" });
   }
-  /* No 2026 cell may be named, however faintly. */
-  if (/2026 (payout )?(cell|schedule) (is|was) /i.test(html) && !/not (reconstructable|public)/i.test(html)) {
-    problems.push({ kind: "2026 CELL IMPLIED", detail: "the index reads as identifying a 2026 cell" });
-  }
+  problems.push(...checkNo2026Term(html));
   return problems;
+}
+
+/* NO 2026 CONTRACT TERM MAY BE NAMED, HOWEVER FAINTLY -- AND THE OLD GUARD COULD NOT FIRE.
+ *
+ * It read:
+ *     /2026 (payout )?(cell|schedule) (is|was) /i.test(html) && !/not (reconstructable|public)/i
+ *
+ * Two independent defects, either of which alone would have disabled it:
+ *
+ *   1. THE QUALIFIER WAS DOCUMENT-SCOPED. The escape clause asked whether the WHOLE PAGE
+ *      contains "not reconstructable" or "not public". It always does -- both events carry
+ *      the settlement status "Not reconstructable from public terms" -- so the negation was
+ *      false on every run and the branch was unreachable. Injecting the literal sentence
+ *      "The 2026 payout cell is 64 kt in zone Z." into the published page returned PASS.
+ *
+ *   2. THE DETECTOR WAS TOO NARROW. It required the exact word order
+ *      "2026 [payout] cell|schedule is|was " with a trailing space. "the 2026 zone polygon is
+ *      Z", "the cell for 2026 was 64 kt" and "2026 attachment = 96 kt" all walked past it.
+ *
+ * The invariant is not "the page mentions a refusal somewhere". It is: A SENTENCE THAT BINDS A
+ * 2026 CONTRACT TERM TO A VALUE MUST REFUSE IT IN THAT SAME SENTENCE. So the qualifier is
+ * sentence-local, and the detector matches a term bound either by a copula or by a figure.
+ *
+ * The page's real sentences all pass, because each carries its own refusal:
+ *   "Neither payout traces to a 2026 contract cell."
+ *   "No 2026 payout cell is identified for either event."
+ *   "for 2026 the schedule, the zone polygons ... are all unpublished."
+ *   "No zone boundary is drawn, estimated or implied."
+ */
+const TERM_2026 = /\b(cells?|schedules?|zones?|polygons?|triggers?|attachments?|thresholds?|rows?|terms?)\b/i;
+const BINDS = /\b(is|was|are|were|equals?|sits? at|settles? at)\b|=/i;
+const FIGURE = /\d+\s*(kt|kts|knots|nm|mi|km)\b|\$\s?[\d,]+/i;
+const REFUSES = /\b(no|not|never|cannot|can't|none|neither|nothing|unpublished|unknown|undisclosed|absent|refus\w*|withheld)\b/i;
+
+function sentences(html) {
+  /* Block ends are sentence ends: a table cell and the next one are not one sentence. */
+  return html
+    .replace(/<(script|style)[\s\S]*?<\/\1>/gi, " ")
+    .replace(/<\/(p|div|td|th|li|h1|h2|h3|h4|figcaption|dd|dt|section|tr|caption)>/gi, ". ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z]+;|&#\d+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .split(/(?<=[.!?])\s+/);
+}
+
+function checkNo2026Term(html) {
+  const hits = [];
+  for (const s of sentences(html)) {
+    if (!/\b2026\b/.test(s)) continue;
+    if (!TERM_2026.test(s)) continue;
+    if (!(BINDS.test(s) || FIGURE.test(s))) continue;
+    if (REFUSES.test(s)) continue;
+    hits.push(s.trim().slice(0, 140));
+  }
+  return hits.length
+    ? [{ kind: "2026 CELL IMPLIED",
+         detail: `a 2026 contract term is bound to a value in a sentence that does not refuse `
+               + `it: "${hits[0]}"` + (hits.length > 1 ? ` (+${hits.length - 1} more)` : "") }]
+    : [];
 }
 
 /* THE ASSOCIATION'S STRENGTH ON THE PAGE MUST BE THE STRENGTH IN THE RECORDS.
@@ -200,6 +256,7 @@ function selfTest() {
      against the REAL published figure with one value bent -- which is exactly the mistake it
      exists to catch (a number retyped into a chart instead of derived). Nothing is written. */
   let cmpCases = 0;
+  let termCases = 0;
   if (existsSync(INDEX) && existsSync(RISK)) {
     const real = readFileSync(INDEX, "utf8");
     const bent = real.replace(/(\d+) kt &#183; (\d+) nm/, (m, kt, nm) => `${+kt + 7} kt &#183; ${nm} nm`);
@@ -217,6 +274,28 @@ function selfTest() {
       bad.push("false positive: the real published figure is rejected by its own check");
     }
     cmpCases++;
+
+    /* THE 2026-TERM GUARD, MADE TO FIRE. Its predecessor could not: the escape clause was
+       document-scoped and the whole page always satisfied it, so the branch was dead for as
+       long as it existed and every run reported PASS. It is exercised here against the REAL
+       page with a prohibited sentence spliced in -- including the four forms the old pattern
+       did not even describe -- and against the real page unmodified. */
+    const implied = [
+      "The 2026 payout cell is 64 kt in zone Z.",
+      "The 2026 zone polygon is Zone B.",
+      "The cell for 2026 was 96 kt at 25 nm.",
+      "2026 attachment = 96 kt.",
+      "This event settles at the 64 kt row for 2026.",
+      "The 2026 schedule pays $300,000 at that wind.",
+    ];
+    for (const sentence of implied) {
+      termCases++;
+      const doc = real.replace("<footer>", `<p>${sentence}</p><footer>`);
+      if (!checkNo2026Term(doc).length) bad.push(`missed: an implied 2026 term — "${sentence}"`);
+    }
+    if (checkNo2026Term(real).length) {
+      bad.push("false positive: the real published page names a 2026 term");
+    }
   }
 
   if (bad.length) {
@@ -226,6 +305,7 @@ function selfTest() {
   }
   console.log(`PASS  doorway gate self-test: ${cases.filter((c) => c[4]).length} bad indexes rejected, 1 allowed`);
   if (cmpCases) console.log(`      comparison check: ${cmpCases - 1} bent figures rejected, the real one allowed`);
+  if (termCases) console.log(`      2026-term check: ${termCases} implied terms rejected, the real page allowed`);
 }
 
 if (process.argv.includes("--self-test")) {
