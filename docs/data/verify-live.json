@@ -1,28 +1,32 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-18T18:35:22.230Z",
+  "ranAt": "2026-09-18T20:53:10.907Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "fc163356d845f8e1b4aa646e2887a6da674ecc15",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35380969596",
+  "sha": "7b96ce70ae7735b40f76f1714068236d69bc99b6",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35393766648",
   "ok": false,
-  "passed": 43,
+  "passed": 42,
   "total": 46,
   "failures": [
+    {
+      "check": "served snapshot is fresh",
+      "detail": "2026-09-18T19:20:36.889Z · 92m old"
+    },
     {
       "check": "storm block swaps correctly",
       "detail": "0 storm(s) · notice=true commandCentre=true"
     },
     {
       "check": "three tabs, so no single view is a wall",
-      "detail": "3 tabs · Situation is 2.4 screens tall (3339px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
+      "detail": "3 tabs · Situation is 2.4 screens tall (3380px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
     },
     {
       "check": "all markets carried",
       "detail": "300 contracts · 50 series · droppedForCap=5"
     }
   ],
-  "thirdPartyFailures": 20,
+  "thirdPartyFailures": 10,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -41,8 +45,8 @@
     },
     {
       "check": "served snapshot is fresh",
-      "pass": true,
-      "detail": "2026-09-18T18:25:34.689Z · 10m old"
+      "pass": false,
+      "detail": "2026-09-18T19:20:36.889Z · 92m old"
     },
     {
       "check": "renders: Situation",
@@ -102,7 +106,7 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "5 ranked of 13 candidates · 105/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "6 ranked of 14 candidates · 105/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
@@ -117,7 +121,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "75/80 tile(s) rendered · 5 hole(s) · 0 still loading"
+      "detail": "77/80 tile(s) rendered · 3 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -132,7 +136,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": false,
-      "detail": "3 tabs · Situation is 2.4 screens tall (3339px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
+      "detail": "3 tabs · Situation is 2.4 screens tall (3380px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -157,7 +161,7 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "0/0 frame(s) carry a consensus peak against 0 in the snapshot · 0 carry its cycle · frame is 10m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "0/0 frame(s) carry a consensus peak against 0 in the snapshot · 0 carry its cycle · frame is 3m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
@@ -197,12 +201,12 @@
     {
       "check": "the tile cache never holds a same-origin asset",
       "pass": true,
-      "detail": "79 tile(s) cached · controlled=true · same-origin=0"
+      "detail": "80 tile(s) cached · controlled=true · same-origin=0"
     },
     {
       "check": "the tile cache actually caches tiles",
       "pass": true,
-      "detail": "80 tile(s) served on reload · 79 in cache"
+      "detail": "81 tile(s) served on reload · 80 in cache"
     },
     {
       "check": "all markets carried",
