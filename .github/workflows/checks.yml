@@ -376,6 +376,21 @@ jobs:
       - name: Verify the Atlas pack still says what the archive says
         run: node scripts/test-atlas-pack.mjs
 
+      # THE IDENTIFIER AN OUTSIDE PARTY IS ASKED TO VERIFY.
+      #
+      # `archive_stamp` digests all six archive tables, two of which change every day by design,
+      # so it moved SEVEN times across seven ingests over an archive that had not changed -- and
+      # every published cohort citation named it. `cohort_archive_id` covers only the four tables
+      # a cohort answer depends on. Both halves of that claim are checked: build metadata, pack
+      # digests and the two daily tables must NOT move it, and each of the four MUST. The stored
+      # value is recomputed from the manifest's own digests, so a hand-edited id fails here, and
+      # the covered table list is compared against the Atlas engine's own COHORT_SOURCE_TABLES,
+      # so a new cohort dependency cannot be added without the identity being extended.
+      - name: Prove the cohort-identity gate can still fail
+        run: node scripts/test-atlas-cohort-identity.mjs --self-test
+      - name: The published cohort archive identity derives from its own table digests
+        run: node scripts/test-atlas-cohort-identity.mjs
+
       # THE ONE THAT MATTERS. The Atlas ships a transliteration of retrieval/analogs.py so a
       # click anywhere on the ocean can be answered without a server. That is only safe while
       # the two provably agree: 42 query vectors -- empty pools, pools below the sample gate,
