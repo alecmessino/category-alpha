@@ -151,6 +151,11 @@ export async function build() {
   const live = await openLive(DATA);
   const M = archive.manifest;
   const STAMP = (M.provenance || {}).archive_stamp;
+  const COHORT_ID = (M.provenance || {}).cohort_archive_id;
+  if (!COHORT_ID) {
+    throw new Error("provenance.cohort_archive_id is absent from the atlas manifest; run "
+      + "python3 scripts/genesis/build/cohort_identity.py docs/storm-atlas/data/atlas-manifest.json");
+  }
   const METHOD = M.methodology_version;
   const NSTORMS = M.counts.storms;
 
@@ -174,7 +179,7 @@ export async function build() {
   const cite = (spec, r) =>
     `STORM ATLAS · ${openQuestion(spec).replace(/ — what happened next\?$/, "")} · `
     + `${r.kept.toLocaleString()} of ${NSTORMS.toLocaleString()} storms · `
-    + `METHODOLOGY ${METHOD} · PACK ${STAMP}`;
+    + `METHODOLOGY ${METHOD} · COHORT ARCHIVE ${COHORT_ID.slice(0, 16)}`;
 
   const url = (spec) => {
     const p = new URLSearchParams(toQuery(spec));
@@ -411,6 +416,8 @@ export async function build() {
       methodology_version: METHOD,
       pack_format: M.pack_format,
       archive_stamp: STAMP,
+      cohort_archive_id: COHORT_ID,
+      cohort_archive_id_derivation: (M.provenance || {}).cohort_archive_id_derivation,
       archive_built_utc: M.provenance.archive_built_utc,
       counts: M.counts,
       env_coverage: M.env_coverage,

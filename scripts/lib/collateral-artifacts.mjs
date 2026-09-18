@@ -510,7 +510,7 @@ ${masthead({
       + `storms that formed there? <b>${esc(s.cohort.cohort_status)}</b>, N = ${s.cohort.n_cases}, `
       + `ESS ${s.cohort.effective_sample_size}, min ${s.cohort.min_sample}.`,
     rule: [["LIVE STATUS", liveStamp(D)], ["CELL", "28.0°N 88.7°W · r 250 km · Aug–Sep · 1971+"],
-      ["PACK", D.pack.archive_stamp]],
+      ["COHORT ARCHIVE", D.pack.cohort_archive_id.slice(0, 16)]],
   })}
 
 ${/* THE QUESTION BOX, FOLDED INTO THE MASTHEAD. It stood as its own sunken panel and cost 104 px;
