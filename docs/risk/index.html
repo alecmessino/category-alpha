@@ -169,32 +169,129 @@
 .rec p{margin:10px 0 0}
 .rec .small{margin-top:14px}
 @media (max-width:900px){.recs{grid-template-columns:1fr}}
+
+/* THE EIGHT-SECOND READ. Finding first, evidence second, qualification third, provenance
+   last. The hashed-input counts that used to open the page are still on it -- they moved
+   below the fold, onto the methodology plate, because a prospect reads what happened before
+   they audit how it was recorded. */
+.hero{border-bottom:0;padding-bottom:0;margin-bottom:22px;display:block}
+.hero h1{max-width:20ch;margin:0 0 14px}
+.hero .lede{max-width:70ch;margin:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:0 0 6px}
+.tile{display:block;border:1px solid var(--rule);border-radius:2px;padding:16px 18px 14px;
+      background:var(--paper-2);text-decoration:none;color:inherit}
+.tile:hover{border-color:var(--chart)}
+.tname{font-size:15px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+.tstate{font-size:11.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tfig{font-family:"IBM Plex Mono",Menlo,monospace;font-size:13.5px;line-height:1.45}
+.tfig b{font-size:17px}
+.compare .cmp-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:30px;align-items:start}
+.cmp-fig{margin:0}
+.cmp-fig svg{display:block;width:100%;height:auto;border:1px solid var(--rule);background:var(--paper-2)}
+.cmp-fig figcaption{margin-top:10px;font-size:11.5px;line-height:1.5;color:var(--mute)}
+.cmp-note h3{margin:0 0 8px;font-size:13px}
+.cmp-note h3+ul{margin:0 0 18px}
+.cmp-note ul{padding-left:18px;font-size:13px}
+.cmp-note li{margin:3px 0}
+.counts{max-width:74ch}
+@media (max-width:900px){.compare .cmp-grid{grid-template-columns:1fr;gap:20px}.hero h1{max-width:none}}
 </style></head><body>
 <div class="wrap">
  <div class="mast"><div class="brand">Millibar <span>/ Risk Evidence</span></div>
   <div class="note">Independent research · Official sources only · Not a forecast, loss estimate or claims determination</div></div>
- <header class="title"><div>
-  <h1>The evidence behind a parametric trigger, reopened.</h1>
-  <p class="lede">Each record here answers one question: which official observation, evaluated
-  against which contract version and which geometry, produced the outcome — and where the public
-  record runs out, the record stops with it and says so. Every figure traces to an archived
-  official product identified by SHA-256. 396 products across 2 events,
-  402 hashed inputs, rebuilt byte-for-byte from those inputs on every run.</p>
- </div><div class="facts">
-  <div><span>What this is</span><span>Point-in-time evidence records, reproducible from archived official products</span></div>
-  <div><span>What it is not</span><span>A forecast, a loss estimate, a claims determination, or insurance advice</span></div>
-  <div><span>Sources</span><span>NHC/CPHC text products, ATCF, Natural Earth, and the policyholder's own publications</span></div>
-  <div><span>Method</span><span>Nothing is inferred from an observed outcome; a missing term is reported as missing</span></div>
- </div></header></div>
+ <header class="hero"><div>
+  <h1>Reopen the evidence behind a storm decision or trigger.</h1>
+  <p class="lede">Two parametric events settled in the 2026 Pacific season, and one watch
+  frozen before its outcome is known. Every observation below is public. Neither payout can be
+  traced to a 2026 contract cell, because the schedule and the zone polygons are not published
+  &mdash; and this record says so rather than closing the gap with an inference.</p>
+ </div></header>
+ <div class="tiles"><a class="tile" href="lala-2026/"><div class="tname">Lala</div><div class="tstate">Settled &middot; public cell unknown</div><div class="tfig"><b>$200k</b> &middot; 65 kt &middot; 23 nm</div></a><a class="tile" href="lowell-2026/"><div class="tname">Lowell</div><div class="tstate">Settled &middot; public cell unknown</div><div class="tfig"><b>$300k</b> &middot; 90 kt &middot; 35 nm</div></a><a class="tile" href="genesis-watch/"><div class="tname">Pacific Genesis Watch</div><div class="tstate">Frozen before outcome</div><div class="tfig">3 objects &middot; NHC names EP98 in this area&rsquo;s outlook heading</div></a></div>
+</div>
 
 <div class="finding"><div class="wrap">
- <h2>A record that cannot be rebuilt from its own contents is not evidence.</h2>
- <p>So each of these is a build, not a document: one command reads the archived products and
- produces the page, the one-page brief and the machine-readable manifest, and a second command
- gates them. The source register is generated from the files the build actually opens —
- nothing declared may be absent, and nothing read may go undeclared. <em>Millibar does not
- infer an undisclosed contract term from an observed payout.</em></p>
+ <h2>Millibar does not infer a 2026 contract term from a payout.</h2>
+ <p>The 2024 fact sheet says payouts are calculated from officially reported wind and proximity
+ to a core zone. The 2026 schedule, zone polygons, designated observation source and wind
+ definition are not public. So the observations are reported exactly as the official products
+ state them, and the step between them is left unexplained &mdash; because the public record
+ does not explain it.</p>
 </div></div>
+
+<div class="wrap">
+<section class="compare"><div class="sec-head"><div class="plate">Two events<small>One axis pair</small></div><div>
+ <h2>Two official observations. Two known payouts. One step the public record cannot account for.</h2>
+ <p>Both points are the closest approach of the <b>operational working best track</b> &mdash; one
+ basis, the same quantity for each event, read from each record&rsquo;s own manifest. The Lala record
+ separately documents a 70 kt / 21 nm figure from the advisory track; that is a different basis
+ and it stays on its own page rather than being mixed into this comparison.</p></div></div>
+ <div class="cmp-grid">
+  <figure class="cmp-fig"><svg viewBox="0 0 660 420" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, Menlo, monospace" font-size="11" role="img" aria-label="Two settled events on one axis pair: officially reported wind against closest approach of the operational track. The 2024 historical wind thresholds are drawn as faint reference lines; the zone dimension that would turn a wind into a payout is not public and is not drawn.">
+<g stroke="var(--rule)" stroke-dasharray="3 4" stroke-width="1">
+<line x1="52" y1="341.9" x2="564" y2="341.9"/>
+<line x1="52" y1="294.2" x2="564" y2="294.2"/>
+<line x1="52" y1="229.4" x2="564" y2="229.4"/>
+<line x1="52" y1="185.1" x2="564" y2="185.1"/>
+<line x1="52" y1="127.1" x2="564" y2="127.1"/>
+<line x1="52" y1="45.3" x2="564" y2="45.3"/>
+</g><g fill="var(--mute)" font-size="10">
+<text x="570" y="344.9">50 kt</text>
+<text x="570" y="297.2">64 kt</text>
+<text x="570" y="232.4">83 kt</text>
+<text x="570" y="188.1">96 kt</text>
+<text x="570" y="130.1">113 kt</text>
+<text x="570" y="48.3">137 kt</text>
+<text x="570" y="33.3">2024 rows</text>
+</g>
+<g stroke="var(--ink)" stroke-width="1.2"><line x1="52" y1="18" x2="52" y2="376"/><line x1="52" y1="376" x2="564" y2="376"/></g>
+<g fill="var(--mute)" font-size="10">
+<line x1="52.0" y1="376" x2="52.0" y2="380" stroke="var(--ink-2)"/>
+<text x="52.0" y="392" text-anchor="middle">0</text>
+<line x1="152.9" y1="376" x2="152.9" y2="380" stroke="var(--ink-2)"/>
+<text x="152.9" y="392" text-anchor="middle">10</text>
+<line x1="253.8" y1="376" x2="253.8" y2="380" stroke="var(--ink-2)"/>
+<text x="253.8" y="392" text-anchor="middle">20</text>
+<line x1="354.7" y1="376" x2="354.7" y2="380" stroke="var(--ink-2)"/>
+<text x="354.7" y="392" text-anchor="middle">30</text>
+<line x1="455.5" y1="376" x2="455.5" y2="380" stroke="var(--ink-2)"/>
+<text x="455.5" y="392" text-anchor="middle">40</text>
+<line x1="556.4" y1="376" x2="556.4" y2="380" stroke="var(--ink-2)"/>
+<text x="556.4" y="392" text-anchor="middle">50</text>
+<text x="45" y="379.0" text-anchor="end">40</text>
+<text x="45" y="310.8" text-anchor="end">60</text>
+<text x="45" y="242.6" text-anchor="end">80</text>
+<text x="45" y="174.4" text-anchor="end">100</text>
+<text x="45" y="106.2" text-anchor="end">120</text>
+<text x="45" y="38.0" text-anchor="end">140</text>
+</g>
+<text x="308" y="414" text-anchor="middle" fill="var(--ink-2)" font-size="11">closest approach of the operational track, nm</text>
+<text transform="translate(13,197) rotate(-90)" text-anchor="middle" fill="var(--ink-2)" font-size="11">officially reported wind, kt</text>
+<circle cx="284.0" cy="290.8" r="6" fill="var(--signal)"/>
+<text x="284.0" y="260.8" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="600">Lala</text>
+<text x="284.0" y="275.8" text-anchor="middle" fill="var(--ink-2)" font-size="11">65 kt &#183; 23 nm &#183; $200k</text>
+<circle cx="405.1" cy="205.5" r="6" fill="var(--signal)"/>
+<text x="405.1" y="231.5" text-anchor="middle" fill="var(--ink)" font-size="13" font-weight="600">Lowell</text>
+<text x="405.1" y="246.5" text-anchor="middle" fill="var(--ink-2)" font-size="11">90 kt &#183; 35 nm &#183; $300k</text></svg>
+   <figcaption>Faint horizontal lines are the wind rows of the <b>2024 TNC fact sheet &mdash;
+   historical terms, not assumed for 2026</b>. The ladder&rsquo;s other axis is <em>zone</em>, and a
+   zone is a polygon, not a distance. It is not drawn, because the 2026 polygons are not
+   published and plotting them against nautical miles would be this page inventing the geometry
+   the record refuses to infer. The missing axis is the finding.</figcaption>
+  </figure>
+  <div class="cmp-note">
+   <h3>What the figure supports</h3>
+   <ul><li>Both winds and both distances are official, on one stated basis.</li>
+    <li>Both payouts are as the policyholder published them.</li>
+    <li>The 2024 wind rows are public, so they are drawn &mdash; faintly, and as history.</li></ul>
+   <h3>What it does not</h3>
+   <ul><li>No 2026 payout cell is identified for either event.</li>
+    <li>No reason is offered for the $100,000 step.</li>
+    <li>No zone boundary is drawn, estimated or implied.</li></ul>
+   <p><span class="status">Not reconstructable from public 2026 terms</span></p>
+  </div>
+ </div>
+</section>
+</div>
 
 <div class="wrap">
 <section><div class="sec-head"><div class="plate">Settled<small>Trigger evidence records</small></div><div>
@@ -239,9 +336,9 @@
  <div class="rec">
   <h3><a href="genesis-watch/">Pacific Genesis Watch</a></h3>
   <table>
-   <tr><td>Sequence</td><td>6 committed records (1 Atlas state appended to an earlier capture; 2 corrections, appended over records left unedited; 1 invest designation, sourced from ATCF; 1 official source state; 1 source state with the Atlas state beside it)</td></tr>
+   <tr><td>Sequence</td><td>7 committed records (1 Atlas state appended to an earlier capture; 1 association stated by NHC, upgrading an earlier containment basis; 2 corrections, appended over records left unedited; 1 invest designation, sourced from ATCF; 1 official source state; 1 source state with the Atlas state beside it)</td></tr>
    <tr><td>Contract</td><td>Append-only; every record hashed twice and never edited</td></tr>
-   <tr><td>Latest entry</td><td class="mono">2026-09-17T21:21:01Z</td></tr>
+   <tr><td>Latest entry</td><td class="mono">2026-09-18T02:25:58Z</td></tr>
    <tr><td>Refuses</td><td>A track, a formation probability of its own, and any continuity beyond an exact name match</td></tr>
   </table>
   <p class="small">A decision state is frozen when it is taken, not reconstructed afterwards. A correction
@@ -265,6 +362,9 @@
 
 <section><div class="sec-head"><div class="plate">Methodology<small>Standing commitments</small></div><div>
  <h2>The rules every record on this page is built under</h2>
+ <p class="counts">Across the 2 settled events listed above: <b>396
+ archived official products</b> and <b>402 hashed inputs</b>. A rebuild of either
+ record is byte-identical to what is published here, and that is checked rather than claimed.</p>
  <p>These are not aspirations. Each one is enforced by a gate that runs on every change, and
  each was written because something went wrong without it.</p></div></div>
  <div class="grid2"><div>

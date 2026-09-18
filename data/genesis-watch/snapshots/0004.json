@@ -1,0 +1,67 @@
+{
+ "schema": "millibar.pacific-genesis-watch.association/1",
+ "label": "NHC-STATED ASSOCIATION — APPENDED, EARLIER RECORDS UNCHANGED",
+ "record_id": "0004",
+ "appends_to": "0003",
+ "appends_to_manifest_sha256": "7d3bcb78349daebb2f8e6786f282d13502dc810341c23bad7432064dc791ed48",
+ "object": "PGW-2026-D1",
+ "why_separate": "0003 recorded that the invest's ATCF position fell inside this area's published polygon and that NHC stated no association. This product states one. It was issued after every committed record, so it is appended rather than folded backwards.",
+ "timestamps": {
+  "source_issued_at": null,
+  "source_issued_at_note": "the product prints its issuance as '500 PM PDT Thu Sep 17 2026' in local time; its WMO header 'ABPZ20 KNHC 172356' carries the UTC day and time group, which is what the acquisition below is checked against",
+  "source_wmo_header": "ABPZ20 KNHC 172356",
+  "source_acquired_at": "2026-09-18T02:25:57Z",
+  "atlas_computed_at": null,
+  "atlas_computed_at_note": "No Atlas state is computed for this record. Nothing about the archive changed; what changed is the strength of one association in the NHC record.",
+  "snapshot_committed_at": null
+ },
+ "association": {
+  "basis_before": "GEOMETRIC CONTAINMENT OF TWO OFFICIAL PRODUCTS (record 0003)",
+  "basis_now": "STATED BY NHC IN AN NHC PRODUCT",
+  "evidence": {
+   "product": "Tropical Weather Outlook (TWOEP)",
+   "wmo_header": "ABPZ20 KNHC 172356",
+   "issuance_line": "500 PM PDT Thu Sep 17 2026",
+   "heading_verbatim": "Western East Pacific (EP98):",
+   "what_it_says": "NHC heads this outlook area with the invest identifier itself, so the association between the area and EP98 is NHC's own, not a relation computed between two of its products."
+  },
+  "nhc_states_this_association": true,
+  "supersedes_wording": "From this record forward the association may be described as stated by NHC. Records 0001 through 0003c1 continue to describe it as containment only, because that is what was supportable when each was written."
+ },
+ "invest_position_peers": {
+  "note": "Two official products place this invest, and they do not agree to the tenth of a degree. Both are carried; neither is averaged, reconciled or preferred, and no position is plotted except from the product that owns it.",
+  "high_seas": {
+   "position": "12N 115.5W",
+   "mslp_mb": 1009,
+   "source": "NHC High Seas Forecast (MIAHSFEP2)"
+  },
+  "atcf": {
+   "valid": "2026-09-18T00:00Z",
+   "position": "11.5N 116.1W",
+   "vmax_kt": 20,
+   "mslp_mb": 1009,
+   "name_field": "INVEST",
+   "source": "ATCF b-deck bep982026.dat"
+  }
+ },
+ "identity": {
+  "object_unchanged": "PGW-2026-D1",
+  "no_new_object_minted": true,
+  "why": "NHC appended a parenthetical invest annotation to a descriptor it did not otherwise change. The identity rule carries an id forward only on a byte-identical NHC name string, so a full re-capture would read that as a rename, mint a new object and drop this one's test label -- refusing continuity at the moment NHC supplied MORE identifying information. This record therefore associates to the existing object and mints nothing.",
+  "identity_rule_unchanged": "object_id_for is NOT amended. One parenthetical annotation is not evidence enough to loosen the rule that keeps this watch from asserting continuity for free. If such annotations recur, that is a separate change with its own evidence."
+ },
+ "observed_and_deferred": [
+  {
+   "what": "NHC renamed the third outlook area from 'South of Southern Mexico' to 'South of Southwestern Mexico' in this same product.",
+   "consequence": "A full capture would mint a new identifier for it, correctly, the way PGW-2026-N4 was minted when that area was last renamed.",
+   "why_deferred": "This record is scoped to one association. The rename is recorded here as observed so that it is not discovered later as a surprise, and it is not acted on without a capture that is about it."
+  }
+ ],
+ "raw_sha256": {
+  "MIAHSFEP2.html": "82f0b77d263efe8955790749c3b1c5b53ab5f8f8e978c2c8a69f28cd8c863993",
+  "MIATWOEP.html": "b2cb5c6dcd4f55dbc4cdf295a755e9b13227fadb1ac7cacef978dbfda9a28386",
+  "bep982026.dat": "93eb4b8a6d45828b5f857741208d26889887b62d567c1026def88b7b9de03d2d"
+ },
+ "append_rule": "This record is immutable once committed. Later states append new records; an error is corrected by appending a supersession record, never by editing this one or any record before it.",
+ "manifest_sha256_excluding_this_field": "c03b161136586b291d4a261e676db1da127960ede901dd0074ef09df025f09e3"
+}

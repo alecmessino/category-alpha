@@ -12,6 +12,7 @@ in scripts/check-risk-doorway.mjs, rather than promised.
 """
 from __future__ import annotations
 import json
+import re
 from pathlib import Path
 
 from tec import EVENTS, ROOT
@@ -29,6 +30,11 @@ METHOD_DOCS = [
     ("TRACK-RESIDUAL.md", "Track residuals: the time model, and the result it retired"),
     ("PLAN-TRACK-MODEL.md", "The time-model correction, as it was planned and carried out"),
 ]
+
+
+def esc(v) -> str:
+    import html as _h
+    return _h.escape("" if v is None else str(v), quote=True)
 
 
 def money(n) -> str:
@@ -82,6 +88,8 @@ def watch() -> dict | None:
                                    "Atlas states appended to earlier captures"),
             "invest-designation": ("invest designation, sourced from ATCF",
                                    "invest designations, sourced from ATCF"),
+            "association": ("association stated by NHC, upgrading an earlier containment basis",
+                            "associations stated by NHC, upgrading earlier containment bases"),
             "correction": ("correction, appended over a record left unedited",
                            "corrections, appended over records left unedited")}
     counts = {}
@@ -91,14 +99,163 @@ def watch() -> dict | None:
     kinds = {}
     for k, n in counts.items():
         pair = SAYS.get(k)
-        kinds[pair[0] if n == 1 else pair[1]] = n if pair else None
-        if not pair:                      # an unrecognised kind falls through as itself
-            kinds.pop(None, None)
-            kinds[k] = n
-    return {"n": len(entries), "kinds": kinds,
+        # An unrecognised kind falls through as ITSELF. The earlier form indexed `pair`
+        # before testing it, which held only while every kind happened to be known -- the
+        # first genuinely new record kind turned a fallback into a crash.
+        kinds[k if pair is None else (pair[0] if n == 1 else pair[1])] = n
+    # THE ASSOCIATION'S STRENGTH IS READ, NEVER ASSUMED. A later record can upgrade it from
+    # geometric containment to an association NHC states itself, and this doorway must not
+    # outrun the records -- nor keep saying "containment only" after they stop.
+    assoc, n_objects = None, None
+    snaps = LEDGER.parent / "snapshots"
+    for e in entries:
+        f = snaps / e.get("file", "")
+        if not f.is_file():
+            continue
+        rec = json.loads(f.read_text())
+        if rec.get("objects"):
+            n_objects = len(rec["objects"])
+        a = rec.get("association")
+        if e.get("kind") == "invest-designation" and a:
+            assoc = {"invest": (rec.get("invest") or {}).get("atcf_id"), "stated": False}
+        if e.get("kind") == "association" and a:
+            assoc = {"invest": None, "stated": bool(a.get("nhc_states_this_association"))}
+            ev = a.get("evidence") or {}
+            head = ev.get("heading_verbatim") or ""
+            m = re.search(r"\(([A-Z]{2}\d{2})\)", head)
+            if m:
+                assoc["invest"] = m.group(1)
+    return {"n": len(entries), "kinds": kinds, "n_objects": n_objects, "association": assoc,
             "latest": max((e.get("committed_at_utc", "") for e in entries), default=""),
             "url": "https://alecmessino.github.io/category-alpha/risk/genesis-watch/"}
 
+
+# ---------------------------------------------------------------------------------------
+# TWO OFFICIAL OBSERVATIONS, TWO KNOWN PAYOUTS, ONE STEP NOBODY CAN EXPLAIN FROM THE PUBLIC
+# RECORD.
+#
+# Both points are read from the published manifests, and both are on ONE basis: the closest
+# approach of the OPERATIONAL working best track, which is the same quantity for each event.
+# The Lala record separately documents a 70 kt / 21 nm advisory-track figure; that is a
+# different basis and it stays on the Lala page rather than being mixed into this axis pair.
+#
+# WHY THE 2024 LADDER APPEARS AS LINES AND NOT AS CELLS. The historical ladder is indexed by
+# WIND and by ZONE. Wind is an axis here. Zone is not a distance -- it is a set of polygons
+# that the 2026 contract has never published, and drawing zone bands against nautical miles
+# would be this page inventing the geometry the whole record refuses to infer. So the wind
+# thresholds are drawn, faintly and as historical reference, and the dimension that would
+# turn a wind into a payout is left visibly absent. That absence is the finding.
+# ---------------------------------------------------------------------------------------
+LADDER_KT_2024 = (50, 64, 83, 96, 113, 137)
+
+
+def comparison_figure(recs, w=660, h=420):
+    pts = []
+    for r in recs:
+        m = json.loads((OUT / r["slug"] / f"{r['slug']}.manifest.json").read_text())
+        op = m["decision_manifest"]["operational"]
+        ca = op.get("operational_closest_approach_hawaii") or \
+            op.get("operational_closest_approach_niihau")
+        island = "Hawaiʻi Island" if "operational_closest_approach_hawaii" in op else "Niʻihau"
+        nm = ca.get("hawaii_nm", ca.get("niihau_nm"))
+        pts.append({"name": m["event"].split()[-1], "nm": nm, "kt": ca["wind_kt"],
+                    "payout": m["decision_manifest"]["settlement"]["payout_observed"],
+                    "at": ca["time"], "island": island, "slug": r["slug"]})
+    if len(pts) < 2:
+        return "", pts
+
+    pad_l, pad_r, pad_t, pad_b = 52, 96, 18, 44
+    x0, x1 = 0.0, max(p["nm"] for p in pts) * 1.45
+    y0, y1 = 40.0, 145.0
+    X = lambda v: pad_l + (v - x0) / (x1 - x0) * (w - pad_l - pad_r)   # noqa: E731
+    Y = lambda v: h - pad_b - (v - y0) / (y1 - y0) * (h - pad_t - pad_b)  # noqa: E731
+
+    g = [f'<svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" '
+         f'font-family="IBM Plex Mono, Menlo, monospace" font-size="11" role="img" '
+         f'aria-label="Two settled events on one axis pair: officially reported wind against '
+         f'closest approach of the operational track. The 2024 historical wind thresholds are '
+         f'drawn as faint reference lines; the zone dimension that would turn a wind into a '
+         f'payout is not public and is not drawn.">']
+
+    # the 2024 wind rows -- historical reference, deliberately unlabelled as payouts
+    g.append('<g stroke="var(--rule)" stroke-dasharray="3 4" stroke-width="1">')
+    for kt in LADDER_KT_2024:
+        g.append(f'<line x1="{pad_l}" y1="{Y(kt):.1f}" x2="{w - pad_r}" y2="{Y(kt):.1f}"/>')
+    g.append('</g><g fill="var(--mute)" font-size="10">')
+    for kt in LADDER_KT_2024:
+        g.append(f'<text x="{w - pad_r + 6}" y="{Y(kt) + 3:.1f}">{kt} kt</text>')
+    g.append(f'<text x="{w - pad_r + 6}" y="{Y(LADDER_KT_2024[-1]) - 12:.1f}">2024 rows</text>')
+    g.append('</g>')
+
+    # axes
+    g.append(f'<g stroke="var(--ink)" stroke-width="1.2">'
+             f'<line x1="{pad_l}" y1="{pad_t}" x2="{pad_l}" y2="{h - pad_b}"/>'
+             f'<line x1="{pad_l}" y1="{h - pad_b}" x2="{w - pad_r}" y2="{h - pad_b}"/></g>')
+    g.append('<g fill="var(--mute)" font-size="10">')
+    for v in range(0, int(x1) + 1, 10):
+        g.append(f'<line x1="{X(v):.1f}" y1="{h - pad_b}" x2="{X(v):.1f}" y2="{h - pad_b + 4}" '
+                 f'stroke="var(--ink-2)"/>')
+        g.append(f'<text x="{X(v):.1f}" y="{h - pad_b + 16}" text-anchor="middle">{v}</text>')
+    for v in range(40, 141, 20):
+        g.append(f'<text x="{pad_l - 7}" y="{Y(v) + 3:.1f}" text-anchor="end">{v}</text>')
+    g.append('</g>')
+    g.append(f'<text x="{(pad_l + w - pad_r) / 2:.0f}" y="{h - 6}" text-anchor="middle" '
+             f'fill="var(--ink-2)" font-size="11">closest approach of the operational track, nm</text>')
+    g.append(f'<text transform="translate(13,{(pad_t + h - pad_b) / 2:.0f}) rotate(-90)" '
+             f'text-anchor="middle" fill="var(--ink-2)" font-size="11">'
+             f'officially reported wind, kt</text>')
+
+    # the two events
+    for i, p in enumerate(pts):
+        x, y = X(p["nm"]), Y(p["kt"])
+        g.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="6" fill="var(--signal)"/>')
+        # Both label lines clear the marker. An earlier pair of offsets put the figures line
+        # three pixels above the centre, i.e. straight through the dot it was labelling.
+        above = i == 0
+        g.append(f'<text x="{x:.1f}" y="{y + (-30 if above else 26):.1f}" text-anchor="middle" '
+                 f'fill="var(--ink)" font-size="13" font-weight="600">{esc(p["name"])}</text>')
+        g.append(f'<text x="{x:.1f}" y="{y + (-15 if above else 41):.1f}" text-anchor="middle" '
+                 f'fill="var(--ink-2)" font-size="11">'
+                 f'{esc(p["kt"])} kt &#183; {esc(p["nm"])} nm &#183; ${p["payout"]//1000}k</text>')
+    return "\n".join(g) + "</svg>", pts
+
+def watch_headline(w: dict | None) -> tuple[str, str]:
+    """What the watch can be said to hold, at exactly the strength its records support."""
+    if not w:
+        return ("", "")
+    n = w.get("n_objects")
+    assoc = w.get("association")
+    if assoc and assoc.get("stated"):
+        second = (f"{n} objects &middot; NHC names {esc(assoc['invest'])} in this area&rsquo;s "
+                  f"outlook heading")
+    elif assoc:
+        second = (f"{n} objects &middot; {esc(assoc['invest'])} inside D1 polygon &middot; "
+                  f"containment only")
+    else:
+        second = f"{n} objects"
+    return ("Frozen before outcome", second)
+
+
+def hero_tiles(pts: list, w: dict | None) -> str:
+    """Three objects, each answering what happened and what is not knowable from it."""
+    tiles = []
+    for p in pts:
+        tiles.append(
+            f'<a class="tile" href="{esc(p["slug"])}/">'
+            f'<div class="tname">{esc(p["name"])}</div>'
+            f'<div class="tstate">Settled &middot; public cell unknown</div>'
+            f'<div class="tfig"><b>${p["payout"] // 1000}k</b> &middot; {esc(p["kt"])} kt '
+            f'&middot; {esc(p["nm"])} nm</div>'
+            f'</a>')
+    if w:
+        state, second = watch_headline(w)
+        tiles.append(
+            f'<a class="tile" href="genesis-watch/">'
+            f'<div class="tname">Pacific Genesis Watch</div>'
+            f'<div class="tstate">{esc(state)}</div>'
+            f'<div class="tfig">{second}</div>'
+            f'</a>')
+    return "".join(tiles)
 
 def record_card(r: dict) -> str:
     s = r["settlement"]
@@ -128,6 +285,8 @@ def build() -> str:
     w = watch()
     total_products = sum(r["n_products"] for r in recs)
     total_sources = sum(r["n_sources"] for r in recs)
+    cmp_svg, cmp_pts = comparison_figure(recs)
+    tiles = hero_tiles(cmp_pts, w)
     watch_row = ""
     if w:
         kinds = "; ".join(f"{v} {k}" for k, v in sorted(w["kinds"].items()))
@@ -159,28 +318,54 @@ def build() -> str:
 <div class="wrap">
  <div class="mast"><div class="brand">Millibar <span>/ Risk Evidence</span></div>
   <div class="note">Independent research · Official sources only · Not a forecast, loss estimate or claims determination</div></div>
- <header class="title"><div>
-  <h1>The evidence behind a parametric trigger, reopened.</h1>
-  <p class="lede">Each record here answers one question: which official observation, evaluated
-  against which contract version and which geometry, produced the outcome — and where the public
-  record runs out, the record stops with it and says so. Every figure traces to an archived
-  official product identified by SHA-256. {total_products} products across {len(recs)} events,
-  {total_sources} hashed inputs, rebuilt byte-for-byte from those inputs on every run.</p>
- </div><div class="facts">
-  <div><span>What this is</span><span>Point-in-time evidence records, reproducible from archived official products</span></div>
-  <div><span>What it is not</span><span>A forecast, a loss estimate, a claims determination, or insurance advice</span></div>
-  <div><span>Sources</span><span>NHC/CPHC text products, ATCF, Natural Earth, and the policyholder's own publications</span></div>
-  <div><span>Method</span><span>Nothing is inferred from an observed outcome; a missing term is reported as missing</span></div>
- </div></header></div>
+ <header class="hero"><div>
+  <h1>Reopen the evidence behind a storm decision or trigger.</h1>
+  <p class="lede">Two parametric events settled in the 2026 Pacific season, and one watch
+  frozen before its outcome is known. Every observation below is public. Neither payout can be
+  traced to a 2026 contract cell, because the schedule and the zone polygons are not published
+  &mdash; and this record says so rather than closing the gap with an inference.</p>
+ </div></header>
+ <div class="tiles">{tiles}</div>
+</div>
 
 <div class="finding"><div class="wrap">
- <h2>A record that cannot be rebuilt from its own contents is not evidence.</h2>
- <p>So each of these is a build, not a document: one command reads the archived products and
- produces the page, the one-page brief and the machine-readable manifest, and a second command
- gates them. The source register is generated from the files the build actually opens —
- nothing declared may be absent, and nothing read may go undeclared. <em>Millibar does not
- infer an undisclosed contract term from an observed payout.</em></p>
+ <h2>Millibar does not infer a 2026 contract term from a payout.</h2>
+ <p>The 2024 fact sheet says payouts are calculated from officially reported wind and proximity
+ to a core zone. The 2026 schedule, zone polygons, designated observation source and wind
+ definition are not public. So the observations are reported exactly as the official products
+ state them, and the step between them is left unexplained &mdash; because the public record
+ does not explain it.</p>
 </div></div>
+
+<div class="wrap">
+<section class="compare"><div class="sec-head"><div class="plate">Two events<small>One axis pair</small></div><div>
+ <h2>Two official observations. Two known payouts. One step the public record cannot account for.</h2>
+ <p>Both points are the closest approach of the <b>operational working best track</b> &mdash; one
+ basis, the same quantity for each event, read from each record&rsquo;s own manifest. The Lala record
+ separately documents a 70 kt / 21 nm figure from the advisory track; that is a different basis
+ and it stays on its own page rather than being mixed into this comparison.</p></div></div>
+ <div class="cmp-grid">
+  <figure class="cmp-fig">{cmp_svg}
+   <figcaption>Faint horizontal lines are the wind rows of the <b>2024 TNC fact sheet &mdash;
+   historical terms, not assumed for 2026</b>. The ladder&rsquo;s other axis is <em>zone</em>, and a
+   zone is a polygon, not a distance. It is not drawn, because the 2026 polygons are not
+   published and plotting them against nautical miles would be this page inventing the geometry
+   the record refuses to infer. The missing axis is the finding.</figcaption>
+  </figure>
+  <div class="cmp-note">
+   <h3>What the figure supports</h3>
+   <ul><li>Both winds and both distances are official, on one stated basis.</li>
+    <li>Both payouts are as the policyholder published them.</li>
+    <li>The 2024 wind rows are public, so they are drawn &mdash; faintly, and as history.</li></ul>
+   <h3>What it does not</h3>
+   <ul><li>No 2026 payout cell is identified for either event.</li>
+    <li>No reason is offered for the $100,000 step.</li>
+    <li>No zone boundary is drawn, estimated or implied.</li></ul>
+   <p><span class="status">Not reconstructable from public 2026 terms</span></p>
+  </div>
+ </div>
+</section>
+</div>
 
 <div class="wrap">
 <section><div class="sec-head"><div class="plate">Settled<small>Trigger evidence records</small></div><div>
@@ -216,6 +401,9 @@ def build() -> str:
 
 <section><div class="sec-head"><div class="plate">Methodology<small>Standing commitments</small></div><div>
  <h2>The rules every record on this page is built under</h2>
+ <p class="counts">Across the {len(recs)} settled events listed above: <b>{total_products}
+ archived official products</b> and <b>{total_sources} hashed inputs</b>. A rebuild of either
+ record is byte-identical to what is published here, and that is checked rather than claimed.</p>
  <p>These are not aspirations. Each one is enforced by a gate that runs on every change, and
  each was written because something went wrong without it.</p></div></div>
  <div class="grid2"><div>

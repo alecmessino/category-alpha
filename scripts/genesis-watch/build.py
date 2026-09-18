@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -261,6 +262,224 @@ def changes_since(prev: dict, cur: dict) -> list[dict]:
                                   f"product\u2019s statement, not a judgement about the system."})
     return out
 
+
+# ---------------------------------------------------------------------------------------
+# THE SHARED PACIFIC PLATE.
+#
+# One camera, three disturbances, so a reader can compare them instead of reconciling three
+# unrelated thumbnails. Everything drawn here comes from a committed record: the polygons and
+# the disturbance points are the GTWO geometry the snapshot froze, the invest positions are
+# the ATCF and High Seas products that own them, and the coastline is the repository's
+# registered primitive, used as geographic reference and nothing else.
+#
+# WHAT IS DELIBERATELY NOT DRAWN. No track: none exists before genesis. No cone: a formation
+# polygon is not one. No shaded probability field: NHC's formation chance is a number in a
+# sentence, and painting it across a polygon would invent a spatial distribution NHC did not
+# publish. No analog density surface: the archive's evidence is a COUNT, and a count is not a
+# probability. Probabilities are printed as text, analogs as n.
+# ---------------------------------------------------------------------------------------
+PLATE_LON0, PLATE_LON1 = -162.0, -100.0
+PLATE_LAT0, PLATE_LAT1 = 5.0, 25.0
+PLATE_COASTS = ("mexico.geojson", "central_america.geojson", "hawaii.geojson")
+INVEST_LABEL = "EP98"
+# A label that must sit near an outline gets a halo in the plate background colour.
+HALO = ('paint-order="stroke" stroke="var(--soft)" stroke-width="3.2" '
+        'stroke-linejoin="round" ')
+
+
+def _coast_rings():
+    """Registered coastline primitives, as plain rings. Geographic reference only."""
+    import json as _j
+    out = []
+    base = C.ROOT / "data" / "genesis-archive" / "coastlines"
+    for name in PLATE_COASTS:
+        p = base / name
+        if not p.is_file():
+            continue
+        for ft in _j.loads(p.read_text()).get("features", []):
+            g = ft.get("geometry") or {}
+            cs = g.get("coordinates") or []
+            polys = [cs] if g.get("type") == "Polygon" else cs
+            for poly in polys:
+                if poly and poly[0]:
+                    out.append(poly[0])
+    return out
+
+
+def _dms(lat, lon):
+    return f"{abs(lat):.1f}{'N' if lat >= 0 else 'S'} {abs(lon):.1f}{'W' if lon < 0 else 'E'}"
+
+
+def pacific_plate(objects, atlas_objs, invest, assoc, w=880, h=284):
+    sx = w / (PLATE_LON1 - PLATE_LON0)
+    sy = h / (PLATE_LAT1 - PLATE_LAT0)
+    X = lambda lo: (lo - PLATE_LON0) * sx          # noqa: E731
+    Y = lambda la: (PLATE_LAT1 - la) * sy          # noqa: E731
+
+    g = [f'<svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" '
+         f'font-family="IBM Plex Mono, Menlo, monospace" font-size="12" role="img" '
+         f'aria-label="One East Pacific camera showing the three official NHC formation '
+         f'polygons this watch is following, with the invest positions that two official '
+         f'products place inside the western area.">']
+
+    # graticule
+    g.append('<g stroke="var(--rule)" stroke-width="1" opacity=".55">')
+    for lo in range(int(PLATE_LON0), int(PLATE_LON1) + 1, 10):
+        g.append(f'<line x1="{X(lo):.1f}" y1="0" x2="{X(lo):.1f}" y2="{h}"/>')
+    for la in range(int(PLATE_LAT0), int(PLATE_LAT1) + 1, 5):
+        g.append(f'<line x1="0" y1="{Y(la):.1f}" x2="{w}" y2="{Y(la):.1f}"/>')
+    g.append('</g><g fill="var(--mute)" font-size="10.5">')
+    for lo in range(int(PLATE_LON0), int(PLATE_LON1) + 1, 10):
+        # The last tick sits on the frame, so it is anchored inward rather than allowed
+        # to run off the plate. A label that leaves the viewBox is clipped, not small.
+        _edge = X(lo) > w - 40
+        g.append(f'<text x="{(X(lo) - 3) if _edge else (X(lo) + 3):.1f}" y="{h-5}" '
+                 f'text-anchor="{"end" if _edge else "start"}">{abs(lo)}\u00b0W</text>')
+    for la in range(int(PLATE_LAT0) + 5, int(PLATE_LAT1) + 1, 5):
+        g.append(f'<text x="3" y="{Y(la)-3:.1f}">{la}°N</text>')
+    g.append('</g>')
+
+    # land, as reference
+    g.append('<g fill="var(--ink)" opacity=".18">')
+    for ring in _coast_rings():
+        pts = " ".join(f"{X(x):.1f},{Y(y):.1f}" for x, y in ring
+                       if PLATE_LON0 - 8 < x < PLATE_LON1 + 8 and PLATE_LAT0 - 8 < y < PLATE_LAT1 + 8)
+        if pts.count(",") > 2:
+            g.append(f'<polygon points="{pts}"/>')
+    g.append('</g>')
+
+    # THE THREE OFFICIAL POLYGONS. They overlap heavily, so each outline gets its own dash and
+    # carries its own label INSIDE the shape -- a label floating at the disturbance point binds
+    # to the dot, not to the outline, and with three overlapping areas that is ambiguous.
+    DASH = ("", "7 4", "2 3")
+    for i, o in enumerate(objects):
+        geom = (o.get("geometry") or {})
+        rings = (geom.get("areas") or {}).get("coordinates") or []
+        label_at = None
+        for ring in rings:
+            pts = " ".join(f"{X(x):.1f},{Y(y):.1f}" for x, y in ring)
+            g.append(f'<polygon points="{pts}" fill="var(--accent)" fill-opacity=".10" '
+                     f'stroke="var(--accent)" stroke-width="1.5" '
+                     f'stroke-dasharray="{DASH[i % len(DASH)]}"/>')
+            xs = [x for x, _ in ring]
+            ys = [y for _, y in ring]
+            if label_at is None or min(xs) < label_at[0]:
+                label_at = (min(xs), sum(ys) / len(ys))
+        if label_at:
+            g.append(f'<text x="{X(label_at[0]) + 8:.1f}" y="{Y(label_at[1]) + 4:.1f}" '
+                     f'fill="var(--accent)" font-size="12.5" font-weight="600" ' + HALO + f'>'
+                     f'{esc(o["millibar_object_id"].replace("PGW-2026-", ""))}</text>')
+        pt = (geom.get("points") or {}).get("coordinates")
+        if pt:
+            g.append(f'<circle cx="{X(pt[0]):.1f}" cy="{Y(pt[1]):.1f}" r="3.2" '
+                     f'fill="var(--accent)"/>')
+
+    # THE INVEST, FROM EACH PRODUCT THAT OWNS A POSITION. The peers sit within a degree of each
+    # other, so two labels at two crosses overlap into noise. Both crosses are drawn; one
+    # callout names both, and neither is averaged into a single "position".
+    marks = []
+    if assoc:
+        peers = assoc.get("invest_position_peers") or {}
+        for key, label in (("atcf", "ATCF b-deck"), ("high_seas", "High Seas Forecast")):
+            p = peers.get(key)
+            if p:
+                marks.append((p["position"], label))
+    elif invest:
+        f = invest["invest"]["latest_fix"]
+        marks.append((f["position"], "ATCF b-deck"))
+
+    plotted = []
+    for pos, label in marks:
+        m = re.match(r"([\d.]+)N\s+([\d.]+)W", pos)
+        if not m:
+            continue
+        la, lo = float(m.group(1)), -float(m.group(2))
+        x, y = X(lo), Y(la)
+        plotted.append((x, y, pos, label))
+        g.append(f'<g stroke="var(--warn)" stroke-width="2.4">'
+                 f'<line x1="{x-5.5:.1f}" y1="{y-5.5:.1f}" x2="{x+5.5:.1f}" y2="{y+5.5:.1f}"/>'
+                 f'<line x1="{x-5.5:.1f}" y1="{y+5.5:.1f}" x2="{x+5.5:.1f}" y2="{y-5.5:.1f}"/></g>')
+    # NO TEXT ON THE PLATE FOR THESE. The peers sit within a degree of each other and
+    # directly on D1's boundary, where any label -- haloed or not -- is read through an
+    # outline and a fill. The crosses stay; the positions are named in the legend below,
+    # where they are legible and still unmistakably two separate official products.
+    g.append("</svg>")
+    return "\n".join(g)
+
+
+def plate_peers(assoc, invest) -> str:
+    """Both official positions, named under the plate rather than crowded onto it."""
+    rows = []
+    if assoc:
+        peers = assoc.get("invest_position_peers") or {}
+        for key in ("atcf", "high_seas"):
+            p = peers.get(key)
+            if p:
+                rows.append((p["position"], p["source"], p.get("valid")))
+    elif invest:
+        f = invest["invest"]["latest_fix"]
+        rows.append((f["position"], invest["invest"]["source"]["file"], f.get("valid")))
+    if not rows:
+        return ""
+    items = "".join(
+        f'<li><span class="mono">{esc(pos)}</span> &middot; {esc(src)}'
+        + (f' &middot; <span class="mono">{esc(valid)}</span>' if valid else "") + '</li>'
+        for pos, src, valid in rows)
+    return (f'<div class="peers"><b>&times; Invest {INVEST_LABEL}</b>, as placed by '
+            f'{len(rows)} official products:<ul>{items}</ul>'
+            f'<span class="cap">Carried as peers. Neither is averaged into the other, and '
+            f'no position is plotted except from the product that owns it.</span></div>')
+
+
+def plate_legend(assoc, invest) -> str:
+    """The association, in exactly the strength the latest record supports."""
+    if assoc and (assoc.get("association") or {}).get("nhc_states_this_association"):
+        ev = assoc["association"]["evidence"]
+        return (f'<p class="assoc stated"><b>{esc(ev["heading_verbatim"])}</b> &mdash; NHC states '
+                f'this association itself, in {esc(ev["product"])} '
+                f'<span class="mono">{esc(ev["wmo_header"])}</span>. Earlier records in this '
+                f'sequence describe it as containment only, because that is what was '
+                f'supportable when each was written.</p>')
+    if invest:
+        return ('<p class="assoc contain">EP982026 FIX INSIDE D1 POLYGON &mdash; NHC DOES NOT '
+                'STATE THE ASSOCIATION. The relation is geometric containment of two official '
+                'products, computed here and labelled as that.</p>')
+    return ""
+
+
+def plate_table(objects, atlas_objs) -> str:
+    """NHC's probabilities as TEXT, the archive's evidence as a COUNT. Never blended."""
+    rows = []
+    for o in objects:
+        oid = o["millibar_object_id"]
+        a = atlas_objs.get(oid) or {}
+        c = a.get("cohort") or {}
+        n, suff = c.get("n"), c.get("sufficient")
+        verdict = ("rate supported" if suff else
+                   f"rate refused &mdash; n &lt; {esc((c.get('definition') or {}).get('min_sample'))}")
+        p48, p7 = o["formation_prob_48h"], o["formation_prob_7d"]
+
+        def vint(p):
+            gis = p.get("gis_attribute")
+            if gis is None:
+                return ""
+            return (f'<div class="vint">GIS vintage carried: <span class="mono">{esc(gis)}</span>'
+                    f'{" &mdash; differs from the text, which stands" if p.get("text_gis_disagreement") else ""}</div>')
+        test = o.get("test")
+        rows.append(
+            f'<div class="pcol">'
+            f'<div class="pid"><span class="mono">{esc(oid)}</span>'
+            + (f' &middot; <b>{esc(test)}</b>' if test else ' &middot; no test label') +
+            f'</div>'
+            f'<div class="pname">{esc(o["nhc_name"])}</div>'
+            f'<table class="pfig"><tbody>'
+            f'<tr><td>NHC 48 h</td><td class="mono">{esc(p48["official_text"])}</td></tr>'
+            f'<tr><td>NHC 7 d</td><td class="mono">{esc(p7["official_text"])}</td></tr>'
+            f'<tr><td>Analogs</td><td class="mono">n = {esc(n)} &middot; {verdict}</td></tr>'
+            f'</tbody></table>'
+            + vint(p48) +
+            f'</div>')
+    return "".join(rows)
 
 # THE THREE QUESTIONS. A test label is the watch's own word for what a disturbance is being
 # used to answer; the sentence beside it is what that question means to a reader who has not
@@ -513,6 +732,21 @@ def build() -> Path:
     # The invest designation, resolved through the LEDGER like every other identity here.
     invest = next((r for e, r in zip(entries, records)
                    if e.get("kind") == "invest-designation"), None)
+    assoc = next((r for e, r in zip(entries, records) if e.get("kind") == "association"), None)
+
+    # THE PLATE'S OBJECTS CARRY THEIR TEST, resolved the way the brief resolves it: a test is
+    # assigned once and travels with the identifier, so the latest snapshot's copy of an object
+    # does not repeat it. The frozen records are not mutated -- these are shallow copies.
+    first_tests = {o.get("millibar_object_id"): o.get("test")
+                   for _sid, _snap in snaps for o in _snap.get("objects", []) if o.get("test")}
+    plate_objects = [{**o, "test": o.get("test") or first_tests.get(o.get("millibar_object_id"))}
+                     for o in latest.get("objects", [])]
+    plate_atlas = {(o.get("object_id") or o.get("millibar_object_id")): o
+                   for o in ((atlas or {}).get("objects") or [])}
+    plate_svg = pacific_plate(plate_objects, plate_atlas, invest, assoc)
+    plate_html = plate_table(plate_objects, plate_atlas)
+    plate_assoc = plate_legend(assoc, invest)
+    plate_peers_html = plate_peers(assoc, invest)
     stages = atlas_by_stage(entries, records, snaps)
     brief_html = brief_section(snaps, invest, stages)
     invest_html = invest_section(invest)
@@ -553,8 +787,24 @@ def build() -> Path:
 <h1>Pacific Genesis Watch</h1>
 <p class="sub">Frozen decision states</p>
 
-<section class="brief">
+<section class="plate">
   <h2>Three disturbances. Three different questions. One frozen decision state.</h2>
+  <p class="lead">One East Pacific camera, so the three areas this watch is following can be
+  compared rather than reconciled from three unrelated thumbnails. The outlines are NHC&rsquo;s own
+  formation polygons &mdash; <b>not forecast cones, and not impact probability</b>. No track is
+  drawn, because none exists before genesis.</p>
+  <div class="plate-frame">{plate_svg}</div>
+  {plate_assoc}
+  {plate_peers_html}
+  <div class="pcols">{plate_html}</div>
+  <p class="cap">Formation chances are NHC&rsquo;s, printed as NHC states them; the polygon is not
+  shaded by them. Analog counts are historical, genesis-conditioned evidence from the Storm
+  Atlas &mdash; a count, never a formation probability. Coastline is the repository&rsquo;s registered
+  Natural Earth primitive, geographic reference only.</p>
+</section>
+
+<section class="brief">
+  <h2>Three different questions</h2>
   <p class="lead">The Pacific is carrying three pre-genesis areas at once. They are not three
   instances of the same problem &mdash; each one tests something different about what a record
   taken <em>before</em> the outcome can be worth, and the sequence below was written while all
@@ -654,6 +904,27 @@ section.state{margin:22px 0}
 .dis{margin:4px 0 0 130px;border-left:2px solid var(--warn);padding-left:8px;font-size:12px;color:var(--ink2)}
 .where{font:16px/1.3 "IBM Plex Mono",Menlo,monospace;margin:0 0 6px}
 .quote{margin:0;padding-left:10px;border-left:2px solid var(--rule);color:var(--ink2);font-size:14px}
+.plate{border-top:2px solid var(--ink);padding-top:16px;margin:26px 0 8px}
+.plate h2{font-size:23px;margin:0 0 10px;letter-spacing:-.015em;max-width:38ch;line-height:1.18}
+.plate .lead{margin:0 0 16px;max-width:82ch}
+.plate-frame{border:1px solid var(--rule);background:var(--soft);padding:8px}
+.plate-frame svg{display:block;width:100%;height:auto;max-width:none;border:0;background:none}
+.assoc{margin:12px 0 0;padding:9px 12px;border-left:3px solid var(--warn);background:var(--soft);font-size:13px}
+.assoc.stated{border-left-color:var(--accent)}
+.peers{margin:12px 0 0;font-size:13px}
+.peers ul{margin:6px 0 4px;padding-left:18px}
+.peers li{margin:2px 0}
+.peers .cap{display:block;color:var(--mute);font-size:11.5px}
+.pcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:18px}
+.pcol{border-top:1px solid var(--rule);padding-top:10px}
+.pid{font-size:11.5px;color:var(--mute);margin-bottom:3px}
+.pname{font-weight:600;font-size:13px;margin-bottom:8px;line-height:1.3}
+.pfig{width:100%;border-collapse:collapse;font-size:12.5px}
+.pfig td{padding:3px 0;vertical-align:top;border-bottom:1px solid var(--rule)}
+.pfig td:first-child{color:var(--mute);white-space:nowrap;padding-right:12px;width:34%}
+.pfig tr:last-child td{border-bottom:0}
+.vint{margin-top:7px;font-size:11.5px;color:var(--mute)}
+@media (max-width:760px){.pcols{grid-template-columns:1fr}.plate h2{font-size:19px}}
 .brief{border-top:2px solid var(--ink);padding-top:16px;margin:26px 0 30px}
 .brief h2{font-size:21px;margin:0 0 10px;letter-spacing:-.01em;max-width:34ch}
 .brief .lead{margin:0 0 20px;max-width:74ch}
