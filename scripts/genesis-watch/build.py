@@ -94,7 +94,24 @@ def lifecycle_rail(life: dict) -> str:
               'and a state never reached is a fact about the object, not a gap in the record.</b></p>')
 
 
-def atlas_block(obj_id: str, atlas: dict) -> str:
+def prior_cohort_row(prior: tuple | None) -> str:
+    """One row: what the archive held for this object at the earlier state, and which record.
+
+    This exists so the finding band's arrow has a left-hand side on the page. It is deliberately
+    one row and not a progression table -- a reader needs to verify n and the sufficiency
+    verdict, not re-read the whole earlier cohort.
+    """
+    if not prior:
+        return ""
+    src, c = prior
+    if not c or c.get("n") is None:
+        return ""
+    verdict = "rates supported" if c.get("sufficient") else "rates refused"
+    return (f'<dt>At record {esc(src)}</dt>'
+            f'<dd>n {esc(c.get("n"))} &middot; {verdict}</dd>')
+
+
+def atlas_block(obj_id: str, atlas: dict, prior: tuple | None = None) -> str:
     entry = next((o for o in (atlas or {}).get("objects", [])
                   if o.get("millibar_object_id") == obj_id), None)
     if not entry:
@@ -112,6 +129,7 @@ def atlas_block(obj_id: str, atlas: dict) -> str:
             f'<dt>n</dt><dd>{esc(c.get("n"))}</dd>'
             f'<dt>Effective sample size</dt><dd>{esc(round(c.get("effective_sample_size") or 0, 1))}</dd>'
             f'<dt>Sufficient</dt><dd>{"yes" if c.get("sufficient") else "NO — below the minimum sample"}</dd>'
+            + prior_cohort_row(prior) +
             "</dl>")
         rates = [(b, r) for b, r in (c.get("intensity_rates") or {}).items()
                  if r.get("rate") is not None]
@@ -137,7 +155,7 @@ def atlas_block(obj_id: str, atlas: dict) -> str:
     return "".join(out)
 
 
-def object_card(o: dict, atlas: dict) -> str:
+def object_card(o: dict, atlas: dict, prior: tuple | None = None) -> str:
     p48, p7 = o.get("formation_prob_48h") or {}, o.get("formation_prob_7d") or {}
 
     def prob_row(label: str, p: dict) -> str:
@@ -194,7 +212,7 @@ def object_card(o: dict, atlas: dict) -> str:
   </section>
 
   <section><h3>Atlas evidence</h3>
-    {atlas_block(o.get("millibar_object_id"), atlas)}
+    {atlas_block(o.get("millibar_object_id"), atlas, prior)}
   </section>
 
   <section><h3>Not yet knowable</h3>
@@ -326,15 +344,17 @@ def pacific_plate(objects, atlas_objs, invest, assoc, w=880, h=284):
         g.append(f'<line x1="{X(lo):.1f}" y1="0" x2="{X(lo):.1f}" y2="{h}"/>')
     for la in range(int(PLATE_LAT0), int(PLATE_LAT1) + 1, 5):
         g.append(f'<line x1="0" y1="{Y(la):.1f}" x2="{w}" y2="{Y(la):.1f}"/>')
-    g.append('</g><g fill="var(--mute)" font-size="10.5">')
+    g.append('</g><g class="gl" fill="var(--mute)" font-size="10.5">')
     for lo in range(int(PLATE_LON0), int(PLATE_LON1) + 1, 10):
         # The last tick sits on the frame, so it is anchored inward rather than allowed
         # to run off the plate. A label that leaves the viewBox is clipped, not small.
         _edge = X(lo) > w - 40
-        g.append(f'<text x="{(X(lo) - 3) if _edge else (X(lo) + 3):.1f}" y="{h-5}" '
+        g.append(f'<text x="{(X(lo) - 3) if _edge else (X(lo) + 3):.1f}" y="{h-8}" '
                  f'text-anchor="{"end" if _edge else "start"}">{abs(lo)}\u00b0W</text>')
     for la in range(int(PLATE_LAT0) + 5, int(PLATE_LAT1) + 1, 5):
-        g.append(f'<text x="3" y="{Y(la)-3:.1f}">{la}°N</text>')
+        # A label above its own line leaves the viewBox when the line IS the top edge, and a
+        # clipped label is not a small one -- it never renders at all.
+        g.append(f'<text x="3" y="{max(Y(la) - 3, 21.0):.1f}">{la}°N</text>')
     g.append('</g>')
 
     # land, as reference
@@ -353,24 +373,18 @@ def pacific_plate(objects, atlas_objs, invest, assoc, w=880, h=284):
     for i, o in enumerate(objects):
         geom = (o.get("geometry") or {})
         rings = (geom.get("areas") or {}).get("coordinates") or []
-        label_at = None
         for ring in rings:
             pts = " ".join(f"{X(x):.1f},{Y(y):.1f}" for x, y in ring)
             g.append(f'<polygon points="{pts}" fill="var(--accent)" fill-opacity=".10" '
                      f'stroke="var(--accent)" stroke-width="1.5" '
                      f'stroke-dasharray="{DASH[i % len(DASH)]}"/>')
-            xs = [x for x, _ in ring]
-            ys = [y for _, y in ring]
-            if label_at is None or min(xs) < label_at[0]:
-                label_at = (min(xs), sum(ys) / len(ys))
-        if label_at:
-            g.append(f'<text x="{X(label_at[0]) + 8:.1f}" y="{Y(label_at[1]) + 4:.1f}" '
-                     f'fill="var(--accent)" font-size="12.5" font-weight="600" ' + HALO + f'>'
-                     f'{esc(o["millibar_object_id"].replace("PGW-2026-", ""))}</text>')
         pt = (geom.get("points") or {}).get("coordinates")
         if pt:
             g.append(f'<circle cx="{X(pt[0]):.1f}" cy="{Y(pt[1]):.1f}" r="3.2" '
                      f'fill="var(--accent)"/>')
+            g.append(f'<text class="ol" x="{X(pt[0]) + 9:.1f}" y="{Y(pt[1]) + 4:.1f}" '
+                     f'fill="var(--accent)" font-size="12.5" font-weight="600" ' + HALO + f'>'
+                     f'{esc(o["millibar_object_id"].replace("PGW-2026-", ""))}</text>')
 
     # THE INVEST, FROM EACH PRODUCT THAT OWNS A POSITION. The peers sit within a degree of each
     # other, so two labels at two crosses overlap into noise. Both crosses are drawn; one
@@ -394,9 +408,12 @@ def pacific_plate(objects, atlas_objs, invest, assoc, w=880, h=284):
         la, lo = float(m.group(1)), -float(m.group(2))
         x, y = X(lo), Y(la)
         plotted.append((x, y, pos, label))
-        g.append(f'<g stroke="var(--warn)" stroke-width="2.4">'
-                 f'<line x1="{x-5.5:.1f}" y1="{y-5.5:.1f}" x2="{x+5.5:.1f}" y2="{y+5.5:.1f}"/>'
-                 f'<line x1="{x-5.5:.1f}" y1="{y+5.5:.1f}" x2="{x+5.5:.1f}" y2="{y-5.5:.1f}"/></g>')
+        # THE TWO PEERS SIT 11 UNITS APART. Drawn with 11-unit arms they overlapped by half
+        # and read as one orange blob -- which is the single thing this pair must not do.
+        # The coordinates are unchanged; only the mark is smaller than the gap it sits in.
+        g.append(f'<g stroke="var(--warn)" stroke-width="1.6">'
+                 f'<line x1="{x-2.8:.1f}" y1="{y-2.8:.1f}" x2="{x+2.8:.1f}" y2="{y+2.8:.1f}"/>'
+                 f'<line x1="{x-2.8:.1f}" y1="{y+2.8:.1f}" x2="{x+2.8:.1f}" y2="{y-2.8:.1f}"/></g>')
     # NO TEXT ON THE PLATE FOR THESE. The peers sit within a degree of each other and
     # directly on D1's boundary, where any label -- haloed or not -- is read through an
     # outline and a fill. The crosses stay; the positions are named in the legend below,
@@ -439,6 +456,22 @@ QUESTION = {
     "EXPOSURE CLOCK": "How long until this matters to a coastline?",
     "CONTINUITY": "Does anything carry over when NHC renames an area?",
 }
+
+
+def atlas_source_record(entries: list, records: list, sid: str) -> str:
+    """Which committed record carried the Atlas state for this snapshot.
+
+    Snapshot 0001 does not carry its own; 0001b was appended against it hours later and says so.
+    A row that cited "0001" for a cohort computed in 0001b would be quietly wrong about when.
+    """
+    for e, r in zip(entries, records):
+        if e["record_id"] == sid and (r.get("atlas_state") or {}).get("objects"):
+            return sid
+    for e, r in zip(entries, records):
+        if (r.get("appends_to") == sid
+                and r.get("schema", "").startswith("millibar.pacific-genesis-watch.atlas-append")):
+            return e["record_id"]
+    return sid
 
 
 def atlas_by_stage(entries: list, records: list, snaps: list) -> dict:
@@ -510,16 +543,22 @@ def finding_band(snaps: list, stages: dict) -> str:
                 c, d = (pct_token(o.get("formation_prob_48h")),
                         pct_token(o.get("formation_prob_7d")))
                 if None not in (a, b, c, d):
-                    lines.append(("prob", f"{esc(a)}/{esc(b)} &rarr; {esc(c)}/{esc(d)}"))
+                    # The per-cent sign goes on only when every token is a number. "near 0" is
+                    # a LABEL at the bottom of NHC's scale, and "near 0/80%" would read as one.
+                    pc = "%" if all(t.replace(".", "", 1).isdigit() for t in (a, b, c, d)) else ""
+                    lines.append(("lab", "NHC formation chance &middot; 48 h / 7 d"))
+                    lines.append(("prob", f"{esc(a)}/{esc(b)}{pc} &rarr; {esc(c)}/{esc(d)}{pc}"))
             ident = (stages.get(last_id, {}).get(oid) or {}).get("identity") or {}
             na = (stages.get(first_id, {}).get(oid) or {}).get("cohort") or {}
             nb = (stages.get(last_id, {}).get(oid) or {}).get("cohort") or {}
             if ident.get("regeneration_rate") == "REFUSED":
                 # The sharper refusal takes the column. A generic "rate refused" beside it
                 # would be the same fact twice; the cohort counts are on this object's card.
+                lines.append(("lab", "Storm Atlas analog cohort"))
                 lines.append(("verdict", "REGENERATION RATE REFUSED"))
             else:
                 if na.get("n") is not None and nb.get("n") is not None:
+                    lines.append(("lab", "Storm Atlas analog cohort"))
                     lines.append(("n", f"n {esc(na['n'])} &rarr; {esc(nb['n'])}"))
                 if na.get("sufficient") is not None and nb.get("sufficient") is not None:
                     lines.append(("verdict",
@@ -529,7 +568,8 @@ def finding_band(snaps: list, stages: dict) -> str:
                                   else "RATE SUPPORTED"))
 
         label = test or "CONTINUITY"
-        body = "".join(f'<div class="fl {cls}">{txt}</div>' for cls, txt in lines)
+        body = "".join(f'<div class="flab">{txt}</div>' if cls == "lab"
+                       else f'<div class="fl {cls}">{txt}</div>' for cls, txt in lines)
         cols.append(f'<div class="fcol">'
                     f'<div class="fh">{esc(oid.replace("PGW-2026-", ""))}'
                     f'<span> &mdash; {esc(label)}</span></div>'
@@ -666,7 +706,17 @@ def build() -> Path:
     for o in latest.get("objects", []):
         if not o.get("test"):
             o["test"] = test_by_id.get(o.get("millibar_object_id"))
-    objects = "".join(object_card(o, atlas) for o in latest.get("objects", []))
+    # THE BAND'S ARROWS NEED A LEFT-HAND SIDE ON THE PAGE. The first state's cohorts are read
+    # here, through the ledger, and handed to each object's own card as one row.
+    _stages = atlas_by_stage(entries, records, snaps)
+    _first_src = atlas_source_record(entries, records, snaps[0][0])
+    _prior = {oid: (_first_src, (o or {}).get("cohort"))
+              for oid, o in _stages.get(snaps[0][0], {}).items()}
+    objects = "".join(
+        object_card(o, atlas,
+                    None if o.get("millibar_object_id") not in _prior or len(snaps) < 2
+                    else _prior[o["millibar_object_id"]])
+        for o in latest.get("objects", []))
 
     # The invest designation, resolved through the LEDGER like every other identity here.
     invest = next((r for e, r in zip(entries, records)
@@ -684,7 +734,7 @@ def build() -> Path:
                    for o in ((atlas or {}).get("objects") or [])}
     plate_svg = pacific_plate(plate_objects, plate_atlas, invest, assoc)
     plate_peers_html = plate_peers(assoc, invest)
-    stages = atlas_by_stage(entries, records, snaps)
+    stages = _stages
     band_html = finding_band(snaps, stages)
     band_note_html = band_note(snaps)
     evidence_html = evidence_line(assoc)
@@ -715,6 +765,8 @@ def build() -> Path:
 <title>Pacific Genesis Watch — Millibar</title>
 <meta name="description" content="Frozen decision states for pre-genesis Pacific disturbances: the authoritative NHC source state, the Storm Atlas state captured alongside it, and what is not yet knowable. Not a forecast.">
 <link rel="canonical" href="https://alecmessino.github.io/category-alpha/risk/genesis-watch/">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>{STYLE}</style>
 </head><body>
 <div class="wrap">
@@ -830,37 +882,43 @@ section.state{margin:22px 0}
 .quote{margin:0;padding-left:10px;border-left:2px solid var(--rule);color:var(--ink2);font-size:14px}
 /* THE FIRST VIEWPORT. One headline, one plate, one band of findings, one sentence of
    evidence. Everything that explains how the page is built sits below it, not beside it. */
-.lede{margin:12px 0 30px;border-top:2px solid var(--ink);padding-top:14px}
+.lede{margin:10px 0 30px;border-top:2px solid var(--ink);padding-top:12px}
 /* The three sentences break where the markup breaks them, never where a measure runs out. */
-.hl{font-size:34px;line-height:1.12;font-weight:500;letter-spacing:-.028em;margin:0 0 13px;
+.hl{font-size:34px;line-height:1.12;font-weight:500;letter-spacing:-.028em;margin:0 0 11px;
     max-width:none}
 .plate-frame{border:1px solid var(--rule);background:var(--soft);padding:6px}
 .plate-frame svg{display:block;width:100%;height:auto;max-width:none;border:0;background:none}
-.pcap{font-size:12px;color:var(--mute);margin:7px 0 0;max-width:86ch;line-height:1.45}
+.pcap{font-size:12px;color:var(--mute);margin:6px 0 0;max-width:86ch;line-height:1.45}
 .pcap b{color:var(--ink)}
 .nf{padding:2px 7px;border:1px solid var(--warn);color:var(--warn);text-transform:uppercase;
     letter-spacing:.12em;font-size:10px;white-space:nowrap}
-.band{display:grid;grid-template-columns:repeat(3,1fr);margin:20px 0 0;
+.band{display:grid;grid-template-columns:repeat(3,1fr);margin:15px 0 0;
       border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
-.fcol{padding:12px 20px 11px 0;border-right:1px solid var(--rule)}
+.fcol{padding:10px 20px 9px 0;border-right:1px solid var(--rule)}
 .fcol+.fcol{padding-left:20px}
 .fcol:last-child{border-right:0}
 .fh{font:600 12px/1.2 "IBM Plex Mono",Menlo,monospace;letter-spacing:.07em;margin:0 0 5px}
 .fh span{color:var(--mute);font-weight:400}
-.fq{font-size:12.5px;color:var(--mute);margin:0 0 12px;line-height:1.3;min-height:2.6em}
+.fq{font-size:12.5px;color:var(--mute);margin:0 0 9px;line-height:1.3;min-height:2.6em}
+.flab{font-size:11px;color:var(--mute);letter-spacing:.04em;margin:0 0 2px;line-height:1.3}
+.flab+.flab,.fl+.flab{margin-top:7px}
 .fl{font:500 19px/1.2 "IBM Plex Mono",Menlo,monospace;margin:0 0 4px;letter-spacing:-.015em}
 .fl.n{font-size:15px;color:var(--ink2)}
 .fl.verdict{font:600 11px/1.35 "IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
             letter-spacing:.09em;color:var(--warn);margin:7px 0 0}
 .fl.verdict+.fl.verdict{margin-top:2px}
-.bnote{font-size:12px;color:var(--mute);margin:9px 0 0;max-width:88ch;line-height:1.45}
-.eline{font-size:14.5px;line-height:1.5;margin:13px 0 0;max-width:80ch;
+.bnote{font-size:12px;color:var(--mute);margin:8px 0 0;max-width:88ch;line-height:1.45}
+.eline{font-size:14.5px;line-height:1.5;margin:10px 0 0;max-width:80ch;
        border-left:3px solid var(--accent);padding-left:13px}
 .eline .cite{display:block;font-size:11.5px;color:var(--mute);margin-top:3px}
 .peers{margin:14px 0 0;font-size:13px}
 .peers ul{margin:6px 0 4px;padding-left:18px}
 .peers li{margin:2px 0}
 .peers .cap{display:block;color:var(--mute);font-size:11.5px}
+/* The plate's labels are set by presentation attribute for the desktop scale; at phone width
+   that scale puts them at ~4px. CSS outranks the attribute, so the type comes back without
+   cropping the geography or touching the viewBox. */
+@media (max-width:620px){.plate-frame svg .gl{font-size:21px}.plate-frame svg .ol{font-size:26px}}
 @media (max-width:760px){
   .hl{font-size:25px;max-width:none}
   .band{grid-template-columns:1fr}
@@ -874,6 +932,7 @@ section.state{margin:22px 0}
 .kv dt{color:var(--mute)}
 .kv dd{margin:0}
 .cap{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.45}
+.cap b{color:var(--ink)}
 .recnote{font-size:13px;color:var(--ink2);margin:26px 0 14px;padding-top:14px;border-top:2px solid var(--ink);max-width:86ch}
 .nil{font-size:13px;color:var(--mute);font-style:italic;margin:4px 0}
 .refuse{border-left:2px solid var(--warn);padding-left:8px;font-size:12.5px;color:var(--ink2);margin:8px 0}
