@@ -64,6 +64,7 @@ from ..provenance import (ARCHIVE_DIR, METHODOLOGY_VERSION, PROCESSING_VERSION, 
                           sha256_file)
 from ..schema import THRESHOLDS_KT
 from ..store import read_table, table_path
+from .cohort_identity import identity_fields
 
 OUT_DIR = REPO_ROOT / "docs" / "storm-atlas" / "data"
 
@@ -441,10 +442,15 @@ def _provenance(base: Path) -> dict:
     stamp = hashlib.sha256(
         "".join(f"{k}:{v['sha256']}" for k, v in sorted(tables.items())).encode()
     ).hexdigest()[:16]
+    # `archive_stamp` above covers ALL SIX tables, two of which change every day by design, so
+    # it moves several times a day over an archive that has not. It stays -- it is a build
+    # identifier and a good one -- but the value an outside party is asked to verify is the
+    # cohort archive identity, which covers only the tables a cohort answer depends on.
     return {
         "archive_dir": "data/genesis-archive",
         "archive_stamp": stamp,
         "table_sha256": tables,
+        **identity_fields(tables),
         "archive_built_utc": man.get("built_utc"),
         "archive_sources": [s.get("key") for s in man.get("sources", [])],
         "gaps": man.get("gaps", []),

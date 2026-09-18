@@ -52,6 +52,24 @@ export const EMPTY_COHORT = Object.freeze({
    RECORD rather than of the storm, so they sit outside both zones as scope switches. */
 const OUTCOME_KEYS = new Set(["intensity", "landfall"]);
 
+/* THE ARCHIVE TABLES WHOSE CONTENT DETERMINES AN ANSWER FROM THIS FILE.
+ *
+ * Source of truth for provenance.cohort_archive_id, mirrored by COHORT_TABLES in
+ * scripts/genesis/build/cohort_identity.py. scripts/test-atlas-cohort-identity.mjs fails if the
+ * two lists disagree, so a new cohort dependency cannot be added here without the published
+ * identity being extended to cover it.
+ *
+ * Grepping `archive.X` in this file under-reports the dependency: landfall rows and derived
+ * threshold crossings arrive through Archive's own accessors (stormLandfalls, landfallRange)
+ * rather than by naming their table. The list is therefore stated, not inferred.
+ *
+ *   storms          membership, season, basin, max intensity
+ *   genesis_events  the genesis position and time the query is keyed to
+ *   landfalls       landfall rows and intensity at crossing
+ *   track_points    the derived crossings behind time-to-event
+ */
+export const COHORT_SOURCE_TABLES = ["genesis_events", "landfalls", "storms", "track_points"];
+
 /**
  * Canonical form. Two specs meaning the same cohort must come out identical, because the URL,
  * the scenario and the memo key are all derived from this.
