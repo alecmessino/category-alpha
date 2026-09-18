@@ -149,7 +149,7 @@ def watch() -> dict | None:
 LADDER_KT_2024 = (50, 64, 83, 96, 113, 137)
 
 
-def comparison_figure(recs, w=660, h=420):
+def comparison_figure(recs, w=760, h=360):
     pts = []
     for r in recs:
         m = json.loads((OUT / r["slug"] / f"{r['slug']}.manifest.json").read_text())
@@ -178,10 +178,10 @@ def comparison_figure(recs, w=660, h=420):
          f'payout is not public and is not drawn.">']
 
     # the 2024 wind rows -- historical reference, deliberately unlabelled as payouts
-    g.append('<g stroke="var(--rule)" stroke-dasharray="3 4" stroke-width="1">')
+    g.append('<g stroke="var(--rule)" stroke-dasharray="3 5" stroke-width="0.8" opacity="0.5">')
     for kt in LADDER_KT_2024:
         g.append(f'<line x1="{pad_l}" y1="{Y(kt):.1f}" x2="{w - pad_r}" y2="{Y(kt):.1f}"/>')
-    g.append('</g><g fill="var(--mute)" font-size="10">')
+    g.append('</g><g fill="var(--mute)" font-size="9" opacity="0.75">')
     for kt in LADDER_KT_2024:
         g.append(f'<text x="{w - pad_r + 6}" y="{Y(kt) + 3:.1f}">{kt} kt</text>')
     g.append(f'<text x="{w - pad_r + 6}" y="{Y(LADDER_KT_2024[-1]) - 12:.1f}">2024 rows</text>')
@@ -208,14 +208,24 @@ def comparison_figure(recs, w=660, h=420):
     # the two events
     for i, p in enumerate(pts):
         x, y = X(p["nm"]), Y(p["kt"])
-        g.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="6" fill="var(--signal)"/>')
-        # Both label lines clear the marker. An earlier pair of offsets put the figures line
-        # three pixels above the centre, i.e. straight through the dot it was labelling.
-        above = i == 0
-        g.append(f'<text x="{x:.1f}" y="{y + (-30 if above else 26):.1f}" text-anchor="middle" '
-                 f'fill="var(--ink)" font-size="13" font-weight="600">{esc(p["name"])}</text>')
-        g.append(f'<text x="{x:.1f}" y="{y + (-15 if above else 41):.1f}" text-anchor="middle" '
-                 f'fill="var(--ink-2)" font-size="11">'
+        # The two settled events are the subject of this figure; the 2024 rows behind them are
+        # context. The marker carries a paper-coloured ring so it reads as a point ON the field
+        # rather than a dot lost in the dashes it crosses.
+        g.append(f'<circle cx="{x:.1f}" cy="{y:.1f}" r="9.5" fill="var(--signal)" '
+                 f'stroke="var(--paper)" stroke-width="3"/>')
+        # WHICH SIDE A LABEL TAKES IS DECIDED BY THE DATA, NOT BY LIST ORDER. Labelling the
+        # first event above and the second below put the low point's caption and the high
+        # point's caption on the same line, overlapping, because the first event here happens
+        # to be the lower of the two. The higher point labels above, the lower below, so the
+        # two captions separate by the whole vertical gap between the events.
+        above = p["kt"] == max(q["kt"] for q in pts) and i == max(
+            range(len(pts)), key=lambda j: pts[j]["kt"])
+        g.append(f'<text x="{x:.1f}" y="{y + (-40 if above else 34):.1f}" text-anchor="middle" '
+                 f'fill="var(--ink)" font-size="17" font-weight="600" '
+                 f'font-family="IBM Plex Sans, system-ui, sans-serif" '
+                 f'letter-spacing="-0.01em">{esc(p["name"])}</text>')
+        g.append(f'<text x="{x:.1f}" y="{y + (-21 if above else 53):.1f}" text-anchor="middle" '
+                 f'fill="var(--ink-2)" font-size="13.5">'
                  f'{esc(p["kt"])} kt &#183; {esc(p["nm"])} nm &#183; ${p["payout"]//1000}k</text>')
     return "\n".join(g) + "</svg>", pts
 
@@ -270,12 +280,14 @@ def record_card(r: dict) -> str:
  <table>
   <tr><td>Observed payout</td><td>{money(s.get('payout_observed'))}</td></tr>
   <tr><td>Settlement</td><td><span class="status">{status}</span></td></tr>
-  <tr><td>Official products</td><td>{r['n_products']}</td></tr>
-  <tr><td>Position records</td><td>{r['n_records']}</td></tr>
-  <tr><td>Hashed inputs</td><td>{r['n_sources']}</td></tr>
-  <tr><td>Time model</td><td>Cycle origin confirmed on {r['discussions']} archived discussions</td></tr>
-  <tr><td>Source vintage</td><td>{issuance}</td></tr>
  </table>
+ <dl class="mech">
+  <dt>Official products</dt><dd>{r['n_products']}</dd>
+  <dt>Position records</dt><dd>{r['n_records']}</dd>
+  <dt>Hashed inputs</dt><dd>{r['n_sources']}</dd>
+  <dt>Time model</dt><dd>Cycle origin confirmed on {r['discussions']} archived discussions</dd>
+  <dt>Source vintage</dt><dd>{issuance}</dd>
+ </dl>
  <p class="small">{pdf}<a href="{r['slug']}/{r['slug']}.manifest.json">machine-readable record</a></p>
 </div>"""
 
@@ -320,30 +332,15 @@ def build() -> str:
   <div class="note">Independent research · Official sources only · Not a forecast, loss estimate or claims determination</div></div>
  <header class="hero"><div>
   <h1>Reopen the evidence behind a storm decision or trigger.</h1>
-  <p class="lede">Two parametric events settled in the 2026 Pacific season, and one watch
-  frozen before its outcome is known. Every observation below is public. Neither payout can be
-  traced to a 2026 contract cell, because the schedule and the zone polygons are not published
-  &mdash; and this record says so rather than closing the gap with an inference.</p>
+  <p class="lede">Two parametric events settled in the 2026 Pacific season, and one watch frozen
+  before its outcome is known. Neither payout traces to a 2026 contract cell.</p>
  </div></header>
  <div class="tiles">{tiles}</div>
 </div>
 
-<div class="finding"><div class="wrap">
- <h2>Millibar does not infer a 2026 contract term from a payout.</h2>
- <p>The 2024 fact sheet says payouts are calculated from officially reported wind and proximity
- to a core zone. The 2026 schedule, zone polygons, designated observation source and wind
- definition are not public. So the observations are reported exactly as the official products
- state them, and the step between them is left unexplained &mdash; because the public record
- does not explain it.</p>
-</div></div>
-
 <div class="wrap">
 <section class="compare"><div class="sec-head"><div class="plate">Two events<small>One axis pair</small></div><div>
- <h2>Two official observations. Two known payouts. One step the public record cannot account for.</h2>
- <p>Both points are the closest approach of the <b>operational working best track</b> &mdash; one
- basis, the same quantity for each event, read from each record&rsquo;s own manifest. The Lala record
- separately documents a 70 kt / 21 nm figure from the advisory track; that is a different basis
- and it stays on its own page rather than being mixed into this comparison.</p></div></div>
+ <h2>Two official observations. Two known payouts. One step the public record cannot account for.</h2></div></div>
  <div class="cmp-grid">
   <figure class="cmp-fig">{cmp_svg}
    <figcaption>Faint horizontal lines are the wind rows of the <b>2024 TNC fact sheet &mdash;
@@ -353,6 +350,9 @@ def build() -> str:
    the record refuses to infer. The missing axis is the finding.</figcaption>
   </figure>
   <div class="cmp-note">
+   <p class="basis">Both points are the closest approach of the <b>operational working best
+   track</b> &mdash; one basis, the same quantity for each event, read from each record&rsquo;s
+   own manifest.</p>
    <h3>What the figure supports</h3>
    <ul><li>Both winds and both distances are official, on one stated basis.</li>
     <li>Both payouts are as the policyholder published them.</li>
@@ -361,6 +361,10 @@ def build() -> str:
    <ul><li>No 2026 payout cell is identified for either event.</li>
     <li>No reason is offered for the $100,000 step.</li>
     <li>No zone boundary is drawn, estimated or implied.</li></ul>
+   <p class="small">The 2024 fact sheet calculates a payout from officially reported wind and
+   proximity to a core zone; for 2026 the schedule, the zone polygons, the observation source
+   and the wind definition are all unpublished. Lala&rsquo;s separate 70 kt / 21 nm
+   advisory-track figure is a different basis, kept on its own page.</p>
    <p><span class="status">Not reconstructable from public 2026 terms</span></p>
   </div>
  </div>

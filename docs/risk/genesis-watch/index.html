@@ -11,15 +11,14 @@
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
      font:15px/1.5 "IBM Plex Sans","Helvetica Neue",Arial,sans-serif}
-.wrap{max-width:860px;margin:0 auto;padding:24px 16px 56px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 16px 56px}
 .mast{display:flex;justify-content:space-between;align-items:baseline;
       border-bottom:1px solid var(--rule);padding-bottom:8px;font-size:13px;color:var(--mute)}
 .mast b{color:var(--ink);font-weight:600}
 .mast a{color:var(--accent)}
-h1{font-size:30px;font-weight:500;letter-spacing:-.02em;margin:18px 0 2px}
-.sub{margin:0 0 14px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
-.banner{border:1.5px solid var(--warn);color:var(--warn);background:#FCF4EE;
-        padding:10px 12px;font-size:13px;margin:0 0 22px}
+.titlerow{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px;margin:13px 0 0}
+h1{font-size:21px;font-weight:600;letter-spacing:-.01em;margin:0}
+.sub{margin:0;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
 h2{font-size:20px;font-weight:500;margin:2px 0 4px;letter-spacing:-.01em}
 h3{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);
    margin:16px 0 6px;padding-top:8px;border-top:1px solid var(--rule)}
@@ -37,45 +36,53 @@ section.state{margin:22px 0}
 .dis{margin:4px 0 0 130px;border-left:2px solid var(--warn);padding-left:8px;font-size:12px;color:var(--ink2)}
 .where{font:16px/1.3 "IBM Plex Mono",Menlo,monospace;margin:0 0 6px}
 .quote{margin:0;padding-left:10px;border-left:2px solid var(--rule);color:var(--ink2);font-size:14px}
-.plate{border-top:2px solid var(--ink);padding-top:16px;margin:26px 0 8px}
-.plate h2{font-size:23px;margin:0 0 10px;letter-spacing:-.015em;max-width:38ch;line-height:1.18}
-.plate .lead{margin:0 0 16px;max-width:82ch}
-.plate-frame{border:1px solid var(--rule);background:var(--soft);padding:8px}
+/* THE FIRST VIEWPORT. One headline, one plate, one band of findings, one sentence of
+   evidence. Everything that explains how the page is built sits below it, not beside it. */
+.lede{margin:12px 0 30px;border-top:2px solid var(--ink);padding-top:14px}
+/* The three sentences break where the markup breaks them, never where a measure runs out. */
+.hl{font-size:34px;line-height:1.12;font-weight:500;letter-spacing:-.028em;margin:0 0 13px;
+    max-width:none}
+.plate-frame{border:1px solid var(--rule);background:var(--soft);padding:6px}
 .plate-frame svg{display:block;width:100%;height:auto;max-width:none;border:0;background:none}
-.assoc{margin:12px 0 0;padding:9px 12px;border-left:3px solid var(--warn);background:var(--soft);font-size:13px}
-.assoc.stated{border-left-color:var(--accent)}
-.peers{margin:12px 0 0;font-size:13px}
+.pcap{font-size:12px;color:var(--mute);margin:7px 0 0;max-width:86ch;line-height:1.45}
+.pcap b{color:var(--ink)}
+.nf{padding:2px 7px;border:1px solid var(--warn);color:var(--warn);text-transform:uppercase;
+    letter-spacing:.12em;font-size:10px;white-space:nowrap}
+.band{display:grid;grid-template-columns:repeat(3,1fr);margin:20px 0 0;
+      border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+.fcol{padding:12px 20px 11px 0;border-right:1px solid var(--rule)}
+.fcol+.fcol{padding-left:20px}
+.fcol:last-child{border-right:0}
+.fh{font:600 12px/1.2 "IBM Plex Mono",Menlo,monospace;letter-spacing:.07em;margin:0 0 5px}
+.fh span{color:var(--mute);font-weight:400}
+.fq{font-size:12.5px;color:var(--mute);margin:0 0 12px;line-height:1.3;min-height:2.6em}
+.fl{font:500 19px/1.2 "IBM Plex Mono",Menlo,monospace;margin:0 0 4px;letter-spacing:-.015em}
+.fl.n{font-size:15px;color:var(--ink2)}
+.fl.verdict{font:600 11px/1.35 "IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+            letter-spacing:.09em;color:var(--warn);margin:7px 0 0}
+.fl.verdict+.fl.verdict{margin-top:2px}
+.bnote{font-size:12px;color:var(--mute);margin:9px 0 0;max-width:88ch;line-height:1.45}
+.eline{font-size:14.5px;line-height:1.5;margin:13px 0 0;max-width:80ch;
+       border-left:3px solid var(--accent);padding-left:13px}
+.eline .cite{display:block;font-size:11.5px;color:var(--mute);margin-top:3px}
+.peers{margin:14px 0 0;font-size:13px}
 .peers ul{margin:6px 0 4px;padding-left:18px}
 .peers li{margin:2px 0}
 .peers .cap{display:block;color:var(--mute);font-size:11.5px}
-.pcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:18px}
-.pcol{border-top:1px solid var(--rule);padding-top:10px}
-.pid{font-size:11.5px;color:var(--mute);margin-bottom:3px}
-.pname{font-weight:600;font-size:13px;margin-bottom:8px;line-height:1.3}
-.pfig{width:100%;border-collapse:collapse;font-size:12.5px}
-.pfig td{padding:3px 0;vertical-align:top;border-bottom:1px solid var(--rule)}
-.pfig td:first-child{color:var(--mute);white-space:nowrap;padding-right:12px;width:34%}
-.pfig tr:last-child td{border-bottom:0}
-.vint{margin-top:7px;font-size:11.5px;color:var(--mute)}
-@media (max-width:760px){.pcols{grid-template-columns:1fr}.plate h2{font-size:19px}}
-.brief{border-top:2px solid var(--ink);padding-top:16px;margin:26px 0 30px}
-.brief h2{font-size:21px;margin:0 0 10px;letter-spacing:-.01em;max-width:34ch}
-.brief .lead{margin:0 0 20px;max-width:74ch}
-.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
-.q{border-left:2px solid var(--rule);padding-left:14px}
-.q h3{font-size:14px;margin:0 0 4px;line-height:1.3}
-.q .qid{font-size:11.5px;color:var(--mute);margin:0 0 8px}
-.q .qhead{font-weight:600;margin:0 0 6px}
-.q p{margin:0 0 8px;font-size:13px}
-.prog{border-collapse:collapse;margin:0 0 8px;font-size:12px}
-.prog td{padding:1px 12px 1px 0;vertical-align:top;color:var(--ink)}
-.prog td:first-child{color:var(--mute);white-space:nowrap}
-@media (max-width:760px){.qs{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .hl{font-size:25px;max-width:none}
+  .band{grid-template-columns:1fr}
+  .fcol{border-right:0;border-bottom:1px solid var(--rule);padding:13px 0}
+  .fcol+.fcol{padding-left:0}
+  .fcol:last-child{border-bottom:0}
+  .fq{min-height:0;margin-bottom:8px}
+}
 .kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 14px;margin:0 0 8px;font-size:13px}
 .kv.wide{grid-template-columns:max-content 1fr}
 .kv dt{color:var(--mute)}
 .kv dd{margin:0}
 .cap{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.45}
+.recnote{font-size:13px;color:var(--ink2);margin:26px 0 14px;padding-top:14px;border-top:2px solid var(--ink);max-width:86ch}
 .nil{font-size:13px;color:var(--mute);font-style:italic;margin:4px 0}
 .refuse{border-left:2px solid var(--warn);padding-left:8px;font-size:12.5px;color:var(--ink2);margin:8px 0}
 table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
@@ -108,15 +115,11 @@ footer a{color:var(--mute)}
   <div><a href="../lowell-2026/">Lowell 2026</a></div>
 </header>
 
-<h1>Pacific Genesis Watch</h1>
-<p class="sub">Frozen decision states</p>
+<div class="titlerow"><h1>Pacific Genesis Watch</h1>
+  <span class="sub">Frozen decision states</span><span class="nf">Not a forecast</span></div>
 
-<section class="plate">
-  <h2>Three disturbances. Three different questions. One frozen decision state.</h2>
-  <p class="lead">One East Pacific camera, so the three areas this watch is following can be
-  compared rather than reconciled from three unrelated thumbnails. The outlines are NHC&rsquo;s own
-  formation polygons &mdash; <b>not forecast cones, and not impact probability</b>. No track is
-  drawn, because none exists before genesis.</p>
+<section class="lede">
+  <h2 class="hl">Three disturbances.<br>Three different questions.<br>One frozen decision state.</h2>
   <div class="plate-frame"><svg viewBox="0 0 880 284" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, Menlo, monospace" font-size="12" role="img" aria-label="One East Pacific camera showing the three official NHC formation polygons this watch is following, with the invest positions that two official products place inside the western area.">
 <g stroke="var(--rule)" stroke-width="1" opacity=".55">
 <line x1="0.0" y1="0" x2="0.0" y2="284"/>
@@ -250,89 +253,16 @@ footer a{color:var(--mute)}
 <g stroke="var(--warn)" stroke-width="2.4"><line x1="646.0" y1="186.2" x2="657.0" y2="197.2"/><line x1="646.0" y1="197.2" x2="657.0" y2="186.2"/></g>
 <g stroke="var(--warn)" stroke-width="2.4"><line x1="654.5" y1="179.1" x2="665.5" y2="190.1"/><line x1="654.5" y1="190.1" x2="665.5" y2="179.1"/></g>
 </svg></div>
-  <p class="assoc stated"><b>Western East Pacific (EP98):</b> &mdash; NHC states this association itself, in Tropical Weather Outlook (TWOEP) <span class="mono">ABPZ20 KNHC 172356</span>. Earlier records in this sequence describe it as containment only, because that is what was supportable when each was written.</p>
-  <div class="peers"><b>&times; Invest EP98</b>, as placed by 2 official products:<ul><li><span class="mono">11.5N 116.1W</span> &middot; ATCF b-deck bep982026.dat &middot; <span class="mono">2026-09-18T00:00Z</span></li><li><span class="mono">12N 115.5W</span> &middot; NHC High Seas Forecast (MIAHSFEP2)</li></ul><span class="cap">Carried as peers. Neither is averaged into the other, and no position is plotted except from the product that owns it.</span></div>
-  <div class="pcols"><div class="pcol"><div class="pid"><span class="mono">PGW-2026-D1</span> &middot; <b>HORIZON</b></div><div class="pname">Western East Pacific</div><table class="pfig"><tbody><tr><td>NHC 48 h</td><td class="mono">medium, 40 percent</td></tr><tr><td>NHC 7 d</td><td class="mono">high, 80 percent</td></tr><tr><td>Analogs</td><td class="mono">n = 7 &middot; rate refused &mdash; n &lt; 10</td></tr></tbody></table><div class="vint">GIS vintage carried: <span class="mono">20.0</span> &mdash; differs from the text, which stands</div></div><div class="pcol"><div class="pid"><span class="mono">PGW-2026-D2</span> &middot; <b>IDENTITY</b></div><div class="pname">Well East-Southeast of the Hawaiian Islands (Former TD15-E)</div><table class="pfig"><tbody><tr><td>NHC 48 h</td><td class="mono">low, 10 percent</td></tr><tr><td>NHC 7 d</td><td class="mono">low, 20 percent</td></tr><tr><td>Analogs</td><td class="mono">n = 8 &middot; rate refused &mdash; n &lt; 10</td></tr></tbody></table><div class="vint">GIS vintage carried: <span class="mono">10.0</span></div></div><div class="pcol"><div class="pid"><span class="mono">PGW-2026-N4</span> &middot; no test label</div><div class="pname">South of Southern Mexico</div><table class="pfig"><tbody><tr><td>NHC 48 h</td><td class="mono">low, near 0 percent</td></tr><tr><td>NHC 7 d</td><td class="mono">high, 80 percent</td></tr><tr><td>Analogs</td><td class="mono">n = 95 &middot; rate supported</td></tr></tbody></table><div class="vint">GIS vintage carried: <span class="mono">0.0</span> &mdash; differs from the text, which stands</div></div></div>
-  <p class="cap">Formation chances are NHC&rsquo;s, printed as NHC states them; the polygon is not
-  shaded by them. Analog counts are historical, genesis-conditioned evidence from the Storm
-  Atlas &mdash; a count, never a formation probability. Coastline is the repository&rsquo;s registered
-  Natural Earth primitive, geographic reference only.</p>
+  <p class="pcap">NHC&rsquo;s own formation polygons, and the invest fixes that fall inside one of
+    them. <b>Not a forecast cone.</b> No official cyclone track is rendered, because none exists.</p>
+  <div class="band"><div class="fcol"><div class="fh">D1<span> &mdash; HORIZON</span></div><div class="fq">How early is a watch worth anything?</div><div class="fl prob">20/70 &rarr; 40/80</div><div class="fl n">n 22 &rarr; 7</div><div class="fl verdict">RATE SUPPORTED &rarr; REFUSED</div></div><div class="fcol"><div class="fh">D2<span> &mdash; IDENTITY</span></div><div class="fq">Is this the same system as before?</div><div class="fl prob">10/10 &rarr; 10/20</div><div class="fl verdict">REGENERATION RATE REFUSED</div></div><div class="fcol"><div class="fh">N4<span> &mdash; CONTINUITY</span></div><div class="fq">Does anything carry over when NHC renames an area?</div><div class="fl verdict">NEW IDENTIFIER</div><div class="fl verdict">NO INHERITED TEST</div></div></div>
+  <p class="bnote">NHC renamed the area between the two states. <span class="mono">PGW-2026-D3</span> carried EXPOSURE CLOCK; <span class="mono">PGW-2026-N4</span> was minted in its place and inherits none of it.</p>
+  <p class="eline">EP982026 was first associated by containment; a later NHC outlook explicitly labeled the area &ldquo;Western East Pacific (EP98).&rdquo; Earlier records remain unchanged. <span class="cite">NHC states this association itself, in Tropical Weather Outlook (TWOEP) <span class="mono">ABPZ20 KNHC 172356</span>.</span></p>
 </section>
 
-<section class="brief">
-  <h2>Three different questions</h2>
-  <p class="lead">The Pacific is carrying three pre-genesis areas at once. They are not three
-  instances of the same problem &mdash; each one tests something different about what a record
-  taken <em>before</em> the outcome can be worth, and the sequence below was written while all
-  three were still open.</p>
-  <div class="qs">
-  <article class="q">
-   <h3>Western East Pacific</h3>
-   <p class="qid"><span class="mono">PGW-2026-D1</span> &middot; test <span class="mono">HORIZON</span></p>
-   <p class="qhead">How early is a watch worth anything?</p>
-   <p>The value of a pre-genesis record is decided before genesis, not after. This is the object that tests it.</p>
-   <p class="cap">NHC formation chance, 48 h / 7 d:</p>
-   <table class="prog"><tr><td class="mono">0001</td><td class="mono">low, 20 percent / high, 70 percent</td></tr><tr><td class="mono">0002</td><td class="mono">medium, 40 percent / high, 80 percent</td></tr></table>
-   <p class="cap">What the archive could say, by state:</p>
-   <table class="prog"><tr><td class="mono">0001</td><td>22 analogs &middot; rates supported</td></tr><tr><td class="mono">0002</td><td>7 analogs &middot; rates refused, 7 &lt; 10 minimum</td></tr><tr><td class="mono">0003</td><td>model guidance becomes admissible, for this object only</td></tr></table>
-<p class="cap"><b>Invest EP982026 now exists inside this area&rsquo;s published NHC polygon.</b> The association is geometric containment of two official products; NHC does not state the association. The invest's own ATCF deck reads &#x27;GENESIS024&#x27; through 17/1200Z, &#x27;INVEST&#x27; from 17/1800Z.</p>  </article>
-  <article class="q">
-   <h3>Well East-Southeast of the Hawaiian Islands (Former TD15-E)</h3>
-   <p class="qid"><span class="mono">PGW-2026-D2</span> &middot; test <span class="mono">IDENTITY</span></p>
-   <p class="qhead">Is this the same system as before?</p>
-   <p>A remnant low that redevelops raises a question the archive cannot answer with a rate, and the watch says so rather than producing one.</p>
-   <p class="cap">NHC formation chance, 48 h / 7 d:</p>
-   <table class="prog"><tr><td class="mono">0001</td><td class="mono">low, 10 percent / low, 10 percent</td></tr><tr><td class="mono">0002</td><td class="mono">low, 10 percent / low, 20 percent</td></tr></table>
-   <p class="cap">What the archive could say, by state:</p>
-   <table class="prog"><tr><td class="mono">0001</td><td>7 analogs &middot; rates refused, 7 &lt; 10 minimum</td></tr><tr><td class="mono">0002</td><td>8 analogs &middot; rates refused, 8 &lt; 10 minimum</td></tr></table>
-  </article>
-  <article class="q">
-   <h3>South of Southern Mexico</h3>
-   <p class="qid"><span class="mono">PGW-2026-N4</span> &middot; no test label</p>
-   <p class="qhead">A question that was not inherited.</p>
-   <p>NHC renamed this area between the two states, so the watch minted a new identifier and refused continuity. Handing the new object the retired one's test label would assert through the back door exactly what the identifier refused.</p>
-   <p class="cap">NHC formation chance, 48 h / 7 d:</p>
-   <table class="prog"><tr><td class="mono">0002</td><td class="mono">low, near 0 percent / high, 80 percent</td></tr></table>
-   <p class="cap">PGW-2026-D3 carried EXPOSURE CLOCK. PGW-2026-N4 carries no test label.</p>
-   <p class="cap">What the archive could say, by state:</p>
-   <table class="prog"><tr><td class="mono">0002</td><td>95 analogs &middot; rates supported</td></tr></table>
-  </article>
-  </div>
-</section>
-
-<section class="state">
-  <h3>The first invest in this sequence</h3>
-    <dl class="kv wide">
-    <dt>ATCF identifier</dt><dd class="mono">EP982026</dd>
-    <dt>Designated INVEST at</dt><dd class="mono">2026-09-17T18:00Z</dd>
-    <dt>Acquired at</dt><dd class="mono">2026-09-17T21:19:46Z</dd>
-    <dt>Association</dt><dd>PGW-2026-D1, by containment</dd>
-    <dt>NHC states this association</dt><dd>no</dd>
-    <dt>Model guidance</dt><dd>admissible for this object only, under its mandatory label</dd>
-  </dl>
-  <p class="cap">No NHC product names an invest against an outlook area: the text outlook names no invest, and the shapefile&#x27;s attributes are basin, area number and two probabilities. Containment is a relation between two official products, not a statement by either of them.</p>
-  <p class="cap">Drop this block. Every other value in this record -- the designation, its evidence, the fix, the hashes -- stands without it.</p>
-  <p class="cap"><b>What changed for the Atlas.</b> Model guidance was refused in every earlier record because no invest association was sourced and naming one would have been a guess about which disturbance it belonged to. A designated invest with a position now exists, and containment singles out one area, so guidance becomes admissible FOR THAT OBJECT ONLY and only under its mandatory label. Nothing about the other two disturbances changes.</p>
-</section>
-
-<p class="banner">Not a forecast. Formation probabilities on this page are NHC&rsquo;s, in NHC&rsquo;s
-  own words. Archive cohorts are historical evidence conditioned on genesis having occurred, and
-  are never a formation or impact probability. No official cyclone track is rendered, because
-  none exists.</p>
-
-<section class="state">
-  <h3>This decision state</h3>
-  <dl class="kv wide">
-    <dt>Record</dt><dd class="mono">0002</dd>
-    <dt>Source issued at</dt><dd class="mono">2026-09-17T17:53Z</dd>
-    <dt>Source acquired at</dt><dd class="mono">2026-09-17T17:54:21Z</dd>
-    <dt>Atlas computed at</dt><dd class="mono">2026-09-17T17:54:21Z</dd>
-    <dt>Snapshot committed at</dt><dd class="mono">2026-09-17T17:54:30Z</dd>
-    <dt>Active tropical cyclones</dt><dd>0</dd>
-    <dt>Pre-genesis objects</dt><dd>3</dd>
-  </dl>
-  <p class="cap">Four timestamps, kept apart. Atlas state captured with this source state, against the repository as it then stood.</p>
-</section>
+<p class="recnote"><b>Formation probability is not impact probability.</b> It is the chance a
+  tropical cyclone forms, not the chance anything is affected if one does. It holds for every
+  object below.</p>
 
 
 <article class="obj">
@@ -347,8 +277,6 @@ footer a{color:var(--mute)}
     <p class="state">pre-genesis disturbance</p>
     <div class="prob"><span class="pl">Formation, 48 h</span><span class="pv">medium, 40 percent</span><div class="dis">GIS attribute prints <b>20.0</b>. The text stands: <b>40 percent</b>. The GIS value is carried, not displayed in its place.</div></div>
     <div class="prob"><span class="pl">Formation, 7 d</span><span class="pv">high, 80 percent</span><div class="dis">GIS attribute prints <b>70.0</b>. The text stands: <b>80 percent</b>. The GIS value is carried, not displayed in its place.</div></div>
-    <p class="cap"><b>Formation probability is not impact probability.</b> It is the chance a
-      tropical cyclone forms, not the chance anything is affected if one does.</p>
   </section>
 
   <section><h3>Where</h3>
@@ -386,8 +314,6 @@ footer a{color:var(--mute)}
     <p class="state">pre-genesis disturbance</p>
     <div class="prob"><span class="pl">Formation, 48 h</span><span class="pv">low, 10 percent</span></div>
     <div class="prob"><span class="pl">Formation, 7 d</span><span class="pv">low, 20 percent</span><div class="dis">GIS attribute prints <b>10.0</b>. The text stands: <b>20 percent</b>. The GIS value is carried, not displayed in its place.</div></div>
-    <p class="cap"><b>Formation probability is not impact probability.</b> It is the chance a
-      tropical cyclone forms, not the chance anything is affected if one does.</p>
   </section>
 
   <section><h3>Where</h3>
@@ -425,8 +351,6 @@ footer a{color:var(--mute)}
     <p class="state">pre-genesis disturbance</p>
     <div class="prob"><span class="pl">Formation, 48 h</span><span class="pv">low, near 0 percent</span><div class="dis">GIS attribute prints <b>0.0</b>. The text stands: <b>near 0 percent</b>. The GIS value is carried, not displayed in its place.</div></div>
     <div class="prob"><span class="pl">Formation, 7 d</span><span class="pv">high, 80 percent</span></div>
-    <p class="cap"><b>Formation probability is not impact probability.</b> It is the chance a
-      tropical cyclone forms, not the chance anything is affected if one does.</p>
   </section>
 
   <section><h3>Where</h3>
@@ -454,6 +378,36 @@ footer a{color:var(--mute)}
 </article>
 
 <section class="state">
+  <h3>This decision state</h3>
+  <dl class="kv wide">
+    <dt>Record</dt><dd class="mono">0002</dd>
+    <dt>Source issued at</dt><dd class="mono">2026-09-17T17:53Z</dd>
+    <dt>Source acquired at</dt><dd class="mono">2026-09-17T17:54:21Z</dd>
+    <dt>Atlas computed at</dt><dd class="mono">2026-09-17T17:54:21Z</dd>
+    <dt>Snapshot committed at</dt><dd class="mono">2026-09-17T17:54:30Z</dd>
+    <dt>Active tropical cyclones</dt><dd>0</dd>
+    <dt>Pre-genesis objects</dt><dd>3</dd>
+  </dl>
+  <p class="cap">Four timestamps, kept apart. Atlas state captured with this source state, against the repository as it then stood.</p>
+</section>
+
+<section class="state">
+  <h3>The invest, as its own record stated it at designation</h3>
+    <dl class="kv wide">
+    <dt>ATCF identifier</dt><dd class="mono">EP982026</dd>
+    <dt>Designated INVEST at</dt><dd class="mono">2026-09-17T18:00Z</dd>
+    <dt>Acquired at</dt><dd class="mono">2026-09-17T21:19:46Z</dd>
+    <dt>Association</dt><dd>PGW-2026-D1, by containment</dd>
+    <dt>NHC states this association</dt><dd>no</dd>
+    <dt>Model guidance</dt><dd>admissible for this object only, under its mandatory label</dd>
+  </dl>
+  <p class="cap">No NHC product names an invest against an outlook area: the text outlook names no invest, and the shapefile&#x27;s attributes are basin, area number and two probabilities. Containment is a relation between two official products, not a statement by either of them.</p>
+  <p class="cap">Drop this block. Every other value in this record -- the designation, its evidence, the fix, the hashes -- stands without it.</p>
+  <p class="cap"><b>What changed for the Atlas.</b> Model guidance was refused in every earlier record because no invest association was sourced and naming one would have been a guess about which disturbance it belonged to. A designated invest with a position now exists, and containment singles out one area, so guidance becomes admissible FOR THAT OBJECT ONLY and only under its mandatory label. Nothing about the other two disturbances changes.</p>
+  <div class="peers"><b>&times; Invest EP98</b>, as placed by 2 official products:<ul><li><span class="mono">11.5N 116.1W</span> &middot; ATCF b-deck bep982026.dat &middot; <span class="mono">2026-09-18T00:00Z</span></li><li><span class="mono">12N 115.5W</span> &middot; NHC High Seas Forecast (MIAHSFEP2)</li></ul><span class="cap">Carried as peers. Neither is averaged into the other, and no position is plotted except from the product that owns it.</span></div>
+</section>
+
+<section class="state">
   <h3>What changed since the previous decision state</h3>
   <p class="cap">Against record 0001. Reported, never scored: whether a change was right is a later question answered against what actually happened, and success does not require a storm to form.</p><table class="seq"><thead><tr><th>Object</th><th>What</th><th>Change</th></tr></thead><tbody><tr><td class="mono">PGW-2026-D1</td><td>FORMATION 48 h</td><td>low, 20 percent → medium, 40 percent</td></tr><tr><td class="mono">PGW-2026-D1</td><td>FORMATION 7 d</td><td>high, 70 percent → high, 80 percent</td></tr><tr><td class="mono">PGW-2026-D1</td><td>WORDING</td><td>NHC’s description changed; both are preserved verbatim in their own records</td></tr><tr><td class="mono">PGW-2026-D1</td><td>GEOMETRY</td><td>polygon centroid 11.9°N 114.3°W → 13.0°N 127.1°W</td></tr><tr><td class="mono">PGW-2026-D2</td><td>FORMATION 7 d</td><td>low, 10 percent → low, 20 percent</td></tr><tr><td class="mono">PGW-2026-D2</td><td>WORDING</td><td>NHC’s description changed; both are preserved verbatim in their own records</td></tr><tr><td class="mono">PGW-2026-D2</td><td>GEOMETRY</td><td>polygon centroid 15.0°N 131.3°W → 15.2°N 141.6°W</td></tr><tr><td class="mono">PGW-2026-N4</td><td>APPEARED</td><td>South of Southern Mexico — new internal identifier; no earlier snapshot carries this NHC name</td></tr><tr><td class="mono">PGW-2026-D3</td><td>NO LONGER CARRIED</td><td>Southwest of Southwestern Mexico is not in this outlook. That is the product’s statement, not a judgement about the system.</td></tr></tbody></table>
 </section>
@@ -471,6 +425,9 @@ footer a{color:var(--mute)}
     <span class="mono">scripts/genesis-watch/tests/</span>, not by this sentence.</p>
   <table class="seq"><thead><tr><th>Record</th><th>Kind</th><th>Committed (UTC)</th>
     <th>Integrity hash</th></tr></thead><tbody><tr><td class="mono">0001</td><td>nhc-source-state</td><td class="mono">2026-09-17T17:15:52Z</td><td class="mono sha">961cdc3e6df6a82b…</td></tr><tr><td class="mono">0001b</td><td>atlas-state-append</td><td class="mono">2026-09-17T17:17:19Z</td><td class="mono sha">e5b841f82ce5ef02…</td></tr><tr><td class="mono">0002</td><td>nhc-source-and-atlas-state</td><td class="mono">2026-09-17T17:54:30Z</td><td class="mono sha">a22ecfe3cce2a00c…</td></tr><tr><td class="mono">0002c1</td><td>correction</td><td class="mono">2026-09-17T17:56:18Z</td><td class="mono sha">9bbc71ea4788e246…</td></tr><tr><td class="mono">0003</td><td>invest-designation</td><td class="mono">2026-09-17T21:19:48Z</td><td class="mono sha">7d3bcb78349daebb…</td></tr><tr><td class="mono">0003c1</td><td>correction</td><td class="mono">2026-09-17T21:21:01Z</td><td class="mono sha">4cda92125256db34…</td></tr><tr><td class="mono">0004</td><td>association</td><td class="mono">2026-09-18T02:25:58Z</td><td class="mono sha">c03b161136586b29…</td></tr></tbody></table>
+  <p class="cap">The plate&rsquo;s coastline is the repository&rsquo;s registered Natural Earth
+    primitive, geographic reference only. No polygon is shaded by a probability: NHC publishes a
+    number in a sentence, not a spatial distribution.</p>
 </section>
 
 <footer>

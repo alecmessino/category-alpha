@@ -181,8 +181,6 @@ def object_card(o: dict, atlas: dict) -> str:
     <p class="state">{esc(o.get("classification"))}</p>
     {prob_row("Formation, 48 h", p48)}
     {prob_row("Formation, 7 d", p7)}
-    <p class="cap"><b>Formation probability is not impact probability.</b> It is the chance a
-      tropical cyclone forms, not the chance anything is affected if one does.</p>
   </section>
 
   <section><h3>Where</h3>
@@ -431,79 +429,16 @@ def plate_peers(assoc, invest) -> str:
             f'no position is plotted except from the product that owns it.</span></div>')
 
 
-def plate_legend(assoc, invest) -> str:
-    """The association, in exactly the strength the latest record supports."""
-    if assoc and (assoc.get("association") or {}).get("nhc_states_this_association"):
-        ev = assoc["association"]["evidence"]
-        return (f'<p class="assoc stated"><b>{esc(ev["heading_verbatim"])}</b> &mdash; NHC states '
-                f'this association itself, in {esc(ev["product"])} '
-                f'<span class="mono">{esc(ev["wmo_header"])}</span>. Earlier records in this '
-                f'sequence describe it as containment only, because that is what was '
-                f'supportable when each was written.</p>')
-    if invest:
-        return ('<p class="assoc contain">EP982026 FIX INSIDE D1 POLYGON &mdash; NHC DOES NOT '
-                'STATE THE ASSOCIATION. The relation is geometric containment of two official '
-                'products, computed here and labelled as that.</p>')
-    return ""
-
-
-def plate_table(objects, atlas_objs) -> str:
-    """NHC's probabilities as TEXT, the archive's evidence as a COUNT. Never blended."""
-    rows = []
-    for o in objects:
-        oid = o["millibar_object_id"]
-        a = atlas_objs.get(oid) or {}
-        c = a.get("cohort") or {}
-        n, suff = c.get("n"), c.get("sufficient")
-        verdict = ("rate supported" if suff else
-                   f"rate refused &mdash; n &lt; {esc((c.get('definition') or {}).get('min_sample'))}")
-        p48, p7 = o["formation_prob_48h"], o["formation_prob_7d"]
-
-        def vint(p):
-            gis = p.get("gis_attribute")
-            if gis is None:
-                return ""
-            return (f'<div class="vint">GIS vintage carried: <span class="mono">{esc(gis)}</span>'
-                    f'{" &mdash; differs from the text, which stands" if p.get("text_gis_disagreement") else ""}</div>')
-        test = o.get("test")
-        rows.append(
-            f'<div class="pcol">'
-            f'<div class="pid"><span class="mono">{esc(oid)}</span>'
-            + (f' &middot; <b>{esc(test)}</b>' if test else ' &middot; no test label') +
-            f'</div>'
-            f'<div class="pname">{esc(o["nhc_name"])}</div>'
-            f'<table class="pfig"><tbody>'
-            f'<tr><td>NHC 48 h</td><td class="mono">{esc(p48["official_text"])}</td></tr>'
-            f'<tr><td>NHC 7 d</td><td class="mono">{esc(p7["official_text"])}</td></tr>'
-            f'<tr><td>Analogs</td><td class="mono">n = {esc(n)} &middot; {verdict}</td></tr>'
-            f'</tbody></table>'
-            + vint(p48) +
-            f'</div>')
-    return "".join(rows)
-
 # THE THREE QUESTIONS. A test label is the watch's own word for what a disturbance is being
-# used to answer; the sentence beside it is what that question means to a reader who has not
-# read the contract. The mapping is prose keyed to a label the RECORDS carry -- an unknown
-# label falls through as itself rather than being dropped or guessed at.
+# used to answer, and the line beside it is that question in plain words. The mapping is keyed
+# to a label the RECORDS carry -- an unknown label falls through as itself rather than being
+# dropped or guessed at.
 QUESTION = {
-    "HORIZON": ("How early is a watch worth anything?",
-                "The value of a pre-genesis record is decided before genesis, not after. This "
-                "is the object that tests it."),
-    "IDENTITY": ("Is this the same system as before?",
-                 "A remnant low that redevelops raises a question the archive cannot answer "
-                 "with a rate, and the watch says so rather than producing one."),
-    "EXPOSURE CLOCK": ("How long until this matters to a coastline?",
-                       "The question a slow-developing system near land raises, and the one "
-                       "that does not survive a rename."),
+    "HORIZON": "How early is a watch worth anything?",
+    "IDENTITY": "Is this the same system as before?",
+    "EXPOSURE CLOCK": "How long until this matters to a coastline?",
+    "CONTINUITY": "Does anything carry over when NHC renames an area?",
 }
-
-
-def _probs(rec) -> str:
-    if rec is None:
-        return ""
-    a = (rec.get("formation_prob_48h") or {}).get("official_text", "")
-    b = (rec.get("formation_prob_7d") or {}).get("official_text", "")
-    return f"{a} / {b}"
 
 
 def atlas_by_stage(entries: list, records: list, snaps: list) -> dict:
@@ -526,110 +461,114 @@ def atlas_by_stage(entries: list, records: list, snaps: list) -> dict:
     return out
 
 
-def atlas_line(oid: str, snaps: list, stages: dict, invest: dict | None) -> str:
-    """What the archive could and could not say about one object, at each stage.
+def pct_token(p: dict | None) -> str | None:
+    """The percentage AS THE PRODUCT PRINTED IT, never a number re-derived from it.
 
-    THIS IS NOT A SUMMARY OF GOOD NEWS. A cohort can exist and still refuse its rates, and the
-    interesting case in this sequence is the one where the archive said LESS as NHC's chance
-    rose -- because the disturbance moved into a worse-sampled part of the basin, not because
-    anything improved or degraded about the method.
+    Two traps sit in this one line. "near 0 percent" is a LABEL at the bottom of NHC's scale
+    and not the integer zero, so it is carried as the words it is. And the first snapshot in
+    this sequence carries no parsed percentage at all -- only the official text -- so a band
+    built on `official_pct` would silently print nothing for the earlier of the two states it
+    exists to compare. The token is read out of the text and printed verbatim.
     """
-    rows = []
-    for sid, _ in snaps:
-        c = (stages.get(sid, {}).get(oid) or {}).get("cohort")
-        if not c:
-            continue
-        n, ok = c.get("n"), c.get("sufficient")
-        verdict = ("rates supported" if ok else
-                   f"rates refused, {esc(str(n))} &lt; {esc(str((c.get('definition') or {}).get('min_sample')))} minimum")
-        rows.append(f'<tr><td class="mono">{esc(sid)}</td>'
-                    f'<td>{esc(str(n))} analogs &middot; {verdict}</td></tr>')
-    if invest and (invest.get("association") or {}).get("object") == oid:
-        g = (invest.get("atlas_state") or {}).get("model_guidance") or {}
-        if g.get("available"):
-            rows.append('<tr><td class="mono">0003</td><td>model guidance becomes admissible, '
-                        'for this object only</td></tr>')
-    if not rows:
-        return ""
-    return ('   <p class="cap">What the archive could say, by state:</p>\n'
-            f'   <table class="prog">{"".join(rows)}</table>\n')
+    t = (p or {}).get("official_text") or ""
+    tok = re.sub(r"\s*percent\s*$", "", t.split(",")[-1].strip()).strip()
+    return tok or None
 
 
-def brief_section(snaps: list, invest: dict | None, stages: dict) -> str:
-    """Three disturbances, three different questions, one frozen sequence.
+def finding_band(snaps: list, stages: dict) -> str:
+    """The three questions as DATA, not as three essays.
 
-    Every figure here is read out of the committed records: the first snapshot's test labels,
-    the progression between the first state and the latest, and the identifier each object
-    carries now. Nothing is restated from memory and nothing is recomputed.
+    Every figure is read from the frozen records: the percentages are NHC's own, as printed,
+    at the first and latest state; the counts are the archive's cohort sizes at those same
+    states; the identity lines are what the record says about continuity. No line here
+    restates a number sitting next to it.
     """
     first_id, first = snaps[0]
     last_id, last = snaps[-1]
-    first_ids = {o.get("millibar_object_id") for o in first.get("objects", [])}
-    last_ids = {o.get("millibar_object_id") for o in last.get("objects", [])}
     first_by = {o.get("millibar_object_id"): o for o in first.get("objects", [])}
-    retired = [o for o in first.get("objects", []) if o.get("millibar_object_id") not in last_ids]
+    tests = {o.get("millibar_object_id"): o.get("test")
+             for _s, snap in snaps for o in snap.get("objects", []) if o.get("test")}
 
-    out = []
+    cols = []
     for o in last.get("objects", []):
-        oid = o.get("millibar_object_id")
+        oid = o["millibar_object_id"]
         prior = first_by.get(oid)
-        note = ""
-        if prior is None:
-            # An object the latest state holds that the first one did not is a NEW identifier,
-            # and the test it did not inherit is the whole point of it being new.
+        test = tests.get(oid)
+        lines = []
+
+        if o.get("continuity_asserted") == "none":
+            # A NEW IDENTIFIER INHERITS NOTHING, and the band must not hand it a test label
+            # through the back door. CONTINUITY is the open question this object raises, which
+            # is not the same thing as a test it carries -- so the label resolves to the
+            # question and the column says outright that no test came with it.
             test = None
-            headline = "A question that was not inherited."
-            gloss = ("NHC renamed this area between the two states, so the watch minted a new "
-                     "identifier and refused continuity. Handing the new object the retired "
-                     "one's test label would assert through the back door exactly what the "
-                     "identifier refused.")
-            if retired:
-                r = retired[0]
-                note = (f"{esc(r.get('millibar_object_id'))} carried "
-                        f"{esc(r.get('test'))}. {esc(oid)} carries no test label.")
+            lines = [("verdict", "NEW IDENTIFIER"), ("verdict", "NO INHERITED TEST")]
         else:
-            test = prior.get("test")
-            headline, gloss = QUESTION.get(test, (esc(test or ""), ""))
+            if prior is not None:
+                a, b = (pct_token(prior.get("formation_prob_48h")),
+                        pct_token(prior.get("formation_prob_7d")))
+                c, d = (pct_token(o.get("formation_prob_48h")),
+                        pct_token(o.get("formation_prob_7d")))
+                if None not in (a, b, c, d):
+                    lines.append(("prob", f"{esc(a)}/{esc(b)} &rarr; {esc(c)}/{esc(d)}"))
+            ident = (stages.get(last_id, {}).get(oid) or {}).get("identity") or {}
+            na = (stages.get(first_id, {}).get(oid) or {}).get("cohort") or {}
+            nb = (stages.get(last_id, {}).get(oid) or {}).get("cohort") or {}
+            if ident.get("regeneration_rate") == "REFUSED":
+                # The sharper refusal takes the column. A generic "rate refused" beside it
+                # would be the same fact twice; the cohort counts are on this object's card.
+                lines.append(("verdict", "REGENERATION RATE REFUSED"))
+            else:
+                if na.get("n") is not None and nb.get("n") is not None:
+                    lines.append(("n", f"n {esc(na['n'])} &rarr; {esc(nb['n'])}"))
+                if na.get("sufficient") is not None and nb.get("sufficient") is not None:
+                    lines.append(("verdict",
+                                  "RATE SUPPORTED &rarr; REFUSED"
+                                  if na["sufficient"] and not nb["sufficient"]
+                                  else "RATE REFUSED" if not nb["sufficient"]
+                                  else "RATE SUPPORTED"))
 
-        states = [(last_id, o)] if prior is None else [(first_id, prior), (last_id, o)]
-        rows_html = "".join(
-            f'<tr><td class="mono">{esc(rid)}</td>'
-            f'<td class="mono">{esc(_probs(rec))}</td></tr>' for rid, rec in states)
-        unchanged = (prior is not None and _probs(prior) == _probs(o))
-        prog = (f'<table class="prog">{rows_html}</table>'
-                + ('<p class="cap">Unchanged between the two states.</p>' if unchanged else ""))
+        label = test or "CONTINUITY"
+        body = "".join(f'<div class="fl {cls}">{txt}</div>' for cls, txt in lines)
+        cols.append(f'<div class="fcol">'
+                    f'<div class="fh">{esc(oid.replace("PGW-2026-", ""))}'
+                    f'<span> &mdash; {esc(label)}</span></div>'
+                    f'<div class="fq">{esc(QUESTION.get(label, ""))}</div>{body}</div>')
+    return "".join(cols)
 
-        inv = ""
-        if invest and (invest.get("association") or {}).get("object") == oid:
-            d = invest["invest"]["designation"]
-            # THE SUBJECT OF THIS SENTENCE IS THE INVEST, NOT THE OBJECT. An earlier draft
-            # opened "Now designated EP982026", which reads as NHC having identified this
-            # disturbance as that invest -- the exact claim the record refuses with
-            # nhc_states_this_association: false. What is true is narrower and is what is
-            # said: the invest exists, and it is inside this area's published polygon.
-            ev = str(d.get("evidence") or "")
-            inv = (f'<p class="cap"><b>Invest '
-                   f'{esc(invest["invest"]["atcf_id"])} now exists inside this area&rsquo;s '
-                   f'published NHC polygon.</b> The association is geometric containment of two '
-                   f'official products; NHC does not state the association. The invest\'s own '
-                   f'ATCF deck reads {esc(ev[ev.find(":") + 2:] if ":" in ev else ev)}.</p>')
 
-        out.append(
-            '  <article class="q">\n'
-            f'   <h3>{esc(o.get("nhc_name"))}</h3>\n'
-            f'   <p class="qid"><span class="mono">{esc(oid)}</span>'
-            + (f' &middot; test <span class="mono">{esc(test)}</span>' if test
-               else ' &middot; no test label')
-            + '</p>\n'
-            f'   <p class="qhead">{headline}</p>\n'
-            f'   <p>{gloss}</p>\n'
-            '   <p class="cap">NHC formation chance, 48 h / 7 d:</p>\n'
-            f'   {prog}\n'
-            + (f'   <p class="cap">{note}</p>\n' if note else "")
-            + atlas_line(oid, snaps, stages, invest)
-            + inv
-            + '  </article>')
-    return "\n".join(out)
+def band_note(snaps: list) -> str:
+    """The one fact the band's new-identifier column rests on and cannot state inside itself."""
+    _, first = snaps[0]
+    _, last = snaps[-1]
+    last_ids = {o.get("millibar_object_id") for o in last.get("objects", [])}
+    new = [o for o in last.get("objects", []) if o.get("continuity_asserted") == "none"]
+    retired = [o for o in first.get("objects", [])
+               if o.get("millibar_object_id") not in last_ids]
+    if not (new and retired):
+        return ""
+    r, n = retired[0], new[0]
+    return (f'<p class="bnote">NHC renamed the area between the two states. '
+            f'<span class="mono">{esc(r.get("millibar_object_id"))}</span> carried '
+            f'{esc(r.get("test"))}; <span class="mono">{esc(n.get("millibar_object_id"))}</span> '
+            f'was minted in its place and inherits none of it.</p>')
+
+
+def evidence_line(assoc) -> str:
+    """One sentence. The containment-to-stated transition, and what it does not do."""
+    if not assoc:
+        return ""
+    ev = (assoc.get("association") or {}).get("evidence") or {}
+    head = (ev.get("heading_verbatim") or "").rstrip(":")
+    # THE CITATION IS NOT DECORATION. Saying only that an outlook "labeled the area" leaves
+    # the strength of the claim to the reader; the record's own finding is that NHC states the
+    # association itself, and scripts/check-risk-doorway.mjs fails this page if the record says
+    # that and the page does not.
+    return (f'<p class="eline">EP982026 was first associated by containment; a later NHC '
+            f'outlook explicitly labeled the area &ldquo;{esc(head)}.&rdquo; Earlier records '
+            f'remain unchanged. <span class="cite">NHC states this association itself, in '
+            f'{esc(ev.get("product"))} '
+            f'<span class="mono">{esc(ev.get("wmo_header"))}</span>.</span></p>')
 
 
 def invest_section(invest: dict | None) -> str:
@@ -744,11 +683,11 @@ def build() -> Path:
     plate_atlas = {(o.get("object_id") or o.get("millibar_object_id")): o
                    for o in ((atlas or {}).get("objects") or [])}
     plate_svg = pacific_plate(plate_objects, plate_atlas, invest, assoc)
-    plate_html = plate_table(plate_objects, plate_atlas)
-    plate_assoc = plate_legend(assoc, invest)
     plate_peers_html = plate_peers(assoc, invest)
     stages = atlas_by_stage(entries, records, snaps)
-    brief_html = brief_section(snaps, invest, stages)
+    band_html = finding_band(snaps, stages)
+    band_note_html = band_note(snaps)
+    evidence_html = evidence_line(assoc)
     invest_html = invest_section(invest)
 
     prev_snap = snaps[-2][1] if len(snaps) > 1 else None
@@ -784,45 +723,24 @@ def build() -> Path:
   <div><a href="../lowell-2026/">Lowell 2026</a></div>
 </header>
 
-<h1>Pacific Genesis Watch</h1>
-<p class="sub">Frozen decision states</p>
+<div class="titlerow"><h1>Pacific Genesis Watch</h1>
+  <span class="sub">Frozen decision states</span><span class="nf">Not a forecast</span></div>
 
-<section class="plate">
-  <h2>Three disturbances. Three different questions. One frozen decision state.</h2>
-  <p class="lead">One East Pacific camera, so the three areas this watch is following can be
-  compared rather than reconciled from three unrelated thumbnails. The outlines are NHC&rsquo;s own
-  formation polygons &mdash; <b>not forecast cones, and not impact probability</b>. No track is
-  drawn, because none exists before genesis.</p>
+<section class="lede">
+  <h2 class="hl">Three disturbances.<br>Three different questions.<br>One frozen decision state.</h2>
   <div class="plate-frame">{plate_svg}</div>
-  {plate_assoc}
-  {plate_peers_html}
-  <div class="pcols">{plate_html}</div>
-  <p class="cap">Formation chances are NHC&rsquo;s, printed as NHC states them; the polygon is not
-  shaded by them. Analog counts are historical, genesis-conditioned evidence from the Storm
-  Atlas &mdash; a count, never a formation probability. Coastline is the repository&rsquo;s registered
-  Natural Earth primitive, geographic reference only.</p>
+  <p class="pcap">NHC&rsquo;s own formation polygons, and the invest fixes that fall inside one of
+    them. <b>Not a forecast cone.</b> No official cyclone track is rendered, because none exists.</p>
+  <div class="band">{band_html}</div>
+  {band_note_html}
+  {evidence_html}
 </section>
 
-<section class="brief">
-  <h2>Three different questions</h2>
-  <p class="lead">The Pacific is carrying three pre-genesis areas at once. They are not three
-  instances of the same problem &mdash; each one tests something different about what a record
-  taken <em>before</em> the outcome can be worth, and the sequence below was written while all
-  three were still open.</p>
-  <div class="qs">
-{brief_html}
-  </div>
-</section>
+<p class="recnote"><b>Formation probability is not impact probability.</b> It is the chance a
+  tropical cyclone forms, not the chance anything is affected if one does. It holds for every
+  object below.</p>
 
-<section class="state">
-  <h3>The first invest in this sequence</h3>
-  {invest_html}
-</section>
-
-<p class="banner">Not a forecast. Formation probabilities on this page are NHC&rsquo;s, in NHC&rsquo;s
-  own words. Archive cohorts are historical evidence conditioned on genesis having occurred, and
-  are never a formation or impact probability. No official cyclone track is rendered, because
-  none exists.</p>
+{objects}
 
 <section class="state">
   <h3>This decision state</h3>
@@ -838,7 +756,11 @@ def build() -> Path:
   <p class="cap">Four timestamps, kept apart. {atlas_note}</p>
 </section>
 
-{objects}
+<section class="state">
+  <h3>The invest, as its own record stated it at designation</h3>
+  {invest_html}
+  {plate_peers_html}
+</section>
 
 <section class="state">
   <h3>What changed since the previous decision state</h3>
@@ -858,6 +780,9 @@ def build() -> Path:
     <span class="mono">scripts/genesis-watch/tests/</span>, not by this sentence.</p>
   <table class="seq"><thead><tr><th>Record</th><th>Kind</th><th>Committed (UTC)</th>
     <th>Integrity hash</th></tr></thead><tbody>{seq_rows}</tbody></table>
+  <p class="cap">The plate&rsquo;s coastline is the repository&rsquo;s registered Natural Earth
+    primitive, geographic reference only. No polygon is shaded by a probability: NHC publishes a
+    number in a sentence, not a spatial distribution.</p>
 </section>
 
 <footer>
@@ -878,15 +803,14 @@ STYLE = """
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);
      font:15px/1.5 "IBM Plex Sans","Helvetica Neue",Arial,sans-serif}
-.wrap{max-width:860px;margin:0 auto;padding:24px 16px 56px}
+.wrap{max-width:920px;margin:0 auto;padding:24px 16px 56px}
 .mast{display:flex;justify-content:space-between;align-items:baseline;
       border-bottom:1px solid var(--rule);padding-bottom:8px;font-size:13px;color:var(--mute)}
 .mast b{color:var(--ink);font-weight:600}
 .mast a{color:var(--accent)}
-h1{font-size:30px;font-weight:500;letter-spacing:-.02em;margin:18px 0 2px}
-.sub{margin:0 0 14px;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
-.banner{border:1.5px solid var(--warn);color:var(--warn);background:#FCF4EE;
-        padding:10px 12px;font-size:13px;margin:0 0 22px}
+.titlerow{display:flex;align-items:baseline;flex-wrap:wrap;gap:6px 14px;margin:13px 0 0}
+h1{font-size:21px;font-weight:600;letter-spacing:-.01em;margin:0}
+.sub{margin:0;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
 h2{font-size:20px;font-weight:500;margin:2px 0 4px;letter-spacing:-.01em}
 h3{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);
    margin:16px 0 6px;padding-top:8px;border-top:1px solid var(--rule)}
@@ -904,45 +828,53 @@ section.state{margin:22px 0}
 .dis{margin:4px 0 0 130px;border-left:2px solid var(--warn);padding-left:8px;font-size:12px;color:var(--ink2)}
 .where{font:16px/1.3 "IBM Plex Mono",Menlo,monospace;margin:0 0 6px}
 .quote{margin:0;padding-left:10px;border-left:2px solid var(--rule);color:var(--ink2);font-size:14px}
-.plate{border-top:2px solid var(--ink);padding-top:16px;margin:26px 0 8px}
-.plate h2{font-size:23px;margin:0 0 10px;letter-spacing:-.015em;max-width:38ch;line-height:1.18}
-.plate .lead{margin:0 0 16px;max-width:82ch}
-.plate-frame{border:1px solid var(--rule);background:var(--soft);padding:8px}
+/* THE FIRST VIEWPORT. One headline, one plate, one band of findings, one sentence of
+   evidence. Everything that explains how the page is built sits below it, not beside it. */
+.lede{margin:12px 0 30px;border-top:2px solid var(--ink);padding-top:14px}
+/* The three sentences break where the markup breaks them, never where a measure runs out. */
+.hl{font-size:34px;line-height:1.12;font-weight:500;letter-spacing:-.028em;margin:0 0 13px;
+    max-width:none}
+.plate-frame{border:1px solid var(--rule);background:var(--soft);padding:6px}
 .plate-frame svg{display:block;width:100%;height:auto;max-width:none;border:0;background:none}
-.assoc{margin:12px 0 0;padding:9px 12px;border-left:3px solid var(--warn);background:var(--soft);font-size:13px}
-.assoc.stated{border-left-color:var(--accent)}
-.peers{margin:12px 0 0;font-size:13px}
+.pcap{font-size:12px;color:var(--mute);margin:7px 0 0;max-width:86ch;line-height:1.45}
+.pcap b{color:var(--ink)}
+.nf{padding:2px 7px;border:1px solid var(--warn);color:var(--warn);text-transform:uppercase;
+    letter-spacing:.12em;font-size:10px;white-space:nowrap}
+.band{display:grid;grid-template-columns:repeat(3,1fr);margin:20px 0 0;
+      border-top:2px solid var(--ink);border-bottom:1px solid var(--rule)}
+.fcol{padding:12px 20px 11px 0;border-right:1px solid var(--rule)}
+.fcol+.fcol{padding-left:20px}
+.fcol:last-child{border-right:0}
+.fh{font:600 12px/1.2 "IBM Plex Mono",Menlo,monospace;letter-spacing:.07em;margin:0 0 5px}
+.fh span{color:var(--mute);font-weight:400}
+.fq{font-size:12.5px;color:var(--mute);margin:0 0 12px;line-height:1.3;min-height:2.6em}
+.fl{font:500 19px/1.2 "IBM Plex Mono",Menlo,monospace;margin:0 0 4px;letter-spacing:-.015em}
+.fl.n{font-size:15px;color:var(--ink2)}
+.fl.verdict{font:600 11px/1.35 "IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+            letter-spacing:.09em;color:var(--warn);margin:7px 0 0}
+.fl.verdict+.fl.verdict{margin-top:2px}
+.bnote{font-size:12px;color:var(--mute);margin:9px 0 0;max-width:88ch;line-height:1.45}
+.eline{font-size:14.5px;line-height:1.5;margin:13px 0 0;max-width:80ch;
+       border-left:3px solid var(--accent);padding-left:13px}
+.eline .cite{display:block;font-size:11.5px;color:var(--mute);margin-top:3px}
+.peers{margin:14px 0 0;font-size:13px}
 .peers ul{margin:6px 0 4px;padding-left:18px}
 .peers li{margin:2px 0}
 .peers .cap{display:block;color:var(--mute);font-size:11.5px}
-.pcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:18px}
-.pcol{border-top:1px solid var(--rule);padding-top:10px}
-.pid{font-size:11.5px;color:var(--mute);margin-bottom:3px}
-.pname{font-weight:600;font-size:13px;margin-bottom:8px;line-height:1.3}
-.pfig{width:100%;border-collapse:collapse;font-size:12.5px}
-.pfig td{padding:3px 0;vertical-align:top;border-bottom:1px solid var(--rule)}
-.pfig td:first-child{color:var(--mute);white-space:nowrap;padding-right:12px;width:34%}
-.pfig tr:last-child td{border-bottom:0}
-.vint{margin-top:7px;font-size:11.5px;color:var(--mute)}
-@media (max-width:760px){.pcols{grid-template-columns:1fr}.plate h2{font-size:19px}}
-.brief{border-top:2px solid var(--ink);padding-top:16px;margin:26px 0 30px}
-.brief h2{font-size:21px;margin:0 0 10px;letter-spacing:-.01em;max-width:34ch}
-.brief .lead{margin:0 0 20px;max-width:74ch}
-.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
-.q{border-left:2px solid var(--rule);padding-left:14px}
-.q h3{font-size:14px;margin:0 0 4px;line-height:1.3}
-.q .qid{font-size:11.5px;color:var(--mute);margin:0 0 8px}
-.q .qhead{font-weight:600;margin:0 0 6px}
-.q p{margin:0 0 8px;font-size:13px}
-.prog{border-collapse:collapse;margin:0 0 8px;font-size:12px}
-.prog td{padding:1px 12px 1px 0;vertical-align:top;color:var(--ink)}
-.prog td:first-child{color:var(--mute);white-space:nowrap}
-@media (max-width:760px){.qs{grid-template-columns:1fr}}
+@media (max-width:760px){
+  .hl{font-size:25px;max-width:none}
+  .band{grid-template-columns:1fr}
+  .fcol{border-right:0;border-bottom:1px solid var(--rule);padding:13px 0}
+  .fcol+.fcol{padding-left:0}
+  .fcol:last-child{border-bottom:0}
+  .fq{min-height:0;margin-bottom:8px}
+}
 .kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 14px;margin:0 0 8px;font-size:13px}
 .kv.wide{grid-template-columns:max-content 1fr}
 .kv dt{color:var(--mute)}
 .kv dd{margin:0}
 .cap{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.45}
+.recnote{font-size:13px;color:var(--ink2);margin:26px 0 14px;padding-top:14px;border-top:2px solid var(--ink);max-width:86ch}
 .nil{font-size:13px;color:var(--mute);font-style:italic;margin:4px 0}
 .refuse{border-left:2px solid var(--warn);padding-left:8px;font-size:12.5px;color:var(--ink2);margin:8px 0}
 table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
