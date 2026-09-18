@@ -12,3 +12,47 @@
 .rec p{margin:10px 0 0}
 .rec .small{margin-top:14px}
 @media (max-width:900px){.recs{grid-template-columns:1fr}}
+
+/* THE EIGHT-SECOND READ. Finding first, evidence second, qualification third, provenance
+   last. The hashed-input counts that used to open the page are still on it -- they moved
+   below the fold, onto the methodology plate, because a prospect reads what happened before
+   they audit how it was recorded. */
+.hero{border-bottom:0;padding-bottom:0;margin-bottom:22px;display:block}
+.hero h1{max-width:20ch;margin:0 0 14px}
+.hero .lede{max-width:70ch;margin:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin:0 0 6px}
+.tile{display:block;border:1px solid var(--rule);border-radius:2px;padding:16px 18px 14px;
+      background:var(--paper-2);text-decoration:none;color:inherit}
+.tile:hover{border-color:var(--chart)}
+.tname{font-size:15px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
+.tstate{font-size:11.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.tfig{font-family:"IBM Plex Mono",Menlo,monospace;font-size:13.5px;line-height:1.45}
+.tfig b{font-size:17px}
+.compare .cmp-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:30px;align-items:start}
+.cmp-fig{margin:0}
+.cmp-fig svg{display:block;width:100%;height:auto;border:1px solid var(--rule);background:var(--paper-2)}
+.cmp-fig figcaption{margin-top:10px;font-size:11.5px;line-height:1.5;color:var(--mute)}
+.cmp-note h3{margin:0 0 8px;font-size:13px}
+.cmp-note h3+ul{margin:0 0 18px}
+.cmp-note ul{padding-left:18px;font-size:13px}
+.cmp-note li{margin:3px 0}
+.counts{max-width:74ch}
+@media (max-width:900px){.compare .cmp-grid{grid-template-columns:1fr;gap:20px}.hero h1{max-width:none}}
+
+/* RECORD MECHANICS, ONE TIER DOWN. The counts and the vintage are evidence and stay on the
+   card; they stop competing with the payout and the settlement status for the first read. */
+.rec .mech{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;margin:13px 0 0;
+           font-size:11.5px;line-height:1.4}
+.rec .mech dt{color:var(--mute)}
+.rec .mech dd{margin:0;color:var(--ink-2)}
+
+/* THE FIRST VIEWPORT CARRIES THE THESIS, THE THREE OBJECTS AND THE COMPARISON. It could not,
+   while the headline ran to three lines of 58px type and the section above the figure opened
+   with 52px of air. Nothing is removed here; the space between things is. */
+.hero h1{max-width:30ch;margin-bottom:12px}
+.hero .lede{max-width:78ch}
+.compare{padding-top:26px}
+.compare .sec-head{margin-bottom:18px}
+.compare .sec-head p+p{margin-top:8px}
+.cmp-note .basis{margin:0 0 18px;font-size:14.5px;line-height:1.5}
+.cmp-note .small{margin:16px 0 0}
