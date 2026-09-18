@@ -1,17 +1,17 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-17T23:04:27.786Z",
+  "ranAt": "2026-09-18T04:40:19.336Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "1c470c43ac5231dde758ccfe797facf9f9b827a1",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35285036424",
+  "sha": "93840fbabaafaf9ee31c461966137e1838232d21",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35307778812",
   "ok": false,
   "passed": 42,
   "total": 46,
   "failures": [
     {
       "check": "served snapshot is fresh",
-      "detail": "2026-09-17T21:59:43.077Z · 65m old"
+      "detail": "2026-09-18T02:58:56.079Z · 101m old"
     },
     {
       "check": "storm block swaps correctly",
@@ -19,14 +19,14 @@
     },
     {
       "check": "three tabs, so no single view is a wall",
-      "detail": "3 tabs · Situation is 2.4 screens tall (3369px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
+      "detail": "3 tabs · Situation is 2.4 screens tall (3409px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · EDGE BOOK — RANKED BY EXPECT 649px"
     },
     {
       "check": "all markets carried",
       "detail": "300 contracts · 50 series · droppedForCap=5"
     }
   ],
-  "thirdPartyFailures": 4,
+  "thirdPartyFailures": 8,
   "checks": [
     {
       "check": "Pages is serving this commit",
@@ -46,7 +46,7 @@
     {
       "check": "served snapshot is fresh",
       "pass": false,
-      "detail": "2026-09-17T21:59:43.077Z · 65m old"
+      "detail": "2026-09-18T02:58:56.079Z · 101m old"
     },
     {
       "check": "renders: Situation",
@@ -106,12 +106,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "5 ranked of 10 candidates · 105/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "6 ranked of 15 candidates · 105/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 6 displayed-only · unverifiable=0"
+      "detail": "0 executable · 4 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -136,7 +136,7 @@
     {
       "check": "three tabs, so no single view is a wall",
       "pass": false,
-      "detail": "3 tabs · Situation is 2.4 screens tall (3369px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · + 648px"
+      "detail": "3 tabs · Situation is 2.4 screens tall (3409px / 1400px) · tallest: ──────────────────────────── 831px · ▾ 698px · EDGE BOOK — RANKED BY EXPECT 649px"
     },
     {
       "check": "the official-advisory console reaches the page",
@@ -161,7 +161,7 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "0/0 frame(s) carry a consensus peak against 0 in the snapshot · 0 carry its cycle · frame is 3m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "0/0 frame(s) carry a consensus peak against 0 in the snapshot · 0 carry its cycle · frame is 4m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
@@ -191,7 +191,7 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-09-17T12:00:00Z"
+      "detail": "cycle 2026-09-17T18:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
