@@ -588,10 +588,16 @@ def band_note(snaps: list) -> str:
     if not (new and retired):
         return ""
     r, n = retired[0], new[0]
+    # THE TEST LABEL IS THE WATCH'S OWN WORD AND MEANS NOTHING TO A FIRST READER. It is glossed
+    # from the same QUESTION map the band uses, so the name and its question cannot drift apart;
+    # an unmapped label falls through as itself rather than being dropped or guessed at.
+    q = QUESTION.get(r.get("test"), "")
+    gloss = f' &mdash; {esc(q.rstrip("?").lower())} &mdash;' if q else ""
     return (f'<p class="bnote">NHC renamed the area between the two states. '
-            f'<span class="mono">{esc(r.get("millibar_object_id"))}</span> carried '
-            f'{esc(r.get("test"))}; <span class="mono">{esc(n.get("millibar_object_id"))}</span> '
-            f'was minted in its place and inherits none of it.</p>')
+            f'<span class="mono">{esc(r.get("millibar_object_id"))}</span> carried the '
+            f'{esc(r.get("test"))} test{gloss} and '
+            f'<span class="mono">{esc(n.get("millibar_object_id"))}</span> '
+            f'was minted in its place, inheriting none of it.</p>')
 
 
 def evidence_line(assoc) -> str:
