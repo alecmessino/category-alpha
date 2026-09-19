@@ -1,18 +1,14 @@
 {
   "schema": "millibar-verify-live/1",
-  "ranAt": "2026-09-19T04:34:48.787Z",
+  "ranAt": "2026-09-19T10:55:15.677Z",
   "url": "https://alecmessino.github.io/category-alpha/",
   "isDeployment": true,
-  "sha": "06fcfd2532aa5ce75b6631f71e403df783257181",
-  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35421627855",
+  "sha": "14c8c0f48eb893b62d7b79d163e75b62261527bf",
+  "runUrl": "https://github.com/alecmessino/category-alpha/actions/runs/35438661375",
   "ok": false,
-  "passed": 42,
+  "passed": 43,
   "total": 46,
   "failures": [
-    {
-      "check": "served snapshot is fresh",
-      "detail": "2026-09-19T01:32:44.502Z · 182m old"
-    },
     {
       "check": "storm block swaps correctly",
       "detail": "0 storm(s) · notice=true commandCentre=true"
@@ -45,8 +41,8 @@
     },
     {
       "check": "served snapshot is fresh",
-      "pass": false,
-      "detail": "2026-09-19T01:32:44.502Z · 182m old"
+      "pass": true,
+      "detail": "2026-09-19T10:42:52.755Z · 12m old"
     },
     {
       "check": "renders: Situation",
@@ -106,12 +102,12 @@
     {
       "check": "edge book renders and ranks nothing it cannot support",
       "pass": true,
-      "detail": "6 ranked of 13 candidates · 105/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
+      "detail": "7 ranked of 14 candidates · 105/300 anchored · unanchored-ranked=0 negativeEV=0 overStaked=0 dupLadders=0 accounted=true"
     },
     {
       "check": "every ladder spread claimed is re-derivable from the book",
       "pass": true,
-      "detail": "0 executable · 7 displayed-only · unverifiable=0"
+      "detail": "0 executable · 6 displayed-only · unverifiable=0"
     },
     {
       "check": "no horizontal overflow and no jittering digits",
@@ -121,7 +117,7 @@
     {
       "check": "the map has no missing raster chunks",
       "pass": true,
-      "detail": "79/80 tile(s) rendered · 1 hole(s) · 0 still loading"
+      "detail": "80/80 tile(s) rendered · 0 hole(s) · 0 still loading"
     },
     {
       "check": "the map is a centrepiece, not a thumbnail",
@@ -161,7 +157,7 @@
     {
       "check": "every consensus in the snapshot reaches the newest frame",
       "pass": true,
-      "detail": "0/0 frame(s) carry a consensus peak against 0 in the snapshot · 0 carry its cycle · frame is 3m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
+      "detail": "0/0 frame(s) carry a consensus peak against 0 in the snapshot · 0 carry its cycle · frame is 4m behind the snapshot (current — full coverage required) · feeds present: atcf/recon/ships/ascat · live: atcf/recon/ships/ascat · 4/4 health rows rendered"
     },
     {
       "check": "the calibrated probability ships with the raw estimate and its evidence tier",
@@ -191,7 +187,7 @@
     {
       "check": "the GFS wind field is ingested and both components present",
       "pass": true,
-      "detail": "cycle 2026-09-18T18:00:00Z"
+      "detail": "cycle 2026-09-19T00:00:00Z"
     },
     {
       "check": "the '?' drawers still carry the caveats",
